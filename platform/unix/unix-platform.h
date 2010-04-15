@@ -1,4 +1,5 @@
-/* -*- tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -39,41 +40,41 @@
 #ifndef __avmplus_unix_platform__
 #define __avmplus_unix_platform__
 
-#define VMPI_memcpy			::memcpy
-#define VMPI_memset 		::memset	
-#define VMPI_memcmp 		::memcmp	
-#define VMPI_memmove 		::memmove	
-#define VMPI_memchr			::memchr	
-#define VMPI_strcmp 		::strcmp
-#define VMPI_strcat 		::strcat
-#define VMPI_strchr 		::strchr
-#define VMPI_strrchr 		::strrchr
-#define VMPI_strcpy 		::strcpy
-#define VMPI_strlen 		::strlen
-#define VMPI_strncat 		::strncat
-#define VMPI_strncmp 		::strncmp
-#define VMPI_strncpy 		::strncpy
-#define VMPI_strtol			::strtol
-#define VMPI_strstr			::strstr
+#define VMPI_memcpy         ::memcpy
+#define VMPI_memset         ::memset
+#define VMPI_memcmp         ::memcmp
+#define VMPI_memmove        ::memmove
+#define VMPI_memchr         ::memchr
+#define VMPI_strcmp         ::strcmp
+#define VMPI_strcat         ::strcat
+#define VMPI_strchr         ::strchr
+#define VMPI_strrchr        ::strrchr
+#define VMPI_strcpy         ::strcpy
+#define VMPI_strlen         ::strlen
+#define VMPI_strncat        ::strncat
+#define VMPI_strncmp        ::strncmp
+#define VMPI_strncpy        ::strncpy
+#define VMPI_strtol         ::strtol
+#define VMPI_strstr         ::strstr
 
-#define VMPI_sprintf		::sprintf
-#define VMPI_snprintf		::snprintf
-#define VMPI_vsnprintf		::vsnprintf
-#define VMPI_sscanf			::sscanf
+#define VMPI_sprintf        ::sprintf
+#define VMPI_snprintf       ::snprintf
+#define VMPI_vsnprintf      ::vsnprintf
+#define VMPI_sscanf         ::sscanf
 
-#define VMPI_atoi	::atoi
-#define VMPI_tolower ::tolower	
-#define VMPI_islower ::islower	
-#define VMPI_toupper ::toupper	
-#define VMPI_isupper ::isupper	
-#define VMPI_isdigit ::isdigit	
-#define VMPI_isalnum ::isalnum	
-#define VMPI_isxdigit ::isxdigit	
-#define VMPI_isspace ::isspace	
-#define VMPI_isgraph ::isgraph	
-#define VMPI_isprint ::isprint	
-#define VMPI_ispunct ::ispunct	
-#define VMPI_iscntrl ::iscntrl	
+#define VMPI_atoi   ::atoi
+#define VMPI_tolower ::tolower
+#define VMPI_islower ::islower
+#define VMPI_toupper ::toupper
+#define VMPI_isupper ::isupper
+#define VMPI_isdigit ::isdigit
+#define VMPI_isalnum ::isalnum
+#define VMPI_isxdigit ::isxdigit
+#define VMPI_isspace ::isspace
+#define VMPI_isgraph ::isgraph
+#define VMPI_isprint ::isprint
+#define VMPI_ispunct ::ispunct
+#define VMPI_iscntrl ::iscntrl
 #define VMPI_isalpha ::isalpha
 #define VMPI_abort   ::abort
 #define VMPI_exit    ::exit
@@ -148,151 +149,151 @@ typedef void *maddr_ptr;
 #define REALLY_INLINE inline __attribute__((always_inline))
 // only define FASTCALL for x86-32; other gcc versions will spew warnings
 #ifdef AVMPLUS_IA32
-	#define FASTCALL __attribute__((fastcall))
+    #define FASTCALL __attribute__((fastcall))
 #endif
 #endif
 
 // inline __attribute__((always_inline)) is supposed to work for SunStudio.
-// Currently SunStudio C++ compiler has a bug which can not parse keyword 
+// Currently SunStudio C++ compiler has a bug which can not parse keyword
 // inline and __attribute__((always_inline)) together. It will be added back
 // when this bug got fixed.
 #if defined __SUNPRO_C || defined __SUNPRO_CC
 #define REALLY_INLINE inline __hidden
-#define FASTCALL 
+#define FASTCALL
 #endif
 
 #if defined(__GNUC__)
-	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
-	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+    #define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+    #define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
-	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+    #define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+    #define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
 #else
-	#error "Unrecognized compiler"
+    #error "Unrecognized compiler"
 #endif
 
 /**
-* Type defintion for an opaque data type representing platform-defined spin lock 
+* Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()
 */
 #if defined(__GNUC__) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 
-struct vmpi_spin_lock_t 
+struct vmpi_spin_lock_t
 {
-	volatile uint32_t lock;
+    volatile uint32_t lock;
 };
 
 
 REALLY_INLINE uint32_t X86_TestAndSet(volatile uint32_t* ptr, uint32_t val) {
-	__asm__ volatile("xchgl %0, (%2)" :"=r"(val) : "0"(val), "r"(ptr));
-	return val;
+    __asm__ volatile("xchgl %0, (%2)" :"=r"(val) : "0"(val), "r"(ptr));
+    return val;
 }
 
 REALLY_INLINE void X86_Pause()
 {
-	__asm__ volatile("pause");
+    __asm__ volatile("pause");
 }
 
 REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
-	lock->lock = 0;
-	__asm__ volatile("" : : : "memory");
+    lock->lock = 0;
+    __asm__ volatile("" : : : "memory");
 }
 
 REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
-	lock->lock = 0;
-	__asm__ volatile("" : : : "memory");
+    lock->lock = 0;
+    __asm__ volatile("" : : : "memory");
 }
 
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 {
-	while ( X86_TestAndSet(&lock->lock, 1) != 0 ) {
-		X86_Pause();
-	}
-	__asm__ volatile("" : : : "memory");
-	return true;
+    while ( X86_TestAndSet(&lock->lock, 1) != 0 ) {
+        X86_Pause();
+    }
+    __asm__ volatile("" : : : "memory");
+    return true;
 }
 
 REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
 {
-	__asm__ volatile("" : : : "memory");
-	lock->lock = 0;
-	return true;
+    __asm__ volatile("" : : : "memory");
+    lock->lock = 0;
+    return true;
 }
 
 REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
-	__asm__ volatile("" : : : "memory");
-	if(X86_TestAndSet(&lock->lock, 1) != 0)
-		return false;
-	return true;
+    __asm__ volatile("" : : : "memory");
+    if(X86_TestAndSet(&lock->lock, 1) != 0)
+        return false;
+    return true;
 }
 
 #elif defined(USE_PTHREAD_MUTEX)
 
 struct vmpi_spin_lock_t
 {
-	// Some small systems (eg android) don't provide spinlock.
-	// using pthread_mutex for now (unfortunate since it's usually more expensive)
-	volatile pthread_mutex_t lock;
+    // Some small systems (eg android) don't provide spinlock.
+    // using pthread_mutex for now (unfortunate since it's usually more expensive)
+    volatile pthread_mutex_t lock;
 };
 
 REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
-	pthread_mutex_init((pthread_mutex_t*)&lock->lock, 0);
+    pthread_mutex_init((pthread_mutex_t*)&lock->lock, 0);
 }
 
 REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
 {
-	pthread_mutex_destroy((pthread_mutex_t*)&lock->lock);
+    pthread_mutex_destroy((pthread_mutex_t*)&lock->lock);
 }
 
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 {
-	return pthread_mutex_lock((pthread_mutex_t*)&lock->lock) == 0;
+    return pthread_mutex_lock((pthread_mutex_t*)&lock->lock) == 0;
 }
- 
+
 REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
 {
-	return pthread_mutex_unlock((pthread_mutex_t*)&lock->lock) == 0;
+    return pthread_mutex_unlock((pthread_mutex_t*)&lock->lock) == 0;
 }
 
 REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
-	return pthread_mutex_trylock((pthread_mutex_t*)&lock->lock) == 0;
+    return pthread_mutex_trylock((pthread_mutex_t*)&lock->lock) == 0;
 }
 
 #else
 
 struct vmpi_spin_lock_t
 {
-	volatile pthread_spinlock_t lock;
+    volatile pthread_spinlock_t lock;
 };
 
 REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
-	pthread_spin_init((pthread_spinlock_t*)&lock->lock, 0);
+    pthread_spin_init((pthread_spinlock_t*)&lock->lock, 0);
 }
 
 REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
 {
-	pthread_spin_destroy((pthread_spinlock_t*)&lock->lock);
+    pthread_spin_destroy((pthread_spinlock_t*)&lock->lock);
 }
 
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 {
-	return pthread_spin_lock((pthread_spinlock_t*)&lock->lock) == 0;
+    return pthread_spin_lock((pthread_spinlock_t*)&lock->lock) == 0;
 }
 
 REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
 {
-	return pthread_spin_unlock((pthread_spinlock_t*)&lock->lock) == 0;
+    return pthread_spin_unlock((pthread_spinlock_t*)&lock->lock) == 0;
 }
 
 REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
-	return pthread_spin_trylock((pthread_spinlock_t*)&lock->lock) == 0;
+    return pthread_spin_trylock((pthread_spinlock_t*)&lock->lock) == 0;
 }
 
 #endif
