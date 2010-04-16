@@ -3638,45 +3638,27 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Atom AvmCore::uintToAtom(uint32_t n)
     {
-#ifdef AVMPLUS_64BIT
-        // We can always fit the value in an Atom
-        return (((Atom)n)<<3) | kIntptrType;
-#else
-        // As kIntptrType is signed, we can only represent a 28-bit uint in it
-        if (!(n&0xF0000000)) {
-            return Atom((n<<3) | kIntptrType);
-        } else {
-            return allocDouble(n);
-        }
-#endif
+        return (atomIsValidIntptrValue_u(n) ?  // always true on 64-bit
+                atomFromIntptrValue_u(n) :
+                allocDouble(n));
     }
 
     Atom AvmCore::intToAtom(int32_t n)
     {
-#ifdef AVMPLUS_64BIT
-        // We can always fit the value in an Atom
-        return (((Atom)n)<<3) | kIntptrType;
-#else
-        // handle integer values w/out allocation
-        int32_t i29 = n << 3;
-        if ((i29>>3) == n)
-        {
-            return Atom(i29 | kIntptrType);
-        }
-        else
-        {
-            return allocDouble(n);
-        }
-#endif
+        return (atomIsValidIntptrValue(n) ? // always true on 64-bit
+                atomFromIntptrValue(n) :
+                allocDouble(n));
     }
 
-#ifdef AVMPLUS_64BIT
-    #define CAN_BE_INT_ATOM(intval,n) (((intval<<8)>>8) == n && !(intval == 0 && MathUtils::isNegZero(n)))
-#else
-    #define CAN_BE_INT_ATOM(intval,n) (((intval<<3)>>3) == n && !(intval == 0 && MathUtils::isNegZero(n)))
-#endif
+    REALLY_INLINE bool atomIsValidIntptrValueAndEqualTo(const intptr_t ival, const double orig)
+    {
+        // ival's intptr_t type is critical; implicitly casts from
+        // int32_t in most invocations of this function here.
 
-#define MAKE_INT_ATOM(intval) ((intptr_t(intval)<<3) | kIntptrType)
+        return ((((ival << atomSignExtendShift) >> atomSignExtendShift) == orig)
+                && !((ival == 0)
+                     && MathUtils::isNegZero(orig)));
+    }
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 
@@ -3693,8 +3675,8 @@ return the result of the comparison ToPrimitive(x) == y.
     #ifdef AVMPLUS_AMD64
 
         int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
-        if (CAN_BE_INT_ATOM(intval, n))
-            return MAKE_INT_ATOM(intval);
+        if (atomIsValidIntptrValueAndEqualTo(intval, n))
+            return atomFromIntptrValue(intval);
         return allocDouble(n);
 
     #else // x86
@@ -3727,8 +3709,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
         // MacTel always has SSE2 available
         int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
-        if (CAN_BE_INT_ATOM(intval, n))
-            return MAKE_INT_ATOM(intval);
+        if (atomIsValidIntptrValueAndEqualTo(intval, n))
+            return atomFromIntptrValue(intval);
 
         return allocDouble(n);
 
@@ -3741,8 +3723,8 @@ return the result of the comparison ToPrimitive(x) == y.
     #ifdef AVMPLUS_AMD64
 
         int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
-        if (CAN_BE_INT_ATOM(intval, n))
-            return MAKE_INT_ATOM(intval);
+        if (atomIsValidIntptrValueAndEqualTo(intval, n))
+            return atomFromIntptrValue(intval);
 
         return allocDouble(n);
 
@@ -3798,8 +3780,8 @@ return the result of the comparison ToPrimitive(x) == y.
     #endif
 
         // make sure n is integer value that fits in 29 bits
-        if (CAN_BE_INT_ATOM(intval, n))
-            return MAKE_INT_ATOM(intval);
+        if (atomIsValidIntptrValueAndEqualTo(intval, n))
+            return atomFromIntptrValue(intval);
 
         return allocDouble(n);
     }
