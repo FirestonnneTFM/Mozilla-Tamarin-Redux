@@ -330,7 +330,7 @@ namespace avmplus
         LIns* atomToNative(BuiltinType, LIns* i);
         LIns* eq0(LIns* i);             // eq(i, imm(0))
         LIns* peq0(LIns* ptr);          // peq(ptr, immq(0))
-        LIns* qlo(LIns* q);             // LIR_qlo(q)
+        LIns* qlo(LIns* q);             // LIR_dlo2l(q)
         LIns* i2p(LIns* i);             // 32bit: nop, 64bit: i2q(i)
         LIns* u2p(LIns* u);             // 32bit: nop, 64bit: u2q(i)
         LIns* p2i(LIns* ptr);           // 32bit: nop, 64bit: qlo(ptr)
@@ -358,7 +358,7 @@ namespace avmplus
         LIns* param(int n, const char *name);
         LIns* lshi(LIns* a, int32_t b);
         LIns* ushp(LIns* a, int32_t b);
-        void  liveAlloc(LIns* expr);        // extend lifetime of LIR_alloc, otherwise no-op
+        void  liveAlloc(LIns* expr);        // extend lifetime of LIR_allocp, otherwise no-op
         void  emitStart(Allocator&, LirBuffer*, LirWriter*&);
 
     protected: // data
