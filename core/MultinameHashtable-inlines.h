@@ -73,7 +73,7 @@ REALLY_INLINE Binding MultinameHashtable::valueAt(int index) const
 
 REALLY_INLINE API MultinameHashtable::apisAt(int index) const
 {
-    return m_quads[index-1].apis;
+    return m_quads[index-1].apis();
 }
 
 REALLY_INLINE size_t MultinameHashtable::allocatedSize() const
@@ -110,7 +110,7 @@ REALLY_INLINE Binding StMNHTIterator::value() const
 
 REALLY_INLINE API StMNHTIterator::apis() const
 {
-    return m_cur->apis;
+    return m_cur->apis();
 }
 
 } // namespace avmplus

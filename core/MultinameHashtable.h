@@ -66,16 +66,29 @@ namespace avmplus
         friend class StMNHTIterator;
 
     private:
-        class Quad // 33% better!
+        // Quad shall be four words; we want the alignment and the space conservation.
+        // There are static asserts in MultinameHashtable.cpp to check that condition.
+        // See also bugzilla 534317.
+
+        class Quad
         {
         public:
-            Stringp name;
+            Stringp    name;
             Namespacep ns;
-            Binding value;
-            // non-0 if the given name exists elsewhere w/ a different NS
-            // (also the alignment gives a speed boost)
-            uint32_t multiNS;
-            API apis;   // bit flags for versions
+            Binding    value;
+            uintptr_t  apisAndMultiNS;
+
+            // 'multiNs' is 1 if the given name exists elsewhere with a different namespace.
+            // 'apis' is the bit vector of API versions.
+            //
+            // The values share a word for space reasons.  The low bit holds 'multiNS', 
+            // the word shifted right 1 holds 'apis'.
+            //
+            // NOTE, some code in MultinameHashtable.cpp operates directly on this
+            // representation when the values are updated.
+
+            REALLY_INLINE uint32_t multiNS() const { return (uint32_t)(apisAndMultiNS & 1); }
+            REALLY_INLINE API apis() const { return (API)(apisAndMultiNS >> 1); }
         };
 
     private:

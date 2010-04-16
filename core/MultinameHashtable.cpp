@@ -101,6 +101,12 @@ namespace avmplus
         size(0),
         numQuads(0)
     {
+        // We really want alignment and size of the Quad to be tightly controlled.
+        MMGC_STATIC_ASSERT(sizeof(Quad) == 4*sizeof(uintptr_t));
+
+        // Code near the end of MultinameHashtable::put assumes that API is a 32-bit type
+        MMGC_STATIC_ASSERT(sizeof(API) == 4);
+
         Init(capacity);
     }
 
@@ -148,7 +154,7 @@ namespace avmplus
         unsigned i = ((0x7FFFFFF8 & (uintptr)name) >> 3) & bitmask;
 
         Stringp k;
-        while (((k=t[i].name) != name || !(t[i].ns == ns || matchNS(t[i].ns->m_uri, t[i].apis, ns))) && k != NULL)
+        while (((k=t[i].name) != name || !(t[i].ns == ns || matchNS(t[i].ns->m_uri, t[i].apis(), ns))) && k != NULL)
         {
             i = (i + (n++)) & bitmask;          // quadratic probe
         }
@@ -164,11 +170,11 @@ namespace avmplus
     const MultinameHashtable::Quad* MultinameHashtable::getNSSet(Stringp mnameName, NamespaceSetp nsset) const
     {
     #ifdef AVMPLUS_64BIT
-        static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0, 0 };
-        static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0, 0 };
+        static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0 };
+        static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0 };
     #else
-        static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0, 0 };
-        static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0, 0 };
+        static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0 };
+        static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0 };
     #endif
 
         int nsCount = nsset->count();
@@ -194,7 +200,7 @@ namespace avmplus
             {
                 Namespacep probeNS = t[i].ns;
                 AvmAssert(probeNS->getURI()->isInterned());
-                API probeAPIs = t[i].apis;
+                API probeAPIs = t[i].apis();
                 uintptr probeURI = probeNS ? probeNS->m_uri : 0;
                 for (j=0; j < nsCount; j++)
                 {
@@ -215,7 +221,7 @@ namespace avmplus
         return &kBindNone;
 
 found1:
-        if (t[i].multiNS)
+        if (t[i].multiNS())
         {
             int k = (i + (n++)) & bitMask;          // quadratic probe
             while ((atomName = t[k].name) != EMPTY)
@@ -224,7 +230,7 @@ found1:
                 {
                     Namespacep probeNS = t[k].ns;
                     AvmAssert(probeNS->getURI()->isInterned());
-                    API probeAPIs = t[k].apis;
+                    API probeAPIs = t[k].apis();
                     uintptr probeURI = t[k].ns->m_uri;
                     for (j=0; j < nsCount; j++)
                     {
@@ -279,7 +285,7 @@ found1:
                 if (probeName == name)
                 {
                     // there's at least one existing entry with this name in the MNHT.
-                    if (cur->ns == ns || matchNS(cur->ns->m_uri, cur->apis, ns))
+                    if (cur->ns == ns || matchNS(cur->ns->m_uri, cur->apis(), ns))
                     {
                         // it's the one we're looking for, just update the value.
                         goto write_value;
@@ -287,7 +293,8 @@ found1:
 
                     // it's not the one we're looking for, thus we are now multiNS on this name.
                     if (cur->ns->m_uri != ns->m_uri) {
-                        cur->multiNS = multiNS = 1;
+                        cur->apisAndMultiNS |= 1;
+                        multiNS = 1;
                     }
                 }
 
@@ -304,12 +311,13 @@ found1:
         WBRC(gc, quadbase, &cur->name, name);
         //quads[i].ns = ns;
         WBRC(gc, quadbase, &cur->ns, ns);
-        cur->multiNS = multiNS;
+        cur->apisAndMultiNS = (cur->apisAndMultiNS & ~1) | multiNS;
 
 write_value:
         //quads[i].value = value;
         WB(gc, quadbase, &cur->value, value);
-        cur->apis |= ns->getAPI();
+        AvmAssert((ns->getAPI() & 0x80000000U) == 0);
+        cur->apisAndMultiNS |= (uintptr_t)ns->getAPI() << 1;
     }
 
     Binding MultinameHashtable::get(Stringp name, Namespacep ns) const
@@ -320,7 +328,7 @@ write_value:
         if (t[i].name == name)
         {
             const Quad& tf = t[i];
-            AvmAssert(tf.ns==ns || matchNS(tf.ns->m_uri, tf.apis, ns));
+            AvmAssert(tf.ns==ns || matchNS(tf.ns->m_uri, tf.apis(), ns));
             return tf.value;
         }
         return BIND_NONE;
@@ -354,8 +362,7 @@ write_value:
                 newAtoms[j].name = oldName;
                 newAtoms[j].ns = oldAtoms[i].ns;
                 newAtoms[j].value = oldAtoms[i].value;
-                newAtoms[j].multiNS = oldAtoms[i].multiNS;
-                newAtoms[j].apis = oldAtoms[i].apis;
+                newAtoms[j].apisAndMultiNS = oldAtoms[i].apisAndMultiNS;
             }
         }
     }
