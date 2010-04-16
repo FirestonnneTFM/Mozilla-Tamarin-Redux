@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,32 +42,32 @@
 #include <wctype.h>
 #include <time.h>
 
-#pragma warning(disable:4201)	// nonstandard extension used : nameless struct/union
-#include <mmsystem.h>			// for timeGetTime (oddly, this include must come AFTER avmplus.h)
+#pragma warning(disable:4201)   // nonstandard extension used : nameless struct/union
+#include <mmsystem.h>           // for timeGetTime (oddly, this include must come AFTER avmplus.h)
 
 namespace avmplus
 {
-	void CALLBACK intWriteTimerProc(UINT, UINT, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
-	{
-		int *i = (int*)dwUser;
-		*i = 1;
-	}
+    void CALLBACK intWriteTimerProc(UINT, UINT, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
+    {
+        int *i = (int*)dwUser;
+        *i = 1;
+    }
 
     // The constant TIME_KILL_SYNCHRONOUS is only available if WINVER >= 0x0501 (== WinXP)
     static const UINT kTimeKillSynchronous = 0x0100;
 
-	uintptr OSDep::startIntWriteTimer(uint32 millis, int *addr)
-	{
-		return (uintptr) timeSetEvent(millis, millis, (LPTIMECALLBACK)intWriteTimerProc, (DWORD_PTR)addr, 
-			TIME_PERIODIC | TIME_CALLBACK_FUNCTION
+    uintptr OSDep::startIntWriteTimer(uint32 millis, int *addr)
+    {
+        return (uintptr) timeSetEvent(millis, millis, (LPTIMECALLBACK)intWriteTimerProc, (DWORD_PTR)addr,
+            TIME_PERIODIC | TIME_CALLBACK_FUNCTION
 #ifndef UNDER_CE
-			| kTimeKillSynchronous
+            | kTimeKillSynchronous
 #endif
-			);
-	}
+            );
+    }
 
-	void OSDep::stopTimer(uintptr handle)
-	{
-		timeKillEvent((UINT)handle);
-	}
+    void OSDep::stopTimer(uintptr handle)
+    {
+        timeKillEvent((UINT)handle);
+    }
 }

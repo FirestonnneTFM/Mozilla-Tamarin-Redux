@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,20 +43,20 @@
 
 namespace avmplus
 {
-	/**
-	 * call a native method using windows thiscall calling conventions.
-	 * we use the traits of the function to figure out what native types
-	 * to convert to, as follows:
-	 *
-	 *  AS type         C++ type
+    /**
+     * call a native method using windows thiscall calling conventions.
+     * we use the traits of the function to figure out what native types
+     * to convert to, as follows:
+     *
+     *  AS type         C++ type
      *  -------         --------
-	 *  Void            void
+     *  Void            void
      *  Object          Atom
-	 *  Boolean         bool      (unsigned 8bit)
-	 *  int             int       (signed 32bit)
-	 *  Number          double    (float 64bit)
-	 *  String          Stringp   (const String *)
-	 *  Class           ClassClosure*
-	 *  MovieClip       MovieClipObject*   (similar for any other class)
-	 */
+     *  Boolean         bool      (unsigned 8bit)
+     *  int             int       (signed 32bit)
+     *  Number          double    (float 64bit)
+     *  String          Stringp   (const String *)
+     *  Class           ClassClosure*
+     *  MovieClip       MovieClipObject*   (similar for any other class)
+     */
 }
