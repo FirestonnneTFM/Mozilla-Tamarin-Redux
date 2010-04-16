@@ -240,9 +240,9 @@ if os.path.isdir(dirbase)==False:
 attempts=0
 retrys=0
 while retrys<5:
-    print "attempt %d, retry %d" % (attempts,retrys)
+    #print "attempt %d, retry %d" % (attempts,retrys)
     (res,sysout)=runTest()
-    print("exit code=%d reason=%s"  % (res,sysout))
+    #print("exit code=%d reason=%s"  % (res,sysout))
     if res!=-1 and res!=1:
         sys.exit(res)
     attempts+=1
