@@ -404,6 +404,11 @@ spidermonkey/js1_6/Array/regress-304828, .*, skip, Array methods on String not s
 spidermonkey/js1_6/Array/regress-386030, .*, skip, https://bugs.adobe.com/jira/browse/ASL-55
 spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 
+## SPARC Only ##
+spidermonkey/js1_5/Regress/regress-58116:Compute Daylight savings time correctly regardless of year Section 3, sparc-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=551173
+spidermonkey/js1_5/Regress/regress-58116:Compute Daylight savings time correctly regardless of year Section 4, sparc-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=551173
+spidermonkey/js1_5/Regress/regress-58116:Compute Daylight savings time correctly regardless of year Section 6, sparc-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=551173
+
 ####################
 # End spidermonkey tests
 ####################
