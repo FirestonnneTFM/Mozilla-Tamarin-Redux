@@ -258,6 +258,7 @@ spidermonkey/js1_6/extensions/regress-456826, .*deep, include, include slow test
 ecma3/Statements/eforin_001_500476, .*-Dverifyall.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
 as3/Statements/for-each-in/eforeachin_001_500476, .*-Dverifyall.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
 regress/bug_498979, .*-Dverifyall.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=498979
+regress/bug_555705, .*-Dverifyall.*, skip, test throws an expected verifyerror that is normally caught by the test itself
 
 ####################
 # Sampling 
@@ -408,7 +409,7 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 # End spidermonkey tests
 ####################
 
-regress/bug_555705, (arm-android.*|.*-Darm_vfp), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559588
+regress/bug_555705, arm-lnx-tvm-debug.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=555705
 regress/bug_558442a, arm.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559652
 as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 
