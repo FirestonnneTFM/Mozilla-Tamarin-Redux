@@ -410,7 +410,6 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 ####################
 
 regress/bug_555705, arm-lnx-tvm-debug.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=555705
-regress/bug_558442a, arm.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559652
 as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 
 #############################
