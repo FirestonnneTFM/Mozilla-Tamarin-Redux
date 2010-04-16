@@ -43,6 +43,11 @@
 . ./environment.sh
 
 echo "Deleting all folders more than 7 days old under: $buildsdir"
-# Bug 522525: this needs to be bullet proofed, being unable to delete a 
-# directory should NEVER fail the build.
-#find $buildsdir -mtime +7 -delete
+
+# -p points to the top-level /builds dir; -i is how many days to preserve build folders.
+python util-clean-buildsdir.py -p $buildsdir -i 7
+ret=$?
+test "$ret" = "0" || {
+    echo "util-clean-buildsdir.py failed"
+}
+exit 0
