@@ -45,7 +45,7 @@
 echo "Deleting all folders more than 7 days old under: $buildsdir"
 
 # -p points to the top-level /builds dir; -i is how many days to preserve build folders.
-python util-clean-buildsdir.py -p $buildsdir -i 7
+python ../all/util-clean-buildsdir.py -p $buildsdir -i 7
 ret=$?
 test "$ret" = "0" || {
     echo "util-clean-buildsdir.py failed"
