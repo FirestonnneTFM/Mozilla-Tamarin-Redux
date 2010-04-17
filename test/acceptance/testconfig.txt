@@ -411,6 +411,7 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 
 regress/bug_555705, arm-lnx-tvm-debug.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=555705
 as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
+abcasm/bug_554915b, .*wordcode.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
 
 #############################
 ## Sampling failures on SPARC
