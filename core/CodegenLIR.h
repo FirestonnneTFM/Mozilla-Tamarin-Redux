@@ -331,33 +331,33 @@ namespace avmplus
         LIns* eq0(LIns* i);             // eq(i, imm(0))
         LIns* peq0(LIns* ptr);          // peq(ptr, immq(0))
         LIns* qlo(LIns* q);             // LIR_dlo2l(q)
-        LIns* i2p(LIns* i);             // 32bit: nop, 64bit: i2q(i)
-        LIns* u2p(LIns* u);             // 32bit: nop, 64bit: u2q(i)
-        LIns* p2i(LIns* ptr);           // 32bit: nop, 64bit: qlo(ptr)
+        LIns* l2p(LIns* i);             // 32bit: nop, 64bit: l2q(i)
+        LIns* ul2up(LIns* u);             // 32bit: nop, 64bit: ul2uq(i)
+        LIns* p2l(LIns* ptr);           // 32bit: nop, 64bit: q2l(ptr)
         LIns* InsConst(int32_t c);
         LIns* InsConstPtr(const void *p);
         LIns* InsConstAtom(Atom c);
         LIns* callIns(const CallInfo *, uint32_t argc, ...);
         LIns* vcallIns(const CallInfo *, uint32_t argc, va_list args);
-        LIns* peq(LIns* a, Atom b);
-        LIns* peq(LIns* a, LIns* b);
+        LIns* eqp(LIns* a, Atom b);
+        LIns* eqp(LIns* a, LIns* b);
         LIns* choose(LIns* c, Atom t, LIns* f);
         LIns* andp(LIns* a, Atom mask);
         LIns* orp(LIns* a, Atom mask);
-        LIns* ori(LIns* a, int32_t mask);
-        LIns* pret(LIns* a);
+        LIns* orl(LIns* a, int32_t mask);
+        LIns* retp(LIns* a);
         LIns* label();
-        LIns* jlt(LIns* a, int32_t b);
-        LIns* jgt(LIns* a, int32_t b);
-        LIns* jne(LIns* a, int32_t b);
-        LIns* sti(LIns* val, LIns* p, int32_t d, AccSet);
+        LIns* jltl(LIns* a, int32_t b);
+        LIns* jgtl(LIns* a, int32_t b);
+        LIns* jneql(LIns* a, int32_t b);
+        LIns* stl(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* stp(LIns* val, LIns* p, int32_t d, AccSet);
-        LIns* stf(LIns* val, LIns* p, int32_t d, AccSet);
+        LIns* std(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* ldp(LIns* p, int32_t d, AccSet);
-        LIns* plive(LIns*);
+        LIns* livep(LIns*);
         LIns* param(int n, const char *name);
-        LIns* lshi(LIns* a, int32_t b);
-        LIns* ushp(LIns* a, int32_t b);
+        LIns* lshl(LIns* a, int32_t b);
+        LIns* rshup(LIns* a, int32_t b);
         void  liveAlloc(LIns* expr);        // extend lifetime of LIR_allocp, otherwise no-op
         void  emitStart(Allocator&, LirBuffer*, LirWriter*&);
 
