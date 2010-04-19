@@ -94,7 +94,7 @@ if (isdebugger) {
 }
 len=0;
 for each (var sample in getSamples()) {
-  len++;
+    len++;
 }
 if (isdebugger) {
     AddTestCase(
@@ -129,18 +129,26 @@ if (isdebugger) {
 }
 
 clearSamples();
+    var len:int=0;
+    for (sample in getSamples()) {
+        if ((sample as DeleteObjectSample)==null) {
+            len++;
+        }
+    }
 
 if (isdebugger) {
     AddTestCase(
       "after clearSamples() sample count is 0, internalAllocs=true",
       0,
-      getSampleCount()
+      len
     );
 }
 
 len=0;
 for each (var sample in getSamples()) {
-  len++;
+    if ((sample as DeleteObjectSample)==null) {
+        len++;
+    }
 }
 if (isdebugger) {
     AddTestCase(
