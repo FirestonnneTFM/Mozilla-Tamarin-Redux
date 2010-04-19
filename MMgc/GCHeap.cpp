@@ -2830,6 +2830,7 @@ namespace MMgc
     {
         GCAssert(instanceEnterLockInitialized);
         VMPI_lockDestroy(&instanceEnterLock);
+        instanceEnterLockInitialized = false;
     }
 
     GCHeap::Region::Region(GCHeap *heap, char *baseAddr, char *rTop, char *cTop, size_t blockId)
