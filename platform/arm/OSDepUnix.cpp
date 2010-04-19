@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -43,11 +45,11 @@
 
 namespace avmplus
 {
-	uint64_t OSDep::currentTimeMillis()
-	{
-		struct timeval tv;
-		::gettimeofday(&tv, NULL);
-		uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-		return result;
-	}
+    uint64_t OSDep::currentTimeMillis()
+    {
+        struct timeval tv;
+        ::gettimeofday(&tv, NULL);
+        uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+        return result;
+    }
 }
