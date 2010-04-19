@@ -129,7 +129,7 @@ class tamarinredux:
                                   ["linux-arm2-test", "linux-arm2-smoke"],
                                  ])
 
-    performance = PhaseTwoScheduler(name="performance", branch="%s-perf" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
+    performance = PhaseTwoScheduler(name="performance", branch="%s-performance" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startPerformanceRun, priority=2, changeDir="changes/perf/processed",
                     builderNames=["windows-performance",
                                    "mac-performance", "mac64-performance",
