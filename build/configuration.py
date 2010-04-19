@@ -293,9 +293,9 @@ class Configuration:
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
             if self._target[1] == "mips":
-                self._acvars.update({'CXXFLAGS' : '-EL -mips32r2 '})
-                self._acvars.update({'LDFLAGS' : '-EL'})
-                self._acvars.update({'zlib_EXTRA_CFLAGS' : '-EL'})
+                self._acvars.update({'CXXFLAGS' : ''})
+                self._acvars.update({'LDFLAGS' : ''})
+                self._acvars.update({'zlib_EXTRA_CFLAGS' : ''})
                 
         elif self._target[0] == 'sunos':
 	    if options.getBoolArg("gcc", False):
