@@ -642,7 +642,7 @@ namespace avmplus
             return callIns(FUNCTIONID(uintToAtom), 2, coreAddr, native);
 
         case BUILTIN_boolean:
-            return u2p(ori(lshi(native, 3), kBooleanType));
+            return ul2up(orl(lshl(native, 3), kBooleanType));
 
         case BUILTIN_string:
             return orp(native, kStringType);
@@ -817,7 +817,7 @@ namespace avmplus
             if (atom->isconst())
                 return InsConst((int32_t)atomGetBoolean((Atom)atom->constvalp()));
             else
-                return p2i(ushp(atom, 3));
+                return p2l(rshup(atom, 3));
 
         default:
             // pointer type
@@ -1910,7 +1910,7 @@ namespace avmplus
         case BUILTIN_uint:
         case BUILTIN_boolean:
             // in the args these are widened to intptr_t or uintptr_t, so truncate here.
-            arg = p2i(loadIns(LIR_ldp, offset, apArg, ACC_READONLY));
+            arg = p2l(loadIns(LIR_ldp, offset, apArg, ACC_READONLY));
             offset += sizeof(Atom);
             break;
         default:
@@ -2658,7 +2658,7 @@ namespace avmplus
             return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetf(index));
         case BUILTIN_boolean: {
             // load "true" or "false" string constant from AvmCore.booleanStrings[]
-            LIns *offset = binaryIns(LIR_lshp, i2p(localGet(index)), InsConst(PTR_SCALE));
+            LIns *offset = binaryIns(LIR_lshp, l2p(localGet(index)), InsConst(PTR_SCALE));
             LIns *arr = InsConstPtr(&core->booleanStrings);
             return loadIns(LIR_ldp, 0, binaryIns(LIR_addp, arr, offset), ACC_READONLY);
         }
@@ -3019,7 +3019,7 @@ namespace avmplus
                 if (!value.notNull) {
                     // v == undefinedAtom ? nullObjectAtom : v;
                     LIns *v = localGetp(loc);
-                    expr = choose(peq(v, undefConst), nullObjectAtom, v);
+                    expr = choose(eqp(v, undefConst), nullObjectAtom, v);
                 } else {
                     expr = loadAtomRep(loc);
                 }
@@ -3176,7 +3176,7 @@ namespace avmplus
     void LirHelper::liveAlloc(LIns* alloc)
     {
         if (alloc->isop(LIR_allocp))
-            plive(alloc);
+            livep(alloc);
     }
 
     // This is for VTable->createInstance which is called by OP_construct
@@ -3325,18 +3325,18 @@ namespace avmplus
             switch (bt(paramType)) {
             case BUILTIN_number:
                 v = (i == 0) ? obj : lirout->insLoad(LIR_ldd, vars, index*8, ACC_VARS);
-                stf(v, ap, disp, ACC_OTHER);
+                std(v, ap, disp, ACC_OTHER);
                 disp += sizeof(double);
                 break;
             case BUILTIN_int:
                 v = (i == 0) ? obj : lirout->insLoad(LIR_ldl, vars, index*8, ACC_VARS);
-                stp(i2p(v), ap, disp, ACC_OTHER);
+                stp(l2p(v), ap, disp, ACC_OTHER);
                 disp += sizeof(intptr_t);
                 break;
             case BUILTIN_uint:
             case BUILTIN_boolean:
                 v = (i == 0) ? obj : lirout->insLoad(LIR_ldl, vars, index*8, ACC_VARS);
-                stp(u2p(v), ap, disp, ACC_OTHER);
+                stp(ul2up(v), ap, disp, ACC_OTHER);
                 disp += sizeof(uintptr_t);
                 break;
             default:
@@ -3490,10 +3490,10 @@ namespace avmplus
         }
         else if (slotType == NUMBER_TYPE) {
             // slot type is double or int
-            stf(value, ptr, offset, ACC_OTHER);
+            std(value, ptr, offset, ACC_OTHER);
         } else {
             AvmAssert(slotType == INT_TYPE || slotType == UINT_TYPE || slotType == BOOLEAN_TYPE);
-            sti(value, ptr, offset, ACC_OTHER);
+            stl(value, ptr, offset, ACC_OTHER);
         }
     }
 
@@ -3754,14 +3754,14 @@ namespace avmplus
                     Ins(LIR_retd, retvalue);
                     break;
                 case BUILTIN_int:
-                    pret(i2p(retvalue));
+                    retp(l2p(retvalue));
                     break;
                 case BUILTIN_uint:
                 case BUILTIN_boolean:
-                    pret(u2p(retvalue));
+                    retp(ul2up(retvalue));
                     break;
                 default:
-                    pret(retvalue);
+                    retp(retvalue);
                     break;
                 }
                 break;
@@ -3964,7 +3964,7 @@ namespace avmplus
                 LIns* obj = InsAlloc(sizeof(Atom));
                 LIns* index = InsAlloc(sizeof(int32_t));
                 stp(loadAtomRep(obj_index), obj, 0, ACC_STORE_ANY);       // Atom obj
-                sti(localGet(index_index), index, 0, ACC_STORE_ANY);      // int32 index
+                stl(localGet(index_index), index, 0, ACC_STORE_ANY);      // int32 index
                 LIns* i1 = callIns(FUNCTIONID(hasnextproto), 3,
                                      env_param, obj, index);
                 localSet(obj_index, loadIns(LIR_ldp, 0, obj, ACC_LOAD_ANY), OBJECT_TYPE);  // Atom obj
@@ -5008,7 +5008,7 @@ namespace avmplus
                 NanoAssert((icmp == LIR_eql && qcmp == LIR_eqq) ||
                            (icmp == LIR_ltl && qcmp == LIR_ltq) ||
                            (icmp == LIR_lel && qcmp == LIR_leq));
-                return binaryIns(qcmp, u2p(lhs), i2p(rhs));
+                return binaryIns(qcmp, ul2up(lhs), l2p(rhs));
             #else
                 if (rhs->isconst() && rhs->imm32() >= 0)
                     return binaryIns(ucmp, lhs, rhs);
@@ -5025,7 +5025,7 @@ namespace avmplus
                 NanoAssert((icmp == LIR_eql && qcmp == LIR_eqq) ||
                            (icmp == LIR_ltl && qcmp == LIR_ltq) ||
                            (icmp == LIR_lel && qcmp == LIR_leq));
-                return binaryIns(qcmp, i2p(lhs), u2p(rhs));
+                return binaryIns(qcmp, l2p(lhs), ul2up(rhs));
             #else
                 if (lhs->isconst() && lhs->imm32() >= 0)
                     return binaryIns(ucmp, lhs, rhs);
@@ -5062,7 +5062,7 @@ namespace avmplus
         // undefined  0100  1100   n
 
         LIns* c = InsConst(8);
-        return binaryIns(LIR_ltl, binaryIns(LIR_xorl, p2i(atom), c), c);
+        return binaryIns(LIR_ltl, binaryIns(LIR_xorl, p2l(atom), c), c);
     }
 
     LIns* CodegenLIR::cmpLe(int lhsi, int rhsi)
@@ -5084,7 +5084,7 @@ namespace avmplus
 
         LIns* c2 = InsConst(1);
         LIns* c4 = InsConst(4);
-        return binaryIns(LIR_lel, binaryIns(LIR_xorl, p2i(atom), c2), c4);
+        return binaryIns(LIR_lel, binaryIns(LIR_xorl, p2l(atom), c2), c4);
     }
 
     LIns* CodegenLIR::cmpEq(const CallInfo *fid, int lhsi, int rhsi)
@@ -5173,26 +5173,26 @@ namespace avmplus
                     lirout->insBranch(LIR_jt, cond, label.labelIns);
                 }
             }
-            plive(_ef);
-            plive(_save_eip);
+            livep(_ef);
+            livep(_save_eip);
         }
 
-        if (prolog->env_scope)      plive(prolog->env_scope);
-        if (prolog->env_vtable)     plive(prolog->env_vtable);
-        if (prolog->env_abcenv)     plive(prolog->env_abcenv);
-        if (prolog->env_domainenv)  plive(prolog->env_domainenv);
-        if (prolog->env_toplevel)   plive(prolog->env_toplevel);
+        if (prolog->env_scope)      livep(prolog->env_scope);
+        if (prolog->env_vtable)     livep(prolog->env_vtable);
+        if (prolog->env_abcenv)     livep(prolog->env_abcenv);
+        if (prolog->env_domainenv)  livep(prolog->env_domainenv);
+        if (prolog->env_toplevel)   livep(prolog->env_toplevel);
 
         #ifdef DEBUGGER
         if (haveDebugger)
-            plive(csn);
+            livep(csn);
         #endif
 
         // extend live range of critical stuff
         // fixme -- this should be automatic based on live analysis
-        plive(methodFrame);
-        plive(env_param);
-        frag->lastIns = plive(coreAddr);
+        livep(methodFrame);
+        livep(env_param);
+        frag->lastIns = livep(coreAddr);
         prologLastIns = prolog->lastIns;
 
         info->set_lookup_cache_size(finddef_cache_builder.next_cache);
@@ -5203,8 +5203,8 @@ namespace avmplus
     LIns* CodegenLIR::copyMultiname(const Multiname* multiname)
     {
         LIns* name = InsAlloc(sizeof(Multiname));
-        sti(InsConst(multiname->ctFlags()), name, offsetof(Multiname, flags), ACC_OTHER);
-        sti(InsConst(multiname->next_index), name, offsetof(Multiname, next_index), ACC_OTHER);
+        stl(InsConst(multiname->ctFlags()), name, offsetof(Multiname, flags), ACC_OTHER);
+        stl(InsConst(multiname->next_index), name, offsetof(Multiname, next_index), ACC_OTHER);
         return name;
     }
 
@@ -5299,7 +5299,7 @@ namespace avmplus
 
         // (yes, i2p, not u2p... it might legitimately be negative due to the
         // displacement optimization in emitCheck().)
-        return binaryIns(LIR_addp, mopsMemoryBase, i2p(mopAddr));
+        return binaryIns(LIR_addp, mopsMemoryBase, l2p(mopAddr));
     }
 
     LIns* CodegenLIR::loadEnvScope()
@@ -5961,9 +5961,9 @@ namespace avmplus
         // if we have not removed all stores to the tags array, mark it live
         // so its live range will span loops.
         if (tags_touched)
-            plive(tags);
+            livep(tags);
         if (vars_touched)
-            plive(vars);
+            livep(vars);
     }
 
     /*
@@ -6031,7 +6031,7 @@ namespace avmplus
         deadvars();  // deadvars_kill() will add live(vars) or live(tags) if necessary
 
         // do this very last so it's after LIR_livel(vars)
-        frag->lastIns = plive(undefConst);
+        frag->lastIns = livep(undefConst);
 
         PERFM_NTPROF("compile");
         mmfx_delete( alloc1 );
@@ -6446,7 +6446,7 @@ namespace avmplus
     {
         // invoker params
         LIns* env_param = param(0, "env");
-        LIns* argc_param = p2i(param(1, "argc"));
+        LIns* argc_param = p2l(param(1, "argc"));
         LIns* args_param = param(2, "args");
         coreAddr = InsConstPtr(core);
 
@@ -6478,7 +6478,7 @@ namespace avmplus
         }
 
         // mark the endpoint of generated LIR with an instruction the Assembler allows at the end
-        frag->lastIns = plive(env_param);
+        frag->lastIns = livep(env_param);
 
         // we're done with LIR generation, free up what we can.
         mmfx_delete(alloc1);
@@ -6492,17 +6492,17 @@ namespace avmplus
         if (min_argc == param_count && !ms->argcOk(param_count + 1)) {
             // exactly param_count args required
             // if (argc != param_count) goto error
-            maxargs_br = jne(argc_param, param_count);
+            maxargs_br = jneql(argc_param, param_count);
         } else {
             if (!ms->argcOk(param_count+1)) {
                 // extra params are not allowed, must check for max args
                 // if (argc > param_count) goto error
-                maxargs_br = jgt(argc_param, param_count);
+                maxargs_br = jgtl(argc_param, param_count);
             }
             if (min_argc > 0) {
                 // at least 1 param is required, so check
                 // if (argc < min_argc) goto error
-                minargs_br = jlt(argc_param, min_argc);
+                minargs_br = jltl(argc_param, min_argc);
             }
         }
     }
@@ -6559,7 +6559,7 @@ namespace avmplus
                     core->console << "optional arg " << i << " " << ms->paramTraits(i) << "\n";
                 )
                 // if (argc < i) { goto done }
-                branches[branch_count++] = jlt(argc_param, i);
+                branches[branch_count++] = jltl(argc_param, i);
                 downcast_arg(i, offset, env_param, args_param);
                 offset += argSize(i);
             }
@@ -6636,9 +6636,9 @@ namespace avmplus
             break;
         }
         LIns* result = callIns(call, 3, env_param, argc_param, args_out);
-        plive(args_out);
+        livep(args_out);
         // box and return the result
-        pret(nativeToAtom(result, ms->returnTraits()));
+        retp(nativeToAtom(result, ms->returnTraits()));
     }
 
     LIns* InvokerCompiler::downcast_expr(LIns* atom, Traits* t, LIns* env)
@@ -6646,15 +6646,15 @@ namespace avmplus
         switch (bt(t)) {
         case BUILTIN_object:
             // return (atom == undefinedAtom) ? nullObjectAtom : atom;
-            return choose(peq(atom, undefinedAtom), nullObjectAtom, atom);
+            return choose(eqp(atom, undefinedAtom), nullObjectAtom, atom);
         case BUILTIN_int:
-            return i2p(callIns(FUNCTIONID(integer), 1, atom));
+            return l2p(callIns(FUNCTIONID(integer), 1, atom));
         case BUILTIN_uint:
-            return u2p(callIns(FUNCTIONID(toUInt32), 1, atom));
+            return ul2up(callIns(FUNCTIONID(toUInt32), 1, atom));
         case BUILTIN_number:
             return callIns(FUNCTIONID(number), 1, atom);
         case BUILTIN_boolean:
-            return u2p(callIns(FUNCTIONID(boolean), 1, atom));
+            return ul2up(callIns(FUNCTIONID(boolean), 1, atom));
         case BUILTIN_string:
             return callIns(FUNCTIONID(coerce_s), 2, InsConstPtr(t->core), atom);
         case BUILTIN_namespace:
