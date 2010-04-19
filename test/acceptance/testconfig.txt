@@ -380,7 +380,7 @@ spidermonkey/js1_5/Regress/regress-356693, .*, expectedfail, https://bugs.adobe.
 
 spidermonkey/js1_5/Regress/regress-438415-02, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551202
 spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4).*, x64-lnx.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
-spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4|6).*, .*(mac|x86-lnx|arm-lnx).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
+spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4|6).*, .*(mac|x86-lnx|arm-lnx|sparc-sol).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
 spidermonkey/js1_5/Regress/regress-58116, .*-diff, skip, skip in diff testing
 spidermonkey/js1_5/Regress/regress-261887, .*-diff, skip, skip in diff testing as output can vary somewhat
 
@@ -412,7 +412,6 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 regress/bug_555705, arm-lnx-tvm-debug.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=555705
 as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 abcasm/bug_554915b, .*wordcode.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
-spidermonkey/js1_5/Regress/regress-58116, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=560163
 
 #############################
 ## Sampling failures on SPARC
