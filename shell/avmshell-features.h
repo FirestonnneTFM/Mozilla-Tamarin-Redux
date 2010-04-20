@@ -179,7 +179,6 @@
     // by default, nanojit enables NJ_VERBOSE mode when AVMPLUS_VERBOSE is on,
     // which is enabled for Debug *and* Debugger builds.
     #define NJ_VERBOSE_DISABLED 1
-    #define NJ_PROFILE_DISABLED 1
 #endif
 
 #ifndef AVMFEATURE_OVERRIDE_GLOBAL_NEW
