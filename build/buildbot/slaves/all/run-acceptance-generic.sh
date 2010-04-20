@@ -152,7 +152,8 @@ else
 fi
 
 test "$silent" = "true" && {
-    silentoptions="-l acceptance-$shell.log --summaryonly"
+    logfile=`echo acceptance-$shell$vmargs.log | sed 's/ //g'`
+    silentoptions="-l $logfile --summaryonly"
 }
 
 if [ "$config" != "" ]
@@ -166,7 +167,8 @@ fi
 
 test "$silent" = "true" && {
     # upload log to asteam
-    . $basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh acceptance-$shell.log $ftp_asteam/$branch/${change}-${changeid}/$platform/
+    . $basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
+    echo "Acceptance logfile can be found here: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile"
 }
 
 ##
