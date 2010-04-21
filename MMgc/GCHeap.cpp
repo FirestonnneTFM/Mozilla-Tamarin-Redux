@@ -360,8 +360,13 @@ namespace MMgc
 				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
 #endif
-			CheckForMemoryLimitsExceeded();
-
+			
+			//  Only check for memory limits if we're allowing OOM notifications
+			if (m_oomHandling) 
+			{
+				CheckForMemoryLimitsExceeded();
+			}
+			
             m_oomHandling = saved_oomHandling;
 		}
 
@@ -372,8 +377,9 @@ namespace MMgc
 			VMPI_memset(baseAddr, 0, size * kBlockSize);
 		}
 		
-		// fail the allocation if we hit soft limit and canFail
-		if(status == kMemSoftLimit && (flags & kCanFail) != 0) {
+		// Fail the allocation if we're a "canFail" allocation that has pushed beyond one of our limits.
+		if((flags & kCanFail) != 0 && (status == kMemSoftLimit || SoftLimitExceeded() || HardLimitExceeded() ))
+		{
 			FreeInternal(baseAddr, (flags & kProfile) != 0, m_oomHandling);
 			return NULL;
 		}
