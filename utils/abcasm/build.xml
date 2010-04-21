@@ -117,6 +117,7 @@
 			excludes="abcasm/Main.java"
 			destdir="classes" 
 			classpathref="compile.classpath"
+			target="1.5"
 			debug="${compile.debug}">
 		</javac>
 
@@ -124,6 +125,7 @@
 			srcdir="gensrc/grammar" 
 			destdir="classes" 
 			classpathref="compile.classpath"
+			target="1.5"
 			debug="${compile.debug}">
 		</javac>
 
@@ -132,6 +134,7 @@
 			includes="abcasm/Main.java"
 			destdir="classes" 
 			classpathref="compile.classpath"
+			target="1.5"
 			debug="${compile.debug}">
 		</javac>	
 	</target>
