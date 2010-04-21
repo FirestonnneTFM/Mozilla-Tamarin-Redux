@@ -40,12 +40,7 @@
 #include "avmshell.h"
 
 #include "shell_toplevel.cpp"
-
-#ifdef VMCFG_TEST_API_VERSIONING
-  #include "api-versions.h"
-#else
-  #include "noapi-versions.h"
-#endif
+#include "api-versions.h"       // Really a cpp file
 
 namespace avmshell
 {
@@ -357,8 +352,12 @@ namespace avmshell
         else {
             // if there is at least on versioned uri, then there must be a version matrix
             if (_uris_count > 0) {
-                // last api of any row is largestApiUtils::getLargestVersion(this);
-                this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
+                // Last api of any row is largestApiUtils::getLargestVersion(this);
+                // Using the largest API is really not ideal, because it means AIR_SYS / FP_SYS 
+                // are open to random ABC code in the shell.  We don't want that normally.
+                // Instead use the largest nonsys value as computed by the preprocessor.
+                //this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
+                this->defaultAPIVersion = _max_nonsys_version_num;
             }
             else {
                 this->defaultAPIVersion = 0;
@@ -415,7 +414,7 @@ namespace avmshell
             initBuiltinPool();
 #endif
             initShellPool();
-
+            
             // init toplevel internally
             shell_toplevel = initShellBuiltins();
 

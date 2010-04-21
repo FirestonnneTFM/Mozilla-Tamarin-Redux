@@ -91,7 +91,7 @@ namespace avmshell
         const char* st_category;
         const char* st_name;
         uint32_t api;
-
+        
         MMgc::GC::GCMode gcMode()
         {
             if (nogc)               return MMgc::GC::kDisableGC;
@@ -163,11 +163,7 @@ namespace avmshell
         static bool isValidProjectorFile(const char* filename);
 #endif
 
-#ifdef VMCFG_TEST_API_VERSIONING
         inline int32_t getDefaultAPI() { return ApiUtils::toAPI(this, defaultAPIVersion); }
-#else
-        inline int32_t getDefaultAPI() { return 0; }
-#endif
 
     protected:
         virtual void setStackLimit() = 0;
