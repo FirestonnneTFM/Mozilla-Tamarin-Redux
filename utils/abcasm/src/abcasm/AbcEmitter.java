@@ -464,6 +464,9 @@ class AbcEmitter
 			case OP_getscopeobject:
 				blockWriter.write(insn.imm[0]);
 				break;
+			case OP_getouterscope:
+				blockWriter.writeU30(insn.imm[0]);
+				break;
 			case OP_pushstring:
 			case OP_dxns:
 			case OP_debugfile:

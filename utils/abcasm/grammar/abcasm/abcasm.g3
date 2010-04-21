@@ -606,7 +606,7 @@ integer_operands_insn
 		  'applytype' |
 	      'debug' | 'debugline' | 'declocal' | 'declocal_i' |	 
 		  'getlocal' | 
-		  'getscopeobject' |
+		  'getscopeobject' | 'getouterscope' |
 		  'hasnext2' | 
 		  'inclocal' | 'inclocal_i' | 
 		  'kill' |
@@ -706,7 +706,7 @@ no_operand_insn
 		'convert_b' | 'convert_i' | 'convert_d' | 'convert_o' | 'convert_u' | 'convert_s' |
 		'decrement' | 'decrement_i' | 'divide' | 'dup' | 
 	    'dxnslate' |
-		'equals' |
+		'equals' | 'strictequals' |
 		'esc_xattr' | 'esc_xelem' |
 		'getglobalscope' | 
 		'getlocal0' | 'getlocal1' | 'getlocal2' | 'getlocal3' |

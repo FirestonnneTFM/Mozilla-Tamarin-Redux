@@ -311,6 +311,7 @@ class MethodBodyInfo
 						max_slot = i.imm[0];
 					break;
 					
+				case OP_getouterscope:
 				case OP_getscopeobject:
 					stkdepth = adjustValueStack(stkdepth,1);
 					break;
