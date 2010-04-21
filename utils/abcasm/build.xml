@@ -86,7 +86,7 @@
 		<java classname="org.antlr.Tool" fork="yes" failonerror="yes">
 			<arg value="-o" />
 			<arg value="gensrc" />
-			<arg value="grammar/abcasm.g3"/>
+			<arg value="grammar/abcasm/abcasm.g3"/>
             <classpath refid="antlr.classpath" />
 		</java>
 	</target>
