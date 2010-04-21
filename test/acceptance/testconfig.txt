@@ -418,3 +418,5 @@ abcasm/bug_554915b, .*wordcode.*, expectedfail, https://bugzilla.mozilla.org/sho
 as3/sampling/Callback:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 as3/sampling/FunctionEntry:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 
+
+
