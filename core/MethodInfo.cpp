@@ -290,7 +290,7 @@ namespace avmplus
 
             PERFM_NTPROF("verify-ticks");
 
-            CodeWriter* coder = NULL;
+            CodeWriter* volatile coder = NULL;
             Verifier verifier(this, toplevel, abc_env);
 
             /*
