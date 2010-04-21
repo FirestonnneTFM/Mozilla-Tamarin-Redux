@@ -956,12 +956,10 @@ namespace avmshell
                     settings.enter_debugger_on_launch = true;
                 }
 #endif /* DEBUGGER */
-#ifdef VMCFG_TEST_API_VERSIONING
-                else if (!VMPI_strcmp(arg, "-api")) {
+                else if (!VMPI_strcmp(arg, "-api") && i+1 < argc) {
                     settings.api = VMPI_atoi(argv[i+1]);
                     i++;
                 }
-#endif
                 else {
                     // Unrecognized command line option
                     AvmLog("Unrecognized option %s\n", arg);
@@ -1138,9 +1136,7 @@ namespace avmshell
         AvmLog("                        If R > 0 is provided then it is the number of times the list of files is repeated.\n");
 #endif
         AvmLog("          [-log]\n");
-#ifdef VMCFG_TEST_API_VERSIONING
         AvmLog("          [-api N] execute ABCs as version N (see api-versions.h)\n");
-#endif
         AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
         AvmLog("          [filename.{abc,swf} ...\n");
         AvmLog("          [-- application argument ...]\n");
