@@ -418,18 +418,3 @@ abcasm/bug_554915b, .*wordcode.*, expectedfail, https://bugzilla.mozilla.org/sho
 as3/sampling/Callback:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 as3/sampling/FunctionEntry:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 
-
-#############################
-## MIPS specific acceptance failures
-#############################
-ecma3/Array/e15_4_4_5_3:testarr3\[(8|9), mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-ecma3/Date/e15_9_5_28_1:TDATE = new Date\(946684800000\);\(TDATE\)\.setMinutes.*(getTime|valueOf|getUTCHours), mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-ecma3/Date/e15_9_5_29_1:TDATE = new Date\(946684800000\);\(TDATE\)\.setUTCMinutes\(1234567\);TDATE\.getHours, mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-ecma3/Date/e15_9_5_32_1:TDATE = new Date\(-2208988800000\);\(TDATE\)\.setDate\(1\).*(getTime|valueOf|getUTCDate|getUTCDay|getDate|getDay), mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-ecma3/Date/e15_9_5_32_1:TDATE = new Date\(-2208988800000\);\(TDATE\)\.setDate\(31\).*(getTime|valueOf|getUTCMonth|getUTCDate|getUTCDay|getMonth|getDate|getDay), mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-ecma3/Date/e15_9_5_34_1:TDATE = new Date\(now\); \(TDATE\)\.setMonth\(1.*(getTime|valueOf|getUTCHours|getHours), mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-ecma3/Date/e15_9_5_34_1:TDATE = new Date\(-2208988800000\); \(TDATE\)\.setMonth\(1\).*(getTime|valueOf|getUTCDate|getUTCDay|getDate|getDay), mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-ecma3/Date/e15_9_5_34_1:TDATE = new Date\(-2208988800000\); \(TDATE\)\.setMonth\(11.*(getTime|valueOf|getUTCFullYear|getUTCMonth|getUTCDate|getUTCDay|getFullYear|getMonth|getDate|getDay), mips-.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-# need to skip this test since testcase names are not unique
-ecma3/Date/e15_9_5_14, mips-.* , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=560848
-
