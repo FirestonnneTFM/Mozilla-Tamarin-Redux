@@ -2301,6 +2301,10 @@ namespace MMgc
     {
         status = kMemAbort;
         EnterFrame *ef = enterFrame;
+
+        //  If we hit abort, we need to turn this back on so that listeners are guaranteed to get this signal
+        m_oomHandling = true;
+
         GCLog("error: out of memory\n");
 
         // release lock so we don't deadlock if exit or longjmp end up coming
