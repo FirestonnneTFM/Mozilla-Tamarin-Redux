@@ -37,7 +37,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#define ARGMASK(a,n) (nanojit::ARGTYPE_##a << (ARGTYPE_SHIFT*(n)))
+static const ArgType ARGTYPE_U = ARGTYPE_UI;
+static const ArgType ARGTYPE_F = ARGTYPE_D;
+
+#define ARGMASK(a,n) (ARGTYPE_##a << (ARGTYPE_SHIFT*(n)))
 #define SIG0(r) ARGMASK(r,0)
 #define SIG1(r,a1) (SIG0(r) | ARGMASK(a1,1))
 #define SIG2(r,a2,a1) (SIG1(r,a1) | ARGMASK(a2,2))
