@@ -40,6 +40,7 @@
 
 package
 {
+    include "api-versions.as"
 
     /*
     AS3 implementation constraint:
@@ -82,8 +83,10 @@ package
                 _setPropertyIsEnumerable(proto, name, false);
             }
         }
+
         // delay proto functions until class Function is initialized.
-        static function init()
+        [API(CONFIG::AIR_SYS)]
+        public static function init()
         {
             prototype.hasOwnProperty =
             function(V=void 0):Boolean
