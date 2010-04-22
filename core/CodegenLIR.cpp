@@ -246,20 +246,20 @@ namespace avmplus
     };
 
     static const MopsInfo kMopsLoadInfo[7] = {
-        { 1, LIR_ldb2l,   FUNCTIONID(mop_lix8) },
-        { 2, LIR_ldw2l,   FUNCTIONID(mop_lix16) },
-        { 1, LIR_ldub2ul, FUNCTIONID(mop_liz8) },
-        { 2, LIR_lduw2ul, FUNCTIONID(mop_liz16) },
-        { 4, LIR_ldl,     FUNCTIONID(mop_li32) },
-        { 4, LIR_lds2d,   FUNCTIONID(mop_lf32) },
+        { 1, LIR_ldc2i,   FUNCTIONID(mop_lix8) },
+        { 2, LIR_lds2i,   FUNCTIONID(mop_lix16) },
+        { 1, LIR_lduc2ui, FUNCTIONID(mop_liz8) },
+        { 2, LIR_ldus2ui, FUNCTIONID(mop_liz16) },
+        { 4, LIR_ldi,     FUNCTIONID(mop_li32) },
+        { 4, LIR_ldf2d,   FUNCTIONID(mop_lf32) },
         { 8, LIR_ldd,     FUNCTIONID(mop_lf64) }
     };
 
     static const MopsInfo kMopsStoreInfo[5] = {
-        { 1, LIR_stl2b, FUNCTIONID(mop_si8) },
-        { 2, LIR_stl2w, FUNCTIONID(mop_si16) },
-        { 4, LIR_stl,   FUNCTIONID(mop_si32) },
-        { 4, LIR_std2s, FUNCTIONID(mop_sf32) },
+        { 1, LIR_sti2c, FUNCTIONID(mop_si8) },
+        { 2, LIR_sti2s, FUNCTIONID(mop_si16) },
+        { 4, LIR_sti,   FUNCTIONID(mop_si32) },
+        { 4, LIR_std2f, FUNCTIONID(mop_sf32) },
         { 8, LIR_std,   FUNCTIONID(mop_sf64) }
      };
 
@@ -351,7 +351,7 @@ namespace avmplus
         for (;;)
         {
             LOpcode const op = mopAddr->opcode();
-            if (op != LIR_addl && op != LIR_subl)
+            if (op != LIR_addi && op != LIR_subi)
                 break;
 
             int32_t imm;
@@ -361,13 +361,13 @@ namespace avmplus
                 imm = mopAddr->oprnd2()->imm32();
                 nonImm = mopAddr->oprnd1();
 
-                if (op == LIR_subl)
+                if (op == LIR_subi)
                     imm = -imm;
             }
             else if (mopAddr->oprnd1()->isconst())
             {
                 // don't try to optimize const-expr
-                if (op == LIR_subl)
+                if (op == LIR_subi)
                     break;
 
                 imm = mopAddr->oprnd1()->imm32();
@@ -437,7 +437,7 @@ namespace avmplus
         {
             //AvmAssert(curMemSize == NULL);
             curMemBase = out->insLoad(LIR_ldp, env_domainenv, offsetof(DomainEnv,m_globalMemoryBase), ACC_OTHER);
-            curMemSize = out->insLoad(LIR_ldl, env_domainenv, offsetof(DomainEnv,m_globalMemorySize), ACC_OTHER);
+            curMemSize = out->insLoad(LIR_ldi, env_domainenv, offsetof(DomainEnv,m_globalMemorySize), ACC_OTHER);
         }
 
         AvmAssert((curRangeCheckLHS != NULL) == (curRangeCheckRHS != NULL));
@@ -480,10 +480,10 @@ namespace avmplus
             AvmAssert(curRangeCheckMaxValue > curRangeCheckMinValue);
             AvmAssert(curRangeCheckMaxValue - curRangeCheckMinValue <= DomainEnv::GLOBAL_MEMORY_MIN_SIZE);
 
-            curRangeCheckLHS = safeIns2(LIR_addl, curMopAddr, curRangeCheckMinValue);
-            curRangeCheckRHS = safeIns2(LIR_subl, curMemSize, curRangeCheckMaxValue - curRangeCheckMinValue);
+            curRangeCheckLHS = safeIns2(LIR_addi, curMopAddr, curRangeCheckMinValue);
+            curRangeCheckRHS = safeIns2(LIR_subi, curMemSize, curRangeCheckMaxValue - curRangeCheckMinValue);
 
-            LInsp cond = this->ins2(LIR_leul, curRangeCheckLHS, curRangeCheckRHS);
+            LInsp cond = this->ins2(LIR_leui, curRangeCheckLHS, curRangeCheckRHS);
             br = this->insBranch(LIR_jf, cond, NULL);
         }
 
@@ -503,7 +503,7 @@ namespace avmplus
     void MopsRangeCheckFilter::safeRewrite(LIns* ins, int32_t rhsConst)
     {
         LIns* rhs = prolog_out->insImm(rhsConst);
-        AvmAssert(ins->isop(LIR_addl) || ins->isop(LIR_subl));
+        AvmAssert(ins->isop(LIR_addi) || ins->isop(LIR_subi));
         ins->initLInsOp2(ins->opcode(), ins->oprnd1(), rhs);
     }
 
@@ -590,7 +590,7 @@ namespace avmplus
         jit_sst[i] = uint8_t(1 << sst);
 #endif
         lirout->insStorei(o, vars, i * 8, ACC_VARS);
-        lirout->insStore(LIR_stl2b, InsConst(sst), tags, i, ACC_TAGS);
+        lirout->insStore(LIR_sti2c, InsConst(sst), tags, i, ACC_TAGS);
     }
 
     LIns* CodegenLIR::atomToNativeRep(int i, LIns* atom)
@@ -1184,7 +1184,7 @@ namespace avmplus
                   (v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) ||
                   (v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE));
 #endif
-        return lirout->insLoad(LIR_ldl, vars, i*8, ACC_VARS);
+        return lirout->insLoad(LIR_ldi, vars, i*8, ACC_VARS);
     }
 
     LIns* CodegenLIR::localGetf(int i) {
@@ -1211,7 +1211,7 @@ namespace avmplus
         } else {
             // more than one representation is possible: convert to atom using tag found at runtime.
             AvmAssert(bt(v.traits) == BUILTIN_any || bt(v.traits) == BUILTIN_object);
-            LIns* tag = lirout->insLoad(LIR_ldub2ul, tags, i, ACC_TAGS);
+            LIns* tag = lirout->insLoad(LIR_lduc2ui, tags, i, ACC_TAGS);
             LIns* varAddr = leaIns(i*8, vars);
             ins = callIns(FUNCTIONID(makeatom), 3, coreAddr, varAddr, tag);
         }
@@ -1280,7 +1280,7 @@ namespace avmplus
         {}
 
         bool isPromote(LOpcode op) {
-            return op == LIR_ul2d || op == LIR_l2d;
+            return op == LIR_ui2d || op == LIR_i2d;
         }
 
         LIns *imm2Int(LIns* imm) {
@@ -1554,8 +1554,8 @@ namespace avmplus
     // we push this onto the call stack pointed to by AvmCore::currentMethodFrame, and
     // in the epilog we pop it back off.
     //
-    // coreAddr (LIR_imml|LIR_immq) constant address of AvmCore*.  used in lots of places.
-    // undefConst (LIR_imml|LIR_immq) constant value = undefinedAtom. used all over.
+    // coreAddr (LIR_immi|LIR_immq) constant address of AvmCore*.  used in lots of places.
+    // undefConst (LIR_immi|LIR_immq) constant value = undefinedAtom. used all over.
     //
     // vars (LIR_allocp) storage for ABC stack frame variables.  8 bytes per variable,
     // always, laid out according to ABC param/local var numbering.  The total number
@@ -1661,7 +1661,7 @@ namespace avmplus
         env_param = lirout->insParam(0, 0);
         argc_param = lirout->insParam(1, 0);
     #ifdef AVMPLUS_64BIT
-        argc_param = lirout->ins1(LIR_q2l, argc_param);
+        argc_param = lirout->ins1(LIR_q2i, argc_param);
     #endif
         ap_param = lirout->insParam(2, 0);
 
@@ -1789,7 +1789,7 @@ namespace avmplus
                 localSet(loc, defaultVal, state->value(loc).traits);
 
                 // then generate: if (argc > p) local[p+1] = arg[p+1]
-                LIns* cmp = binaryIns(LIR_lel, argcarg, InsConst(param));
+                LIns* cmp = binaryIns(LIR_lei, argcarg, InsConst(param));
                 CodegenLabel& optional_label = createLabel("param_", i);
                 branchToLabel(LIR_jt, cmp, optional_label); // will patch
                 copyParam(loc, offset);
@@ -1959,8 +1959,8 @@ namespace avmplus
         // If this is a backwards branch, generate an interrupt check.
         // current verifier state, includes tack pointer.
         if (interruptable && core->config.interrupts && state->targetOfBackwardsBranch) {
-            LIns* interrupted = loadIns(LIR_ldl, offsetof(AvmCore,interrupted), coreAddr, ACC_OTHER);
-            LIns* cond = binaryIns(LIR_eql, interrupted, InsConst(AvmCore::NotInterrupted));
+            LIns* interrupted = loadIns(LIR_ldi, offsetof(AvmCore,interrupted), coreAddr, ACC_OTHER);
+            LIns* cond = binaryIns(LIR_eqi, interrupted, InsConst(AvmCore::NotInterrupted));
             branchToLabel(LIR_jf, cond, interrupt_label);
         }
     }
@@ -3329,13 +3329,13 @@ namespace avmplus
                 disp += sizeof(double);
                 break;
             case BUILTIN_int:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldl, vars, index*8, ACC_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index*8, ACC_VARS);
                 stp(l2p(v), ap, disp, ACC_OTHER);
                 disp += sizeof(intptr_t);
                 break;
             case BUILTIN_uint:
             case BUILTIN_boolean:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldl, vars, index*8, ACC_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index*8, ACC_VARS);
                 stp(ul2up(v), ap, disp, ACC_OTHER);
                 disp += sizeof(uintptr_t);
                 break;
@@ -3414,7 +3414,7 @@ namespace avmplus
         case BUILTIN_number:    op = LIR_ldd;   break;
         case BUILTIN_int:
         case BUILTIN_uint:
-        case BUILTIN_boolean:   op = LIR_ldl;    break;
+        case BUILTIN_boolean:   op = LIR_ldi;    break;
         default:                op = LIR_ldp;   break;
         }
         return loadIns(op, offset, ptr, ACC_OTHER);
@@ -3549,16 +3549,16 @@ namespace avmplus
                 static const uint8_t kShiftAmt[3] = { 31, 24, 16 };
                 int32_t index = (int32_t) op1;
                 LIns* val = localGet(index);
-                if ((opcode == OP_sxi8 && val->opcode() == LIR_ldb2l) ||
-                    (opcode == OP_sxi16 && val->opcode() == LIR_ldw2l))
+                if ((opcode == OP_sxi8 && val->opcode() == LIR_ldc2i) ||
+                    (opcode == OP_sxi16 && val->opcode() == LIR_lds2i))
                 {
                     // if we are sign-extending the result of a load-and-sign-extend
                     // instruction, no need to do anything.
                     break;
                 }
                 LIns* sh = InsConst(kShiftAmt[opcode - OP_sxi1]);
-                LIns* shl = binaryIns(LIR_lshl, val, sh);
-                LIns* res = binaryIns(LIR_rshl, shl, sh);
+                LIns* shl = binaryIns(LIR_lshi, val, sh);
+                LIns* res = binaryIns(LIR_rshi, shl, sh);
                 localSet(index, res, result);
                 break;
             }
@@ -3678,7 +3678,7 @@ namespace avmplus
 
                 if (count > 0) {
                     LIns* index = localGet(sp);
-                    LIns* cmp = binaryIns(LIR_ltul, index, InsConst(count));
+                    LIns* cmp = binaryIns(LIR_ltui, index, InsConst(count));
                     branchToAbcPos(LIR_jf, cmp, targetpc_off);
 
                     if (NJ_JTBL_SUPPORTED) {
@@ -3692,7 +3692,7 @@ namespace avmplus
                         // Backend doesn't support jump tables, use cascading if's
                         for (int i=0; i < count; i++) {
                             int target = state->pc + AvmCore::readS24(pc+3*i);
-                            branchToAbcPos(LIR_jt, binaryIns(LIR_eql, index, InsConst(i)), target);
+                            branchToAbcPos(LIR_jt, binaryIns(LIR_eqi, index, InsConst(i)), target);
                         }
                     }
                 }
@@ -3799,7 +3799,7 @@ namespace avmplus
                 //framep[op1] = -framep[op1]
                 int32_t index = (int32_t) op1;
                 AvmAssert(state->value(index).traits == INT_TYPE);
-                localSet(index, Ins(LIR_negl, localGet(index)), result);
+                localSet(index, Ins(LIR_negi, localGet(index)), result);
                 break;
             }
 
@@ -3820,7 +3820,7 @@ namespace avmplus
                 int32_t index = (int32_t) op1;
                 int32_t incr = (int32_t) op2;
                 AvmAssert(state->value(index).traits == INT_TYPE);
-                localSet(index, binaryIns(LIR_addl, localGet(index), InsConst(incr)), result);
+                localSet(index, binaryIns(LIR_addi, localGet(index), InsConst(incr)), result);
                 break;
             }
 
@@ -3828,7 +3828,7 @@ namespace avmplus
                 // *sp = core->intToAtom(~integer(*sp));
                 int32_t index = (int32_t) op1;
                 AvmAssert(state->value(index).traits == INT_TYPE);
-                localSet(index, lirout->ins1(LIR_notl, localGet(index)), result);
+                localSet(index, lirout->ins1(LIR_noti, localGet(index)), result);
                 break;
             }
 
@@ -3866,15 +3866,15 @@ namespace avmplus
                 LOpcode op;
                 switch (opcode) {
                     default:
-                    case OP_bitxor:     op = LIR_xorl;  break;
-                    case OP_bitor:      op = LIR_orl;   break;
-                    case OP_bitand:     op = LIR_andl;  break;
-                    case OP_urshift:    op = LIR_rshul; break;
-                    case OP_rshift:     op = LIR_rshl;  break;
-                    case OP_lshift:     op = LIR_lshl;  break;
-                    case OP_multiply_i: op = LIR_mull;  break;
-                    case OP_add_i:      op = LIR_addl;  break;
-                    case OP_subtract_i: op = LIR_subl;  break;
+                    case OP_bitxor:     op = LIR_xori;  break;
+                    case OP_bitor:      op = LIR_ori;   break;
+                    case OP_bitand:     op = LIR_andi;  break;
+                    case OP_urshift:    op = LIR_rshui; break;
+                    case OP_rshift:     op = LIR_rshi;  break;
+                    case OP_lshift:     op = LIR_lshi;  break;
+                    case OP_multiply_i: op = LIR_muli;  break;
+                    case OP_add_i:      op = LIR_addi;  break;
+                    case OP_subtract_i: op = LIR_subi;  break;
                 }
                 LIns* lhs = localGet(sp-1);
                 LIns* rhs = localGet(sp);
@@ -3968,7 +3968,7 @@ namespace avmplus
                 LIns* i1 = callIns(FUNCTIONID(hasnextproto), 3,
                                      env_param, obj, index);
                 localSet(obj_index, loadIns(LIR_ldp, 0, obj, ACC_LOAD_ANY), OBJECT_TYPE);  // Atom obj
-                localSet(index_index, loadIns(LIR_ldl, 0, index, ACC_LOAD_ANY), INT_TYPE); // int32 index
+                localSet(index_index, loadIns(LIR_ldi, 0, index, ACC_LOAD_ANY), INT_TYPE); // int32 index
                 AvmAssert(result == BOOLEAN_TYPE);
                 localSet(sp+1, i1, result);
                 break;
@@ -5005,9 +5005,9 @@ namespace avmplus
                 // 32-bit signed and unsigned values fit in 64-bit registers
                 // so we can promote and simply do a signed 64bit compare
                 LOpcode qcmp = i32cmp_to_i64cmp(icmp);
-                NanoAssert((icmp == LIR_eql && qcmp == LIR_eqq) ||
-                           (icmp == LIR_ltl && qcmp == LIR_ltq) ||
-                           (icmp == LIR_lel && qcmp == LIR_leq));
+                NanoAssert((icmp == LIR_eqi && qcmp == LIR_eqq) ||
+                           (icmp == LIR_lti && qcmp == LIR_ltq) ||
+                           (icmp == LIR_lei && qcmp == LIR_leq));
                 return binaryIns(qcmp, ul2up(lhs), l2p(rhs));
             #else
                 if (rhs->isconst() && rhs->imm32() >= 0)
@@ -5022,9 +5022,9 @@ namespace avmplus
                 // 32-bit signed and unsigned values fit in 64-bit registers
                 // so we can promote and simply do a signed 64bit compare
                 LOpcode qcmp = i32cmp_to_i64cmp(icmp);
-                NanoAssert((icmp == LIR_eql && qcmp == LIR_eqq) ||
-                           (icmp == LIR_ltl && qcmp == LIR_ltq) ||
-                           (icmp == LIR_lel && qcmp == LIR_leq));
+                NanoAssert((icmp == LIR_eqi && qcmp == LIR_eqq) ||
+                           (icmp == LIR_lti && qcmp == LIR_ltq) ||
+                           (icmp == LIR_lei && qcmp == LIR_leq));
                 return binaryIns(qcmp, l2p(lhs), ul2up(rhs));
             #else
                 if (lhs->isconst() && lhs->imm32() >= 0)
@@ -5043,7 +5043,7 @@ namespace avmplus
     // set cc's for < operator
     LIns* CodegenLIR::cmpLt(int lhsi, int rhsi)
     {
-        LIns *result = cmpOptimization (lhsi, rhsi, LIR_ltl, LIR_ltul, LIR_ltd);
+        LIns *result = cmpOptimization (lhsi, rhsi, LIR_lti, LIR_ltui, LIR_ltd);
         if (result)
             return result;
 
@@ -5062,12 +5062,12 @@ namespace avmplus
         // undefined  0100  1100   n
 
         LIns* c = InsConst(8);
-        return binaryIns(LIR_ltl, binaryIns(LIR_xorl, p2l(atom), c), c);
+        return binaryIns(LIR_lti, binaryIns(LIR_xori, p2l(atom), c), c);
     }
 
     LIns* CodegenLIR::cmpLe(int lhsi, int rhsi)
     {
-        LIns *result = cmpOptimization (lhsi, rhsi, LIR_lel, LIR_leul, LIR_led);
+        LIns *result = cmpOptimization (lhsi, rhsi, LIR_lei, LIR_leui, LIR_led);
         if (result)
             return result;
 
@@ -5084,12 +5084,12 @@ namespace avmplus
 
         LIns* c2 = InsConst(1);
         LIns* c4 = InsConst(4);
-        return binaryIns(LIR_lel, binaryIns(LIR_xorl, p2l(atom), c2), c4);
+        return binaryIns(LIR_lei, binaryIns(LIR_xori, p2l(atom), c2), c4);
     }
 
     LIns* CodegenLIR::cmpEq(const CallInfo *fid, int lhsi, int rhsi)
     {
-        LIns *result = cmpOptimization (lhsi, rhsi, LIR_eql, LIR_eql, LIR_eqd);
+        LIns *result = cmpOptimization (lhsi, rhsi, LIR_eqi, LIR_eqi, LIR_eqd);
         if (result) {
             return result;
         }
@@ -5158,7 +5158,7 @@ namespace avmplus
 
             int handler_count = info->abc_exceptions()->exception_count;
             // Jump to catch handler
-            LIns *handler_target = loadIns(LIR_ldl, offsetof(ExceptionHandler, target), handler, ACC_OTHER);
+            LIns *handler_target = loadIns(LIR_ldi, offsetof(ExceptionHandler, target), handler, ACC_OTHER);
             // Do a compare & branch to each possible target.
             for (int i=0; i < handler_count; i++) {
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
@@ -5166,7 +5166,7 @@ namespace avmplus
                 if (state->verifier->hasFrameState(handler_pc_off)) {
                     CodegenLabel& label = getCodegenLabel(handler_pc_off);
                     AvmAssert(label.labelIns != NULL);
-                    LIns* cond = binaryIns(LIR_eql, handler_target, InsConst(handler_pc_off));
+                    LIns* cond = binaryIns(LIR_eqi, handler_target, InsConst(handler_pc_off));
                     // don't use branchIns() here because we don't want to check null bits;
                     // this backedge is internal to exception handling and doesn't affect user
                     // variable dataflow.
@@ -5274,7 +5274,7 @@ namespace avmplus
         if (!mopsRangeCheckFilter) {
             // add a MopsRangeCheckFilter to the back end of the lirout pipeline, just after CseFilter.
             // fixme bug Bug 554030: We must put this after CseFilter and ExprFilter so that
-            // the range-check expression using LIR_addl/LIR_subl are not modified (by ExprFilter)
+            // the range-check expression using LIR_addi/LIR_subi are not modified (by ExprFilter)
             // and no not become referenced by other unrelated code (by CseFilter).
             AvmAssert(lirout == varTracker);
             mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(redirectWriter->out, prolog, loadEnvDomainEnv());
@@ -5713,16 +5713,16 @@ namespace avmplus
             for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
                 LOpcode op = i->opcode();
                 switch (op) {
-                case LIR_retl:
+                case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
                     varlivein.reset();
                     taglivein.reset();
                     break;
                 CASE64(LIR_stq:)
-                case LIR_stl:
+                case LIR_sti:
                 case LIR_std:
-                case LIR_stl2b:
+                case LIR_sti2c:
                     if (i->oprnd2() == vars) {
                         int d = i->disp() >> 3;
                         varlivein.clear(d);
@@ -5736,9 +5736,9 @@ namespace avmplus
                     analyze_addp(i, vars, varlivein);
                     break;
                 CASE64(LIR_ldq:)
-                case LIR_ldl:
+                case LIR_ldi:
                 case LIR_ldd:
-                case LIR_ldub2ul: case LIR_ldb2l:
+                case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
                         int d = i->disp() >> 3;
                         varlivein.set(d);
@@ -5800,7 +5800,7 @@ namespace avmplus
                     }
                     break;
                 CASE64(LIR_callq:)
-                case LIR_calll:
+                case LIR_calli:
                 case LIR_calld:
                     analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
                             varlivein, varlabels, taglivein, taglabels);
@@ -5855,16 +5855,16 @@ namespace avmplus
         for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
             LOpcode op = i->opcode();
             switch (op) {
-                case LIR_retl:
+                case LIR_reti:
                 CASE64(LIR_retq:)
                 case LIR_retd:
                     varlivein.reset();
                     taglivein.reset();
                     break;
                 CASE64(LIR_stq:)
-                case LIR_stl:
+                case LIR_sti:
                 case LIR_std:
-                case LIR_stl2b:
+                case LIR_sti2c:
                     if (i->oprnd2() == vars) {
                         int d = i->disp() >> 3;
                         if (!varlivein.get(d)) {
@@ -5904,9 +5904,9 @@ namespace avmplus
                     analyze_addp(i, vars, varlivein);
                     break;
                 CASE64(LIR_ldq:)
-                case LIR_ldl:
+                case LIR_ldi:
                 case LIR_ldd:
-                case LIR_ldub2ul: case LIR_ldb2l:
+                case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
                         int d = i->disp() >> 3;
                         varlivein.set(d);
@@ -5948,7 +5948,7 @@ namespace avmplus
                     }
                     break;
                 CASE64(LIR_callq:)
-                case LIR_calll:
+                case LIR_calli:
                 case LIR_calld:
                     analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
                             varlivein, varlabels, taglivein, taglabels);
@@ -6028,9 +6028,9 @@ namespace avmplus
 
     void CodegenLIR::emitMD()
     {
-        deadvars();  // deadvars_kill() will add live(vars) or live(tags) if necessary
+        deadvars();  // deadvars_kill() will add livep(vars) or livep(tags) if necessary
 
-        // do this very last so it's after LIR_livel(vars)
+        // do this very last so it's after livep(vars)
         frag->lastIns = livep(undefConst);
 
         PERFM_NTPROF("compile");
