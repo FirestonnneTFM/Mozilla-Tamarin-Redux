@@ -330,7 +330,7 @@ namespace avmplus
         LIns* atomToNative(BuiltinType, LIns* i);
         LIns* eq0(LIns* i);             // eq(i, imm(0))
         LIns* peq0(LIns* ptr);          // peq(ptr, immq(0))
-        LIns* qlo(LIns* q);             // LIR_dlo2l(q)
+        LIns* qlo(LIns* q);             // LIR_dlo2i(q)
         LIns* l2p(LIns* i);             // 32bit: nop, 64bit: l2q(i)
         LIns* ul2up(LIns* u);             // 32bit: nop, 64bit: ul2uq(i)
         LIns* p2l(LIns* ptr);           // 32bit: nop, 64bit: q2l(ptr)
