@@ -356,21 +356,21 @@ namespace avmplus
 
             int32_t imm;
             LInsp nonImm;
-            if (mopAddr->oprnd2()->isconst())
+            if (mopAddr->oprnd2()->isImmI())
             {
-                imm = mopAddr->oprnd2()->imm32();
+                imm = mopAddr->oprnd2()->immI();
                 nonImm = mopAddr->oprnd1();
 
                 if (op == LIR_subi)
                     imm = -imm;
             }
-            else if (mopAddr->oprnd1()->isconst())
+            else if (mopAddr->oprnd1()->isImmI())
             {
                 // don't try to optimize const-expr
                 if (op == LIR_subi)
                     break;
 
-                imm = mopAddr->oprnd1()->imm32();
+                imm = mopAddr->oprnd1()->immI();
                 nonImm = mopAddr->oprnd2();
             }
             else
@@ -493,7 +493,7 @@ namespace avmplus
     // workaround for WE2569232: don't let these adds get specialized or CSE'd.
     LIns* MopsRangeCheckFilter::safeIns2(LOpcode op, LIns* lhs, int32_t rhsConst)
     {
-        LIns* rhs = prolog_out->insImm(rhsConst);
+        LIns* rhs = prolog_out->insImmI(rhsConst);
         LIns* ins = out->ins2(op, lhs, rhs);
         AvmAssert(ins->isop(op) && ins->oprnd1() == lhs && ins->oprnd2() == rhs);
         return ins;
@@ -502,7 +502,7 @@ namespace avmplus
     // rewrite the instruction with a new rhs constant
     void MopsRangeCheckFilter::safeRewrite(LIns* ins, int32_t rhsConst)
     {
-        LIns* rhs = prolog_out->insImm(rhsConst);
+        LIns* rhs = prolog_out->insImmI(rhsConst);
         AvmAssert(ins->isop(LIR_addi) || ins->isop(LIR_subi));
         ins->initLInsOp2(ins->opcode(), ins->oprnd1(), rhs);
     }
@@ -589,7 +589,7 @@ namespace avmplus
 #ifdef DEBUG
         jit_sst[i] = uint8_t(1 << sst);
 #endif
-        lirout->insStorei(o, vars, i * 8, ACC_VARS);
+        lirout->insStore(o, vars, i * 8, ACC_VARS);
         lirout->insStore(LIR_sti2c, InsConst(sst), tags, i, ACC_TAGS);
     }
 
@@ -626,16 +626,16 @@ namespace avmplus
             return native;  // value already represented as Atom
 
         case BUILTIN_int:
-            if (native->isconst()) {
-                int32_t val = native->imm32();
+            if (native->isImmI()) {
+                int32_t val = native->immI();
                 if (atomIsValidIntptrValue(val))
                     return InsConstAtom(atomFromIntptrValue(val));
             }
             return callIns(FUNCTIONID(intToAtom), 2, coreAddr, native);
 
         case BUILTIN_uint:
-            if (native->isconst()) {
-                uint32_t val = native->imm32();
+            if (native->isImmI()) {
+                uint32_t val = native->immI();
                 if (atomIsValidIntptrValue_u(val))
                     return InsConstAtom(atomFromIntptrValue_u(val));
             }
@@ -796,33 +796,33 @@ namespace avmplus
             return atom;
 
         case BUILTIN_number:
-            if (atom->isconstp())
-                return lirout->insImmf(AvmCore::number_d((Atom)atom->constvalp()));
+            if (atom->isImmP())
+                return lirout->insImmD(AvmCore::number_d((Atom)atom->immP()));
             else
                 return callIns(FUNCTIONID(number_d), 1, atom);
 
         case BUILTIN_int:
-            if (atom->isconstp())
-                return InsConst(AvmCore::integer_i((Atom)atom->constvalp()));
+            if (atom->isImmP())
+                return InsConst(AvmCore::integer_i((Atom)atom->immP()));
             else
                 return callIns(FUNCTIONID(integer_i), 1, atom);
 
         case BUILTIN_uint:
-            if (atom->isconstp())
-                return InsConst(AvmCore::integer_u((Atom)atom->constvalp()));
+            if (atom->isImmP())
+                return InsConst(AvmCore::integer_u((Atom)atom->immP()));
             else
                 return callIns(FUNCTIONID(integer_u), 1, atom);
 
         case BUILTIN_boolean:
-            if (atom->isconst())
-                return InsConst((int32_t)atomGetBoolean((Atom)atom->constvalp()));
+            if (atom->isImmI())
+                return InsConst((int32_t)atomGetBoolean((Atom)atom->immP()));
             else
                 return p2l(rshup(atom, 3));
 
         default:
             // pointer type
-            if (atom->isconstp())
-                return InsConstPtr(atomPtr((Atom)atom->constvalp()));
+            if (atom->isImmP())
+                return InsConstPtr(atomPtr((Atom)atom->immP()));
             else
                 return andp(atom, ~7);
         }
@@ -1285,13 +1285,13 @@ namespace avmplus
 
         LIns *imm2Int(LIns* imm) {
             // return LIns* if we can fit the constant into a i32
-            if (imm->isconst())
+            if (imm->isImmI())
                 ; // just use imm
-            else if (imm->isconstf()) {
-                double val = imm->imm64f();
+            else if (imm->isImmD()) {
+                double val = imm->immD();
                 double cvt = (int)val;
                 if (val == 0 || val == cvt)
-                    imm = out->insImm((int32_t)cvt);
+                    imm = out->insImmI((int32_t)cvt);
                 else
                     imm = 0; // can't convert
             } else {
@@ -1312,12 +1312,12 @@ namespace avmplus
                     a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
                     b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
                     if (a && b)
-                        return out->ins2(f64arith_to_i32arith(op), a, b);
+                        return out->ins2(arithOpcodeD2I(op), a, b);
                 }
 #ifdef AVMPLUS_64BIT
                 else if (op == LIR_immq) {
                     // const fold
-                    return insImm(AvmCore::integer_d(v->imm64f()));
+                    return insImmI(AvmCore::integer_d(v->immD()));
                 }
 #endif
             }
@@ -1393,17 +1393,17 @@ namespace avmplus
             LIns* tra = tagTracker[i];
             NanoAssert(val && tra);
 
-            switch ((SlotStorageType) tra->imm32()) {
+            switch ((SlotStorageType) tra->immI()) {
             case SST_double:
-                AvmAssert(val->isN64());
+                AvmAssert(val->isQorD());
                 break;
             case SST_int32:
             case SST_uint32:
             case SST_bool32:
-                AvmAssert(val->isI32());
+                AvmAssert(val->isI());
                 break;
             default:
-                AvmAssert(val->isPtr());
+                AvmAssert(val->isP());
                 break;
             }
         }
@@ -1481,16 +1481,16 @@ namespace avmplus
         virtual LInsp insParam(int32_t arg, int32_t kind) {
             return lastIns = out->insParam(arg, kind);
         }
-        virtual LInsp insImm(int32_t imm) {
-            return lastIns = out->insImm(imm);
+        virtual LInsp insImmI(int32_t imm) {
+            return lastIns = out->insImmI(imm);
         }
 #ifdef AVMPLUS_64BIT
-        virtual LInsp insImmq(uint64_t imm) {
-            return lastIns = out->insImmq(imm);
+        virtual LInsp insImmQ(uint64_t imm) {
+            return lastIns = out->insImmQ(imm);
         }
 #endif
-        virtual LInsp insImmf(double d) {
-            return lastIns = out->insImmf(d);
+        virtual LInsp insImmD(double d) {
+            return lastIns = out->insImmD(d);
         }
         virtual LInsp insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet) {
             return lastIns = out->insLoad(op, base, d, accSet);
@@ -2975,17 +2975,17 @@ namespace avmplus
 
     void CodegenLIR::emitIntConst(int index, int32_t c, Traits* type)
     {
-        localSet(index, lirout->insImm(c), type);
+        localSet(index, lirout->insImmI(c), type);
     }
 
     void CodegenLIR::emitPtrConst(int index, void* c, Traits* type)
     {
-        localSet(index, lirout->insImmPtr(c), type);
+        localSet(index, lirout->insImmP(c), type);
     }
 
     void CodegenLIR::emitDoubleConst(int index, double* pd)
     {
-        localSet(index, lirout->insImmf(*pd), NUMBER_TYPE);
+        localSet(index, lirout->insImmD(*pd), NUMBER_TYPE);
     }
 
     void CodegenLIR::writeCoerce(const FrameState* state, uint32_t loc, Traits* result)
@@ -4960,8 +4960,8 @@ namespace avmplus
             return;
         }
 
-        if (cond->isconst()) {
-            if ((br == LIR_jt && cond->imm32()) || (br == LIR_jf && !cond->imm32())) {
+        if (cond->isImmI()) {
+            if ((br == LIR_jt && cond->immI()) || (br == LIR_jf && !cond->immI())) {
                 // taken
                 br = LIR_j;
                 cond = 0;
@@ -5004,13 +5004,13 @@ namespace avmplus
             #ifdef AVMPLUS_64BIT
                 // 32-bit signed and unsigned values fit in 64-bit registers
                 // so we can promote and simply do a signed 64bit compare
-                LOpcode qcmp = i32cmp_to_i64cmp(icmp);
+                LOpcode qcmp = cmpOpcodeI2Q(icmp);
                 NanoAssert((icmp == LIR_eqi && qcmp == LIR_eqq) ||
                            (icmp == LIR_lti && qcmp == LIR_ltq) ||
                            (icmp == LIR_lei && qcmp == LIR_leq));
                 return binaryIns(qcmp, ul2up(lhs), l2p(rhs));
             #else
-                if (rhs->isconst() && rhs->imm32() >= 0)
+                if (rhs->isImmI() && rhs->immI() >= 0)
                     return binaryIns(ucmp, lhs, rhs);
             #endif
             }
@@ -5021,13 +5021,13 @@ namespace avmplus
             #ifdef AVMPLUS_64BIT
                 // 32-bit signed and unsigned values fit in 64-bit registers
                 // so we can promote and simply do a signed 64bit compare
-                LOpcode qcmp = i32cmp_to_i64cmp(icmp);
+                LOpcode qcmp = cmpOpcodeI2Q(icmp);
                 NanoAssert((icmp == LIR_eqi && qcmp == LIR_eqq) ||
                            (icmp == LIR_lti && qcmp == LIR_ltq) ||
                            (icmp == LIR_lei && qcmp == LIR_leq));
                 return binaryIns(qcmp, l2p(lhs), ul2up(rhs));
             #else
-                if (lhs->isconst() && lhs->imm32() >= 0)
+                if (lhs->isImmI() && lhs->immI() >= 0)
                     return binaryIns(ucmp, lhs, rhs);
             #endif
             }
@@ -5291,9 +5291,9 @@ namespace avmplus
         // if mopAddr is a compiletime constant, we still have to do the range-check above
         // (since globalMemorySize can vary at runtime), but we might be able to encode
         // the entire address into the displacement (if any)...
-        if (mopAddr->isconst() && disp != NULL && sumFitsInInt32(*disp, mopAddr->imm32()))
+        if (mopAddr->isImmI() && disp != NULL && sumFitsInInt32(*disp, mopAddr->immI()))
         {
-            *disp += mopAddr->imm32();
+            *disp += mopAddr->immI();
             return mopsMemoryBase;
         }
 
@@ -5486,10 +5486,10 @@ namespace avmplus
                 cond = eq0(cond);
                 op = LOpcode(op ^ 1);
             }
-            if (cond->isconst()) {
+            if (cond->isImmI()) {
                 // the branch condition is constant so we're either always branching
                 // or never branching.  handle each case.
-                if ((op == LIR_jt && cond->imm32()) || (op == LIR_jf && !cond->imm32())) {
+                if ((op == LIR_jt && cond->immI()) || (op == LIR_jf && !cond->immI())) {
                     // taken
                     op = LIR_j;
                     cond = 0;
@@ -5649,9 +5649,9 @@ namespace avmplus
     void analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet& varlivein)
     {
         AvmAssert(ins->isop(LIR_addp));
-        if (ins->oprnd1() == vars && ins->oprnd2()->isconstp()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->constvalp(), 8));
-            int d = int(uintptr_t(ins->oprnd2()->constvalp()) >> 3);
+        if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 8));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) >> 3);
             varlivein.set(d);
         }
     }
@@ -6513,10 +6513,10 @@ namespace avmplus
         if (bt != BUILTIN_any) {
             LIns* atom = ldp(args_param, i*sizeof(Atom), ACC_OTHER);
             LIns* native = downcast_expr(atom, ms->paramTraits(i), env_param);
-            lirout->insStorei(native, args_out, offset, ACC_OTHER);
+            lirout->insStore(native, args_out, offset, ACC_OTHER);
         } else if (copyArgs()) {
             LIns* atom = ldp(args_param, i*sizeof(Atom), ACC_OTHER);
-            lirout->insStorei(atom, args_out, offset, ACC_OTHER);
+            lirout->insStore(atom, args_out, offset, ACC_OTHER);
         }
     }
 
@@ -6534,7 +6534,7 @@ namespace avmplus
         LIns* atom = ldp(args_param, 0, ACC_OTHER);
         LIns* native = atomToNative(ms->paramTraitsBT(0), atom);
         if (native != atom || copyArgs())
-            lirout->insStorei(native, args_out, 0, ACC_OTHER);
+            lirout->insStore(native, args_out, 0, ACC_OTHER);
         int offset = argSize(0);
 
         // the required args need to be coerced and unboxed

@@ -98,27 +98,27 @@ REALLY_INLINE LIns* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b)
 
 REALLY_INLINE LIns* LirHelper::InsConst(int32_t c)
 {
-    return lirout->insImm(c);
+    return lirout->insImmI(c);
 }
 
 REALLY_INLINE LIns* LirHelper::InsConstPtr(const void *p)
 {
-    return lirout->insImmPtr(p);
+    return lirout->insImmP(p);
 }
 
 REALLY_INLINE LIns* LirHelper::InsConstAtom(Atom c)
 {
-    return lirout->insImmPtr((void*)c);
+    return lirout->insImmP((void*)c);
 }
 
 REALLY_INLINE LIns* LirHelper::l2p(LIns *i)
 {
-    return lirout->ins_i2p(i);
+    return lirout->insI2P(i);
 }
 
 REALLY_INLINE LIns* LirHelper::ul2up(LIns *i)
 {
-    return lirout->ins_u2p(i);
+    return lirout->insUI2P(i);
 }
 
 REALLY_INLINE LIns* LirHelper::p2l(LIns *i)
@@ -139,12 +139,12 @@ REALLY_INLINE LIns* LirHelper::qlo(LIns* q)
 
 REALLY_INLINE LIns* LirHelper::peq0(LIns* ptr)
 {
-    return lirout->ins_peq0(ptr);
+    return lirout->insEqP_0(ptr);
 }
 
 REALLY_INLINE LIns* LirHelper::eq0(LIns* ptr)
 {
-    return lirout->ins_eq0(ptr);
+    return lirout->insEqI_0(ptr);
 }
 
 REALLY_INLINE LIns* LirHelper::eqp(LIns* a, Atom b)
@@ -159,7 +159,7 @@ REALLY_INLINE LIns* LirHelper::eqp(LIns* a, LIns* b)
 
 REALLY_INLINE LIns* LirHelper::choose(LIns* cond, Atom t, LIns* f)
 {
-    return lirout->ins_choose(cond, InsConstAtom(t), f, true/*use_cmov*/);
+    return lirout->insChoose(cond, InsConstAtom(t), f, true/*use_cmov*/);
 }
 
 REALLY_INLINE LIns* LirHelper::andp(LIns* a, Atom mask)
@@ -204,19 +204,19 @@ REALLY_INLINE LIns* LirHelper::jneql(LIns *a, int32_t b)
 
 REALLY_INLINE LIns* LirHelper::stp(LIns* val, LIns* p, int32_t d, AccSet accSet)
 {
-    AvmAssert(val->isPtr());
+    AvmAssert(val->isP());
     return lirout->insStore(LIR_stp, val, p, d, accSet);
 }
 
 REALLY_INLINE LIns* LirHelper::stl(LIns* val, LIns* p, int32_t d, AccSet accSet)
 {
-    AvmAssert(val->isI32());
+    AvmAssert(val->isI());
     return lirout->insStore(LIR_sti, val, p, d, accSet);
 }
 
 REALLY_INLINE LIns* LirHelper::std(LIns* val, LIns* p, int32_t d, AccSet accSet)
 {
-    AvmAssert(val->isF64());
+    AvmAssert(val->isD());
     return lirout->insStore(LIR_std, val, p, d, accSet);
 }
 
