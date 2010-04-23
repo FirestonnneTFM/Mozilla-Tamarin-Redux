@@ -335,6 +335,7 @@ namespace avmplus
 		int32_t end = start;
 		while (bgn >= start && bgn < last)
 		{
+            int32_t ampBgn = bgn;
 			int32_t ampEnd = m_str->indexOfCharCode(';', ++bgn, last);
 			if (ampEnd < 0)
 				// &xxx without semicolon - we are done
@@ -403,13 +404,15 @@ namespace avmplus
 				else
 					ok = false;
 			}
+            else
+                ok = false;
 			if (!ok)
 			{
 				bgn = end + 1;
                 // in this case we don't want to just throw out the
                 // the value entirely as that would break existing content
-				if (start < end)
-					dest = dest->append(m_str->substring(start, end));
+				if (ampBgn < end)
+					dest = dest->append(m_str->substring(ampBgn, end));
             }
 			bgn = m_str->indexOfCharCode('&', bgn, last);
 		}
