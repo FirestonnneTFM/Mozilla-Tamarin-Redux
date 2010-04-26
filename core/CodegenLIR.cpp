@@ -3350,7 +3350,7 @@ namespace avmplus
         // patch the size to what we actually need
         ap->setSize(disp);
 
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
         LIns* target = loadIns(LIR_ldp, offsetof(MethodEnvProcHolder,_implGPR), method, ACC_OTHER);
 #else
         LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnvProcHolder, method), method, ACC_OTHER);

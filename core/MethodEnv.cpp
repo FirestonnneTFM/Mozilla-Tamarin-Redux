@@ -534,7 +534,7 @@ namespace avmplus
             *args++ = in[end++];
     }
 
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
     uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int32_t argc, uint32_t *ap)
     {
         env->_implGPR = env->method->implGPR();
@@ -544,7 +544,7 @@ namespace avmplus
 #endif // VMCFG_METHODENV_IMPL32
 
     MethodEnv::MethodEnv(MethodInfo* method, ScopeChain* scope) :
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
         MethodEnvProcHolder(delegateInvoke),
         method(method),
 #else

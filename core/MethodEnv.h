@@ -47,7 +47,7 @@ namespace avmplus
     {
         friend class CodegenLIR;
 
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
     protected:
         MethodEnvProcHolder(GprMethodProc p);
         union {
@@ -70,7 +70,7 @@ namespace avmplus
         friend class CodegenLIR;
         friend class MethodInfo;
         friend class MethodInfoProcHolder;
-    #if VMCFG_METHODENV_IMPL32
+    #ifdef VMCFG_METHODENV_IMPL32
         static uintptr_t delegateInvoke(MethodEnv* env, int32_t argc, uint32_t *ap);
     #endif
     public:
@@ -308,7 +308,7 @@ namespace avmplus
         VTable* vtable() const;
 
     // ------------------------ DATA SECTION BEGIN
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
     public:
         MethodInfo* const method;
 #else
@@ -380,7 +380,7 @@ namespace avmplus
             VTable* vtable;
             uint32_t imtMapCount;
         };
-#if !VMCFG_METHODENV_IMPL32
+#if !defined(VMCFG_METHODENV_IMPL32)
         MethodInfoProcHolder methodProcHolder;
 #endif
     // ------------------------ DATA SECTION END

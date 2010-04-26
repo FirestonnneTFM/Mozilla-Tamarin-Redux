@@ -139,14 +139,6 @@
 
 // This is here for VM development.
 //
-// define this to 1 to keep a shadow copy of implGPR in MethodEnv (vs MethodInfo only).
-// more speed, but more memory used... not clear if the tradeoff is worthwhile yet.
-#ifndef VMCFG_METHODENV_IMPL32
-#  define VMCFG_METHODENV_IMPL32 1
-#endif
-
-// This is here for VM development.
-//
 // Enable support for printing the control flow graph in the JIT.
 //#define FEATURE_CFGWRITER
 
