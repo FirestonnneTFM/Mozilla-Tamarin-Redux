@@ -190,7 +190,7 @@ namespace avmplus
 
         f->verify(env->toplevel(), env->abcEnv());
 
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
         // we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
         // but next time we want to call the real code, not verifyEnter again.
         // All other MethodEnv's in their default state will call the target method
@@ -213,7 +213,7 @@ namespace avmplus
 
         f->verify(env->toplevel(), env->abcEnv());
 
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
         // we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
         // but next time we want to call the real code, not verifyEnter again.
         // All other MethodEnv's in their default state will call the target method
@@ -237,7 +237,7 @@ namespace avmplus
 
         f->verify(env->toplevel(), env->abcEnv());
 
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
         // we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
         // but next time we want to call the real code, not verifyEnter again.
         // All other MethodEnv's in their default state will call the target method

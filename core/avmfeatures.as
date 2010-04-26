@@ -397,6 +397,7 @@ var FEATURES =
     <defines> VMCFG_NANOJIT  </defines>
     <defines> VMCFG_PRECOMP_NAMES </defines>
     <defines> VMCFG_LOOKUP_CACHE </defines>
+    <defines> VMCFG_METHODENV_IMPL32 </defines>
     <defines> FEATURE_NANOJIT </defines>  <!-- FIXME: legacy name -->
   </feature>
 

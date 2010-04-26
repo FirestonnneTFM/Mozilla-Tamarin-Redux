@@ -39,7 +39,7 @@
 
 namespace avmplus
 {
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
 REALLY_INLINE MethodEnvProcHolder::MethodEnvProcHolder(GprMethodProc p)
     : _implGPR(p)
 { }
@@ -191,7 +191,7 @@ REALLY_INLINE FunctionEnv::FunctionEnv(MethodInfo* _method, ScopeChain* _scope)
 
 #ifdef FEATURE_NANOJIT
 
-#if VMCFG_METHODENV_IMPL32
+#ifdef VMCFG_METHODENV_IMPL32
 
 REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, VTable* v)
     : MethodEnvProcHolder((GprMethodProc)p), vtable(v)
