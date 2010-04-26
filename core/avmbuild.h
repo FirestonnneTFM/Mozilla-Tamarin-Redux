@@ -85,14 +85,6 @@
     #endif
 #endif
 
-// This is here because the conditional can't be expressed by the feature system (yet),
-// and because support for this case (word code + jit) is likely to be removed anyway.
-//
-// For word code + jit, define a verifier output module that can drive two code generators.
-#if defined VMCFG_WORDCODE && defined FEATURE_NANOJIT
-    #define FEATURE_TEEWRITER
-#endif
-
 // This is here because it's an always-enabled switch to externally sourced code:
 // PCRE should always be compiled as a statically linked library, never as a shared
 // library.  See pcre/pcre_internal.h, pcre/pcre.h, and pcre/config.h.
@@ -157,25 +149,6 @@
 //
 // Enable support for printing the control flow graph in the JIT.
 //#define FEATURE_CFGWRITER
-
-// This is here for documentation purposes.
-//
-// This must be enabled (probably not in this file) if nanojit is being used outside AVM,
-// eg, in TraceMonkey.
-//#define VMCFG_NANOJIT_STANDALONE
-
-// This is here because it's slated to be deleted, but can't be deleted yet (now == Apr-2009).
-//
-// AVMPLUS_PORTING_API is completely unsupported and it /will/ be removed here and elsewhere
-// in the code.  Embedding software /must/ instead use the common configuration system, see
-// core/avmfeatures.as and core/avmfeatures.h.
-#if defined(AVMPLUS_PORTING_API)
-    // The portapi_avmbuild.h file is used to override
-    // definitions in this file. E.g. turning off
-    // features, etc.
-    //#include "portapi_avmbuild.h"
-    #error "Obsolete define"
-#endif
 
 //Enable this if compiling for fuzz testing, where informational asserts are not desired.
 //There are only a few informational asserts in the source code.
