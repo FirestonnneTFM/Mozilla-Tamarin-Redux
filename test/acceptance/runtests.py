@@ -444,8 +444,10 @@ class AcceptanceRuntest(RuntestBase):
                     outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d Signal Name: %s FAILED!' % (expectedExitcode,exitcode,getSignalName(abs(exitcode))), self.failmsgs)))
                     outputCalls.append((self.fail,(testName, 'captured output: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
                     lfail+= 1
-            elif err!=[]:
+            elif err:
+                # TODO: When needed, add support for expected stderr output - see https://bugzilla.mozilla.org/show_bug.cgi?id=561892
                 outputCalls.append((self.fail,(testName, "unexpected stderr expected:'%s' actual:'%s'" % ('',err), self.failmsgs)))
+                lfail += 1  # any messages to stderr automatically fail the test
             elif lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
                 res=dict_match(settings,'*','expectedfail')
                 if res:
