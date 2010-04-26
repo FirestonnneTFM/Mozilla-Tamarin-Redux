@@ -81,7 +81,7 @@ namespace avmplus
             // 'multiNs' is 1 if the given name exists elsewhere with a different namespace.
             // 'apis' is the bit vector of API versions.
             //
-            // The values share a word for space reasons.  The low bit holds 'multiNS', 
+            // The values share a word for space reasons.  The low bit holds 'multiNS',
             // the word shifted right 1 holds 'apis'.
             //
             // NOTE, some code in MultinameHashtable.cpp operates directly on this

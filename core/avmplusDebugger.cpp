@@ -535,7 +535,7 @@ namespace avmplus
     {
         const int MAX_FRAMES = 500; // we need a max, for perf. reasons (bug 175526)
         CallStackNode* trace = core->callStack;
-        if (trace == NULL) 
+        if (trace == NULL)
             return 0;
         int count = 1;
         while( (trace = trace->next()) != 0 && count < MAX_FRAMES )
@@ -592,14 +592,14 @@ namespace avmplus
         case AUTO_LOCAL:
             success = frame->locals(arr, count);
             break;
-            
+
         case AUTO_ARGUMENT:
             success = frame->arguments(arr, count);
             break;
         case AUTO_THIS:
             AvmAssert(index == 0);
             success = frame->dhis(dhis);
-            if (success) { 
+            if (success) {
                 arr = &dhis;
             }
             break;
@@ -614,42 +614,42 @@ namespace avmplus
         }
         return unreachableAtom;
     }
-    
+
     // interactive
     Atom Debugger::autoAtomKindAt(DebugFrame* frame, int autoIndex, AutoVarKind kind) {
         if (!frame) return unreachableAtom;
         else return atomKind(autoAtomAt(frame, autoIndex, kind));
     }
-    
+
     ScriptObject* Debugger::autoVarAsObject(DebugFrame* frame, int index, AutoVarKind kind)
     {
         if (!frame) return NULL; // should have tested for error earlier
         return AvmCore::atomToScriptObject(autoAtomAt(frame, index, kind));
     }
-    
+
     Stringp Debugger::autoVarAsString(DebugFrame* frame, int index, AutoVarKind kind)
     {
         if (!frame) return NULL; // should have tested for error earlier
         return AvmCore::atomToString(autoAtomAt(frame, index, kind));
     }
-    
+
     bool Debugger::autoVarAsBoolean(DebugFrame* frame, int index, AutoVarKind kind)
     {
         if (!frame) return false; // should have tested for error earlier
         Atom value = autoAtomAt(frame, index, kind);
         return value == trueAtom ? true : false;
     }
- 
+
     double Debugger::autoVarAsInteger(DebugFrame* frame, int index, AutoVarKind kind) {
         if (!frame) return MathUtils::kNaN; // should have tested for error earlier
         return AvmCore::number_d(autoAtomAt(frame, index, kind));
     }
-    
+
     double Debugger::autoVarAsDouble(DebugFrame* frame, int index, AutoVarKind kind) {
         if (!frame) return MathUtils::kNaN; // should have tested for error earlier
         return AvmCore::atomToDouble(autoAtomAt(frame, index, kind));
     }
-    
+
     Stringp Debugger::autoVarName(DebugStackFrame* frame, int index, AutoVarKind kind) {
         if (frame == NULL) return NULL;
         int line;
@@ -670,7 +670,7 @@ namespace avmplus
         }
         return NULL;
     }
-    
+
     int Debugger::autoVarCount(DebugStackFrame* frame, AutoVarKind kind) {
         if (frame == NULL) return NULL;
         int line, count;
@@ -681,7 +681,7 @@ namespace avmplus
         MethodInfo* info = functionFor(src, line, frame);
         if (!info) return NULL;
         switch (kind) {
-        case AUTO_LOCAL: 
+        case AUTO_LOCAL:
             return frame->locals(ptr, count) ? count : -1;
         case AUTO_ARGUMENT:
             return frame->arguments(ptr, count) ? count : -1;
@@ -692,7 +692,7 @@ namespace avmplus
         }
         return -1;
     }
-    
+
      Stringp Debugger::methodNameAt(DebugStackFrame* frame) {
          if (frame == NULL) return NULL;
          int line;
@@ -702,14 +702,14 @@ namespace avmplus
          MethodInfo* info = functionFor(src, line, frame);
          return  info ? info->getMethodName() : NULL;
      }
-    
+
      void Debugger::printString(Stringp string) {
          StUTF8String buf(string);
          fputs(buf.c_str(), stdout);
          // flush in case debugger output is interleaved with process output
          fflush(stdout);
      }
-    
+
      void Debugger::printMethod(MethodInfo* info) {
           String* name = info->getMethodName();
           if (!name) return;

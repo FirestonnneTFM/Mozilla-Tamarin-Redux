@@ -50,7 +50,7 @@ namespace MMgc
     #define GCAssert         AvmAssert
     #define GCAssertMsg      AvmAssertMsg
     #define GCDebugMsg       avmplus::AvmDebugMsg
-    
+
 }
 
 #endif /* __GCDebug__ */

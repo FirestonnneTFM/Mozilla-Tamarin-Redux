@@ -58,7 +58,7 @@ namespace avmplus
     void AvmDebugMsg(const wchar* msg, bool debuggerBreak);
 
 #if defined DEBUG || defined _DEBUG
-    
+
     inline void AvmAssertFail(const char *message) {
         #if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
             AVMPlusCustomAssertionHandler(message);
@@ -87,7 +87,7 @@ namespace avmplus
         } while (0) /* no semi */
 
 #else
-    
+
     #define AvmAssertMsg(condition,message) \
         do { } while (0) /* no semi */
 

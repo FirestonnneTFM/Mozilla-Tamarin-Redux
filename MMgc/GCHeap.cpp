@@ -363,11 +363,11 @@ namespace MMgc
 #endif
 
             //  Only check for memory limits if we're allowing OOM notifications
-            if (m_oomHandling) 
+            if (m_oomHandling)
             {
                 CheckForMemoryLimitsExceeded();
             }
-			
+
             m_oomHandling = saved_oomHandling;
         }
 

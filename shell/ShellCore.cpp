@@ -353,7 +353,7 @@ namespace avmshell
             // if there is at least on versioned uri, then there must be a version matrix
             if (_uris_count > 0) {
                 // Last api of any row is largestApiUtils::getLargestVersion(this);
-                // Using the largest API is really not ideal, because it means AIR_SYS / FP_SYS 
+                // Using the largest API is really not ideal, because it means AIR_SYS / FP_SYS
                 // are open to random ABC code in the shell.  We don't want that normally.
                 // Instead use the largest nonsys value as computed by the preprocessor.
                 //this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
@@ -414,7 +414,7 @@ namespace avmshell
             initBuiltinPool();
 #endif
             initShellPool();
-            
+
             // init toplevel internally
             shell_toplevel = initShellBuiltins();
 
