@@ -451,17 +451,17 @@ namespace avmplus
                AUTO_ARGUMENT,
                AUTO_THIS
           };
-        
+
         // The following are meant to be called interactively from a debugger.
         /**
          * Query the kind of the automatic variable.
          * @see avmplus::AtomConstants
          */
         static Atom autoAtomKindAt(DebugFrame* frame, int autoIndex, AutoVarKind kind);
-        
+
         // The following return the native type and rely the client
         //  (i.e., most likely the debugger) to use the right variant.
-        // 
+        //
         static ScriptObject* autoVarAsObject(DebugFrame* frame, int index, AutoVarKind kind);
         static bool autoVarAsBoolean(DebugFrame* frame, int index, AutoVarKind kind);
         static Stringp autoVarAsString(DebugFrame* frame, int index, AutoVarKind kind);
@@ -473,7 +473,7 @@ namespace avmplus
         static Stringp methodNameAt(DebugStackFrame* frame);
         static void printString(Stringp string);
         static void printMethod(MethodInfo* method);
-        
+
     protected:
         static MethodInfo* functionFor(SourceInfo* src, int line, DebugStackFrame* frame); // protected
         static Atom autoAtomAt(DebugFrame* frame, int index, AutoVarKind kind);

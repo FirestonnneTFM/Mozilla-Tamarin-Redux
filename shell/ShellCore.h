@@ -91,7 +91,7 @@ namespace avmshell
         const char* st_category;
         const char* st_name;
         uint32_t api;
-        
+
         MMgc::GC::GCMode gcMode()
         {
             if (nogc)               return MMgc::GC::kDisableGC;

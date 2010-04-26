@@ -229,9 +229,9 @@ namespace avmplus
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
-	static VTable* _newVT(Toplevel* toplevel, PoolObject* pool, uint16_t sz)
-	{
-		Traits* t = Traits::newTraits(pool, NULL, sz, 0, 0, TRAITSTYPE_RT);
+    static VTable* _newVT(Toplevel* toplevel, PoolObject* pool, uint16_t sz)
+    {
+        Traits* t = Traits::newTraits(pool, NULL, sz, 0, 0, TRAITSTYPE_RT);
         t->verifyBindings(toplevel);
         t->resolveSignatures(toplevel);
         return toplevel->core()->newVTable(t, NULL, toplevel);
