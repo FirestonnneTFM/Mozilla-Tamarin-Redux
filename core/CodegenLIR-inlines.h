@@ -162,6 +162,11 @@ REALLY_INLINE LIns* LirHelper::choose(LIns* cond, Atom t, LIns* f)
     return lirout->insChoose(cond, InsConstAtom(t), f, true/*use_cmov*/);
 }
 
+REALLY_INLINE LIns* LirHelper::addp(LIns* a, Atom mask)
+{
+    return lirout->ins2(LIR_addp, a, InsConstAtom(mask));
+}
+
 REALLY_INLINE LIns* LirHelper::andp(LIns* a, Atom mask)
 {
     return lirout->ins2(LIR_andp, a, InsConstAtom(mask));
@@ -170,6 +175,11 @@ REALLY_INLINE LIns* LirHelper::andp(LIns* a, Atom mask)
 REALLY_INLINE LIns* LirHelper::orp(LIns* a, Atom mask)
 {
     return lirout->ins2(LIR_orp, a, InsConstAtom(mask));
+}
+
+REALLY_INLINE LIns* LirHelper::addi(LIns* a, int32_t mask)
+{
+    return lirout->ins2(LIR_addi, a, InsConst(mask));
 }
 
 REALLY_INLINE LIns* LirHelper::orl(LIns* a, int32_t mask)

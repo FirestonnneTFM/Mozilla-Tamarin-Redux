@@ -342,6 +342,8 @@ namespace avmplus
         LIns* eqp(LIns* a, Atom b);
         LIns* eqp(LIns* a, LIns* b);
         LIns* choose(LIns* c, Atom t, LIns* f);
+        LIns* addp(LIns* a, Atom imm);
+        LIns* addi(LIns* a, int32_t imm);
         LIns* andp(LIns* a, Atom mask);
         LIns* orp(LIns* a, Atom mask);
         LIns* orl(LIns* a, int32_t mask);
