@@ -600,7 +600,7 @@ namespace avmplus
 
     LIns* CodegenLIR::ptrToNativeRep(Traits*t, LIns* ptr)
     {
-        return t->isMachineType() ? orp(ptr, kObjectType) : ptr;
+        return t->isMachineType() ? addp(ptr, kObjectType) : ptr;
     }
 
 #ifdef _DEBUG
@@ -642,16 +642,16 @@ namespace avmplus
             return callIns(FUNCTIONID(uintToAtom), 2, coreAddr, native);
 
         case BUILTIN_boolean:
-            return ul2up(orl(lshl(native, 3), kBooleanType));
+            return ul2up(addi(lshl(native, 3), kBooleanType));
 
         case BUILTIN_string:
-            return orp(native, kStringType);
+            return addp(native, kStringType);
 
         case BUILTIN_namespace:
-            return orp(native, kNamespaceType);
+            return addp(native, kNamespaceType);
 
         default:
-            return orp(native, kObjectType);
+            return addp(native, kObjectType);
         }
     }
 
