@@ -696,6 +696,7 @@ class tamarinredux:
     linux_mips_compile_factory.addStep(sync_clone(url=HG_URL))
     linux_mips_compile_factory.addStep(sync_update)
     linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
+    linux_mips_compile_factory.addStep(compile_builtin)
     linux_mips_compile_factory.addStep(BuildShellCommand(
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=mips-linux', 'avmshell_mips', 'false'],
                 env={
