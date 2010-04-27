@@ -40,10 +40,6 @@
 # assumes the shell is deployed to $SSH_SHELL_REMOTE_DIR/avmshell
 #
 
-##
-# Bring in the environment variables
-##
-. ./environment.sh
 
 if [ "$SSH_SHELL_REMOTE_USER" = "" ] ||
    [ "$SSH_SHELL_REMOTE_HOST" = "" ] ||
@@ -83,7 +79,7 @@ else
     ret=`cat /tmp/stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     for a in $filelist
     do
-        ssh $REMOTE_USER@$REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm $a"
+        ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm $a"
     done
     cat /tmp/stdout
     rm -f /tmp/stdout
