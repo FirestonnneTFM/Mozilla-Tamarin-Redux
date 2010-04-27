@@ -150,7 +150,7 @@ namespace avmplus
 					if (!depth) 
 					{
 						// We've reached the end of the DOCTYPE.
-						tag.text = m_str->substring(start, end - 1);
+						tag.text = m_str->substring(start, end);
 						tag.nodeType = XMLTag::kDocTypeDeclaration;
 						m_pos = end;
 						return XMLParser::kNoError;
