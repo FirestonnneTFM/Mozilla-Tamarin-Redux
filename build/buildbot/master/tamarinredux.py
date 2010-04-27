@@ -65,7 +65,8 @@ class tamarinredux:
                                    "winmobile-emulator-compile",
                                    "solaris-sparc-compile",
                                    "android-compile",
-                                   "linux-arm-compile", "linux-arm2-compile"])
+                                   "linux-arm-compile", "linux-arm2-compile", 
+                                   "linux-mips-compile"])
 
     smoke = BuilderDependent(name="smoke",upstream=compile, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-smoke", "windows64-smoke",
@@ -77,7 +78,8 @@ class tamarinredux:
                                    "winmobile-emulator-smoke",
                                    "solaris-sparc-smoke",
                                    "android-smoke",
-                                   "linux-arm-smoke", "linux-arm2-smoke"],
+                                   "linux-arm-smoke", "linux-arm2-smoke",
+                                   "linux-mips-smoke"],
                     builderDependencies=[
                                   ["windows-smoke", "windows-compile"], 
                                   ["windows64-smoke", "windows64-compile"], 
@@ -96,6 +98,7 @@ class tamarinredux:
                                   ["android-smoke","android-compile"],
                                   ["linux-arm-smoke","linux-compile"],
                                   ["linux-arm2-smoke","linux-compile"],
+                                  ["linux-mips-smoke","linux-mips-compile"],
                                  ])
 
     test = BuilderDependent(name="test",upstream=smoke, callbackInterval=60, properties={'silent':'false'},
@@ -108,7 +111,8 @@ class tamarinredux:
                                    "winmobile-emulator-test",
                                    "solaris-sparc-test",
                                    "android-test",
-                                   "linux-arm-test", "linux-arm2-test"],
+                                   "linux-arm-test", "linux-arm2-test",
+                                   "linux-mips-test"],
                     builderDependencies=[
                                   ["windows-test", "windows-smoke"], 
                                   ["windows64-test", "windows64-smoke"], 
@@ -127,6 +131,7 @@ class tamarinredux:
                                   ["android-test", "android-smoke"],
                                   ["linux-arm-test", "linux-arm-smoke"],
                                   ["linux-arm2-test", "linux-arm2-smoke"],
+                                  ["linux-mips-test", "linux-mips-smoke"],
                                  ])
 
     performance = PhaseTwoScheduler(name="performance", branch="%s-performance" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
@@ -681,6 +686,56 @@ class tamarinredux:
                 'factory': linux_arm2_compile_factory,
                 'builddir': './linux-arm2-compile',
     }
+    
+    
+    ################################
+    #### builder for linux-mips ####
+    ################################
+    linux_mips_compile_factory = factory.BuildFactory()
+    linux_mips_compile_factory.addStep(sync_clean)
+    linux_mips_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_mips_compile_factory.addStep(sync_update)
+    linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
+    linux_mips_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=mips-linux', 'avmshell_mips', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'mipsel-linux-uclibc-g++ -static',
+                    'CC' : 'mipsel-linux-uclibc-gcc -static',
+                    'LD' : 'mipsel-linux-uclibc-ld',
+                    'AR' : 'mipsel-linux-uclibc-ar',
+                },
+                description='starting Release-mips-linux build...',
+                descriptionDone='finished Release-mips-linux build.',
+                name="Release_mips-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    linux_mips_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=mips-linux', 'avmshell_mips_d', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'mipsel-linux-uclibc-g++ -static',
+                    'CC' : 'mipsel-linux-uclibc-gcc -static',
+                    'LD' : 'mipsel-linux-uclibc-ld',
+                    'AR' : 'mipsel-linux-uclibc-ar',
+                },
+                description='starting Debug-mips-linux build...',
+                descriptionDone='finished Debug-mips-linux build.',
+                name="Debug_mips-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    linux_mips_compile_factory.addStep(compile_buildcheck_local)
+    linux_mips_compile_factory.addStep(util_upload_asteam_local)
+    linux_mips_compile_factory.addStep(util_upload_mozilla_local)
+    
+    linux_mips_compile_builder = {
+                'name': "linux-mips-compile",
+                'slavename': "asteamlin1-mips",
+                'factory': linux_mips_compile_factory,
+                'builddir': './linux-mips-compile',
+    }
+
+    
 
     ################################################################################
     ################################################################################
@@ -980,6 +1035,30 @@ class tamarinredux:
                 'slavename': "asteambeagle4",
                 'factory': linux_arm2_smoke_factory,
                 'builddir': './linux-arm2-smoke',
+    }
+    
+    
+    #########################################
+    #### builder for linux-mips-smoke    ####
+    #########################################
+    linux_mips_smoke_factory = factory.BuildFactory()
+    linux_mips_smoke_factory.addStep(download_testmedia)
+    linux_mips_smoke_factory.addStep(TestSuiteShellCommand(
+                command=['./run-smoketests.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    linux_mips_smoke_factory.addStep(util_process_clean)
+
+    linux_mips_smoke_builder = {
+                'name': "linux-mips-smoke",
+                'slavename': "asteamlin1-mips",
+                'factory': linux_mips_smoke_factory,
+                'builddir': './linux-mips-smoke',
     }
 
 
@@ -1374,6 +1453,21 @@ class tamarinredux:
                 'slavename': "asteambeagle4",
                 'factory': linux_arm2_test_factory,
                 'builddir': './linux-arm2-test',
+    }
+    
+    
+    ##########################################
+    #### builder for linux-mips-test      ####
+    ##########################################
+    linux_mips_test_factory = factory.BuildFactory()
+    linux_mips_test_factory.addStep(util_process_clean)
+    linux_mips_test_factory.addStep(util_clean_buildsdir)
+
+    linux_mips_test_builder = {
+                'name': "linux-mips-test",
+                'slavename': "asteamlin1-mips",
+                'factory': linux_mips_test_factory,
+                'builddir': './linux-mips-test',
     }
 
 
@@ -1872,6 +1966,7 @@ class tamarinredux:
                 android_compile_builder,
                 linux_arm_compile_builder,
                 linux_arm2_compile_builder,
+                linux_mips_compile_builder,
                 
                 windows_smoke_builder,
                 windows_64_smoke_builder,
@@ -1890,6 +1985,7 @@ class tamarinredux:
                 android_smoke_builder,
                 linux_arm_smoke_builder,
                 linux_arm2_smoke_builder,
+                linux_mips_smoke_builder,
                 
                 windows_test_builder,
                 windows_64_test_builder,
@@ -1908,6 +2004,7 @@ class tamarinredux:
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_arm2_test_builder,
+                linux_mips_test_builder,
 
                 windows_performance_builder,
                 mac_performance_builder,
