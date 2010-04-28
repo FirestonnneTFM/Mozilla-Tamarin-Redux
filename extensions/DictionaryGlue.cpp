@@ -55,24 +55,24 @@ namespace avmplus
     : ClassClosure(vtable)
     {
         createVanillaPrototype();
-        vtable->traits->itraits->isDictionary = true;
+        vtable->traits->itraits->set_isDictionary();
     }
 
     ScriptObject *DictionaryClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
     {
-        GCAssert(ivtable->traits->isDictionary == true);
+        GCAssert(ivtable->traits->isDictionary());
         return new (core()->GetGC(), ivtable->getExtraSize()) DictionaryObject(ivtable, prototypePtr());
     }
 
     DictionaryObject::DictionaryObject(VTable *vtable, ScriptObject *delegate)
         : ScriptObject(vtable, delegate)
     {
-        GCAssert(vtable->traits->isDictionary == true);
+        GCAssert(vtable->traits->isDictionary());
     }
 
     void DictionaryObject::init(bool weakKeys)
     {
-        GCAssert(vtable->traits->isDictionary == true);
+        GCAssert(vtable->traits->isDictionary());
         MMgc::GC* gc = this->gc();
 
         HeapHashtable* ht = weakKeys ? new (gc) WeakKeyHashtable(gc)

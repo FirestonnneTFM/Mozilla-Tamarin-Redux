@@ -92,7 +92,7 @@ namespace avmplus
                 HeapHashtable** hht;
             };
             p = (uint8_t*)this + vtable->traits->getHashtableOffset();
-            if(!vtable->traits->isDictionary)
+            if(!vtable->traits->isDictionary())
             {
                 return iht;
             }

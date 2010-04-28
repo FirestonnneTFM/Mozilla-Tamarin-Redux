@@ -89,7 +89,7 @@ namespace avmplus
 
     void ScriptObject::initHashtable(int capacity /*=InlineHashtable::kDefaultCapacity*/)
     {
-        AvmAssert(vtable->traits->isDictionary == 0); //should not be called DictionaryObject uses HeapHashtable
+        AvmAssert(vtable->traits->isDictionary() == 0); //should not be called DictionaryObject uses HeapHashtable
 
         MMGC_MEM_TYPE(this);
         union {
@@ -109,7 +109,7 @@ namespace avmplus
             HeapHashtable** hht;
         };
         p = (uint8_t*)this + vtable->traits->getHashtableOffset();
-        if(!vtable->traits->isDictionary)
+        if(!vtable->traits->isDictionary())
         {
             if (iht->needsInitialize())
                 const_cast<ScriptObject*>(this)->initHashtable();
@@ -855,7 +855,7 @@ namespace avmplus
         uint64_t bytesUsed = traits()->getTotalSize();
         if(traits()->needsHashtable())
         {
-            if (traits()->isDictionary)
+            if (traits()->isDictionary())
             {
                 union {
                     uint8_t* p;

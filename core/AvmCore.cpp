@@ -2268,7 +2268,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     /*static*/ bool AvmCore::isDictionary(Atom atm)
     {
-        return isObject(atm) && atomToScriptObject(atm)->vtable->traits->isDictionary;
+        return isObject(atm) && atomToScriptObject(atm)->vtable->traits->isDictionary();
     }
 
     // Tables are from http://www.w3.org/TR/2004/REC-xml-20040204/#NT-NameChar
