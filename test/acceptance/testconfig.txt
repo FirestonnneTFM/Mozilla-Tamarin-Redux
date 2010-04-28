@@ -205,6 +205,9 @@ ecma3/Date/e15_9_5_10, arm-winmobile-emulator-tvm-.*(?<!-deep)$, skip, tests run
 as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
+regress/bug_555568, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335
+regress/bug_558442a, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335
+
 
 ####################
 # skip slow tests in test phase, -Dgreedy passes
