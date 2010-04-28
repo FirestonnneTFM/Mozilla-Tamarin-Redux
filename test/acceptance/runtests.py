@@ -229,7 +229,7 @@ class AcceptanceRuntest(RuntestBase):
         if self.forcerebuild and isfile(testName) and ext not in self.executableExtensions:
             os.unlink(testName)
         if isfile(testName) and getmtime(ast)>getmtime(testName) and self.timestampcheck:
-            self.verbose_print("%s has been modified, recompiling" % ast)
+            outputCalls.append((self.verbose_print, ("%s has been modified, recompiling" % ast)))
             os.unlink(testName)
         if not isfile(testName):
             compileOutput = self.compile_test(ast)
@@ -384,7 +384,7 @@ class AcceptanceRuntest(RuntestBase):
                 else:   
                     for line in f+err:
                         outputLines.append(line)
-                        outputCalls.append((self.verbose_print,(line.strip(),)))
+                        outputCalls.append((self.verbose_print,('   %s' % line.strip(),)))
                         if 'Assertion failed:' in line:
                             lassert += 1
                             outputCalls.append((self.fail,(testName+extraVmArgs, line, self.assertmsgs)))
@@ -469,9 +469,9 @@ class AcceptanceRuntest(RuntestBase):
         self.alltimeouts += ltimeout
         self.allasserts += lassert
         if lfail or lunpass:
-            outputCalls.append((self.js_print, ('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+            outputCalls.append((self.js_print, ('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d\n' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
         else:
-            outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+            outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d\n' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
         if self.show_time:
             outputCalls.insert(0,(self.js_print,('%s running %s %s %s time %.1f' % (testnum, ast, extraVmArgs, abcargs, time()-starttime), '<b>', '</b><br/>')));
         else:
