@@ -861,13 +861,7 @@ class RuntestBase:
             return
         
         try:
-            self.verbose_print('   compiling %s' % file)
-            self.verbose_print('%s %s' % (cmd,as_file))
             (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file))
-            for line in f:
-                self.verbose_print(line.strip())
-            for line in err:
-                self.verbose_print(line.strip())
             
             if self.genAtsSwfs:
                 moveAtsSwf(dir,file, self.atsDir)
@@ -1100,9 +1094,6 @@ class RuntestBase:
     
     def run_pipe(self, cmd):
         # run a command and return a tuple of (output, stdErr, exitCode) 
-        if self.debug:
-            print('cmd: %s' % cmd)
-        self.verbose_print('executing: %s' % cmd)
         try:
             self.lock.acquire()
             try:
