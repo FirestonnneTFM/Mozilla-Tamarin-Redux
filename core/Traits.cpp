@@ -1891,7 +1891,7 @@ namespace avmplus
         }
         //for DictionaryObject also zero out the
         //hashtable pointer stored at the offset address;
-        if(isDictionary)
+        if(isDictionary())
         {
             union {
                 char* p_8;

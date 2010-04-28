@@ -388,6 +388,16 @@ REALLY_INLINE void Traits::setDeclaringScopes(const ScopeTypeChain* stc)
     m_declaringScope = stc;
 }
 
+REALLY_INLINE bool Traits::isDictionary() const
+{
+    return m_isDictionary != 0;
+}
+        
+REALLY_INLINE void Traits::set_isDictionary()
+{
+    m_isDictionary = true;
+}
+
 REALLY_INLINE InterfaceIterator::InterfaceIterator(Traits* t)
 {
     st = t->m_secondary_supertypes;

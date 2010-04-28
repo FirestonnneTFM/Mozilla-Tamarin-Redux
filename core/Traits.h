@@ -419,6 +419,11 @@ namespace avmplus
         // essential for efficient building of IMT thunks.
         bool implementsNewInterfaces() const;
 
+        bool isDictionary() const;
+        
+        // sets isDictionary() to true. (can't go the other way...)
+        void set_isDictionary();
+
         // Data Structures for fast subtype checking (edwsmith 11/17/09):
         // subtypeof(S,T) is frequently used by the (often implicit) "is" and "coerce"
         // operators and therefore is critical to optimize.
@@ -549,7 +554,7 @@ namespace avmplus
     private:    uint32_t                m_resolved:1;               // set once signature types have been resolved
     public:     uint32_t                final:1;                    // set when the class cannot be extended
     public:     uint32_t                commonBase:1;               // used for Verify::findCommonBase
-    public:     uint32_t                isDictionary:1;             // how we implement dictionary or strict style lookups
+    private:    uint32_t                m_isDictionary:1;             // how we implement dictionary or strict style lookups
                             // If hasCustomConstruct is false, the JIT will early bind to the AS defined constructor.
     public:     uint32_t                hasCustomConstruct:1;       // does this type use the default ClassClosure::construct method or not?
                             // If the traits are for a type that implements its own construct method, m_immplementsNewInterfaces must be set to true.

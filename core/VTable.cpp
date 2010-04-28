@@ -408,8 +408,8 @@ namespace avmplus
 
             // this is done here b/c this property of the traits isn't set until the
             // Dictionary's ClassClosure is called
-        if (base)
-            traits->isDictionary = base->traits->isDictionary;
+        if (base && base->traits->isDictionary())
+            traits->set_isDictionary();
 
 #if defined FEATURE_NANOJIT
         if (traits->core->IsJITEnabled())
