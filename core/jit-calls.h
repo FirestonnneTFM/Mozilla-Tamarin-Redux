@@ -37,8 +37,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-static const ArgType ARGTYPE_U = ARGTYPE_UI;
-static const ArgType ARGTYPE_F = ARGTYPE_D;
+static const ArgType ARGTYPE_U = ARGTYPE_UI; // uint32_t
+static const ArgType ARGTYPE_F = ARGTYPE_D;  // double
+static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
 
 #define ARGMASK(a,n) (ARGTYPE_##a << (ARGTYPE_SHIFT*(n)))
 #define SIG0(r) ARGMASK(r,0)
@@ -50,8 +51,6 @@ static const ArgType ARGTYPE_F = ARGTYPE_D;
 #define SIG6(r,a6,a5,a4,a3,a2,a1) (SIG5(r,a5,a4,a3,a2,a1) | ARGMASK(a6,6))
 #define SIG7(r,a7,a6,a5,a4,a3,a2,a1) (SIG6(r,a6,a5,a4,a3,a2,a1) | ARGMASK(a7,7))
 #define SIG8(r,a8,a7,a6,a5,a4,a3,a2,a1) (SIG7(r,a7,a6,a5,a4,a3,a2,a1) | ARGMASK(a8,8))
-
-#define ARGTYPE_A ARGTYPE_P
 
 #define FUNCTIONID(n) &ci_##n
 
