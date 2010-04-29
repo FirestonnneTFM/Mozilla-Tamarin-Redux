@@ -62,7 +62,7 @@ def startCompile(change):
     compile = True
     for name in change.files:
         # ignore all changes to buildbot master files
-        if '/buildbot/master/' in name:
+        if ('/buildbot/master/' in name) or ('/utils/hooks/' in name):
             compile = False
         # ignore changes to the runsmokes*.txt files
         elif ('runsmokes' in name) and name.endswith('.txt'):
