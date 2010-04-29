@@ -75,3 +75,24 @@ echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changei
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_debug_fpu_arm $shell_debug_fpu_arm"
 
 
+# bring in the win64 environment this will reset the shell names so that the x64 shells are uploaded
+. ../windows64/scripts/environment.sh
+# Release
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release $shell_release"
+
+# Release-wordcode
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release_wordcode
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release_wordcode $shell_release_wordcode"
+
+# Release_Debugger
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release_debugger
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release_debugger $shell_release_debugger"
+
+# Debug
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_debug
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_debug $shell_debug"
+
+#Debug_Debugger
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_debug_debugger
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_debug_debugger $shell_debug_debugger"
