@@ -97,6 +97,38 @@ test -f $basedir/shell/$shellABC || {
 }
 
 
+# bring in the win64 environment this will reset the shell names so that the x64 shells are checked
+. ../windows64/scripts/environment.sh
+# Release
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
+  echo "message: Release64 Failed"
+  fail=1
+}
+
+# Release-wordcode
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
+  echo "message: ReleaseWordCode64 Failed"
+  fail=1
+}
+
+# Release_Debugger
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
+  echo "message: Release_Debugger64 Failed"
+  fail=1
+}
+
+# Debug
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug || {
+  echo "message: Debug64 Failed"
+  fail=1
+}
+
+#Debug_Debugger
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
+  echo "message: Debug_Debugger64 Failed"
+  fail=1
+}
+
 
 if test "${fail}" = 1; then
    echo Failing the build
