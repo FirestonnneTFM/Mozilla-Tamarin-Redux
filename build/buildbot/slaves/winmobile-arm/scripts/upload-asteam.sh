@@ -64,3 +64,21 @@
 
 # Debug-FPU_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_fpu_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_fpu_arm
+
+
+# bring in the win64 environment this will reset the shell names so that the x64 shells are uploaded
+. ../windows64/scripts/environment.sh
+# Release
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release
+
+# Release-wordcode
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode
+
+# Release_Debugger
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
+
+# Debug
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
+
+#Debug_Debugger
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_debugger

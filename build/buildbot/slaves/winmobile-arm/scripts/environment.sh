@@ -80,6 +80,12 @@ export LIBPATH="$MOBILE_SDK_DIR\Lib\ARMV4I;$VS_HOME\VC\ce\lib\armv4i;$LIBPATH"
 
 export mobile_dir=Windows\ Mobile\ 6\ Professional\ SDK\ \(ARMV4I\)
 
+# If we are being asked to compile the windows64 shells then bring in the win64 environment
+# this will reset the PATH, INCLUDE and LIB to point to the correct x64 locations
+if [ "$compile64" == "true" ]; then
+    . ../windows64/scripts/environment.sh
+fi
+
 ## Used by make in the build scripts
 export make_opt="-j16"
 export test_threads=1
