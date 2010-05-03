@@ -475,7 +475,8 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=x86_64-win', 'avmshell_64', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
-                    'compile64':'true'
+                    'silent':WithProperties('%s','silent'),
+                    'compile64':'true',
                 },
                 description='starting Release64 build...',
                 descriptionDone='finished Release64 build.',
@@ -486,6 +487,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-wordcode-interp --target=x86_64-win', 'avmshell_wordcode_64', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'compile64':'true'
                 },
                 description='starting Release-wordcode64 build...',
@@ -497,6 +499,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=x86_64-win', 'avmshell_d_64', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'compile64':'true'
                 },
                 description='starting Debug64 build...',
@@ -508,6 +511,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debugger --target=x86_64-win', 'avmshell_s_64', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'compile64':'true'
                 },
                 description='starting ReleaseDebugger64 build...',
@@ -519,6 +523,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-debugger --target=x86_64-win', 'avmshell_sd_64', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'compile64':'true'
                 },
                 description='starting DebugDebugger64 build...',
