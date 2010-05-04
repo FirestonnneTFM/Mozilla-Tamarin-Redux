@@ -708,7 +708,7 @@ namespace avmshell
                 ScopeBuilder scopeBuilder;
                 frame->trace->enumerateScopeChainAtoms(scopeBuilder);
 
-                for (uint32 i=0, n=scopeBuilder.scopeChain.size(); i<n; ++i)
+                for (uint32_t i=0, n=scopeBuilder.scopeChain.size(); i<n; ++i)
                 {
                     StPropertyFinder finder(core, scopeBuilder.scopeChain.get(i), name);
                     finder.iterate();
