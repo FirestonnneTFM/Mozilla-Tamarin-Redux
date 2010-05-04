@@ -90,7 +90,7 @@ namespace avmshell
 
         virtual bool isLValue() { return false; }
         virtual Atom get() { return value; }
-        virtual void set(Atom newValue) { AvmAssert(false); }
+        virtual void set(Atom /*newValue*/) { AvmAssert(false); }
 
     private:
         Atom value;
