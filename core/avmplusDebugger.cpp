@@ -284,7 +284,7 @@ namespace avmplus
                     core->console << traceArgumentsString();
 
                 core->console << ")";
-                if (!fnc->suggestInterp())
+                if (!fnc->isInterpreted())
                 {
                     core->console << " @ 0x";
                     core->console.writeHexAddr( (uintptr)fnc->implGPR());

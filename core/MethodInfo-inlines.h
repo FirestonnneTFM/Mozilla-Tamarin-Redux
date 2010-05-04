@@ -177,9 +177,9 @@ REALLY_INLINE int32_t MethodInfo::setsDxns() const
     return _flags & SETS_DXNS;
 }
 
-REALLY_INLINE int32_t MethodInfo::suggestInterp() const
+REALLY_INLINE int32_t MethodInfo::isStaticInit() const
 {
-    return _flags & SUGGEST_INTERP;
+    return _flags & STATIC_INIT;
 }
 
 REALLY_INLINE int32_t MethodInfo::unboxThis() const
@@ -192,9 +192,9 @@ REALLY_INLINE void MethodInfo::setUnboxThis()
     _flags |= UNBOX_THIS;
 }
 
-REALLY_INLINE void MethodInfo::setSuggestInterp()
+REALLY_INLINE void MethodInfo::setStaticInit()
 {
-    _flags |= SUGGEST_INTERP;
+    _flags |= STATIC_INIT;
 }
 
 REALLY_INLINE void MethodInfo::setHasExceptions()

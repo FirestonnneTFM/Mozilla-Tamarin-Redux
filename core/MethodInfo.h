@@ -195,10 +195,9 @@ namespace avmplus
         static const int32_t RESOLVED               = 0x00200000;
 
         /**
-         * set to indictate that a function has been
-         * recommended to be interpreted.
+         * set to indictate that a function is a static initializer
          */
-        static const int32_t SUGGEST_INTERP         = 0x00400000;
+        static const int32_t STATIC_INIT            = 0x00400000;
 
         /**
          * set to indicate that a function has been compiled
@@ -313,11 +312,11 @@ namespace avmplus
         int32_t needRest() const;
         int32_t needRestOrArguments() const;
         int32_t setsDxns() const;
-        int32_t suggestInterp() const;
+        int32_t isStaticInit() const;
         int32_t unboxThis() const;
 
         void setUnboxThis();
-        void setSuggestInterp();
+        void setStaticInit();
         void setHasExceptions();
         void setNeedsDxns();
         void setFinal();
