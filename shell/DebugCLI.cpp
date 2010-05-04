@@ -480,14 +480,14 @@ namespace avmshell
         }
     }
 
-    bool DebugCLI::locals(int frameNumber)
+    void DebugCLI::locals(int frameNumber)
     {
         Atom* ptr;
         int count, line;
         SourceInfo* src = NULL;
         AvmCore* core = AvmCore::getActiveCore();
         DebugFrame* frame = core->debugger()->frameAt(frameNumber);
-        if (frame == NULL) return false;
+        if (frame == NULL) return;
 
         // source information
         frame->sourceLocation(src, line);
@@ -504,14 +504,12 @@ namespace avmshell
                     core->console << nm;
                 else
                     core->console << "<local_" << i << ">";
-                core->console << " = " << core->format(*ptr++) << "\n";
+                core->console << " = " << formatValue(*ptr++) << "\n";
             }
-            return true;
         }
-        return false;
     }
 
-    bool DebugCLI::arguments(int frameNumber)
+    void DebugCLI::arguments(int frameNumber)
     {
          int count;
          Atom* arr;
@@ -521,11 +519,9 @@ namespace avmshell
              for (int i = 0; i < count; i++) {
                  Stringp nm = NULL;
                  frame->argumentName(i, nm);
-                 core->console << i << ": " << nm << " = " << core->format(*arr++) << "\n";
+                 core->console << i << ": " << nm << " = " << formatValue(*arr++) << "\n";
              }
-             return true;
          }
-         return false;
     }
 
     Atom DebugCLI::ease2Atom(const char* to, Atom baseline)
@@ -542,94 +538,323 @@ namespace avmshell
         return nullStringAtom;
     }
 
+    /**
+     * Given a pointer, trims leading and trailing whitespace.  Note, this will
+     * modify the buffer -- it trims trailing whitespace by writing a null
+     * character.
+     *
+     * Returns the first offset past leading whitespace.
+     */
+    static char* trim(char* ptr)
+    {
+        while (*ptr && (*ptr==' ' || *ptr=='\t'))
+            ++ptr;
+        char* start = ptr;
+
+        while (*ptr)
+            ++ptr;
+
+        while (ptr>start && (ptr[-1]==' ' || ptr[-1]=='\t'))
+            --ptr;
+        *ptr = '\0';
+
+        return start;
+    }
+
     void DebugCLI::set()
     {
-        const char* what = nextToken();
-        const char* equ = nextToken();
-        const char* to = nextToken();
-        if (!to || !equ || !what || *equ != '=')
+        char* line = currentToken;
+        char* expr = line;
+        char* equ = VMPI_strchr(currentToken, '=');
+        char* value = NULL;
+        if (equ)
+        {
+            *equ = '\0';
+            value = equ+1;
+            expr = trim(expr);
+            value = trim(value);
+        }
+
+        if (!expr || !*expr || !value || !*value)
         {
             core->console << " Bad format, should be:  'set {variable} = {value}' \n";
         }
         else
         {
-            // look for the varable in our locals or args.
-            Atom* ptr;
-            int count, line;
-            SourceInfo* src;
-            DebugFrame* frame = core->debugger()->frameAt(0);
-
-            // source information
-            frame->sourceLocation(src, line);
-            if (!src)
-            {
-                core->console << "Unable to locate debug information for current source file, so no local or argument names known\n";
-                return;
-            }
-
-            // method
-            MethodInfo* info = functionFor(src, line);
-            if (!info)
-            {
-                core->console << "Unable to find method debug information, so no local or argument names known\n";
-                return;
-            }
-
-            frame->arguments(ptr, count);
-            for(int i=0; i<count; i++)
-            {
-                Stringp arg = info->getArgName(i);
-                if (arg->equalsLatin1(what))
-                {
-                    // match!
-                    Atom a = ease2Atom(to, ptr[i]);
-                    if (a == undefinedAtom)
-                        core->console << " Type mismatch : current value is " << core->format(ptr[i]);
-                    else
-                        frame->setArgument(i, a);
-                    return;
-                }
-            }
-
-            frame->locals(ptr, count);
-            for(int i=0; i<count; i++)
-            {
-                Stringp local = info->getLocalName(i);
-                if ( local->equalsLatin1(what))
-                {
-                    // match!
-                    Atom a = ease2Atom(to, ptr[i]);
-                    if (a == undefinedAtom)
-                        core->console << " Type mismatch : current value is " << core->format(ptr[i]);
-                    else
-                        frame->setLocal(i, a);
-                    return;
-                }
-            }
+            bool sawTrailingDot = false;
+            IValue* lvalue = evaluate(expr, &sawTrailingDot);
+            IValue* rvalue = evaluate(value, &sawTrailingDot);
+            AvmAssert(lvalue != NULL);
+            AvmAssert(rvalue != NULL);
+            if (!lvalue->isLValue())
+                core->console << " Can't assign to " << expr << '\n';
+            else
+                lvalue->set(rvalue->get());
         }
     }
 
-    void DebugCLI::print(const char *name)
+    class ScopeBuilder : public CallStackNode::IScopeChainEnumerator
     {
-        if (!name) {
-            core->console << "Must specify a name.\n";
-            return;
+    public:
+        /*virtual*/ void addScope(Atom scope)
+        {
+            // null/undefined are not legal entries for scope, but
+            // enumerateScopeChainAtoms() can hand them to us, for entries
+            // within the max_scope range that aren't in use. just ignore 'em.
+
+            if (AvmCore::isNullOrUndefined(scope))
+                return;
+
+            scopeChain.add(scope);
         }
 
-        // todo deal with exceptions
-        Multiname mname(
-            core->getAnyPublicNamespace(),
-            core->internStringLatin1(name)
-        );
+        List<Atom> scopeChain;
+    };
 
-#if 0
-        // rick fixme
-        Atom objAtom = env->findproperty(outerScope, scopes, extraScopes, &mname, false);
-        Atom valueAtom = env->getproperty(objAtom, &mname);
-        core->console << core->string(valueAtom) << '\n';
-#else
-        core->console << "Command not implemented.\n";
-#endif
+    void DebugCLI::throwUndefinedVarError(const char* name)
+    {
+        Stringp errorMessage = core->newStringLatin1("Error: Variable ");
+        errorMessage = errorMessage->appendLatin1(name);
+        errorMessage = errorMessage->appendLatin1(" is not defined.");
+        core->throwAtom(errorMessage->atom());
+    }
+
+    IValue* DebugCLI::getValue(const char *name)
+    {
+        DebugStackFrame* frame = (DebugStackFrame*)frameAt(0);
+        Atom thisAtom;
+        frame->dhis(thisAtom);
+
+        Stringp namestr = core->internStringLatin1(name, -1);
+        if (VMPI_strcmp(name, "this") == 0)
+            return new (core->gc) ConstantValue(thisAtom);
+        if (VMPI_strcmp(name, "NaN") == 0)
+            return new (core->gc) ConstantValue(core->kNaN);
+        if (namestr == core->kfalse)
+            return new (core->gc) ConstantValue(falseAtom);
+        if (namestr == core->ktrue)
+            return new (core->gc) ConstantValue(trueAtom);
+        if (namestr == core->knull)
+            return new (core->gc) ConstantValue(nullObjectAtom);
+        if (namestr == core->kundefined)
+            return new (core->gc) ConstantValue(undefinedAtom);
+        if (name[0] == '-' || VMPI_isdigit(name[0]))
+            return new (core->gc) ConstantValue(core->numberAtom(namestr->atom()));
+        if (name[0] == '\'' || name[0] == '"') // String literal
+        {
+            int32_t length = namestr->length();
+            if (length >= 2 && namestr->charAt(length-1) == namestr->charAt(0))
+            {
+                // Note, this doesn't do any escaping
+                return new (core->gc) ConstantValue(namestr->substr(1, length-2)->atom());
+            }
+        }
+        if (name[0] == '<') // XML or XMLList literal
+        {
+            if (AvmCore::isObject(thisAtom))
+            {
+                Toplevel* toplevel = AvmCore::atomToScriptObject(thisAtom)->toplevel();
+                if (name[1] == '>')
+                    return new (core->gc) ConstantValue(toplevel->xmlListClass()->ToXMLList(namestr->atom()));
+                else
+                    return new (core->gc) ConstantValue(toplevel->xmlClass()->ToXML(namestr->atom()));
+            }
+        }
+
+        Atom* ptr;
+        int count, line;
+        SourceInfo* src;
+
+        // See if the name matches a function argument or local
+        frame->sourceLocation(src, line);
+        if (src)
+        {
+            MethodInfo* info = functionFor(src, line);
+            if (info)
+            {
+                // see if the name matches a function argument
+                frame->arguments(ptr, count);
+                for(int i=0; i<count; i++)
+                {
+                    Stringp arg = info->getArgName(i);
+                    if (arg->equalsLatin1(name))
+                    {
+                        // match!
+                        return new (core->gc) ArgumentValue(frame, i);
+                    }
+                }
+
+                // see if the name matches a local
+                frame->locals(ptr, count);
+                for(int i=0; i<count; i++)
+                {
+                    Stringp local = info->getLocalName(i);
+                    if ( local->equalsLatin1(name))
+                    {
+                        // match!
+                        return new (core->gc) LocalValue(frame, i);
+                    }
+                }
+            }
+        }
+
+        // See if the name matches a property on the scope chain (which includes
+        // the 'this' object)
+        if (frame->trace)
+        {
+            MethodEnv* env = frame->trace->env();
+            if (env)
+            {
+                ScopeBuilder scopeBuilder;
+                frame->trace->enumerateScopeChainAtoms(scopeBuilder);
+
+                for (uint32 i=0, n=scopeBuilder.scopeChain.size(); i<n; ++i)
+                {
+                    StPropertyFinder finder(core, scopeBuilder.scopeChain.get(i), name);
+                    finder.iterate();
+                    if (finder.value)
+                        return finder.value;
+                }
+            }
+        }
+
+        // Look for globals like 'Number'
+        MethodEnv* env = frame->trace->env();
+        if (env)
+        {
+            Multiname* mn = new (core->gc) Multiname(
+                    core->getAnyPublicNamespace(),
+                    core->internStringLatin1(name)
+            );
+            ScriptEnv* script = env->getScriptEnv(mn);
+            if (script != (ScriptEnv*)BIND_NONE && script != (ScriptEnv*)BIND_AMBIGUOUS)
+            {
+                ScriptObject* global = script->global;
+                if (global)
+                {
+                    return new PropertyValue(global, mn);
+                }
+            }
+        }
+
+        throwUndefinedVarError(name);
+        return NULL; // unreachable
+    }
+
+    /**
+     * Accepts expressions of these forms:
+     *      foo
+     *      foo.bar
+     *      foo.bar.baz
+     *
+     * Also allows literals: boolean, string, numeric, XML/XMLList,
+     * null, undefined.
+     *
+     * If the expression ends with a dot, e.g. "foo.bar.", then
+     * *outSawTrailingDot is set to true.  This is used by the
+     * "print" command to allow "print foo." to print all members
+     * of variable "foo".
+     */
+    IValue* DebugCLI::evaluate(char *expr, bool* outSawTrailingDot)
+    {
+        const char *name;
+        IValue* value = NULL;
+        bool firstPart = true;
+
+        *outSawTrailingDot = false;
+
+        while (expr)
+        {
+            name = expr;
+            char *dot = VMPI_strchr(expr, '.');
+            if (dot)
+            {
+                *dot = '\0';
+                name = expr;
+                expr = dot+1;
+            }
+            else
+            {
+                name = expr;
+                expr = NULL;
+            }
+
+            if (firstPart)
+            {
+                value = getValue(name);
+                AvmAssert(value != NULL);
+            }
+            else
+            {
+                if (*name)
+                {
+                    // "foo.bar" -- find property "bar" of object "foo"
+                    Atom parent = value->get();
+                    StPropertyFinder finder(core, parent, name);
+                    finder.iterate();
+                    value = finder.value;
+                    if (!value)
+                    {
+                        if (AvmCore::isObject(parent))
+                        {
+                            // Since we didn't find an existing property, we'll just construct
+                            // one.  If the parent object is dynamic, then calling get() on the
+                            // PropertyVaulue we create will return undefined, and calling set()
+                            // on it will define a new property.  If the parent object is not
+                            // dynamic, then get() and set() will throw exceptions.  Either way,
+                            // that's the correct behavior.
+                            Multiname* mn = new (core->gc) Multiname(
+                                    core->getAnyPublicNamespace(),
+                                    core->internStringLatin1(name)
+                            );
+                            value = new (core->gc) PropertyValue(AvmCore::atomToScriptObject(parent), mn);
+                        }
+                        else
+                        {
+                            if (dot) *dot = '.'; // restore for our caller
+                            throwUndefinedVarError(name);
+                            return NULL; // unreachable
+                        }
+                    }
+                }
+                else
+                {
+                    // "foo."
+                    *outSawTrailingDot = true;
+                }
+            }
+
+            if (dot) *dot = '.'; // restore for our caller
+            firstPart = false;
+        }
+
+        return value;
+    }
+
+    /**
+     * Accepts expressions of these forms:
+     *      foo
+     *      foo.bar
+     *      foo.bar.baz
+     * Also, allows a trailing dot, e.g. "foo.bar.", in which case all properties
+     * of foo.bar will be displayed.
+     */
+    void DebugCLI::print(char *expr)
+    {
+        bool sawTrailingDot = false;
+        IValue* value = evaluate(expr, &sawTrailingDot);
+        AvmAssert(value != NULL);
+
+        if (sawTrailingDot)
+        {
+            // "foo." -- print all of object foo's properties
+            PropertyPrinter printer(core, this, value->get());
+            printer.iterate();
+        }
+        else
+        {
+            core->console << formatValue(value->get()) << '\n';
+        }
     }
 
     bool DebugCLI::filterException(Exception *exception, bool /*willBeCaught*/)
@@ -701,57 +926,66 @@ namespace avmshell
             char *command = nextToken();
             int cmd = commandFor(command);
 
-            switch (cmd) {
-            case -1:
-                // ambiguous, we already printed error message
-                break;
-            case CMD_COMMENT:
-                break;
-            case CMD_INFO:
-                info();
-                break;
-            case CMD_BREAK:
-                breakpoint(nextToken());
-                break;
-            case CMD_DELETE:
-                deleteBreakpoint(nextToken());
-                break;
-            case CMD_LIST:
-                list(nextToken());
-                break;
-            case CMD_UNKNOWN:
-                core->console << "Unknown command.\n";
-                break;
-            case CMD_QUIT:
-                Platform::GetInstance()->exit(0);
-                break;
-            case CMD_CONTINUE:
-                return;
-            case CMD_PRINT:
-                print(nextToken());
-                break;
-            case CMD_NEXT:
-                stepOver();
-                return;
-            case INFO_STACK_CMD:
-                bt();
-                break;
-            case CMD_FINISH:
-                stepOut();
-                return;
-            case CMD_HELP:
-                help();
-                break;
-            case CMD_STEP:
-                stepInto();
-                return;
-            case CMD_SET:
-                set();
-                break;
-            default:
-                core->console << "Command not implemented.\n";
-                break;
+            TRY(core, kCatchAction_Ignore)
+            {
+                switch (cmd) {
+                case -1:
+                    // ambiguous, we already printed error message
+                    break;
+                case CMD_COMMENT:
+                    break;
+                case CMD_INFO:
+                    info();
+                    break;
+                case CMD_BREAK:
+                    breakpoint(nextToken());
+                    break;
+                case CMD_DELETE:
+                    deleteBreakpoint(nextToken());
+                    break;
+                case CMD_LIST:
+                    list(nextToken());
+                    break;
+                case CMD_UNKNOWN:
+                    core->console << "Unknown command.\n";
+                    break;
+                case CMD_QUIT:
+                    Platform::GetInstance()->exit(0);
+                    break;
+                case CMD_CONTINUE:
+                    return;
+                case CMD_PRINT:
+                    print(nextToken());
+                    break;
+                case CMD_NEXT:
+                    stepOver();
+                    return;
+                case INFO_STACK_CMD:
+                    bt();
+                    break;
+                case CMD_FINISH:
+                    stepOut();
+                    return;
+                case CMD_HELP:
+                    help();
+                    break;
+                case CMD_STEP:
+                    stepInto();
+                    return;
+                case CMD_SET:
+                    set();
+                    break;
+                default:
+                    core->console << "Command not implemented.\n";
+                    break;
+                }
             }
+            CATCH(Exception *exception)
+            {
+                core->console << core->string(exception->atom) << '\n';
+            }
+            END_CATCH
+            END_TRY
         }
     }
 
@@ -788,6 +1022,20 @@ namespace avmshell
         }
     }
 
+    Stringp DebugCLI::formatValue(Atom value)
+    {
+// An experiment: Printing XML and XMLList variables with their full toXMLString() form.
+//        if (core->isXMLorXMLList(value))
+//        {
+//            ScriptObject* object = AvmCore::atomToScriptObject(value);
+//            Multiname mn(core->getAnyPublicNamespace(), core->internStringLatin1("toXMLString"));
+//            Atom thisAtom = undefinedAtom;
+//            return core->string(object->toplevel()->callproperty(value, &mn, 1, &thisAtom, object->vtable));
+//        }
+
+        return core->format(value);
+    }
+
     //
     // BreakAction
     //
@@ -797,6 +1045,99 @@ namespace avmshell
         out << id << " at "
             << filename
             << ":" << (linenum) << '\n';
+    }
+
+    PropertyIterator::PropertyIterator(AvmCore* core, Atom atom)
+    : core(core)
+    {
+        if (AvmCore::isObject(atom))
+            object = AvmCore::atomToScriptObject(atom);
+        else
+            object = NULL;
+    }
+
+    void PropertyIterator::iterate()
+    {
+        if (!object)
+            return;
+
+        // Iterate over the object's traits
+        Traits* t = object->traits();
+        while (t)
+        {
+            const TraitsBindings* bindings = t->getTraitsBindings();
+            StTraitsBindingsIterator iter(bindings);
+            while (iter.next()) {
+                Stringp key = iter.key();
+                if (!key)
+                    continue;
+                Binding b = iter.value();
+                Multiname* mn = new (core->gc) Multiname(iter.ns(), key);
+                if (!process(mn, AvmCore::bindingKind(b)))
+                    return;
+            }
+            t = t->base;
+        }
+
+        // Iterate over the object's dynamic properties
+        int index = 0;
+        while ((index = object->nextNameIndex(index)) != 0)
+        {
+            Multiname* mn = new (core->gc) Multiname(core->getAnyPublicNamespace(), core->string(object->nextName(index)));
+            if (!process(mn, BKIND_VAR))
+                return;
+        }
+    }
+
+    StPropertyFinder::StPropertyFinder(AvmCore* core, Atom atom, const char* propertyname)
+    : PropertyIterator(core, atom),
+      value(NULL),
+      propertyname(propertyname)
+    {
+    }
+
+    bool StPropertyFinder::process(Multiname* key, BindingKind bk)
+    {
+        if (key->getName()->equalsLatin1(propertyname))
+        {
+            value = new (core->gc) PropertyValue(object, key);
+            return false; // stop iterating
+        }
+
+        return true;
+    }
+
+    PropertyPrinter::PropertyPrinter(AvmCore* core, DebugCLI* debugger, Atom atom)
+    : PropertyIterator(core, atom),
+      debugger(debugger)
+    {
+    }
+
+    bool PropertyPrinter::process(Multiname* key, BindingKind bk)
+    {
+        if (bk == BKIND_CONST || bk == BKIND_VAR || bk == BKIND_GET || bk == BKIND_GETSET)
+        {
+            Atom value = object->toplevel()->getproperty(object->atom(), key, object->vtable);
+            switch (bk)
+            {
+            case BKIND_CONST:
+                core->console << "const ";
+                break;
+            case BKIND_VAR:
+                core->console << "var ";
+                break;
+            case BKIND_GET:
+            case BKIND_GETSET:
+                core->console << "function get ";
+                break;
+            }
+            core->console << key->format(core, Multiname::MULTI_FORMAT_NAME_ONLY);
+            if (bk == BKIND_GET || bk == BKIND_GETSET)
+                core->console << "()";
+            core->console << " = " << debugger->formatValue(value) << '\n';
+        }
+
+        return true;
     }
 }
 #endif

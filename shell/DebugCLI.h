@@ -71,6 +71,108 @@ namespace avmshell
     };
 
     /**
+     * This can be either an l-value or an r-value.
+     */
+    class IValue
+    {
+    public:
+        virtual ~IValue() {}
+
+        virtual bool isLValue() = 0;
+        virtual Atom get() = 0;
+        virtual void set(Atom newValue) = 0;
+    };
+
+    class ConstantValue: public IValue
+    {
+    public:
+        ConstantValue(Atom value) : value(value) { }
+
+        virtual bool isLValue() { return false; }
+        virtual Atom get() { return value; }
+        virtual void set(Atom newValue) { AvmAssert(false); }
+
+    private:
+        Atom value;
+    };
+
+    /**
+     * An IValue representing a local variable.
+     */
+    class LocalValue: public IValue
+    {
+    public:
+        LocalValue(DebugFrame* frame, int index) : frame(frame), index(index) { }
+
+        virtual bool isLValue() { return true; }
+        virtual Atom get()
+        {
+            Atom* locals;
+            int countLocals;
+            frame->locals(locals, countLocals);
+            return locals[index];
+        }
+        virtual void set(Atom newValue)
+        {
+            frame->setLocal(index, newValue);
+        }
+
+    private:
+        DebugFrame* frame;
+        int index;
+    };
+
+    /**
+     * An IValue representing an argument to a function.
+     */
+    class ArgumentValue: public IValue
+    {
+    public:
+        ArgumentValue(DebugFrame* frame, int index) : frame(frame), index(index) { }
+
+        virtual bool isLValue() { return true; }
+        virtual Atom get()
+        {
+            Atom* arguments;
+            int countArguments;
+            frame->arguments(arguments, countArguments);
+            return arguments[index];
+        }
+        virtual void set(Atom newValue)
+        {
+            frame->setArgument(index, newValue);
+        }
+
+    private:
+        DebugFrame* frame;
+        int index;
+    };
+
+    /**
+     * An IValue representing a property of an object.
+     */
+    class PropertyValue: public IValue
+    {
+    public:
+        PropertyValue(ScriptObject* parent, Multiname* propertyname)
+        : parent(parent), propertyname(propertyname) { }
+
+        virtual bool isLValue() { return true; }
+        virtual Atom get()
+        {
+            return parent->toplevel()->getproperty(parent->atom(), propertyname, parent->vtable);
+        }
+        virtual void set(Atom newValue)
+        {
+            parent->toplevel()->setproperty(parent->atom(), propertyname, newValue, parent->vtable);
+        }
+
+    private:
+        ScriptObject* parent;
+        Multiname* propertyname;
+    };
+
+    /**
      * A simple command line interface for the Debugger.
      * Supports a gdb-like command line.
      */
@@ -136,21 +238,30 @@ namespace avmshell
         void deleteBreakpoint(char *idstr);
         void showBreakpoints();
         void help();
+        void locals(int frameNumber);
+        void arguments(int frameNumber);
+
         static void bt();
         static bool printFrame(int frameNumber);
-        static bool locals(int frameNumber);
-        static bool arguments(int frameNumber);
         static bool debuggerInterruptOnEnter;
 
 
         void info();
         void set();
         void list(const char* line);
-        void print(const char *name);
+        void print(char *name);
         void quit();
         /*@}*/
 
         void activate() { activeFlag = true; }
+
+        static MethodInfo* functionFor(SourceInfo* src, int line);
+
+        /**
+         * Formats a value for display to the user.  Very similar to
+         * AvmCore::format(), but does a few extra things.
+         */
+        Stringp formatValue(Atom value);
 
     private:
         bool activeFlag;
@@ -173,9 +284,25 @@ namespace avmshell
 
         char* lineStart(int linenum);
         Atom ease2Atom(const char* to, Atom baseline);
-        static MethodInfo* functionFor(SourceInfo* src, int line);
+
+        void throwUndefinedVarError(const char* name);
 
         /**
+         * Gets a value.  "name" can be either a constant (string,
+         * number, boolean, undefined, null, xml, xmllist), or the
+         * name of a local, argument, or member of a variable on
+         * the scope chain.
+         */
+        IValue* getValue(const char *name);
+
+        /**
+         * Evaluates an expression, and returns its value.
+         * *outSawTrailingDot is set to true if the expression has a trailing
+         * dot, e.g. "foo." or "foo.bar."
+         */
+        IValue* evaluate(char *expr, bool* outSawTrailingDot);
+
+       /**
          * @name command name arrays and support code
          */
         /*@{*/
@@ -194,6 +321,84 @@ namespace avmshell
         static StringInt commandArray[];
         static StringInt infoCommandArray[];
         /*@}*/
+    };
+
+    /**
+     * Helper class to iterate over all properties of an object (both slots
+     * and dynamic properties).
+     */
+    class PropertyIterator
+    {
+    public:
+        /**
+         * atom: the object whose properties we will iterate over.
+         */
+        PropertyIterator(AvmCore* core, Atom atom);
+        virtual ~PropertyIterator() {}
+
+        /**
+         * Iterates over all the object's properties, and calls process()
+         * for each one.  If process() ever returns false, iteration halts.
+         */
+        void iterate();
+
+    protected:
+        /**
+         * Called once for each property that has been found.  If process()
+         * ever returns false, iteration halts.
+         */
+        virtual bool process(Multiname* key, BindingKind bk) = 0;
+
+        AvmCore* core;
+        ScriptObject* object;
+    };
+
+    /**
+     * Helper to find a property with the given name.  Since this is for the
+     * debugger, it ignores visibility issues -- e.g. it will match any property
+     * with the given name, even if that property is private and therefore not
+     * visible from the caller's context.
+     *
+     * After you call iterate(), 'value' will be the property's value if it was
+     * found, or NULL if it was not found.
+     *
+     * This class can only be used on the stack.  ('value' does not have a write
+     * barrier around it.)
+     */
+    class StPropertyFinder: public PropertyIterator
+    {
+    public:
+        /**
+         * atom:         The object in which we want to look for a property.
+         * propertyname: The property name to look for.
+         */
+        StPropertyFinder(AvmCore* core, Atom atom, const char* propertyname);
+
+        IValue* value;
+
+    protected:
+        /**
+         * Returns true if the key matches the originally passed-in property name.
+         */
+        bool matches(const Multiname* key) const;
+
+        virtual bool process(Multiname* key, BindingKind bk);
+
+        const char* propertyname;
+    };
+
+    /**
+     * Prints all of an object's properties, and their values, to core->console.
+     */
+    class PropertyPrinter: public PropertyIterator
+    {
+    public:
+        PropertyPrinter(AvmCore* core, DebugCLI* debugger, Atom atom);
+
+    protected:
+        virtual bool process(Multiname* key, BindingKind bk);
+
+        DebugCLI* debugger;
     };
 }
 #endif
