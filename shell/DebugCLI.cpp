@@ -1096,7 +1096,7 @@ namespace avmshell
     {
     }
 
-    bool StPropertyFinder::process(Multiname* key, BindingKind bk)
+    bool StPropertyFinder::process(Multiname* key, BindingKind /*bk*/)
     {
         if (key->getName()->equalsLatin1(propertyname))
         {
