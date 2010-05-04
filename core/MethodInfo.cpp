@@ -335,7 +335,8 @@ namespace avmplus
             TRY(core, kCatchAction_Rethrow)
             {
 #if defined FEATURE_NANOJIT
-                if ((core->IsJITEnabled()) && !suggestInterp())
+                Runmode runmode = core->config.runmode;
+                if (runmode == RM_jit_all || (runmode == RM_mixed && !isStaticInit()))
                 {
                     PERFM_NTPROF("verify & IR gen");
 

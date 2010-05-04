@@ -1688,14 +1688,7 @@ namespace avmplus
 
             script->makeMethodOf(traits);
             traits->init = script;
-
-            #if defined FEATURE_NANOJIT
-            if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
-            {
-                // suggest that we don't jit the $init methods
-                script->setSuggestInterp();
-            }
-            #endif
+            script->setStaticInit();
 
             pool->_scripts.set(i, traits);
 #ifdef VMCFG_AOT
@@ -1967,14 +1960,7 @@ namespace avmplus
             ctraits->itraits = itraits;
             ctraits->final = true;
             ctraits->set_needsHashtable(true);
-
-            #if defined FEATURE_NANOJIT
-            if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
-            {
-                // suggest that we don't jit the class initializer
-                cinit->setSuggestInterp();
-            }
-            #endif
+            cinit->setStaticInit();
 
             pool->_classes.set(i, ctraits);
         }
