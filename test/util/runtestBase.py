@@ -744,6 +744,9 @@ class RuntestBase:
       if self.verbose:
         self.js_print(m, start, end)
     
+    def debug_print(self, m, start='', end=''):
+      if self.debug:
+        self.js_print(m, start, end)
 
     ### ASC / Compiling Functions ###
 
@@ -774,7 +777,7 @@ class RuntestBase:
             except:
                 self.js_print('AOT compilation of %s FAILED' % (abcfile))
     
-    def compile_test(self, as_file, extraArgs=[]):
+    def compile_test(self, as_file, extraArgs=[], outputCalls = None):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
         # if there is a .build file available (which is an executable script) run that file instead
         # of compiling with asc
@@ -782,7 +785,7 @@ class RuntestBase:
         if isfile(as_base+'.build'):
             (dir,file)=split(as_base)
             self.verbose_print('    compiling %s running %s%s' % (file, as_base, '.build'))
-            (f,err,exitcode) = self.run_pipe('%s%s' % (as_base, '.build'))
+            (f,err,exitcode) = self.run_pipe('%s%s' % (as_base, '.build'), outputCalls=outputCalls)
             for line in f:
                 self.verbose_print(line.strip())
             for line in err:
@@ -806,6 +809,8 @@ class RuntestBase:
         if as_file.endswith(self.sourceExt):
             if not isfile(builtinabc):
                 exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
+        
+
         
             javaArgList = parseArgStringToList(self.javaargs)
             javaArgList = self.loadArgsFile(javaArgList, dir, as_file, 'java_args')
@@ -854,15 +859,17 @@ class RuntestBase:
                     cmd += ' -in %s' % string.replace(util, '$', '\$')
                 
         elif as_file.endswith(self.abcasmExt):
-            cmd = '%s -j "%s" ' % (self.abcasmRunner,self.java)
+            javaArgList = parseArgStringToList(self.javaargs)
+            javaArgList = self.loadArgsFile(javaArgList, dir, as_file, 'java_args')
+            
+            cmd = '%s -j "%s" -a "%s"' % (self.abcasmRunner, self.java, ' '.join(javaArgList))
             
         elif as_file.endswith(self.executableExtensions):
             # directly executable file doesn't need to be compiled
             return
         
         try:
-            (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file))
-            
+            (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file), outputCalls=outputCalls)
             if self.genAtsSwfs:
                 moveAtsSwf(dir,file, self.atsDir)
             
@@ -956,11 +963,6 @@ class RuntestBase:
                         for util in deps + glob(join(dir,"*Util.as")):
                             cmd += " -in %s" % util #no need to prepend \ to $ when using ash
                         cmd += " %s" % test
-                        
-                        if self.debug:
-                            self.js_print(cmd)
-                        else:
-                            self.js_print("Compiling %s" % test)
                         
                         if exists(testdir+".abc"):
                             os.unlink(testdir+".abc")
@@ -1092,8 +1094,10 @@ class RuntestBase:
         finally:
             self.lock.release()
     
-    def run_pipe(self, cmd):
-        # run a command and return a tuple of (output, stdErr, exitCode) 
+    def run_pipe(self, cmd, outputCalls=None):
+        # run a command and return a tuple of (output, stdErr, exitCode)
+        if outputCalls != None:
+            outputCalls.append((self.debug_print,(cmd,)))
         try:
             self.lock.acquire()
             try:
@@ -1110,9 +1114,7 @@ class RuntestBase:
             err = err.split('\n') if err else []
             if err and err[-1].strip() == '':
                 err = err[:-1]
-            if self.debug:
-                print('output: %s' % output)
-                print('err: %s' % err)
+
             exitCode = p.returncode
             
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
@@ -1123,7 +1125,7 @@ class RuntestBase:
                 self.currentPids.remove(p)
             finally:
                 self.lock.release()
-
+            
             return (output,err,exitCode)
         except KeyboardInterrupt:
             self.killCurrentPids()
