@@ -44,11 +44,11 @@ ANTLR_RUNTIME=$ANTLR_HOME/antlr-runtime-3.0.1.jar
 JAVA=java
 
 # enable setting asc.jar using -a switch
-while getopts "j:" OPTION
+while getopts "j:a:" OPTION
     do
         case $OPTION in
             j) JAVA="$OPTARG" ;;
-                
+            a) JAVAARGS="$OPTARG" ;;
         esac
     done
 shift $(($OPTIND - 1))
@@ -57,11 +57,11 @@ echo "$*"
 case `uname -s` in
 	CYGWIN*)
 		# Classpath set for Cygwin systems
-		"$JAVA" -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ANTLR_RUNTIME abcasm.Main $*
+		"$JAVA" $JAVAARGS -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ANTLR_RUNTIME abcasm.Main $*
 		;;
 	*)
 		# 'NIX systems use this classpath
-		"$JAVA" -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ANTLR_RUNTIME abcasm.Main $*
+		"$JAVA" $JAVAARGS -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ANTLR_RUNTIME abcasm.Main $*
 		;;
 esac
 
