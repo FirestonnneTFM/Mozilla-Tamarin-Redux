@@ -641,7 +641,7 @@ class tamarinredux:
     #### builder for android on mac        ####
     ###########################################
 
-    android_compile_factory = factory.BuildFactory();
+    android_compile_factory = factory.BuildFactory()
     android_compile_factory.addStep(sync_clean)
     android_compile_factory.addStep(sync_clone(url=HG_URL))
     android_compile_factory.addStep(sync_update)
@@ -1810,7 +1810,6 @@ class tamarinredux:
                 workdir="../scripts",
                 timeout=3600)
     )
-    windows_frr_factory.addStep(util_clean_buildsdir)
 
     windows_frr_builder = {
                 'name': "windows-frr",

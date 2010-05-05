@@ -42,6 +42,7 @@ import sys
 import time
 import shutil
 from optparse import OptionParser
+from datetime import date
 
 @staticmethod
 def _onerror(func, path, exc_info): 
@@ -53,6 +54,7 @@ def _onerror(func, path, exc_info):
             func(path)
         except Exception,e:
             print e
+            print "buildbot_status: WARNINGS"
             pass
 
 def main():
@@ -76,10 +78,11 @@ def main():
              timestamp = os.path.getmtime(os.path.join(r,dir))
              if now-timestamp > numdays:
                  try:
-                      print "removing ",os.path.join(r,dir)
+                      print "Removing: %s -- Date: %s" % (os.path.join(r,dir), date.fromtimestamp(timestamp))
                       shutil.rmtree(os.path.join(r,dir), onerror=_onerror)  # comment to test
                  except Exception,e:
                       print e
+                      print "buildbot_status: WARNINGS"
                       pass
                       
 if __name__ == "__main__":

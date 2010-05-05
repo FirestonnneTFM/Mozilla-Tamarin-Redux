@@ -1699,7 +1699,6 @@ class argo:
                 workdir="../scripts",
                 timeout=3600)
     )
-    windows_frr_factory.addStep(util_clean_buildsdir)
 
     windows_frr_builder = {
                 'name': "windows-frr-argo",
