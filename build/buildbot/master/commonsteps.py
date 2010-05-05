@@ -315,8 +315,8 @@ util_process_clean = BuildShellCommand(
             workdir="../repo/build/buildbot/slaves/scripts",
             alwaysRun="True" )
 
-util_clean_buildsdir = ShellCommand(
-            command=['../all/util-clean-buildsdir.sh'],
+util_clean_buildsdir = BuildShellCommand(
+            command=['../all/util-clean-buildsdir.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Remove build folders older than one week...',
             descriptionDone='Finished removing build folders',
