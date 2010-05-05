@@ -1331,7 +1331,7 @@ namespace MMgc
         }
         numDecommitted -= block->size;
         block->committed = true;
-        block->dirty = false;
+        block->dirty = VMPI_areNewPagesDirty();
 	}
 
 #ifdef _DEBUG
