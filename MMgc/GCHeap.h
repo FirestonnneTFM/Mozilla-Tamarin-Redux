@@ -781,11 +781,33 @@ namespace MMgc
 #endif
 			bool inUse() const { return prev == NULL; }
 			char *endAddr() const { return baseAddr + size*kBlockSize; }
+			void Clear()
+			{
+				baseAddr = NULL;
+				size = 0;
+				sizePrevious = 0;
+				prev = NULL;
+				next = NULL;
+				committed = false;
+				dirty = false;
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
+				allocTrace = 0;
+				freeTrace = 0;
+#endif
+			}
+
+			void Init(char *baseAddr, size_t size, bool dirty)
+			{
+				Clear();
+				this->baseAddr     = baseAddr;
+				this->size         = size;
+				committed = true;
+				this->dirty = dirty;
+			}
+
 			void FreelistInit()
 			{
-				baseAddr     = NULL;
-				size         = 0;
-				sizePrevious = 0;
+				Clear();
 				prev         = this;
 				next         = this;
 				committed    = true;
@@ -927,6 +949,8 @@ namespace MMgc
 		bool EnsureFreeRegion(bool allowExpansion);
 		bool HaveFreeRegion() const;
 
+		bool newPagesDirty();
+
 		// data section
 		static GCHeap *instance;
 		static size_t leakedBytes;
@@ -1012,6 +1036,12 @@ namespace MMgc
 	REALLY_INLINE bool GCHeap::HaveFreeRegion() const
 	{
 		return nextRegion != NULL || freeRegion != NULL;
+	}
+
+
+	REALLY_INLINE bool GCHeap::newPagesDirty()
+	{
+		return config.useVirtualMemory ? VMPI_areNewPagesDirty() : true;
 	}
 }
 
