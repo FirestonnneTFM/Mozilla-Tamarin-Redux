@@ -232,7 +232,7 @@ class AcceptanceRuntest(RuntestBase):
             outputCalls.append((self.verbose_print, ("%s has been modified, recompiling" % ast)))
             os.unlink(testName)
         if not isfile(testName):
-            compileOutput = self.compile_test(ast)
+            compileOutput = self.compile_test(ast, outputCalls=outputCalls)
             if not isfile(testName):
                 if ast.endswith(self.abcasmExt):
                     # file didn't compile, compare compile output
@@ -305,12 +305,10 @@ class AcceptanceRuntest(RuntestBase):
                 while retryCount > 0:
                     # copy file to remote device
                     cmd = "scp %s %s@%s:" % (progpath, self.remoteuser, self.remoteip)
-                    print "about to execute: " + cmd
-                    self.run_pipe(cmd)
+                    self.run_pipe(cmd, outputCalls=outputCalls)
                     # run app
                     cmd = "ssh %s@%s ./%s %s" % (self.remoteuser, self.remoteip, progname, avm_args)
-                    print "about to execute: " + cmd
-                    (f,err,exitcode) = self.run_pipe(cmd)
+                    (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls)
                     if exitcode != 0:
                         sleep(5)
                         retryCount -= 1
@@ -318,25 +316,24 @@ class AcceptanceRuntest(RuntestBase):
                         break
                 # delete app
                 cmd = "ssh %s@%s rm %s" % (self.remoteuser, self.remoteip, progname)
-                print "about to execute: " + cmd
-                self.run_pipe(cmd)
+                self.run_pipe(cmd, outputCalls=outputCalls)
             else:
                 cmd = "%s %s" % (progpath, avm_args)
                 # print "about to execute: " + cmd
-                (f,err,exitcode) = self.run_pipe(cmd)
+                (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls)
         elif ast.endswith(self.abcasmExt):
             # make sure util file has been compiled
             if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
-                self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
-            (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, self.abcasmShell+'.abc', testName))
+                self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'), outputCalls=outputCalls)
+            (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, self.abcasmShell+'.abc', testName), outputCalls=outputCalls)
         elif self.verify:
             # get the abcdump for the file
-            (f,err,exitcode) = self.run_pipe('%s %s -- %s' % (self.avm, self.abcdump+'.abc', testName))
+            (f,err,exitcode) = self.run_pipe('%s %s -- %s' % (self.avm, self.abcdump+'.abc', testName), outputCalls=outputCalls)
             abcdumpFunctions = [line.strip() for line in f if line.startswith('var function')]
             if self.verbose:
                 outputCalls.append((self.js_print,(abcdumpFunctions,)))
             # get -Dverifyall -Dverbose=verify output
-            (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
+            (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName), outputCalls=outputCalls)
             verifyFunctions = [line.strip() for line in f if line.startswith('verify Function/')]
             if self.verbose:
                 outputCalls.append((self.js_print,(verifyFunctions,)))
@@ -351,9 +348,9 @@ class AcceptanceRuntest(RuntestBase):
                 lpass += 1
         else:
             if abcargs:
-                (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs))
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs), outputCalls=outputCalls)
             else:
-                (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName))
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName), outputCalls=outputCalls)
         
         # Test has been run, handle output
             
