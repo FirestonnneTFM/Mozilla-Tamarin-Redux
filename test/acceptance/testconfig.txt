@@ -338,6 +338,8 @@ spidermonkey/js1_5/GC/.*, .*, skip, GC tests for spidermonkey
 
 spidermonkey/js1_5/Object/regress-308806-01, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550358
 
+spidermonkey/js1_5/Regress/regress-58116.as, .*, skip, locale-specific test: https://bugzilla.mozilla.org/show_bug.cgi?id=564127
+
 spidermonkey/js1_5/Regress/regress-104077, .*, skip, verifyerror: https://bugzilla.mozilla.org/show_bug.cgi?id=550512
 spidermonkey/js1_5/Regress/regress-140974:^Section [3-6].*, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550530 
 
