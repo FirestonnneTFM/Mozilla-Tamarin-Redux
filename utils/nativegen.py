@@ -1026,10 +1026,10 @@ def outputBasicSlotDecl(output, slotDict):
 	output.println(u'%(type)s m_%(name)s;' % slotDict)
 	
 def outputWBRCSlotDecl(output, slotDict):
-	output.println(u'DRCWB(%(type)s) m_%(name)s;' % slotDict)
+	output.println(u'%(type)s m_%(name)s;' % slotDict)
 
 def outputWBAtomSlotDecl(output, slotDict):
-	output.println(u'ATOM_WB m_%(name)s;' % slotDict)
+	output.println(u'Atom m_%(name)s;' % slotDict)
 
 CTYPE_TO_SLOT_DECL = {
 	ctype_from_enum(CTYPE_OBJECT, True) : outputWBRCSlotDecl,
@@ -1092,7 +1092,7 @@ def outputWBRCSetMethodBody(output, slotDict):
 	output.println(u'REALLY_INLINE void %(struct)s::set_%(name)s(%(native)s* obj, %(type)s newVal)' % slotDict)
 	output.println(u'{')
 	output.indent += 1
-	output.println(u'm_%(name)s.set(((ScriptObject*)obj)->gc(), obj, newVal);' % slotDict)
+	output.println(u'WBRC(((ScriptObject*)obj)->gc(), obj, &m_%(name)s, newVal);' % slotDict)
 	output.indent -= 1
 	output.println('}')
 
@@ -1100,7 +1100,7 @@ def outputWBAtomSetMethodBody(output, slotDict):
 	output.println(u'REALLY_INLINE void %(struct)s::set_%(name)s(%(native)s* obj, %(type)s newVal)' % slotDict)
 	output.println(u'{')
 	output.indent += 1
-	output.println(u'm_%(name)s.set(((ScriptObject*)obj)->gc(), obj, newVal);' % slotDict)
+	output.println(u'WBATOM(((ScriptObject*)obj)->gc(), obj, &m_%(name)s, newVal);' % slotDict)
 	output.indent -= 1
 	output.println('}')
 
@@ -1582,7 +1582,7 @@ class AbcThunkGen:
 				slotDict = { u'struct' : structName, u'native' : t.niname, u'instance' : slotsInstanceName, u'type' : slotNIType, u'name' : to_cname(slot.name) }
 				CTYPE_TO_SLOT_DECL[slotCType](out_h, slotDict)
 			else:
-				out_h.println(u'ATOM_WB __anonymous_slot_%u;' % (anonCount,))
+				out_h.println(u'Atom __anonymous_slot_%u;' % (anonCount,))
 				anonCount = anonCount + 1
 		baseTraits = self.lookupTraits(t.base)
 			
