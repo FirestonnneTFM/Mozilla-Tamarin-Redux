@@ -546,17 +546,17 @@ double FASTCALL mop_lf64(const void* addr)
     const uint8_t* u = (const uint8_t*)addr;
     double_overlay d;
 #if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
-    d.lsw = *(uint32_t*)u;
-    d.msw = *((uint32_t*)u+1);
+    d.words.lsw = *(uint32_t*)u;
+    d.words.msw = *((uint32_t*)u+1);
 #else
-    d.lsw = ((uint64_t(u[3]) << 24) |
-             (uint64_t(u[2]) << 16) |
-             (uint64_t(u[1]) << 8) |
-             (uint64_t(u[0])));
-    d.msw = ((uint32_t(u[7]) << 24) |
-             (uint32_t(u[6]) << 16) |
-             (uint32_t(u[5]) << 8) |
-             (uint32_t(u[4])));
+    d.words.lsw = ((uint64_t(u[3]) << 24) |
+                   (uint64_t(u[2]) << 16) |
+                   (uint64_t(u[1]) << 8) |
+                   (uint64_t(u[0])));
+    d.words.msw = ((uint32_t(u[7]) << 24) |
+                   (uint32_t(u[6]) << 16) |
+                   (uint32_t(u[5]) << 8) |
+                   (uint32_t(u[4])));
 #endif
     return d.value;
 #endif
@@ -621,17 +621,17 @@ void mop_sf64(void* addr, double value)
     double_overlay d(value);
     uint8_t* u = (uint8_t*)addr;
 #if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
-    *(uint32_t*)u = d.lsw;
-    *((uint32_t*)u+1) = d.msw;
+    *(uint32_t*)u = d.words.lsw;
+    *((uint32_t*)u+1) = d.words.msw;
 #else
-    u[0] = uint8_t(d.lsw);
-    u[1] = uint8_t(d.lsw >> 8);
-    u[2] = uint8_t(d.lsw >> 16);
-    u[3] = uint8_t(d.lsw >> 24);
-    u[4] = uint8_t(d.msw);
-    u[5] = uint8_t(d.msw >> 8);
-    u[6] = uint8_t(d.msw >> 16);
-    u[7] = uint8_t(d.msw >> 24);
+    u[0] = uint8_t(d.words.lsw);
+    u[1] = uint8_t(d.words.lsw >> 8);
+    u[2] = uint8_t(d.words.lsw >> 16);
+    u[3] = uint8_t(d.words.lsw >> 24);
+    u[4] = uint8_t(d.words.msw);
+    u[5] = uint8_t(d.words.msw >> 8);
+    u[6] = uint8_t(d.words.msw >> 16);
+    u[7] = uint8_t(d.words.msw >> 24);
 #endif
 #endif
 }

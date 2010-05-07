@@ -1984,8 +1984,8 @@ namespace avmplus
             toplevel->throwVerifyError(kCorruptABCError);
 
         double_overlay d;
-        d.lsw = p[0] | p[1]<<8 | p[2]<<16 | p[3]<<24;
-        d.msw = p[4] | p[5]<<8 | p[6]<<16 | p[7]<<24;
+        d.words.lsw = p[0] | p[1]<<8 | p[2]<<16 | p[3]<<24;
+        d.words.msw = p[4] | p[5]<<8 | p[6]<<16 | p[7]<<24;
         p += 8;
         return d.value;
     }

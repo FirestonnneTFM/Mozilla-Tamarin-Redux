@@ -115,12 +115,15 @@ const int kBufferPadding = 16;
     class MethodFrame;
 
     // Use this for picking apart and putting together double values from constituent
-    // words.  "parts.msw" is the most significant word, containing sign bit, exponent,
-    // and most significant bits of mantissa.  "parts.lsw" is the least significant
+    // words.  "words.msw" is the most significant word, containing sign bit, exponent,
+    // and most significant bits of mantissa.  "words.lsw" is the least significant
     // word, containing the least significant bits of mantissa.  "bits" are two words
     // you can use if you don't care about the word order or if you're constructing
     // a double from a machine representation to which you only have a byte pointer.
     // All words are native-endianness.
+    //
+    // (Note the structure tag 'words' is required, the Solaris C++ compiler does not
+    // support unnamed structures as of May, 2010.
 
     union double_overlay
     {
@@ -130,9 +133,9 @@ const int kBufferPadding = 16;
 
         double value;
 #if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
-        struct { uint32_t msw, lsw; };
+        struct { uint32_t msw, lsw; } words;
 #else
-        struct { uint32_t lsw, msw; };
+        struct { uint32_t lsw, msw; } words;
 #endif
         uint32_t bits32[2];
         uint64_t bits64;

@@ -133,7 +133,7 @@ namespace avmplus
 #ifdef _DEBUG
         // It's going to be either 0x1 (~4.94e-324) if subnormals are supported or 0x0010000000000000 (~2.225e-308) if not.
         double_overlay d(minValue);
-        AvmAssert((d.msw == 0 && d.lsw == 1) || (d.msw == 0x00100000 && d.lsw == 0));
+        AvmAssert((d.words.msw == 0 && d.words.lsw == 1) || (d.words.msw == 0x00100000 && d.words.lsw == 0));
 #endif
         return minValue;
     }

@@ -149,8 +149,8 @@ namespace avmplus
     {
         double_overlay u(x);
 
-        int32_t hx = u.msw;
-        int32_t lx = u.lsw;
+        int32_t hx = u.words.msw;
+        int32_t lx = u.words.lsw;
 
         lx |= (hx & 0x7FFFFFFF) ^ 0x7FF00000;
         lx |= -lx;
@@ -167,8 +167,8 @@ namespace avmplus
 
         double_overlay u(x);
 
-        int32_t hx = u.msw;
-        int32_t lx = u.lsw;
+        int32_t hx = u.words.msw;
+        int32_t lx = u.words.lsw;
 
         hx &= 0x7FFFFFFF;
         hx |= (uint32_t) (lx | (-lx)) >> 31;
@@ -180,8 +180,8 @@ namespace avmplus
     {
         double_overlay u(x);
 
-        int32_t hx = u.msw;
-        int32_t lx = u.lsw;
+        int32_t hx = u.words.msw;
+        int32_t lx = u.words.lsw;
 
         return (hx == (int32_t)0x80000000 && lx == (int32_t)0x0);
     }
