@@ -95,7 +95,7 @@ namespace avmshell
         } ptr;
 
         Read(&ptr.d, 8);
-        ConvertU64(ptr.u);
+        ConvertD64(ptr.u);
         return ptr.d;
     }
 
@@ -217,7 +217,7 @@ namespace avmshell
             double v;
         } ptr;
         ptr.v = value;
-        ConvertU64(ptr.u);
+        ConvertD64(ptr.u);
         Write(&ptr.u, 8);
     }
 

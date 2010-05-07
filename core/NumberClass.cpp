@@ -132,9 +132,8 @@ namespace avmplus
             minValue = minNormalizedDouble;
 #ifdef _DEBUG
         // It's going to be either 0x1 (~4.94e-324) if subnormals are supported or 0x0010000000000000 (~2.225e-308) if not.
-        double_overlay u;
-        u.value = minValue;
-        AvmAssert((u.parts.msw == 0 && u.parts.lsw == 1) || (u.parts.msw == 0x00100000 && u.parts.lsw == 0));
+        double_overlay d(minValue);
+        AvmAssert((d.msw == 0 && d.lsw == 1) || (d.msw == 0x00100000 && d.lsw == 0));
 #endif
         return minValue;
     }

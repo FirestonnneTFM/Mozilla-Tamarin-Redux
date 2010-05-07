@@ -905,15 +905,11 @@ namespace avmplus
 #endif
         }
         else {
-            union {
-                double d;
-                uint32_t bits[2];
-            } v;
-            v.d = (double)value;
+            double_overlay v((double)value);
             CHECK(3);
             *dest++ = NEW_OPCODE(WOP_push_doublebits);
-            *dest++ = v.bits[0];
-            *dest++ = v.bits[1];
+            *dest++ = v.bits32[0];
+            *dest++ = v.bits32[1];
 #ifdef VMCFG_WORDCODE_PEEPHOLE
             peep(WOP_push_doublebits, dest-3);
 #endif
@@ -934,15 +930,11 @@ namespace avmplus
 #endif
         }
         else {
-            union {
-                double d;
-                uint32_t bits[2];
-            } v;
-            v.d = (double)value;
+            double_overlay d((double)value);
             CHECK(3);
             *dest++ = NEW_OPCODE(WOP_push_doublebits);
-            *dest++ = v.bits[0];
-            *dest++ = v.bits[1];
+            *dest++ = d.bits32[0];
+            *dest++ = d.bits32[1];
 #ifdef VMCFG_WORDCODE_PEEPHOLE
             peep(WOP_push_doublebits, dest-3);
 #endif

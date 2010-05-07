@@ -1821,13 +1821,10 @@ return the result of the comparison ToPrimitive(x) == y.
             }
 
             case WOP_push_doublebits: {
-                union {
-                    double d;
-                    uint32_t b[2];
-                } u;
-                u.b[0] = (uint32)*pc++;
-                u.b[1] = (uint32)*pc++;
-                buffer << wopAttrs[opcode].name << " " << u.d;
+                double_overlay d;
+                d.bits32[0] = (uint32)*pc++;
+                d.bits32[1] = (uint32)*pc++;
+                buffer << wopAttrs[opcode].name << " " << d.value;
                 break;
             }
 

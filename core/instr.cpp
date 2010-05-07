@@ -524,10 +524,14 @@ double FASTCALL mop_lf32(const void* addr)
         float b;
     };
     const uint8_t* u = (const uint8_t*)addr;
+#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    a = *(uint32_t*)u;
+#else
     a = (uint32_t(u[3]) << 24) |
         (uint32_t(u[2]) << 16) |
         (uint32_t(u[1]) << 8) |
         uint32_t(u[0]);
+#endif
     return b;
 #endif
 }
@@ -537,23 +541,24 @@ double FASTCALL mop_lf64(const void* addr)
 #if defined(VMCFG_UNALIGNED_FP_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     return *(const double*)(addr);
 #else
-    union {
-        uint64_t a;
-        double b;
-    };
+    // The layout in memory is little-endian with the least significant
+    // word first.
     const uint8_t* u = (const uint8_t*)addr;
-#ifdef VMCFG_DOUBLE_MSW_FIRST
-    #error "VMCFG_DOUBLE_MSW_FIRST not handled here yet"
+    double_overlay d;
+#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    d.lsw = *(uint32_t*)u;
+    d.msw = *((uint32_t*)u+1);
+#else
+    d.lsw = ((uint64_t(u[3]) << 24) |
+             (uint64_t(u[2]) << 16) |
+             (uint64_t(u[1]) << 8) |
+             (uint64_t(u[0])));
+    d.msw = ((uint32_t(u[7]) << 24) |
+             (uint32_t(u[6]) << 16) |
+             (uint32_t(u[5]) << 8) |
+             (uint32_t(u[4])));
 #endif
-    a = (uint64_t(u[7]) << 56) |
-        (uint64_t(u[6]) << 48) |
-        (uint64_t(u[5]) << 40) |
-        (uint64_t(u[4]) << 32) |
-        (uint64_t(u[3]) << 24) |
-        (uint64_t(u[2]) << 16) |
-        (uint64_t(u[1]) << 8) |
-        uint64_t(u[0]);
-    return b;
+    return d.value;
 #endif
 }
 
@@ -597,35 +602,37 @@ void mop_sf32(void* addr, double value)
     };
     a = float(value);
     uint8_t* u = (uint8_t*)addr;
+#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    *(uint32_t*)u = b;
+#else
     u[0] = uint8_t(b);
     u[1] = uint8_t(b >> 8);
     u[2] = uint8_t(b >> 16);
     u[3] = uint8_t(b >> 24);
+#endif
 #endif
 }
 
 void mop_sf64(void* addr, double value)
 {
 #if defined(VMCFG_UNALIGNED_FP_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
-    *(double*)(addr) = double(value);
+    *(double*)(addr) = value;
 #else
-    union {
-        double a;
-        uint64_t b;
-    };
-    a = double(value);
+    double_overlay d(value);
     uint8_t* u = (uint8_t*)addr;
-#ifdef VMCFG_DOUBLE_MSW_FIRST
-    #error "VMCFG_DOUBLE_MSW_FIRST not handled here yet"
+#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    *(uint32_t*)u = d.lsw;
+    *((uint32_t*)u+1) = d.msw;
+#else
+    u[0] = uint8_t(d.lsw);
+    u[1] = uint8_t(d.lsw >> 8);
+    u[2] = uint8_t(d.lsw >> 16);
+    u[3] = uint8_t(d.lsw >> 24);
+    u[4] = uint8_t(d.msw);
+    u[5] = uint8_t(d.msw >> 8);
+    u[6] = uint8_t(d.msw >> 16);
+    u[7] = uint8_t(d.msw >> 24);
 #endif
-    u[0] = uint8_t(b);
-    u[1] = uint8_t(b >> 8);
-    u[2] = uint8_t(b >> 16);
-    u[3] = uint8_t(b >> 24);
-    u[4] = uint8_t(b >> 32);
-    u[5] = uint8_t(b >> 40);
-    u[6] = uint8_t(b >> 48);
-    u[7] = uint8_t(b >> 56);
 #endif
 }
 

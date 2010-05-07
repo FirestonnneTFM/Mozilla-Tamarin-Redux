@@ -114,14 +114,28 @@ const int kBufferPadding = 16;
 
     class MethodFrame;
 
+    // Use this for picking apart and putting together double values from constituent
+    // words.  "parts.msw" is the most significant word, containing sign bit, exponent,
+    // and most significant bits of mantissa.  "parts.lsw" is the least significant
+    // word, containing the least significant bits of mantissa.  "bits" are two words
+    // you can use if you don't care about the word order or if you're constructing
+    // a double from a machine representation to which you only have a byte pointer.
+    // All words are native-endianness.
+
     union double_overlay
     {
+        double_overlay() {}
+        double_overlay(double d) { value=d; }
+        double_overlay(uint64_t v) { bits64=v; }
+
         double value;
 #if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
-        struct { uint32_t msw, lsw; } parts;
+        struct { uint32_t msw, lsw; };
 #else
-        struct { uint32_t lsw, msw; } parts;
+        struct { uint32_t lsw, msw; };
 #endif
+        uint32_t bits32[2];
+        uint64_t bits64;
     };
 
     /**

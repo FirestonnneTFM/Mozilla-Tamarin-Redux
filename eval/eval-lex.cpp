@@ -1711,12 +1711,8 @@ namespace avmplus
             // Compute and insert exponent
             // FIXME: overflow integer constants properly to Infinity.
             bits |= (uint64_t)(1023 + scale) << 52;
-            union {
-                uint64_t bits;
-                double d;
-            } u;
-            u.bits = bits;
-            return u.d;
+            double_overlay d(bits);
+            return d.value;
         }
         
         double Lexer::parseFloat()
