@@ -178,7 +178,7 @@ namespace avmplus
 
     bool MathUtils::isNegZero(double x)
     {
-        double_overlay u(x)
+        double_overlay u(x);
 
         int32_t hx = u.msw;
         int32_t lx = u.lsw;
