@@ -63,7 +63,7 @@ class tamarinredux:
                                    "mac64-ppc-compile",
                                    "linux-compile", "linux64-compile",
                                    "winmobile-emulator-compile",
-                                   "solaris-sparc-compile",
+                                   "solaris-sparc-compile", "solaris-sparc2-compile",
                                    "android-compile",
                                    "linux-arm-compile", "linux-arm2-compile", 
                                    "linux-mips-compile"])
@@ -76,7 +76,7 @@ class tamarinredux:
                                    "mac64-ppc-smoke",
                                    "linux-smoke", "linux64-smoke",
                                    "winmobile-emulator-smoke",
-                                   "solaris-sparc-smoke",
+                                   "solaris-sparc-smoke", "solaris-sparc2-smoke",
                                    "android-smoke",
                                    "linux-arm-smoke", "linux-arm2-smoke",
                                    "linux-mips-smoke"],
@@ -95,6 +95,7 @@ class tamarinredux:
                                   ["linux64-smoke", "linux64-compile"],
                                   ["winmobile-emulator-smoke", "winmobile-emulator-compile"],
                                   ["solaris-sparc-smoke", "solaris-sparc-compile"],
+                                  ["solaris-sparc2-smoke", "solaris-sparc-compile"],
                                   ["android-smoke","android-compile"],
                                   ["linux-arm-smoke","linux-compile"],
                                   ["linux-arm2-smoke","linux-compile"],
@@ -109,7 +110,7 @@ class tamarinredux:
                                    "mac64-ppc-test",
                                    "linux-test", "linux64-test",
                                    "winmobile-emulator-test",
-                                   "solaris-sparc-test",
+                                   "solaris-sparc-test", "solaris-sparc2-test",
                                    "android-test",
                                    "linux-arm-test", "linux-arm2-test",
                                    "linux-mips-test"],
@@ -128,6 +129,7 @@ class tamarinredux:
                                   ["linux64-test", "linux64-smoke"],
                                   ["winmobile-emulator-test", "winmobile-emulator-smoke"],
                                   ["solaris-sparc-test", "solaris-sparc-smoke"],
+                                  ["solaris-sparc2-test", "solaris-sparc2-smoke"],
                                   ["android-test", "android-smoke"],
                                   ["linux-arm-test", "linux-arm-smoke"],
                                   ["linux-arm2-test", "linux-arm2-smoke"],
@@ -216,7 +218,6 @@ class tamarinredux:
     )
     windows_compile_factory.addStep(compile_buildcheck)
     windows_compile_factory.addStep(util_upload_asteam)
-    windows_compile_factory.addStep(util_upload_mozilla)
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-sizereport.sh',WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -274,7 +275,6 @@ class tamarinredux:
     mac_intel_104_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_104_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_104_compile_factory.addStep(util_upload_asteam_local)
-    mac_intel_104_compile_factory.addStep(util_upload_mozilla_local)
 
     mac_intel_104_compile_builder = {
                 'name': "mac-intel-10.4-compile",
@@ -306,7 +306,6 @@ class tamarinredux:
     mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_105_compile_factory.addStep(util_upload_asteam_local)
-    mac_intel_105_compile_factory.addStep(util_upload_mozilla_local)
 
     mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile",
@@ -337,7 +336,6 @@ class tamarinredux:
     mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_64_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc64-darwin", upload="false"))
     mac_intel_64_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_64_compile_factory.addStep(util_upload_asteam_local)
-    mac_intel_64_compile_factory.addStep(util_upload_mozilla_local)
 
     mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile",
@@ -485,7 +483,6 @@ class tamarinredux:
     )
     linux_compile_factory.addStep(compile_buildcheck_local)
     linux_compile_factory.addStep(util_upload_asteam_local)
-    linux_compile_factory.addStep(util_upload_mozilla)
 
     linux_compile_builder = {
                 'name': "linux-compile",
@@ -512,7 +509,6 @@ class tamarinredux:
     linux_64_compile_factory.addStep(compile_testmedia)
     linux_64_compile_factory.addStep(compile_buildcheck_local)
     linux_64_compile_factory.addStep(util_upload_asteam_local)
-    linux_64_compile_factory.addStep(util_upload_mozilla_local)
 
     linux_64_compile_builder = {
                 'name': "linux64-compile",
@@ -594,7 +590,6 @@ class tamarinredux:
     )
     winmobile_emulator_compile_factory.addStep(compile_buildcheck_local)
     winmobile_emulator_compile_factory.addStep(util_upload_asteam_local)
-    winmobile_emulator_compile_factory.addStep(util_upload_mozilla_local)
     winmobile_emulator_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-mobile-pocketpc-arm-sizereport.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -628,13 +623,29 @@ class tamarinredux:
     solaris_sparc_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     solaris_sparc_compile_factory.addStep(compile_buildcheck_local)
     solaris_sparc_compile_factory.addStep(util_upload_asteam)
-    solaris_sparc_compile_factory.addStep(util_upload_mozilla)
 
     solaris_sparc_compile_builder = {
                 'name': "solaris-sparc-compile",
                 'slavename': "asteamsol4",
                 'factory': solaris_sparc_compile_factory,
                 'builddir': './solaris-sparc-compile',
+    }
+    
+    
+    ############################################
+    #### builder for solaris-sparc2-compile ####
+    ############################################
+    solaris_sparc2_compile_factory = factory.BuildFactory()
+    solaris_sparc2_compile_factory.addStep(sync_clean)
+    solaris_sparc2_compile_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc2_compile_factory.addStep(sync_update)
+    solaris_sparc2_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
+    
+    solaris_sparc2_compile_builder = {
+                'name': "solaris-sparc2-compile",
+                'slavename': "asteamsol3",
+                'factory': solaris_sparc2_compile_factory,
+                'builddir': './solaris-sparc2-compile',
     }
 
     ###########################################
@@ -680,15 +691,6 @@ class tamarinredux:
                 description='running upload to asteam...',
                 descriptionDone='finished upload to asteam.',
                 name="Upload_ASTEAM",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-    android_compile_factory.addStep(BuildShellCommand(
-                command=['./upload-mozilla-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='running upload to mozilla...',
-                descriptionDone='finished upload to mozilla.',
-                name="Upload_MOZILLA",
                 workdir="../repo/build/buildbot/slaves/scripts",
                 timeout=3600)
     )
@@ -773,7 +775,6 @@ class tamarinredux:
     )
     linux_mips_compile_factory.addStep(compile_buildcheck_local)
     linux_mips_compile_factory.addStep(util_upload_asteam_local)
-    linux_mips_compile_factory.addStep(util_upload_mozilla_local)
     
     linux_mips_compile_builder = {
                 'name': "linux-mips-compile",
@@ -1014,6 +1015,22 @@ class tamarinredux:
                 'slavename': "asteamsol4",
                 'factory': solaris_sparc_smoke_factory,
                 'builddir': './solaris-sparc-smoke',
+    }
+    
+    
+    ##########################################
+    #### builder for solaris-sparc2-smoke ####
+    ##########################################
+    solaris_sparc2_smoke_factory = factory.BuildFactory()
+    solaris_sparc2_smoke_factory.addStep(download_testmedia)
+    solaris_sparc2_smoke_factory.addStep(test_smoke)
+    solaris_sparc2_smoke_factory.addStep(util_process_clean)
+
+    solaris_sparc2_smoke_builder = {
+                'name': "solaris-sparc2-smoke",
+                'slavename': "asteamsol3",
+                'factory': solaris_sparc2_smoke_factory,
+                'builddir': './solaris-sparc2-smoke',
     }
 
     #########################################
@@ -1426,11 +1443,6 @@ class tamarinredux:
     solaris_sparc_test_factory = factory.BuildFactory()
     solaris_sparc_test_factory.addStep(test_commandline)
     solaris_sparc_test_factory.addStep(test_selftest)
-    solaris_sparc_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(util_process_clean)
@@ -1441,6 +1453,26 @@ class tamarinredux:
                 'slavename': "asteamsol4",
                 'factory': solaris_sparc_test_factory,
                 'builddir': './solaris-sparc-test',
+    }
+    
+    
+    #########################################
+    #### builder for solaris-sparc2-test ####
+    #########################################
+    solaris_sparc2_test_factory = factory.BuildFactory()
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(util_process_clean)
+    solaris_sparc2_test_factory.addStep(util_clean_buildsdir)
+
+    solaris_sparc2_test_builder = {
+                'name': "solaris-sparc2-test",
+                'slavename': "asteamsol3",
+                'factory': solaris_sparc2_test_factory,
+                'builddir': './solaris-sparc2-test',
     }
 
     ########################################
@@ -2009,6 +2041,7 @@ class tamarinredux:
                 linux_64_compile_builder,
                 winmobile_emulator_compile_builder,
                 solaris_sparc_compile_builder,
+                solaris_sparc2_compile_builder,
                 android_compile_builder,
                 linux_arm_compile_builder,
                 linux_arm2_compile_builder,
@@ -2028,6 +2061,7 @@ class tamarinredux:
                 linux_64_smoke_builder,
                 winmobile_emulator_smoke_builder,
                 solaris_sparc_smoke_builder,
+                solaris_sparc2_smoke_builder,
                 android_smoke_builder,
                 linux_arm_smoke_builder,
                 linux_arm2_smoke_builder,
@@ -2047,6 +2081,7 @@ class tamarinredux:
                 linux_64_test_builder,
                 winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
+                solaris_sparc2_test_builder,
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_arm2_test_builder,
