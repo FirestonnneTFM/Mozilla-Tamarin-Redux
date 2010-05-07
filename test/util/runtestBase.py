@@ -740,7 +740,9 @@ class RuntestBase:
             else:
                 self.js_print(m, start, end)
                 
-    def verbose_print(self, m, start='', end=''):
+    ### The *ignored here is to mask a bug, https://bugzilla.mozilla.org/show_bug.cgi?id=564124
+
+    def verbose_print(self, m, start='', end='', *ignored):
       if self.verbose:
         self.js_print(m, start, end)
     
