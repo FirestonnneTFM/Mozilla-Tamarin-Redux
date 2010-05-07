@@ -350,14 +350,14 @@ namespace avmplus
         uint8_t* emitDouble(uint8_t* out, double d)
         {
             double_overlay v(d);
-            out[0] = uint8_t(v.lsw);
-            out[1] = uint8_t(v.lsw >> 8);
-            out[2] = uint8_t(v.lsw >> 16);
-            out[3] = uint8_t(v.lsw >> 24);
-            out[4] = uint8_t(v.msw);
-            out[5] = uint8_t(v.msw >> 8);
-            out[6] = uint8_t(v.msw >> 16);
-            out[7] = uint8_t(v.msw >> 24);
+            out[0] = uint8_t(v.words.lsw);
+            out[1] = uint8_t(v.words.lsw >> 8);
+            out[2] = uint8_t(v.words.lsw >> 16);
+            out[3] = uint8_t(v.words.lsw >> 24);
+            out[4] = uint8_t(v.words.msw);
+            out[5] = uint8_t(v.words.msw >> 8);
+            out[6] = uint8_t(v.words.msw >> 16);
+            out[7] = uint8_t(v.words.msw >> 24);
             return out + 8;
         }
         
