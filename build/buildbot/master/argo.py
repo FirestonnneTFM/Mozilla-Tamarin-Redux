@@ -63,7 +63,7 @@ class argo:
                                    "mac64-ppc-compile-argo",
                                    "linux-compile-argo", "linux64-compile-argo",
                                    "winmobile-emulator-compile-argo",
-                                   "solaris-sparc-compile-argo",
+                                   "solaris-sparc-compile-argo", "solaris-sparc2-compile-argo",
                                    "android-compile-argo",
                                    "linux-arm-compile-argo", "linux-arm2-compile-argo"])
 
@@ -75,7 +75,7 @@ class argo:
                                    "mac64-ppc-smoke-argo",
                                    "linux-smoke-argo", "linux64-smoke-argo",
                                    "winmobile-emulator-smoke-argo",
-                                   "solaris-sparc-smoke-argo",
+                                   "solaris-sparc-smoke-argo", "solaris-sparc2-smoke-argo",
                                    "android-smoke-argo",
                                    "linux-arm-smoke-argo", "linux-arm2-smoke-argo"],
                     builderDependencies=[
@@ -93,6 +93,7 @@ class argo:
                                   ["linux64-smoke-argo", "linux64-compile-argo"],
                                   ["winmobile-emulator-smoke-argo", "winmobile-emulator-compile-argo"],
                                   ["solaris-sparc-smoke-argo", "solaris-sparc-compile-argo"],
+                                  ["solaris-sparc2-smoke-argo", "solaris-sparc-compile-argo"],
                                   ["android-smoke-argo","android-compile-argo"],
                                   ["linux-arm-smoke-argo","linux-compile-argo"],
                                   ["linux-arm2-smoke-argo","linux-compile-argo"],
@@ -106,7 +107,7 @@ class argo:
                                    "mac64-ppc-test-argo",
                                    "linux-test-argo", "linux64-test-argo",
                                    "winmobile-emulator-test-argo",
-                                   "solaris-sparc-test-argo",
+                                   "solaris-sparc-test-argo", "solaris-sparc2-test-argo",
                                    "android-test-argo",
                                    "linux-arm-test-argo", "linux-arm2-test-argo"],
                     builderDependencies=[
@@ -124,6 +125,7 @@ class argo:
                                   ["linux64-test-argo", "linux64-smoke-argo"],
                                   ["winmobile-emulator-test-argo", "winmobile-emulator-smoke-argo"],
                                   ["solaris-sparc-test-argo", "solaris-sparc-smoke-argo"],
+                                  ["solaris-sparc2-test-argo", "solaris-sparc2-smoke-argo"],
                                   ["android-test-argo", "android-smoke-argo"],
                                   ["linux-arm-test-argo", "linux-arm-smoke-argo"],
                                   ["linux-arm2-test-argo", "linux-arm2-smoke-argo"],
@@ -620,6 +622,23 @@ class argo:
                 'factory': solaris_sparc_compile_factory,
                 'builddir': './argo-solaris-sparc-compile',
     }
+    
+    
+    ############################################
+    #### builder for solaris-sparc2-compile ####
+    ############################################
+    solaris_sparc2_compile_factory = factory.BuildFactory()
+    solaris_sparc2_compile_factory.addStep(sync_clean)
+    solaris_sparc2_compile_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc2_compile_factory.addStep(sync_update)
+    solaris_sparc2_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
+    
+    solaris_sparc2_compile_builder = {
+                'name': "solaris-sparc2-compile-argo",
+                'slavename': "asteamsol3",
+                'factory': solaris_sparc2_compile_factory,
+                'builddir': './argo-solaris-sparc2-compile',
+    }
 
     ###########################################
     #### builder for android on mac        ####
@@ -939,6 +958,22 @@ class argo:
                 'slavename': "asteamsol4",
                 'factory': solaris_sparc_smoke_factory,
                 'builddir': './argo-solaris-sparc-smoke',
+    }
+    
+    
+    ##########################################
+    #### builder for solaris-sparc2-smoke ####
+    ##########################################
+    solaris_sparc2_smoke_factory = factory.BuildFactory()
+    solaris_sparc2_smoke_factory.addStep(download_testmedia)
+    solaris_sparc2_smoke_factory.addStep(test_smoke)
+    solaris_sparc2_smoke_factory.addStep(util_process_clean)
+
+    solaris_sparc2_smoke_builder = {
+                'name': "solaris-sparc2-smoke-argo",
+                'slavename': "asteamsol3",
+                'factory': solaris_sparc2_smoke_factory,
+                'builddir': './argo-solaris-sparc2-smoke',
     }
 
 
@@ -1329,11 +1364,6 @@ class argo:
     solaris_sparc_test_factory = factory.BuildFactory()
     solaris_sparc_test_factory.addStep(test_commandline)
     solaris_sparc_test_factory.addStep(test_selftest)
-    solaris_sparc_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
-    solaris_sparc_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(util_process_clean)
@@ -1344,6 +1374,26 @@ class argo:
                 'slavename': "asteamsol4",
                 'factory': solaris_sparc_test_factory,
                 'builddir': './argo-solaris-sparc-test',
+    }
+    
+    
+    #########################################
+    #### builder for solaris-sparc2-test ####
+    #########################################
+    solaris_sparc2_test_factory = factory.BuildFactory()
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_test_factory.addStep(util_process_clean)
+    solaris_sparc2_test_factory.addStep(util_clean_buildsdir)
+
+    solaris_sparc2_test_builder = {
+                'name': "solaris-sparc2-test-argo",
+                'slavename': "asteamsol3",
+                'factory': solaris_sparc2_test_factory,
+                'builddir': './argo-solaris-sparc2-test',
     }
     
     ########################################
@@ -1899,6 +1949,7 @@ class argo:
                 linux_64_compile_builder,
                 winmobile_emulator_compile_builder,
                 solaris_sparc_compile_builder,
+                solaris_sparc2_compile_builder,
                 android_compile_builder,
                 linux_arm_compile_builder,
                 linux_arm2_compile_builder,
@@ -1917,6 +1968,7 @@ class argo:
                 linux_64_smoke_builder,
                 winmobile_emulator_smoke_builder,
                 solaris_sparc_smoke_builder,
+                solaris_sparc2_smoke_builder,
                 android_smoke_builder,
                 linux_arm_smoke_builder,
                 linux_arm2_smoke_builder,
@@ -1935,6 +1987,7 @@ class argo:
                 linux_64_test_builder,
                 winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
+                solaris_sparc2_test_builder,
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_arm2_test_builder,

@@ -311,7 +311,7 @@ class PhaseOneListener(base.StatusReceiverMultiService):
                         
     def _writeBuildRequest(self, build, onlineslaves):
         """ Only send the LAST change into the next phases as this is what the build
-        system actually built. Since thenext phases can have there own "changeIsImportant"
+        system actually built. Since the next phases can have there own "changeIsImportant"
         functions to determine whether or not to run, we MUST only send in changes that were
         actually built by the previous phase 
         """
@@ -319,7 +319,16 @@ class PhaseOneListener(base.StatusReceiverMultiService):
         out  = "changeset:   %s\n" % (build.getSourceStamp().revision)
         out += "user:        %s\n" % (change.who)
         out += "date:        %s\n" % (change.getTime())
-        out += "files:       %s\n" % (' '.join(change.files))
+        
+        # Bug: 549628
+        # Since only the the change that is actually compiled is going to be passed to
+        # the next phase we must look at ALL of the changes that were combined together
+        # in this build in order to create a complete list of files that were changed.
+        # If you only describe the files in that are in the last change it is possible
+        # that the last change will be to files that will not pass the "changeIsImportant"
+        # but other changes that were combined would have passed the check.
+        allfiles = ' '.join([' '.join(change.files) for change in build.getSourceStamp().changes])
+        out += "files:       %s\n" % allfiles
         out += "builders:    %s\n" % (' '.join(onlineslaves))
         out += "description:\n%s\n" % (change.comments)
         
