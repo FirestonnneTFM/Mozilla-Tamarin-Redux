@@ -119,7 +119,7 @@ namespace avmplus
 
 		// Is this a <?xml> declaration?
 		start = m_pos;
-		if (m_str->matchesLatin1("<?xml ", 6, start))
+		if (m_str->matchesLatin1_caseless("<?xml ", 6, start))
 		{
 			end = m_str->indexOfLatin1("?>", 2, start + 6);
 			if (end >= 0)
@@ -163,7 +163,7 @@ namespace avmplus
 		}
 
 		// Is this a CDATA section?
-		if (m_str->matchesLatin1("<![CDATA[", 9, start))
+		if (m_str->matchesLatin1_caseless("<![CDATA[", 9, start))
 		{
 			start += 9;
 			end = m_str->indexOfLatin1("]]>", 3, start);
