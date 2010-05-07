@@ -104,22 +104,22 @@ def diff_check(ui, repo, **kwargs):
 
     # check for tabs - exit if user chooses to abort
     if checkChangeCtxDiff(ui, repo, changecontexts, tabCheck,
-                          'Tab', ('.cpp', '.h', '.as', '.abs', '.py')):
+                          'Tab', ('.cpp', '.c', '.h', '.as', '.abs', '.py')):
         return True
 
     if checkChangeCtxDiff(ui, repo, changecontexts, windowsLineendingsCheck,
-                          'Windows line ending', ('.cpp', '.h', '.as', '.abs', '.py')):
+                          'Windows line ending', ('.cpp', '.c', '.h', '.as', '.abs', '.py')):
         return True
 
     if checkChangeCtxDiff(ui, repo, changecontexts, trailingWhitespaceCheck,
-                          'Trailing Whitespace', ('.cpp', '.h', '.as', '.abs', '.py')):
+                          'Trailing Whitespace', ('.cpp', '.c', '.h', '.as', '.abs', '.py')):
         return True
 
     return False
 
 def checkChangeCtxDiff(ui, repo, changecontexts, testFunc, testDesc, fileEndings):
     '''Loop through each diff for each change and run the testFunc against each line'''
-    ui.debug('Checking %s' % testDesc)
+    ui.debug('Checking %s\n' % testDesc)
     for ctx in changecontexts:
         # Get the diff for each change and file
         for file in [f for f in ctx.files() if f.endswith(fileEndings)]:
@@ -141,9 +141,13 @@ def checkChangeCtxDiff(ui, repo, changecontexts, testFunc, testDesc, fileEndings
                         ui.warn('%s\n' % diffLocation)
                         ui.warn('%s\n' % line)
                         ui.warn('%s^\n' % (' '*errorLocation,)) # show a pointer to error
-                        response = ui.promptchoice('(n)o, (y)es, (a)llow %ss for current file\n' % testDesc +
+                        try:
+                            response = ui.promptchoice('(n)o, (y)es, (a)llow %ss for current file\n' % testDesc +
                                                     'Are you sure you want to commit this change? [n]: ' ,
                                                    (('&No'), ('&Yes'), ('&Allow')), 0)
+                        except AttributeError:
+                            ui.warn('This commit hook requires that you have mercurial 1.4+ installed.  Please upgrade your hg installation.')
+                            response = 0
                         if response == 1:
                             # next occurance in file
                             continue
