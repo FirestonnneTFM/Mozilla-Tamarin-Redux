@@ -2917,15 +2917,16 @@ namespace avmplus
             // it would be better to keep it in the constant pool.
             //
             // OPTIMIZEME - on 64-bit systems we don't need two operand words here
+            //
+            // OPTIMIZEME - we can do better if unaligned int64 loads or unaligned fp loads 
+            // are allowed on the platform.
 
             INSTR(push_doublebits) {
-                volatile union {
-                    double d;
-                    uint32_t bits[2];
-                } u;
-                u.bits[0] = (uint32_t)*pc++;
-                u.bits[1] = (uint32_t)*pc++;
-                *++sp = core->doubleToAtom(u.d);
+                // Native layout in the instruction stream, just copy it over
+                double_overlay d;
+                d.bits32[0] = (uint32_t)*pc++;
+                d.bits32[1] = (uint32_t)*pc++;
+                *++sp = core->doubleToAtom(d.value);
                 NEXT;
             }
 

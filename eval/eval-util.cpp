@@ -349,18 +349,15 @@ namespace avmplus
         
         uint8_t* emitDouble(uint8_t* out, double d)
         {
-            union {
-                uint8_t b[8];
-                double d;
-            } v;
-            v.d = d;
-#ifdef AVMPLUS_BIG_ENDIAN
-            for ( int i=0 ; i < 8 ; i++ )
-                out[i] = v.b[7-i];
-#else
-            for ( int i=0 ; i < 8 ; i++ )
-                out[i] = v.b[i];
-#endif
+            double_overlay v(d);
+            out[0] = uint8_t(v.lsw);
+            out[1] = uint8_t(v.lsw >> 8);
+            out[2] = uint8_t(v.lsw >> 16);
+            out[3] = uint8_t(v.lsw >> 24);
+            out[4] = uint8_t(v.msw);
+            out[5] = uint8_t(v.msw >> 8);
+            out[6] = uint8_t(v.msw >> 16);
+            out[7] = uint8_t(v.msw >> 24);
             return out + 8;
         }
         

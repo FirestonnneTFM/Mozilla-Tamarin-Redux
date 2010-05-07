@@ -142,14 +142,10 @@ namespace avmplus
         return *(const double*)b;
     #else
         AvmAssert(sizeof(AvmBox)*2 == sizeof(double));
-        union {
-            double d;
-            AvmBox b[2];
-        } u;
-        // @todo, does this need endian attention?
-        u.b[0] = b[0];
-        u.b[1] = b[1];
-        return u.d;
+        double_overlay u;
+        u.bits32[0] = b[0];
+        u.bits32[1] = b[1];
+        return u.value;
     #endif
     }
 

@@ -123,6 +123,25 @@ namespace avmshell
             }
         }
 
+        void ConvertD64(uint64_t& value)
+        {
+#if defined(VMCFG_DOUBLE_MSW_FIRST)
+            // Swap the high and low words so that the datum is in "natural" endianness,
+            // this produces or consumes big-endian or little-endian external data
+            // as appropriate.
+            union {
+                uint64_t v;
+                struct { uint32_t a, b; }
+            }
+            v = value;
+            uint32_t tmp = a;
+            a = b;
+            b = tmp;
+            value = v;
+#endif
+            return ConvertU64(value);
+        }
+        
         Endian GetNativeEndian() const
         {
             #if defined(AVMPLUS_LITTLE_ENDIAN)

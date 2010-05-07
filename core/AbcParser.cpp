@@ -1983,19 +1983,10 @@ namespace avmplus
         if (p < abcStart || p+7 >= abcEnd )
             toplevel->throwVerifyError(kCorruptABCError);
 
-        union {
-            double value;
-            #if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
-                struct { uint32_t hi, lo; } words;
-            #else
-                struct { uint32_t lo, hi; } words;
-            #endif
-        };
-        // the bytes in the abc are little endian but the words
-        // in memory can be little endian or big endian.
-        words.lo = p[0] | p[1]<<8 | p[2]<<16 | p[3]<<24;
-        words.hi = p[4] | p[5]<<8 | p[6]<<16 | p[7]<<24;
+        double_overlay d;
+        d.lsw = p[0] | p[1]<<8 | p[2]<<16 | p[3]<<24;
+        d.msw = p[4] | p[5]<<8 | p[6]<<16 | p[7]<<24;
         p += 8;
-        return value;
+        return d.value;
     }
 }

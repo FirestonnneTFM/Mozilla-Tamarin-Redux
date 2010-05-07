@@ -450,13 +450,10 @@ namespace avmplus
     #if defined(AVMPLUS_64BIT) || defined(VMCFG_UNALIGNED_FP_ACCESS)
         return *(const double*)src;
     #else
-        union {
-            uint32_t b[2];
-            double d;
-        } u;
-        u.b[0] = ((const uint32_t*)src)[0];
-        u.b[1] = ((const uint32_t*)src)[1];
-        return u.d;
+        double_overlay u;
+        u.bits32[0] = ((const uint32_t*)src)[0];
+        u.bits32[1] = ((const uint32_t*)src)[1];
+        return u.value;
     #endif
     }
 

@@ -1056,7 +1056,7 @@ namespace nanojit
             union {
                 double d;
                 struct {
-                    int32_t hi, lo;
+                    int32_t hi, lo; // Always assuming big-endian in NativePPC.cpp
                 } w;
             };
             d = ins->immD();
@@ -1098,7 +1098,7 @@ namespace nanojit
             union {
                 double d;
                 struct {
-                    int32_t hi, lo;
+                    int32_t hi, lo; // Always assuming big-endian in NativePPC.cpp
                 } w;
             };
             d = ins->immD();

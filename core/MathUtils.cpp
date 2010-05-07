@@ -147,11 +147,10 @@ namespace avmplus
 
     int32_t MathUtils::isInfinite(double x)
     {
-        double_overlay u;
-        u.value = x;
+        double_overlay u(x);
 
-        int32_t hx = u.parts.msw;
-        int32_t lx = u.parts.lsw;
+        int32_t hx = u.msw;
+        int32_t lx = u.lsw;
 
         lx |= (hx & 0x7FFFFFFF) ^ 0x7FF00000;
         lx |= -lx;
@@ -166,11 +165,10 @@ namespace avmplus
             return false;
         }
 
-        double_overlay u;
-        u.value = x;
+        double_overlay u(x);
 
-        int32_t hx = u.parts.msw;
-        int32_t lx = u.parts.lsw;
+        int32_t hx = u.msw;
+        int32_t lx = u.lsw;
 
         hx &= 0x7FFFFFFF;
         hx |= (uint32_t) (lx | (-lx)) >> 31;
@@ -180,11 +178,10 @@ namespace avmplus
 
     bool MathUtils::isNegZero(double x)
     {
-        double_overlay u;
-        u.value = x;
+        double_overlay u(x)
 
-        int32_t hx = u.parts.msw;
-        int32_t lx = u.parts.lsw;
+        int32_t hx = u.msw;
+        int32_t lx = u.lsw;
 
         return (hx == (int32_t)0x80000000 && lx == (int32_t)0x0);
     }
@@ -203,10 +200,11 @@ namespace avmplus
 
     int32_t MathUtils::isInfinite(double x)
     {
-        union { double d; uint64_t v; }; d = x;
-        if ((v & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
+        double_overlay u(x);
+
+        if ((u.bits64 & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
             return 0;
-        if (v & 0x8000000000000000LL)
+        if (u.bits64 & 0x8000000000000000LL)
             return -1;
         else
             return 1;
@@ -214,19 +212,16 @@ namespace avmplus
 
     bool MathUtils::isNaN(double value)
     {
-        union {
-              double dvalue;
-              uint64_t lvalue;
-        };
-        dvalue = value;
-        return ( ( int64_t(lvalue) & ~0x8000000000000000ULL ) > 0x7ff0000000000000ULL );
-        //return x != x;
+        double_overlay u(value);
+
+        return (u.bits64 & ~0x8000000000000000ULL) > 0x7ff0000000000000ULL;
     }
 
     bool MathUtils::isNegZero(double x)
     {
-        union { double d; uint64_t v; }; d = x;
-        return (v == 0x8000000000000000LL);
+        double_overlay d(x);
+
+        return d.bits64 == 0x8000000000000000ULL;
     }
 
 #endif // UNIX
