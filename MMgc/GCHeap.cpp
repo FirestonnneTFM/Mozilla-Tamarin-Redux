@@ -291,7 +291,7 @@ namespace MMgc
 
 		if(hasSpy)
 			VMPI_spyTeardown();
-		profiler = NULL;
+        profiler = (MemoryProfiler *)-1;
 #endif
 
 		FreeAll();
