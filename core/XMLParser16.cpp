@@ -406,6 +406,8 @@ namespace avmplus
 				else
 					ok = false;
 			}
+            else
+                ok = false;
 			if (!ok)
 			{
 				bgn = end + 1;
