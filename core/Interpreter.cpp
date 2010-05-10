@@ -2918,7 +2918,7 @@ namespace avmplus
             //
             // OPTIMIZEME - on 64-bit systems we don't need two operand words here
             //
-            // OPTIMIZEME - we can do better if unaligned int64 loads or unaligned fp loads 
+            // OPTIMIZEME - we can do better if unaligned int64 loads or unaligned fp loads
             // are allowed on the platform.
 
             INSTR(push_doublebits) {

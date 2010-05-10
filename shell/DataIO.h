@@ -141,7 +141,7 @@ namespace avmshell
 #endif
             return ConvertU64(value);
         }
-        
+
         Endian GetNativeEndian() const
         {
             #if defined(AVMPLUS_LITTLE_ENDIAN)

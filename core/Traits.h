@@ -420,7 +420,7 @@ namespace avmplus
         bool implementsNewInterfaces() const;
 
         bool isDictionary() const;
-        
+
         // sets isDictionary() to true. (can't go the other way...)
         void set_isDictionary();
 

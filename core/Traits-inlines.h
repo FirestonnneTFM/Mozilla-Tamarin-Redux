@@ -392,7 +392,7 @@ REALLY_INLINE bool Traits::isDictionary() const
 {
     return m_isDictionary != 0;
 }
-        
+
 REALLY_INLINE void Traits::set_isDictionary()
 {
     m_isDictionary = true;
