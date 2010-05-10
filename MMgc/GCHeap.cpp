@@ -2268,8 +2268,10 @@ namespace MMgc
 		status = kMemAbort;
 		EnterFrame *ef = enterFrame;
 
-		//  If we hit abort, we need to turn this back on so that listeners are guaranteed to get this signal
-		m_oomHandling = true; 
+		//  If we hit abort, we need to turn m_oomHandling back on so that listeners are guaranteed to get this signal
+		//  We also need to set m_notoficationThread to NULL in case we hit abort while we were processing another memory status change
+		m_oomHandling = true;
+		m_notificationThread = NULL;
 		
 		GCLog("error: out of memory\n");
 		
