@@ -1259,23 +1259,13 @@ namespace avmplus
         return createDependent(gc, master, start, end - start);
     }
 
-    Stringp String::substr(int32_t start, int32_t len)
-    {
-        if (start < 0)
-            start = 0;
-        else if (start > m_length)
-            start = m_length;
-
-        int32_t end;
-        if ((len > 0x3fffffff) || (start > 0x3fffffff)) // might overflow - use doubles
-            end = int32_t(double(len) + double(start));
-        else
-            end = start + len;
-
-        end = (int32_t) NativeObjectHelpers::ClampIndexInt(end, m_length);
-
-        return substring(start, end);
-    }
+	Stringp String::substr(int32_t start, int32_t len)
+	{
+		start = (int32_t) NativeObjectHelpers::ClampIndexInt(start, m_length);
+		len = (int32_t) NativeObjectHelpers::ClampIndexInt(len, m_length);
+		int32_t end = (m_length-len<=start)? m_length:start+len; // no need to further clamp
+		return substring(start, end);
+	}
 
     Stringp String::slice(int32_t start, int32_t end)
     {

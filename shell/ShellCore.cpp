@@ -539,19 +539,29 @@ namespace avmshell
         }
         CATCH(Exception *exception)
         {
-#ifdef DEBUGGER
-            if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+            TRY(this, kCatchAction_ReportAsError)
             {
+    #ifdef DEBUGGER
+                if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+                {
+                    console << string(exception->atom) << "\n";
+                }
+                if (exception->getStackTrace()) {
+                    console << exception->getStackTrace()->format(this) << '\n';
+                }
+    #else
+                // [ed] always show error, even in release mode,
+                // see bug #121382
                 console << string(exception->atom) << "\n";
+    #endif /* DEBUGGER */
             }
-            if (exception->getStackTrace()) {
-                console << exception->getStackTrace()->format(this) << '\n';
+            CATCH(Exception * e2)
+            {
+                (void)e2;
+                console << "Sorry, an exception occurred but could not be reported\n";
             }
-#else
-            // [ed] always show error, even in release mode,
-            // see bug #121382
-            console << string(exception->atom) << "\n";
-#endif /* DEBUGGER */
+            END_CATCH
+            END_TRY
 
             return 1;
         }
