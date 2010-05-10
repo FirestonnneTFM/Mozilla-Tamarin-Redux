@@ -334,14 +334,6 @@ namespace avmplus
                     m_str->substring(start, last);
         }
 
-		int32_t bgn = m_str->indexOfCharCode('&', start, last);
-		if (bgn < 0)
-		{
-			return intern ?
-					core->internSubstring(m_str.str(), start, last) :
-					m_str->substring(start, last);
-		}
-		
 		int32_t end = start;
 		while (bgn >= start && bgn < last)
 		{
