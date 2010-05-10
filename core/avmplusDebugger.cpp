@@ -283,13 +283,7 @@ namespace avmplus
                 if (!ignoreArgs && core->callStack && (astrace_console == TRACE_METHODS_WITH_ARGS || astrace_console == TRACE_METHODS_AND_LINES_WITH_ARGS))
                     core->console << traceArgumentsString();
 
-                core->console << ")";
-                if (!fnc->isInterpreted())
-                {
-                    core->console << " @ 0x";
-                    core->console.writeHexAddr( (uintptr)fnc->implGPR());
-                }
-                core->console << "\n";
+                core->console << ")\n";
             }
         }
         in_trace = false;
