@@ -729,7 +729,15 @@ class RuntestBase:
         #execute the outputCalls
         if outputCalls:
             for call in outputCalls:
-                apply(call[0],call[1])
+                try:
+                    apply(call[0],call[1])
+                except TypeError:
+                    # intermittent issue: TypeError: verbose_print() takes at most 4 arguments (53 given)
+                    # see https://bugzilla.mozilla.org/show_bug.cgi?id=564124
+                    print('Exception Info:')
+                    print(sys.exc_info())
+                    print('outputCalls: %s' % outputCalls)
+                    print('If you see this, please send the above exception info to actionscriptqe@adobe.com')
     
     def quiet_print(self, m, start=None, end=None):
         if self.quiet:
@@ -740,7 +748,9 @@ class RuntestBase:
             else:
                 self.js_print(m, start, end)
                 
-    def verbose_print(self, m, start='', end=''):
+    ### The *ignored here is to mask a bug, https://bugzilla.mozilla.org/show_bug.cgi?id=564124
+
+    def verbose_print(self, m, start='', end='', *ignored):
       if self.verbose:
         self.js_print(m, start, end)
     
