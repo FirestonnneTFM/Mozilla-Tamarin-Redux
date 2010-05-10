@@ -136,33 +136,33 @@ namespace avmplus
             return XMLParser::kUnterminatedXMLDeclaration;
         }
 
-        // Is this a <!DOCTYPE> declaration?
-        if (m_str->matchesLatin1_caseless("<!DOCTYPE", 8, start))
-        {
-            // Scan forward for '>', but check for embedded <>
-            int32_t depth = 0;
-            end = start + 1;
-            while (!atEnd())
-            {
-                ch = m_str[end++];
-                if (ch == '<')
-                    depth++;
-                else if (ch == '>')
-                {
-                    if (!depth)
-                    {
-                        // We've reached the end of the DOCTYPE.
-                        tag.text = m_str->substring(start, end - 1);
-                        tag.nodeType = XMLTag::kDocTypeDeclaration;
-                        m_pos = end;
-                        return XMLParser::kNoError;
-                    }
-                    depth--;
-                }
-                m_pos = end;
-            }
-            return XMLParser::kUnterminatedDocTypeDeclaration;
-        }
+		// Is this a <!DOCTYPE> declaration?
+		if (m_str->matchesLatin1_caseless("<!DOCTYPE", 8, start))
+		{
+			// Scan forward for '>', but check for embedded <>
+			int32_t depth = 0;
+			end = start + 1;
+			while (!atEnd())
+			{
+				ch = m_str[end++];
+				if (ch == '<')
+					depth++;
+				else if (ch == '>')
+				{
+					if (!depth) 
+					{
+						// We've reached the end of the DOCTYPE.
+						tag.text = m_str->substring(start, end);
+						tag.nodeType = XMLTag::kDocTypeDeclaration;
+						m_pos = end;
+						return XMLParser::kNoError;
+					}
+					depth--;
+				}
+				m_pos = end;
+			}
+			return XMLParser::kUnterminatedDocTypeDeclaration;
+		}
 
         // Is this a CDATA section?
         if (m_str->matchesLatin1("<![CDATA[", 9, start))
@@ -334,84 +334,93 @@ namespace avmplus
                     m_str->substring(start, last);
         }
 
-        int32_t end = start;
-        while (bgn >= start && bgn < last)
-        {
-            int32_t ampEnd = m_str->indexOfCharCode(';', ++bgn, last);
-            if (ampEnd < 0)
-                // &xxx without semicolon - we are done
-                break;
-            // add the text between the last sequence and this sequence
-            dest = dest->append(m_str->substring(end, bgn-1));
-            end = ampEnd;
-            int32_t len = end - bgn;
-            // an &xx; sequence is at least two characters
-            bool ok = true;
-            if (len >= 2)
-            {
-                int32_t ch = m_str[bgn];
-                if (ch == '#')
-                {
-                    // Parse a &#xx; decimal sequence.  Or a &#xDD hex sequence
-                    ch = m_str[++bgn];
-                    len--;
-                    int base = 10;
-                    if (len >= 2 && ch == 'x')
-                        base = 16, bgn++, len--;
-                    if (len > 0)
-                    {
-                        int32_t value = 0;
-                        while (len-- && ok)
-                        {
-                            ch = m_str[bgn++];
-                            if (ch >= 'A' && ch <= 'F')
-                                ch -= 7;
-                            else if (ch >= 'a' && ch <= 'f')
-                                ch -= ('a' - 'A' + 7);
-                            ch -= '0';
-                            if (ch >= 0 && ch < base)
-                                value = (value * base) + ch;
-                            else
-                                ok = false;
-                            if (value > 0xFFFF)
-                                ok = false;
-                        }
-                        if (ok)
-                        {
-                            wchar c = (wchar) value;
-                            // note: this code is allowed to construct a string
-                            // containing illegal UTF16 sequences!
-                            dest = dest->append16(&c, 1);
-                            bgn = ++end;
-                        }
-                    }
-                }
-                else if (len <= 4) // Our xmlEntities are only 4 characters or less
-                {
-                    Atom entityAtom = core->internSubstring(m_str.str(), bgn, end)->atom();
-                    Atom result = core->xmlEntities->get(entityAtom);
-                    if (result != undefinedAtom)
-                    {
-                        AvmAssert(atomIsIntptr(result));
-                        wchar c = (wchar) atomGetIntptr(result);
-                        // note: this code is allowed to construct a string
-                        // containing illegal UTF16 sequences!
-                        dest = dest->append16(&c, 1);
-                        bgn = ++end;
-                    }
-                    else
-                        ok = false;
-                }
-                else
-                    ok = false;
-            }
-            if (!ok)
-            {
-                bgn = end + 1;
+		int32_t bgn = m_str->indexOfCharCode('&', start, last);
+		if (bgn < 0)
+		{
+			return intern ?
+					core->internSubstring(m_str.str(), start, last) :
+					m_str->substring(start, last);
+		}
+		
+		int32_t end = start;
+		while (bgn >= start && bgn < last)
+		{
+            int32_t ampBgn = bgn;
+			int32_t ampEnd = m_str->indexOfCharCode(';', ++bgn, last);
+			if (ampEnd < 0)
+				// &xxx without semicolon - we are done
+				break;
+			// add the text between the last sequence and this sequence
+			dest = dest->append(m_str->substring(end, bgn-1));
+			end = ampEnd;
+			int32_t len = end - bgn;
+			// an &xx; sequence is at least two characters
+			bool ok = true;
+			if (len >= 2)
+			{
+				int32_t ch = m_str[bgn];
+				if (ch == '#')
+				{
+					// Parse a &#xx; decimal sequence.  Or a &#xDD hex sequence
+					ch = m_str[++bgn];
+					len--;
+					int base = 10;
+					if (len >= 2 && ch == 'x')
+						base = 16, bgn++, len--;
+					if (len > 0)
+					{
+						int32_t value = 0;
+						while (len-- && ok)
+						{
+							ch = m_str[bgn++];
+							if (ch >= 'A' && ch <= 'F')
+								ch -= 7;
+							else if (ch >= 'a' && ch <= 'f')
+								ch -= ('a' - 'A' + 7);
+							ch -= '0';
+							if (ch >= 0 && ch < base)
+								value = (value * base) + ch;
+							else
+								ok = false;
+							if (value > 0xFFFF)
+								ok = false;
+						}
+						if (ok)
+						{
+							wchar c = (wchar) value;
+							// note: this code is allowed to construct a string
+							// containing illegal UTF16 sequences!
+							dest = dest->append16(&c, 1);
+							bgn = ++end;
+						}
+					}
+				} 
+				else if (len <= 4) // Our xmlEntities are only 4 characters or less
+				{
+					Atom entityAtom = core->internSubstring(m_str.str(), bgn, end)->atom();
+					Atom result = core->xmlEntities->get(entityAtom);
+					if (result != undefinedAtom) 
+					{
+						AvmAssert(atomIsIntptr(result));
+						wchar c = (wchar) atomGetIntptr(result);
+						// note: this code is allowed to construct a string
+						// containing illegal UTF16 sequences!
+						dest = dest->append16(&c, 1);
+						bgn = ++end;
+					}
+					else
+						ok = false;
+				}
+				else
+					ok = false;
+			}
+			if (!ok)
+			{
+				bgn = end + 1;
                 // in this case we don't want to just throw out the
                 // the value entirely as that would break existing content
-                if (start < end)
-                    dest = dest->append(m_str->substring(start, end));
+				if (ampBgn < end)
+					dest = dest->append(m_str->substring(ampBgn, end));
             }
             bgn = m_str->indexOfCharCode('&', bgn, last);
         }

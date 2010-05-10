@@ -1223,7 +1223,7 @@ namespace nanojit
     #else
         NanoAssert((ins->opcode() == LIR_cmov  && iftrue->isI() && iffalse->isI()));
     #endif
-
+    
         Register rr = prepareResultReg(ins, GpRegs);
         Register rf = findRegFor(iffalse, GpRegs & ~rmask(rr));
 
@@ -1235,7 +1235,7 @@ namespace nanojit
         verbose_only(if (_logc->lcbits & LC_Assembly) outputf("%p:",after);)
         MR(rr,rf);
 
-        NanoAssert(isS14(after - (_nIns-1)));
+        NanoAssert(isS24(after - (_nIns-1)));
         asm_branch_near(false, condval, after);
 
         if (rr != rt)
