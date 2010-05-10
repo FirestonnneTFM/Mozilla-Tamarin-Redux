@@ -1306,12 +1306,9 @@ namespace MMgc
     {
         GCAssert(block->size > size);
         HeapBlock *newBlock = block + size;
-        newBlock->baseAddr = block->baseAddr + kBlockSize * size;
-
-        newBlock->size = block->size - size;
+        newBlock->Init(block->baseAddr + kBlockSize * size, block->size - size, block->dirty);
         newBlock->sizePrevious = size;
         newBlock->committed = block->committed;
-        newBlock->dirty = block->dirty;
         block->size = size;
 
         // Update sizePrevious in block after that
@@ -1335,7 +1332,7 @@ namespace MMgc
         }
         numDecommitted -= block->size;
         block->committed = true;
-        block->dirty = false;
+        block->dirty = VMPI_areNewPagesDirty();
     }
 
 #ifdef _DEBUG
@@ -1849,9 +1846,7 @@ namespace MMgc
         // Create a single free block for the new space,
         // and add it to the free list.
         HeapBlock *block = newBlocks+blocksLen;
-        block->baseAddr = baseAddr;
-        block->size = size;
-        block->sizePrevious = 0;
+        block->Init(baseAddr, size, newPagesDirty());
 
         // link up contiguous blocks
         if(blocksLen && contiguous)
@@ -1866,15 +1861,6 @@ namespace MMgc
             block->sizePrevious = b->size;
             GCAssert((block - block->sizePrevious)->size == b->size);
         }
-        block->prev = NULL;
-        block->next = NULL;
-        block->committed = true;
-        block->dirty = config.useVirtualMemory ? VMPI_areNewPagesDirty() : true;
-
-#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
-        block->allocTrace = 0;
-        block->freeTrace = 0;
-#endif
 
         // if baseAddr was used for HeapBlocks split
         if((char*)newBlocks == baseAddr)
@@ -1904,32 +1890,13 @@ namespace MMgc
 
         for (uint32_t i=1; i < freeBlockSize; i++) {
             block++;
-            block->baseAddr = NULL;
-            block->size = 0;
-            block->sizePrevious = 0;
-            block->prev = NULL;
-            block->next = NULL;
-            block->committed = false;
-            block->dirty = false;
-#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
-            block->allocTrace = 0;
-            block->freeTrace = 0;
-#endif
+            block->Clear();
         }
 
         // Fill in the sentinel for the top of the heap.
         block++;
-        block->baseAddr     = NULL;
-        block->size         = 0;
+        block->Clear();
         block->sizePrevious = freeBlockSize;
-        block->prev         = NULL;
-        block->next         = NULL;
-        block->committed    = false;
-        block->dirty        = false;
-#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
-        block->allocTrace = 0;
-        block->freeTrace = 0;
-#endif
 
         AddToFreeList(newBlock);
 
