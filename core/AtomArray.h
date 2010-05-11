@@ -77,12 +77,9 @@ namespace avmplus
 
         /////////////////////////////////////////////////////
 
-        uint32 getLength() const { return m_length; };
-        void setLength(uint32 len) { m_length = len; }
-        uint32 capacity()  const
-        {
-            return (uint32)(MMgc::GC::Size(m_atoms)/sizeof(Atom));
-        }
+        uint32 getLength() const;
+        void setLength(uint32 len);
+        uint32 capacity()  const;
 
         void push (Atom a);
         void push (const AtomArray *a);
@@ -93,15 +90,11 @@ namespace avmplus
 
         void clear();
 
-        Atom operator[](uint32 index) const { return getAt(index); };
+        Atom operator[](uint32 index) const;
         Atom getAt(uint32 index) const;
 
         // ONLY USE THIS IF YOU PRE-CHECK THE LENGTH
-        Atom getAtFast(uint32 index) const
-        {
-            AvmAssert(index < m_length);
-            return m_atoms[index];
-        };
+        Atom getAtFast(uint32 index) const;
 
         /**
          * Compacts the AtomArray so it is exactly large enough
@@ -123,21 +116,11 @@ namespace avmplus
 
         const static int  kMinCapacity = 4;
 
-        void setAtInternal(uint32 index, Atom a)
-        {
-            // m_arr[index] = a;
-            WBATOM( MMgc::GC::GetGC(m_atoms), m_atoms, m_atoms + index, a);
-        }
+        void setAtInternal(uint32 index, Atom a);
 
-        void setAtoms(MMgc::GC *gc, Atom *atoms)
-        {
-            WB(gc, gc->FindBeginningFast(this), &m_atoms, atoms);
-        }
+        void setAtoms(MMgc::GC *gc, Atom *atoms);
 
-        void moveAtoms(Atom *atoms, uint32_t dstOffset, uint32_t srcOffset, size_t numAtoms)
-        {
-            MMgc::GC::GetGC(this)->movePointers((void**)atoms, dstOffset, (const void**)atoms, srcOffset, numAtoms);
-        }
+        void moveAtoms(Atom *atoms, uint32_t dstOffset, uint32_t srcOffset, size_t numAtoms);
     };
 }
 
