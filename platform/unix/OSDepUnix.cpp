@@ -50,13 +50,13 @@ namespace avmplus
     {
         uint32 interval; // in microseconds
         pthread_t thread;
-        int *addr;
+        volatile int *addr;
     };
 
     void *timerThread(void *arg)
     {
         IntWriteTimerData *data = (IntWriteTimerData*)arg;
-        int *addr = data->addr;
+        volatile int *addr = data->addr;
         uint32 interval = data->interval;
         while(data->addr)
         {
@@ -67,7 +67,7 @@ namespace avmplus
         return NULL;
     }
 
-    uintptr OSDep::startIntWriteTimer(uint32 millis, int *addr)
+    uintptr OSDep::startIntWriteTimer(uint32 millis, volatile int *addr)
     {
         pthread_t p;
         IntWriteTimerData *data = mmfx_new( IntWriteTimerData() );

@@ -52,7 +52,7 @@ namespace avmplus
     class OSDep
     {
     public:
-        static uintptr startIntWriteTimer(uint32 millis, int *addr);
+        static uintptr startIntWriteTimer(uint32 millis, volatile int *addr);
         static void stopTimer(uintptr handle);
     };
 }
