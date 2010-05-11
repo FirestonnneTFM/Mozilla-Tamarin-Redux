@@ -84,8 +84,6 @@ namespace avmplus
         return retAtom;
     }
 
-    using namespace MMgc;
-
     // n arguments are pushed on the array
     uint32 AtomArray::push(Atom *args, int argc)
     {
@@ -241,14 +239,6 @@ namespace avmplus
         setAtInternal(m_length++, a);
     }
 
-    void AtomArray::push (const AtomArray *a)
-    {
-        if (!a)
-            return;
-
-        push (a->m_atoms, a->getLength());
-    }
-
     void AtomArray::removeAt (uint32 index)
     {
         AvmAssert (m_length > 0);
@@ -285,27 +275,6 @@ namespace avmplus
         setAtInternal(index, a);
     }
 
-    void AtomArray::setAt (uint32 index, Atom a)
-    {
-        if (index > m_length)
-        {
-            AvmAssert(0);
-            return;
-        }
-
-        setAtInternal(index, a);
-    }
-
-    Atom AtomArray::getAt (uint32 index) const
-    {
-        if (index > m_length)
-        {
-            AvmAssert(0);
-            return nullObjectAtom;
-        }
-
-        return m_atoms[index];
-    }
 
     void AtomArray::clear()
     {
