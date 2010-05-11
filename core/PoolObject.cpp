@@ -350,7 +350,7 @@ namespace avmplus
             {
                 if (index >= (maxcount = constantUIntCount))
                     goto range_error;
-                const int32_t u = cpool_int[index];
+                const int32_t u = cpool_uint[index];
 #ifdef AVMPLUS_64BIT
                 value = core->uintToAtom(u);
                 AvmAssert(atomIsIntptr(value) && atomCanBeUint32(value));
