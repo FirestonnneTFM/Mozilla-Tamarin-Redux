@@ -67,6 +67,8 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 mmgc/outofmemory , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 
+# https://bugzilla.mozilla.org/show_bug.cgi?id=564527
+as3/ShellClasses/DictionarySubclass , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=564527
 
 ####################
 # force JIT -Ojit
