@@ -64,6 +64,7 @@ namespace avmplus
     public:
 
         ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32 capacity);
+        ArrayObject(VTable* ivtable, ScriptObject *delegate, Atom *argv, int argc);
         ~ArrayObject();
 
         bool hasDense() const;

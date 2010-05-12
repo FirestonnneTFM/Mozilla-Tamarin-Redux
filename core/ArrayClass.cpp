@@ -1364,13 +1364,10 @@ namespace avmplus
 
     ArrayObject* ArrayClass::newarray(Atom* argv, int argc)
     {
-        ArrayObject *inst = newArray(argc);
-
-        for (uint32 i=0; i<uint32(argc); i++) {
-            inst->setUintProperty(i, argv[i]);
-        }
-
-        return inst;
+        VTable* ivtable = this->ivtable();
+        ArrayObject *a = new (core()->GetGC(), ivtable->getExtraSize())
+            ArrayObject(ivtable, prototypePtr(), argv, argc);
+        return a;
     }
 
     ArrayObject* ArrayClass::newArray(uint32 capacity)

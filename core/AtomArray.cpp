@@ -63,6 +63,20 @@ namespace avmplus
          }
     }
 
+    AtomArray::AtomArray (Atom *argv, int argc)
+    {
+        m_length = argc;
+        if(argc > 0)
+        {
+            GC *gc = GC::GetGC(this);
+            setAtoms(gc, (Atom*) gc->Calloc(argc, sizeof(Atom), GC::kContainsPointers|GC::kZero));
+            for(int i=0; i < argc; i++) {
+                AvmCore::atomWriteBarrier_ctor(gc, m_atoms, &m_atoms[i], argv[i]);
+            }
+        }
+    }
+
+
     AtomArray::~AtomArray()
     {
         clear();

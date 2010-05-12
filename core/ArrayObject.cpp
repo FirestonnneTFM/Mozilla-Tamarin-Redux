@@ -58,6 +58,13 @@ namespace avmplus
         m_length = 0;
     }
 
+    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, Atom *argv, int argc)
+        : ScriptObject(vtable, proto, 0),
+          m_denseArr(argv, argc),
+          m_length(argc)
+    {
+    }
+
 #if 0 // Test code to determine if our array is a pure dense array
     bool ArrayObject::getDense()
     {
