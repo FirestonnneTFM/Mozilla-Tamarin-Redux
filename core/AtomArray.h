@@ -47,6 +47,7 @@ namespace avmplus
     {
     public:
         AtomArray(int initialCapacity = 0);
+        AtomArray(Atom *argv, int argc);
         ~AtomArray();
 
         /////////////////////////////////////////////////////
