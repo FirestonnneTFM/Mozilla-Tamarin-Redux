@@ -120,7 +120,7 @@ delete gc;
     MMgc::FixedAlloc *fa;
     fa=new MMgc::FixedAlloc(2048,MMgc::GCHeap::GetGCHeap());
     %%verify (int)fa->GetMaxAlloc()==0
-    %%verify (int)fa->GetNumChunks()==0
+    %%verify (int)fa->GetNumBlocks()==0
     void *data1=fa->Alloc(2048);
     %%verify MMgc::FixedAlloc::GetFixedAlloc(data1)==fa
     %%verify fa->GetBytesInUse()==DebugSize()+2048
@@ -132,7 +132,7 @@ delete gc;
     fa->Free(data1);
     %%verify (int)fa->GetItemSize()==2048
     %%verify (int)fa->GetMaxAlloc()==1
-    %%verify (int)fa->GetNumChunks()==1
+    %%verify (int)fa->GetNumBlocks()==1
     fa->Free(data2);
     delete fa;
 

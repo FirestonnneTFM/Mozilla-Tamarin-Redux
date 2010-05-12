@@ -47,6 +47,10 @@ namespace MMgc
         : m_isFixedAllocSafe(isFixedAllocSafe)
     {
         Init(itemSize, heap);
+        
+        GCAssert(m_itemSize <= GCHeap::kBlockSize);
+        GCAssert(m_itemsPerBlock <= GCHeap::kBlockSize);
+        GCAssert(m_itemSize*m_itemsPerBlock + kBlockHeadSize <= GCHeap::kBlockSize);
     }
 
     FixedAlloc::FixedAlloc()
@@ -56,17 +60,12 @@ namespace MMgc
 
     void FixedAlloc::Init(uint32_t itemSize, GCHeap* heap)
     {
-        m_heap = heap;
+        m_heap          = heap;
         m_firstBlock    = NULL;
         m_lastBlock     = NULL;
         m_firstFree     = NULL;
-        m_maxAlloc      = 0;
-
-#ifdef MMGC_MEMORY_INFO
-        itemSize += (int)DebugSize();
-#endif
-
-        m_itemSize      = itemSize;
+        m_numBlocks     = 0;
+        m_itemSize      = itemSize + (int)DebugSize();
 
 #ifdef MMGC_MEMORY_PROFILER
         m_totalAskSize = 0;
@@ -134,6 +133,9 @@ namespace MMgc
 #endif
 
 #endif
+            // Note, don't cache any state across this call; FreeChunk may temporarily 
+            // release locks held if the true type of this allocator is FixedAllocSafe.
+            
             FreeChunk(m_firstBlock);
         }
         m_firstBlock = NULL;
@@ -160,7 +162,7 @@ namespace MMgc
         FixedAlloc::InlineFreeSansHook(ptr MMGC_MEMORY_PROFILER_ARG(askSize));
     }
 
-    void FixedAlloc::GetUsageInfo(size_t& totalAsk, size_t& totalAllocated)
+    void FixedAlloc::GetUsageInfo(size_t& totalAsk, size_t& totalAllocated) const
     {
         totalAsk = totalAllocated = 0;
 
@@ -179,7 +181,7 @@ namespace MMgc
     void FixedAlloc::CreateChunk(bool canFail)
     {
         // Allocate a new block
-        m_maxAlloc += m_itemsPerBlock;
+        m_numBlocks++;
 
         vmpi_spin_lock_t *lock = NULL;
         if(m_isFixedAllocSafe) {
@@ -192,8 +194,6 @@ namespace MMgc
         if(lock != NULL)
             VMPI_lockAcquire(lock);
 
-        GCAssert(m_itemSize <= 0xffff);
-
         if(!b)
             return;
 
@@ -203,7 +203,7 @@ namespace MMgc
         b->nextItem = b->items;
         b->alloc = this;
 
-#ifdef _DEBUG
+#ifdef DEBUG
         // deleted and unused memory is 0xed'd, this is important for leak diagnostics
         VMPI_memset(b->items, 0xed, m_itemSize * m_itemsPerBlock);
 #endif
@@ -211,12 +211,10 @@ namespace MMgc
         // Link the block at the end of the list
         b->prev = m_lastBlock;
         b->next = 0;
-        if (m_lastBlock) {
+        if (m_lastBlock)
             m_lastBlock->next = b;
-        }
-        if (!m_firstBlock) {
+        if (!m_firstBlock)
             m_firstBlock = b;
-        }
         m_lastBlock = b;
 
         // Add our new ChunkBlock to the firstFree list (which should
@@ -235,20 +233,18 @@ namespace MMgc
 
     void FixedAlloc::FreeChunk(FixedBlock* b)
     {
-        m_maxAlloc -= m_itemsPerBlock;
+        m_numBlocks--;
 
         // Unlink the block from the list
-        if (b == m_firstBlock) {
+        if (b == m_firstBlock)
             m_firstBlock = b->next;
-        } else {
+        else
             b->prev->next = b->next;
-        }
 
-        if (b == m_lastBlock) {
+        if (b == m_lastBlock)
             m_lastBlock = b->prev;
-        } else {
+        else
             b->next->prev = b->prev;
-        }
 
         // If this is the first free block, pick a new one...
         if ( m_firstFree == b )
@@ -259,8 +255,12 @@ namespace MMgc
         if (b->nextFree)
             b->nextFree->prevFree = b->prevFree;
 
+        // Any lock can't be held across the call to FreeNoProfile, so if there
+        // is a lock obtain it, release it, and then reacquire it.  This works
+        // because Destroy caches no state across the call to FreeChunk.
 
         vmpi_spin_lock_t *lock = NULL;
+
         if(m_isFixedAllocSafe) {
             lock = &((FixedAllocSafe*)this)->m_spinlock;
             VMPI_lockRelease(lock);
@@ -271,16 +271,9 @@ namespace MMgc
 
         if(lock != NULL)
             VMPI_lockAcquire(lock);
-
-
     }
 
-    size_t FixedAlloc::GetItemSize() const
-    {
-        return m_itemSize - DebugSize();
-    }
-
-#ifdef _DEBUG
+#ifdef DEBUG
     bool FixedAlloc::QueryOwnsObject(const void* item)
     {
         const char* ci = (const char*) item;
@@ -295,8 +288,6 @@ namespace MMgc
     /* static */
     void FixedAlloc::VerifyFreeBlockIntegrity(const void* item, uint32_t size)
     {
-        // go through every item on the free list and make sure it wasn't written to
-        // after being poisoned.
         while(item)
         {
 #ifdef MMGC_64BIT

@@ -280,7 +280,7 @@ namespace MMgc
     {
         size_t total = GetNumLargeBlocks();
         for (int i=0; i<kNumSizeClasses; i++)
-            total += m_allocs[i].GetNumChunks();
+            total += m_allocs[i].GetNumBlocks();
         return total;
     }
 
@@ -292,8 +292,8 @@ namespace MMgc
         GCLog("[mem] FixedMalloc total %d pages inuse %d bytes ask %d bytes\n", GetTotalSize(), inUse, ask);
         for (int i=0; i<kNumSizeClasses; i++) {
             m_allocs[i].GetUsageInfo(ask, inUse);
-            if( m_allocs[i].GetNumChunks() > 0)
-                GCLog("[mem] FixedMalloc[%d] total %d pages inuse %d bytes ask %d bytes\n", kSizeClasses[i], m_allocs[i].GetNumChunks(), inUse, ask);
+            if( m_allocs[i].GetNumBlocks() > 0)
+                GCLog("[mem] FixedMalloc[%d] total %d pages inuse %d bytes ask %d bytes\n", kSizeClasses[i], m_allocs[i].GetNumBlocks(), inUse, ask);
         }
         GCLog("[mem] FixedMalloc[large] total %d pages\n", GetNumLargeBlocks());
     }

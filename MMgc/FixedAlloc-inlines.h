@@ -40,11 +40,29 @@
 #ifndef __FixedAlloc_inlines__
 #define __FixedAlloc_inlines__
 
-// Inline methods for FixedAlloc, FixedAllocSafe, and FastAllocator
+// Inline methods for FixedAlloc, FixedAllocSafe, and FastAllocator.
 
 namespace MMgc
 {
-    REALLY_INLINE size_t FixedAlloc::GetBytesInUse()
+    /*static*/
+    REALLY_INLINE FixedAlloc *FixedAlloc::GetFixedAlloc(void *item)
+    {
+        return GetFixedBlock(item)->alloc;
+    }
+    
+    /*static*/
+    REALLY_INLINE FixedAlloc::FixedBlock* FixedAlloc::GetFixedBlock(const void *item)
+    {
+        return (FixedBlock*) ((uintptr_t)item & ~((uintptr_t)GCHeap::kBlockSize-1));
+    }
+    
+    /*static*/
+    REALLY_INLINE size_t FixedAlloc::Size(const void *item)
+    {
+        return GetFixedBlock(item)->size;
+    }
+    
+    REALLY_INLINE size_t FixedAlloc::GetBytesInUse() const
     {
         size_t totalAskSize, totalAllocated;
         GetUsageInfo(totalAskSize, totalAllocated);
@@ -53,18 +71,12 @@ namespace MMgc
 
     REALLY_INLINE size_t FixedAlloc::GetMaxAlloc() const
     {
-        return m_maxAlloc;
+        return m_numBlocks / GCHeap::kBlockSize;
     }
 
-    REALLY_INLINE size_t FixedAlloc::GetNumChunks()
+    REALLY_INLINE size_t FixedAlloc::GetNumBlocks() const
     {
-        return m_maxAlloc / m_itemsPerBlock;
-    }
-
-    /*static*/
-    REALLY_INLINE FixedAlloc *FixedAlloc::GetFixedAlloc(void *item)
-    {
-        return GetFixedBlock(item)->alloc;
+        return m_numBlocks;
     }
 
     REALLY_INLINE bool FixedAlloc::IsFull(FixedBlock *b) const
@@ -72,16 +84,9 @@ namespace MMgc
         return b->numAlloc == m_itemsPerBlock;
     }
 
-    /*static*/
-    REALLY_INLINE FixedAlloc::FixedBlock* FixedAlloc::GetFixedBlock(const void *item)
+    REALLY_INLINE size_t FixedAlloc::GetItemSize() const
     {
-        return (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-    }
-
-    /*static*/
-    REALLY_INLINE size_t FixedAlloc::Size(const void *item)
-    {
-        return GetFixedBlock(item)->size;
+        return m_itemSize - DebugSize();
     }
 
 #ifdef MMGC_HOOKS
@@ -89,7 +94,7 @@ namespace MMgc
     REALLY_INLINE void FixedAlloc::InlineAllocHook(size_t size, void *item)
     {
         if(m_heap->HooksEnabled() && item != NULL) {
-            FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
+            FixedBlock *b = FixedAlloc::GetFixedBlock(item);
             m_heap->AllocHook(item, size, b->size - DebugSize());
         }
     }
@@ -97,8 +102,9 @@ namespace MMgc
     /*static*/
     REALLY_INLINE void FixedAlloc::InlineFreeHook(void *item MMGC_MEMORY_PROFILER_ARG(size_t& askSize))
     {
-        FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
+        FixedBlock *b = FixedAlloc::GetFixedBlock(item);
         GCHeap *heap = b->alloc->m_heap;
+
         if(heap->HooksEnabled()) {
 #ifdef MMGC_MEMORY_PROFILER
             if(heap->GetProfiler())
@@ -145,6 +151,7 @@ namespace MMgc
         GCAssertMsg(m_heap->IsStackEntered() || (opts&kCanFail) != 0, "MMGC_ENTER must be on the stack");
         GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
+        // Obtain a non-full block if there isn't one.
         if(!m_firstFree) {
             bool canFail = (opts & kCanFail) != 0;
             CreateChunk(canFail);
@@ -163,34 +170,33 @@ namespace MMgc
 
         b->numAlloc++;
 
-        // Consume the free list if available
+        // Take the object from the free list if it is not empty
         void *item = NULL;
         if (b->firstFree) {
             item = b->firstFree;
             b->firstFree = *((void**)item);
-            // assert that the freelist hasn't been tampered with (by writing to the first 4 bytes)
+            // Assert that the freelist hasn't been tampered with (by writing to the first 4 bytes).
             GCAssert(b->firstFree == NULL ||
                     (b->firstFree >= b->items &&
                     (((uintptr_t)b->firstFree - (uintptr_t)b->items) % b->size) == 0 &&
-                    (uintptr_t) b->firstFree < ((uintptr_t)b & ~0xfff) + GCHeap::kBlockSize));
+                     (uintptr_t) b->firstFree < ((uintptr_t)b & ~((uintptr_t)GCHeap::kBlockSize-1)) + GCHeap::kBlockSize));
 #ifdef MMGC_MEMORY_INFO
-            //check for writes on deleted memory
+            // Check for writes on deleted memory.
             VerifyFreeBlockIntegrity(item, b->size);
 #endif
-        } else {
-            // Take next item from end of block
+        }
+        else {
+            // Otherwise take the object from the end of the block.
             item = b->nextItem;
             GCAssert(item != 0);
-            if(!IsFull(b)) {
-                // There are more items at the end of the block
+            if(!IsFull(b)) // There are more items at the end of the block
                 b->nextItem = (void *) ((uintptr_t)item+m_itemSize);
-            } else {
+            else
                 b->nextItem = 0;
-            }
         }
 
-        // If we're out of free items, be sure to remove ourselves from the
-        // list of blocks with free items.
+        // If the block has no more free items, be sure to remove it from the list of
+        // blocks with free items.
         if (IsFull(b)) {
             m_firstFree = b->nextFree;
             b->nextFree = NULL;
@@ -202,12 +208,11 @@ namespace MMgc
 
         item = GetUserPointer(item);
 
-#ifdef _DEBUG
-        // fresh memory poisoning
+#ifdef DEBUG
+        // Fresh memory poisoning.
         if((opts & kZero) == 0)
             memset(item, 0xfa, b->size - DebugSize());
 #endif
-
         if((opts & kZero) != 0)
             memset(item, 0, b->size - DebugSize());
 
@@ -222,8 +227,9 @@ namespace MMgc
     /*static*/
     REALLY_INLINE void FixedAlloc::InlineFreeSansHook(void *item MMGC_MEMORY_PROFILER_ARG(size_t askSize))
     {
-        FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-        // FIXME: IsAddressInHeap acquires the heap lock which we can't do safely here
+        FixedBlock *b = (FixedBlock*) FixedAlloc::GetFixedBlock(item);
+
+        // IsAddressInHeap acquires the heap lock which we can't do safely here
         //      GCAssertMsg(b->alloc->m_heap->IsAddressInHeap(item), "Bogus pointer passed to free");
 
 #ifdef MMGC_MEMORY_PROFILER
@@ -234,11 +240,11 @@ namespace MMgc
 
         item = GetRealPointer(item);
 
-        // Add this item to the free list
+        // Add the item to b's free list.
         *((void**)item) = b->firstFree;
         b->firstFree = item;
 
-        // We were full but now we have a free spot, add us to the free block list.
+        // 'b' was full but now it has a free spot, add it to the free block list.
         if (b->numAlloc == b->alloc->m_itemsPerBlock)
         {
             GCAssert(!b->nextFree && !b->prevFree);
@@ -247,8 +253,8 @@ namespace MMgc
                 b->alloc->m_firstFree->prevFree = b;
             b->alloc->m_firstFree = b;
         }
-#ifdef _DEBUG
-        else // we should already be on the free list
+#ifdef DEBUG
+        else // The item should already be on b's free list
         {
             GCAssert ((b == b->alloc->m_firstFree) || b->prevFree);
         }
@@ -256,18 +262,9 @@ namespace MMgc
 
         b->numAlloc--;
 
-        if(b->numAlloc == 0) {
+        if(b->numAlloc == 0)
             b->alloc->FreeChunk(b);
-        }
     }
-
-#ifdef _DEBUG
-    REALLY_INLINE bool FixedAllocSafe::QueryOwnsObject(const void* item)
-    {
-        MMGC_LOCK(m_spinlock);
-        return FixedAlloc::QueryOwnsObject(item);
-    }
-#endif
 
     /*static*/
     REALLY_INLINE FixedAllocSafe* FixedAllocSafe::GetFixedAllocSafe(void *item)
@@ -287,6 +284,13 @@ namespace MMgc
         FixedAlloc::Free(item);
     }
 
+#ifdef DEBUG
+    REALLY_INLINE bool FixedAllocSafe::QueryOwnsObject(const void* item)
+    {
+        MMGC_LOCK(m_spinlock);
+        return FixedAlloc::QueryOwnsObject(item);
+    }
+#endif
 }
 
 #endif /* __FixedAlloc_inlines__ */
