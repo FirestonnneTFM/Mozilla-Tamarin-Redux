@@ -57,6 +57,7 @@ namespace avmplus
         virtual void setAtomProperty(Atom name, Atom value);
 
         virtual Atom nextName(int index);
+        virtual Atom nextValue(int index);
         virtual int nextNameIndex(int index);
 
         bool isUsingWeakKeys() const { return getHeapHashtable()->weakKeys(); }

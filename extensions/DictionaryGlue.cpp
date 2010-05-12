@@ -151,9 +151,13 @@ namespace avmplus
 
     Atom DictionaryObject::nextName(int index)
     {
-        Atom k = ScriptObject::nextName(index);
+        AvmAssert(index > 0);
 
-        if (AvmCore::isGenericObject(k) && getHeapHashtable()->weakKeys())
+        HeapHashtable* hht = getHeapHashtable();
+        Atom m = hht->keyAt(index);
+        Atom k = AvmCore::isNullOrUndefined(m) ? nullStringAtom : m;
+
+        if (AvmCore::isGenericObject(k) && hht->weakKeys())
         {
             GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(k);
             union {
@@ -171,6 +175,17 @@ namespace avmplus
         }
 
         return k;
+    }
+
+    Atom DictionaryObject::nextValue(int index)
+    {
+        AvmAssert(index > 0);
+
+        HeapHashtable* hht = getHeapHashtable();
+        Atom m = hht->keyAt(index);
+        if (AvmCore::isNullOrUndefined(m))
+            return nullStringAtom;
+        return hht->valueAt(index);
     }
 
     int DictionaryObject::nextNameIndex(int index)
