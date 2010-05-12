@@ -438,14 +438,6 @@ class argo:
     linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     linux_compile_factory.addStep(BuildShellCommand(
-                command=['./build-release-cov.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting linux code coverage release build...',
-                descriptionDone='finished linux code coverage release build.',
-                name="Build_Release_cov",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    linux_compile_factory.addStep(BuildShellCommand(
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
@@ -1296,14 +1288,6 @@ class argo:
     linux_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     linux_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     linux_test_factory.addStep(test_differential)
-    linux_test_factory.addStep(TestSuiteShellCommand(
-                command=['./run-tests-release-cov.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run release code coverage vmtests...',
-                descriptionDone='finished release code coverage vmtests.',
-                name="Testsuite_Release-cov",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
     linux_test_factory.addStep(util_process_clean)
     linux_test_factory.addStep(util_clean_buildsdir)
 
@@ -1893,6 +1877,7 @@ class argo:
     linux_deep_factory.addStep(compile_generic(name="Release-system-malloc", shellname="avmshell_sysmalloc", args="--enable-shell --enable-use-system-malloc", upload="true"))
     linux_deep_factory.addStep(test_generic(name="Release-system-malloc", shellname="avmshell_sysmalloc", vmargs="", config="x86-lnx-tvm-release-use-system-malloc", scriptargs=""))
     linux_deep_factory.addStep(test_misc)
+    linux_deep_factory.addStep(deep_codecoverage)
     linux_deep_factory.addStep(compile_generic(name="Release-api", shellname="avmshell_api", args="--enable-shell --enable-api-versioning", upload="true"))
     linux_deep_factory.addStep(test_generic(name="Release-api", shellname="avmshell_api", vmargs="", config="", scriptargs="versioning/"))
     linux_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true"))
