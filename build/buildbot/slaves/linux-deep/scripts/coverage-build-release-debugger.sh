@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -37,19 +37,51 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=linux
+. ./environment.sh
 
 
-## Used by make in the build scripts
-export make_opt="-j2"
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
+
+
+
+##
+# Update the version string
+##
+. ../all/util-update-version.sh
+
+
+# Need to have bullseye at the start of the PATH
+export PATH=$bullseyedir:$PATH
+export COVFILE=$buildsdir/${change}-${changeid}/$platform/release_debugger.cov
+# MUST set COVSRCDIR otherwise some file will be relative and other absolute
+# Seems like cpp files are relative and header files are absolute, this was
+# causing some problems with viewing coverage based on directory, since there
+# would be 2 directories, one relative and one absolute
+export COVSRCDIR=/
+
+# Make sure that the directory structure is created, bullseye will fail otherwise
+mkdir -p $buildsdir/${change}-${changeid}/$platform
+
+# Remove the generated coverage file if it already exists
+test -f $COVFILE && rm -f $COVFILE
+
+# Turn on bullseye code coverage
+$bullseyedir/cov01 --on
+
+##
+# Execute the common build script.
+# Just need to pass in a dummy additional args string ($2) and then the 
+# name of the executable that we want ($3)
+##
+cd $basedir/build/buildbot/slaves/scripts/
+../all/compile-generic.sh $change "--enable-shell --enable-debugger" ${build_shell_release_debugger_cov}
+
+
 

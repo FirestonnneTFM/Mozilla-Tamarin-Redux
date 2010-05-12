@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -38,18 +38,47 @@
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 ##
-# Set any variables that my be needed higher up the chain
+# Bring in the environment variables
 ##
-export shell_extension=
+. ./environment.sh
+
 
 ##
-# Bring in the BRANCH environment variables
+# Calculate the change number and change id
 ##
-. ../all/environment.sh
-
-export platform=linux
+. ../all/util-calculate-change.sh $1
 
 
-## Used by make in the build scripts
-export make_opt="-j2"
+
+# Release
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_cov || {
+  echo "message: Release Failed"
+  fail=1
+}
+
+# Release_Debugger
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger_cov || {
+  echo "message: Release_Debugger Failed"
+  fail=1
+}
+
+# Debug
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_cov || {
+  echo "message: Debug Failed"
+  fail=1
+}
+
+#Debug_Debugger
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger_cov || {
+  echo "message: Debug_Debugger Failed"
+  fail=1
+}
+
+
+if test "${fail}" = 1; then
+   echo Failing the build
+   exit 1
+fi
+
+
 

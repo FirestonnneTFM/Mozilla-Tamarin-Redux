@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -49,6 +49,7 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+
 ##
 # Download the latest asc.jar if it does not exist
 ##
@@ -73,8 +74,8 @@ echo ""
 export ASC=$basedir/utils/asc.jar
 export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
-export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_release_debugger}_cov
-export COVFILE=$buildsdir/avm.cov
+export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_release_cov}
+export COVFILE=$buildsdir/${change}-${changeid}/$platform/release.cov
 
 echo AVM=$AVM
 test -f $AVM || {
@@ -94,44 +95,25 @@ echo "`$AVM -Dversion`"
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean.sh
 
-$bullseyedir/covclear
+cd ${basedir}/test/acceptance
 
-cd $basedir/test/acceptance
+# If available, use windows python (instead of cygwin python)
+# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
+# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
+if [ -z "$PYTHONWIN" ]
+then
+    py=python
+else
+    py=$PYTHONWIN
+fi
 
-test "$silent" = "true" && {
-    # Note that log files are not uploaded to asteam as any failures would have
-    # occured in previous steps
-    silentoptions="--summaryonly"
-}
 
+echo "message: $py ./runtests.py --config=x86-lnx-tvm-cov-release-Ojit   --notimecheck"
+$py ./runtests.py --config=x86-lnx-tvm-cov-release-Ojit --vmargs=${jit}   --notimecheck
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py  --notimecheck ${silentoptions}"
-python ./runtests.py --config=x86-lnx-tvm-cov-releasedebugger  --notimecheck ${silentoptions}
-$bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Dinterp   --notimecheck ${silentoptions}"
-python ./runtests.py --vmargs=-Dinterp --config=x86-lnx-tvm-cov-releasedebugger-Dinterp  --notimecheck ${silentoptions}
-$bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Ojit   --notimecheck ${silentoptions}"
-python ./runtests.py --vmargs=-Ojit --config=x86-lnx-tvm-cov-releasedebugger-Ojit  --notimecheck ${silentoptions}
-$bullseyedir/covdir -q
-
-fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
-cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
-
-##
-# Post coverage data to ASTEAM
-##
-. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
-
-
-echo "message: total function coverage:           $fnpct"
-echo "message: total condition/decision coverage: $cdpct"
-echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/avm.cov code coverage data file avm.cov"
 
 ##
 # Ensure that the system is torn down and clean
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
-
-

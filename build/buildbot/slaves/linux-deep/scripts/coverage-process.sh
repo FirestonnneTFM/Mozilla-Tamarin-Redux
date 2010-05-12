@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -37,19 +37,38 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=linux
+. ./environment.sh
 
 
-## Used by make in the build scripts
-export make_opt="-j2"
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
+
+
+export COVFILE=$buildsdir/${change}-${changeid}/$platform/avm.cov
+test -f $COVFILE && rm -f $COVFILE
+
+cd $buildsdir/${change}-${changeid}/$platform/
+files=`ls *.cov`
+
+$bullseyedir/covmerge -c $files
+
+
+$bullseyedir/covdir -q
+fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
+cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
+
+
+
+echo "message: total function coverage:           $fnpct"
+echo "message: total condition/decision coverage: $cdpct"
+
+. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
+
+echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/avm.cov code coverage data file avm.cov"
 

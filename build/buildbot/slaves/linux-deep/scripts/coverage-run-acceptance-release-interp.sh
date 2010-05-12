@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -37,6 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
@@ -50,31 +51,68 @@
 
 
 ##
-# Upload the common builds
+# Download the latest asc.jar if it does not exist
 ##
-. ../all/build-check.sh
-
-
-fail=0
-
-# Release_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm || {
-  echo "message: Release_arm-linux Failed"
-  fail=1
-}
-
-# Debug_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm_d || {
-  echo "message: Debug_arm-linux Failed"
-  fail=1
-}
-
-if test "${fail}" = 1; then
-   echo Failing the build
-   exit 1
+if [ ! -e "$basedir/utils/asc.jar" ]; then
+    echo "Download asc.jar"
+    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of asc.jar failed"
+        rm -f $basedir/utils/asc.jar
+        exit 1
+    }
 fi
 
+echo ""
+echo "Missing media will be compiled using the following ASC version:"
+echo "`java -jar $basedir/utils/asc.jar`"
+echo ""
 
 
 
+export ASC=$basedir/utils/asc.jar
+export BUILTINABC=$basedir/core/$builtinABC
+export SHELLABC=$basedir/shell/$shellABC
+export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_release_cov}
+export COVFILE=$buildsdir/${change}-${changeid}/$platform/release.cov
 
+echo AVM=$AVM
+test -f $AVM || {
+  echo "ERROR: $AVM not found"
+  exit 1
+}
+
+echo AVM=$AVM
+echo "`$AVM`"
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
+
+
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
+cd ${basedir}/test/acceptance
+
+# If available, use windows python (instead of cygwin python)
+# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
+# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
+if [ -z "$PYTHONWIN" ]
+then
+    py=python
+else
+    py=$PYTHONWIN
+fi
+
+echo "message: $py ./runtests.py --config=x86-lnx-tvm-cov-release-Dinterp   --notimecheck"
+$py ./runtests.py --config=x86-lnx-tvm-cov-release-Dinterp --vmargs=${interp}   --notimecheck
+$bullseyedir/covdir -q
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh

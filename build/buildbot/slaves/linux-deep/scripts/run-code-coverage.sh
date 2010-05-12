@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -37,19 +37,39 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
+. ./environment.sh
 
-export platform=linux
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
+
+set -x  # activate debugging
+../all/build-builtinabc.sh $change:$changeid
+./coverage-build-release.sh $change:$changeid
+./coverage-build-debug.sh $change:$changeid
+./coverage-build-release-debugger.sh $change:$changeid
+./coverage-build-debug-debugger.sh $change:$changeid
 
 
-## Used by make in the build scripts
-export make_opt="-j2"
+./coverage-build-check.sh $change:$changeid
+res=$?
+test "$res" = "0" || {
+    echo "Build check failed"
+    exit 1
+}
 
+../all/download-acceptance-tests.sh $change:$changeid
+./coverage-run-selftest.sh $change:$changeid
+./coverage-run-acceptance-release.sh $change:$changeid
+./coverage-run-acceptance-release-interp.sh $change:$changeid
+./coverage-run-acceptance-release-jit.sh $change:$changeid
+./coverage-run-acceptance-release-debugger.sh $change:$changeid
+./coverage-run-acceptance-debug.sh $change:$changeid
+./coverage-run-acceptance-debug-debugger.sh $change:$changeid
+
+./coverage-process.sh
