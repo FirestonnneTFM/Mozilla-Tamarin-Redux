@@ -60,18 +60,15 @@ namespace avmplus
         static const uint32 NO_LOW_HTENTRY  = 0;
         uint32 m_lowHTentry; // lowest numeric entry in our hash table
         uint32 m_length;
+
     public:
 
         ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32 capacity);
-        ~ArrayObject()
-        {
-            m_lowHTentry = 0;
-            m_length = 0;
-        }
+        ~ArrayObject();
 
-        bool hasDense() const { return (m_denseArr.getLength() != 0); };
-        bool isSimpleDense() const { return (m_denseArr.getLength() == m_length); };
-        uint32 getDenseLength() const { return m_denseArr.getLength(); }
+        bool hasDense() const;
+        bool isSimpleDense() const;
+        uint32 getDenseLength() const;
 
         // Non-virtual members for ActionScript method implementation
         uint32 get_length() const;
@@ -87,25 +84,13 @@ namespace avmplus
         virtual bool hasAtomProperty(Atom name) const;
 
         // Faster versions that takes direct indices
-        virtual Atom getUintProperty(uint32 index) const
-        {
-             return _getUintProperty(index);
-        }
-        virtual void setUintProperty(uint32 index, Atom value)
-        {
-            _setUintProperty(index, value);
-        }
+        virtual Atom getUintProperty(uint32 index) const;
+        virtual void setUintProperty(uint32 index, Atom value);
         virtual bool delUintProperty(uint32 index);
         virtual bool hasUintProperty(uint32 i) const;
 
-        inline Atom getIntProperty(int index) const
-        {
-            return _getIntProperty(index);
-        }
-        inline void setIntProperty(int index, Atom value)
-        {
-            _setIntProperty(index, value);
-        }
+        Atom getIntProperty(int index) const;
+        void setIntProperty(int index, Atom value);
 
         virtual bool getAtomPropertyIsEnumerable(Atom name) const;
 
@@ -124,9 +109,9 @@ namespace avmplus
         uint32 AS3_push(Atom *args, int argc); // push(...args):uint
         uint32 AS3_unshift(Atom *args, int argc); // unshift(...args):
 
-        inline Atom pop() { return AS3_pop(); }
-        inline uint32 push(Atom *args, int argc) { return AS3_push(args, argc); }
-        inline uint32 unshift(Atom *args, int argc) { return AS3_unshift(args, argc); }
+        Atom pop();
+        uint32 push(Atom *args, int argc);
+        uint32 unshift(Atom *args, int argc);
 
         void checkForSparseToDenseConversion();
 
