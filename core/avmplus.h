@@ -336,6 +336,7 @@ namespace avmplus
 // inline implementations
 #include "AbcEnv-inlines.h"
 #include "AbcParser-inlines.h"
+#include "ArrayObject-inlines.h"
 #include "atom-inlines.h"
 #include "AtomArray-inlines.h"
 #include "AvmCore-inlines.h"
