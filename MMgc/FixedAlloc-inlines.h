@@ -111,7 +111,7 @@ namespace MMgc
                 askSize = heap->GetProfiler()->GetAskSize(item);
 #endif
             heap->FinalizeHook(item, b->size - DebugSize());
-            heap->FreeHook(item, b->size - DebugSize(), 0xed);
+            heap->FreeHook(item, b->size - DebugSize(), uint8_t(GCHeap::FXFreedPoison));
         }
     }
 
@@ -211,7 +211,7 @@ namespace MMgc
 #ifdef DEBUG
         // Fresh memory poisoning.
         if((opts & kZero) == 0)
-            memset(item, 0xfa, b->size - DebugSize());
+            memset(item, uint8_t(GCHeap::FXFreshPoison), b->size - DebugSize());
 #endif
         if((opts & kZero) != 0)
             memset(item, 0, b->size - DebugSize());

@@ -175,7 +175,8 @@ namespace MMgc
      *    placed on a free list).
      *  - In debug builds its value is zero iff the object's destructor has been run and the
      *    object has not yet been put on the free list or been reallocated.  Once it's been
-     *    put on the free list the composite word is a cookie, 0xCACACACA or 0xBABABABA.
+     *    put on the free list the composite word is a cookie: GCHeap::GCFreedPoison or
+     *    GCHeap::GCSweptPoison.
      *
      * The RC operations check whether the object is free - and if it is, then the operations
      * have no effect.  This is useful because of the current finalization semantics:
@@ -229,6 +230,12 @@ namespace MMgc
             return (composite & STACK_PIN) != 0;
         }
 
+#ifdef _DEBUG
+        REALLY_INLINE bool IsGCPoisoned() {
+            return composite == uint32_t(GCHeap::GCFreedPoison) || composite == uint32_t(GCHeap::GCSweptPoison);
+        }
+#endif
+        
         /**
          * Explicitly pin the object, protecting it from ZCT reaping.  The pin
          * flag /will/ be cleared if the object is subsequently added to the
@@ -239,7 +246,7 @@ namespace MMgc
         {
 #ifdef _DEBUG
             // This is a deleted object so ignore it.
-            if(composite == 0xcacacaca || composite == 0xbabababa)
+            if(IsGCPoisoned())
                 return;
 #endif
             // This is a deleted/free object so ignore it.
@@ -259,7 +266,7 @@ namespace MMgc
         {
 #ifdef _DEBUG
             // This is a deleted object so ignore it.
-            if(composite == 0xcacacaca || composite == 0xbabababa)
+            if(IsGCPoisoned())
                 return;
 #endif
             // This is a deleted/free object so ignore it.
@@ -295,7 +302,7 @@ namespace MMgc
         {
 #ifdef _DEBUG
             // This is a deleted object so ignore it.
-            if(composite == 0xcacacaca || composite == 0xbabababa)
+            if(IsGCPoisoned())
                 return;
 #endif
             // This is a deleted/free object so ignore it.
@@ -322,7 +329,7 @@ namespace MMgc
         {
 #ifdef _DEBUG
             // This is a deleted object so ignore it.
-            if(composite == 0xcacacaca || composite == 0xbabababa)
+            if(IsGCPoisoned())
                 return;
 #endif
             // This is a deleted/free object so ignore it.
@@ -367,7 +374,7 @@ namespace MMgc
         {
 #ifdef _DEBUG
             // This is a deleted object so ignore it.
-            if(composite == 0xcacacaca || composite == 0xbabababa)
+            if(IsGCPoisoned())
                 return;
 #endif
             // This is a deleted/free object so ignore it.

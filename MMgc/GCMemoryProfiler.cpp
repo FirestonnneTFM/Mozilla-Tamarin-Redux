@@ -264,7 +264,7 @@ namespace MMgc
         info->deleteTrace = GetStackTraceLocked();
 
 #if 0
-        if(poison == 0xba) {
+        if(poison == uint8_t(GCHeap::GCSweptPoison)) {
             trace->sweepSize += size;
             trace->sweepCount++;
         }
@@ -739,7 +739,7 @@ namespace MMgc
      * first four bytes == size
      * second four bytes == stack trace index
      * size data bytes
-     * 4 bytes == 0xdeadbeef
+     * 4 bytes == GCHeap::GCEndOfObjectPoison
      * last 4/8 bytes - writeback pointer
      *
      * Its important that the stack trace index is not stored in the first 4 bytes,
@@ -757,7 +757,7 @@ namespace MMgc
         *mem++ = (int32_t)size;
         *mem++ = 0;
         mem += (size>>2);
-        *mem++ = 0xdeadbeef;
+        *mem++ = int32_t(GCHeap::GCEndOfObjectPoison);
         *mem = 0;
     #ifdef MMGC_64BIT
         *(mem+1) = 0;
@@ -776,7 +776,7 @@ namespace MMgc
             if(size == 0)
                 return;
 
-            if (*endMarker != 0xdeadbeef)
+            if (*endMarker != uint32_t(GCHeap::GCEndOfObjectPoison))
             {
                 // if you get here, you have a buffer overrun.  The stack trace about to
                 // be printed tells you where the block was allocated from.  To find the

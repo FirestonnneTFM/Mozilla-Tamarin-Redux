@@ -238,7 +238,7 @@ namespace MMgc
 #ifdef DEBUG
             // Fresh memory poisoning
             if((flags & kZero) == 0)
-                memset(item, 0xfa, size - DebugSize());
+                memset(item, uint8_t(GCHeap::FXFreshPoison), size - DebugSize());
 
 #ifndef AVMPLUS_SAMPLER
             // Enregister the large object
@@ -260,7 +260,7 @@ namespace MMgc
         if(m_heap->HooksEnabled())
         {
             m_heap->FinalizeHook(item, Size(item));
-            m_heap->FreeHook(item, Size(item), 0xfa);
+            m_heap->FreeHook(item, Size(item), uint8_t(GCHeap::FXFreedPoison));
         }
 #endif
         m_heap->FreeNoProfile(GetRealPointer(item));
