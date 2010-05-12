@@ -105,7 +105,7 @@ namespace avmplus
 
         // slow path to trigger write barrier
         for(int i=0; i < argc; i++) {
-            setAtInternal(m_length++, a);
+            setAtInternal(m_length++, args[i]);
         }
 
         return argc;
