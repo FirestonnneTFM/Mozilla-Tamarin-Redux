@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -49,9 +49,7 @@
 ##
 . ../all/util-calculate-change.sh $1
 
-# silence output if silent=true (function defined in environment.sh)
-logfile=build-release-cov.log
-beginSilent
+
 
 ##
 # Update the version string
@@ -59,72 +57,31 @@ beginSilent
 . ../all/util-update-version.sh
 
 
-##
-# Make sure that there are no left over directories from previous compile
-##
-cd $basedir
-test -d objdir-releasedebugger-cov && {
-    echo Remove directory $basedir/objdir-releasedebugger-cov
-    rm -rf $basedir/objdir-releasedebugger-cov
-}
-
-# zip source code for use with viewing code coverage results
-files=`find . -name "*.cpp" -o -name "*.h"`
-zip -q ${branch}-src.zip $files
-
-mkdir objdir-releasedebugger-cov
-
-cd objdir-releasedebugger-cov
-
+# Need to have bullseye at the start of the PATH
 export PATH=$bullseyedir:$PATH
-export COVFILE=${buildsdir}/avm.cov
+export COVFILE=$buildsdir/${change}-${changeid}/$platform/debug_debugger.cov
+# MUST set COVSRCDIR otherwise some file will be relative and other absolute
+# Seems like cpp files are relative and header files are absolute, this was
+# causing some problems with viewing coverage based on directory, since there
+# would be 2 directories, one relative and one absolute
+export COVSRCDIR=/
+
+# Make sure that the directory structure is created, bullseye will fail otherwise
+mkdir -p $buildsdir/${change}-${changeid}/$platform
+
+# Remove the generated coverage file if it already exists
 test -f $COVFILE && rm -f $COVFILE
 
+# Turn on bullseye code coverage
 $bullseyedir/cov01 --on
 
-python ../configure.py --enable-shell --enable-debugger
-
-topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
-CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
-echo ""
-echo compiler version: 
-eval ${CXX} --version
-echo ""
-echo ""
-
-
-make $make_opt clean
-make $make_opt 
-res=$?
-
-test "$res" = "0" || {
-    echo "build failed return value $res"
-}
-test -f shell/${shell_release} || {
-    echo "avmshell is missing, Release Debugger build failed"
-    cd $basedir/core
-    hg revert avmplusVersion.h
-    endSilent
-    exit 1
-}
-
-mkdir -p $buildsdir/${change}-${changeid}/$platform
-cp shell/${shell_release} $buildsdir/${change}-${changeid}/$platform/${shell_release_debugger}_cov
-chmod 777 $buildsdir/${change}-${changeid}/$platform/${shell_release_debugger}_cov
-
-
 ##
-# Post coverage data to ASTEAM
+# Execute the common build script.
+# Just need to pass in a dummy additional args string ($2) and then the 
+# name of the executable that we want ($3)
 ##
-mv ../${branch}-src.zip .
-${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh ${branch}-src.zip $ftp_asteam/$branch/${change}-${changeid}/$platform/${branch}-src.zip
+cd $basedir/build/buildbot/slaves/scripts/
+../all/compile-generic.sh $change "--enable-shell --enable-debug --enable-debugger" ${build_shell_debug_debugger_cov}
 
-cd $basedir/core
-hg revert avmplusVersion.h
 
-echo "build succeeded"
 
-endSilent
-
-#rm -rf $basedir/objdir-releasedebugger-cov
-exit 0
