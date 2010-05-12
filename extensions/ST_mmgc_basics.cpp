@@ -184,7 +184,7 @@ void ST_mmgc_basics::test5() {
 #line 122 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetMaxAlloc()==0, "(int)fa->GetMaxAlloc()==0", __FILE__, __LINE__);
 #line 123 "ST_mmgc_basics.st"
-verifyPass((int)fa->GetNumChunks()==0, "(int)fa->GetNumChunks()==0", __FILE__, __LINE__);
+verifyPass((int)fa->GetNumBlocks()==0, "(int)fa->GetNumBlocks()==0", __FILE__, __LINE__);
     void *data1=fa->Alloc(2048);
 #line 125 "ST_mmgc_basics.st"
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data1)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data1)==fa", __FILE__, __LINE__);
@@ -204,7 +204,7 @@ verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE_
 #line 134 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetMaxAlloc()==1, "(int)fa->GetMaxAlloc()==1", __FILE__, __LINE__);
 #line 135 "ST_mmgc_basics.st"
-verifyPass((int)fa->GetNumChunks()==1, "(int)fa->GetNumChunks()==1", __FILE__, __LINE__);
+verifyPass((int)fa->GetNumBlocks()==1, "(int)fa->GetNumBlocks()==1", __FILE__, __LINE__);
     fa->Free(data2);
     delete fa;
 
