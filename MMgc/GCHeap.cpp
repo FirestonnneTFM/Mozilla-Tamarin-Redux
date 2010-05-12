@@ -297,11 +297,19 @@ namespace MMgc
 
         FreeAll();
 
-        //  Acquire all the locks before destroying them to make absolutely sure we're the last consumers.
+        // Acquire all the locks before destroying them to make reasonably 
+        // sure we're the last consumers.  This is probably not exactly
+        // right, see https://bugzilla.mozilla.org/show_bug.cgi?id=548347
+        // and linked bugs for a discussion.  Note we can't acquire these
+        // much higher up because we get into situations where GCHeap code
+        // will want to lock these locks, but they are already locked.
+        
         VMPI_lockAcquire(&m_spinlock);
+        VMPI_lockRelease(&m_spinlock);
         VMPI_lockDestroy(&m_spinlock);
-
+        
         VMPI_lockAcquire(&gclog_spinlock);
+        VMPI_lockRelease(&gclog_spinlock);
         VMPI_lockDestroy(&gclog_spinlock);
 
         if(enterFrame)
