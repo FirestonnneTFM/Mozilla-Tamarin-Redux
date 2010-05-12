@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -37,19 +37,34 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=linux
+. ./environment.sh
 
 
-## Used by make in the build scripts
-export make_opt="-j2"
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
 
+
+export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_release_cov}
+export COVFILE=$buildsdir/${change}-${changeid}/$platform/selftest.cov
+
+
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
+$AVM -Dselftest
+$bullseyedir/covdir -q
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
