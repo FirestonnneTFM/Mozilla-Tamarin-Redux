@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -48,6 +48,18 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=linux
+
+export shell_release_cov=avmshell_cov
+export shell_release_debugger_cov=avmshell_s_cov
+export shell_debug_cov=avmshell_d_cov
+export shell_debug_debugger_cov=avmshell_sd_cov
+
+export build_shell_release_cov=avmshell_cov
+export build_shell_release_debugger_cov=avmshell_s_cov
+export build_shell_debug_cov=avmshell_d_cov
+export build_shell_debug_debugger_cov=avmshell_sd_cov
+
+bullseyedir=/home/build/tools/bullseye/bin
 
 ## Used by make in the build scripts
 export make_opt="-j2"
