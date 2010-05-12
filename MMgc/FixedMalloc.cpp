@@ -43,12 +43,12 @@
 namespace MMgc
 {
     // kSizeClassIndex[] is an array that lets us quickly determine the allocator
-    // to use for a given size, without division. A given allocation is rounded
+    // to use for a given size, without division.  A given allocation is rounded
     // up to the nearest multiple of 8, then downshifted 3 bits, and the index
-    // tells us which allocator to use. (a special case is made for <= 4 bytes on
-    // 32-bit systems in FindSizeClass to keep the table small.)
+    // tells us which allocator to use.  (A special case is made for <= 4 bytes on
+    // 32-bit systems in FindAllocatorForSize to keep the table small.)
 
-    // code to generate the table:
+    // Code to generate the table:
     //
     //      const int kMaxSizeClassIndex = (kLargestAlloc>>3)+1;
     //      uint8_t kSizeClassIndex[kMaxSizeClassIndex];
@@ -128,49 +128,48 @@ namespace MMgc
 
 #endif
 
+#if defined DEBUG
+    // For debugging we track live large objects in a list.  If there are a lot
+    // of large objects then a list may slow down debug builds too much; in that
+    // case we can move to a tree or similar structure.  (It's useful to avoid using
+    // large objects in this data structure.)
+    struct FixedMalloc::LargeObject
+    {
+        const void *item;       // Start of a block
+        LargeObject* next;      // Next object
+    };
+#endif
+    
     /*static*/
     FixedMalloc *FixedMalloc::instance;
 
     void FixedMalloc::InitInstance(GCHeap* heap)
     {
         m_heap = heap;
-        numLargeChunks = 0;
+        numLargeBlocks = 0;
         VMPI_lockInit(&m_largeAllocInfoLock);
     #ifdef MMGC_MEMORY_PROFILER
         totalAskSizeLargeAllocs = 0;
     #endif
-    #ifdef _DEBUG
-    #ifndef AVMPLUS_SAMPLER
+    #if defined DEBUG && !defined AVMPLUS_SAMPLER
         largeObjects = NULL;
         VMPI_lockInit(&m_largeObjectLock);
     #endif
-    #endif
 
-        // Create all the allocators up front (not lazy)
-        // so that we don't have to check the pointers for
-        // NULL on every allocation.
-        for (int i=0; i<kNumSizeClasses; i++) {
-            // FIXME: by default FixedAlloc uses 4K chunks, for the
-            // more common size classes maybe we should use 8/16/32.
-            // FIXME: we could use FixedAllocLarge for the bigger size
-            // classes but how to call the right Free would need to be work out
+        for (int i=0; i<kNumSizeClasses; i++)
             m_allocs[i].Init((uint32_t)kSizeClasses[i], heap);
-        }
 
         FixedMalloc::instance = this;
     }
 
     void FixedMalloc::DestroyInstance()
     {
-        for (int i=0; i<kNumSizeClasses; i++) {
+        for (int i=0; i<kNumSizeClasses; i++)
             m_allocs[i].Destroy();
-        }
 
         VMPI_lockDestroy(&m_largeAllocInfoLock);
-    #ifdef _DEBUG
-    #ifndef AVMPLUS_SAMPLER
+    #if defined DEBUG && !defined AVMPLUS_SAMPLER
         VMPI_lockDestroy(&m_largeObjectLock);
-    #endif
     #endif
 
         FixedMalloc::instance = NULL;
@@ -178,21 +177,11 @@ namespace MMgc
 
     void* FASTCALL FixedMalloc::OutOfLineAlloc(size_t size, FixedMallocOpts flags)
     {
-        // OPTIMIZEME?  Alloc() is inlined, as are some functions
-        // it calls, but we could inline massively here.  As it
-        // is, Alloc(size) expands to three calls: VMPI_lockAcquire,
-        // FixedAlloc::Alloc/LargeAlloc, and VMPI_lockRelease.
-
         return Alloc(size, flags);
     }
 
     void FASTCALL FixedMalloc::OutOfLineFree(void* p)
     {
-        // OPTIMIZEME?  Free() is inlined, as are some functions
-        // it calls, but we could inline massively here.  As it is,
-        // Free(p) expands into three calls: VMPI_lockAcquire,
-        // FixedAlloc::Free/LargeFree, and VMPI_lockRelease.
-
         Free(p);
     }
 
@@ -208,14 +197,16 @@ namespace MMgc
             totalAllocated += allocated;
         }
 
-        {
 #ifdef MMGC_MEMORY_PROFILER
+        {
             MMGC_LOCK(m_largeAllocInfoLock);
             totalAskSize += totalAskSizeLargeAllocs;
-#endif
         }
-        // not entirely accurate, assumes large allocations using all of last page (large ask size not stored)
-        totalAllocated += (GetNumLargeChunks() * GCHeap::kBlockSize);
+#endif
+
+        // Not entirely accurate, assumes large allocations using all of
+        // the last block (large ask size not stored).
+        totalAllocated += (GetNumLargeBlocks() * GCHeap::kBlockSize);
     }
 
     void *FixedMalloc::LargeAlloc(size_t size, FixedMallocOpts flags)
@@ -239,34 +230,29 @@ namespace MMgc
             item = GetUserPointer(item);
 #ifdef MMGC_HOOKS
             if(m_heap->HooksEnabled())
-            {
                 m_heap->AllocHook(item, size - DebugSize(), Size(item));
-            }
 #endif // MMGC_HOOKS
 
             UpdateLargeAllocStats(item, blocksNeeded);
 
-#ifdef _DEBUG
-        // fresh memory poisoning
+#ifdef DEBUG
+            // Fresh memory poisoning
             if((flags & kZero) == 0)
                 memset(item, 0xfa, size - DebugSize());
 
 #ifndef AVMPLUS_SAMPLER
-        // enregister
+            // Enregister the large object
             AddToLargeObjectTracker(item);
 #endif
-#endif
+#endif // DEBUG
         }
         return item;
     }
 
-
     void FixedMalloc::LargeFree(void *item)
     {
-#ifdef _DEBUG
-#ifndef AVMPLUS_SAMPLER
+#if defined DEBUG && !defined AVMPLUS_SAMPLER
         RemoveFromLargeObjectTracker(item);
-#endif
 #endif
         UpdateLargeFreeStats(item, GCHeap::SizeToBlocks(LargeSize(item)));
 
@@ -292,10 +278,9 @@ namespace MMgc
 
     size_t FixedMalloc::GetTotalSize()
     {
-        size_t total = GetNumLargeChunks();
-        for (int i=0; i<kNumSizeClasses; i++) {
+        size_t total = GetNumLargeBlocks();
+        for (int i=0; i<kNumSizeClasses; i++)
             total += m_allocs[i].GetNumChunks();
-        }
         return total;
     }
 
@@ -310,14 +295,14 @@ namespace MMgc
             if( m_allocs[i].GetNumChunks() > 0)
                 GCLog("[mem] FixedMalloc[%d] total %d pages inuse %d bytes ask %d bytes\n", kSizeClasses[i], m_allocs[i].GetNumChunks(), inUse, ask);
         }
-        GCLog("[mem] FixedMalloc[large] total %d pages\n", GetNumLargeChunks());
+        GCLog("[mem] FixedMalloc[large] total %d pages\n", GetNumLargeBlocks());
     }
 #endif
 
-#ifdef _DEBUG
-    // If this returns then item was definitely allocated by an allocator
-    // owned by this FixedMalloc.  Large objects must be handled one of
-    // two ways depending on whether the sampler is operating: if it is,
+#ifdef DEBUG
+    // If EnsureFixedMallocMemory returns then item was definitely allocated
+    // by an allocator owned by this FixedMalloc.  Large objects must be handled
+    // one of two ways depending on whether the sampler is operating: if it is,
     // we can't allocate storage to track large objects (see bugzilla 533954),
     // so fall back on a less accurate method.
 
@@ -373,7 +358,6 @@ namespace MMgc
             Free(loToFree);
     }
 #endif // !AVMPLUS_SAMPLER
-#endif // _DEBUG
-
+#endif // DEBUG
 }
 
