@@ -247,6 +247,12 @@ namespace MMgc
         /** if this much of the heap is free un-reserve it */
         const static uint32_t kReleaseThresholdPercentage = 50;
 
+        const static uintptr_t GCEndOfObjectPoison = 0xdeadbeef;// First word past legitimate payload in GC object
+        const static uintptr_t GCFreedPoison = 0xcacacaca;      // Object fill when GC object has been freed
+        const static uintptr_t GCSweptPoison = 0xbabababa;      // Object fill when GC object has been swept
+        const static uintptr_t FXFreshPoison = 0xfafafafa;      // Object fill in fresh FixedAlloc object (before any zeroing)
+        const static uintptr_t FXFreedPoison = 0xedededed;      // Object fill when FixedAlloc object has been freed
+        
         /**
          * Init must be called to set up the GCHeap singleton
          */

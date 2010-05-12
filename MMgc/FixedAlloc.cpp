@@ -204,11 +204,11 @@ namespace MMgc
         b->alloc = this;
 
 #ifdef DEBUG
-        // deleted and unused memory is 0xed'd, this is important for leak diagnostics
-        VMPI_memset(b->items, 0xed, m_itemSize * m_itemsPerBlock);
+        // Deleted and unused memory is poisoned, this is important for leak diagnostics.
+        VMPI_memset(b->items, uint8_t(GCHeap::FXFreedPoison), m_itemSize * m_itemsPerBlock);
 #endif
 
-        // Link the block at the end of the list
+        // Link the block at the end of the list.
         b->prev = m_lastBlock;
         b->next = 0;
         if (m_lastBlock)
@@ -300,7 +300,7 @@ namespace MMgc
             for(int i=startIndex; i<n; i++)
             {
                 uint32_t data = ((uint32_t*)item)[i];
-                if(data != 0xedededed)
+                if(data != uint32_t(GCHeap::FXFreedPoison))
                 {
                     ReportDeletedMemoryWrite(item);
                     break;

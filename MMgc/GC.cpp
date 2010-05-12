@@ -1694,7 +1694,7 @@ namespace MMgc
             GCLargeAlloc::LargeBlock *next = GCLargeAlloc::Next(lb);
 #ifdef MMGC_HOOKS
             if(heap->HooksEnabled())
-                heap->FreeHook(GetUserPointer(lb+1), lb->size - DebugSize(), 0xba);
+                heap->FreeHook(GetUserPointer(lb+1), lb->size - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
 #endif
             int numBlocks = lb->GetNumBlocks();
             sweepResults += numBlocks;
@@ -2117,7 +2117,7 @@ namespace MMgc
         // in incrementalValidation mode manually deleted items
         // aren't put on the freelist so skip them
         if(incrementalValidation) {
-            if(*p == 0xcacacaca)
+            if(*p == uint32_t(GCHeap::FXFreedPoison))
                 return;
         }
         for ( ; p < limit ; p++ )
@@ -3560,17 +3560,17 @@ namespace MMgc
     void GC::WhitePointerScan(const void *mem, size_t size)
     {
         uintptr_t *p = (uintptr_t *) mem;
-        // the minus 8 skips the deadbeef and back pointer
+        // the minus 8 skips the GCEndOfObjectPoison and back pointer
         uintptr_t *end = p + ((size) / sizeof(void*));
 
         while(p < end)
         {
             uintptr_t val = *p;
-            if(val == 0xdeadbeef)
+            if(val == GCHeap::GCEndOfObjectPoison)
                 break;
             if(IsWhite((const void*) (val&~7)) &&
-               *(((int32_t*)(val&~7))+1) != (int32_t)0xcacacaca && // Free'd
-               *(((int32_t*)(val&~7))+1) != (int32_t)0xbabababa) // Swept
+               *(((int32_t*)(val&~7))+1) != int32_t(GCHeap::GCFreedPoison) &&
+               *(((int32_t*)(val&~7))+1) != int32_t(GCHeap::GCSweptPoison))
             {
                 GCDebugMsg(false, "Object 0x%x allocated here:\n", mem);
                 PrintAllocStackTrace(mem);

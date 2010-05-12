@@ -155,7 +155,7 @@ namespace MMgc
                 m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
 #endif
             heap->FinalizeHook(p, userSize);
-            heap->FreeHook(p, userSize, 0xca);
+            heap->FreeHook(p, userSize, uint8_t(GCHeap::GCFreedPoison));
         }
 #endif
 

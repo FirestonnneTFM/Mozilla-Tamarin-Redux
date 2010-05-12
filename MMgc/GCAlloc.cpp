@@ -299,14 +299,14 @@ namespace MMgc
                 GCAssert(m_itemSize >= DebugSize());
 #endif
                 if(heap->HooksEnabled())
-                    heap->PseudoFreeHook(GetUserPointer(p), m_itemSize - DebugSize(), 0xba);
+                    heap->PseudoFreeHook(GetUserPointer(p), m_itemSize - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
 #endif
                 p[0] = (char*)p + m_itemSize;
                 p = (void**)(void*)((char*)p + m_itemSize);
             }
 #ifdef MMGC_HOOKS
             if(heap->HooksEnabled())
-                heap->PseudoFreeHook(GetUserPointer(p), m_itemSize - DebugSize(), 0xba);
+                heap->PseudoFreeHook(GetUserPointer(p), m_itemSize - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
 #endif
             p[0] = NULL;
 
@@ -598,7 +598,7 @@ namespace MMgc
                 m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
 #endif
             heap->FinalizeHook(p, userSize);
-            heap->FreeHook(p, userSize, 0xca);
+            heap->FreeHook(p, userSize, uint8_t(GCHeap::GCFreedPoison));
         }
 #endif
 
@@ -914,7 +914,7 @@ namespace MMgc
                 void *item = (char*)b->items + m_itemSize*(i*8+j);
 #ifdef MMGC_HOOKS
                 if(m_gc->heap->HooksEnabled())
-                    m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), 0xba);
+                    m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
 #endif
                 b->FreeSweptItem(item, (i*8+j));
             }
@@ -1142,7 +1142,7 @@ namespace MMgc
             for(int i=startIndex; i<n; i++)
             {
                 uint32_t data = ((uint32_t*)item)[i];
-                if(data != 0xbabababa && data != 0xcacacaca)
+                if(data != uint32_t(GCHeap::GCSweptPoison) && data != uint32_t(GCHeap::GCFreedPoison))
                 {
                     ReportDeletedMemoryWrite(item);
                     break;
