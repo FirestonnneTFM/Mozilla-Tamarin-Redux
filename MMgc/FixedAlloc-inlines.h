@@ -71,7 +71,7 @@ namespace MMgc
 
     REALLY_INLINE size_t FixedAlloc::GetMaxAlloc() const
     {
-        return m_numBlocks / GCHeap::kBlockSize;
+        return m_numBlocks * m_itemsPerBlock;
     }
 
     REALLY_INLINE size_t FixedAlloc::GetNumBlocks() const
