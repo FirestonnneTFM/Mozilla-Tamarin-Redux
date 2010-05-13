@@ -385,14 +385,6 @@ class sandbox:
     sb_linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     sb_linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     sb_linux_compile_factory.addStep(BuildShellCommand(
-                command=['./build-release-cov.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-                description='starting linux code coverage release build...',
-                descriptionDone='finished linux code coverage release build.',
-                name="Build_Release_cov",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux_compile_factory.addStep(BuildShellCommand(
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
@@ -1234,14 +1226,6 @@ class sandbox:
     sb_linux_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     sb_linux_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     sb_linux_test_factory.addStep(test_differential)
-    sb_linux_test_factory.addStep(TestSuiteShellCommand(
-                command=['./run-tests-release-cov.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-                description='starting to run release code coverage vmtests...',
-                descriptionDone='finished release code coverage vmtests.',
-                name="Testsuite_Release-cov",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
     sb_linux_test_factory.addStep(util_process_clean)
     sb_linux_test_factory.addStep(util_clean_buildsdir)
 
