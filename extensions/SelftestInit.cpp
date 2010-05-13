@@ -53,7 +53,6 @@ extern void create_mmgc_gcheap(AvmCore* core);
 #if defined VMCFG_WORKERTHREADS
 extern void create_mmgc_threads(AvmCore* core);
 #endif
-extern void create_platform_libc(AvmCore* core);
 void SelftestRunner::createGeneratedSelftestClasses() {
 create_avmplus_basics(core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
@@ -70,7 +69,6 @@ create_mmgc_gcheap(core);
 #if defined VMCFG_WORKERTHREADS
 create_mmgc_threads(core);
 #endif
-create_platform_libc(core);
 }
 #endif // VMCFG_SELFTEST
 }
