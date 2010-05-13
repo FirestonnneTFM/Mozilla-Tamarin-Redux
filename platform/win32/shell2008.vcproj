@@ -1691,6 +1691,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\ST_platform_libc.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\swf.cpp"
 				>
 			</File>
