@@ -694,6 +694,9 @@ namespace avmshell
                     else if (!VMPI_strcmp(arg+2, "noincgc")) {
                         settings.incremental = false;
                     }
+                    else if (!VMPI_strcmp(arg+2, "nofixedcheck")) {
+                        settings.fixedcheck = false;
+                    }
 #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
                     else if (!VMPI_strcmp(arg+2, "astrace") && i+1 < argc ) {
                         settings.astrace_console = VMPI_strtol(argv[++i], 0, 10);
@@ -1075,6 +1078,7 @@ namespace avmshell
         AvmLog("          [-Dgreedy]    collect before every allocation\n");
         AvmLog("          [-Dnogc]      don't collect\n");
         AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+        AvmLog("          [-Dnofixedcheck]  don't check FixedMalloc deallocations for correctness (sometimes expensive)\n");
 #ifdef DEBUGGER
         AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
         AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
