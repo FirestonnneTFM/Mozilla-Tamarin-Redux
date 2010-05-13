@@ -115,7 +115,8 @@ namespace MMgc
         dumpFalsePositives(false),
 #endif
         gcLoadCeiling(1.0), // 1.0 is probably OK for desktop, maybe less so for mobile - more experiments needed
-        gcEfficiency(0.25)
+        gcEfficiency(0.25),
+        _checkFixedMemory(true) // See comment in GCHeap.h for why the default must be 'true'
     {
         // Bugzilla 544695 - large heaps need to be controlled more tightly than
         // small heaps due to the reliance of the Player on the GC for removing some

@@ -300,14 +300,19 @@ namespace MMgc
 #endif
 
 #ifdef DEBUG
-    // If EnsureFixedMallocMemory returns then item was definitely allocated
-    // by an allocator owned by this FixedMalloc.  Large objects must be handled
-    // one of two ways depending on whether the sampler is operating: if it is,
-    // we can't allocate storage to track large objects (see bugzilla 533954),
+    // If EnsureFixedMallocMemory returns and fixed-memory checking has not
+    // been disabled then item was definitely allocated by an allocator owned
+    // by this FixedMalloc.  Large objects must be handled one of two ways
+    // depending on whether the sampler is operating: if it is, we can't
+    // allocate storage to track large objects (see bugzilla 533954),
     // so fall back on a less accurate method.
 
     void FixedMalloc::EnsureFixedMallocMemory(const void* item)
     {
+        // For a discussion of this flag, see bugzilla 564878.
+        if (!m_heap->config.checkFixedMemory())
+            return;
+        
         for (int i=0; i<kNumSizeClasses; i++)
             if (m_allocs[i].QueryOwnsObject(item))
                 return;
@@ -330,6 +335,9 @@ namespace MMgc
 #ifndef AVMPLUS_SAMPLER
     void FixedMalloc::AddToLargeObjectTracker(const void* item)
     {
+        if (!m_heap->config.checkFixedMemory())
+            return;
+        
         LargeObject* lo = (LargeObject*)Alloc(sizeof(LargeObject));
         lo->item = item;
         MMGC_LOCK(m_largeObjectLock);
@@ -339,6 +347,9 @@ namespace MMgc
 
     void FixedMalloc::RemoveFromLargeObjectTracker(const void* item)
     {
+        if (!m_heap->config.checkFixedMemory())
+            return;
+        
         void *loToFree=NULL;
         {
             MMGC_LOCK(m_largeObjectLock);

@@ -60,6 +60,7 @@ namespace avmshell
         , greedy(false)
         , nogc(false)
         , incremental(true)
+        , fixedcheck(true)
         , langID(-1)
         , jitordie(AvmCore::jitordie_default)
         , runmode(AvmCore::runmode_default)
@@ -366,6 +367,11 @@ namespace avmshell
         //console << "defaultAPIVersion=" << defaultAPIVersion;
         this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
 
+        // This is obscure but well-defined: the clearing of this flag is allowed
+        // at any time, see comment for checkFixedMemory in GCHeap.h.
+        if (!settings.fixedcheck)
+            GCHeap::GetGCHeap()->Config().clearCheckFixedMemory();
+        
         config.interrupts = settings.interrupts;
 #ifdef VMCFG_VERIFYALL
         config.verifyall = settings.verifyall;

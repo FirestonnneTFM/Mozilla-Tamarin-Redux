@@ -80,6 +80,7 @@ namespace avmshell
         bool greedy;                    // copy to each GC
         bool nogc;                      // copy to each GC
         bool incremental;               // copy to each GC
+        bool fixedcheck;                // copy to each GC
         int langID;                     // copy to ShellCore?
         bool jitordie;                  // copy to config
         Runmode runmode;                // copy to config

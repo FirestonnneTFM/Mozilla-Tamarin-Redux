@@ -94,6 +94,23 @@ namespace MMgc
          */
         bool sloppyCommit;
 
+        /**
+         * In DEBUG builds, if checkFixedMemory is true then a test is made to check whether
+         * the fixed object about to be freed is owned by FixedMalloc.  That test is somewhat
+         * expensive, so it can be toggled by means of this flag.
+         *
+         * This flag will probably disappear in the future when expected changes to GCHeap
+         * makes the test much cheaper.
+         *
+         * The flag defaults to 'true' and can be changed to 'false' after startup, but
+         * then sticks at false.  (Any large objects that have been allocated with it
+         * set to 'false' will not be properly registered, and when trying to free
+         * them with the value subsequently set to 'true' an assert may be triggered.)
+         */
+        bool checkFixedMemory() { return _checkFixedMemory; }
+
+        void clearCheckFixedMemory() { _checkFixedMemory = false; }
+        
         bool verbose;
         bool returnMemory;
         bool gcstats;
@@ -107,6 +124,9 @@ namespace MMgc
         double gcLoadCutoff[kNumLoadFactors]; // Heap sizes (MB) following GC below which the corresponding load factor applies, last entry is +infinity
         double gcLoadCeiling;   // Max multiple of gcLoad policy should use after adjusting L for various factors (0=unlimited)
         double gcEfficiency;    // Max fraction of time to spend in the collector while the incremental collector is active
+        
+    private:
+        bool _checkFixedMemory;
     };
 
     /**
