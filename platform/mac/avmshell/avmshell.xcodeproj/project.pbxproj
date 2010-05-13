@@ -60,6 +60,8 @@
 		07689AA1101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		078F536B0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
 		078F536C0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
+		07961107119BE3C9001ECFC5 /* ST_platform_libc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07961106119BE3C9001ECFC5 /* ST_platform_libc.cpp */; };
+		07961108119BE3C9001ECFC5 /* ST_platform_libc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07961106119BE3C9001ECFC5 /* ST_platform_libc.cpp */; };
 		079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
 		079C96F10F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
 		079DF8350F3A882D0031D1B4 /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B50F3A882D0031D1B4 /* AbcData.cpp */; };
@@ -497,6 +499,8 @@
 		077494B80F8E2DC900230F6D /* unix-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "unix-platform.h"; path = "../../unix/unix-platform.h"; sourceTree = SOURCE_ROOT; };
 		078F53690FA473C50064216F /* ShellCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShellCore.cpp; path = ../../../shell/ShellCore.cpp; sourceTree = SOURCE_ROOT; };
 		078F536A0FA473C50064216F /* ShellCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShellCore.h; path = ../../../shell/ShellCore.h; sourceTree = SOURCE_ROOT; };
+		07961104119BE3B2001ECFC5 /* ST_platform_libc.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_platform_libc.st; path = ../../../extensions/ST_platform_libc.st; sourceTree = SOURCE_ROOT; };
+		07961106119BE3C9001ECFC5 /* ST_platform_libc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_platform_libc.cpp; path = ../../../extensions/ST_platform_libc.cpp; sourceTree = SOURCE_ROOT; };
 		079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmfeatures.cpp; path = ../../../core/avmfeatures.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7A90F3A86850031D1B4 /* shell64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell64; sourceTree = BUILT_PRODUCTS_DIR; };
 		079DF7B50F3A882D0031D1B4 /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
@@ -983,6 +987,7 @@
 				073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */,
 				D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */,
 				0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */,
+				07961104119BE3B2001ECFC5 /* ST_platform_libc.st */,
 			);
 			name = sources;
 			sourceTree = "<group>";
@@ -1370,6 +1375,7 @@
 				073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */,
 				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
 				0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */,
+				07961106119BE3C9001ECFC5 /* ST_platform_libc.cpp */,
 			);
 			name = selftest;
 			sourceTree = "<group>";
@@ -1835,6 +1841,7 @@
 				07E2E7AE114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC651116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 				0749E7751173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
+				07961108119BE3C9001ECFC5 /* ST_platform_libc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2019,6 +2026,7 @@
 				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 				0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
+				07961107119BE3C9001ECFC5 /* ST_platform_libc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
