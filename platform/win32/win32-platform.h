@@ -48,25 +48,24 @@
  * which is quite picky.  Disable warnings we don't care about.
  */
 #ifdef _MSC_VER
-    #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-    #pragma warning(disable:4512) // assignment operator could not be generated
-    #pragma warning(disable:4511) // can't generate copy ctor
     #pragma warning(disable:4127) // conditional expression is constant - appears to be compiler noise primarily
-    #pragma warning(disable:4611) // interaction between _setjmp and destruct
-    #pragma warning(disable:4725) // instruction may be inaccurate on some Pentiums
-    #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
+    #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
     #pragma warning(disable:4251) // X needs to have dll-interface to be used by clients of class Y
+    #pragma warning(disable:4310) // cast truncates constant value
+    #pragma warning(disable:4511) // can't generate copy ctor
+    #pragma warning(disable:4512) // assignment operator could not be generated
+    #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
+    #pragma warning(disable:4725) // instruction may be inaccurate on some Pentiums
 
     // enable some that are off even in /W4 mode, but are still handy
-    #pragma warning(default:4265)   // 'class' : class has virtual functions, but destructor is not virtual
-    #pragma warning(default:4905)   // wide string literal cast to 'LPSTR'
-    #pragma warning(default:4906)   // string literal cast to 'LPWSTR'
+    #pragma warning(default:4242)   // 'identifier' : conversion from 'type1' to 'type2', possible loss of data
     #pragma warning(default:4263)   // 'function' : member function does not override any base class virtual member function
     #pragma warning(default:4264)   // 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden
+    #pragma warning(default:4265)   // 'class' : class has virtual functions, but destructor is not virtual
     #pragma warning(default:4266)   // 'function' : no override available for virtual member function from base 'type'; function is hidden
-    #pragma warning(default:4242)   // 'identifier' : conversion from 'type1' to 'type2', possible loss of data
-    #pragma warning(default:4263)   // member function does not override any base class virtual member function
     #pragma warning(default:4296)   // expression is always true (false) (Generally, an unsigned variable was used in a comparison operation with zero.)
+    #pragma warning(default:4905)   // wide string literal cast to 'LPSTR'
+    #pragma warning(default:4906)   // string literal cast to 'LPWSTR'
 
     // some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
     //  #pragma warning(error:4820) // 'bytes' bytes padding added after construct 'member_name' (MSFT system headers generate zillions of these, sadly)
@@ -83,7 +82,7 @@
     // This needs to be fixed, but reflects our generally cavalier treatment of stack overflow
     #pragma warning(disable:6255)   // _alloca indicates failure by raising a stack overflow exception
 #endif
-#endif
+#endif // _MSC_VER
 
 #define VMPI_memcpy         ::memcpy
 #define VMPI_memset         ::memset
@@ -257,7 +256,6 @@ struct vmpi_spin_lock_t
 {
     volatile LONG lock;
 };
-
 
 REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
