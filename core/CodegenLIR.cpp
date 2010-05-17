@@ -866,7 +866,7 @@ namespace avmplus
             (void) info; // suppress warning if !DEBUGGER && !AVMPLUS_VERBOSE
             varTracker = new (alloc) LIns*[nvar];
             tagTracker = new (alloc) LIns*[nvar];
-            checked = new (alloc) HashMap<LIns*,bool>(alloc, nvar);
+            checked = new (alloc) HashMap<LIns*,bool>(alloc, 16700); // allocate a large value until https://bugzilla.mozilla.org/show_bug.cgi?id=565489 is resolved
             notnull = new (alloc) nanojit::BitSet(alloc, nvar);
             clearState();
         }
