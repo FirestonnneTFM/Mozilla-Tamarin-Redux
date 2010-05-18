@@ -1,26 +1,26 @@
-# ***** BEGIN LICENSE BLOCK ***** 
-# Version: MPL 1.1/GPL 2.0/LGPL 2.1 
+# ***** BEGIN LICENSE BLOCK *****
+# Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
-# The contents of this file are subject to the Mozilla Public License Version 1.1 (the 
-# "License"); you may not use this file except in compliance with the License. You may obtain 
-# a copy of the License at http://www.mozilla.org/MPL/ 
+# The contents of this file are subject to the Mozilla Public License Version 1.1 (the
+# "License"); you may not use this file except in compliance with the License. You may obtain
+# a copy of the License at http://www.mozilla.org/MPL/
 #
-# Software distributed under the License is distributed on an "AS IS" basis, WITHOUT 
-# WARRANTY OF ANY KIND, either express or implied. See the License for the specific 
-# language governing rights and limitations under the License. 
+# Software distributed under the License is distributed on an "AS IS" basis, WITHOUT
+# WARRANTY OF ANY KIND, either express or implied. See the License for the specific
+# language governing rights and limitations under the License.
 #
 # created by dschaffe@adobe.com for use with tamarin tests
 #
-# Alternatively, the contents of this file may be used under the terms of either the GNU 
-# General Public License Version 2 or later (the "GPL"), or the GNU Lesser General Public 
-# License Version 2.1 or later (the "LGPL"), in which case the provisions of the GPL or the 
-# LGPL are applicable instead of those above. If you wish to allow use of your version of this 
-# file only under the terms of either the GPL or the LGPL, and not to allow others to use your 
-# version of this file under the terms of the MPL, indicate your decision by deleting provisions 
-# above and replace them with the notice and other provisions required by the GPL or the 
-# LGPL. If you do not delete the provisions above, a recipient may use your version of this file 
-# under the terms of any one of the MPL, the GPL or the LGPL. 
-# 
+# Alternatively, the contents of this file may be used under the terms of either the GNU
+# General Public License Version 2 or later (the "GPL"), or the GNU Lesser General Public
+# License Version 2.1 or later (the "LGPL"), in which case the provisions of the GPL or the
+# LGPL are applicable instead of those above. If you wish to allow use of your version of this
+# file only under the terms of either the GPL or the LGPL, and not to allow others to use your
+# version of this file under the terms of the MPL, indicate your decision by deleting provisions
+# above and replace them with the notice and other provisions required by the GPL or the
+# LGPL. If you do not delete the provisions above, a recipient may use your version of this file
+# under the terms of any one of the MPL, the GPL or the LGPL.
+#
 # ***** END LICENSE BLOCK ***** */
 
 ########################################################################################################################
@@ -169,7 +169,7 @@ ecma3/TypeConversion/e9_3_1_1, arm-winmobile.*-debug, expectedfail, bug https://
 
 
 ####################
-# Android 
+# Android
 ####################
 regress/bug_515935 , arm-android.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=547282
 
@@ -229,6 +229,7 @@ spidermonkey/js1_5/Regress/regress-360969-0(5|6), .*, skip, skip slow tests
 spidermonkey/js1_5/Regress/regress-80981, .*, skip, skip slow tests
 spidermonkey/js1_5/Regress/regress-96128-n, .*, skip, skip slow tests
 spidermonkey/js1_6/extensions/regress-456826, .*, skip, skip slow tests
+misc/testJitordieSwitch, .*, skip, skip slow tests
 
 ####################
 # run slow tests in deep test phase
@@ -252,6 +253,7 @@ spidermonkey/js1_5/Regress/regress-360969-0(5|6), .*deep, include, include slow 
 spidermonkey/js1_5/Regress/regress-80981, .*deep, include, include slow tests in deep phase
 spidermonkey/js1_5/Regress/regress-96128-n, .*deep, include, include slow tests in deep phase
 spidermonkey/js1_6/extensions/regress-456826, .*deep, include, include slow tests in deep phase
+misc/testJitordieSwitch, .*deep, include, include slow tests in deep phase
 
 ####################
 # verifier
@@ -262,7 +264,7 @@ regress/bug_498979, .*-Dverifyall.*, skip, https://bugzilla.mozilla.org/show_bug
 regress/bug_555705, .*-Dverifyall.*, skip, test throws an expected verifyerror that is normally caught by the test itself
 
 ####################
-# Sampling 
+# Sampling
 ####################
 # Assertion failed: "(((start_event == (PolicyEvent)(ev - 1))))" (".\\GC.cpp":461)
 # Disabling test until this can be properly investigated
@@ -340,7 +342,7 @@ spidermonkey/js1_5/Object/regress-308806-01, ^((?!diff).)*$, expectedfail, https
 spidermonkey/js1_5/Regress/regress-58116.as, .*, skip, locale-specific test: https://bugzilla.mozilla.org/show_bug.cgi?id=564127
 
 spidermonkey/js1_5/Regress/regress-104077, .*, skip, verifyerror: https://bugzilla.mozilla.org/show_bug.cgi?id=550512
-spidermonkey/js1_5/Regress/regress-140974:^Section [3-6].*, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550530 
+spidermonkey/js1_5/Regress/regress-140974:^Section [3-6].*, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550530
 
 spidermonkey/js1_5/Regress/regress-169559, .*, skip, need to investigate if global performance is really an issue
 spidermonkey/js1_5/Regress/regress-174709, .*, skip, need to figure out what test is trying to do
@@ -420,6 +422,3 @@ abcasm/bug_554915b, .*wordcode.*, expectedfail, https://bugzilla.mozilla.org/sho
 #############################
 as3/sampling/Callback:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 as3/sampling/FunctionEntry:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
-
-
-
