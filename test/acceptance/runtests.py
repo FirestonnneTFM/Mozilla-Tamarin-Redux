@@ -63,7 +63,7 @@ class AcceptanceRuntest(RuntestBase):
     abcOnlyExt = '.abc_'  # only run, don't compile these abc files - underscore is used so that tests are not deleted when removing old abc files
     runESC = False
     escbin = '../../esc/bin/'
-    
+
 
     def __init__(self):
         # Set threads to # of available cpus/cores
@@ -74,7 +74,7 @@ class AcceptanceRuntest(RuntestBase):
         RuntestBase.setEnvironVars(self)
         if 'ESCBIN' in environ:
             self.escbin = environ['ESCBIN'].strip()
-        
+
     def usage(self, c):
         RuntestBase.usage(self, c)
         print '    --esc           run esc instead of avm'
@@ -91,11 +91,11 @@ class AcceptanceRuntest(RuntestBase):
         print '    --remoteip      IP/DNS address of the machine to run the tests on.'
         print '    --remoteuser    user name to use to connect to the remote machine.'
         exit(c)
-    
+
     def setOptions(self):
         RuntestBase.setOptions(self)
         self.longOptions.extend(['ext=','esc','escbin=','eval','threads=','ats','atsdir=','verify'])
-    
+
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
         for o, v in opts:
@@ -127,7 +127,7 @@ class AcceptanceRuntest(RuntestBase):
                 self.remoteip = v
             elif o in ('--remoteuser',):
                 self.remoteuser = v
-                
+
     def run(self):
         self.setEnvironVars()
         self.loadPropertiesFile()
@@ -188,43 +188,43 @@ class AcceptanceRuntest(RuntestBase):
         lassert = 0
         extraVmArgs = ''
         abcargs = ''
-        
+
         dir = os.path.split(ast)[0]
         root,ext = splitext(ast)
         if self.runSource or self.eval or ext in self.executableExtensions:
             testName = ast
         else:
             testName = root + '.abc'
-            
+
         includes = self.includes #list
-        
+
         settings = self.getLocalSettings(root)
-        
+
         #TODO: possibly handle includes by building test list?  This works for now...
         if includes and not list_match(includes,root):
             return
-        
+
         # skip tests that can't be verified
         if self.verify and settings.has_key('.*') and settings['.*'].has_key('verify_skip'):
             outputCalls.append((self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['verify_skip'],)))
             self.allskips += 1
             return outputCalls
-        
+
         # skip entire test if specified
         if settings.has_key('.*') and settings['.*'].has_key('skip') and not settings['.*'].has_key('include'):
             outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['skip'],)))
             self.allskips += 1
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
-        
+
         # skip apiversioning tests if api versioning not enabled
         if not self.apiVersioning and settings.has_key('.*') and settings['.*'].has_key('apiversioning'):
             outputCalls.append((self.js_print,('  skipping... reason: apiversioning not enabled',)))
             self.allskips += 1
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
-        
+
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName) and ext not in self.executableExtensions:
             os.unlink(testName)
@@ -251,16 +251,16 @@ class AcceptanceRuntest(RuntestBase):
                 else:
                     lfail += 1
                     outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
-        
+
         self.allfails += lfail
         self.allpasses += lpass
-        
+
         if self.runSource or self.eval:
             incfiles=self.build_incfiles(testName)
             incfiles.append("shell" + self.sourceExt)
             for incfile in incfiles:
                 testName=incfile+" "+testName
-        
+
         # read any extra avm arguments, each line will execute the avm with those args
         if isfile('%s.avm_args' % ast):
             avm_args_file = open('%s.avm_args' % ast,'r')
@@ -278,9 +278,9 @@ class AcceptanceRuntest(RuntestBase):
                 outputCalls.extend(self.runTest(ast, root, testName, '%s.%s' % (testnum, index), settings, extraVmArgs, abcargs))
         else:
             outputCalls.extend(self.runTest(ast, root, testName, testnum, settings))
-        
+
         return outputCalls
-        
+
     def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
         outputCalls = []
         lpass = 0
@@ -290,7 +290,7 @@ class AcceptanceRuntest(RuntestBase):
         ltimeout = 0
         lassert = 0
         starttime=time()
-        
+
         if self.aotsdk and self.aotout:
             avm_args = ""
             if isfile("%s.avm_args" % ast):
@@ -337,7 +337,7 @@ class AcceptanceRuntest(RuntestBase):
             verifyFunctions = [line.strip() for line in f if line.startswith('verify Function/')]
             if self.verbose:
                 outputCalls.append((self.js_print,(verifyFunctions,)))
-                
+
             # we can't compare actual function names since abcdump treats function names and var names the same
             # we instead just compare that the # of functions verified == the # of functions listed out by abcdump
             if len(abcdumpFunctions) != len(verifyFunctions):
@@ -351,9 +351,9 @@ class AcceptanceRuntest(RuntestBase):
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs), outputCalls=outputCalls)
             else:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName), outputCalls=outputCalls)
-        
+
         # Test has been run, handle output
-            
+
         if not self.verify:
             try:
                 outputLines = []
@@ -368,17 +368,30 @@ class AcceptanceRuntest(RuntestBase):
                         outputCalls.append((self.verbose_print,(expectedOut,)))
                         outputCalls.append((self.verbose_print,('\nactual output:',)))
                         outputCalls.append((self.verbose_print,(actual,)))
-                        if actual == expectedOut:
+                        # .out files can contain regex but must be prefaced with REGEXP as the first line in the file
+                        try:
+                            if expectedOut[0] == 'REGEXP':
+                                expectedOut = expectedOut[1:]
+                                if len(actual) < len(expectedOut):
+                                    # pad actual output w/ empty lines
+                                    for i in range(len(expectedOut)-len(actual)):
+                                        actual.append('')
+                                for i in range(len(actual)):
+                                    if not re.search(expectedOut[i], actual[i]):
+                                        raise IndexError
+                            else:
+                                if actual != expectedOut:
+                                    raise IndexError
                             lpass += 1
-                        else:
+                        except IndexError:
                             outputCalls.append((self.fail,(testName,
                                 '.out file does not match output:\n%s.out file (expected):\n%s\nactual output:\n%s' % (root, expectedOut,actual),
                                 self.failmsgs)))
                             lfail += 1
                     except IOError:
                         outputLines.append((self.js_print,('Error opening %s.out' % root,)))
-                        lfail += 1    
-                else:   
+                        lfail += 1
+                else:
                     for line in f+err:
                         outputLines.append(line)
                         outputCalls.append((self.verbose_print,('   %s' % line.strip(),)))
@@ -458,7 +471,7 @@ class AcceptanceRuntest(RuntestBase):
                     else:
                         lfail = 1
                         outputCalls.append((self.fail,(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
-                 
+
         self.allfails += lfail
         self.allpasses += lpass
         self.allexpfails += lexpfail
@@ -473,10 +486,10 @@ class AcceptanceRuntest(RuntestBase):
             outputCalls.insert(0,(self.js_print,('%s running %s %s %s time %.1f' % (testnum, ast, extraVmArgs, abcargs, time()-starttime), '<b>', '</b><br/>')));
         else:
             outputCalls.insert(0,(self.js_print,('%s running %s %s %s' % (testnum, ast, extraVmArgs, abcargs), '<b>', '</b><br/>')));
-        
+
 
         return outputCalls
-    
+
     def loadExpectedErr(self, file):
         try:
             f = open(file, 'r')
@@ -499,12 +512,12 @@ class AcceptanceRuntest(RuntestBase):
             return expectedErr, expectedExitcode
         except:
             return 'Error reading .err file: %s' % file, 0
-    
+
     def getError(self, line):
         # Parse out the error type and #, but strip the description
         try:
             return ':'.join(line.split(':')[0:2])
         except:
             return line
-    
+
 runtest = AcceptanceRuntest()
