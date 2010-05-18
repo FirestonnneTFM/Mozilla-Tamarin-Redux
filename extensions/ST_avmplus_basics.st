@@ -77,3 +77,25 @@
 %%verify matches2 == true
 
 
+%%test bug562101
+// XMLParser omits the last char of a DOCTYPE node
+Stringp str = core->newConstantStringLatin1("<?xml version=\"1.0\"?><!DOCTYPE greeting SYSTEM><greeting>Hello, world!</greeting>");
+XMLParser parser(core, str);
+MMgc::GC *gc = core->GetGC();
+XMLTag tag(gc);
+int m_status;
+bool pass = false;
+while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
+{
+    switch (tag.nodeType)
+    {
+        case XMLTag::kDocTypeDeclaration:
+        {
+            pass = false;
+            pass = tag.text->equalsLatin1("<!DOCTYPE greeting SYSTEM>");
+        }
+    break;
+    }
+}
+
+%%verify pass == true
