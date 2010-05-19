@@ -242,7 +242,8 @@ namespace MMgc
 		const static uint32_t kMinHeapIncrement = 32;
 
 		/** if this much of the heap is free decommit some memory */
-		const static uint32_t kDecommitThresholdPercentage = 1;
+		const static uint32_t kDecommitThresholdPercentage = 25;
+
 		/** if this much of the heap is free un-reserve it */
 		const static uint32_t kReleaseThresholdPercentage = 50;
 
