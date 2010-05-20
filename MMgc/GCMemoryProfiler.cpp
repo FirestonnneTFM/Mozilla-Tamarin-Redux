@@ -805,7 +805,7 @@ namespace MMgc
 
     void ReportDeletedMemoryWrite(const void* item)
     {
-        GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:");
+        GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:", item);
         PrintAllocStackTrace(GetUserPointer(item));
         GCDebugMsg(false, "Deletion trace:");
         PrintDeleteStackTrace(GetUserPointer(item));
