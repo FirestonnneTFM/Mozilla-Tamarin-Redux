@@ -2138,15 +2138,12 @@ namespace MMgc
 
     void GC::gclog(const char *format, ...)
     {
-        (void)format;
         char buf[4096];
         va_list argptr;
 
         va_start(argptr, format);
-        vsprintf(buf, format, argptr);
+        VMPI_vsnprintf(buf, ARRAY_SIZE(buf), format, argptr);
         va_end(argptr);
-
-        GCAssert(VMPI_strlen(buf) < 4096);
 
         VMPI_log(buf);
 
