@@ -1038,6 +1038,8 @@ namespace MMgc
 
     REALLY_INLINE size_t GCHeap::LargeAllocSize(const void *item)
     {
+        GCAssert(config.useVirtualMemory);
+
         Region *r = AddrToRegion(item);
         // Note: we can't use r->baseAddr or r->reserveTop b/c
         // alignment might have shifted the start down and we may

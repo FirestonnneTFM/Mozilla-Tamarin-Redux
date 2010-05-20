@@ -416,7 +416,7 @@ namespace MMgc
             if(HardLimitExceeded(size))
                 return NULL;
 
-            if(size >= kOSAllocThreshold) {
+            if(size >= kOSAllocThreshold && config.useVirtualMemory) {
                 return LargeAlloc(size, alignment);
             } else {
                 ExpandHeap(size);
@@ -1055,6 +1055,8 @@ namespace MMgc
 
     void *GCHeap::LargeAlloc(size_t size, size_t alignment)
     {
+        GCAssert(config.useVirtualMemory);
+        
         size_t sizeInBytes = size * kBlockSize;
 
         if(!EnsureFreeRegion(true))
@@ -1095,6 +1097,8 @@ namespace MMgc
 
     void GCHeap::LargeFree(const void *item)
     {
+        GCAssert(config.useVirtualMemory);
+
         size_t size = LargeAllocSize(item);
         largeAllocs -= size;
         Region *r = AddrToRegion(item);
