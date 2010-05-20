@@ -6050,7 +6050,7 @@ namespace avmplus
             SeqReader in(frag->lastIns, prologLastIns);
             nanojit::live(&in, live_alloc, frag, &mgr->log);
         }
-        if (pool->isVerbose(LC_Assembly)) {
+        if (pool->isVerbose(LC_AfterDCE | LC_Native)) {
             StUTF8String name(info->format(core));
             mgr->log.printf("jit-assembler %s\n", name.c_str());
         }
