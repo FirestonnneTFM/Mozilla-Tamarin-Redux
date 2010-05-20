@@ -130,11 +130,11 @@ namespace avmplus
                 MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
 #if defined FEATURE_NANOJIT
             else if (substrMatches("jit", p, e))
-                 r |= VB_jit | LC_Assembly;
+                 r |= VB_jit | LC_AfterDCE | LC_Native;
              else if (substrMatches("opt", p, e))
-                 r |= VB_jit | LC_Assembly | LC_Liveness | LC_ReadLIR | LC_AfterSF;
+                 r |= VB_jit | LC_AfterDCE | LC_Native | LC_Liveness | LC_ReadLIR | LC_AfterSF;
              else if (substrMatches("regs", p, e))
-                 r |= VB_jit | LC_Assembly | LC_Activation | LC_RegAlloc;
+                 r |= VB_jit | LC_AfterDCE | LC_Native | LC_Activation | LC_RegAlloc;
 #endif /* FEATURE_NANOJIT */
              else
                  badFlag = (char*)p;
