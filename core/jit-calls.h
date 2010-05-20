@@ -827,6 +827,7 @@
     METHOD(ENVADDR(MethodEnv::setsuper), SIG4(V,P,A,P,A), setsuper)
     METHOD(ENVADDR(MethodEnv::getsuper), SIG3(A,P,A,P), getsuper)
     METHOD(COREADDR(AvmCore::throwAtom), SIG2(V,P,A), throwAtom)
+    METHOD(COREADDR(AvmCore::throwException), SIG2(V,P,P), throwException)
     CSEFUNCTION(FUNCADDR(MathUtils::mod), SIG2(F,F,F), mod)
     CSEMETHOD(COREADDR(AvmCore::_typeof), SIG2(P,P,A), typeof)
     FUNCTION(FUNCADDR(AvmCore::atomWriteBarrier), SIG4(V,P,P,P,A), atomWriteBarrier)
