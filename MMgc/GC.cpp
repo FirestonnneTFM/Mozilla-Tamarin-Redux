@@ -1240,12 +1240,17 @@ namespace MMgc
 		
 		if (incremental) {
 			if (!collecting) {
-				if (!marking)
-					StartIncrementalMark();
-				else if (policy.queryEndOfCollectionCycle())
+				if (!marking) {
+                    if (!Reaping()) {
+                        StartIncrementalMark();
+                    }
+                }
+				else if (policy.queryEndOfCollectionCycle()) {
 					FinishIncrementalMark(true);
-				else
+                }
+				else {
 					IncrementalMark();
+                }
 			}
 		}
 		else {
@@ -1329,8 +1334,11 @@ namespace MMgc
 		
 		// always be marking in pedantic mode
 		if(incrementalValidationPedantic) {
-			if(!marking)
-				StartIncrementalMark();
+			if(!marking) {
+                if (!Reaping()) {
+                    StartIncrementalMark();
+                }
+            }
 		}
 #endif
 #ifdef AVMPLUS_SAMPLER
@@ -2532,6 +2540,7 @@ namespace MMgc
 		
 		GCAssert(!marking);
 		GCAssert(!collecting);
+        GCAssert(!Reaping());       // bugzilla 564800
 
 		lastStartMarkIncrementCount = markIncrements();
 
