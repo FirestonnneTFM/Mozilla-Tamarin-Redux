@@ -2210,7 +2210,7 @@ namespace nanojit
             }
 
         } else {
-            debug_only( Register rr = ) prepareResultReg(ins, x87Regs);
+            verbose_only( Register rr = ) prepareResultReg(ins, x87Regs);
             NanoAssert(FST0 == rr);
 
             NanoAssert(!lhs->isInReg() || FST0 == lhs->getReg());
