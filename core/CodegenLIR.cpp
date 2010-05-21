@@ -6288,7 +6288,7 @@ namespace nanojit
     }
 
     void Allocator::freeChunk(void* p) {
-        return mmfx_free(p);
+        mmfx_free(p);
     }
 
     void Allocator::postReset() {
