@@ -98,7 +98,7 @@ REALLY_INLINE ScriptEnv* AbcEnv::getPrivateScriptEnv(const Multiname& m) const
 REALLY_INLINE void AbcEnv::addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv)
 {
     AvmAssert(!getPrivateScriptEnv(name, ns));
-    return m_privateScriptEnvs->add(name, ns, (Binding) scriptEnv);
+    m_privateScriptEnvs->add(name, ns, (Binding) scriptEnv);
 }
 
 } // namespace avmplus
