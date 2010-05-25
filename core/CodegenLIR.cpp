@@ -267,34 +267,34 @@ namespace avmplus
     {
     private:
         LirWriter* const prolog_out;
-        LInsp const env_domainenv;
-        LInsp curMemBase;
-        LInsp curMemSize;
-        LInsp curMopAddr;
-        LInsp curRangeCheckLHS;
-        LInsp curRangeCheckRHS;
+        LIns* const env_domainenv;
+        LIns* curMemBase;
+        LIns* curMemSize;
+        LIns* curMopAddr;
+        LIns* curRangeCheckLHS;
+        LIns* curRangeCheckRHS;
         int32_t curRangeCheckMinValue;
         int32_t curRangeCheckMaxValue;
 
     private:
         void clearMemBaseAndSize();
 
-        static void extractConstantDisp(LInsp& mopAddr, int32_t& curDisp);
+        static void extractConstantDisp(LIns*& mopAddr, int32_t& curDisp);
         LIns* safeIns2(LOpcode op, LIns*, int32_t);
         void safeRewrite(LIns* ins, int32_t);
 
     public:
-        MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LInsp env_domainenv);
+        MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LIns* env_domainenv);
 
-        LInsp emitRangeCheck(LInsp& mopAddr, int32_t const size, int32_t* disp, LInsp& br);
+        LIns* emitRangeCheck(LIns*& mopAddr, int32_t const size, int32_t* disp, LIns*& br);
         void flushRangeChecks();
 
         // overrides from LirWriter
         LIns* ins0(LOpcode v);
-        LIns* insCall(const CallInfo* call, LInsp args[]);
+        LIns* insCall(const CallInfo* call, LIns* args[]);
     };
 
-    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LInsp env_domainenv) :
+    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LIns* env_domainenv) :
         LirWriter(out),
         prolog_out(prolog_out),
         env_domainenv(env_domainenv),
@@ -337,7 +337,7 @@ namespace avmplus
         return int64_t(a) + int64_t(b) == int64_t(a + b);
     }
 
-    /*static*/ void MopsRangeCheckFilter::extractConstantDisp(LInsp& mopAddr, int32_t& curDisp)
+    /*static*/ void MopsRangeCheckFilter::extractConstantDisp(LIns*& mopAddr, int32_t& curDisp)
     {
         // mopAddr is an int (an offset from globalMemoryBase) on all archs.
         // if mopAddr is an expression of the form
@@ -355,7 +355,7 @@ namespace avmplus
                 break;
 
             int32_t imm;
-            LInsp nonImm;
+            LIns* nonImm;
             if (mopAddr->oprnd2()->isImmI())
             {
                 imm = mopAddr->oprnd2()->immI();
@@ -386,7 +386,7 @@ namespace avmplus
         }
     }
 
-    LInsp MopsRangeCheckFilter::emitRangeCheck(LInsp& mopAddr, int32_t const size, int32_t* disp, LInsp& br)
+    LIns* MopsRangeCheckFilter::emitRangeCheck(LIns*& mopAddr, int32_t const size, int32_t* disp, LIns*& br)
     {
         int32_t offsetMin = 0;
         if (disp != NULL)
@@ -483,7 +483,7 @@ namespace avmplus
             curRangeCheckLHS = safeIns2(LIR_addi, curMopAddr, curRangeCheckMinValue);
             curRangeCheckRHS = safeIns2(LIR_subi, curMemSize, curRangeCheckMaxValue - curRangeCheckMinValue);
 
-            LInsp cond = this->ins2(LIR_leui, curRangeCheckLHS, curRangeCheckRHS);
+            LIns* cond = this->ins2(LIR_leui, curRangeCheckLHS, curRangeCheckRHS);
             br = this->insBranch(LIR_jf, cond, NULL);
         }
 
@@ -517,7 +517,7 @@ namespace avmplus
         return LirWriter::ins0(v);
     }
 
-    LInsp MopsRangeCheckFilter::insCall(const CallInfo *ci, LInsp args[])
+    LIns* MopsRangeCheckFilter::insCall(const CallInfo *ci, LIns* args[])
     {
         // calls could potentially resize globalMemorySize, so we
         // can't collapse range checks across them
@@ -554,7 +554,7 @@ namespace avmplus
     {
         AvmAssert(argc <= MAXARGS);
         AvmAssert(argc == ci->count_args());
-        LInsp argIns[MAXARGS];
+        LIns* argIns[MAXARGS];
         for (uint32_t i=0; i < argc; i++)
             argIns[argc-i-1] = va_arg(ap, LIns*);
         return lirout->insCall(ci, argIns);
@@ -1047,8 +1047,8 @@ namespace avmplus
         // be done or never be done (can't be conditional on debugging).
         // FIXME: bug 544238: clearing only the var state has questionable validity
         void clearVarState() {
-            VMPI_memset(varTracker, 0, nvar*sizeof(LInsp));
-            VMPI_memset(tagTracker, 0, nvar*sizeof(LInsp));
+            VMPI_memset(varTracker, 0, nvar*sizeof(LIns*));
+            VMPI_memset(tagTracker, 0, nvar*sizeof(LIns*));
         }
 
         // clear all nullability and var/tag tracking state at branch targets
@@ -1138,7 +1138,7 @@ namespace avmplus
         }
 
         // set reachable = false after unconditional jumps
-        LIns *insBranch(LOpcode v, LInsp cond, LInsp to) {
+        LIns *insBranch(LOpcode v, LIns* cond, LIns* to) {
             if (v == LIR_j)
                 reachable = false;
             return out->insBranch(v, cond, to);
@@ -1168,7 +1168,7 @@ namespace avmplus
         // if debugging is attached, clear our tracking state when calling side-effect
         // fucntions, which are effectively debugger safe points.
         // also set reachable = false if the function is known to always throw, and never return.
-        LIns *insCall(const CallInfo *call, LInsp args[]) {
+        LIns *insCall(const CallInfo *call, LIns* args[]) {
             if (haveDebugger && canThrow(call))
                 clearVarState(); // debugger might have modified locals, so make sure we reload after call.
             if (alwaysThrows(call))
@@ -1300,7 +1300,7 @@ namespace avmplus
             return imm;
         }
 
-        LIns *insCall(const CallInfo *call, LInsp args[]) {
+        LIns *insCall(const CallInfo *call, LIns* args[]) {
             if (call == FUNCTIONID(integer_d)) {
                 LIns *v = args[0];
                 LOpcode op = v->opcode();
@@ -1346,8 +1346,8 @@ namespace avmplus
     class DebuggerCheck : public LirWriter
     {
         AvmCore* core;
-        LInsp *varTracker;
-        LInsp *tagTracker;
+        LIns** varTracker;
+        LIns** tagTracker;
         LIns *vars;
         LIns *tags;
         int nvar;
@@ -1355,8 +1355,8 @@ namespace avmplus
         DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar)
             : LirWriter(out), core(core), vars(NULL), tags(NULL), nvar(nvar)
         {
-            varTracker = new (alloc) LInsp[nvar];
-            tagTracker = new (alloc) LInsp[nvar];
+            varTracker = new (alloc) LIns*[nvar];
+            tagTracker = new (alloc) LIns*[nvar];
             clearState();
         }
 
@@ -1383,8 +1383,8 @@ namespace avmplus
         }
 
         void clearState() {
-            VMPI_memset(varTracker, 0, nvar * sizeof(LInsp));
-            VMPI_memset(tagTracker, 0, nvar * sizeof(LInsp));
+            VMPI_memset(varTracker, 0, nvar * sizeof(LIns*));
+            VMPI_memset(tagTracker, 0, nvar * sizeof(LIns*));
         }
 
         void checkValid(int i) {
@@ -1419,7 +1419,7 @@ namespace avmplus
             }
         }
 
-        LIns *insCall(const CallInfo *call, LInsp args[]) {
+        LIns *insCall(const CallInfo *call, LIns* args[]) {
             if (call == FUNCTIONID(debugLine))
                 checkState();
             return out->insCall(call,args);
@@ -1458,55 +1458,55 @@ namespace avmplus
             env_toplevel(NULL)
         {}
 
-        virtual LInsp ins0(LOpcode v) {
+        virtual LIns* ins0(LOpcode v) {
             return lastIns = out->ins0(v);
         }
-        virtual LInsp ins1(LOpcode v, LIns* a) {
+        virtual LIns* ins1(LOpcode v, LIns* a) {
             return lastIns = out->ins1(v, a);
         }
-        virtual LInsp ins2(LOpcode v, LIns* a, LIns* b) {
+        virtual LIns* ins2(LOpcode v, LIns* a, LIns* b) {
             return lastIns = out->ins2(v, a, b);
         }
-        virtual LInsp ins3(LOpcode v, LIns* a, LIns* b, LIns* c) {
+        virtual LIns* ins3(LOpcode v, LIns* a, LIns* b, LIns* c) {
             return lastIns = out->ins3(v, a, b, c);
         }
-        virtual LInsp insGuard(LOpcode v, LIns *c, GuardRecord *gr) {
+        virtual LIns* insGuard(LOpcode v, LIns *c, GuardRecord *gr) {
             return lastIns = out->insGuard(v, c, gr);
         }
-        virtual LInsp insBranch(LOpcode v, LInsp condition, LInsp to) {
+        virtual LIns* insBranch(LOpcode v, LIns* condition, LIns* to) {
             return lastIns = out->insBranch(v, condition, to);
         }
         // arg: 0=first, 1=second, ...
         // kind: 0=arg 1=saved-reg
-        virtual LInsp insParam(int32_t arg, int32_t kind) {
+        virtual LIns* insParam(int32_t arg, int32_t kind) {
             return lastIns = out->insParam(arg, kind);
         }
-        virtual LInsp insImmI(int32_t imm) {
+        virtual LIns* insImmI(int32_t imm) {
             return lastIns = out->insImmI(imm);
         }
 #ifdef AVMPLUS_64BIT
-        virtual LInsp insImmQ(uint64_t imm) {
+        virtual LIns* insImmQ(uint64_t imm) {
             return lastIns = out->insImmQ(imm);
         }
 #endif
-        virtual LInsp insImmD(double d) {
+        virtual LIns* insImmD(double d) {
             return lastIns = out->insImmD(d);
         }
-        virtual LInsp insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet) {
+        virtual LIns* insLoad(LOpcode op, LIns* base, int32_t d, AccSet accSet) {
             return lastIns = out->insLoad(op, base, d, accSet);
         }
-        virtual LInsp insStore(LOpcode op, LIns* value, LIns* base, int32_t d, AccSet accSet) {
+        virtual LIns* insStore(LOpcode op, LIns* value, LIns* base, int32_t d, AccSet accSet) {
             return lastIns = out->insStore(op, value, base, d, accSet);
         }
         // args[] is in reverse order, ie. args[0] holds the rightmost arg.
-        virtual LInsp insCall(const CallInfo *call, LInsp args[]) {
+        virtual LIns* insCall(const CallInfo *call, LIns* args[]) {
             return lastIns = out->insCall(call, args);
         }
-        virtual LInsp insAlloc(int32_t size) {
+        virtual LIns* insAlloc(int32_t size) {
             NanoAssert(size != 0);
             return lastIns = out->insAlloc(size);
         }
-        virtual LInsp insJtbl(LIns* index, uint32_t size) {
+        virtual LIns* insJtbl(LIns* index, uint32_t size) {
             return lastIns = out->insJtbl(index, size);
         }
 
@@ -5282,8 +5282,8 @@ namespace avmplus
         }
 
         // note, mopAddr and disp are both in/out parameters
-        LInsp br = NULL;
-        LInsp mopsMemoryBase = mopsRangeCheckFilter->emitRangeCheck(mopAddr, size, disp, br);
+        LIns* br = NULL;
+        LIns* mopsMemoryBase = mopsRangeCheckFilter->emitRangeCheck(mopAddr, size, disp, br);
         if (br)
             patchLater(br, mop_rangeCheckFailed_label);
 
@@ -6269,7 +6269,7 @@ namespace avmplus
 
 namespace nanojit
 {
-    int StackFilter::getTop(LInsp /*br*/) {
+    int StackFilter::getTop(LIns* /*br*/) {
         AvmAssert(false);
         return 0;
     }
