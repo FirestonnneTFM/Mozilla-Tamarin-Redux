@@ -177,47 +177,6 @@ namespace avmplus
         void emitCheckNull(int index);
         Traits* checkTypeName(uint32_t name_index);
     };
-
-#if defined FEATURE_CFGWRITER
-    class Block {
-    public:
-      uint32_t label;   // ordinal number
-      int32_t begin;    // offset from code_start
-      int32_t end;      // offset from code_start
-      Block* succ;
-      List<uint32_t, LIST_NonGCObjects> succs;
-      List<uint32_t, LIST_NonGCObjects> preds;
-      int32_t pred_count;
-      Block(uint32_t label, int32_t begin);
-      ~Block();
-    };
-
-    class Edge {
-    public:
-      uint32_t src;
-      uint32_t snk;
-      Edge(uint32_t src, uint32_t snk);
-    };
-
-    class CFGWriter : public NullWriter {
-        MethodInfo* info;
-        SortedMap<int, Block*, LIST_NonGCObjects> blocks;
-        SortedMap<int, Edge*, LIST_NonGCObjects> edges;
-        uint32_t label;
-        uint32_t edge;
-        Block* current;
-    public:
-        CFGWriter(MethodInfo* info, CodeWriter* coder);
-        ~CFGWriter();
-
-        // CodeWriter methods
-        void write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits*);
-        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
-        void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-        void writeEpilogue(const FrameState*);
-        void cleanup();
-    };
-#endif // FEATURE_CFGWRITER
 }
 
 #endif /* __avmplus_Verifier__ */
