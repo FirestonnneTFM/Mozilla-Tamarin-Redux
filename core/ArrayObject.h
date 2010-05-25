@@ -122,7 +122,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
     public:
-        Stringp format(AvmCore* core) const;
+        PrintWriter& print(PrintWriter& prw) const;
 #endif
 
         DECLARE_SLOTS_ArrayObject;

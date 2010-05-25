@@ -1648,14 +1648,15 @@ namespace avmplus
     }
 
 #if VMCFG_METHOD_NAMES
-    Stringp Traits::format(AvmCore* core, bool includeAllNamespaces) const
+    PrintWriter& Traits::print(PrintWriter& prw, bool includeAllNamespaces) const
     {
-        if (name() != NULL)
-            return Multiname::format(core, ns(), name(), false, !includeAllNamespaces);
-
-        return core->concatStrings(core->newConstantStringLatin1("Traits@"),
-                                    core->formatAtomPtr((uintptr)this));
-    }
+        if (name() != NULL) {
+            Multiname::print(prw, ns(), name(), false, !includeAllNamespaces);
+        } else {
+            prw << "Traits@" << asAtomHex((Atom)this);
+        }
+        return prw;
+    } 
 #endif
 
     void Traits::genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const

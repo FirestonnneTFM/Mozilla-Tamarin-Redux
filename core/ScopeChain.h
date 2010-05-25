@@ -66,7 +66,7 @@ namespace avmplus
         bool getScopeIsWithAt(uint32_t i) const;
 
         #if VMCFG_METHOD_NAMES
-        Stringp format(AvmCore* core) const;
+        PrintWriter& print(PrintWriter& prw) const;
         #endif
 
         bool equals(const ScopeTypeChain* that) const;
@@ -120,7 +120,7 @@ namespace avmplus
         Namespacep getDefaultNamespace() const;
 
         #if VMCFG_METHOD_NAMES
-        Stringp format(AvmCore* core) const;
+        PrintWriter& print(PrintWriter& prw) const;
         #endif
 
     // ------------------------ DATA SECTION BEGIN

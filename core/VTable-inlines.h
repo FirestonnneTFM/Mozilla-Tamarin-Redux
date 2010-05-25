@@ -60,11 +60,4 @@ REALLY_INLINE Toplevel* VTable::toplevel() const
     return _toplevel;
 }
 
-#ifdef AVMPLUS_VERBOSE
-REALLY_INLINE Stringp VTable::format(AvmCore* core) const
-{
-    return traits->format(core);
-}
-#endif
-
 } // namespace avmplus

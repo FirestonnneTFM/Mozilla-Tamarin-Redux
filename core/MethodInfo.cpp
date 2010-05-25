@@ -783,14 +783,12 @@ namespace avmplus
 
 #endif //DEBUGGER
 
-
 #ifdef AVMPLUS_VERBOSE
-    Stringp MethodInfo::format(AvmCore* core) const
+    PrintWriter& MethodInfo::print(PrintWriter& prw) const
     {
-        Stringp n = getMethodName();
-        return n ?
-                n->appendLatin1("()") :
-                core->newConstantStringLatin1("?()");
+        String* n = getMethodName();
+        return n ? prw << n << "()" 
+                 : prw << "?()";
     }
 #endif // AVMPLUS_VERBOSE
 
@@ -1123,7 +1121,9 @@ namespace avmplus
 
             if (t)
             {
-                Stringp tname = t->format(core, includeAllNamespaces);
+                StringBuffer sb(core);
+                t->print(sb, includeAllNamespaces);
+                Stringp tname = sb.toString();
                 if (core->config.oldVectorMethodNames)
                 {
                     // Tamarin used to incorrectly return the internal name of these

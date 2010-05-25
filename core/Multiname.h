@@ -152,11 +152,32 @@ namespace avmplus
         }
         MultiFormat;
 
-        Stringp format(AvmCore* core, MultiFormat form=MULTI_FORMAT_FULL) const;
-        static Stringp format(AvmCore* core, Namespacep ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);
+        PrintWriter& print(PrintWriter& prw, MultiFormat form=MULTI_FORMAT_FULL) const;
+        PrintWriter& printName(PrintWriter& prw) const;
+        static PrintWriter& print(PrintWriter& prw, Namespacep ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);        
+
+        // Use 'Format' like this: myPrintWriter << Format(ns, name)
+        class Format
+        {
+        public:
+            Format(const Namespace* ns, const String* name) : _ns(ns), _name(name) {}
+            Format(const Multiname* mn) : _ns(mn->getNamespace()), _name(mn->getName()) {}
+            const Namespace* _ns;
+            const String* _name;
+        };
+        
+        class FormatNameOnly
+        {
+        public:
+            FormatNameOnly(const Multiname* mn) : _mn(mn) {}
+            const Multiname* _mn;
+        };
 //#endif
     };
 
+    PrintWriter& operator<<(PrintWriter& prw, const Multiname::Format& mnf);
+    PrintWriter& operator<<(PrintWriter& prw, const Multiname::FormatNameOnly& mnf);
+    
     // version of multiname sporting write barriers
     // NOTE NOTE NOTE
     // This is embedded into other GCObjects, it's not a GCObject by itself.
@@ -200,11 +221,6 @@ namespace avmplus
         int32_t isNsset() const;
         bool matches(const Multiname *mn) const;
 
-//#ifdef AVMPLUS_VERBOSE
-    public:
-        Stringp format(AvmCore* core, Multiname::MultiFormat form=Multiname::MULTI_FORMAT_FULL) const;
-        static Stringp format(AvmCore* core, Namespacep ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);
-//#endif
     private:
         Multiname name;
         MMgc::GC* gc() const;

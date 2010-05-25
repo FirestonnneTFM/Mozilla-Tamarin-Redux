@@ -45,39 +45,42 @@
 
 namespace avmplus
 {
-    int PrintWriter::write(const void *buffer, int count)
+    void PrintWriter::write(const char* utf8)
     {
-        if (m_stream) {
-            int result = m_stream->write(buffer, count);
+        m_stream->write(utf8);
+    }
 
-            const char *ptr = (const char *) buffer;
-            while (--count >= 0) {
-                switch (*ptr) {
-                case '\n':
-                    col = 0;
-                    break;
-                case '\t':
-                    col = ((col>>3)+1)<<3;
-                    break;
-                default:
-                    col++;
-                    break;
-                }
-                ptr++;
-            }
-
-            return result;
-        } else {
-            return 0;
+    // this is an expensive call , use with caution !!!    
+    void PrintWriter::writeN(const char* utf8, size_t count)
+    {
+        //Currently this method is called from avmplus::PrintWriter class
+        //which can pass 1-4 bytes of data at at time.
+        //To do a new/delete for small bursts of data could be inefficient.
+        //So for data < 256 bytes we use a stack buffer to copy and log the message
+        if(count < 256)
+        {
+            char message[256];
+            VMPI_strncpy(message, (const char*) utf8, count);
+            message[count] = '\0';
+            write(message);
+        }
+        else
+        {
+            char* message = new char[count+1];
+            VMPI_strncpy(message, (const char*)utf8, count);
+            message[count] = '\0';
+            write(message);
+            delete [] message;
         }
     }
 
-    PrintWriter& PrintWriter::operator<< (tabstop tabs)
+    // only called from Date.print()
+    void PrintWriter::writeUTF16(const void* buffer, size_t count)
     {
-        while (col <= tabs.getSpaces()) {
-            *this << ' ';
-        }
-        return *this;
+        for (size_t i=0; i<count; i++)
+        {
+            *this << ((wchar*)buffer)[i];
+        } 
     }
 
     PrintWriter& PrintWriter::operator<< (hexAddr value)
@@ -86,28 +89,27 @@ namespace avmplus
         return *this;
     }
 
-    PrintWriter& PrintWriter::operator<< (percent value)
+    PrintWriter& PrintWriter::operator<< (asAtomHex a)
     {
-        if (value.getPercent() < 10) {
-            *this << ' ';
-        }
-        Stringp s = MathUtils::convertDoubleToString(m_core, value.getPercent());
-        StringIndexer str(s);
-        for (int32_t i = 0; i < s->length(); i++)
-        {
-            wchar ch = str[i];
-            *this << ch;
-            if (ch == '.' && i < s->length() - 1) {
-                *this << str[++i];
-                break;
-            }
-        }
+        writeAtomHex(a._atom);
+        return *this;
+    }
+
+    PrintWriter& PrintWriter::operator<< (asAtom a)
+    {
+        writeAtom(a._atom);
+        return *this;
+    }
+
+    PrintWriter& PrintWriter::operator<< (asUTF16 a)
+    {
+        writeUTF16(a._buf, a._len);
         return *this;
     }
 
     PrintWriter& PrintWriter::operator<< (const char *str)
     {
-        write(str, String::Length(str));
+        write(str);
         return *this;
     }
 
@@ -117,17 +119,10 @@ namespace avmplus
         return *this;
     }
 
-    PrintWriter& PrintWriter::operator<< (const wchar *str)
-    {
-        while (*str) {
-            *this << *str++;
-        }
-        return *this;
-    }
-
     PrintWriter& PrintWriter::operator<< (char value)
     {
-        write(&value, 1);
+        char buf[2] = { value, '\0' };
+        if (value) write(buf);
         return *this;
     }
 
@@ -137,153 +132,189 @@ namespace avmplus
         if (value < 0x80) {
             *this << (char)value;
         } else {
-            uint8 Octets[6];
-            int OctetsLen = UnicodeUtils::Ucs4ToUtf8((uint32)value, Octets);
-            write(Octets, OctetsLen);
+            uint8 Octets[7];
+            size_t OctetsLen = UnicodeUtils::Ucs4ToUtf8((uint32)value, Octets);
+            Octets[OctetsLen] = '\0';
+            write((const char*)Octets);
         }
         return *this;
     }
 
     PrintWriter& PrintWriter::operator<< (int32_t value)
     {
-        Stringp s = MathUtils::convertIntegerToStringBase10(m_core, value, MathUtils::kTreatAsSigned);
-        return *this << s;
+        switch (value) {
+            case 0:
+                return *this << "0";
+            case 1:
+                return *this << "1";
+            default:
+            {
+                char buffer[MathUtils::kMinSizeForInt32_t_base10_toString];
+                int32_t len = sizeof(buffer);
+                char* p = MathUtils::convertIntegerToStringBuffer((intptr_t)(uint32_t)value, buffer, len, 10, MathUtils::kTreatAsSigned);
+                return *this << p;
+            }
+        }
     }
 
     PrintWriter& PrintWriter::operator<< (uint64_t value)
     {
-        // use the intptr_t version - it is 64, not 32 bits
-        Stringp s = MathUtils::convertIntegerToStringRadix(m_core, (intptr_t) value, 10, MathUtils::kTreatAsUnsigned);
-        return *this << s;
+        switch (value) {
+            case 0:
+                return *this << "0";
+            case 1:
+                return *this << "1";
+            default:
+            {        
+                char buffer[MathUtils::kMinSizeForInt64_t_toString];
+                int32_t len = sizeof(buffer);
+                char* p = MathUtils::convertIntegerToStringBuffer((intptr_t) value, buffer, len, 10, MathUtils::kTreatAsUnsigned);
+                return *this << p;
+            }
+        }
     }
 
     PrintWriter& PrintWriter::operator<< (int64_t value)
     {
-        // use the intptr_t version - it is 64, not 32 bits
-        Stringp s = MathUtils::convertIntegerToStringRadix(m_core, (intptr_t) value, 10, MathUtils::kTreatAsSigned);
-        return *this << s;
+        switch (value) {
+            case 0:
+                return *this << "0";
+            case 1:
+                return *this << "1";
+            default:
+            {        
+                char buffer[MathUtils::kMinSizeForInt64_t_toString];
+                int32_t len = sizeof(buffer);
+                char* p = MathUtils::convertIntegerToStringBuffer((intptr_t) value, buffer, len, 10, MathUtils::kTreatAsSigned);
+                return *this << p;
+            }
+        }
     }
 
 #if defined AVMPLUS_MAC && defined AVMPLUS_64BIT
     PrintWriter& PrintWriter::operator<< (ptrdiff_t value)
     {
-        // use the intptr_t version - it is 64, not 32 bits
-        Stringp s = MathUtils::convertIntegerToStringRadix(m_core, (intptr_t) value, 10, MathUtils::kTreatAsSigned);
-        return *this << s;
+        return *this << (int64_t)value;
     }
 #endif
 
     PrintWriter& PrintWriter::operator<< (uint32_t value)
     {
-        Stringp s = MathUtils::convertIntegerToStringBase10(m_core, value, MathUtils::kTreatAsUnsigned);
-        return *this << s;
+        switch (value) {
+            case 0:
+                return *this << "0";
+            case 1:
+                return *this << "1";
+            default:
+            {
+                char buffer[MathUtils::kMinSizeForInt32_t_base10_toString];
+                int32_t len = sizeof(buffer);
+                intptr_t wideVal = (intptr_t) value;
+            #ifdef AVMPLUS_64BIT
+                wideVal = (intptr_t)(uint32_t)value;
+            #endif
+                char* p = MathUtils::convertIntegerToStringBuffer(wideVal, buffer, len, 10, MathUtils::kTreatAsUnsigned);
+                return *this << p;
+            }
+        }
+    }
+
+    /**
+     * format the value of an atom for debugging. 
+     */
+    void PrintWriter::writeAtom(Atom atom)
+    {
+        if (!AvmCore::isNull(atom))
+        {
+            switch (atomKind(atom))
+            {
+            case kNamespaceType:
+                *this << AvmCore::atomToNamespace(atom);
+                break;
+            case kObjectType:
+#ifdef AVMPLUS_VERBOSE
+                *this << AvmCore::atomToScriptObject(atom);
+#else
+                this->writeAtomHex(atom);
+#endif
+                break;
+            case kStringType:
+                *this << "\"";
+                if (AvmCore::isString(atom)) *this << AvmCore::atomToString(atom);
+                *this << "\"";
+                break;
+            case kSpecialType:
+                *this << "undefined";
+                break;
+            case kBooleanType:
+                *this << (((atom & ~7) != 0) ? "true" : "false");
+                break;
+            case kIntptrType:
+                *this << (int64_t) atomGetIntptr(atom); // might be slow on 32b 
+                break;
+            case kDoubleType:
+                AvmAssert(atom != kDoubleType); // this would be a null pointer to double
+                *this << AvmCore::atomToDouble(atom); 
+                break;
+            default:
+                AvmAssertMsg(0, "Was ist das?");
+            }
+        }
+        else
+        {
+            *this << "null";
+        }
+    }
+    
+    void PrintWriter::writeAtomHex(Atom atom)
+    {
+        char buffer[MathUtils::kMinSizeForInt64_t_toString];
+        int32_t len = sizeof(buffer);
+        char* p = MathUtils::convertIntegerToStringBuffer((intptr_t)atom, buffer, len, 16, MathUtils::kTreatAsUnsigned);        
+        *this << p;
     }
 
     PrintWriter& PrintWriter::operator<< (double value)
     {
+        // this could be an expensive call ... avoid it
         return *this << MathUtils::convertDoubleToString(m_core, value);
     }
 
-    PrintWriter& PrintWriter::operator<< (Stringp str)
-    {
-        if (!str)
-            return *this << "(null)";
-
-        StringIndexer str_idx(str);
-        for (int i=0, n=str_idx->length(); i<n; i++)
-        {
-            *this << (wchar)str_idx[i];
+    #define PRINT_STAR_OPERATOR_SUPPORT(x,r)                \
+        PrintWriter& PrintWriter::operator<< (const x* obj) \
+        {                                                   \
+            if (!obj) { *this<<r; return *this; }           \
+            return obj->print(*this);                       \
         }
-        return *this;
-    }
 
-    PrintWriter& PrintWriter::operator<< (ScriptObject *obj)
-    {
+    #define PRINT_AMP_OPERATOR_SUPPORT(x)                   \
+        PrintWriter& PrintWriter::operator<< (const x& obj) \
+        {                                                   \
+            return obj.print(*this);                        \
+        }
+
+    #define PRINT_STAR_OPERATOR_SUPPORT_NULL(x) PRINT_STAR_OPERATOR_SUPPORT(x,"null")
+    
 #ifdef AVMPLUS_VERBOSE
-        if (obj) {
-            return *this << obj->format(m_core);
-        } else {
-            return *this << "null";
-        }
+    PRINT_STAR_OPERATOR_SUPPORT(String,"(null)")
+    PRINT_STAR_OPERATOR_SUPPORT(Traits,"*")
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(ScriptObject)
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(MethodInfo)
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(Namespace)
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(NamespaceSet)
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(ScopeTypeChain)
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(ScopeChain)
+    PRINT_AMP_OPERATOR_SUPPORT(Multiname)
 #else
-        (void)obj;
-        AvmAssert(0); // this is only supported in AVMPLUS_VERBOSE builds
-        return *this;
+    PRINT_STAR_OPERATOR_SUPPORT(String,"(null)")
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(Namespace)
+    PRINT_AMP_OPERATOR_SUPPORT(Multiname)
 #endif
-    }
-    PrintWriter& PrintWriter::operator<< (const Traits *obj)
-    {
-#ifdef AVMPLUS_VERBOSE
-        if (obj) {
-            return *this << obj->format(m_core);
-        } else {
-            return *this << "*";
-        }
-#else
-        (void)obj;
-        AvmAssert(0); // this is only supported in AVMPLUS_VERBOSE builds
-        return *this;
-#endif
-    }
-    PrintWriter& PrintWriter::operator<< (const MethodInfo *obj)
-    {
-#ifdef AVMPLUS_VERBOSE
-        if (obj) {
-            return *this << obj->format(m_core);
-        } else {
-            return *this << "null";
-        }
-#else
-        (void)obj;
-        AvmAssert(0); // this is only supported in AVMPLUS_VERBOSE builds
-        return *this;
-#endif
-    }
+                                                      
 
-    PrintWriter& PrintWriter::operator<< (const Multiname& obj)
-    {
-        // Made available in non-AVMPLUS_VERBOSE builds for describeType
-//#ifdef AVMPLUS_VERBOSE
-#if 1
-        return *this << obj.format(m_core);
-#else
-        AvmAssert(0); // this is only supported in AVMPLUS_VERBOSE builds
-        return *this;
-#endif
-    }
-
-    PrintWriter& PrintWriter::operator<< (Namespacep ns)
-    {
-        // Made available in non-AVMPLUS_VERBOSE builds for describeType
-//#ifdef AVMPLUS_VERBOSE
-#if 1
-        if (ns)
-            return *this << ns->format(m_core);
-        else
-            return *this << "null";
-#else
-        AvmAssert(0); // this is only supported in AVMPLUS_VERBOSE builds
-        return *this;
-#endif
-    }
-
-#if VMCFG_METHOD_NAMES
-    PrintWriter& PrintWriter::operator<< (const ScopeTypeChain* s)
-    {
-        if (s)
-            return *this << s->format(m_core);
-        else
-            return *this << "null";
-    }
-
-    PrintWriter& PrintWriter::operator<< (const ScopeChain* s)
-    {
-        if (s)
-            return *this << s->format(m_core);
-        else
-            return *this << "null";
-    }
-#endif
+#undef PRINT_STAR_OPERATOR_SUPPORT
+#undef PRINT_STAR_OPERATOR_SUPPORT_NULL
+#undef PRINT_AMP_OPERATOR_SUPPORT
 
     void PrintWriter::writeHexNibble(uint8 value)
     {
@@ -318,31 +349,6 @@ namespace avmplus
         writeHexByte(uint8((value>>16) & 0xff));
         writeHexByte(uint8(value>>8));
         writeHexByte(uint8(value&0xff));
-    }
-
-    void PrintWriter::formatTypeName(Traits* t)
-    {
-        if (!t)
-        {
-            *this << "*";
-            return;
-        }
-
-        if (t->base == m_core->traits.class_itraits)
-        {
-            t = t->itraits;
-            *this << "class ";
-        }
-
-        Namespacep ns = t->ns();
-        if (ns != NULL && !ns->isPublic())
-            *this << ns << ".";
-
-        Stringp n = t->name();
-        if (n)
-            *this << n;
-        else
-            *this << "(null)";
     }
 
 #ifdef AVMPLUS_VERBOSE
@@ -380,86 +386,6 @@ namespace avmplus
             }
             format++;
         }
-    }
-
-    void PrintWriter::format(const char *format, ...)
-    {
-        va_list ap;
-        va_start(ap, format);
-        formatV(format, ap);
-        va_end(ap);
-    }
-
-    void PrintWriter::formatV(const char *format, va_list ap)
-    {
-        while (*format) {
-            if (*format == '%') {
-                switch (*++format) {
-                case 's':
-                    *this << va_arg(ap, char*);
-                    break;
-                case 'w':
-                    *this << va_arg(ap, wchar*);
-                    break;
-                case 'a':
-                    *this << m_core->format(va_arg(ap, Atom));
-                    break;
-                case 'o':
-                    *this << va_arg(ap, ScriptObject*);
-                    break;
-                case 't':
-                    formatTypeName(va_arg(ap, Traits*));
-                    break;
-                case 'm':
-                    *this << va_arg(ap, MethodInfo*);
-                    break;
-                case 'n':
-                    *this << va_arg(ap, Multiname*)->format(m_core, Multiname::MULTI_FORMAT_NAME_ONLY);
-                    break;
-                case 'N':
-                    *this << va_arg(ap, Multiname*)->format(m_core, Multiname::MULTI_FORMAT_NS_ONLY);
-                    break;
-                case 'S':
-                    *this << va_arg(ap, Stringp);
-                    break;
-                case '2':
-                    {
-                        // A 2-digit integer.
-                        int value = va_arg(ap, int);
-                        *this << (char) ((value/10) + '0');
-                        *this << (char) ((value%10) + '0');
-                    }
-                    break;
-                case '3':
-                    {
-                        // A 3-char month, used by Date.
-                        char *str = va_arg(ap, char *);
-                        *this << str[0] << str[1] << str[2];
-                    }
-                    break;
-                case 'c':
-                    {
-                        // gcc complains if you put va_arg(ap, char)
-                        char value = (char)(va_arg(ap, int));
-                        *this << value;
-                    }
-                    break;
-                case 'f':
-                    *this << va_arg(ap, double);
-                    break;
-                case 'd':
-                    *this << va_arg(ap, int);
-                    break;
-                case 'D':
-                    *this << va_arg(ap, int64_t);
-                    break;
-                }
-            } else {
-                *this << *format;
-            }
-            format++;
-        }
-        va_end(ap);
     }
 #endif /* VERBOSE */
 }

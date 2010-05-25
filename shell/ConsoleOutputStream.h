@@ -54,7 +54,7 @@ namespace avmshell
     class ConsoleOutputStream : public OutputStream
     {
     public:
-        int write(const void *buffer, int count);
+        void write(const char* utf8);    
     };
 }
 

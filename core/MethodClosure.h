@@ -92,7 +92,7 @@ namespace avmplus
         virtual bool isMethodClosure() { return true; }
 
 #ifdef AVMPLUS_VERBOSE
-        Stringp format(AvmCore* core) const;
+        PrintWriter& print(PrintWriter& prw) const;
 #endif
 
         // Flash needs to peek at these for WeakMethodClosure, alas

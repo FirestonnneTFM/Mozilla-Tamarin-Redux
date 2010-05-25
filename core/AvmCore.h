@@ -1447,14 +1447,6 @@ const int kBufferPadding = 16;
 
         static void decrementAtomRegion(Atom *ar, int length);
 
-    public:
-#ifdef AVMPLUS_VERBOSE
-        Stringp format(Atom atom);
-#endif
-#if VMCFG_METHOD_NAMES
-        Stringp formatAtomPtr(Atom atom);
-#endif
-
     private:
         // hash set containing intern'ed strings
         DRC(Stringp) * strings;

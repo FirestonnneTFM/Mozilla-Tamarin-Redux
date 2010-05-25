@@ -212,7 +212,7 @@ namespace avmshell
         // this
         Atom a = nullObjectAtom;
         frame->dhis(a);
-        core->console << core->format(a) << ".";
+        core->console << asAtom(a) << ".";
 
         // method
         MethodInfo* info = functionFor(src, line);
@@ -237,7 +237,7 @@ namespace avmshell
                 if (info && frame->argumentName(i, nm))
                     core->console << nm << "=";
 
-                core->console << core->format(*ptr++);
+                core->console << asAtom(*ptr++);
                 if (i<count-1)
                     core->console << ",";
         }
@@ -504,7 +504,7 @@ namespace avmshell
                     core->console << nm;
                 else
                     core->console << "<local_" << i << ">";
-                core->console << " = " << formatValue(*ptr++) << "\n";
+                core->console << " = " << asAtom(*ptr++) << "\n";
             }
         }
     }
@@ -519,7 +519,7 @@ namespace avmshell
              for (int i = 0; i < count; i++) {
                  Stringp nm = NULL;
                  frame->argumentName(i, nm);
-                 core->console << i << ": " << nm << " = " << formatValue(*arr++) << "\n";
+                 core->console << i << ": " << nm << " = " << asAtom(*arr++) << "\n";
              }
          }
     }
@@ -661,37 +661,37 @@ namespace avmshell
             }
         }
 
-        Atom* ptr;
-        int count, line;
-        SourceInfo* src;
+            Atom* ptr;
+            int count, line;
+            SourceInfo* src;
 
         // See if the name matches a function argument or local
-        frame->sourceLocation(src, line);
+            frame->sourceLocation(src, line);
         if (src)
-        {
+            {
             MethodInfo* info = functionFor(src, line);
             if (info)
             {
                 // see if the name matches a function argument
-                frame->arguments(ptr, count);
-                for(int i=0; i<count; i++)
-                {
-                    Stringp arg = info->getArgName(i);
+            frame->arguments(ptr, count);
+            for(int i=0; i<count; i++)
+            {
+                Stringp arg = info->getArgName(i);
                     if (arg->equalsLatin1(name))
-                    {
-                        // match!
+                {
+                    // match!
                         return new (core->gc) ArgumentValue(frame, i);
-                    }
                 }
+            }
 
                 // see if the name matches a local
-                frame->locals(ptr, count);
-                for(int i=0; i<count; i++)
-                {
-                    Stringp local = info->getLocalName(i);
+            frame->locals(ptr, count);
+            for(int i=0; i<count; i++)
+            {
+                Stringp local = info->getLocalName(i);
                     if ( local->equalsLatin1(name))
-                    {
-                        // match!
+                {
+                    // match!
                         return new (core->gc) LocalValue(frame, i);
                     }
                 }
@@ -714,9 +714,9 @@ namespace avmshell
                     finder.iterate();
                     if (finder.value)
                         return finder.value;
+                    }
                 }
             }
-        }
 
         // Look for globals like 'Number'
         MethodEnv* env = frame->trace->env();
@@ -734,8 +734,8 @@ namespace avmshell
                 {
                     return new PropertyValue(global, mn);
                 }
-            }
         }
+    }
 
         throwUndefinedVarError(name);
         return NULL; // unreachable
@@ -777,7 +777,7 @@ namespace avmshell
             {
                 name = expr;
                 expr = NULL;
-            }
+        }
 
             if (firstPart)
             {
@@ -804,9 +804,9 @@ namespace avmshell
                             // dynamic, then get() and set() will throw exceptions.  Either way,
                             // that's the correct behavior.
                             Multiname* mn = new (core->gc) Multiname(
-                                    core->getAnyPublicNamespace(),
-                                    core->internStringLatin1(name)
-                            );
+            core->getAnyPublicNamespace(),
+            core->internStringLatin1(name)
+        );
                             value = new (core->gc) PropertyValue(AvmCore::atomToScriptObject(parent), mn);
                         }
                         else
@@ -928,58 +928,58 @@ namespace avmshell
 
             TRY(core, kCatchAction_Ignore)
             {
-                switch (cmd) {
-                case -1:
-                    // ambiguous, we already printed error message
-                    break;
-                case CMD_COMMENT:
-                    break;
-                case CMD_INFO:
-                    info();
-                    break;
-                case CMD_BREAK:
-                    breakpoint(nextToken());
-                    break;
-                case CMD_DELETE:
-                    deleteBreakpoint(nextToken());
-                    break;
-                case CMD_LIST:
-                    list(nextToken());
-                    break;
-                case CMD_UNKNOWN:
-                    core->console << "Unknown command.\n";
-                    break;
-                case CMD_QUIT:
-                    Platform::GetInstance()->exit(0);
-                    break;
-                case CMD_CONTINUE:
-                    return;
-                case CMD_PRINT:
-                    print(nextToken());
-                    break;
-                case CMD_NEXT:
-                    stepOver();
-                    return;
-                case INFO_STACK_CMD:
-                    bt();
-                    break;
-                case CMD_FINISH:
-                    stepOut();
-                    return;
-                case CMD_HELP:
-                    help();
-                    break;
-                case CMD_STEP:
-                    stepInto();
-                    return;
-                case CMD_SET:
-                    set();
-                    break;
-                default:
-                    core->console << "Command not implemented.\n";
-                    break;
-                }
+            switch (cmd) {
+            case -1:
+                // ambiguous, we already printed error message
+                break;
+            case CMD_COMMENT:
+                break;
+            case CMD_INFO:
+                info();
+                break;
+            case CMD_BREAK:
+                breakpoint(nextToken());
+                break;
+            case CMD_DELETE:
+                deleteBreakpoint(nextToken());
+                break;
+            case CMD_LIST:
+                list(nextToken());
+                break;
+            case CMD_UNKNOWN:
+                core->console << "Unknown command.\n";
+                break;
+            case CMD_QUIT:
+                Platform::GetInstance()->exit(0);
+                break;
+            case CMD_CONTINUE:
+                return;
+            case CMD_PRINT:
+                print(nextToken());
+                break;
+            case CMD_NEXT:
+                stepOver();
+                return;
+            case INFO_STACK_CMD:
+                bt();
+                break;
+            case CMD_FINISH:
+                stepOut();
+                return;
+            case CMD_HELP:
+                help();
+                break;
+            case CMD_STEP:
+                stepInto();
+                return;
+            case CMD_SET:
+                set();
+                break;
+            default:
+                core->console << "Command not implemented.\n";
+                break;
             }
+        }
             CATCH(Exception *exception)
             {
                 core->console << core->string(exception->atom) << '\n';
@@ -1033,7 +1033,9 @@ namespace avmshell
 //            return core->string(object->toplevel()->callproperty(value, &mn, 1, &thisAtom, object->vtable));
 //        }
 
-        return core->format(value);
+        StringBuffer sb(core);
+        sb << asAtom(value);
+        return sb.toString();
     }
 
     //
@@ -1131,7 +1133,7 @@ namespace avmshell
                 core->console << "function get ";
                 break;
             }
-            core->console << key->format(core, Multiname::MULTI_FORMAT_NAME_ONLY);
+            core->console << Multiname::FormatNameOnly(key);
             if (bk == BKIND_GET || bk == BKIND_GETSET)
                 core->console << "()";
             core->console << " = " << debugger->formatValue(value) << '\n';

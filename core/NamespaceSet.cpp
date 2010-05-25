@@ -59,25 +59,19 @@ namespace avmplus
         return nsset;
     }
 
-//#ifdef AVMPLUS_VERBOSE
-    // Made available in non-AVMPLUS_VERBOSE builds for describeType
-    Stringp NamespaceSet::format(AvmCore* core) const
+    PrintWriter& NamespaceSet::print(PrintWriter& prw) const
     {
-        Stringp s = core->newConstantStringLatin1("{");
+        prw << "{";
         bool comma = false;
         for (NamespaceSetIterator iter(this); iter.hasNext();)
         {
             if (comma)
-                s = core->concatStrings(s, core->newConstantStringLatin1(","));
+                prw << ",";
             Namespacep ns = iter.next();
-            if (ns->isPublic())
-                s = core->concatStrings(s, core->newConstantStringLatin1("public"));
-            else
-                s = core->concatStrings(s, ns->getURI());
+            (ns->isPublic()) ? prw << "public" 
+                             : prw << ns->getURI();
             comma = true;
         }
-        s = core->concatStrings(s, core->newConstantStringLatin1("}"));
-        return s;
+        return prw << "}";
     }
-//#endif
 }

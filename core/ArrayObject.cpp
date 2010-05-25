@@ -421,10 +421,9 @@ namespace avmplus
     }
 
 #ifdef AVMPLUS_VERBOSE
-    Stringp ArrayObject::format(AvmCore* core) const
+    PrintWriter& ArrayObject::print(PrintWriter& prw) const
     {
-        Stringp prefix = core->newConstantStringLatin1("[]@");
-        return core->concatStrings(prefix, core->formatAtomPtr(atom()));
+        return prw << "[]@" << asAtomHex(atom());
     }
 #endif
 

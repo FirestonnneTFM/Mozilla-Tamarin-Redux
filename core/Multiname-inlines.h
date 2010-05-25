@@ -422,17 +422,6 @@ REALLY_INLINE bool HeapMultiname::matches(const Multiname *mn) const
     return name.matches(mn);
 }
 
-REALLY_INLINE Stringp HeapMultiname::format(AvmCore* core, Multiname::MultiFormat form) const
-{
-    return name.format(core, form);
-}
-
-REALLY_INLINE Stringp HeapMultiname::format(AvmCore* core, Namespacep ns, Stringp name, bool attr,
-                                            bool hideNonPublicNamespaces)
-{
-    return format(core, ns, name, attr, hideNonPublicNamespaces);
-}
-
 REALLY_INLINE MMgc::GC* HeapMultiname::gc() const
 {
     return MMgc::GC::GetGC(this);

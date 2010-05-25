@@ -56,7 +56,7 @@ namespace avmplus
     public:
         OutputStream() {}
         virtual ~OutputStream() {}
-        virtual int write(const void *buffer, int count) = 0;
+        virtual void write(const char* utf8) = 0;  // null terminated-utf8 data
     };
 }
 

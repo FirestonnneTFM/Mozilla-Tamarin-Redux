@@ -2591,6 +2591,24 @@ namespace avmplus
         return s;
     }
 
+    PrintWriter& String::print(PrintWriter& prw) const
+    {
+        if (k8 == getWidth())
+        {
+            // fast form
+            Pointers ptrs(this);
+            prw.writeN( (const char*)ptrs.p8, m_length );
+        }
+        else 
+        {
+            for (int32_t i=0, n=length(); i<n; i++)
+            {
+                prw << (wchar)charAt(i);
+            }        
+        }
+        return prw;
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
 
     // ---------------------------------------------------------------------------

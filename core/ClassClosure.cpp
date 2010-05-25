@@ -135,15 +135,11 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-    Stringp ClassClosure::format(AvmCore* core) const
+    PrintWriter& ClassClosure::print(PrintWriter& prw) const
     {
-        if (traits()->name())
-        {
-            return traits()->format(core);
-        }
-
-        Stringp prefix = core->newConstantStringLatin1("CC{}@");
-        return core->concatStrings(prefix, core->formatAtomPtr(atom()));
+        return traits()->name()
+            ? prw << traits()
+            : prw << "CC{}@" << asAtomHex(atom());
     }
 #endif
 

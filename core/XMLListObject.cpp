@@ -903,7 +903,7 @@ namespace avmplus
     }
 
     // E4X 13.5.4.21, page 93 which just refers to 10.2, page 31 (XMLList case)
-    void XMLListObject::__toXMLString(StringBuffer &output, Atom, int /*indentLevel*/)
+    void XMLListObject::__toXMLString(PrintWriter &output, Atom, int /*indentLevel*/)
     {
         AvmCore *core = this->core();
 

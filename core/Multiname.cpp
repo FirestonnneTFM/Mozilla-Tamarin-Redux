@@ -124,53 +124,72 @@ namespace avmplus
         return false;
     }
 
-    /* static */
-    Stringp Multiname::format(AvmCore *core, Namespacep ns, Stringp name, bool attr, bool hideNonPublicNamespaces)
+    PrintWriter& operator<<(PrintWriter& prw, const Multiname::Format& mnf)
+    {
+        if (mnf._ns->isPublic() ||
+            ( // backwards compatibility
+            mnf._ns->getType() != Namespace::NS_Public))
+        {
+            prw << mnf._name;
+        }
+        else 
+        {
+            prw << mnf._ns->getURI() << "::" << mnf._name;
+        }
+        return prw;
+    }
+
+    PrintWriter& operator<<(PrintWriter& prw, const Multiname::FormatNameOnly& mnf)
+    {
+        return mnf._mn->print(prw, Multiname::MULTI_FORMAT_NAME_ONLY);
+    }
+    
+    // @TODO can we get rid of this ?!? 
+    /*static*/ PrintWriter& Multiname::print(PrintWriter& prw, Namespacep ns, Stringp name, bool attr, bool hideNonPublicNamespaces)
     {
         if (ns->isPublic() ||
             (hideNonPublicNamespaces && // backwards compatibility
-            ns->getType() != Namespace::NS_Public))
+            ns->getType() != Namespace::NS_Public)) 
         {
-            return name;
+            prw << name;
         }
-        else
+        else 
         {
-            Stringp uri = ns->getURI();
-            if (attr)
-            {
-                return core->concatStrings(core->newConstantStringLatin1("@"), core->concatStrings(uri,
-                    core->concatStrings(core->newConstantStringLatin1("::"), name)));
-            }
-            else
-            {
-                return core->concatStrings(uri,
-                    core->concatStrings(core->newConstantStringLatin1("::"), name));
-            }
+            (attr) ? prw << "@" << ns->getURI() << "::" << name 
+                   : prw << ns->getURI() << "::" << name;
         }
+        return prw;
     }
 
-//#ifdef AVMPLUS_VERBOSE
-    // Made available in non-AVMPLUS_VERBOSE builds for describeType
-    Stringp Multiname::format(AvmCore* core , MultiFormat form) const
+    PrintWriter& Multiname::printName(PrintWriter& prw) const
     {
-        Stringp attr = this->isAttr() ? core->newConstantStringLatin1("@") : (Stringp)core->kEmptyString;
-        Stringp name = this->isAnyName()
-            ? core->newConstantStringLatin1("*")
-            : (this->isRtname()
-                ? core->newConstantStringLatin1("[]")
-                : getName());
+        this->isAnyName() ? prw << "*"
+                          : (this->isRtname() ? prw << "[]" : prw << getName());
+        return prw;        
+    }
 
-        if (isAnyNamespace())
+    PrintWriter& Multiname::print(PrintWriter& prw, MultiFormat form) const
+    {
+        char attr = this->isAttr() ? '@' : '\0';
+        bool isAny = this->isAnyNamespace();
+        bool isRt = this->isRtns() ? true : false;
+        
+        if (isAny) 
         {
-            return core->concatStrings(attr, core->concatStrings(core->newConstantStringLatin1("*::"), name));
-        }
-        else if (isRtns())
+            prw << attr << "*::";
+            return printName(prw);
+        }            
+        else if (isRt)
         {
-            return core->concatStrings(attr, core->concatStrings(core->newConstantStringLatin1("[]::"), name));
+            prw << attr << "[]::";
+            return printName(prw);
         }
         else if (namespaceCount() == 1 && isQName())
         {
-            return format(core, getNamespace(), core->concatStrings(attr,name), false, false);
+            if (!ns->isPublic())
+                prw << ns->getURI() << "::";
+            prw << attr;
+            return printName(prw);
         }
         else
         {
@@ -178,32 +197,30 @@ namespace avmplus
             bool showNs = (form == MULTI_FORMAT_FULL) || (form == MULTI_FORMAT_NS_ONLY);
             bool showName = (form == MULTI_FORMAT_FULL) || (form == MULTI_FORMAT_NAME_ONLY);
             bool showBrackets = (form == MULTI_FORMAT_FULL);
-            Stringp s = attr;
             if (showNs)
             {
                 if (showBrackets)
-                    s = core->concatStrings(s, core->newConstantStringLatin1("{"));
+                    prw << attr << "{";
 
                 for (int i=0,n=namespaceCount(); i < n; i++)
                 {
                     if (getNamespace(i)->isPublic())
-                        s = core->concatStrings(s, core->newConstantStringLatin1("public"));
+                        prw << "public";
                     else
-                        s = core->concatStrings(s, getNamespace(i)->getURI());
+                        prw << getNamespace(i)->getURI();
                     if (i+1 < n)
-                        s = core->concatStrings(s, core->newConstantStringLatin1(","));
+                        prw << ",";
                 }
 
                 if (showBrackets)
-                    s = core->concatStrings(s, core->newConstantStringLatin1("}::"));
+                    prw << "}::";
             }
 
             if (showName)
-                s = core->concatStrings(s, name);
-            return s;
+                printName(prw);
+            return prw;
         }
     }
-//#endif
 
     // NOTE NOTE NOTE
     // Write barrier note: the container for a HeapMultiname is *not* 'this';

@@ -111,25 +111,19 @@ namespace avmplus
     }
 
     #if VMCFG_METHOD_NAMES
-    Stringp ScopeTypeChain::format(AvmCore* core) const
+    PrintWriter& ScopeTypeChain::print(PrintWriter& prw) const
     {
-        Stringp r = core->kEmptyString;
-        r = r->appendLatin1("STC:[traits=");
-        r = r->append(_traits->format(core));
-        r = r->appendLatin1(";");
+        prw << "STC:{traits=" << traits() << ":";
         for (int32_t i = 0; i < fullsize; i++)
         {
             if (i > 0)
-                r = r->appendLatin1(",");
-            Traits* t = getScopeTraitsAt(i);
-            bool b = getScopeIsWithAt(i);
-            r = r->append(t->format(core));
-            if (b)
-                r = r->appendLatin1("(iswith)");
+                prw << ',';
+            prw << getScopeTraitsAt(i);
+            if (getScopeIsWithAt(i)) prw << "(iswith)";
+            
         }
-        r = r->appendLatin1("]");
-        return r;
-    }
+        return prw << "]";
+    }    
     #endif
 
     bool ScopeTypeChain::equals(const ScopeTypeChain* that) const
@@ -192,23 +186,16 @@ namespace avmplus
         WBATOM(gc, this, &_scopes[i], value);
     }
 
-    #if VMCFG_METHOD_NAMES
-    Stringp ScopeChain::format(AvmCore* core) const
+    #if VMCFG_METHOD_NAMES    
+    PrintWriter& ScopeChain::print(PrintWriter& prw) const
     {
-        Stringp r = core->kEmptyString;
-        r = r->appendLatin1("SC:{dxns=(");
-        r = r->append(_defaultXmlNamespace->format(core));
-        r = r->appendLatin1("),");
-        r = r->append(_scopeTraits->format(core));
-        r = r->appendLatin1(",V:[");
+        prw << "SC:{dxns=(" << _defaultXmlNamespace << ")," << _scopeTraits << ",V:[";
         for (int32_t i = 0; i < _scopeTraits->size; i++)
         {
-            if (i > 0)
-                r = r->appendLatin1(",");
-            r = r->append(core->format(_scopes[i]));
+            if (i > 0) prw << ",";
+            prw << asAtom(_scopes[i]);
         }
-        r = r->appendLatin1("]}");
-        return r;
+        return prw << "]}";
     }
     #endif
 }

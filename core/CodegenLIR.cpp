@@ -6040,10 +6040,10 @@ namespace avmplus
         CodeMgr *mgr = pool->codeMgr;
         #ifdef NJ_VERBOSE
         if (pool->isVerbose(LC_ReadLIR)) {
-            StUTF8String name(info->format(core));
-            char *title = new (*lir_alloc) char[VMPI_strlen(name.c_str()) + 20];
-            VMPI_sprintf(title, "Final LIR %s", name.c_str());
-            listing(title, mgr->log, frag, prologLastIns);
+            StringBuffer sb(core);
+            sb << info;
+            core->console << "Final LIR " << info;
+            listing(sb.c_str(), mgr->log, frag, prologLastIns);
         }
         if (pool->isVerbose(LC_Liveness)) {
             Allocator live_alloc;
@@ -6051,8 +6051,9 @@ namespace avmplus
             nanojit::live(&in, live_alloc, frag, &mgr->log);
         }
         if (pool->isVerbose(LC_AfterDCE | LC_Native)) {
-            StUTF8String name(info->format(core));
-            mgr->log.printf("jit-assembler %s\n", name.c_str());
+            StringBuffer sb(core);
+            sb << info;
+            mgr->log.printf("jit-assembler %s\n", sb.c_str());
         }
         #endif
 

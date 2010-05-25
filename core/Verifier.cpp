@@ -2314,7 +2314,9 @@ namespace avmplus
     {
         if (name->isAttr())
         {
-            verifyFailed(kIllegalOpMultinameError, core->toErrorString(name), name->format(core));
+            StringBuffer sb(core);
+            sb << *name;
+            verifyFailed(kIllegalOpMultinameError, core->toErrorString(name), sb.toString());
         }
     }
 
@@ -2987,7 +2989,7 @@ namespace avmplus
                 if (!t)
                     out << "*!";
                 else
-                    out << t->format(core);
+                    out << t;
                 if (i+1 < n)
                     out << ' ';
             }
@@ -3004,7 +3006,7 @@ namespace avmplus
         if (!t) {
             out << (v.notNull ? "*!" : "*");
         } else {
-            out << t->format(core);
+            out << t;
             if (!t->isNumeric() && t != BOOLEAN_TYPE && t != NULL_TYPE && t != VOID_TYPE)
                 out << (v.notNull ? "" : "?");
         }

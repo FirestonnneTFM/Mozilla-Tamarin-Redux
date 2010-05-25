@@ -783,7 +783,9 @@ range_error:
                 Multiname mn;
                 this->parseMultiname(mn, -index);
 #endif
-                name = Multiname::format(core, mn.getNamespace(), mn.getName());
+                StringBuffer sb(core);
+                sb << Multiname::Format(&mn);
+                name = sb.toString();
             }
         }
         return name;

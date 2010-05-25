@@ -59,24 +59,29 @@ namespace avmplus
         }
     }
 
-    int StringOutputStream::write(const void *buffer,
-                                  int count)
+    void StringOutputStream::write(const char* utf8)
     {
-        if (m_length + count >= (int)GC::Size(m_buffer))
+        writeN(utf8, String::Length(utf8));
+    }
+
+    void StringOutputStream::writeN(const char* buffer, size_t count)
+    {
+        if (m_length + count >= (size_t)GC::Size(m_buffer))
         {
             GC* gc = MMgc::GC::GetGC(m_buffer);
-            int newCapacity = (m_length+count+1)*2;
+            size_t newCapacity = (m_length+count+1)*2;
             char* newBuffer = (char*) gc->Alloc(newCapacity);
-            if (!newBuffer) {
-                return 0;
-            }
             VMPI_memcpy(newBuffer, m_buffer, m_length);
             gc->Free(m_buffer);
             m_buffer = newBuffer;
         }
         VMPI_memcpy(m_buffer+m_length, buffer, count);
-        m_length += count;
+        m_length += (int)count;
         m_buffer[m_length] = 0;
-        return count;
+    }    
+    
+    void StringBuffer::writeN(const char* buffer, size_t count)
+    {
+        m_stream.writeN(buffer, count);
     }
 }

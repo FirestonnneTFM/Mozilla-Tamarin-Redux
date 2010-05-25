@@ -508,8 +508,8 @@ namespace avmplus
         MMgc::GCHashtable               pool2abcIndex;
 
     private:
-        void    traceCallback(int line);
-        Stringp traceArgumentsString();
+        void traceCallback(int line);
+        void traceArgumentsString(PrintWriter& prw);
 
         static int readS24(const byte *pc) { return AvmCore::readS24(pc); }
         static int readU16(const byte *pc) { return AvmCore::readU16(pc); }
