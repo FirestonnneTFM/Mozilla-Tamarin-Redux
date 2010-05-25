@@ -3441,21 +3441,21 @@ namespace avmplus
         // stack
         core->console << "                        stack:";
         for (ptrdiff_t i=stackBase; i <= sp; i++) {
-            core->console << " " << core->format(framep[i]);
+            core->console << " " << asAtom(framep[i]);
         }
         core->console << '\n';
 
         // scope chain
         core->console << "                        scope: ";
         for (ptrdiff_t i=scopeBase; i <= scopep; i++) {
-            core->console << core->format(framep[i]) << " ";
+            core->console << asAtom(framep[i]) << " ";
         }
         core->console << '\n';
 
         // locals
         core->console << "                         locals: ";
         for (ptrdiff_t i=0; i < scopeBase; i++) {
-            core->console << core->format(framep[i]) << " ";
+            core->console << asAtom(framep[i]) << " ";
         }
         core->console << '\n';
 

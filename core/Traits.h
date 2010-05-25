@@ -406,7 +406,7 @@ namespace avmplus
 
     public:
 #if VMCFG_METHOD_NAMES
-        Stringp format(AvmCore* core, bool includeAllNamespaces = false) const;
+        PrintWriter& print(PrintWriter& prw, bool includeAllNamespaces = false) const;
 #endif
 
         void setDeclaringScopes(const ScopeTypeChain* stc);

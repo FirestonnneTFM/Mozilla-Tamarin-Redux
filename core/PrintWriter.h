@@ -63,6 +63,40 @@ namespace avmplus
     };
 
     /**
+     * asAtom is an operator to be used with PrintWriter
+     * in order to write the value of an atom 
+     */
+    class asAtom
+    {
+    public:
+        asAtom(Atom a) : _atom(a) {}        
+        Atom _atom;
+    };
+
+    /**
+     * asAtom is an operator to be used with PrintWriter
+     * in order to write the value of an atom 
+     */
+    class asAtomHex
+    {
+    public:
+        asAtomHex(Atom a) : _atom(a) {}        
+        Atom _atom;
+    };
+    
+    /**
+     * asUTF16 is an operator to be used with PrintWriter
+     * in order to write the contents of a wchar'd buffer 
+     */
+    class asUTF16
+    {
+    public:
+        asUTF16(wchar* w, uint32_t len) : _buf(w), _len(len) {}        
+        wchar* _buf;
+        uint32_t _len;
+    };
+    
+    /**
      * tabstop is an operator that can be used with PrintWriter
      * to advance to the specified tabstop
      */
@@ -82,25 +116,6 @@ namespace avmplus
     };
 
     /**
-     * percent is an operator that can be used with PrintWrtier
-     * to output a number as a percentage
-     */
-    class percent
-    {
-    public:
-        percent(double _value) { this->value = _value; }
-        percent(const percent& toCopy) { value = toCopy.value; }
-        percent& operator= (const percent& toCopy) {
-            value = toCopy.value;
-            return *this;
-        }
-        double getPercent() const { return value; }
-
-    private:
-        double value;
-    };
-
-    /**
      * PrintWriter is a utility class for writing human-readable
      * text.  It has an interface similar to the C++ iostreams
      * library, overloading the "<<" operator to accept most
@@ -109,17 +124,17 @@ namespace avmplus
     class PrintWriter : public OutputStream
     {
     public:
-        PrintWriter(AvmCore* core) { m_core = core; m_stream = NULL; col = 0; }
-        PrintWriter(AvmCore* core, OutputStream *stream) { m_core = core; m_stream = stream; col = 0; }
+        PrintWriter(AvmCore* core) { m_core = core; m_stream = NULL; }
+        PrintWriter(AvmCore* core, OutputStream *stream) { m_core = core; m_stream = stream; }
         ~PrintWriter() {}
 
         void setOutputStream(OutputStream *stream) { m_stream = stream; }
         void setCore(AvmCore* core) { m_core = core; }
 
-        int write(const void *buffer, int count);
+        void write(const char* utf8);  // null terminated
+        void writeN(const char* utf8, size_t count);
 
-        PrintWriter& operator<< (const char *str);
-        PrintWriter& operator<< (const wchar *str);
+        PrintWriter& operator<< (const char* str);
         PrintWriter& operator<< (char value);
         PrintWriter& operator<< (wchar value);
         PrintWriter& operator<< (int32_t value);
@@ -130,30 +145,29 @@ namespace avmplus
         PrintWriter& operator<< (ptrdiff_t value);
 #endif
         PrintWriter& operator<< (double value);
-        PrintWriter& operator<< (Stringp str);
-        PrintWriter& operator<< (tabstop tabs);
+        PrintWriter& operator<< (const String* str);
         PrintWriter& operator<< (hexAddr tabs);
-        PrintWriter& operator<< (percent value);
+        PrintWriter& operator<< (asAtom a);
+        PrintWriter& operator<< (asAtomHex a);
+        PrintWriter& operator<< (asUTF16 a);
         PrintWriter& operator<< (bool b);
     #if VMCFG_METHOD_NAMES
         PrintWriter& operator<< (const ScopeTypeChain* s);
         PrintWriter& operator<< (const ScopeChain* s);
     #endif
 
-        void formatTypeName(Traits* t);
-
+        void writeAtom(Atom atom);
+        void writeAtomHex(Atom atom);
+        void writeUTF16(const void* buffer, size_t count);        
         void writeHexByte(uint8 value);
         void writeHexWord(uint16_t value);
         void writeHexAddr(uintptr value);
 
         #ifdef AVMPLUS_VERBOSE
-        void format(const char *format, ...);
-        void formatV(const char *format, va_list ap);
         void formatP(const char* format, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
         #endif
 
     private:
-        int col;
         OutputStream *m_stream;
         AvmCore *m_core;
 
@@ -161,13 +175,12 @@ namespace avmplus
 
         // These are defined for not DEBUGGER builds but fire asserts
     public:
-        PrintWriter& operator<< (ScriptObject* obj);
+        PrintWriter& operator<< (const ScriptObject* obj);
         PrintWriter& operator<< (const Traits* obj);
         PrintWriter& operator<< (const MethodInfo* obj);
+        PrintWriter& operator<< (const NamespaceSet* obj);
+        PrintWriter& operator<< (const Namespace* obj);
         PrintWriter& operator<< (const Multiname& obj);
-        PrintWriter& operator<< (Namespacep str);
-    private:
-        PrintWriter& operator<< (const Multiname* obj); // not defined
     };
 }
 

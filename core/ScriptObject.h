@@ -237,7 +237,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
     public:
-        virtual Stringp format(AvmCore* core) const;
+        virtual PrintWriter& print(PrintWriter& prw) const;
 #endif
 
 #ifdef DEBUGGER

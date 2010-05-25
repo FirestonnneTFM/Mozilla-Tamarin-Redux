@@ -388,7 +388,7 @@ namespace avmshell
 #endif
         config.runmode = settings.runmode;
 
-#ifdef VMCFG_METHOD_NAMES
+#if VMCFG_METHOD_NAMES
         // verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
         if (settings.do_verbose)
             config.methodNames = true;

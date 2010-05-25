@@ -497,16 +497,11 @@ namespace avmplus
     }
 
 #ifdef AVMPLUS_VERBOSE
-    Stringp ScriptObject::format(AvmCore* core) const
+    PrintWriter& ScriptObject::print(PrintWriter& prw) const
     {
-        if (traits()->name() != NULL) {
-            return core->concatStrings(traits()->format(core),
-                                       core->concatStrings(core->newConstantStringLatin1("@"),
-                                                           core->formatAtomPtr(atom())));
-        } else {
-            return core->concatStrings(core->newConstantStringLatin1("{}@"),
-                                       core->formatAtomPtr(atom()));
-        }
+        (traits()->name() != NULL) ? prw << traits()
+                                   : prw << "{}"; 
+        return prw << "@" << asAtomHex(atom());
     }
 #endif
 

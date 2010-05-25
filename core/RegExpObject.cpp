@@ -500,7 +500,7 @@ namespace avmplus
             int matchLen   = ovector[1]-ovector[0];
 
             // copy in stuff leading up to match
-            resultBuffer.write(src+lastIndex, matchIndex-lastIndex);
+            resultBuffer.writeN(src+lastIndex, matchIndex-lastIndex);
 
             const char *ptr = utf8Replacement.c_str();
             while (*ptr) {
@@ -511,11 +511,11 @@ namespace avmplus
                         ptr += 2;
                         break;
                     case '&':
-                        resultBuffer.write(src+matchIndex, matchLen);
+                        resultBuffer.writeN(src+matchIndex, matchLen);
                         ptr += 2;
                         break;
                     case '`':
-                        resultBuffer.write(src, matchIndex);
+                        resultBuffer.writeN(src, matchIndex);
                         ptr += 2;
                         break;
                     case '\'':
@@ -547,7 +547,7 @@ namespace avmplus
                                 i = ptr[1]-'0';
                             }
                             if (i >= 1 && i <= captureCount) {
-                                resultBuffer.write(src+ovector[i*2],
+                                resultBuffer.writeN(src+ovector[i*2],
                                                    ovector[i*2+1]-ovector[i*2]);
                                 ptr += (i >= 10) ? 3 : 2;
                             } else {
@@ -584,7 +584,7 @@ namespace avmplus
         // copy in stuff after last match
         if (lastIndex < subjectLength)
         {
-            resultBuffer.write(src+lastIndex, subjectLength-lastIndex);
+            resultBuffer.writeN(src+lastIndex, subjectLength-lastIndex);
         }
 
         return stringFromUTF8((const char*)resultBuffer.c_str(), resultBuffer.length());
@@ -617,7 +617,7 @@ namespace avmplus
             int matchLen   = ovector[1]-ovector[0];
 
             // copy in stuff leading up to match
-            resultBuffer.write(src+lastIndex, matchIndex-lastIndex);
+            resultBuffer.writeN(src+lastIndex, matchIndex-lastIndex);
 
             // call the replace function
             Atom argv[NUM_MATCHES+4];
@@ -663,7 +663,7 @@ namespace avmplus
         // copy in stuff after last match
         if (lastIndex < subjectLength)
         {
-            resultBuffer.write(src+lastIndex, subjectLength-lastIndex);
+            resultBuffer.writeN(src+lastIndex, subjectLength-lastIndex);
         }
 
         return stringFromUTF8((const char*)resultBuffer.c_str(), resultBuffer.length());
@@ -687,7 +687,7 @@ namespace avmplus
                     // Invalid UTF8 sequence, advance one byte
                     n = 1;
                 }
-                resultBuffer.write(src+newLastIndex, n);
+                resultBuffer.writeN(src+newLastIndex, n);
                 newLastIndex += n;
             }
             else

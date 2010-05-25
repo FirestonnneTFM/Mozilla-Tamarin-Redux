@@ -452,6 +452,8 @@ namespace avmplus
                 Stringp             getMasterString() const; // used by profiler
 #endif
 
+        PrintWriter& print(PrintWriter& prw) const;
+        
     private:
         friend class StringIndexer;
         friend class StUTF8String;

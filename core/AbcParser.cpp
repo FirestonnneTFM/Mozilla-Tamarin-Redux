@@ -538,8 +538,8 @@ namespace avmplus
                     #ifdef AVMPLUS_VERBOSE
                     if (pool->isVerbose(VB_parse))
                     {
-                        core->console << "            " << traitNames[kind]
-                            << " name=" << Multiname::format(core, ns, name)
+                        core->console << "            " << traitNames[kind] 
+                            << " name=" << Multiname::Format(ns, name)
                             << " slot_id=" << slot_id
                             << " type=" << ctraits
                             << "\n";
@@ -570,7 +570,7 @@ namespace avmplus
                     if (pool->isVerbose(VB_parse))
                     {
                         core->console << "            " << traitNames[kind]
-                            << " name=" << Multiname::format(core,ns,name)
+                            << " name=" << Multiname::Format(ns, name)
                             << " slot_id=" << slot_id
                             << " value_index=" << value_index
                             << " type=" << typeName
@@ -588,7 +588,7 @@ namespace avmplus
                 if (pool->isVerbose(VB_parse))
                 {
                     core->console << "            " << traitNames[kind]
-                        << " name=" << Multiname::format(core, ns, name)
+                        << " name=" << Multiname::Format(ns, name)
                         << " disp_id=" << earlyDispId << " (ignored)"
                         << " method_index=" << method_index
                         << " attr=" << ((tag&ATTR_final)?"final":"virtual");
@@ -1295,7 +1295,7 @@ namespace avmplus
             if(pool->isVerbose(VB_parse)) {
                 core->console << "    " << offset << ":" << "cpool_string["<<i<<"]="
                     << constantNames[CONSTANT_Utf8] << " ";
-                core->console.write(pos, len);
+                core->console.writeN( (const char*)pos, len);
                 core->console << "\n";
             }
 #endif
@@ -1400,9 +1400,7 @@ namespace avmplus
             #ifdef AVMPLUS_VERBOSE
             if(pool->isVerbose(VB_parse)) {
                 core->console << "    " << offset << ":" << "cpool_ns["<<i<<"]="
-                    <<constantNames[kind] << " ";
-                core->console << core->format(cpool_ns[i]->atom());
-                core->console << "\n";
+                    <<constantNames[kind] << " " << cpool_ns[i] << "\n";
             }
             #endif
         }
@@ -1442,9 +1440,7 @@ namespace avmplus
             #ifdef AVMPLUS_VERBOSE
             if(pool->isVerbose(VB_parse)) {
                 core->console << "    " << offset << ":" << "cpool_ns_set["<<i<<"]="
-                    <<constantNames[CONSTANT_NamespaceSet] << " ";
-                core->console << cpool_ns_set[i]->format(core);
-                core->console << "\n";
+                     << constantNames[CONSTANT_NamespaceSet] << " " << cpool_ns_set[i] << "\n";
             }
             #endif
         }

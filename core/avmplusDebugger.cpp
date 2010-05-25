@@ -281,7 +281,7 @@ namespace avmplus
                 core->console << " (";
 
                 if (!ignoreArgs && core->callStack && (astrace_console == TRACE_METHODS_WITH_ARGS || astrace_console == TRACE_METHODS_AND_LINES_WITH_ARGS))
-                    core->console << traceArgumentsString();
+                    traceArgumentsString(core->console);
 
                 core->console << ")\n";
             }
@@ -333,8 +333,11 @@ namespace avmplus
             name = env->method->getMethodName(includeAllNamespaces);
             if (!name)
                 name = core->kEmptyString;
-            if ((line == 0) && (astrace_callback == TRACE_METHODS_WITH_ARGS || astrace_callback == TRACE_METHODS_AND_LINES_WITH_ARGS))
-                args = traceArgumentsString();
+            if ((line == 0) && (astrace_callback == TRACE_METHODS_WITH_ARGS || astrace_callback == TRACE_METHODS_AND_LINES_WITH_ARGS)) {
+                StringBuffer sb(core);
+                traceArgumentsString(sb);
+                args = sb.toString();
+            } 
         }
 
         Atom argv[5] = { trace_callback->atom(), file->atom(), core->intToAtom(line), name->atom(), args->atom() };
@@ -353,23 +356,20 @@ namespace avmplus
         END_TRY
     }
 
-    Stringp Debugger::traceArgumentsString()
+    void Debugger::traceArgumentsString(PrintWriter& prw)
     {
-        Stringp args = core->kEmptyString;
         DebugStackFrame* frame = (DebugStackFrame*)frameAt(0);
         int count;
         Atom* arr;
         if (frame && frame->arguments(arr, count))
         {
-            Stringp comma = core->newConstantStringLatin1(",");
             for(int i=0; i<count; i++)
             {
-                args = core->concatStrings(args, core->format(arr[i]));
+                prw << asAtom(arr[i]);
                 if (i+1 < count)
-                    args = core->concatStrings(args, comma);
+                    prw << ",";
             }
         }
-        return args;
     }
 
     /**

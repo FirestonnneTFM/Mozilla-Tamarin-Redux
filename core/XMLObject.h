@@ -253,7 +253,7 @@ namespace avmplus
         inline String* toXMLString () { return AS3_toXMLString (); }
 
         // E4X support routines
-        void __toXMLString(StringBuffer &s, AtomArray *AncestorNamespace, int indentLevel = 0, bool includeChildren = true) const;
+        void __toXMLString(PrintWriter &s, AtomArray *AncestorNamespace, int indentLevel = 0, bool includeChildren = true) const;
         XMLObject* _deepCopy () const;
 
         Namespace *GenerateUniquePrefix (Namespace *ns, const AtomArray *namespaces) const;
@@ -292,6 +292,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
     public:
         Stringp format(AvmCore* core) const;
+        PrintWriter& printUsingAncestors(PrintWriter& prw, AtomArray* AncestorNamespaces) const;
 #endif
     private:
         /**

@@ -157,7 +157,7 @@ namespace avmplus
 
         inline void checkCapacity(int c) { m_children.checkCapacity(c); }
 
-        void __toXMLString(StringBuffer &output, Atom AncestorNamespace, int indentLevel = 0);
+        void __toXMLString(PrintWriter &output, Atom AncestorNamespace, int indentLevel = 0);
 
         // Iterator support - for in, for each
         Atom nextName(int index);

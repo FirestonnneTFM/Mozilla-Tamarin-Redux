@@ -127,7 +127,7 @@ namespace avmplus
 
 //#ifdef AVMPLUS_VERBOSE
     public:
-        Stringp format(AvmCore* core) const;
+        PrintWriter& print(PrintWriter& prw) const;
 //#endif
     private:
         void setUri(Stringp uri, NamespaceType flags);

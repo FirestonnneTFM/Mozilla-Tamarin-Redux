@@ -253,15 +253,11 @@ namespace avmplus
     static Stringp getStackTraceLine(MethodInfo* method, Stringp filename)
     {
         AvmCore *core = method->pool()->core;
-        Stringp s = core->newStringLatin1("\tat ");
-        s = core->concatStrings(s, method->format(core));
+        StringBuffer sb(core);
+        sb << "\tat" << method;
         if (filename)
-        {
-            s = s->appendLatin1("[");
-            s = s->append(filename);
-            s = s->appendLatin1(":");
-        }
-        return s;
+            sb << "[" << filename << ":";
+        return sb.toString();
     }
 
     Stringp StackTrace::format(AvmCore* core)
@@ -287,9 +283,9 @@ namespace avmplus
                 Stringp filename=NULL;
                 if(e->filename())
                 {
-                    StringBuffer sb(core->gc);
+                    StringBuffer sb(core);
                     dumpFilename(e->filename(), sb);
-                    filename = core->newStringUTF8(sb.c_str());
+                    filename = sb.toString();
                 }
                 s = core->concatStrings(s, getStackTraceLine(e->info(), filename));
                 if(e->filename())

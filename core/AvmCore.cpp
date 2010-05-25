@@ -67,7 +67,7 @@ namespace avmplus
         #ifdef AVMPLUS_VERBOSE
         if (isVerbose(VB_traits))
         {
-            console << "setCacheSize: bindings " << cs.bindings << " metadata " << cs.metadata << '\n';
+            console << "setCacheSize: bindings " << hexAddr(cs.bindings) << " metadata " << hexAddr(cs.metadata) << '\n';
         }
         #endif
 
@@ -1192,7 +1192,9 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         String* out = NULL;
     #ifdef DEBUGGER
-        out = this->format(a);
+        StringBuffer sb(this); // 256B gc alloc occurs here.
+        sb << asAtom(a);
+        out = sb.toString();
     #else
         (void)a;
         out = kEmptyString;
@@ -1244,10 +1246,13 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         String* s = NULL;
     #ifdef DEBUGGER
-        if (m)
-            s = m->format(this);
-        else
+        if (m) {
+            StringBuffer sb(this); // 256B gc alloc occurs here.
+            m->print(sb);
+            s = sb.toString();
+        } else {
             s = kEmptyString;
+        }
     #else
         s = kEmptyString;
         (void)m;
@@ -1257,24 +1262,20 @@ return the result of the comparison ToPrimitive(x) == y.
 
     String* AvmCore::toErrorString(const Multiname& n)
     {
-        String* s = NULL;
-    #ifdef DEBUGGER
-        s = n.format(this, Multiname::MULTI_FORMAT_NAME_ONLY);
-    #else
-        s = kEmptyString;
-        (void)n;
-    #endif /* DEBUGGER */
-        return s;
+        return toErrorString(&n);
     }
 
     String* AvmCore::toErrorString(const Multiname* n)
     {
         String* s = NULL;
     #ifdef DEBUGGER
-        if (n)
-            s = n->format(this, Multiname::MULTI_FORMAT_NAME_ONLY);
-        else
+        if (n) {
+            StringBuffer sb(this); // 256B gc alloc occurs here.
+            sb << Multiname::FormatNameOnly(n);
+            s = sb.toString();
+        } else { 
             s = kEmptyString;
+        }
     #else
         s = kEmptyString;
         (void)n;
@@ -1286,10 +1287,13 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         String* s = NULL;
     #ifdef DEBUGGER
-        if (ns)
-            s = ns->format(this);
-        else
+        if (ns) {
+            StringBuffer sb(this); // 256B gc alloc occurs here.
+            ns->print(sb);
+            s = sb.toString();
+        } else {
             s = kEmptyString;
+        }
     #else
         s = kEmptyString;
         (void)ns;
@@ -1308,26 +1312,24 @@ return the result of the comparison ToPrimitive(x) == y.
             return newConstantStringLatin1("*");
         }
 
-        String* s = NULL;
+        StringBuffer sb(this); // 256B gc alloc occurs here.
         if (t->base == traits.class_itraits)
         {
             t = t->itraits;
-            s = newConstantStringLatin1("class ");
-        }
-        else
-        {
-            s = kEmptyString;
+            sb << "class ";
         }
 
         Namespacep ns = t->ns();
         if (ns != NULL && !ns->getURI()->isEmpty())
-            s = concatStrings(s, concatStrings(toErrorString(ns), newConstantStringLatin1(".")));
+            sb << ns << ".";
 
         Stringp n = t->name();
         if (n)
-            s = concatStrings(s, n);
+            sb << n;
         else
-            s = concatStrings(s, newConstantStringLatin1("(null)"));
+            sb << "(null)";
+
+        Stringp s = sb.toString();
         return s;
         #endif /* DEBUGGER */
     }
@@ -1348,7 +1350,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 StringBuffer buffer(this);
                 buffer.formatP( format, arg1, arg2, arg3);
-                out = newStringUTF8(buffer.c_str());
+                out = buffer.toString();
             }
             #else
             /**
@@ -1612,8 +1614,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 uint32 index = readU32(pc);
                 if (index < pool->constantStringCount)
                 {
-                    String *s = format(pool->getString(index)->atom());
-                    buffer << " " << s;
+                    buffer << " \"" << pool->getString(index) << "\"";
                 }
                 break;
             }
@@ -1807,7 +1808,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 buffer << wopAttrs[opcode].name;
                 uint32 index = (uint32)*pc++;
                 if (index < pool->constantStringCount)
-                    buffer << " " << format(pool->getString(index)->atom());
+                    buffer << " \"" << pool->getString(index) << "\"";
                 else
                     buffer << " OUT OF RANGE: " << index;
                 break;
@@ -3783,56 +3784,6 @@ return the result of the comparison ToPrimitive(x) == y.
         return allocDouble(n);
     }
 #endif // not AVMPLUS_SSE2_ALWAYS
-
-#ifdef AVMPLUS_VERBOSE
-    /**
-     * format the value of an atom for debugging.  This is here so that we can
-     * more eazily take care of pointer swizzling when called from ScriptObject.format().
-     * @param atom
-     * @return
-     */
-    Stringp AvmCore::format(Atom atom)
-    {
-        if (!isNull(atom))
-        {
-            switch (atomKind(atom))
-            {
-            default:
-            case kNamespaceType:
-                return atomToNamespace(atom)->format(this);
-            case kObjectType:
-                return atomToScriptObject(atom)->format(this);
-            case kStringType:
-                {
-                    Stringp quotes = newConstantStringLatin1("\"");
-                    return concatStrings(quotes,
-                        concatStrings(atomToString((atom&~7)==0 ? kEmptyString->atom() : atom),
-                                                    quotes));
-                }
-            case kSpecialType:
-                return kundefined;
-            case kBooleanType:
-                return booleanStrings[atom>>3];
-            case kIntptrType:
-                return MathUtils::convertIntegerToStringRadix(this, atomGetIntptr(atom), 10, MathUtils::kTreatAsSigned);
-            case kDoubleType:
-                AvmAssert(atom != kDoubleType); // this would be a null pointer to double
-                return doubleToString(atomToDouble(atom));
-            }
-        }
-        else
-        {
-            return knull;
-        }
-    }
-#endif
-
-#if VMCFG_METHOD_NAMES
-    Stringp AvmCore::formatAtomPtr(Atom atom)
-    {
-        return MathUtils::convertIntegerToStringRadix(this, atom, 16, MathUtils::kTreatAsUnsigned);
-    }
-#endif
 
     Stringp AvmCore::newConstantStringLatin1(const char* s)
     {

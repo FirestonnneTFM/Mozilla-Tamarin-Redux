@@ -139,10 +139,9 @@ namespace avmplus
             return 0;
     }
 
-    Stringp Namespace::format(AvmCore* core) const
+    PrintWriter& Namespace::print(PrintWriter& prw) const
     {
-        (void) core;
-        return getURI();
+        return prw << getURI();
     }
 
     Stringp Namespace::getURI() const

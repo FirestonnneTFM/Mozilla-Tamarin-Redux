@@ -75,14 +75,9 @@ namespace avmplus
     }
 
 #ifdef AVMPLUS_VERBOSE
-    Stringp MethodClosure::format(AvmCore* core) const
+    PrintWriter& MethodClosure::print(PrintWriter& prw) const
     {
-        Stringp prefix = core->newConstantStringLatin1("MC{");
-        prefix = core->concatStrings(prefix, core->format(_savedThis));
-        prefix = core->concatStrings(prefix, core->newConstantStringLatin1(" "));
-        prefix = core->concatStrings(prefix, _call->method->format(core));
-        prefix = core->concatStrings(prefix, core->newConstantStringLatin1("}@"));
-        return core->concatStrings(prefix, core->formatAtomPtr(atom()));
+        return prw << "MC{" << asAtom(_savedThis) << " " << _call->method << "}@" << asAtomHex(atom());
     }
 #endif
 

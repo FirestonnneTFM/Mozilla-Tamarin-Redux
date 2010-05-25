@@ -112,16 +112,12 @@ namespace avmplus
     }
 
 #ifdef AVMPLUS_VERBOSE
-    Stringp DateObject::format(AvmCore* core) const
+    PrintWriter& DateObject::print(PrintWriter& prw) const
     {
         wchar buffer[256];
         int len;
-        date.toString(buffer, Date::kToString, len);
-        Stringp result = core->newConstantStringLatin1("<");
-        result = String::concatStrings(result, core->newStringUTF16(buffer, len));
-        result = String::concatStrings(result, core->newConstantStringLatin1(">@"));
-        result = String::concatStrings(result, core->formatAtomPtr(atom()));
-        return result;
+        date.toString(buffer, Date::kToString, len);        
+        return prw << "<" << asUTF16(buffer, len) << ">@" << asAtomHex(atom());
     }
 #endif
 }

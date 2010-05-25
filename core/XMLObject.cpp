@@ -628,7 +628,7 @@ namespace avmplus
                         output << " " << core->string (xl->_getAt (i)->atom());
                     }
 
-                    sc = core->newStringUTF8(output.c_str());
+                    sc = core->newStringUTF8(output.c_str(), output.length());
                 }
             }
             else // step 7c
@@ -1160,7 +1160,7 @@ namespace avmplus
     }
 
     // E4X 10.2, pg 29
-    void XMLObject::__toXMLString(StringBuffer &s, AtomArray *AncestorNamespaces, int indentLevel, bool includeChildren) const
+    void XMLObject::__toXMLString(PrintWriter &s, AtomArray *AncestorNamespaces, int indentLevel, bool includeChildren) const
     {
         AvmCore *core = this->core();
 
@@ -1228,7 +1228,7 @@ namespace avmplus
 
         AtomArray *inScopeNS = new (core->GetGC()) AtomArray();
         m_node->BuildInScopeNamespaceList (core, inScopeNS);
-        uint32 origLength = AncestorNamespaces->getLength();
+        uint32 origLength = (AncestorNamespaces) ? AncestorNamespaces->getLength() : 0;
 
         // step 8 - ancestorNamespaces passed in
         // step 9/10 - add in our namespaces into ancestorNamespaces if there are no conflicts
@@ -2472,7 +2472,7 @@ namespace avmplus
             AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
             StringBuffer s(core);
             __toXMLString(s, AncestorNamespaces, 0);
-            return core->newStringUTF8(s.c_str())->atom();
+            return core->newStringUTF8(s.c_str(), s.length())->atom();
         }
     }
 
@@ -2490,7 +2490,7 @@ namespace avmplus
     }
 
 #ifdef AVMPLUS_VERBOSE
-    Stringp XMLObject::format(AvmCore* core) const
+    PrintWriter& XMLObject::printUsingAncestors(PrintWriter& prw, AtomArray* AncestorNamespaces) const
     {
         //
         // [mmorearty 10/24/05] Flex Builder 2.0 relies on this format in order to
@@ -2498,17 +2498,19 @@ namespace avmplus
         //
         //      "XML@hexaddr nodeKind text_to_display"
         //
-        AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
-        StringBuffer openTag(core);
-        __toXMLString(openTag, AncestorNamespaces, 0, false);
-        Stringp openingTag = core->newStringUTF8(openTag.c_str());
+        ScriptObject::print(prw);
+        prw << " " << nodeKind() << " ";
 
-        Stringp result = ScriptObject::format(core);
-        result = result->appendLatin1(" ");
-        result = core->concatStrings(result, nodeKind());
-        result = result->appendLatin1(" ");
-        result = core->concatStrings(result, openingTag);
-        return result;
+        __toXMLString(prw, AncestorNamespaces, 0, false);
+        return prw;
+    }
+    
+    Stringp XMLObject::format(AvmCore* core) const
+    {
+        StringBuffer sb(core); // 256B gc alloc occurs here.
+        AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
+        this->printUsingAncestors(sb, AncestorNamespaces);
+        return sb.toString();
     }
 #endif
 

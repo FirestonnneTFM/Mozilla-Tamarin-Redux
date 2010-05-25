@@ -59,7 +59,8 @@ namespace avmplus
         int length() const { return m_length; }
         void reset() { m_length=0; }
 
-        int write(const void *buffer, int count);
+        void write(const char* utf8);
+        void writeN(const char* utf8, size_t count);
 
     private:
         enum { kInitialCapacity = 256 };
@@ -79,23 +80,22 @@ namespace avmplus
     {
     public:
         StringBuffer(AvmCore* core) :
-            PrintWriter(core), m_stream(core->GetGC())
+            PrintWriter(core), m_stream(core->GetGC()), m_core(core)
         {
             setOutputStream(&m_stream);
         }
 
-        StringBuffer(MMgc::GC *gc) :
-            PrintWriter(NULL), m_stream(gc)
-        {
-            setOutputStream(&m_stream);
-        }
-
+        void writeN(const char* utf8, size_t count);
+         
         const char* c_str() { return m_stream.c_str(); }    // note, always in UTF8 form
         int length() const { return m_stream.length(); }
         void reset() { m_stream.reset(); }
 
+        String* toString() { return m_core->newStringUTF8(c_str(), length()); }
+
     private:
         StringOutputStream m_stream;
+        AvmCore* m_core;
     };
 }
 
