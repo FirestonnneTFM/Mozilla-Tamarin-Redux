@@ -322,9 +322,6 @@ namespace avmplus
             #if defined VMCFG_WORDCODE
             MAKE_BUF(teeWriter_buf, TeeWriter);
             #endif
-            #ifdef FEATURE_CFGWRITER
-            MAKE_BUF(cfg_buf, CFGWriter);
-            #endif
         #endif
             #if defined VMCFG_WORDCODE
             MAKE_BUF(translator_buf, WordcodeEmitter);
@@ -349,12 +346,6 @@ namespace avmplus
                     #else
                     coder = jit;
                     #endif
-
-                #ifdef FEATURE_CFGWRITER
-                    // analyze code and generate LIR
-                    CFGWriter* cfg = new(cfg_buf) CFGWriter(this, coder);
-                    coder = cfg;
-                #endif
 
                     verifier.verify(coder);
                     PERFM_TPROF_END();
