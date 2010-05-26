@@ -385,9 +385,7 @@ namespace avmplus
      */
     class CodegenLIR : public LirHelper, public CodeWriter {
     public:
-        bool overflow;
-        const byte *abcStart;
-        const byte *abcEnd;
+       bool overflow;
 
        #ifdef VTUNE
        bool hasDebugInfo;
@@ -419,7 +417,7 @@ namespace avmplus
         CodegenLabel interrupt_label;
         CodegenLabel mop_rangeCheckFailed_label;
         CodegenLabel catch_label;
-        intptr_t lastPcSave;
+        const byte* lastPcSave;
         LIns *setjmpResult;
         VarTracker *varTracker;
         int framesize;
@@ -433,7 +431,7 @@ namespace avmplus
         CacheBuilder<SetCache> set_cache_builder;
         PrologWriter *prolog;
         LIns* prologLastIns;
-        HashMap<int, CodegenLabel*> *blockLabels;
+        HashMap<const byte*, CodegenLabel*> *blockLabels;
         LirWriter* redirectWriter;
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LInsPrinter* vbNames;)
@@ -462,7 +460,7 @@ namespace avmplus
         LIns *localGetf(int i);
         LIns *localCopy(int i); // sniff's type from FrameState
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
-        void branchToAbcPos(LOpcode op, LIns *cond, int target_off);
+        void branchToAbcPos(LOpcode op, LIns *cond, const byte* target);
         LIns *retIns(LIns *val);
         LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
         LIns *loadEnvScope();
@@ -481,15 +479,14 @@ namespace avmplus
         LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
         debug_only( bool isPointer(int i); )
-        void emitSetPc();
+        void emitSetPc(const byte* pc);
         void emitSampleCheck();
         bool verbose();
-        CodegenLabel& getCodegenLabel(int pc_off);
+        CodegenLabel& getCodegenLabel(const byte* pc);
         CodegenLabel& createLabel(const char *name);
         CodegenLabel& createLabel(const char *prefix, int id);
         void patchLater(LIns *br, CodegenLabel &);
-        void patchLater(LIns *jtbl, CodegenLabel &, uint32_t index);
-        void patchLater(LIns *jtbl, int pc_off, uint32_t index);
+        void patchLater(LIns *jtbl, const byte* pc, uint32_t index);
         void emitLabel(CodegenLabel &l);
         void deadvars();
         void deadvars_analyze(Allocator& alloc,
@@ -530,7 +527,7 @@ namespace avmplus
         void coerceArgs(MethodSignaturep mms, int argc, int firstArg);
 
         void emit(AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
-        void emitIf(AbcOpcode opcode, int target_off, int lhs, int rhs);
+        void emitIf(AbcOpcode opcode, const byte* target, int lhs, int rhs);
         void emitSwap(int i, int j);
         void emitCopy(int src, int dest);
         void emitGetscope(int scope, int dest);

@@ -76,7 +76,7 @@ namespace avmplus
     public:
         Verifier *verifier;  // ideally this would be const Verifier*
         FrameState* wl_next; // next block in verifier->worklist.  ideally this is only accessed by Verifier.
-        int32_t pc; // offset from code_start
+        const byte* abc_pc;  // pointer into abc bytecode
         int32_t scopeDepth;
         int32_t stackDepth;
         int32_t withBase;

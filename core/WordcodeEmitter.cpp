@@ -366,7 +366,7 @@ namespace avmplus
 
     void WordcodeEmitter::writeBlockStart(const FrameState* state)
     {
-        emitLabel(state->verifier->code_pos + state->pc);
+        emitLabel(state->abc_pc);
     }
 
     void WordcodeEmitter::writeOpcodeVerified(const FrameState*, const byte*, AbcOpcode)
