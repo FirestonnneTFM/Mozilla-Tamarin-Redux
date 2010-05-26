@@ -49,6 +49,7 @@ jsbench/.*            , jsbench   , include , jsbench testsuite
 v8/.*                 , v8        , include , v8 testsuite 
 scimark/.*            , scimark   , include , scimark testsuite
 language/.*           , language  , include , language micro-benchmarks testsuite
+mmgc/.*               , mmgc      , include  , mmgc testsuite
 
 canaries/.*           , canaries  , include , canaries testsuite
 .*/canaries/.*        , canaries  , include , canaries testsuite
@@ -60,7 +61,7 @@ v8.*/.*               , misc    , skip  , skip v8
 misc/.*               , miscdir    , include  , misc testsuite
 
 ## skip mmgc tests always, they are to be run manually for the time being
-mmgc/.*               , .*      , skip , mmgc diagnostic tests
+mmgc/.*               , misc      , skip , mmgc diagnostic tests
 
 ## skip fc64, crashes -memstats on windows
 .*fc64.*              , .*      , skip  , skip fc64 bug 488114
