@@ -204,6 +204,21 @@ else
             resultmessage="$resultmessage \nv8 memory test run failed. " 
         }
     }
+        
+    echo ""
+    echo "===========   MMGC   ==========="
+    python ./runtests.py --config=mmgc -r $branch -k -f -i 3
+    test "$?" = "0" || { 
+        result="1"; 
+        resultmessage="$resultmessage \nmmgc time test run failed. " 
+    }
+    test "$measurememory" = "true" && {
+        python ./runtests.py --config=mmgc --memory -r $branch -k -f -i 1
+        test "$?" = "0" || { 
+            result="1"; 
+            resultmessage="$resultmessage \nmmgc memory test run failed. " 
+        }
+    }
 fi # second parameter
 
 export memory_url="http://tamarin-builds.mozilla.org/report/index.cfm?hostip=${hostip}&config1=${configDefault}&config2=${configDefault}&configbaseline=${baselineConfigMemory}&baselineBuild=${baselineBuildMemory}&topBuild=${change}&product1=${branch}&product2=${branch}&productBaseline=${baselineBranchMemory}&raw=false&ratio=false&verbose=false&group=Desktop&metricsChecked=memory"
