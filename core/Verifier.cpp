@@ -92,7 +92,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
         , bool secondTry
 #endif
-        ) : tryFrom(NULL), tryTo(NULL)
+        ) : tryBase(NULL), tryFrom(NULL), tryTo(NULL)
           , ms(info->getMethodSignature())
           , worklist(NULL)
           , blockStates(NULL)
@@ -385,7 +385,7 @@ namespace avmplus
         coder->writePrologue(state, code_pos);
         const byte* end_pos = code_pos;
         // typically, first block is not in blockStates: verify it explicitly
-        if (!hasFrameState(0))
+        if (!hasFrameState(code_pos))
             end_pos = verifyBlock(coder, code_pos);
         // visit blocks in linear order (blockStates is sorted by abc address)
         for (int i=0, n=getBlockCount(); i < n; i++) {
@@ -409,19 +409,19 @@ namespace avmplus
         // now load the saved state at this block
         state->init(blk);
         state->targetOfBackwardsBranch = blk->targetOfBackwardsBranch;
-        state->pc = blk->pc;
+        state->abc_pc = blk->abc_pc;
 
 #ifdef AVMPLUS_VERBOSE
         if (verbose) {
             StringBuffer buf(core);
-            buf << "B" << blk->pc << ":";
+            buf << "B" << int(blk->abc_pc - code_pos) << ":";
             printState(buf, state);
         }
 #endif
 
         // found the start of a new basic block
         coder->writeBlockStart(state);
-        return code_pos + blk->pc;
+        return blk->abc_pc;
     }
 
     void Verifier::checkParams()
@@ -490,11 +490,10 @@ namespace avmplus
             if (opcodeInfo[opcode].operandCount == -1)
                 verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
 
-            int logical_pc = int(pc - code_pos);
-            state->pc = logical_pc;
+            state->abc_pc = pc;
 
             // test for the start of a new block
-            if (pc != start_pos && (opcode == OP_label || hasFrameState(logical_pc))) {
+            if (pc != start_pos && (opcode == OP_label || hasFrameState(pc))) {
                 checkTarget(pc-1, pc);
                 return pc;
             }
@@ -2286,14 +2285,14 @@ namespace avmplus
         }
     }
 
-    FrameState *Verifier::getFrameState(int target_off)
+    FrameState *Verifier::getFrameState(const byte* pc)
     {
-        return blockStates ? blockStates->get(code_pos + target_off) : NULL;
+        return blockStates ? blockStates->get(pc) : NULL;
     }
 
-    bool Verifier::hasFrameState(int target_off)
+    bool Verifier::hasFrameState(const byte* pc)
     {
-        return blockStates && blockStates->containsKey(code_pos + target_off);
+        return blockStates && blockStates->containsKey(pc);
     }
 
     int Verifier::getBlockCount()
@@ -2534,6 +2533,7 @@ namespace avmplus
             // capture the verify trace even if verbose is false.
             Verifier v2(info, toplevel, abc_env, true);
             v2.verbose = true;
+            v2.tryBase = tryBase;
             v2.tryFrom = tryFrom;
             v2.tryTo = tryTo;
             CodeWriter stubWriter;
@@ -2565,26 +2565,25 @@ namespace avmplus
     // outside the valid range of bytecodes.  Its only for back-edge detection.
     void Verifier::checkTarget(const byte* current, const byte* target)
     {
-        int target_off = int(target - code_pos);
         if (emitPass) {
-            AvmAssert(hasFrameState(target_off));
+            AvmAssert(hasFrameState(target));
             return;
         }
 
         // branches must stay inside code, and back edges must land on an OP_label,
         // or a location already known as a forward-branch target
-        if (target_off < 0 || target_off >= code_length ||
-            (target <= current && !hasFrameState(target_off) && code_pos[target_off] != OP_label)) {
+        if (target < code_pos || target >= code_pos+code_length ||
+            (target <= current && !hasFrameState(target) && *target != OP_label)) {
             verifyFailed(kInvalidBranchTargetError);
         }
 
-        FrameState *targetState = getFrameState(target_off);
+        FrameState *targetState = getFrameState(target);
         bool targetChanged;
         if (!targetState) {
             if (!blockStates)
                 blockStates = new (core->GetGC()) GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects>(core->GetGC());
             targetState = mmfx_new( FrameState(this) );
-            targetState->pc = target_off;
+            targetState->abc_pc = target;
             blockStates->put(target, targetState);
 
             // first time visiting target block
@@ -2595,7 +2594,7 @@ namespace avmplus
             if (verbose) {
                 core->console << "------------------------------------\n";
                 StringBuffer buf(core);
-                buf << "MERGE FIRST B" << targetState->pc << ":";
+                buf << "MERGE FIRST B" << int(targetState->abc_pc - code_pos) << ":";
                 printState(buf, targetState);
                 core->console << "------------------------------------\n";
             }
@@ -2620,10 +2619,10 @@ namespace avmplus
         if (verbose) {
             core->console << "------------------------------------\n";
             StringBuffer buf(core);
-            buf << "MERGE CURRENT " << (int)state->pc << ":";
+            buf << "MERGE CURRENT " << int(state->abc_pc - code_pos) << ":";
             printState(buf, state);
             buf.reset();
-            buf << "MERGE TARGET B" << (int)targetState->pc << ":";
+            buf << "MERGE TARGET B" << int(targetState->abc_pc - code_pos) << ":";
             printState(buf, targetState);
         }
 #endif
@@ -2684,7 +2683,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
         if (verbose) {
             StringBuffer buf(core);
-            buf << "AFTER MERGE B" << targetState->pc << ":";
+            buf << "AFTER MERGE B" << int(targetState->abc_pc - code_pos) << ":";
             printState(buf, targetState);
             core->console << "------------------------------------\n";
         }
@@ -2842,6 +2841,8 @@ namespace avmplus
             if (exception_count == 0 || (size_t)(exception_count-1) > SIZE_T_MAX / sizeof(ExceptionHandler))
                 verifyFailed(kIllegalExceptionHandlerError);
 
+            // save code_pos as the base that offsets in the handler table will use
+            tryBase = code_pos;
             size_t extra = sizeof(ExceptionHandler)*(exception_count-1);
             ExceptionHandlerTable* table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
             ExceptionHandler *handler = table->exceptions;
@@ -2895,10 +2896,10 @@ namespace avmplus
                 }
 
                 // save maximum try range
-                if (!tryFrom || (code_pos + handler->from) < tryFrom)
-                    tryFrom = code_pos + handler->from;
-                if (code_pos + handler->to > tryTo)
-                    tryTo = code_pos + handler->to;
+                if (!tryFrom || (tryBase + handler->from) < tryFrom)
+                    tryFrom = tryBase + handler->from;
+                if (tryBase + handler->to > tryTo)
+                    tryTo = tryBase + handler->to;
 
                 // note: since we require (code_len > target >= to >= from >= 0),
                 // all implicit exception edges are forward edges.
@@ -3029,7 +3030,7 @@ namespace avmplus
 
     FrameState::FrameState(Verifier* verifier)
         : verifier(verifier), wl_next(NULL),
-          pc(0), scopeDepth(0), stackDepth(0), withBase(-1),
+          abc_pc(NULL), scopeDepth(0), stackDepth(0), withBase(-1),
           targetOfBackwardsBranch(false),
           wl_pending(false)
     {

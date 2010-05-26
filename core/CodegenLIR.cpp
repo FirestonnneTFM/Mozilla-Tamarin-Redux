@@ -711,8 +711,6 @@ namespace avmplus
     CodegenLIR::CodegenLIR(MethodInfo* i) :
         LirHelper(i->pool()),
         overflow(false),
-        abcStart(NULL),
-        abcEnd(NULL),
 #ifdef VTUNE
         hasDebugInfo(false),
         jitInfoList(i->core()->gc),
@@ -1222,8 +1220,7 @@ namespace avmplus
 
     LIns* CodegenLIR::callIns(const CallInfo *ci, uint32_t argc, ...)
     {
-        const byte* code = state->verifier->code_pos;
-        const byte* pc = code + state->pc;
+        const byte* pc = state->abc_pc;
 
         // each exception edge needs to be tracked to make sure we correctly
         // model the notnull state at the starts of catch blocks.  Treat any function
@@ -1235,10 +1232,14 @@ namespace avmplus
         if (!ci->_isPure && pc >= state->verifier->tryFrom && pc < state->verifier->tryTo) {
             // inside exception handler range, calling a function that could throw
             ExceptionHandlerTable *exTable = info->abc_exceptions();
+            const byte* tryBase = state->verifier->tryBase;
             for (int i=0, n=exTable->exception_count; i < n; i++) {
                 ExceptionHandler* handler = &exTable->exceptions[i];
-                if (pc >= code + handler->from && pc < code + handler->to && state->verifier->hasFrameState(handler->target))
-                    varTracker->trackForwardEdge(getCodegenLabel(handler->target));
+                const byte* from   = tryBase + handler->from;
+                const byte* to     = tryBase + handler->to;
+                const byte* target = tryBase + handler->target;
+                if (pc >= from && pc < to && state->verifier->hasFrameState(target))
+                    varTracker->trackForwardEdge(getCodegenLabel(target));
             }
         }
 
@@ -1593,14 +1594,12 @@ namespace avmplus
     // jump forward, pick a catch block, then jump backwards to the catch block.
     //
 
-    void CodegenLIR::writePrologue(const FrameState* state, const byte* /* pc */)
+    void CodegenLIR::writePrologue(const FrameState* state, const byte* pc)
     {
         this->state = state;
-        abcStart = state->verifier->code_pos;
-        abcEnd   = abcStart + state->verifier->code_length;
         framesize = state->verifier->frameSize;
 
-        frag = new (*lir_alloc) Fragment(abcStart verbose_only(, 0));
+        frag = new (*lir_alloc) Fragment(pc verbose_only(, 0));
         LirBuffer *prolog_buf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         prolog_buf->abi = ABI_CDECL;
 
@@ -1651,7 +1650,7 @@ namespace avmplus
         lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout, framesize);
 
         // last pc value that we generated a store for
-        lastPcSave = 0;
+        lastPcSave = NULL;
 
         //
         // generate lir to define incoming method arguments.  Stack
@@ -1948,9 +1947,9 @@ namespace avmplus
     {
         this->state = state;
         // get the saved label for our block start and tie it to this location
-        CodegenLabel& label = getCodegenLabel(state->pc);
+        CodegenLabel& label = getCodegenLabel(state->abc_pc);
         emitLabel(label);
-        emitSetPc();
+        emitSetPc(state->abc_pc);
 
 #ifdef DEBUG
         memset(jit_sst, 0, framesize);
@@ -1990,7 +1989,7 @@ namespace avmplus
     {
       //AvmLog("CodegenLIR::write %x\n", opcode);
         this->state = state;
-        emitSetPc();
+        emitSetPc(pc);
         const byte* nextpc = pc;
         unsigned int imm30=0, imm30b=0;
         int imm8=0, imm24=0;
@@ -2070,7 +2069,7 @@ namespace avmplus
             emitDoubleConst(sp+1, (double*)atomPtr(core->kNaN));
             break;
         case OP_lookupswitch:
-            emit(opcode, state->pc+imm24, imm30b /*count*/);
+            emit(opcode, uintptr_t(pc + imm24), imm30b /*count*/);
             break;
         case OP_throw:
         case OP_returnvalue:
@@ -2510,10 +2509,10 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::writeOp1(const FrameState* state, const byte *, AbcOpcode opcode, uint32_t opd1, Traits *type)
+    void CodegenLIR::writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
     {
         this->state = state;
-        emitSetPc();
+        emitSetPc(pc);
         switch (opcode) {
         case OP_iflt:
         case OP_ifle:
@@ -2530,7 +2529,7 @@ namespace avmplus
         {
             int32_t offset = (int32_t) opd1;
             int lhs = state->sp()-1;
-            emitIf(opcode, state->pc+4/*size*/+offset, lhs, lhs+1);
+            emitIf(opcode, pc+4/*size*/+offset, lhs, lhs+1);
             break;
         }
         case OP_iftrue:
@@ -2538,13 +2537,13 @@ namespace avmplus
         {
             int32_t offset = (int32_t) opd1;
             int sp = state->sp();
-            emitIf(opcode, state->pc+4/*size*/+offset, sp, 0);
+            emitIf(opcode, pc+4/*size*/+offset, sp, 0);
             break;
         }
         case OP_jump:
         {
             int32_t offset = (int32_t) opd1;
-            emit(opcode, state->pc+4/*size*/+offset);
+            emit(opcode, uintptr_t(pc+4/*size*/+offset));
             break;
         }
         case OP_getslot:
@@ -2705,17 +2704,17 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::writeNip(const FrameState* state, const byte *)
+    void CodegenLIR::writeNip(const FrameState* state, const byte *pc)
     {
         this->state = state;
-        emitSetPc();
+        emitSetPc(pc);
         emitCopy(state->sp(), state->sp()-1);
     }
 
-    void CodegenLIR::writeMethodCall(const FrameState* state, const byte *, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits *type)
+    void CodegenLIR::writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits *type)
     {
         this->state = state;
-        emitSetPc();
+        emitSetPc(pc);
         switch (opcode) {
         case OP_callproperty:
         case OP_callproplex:
@@ -2735,7 +2734,7 @@ namespace avmplus
     void CodegenLIR::writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits *type)
     {
         this->state = state;
-        emitSetPc();
+        emitSetPc(pc);
         int sp = state->sp();
         switch (opcode) {
 
@@ -2934,23 +2933,7 @@ namespace avmplus
             break;
 
         case OP_abs_jump:
-        {
-            #ifdef AVMPLUS_64BIT
-            const byte* nextpc = pc;
-            unsigned int imm30=0, imm30b=0;
-            int imm8=0, imm24=0;
-            AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
-            const byte* new_pc = (const byte *) (uintptr(opd1) | (((uintptr) opd2) << 32));
-            const byte* new_code_end = new_pc + AvmCore::readU32 (nextpc);
-            #else
-            (void)pc;
-            const byte* new_pc = (const byte*) opd1;
-            const byte* new_code_end = new_pc + opd2;
-            #endif
-            this->abcStart = new_pc;
-            this->abcEnd = new_code_end;
             break;
-        }
 
         case OP_callproperty:
         case OP_callproplex:
@@ -2991,7 +2974,7 @@ namespace avmplus
     void CodegenLIR::writeCoerce(const FrameState* state, uint32_t loc, Traits* result)
     {
         this->state = state;
-        emitSetPc();
+        emitSetPc(state->abc_pc);
         emitCoerce(loc, result);
     }
 
@@ -3142,7 +3125,7 @@ namespace avmplus
     void CodegenLIR::writeCheckNull(const FrameState* state, uint32_t index)
     {
         this->state = state;
-        emitSetPc();
+        emitSetPc(state->abc_pc);
         emitCheckNull(localCopy(index), state->value(index).traits);
     }
 
@@ -3164,12 +3147,14 @@ namespace avmplus
     }
 
     // Save our current PC location for the catch finder later.
-    void CodegenLIR::emitSetPc()
+    void CodegenLIR::emitSetPc(const byte* pc)
     {
+        AvmAssert(state->abc_pc == pc);
         // update bytecode ip if necessary
-        if (_save_eip && lastPcSave != state->pc) {
-            stp(InsConstPtr((void*)state->pc), _save_eip, 0, ACC_OTHER);
-            lastPcSave = state->pc;
+        if (_save_eip && lastPcSave != pc) {
+            const byte* tryBase = state->verifier->tryBase;
+            stp(InsConstPtr((void*)(pc - tryBase)), _save_eip, 0, ACC_OTHER);
+            lastPcSave = pc;
         }
     }
 
@@ -3642,17 +3627,17 @@ namespace avmplus
             case OP_jump:
             {
                 // spill everything first
-                int targetpc_off = (int)op1;
+                const byte* target = (const byte*) op1;
 
 #ifdef DEBUGGER
                 Sampler* s = core->get_sampler();
-                if (s && s->sampling() && targetpc_off < state->pc)
+                if (s && s->sampling() && target < state->abc_pc)
                 {
                     emitSampleCheck();
                 }
 #endif
 
-                branchToAbcPos(LIR_j, 0, targetpc_off);
+                branchToAbcPos(LIR_j, 0, target);
                 break;
             }
 
@@ -3663,42 +3648,42 @@ namespace avmplus
                 //  (pc+6+3*index) :    // matched case
                 //  (pc+1));            // default
                 int count = int(1 + op2);
-                int targetpc_off = (int)op1;
+                const byte* targetpc = (const byte*) op1;
 
                 AvmAssert(state->value(sp).traits == INT_TYPE);
                 AvmAssert(count >= 0);
 
                 // Compute address of jump table
-                const byte* pc = 4 + abcStart + state->pc;
+                const byte* pc = 4 + state->abc_pc;
                 AvmCore::readU32(pc);  // skip count
 
                 // Delete any trailing table entries that == default case (effective for asc output)
-                while (count > 0 && targetpc_off == (state->pc + AvmCore::readS24(pc+3*(count-1))))
+                while (count > 0 && targetpc == (state->abc_pc + AvmCore::readS24(pc+3*(count-1))))
                     count--;
 
                 if (count > 0) {
                     LIns* index = localGet(sp);
                     LIns* cmp = binaryIns(LIR_ltui, index, InsConst(count));
-                    branchToAbcPos(LIR_jf, cmp, targetpc_off);
+                    branchToAbcPos(LIR_jf, cmp, targetpc);
 
                     if (NJ_JTBL_SUPPORTED) {
                         // Backend supports LIR_jtbl for jump tables
                         LIns* jtbl = lirout->insJtbl(index, count);
                         for (int i=0; i < count; i++) {
-                            int target = state->pc + AvmCore::readS24(pc+3*i);
+                            const byte* target = state->abc_pc + AvmCore::readS24(pc+3*i);
                             patchLater(jtbl, target, i);
                         }
                     } else {
                         // Backend doesn't support jump tables, use cascading if's
                         for (int i=0; i < count; i++) {
-                            int target = state->pc + AvmCore::readS24(pc+3*i);
+                            const byte* target = state->abc_pc + AvmCore::readS24(pc+3*i);
                             branchToAbcPos(LIR_jt, binaryIns(LIR_eqi, index, InsConst(i)), target);
                         }
                     }
                 }
                 else {
                     // switch collapses into a single target
-                    branchToAbcPos(LIR_j, 0, targetpc_off);
+                    branchToAbcPos(LIR_j, 0, targetpc);
                 }
                 break;
             }
@@ -4875,11 +4860,11 @@ namespace avmplus
 
     } // emit()
 
-    void CodegenLIR::emitIf(AbcOpcode opcode, int target_off, int a, int b)
+    void CodegenLIR::emitIf(AbcOpcode opcode, const byte* target, int a, int b)
     {
 #ifdef DEBUGGER
         Sampler* s = core->get_sampler();
-        if (s && s->sampling() && target_off < state->pc)
+        if (s && s->sampling() && target < state->abc_pc)
         {
             emitSampleCheck();
         }
@@ -4972,7 +4957,7 @@ namespace avmplus
             }
         }
 
-        branchToAbcPos(br, cond, target_off);
+        branchToAbcPos(br, cond, target);
     } // emitIf()
 
     // Faster compares for ints, uint, doubles
@@ -5160,11 +5145,12 @@ namespace avmplus
             // Jump to catch handler
             LIns *handler_target = loadIns(LIR_ldi, offsetof(ExceptionHandler, target), handler, ACC_OTHER);
             // Do a compare & branch to each possible target.
+            const byte* tryBase = state->verifier->tryBase;
             for (int i=0; i < handler_count; i++) {
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
                 int handler_pc_off = h->target;
-                if (state->verifier->hasFrameState(handler_pc_off)) {
-                    CodegenLabel& label = getCodegenLabel(handler_pc_off);
+                if (state->verifier->hasFrameState(tryBase + handler_pc_off)) {
+                    CodegenLabel& label = getCodegenLabel(tryBase + handler_pc_off);
                     AvmAssert(label.labelIns != NULL);
                     LIns* cond = binaryIns(LIR_eqi, handler_target, InsConst(handler_pc_off));
                     // don't use branchIns() here because we don't want to check null bits;
@@ -5514,10 +5500,10 @@ namespace avmplus
         }
     }
 
-    // emit a relative branch to the given ABC pc-offset by mapping pc_off
+    // emit a relative branch to the given ABC pc-offset by mapping pc
     // to a corresponding CodegenLabel, and creating a new one if necessary
-    void CodegenLIR::branchToAbcPos(LOpcode op, LIns *cond, int pc_off) {
-        CodegenLabel& label = getCodegenLabel(pc_off);
+    void CodegenLIR::branchToAbcPos(LOpcode op, LIns *cond, const byte* pc) {
+        CodegenLabel& label = getCodegenLabel(pc);
         branchToLabel(op, cond, label);
     }
 
@@ -5540,10 +5526,10 @@ namespace avmplus
         return *label;
     }
 
-    CodegenLabel& CodegenLIR::getCodegenLabel(int pc) {
+    CodegenLabel& CodegenLIR::getCodegenLabel(const byte* pc) {
         AvmAssert(state->verifier->hasFrameState(pc));
         if (!blockLabels)
-            blockLabels = new (*alloc1) HashMap<int,CodegenLabel*>(*alloc1, state->verifier->getBlockCount());
+            blockLabels = new (*alloc1) HashMap<const byte*,CodegenLabel*>(*alloc1, state->verifier->getBlockCount());
         CodegenLabel* label = blockLabels->get(pc);
         if (!label) {
             label = new (*alloc1) CodegenLabel();
@@ -5552,7 +5538,7 @@ namespace avmplus
 #ifdef NJ_VERBOSE
         if (!label->name && vbNames) {
             char *name = new (*lir_alloc) char[16];
-            VMPI_sprintf(name, "B%d", pc);
+            VMPI_sprintf(name, "B%d", int(pc - state->verifier->code_pos));
             label->name = name;
         }
 #endif
@@ -5560,8 +5546,8 @@ namespace avmplus
     }
 
     /// connect to a label for one entry of a switch
-    void CodegenLIR::patchLater(LIns* jtbl, int pc_off, uint32_t index) {
-        CodegenLabel& target = getCodegenLabel(pc_off);
+    void CodegenLIR::patchLater(LIns* jtbl, const byte* pc, uint32_t index) {
+        CodegenLabel& target = getCodegenLabel(pc);
         if (target.labelIns != 0) {
             jtbl->setTarget(index, target.labelIns);           // backward edge
             varTracker->checkBackEdge(target, state);

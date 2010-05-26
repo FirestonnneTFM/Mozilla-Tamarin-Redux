@@ -79,6 +79,7 @@ namespace avmplus
         int frameSize;          // local_count + max_scope + max_stack
         int code_length;        // size of abc bytecode (bytes)
         const byte* code_pos;   // start of abc bytecode
+        const byte* tryBase;   // code_pos that ExceptionHandler offsets use
         const byte* tryFrom;   // start of earliest try region
         const byte* tryTo;     // end of latest try region
 
@@ -96,7 +97,7 @@ namespace avmplus
          */
         // Sun's C++ compiler wants "volatile" here because the definition has it
         void verify(CodeWriter * volatile coder);
-        bool hasFrameState(int pc_off);
+        bool hasFrameState(const byte* pc);
         bool canAssign(Traits* lhs, Traits* rhs) const;
         int getBlockCount();
 
@@ -116,7 +117,7 @@ namespace avmplus
         GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
         FrameState *state;
         bool emitPass;
-        FrameState* getFrameState(int pc_off);
+        FrameState* getFrameState(const byte* pc);
         const byte* verifyBlock(CodeWriter *, const byte*);
         void identifyBlocks(const byte*, int);
         void dfsBlock(const byte*, int);
