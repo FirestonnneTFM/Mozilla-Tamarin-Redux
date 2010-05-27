@@ -337,10 +337,7 @@ uint64_t VMPI_getPerformanceFrequency()
 
 uint64_t VMPI_getPerformanceCounter()
 {
-#ifdef SOLARIS
-	uint64_t retval = gethrtime();
-	return retval;
-#elif defined(AVMPLUS_UNIX)
+#ifdef AVMPLUS_UNIX
 	struct timeval tv;
 	::gettimeofday(&tv, NULL);
 
