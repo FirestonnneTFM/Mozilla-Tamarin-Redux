@@ -288,7 +288,7 @@ namespace avmplus
             CallStackNode callStackNode(this);
             #endif /* DEBUGGER */
 
-            PERFM_NTPROF("verify-ticks");
+            PERFM_NTPROF_BEGIN("verify-ticks");
 
             CodeWriter* volatile coder = NULL;
             Verifier verifier(this, toplevel, abc_env);
@@ -335,7 +335,7 @@ namespace avmplus
                 Runmode runmode = core->config.runmode;
                 if (runmode == RM_jit_all || (runmode == RM_mixed && !isStaticInit()))
                 {
-                    PERFM_NTPROF("verify & IR gen");
+                    PERFM_NTPROF_BEGIN("verify & IR gen");
 
                     // note placement-new usage!
                     CodegenLIR* jit = new(jit_buf) CodegenLIR(this);
@@ -348,7 +348,7 @@ namespace avmplus
                     #endif
 
                     verifier.verify(coder);
-                    PERFM_TPROF_END();
+                    PERFM_NTPROF_END("verify & IR gen");
 
                     if (!jit->overflow) {
                         // assembler LIR into native code
@@ -432,7 +432,7 @@ namespace avmplus
             }
             END_CATCH
             END_TRY
-            PERFM_TPROF_END();
+            PERFM_NTPROF_END("verify-ticks");
         }
     }
 

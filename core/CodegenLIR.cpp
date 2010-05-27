@@ -105,6 +105,26 @@ return *((intptr_t*)&_method);
 //#define DOPROF
 #include "../vprof/vprof.h"
 
+// Profiling generated code.
+
+#ifdef DOPROF
+#define JIT_EVENT(id) \
+    do { \
+        static void* id; \
+        _jnvprof_init(&id, #id, NULL); \
+        callIns(FUNCTIONID(jitProfileEvent), 1, InsConstPtr(id)); \
+    } while (0)
+#define JIT_VALUE(id, val) \
+    do { \
+        static void* id; \
+        _jnvprof_init(&id, #id, NULL); \
+        callIns(FUNCTIONID(jitProfileValue32), 2, InsConstPtr(id), val); \
+    } while (0)
+#else
+#define JIT_EVENT(id)       do { } while (0)
+#define JIT_VALUE(id, val)  do { } while (0)
+#endif
+
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer         AvmCore::integer64
 #define AVMCORE_integer_d       AvmCore::integer64_d
@@ -6019,7 +6039,7 @@ namespace avmplus
         // do this very last so it's after livep(vars)
         frag->lastIns = livep(undefConst);
 
-        PERFM_NTPROF("compile");
+        PERFM_NTPROF_BEGIN("compile");
         mmfx_delete( alloc1 );
         alloc1 = NULL;
 
@@ -6055,7 +6075,7 @@ namespace avmplus
         SeqReader seqReader(frag->lastIns, prologLastIns);
         assm->assemble(frag, &seqReader);
         assm->endAssembly(frag);
-        PERFM_TPROF_END();
+        PERFM_NTPROF_END("compile");
 
         verbose_only(
             assm->_outputCache = 0;
