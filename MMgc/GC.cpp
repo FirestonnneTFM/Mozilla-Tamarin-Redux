@@ -3527,37 +3527,41 @@ namespace MMgc
 
     GCWeakRef* GC::GetWeakRef(const void *item)
     {
-        GC *gc = GetGC(item);
-        GCWeakRef *ref = (GCWeakRef*) gc->weakRefs.get(item);
+        // input might be an Atom (but only of a pointer type); if so, retain lower three bits in the weakref
+        void* itemptr = (void*)(uintptr_t(item) & ~7);
+        GC *gc = GetGC(itemptr);
+        GCWeakRef *ref = (GCWeakRef*) gc->weakRefs.get(itemptr);
 
         if(ref == NULL) {
-            ref = new (gc) GCWeakRef(item);
-            gc->weakRefs.put(item, ref);
-            item = GetRealPointer(item);
-            if (GCLargeAlloc::IsLargeBlock(item)) {
-                GCLargeAlloc::SetHasWeakRef(item, true);
+            ref = new (gc) GCWeakRef(item); // save full ptr, including lower 3 bits
+            gc->weakRefs.put(itemptr, ref);
+            itemptr = GetRealPointer(itemptr);
+            if (GCLargeAlloc::IsLargeBlock(itemptr)) {
+                GCLargeAlloc::SetHasWeakRef(itemptr, true);
             } else {
-                GCAlloc::SetHasWeakRef(item, true);
+                GCAlloc::SetHasWeakRef(itemptr, true);
             }
         } else {
-            GCAssert(ref->get() == item);
+            GCAssert(ref->get() == item); // all bits should match, including lower 3
         }
         return ref;
     }
 
     void GC::ClearWeakRef(const void *item)
     {
-        GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item);
-        GCAssert(weakRefs.get(item) == NULL);
+        // input might be an Atom (but only of a pointer type); if so, retain lower three bits in the weakref
+        void* itemptr = (void*)(uintptr_t(item) & ~7);
+        GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(itemptr);
+        GCAssert(weakRefs.get(itemptr) == NULL);
         GCAssert(ref != NULL || heap->GetStatus() == kMemAbort);
         if(ref) {
-            GCAssert(ref->get() == item || ref->get() == NULL);
+            GCAssert((uintptr_t(ref->get()) & ~7) == uintptr_t(itemptr) || ref->get() == NULL);
             ref->m_obj = NULL;
-            item = GetRealPointer(item);
-            if (GCLargeAlloc::IsLargeBlock(item)) {
-                GCLargeAlloc::SetHasWeakRef(item, false);
+            itemptr = GetRealPointer(itemptr);
+            if (GCLargeAlloc::IsLargeBlock(itemptr)) {
+                GCLargeAlloc::SetHasWeakRef(itemptr, false);
             } else {
-                GCAlloc::SetHasWeakRef(item, false);
+                GCAlloc::SetHasWeakRef(itemptr, false);
             }
         }
     }
