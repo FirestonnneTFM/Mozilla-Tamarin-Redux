@@ -48,6 +48,11 @@
 namespace MMgc
 {
     // new improved weak ref
+    // Note that a GCWeakRef preserves the lower three bits of the pointer
+    // passed in (ie, you can use this to reconstruct an Atom safely)
+    // BUT ignores them for comparison purposes -- ie, it assumes that the value
+    // is really an 8-aligned pointer with the lower 3 bits not meaningful
+    // for address calculations.
     class GCWeakRef : public GCFinalizedObject
     {
         friend class GC;

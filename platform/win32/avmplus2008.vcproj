@@ -1564,6 +1564,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\WeakAtom.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\WeakAtom-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath=".\avmplus.cpp"
 				>
 				<FileConfiguration
