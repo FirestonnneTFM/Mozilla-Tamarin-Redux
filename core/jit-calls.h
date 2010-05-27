@@ -924,3 +924,20 @@ SSE2_ONLY(
     PUREFUNCTION(FUNCADDR(finddef_cache), SIG3(P,P,P,U), finddef_cache)
 
     METHOD(ENVADDR(MethodEnv::argcError), SIG2(V,P,I), argcError)
+
+    // JIT profiling
+
+#ifdef DOPROF
+    void jitProfileEvent(void* id)
+    {
+        _jvprof(id, 1);
+    }
+
+    void jitProfileValue32(void* id, int32_t value)
+    {
+        _jvprof(id, value);
+    }
+
+    FUNCTION(FUNCADDR(jitProfileEvent), SIG1(V,P), jitProfileEvent)
+    FUNCTION(FUNCADDR(jitProfileValue32), SIG2(V,P,I), jitProfileValue32)
+#endif

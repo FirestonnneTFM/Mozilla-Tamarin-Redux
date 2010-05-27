@@ -103,12 +103,12 @@
 
 #ifdef PERFM
 # define PERFM_NVPROF(n,v) _nvprof(n,v)
-# define PERFM_NTPROF(n) _ntprof(n)
-# define PERFM_TPROF_END() _tprof_end()
+# define PERFM_NTPROF_BEGIN(n) _ntprof_begin(n)
+# define PERFM_NTPROF_END(n) _ntprof_end(n)
 #else
 # define PERFM_NVPROF(n,v)
-# define PERFM_NTPROF(n)
-# define PERFM_TPROF_END()
+# define PERFM_NTPROF_BEGIN(n)
+# define PERFM_NTPROF_END(n)
 #endif
 
 // This is here for VM performance profiling.
