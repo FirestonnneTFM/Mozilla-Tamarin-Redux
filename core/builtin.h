@@ -70,7 +70,7 @@ namespace avmplus {
     class NumberClass; //Number$
     class ObjectClass; //Object$
     class ObjectVectorClass; //__AS3__.vec::Vector$object$
-    class ObjectVectorObject; //__AS3__.vec::Vector
+    class ObjectVectorObject; //__AS3__.vec::Vector$object
     class QNameClass; //QName$
     class QNameObject; //QName
     class RangeErrorClass; //RangeError$
@@ -1281,7 +1281,7 @@ class NamespaceClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    ATOM_WB m_length;
+    Atom m_length;
 };
 #define DECLARE_SLOTS_NamespaceClass \
     private: \
@@ -1701,17 +1701,17 @@ public:
     void set_name(ErrorObject* obj, AvmBox newVal);
 private:
     int32_t m_private__errorID;
-    ATOM_WB m_message;
-    ATOM_WB m_name;
+    Atom m_message;
+    Atom m_name;
 };
 REALLY_INLINE void ErrorObjectSlots::set_private__errorID(int32_t newVal) { m_private__errorID = newVal; }
 REALLY_INLINE void ErrorObjectSlots::set_message(ErrorObject* obj, AvmBox newVal)
 {
-    m_message.set(((ScriptObject*)obj)->gc(), obj, newVal);
+    WBATOM(((ScriptObject*)obj)->gc(), obj, &m_message, newVal);
 }
 REALLY_INLINE void ErrorObjectSlots::set_name(ErrorObject* obj, AvmBox newVal)
 {
-    m_name.set(((ScriptObject*)obj)->gc(), obj, newVal);
+    WBATOM(((ScriptObject*)obj)->gc(), obj, &m_name, newVal);
 }
 #define DECLARE_SLOTS_ErrorObject \
     private: \
@@ -2164,7 +2164,7 @@ class XMLClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    ATOM_WB m_length;
+    Atom m_length;
 };
 #define DECLARE_SLOTS_XMLClass \
     private: \
@@ -2197,7 +2197,7 @@ class XMLListClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    ATOM_WB m_length;
+    Atom m_length;
 };
 #define DECLARE_SLOTS_XMLListClass \
     private: \
@@ -2230,7 +2230,7 @@ class QNameClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    ATOM_WB m_length;
+    Atom m_length;
 };
 #define DECLARE_SLOTS_QNameClass \
     private: \
