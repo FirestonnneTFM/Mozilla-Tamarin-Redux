@@ -63,7 +63,7 @@ namespace avmplus {
     class NewObjectSampleObject; //flash.sampler::NewObjectSample
     class SampleClass; //flash.sampler::Sample$
     class SampleObject; //flash.sampler::Sample
-    class ScriptObject; //avmplus::File
+    class ScriptObject; //flash.trace::Trace
     class StackFrameClass; //flash.sampler::StackFrame$
     class StackFrameObject; //flash.sampler::StackFrame
     class String; //String
@@ -515,7 +515,7 @@ class _avmshell_SystemClassSlots
 public:
     REALLY_INLINE ArrayObject* get_argv() const { return m_argv; }
 private:
-    DRCWB(ArrayObject*) m_argv;
+    ArrayObject* m_argv;
 };
 #define DECLARE_SLOTS_SystemClass \
     private: \
@@ -626,18 +626,18 @@ public:
     void set_scriptID(double newVal);
 private:
     uint32_t m_line;
-    DRCWB(AvmString) m_name;
-    DRCWB(AvmString) m_file;
+    AvmString m_name;
+    AvmString m_file;
     double m_scriptID;
 };
 REALLY_INLINE void StackFrameObjectSlots::set_line(uint32_t newVal) { m_line = newVal; }
 REALLY_INLINE void StackFrameObjectSlots::set_name(StackFrameObject* obj, AvmString newVal)
 {
-    m_name.set(((ScriptObject*)obj)->gc(), obj, newVal);
+    WBRC(((ScriptObject*)obj)->gc(), obj, &m_name, newVal);
 }
 REALLY_INLINE void StackFrameObjectSlots::set_file(StackFrameObject* obj, AvmString newVal)
 {
-    m_file.set(((ScriptObject*)obj)->gc(), obj, newVal);
+    WBRC(((ScriptObject*)obj)->gc(), obj, &m_file, newVal);
 }
 REALLY_INLINE void StackFrameObjectSlots::set_scriptID(double newVal) { m_scriptID = newVal; }
 #define DECLARE_SLOTS_StackFrameObject \
@@ -681,12 +681,12 @@ public:
     REALLY_INLINE double get_time() const { return m_time; }
     void set_time(double newVal);
 private:
-    DRCWB(ArrayObject*) m_stack;
+    ArrayObject* m_stack;
     double m_time;
 };
 REALLY_INLINE void SampleObjectSlots::set_stack(SampleObject* obj, ArrayObject* newVal)
 {
-    m_stack.set(((ScriptObject*)obj)->gc(), obj, newVal);
+    WBRC(((ScriptObject*)obj)->gc(), obj, &m_stack, newVal);
 }
 REALLY_INLINE void SampleObjectSlots::set_time(double newVal) { m_time = newVal; }
 #define DECLARE_SLOTS_SampleObject \
@@ -726,12 +726,12 @@ public:
     REALLY_INLINE double get_id() const { return m_id; }
     void set_id(double newVal);
 private:
-    DRCWB(ClassClosure*) m_type;
+    ClassClosure* m_type;
     double m_id;
 };
 REALLY_INLINE void NewObjectSampleObjectSlots::set_type(NewObjectSampleObject* obj, ClassClosure* newVal)
 {
-    m_type.set(((ScriptObject*)obj)->gc(), obj, newVal);
+    WBRC(((ScriptObject*)obj)->gc(), obj, &m_type, newVal);
 }
 REALLY_INLINE void NewObjectSampleObjectSlots::set_id(double newVal) { m_id = newVal; }
 #define DECLARE_SLOTS_NewObjectSampleObject \
@@ -807,8 +807,8 @@ private:
     int32_t m_METHODS_WITH_ARGS;
     int32_t m_METHODS_AND_LINES;
     int32_t m_METHODS_AND_LINES_WITH_ARGS;
-    ATOM_WB m_FILE;
-    ATOM_WB m_LISTENER;
+    Atom m_FILE;
+    Atom m_LISTENER;
 };
 #define DECLARE_SLOTS_TraceClass \
     private: \
