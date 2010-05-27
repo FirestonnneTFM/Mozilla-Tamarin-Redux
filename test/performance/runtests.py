@@ -270,9 +270,9 @@ class PerformanceRuntest(RuntestBase):
                     self.js_print('Note that %diff is calculated using the largest memory value (not avg) from all runs', csv=False)
                 else:
                     self.js_print('Note that %diff is calculated using the fastest value (not avg) of all runs', csv=False)
-                self.js_print("\n%-50s %20s   %20s" % ('',self.avmname,self.avm2name))
-                self.js_print('%-50s  %6s :%6s  %6s %6s    %6s :%6s  %6s %6s %7s %7s %8s' % ('test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  ','metric'))
-                self.js_print('                                                   ------------------------------   ------------------------------   -----  -------  ------', csvOut=False)
+                self.js_print("\n%-50s %-33s   %-33s" % ('',self.avmname,self.avm2name))
+                self.js_print('%-50s  %7s :%7s  %7s %6s    %7s :%7s  %7s %6s %7s %8s %8s' % ('test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  ','metric'))
+                self.js_print('                                                   ---------------------------------   ---------------------------------   -----  --------  ------', csvOut=False)
         else:
             if (self.iterations>2):
                 runFormatStr = ''
@@ -507,7 +507,7 @@ class PerformanceRuntest(RuntestBase):
                               else '++' if (sig > 2.0 and spdup > 5.0) else '+ ' if sig > 1.0 else '  '
                     bold = '\033[1m' if (abs(sig)>1.0 and self.prettyprint) else ''
                     endbold = '\033[0;0m' if bold else ''
-                    self.js_print('%s%-50s [%6s :%6s] %6s ±%4.1f%%   [%6s :%6s] %6s ±%4.1f%% %6.1f%% %5.1f %2s %7s %s%s' %
+                    self.js_print('%s%-50s [%7s :%7s] %7s ±%4.1f%%   [%7s :%7s] %7s ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
                                   (bold,testName,formatMemory(min(resultList)),formatMemory(memoryhigh),mem1_avg,
                                     rel_std_dev(resultList), formatMemory(min(resultList2)),
                                     formatMemory(memoryhigh2),mem2_avg,rel_std_dev(resultList2),
@@ -559,13 +559,13 @@ class PerformanceRuntest(RuntestBase):
                         # only bold if abs > 1 and averages are > 3 ms apart
                         bold = '\033[1m' if (abs(sig)>1.0 and abs(rl1_avg-rl2_avg) > 3 and self.prettyprint) else ''
                         endbold = '\033[0;0m' if bold else ''
-                        self.js_print('%s%-50s [%6s :%6s] %6.1f ±%4.1f%%   [%6s :%6s] %6.1f ±%4.1f%% %6.1f%% %5.1f %2s %7s %s%s' %
+                        self.js_print('%s%-50s [%7s :%7s] %7.1f ±%4.1f%%   [%7s :%7s] %7.1f ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
                                       (bold,testName, min1, max1, rl1_avg, relStdDev1,
                                        min2, max2, rl2_avg, relStdDev2,
                                        spdup, sig,sig_str, metric, largerIsFaster,endbold))
                     except:
                         print sys.exc_info
-                        self.js_print('%-50s [%6s :%6s] %6.1f %6s   [%6s :%6s] %6.1f %6s %7.1f %7s %s' % (testName, '', '', result1,'', '', '', result2,'', spdup, metric, largerIsFaster))
+                        self.js_print('%-50s [%7s :%7s] %7.1f %6s   [%7s :%7s] %7.1f %6s %6.1f%% %6s %2s %7s %s' % (testName, '', '', result1,'', '', '', result2,'', spdup, '', '', metric, largerIsFaster))
                 #TODO: clean up / reformat
                 if self.perfm:
                     if perfm1Dict['verify']:    # only calc if data present
@@ -578,7 +578,7 @@ class PerformanceRuntest(RuntestBase):
                                 else:
                                     avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
                                     avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
-                                    self.js_print('     %-45s [%6s :%6s] %6s   [%6s :%6s] %6s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
+                                    self.js_print('     %-45s [%7s :%7s] %7s   [%7s :%7s] %7s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
                                                                                  min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
                                                                                  ((avg1-avg2)/float(avg2))*100.0))
                             except:
