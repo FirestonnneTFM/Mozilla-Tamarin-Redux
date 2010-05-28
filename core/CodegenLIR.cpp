@@ -2759,9 +2759,16 @@ namespace avmplus
         switch (opcode) {
 
         case OP_constructsuper:
+        {
+            Traits* base = info->declaringTraits()->base;
             // opd1=unused, opd2=argc
-            emitTypedCall(OP_constructsuper, 0, opd2, VOID_TYPE, info->declaringTraits()->base->init);
+            if (base == OBJECT_TYPE && base->init->isTrivial()) {
+                AvmAssert(opd2 == 0);   // The verifier should have caught a non-zero argc
+                break;
+            }
+            emitTypedCall(OP_constructsuper, 0, opd2, VOID_TYPE, base->init);
             break;
+        }
 
         case OP_setsuper:
         {
