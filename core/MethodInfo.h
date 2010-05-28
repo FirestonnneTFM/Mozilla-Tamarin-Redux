@@ -216,8 +216,14 @@ namespace avmplus
 #ifdef VMCFG_AOT
         static const int32_t AOT_COMPILED           = 0x04000000;
 #endif
-        // unused:                              = 0x08000000;
-        // unused:                              = 0x10000000;
+
+        // Set by isTrivial() if the method is trivial; see isTrivial() below.
+        static const int32_t TRIVIAL                = 0x08000000;
+
+        // Set by isTrivial() if the method is not trivial.  We could 
+        // reuse the AOT_COMPILED flag for this.
+        static const int32_t NONTRIVIAL             = 0x10000000;
+        
         // unused:                              = 0x20000000;
         // unused:                              = 0x40000000;
         // unused:                              = 0x80000000;
@@ -394,9 +400,29 @@ namespace avmplus
         MethodSignaturep getMethodSignature();
         void update_max_stack(int32_t max_stack);
 
+        /**
+         * Determine whether a function is trivial.  A function is (conservatively) trivial
+         * if all these conditions hold:
+         *
+         *   - it always terminates
+         *   - it always terminates by returning, never by throwing exceptions
+         *     (apart from system errors like stack overflow and out-of-memory)
+         *   - it always returns 'undefined'
+         *   - it does not update any non-local locations
+         *
+         * Stronger definitions of triviality are possible - for example, the condition on
+         * returning 'undefined' is a hack to avoid dealing with data flow analysis and
+         * determining whether RETURNVALUE will throw an exception - and some functions that
+         * are trivial by the above definition may still not be recognized by the implementation,
+         * obviously.  The only condition is that if isTrivial returns true then the function
+         * is trivial by the above definition.
+         */
+        bool isTrivial();
+        
     private:
         MethodSignature* FASTCALL _getMethodSignature();
         MethodSignature* FASTCALL _buildMethodSignature(const Toplevel* toplevel);
+        bool computeIsTrivial();
 
     private:
         struct NativeInfo

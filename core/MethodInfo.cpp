@@ -1068,6 +1068,129 @@ namespace avmplus
         return pool()->isBuiltin && (!isNative() || (_flags & NEEDS_DXNS));
     }
 
+    bool MethodInfo::isTrivial()
+    {
+        if (_flags & TRIVIAL)
+            return true;
+        if (_flags & NONTRIVIAL)
+            return false;
+        bool trivial = computeIsTrivial();
+        if (trivial)
+            _flags |= TRIVIAL;
+        else
+            _flags |= NONTRIVIAL;
+        return trivial;
+    }
+
+    // Compute a conservative approximation to triviality.  It is possible to
+    // do better.  For example, IFTRUE and IFFALSE don't throw exceptions but
+    // termination is assured only if all branches are forward; also, RETURNVALUE
+    // is acceptable if data flow and type analyses shows that the returned value
+    // will not trigger a coercion exception.  (That's true for many instructions
+    // generally.)
+
+    bool MethodInfo::computeIsTrivial()
+    {
+#ifdef VMCFG_AOT
+        return false;
+#else
+        // Initial attribute guard:
+        //
+        // NEED_REST and NEED_ARGUMENTS are here because they invoke
+        // the Array constructor, ie, they may update system state.
+        //
+        // NATIVE and ABSTRACT_METHOD are here because those methods have
+        // no bytecode, and this computation is bytecode-based.
+        //
+        // SETS_DXNS is here because the "default xml namespace" semantics
+        // are wild & crazy and some testing suggests that all bets are
+        // off when using it.  (Belt and suspenders, belt and suspenders...)
+        //
+        // NEED_ACTIVATION is here mostly as a shortcut; it will usually pair
+        // with NEWACTIVATION and GETPROPERTY and so on, and so the method will
+        // be tossed out anyway.
+        
+        if ((_flags & (NEED_ACTIVATION|NEED_REST|NEED_ARGUMENTS|NATIVE|SETS_DXNS|ABSTRACT_METHOD)) != 0)
+            return false;
+        
+        const uint8_t* pc = _abc.body_pos;
+        AvmCore::skipU32(pc, 4);
+        uint32_t code_length = AvmCore::readU32(pc);
+        const uint8_t* code_end = pc + code_length;
+        
+        while (pc < code_end) {
+            const uint8_t* nextpc = pc;
+            uint32_t imm30=0, imm30b=0;
+            int32_t imm8=0, imm24=0;
+            
+            AbcOpcode opcode = (AbcOpcode) *pc;
+            AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
+
+            // We may want to fold this logic into the table in ActionBlockConstants.cpp
+            // rather than having a dedicated switch.
+            
+            switch (opcode) {
+                case OP_nop:
+                case OP_kill:
+                case OP_label:
+                case OP_popscope:
+                case OP_pushnull:
+                case OP_pushundefined:
+                case OP_pushbyte:
+                case OP_pushshort:
+                case OP_pushtrue:
+                case OP_pushfalse:
+                case OP_pushnan:
+                case OP_pop:
+                case OP_dup:
+                case OP_swap:
+                case OP_pushstring:
+                case OP_pushint:
+                case OP_pushuint:
+                case OP_pushdouble:
+                case OP_pushscope:
+                case OP_pushnamespace:
+                case OP_returnvoid:
+                case OP_getlocal:
+                case OP_getlocal0:
+                case OP_getlocal1:
+                case OP_getlocal2:
+                case OP_getlocal3:
+                case OP_setlocal:
+                case OP_setlocal0:
+                case OP_setlocal1:
+                case OP_setlocal2:
+                case OP_setlocal3:
+                case OP_getglobalscope:
+                case OP_getscopeobject:
+                case OP_getouterscope:
+                case OP_getglobalslot:
+                case OP_typeof:
+                case OP_not:
+                    pc = nextpc;
+                    break;
+                case OP_bkpt:
+                case OP_debug:
+                case OP_debugline:
+                case OP_debugfile:
+                case OP_bkptline:
+                case OP_timestamp:
+#ifdef DEBUGGER
+                    // Debugging instructions are nontrivial if the debugger
+                    // is present, we don't want to confuse the programmer.
+                    if (pool()->core->debugger() != NULL)
+                        return false;
+#endif
+                    pc = nextpc;
+                    break;
+                default:
+                    return false;
+            }
+        }
+        return true;
+#endif        
+    }
+
 #if VMCFG_METHOD_NAMES
     Stringp MethodInfo::getMethodName(bool includeAllNamespaces) const
     {
