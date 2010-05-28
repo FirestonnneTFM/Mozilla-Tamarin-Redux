@@ -121,6 +121,7 @@ as3/Vector/nonindexproperty , .*3264-diff , skip , bug https://bugzilla.mozilla.
 ecma3/Math/e15_8_2_16 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_18 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
+spidermonkey/js1_5/Regress/regress-329383 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 
 ####################
 # Number
@@ -391,8 +392,8 @@ spidermonkey/js1_5/Scope/regress-185485:Section (2|5), ^((?!diff).)*$, expectedf
 spidermonkey/js1_5/Scope/scope-004:Section (6|7).*, ^((?!diff).)*$, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4027
 
 # spidermonkey wordcode issues
-spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|Ojit|jitordie|-diff).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
-spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|Ojit|jitordie|-diff).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
+spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|Ojit|jitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
+spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|Ojit|jitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 
 spidermonkey/js1_5/Array/regress-157652, arm.*, skip, test runs out of memory on devices
 spidermonkey/js1_5/Function/regress-338121-.*, arm.*, skip, test runs out of memory on devices
