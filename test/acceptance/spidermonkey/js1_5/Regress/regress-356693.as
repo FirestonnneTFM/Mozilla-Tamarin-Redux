@@ -55,7 +55,7 @@ function addtestcases()
   printBugNumber(BUGNUMBER);
   printStatus (summary);
  
-  expect = 'ReferenceError: x is not defined';
+  expect = 'ReferenceError: Error #1065';   // Variable x is not defined.
   try
   {
     delete (0 ? 3 : x());
@@ -65,7 +65,7 @@ function addtestcases()
     actual = ex + '';
   }
 
-  AddTestCase(summary, expect, actual);
+  AddTestCase(summary, expect, actual.substr(0,expect.length));
 
 
 }
