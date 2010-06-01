@@ -396,20 +396,12 @@ namespace MMgc
     /*static*/
     REALLY_INLINE int GC::HasWeakRef(const void *item)
     {
-        // input might be an Atom (but only of pointer type); 
-        // if so, retain lower three bits in the weakref.
-        // Note that GC doesn't know about Atom types per se,
-        // so it is up to the caller to ensure that any
-        // Atom is really a pointer Atom (though we should
-        // be able to redundantly catch such cases here via
-        // the IsPointerToGCObject assertion)
-        void* itemptr = (void*)(uintptr_t(item) & ~7);
-        itemptr = GetRealPointer(itemptr);
-        GCAssert(GetGC(itemptr)->IsPointerToGCObject(itemptr));
-        if (GCLargeAlloc::IsLargeBlock(itemptr)) {
-            return GCLargeAlloc::HasWeakRef(itemptr);
+        item = GetRealPointer(item);
+        GCAssert(GetGC(item)->IsPointerToGCObject(item));
+        if (GCLargeAlloc::IsLargeBlock(item)) {
+            return GCLargeAlloc::HasWeakRef(item);
         } else {
-            return GCAlloc::HasWeakRef(itemptr);
+            return GCAlloc::HasWeakRef(item);
         }
     }
 
