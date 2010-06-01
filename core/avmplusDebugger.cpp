@@ -337,7 +337,7 @@ namespace avmplus
                 StringBuffer sb(core);
                 traceArgumentsString(sb);
                 args = sb.toString();
-            } 
+            }
         }
 
         Atom argv[5] = { trace_callback->atom(), file->atom(), core->intToAtom(line), name->atom(), args->atom() };

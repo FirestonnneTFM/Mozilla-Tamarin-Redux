@@ -120,10 +120,10 @@ namespace avmplus
                 prw << ',';
             prw << getScopeTraitsAt(i);
             if (getScopeIsWithAt(i)) prw << "(iswith)";
-            
+
         }
         return prw << "]";
-    }    
+    }
     #endif
 
     bool ScopeTypeChain::equals(const ScopeTypeChain* that) const
@@ -186,7 +186,7 @@ namespace avmplus
         WBATOM(gc, this, &_scopes[i], value);
     }
 
-    #if VMCFG_METHOD_NAMES    
+    #if VMCFG_METHOD_NAMES
     PrintWriter& ScopeChain::print(PrintWriter& prw) const
     {
         prw << "SC:{dxns=(" << _defaultXmlNamespace << ")," << _scopeTraits << ",V:[";

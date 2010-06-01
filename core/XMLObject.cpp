@@ -2504,7 +2504,7 @@ namespace avmplus
         __toXMLString(prw, AncestorNamespaces, 0, false);
         return prw;
     }
-    
+
     Stringp XMLObject::format(AvmCore* core) const
     {
         StringBuffer sb(core); // 256B gc alloc occurs here.

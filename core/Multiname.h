@@ -154,7 +154,7 @@ namespace avmplus
 
         PrintWriter& print(PrintWriter& prw, MultiFormat form=MULTI_FORMAT_FULL) const;
         PrintWriter& printName(PrintWriter& prw) const;
-        static PrintWriter& print(PrintWriter& prw, Namespacep ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);        
+        static PrintWriter& print(PrintWriter& prw, Namespacep ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);
 
         // Use 'Format' like this: myPrintWriter << Format(ns, name)
         class Format
@@ -165,7 +165,7 @@ namespace avmplus
             const Namespace* _ns;
             const String* _name;
         };
-        
+
         class FormatNameOnly
         {
         public:
@@ -177,7 +177,7 @@ namespace avmplus
 
     PrintWriter& operator<<(PrintWriter& prw, const Multiname::Format& mnf);
     PrintWriter& operator<<(PrintWriter& prw, const Multiname::FormatNameOnly& mnf);
-    
+
     // version of multiname sporting write barriers
     // NOTE NOTE NOTE
     // This is embedded into other GCObjects, it's not a GCObject by itself.

@@ -68,7 +68,7 @@ namespace avmplus
             if (comma)
                 prw << ",";
             Namespacep ns = iter.next();
-            (ns->isPublic()) ? prw << "public" 
+            (ns->isPublic()) ? prw << "public"
                              : prw << ns->getURI();
             comma = true;
         }

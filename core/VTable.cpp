@@ -533,8 +533,8 @@ namespace avmplus
 
         return cvtab;
     }
-    
-#ifdef AVMPLUS_VERBOSE    
+
+#ifdef AVMPLUS_VERBOSE
     PrintWriter& VTable::print(PrintWriter& prw) const
     {
         return prw << traits;

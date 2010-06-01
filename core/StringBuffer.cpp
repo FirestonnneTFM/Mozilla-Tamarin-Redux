@@ -78,8 +78,8 @@ namespace avmplus
         VMPI_memcpy(m_buffer+m_length, buffer, count);
         m_length += (int)count;
         m_buffer[m_length] = 0;
-    }    
-    
+    }
+
     void StringBuffer::writeN(const char* buffer, size_t count)
     {
         m_stream.writeN(buffer, count);

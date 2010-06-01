@@ -538,7 +538,7 @@ namespace avmplus
                     #ifdef AVMPLUS_VERBOSE
                     if (pool->isVerbose(VB_parse))
                     {
-                        core->console << "            " << traitNames[kind] 
+                        core->console << "            " << traitNames[kind]
                             << " name=" << Multiname::Format(ns, name)
                             << " slot_id=" << slot_id
                             << " type=" << ctraits

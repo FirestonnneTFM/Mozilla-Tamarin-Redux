@@ -132,7 +132,7 @@ namespace avmplus
         {
             prw << mnf._name;
         }
-        else 
+        else
         {
             prw << mnf._ns->getURI() << "::" << mnf._name;
         }
@@ -143,19 +143,19 @@ namespace avmplus
     {
         return mnf._mn->print(prw, Multiname::MULTI_FORMAT_NAME_ONLY);
     }
-    
-    // @TODO can we get rid of this ?!? 
+
+    // @TODO can we get rid of this ?!?
     /*static*/ PrintWriter& Multiname::print(PrintWriter& prw, Namespacep ns, Stringp name, bool attr, bool hideNonPublicNamespaces)
     {
         if (ns->isPublic() ||
             (hideNonPublicNamespaces && // backwards compatibility
-            ns->getType() != Namespace::NS_Public)) 
+            ns->getType() != Namespace::NS_Public))
         {
             prw << name;
         }
-        else 
+        else
         {
-            (attr) ? prw << "@" << ns->getURI() << "::" << name 
+            (attr) ? prw << "@" << ns->getURI() << "::" << name
                    : prw << ns->getURI() << "::" << name;
         }
         return prw;
@@ -165,7 +165,7 @@ namespace avmplus
     {
         this->isAnyName() ? prw << "*"
                           : (this->isRtname() ? prw << "[]" : prw << getName());
-        return prw;        
+        return prw;
     }
 
     PrintWriter& Multiname::print(PrintWriter& prw, MultiFormat form) const
@@ -173,12 +173,12 @@ namespace avmplus
         char attr = this->isAttr() ? '@' : '\0';
         bool isAny = this->isAnyNamespace();
         bool isRt = this->isRtns() ? true : false;
-        
-        if (isAny) 
+
+        if (isAny)
         {
             prw << attr << "*::";
             return printName(prw);
-        }            
+        }
         else if (isRt)
         {
             prw << attr << "[]::";

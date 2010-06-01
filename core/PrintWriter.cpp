@@ -50,7 +50,7 @@ namespace avmplus
         m_stream->write(utf8);
     }
 
-    // this is an expensive call , use with caution !!!    
+    // this is an expensive call , use with caution !!!
     void PrintWriter::writeN(const char* utf8, size_t count)
     {
         //Currently this method is called from avmplus::PrintWriter class
@@ -80,7 +80,7 @@ namespace avmplus
         for (size_t i=0; i<count; i++)
         {
             *this << ((wchar*)buffer)[i];
-        } 
+        }
     }
 
     PrintWriter& PrintWriter::operator<< (hexAddr value)
@@ -165,7 +165,7 @@ namespace avmplus
             case 1:
                 return *this << "1";
             default:
-            {        
+            {
                 char buffer[MathUtils::kMinSizeForInt64_t_toString];
                 int32_t len = sizeof(buffer);
                 char* p = MathUtils::convertIntegerToStringBuffer((intptr_t) value, buffer, len, 10, MathUtils::kTreatAsUnsigned);
@@ -182,7 +182,7 @@ namespace avmplus
             case 1:
                 return *this << "1";
             default:
-            {        
+            {
                 char buffer[MathUtils::kMinSizeForInt64_t_toString];
                 int32_t len = sizeof(buffer);
                 char* p = MathUtils::convertIntegerToStringBuffer((intptr_t) value, buffer, len, 10, MathUtils::kTreatAsSigned);
@@ -220,7 +220,7 @@ namespace avmplus
     }
 
     /**
-     * format the value of an atom for debugging. 
+     * format the value of an atom for debugging.
      */
     void PrintWriter::writeAtom(Atom atom)
     {
@@ -250,11 +250,11 @@ namespace avmplus
                 *this << (((atom & ~7) != 0) ? "true" : "false");
                 break;
             case kIntptrType:
-                *this << (int64_t) atomGetIntptr(atom); // might be slow on 32b 
+                *this << (int64_t) atomGetIntptr(atom); // might be slow on 32b
                 break;
             case kDoubleType:
                 AvmAssert(atom != kDoubleType); // this would be a null pointer to double
-                *this << AvmCore::atomToDouble(atom); 
+                *this << AvmCore::atomToDouble(atom);
                 break;
             default:
                 AvmAssertMsg(0, "Was ist das?");
@@ -265,12 +265,12 @@ namespace avmplus
             *this << "null";
         }
     }
-    
+
     void PrintWriter::writeAtomHex(Atom atom)
     {
         char buffer[MathUtils::kMinSizeForInt64_t_toString];
         int32_t len = sizeof(buffer);
-        char* p = MathUtils::convertIntegerToStringBuffer((intptr_t)atom, buffer, len, 16, MathUtils::kTreatAsUnsigned);        
+        char* p = MathUtils::convertIntegerToStringBuffer((intptr_t)atom, buffer, len, 16, MathUtils::kTreatAsUnsigned);
         *this << p;
     }
 
@@ -294,7 +294,7 @@ namespace avmplus
         }
 
     #define PRINT_STAR_OPERATOR_SUPPORT_NULL(x) PRINT_STAR_OPERATOR_SUPPORT(x,"null")
-    
+
 #ifdef AVMPLUS_VERBOSE
     PRINT_STAR_OPERATOR_SUPPORT(String,"(null)")
     PRINT_STAR_OPERATOR_SUPPORT(Traits,"*")
@@ -310,7 +310,7 @@ namespace avmplus
     PRINT_STAR_OPERATOR_SUPPORT_NULL(Namespace)
     PRINT_AMP_OPERATOR_SUPPORT(Multiname)
 #endif
-                                                      
+
 
 #undef PRINT_STAR_OPERATOR_SUPPORT
 #undef PRINT_STAR_OPERATOR_SUPPORT_NULL
