@@ -245,7 +245,6 @@ namespace avmplus
 
 #include "MMgc.h"
 #include "QCache.h"
-#include "WeakAtom.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"
 #include "OSDep.h"
@@ -357,6 +356,5 @@ namespace avmplus
 #include "Traits-inlines.h"
 #include "Verifier-inlines.h"
 #include "VTable-inlines.h"
-#include "WeakAtom-inlines.h"
 
 #endif /* __avmplus__ */

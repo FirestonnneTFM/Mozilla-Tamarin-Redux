@@ -876,8 +876,6 @@
 		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
 		D9854B961090D05700F30404 /* AvmCore-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AvmCore-inlines.h"; path = "../../../core/AvmCore-inlines.h"; sourceTree = SOURCE_ROOT; };
-		D98EDB7511AAFAAC00F3CF02 /* WeakAtom-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "WeakAtom-inlines.h"; path = "../../../core/WeakAtom-inlines.h"; sourceTree = SOURCE_ROOT; };
-		D98EDB7611AAFAAC00F3CF02 /* WeakAtom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WeakAtom.h; path = ../../../core/WeakAtom.h; sourceTree = SOURCE_ROOT; };
 		D9A4F1C710B3362F00D0408C /* Multiname-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Multiname-inlines.h"; path = "../../../core/Multiname-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9A4F1E810B3382300D0408C /* NamespaceSet-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NamespaceSet-inlines.h"; path = "../../../core/NamespaceSet-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
@@ -1152,8 +1150,6 @@
 				079DF82B0F3A882D0031D1B4 /* VTable.cpp */,
 				19C97B9D1097822700AE4BEE /* VTable-inlines.h */,
 				079DF82C0F3A882D0031D1B4 /* VTable.h */,
-				D98EDB7511AAFAAC00F3CF02 /* WeakAtom-inlines.h */,
-				D98EDB7611AAFAAC00F3CF02 /* WeakAtom.h */,
 				079DF82D0F3A882D0031D1B4 /* wopcodes.cpp */,
 				079DF82E0F3A882D0031D1B4 /* wopcodes.h */,
 				079DF82F0F3A882D0031D1B4 /* WordcodeEmitter.cpp */,
