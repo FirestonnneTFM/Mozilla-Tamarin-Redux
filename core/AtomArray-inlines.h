@@ -50,14 +50,14 @@ namespace avmplus
         WBATOM( MMgc::GC::GetGC(m_atoms), m_atoms, m_atoms + index, a);
     }
 
-    REALLY_INLINE uint32 AtomArray::getLength() const 
+    REALLY_INLINE uint32 AtomArray::getLength() const
     {
-        return m_length; 
+        return m_length;
     }
 
-    REALLY_INLINE void AtomArray::setLength(uint32 len) 
+    REALLY_INLINE void AtomArray::setLength(uint32 len)
     {
-        m_length = len; 
+        m_length = len;
     }
 
     REALLY_INLINE uint32 AtomArray::capacity()  const
@@ -65,9 +65,9 @@ namespace avmplus
         return (uint32)(MMgc::GC::Size(m_atoms)/sizeof(Atom));
     }
 
-    REALLY_INLINE Atom AtomArray::operator[](uint32 index) const 
+    REALLY_INLINE Atom AtomArray::operator[](uint32 index) const
     {
-        return getAt(index); 
+        return getAt(index);
     }
 
     REALLY_INLINE Atom AtomArray::getAtFast(uint32 index) const

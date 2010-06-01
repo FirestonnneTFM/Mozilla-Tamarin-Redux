@@ -1259,13 +1259,13 @@ namespace avmplus
         return createDependent(gc, master, start, end - start);
     }
 
-	Stringp String::substr(int32_t start, int32_t len)
-	{
-		start = (int32_t) NativeObjectHelpers::ClampIndexInt(start, m_length);
-		len = (int32_t) NativeObjectHelpers::ClampIndexInt(len, m_length);
-		int32_t end = (m_length-len<=start)? m_length:start+len; // no need to further clamp
-		return substring(start, end);
-	}
+    Stringp String::substr(int32_t start, int32_t len)
+    {
+        start = (int32_t) NativeObjectHelpers::ClampIndexInt(start, m_length);
+        len = (int32_t) NativeObjectHelpers::ClampIndexInt(len, m_length);
+        int32_t end = (m_length-len<=start)? m_length:start+len; // no need to further clamp
+        return substring(start, end);
+    }
 
     Stringp String::slice(int32_t start, int32_t end)
     {
@@ -2599,16 +2599,16 @@ namespace avmplus
             Pointers ptrs(this);
             prw.writeN( (const char*)ptrs.p8, m_length );
         }
-        else 
+        else
         {
             for (int32_t i=0, n=length(); i<n; i++)
             {
                 prw << (wchar)charAt(i);
-            }        
+            }
         }
         return prw;
     }
-    
+
     ///////////////////////////////////////////////////////////////////////////////////
 
     // ---------------------------------------------------------------------------

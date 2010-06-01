@@ -116,7 +116,7 @@ namespace avmplus
     {
         wchar buffer[256];
         int len;
-        date.toString(buffer, Date::kToString, len);        
+        date.toString(buffer, Date::kToString, len);
         return prw << "<" << asUTF16(buffer, len) << ">@" << asAtomHex(atom());
     }
 #endif

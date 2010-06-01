@@ -86,7 +86,7 @@ namespace avmplus
         }
 
         void writeN(const char* utf8, size_t count);
-         
+
         const char* c_str() { return m_stream.c_str(); }    // note, always in UTF8 form
         int length() const { return m_stream.length(); }
         void reset() { m_stream.reset(); }

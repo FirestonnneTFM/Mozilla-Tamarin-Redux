@@ -220,10 +220,10 @@ namespace avmplus
         // Set by isTrivial() if the method is trivial; see isTrivial() below.
         static const int32_t TRIVIAL                = 0x08000000;
 
-        // Set by isTrivial() if the method is not trivial.  We could 
+        // Set by isTrivial() if the method is not trivial.  We could
         // reuse the AOT_COMPILED flag for this.
         static const int32_t NONTRIVIAL             = 0x10000000;
-        
+
         // unused:                              = 0x20000000;
         // unused:                              = 0x40000000;
         // unused:                              = 0x80000000;
@@ -418,7 +418,7 @@ namespace avmplus
          * is trivial by the above definition.
          */
         bool isTrivial();
-        
+
     private:
         MethodSignature* FASTCALL _getMethodSignature();
         MethodSignature* FASTCALL _buildMethodSignature(const Toplevel* toplevel);

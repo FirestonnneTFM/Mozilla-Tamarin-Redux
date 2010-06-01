@@ -500,7 +500,7 @@ namespace avmplus
     PrintWriter& ScriptObject::print(PrintWriter& prw) const
     {
         (traits()->name() != NULL) ? prw << traits()
-                                   : prw << "{}"; 
+                                   : prw << "{}";
         return prw << "@" << asAtomHex(atom());
     }
 #endif

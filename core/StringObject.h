@@ -453,7 +453,7 @@ namespace avmplus
 #endif
 
         PrintWriter& print(PrintWriter& prw) const;
-        
+
     private:
         friend class StringIndexer;
         friend class StUTF8String;

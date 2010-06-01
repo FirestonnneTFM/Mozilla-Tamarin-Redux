@@ -778,7 +778,7 @@ namespace avmplus
     PrintWriter& MethodInfo::print(PrintWriter& prw) const
     {
         String* n = getMethodName();
-        return n ? prw << n << "()" 
+        return n ? prw << n << "()"
                  : prw << "?()";
     }
 #endif // AVMPLUS_VERBOSE
@@ -1109,26 +1109,26 @@ namespace avmplus
         // NEED_ACTIVATION is here mostly as a shortcut; it will usually pair
         // with NEWACTIVATION and GETPROPERTY and so on, and so the method will
         // be tossed out anyway.
-        
+
         if ((_flags & (NEED_ACTIVATION|NEED_REST|NEED_ARGUMENTS|NATIVE|SETS_DXNS|ABSTRACT_METHOD)) != 0)
             return false;
-        
+
         const uint8_t* pc = _abc.body_pos;
         AvmCore::skipU32(pc, 4);
         uint32_t code_length = AvmCore::readU32(pc);
         const uint8_t* code_end = pc + code_length;
-        
+
         while (pc < code_end) {
             const uint8_t* nextpc = pc;
             uint32_t imm30=0, imm30b=0;
             int32_t imm8=0, imm24=0;
-            
+
             AbcOpcode opcode = (AbcOpcode) *pc;
             AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
 
             // We may want to fold this logic into the table in ActionBlockConstants.cpp
             // rather than having a dedicated switch.
-            
+
             switch (opcode) {
                 case OP_nop:
                 case OP_kill:
@@ -1188,7 +1188,7 @@ namespace avmplus
             }
         }
         return true;
-#endif        
+#endif
     }
 
 #if VMCFG_METHOD_NAMES

@@ -64,38 +64,38 @@ namespace avmplus
 
     /**
      * asAtom is an operator to be used with PrintWriter
-     * in order to write the value of an atom 
+     * in order to write the value of an atom
      */
     class asAtom
     {
     public:
-        asAtom(Atom a) : _atom(a) {}        
+        asAtom(Atom a) : _atom(a) {}
         Atom _atom;
     };
 
     /**
      * asAtom is an operator to be used with PrintWriter
-     * in order to write the value of an atom 
+     * in order to write the value of an atom
      */
     class asAtomHex
     {
     public:
-        asAtomHex(Atom a) : _atom(a) {}        
+        asAtomHex(Atom a) : _atom(a) {}
         Atom _atom;
     };
-    
+
     /**
      * asUTF16 is an operator to be used with PrintWriter
-     * in order to write the contents of a wchar'd buffer 
+     * in order to write the contents of a wchar'd buffer
      */
     class asUTF16
     {
     public:
-        asUTF16(wchar* w, uint32_t len) : _buf(w), _len(len) {}        
+        asUTF16(wchar* w, uint32_t len) : _buf(w), _len(len) {}
         wchar* _buf;
         uint32_t _len;
     };
-    
+
     /**
      * tabstop is an operator that can be used with PrintWriter
      * to advance to the specified tabstop
@@ -158,7 +158,7 @@ namespace avmplus
 
         void writeAtom(Atom atom);
         void writeAtomHex(Atom atom);
-        void writeUTF16(const void* buffer, size_t count);        
+        void writeUTF16(const void* buffer, size_t count);
         void writeHexByte(uint8 value);
         void writeHexWord(uint16_t value);
         void writeHexAddr(uintptr value);

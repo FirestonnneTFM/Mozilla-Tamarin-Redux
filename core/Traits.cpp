@@ -1656,7 +1656,7 @@ namespace avmplus
             prw << "Traits@" << asAtomHex((Atom)this);
         }
         return prw;
-    } 
+    }
 #endif
 
     void Traits::genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const

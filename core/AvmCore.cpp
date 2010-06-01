@@ -1273,7 +1273,7 @@ return the result of the comparison ToPrimitive(x) == y.
             StringBuffer sb(this); // 256B gc alloc occurs here.
             sb << Multiname::FormatNameOnly(n);
             s = sb.toString();
-        } else { 
+        } else {
             s = kEmptyString;
         }
     #else

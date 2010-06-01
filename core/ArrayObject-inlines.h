@@ -42,48 +42,48 @@
 
 namespace avmplus
 {
-    REALLY_INLINE bool ArrayObject::hasDense() const 
+    REALLY_INLINE bool ArrayObject::hasDense() const
     {
-        return (m_denseArr.getLength() != 0); 
+        return (m_denseArr.getLength() != 0);
     }
 
-    REALLY_INLINE bool ArrayObject::isSimpleDense() const 
+    REALLY_INLINE bool ArrayObject::isSimpleDense() const
     {
-        return (m_denseArr.getLength() == m_length); 
+        return (m_denseArr.getLength() == m_length);
     }
 
-    REALLY_INLINE uint32 ArrayObject::getDenseLength() const 
+    REALLY_INLINE uint32 ArrayObject::getDenseLength() const
     {
-        return m_denseArr.getLength(); 
+        return m_denseArr.getLength();
     }
 
     REALLY_INLINE Atom ArrayObject::getIntProperty(int index) const
     {
         return _getIntProperty(index);
     }
-    
+
     REALLY_INLINE void ArrayObject::setIntProperty(int index, Atom value)
     {
         _setIntProperty(index, value);
     }
-    
-    REALLY_INLINE Atom ArrayObject::pop() 
-    { 
-        return AS3_pop(); 
-    }
-    
-    REALLY_INLINE uint32 ArrayObject::push(Atom *args, int argc) 
+
+    REALLY_INLINE Atom ArrayObject::pop()
     {
-        return AS3_push(args, argc); 
+        return AS3_pop();
     }
-    
-    REALLY_INLINE uint32 ArrayObject::unshift(Atom *args, int argc) 
+
+    REALLY_INLINE uint32 ArrayObject::push(Atom *args, int argc)
     {
-        return AS3_unshift(args, argc); 
+        return AS3_push(args, argc);
+    }
+
+    REALLY_INLINE uint32 ArrayObject::unshift(Atom *args, int argc)
+    {
+        return AS3_unshift(args, argc);
     }
 
     /*virtual*/
-    REALLY_INLINE void ArrayObject::setUintProperty(uint32 index, Atom value) 
+    REALLY_INLINE void ArrayObject::setUintProperty(uint32 index, Atom value)
     {
         _setUintProperty(index, value);
     }

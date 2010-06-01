@@ -427,7 +427,7 @@ namespace avmplus
     }
 #endif
 
-  
+
     /*virtual*/ void ArrayObject::setLength(uint32 newLength)
     {
         if (traits()->needsHashtable())
