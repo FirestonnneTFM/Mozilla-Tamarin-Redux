@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -38,10 +40,10 @@
 #include "avmplus.h"
 
 #include <sys/time.h>
-#include <math.h> 
+#include <math.h>
 
 #ifdef AVMPLUS_UNIX
-	#include <time.h>
+    #include <time.h>
 #endif // AVMPLUS_UNIX
 
 #include <sys/mman.h>
@@ -63,45 +65,45 @@
 
 void DebugTrace(const TDesC8& aBuffer)
 {
-	RFile file;
-	RFs fs;
+    RFile file;
+    RFs fs;
 
-	if (fs.Connect() != KErrNone)
-	{
-		return;
-	}
+    if (fs.Connect() != KErrNone)
+    {
+        return;
+    }
 
-	TInt err = file.Open(fs, _L("c:\\debug.txt"), EFileWrite);
-	if (err == KErrNotFound)
-	{
-		err = file.Create(fs, _L("c:\\debug.txt"), EFileWrite);
-	}
-	if (err == KErrNone)
-	{
-		TInt pos = 0;
-		file.Seek(ESeekEnd, pos);
-		file.Write(aBuffer);
-		file.Close();
-	}
+    TInt err = file.Open(fs, _L("c:\\debug.txt"), EFileWrite);
+    if (err == KErrNotFound)
+    {
+        err = file.Create(fs, _L("c:\\debug.txt"), EFileWrite);
+    }
+    if (err == KErrNone)
+    {
+        TInt pos = 0;
+        file.Seek(ESeekEnd, pos);
+        file.Write(aBuffer);
+        file.Close();
+    }
 
-	fs.Close();
+    fs.Close();
 }
 
 _LIT8(kNewline, "\n");
 _LIT8(kNullString, "NULL STRING");
-	
+
 void DebugTraceString(const char* aString)
 {
-	if (aString == NULL)
-	{
-		DebugTrace(kNullString);
-	}
-	else
-	{
-		TPtrC8 tstr((const TUint8*)aString);
-		DebugTrace(tstr);
-		DebugTrace(kNewline);
-	}
+    if (aString == NULL)
+    {
+        DebugTrace(kNullString);
+    }
+    else
+    {
+        TPtrC8 tstr((const TUint8*)aString);
+        DebugTrace(tstr);
+        DebugTrace(kNewline);
+    }
 }
 /**
 * Logging code ends
@@ -110,87 +112,87 @@ void DebugTraceString(const char* aString)
 
 double VMPI_getLocalTimeOffset()
 {
-	struct tm* t;
-	time_t current, localSec, globalSec;
+    struct tm* t;
+    time_t current, localSec, globalSec;
 
-	// The win32 implementation ignores the passed in time
-	// and uses current time instead, so to keep similar
-	// behaviour we will do the same
-	time( &current );
+    // The win32 implementation ignores the passed in time
+    // and uses current time instead, so to keep similar
+    // behaviour we will do the same
+    time( &current );
 
-	t = localtime( &current );
-	localSec = mktime( t );
+    t = localtime( &current );
+    localSec = mktime( t );
 
-	t = gmtime( &current );
-	globalSec = mktime( t );
+    t = gmtime( &current );
+    globalSec = mktime( t );
 
-	return double( localSec - globalSec ) * 1000.0;
+    return double( localSec - globalSec ) * 1000.0;
 }
 
 double VMPI_getDate()
 {
-	struct timeval tv;
-	struct timezone tz; // Unused
+    struct timeval tv;
+    struct timezone tz; // Unused
 
-	gettimeofday(&tv, &tz);
-	double v = (tv.tv_sec + (tv.tv_usec/kMicroPerSec)) * kMsecPerSecond;
-	double ip;
-	::modf(v, &ip); // strip fractional part
-	return ip;
+    gettimeofday(&tv, &tz);
+    double v = (tv.tv_sec + (tv.tv_usec/kMicroPerSec)) * kMsecPerSecond;
+    double ip;
+    ::modf(v, &ip); // strip fractional part
+    return ip;
 }
 
 //time is passed in as milliseconds from UTC.
 double VMPI_getDaylightSavingsTA(double newtime)
 {
-	struct tm *broken_down_time;
+    struct tm *broken_down_time;
 
-	//convert time from milliseconds
-	newtime=newtime/kMsecPerSecond;
+    //convert time from milliseconds
+    newtime=newtime/kMsecPerSecond;
 
-	time_t time_t_time=(time_t)newtime;
+    time_t time_t_time=(time_t)newtime;
 
-	//pull out a struct tm
-	broken_down_time = localtime( &time_t_time );
+    //pull out a struct tm
+    broken_down_time = localtime( &time_t_time );
 
-	if (!broken_down_time)
-	{
-		return 0;
-	}
+    if (!broken_down_time)
+    {
+        return 0;
+    }
 
-	if (broken_down_time->tm_isdst > 0)
-	{
-		//daylight saving is definitely in effect.
-		return kMsecPerHour;
-	}
+    if (broken_down_time->tm_isdst > 0)
+    {
+        //daylight saving is definitely in effect.
+        return kMsecPerHour;
+    }
 
-	//either daylight saving is not in effect, or we don't know (if tm_isdst is negative).
-	return 0;
+    //either daylight saving is not in effect, or we don't know (if tm_isdst is negative).
+    return 0;
 }
 
 
 uint64_t VMPI_getTime()
 {
-	struct timeval tv;
-	::gettimeofday(&tv, NULL);
-	uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	return result;
+    struct timeval tv;
+    ::gettimeofday(&tv, NULL);
+    uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+    return result;
 }
 
 
 void* VMPI_alloc(size_t size)
 {
-	return malloc(size);
+    return malloc(size);
 
 }
 
 void VMPI_free(void* ptr)
 {
-	free(ptr);
+    free(ptr);
 }
 
 size_t VMPI_size(void *ptr)
 {
-	return 0;
+    return 0;
 }
 
 typedef int (*LoggingFunction)(const char*);
@@ -199,28 +201,28 @@ LoggingFunction logFunc = NULL;
 
 void RedirectLogOutput(LoggingFunction func)
 {
-	logFunc = func;
+    logFunc = func;
 }
 
 void VMPI_log(const char* message)
 {
-	DebugTraceString(message);
+    DebugTraceString(message);
 }
 
 bool VMPI_isMemoryProfilingEnabled()
 {
-	//read the mmgc profiling option switch
-	const char *env = getenv("MMGC_PROFILE");
-	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+    //read the mmgc profiling option switch
+    const char *env = getenv("MMGC_PROFILE");
+    return (env && (VMPI_strncmp(env, "1", 1) == 0));
 }
 
 void *VMPI_allocateCodeMemory(size_t nbytes)
 {
     // See VMPI.h for documentation about the semantics of this method
-    
+
     // See PosixPortUtils.cpp for many useful comments about constraints
     // that you may wish to implement in this function
-    
+
     (void)nbytes;
     AvmAssert(!"Unimplemented: VMPI_allocateCodeMemory");
 }
@@ -228,10 +230,10 @@ void *VMPI_allocateCodeMemory(size_t nbytes)
 void VMPI_freeCodeMemory(void* address, size_t nbytes)
 {
     // See VMPI.h for documentation about the semantics of this method
-    
+
     // See PosixPortUtils.cpp for many useful comments about constraints
     // that you may wish to implement in this function
-    
+
     (void)address;
     (void)nbytes;
     AvmAssert(!"Unimplemented: VMPI_freeCodeMemory");
@@ -240,10 +242,10 @@ void VMPI_freeCodeMemory(void* address, size_t nbytes)
 void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
 {
     // See VMPI.h for documentation about the semantics of this method
-    
+
     // See PosixPortUtils.cpp for many useful comments about constraints
     // that you may wish to implement in this function
-    
+
     (void)address;
     (void)nbytes;
     (void)makeItSo;
@@ -252,7 +254,7 @@ void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
 
 const char *VMPI_getenv(const char *name)
 {
-	return getenv(name);
+    return getenv(name);
 }
 
 
@@ -262,15 +264,15 @@ const char *VMPI_getenv(const char *name)
 // Registers have been flushed; compute a stack pointer and call the user function.
 void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
-	(void)buf;
-	volatile int temp = 0;
-	fn((void*)((uintptr_t)&temp & ~7), arg);
+    (void)buf;
+    volatile int temp = 0;
+    fn((void*)((uintptr_t)&temp & ~7), arg);
 }
 
 // Do nothing - just called to prevent another call from being a tail call, and to keep some values alive
 void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
-	(void)buf;
-	(void)fn;
-	(void)arg;
+    (void)buf;
+    (void)fn;
+    (void)arg;
 }

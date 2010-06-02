@@ -1,4 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -48,94 +49,94 @@
 //#define SYMBIAN_JIT_TEST
 #define USE_RCHUNK
 #ifdef USE_RCHUNK
-	class SymbianHeap
-	{
-	public:
-		
-		SymbianHeap(TInt size)
-		{
-			ok = false;
-			startAddr = 0;
-			endAddr = 0;
-			next = 0;
+    class SymbianHeap
+    {
+    public:
+
+        SymbianHeap(TInt size)
+        {
+            ok = false;
+            startAddr = 0;
+            endAddr = 0;
+            next = 0;
 #ifdef SYMBIAN_JIT_TEST // make all memory executable to quickly test JIT
-			if(chunk.CreateLocalCode(0,size,EOwnerProcess) == KErrNone)
+            if(chunk.CreateLocalCode(0,size,EOwnerProcess) == KErrNone)
 #else
-			if(chunk.CreateDisconnectedLocal(0,0,size,EOwnerProcess) == KErrNone)
+            if(chunk.CreateDisconnectedLocal(0,0,size,EOwnerProcess) == KErrNone)
 #endif // SYMBIAN_JIT
-			{
-				ok = true;
-				startAddr = (TInt)chunk.Base();
-				endAddr = startAddr + size;
-			}
-		}
-		
-		~SymbianHeap()
-		{
-			chunk.Close();
-		}
-		
-		void Close()
-		{
-			chunk.Close();
-		}
-		
-		bool Commit(TInt addr, TInt size)
-		{
-			bool result = false;
-			if(chunk.Commit(addr - startAddr, size) == KErrNone)
-			{
-				result = true;
-			}
-			return result;
-		}
-		
-		bool Decommit(TInt addr, TInt size)
-		{
-			bool result = false;
-			if(chunk.Decommit(addr - startAddr, size) == KErrNone)
-			{
-				result = true;
-			}
-			return result;
-		}
-		
-		RChunk chunk;
-		TInt startAddr;
-		TInt endAddr;
-		SymbianHeap* next;
-		bool ok;
-	};
-	
-	static SymbianHeap* heapListRoot = 0;
-	
-	static SymbianHeap* FindHeap(TInt addr)
-	{
-		SymbianHeap* retHeap = 0;
-		SymbianHeap* heap = heapListRoot;
-		while(heap)
-		{
-			if((addr >= heap->startAddr) && (addr < heap->endAddr))
-			{
-				retHeap = heap;
-				break;
-			}
-			heap = heap->next;
-		}
-		return retHeap;
-	}
+            {
+                ok = true;
+                startAddr = (TInt)chunk.Base();
+                endAddr = startAddr + size;
+            }
+        }
+
+        ~SymbianHeap()
+        {
+            chunk.Close();
+        }
+
+        void Close()
+        {
+            chunk.Close();
+        }
+
+        bool Commit(TInt addr, TInt size)
+        {
+            bool result = false;
+            if(chunk.Commit(addr - startAddr, size) == KErrNone)
+            {
+                result = true;
+            }
+            return result;
+        }
+
+        bool Decommit(TInt addr, TInt size)
+        {
+            bool result = false;
+            if(chunk.Decommit(addr - startAddr, size) == KErrNone)
+            {
+                result = true;
+            }
+            return result;
+        }
+
+        RChunk chunk;
+        TInt startAddr;
+        TInt endAddr;
+        SymbianHeap* next;
+        bool ok;
+    };
+
+    static SymbianHeap* heapListRoot = 0;
+
+    static SymbianHeap* FindHeap(TInt addr)
+    {
+        SymbianHeap* retHeap = 0;
+        SymbianHeap* heap = heapListRoot;
+        while(heap)
+        {
+            if((addr >= heap->startAddr) && (addr < heap->endAddr))
+            {
+                retHeap = heap;
+                break;
+            }
+            heap = heap->next;
+        }
+        return retHeap;
+    }
 #endif // USE_RCHUNK
 
 size_t VMPI_getVMPageSize()
 {
-	TInt pageSize;
-	HAL::Get(HAL::EMemoryPageSize, pageSize);
-	return pageSize;
+    TInt pageSize;
+    HAL::Get(HAL::EMemoryPageSize, pageSize);
+    return pageSize;
 }
 
 bool VMPI_canMergeContiguousRegions()
 {
-	return false;
+    return false;
 }
 
 bool VMPI_canCommitAlreadyCommittedMemory()
@@ -146,207 +147,207 @@ bool VMPI_canCommitAlreadyCommittedMemory()
 bool VMPI_useVirtualMemory()
 {
 #ifdef USE_RCHUNK
-	return true;
+    return true;
 #else // USE_RCHUNK
-	return false;
+    return false;
 #endif // USE_RCHUNK
 }
 
 bool VMPI_areNewPagesDirty()
 {
-	return true;
+    return true;
 }
 
 void* VMPI_reserveMemoryRegion(void* address, size_t size)
 {
-	void* ptr = 0;
+    void* ptr = 0;
 #ifdef USE_RCHUNK
-	// After reading the RChunk Symbian API it looks like we can not allocate contiguous memory.
-	// Reserve only when address is null. MMgc should handle the rest.
-	if(address == NULL)
-	{
-		SymbianHeap* newHeap = new SymbianHeap(size);
-		if(newHeap && newHeap->ok)
-		{
-			newHeap->next = heapListRoot;
-			heapListRoot = newHeap;
-			ptr = (void*)newHeap->startAddr;
-		}
-	}
+    // After reading the RChunk Symbian API it looks like we can not allocate contiguous memory.
+    // Reserve only when address is null. MMgc should handle the rest.
+    if(address == NULL)
+    {
+        SymbianHeap* newHeap = new SymbianHeap(size);
+        if(newHeap && newHeap->ok)
+        {
+            newHeap->next = heapListRoot;
+            heapListRoot = newHeap;
+            ptr = (void*)newHeap->startAddr;
+        }
+    }
 #endif // USE_RCHUNK
-	return ptr;
+    return ptr;
 }
 
 bool VMPI_releaseMemoryRegion(void* address, size_t size)
 {
 #ifdef USE_RCHUNK
-	SymbianHeap* heap = FindHeap((TInt)address);
-	if(heap)
-	{
-		// close does not have a return value
-		heap->Close();
-		
-		// remove from list
-		SymbianHeap* list = heapListRoot;
-		SymbianHeap* prev = NULL;
-		while(list)
-		{
-			if(list == heap)
-			{
-				if(prev)
-				{
-					prev->next = heap->next;
-				} else
-				{
-					heapListRoot = heap->next;
-				}
-				delete heap;
-				break;
-			}
-			prev = list;
-			list = list->next;
-		}
-		return true;
-	}
+    SymbianHeap* heap = FindHeap((TInt)address);
+    if(heap)
+    {
+        // close does not have a return value
+        heap->Close();
+
+        // remove from list
+        SymbianHeap* list = heapListRoot;
+        SymbianHeap* prev = NULL;
+        while(list)
+        {
+            if(list == heap)
+            {
+                if(prev)
+                {
+                    prev->next = heap->next;
+                } else
+                {
+                    heapListRoot = heap->next;
+                }
+                delete heap;
+                break;
+            }
+            prev = list;
+            list = list->next;
+        }
+        return true;
+    }
 #endif // USE_RCHUNK
-	return false;
+    return false;
 }
 
 bool VMPI_commitMemory(void* address, size_t size)
 {
-	bool result = false;
+    bool result = false;
 #ifdef USE_RCHUNK
-	SymbianHeap* heap = FindHeap((TInt)address);
-	if(heap)
-	{
-		result = heap->Commit((TInt)address, (TInt)size);
+    SymbianHeap* heap = FindHeap((TInt)address);
+    if(heap)
+    {
+        result = heap->Commit((TInt)address, (TInt)size);
 // TEMPORARY FIX: MMgc should zero initialize the memory, but it does not seem to do it in all cases.
-		if(result)
-		{
-			memset(address, 0, size);
-		}
+        if(result)
+        {
+            memset(address, 0, size);
+        }
 // TEMPORARY FIX: MMgc should zero initialize the memory, but it does not seem to do it in all cases.
-	}
+    }
 #if 1
-	if(result)
-	{
-		size_t pageSize = VMPI_getVMPageSize();
-		char* addr = (char*)address;
-		char* temp_addr = addr;
-		while( temp_addr < (addr+size))
-		{
-			// Touch each page
-			*temp_addr = 0;
-			temp_addr += pageSize;
-		}
-	}
+    if(result)
+    {
+        size_t pageSize = VMPI_getVMPageSize();
+        char* addr = (char*)address;
+        char* temp_addr = addr;
+        while( temp_addr < (addr+size))
+        {
+            // Touch each page
+            *temp_addr = 0;
+            temp_addr += pageSize;
+        }
+    }
 #endif // 1
 
 #endif // USE_RCHUNK
-	return result;
+    return result;
 }
 
 bool VMPI_decommitMemory(char *address, size_t size)
 {
-	bool result = false;
+    bool result = false;
 #ifdef USE_RCHUNK
-	SymbianHeap* heap = FindHeap((TInt)address);
-	if(heap)
-	{
-		result = heap->Decommit((TInt)address, (TInt)size);
-	}
+    SymbianHeap* heap = FindHeap((TInt)address);
+    if(heap)
+    {
+        result = heap->Decommit((TInt)address, (TInt)size);
+    }
 #endif // USE_RCHUNK
-	return result;
+    return result;
 }
 
 void* VMPI_allocateAlignedMemory(size_t size)
 {
 #ifndef USE_RCHUNK
-	char *ptr, *ptr2, *aligned_ptr;
-	size_t align_size = VMPI_getVMPageSize();
-	size_t align_mask = align_size - 1;
+    char *ptr, *ptr2, *aligned_ptr;
+    size_t align_size = VMPI_getVMPageSize();
+    size_t align_mask = align_size - 1;
 
-	size_t alloc_size = size + align_size + sizeof(int);
-	ptr = (char *)malloc(alloc_size);
+    size_t alloc_size = size + align_size + sizeof(int);
+    ptr = (char *)malloc(alloc_size);
 
-	if(ptr==NULL) return(NULL);
+    if(ptr==NULL) return(NULL);
 
-	ptr2 = ptr + sizeof(int);
-	aligned_ptr = ptr2 + (align_size - ((size_t)ptr2 & align_mask));
+    ptr2 = ptr + sizeof(int);
+    aligned_ptr = ptr2 + (align_size - ((size_t)ptr2 & align_mask));
 
-	ptr2 = aligned_ptr - sizeof(int);
-	*((int *)ptr2)=(int)(aligned_ptr - ptr);
+    ptr2 = aligned_ptr - sizeof(int);
+    *((int *)ptr2)=(int)(aligned_ptr - ptr);
 
-	return(aligned_ptr);
+    return(aligned_ptr);
 #else
-	return 0;
+    return 0;
 #endif // USE_RCHUNK
 }
 
 void VMPI_releaseAlignedMemory(void* address)
 {
 #ifndef USE_RCHUNK
-	int *ptr2=(int *)address - 1;
-	char *unaligned_ptr = (char*) address - *ptr2;
-	free(unaligned_ptr);
+    int *ptr2=(int *)address - 1;
+    char *unaligned_ptr = (char*) address - *ptr2;
+    free(unaligned_ptr);
 #endif // USE_RCHUNK
 }
 
 size_t VMPI_getPrivateResidentPageCount()
 {
-	size_t pageSize = VMPI_getVMPageSize();
-	if(pageSize > 0)
-	{
-		TInt freeRAM;
-		HAL::Get(HAL::EMemoryRAMFree, freeRAM);
-		return freeRAM/pageSize;
-	} else
-	{
-		return 0;
-	}
+    size_t pageSize = VMPI_getVMPageSize();
+    if(pageSize > 0)
+    {
+        TInt freeRAM;
+        HAL::Get(HAL::EMemoryRAMFree, freeRAM);
+        return freeRAM/pageSize;
+    } else
+    {
+        return 0;
+    }
 }
 
 uint64_t VMPI_getPerformanceFrequency()
 {
-	TInt tickPeriod;
-	HAL::Get(HALData::EFastCounterFrequency, tickPeriod);
-	return (uint64_t)tickPeriod;
+    TInt tickPeriod;
+    HAL::Get(HALData::EFastCounterFrequency, tickPeriod);
+    return (uint64_t)tickPeriod;
 }
 
 uint64_t VMPI_getPerformanceCounter()
 {
 // Alternative way:
 /*
-	TTime t;
-	t.UniversalTime ();
-	TInt64 lt = t.Int64 ();
-	return (uint64_t) (lt & 0x7FFFFFFF);
+    TTime t;
+    t.UniversalTime ();
+    TInt64 lt = t.Int64 ();
+    return (uint64_t) (lt & 0x7FFFFFFF);
 */
-	TUint32 counter = User::FastCounter();
-	return counter;
+    TUint32 counter = User::FastCounter();
+    return counter;
 }
 
 void VMPI_cleanStack(size_t amt)
 {
-	// TODO
+    // TODO
 }
 
 void VMPI_setupPCResolution()
 {
-	// TODO
+    // TODO
 }
 
 void VMPI_desetupPCResolution()
 {
-	// TODO
+    // TODO
 }
 
 uintptr_t VMPI_getThreadStackBase()
 {
-	TThreadStackInfo info;
-	RThread mythread;
-	mythread.StackInfo(info);
-	return uintptr_t(info.iBase);
+    TThreadStackInfo info;
+    RThread mythread;
+    mythread.StackInfo(info);
+    return uintptr_t(info.iBase);
 }
 
 // Defined in SymbianPortUtils.cpp to prevent them from being inlined below
@@ -356,34 +357,34 @@ extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), v
 
 void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
 {
-	jmp_buf buf;
-	VMPI_setjmpNoUnwind(buf);					// Save registers
-	CallWithRegistersSaved2(fn, arg, &buf);		// Computes the stack pointer, calls fn
-	CallWithRegistersSaved3(fn, &arg, &buf);	// Probably prevents the previous call from being a tail call
+    jmp_buf buf;
+    VMPI_setjmpNoUnwind(buf);                   // Save registers
+    CallWithRegistersSaved2(fn, arg, &buf);     // Computes the stack pointer, calls fn
+    CallWithRegistersSaved3(fn, &arg, &buf);    // Probably prevents the previous call from being a tail call
 }
 
 #ifdef MMGC_MEMORY_PROFILER
 
-	bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip)
-	{
-		(void) buffer;
-		(void) bufferSize;
-		(void) framesToSkip;
-		return false;
-	}
+    bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip)
+    {
+        (void) buffer;
+        (void) bufferSize;
+        (void) framesToSkip;
+        return false;
+    }
 
-	bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
-	{
-		(void)pc;
-		(void)buffer;
-		(void)bufferSize;
-		return false;
-	}
+    bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
+    {
+        (void)pc;
+        (void)buffer;
+        (void)bufferSize;
+        return false;
+    }
 
-	bool VMPI_getFileAndLineInfoFromPC(uintptr_t /*pc*/, char */*buffer*/, size_t /*bufferSize*/, uint32_t* /*lineNumber*/) 
-	{
-		return false;
-	}
+    bool VMPI_getFileAndLineInfoFromPC(uintptr_t /*pc*/, char */*buffer*/, size_t /*bufferSize*/, uint32_t* /*lineNumber*/)
+    {
+        return false;
+    }
 
 #endif //MEMORY_PROFILER
 

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -41,38 +43,38 @@
 
 bool VMPI_tlsCreate(uintptr_t* tlsId)
 {
-	pthread_key_t key;
-	const int r = pthread_key_create(&key, NULL);
-	
-	if(r == 0)
-	{
-		// we expect the value to default to zero
-		GCAssert(pthread_getspecific(key) == 0);
-		*tlsId = (uintptr_t) key;
-		return true;
-	}
+    pthread_key_t key;
+    const int r = pthread_key_create(&key, NULL);
 
-	return false;
+    if(r == 0)
+    {
+        // we expect the value to default to zero
+        GCAssert(pthread_getspecific(key) == 0);
+        *tlsId = (uintptr_t) key;
+        return true;
+    }
+
+    return false;
 }
 
 void VMPI_tlsDestroy(uintptr_t tlsId)
 {
-	pthread_key_delete((pthread_key_t)tlsId);
+    pthread_key_delete((pthread_key_t)tlsId);
 }
 
 bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
 {
-	const int r = pthread_setspecific((pthread_key_t)tlsId, value);
-	GCAssert(pthread_getspecific((pthread_key_t)tlsId) == value);
-	return (r == 0);
+    const int r = pthread_setspecific((pthread_key_t)tlsId, value);
+    GCAssert(pthread_getspecific((pthread_key_t)tlsId) == value);
+    return (r == 0);
 }
 
 void* VMPI_tlsGetValue(uintptr_t tlsId)
 {
-	return pthread_getspecific((pthread_key_t)tlsId);
+    return pthread_getspecific((pthread_key_t)tlsId);
 }
 
 vmpi_thread_t VMPI_currentThread()
 {
-	return (void*)pthread_self();
+    return (void*)pthread_self();
 }

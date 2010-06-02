@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -44,10 +46,10 @@
 
 void VMPI_debugLog(const char* /*message*/)
 {
-//	VMPI_log( message ); //also log to standard output
+//  VMPI_log( message ); //also log to standard output
 }
 
 void VMPI_debugBreak()
 {
-//	ASSERT( false );
+//  ASSERT( false );
 }
