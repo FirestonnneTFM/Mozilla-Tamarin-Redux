@@ -48,7 +48,7 @@ namespace avmplus
 
     typedef uintptr_t GprImtThunkProcRetType;
 
-    typedef GprImtThunkProcRetType (*GprImtThunkProc)(ImtThunkEnv*, int, uint32*, uintptr_t);
+    typedef GprImtThunkProcRetType (*GprImtThunkProc)(ImtThunkEnv*, int, uint32_t*, uintptr_t);
 
 #endif
 
@@ -69,8 +69,8 @@ namespace avmplus
         bool resolveImtSlotSelf(uint32_t slot);
 
         // return uint64_t, not uintptr_t: see note for GprImtThunkProc
-        static GprImtThunkProcRetType resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
-        static GprImtThunkProcRetType dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
+        static GprImtThunkProcRetType resolveImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
+        static GprImtThunkProcRetType dispatchImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
 
     public:
 #if defined FEATURE_NANOJIT

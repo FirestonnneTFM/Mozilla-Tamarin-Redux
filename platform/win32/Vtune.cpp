@@ -187,7 +187,7 @@ namespace avmplus
         // assume no method inlining so start/end of JIT code gen = method start/end
        uintptr_t startAt = inf->startAddr;
        uintptr_t endAt = inf->endAddr;
-        uint32 methodSize = endAt - startAt;
+       uint32_t methodSize = endAt - startAt;
 
        Stringp name = inf->method->format(core);
        int idx[4];

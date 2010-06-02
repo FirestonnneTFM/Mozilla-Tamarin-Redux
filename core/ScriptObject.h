@@ -138,10 +138,10 @@ namespace avmplus
         virtual bool deleteMultinameProperty(const Multiname* name);
         virtual bool hasMultinameProperty(const Multiname* name) const;
 
-        virtual Atom getUintProperty(uint32 i) const;
-        virtual void setUintProperty(uint32 i, Atom value);
-        virtual bool delUintProperty(uint32 i);
-        virtual bool hasUintProperty(uint32 i) const;
+        virtual Atom getUintProperty(uint32_t i) const;
+        virtual void setUintProperty(uint32_t i, Atom value);
+        virtual bool delUintProperty(uint32_t i);
+        virtual bool hasUintProperty(uint32_t i) const;
 
         // convenience wrappers for passing Stringp instead of Atom
         // inline, not virtual (should never need overriding)
@@ -214,7 +214,7 @@ namespace avmplus
         // The maximum integer key we can use with our ScriptObject
         // HashTable must fit within 28 bits.  Any integer larger
         // than 28 bits will use a string key.
-        static const uint32 MAX_INTEGER_MASK = 0xF0000000;
+        static const uint32_t MAX_INTEGER_MASK = 0xF0000000;
 
         // return true iff the object is a toplevel script init object.
         bool isGlobalObject() const;

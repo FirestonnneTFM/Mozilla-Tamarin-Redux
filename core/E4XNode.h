@@ -189,20 +189,20 @@ namespace avmplus
 
         virtual int getClass() const = 0;
 
-        virtual uint32 numAttributes() const { return 0; };
+        virtual uint32_t numAttributes() const { return 0; };
         virtual AtomArray *getAttributes() const { return 0; };
-        virtual E4XNode *getAttribute(uint32 /*index*/) const { return NULL; };
+        virtual E4XNode *getAttribute(uint32_t /*index*/) const { return NULL; };
 
-        virtual uint32 numNamespaces() const { return 0; };
+        virtual uint32_t numNamespaces() const { return 0; };
         virtual AtomArray *getNamespaces() const { return 0; };
 
-        virtual uint32 numChildren()   const { return 0; };
-        virtual E4XNode *_getAt(uint32 /*i*/) const { return 0; };
+        virtual uint32_t numChildren()   const { return 0; };
+        virtual E4XNode *_getAt(uint32_t /*i*/) const { return 0; };
 
         virtual void clearChildren() {};
-        virtual void setChildAt (uint32 /*i*/, E4XNode* /*x*/) {};
-        virtual void insertChild (uint32 /*i*/, E4XNode* /*x*/) {};
-        virtual void removeChild (uint32 /*i*/) {};
+        virtual void setChildAt (uint32_t /*i*/, E4XNode* /*x*/) {};
+        virtual void insertChild (uint32_t /*i*/, E4XNode* /*x*/) {};
+        virtual void removeChild (uint32_t /*i*/) {};
         virtual void convertToAtomArray() {};
 
         bool hasSimpleContent() const;
@@ -229,14 +229,14 @@ namespace avmplus
         // AddInScopeNamespace (Namespace)
 
         // Corresponds to [[Length]] in the docs
-        virtual uint32 _length() const { return 0; };
+        virtual uint32_t _length() const { return 0; };
 
         bool _equals(Toplevel* toplevel, AvmCore *core, E4XNode *value) const;
 
-        void _deleteByIndex (uint32 entry);
+        void _deleteByIndex (uint32_t entry);
         E4XNode *_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const;
-        virtual void _insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value);
-        virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
+        virtual void _insert (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value);
+        virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value, Atom pastValue = 0);
         virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS);
         virtual void _append (E4XNode* /*childNode*/) { AvmAssert(0); };
         // Extract a namespace from a tag name, and return the new tag name in tagName
@@ -367,21 +367,21 @@ namespace avmplus
         ElementE4XNode (E4XNode *parent);
         int getClass() const { return kElement; };
 
-        uint32 numAttributes() const { return (m_attributes ? m_attributes->getLength() : 0); };
+        uint32_t numAttributes() const { return (m_attributes ? m_attributes->getLength() : 0); };
         AtomArray *getAttributes() const { return m_attributes; };
-        E4XNode *getAttribute(uint32 index) const { return (E4XNode *)AvmCore::atomToGenericObject(m_attributes->getAt(index)); };
+        E4XNode *getAttribute(uint32_t index) const { return (E4XNode *)AvmCore::atomToGenericObject(m_attributes->getAt(index)); };
         void addAttribute (E4XNode *x);
 
-        uint32 numNamespaces() const { return (m_namespaces ? m_namespaces->getLength() : 0); };
+        uint32_t numNamespaces() const { return (m_namespaces ? m_namespaces->getLength() : 0); };
         AtomArray *getNamespaces() const { return m_namespaces; };
 
-        uint32 numChildren()   const;// { return (m_children ? m_children->getLength() : 0); };
+        uint32_t numChildren()   const;// { return (m_children ? m_children->getLength() : 0); };
 
         void clearChildren();
-        void setChildAt (uint32 i, E4XNode *x);
+        void setChildAt (uint32_t i, E4XNode *x);
         #define SINGLECHILDBIT 0x1
-        void insertChild (uint32 i, E4XNode *x);
-        void removeChild (uint32 i);
+        void insertChild (uint32_t i, E4XNode *x);
+        void removeChild (uint32_t i);
         void convertToAtomArray();
 
         Stringp getValue() const { return 0; };
@@ -391,14 +391,14 @@ namespace avmplus
         FunctionObject* getNotification() const;
 
         // E4X support routines below
-        uint32 _length() const { return numChildren(); };
-        E4XNode *_getAt(uint32 i) const;
+        uint32_t _length() const { return numChildren(); };
+        E4XNode *_getAt(uint32_t i) const;
 
         void _append (E4XNode *childNode);
 
         void _addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS);
-        void _insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value);
-        E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
+        void _insert (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value);
+        E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value, Atom pastValue = 0);
 
         void CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, Namespacep publicNS);
 

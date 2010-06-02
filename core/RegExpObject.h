@@ -68,7 +68,7 @@ namespace avmplus
         Atom call(int argc, Atom* argv);
 
         int search(Stringp subject);
-        ArrayObject* split(Stringp subject, uint32 limit);
+        ArrayObject* split(Stringp subject, uint32_t limit);
         ArrayObject* match(Stringp subject);
 
         Atom AS3_exec(Stringp subject);

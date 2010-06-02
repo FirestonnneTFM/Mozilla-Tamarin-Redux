@@ -132,11 +132,11 @@ namespace avmplus
     {
     protected:
         T *data;
-        uint32 len;
-        uint32 max;
+        uint32_t len;
+        uint32_t max;
         MMgc::GC* gc;
 
-        void wb(uint32 index, T value)
+        void wb(uint32_t index, T value)
         {
             AvmAssert(index < max);
             AvmAssert(data != NULL);
@@ -164,11 +164,11 @@ namespace avmplus
     {
     protected:
         T *data;
-        uint32 len;
-        uint32 max;
+        uint32_t len;
+        uint32_t max;
         MMgc::GC* gc;
 
-        void wb(uint32 index, T value)
+        void wb(uint32_t index, T value)
         {
             AvmAssert(index < max);
             AvmAssert(data != NULL);
@@ -200,11 +200,11 @@ namespace avmplus
     {
     protected:
         T *data;
-        uint32 len;
-        uint32 max;
+        uint32_t len;
+        uint32_t max;
         MMgc::GC* gc;
 
-        void wb(uint32 index, T value)
+        void wb(uint32_t index, T value)
         {
             AvmAssert(index < max);
             AvmAssert(data != NULL);
@@ -247,11 +247,11 @@ namespace avmplus
         {
             init(0, _capacity);
         }
-        List(MMgc::GC* _gc, uint32 _capacity = kInitialCapacity)
+        List(MMgc::GC* _gc, uint32_t _capacity = kInitialCapacity)
         {
             init(_gc, _capacity);
         }
-        void init(MMgc::GC* _gc, uint32 _capacity)
+        void init(MMgc::GC* _gc, uint32_t _capacity)
         {
             len = 0;
             max = 0;
@@ -278,7 +278,7 @@ namespace avmplus
             max = 0;
             gc = 0;
         }
-        uint32 add(T value)
+        uint32_t add(T value)
         {
             if (len >= max) {
                 grow();
@@ -291,15 +291,15 @@ namespace avmplus
         {
             return len == 0;
         }
-        uint32 size() const
+        uint32_t size() const
         {
             return len;
         }
-        uint32 capacity() const
+        uint32_t capacity() const
         {
             return max;
         }
-        T get(uint32 index) const
+        T get(uint32_t index) const
         {
             AvmAssert(index < len);
             return data[index];
@@ -309,7 +309,7 @@ namespace avmplus
             AvmAssert(len > 0);
             return data[len-1];
         }
-        void set(uint32 index, T value)
+        void set(uint32_t index, T value)
         {
             wb(index, value);
             len = (index+1 > len) ? index+1 : len;
@@ -317,7 +317,7 @@ namespace avmplus
         }
         void insert(int index, T value)
         {
-            if ((uint32)index >= len)
+            if ((uint32_t)index >= len)
             {
                 // Someone is trying to insert at the end
                 add(value);
@@ -366,7 +366,7 @@ namespace avmplus
 
         int indexOf(T value) const
         {
-            for(uint32 i=0; i<len; i++)
+            for(uint32_t i=0; i<len; i++)
                 if (data[i] == value)
                     return i;
             return -1;
@@ -379,7 +379,7 @@ namespace avmplus
             return -1;
         }
 
-        T removeAt(uint32 i)
+        T removeAt(uint32_t i)
         {
             T old = (T)0;
             old = data[i];
@@ -398,13 +398,13 @@ namespace avmplus
         T removeFirst() { return isEmpty() ? (T)0 : removeAt(0); }
         T removeLast()  { return isEmpty() ? (T)0 : removeAt(len-1); }
 
-        T operator[](uint32 index) const
+        T operator[](uint32_t index) const
         {
             AvmAssert(index < len);
             return data[index];
         }
 
-        void ensureCapacity(uint32 cap)
+        void ensureCapacity(uint32_t cap)
         {
             if(cap > max) {
                 int gcflags = 0;

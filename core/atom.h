@@ -187,9 +187,9 @@ namespace avmplus
 
     // returns true if atom type is int.
     // Note that this DOES NOT imply that the Atom's value will
-    // fit into an int32 (or a uint32); an integer atom's value
+    // fit into an int32 (or a uint32_t); an integer atom's value
     // will always fit into an intptr_t, which may be more than
-    // an int32 (or uint32) will hold on 64-bit architectures.
+    // an int32 (or uint32_t) will hold on 64-bit architectures.
     bool            atomIsIntptr(Atom atom);
 
     // return true iff both atoms are of the given type. sometimes this is slightly

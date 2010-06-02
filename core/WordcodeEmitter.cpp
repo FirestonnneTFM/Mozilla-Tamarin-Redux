@@ -996,7 +996,7 @@ namespace avmplus
         computeExceptionFixups();
     }
 
-    uint32 WordcodeEmitter::epilogue(uintptr_t** code_result)
+    uint32_t WordcodeEmitter::epilogue(uintptr_t** code_result)
     {
         AvmAssert(backpatches == NULL);
         AvmAssert(exception_fixes == NULL);

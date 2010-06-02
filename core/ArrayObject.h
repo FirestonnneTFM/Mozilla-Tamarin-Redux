@@ -57,27 +57,27 @@ namespace avmplus
 
         // We can NOT use 0xFFFFFFFF for this since x[0xFFFFFFFE] is a valid prop
         // which would make our length 0xFFFFFFFF
-        static const uint32 NO_LOW_HTENTRY  = 0;
-        uint32 m_lowHTentry; // lowest numeric entry in our hash table
-        uint32 m_length;
+        static const uint32_t NO_LOW_HTENTRY  = 0;
+        uint32_t m_lowHTentry; // lowest numeric entry in our hash table
+        uint32_t m_length;
 
     public:
 
-        ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32 capacity);
+        ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity);
         ArrayObject(VTable* ivtable, ScriptObject *delegate, Atom *argv, int argc);
         ~ArrayObject();
 
         bool hasDense() const;
         bool isSimpleDense() const;
-        uint32 getDenseLength() const;
+        uint32_t getDenseLength() const;
 
         // Non-virtual members for ActionScript method implementation
-        uint32 get_length() const;
-        void set_length(uint32 newLength);
+        uint32_t get_length() const;
+        void set_length(uint32_t newLength);
 
         // Virtual members so Array subclasses can treat length differently (in both C++ and AS3)
-        virtual uint32 getLength() const;
-        virtual void setLength(uint32 newLength);
+        virtual uint32_t getLength() const;
+        virtual void setLength(uint32_t newLength);
 
         virtual Atom getAtomProperty(Atom name) const;
         virtual void setAtomProperty(Atom name, Atom value);
@@ -85,18 +85,18 @@ namespace avmplus
         virtual bool hasAtomProperty(Atom name) const;
 
         // Faster versions that takes direct indices
-        virtual Atom getUintProperty(uint32 index) const;
-        virtual void setUintProperty(uint32 index, Atom value);
-        virtual bool delUintProperty(uint32 index);
-        virtual bool hasUintProperty(uint32 i) const;
+        virtual Atom getUintProperty(uint32_t index) const;
+        virtual void setUintProperty(uint32_t index, Atom value);
+        virtual bool delUintProperty(uint32_t index);
+        virtual bool hasUintProperty(uint32_t i) const;
 
         Atom getIntProperty(int index) const;
         void setIntProperty(int index, Atom value);
 
         virtual bool getAtomPropertyIsEnumerable(Atom name) const;
 
-        Atom _getUintProperty(uint32 index) const;
-        void _setUintProperty(uint32 index, Atom value);
+        Atom _getUintProperty(uint32_t index) const;
+        void _setUintProperty(uint32_t index, Atom value);
         Atom _getIntProperty(int index) const;
         void _setIntProperty(int index, Atom value);
 
@@ -107,12 +107,12 @@ namespace avmplus
 
         // native methods
         Atom AS3_pop(); // pop(...rest)
-        uint32 AS3_push(Atom *args, int argc); // push(...args):uint
-        uint32 AS3_unshift(Atom *args, int argc); // unshift(...args):
+        uint32_t AS3_push(Atom *args, int argc); // push(...args):uint
+        uint32_t AS3_unshift(Atom *args, int argc); // unshift(...args):
 
         Atom pop();
-        uint32 push(Atom *args, int argc);
-        uint32 unshift(Atom *args, int argc);
+        uint32_t push(Atom *args, int argc);
+        uint32_t unshift(Atom *args, int argc);
 
         void checkForSparseToDenseConversion();
 

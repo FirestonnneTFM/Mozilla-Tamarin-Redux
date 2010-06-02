@@ -484,7 +484,7 @@ namespace avmplus
         m_ignoreWhite = ignoreWhite;
     }
 
-    bool XMLTag::nextAttribute(uint32& index,
+    bool XMLTag::nextAttribute(uint32_t& index,
                                Stringp& name,
                                Stringp& value)
     {

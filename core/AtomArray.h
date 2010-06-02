@@ -58,7 +58,7 @@ namespace avmplus
         Atom pop();
 
         // n arguments are pushed on the array (argc is returned)
-        uint32 push(Atom *args, int argc);
+        uint32_t push(Atom *args, int argc);
 
         // Reverse array elements
         void reverse();
@@ -71,31 +71,31 @@ namespace avmplus
         // deleteCount - number to delete
         // args - #insertCount args to insert
         // offset - offset in args to start the insertion from.
-        void splice(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, AtomArray *args, int offset=0);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, AtomArray *args, int offset=0);
 
         // insert array of arguments at front of array
         Atom unshift(Atom *args, int argc);
 
         /////////////////////////////////////////////////////
 
-        uint32 getLength() const;
-        void setLength(uint32 len);
-        uint32 capacity()  const;
+        uint32_t getLength() const;
+        void setLength(uint32_t len);
+        uint32_t capacity()  const;
 
         void push (Atom a);
         void push (const AtomArray *a);
-        void removeAt (uint32 index);
+        void removeAt (uint32_t index);
 
-        void insert (uint32 index, Atom a);
-        void setAt (uint32 index, Atom a);
+        void insert (uint32_t index, Atom a);
+        void setAt (uint32_t index, Atom a);
 
         void clear();
 
-        Atom operator[](uint32 index) const;
-        Atom getAt(uint32 index) const;
+        Atom operator[](uint32_t index) const;
+        Atom getAt(uint32_t index) const;
 
         // ONLY USE THIS IF YOU PRE-CHECK THE LENGTH
-        Atom getAtFast(uint32 index) const;
+        Atom getAtFast(uint32_t index) const;
 
         /**
          * Compacts the AtomArray so it is exactly large enough
@@ -112,12 +112,12 @@ namespace avmplus
 #endif
 
     private:
-        uint32  m_length;
+        uint32_t  m_length;
         Atom* m_atoms;
 
         const static int  kMinCapacity = 4;
 
-        void setAtInternal(uint32 index, Atom a);
+        void setAtInternal(uint32_t index, Atom a);
 
         void setAtoms(MMgc::GC *gc, Atom *atoms);
 

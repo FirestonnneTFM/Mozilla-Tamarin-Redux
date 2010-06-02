@@ -1087,7 +1087,7 @@ namespace avmplus
                 {
                     const Binding b = tb->m_bindings->get(name, ns);
                     AvmAssert(b != BIND_NONE);
-                    const uint32 disp_id = uint32(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
+                    const uint32_t disp_id = uint32_t(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
                     MethodInfo* f = this->pool->getMethodInfo(ne.id);
                     //AvmAssert(f->declaringTraits() == this);
                     tb->setMethodInfo(disp_id, f);
@@ -1342,7 +1342,7 @@ namespace avmplus
                         this->pool->resolveBindingNameNoCheck(ne.qni, qn, /*toplevel*/NULL);
                         const Binding b = td->findBinding(qn.getName(), qn.getNamespace());
                         AvmAssert(b != BIND_NONE);
-                        const uint32 disp_id = uint32(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
+                        const uint32_t disp_id = uint32_t(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
                         tm->methodMetadataPos[disp_id] = ne.meta_pos;
                     }
                     break;

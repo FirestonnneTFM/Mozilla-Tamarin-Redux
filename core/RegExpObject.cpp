@@ -247,7 +247,7 @@ namespace avmplus
     }
 
 
-    ArrayObject* RegExpObject::split(Stringp subject, uint32 limit)
+    ArrayObject* RegExpObject::split(Stringp subject, uint32_t limit)
     {
         ArrayObject *out = toplevel()->arrayClass->newArray();
         StIndexableUTF8String utf8Subject(subject);
@@ -289,7 +289,7 @@ namespace avmplus
                 out->setUintProperty(n++, stringFromUTF8(utf8Subject.c_str()+startIndex, matchIndex-startIndex));
                 if (n >= limit)
                     break;
-                for (uint32 j=1; j<matchArray->getLength(); j++) {
+                for (uint32_t j=1; j<matchArray->getLength(); j++) {
                     out->setUintProperty(n++, matchArray->getUintProperty(j));
                     if (n >= limit)
                         break;
@@ -409,7 +409,7 @@ namespace avmplus
                 nameIndex = (nameTable[0] << 8) + nameTable[1];
                 length = ovector[nameIndex * 2 + 1] - ovector[ nameIndex * 2 ];
 
-                Atom name = stringFromUTF8((nameTable+2), (uint32)VMPI_strlen(nameTable+2));
+                Atom name = stringFromUTF8((nameTable+2), (uint32_t)VMPI_strlen(nameTable+2));
                 name = core->internString(name)->atom();
 
                 Atom value = stringFromUTF8(utf8Subject.c_str()+ovector[nameIndex*2], length);
@@ -680,7 +680,7 @@ namespace avmplus
             // Advance one character
             if (newLastIndex < subjectLength)
             {
-                uint32 ch;
+                uint32_t ch;
                 int n = UnicodeUtils::Utf8ToUcs4((const uint8*)src+newLastIndex, subjectLength-newLastIndex, &ch);
                 if (n <= 0)
                 {

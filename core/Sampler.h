@@ -131,13 +131,13 @@ namespace avmplus
     struct Sample
     {
         uint64_t micros;
-        uint32 sampleType;
+        uint32_t sampleType;
         union {
             // not filled in for sampleType==DELETED_OBJECT_SAMPLE
             struct {
                 // Number of StackTraceElements in the trace
-                uint32 depth;
-                // Beginning of an array of StackTraceElement.  Basically, an MethodInfo*, Stringp, Stringp, uint32 for each entry.
+                uint32_t depth;
+                // Beginning of an array of StackTraceElement.  Basically, an MethodInfo*, Stringp, Stringp, uint32_t for each entry.
                 void *trace;
             } stack;
             // deleted object size record, instead of stack
@@ -170,7 +170,7 @@ namespace avmplus
         enum { SAMPLE_FREQUENCY_MILLIS = 1 };
 
         // should use opaque Cursor type instead of byte*
-        byte *getSamples(uint32 &num);
+        byte *getSamples(uint32_t &num);
         void readSample(byte *&p, Sample &s);
 
         void init(bool sampling, bool autoStart);
@@ -207,7 +207,7 @@ namespace avmplus
 
         void sample();
 
-        void rewind(byte*&b, uint32 amount)
+        void rewind(byte*&b, uint32_t amount)
         {
             b -= amount;
         }

@@ -45,7 +45,7 @@ namespace avmplus
 {
     namespace NativeObjectHelpers
     {
-        // CN:  ES3 compliance requires uint32 array and string indicies.  The arguments to several
+        // CN:  ES3 compliance requires uint32_t array and string indicies.  The arguments to several
         //  array methods are integral values held in a double (to allow for negative offsets from
         //  the array length).  To deal with this, ClampIndex replaces ClampA
         // i.e. instead of doing this:
@@ -55,44 +55,44 @@ namespace avmplus
         //  ClampA(start,end,a->getLength());
         //
         //  do this:
-        //  uint32 start = ClampArrayIndex( AvmCore::toInteger(argv[0]), a->getLength() );
-        //  uint32 end   = ClampArrayIndex( AvmCore::toInteger(argv[1]), a->getLength() );
+        //  uint32_t start = ClampArrayIndex( AvmCore::toInteger(argv[0]), a->getLength() );
+        //  uint32_t end   = ClampArrayIndex( AvmCore::toInteger(argv[1]), a->getLength() );
         //  if (end < start)
         //    end == start;
-        inline uint32 ClampIndex(double intValue, uint32 length)
+        inline uint32_t ClampIndex(double intValue, uint32_t length)
         {
-            uint32 result;
+            uint32_t result;
             if (intValue < 0.0)
             {
                 if (intValue + length < 0.0)
                     result = 0;
                 else
-                    result = (uint32)(intValue + length);
+                    result = (uint32_t)(intValue + length);
             }
             else if (intValue > length)
                 result = length;
             else if (intValue != intValue) // lookout for NaN.  It converts to a 0 int value on Win, but as 0xffffffff on Mac
                 result = 0;
             else
-                result = (uint32)intValue;
+                result = (uint32_t)intValue;
 
             return result;
         }
 
-        inline uint32 ClampIndexInt(int intValue, uint32 length)
+        inline uint32_t ClampIndexInt(int intValue, uint32_t length)
         {
-            uint32 result;
+            uint32_t result;
             if (intValue < 0)
             {
                 if (intValue + int(length) < 0)
                     result = 0;
                 else
-                    result = (uint32)(intValue + length);
+                    result = (uint32_t)(intValue + length);
             }
             else if (intValue > int(length))
                 result = length;
             else
-                result = (uint32)intValue;
+                result = (uint32_t)intValue;
 
             return result;
         }

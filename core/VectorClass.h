@@ -69,8 +69,8 @@ namespace avmplus
         virtual void setAtomProperty(Atom name, Atom value);
         virtual Atom getAtomProperty(Atom name) const;
 
-        uint32 get_length();
-        void set_length(uint32 newLength);
+        uint32_t get_length();
+        void set_length(uint32_t newLength);
 
         bool get_fixed();
         void set_fixed(bool fixed);
@@ -83,17 +83,17 @@ namespace avmplus
         Atom map(ScriptObject *callback, Atom thisObject);
         Atom filter(ScriptObject *callback, Atom thisObject);
 
-        uint32 AS3_push(Atom *args, int argc);
+        uint32_t AS3_push(Atom *args, int argc);
 
-        uint32 m_length;
+        uint32_t m_length;
     protected:
-        uint32 m_capacity;
+        uint32_t m_capacity;
         bool m_fixed;
 
-        virtual void grow(uint32 newCapacity, bool exact=false) = 0;
-        virtual VectorBaseObject* newVector(uint32 length = 0) = 0;
+        virtual void grow(uint32_t newCapacity, bool exact=false) = 0;
+        virtual VectorBaseObject* newVector(uint32_t length = 0) = 0;
 
-        bool getVectorIndex(Atom name, uint32& index, bool& isNumber) const;
+        bool getVectorIndex(Atom name, uint32_t& index, bool& isNumber) const;
     };
 
     template <class T>
@@ -115,17 +115,17 @@ namespace avmplus
         Atom _filter(ScriptObject* callback, Atom thisObject) { return filter(callback, thisObject); }
         Atom _map(ScriptObject* callback, Atom thisObject) { return map(callback, thisObject); }
 
-        virtual Atom getUintProperty(uint32 index) const
+        virtual Atom getUintProperty(uint32_t index) const
         {
             return _getUintProperty(index);
         }
 
-        virtual void setUintProperty(uint32 index, Atom value)
+        virtual void setUintProperty(uint32_t index, Atom value)
         {
             _setUintProperty(index, value);
         }
 
-        T _getNativeUintProperty(uint32 index) const
+        T _getNativeUintProperty(uint32_t index) const
         {
             if( m_length <= index )
                 toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
@@ -134,12 +134,12 @@ namespace avmplus
 
         T _getNativeIntProperty(int index) const
         {
-            if( m_length <= uint32(index) )
+            if( m_length <= uint32_t(index) )
                 toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
             return m_array[index];
         }
 
-        void _setNativeUintProperty(uint32 index, T value)
+        void _setNativeUintProperty(uint32_t index, T value)
         {
             if (m_length <= index)
             {
@@ -153,11 +153,11 @@ namespace avmplus
 
         void _setNativeIntProperty(int index, T value)
         {
-            if (m_length <= uint32(index))
+            if (m_length <= uint32_t(index))
             {
                 if( index < 0 )
                     toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
-                else if(uint32(index) > m_length || m_fixed)
+                else if(uint32_t(index) > m_length || m_fixed)
                     toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
                 grow(index+1);
                 m_length = index+1;
@@ -165,7 +165,7 @@ namespace avmplus
             m_array[index] = value;
         }
 
-        Atom _getUintProperty(uint32 index) const
+        Atom _getUintProperty(uint32_t index) const
         {
             if (m_length <= index)
             {
@@ -183,7 +183,7 @@ namespace avmplus
             return 0;
         }
 
-        void _setUintProperty(uint32 index, Atom value)
+        void _setUintProperty(uint32_t index, Atom value)
         {
             if (m_length <= index)
             {
@@ -203,7 +203,7 @@ namespace avmplus
                 toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
         }
 
-        void set_length(uint32 newLength)
+        void set_length(uint32_t newLength)
         {
             if( newLength < m_length )
             {
@@ -212,7 +212,7 @@ namespace avmplus
             VectorBaseObject::set_length(newLength);
         }
 
-        uint32 AS3_unshift(Atom* argv, int argc)
+        uint32_t AS3_unshift(Atom* argv, int argc)
         {
             // shift elements up by argc
             // inserts args into initial spots
@@ -238,14 +238,14 @@ namespace avmplus
             if(!m_length)
                 return;
             T temp;
-            for(uint32 i = 0, j = m_length-1; i < j; ++i, --j)
+            for(uint32_t i = 0, j = m_length-1; i < j; ++i, --j)
             {
                 temp = m_array[i];
                 m_array[i] = m_array[j];
                 m_array[j] = temp;
             }
         }
-        void _spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)
+        void _spliceHelper(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, Atom args, int offset)
         {
             long l_shiftAmount = (long)insertCount - (long) deleteCount; // long because result could be negative
 
@@ -284,7 +284,7 @@ namespace avmplus
                 }
                 else if( so_args )
                 {
-                    for (uint32 i=0; i<insertCount; i++)
+                    for (uint32_t i=0; i<insertCount; i++)
                     {
                         //setUintProperty(insertPoint+i, so_args->getUintProperty(i+offset));
                         atomToValue(so_args->getUintProperty(i+offset), m_array[insertPoint+i]);
@@ -301,7 +301,7 @@ namespace avmplus
                 toplevel()->throwRangeError(kVectorFixedError);
             if(m_length)
             {
-                uint32 l = --m_length;
+                uint32_t l = --m_length;
                 T r = m_array[l];
                 m_array[l] = 0;
                 return r;
@@ -317,8 +317,8 @@ namespace avmplus
             ScriptObject* so_args = atomKind(obj)==kObjectType ?  AvmCore::atomToScriptObject(obj) : 0;
             if( so_args )
             {
-                uint32 len = ArrayClass::getLengthHelper(toplevel(), so_args);
-                for( uint32 i = 0; i < len; ++i )
+                uint32_t len = ArrayClass::getLengthHelper(toplevel(), so_args);
+                for( uint32_t i = 0; i < len; ++i )
                 {
                     this->setUintProperty(i, so_args->getUintProperty(i));
                 }
@@ -355,7 +355,7 @@ namespace avmplus
         {
             value = AvmCore::integer(int(atom));
         }
-        void atomToValue(Atom atom, uint32& value)
+        void atomToValue(Atom atom, uint32_t& value)
         {
             value = AvmCore::toUInt32(atom);
         }
@@ -384,7 +384,7 @@ namespace avmplus
         {
             return core()->intToAtom(value);
         }
-        Atom valueToAtom(uint32 value) const
+        Atom valueToAtom(uint32_t value) const
         {
             return core()->uintToAtom(value);
         }
@@ -412,7 +412,7 @@ namespace avmplus
             return NULL;
         }
 
-        virtual void grow(uint32 newCapacity, bool exact = false)
+        virtual void grow(uint32_t newCapacity, bool exact = false)
         {
             if (newCapacity > m_capacity)
             {
@@ -447,14 +447,14 @@ namespace avmplus
         {
         }
     protected:
-        virtual VectorBaseObject* newVector(uint32 length = 0);
+        virtual VectorBaseObject* newVector(uint32_t length = 0);
         DECLARE_SLOTS_IntVectorObject;
     };
 
-    class UIntVectorObject : public TypedVectorObject<uint32> {
+    class UIntVectorObject : public TypedVectorObject<uint32_t> {
     public:
         UIntVectorObject(VTable *ivtable, ScriptObject *delegate)
-            : TypedVectorObject<uint32>(ivtable, delegate)
+            : TypedVectorObject<uint32_t>(ivtable, delegate)
         {
         }
 
@@ -463,7 +463,7 @@ namespace avmplus
         }
 
     protected:
-        virtual VectorBaseObject* newVector(uint32 length = 0);
+        virtual VectorBaseObject* newVector(uint32_t length = 0);
         DECLARE_SLOTS_UIntVectorObject;
     };
 
@@ -479,7 +479,7 @@ namespace avmplus
         }
 
     protected:
-        virtual VectorBaseObject* newVector(uint32 length = 0);
+        virtual VectorBaseObject* newVector(uint32_t length = 0);
         DECLARE_SLOTS_DoubleVectorObject;
     };
 
@@ -501,30 +501,30 @@ namespace avmplus
             }
         }
 
-        virtual Atom getUintProperty(uint32 index) const;
-        virtual void setUintProperty(uint32 index, Atom value);
+        virtual Atom getUintProperty(uint32_t index) const;
+        virtual void setUintProperty(uint32_t index, Atom value);
 
-        Atom _getUintProperty(uint32 index) const;
-        void _setUintProperty(uint32 index, Atom value);
+        Atom _getUintProperty(uint32_t index) const;
+        void _setUintProperty(uint32_t index, Atom value);
 
         Atom _getIntProperty(int index) const;
         void _setIntProperty(int index, Atom value);
 
-        void set_length(uint32 newLength);
+        void set_length(uint32_t newLength);
 
         void set_type(Atom a);
         Atom get_type();
 
         //void _reverse();
         // insert array of arguments at front of array
-        uint32 AS3_unshift(Atom* argv, int argc);
-        void _spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset);
+        uint32_t AS3_unshift(Atom* argv, int argc);
+        void _spliceHelper(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, Atom args, int offset);
 
         Atom AS3_pop();
 
     protected:
-        virtual void grow(uint32 newCapacity, bool exact=false);
-        virtual VectorBaseObject* newVector(uint32 length = 0);
+        virtual void grow(uint32_t newCapacity, bool exact=false);
+        virtual VectorBaseObject* newVector(uint32_t length = 0);
 
     private:
         ObjectVectorObject* isVector(Atom instance)
@@ -552,7 +552,7 @@ namespace avmplus
 
         Atom call(int argc, Atom* argv);
 
-        IntVectorObject* newVector(uint32 length = 0);
+        IntVectorObject* newVector(uint32_t length = 0);
 
         void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
         bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
@@ -571,7 +571,7 @@ namespace avmplus
 
         Atom call(int argc, Atom* argv);
 
-        UIntVectorObject* newVector(uint32 length = 0);
+        UIntVectorObject* newVector(uint32_t length = 0);
 
         void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
         bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
@@ -590,7 +590,7 @@ namespace avmplus
 
         Atom call(int argc, Atom* argv);
 
-        DoubleVectorObject* newVector(uint32 length = 0);
+        DoubleVectorObject* newVector(uint32_t length = 0);
 
         void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
         bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
@@ -617,7 +617,7 @@ namespace avmplus
          *  @pre The type must be an Object type.
          *
          */
-        ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
+        ObjectVectorObject* newVector(ClassClosure* type, uint32_t length = 0);
 
         virtual Atom applyTypeArgs(int argc, Atom* argv);
 
@@ -637,7 +637,7 @@ namespace avmplus
 
         Atom call(int argc, Atom* argv);
 
-        ObjectVectorObject* newVector(uint32 length = 0);
+        ObjectVectorObject* newVector(uint32_t length = 0);
 
         void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
         bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }

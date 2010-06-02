@@ -63,8 +63,8 @@ namespace avmplus
      * @return The return value of the method that was executed.
      * @throws Exception if the method throws an exception.
      */
-    uintptr_t interpGPR(MethodEnv* method, int argc, uint32 *ap); // returns Atom, int/uint, or a pointer
-    double interpFPR(MethodEnv* method, int argc, uint32 *ap); // really returns double
+    uintptr_t interpGPR(MethodEnv* method, int argc, uint32_t *ap); // returns Atom, int/uint, or a pointer
+    double interpFPR(MethodEnv* method, int argc, uint32_t *ap); // really returns double
 
     // main interpreter method.  Signature should correspond to AtomMethodProc to allow tail calls to here
     Atom interpBoxed(MethodEnv* method, int argc, Atom* ap);

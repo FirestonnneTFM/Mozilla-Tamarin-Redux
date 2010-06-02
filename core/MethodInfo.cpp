@@ -622,7 +622,7 @@ namespace avmplus
     DebuggerMethodInfo* MethodInfo::dmi() const
     {
         // rely on the fact that not-in-pool MethodInfo returns -1,
-        // which will always be > methodCount as uint32
+        // which will always be > methodCount as uint32_t
         const uint32_t method_id = uint32_t(this->method_id());
         AvmAssert(_pool->core->debugger() != NULL);
         // getDebuggerMethodInfo quietly returns NULL for out-of-range.

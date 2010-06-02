@@ -109,17 +109,17 @@ namespace avmplus
         // XML.setSettings ([settings]) (in AS)
         // XML.defaultSettings() (in AS)
 
-        void set_ignoreComments(uint32 ignoreFlag);
-        uint32 get_ignoreComments();
+        void set_ignoreComments(uint32_t ignoreFlag);
+        uint32_t get_ignoreComments();
 
-        void set_ignoreProcessingInstructions(uint32 ignoreFlag);
-        uint32 get_ignoreProcessingInstructions();
+        void set_ignoreProcessingInstructions(uint32_t ignoreFlag);
+        uint32_t get_ignoreProcessingInstructions();
 
-        void set_ignoreWhitespace(uint32 ignoreFlag);
-        uint32 get_ignoreWhitespace();
+        void set_ignoreWhitespace(uint32_t ignoreFlag);
+        uint32_t get_ignoreWhitespace();
 
-        void set_prettyPrinting(uint32 prettyPrinting);
-        uint32 get_prettyPrinting();
+        void set_prettyPrinting(uint32_t prettyPrinting);
+        uint32_t get_prettyPrinting();
 
         void set_prettyIndent(int indent);
         int get_prettyIndent();

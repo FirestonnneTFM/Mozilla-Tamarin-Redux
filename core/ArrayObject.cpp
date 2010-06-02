@@ -42,7 +42,7 @@
 
 namespace avmplus
 {
-    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, uint32 capacity)
+    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, uint32_t capacity)
         : ScriptObject(vtable, proto, 0),
         m_denseArr(capacity)
     {
@@ -124,7 +124,7 @@ namespace avmplus
                     while (index)
                     {
                         Atom name = ScriptObject::nextName (index);
-                        uint32 nameIndex;
+                        uint32_t nameIndex;
                         if (AvmCore::getIndexFromAtom(name, &nameIndex))
                         {
                             if ((m_lowHTentry == NO_LOW_HTENTRY) || (nameIndex < m_lowHTentry))
@@ -152,7 +152,7 @@ namespace avmplus
         {
             AvmCore *core = this->core();
             // Update the array length.
-            uint32 index;
+            uint32_t index;
             if (AvmCore::getIndexFromAtom(name, &index))
             {
                 return _setUintProperty (index, value);
@@ -165,7 +165,7 @@ namespace avmplus
         ScriptObject::setAtomProperty(name, value);
     }
 
-    void ArrayObject::_setUintProperty(uint32 index, Atom value)
+    void ArrayObject::_setUintProperty(uint32_t index, Atom value)
     {
         if (traits()->needsHashtable())
         {
@@ -227,7 +227,7 @@ namespace avmplus
             AvmCore *core = this->core();
             if (hasDense())
             {
-                uint32 index;
+                uint32_t index;
                 if (AvmCore::getIndexFromAtom(name, &index))
                 {
                     // if we get here, we have a valid integer index.
@@ -243,7 +243,7 @@ namespace avmplus
         return ScriptObject::getAtomProperty(name);
     }
 
-    Atom ArrayObject::_getUintProperty(uint32 index) const
+    Atom ArrayObject::_getUintProperty(uint32_t index) const
     {
         if (traits()->needsHashtable())
         {
@@ -280,7 +280,7 @@ namespace avmplus
         {
             if (hasDense())
             {
-                uint32 index;
+                uint32_t index;
                 if (AvmCore::getIndexFromAtom(name, &index) && index < getDenseLength())
                 {
                     return delUintProperty(index);
@@ -291,7 +291,7 @@ namespace avmplus
         return ScriptObject::deleteAtomProperty(name);
     }
 
-    bool ArrayObject::delUintProperty(uint32 index)
+    bool ArrayObject::delUintProperty(uint32_t index)
     {
         // if we get here, we have a valid integer index.
         if (traits()->needsHashtable())
@@ -307,7 +307,7 @@ namespace avmplus
                 // get moved to the HT.
                 else
                 {
-                    for (uint32 i = index + 1; i < getDenseLength(); i++)
+                    for (uint32_t i = index + 1; i < getDenseLength(); i++)
                     {
                         ScriptObject::setUintProperty (i, m_denseArr.getAtFast(i));
                     }
@@ -326,7 +326,7 @@ namespace avmplus
         {
             if (hasDense())
             {
-                uint32 index;
+                uint32_t index;
                 if (AvmCore::getIndexFromAtom(name, &index))
                 {
                     // {DontEnum} is not supported on the dense portion
@@ -346,7 +346,7 @@ namespace avmplus
         {
             if (hasDense())
             {
-                uint32 index;
+                uint32_t index;
                 if (AvmCore::getIndexFromAtom(name, &index))
                 {
                     if (index < getDenseLength())
@@ -358,7 +358,7 @@ namespace avmplus
         return ScriptObject::hasAtomProperty(name);
     }
 
-    bool ArrayObject::hasUintProperty(uint32 index) const
+    bool ArrayObject::hasUintProperty(uint32_t index) const
     {
         if (traits()->needsHashtable())
         {
@@ -428,15 +428,15 @@ namespace avmplus
 #endif
 
 
-    /*virtual*/ void ArrayObject::setLength(uint32 newLength)
+    /*virtual*/ void ArrayObject::setLength(uint32_t newLength)
     {
         if (traits()->needsHashtable())
         {
             // Delete all items between size and newLength
-            uint32 oldLength = getLength();
+            uint32_t oldLength = getLength();
             if (newLength < oldLength)
             {
-                uint32 denseLength = getDenseLength();
+                uint32_t denseLength = getDenseLength();
                 if (newLength < denseLength)
                 {
                     this->m_denseArr.splice(newLength, 0, (denseLength - newLength), 0);
@@ -486,7 +486,7 @@ namespace avmplus
         }
     }
 
-    uint32 ArrayObject::AS3_push(Atom* argv, int argc)
+    uint32_t ArrayObject::AS3_push(Atom* argv, int argc)
     {
         if (isSimpleDense())
         {
@@ -502,7 +502,7 @@ namespace avmplus
         return m_length;
     }
 
-    uint32 ArrayObject::AS3_unshift(Atom* argv, int argc)
+    uint32_t ArrayObject::AS3_unshift(Atom* argv, int argc)
     {
         if (argc != 0)
         {
@@ -513,15 +513,15 @@ namespace avmplus
             }
             else
             {
-                uint32 i;
+                uint32_t i;
                 // First, move all the elements up
-                uint32 len = getLength();
+                uint32_t len = getLength();
                 for (i=len; i > 0; ) {  // note: i is unsigned, can't check if --i >=0.
                     i--;
                     _setUintProperty(i+argc, _getUintProperty(i));
                 }
 
-                for (i=0; i < ((uint32)argc); i++) {
+                for (i=0; i < ((uint32_t)argc); i++) {
                     _setUintProperty(i, argv[i]);
                 }
 

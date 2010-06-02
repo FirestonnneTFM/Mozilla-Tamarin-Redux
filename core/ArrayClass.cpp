@@ -183,16 +183,16 @@ namespace avmplus
         AvmCore* core = toplevel->core();
         ScriptObject *d = AvmCore::isObject(thisAtom) ? AvmCore::atomToScriptObject(thisAtom) : 0;
 
-        uint32 len = 0;
+        uint32_t len = 0;
         if (d)
         {
             len = getLengthHelper(toplevel, d);
         }
 
         ArrayObject *a = isArray(toplevel, thisAtom);
-        uint32 i;
+        uint32_t i;
 
-        uint32 argc = args->getLength();
+        uint32_t argc = args->getLength();
 
         int  newLength = len;
         for (i = 0; i< argc; i++)
@@ -227,7 +227,7 @@ namespace avmplus
             }
         }
 
-        for (i = 0; i< (uint32)argc; i++)
+        for (i = 0; i< (uint32_t)argc; i++)
         {
             Atom atom = args->getUintProperty(i);
             if (AvmCore::istype(atom, ARRAY_TYPE))
@@ -238,8 +238,8 @@ namespace avmplus
                 out->m_length += b->getDenseLength();
 
                 // copy over any non-dense values
-                uint32 len = b->getLength();
-                for (uint32 j=b->getDenseLength(); j<len; j++) {
+                uint32_t len = b->getLength();
+                for (uint32_t j=b->getDenseLength(); j<len; j++) {
                     out->m_denseArr.push (b->getUintProperty(j));
                     out->m_length++;
                 }
@@ -270,7 +270,7 @@ namespace avmplus
 
         // Different than Rhino (because of delete) but matches 262.pdf
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
         if (!len)
         {
             setLengthHelper(toplevel, d, 0);
@@ -304,9 +304,9 @@ namespace avmplus
             return thisAtom;
 
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 j = getLengthHelper(toplevel, d);
+        uint32_t j = getLengthHelper(toplevel, d);
 
-        uint32 i = 0;
+        uint32_t i = 0;
         if (j)
             j--;
 
@@ -343,7 +343,7 @@ namespace avmplus
 
         Atom outAtom;
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         if (len == 0)
         {
@@ -357,7 +357,7 @@ namespace avmplus
             outAtom = d->getUintProperty(0);
 
             // Move all of the elements down
-            for (uint32 i=0; i<len-1; i++) {
+            for (uint32_t i=0; i<len-1; i++) {
                 d->setUintProperty(i, d->getUintProperty(i+1));
             }
 
@@ -378,19 +378,19 @@ namespace avmplus
             return 0;
 
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         // if a param is passed then the first one is A
         // if no params are passed then A = 0
-        uint32 a = NativeObjectHelpers::ClampIndex(A, len);
-        uint32 b = NativeObjectHelpers::ClampIndex(B, len);
+        uint32_t a = NativeObjectHelpers::ClampIndex(A, len);
+        uint32_t b = NativeObjectHelpers::ClampIndex(B, len);
         if (b < a)
             b = a;
 
         ArrayObject *out = toplevel->arrayClass->newArray(b-a);
 
-        uint32 outIndex=0;
-        for (uint32 i=a; i<b; i++) {
+        uint32_t outIndex=0;
+        for (uint32_t i=a; i<b; i++) {
             out->setUintProperty (outIndex++, d->getUintProperty (i));
         }
 
@@ -426,14 +426,14 @@ namespace avmplus
             int options;
         };
 
-        typedef int     (*CompareFuncPtr)   (const ArraySort *s, uint32 i, uint32 j);
+        typedef int     (*CompareFuncPtr)   (const ArraySort *s, uint32_t i, uint32_t j);
 
-        static int StringCompareFunc(const ArraySort *s, uint32 j, uint32 k) { return s->StringCompare(j, k); }
-        static int CaseInsensitiveStringCompareFunc(const ArraySort *s, uint32 j, uint32 k) { return s->CaseInsensitiveStringCompare(j, k); }
-        static int ScriptCompareFunc(const ArraySort *s, uint32 j, uint32 k) { return s->ScriptCompare(j, k); }
-        static int NumericCompareFunc(const ArraySort *s, uint32 j, uint32 k) { return s->NumericCompare(j, k); }
-        static int DescendingCompareFunc(const ArraySort *s, uint32 j, uint32 k) { return s->altCmpFunc(s, k, j); }
-        static int FieldCompareFunc(const ArraySort *s, uint32 j, uint32 k) { return s->FieldCompare(j, k); }
+        static int StringCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->StringCompare(j, k); }
+        static int CaseInsensitiveStringCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->CaseInsensitiveStringCompare(j, k); }
+        static int ScriptCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->ScriptCompare(j, k); }
+        static int NumericCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->NumericCompare(j, k); }
+        static int DescendingCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->altCmpFunc(s, k, j); }
+        static int FieldCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->FieldCompare(j, k); }
 
     public:
         /*************************************************************
@@ -441,7 +441,7 @@ namespace avmplus
          *************************************************************/
 
         ArraySort(Atom &result, ArrayClass *f, ScriptObject *d, int options, CompareFuncPtr cmpFunc,
-            CompareFuncPtr altCmpFunc, Atom cmpActionScript, uint32 numFields = 0, FieldName *fields = NULL);
+            CompareFuncPtr altCmpFunc, Atom cmpActionScript, uint32_t numFields = 0, FieldName *fields = NULL);
 
         ~ArraySort();
 
@@ -454,7 +454,7 @@ namespace avmplus
          *************************************************************/
 
         // non-recursive quicksort implementation
-        void qsort(uint32 lo, uint32 hi);
+        void qsort(uint32_t lo, uint32_t hi);
 
         // qsort() is abstracted from the array by swap() and compare()
         // compare(), in turn, is abstracted from the array via get()
@@ -462,20 +462,20 @@ namespace avmplus
         // cmpFunc is conditional, for instance :
         //      cmpFunc = DefaultCompareFunc;   // Array.sort()
         //      cmpFunc = ScriptCompareFunc;    // Array.sort(compareFunction)
-        int compare(uint32 lhs, uint32 rhs) const   { return cmpFunc(this, lhs, rhs); }
-        Atom get(uint32 i)      const   { return atoms->getAt(index[i]); }
-        void swap(uint32 j, uint32 k)
+        int compare(uint32_t lhs, uint32_t rhs) const   { return cmpFunc(this, lhs, rhs); }
+        Atom get(uint32_t i)      const   { return atoms->getAt(index[i]); }
+        void swap(uint32_t j, uint32_t k)
         {
-            uint32 temp = index[j];
+            uint32_t temp = index[j];
             index[j] = index[k];
             index[k] = temp;
         }
 
-        inline int StringCompare(uint32 j, uint32 k) const;
-        inline int CaseInsensitiveStringCompare(uint32 j, uint32 k) const;
-        inline int ScriptCompare(uint32 j, uint32 k) const;
-        inline int NumericCompare(uint32 j, uint32 k) const;
-        inline int FieldCompare(uint32 j, uint32 k) const;
+        inline int StringCompare(uint32_t j, uint32_t k) const;
+        inline int CaseInsensitiveStringCompare(uint32_t j, uint32_t k) const;
+        inline int ScriptCompare(uint32_t j, uint32_t k) const;
+        inline int NumericCompare(uint32_t j, uint32_t k) const;
+        inline int FieldCompare(uint32_t j, uint32_t k) const;
 
         /**
          * null check + pointer cast.  only used in contexts where we know we
@@ -497,10 +497,10 @@ namespace avmplus
         CompareFuncPtr altCmpFunc;
         Atom cmpActionScript;
 
-        uint32 *index;
+        uint32_t *index;
         AtomArray *atoms;
 
-        uint32 numFields;
+        uint32_t numFields;
         FieldName *fields;
         AtomArray *fieldatoms;
     };
@@ -513,7 +513,7 @@ namespace avmplus
         CompareFuncPtr cmpFunc,
         CompareFuncPtr altCmpFunc,
         Atom cmpActionScript,
-        uint32 numFields,
+        uint32_t numFields,
         FieldName *fields
     ) :
         d(d),
@@ -529,9 +529,9 @@ namespace avmplus
         fields(fields),
         fieldatoms(NULL)
     {
-        uint32 len = f->getLengthHelper(toplevel, d);
-        uint32 iFirstUndefined = len;
-        uint32 iFirstAbsent = len;
+        uint32_t len = f->getLengthHelper(toplevel, d);
+        uint32_t iFirstUndefined = len;
+        uint32_t iFirstAbsent = len;
 
         // new class[n] compiles into code which tries to allocate n * sizeof(class).
         // unfortunately, the generated assembly does not protect against this product overflowing int.
@@ -539,7 +539,7 @@ namespace avmplus
         if ((len > 0) && (len < (0x10000000)))
         {
 
-            index = mmfx_new_array(uint32, len);
+            index = mmfx_new_array(uint32_t, len);
             atoms = new (core->GetGC()) AtomArray(len);
             atoms->setLength(len);
         }
@@ -554,8 +554,8 @@ namespace avmplus
             return;
         }
 
-        uint32 i, j;
-        uint32 newlen = len;
+        uint32_t i, j;
+        uint32_t newlen = len;
 
         // One field value - pre-get our field values so we can just do a regular sort
         if (cmpFunc == ArraySort::FieldCompareFunc && numFields == 1)
@@ -587,7 +587,7 @@ namespace avmplus
                 {
                     j--;
 
-                    uint32 temp = index[i];
+                    uint32_t temp = index[i];
                     index[i] = index[j];
 
                     if (!d->hasUintProperty(i)) {
@@ -649,7 +649,7 @@ namespace avmplus
                 if (!defined(atoms->getAt(i))) {
                     j--;
 
-                    uint32 temp = index[i];
+                    uint32_t temp = index[i];
                     index[i] = index[j];
 
                     if (!d->hasUintProperty(i)) {
@@ -677,7 +677,7 @@ namespace avmplus
         {
             // todo : kUniqueSort could throw an exception.
             // todo : kUniqueSort could abort the sort once equal members are found
-            for (uint32 i = 0; i < (len - 1); i++)
+            for (uint32_t i = 0; i < (len - 1); i++)
             {
                 if (compare(i, (i+1)) == 0)
                 {
@@ -692,7 +692,7 @@ namespace avmplus
             // return the index array without modifying the original array
             ArrayObject *obj = toplevel->arrayClass->newArray(len);
 
-            for (uint32 i = 0; i < len; i++)
+            for (uint32_t i = 0; i < len; i++)
             {
                 obj->setUintProperty(i, core->uintToAtom(index[i]));
             }
@@ -754,7 +754,7 @@ namespace avmplus
     /*
      * QuickSort a portion of the ArrayObject.
      */
-    void ArraySort::qsort(uint32 lo, uint32 hi)
+    void ArraySort::qsort(uint32_t lo, uint32_t hi)
     {
         // This is an iterative implementation of the recursive quick sort.
         // Recursive implementations are basically storing nested (lo,hi) pairs
@@ -765,8 +765,8 @@ namespace avmplus
         // the greatest stack depth happens with equal partitions, all the way down,
         // which would be 1 + log2(size), which could never exceed 33.
 
-        uint32 size;
-        struct StackFrame { uint32 lo, hi; };
+        uint32_t size;
+        struct StackFrame { uint32_t lo, hi; };
         StackFrame stk[33];
         int stkptr = 0;
 
@@ -819,12 +819,12 @@ namespace avmplus
             // you use the midpoint as the pivot, but the algorithm is simpler
             // if the pivot is at the start of the list, so move the middle
             // element to the front!
-            uint32 pivot = lo + (size / 2);
+            uint32_t pivot = lo + (size / 2);
             swap(pivot, lo);
 
 
-            uint32 left = lo;
-            uint32 right = hi + 1;
+            uint32_t left = lo;
+            uint32_t right = hi + 1;
 
             for (;;) {
                 // Move the left right until it's at an element greater than the pivot.
@@ -910,7 +910,7 @@ namespace avmplus
     /*
      * compare(j, k) as string's
      */
-    int ArraySort::StringCompare(uint32 j, uint32 k) const
+    int ArraySort::StringCompare(uint32_t j, uint32_t k) const
     {
         Atom x = get(j);
         Atom y = get(k);
@@ -924,7 +924,7 @@ namespace avmplus
     /*
      * compare(j, k) as case insensitive string's
      */
-    int ArraySort::CaseInsensitiveStringCompare(uint32 j, uint32 k) const
+    int ArraySort::CaseInsensitiveStringCompare(uint32_t j, uint32_t k) const
     {
         Atom x = get(j);
         Atom y = get(k);
@@ -938,7 +938,7 @@ namespace avmplus
     /*
      * compare(j, k) using an actionscript function
      */
-    int ArraySort::ScriptCompare(uint32 j, uint32 k) const
+    int ArraySort::ScriptCompare(uint32_t j, uint32_t k) const
     {
         // todo must figure out the kosher way to invoke
         // callbacks like the sort comparator.
@@ -961,7 +961,7 @@ namespace avmplus
     /*
      * compare(j, k) as numbers
      */
-    int ArraySort::NumericCompare(uint32 j, uint32 k) const
+    int ArraySort::NumericCompare(uint32_t j, uint32_t k) const
     {
         Atom atmj = get(j);
         Atom atmk = get(k);
@@ -1009,7 +1009,7 @@ namespace avmplus
     /*
      * FieldCompare is for Array.sortOn()
      */
-    inline int ArraySort::FieldCompare(uint32 lhs, uint32 rhs) const
+    inline int ArraySort::FieldCompare(uint32_t lhs, uint32_t rhs) const
     {
         Atom j, k;
         int opt = options;
@@ -1033,7 +1033,7 @@ namespace avmplus
             return (opt & kDescending) ? -result : result;
         }
 
-        for (uint32 i = 0; i < numFields; i++)
+        for (uint32_t i = 0; i < numFields; i++)
         {
             Stringp name = fields[i].name;
             // NOTE compare the names of the caller's version
@@ -1221,7 +1221,7 @@ namespace avmplus
         //  Perhaps it is the union of all field's options?
 
         ArraySort::FieldName *fn = NULL;
-        uint32 nFields = 0;
+        uint32_t nFields = 0;
         int options = 0;
 
         if (AvmCore::istype(namesAtom, STRING_TYPE))
@@ -1241,7 +1241,7 @@ namespace avmplus
             nFields = obj->getLength();
             fn = (ArraySort::FieldName*) core->GetGC()->Calloc(nFields, sizeof(ArraySort::FieldName), GC::kZero|GC::kContainsPointers);
 
-            for (uint32 i = 0; i < nFields; i++)
+            for (uint32_t i = 0; i < nFields; i++)
             {
                 fn[i].name = core->intern(obj->getUintProperty(i));
                 fn[i].options = 0;
@@ -1250,12 +1250,12 @@ namespace avmplus
             if (AvmCore::istype(optionsAtom, toplevel->arrayClass->ivtable()->traits /* array itraits */))
             {
                 ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(optionsAtom);
-                uint32 nOptions = obj->getLength();
+                uint32_t nOptions = obj->getLength();
                 if (nOptions == nFields)
                 {
                     // The first options are used for uniqueSort and returnIndexedArray option
                     options = AvmCore::integer(obj->getUintProperty(0));
-                    for (uint32 i = 0; i < nFields; i++)
+                    for (uint32_t i = 0; i < nFields; i++)
                     {
                         fn[i].options = AvmCore::integer(obj->getUintProperty (i));
                     }
@@ -1264,7 +1264,7 @@ namespace avmplus
             else
             {
                 options = AvmCore::integer(optionsAtom);
-                for (uint32 i = 0; i < nFields; i++)
+                for (uint32_t i = 0; i < nFields; i++)
                 {
                     fn[i].options = options;
                 }
@@ -1296,29 +1296,29 @@ namespace avmplus
             return 0;
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
 
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
-        uint32 start = NativeObjectHelpers::ClampIndex(AvmCore::toInteger(args->getUintProperty(0)),len);
+        uint32_t start = NativeObjectHelpers::ClampIndex(AvmCore::toInteger(args->getUintProperty(0)),len);
 
         double d_deleteCount = args->getLength() > 1 ? AvmCore::toInteger(args->getUintProperty(1)) : (len - start);
-        uint32 deleteCount = (d_deleteCount < 0) ? 0 : AvmCore::integer_d(d_deleteCount);
+        uint32_t deleteCount = (d_deleteCount < 0) ? 0 : AvmCore::integer_d(d_deleteCount);
         if (deleteCount > (len - start)) {
             deleteCount = len - start;
         }
-        uint32 end = start + deleteCount;
+        uint32_t end = start + deleteCount;
 
         // Copy out the elements we are going to remove
         ArrayObject *out = toplevel->arrayClass->newArray(deleteCount);
-        uint32 i;
+        uint32_t i;
 
         // !!@ add faster version when both arrays are simpleDense
         for (i=0; i< deleteCount; i++) {
             out->setUintProperty(i, d->getUintProperty(i+start));
         }
 
-        uint32 insertCount = (args->getLength() > 2) ? (args->getLength() - 2) : 0;
+        uint32_t insertCount = (args->getLength() > 2) ? (args->getLength() - 2) : 0;
         long l_shiftAmount = (long)insertCount - (long) deleteCount; // long because result could be negative
-        uint32 shiftAmount;
+        uint32_t shiftAmount;
 
         ArrayObject *a = isArray(toplevel, thisAtom);
         if (a && a->isSimpleDense() && args->isSimpleDense())
@@ -1331,7 +1331,7 @@ namespace avmplus
         // delete items by shifting elements past end (of delete) by l_shiftAmount
         if (l_shiftAmount < 0) {
             // Shift the remaining elements down
-            shiftAmount = (uint32)(-l_shiftAmount);
+            shiftAmount = (uint32_t)(-l_shiftAmount);
 
             for (i=end; i<len; i++) {
                 d->setUintProperty(i-shiftAmount, d->getUintProperty(i));
@@ -1343,7 +1343,7 @@ namespace avmplus
             }
         } else {
             // Shift the remaining elements up.
-            shiftAmount = (uint32)l_shiftAmount;
+            shiftAmount = (uint32_t)l_shiftAmount;
 
             for (i=len; i > end; ) { // Note: i is unsigned, can't check if --i >=0.
                 --i;
@@ -1370,7 +1370,7 @@ namespace avmplus
         return a;
     }
 
-    ArrayObject* ArrayClass::newArray(uint32 capacity)
+    ArrayObject* ArrayClass::newArray(uint32_t capacity)
     {
         VTable* ivtable = this->ivtable();
         ArrayObject *a = new (core()->GetGC(), ivtable->getExtraSize())
@@ -1391,11 +1391,11 @@ namespace avmplus
 
         AvmCore* core = toplevel->core();
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
-        uint32 start = NativeObjectHelpers::ClampIndexInt(startIndex, len);
+        uint32_t start = NativeObjectHelpers::ClampIndexInt(startIndex, len);
 
-        for (uint32 i = start; i < len; i++)
+        for (uint32_t i = start; i < len; i++)
         {
             Atom atom = d->getUintProperty(i);
             if (core->stricteq(atom, searchElement) == trueAtom)
@@ -1412,7 +1412,7 @@ namespace avmplus
 
         AvmCore* core = toplevel->core();
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         int start = NativeObjectHelpers::ClampIndexInt(startIndex, len);
         if (start == int(len))
@@ -1439,10 +1439,10 @@ namespace avmplus
         }
 
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         AvmCore* core = toplevel->core();
-        for (uint32 i = 0; i < len; i++)
+        for (uint32_t i = 0; i < len; i++)
         {
             // If thisObject is null, the call function will substitute the global object.
             // args are modified in place by callee
@@ -1472,10 +1472,10 @@ namespace avmplus
         }
 
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         AvmCore* core = toplevel->core();
-        for (uint32 i = 0; i < len; i++)
+        for (uint32_t i = 0; i < len; i++)
         {
             //  The Array and/or the args may be modified by the caller,
             //  so get a local reference to the element.
@@ -1507,10 +1507,10 @@ namespace avmplus
         }
 
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         AvmCore* core = toplevel->core();
-        for (uint32 i = 0; i < len; i++)
+        for (uint32_t i = 0; i < len; i++)
         {
             // If thisObject is null, the call function will substitute the global object
             // args are modified in place by callee
@@ -1534,10 +1534,10 @@ namespace avmplus
         }
 
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         AvmCore* core = toplevel->core();
-        for (uint32 i = 0; i < len; i++)
+        for (uint32_t i = 0; i < len; i++)
         {
             // If thisObject is null, the call function will substitute the global object
             // args are modified in place by callee
@@ -1563,10 +1563,10 @@ namespace avmplus
             return r;
 
         ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
-        uint32 len = getLengthHelper(toplevel, d);
+        uint32_t len = getLengthHelper(toplevel, d);
 
         AvmCore* core = toplevel->core();
-        for (uint32 i = 0; i < len; i++)
+        for (uint32_t i = 0; i < len; i++)
         {
             // If thisObject is null, the call function will substitute the global object
             // args are modified in place by callee
@@ -1592,7 +1592,7 @@ namespace avmplus
         return AvmCore::toUInt32(lenAtm);
     }
 
-    /*static*/ void ArrayClass::setLengthHelper(Toplevel* toplevel, ScriptObject* d, uint32 newLen)
+    /*static*/ void ArrayClass::setLengthHelper(Toplevel* toplevel, ScriptObject* d, uint32_t newLen)
     {
         AvmCore* core = toplevel->core();
         // NOTE we can pick any public::length, so pick the default versioned one
@@ -1601,12 +1601,12 @@ namespace avmplus
         toplevel->setproperty(d->atom(), &mname, lenAtm, d->vtable);
     }
 
-    /* static */ uint32 ArrayClass::generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args)
+    /* static */ uint32_t ArrayClass::generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args)
     {
         ArrayObject *a = isArray(toplevel, thisAtom);
 
         AvmAssert(a != NULL);
-        for (uint32 i = args->getLength() ; i > 0; i--) {
+        for (uint32_t i = args->getLength() ; i > 0; i--) {
             Atom atom = args->getUintProperty(i - 1);
             a->unshift(&atom, 1);
         }

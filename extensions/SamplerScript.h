@@ -76,7 +76,7 @@ namespace avmplus
         static void sampleInternalAllocs(ScriptObject* self, bool b);
         static double getSampleCount(ScriptObject* self);
         static void _setSamplerCallback(ScriptObject* self, ScriptObject* callback);
-        static double _getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32 type);
+        static double _getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32_t type);
         static bool isGetterSetter(ScriptObject* self, Atom a, QNameObject* name);
 
         static ArrayObject* getLexicalScopes(ScriptObject* self, FunctionObject *function);

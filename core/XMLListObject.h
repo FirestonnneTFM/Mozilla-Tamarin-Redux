@@ -131,13 +131,13 @@ namespace avmplus
 
         bool hasMultinameProperty(const Multiname* name) const;
         bool hasAtomProperty(Atom name) const;
-        bool hasUintProperty(uint32 i) const;
+        bool hasUintProperty(uint32_t i) const;
 
         Atom getDescendants(const Multiname* name) const;
 
-        Atom getUintProperty(uint32 i) const;
-        void setUintProperty(uint32 i, Atom value);
-        bool delUintProperty(uint32 i);
+        Atom getUintProperty(uint32_t i) const;
+        void setUintProperty(uint32_t i, Atom value);
+        bool delUintProperty(uint32_t i);
 
         // private helper functions
         void _appendNode(E4XNode *node);            // [[Append]]
@@ -146,14 +146,14 @@ namespace avmplus
         Atom _equals(Atom V) const;                 // [[Equals]]
         Atom _resolveValue();                       // [[ResolveValue]
 
-        uint32 numChildren()   const { return m_children.getLength(); };
+        uint32_t numChildren()   const { return m_children.getLength(); };
 
         // inline version for frequent internal use
-        inline uint32 _length() const { return (numChildren()); }; //[[Length]]
+        inline uint32_t _length() const { return (numChildren()); }; //[[Length]]
 
         // may convert an E4XNode to an XMLObject despite of being const
-        XMLObject* _getAt(uint32 i) const;
-        E4XNode*   _getNodeAt(uint32 i) const;
+        XMLObject* _getAt(uint32_t i) const;
+        E4XNode*   _getNodeAt(uint32_t i) const;
 
         inline void checkCapacity(int c) { m_children.checkCapacity(c); }
 
@@ -175,7 +175,7 @@ namespace avmplus
         XMLListObject* AS3_descendants (Atom name);
         XMLListObject* AS3_elements (Atom name);
         bool XMLList_AS3_hasOwnProperty (Atom P);
-        uint32 AS3_length () const; // slow version for AS3 glue code
+        uint32_t AS3_length () const; // slow version for AS3 glue code
         bool AS3_hasComplexContent ();
         bool AS3_hasSimpleContent ();
         Atom AS3_name();
@@ -217,7 +217,7 @@ namespace avmplus
         inline XMLListObject* descendants (Atom name) { return AS3_descendants (name); }
         inline XMLListObject* elements (Atom name) { return AS3_elements (name); }
         inline bool hasOwnProperty (Atom P) { return XMLList_AS3_hasOwnProperty(P); }
-        inline uint32 length () const { return AS3_length (); }
+        inline uint32_t length () const { return AS3_length (); }
         inline bool hasComplexContent () { return AS3_hasComplexContent (); }
         inline bool hasSimpleContent () { return AS3_hasSimpleContent (); }
         inline Atom name() { return AS3_name(); }

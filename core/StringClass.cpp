@@ -244,7 +244,7 @@ namespace avmplus
         return reObj->search(in);
     }
 
-    ArrayObject* StringClass::_split(Stringp in, Atom delimAtom, uint32 limit)
+    ArrayObject* StringClass::_split(Stringp in, Atom delimAtom, uint32_t limit)
     {
         AvmCore* core = this->core();
 

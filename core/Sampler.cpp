@@ -190,7 +190,7 @@ namespace avmplus
         this->autoStartSampling = autoStart;
     }
 
-    byte *Sampler::getSamples(uint32 &num)
+    byte *Sampler::getSamples(uint32_t &num)
     {
         num = numSamples;
         byte *start = samples;
@@ -244,8 +244,8 @@ namespace avmplus
         if(!samples)
             return 0;
 
-        uint32 sampleSize = sizeof(Sample);
-        uint32 callStackDepth = core->callStack ? core->callStack->depth() : 0;
+        uint32_t sampleSize = sizeof(Sample);
+        uint32_t callStackDepth = core->callStack ? core->callStack->depth() : 0;
         sampleSize += callStackDepth * sizeof(StackTrace::Element);
         sampleSize += sizeof(uint64_t) * 2;
         if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples_size/3 > (samples + samples_size)
@@ -294,7 +294,7 @@ namespace avmplus
     void Sampler::writeRawSample(SampleType sampleType, uint64_t sampleTimeMicros /* =0 */)
     {
         CallStackNode *csn = core->callStack;
-        uint32 depth = csn ? csn->depth() : 0;
+        uint32_t depth = csn ? csn->depth() : 0;
         byte *p = currentSample;
         if (sampleTimeMicros == 0)
             sampleTimeMicros = nowMicros();
@@ -640,12 +640,12 @@ namespace avmplus
     /* sample data has pointers need to scan */
     void Sampler::presweep()
     {
-        uint32 num;
+        uint32_t num;
         byte *p = getSamples(num);
 
         MMgc::GC * const gc = core->gc;
 
-        for(uint32 i=0; i < num ; i++)
+        for(uint32_t i=0; i < num ; i++)
         {
             Sample s;
             readSample(p, s);
@@ -656,7 +656,7 @@ namespace avmplus
                 void *ptr = sotGetGCPointer(s.sot);
                 if (ptr != NULL && !GC::GetMark(ptr))
                 {
-                    GCWorkItem item(ptr, (uint32)GC::Size(ptr), GCWorkItem::kGCObject);
+                    GCWorkItem item(ptr, (uint32_t)GC::Size(ptr), GCWorkItem::kGCObject);
                     // NOTE that PushWorkItem_MayFail can fail due to mark stack overflow in tight memory situations.
                     // This failure is visible as GC::GetMarkStackOverflow() being true.  The GC compensates
                     // for that but it seems hard to compensate for it here.  The most credible workaround

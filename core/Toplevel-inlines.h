@@ -95,7 +95,7 @@ REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
 }
 
 // static
-REALLY_INLINE bool Toplevel::contains(const uint32 *uriSet, uint32 ch)
+REALLY_INLINE bool Toplevel::contains(const uint32_t *uriSet, uint32_t ch)
 {
     return (ch<0x80) && (uriSet[ch>>5]&(1<<(ch&0x1f))) != 0;
 }

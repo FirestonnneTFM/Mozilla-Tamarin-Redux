@@ -100,7 +100,7 @@ namespace avmplus
             XMLObject *x = new (core->GetGC()) XMLObject(toplevel->xmlClass(), s, defaultNamespace);
 
             XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel->xmlListClass());
-            for (uint32 i = 0; i < x->getNode()->_length(); i++)
+            for (uint32_t i = 0; i < x->getNode()->_length(); i++)
             {
                 E4XNode *c = x->getNode()->_getAt (i);
                 c->setParent (NULL);
