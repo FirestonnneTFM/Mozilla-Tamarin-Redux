@@ -735,7 +735,7 @@ namespace avmplus
         case BKIND_GETSET:
         {
             // Invoke the setter
-            uint32 m = AvmCore::bindingToSetterId(b);
+            uint32_t m = AvmCore::bindingToSetterId(b);
             AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);
             MethodEnv* method = vtable->methods[m];
             Atom atomv_out[2] = { obj, value };
@@ -1037,7 +1037,7 @@ namespace avmplus
                 if (ch >= 0xDC00 && ch <= 0xDFFF) {
                     return NULL;
                 }
-                uint32 V;
+                uint32_t V;
                 if (ch >= 0xD800 && ch < 0xDC00) {
                     if (src[1] < 0xDC00 || src[1] > 0xDFFF) {
                         return NULL;
@@ -1086,7 +1086,7 @@ namespace avmplus
                 }
                 k += 2;
                 uint8 B = (uint8)((v1<<4) | v2);
-                uint32 V;
+                uint32_t V;
                 if (!(B & 0x80)) {
                     V = (wchar)B;
                 } else {
@@ -1159,8 +1159,8 @@ namespace avmplus
                     }
                     // 32. Let L be (((V - 0x10000) & 0x3FF) + 0xDC00).
                     // 33. Let H be ((((V - 0x10000) >> 10) & 0x3FF) + 0xD800).
-                    uint32 L = (((V - 0x10000) & 0x3FF) + 0xDC00);
-                    uint32 H = ((((V - 0x10000) >> 10) & 0x3FF) + 0xD800);
+                    uint32_t L = (((V - 0x10000) & 0x3FF) + 0xDC00);
+                    uint32_t H = ((((V - 0x10000) >> 10) & 0x3FF) + 0xD800);
                     out[outLen++] = (wchar)H;
                     out[outLen++] = (wchar)L;
                 }
@@ -1175,7 +1175,7 @@ namespace avmplus
     /*
      * uriUnescaped is defined in Section 15.1 of the ECMA-262 specification
      */
-    const uint32 Toplevel::uriUnescaped[] = {
+    const uint32_t Toplevel::uriUnescaped[] = {
         0x00000000,
         0x03ff6782,
         0x87fffffe,
@@ -1187,7 +1187,7 @@ namespace avmplus
      * The '#' sign is added in accordance with the definition of
      * the encodeURI/decodeURI functions
      */
-    const uint32 Toplevel::uriReservedPlusPound[] = {
+    const uint32_t Toplevel::uriReservedPlusPound[] = {
         0x00000000,
         0xac009858,
         0x00000001,
@@ -1199,7 +1199,7 @@ namespace avmplus
      * characters defined in ECMA-262 Section B.2.1 for the
      * escape top-level function
      */
-    const uint32 Toplevel::unescaped[] = {
+    const uint32_t Toplevel::unescaped[] = {
         0x00000000,
         0x03ffec00,
         0x87ffffff,

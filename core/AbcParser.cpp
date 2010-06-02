@@ -270,7 +270,7 @@ namespace avmplus
 
     Namespacep AbcParser::parseNsRef(const byte* &pc) const
     {
-        uint32 index = readU30(pc);
+        uint32_t index = readU30(pc);
         if (index == 0)
         {
             return NULL; // AnyNamespace
@@ -285,7 +285,7 @@ namespace avmplus
     void AbcParser::parseTypeName(const byte* &pc, Multiname& m) const
     {
         // only save the type name for now.  verifier will resolve to traits
-        uint32 index = readU30(pc);
+        uint32_t index = readU30(pc);
         if (index == 0)
         {
             // type is *
@@ -303,7 +303,7 @@ namespace avmplus
 
     uint32_t AbcParser::resolveBindingName(const byte* &p, Multiname &m) const
     {
-        uint32 index = readU30(p);
+        uint32_t index = readU30(p);
         if (index == 0 || index >= pool->cpool_mn_offsets.size())
             toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index),
                                        core->toErrorString(pool->cpool_mn_offsets.size()));
@@ -320,7 +320,7 @@ namespace avmplus
         }
     }
 
-    MethodInfo* AbcParser::resolveMethodInfo(uint32 index) const
+    MethodInfo* AbcParser::resolveMethodInfo(uint32_t index) const
     {
         const uint32_t c = pool->methodCount();
         if (index >= c)
@@ -333,7 +333,7 @@ namespace avmplus
         return f;
     }
 
-    Stringp AbcParser::resolveUtf8(uint32 index) const
+    Stringp AbcParser::resolveUtf8(uint32_t index) const
     {
         if (index > 0 && index < pool->constantStringCount)
         {
@@ -345,7 +345,7 @@ namespace avmplus
 
     Stringp AbcParser::parseName(const byte* &pc) const
     {
-        uint32 index = readU30(pc);
+        uint32_t index = readU30(pc);
         if (index == 0)
             return NULL;
         return resolveUtf8(index);
@@ -1004,7 +1004,7 @@ namespace avmplus
                     parseTypeName(pos, typeName);
 
                     Multiname qn;
-                    uint32 name_index = (version != (46<<16|15)) ? readU30(pos) : 0;
+                    uint32_t name_index = (version != (46<<16|15)) ? readU30(pos) : 0;
                     if (name_index != 0)
                     {
                         if (name_index >= pool->cpool_mn_offsets.size())
@@ -1036,7 +1036,7 @@ namespace avmplus
                     readU30(pos); // type name
                     if (version != (46<<16|15))
                     {
-                        const uint32 name_index = readU30(pos); // variable name
+                        const uint32_t name_index = readU30(pos); // variable name
                         if (name_index >= pool->cpool_mn_offsets.size())
                             toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(name_index), core->toErrorString(pool->constantCount));
                     }
@@ -1159,9 +1159,9 @@ namespace avmplus
         pool->isBuiltin = (natives != NULL);
 #endif
 
-        uint32 int_count = readU30(pos);
+        uint32_t int_count = readU30(pos);
         // sanity check to prevent huge allocations
-        if (int_count > (uint32)(abcEnd - pos))
+        if (int_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
         List<int>& cpool_int = pool->cpool_int;
@@ -1192,11 +1192,11 @@ namespace avmplus
             #endif
         }
 
-        uint32 uint_count = readU30(pos);
-        if (uint_count > (uint32)(abcEnd - pos))
+        uint32_t uint_count = readU30(pos);
+        if (uint_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        List<uint32>& cpool_uint = pool->cpool_uint;
+        List<uint32_t>& cpool_uint = pool->cpool_uint;
         cpool_uint.ensureCapacity(uint_count);
         pool->constantUIntCount = uint_count;
 
@@ -1222,8 +1222,8 @@ namespace avmplus
             #endif
         }
 
-        uint32 double_count = readU30(pos);
-        if (double_count > (uint32)(abcEnd - pos))
+        uint32_t double_count = readU30(pos);
+        if (double_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
         List<double*, LIST_GCObjects>& cpool_double = pool->cpool_double;
@@ -1251,8 +1251,8 @@ namespace avmplus
             #endif
         }
 
-        uint32 string_count = readU30(pos);
-        if (string_count > (uint32)(abcEnd - pos))
+        uint32_t string_count = readU30(pos);
+        if (string_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
         MMGC_MEM_TYPE(pool);
@@ -1304,8 +1304,8 @@ namespace avmplus
         }
         pool->_abcStringEnd = pos;
 
-        uint32 ns_count = readU30(pos);
-        if (ns_count > (uint32)(abcEnd - pos))
+        uint32_t ns_count = readU30(pos);
+        if (ns_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
         List<Namespacep> &cpool_ns = pool->cpool_ns;
@@ -1333,7 +1333,7 @@ namespace avmplus
                 case CONSTANT_ExplicitNamespace:
                 case CONSTANT_StaticProtectedNs:
                 {
-                    uint32 index = readU30(pos);
+                    uint32_t index = readU30(pos);
                     Namespace::NamespaceType type = Namespace::NS_Public;
                     switch(kind)
                     {
@@ -1386,7 +1386,7 @@ namespace avmplus
 
                 case CONSTANT_PrivateNs:
                 {
-                    uint32 index =  readU30(pos);
+                    uint32_t index =  readU30(pos);
                     Stringp uri = index ? resolveUtf8(index) : (Stringp)core->kEmptyString;
                     Namespacep ns = new (core->GetGC()) Namespace(nullStringAtom, uri, Namespace::NS_Private);
                     cpool_ns.set(i, ns);
@@ -1405,8 +1405,8 @@ namespace avmplus
             #endif
         }
 
-        uint32 ns_set_count = readU30(pos);
-        if (ns_set_count > (uint32)(abcEnd - pos))
+        uint32_t ns_set_count = readU30(pos);
+        if (ns_set_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
         List<NamespaceSetp>& cpool_ns_set = pool->cpool_ns_set;
@@ -1422,13 +1422,13 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
             int offset = (int)(pos-startpos);
 #endif
-            uint32 ns_count = readU30(pos);
+            uint32_t ns_count = readU30(pos);
 
-            if (ns_count > (uint32)(abcEnd - pos))
+            if (ns_count > (uint32_t)(abcEnd - pos))
                 toplevel->throwVerifyError(kCorruptABCError);
 
             NamespaceSet* namespace_set = NamespaceSet::_create(core->GetGC(), ns_count);
-            for(uint32 j=0; j < ns_count; ++j)
+            for(uint32_t j=0; j < ns_count; ++j)
             {
                 Namespacep ns = parseNsRef(pos);
                 if (!ns)
@@ -1445,8 +1445,8 @@ namespace avmplus
             #endif
         }
 
-        uint32 mn_count = readU30(pos);
-        if (mn_count > (uint32)(abcEnd - pos))
+        uint32_t mn_count = readU30(pos);
+        if (mn_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
         List<uint32_t>& cpool_mn_offsets = pool->cpool_mn_offsets;
@@ -1492,7 +1492,7 @@ namespace avmplus
             {
                 parseName(pos);
 
-                uint32 index = readU30(pos);
+                uint32_t index = readU30(pos);
 
                 if (!index || index >= pool->constantNsSetCount)
                     toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantNsSetCount));
@@ -1504,7 +1504,7 @@ namespace avmplus
             case CONSTANT_MultinameL:
             case CONSTANT_MultinameLA:
             {
-                uint32 index = readU30(pos);
+                uint32_t index = readU30(pos);
 
                 if (!index || index >= pool->constantNsSetCount)
                     toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantNsSetCount));
@@ -1516,7 +1516,7 @@ namespace avmplus
 
             case CONSTANT_TypeName:
             {
-                uint32 index = readU30(pos);
+                uint32_t index = readU30(pos);
 
                 // compare index against mn_count, *not* cpool_mn_offsets.size(), as the latter is still being built...
                 // it's ok to forward-reference here.
@@ -1635,7 +1635,7 @@ namespace avmplus
             return true;
         }
 
-        if (count > (uint32)(abcEnd - pos))
+        if (count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
         pool->_scripts.ensureCapacity(count);

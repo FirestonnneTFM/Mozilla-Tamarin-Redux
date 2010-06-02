@@ -44,33 +44,33 @@ namespace avmplus
 {
     using namespace MMgc;
 
-    REALLY_INLINE void AtomArray::setAtInternal(uint32 index, Atom a)
+    REALLY_INLINE void AtomArray::setAtInternal(uint32_t index, Atom a)
     {
         // m_arr[index] = a;
         WBATOM( MMgc::GC::GetGC(m_atoms), m_atoms, m_atoms + index, a);
     }
 
-    REALLY_INLINE uint32 AtomArray::getLength() const
+    REALLY_INLINE uint32_t AtomArray::getLength() const
     {
         return m_length;
     }
 
-    REALLY_INLINE void AtomArray::setLength(uint32 len)
+    REALLY_INLINE void AtomArray::setLength(uint32_t len)
     {
         m_length = len;
     }
 
-    REALLY_INLINE uint32 AtomArray::capacity()  const
+    REALLY_INLINE uint32_t AtomArray::capacity()  const
     {
-        return (uint32)(MMgc::GC::Size(m_atoms)/sizeof(Atom));
+        return (uint32_t)(MMgc::GC::Size(m_atoms)/sizeof(Atom));
     }
 
-    REALLY_INLINE Atom AtomArray::operator[](uint32 index) const
+    REALLY_INLINE Atom AtomArray::operator[](uint32_t index) const
     {
         return getAt(index);
     }
 
-    REALLY_INLINE Atom AtomArray::getAtFast(uint32 index) const
+    REALLY_INLINE Atom AtomArray::getAtFast(uint32_t index) const
     {
         AvmAssert(index < m_length);
         return m_atoms[index];
@@ -86,7 +86,7 @@ namespace avmplus
         MMgc::GC::GetGC(this)->movePointers((void**)atoms, dstOffset, (const void**)atoms, srcOffset, numAtoms);
     }
 
-    REALLY_INLINE void AtomArray::setAt (uint32 index, Atom a)
+    REALLY_INLINE void AtomArray::setAt (uint32_t index, Atom a)
     {
         if (index > m_length)
         {
@@ -97,7 +97,7 @@ namespace avmplus
         setAtInternal(index, a);
     }
 
-    REALLY_INLINE Atom AtomArray::getAt (uint32 index) const
+    REALLY_INLINE Atom AtomArray::getAt (uint32_t index) const
     {
         if (index > m_length)
         {

@@ -213,7 +213,7 @@ namespace avmplus
     {
         Atom* const atomv = (Atom*)ap;
         MethodSignaturep ms = env->method->getMethodSignature();
-        ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
+        ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
         Atom a = interpBoxed(env, argc, atomv);
         const BuiltinType bt = ms->returnTraitsBT();
         const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
@@ -232,7 +232,7 @@ namespace avmplus
     {
         Atom* const atomv = (Atom*)ap;
         MethodSignaturep ms = env->method->getMethodSignature();
-        ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
+        ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
         Atom a = interpBoxed(env, argc, atomv);
         return AvmCore::number_d(a);
     }

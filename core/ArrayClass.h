@@ -62,7 +62,7 @@ namespace avmplus
         // create a new array, even when argc=1
         ArrayObject* newarray(Atom* argv, int argc);
 
-        ArrayObject* newArray(uint32 capacity=0);
+        ArrayObject* newArray(uint32_t capacity=0);
 
         // override ScriptObject::createInstance
         ArrayObject* createInstance(VTable *ivtable, ScriptObject* prototype);
@@ -83,7 +83,7 @@ namespace avmplus
         void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
         bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
         ArrayObject* _map(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_map(toplevel(), thisAtom, callback, thisObject); }
-        uint32 _unshift(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_unshift(toplevel(), thisAtom, args); }
+        uint32_t _unshift(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_unshift(toplevel(), thisAtom, args); }
 
         // inline wrappers for legacy code.
         inline ArrayObject* concat(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_concat(toplevel(), thisAtom, args); }
@@ -117,12 +117,12 @@ namespace avmplus
         static void generic_forEach(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject);
         static bool generic_some(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject);
         static ArrayObject* generic_map(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject);
-        static uint32 generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args);
+        static uint32_t generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args);
 
         static uint32_t getLengthHelper(Toplevel* toplevel, ScriptObject* d);
 
     private:
-        static void setLengthHelper(Toplevel* toplevel, ScriptObject *d, uint32 newLen);
+        static void setLengthHelper(Toplevel* toplevel, ScriptObject *d, uint32_t newLen);
 
         static ArrayObject* isArray(Toplevel* toplevel, Atom instance);
 

@@ -99,7 +99,7 @@ namespace avmplus
     }
 
     // n arguments are pushed on the array
-    uint32 AtomArray::push(Atom *args, int argc)
+    uint32_t AtomArray::push(Atom *args, int argc)
     {
         checkCapacity (m_length + argc);
 
@@ -116,7 +116,7 @@ namespace avmplus
     {
         if (m_length > 1)
         {
-            for (uint32 k = 0; k < (m_length >> 1); k++)
+            for (uint32_t k = 0; k < (m_length >> 1); k++)
             {
                 Atom temp = m_atoms[k];
                 m_atoms[k] = m_atoms[m_length - k - 1];
@@ -145,7 +145,7 @@ namespace avmplus
     // insertCount arg - number to insert
     // deleteCount - number to delete
     // args - #insertCount args to insert
-    void AtomArray::splice(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, AtomArray *args, int offset)
+    void AtomArray::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, AtomArray *args, int offset)
     {
         long l_shiftAmount = (long)insertCount - (long) deleteCount; // long because result could be negative
 
@@ -180,7 +180,7 @@ namespace avmplus
         if (insertCount)
         {
             AvmAssert(args != 0);
-            for (uint32 i=0; i<insertCount; i++)
+            for (uint32_t i=0; i<insertCount; i++)
             {
                 setAtInternal(insertPoint+i, argsArr[i+offset]);
             }
@@ -253,10 +253,10 @@ namespace avmplus
         setAtInternal(m_length++, a);
     }
 
-    void AtomArray::removeAt (uint32 index)
+    void AtomArray::removeAt (uint32_t index)
     {
         AvmAssert (m_length > 0);
-        AvmAssert (index < uint32(m_length));
+        AvmAssert (index < uint32_t(m_length));
         if (!m_length)
             return;
 
@@ -274,7 +274,7 @@ namespace avmplus
         arr[m_length] = 0; // clear our entry so GC can collect it
     }
 
-    void AtomArray::insert (uint32 index, Atom a)
+    void AtomArray::insert (uint32_t index, Atom a)
     {
         AvmAssert(index <= m_length);
 

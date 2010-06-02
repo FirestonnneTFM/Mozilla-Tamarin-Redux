@@ -133,11 +133,11 @@ namespace avmplus
 
             // Shift a BigInteger by <shiftBy> bits to right or left.  If
             //  result is not NULL, write result into it, else allocate a new BigInteger.
-            BigInteger* rshift(uint32 shiftBy, BigInteger* result) const;
-            BigInteger* lshift(uint32 shiftBy, BigInteger* result) const;
+            BigInteger* rshift(uint32_t shiftBy, BigInteger* result) const;
+            BigInteger* lshift(uint32_t shiftBy, BigInteger* result) const;
 
             // Same as above but store result back into "this"
-            void lshiftBy(uint32 shiftBy)
+            void lshiftBy(uint32_t shiftBy)
             {
                 BigInteger tempInt;
                 tempInt.setFromInteger(0);
@@ -145,7 +145,7 @@ namespace avmplus
                 copyFrom(&tempInt);
             }
 
-            void rshiftBy(uint32 shiftBy)
+            void rshiftBy(uint32_t shiftBy)
             {
                 BigInteger tempInt;
                 tempInt.setFromInteger(0);
@@ -190,7 +190,7 @@ namespace avmplus
 
             /* Thought this would be faster than the above, but its not */
             BigInteger* divideByReciprocalMethod(const BigInteger* divisor, BigInteger* modResult, BigInteger* divResult);
-            uint32 lg2() const;
+            uint32_t lg2() const;
 
 
 
@@ -210,7 +210,7 @@ namespace avmplus
             //  Data members
             // --------------------------------------------------------
             static const int kMaxBigIntegerBufferSize=128;
-            uint32 wordBuffer[kMaxBigIntegerBufferSize+2];
+            uint32_t wordBuffer[kMaxBigIntegerBufferSize+2];
             int32  numWords;
 
         private:
@@ -220,7 +220,7 @@ namespace avmplus
             // --------------------------------------------------------
 
             // set value to a simple integer
-            inline void setValue(uint32 val)
+            inline void setValue(uint32_t val)
             {
                 this->numWords = 1;
                 this->wordBuffer[0] = val;
@@ -228,12 +228,12 @@ namespace avmplus
 
 
             // copy wordBuffer from another BigInteger
-            inline void copyBuffer(const uint32 *newBuff,  int32 size)
+            inline void copyBuffer(const uint32_t *newBuff,  int32 size)
             {
                 numWords = size;
                 AvmAssert(newBuff != wordBuffer);
                 AvmAssert(numWords <= kMaxBigIntegerBufferSize);
-                VMPI_memcpy(wordBuffer, newBuff, numWords*sizeof(uint32));
+                VMPI_memcpy(wordBuffer, newBuff, numWords*sizeof(uint32_t));
             }
 
             inline void setNumWords( int32 newNumWords,bool initToZero=false)

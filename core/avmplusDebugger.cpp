@@ -271,7 +271,7 @@ namespace avmplus
             {
                 // WARNING: don't change the format of output since outside utils depend on it
                 uint64_t delta = VMPI_getTime() - astraceStartTime;
-                core->console << (uint32)(delta) << " AVMINF: MTHD ";
+                core->console << (uint32_t)(delta) << " AVMINF: MTHD ";
                 Stringp fname = fnc->getMethodName();
                 if (fname && (fname->length() > 0) )
                     core->console << fname;
@@ -306,7 +306,7 @@ namespace avmplus
 
             // WARNING: don't change the format of output since outside utils depend on it
             uint64_t delta = VMPI_getTime() - astraceStartTime;
-            core->console << (uint32)(delta) << " AVMINF: LINE ";
+            core->console << (uint32_t)(delta) << " AVMINF: LINE ";
             if (file)
                 core->console << "   " << line << "\t\t " << file << "\n";
             else
@@ -781,7 +781,7 @@ namespace avmplus
         Atom atom = sourcemap->get(name->atom());
         if (AvmCore::isUndefined(atom))
             return NULL;
-        uint32 index = AvmCore::integer_u(atom);
+        uint32_t index = AvmCore::integer_u(atom);
         return source.get(index);
     }
 
@@ -791,7 +791,7 @@ namespace avmplus
      */
     void AbcFile::sourceAdd(SourceFile* s)
     {
-        uint32 index = source.add(s);
+        uint32_t index = source.add(s);
         sourcemap->add(s->name()->atom(), core->uintToAtom(index));
     }
 

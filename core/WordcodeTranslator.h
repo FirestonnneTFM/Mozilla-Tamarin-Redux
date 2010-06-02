@@ -69,15 +69,15 @@ namespace avmplus
         virtual void fixExceptionsAndLabels(const uint8_t *pc) = 0;
 
         // Paste up the translated code and install it in info
-        virtual uint32 epilogue(uintptr_t** code_result = NULL) = 0;
+        virtual uint32_t epilogue(uintptr_t** code_result = NULL) = 0;
 
         // Handle specific instructions or instruction classes
         virtual void emitOp0(const uint8_t *pc, WordOpcode opcode) = 0;
         void emitOp0(WordOpcode opcode) { emitOp0(NULL, opcode); }
         virtual void emitOp1(const uint8_t *pc, WordOpcode opcode) = 0;
-        virtual void emitOp1(WordOpcode opcode, uint32 operand) = 0;
+        virtual void emitOp1(WordOpcode opcode, uint32_t operand) = 0;
         virtual void emitOp2(const uint8_t *pc, WordOpcode opcode) = 0;
-        virtual void emitOp2(WordOpcode opcode, uint32 op1, uint32 op2) = 0;
+        virtual void emitOp2(WordOpcode opcode, uint32_t op1, uint32_t op2) = 0;
 #ifdef DEBUGGER
         virtual void emitDebug(const uint8_t *pc) = 0;
 #endif

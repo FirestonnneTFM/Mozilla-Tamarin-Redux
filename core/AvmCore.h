@@ -654,9 +654,9 @@ const int kBufferPadding = 16;
         void formatOpcode(PrintWriter& out, const byte *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
 # ifdef VMCFG_WORDCODE
         void formatOpcode(PrintWriter& out, const uintptr_t *pc, WordOpcode opcode, ptrdiff_t off, PoolObject* pool);
-        void formatBits(PrintWriter& buffer, uint32 bits);
+        void formatBits(PrintWriter& buffer, uint32_t bits);
 # endif
-        static void formatMultiname(PrintWriter& out, uint32 index, PoolObject* pool);
+        static void formatMultiname(PrintWriter& out, uint32_t index, PoolObject* pool);
 #endif
 
         /**
@@ -1397,7 +1397,7 @@ const int kBufferPadding = 16;
         Stringp internString(Atom atom);
         Stringp internInt(int n);
         Stringp internDouble(double d);
-        Stringp internUint32(uint32 ui);
+        Stringp internUint32(uint32_t ui);
 
         Stringp internSubstring(Stringp s, int32_t start, int32_t end);
 
@@ -1409,8 +1409,8 @@ const int kBufferPadding = 16;
         Stringp findInternedString(const char *s, int len);
 #endif
 
-        static bool getIndexFromAtom(Atom a, uint32 *result);
-        static bool getIndexFromString(Stringp s, uint32 *result);
+        static bool getIndexFromAtom(Atom a, uint32_t *result);
+        static bool getIndexFromString(Stringp s, uint32_t *result);
 
         ScriptBufferImpl* newScriptBuffer(size_t size);
         VTable* newVTable(Traits* traits, VTable* base, Toplevel* toplevel);
@@ -1427,7 +1427,7 @@ const int kBufferPadding = 16;
         Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public, int32_t api = 0);
         Namespacep newPublicNamespace(Stringp uri);
 
-        Stringp uintToString(uint32 i);
+        Stringp uintToString(uint32_t i);
         Stringp intToString(int i);
         Stringp doubleToString(double d);
         Stringp concatStrings(Stringp s1, Stringp s2);

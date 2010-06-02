@@ -181,7 +181,7 @@ namespace avmplus
         return map;
     }
 
-    /*static*/ GprImtThunkProcRetType VTable::dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid)
+    /*static*/ GprImtThunkProcRetType VTable::dispatchImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid)
     {
         AvmAssert(ite->imtMapCount > 1);
         const ImtThunkEntry* const m = ite->entries();
@@ -205,7 +205,7 @@ namespace avmplus
         return (*env->implGPR())(env, argc, ap);
     }
 
-    /*static*/ GprImtThunkProcRetType VTable::resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid)
+    /*static*/ GprImtThunkProcRetType VTable::resolveImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid)
     {
         const uint32_t slot = iid % IMT_SIZE;
 
@@ -323,8 +323,8 @@ namespace avmplus
 
         // work backwards through the base types, copying
         // the imt stub down as we go
-        uint32 size = work_stack.size();
-        for(uint32 i = 0; i < size; ++i)
+        uint32_t size = work_stack.size();
+        for(uint32_t i = 0; i < size; ++i)
         {
             cur = work_stack[size-i-1];
             cur->resolveImtSlotFromBase(slot);

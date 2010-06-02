@@ -48,7 +48,7 @@ namespace avmplus
 {
     bool VectorBaseObject::hasAtomProperty(Atom name) const
     {
-        uint32 index;
+        uint32_t index;
         bool isNumber=false;
         if (getVectorIndex(name, index, isNumber))
         {
@@ -65,9 +65,9 @@ namespace avmplus
     }
 
     // helper method
-    // sets index to the uint32 value of name, if it can be converted
-    // isNumber is set to true if name was a number (whether it was a uint32 value or not)
-    bool VectorBaseObject::getVectorIndex(Atom name, uint32& index, bool& isNumber) const
+    // sets index to the uint32_t value of name, if it can be converted
+    // isNumber is set to true if name was a number (whether it was a uint32_t value or not)
+    bool VectorBaseObject::getVectorIndex(Atom name, uint32_t& index, bool& isNumber) const
     {
         AvmCore* core = this->core();
         isNumber = false;
@@ -111,7 +111,7 @@ namespace avmplus
 
     void VectorBaseObject::setAtomProperty(Atom name, Atom value)
     {
-        uint32 index;
+        uint32_t index;
         bool isNumber=false;
         if (getVectorIndex(name, index, isNumber))
         {
@@ -129,7 +129,7 @@ namespace avmplus
 
     Atom VectorBaseObject::getAtomProperty(Atom name) const
     {
-        uint32 index;
+        uint32_t index;
         bool isNumber=false;
         AvmCore* core = this->core();
         if (getVectorIndex(name, index, isNumber))
@@ -150,12 +150,12 @@ namespace avmplus
         }
     }
 
-    uint32 VectorBaseObject::get_length()
+    uint32_t VectorBaseObject::get_length()
     {
         return m_length;
     }
 
-    void VectorBaseObject::set_length(uint32 newLength)
+    void VectorBaseObject::set_length(uint32_t newLength)
     {
         if( m_fixed )
             toplevel()->throwRangeError(kVectorFixedError);
@@ -180,7 +180,7 @@ namespace avmplus
     Atom VectorBaseObject::nextName(int index)
     {
         AvmAssert(index > 0);
-        if (((uint32)index) <= m_length)
+        if (((uint32_t)index) <= m_length)
         {
             AvmCore *core = this->core();
             return core->intToAtom(index-1);
@@ -193,7 +193,7 @@ namespace avmplus
     Atom VectorBaseObject::nextValue(int index)
     {
         AvmAssert(index > 0);
-        if (((uint32)index) <= m_length)
+        if (((uint32_t)index) <= m_length)
         {
             return getUintProperty(index-1);
         }
@@ -204,7 +204,7 @@ namespace avmplus
     }
     int VectorBaseObject::nextNameIndex(int index)
     {
-        if (((uint32)index) < m_length)
+        if (((uint32_t)index) < m_length)
         {
             return index + 1;
         }
@@ -223,9 +223,9 @@ namespace avmplus
             return r->atom();
 
         ScriptObject *d = this;
-        uint32 len = m_length;
+        uint32_t len = m_length;
 
-        for (uint32 i = 0; i < len; i++)
+        for (uint32_t i = 0; i < len; i++)
         {
             // If thisObject is null, the call function will substitute the global object
             // args are modified in place by callee
@@ -251,9 +251,9 @@ namespace avmplus
             return r->atom();
 
         ScriptObject *d = this;
-        uint32 len = m_length;
+        uint32_t len = m_length;
 
-        for (uint32 i = 0, k = 0; i < len; i++)
+        for (uint32_t i = 0, k = 0; i < len; i++)
         {
             // If thisObject is null, the call function will substitute the global object
             // args are modified in place by callee
@@ -272,7 +272,7 @@ namespace avmplus
         return r->atom();
     }
 
-    uint32 VectorBaseObject::AS3_push(Atom *argv, int argc)
+    uint32_t VectorBaseObject::AS3_push(Atom *argv, int argc)
     {
         if( m_fixed )
             toplevel()->throwRangeError(kVectorFixedError);
@@ -316,7 +316,7 @@ namespace avmplus
         return v->atom();
     }
 
-    IntVectorObject* IntVectorClass::newVector(uint32 length)
+    IntVectorObject* IntVectorClass::newVector(uint32_t length)
     {
         VTable* ivtable = this->ivtable();
         IntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
@@ -326,7 +326,7 @@ namespace avmplus
     }
 
 
-    VectorBaseObject* IntVectorObject::newVector(uint32 length)
+    VectorBaseObject* IntVectorObject::newVector(uint32_t length)
     {
         return toplevel()->intVectorClass->newVector(length);
     }
@@ -365,7 +365,7 @@ namespace avmplus
         return v->atom();
     }
 
-    UIntVectorObject* UIntVectorClass::newVector(uint32 length)
+    UIntVectorObject* UIntVectorClass::newVector(uint32_t length)
     {
         VTable* ivtable = this->ivtable();
         UIntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
@@ -374,7 +374,7 @@ namespace avmplus
         return v;
     }
 
-    VectorBaseObject* UIntVectorObject::newVector(uint32 length)
+    VectorBaseObject* UIntVectorObject::newVector(uint32_t length)
     {
         return toplevel()->uintVectorClass->newVector(length);
     }
@@ -413,7 +413,7 @@ namespace avmplus
         return v->atom();
     }
 
-    DoubleVectorObject* DoubleVectorClass::newVector(uint32 length)
+    DoubleVectorObject* DoubleVectorClass::newVector(uint32_t length)
     {
         VTable* ivtable = this->ivtable();
         DoubleVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
@@ -422,7 +422,7 @@ namespace avmplus
         return v;
     }
 
-    VectorBaseObject* DoubleVectorObject::newVector(uint32 length)
+    VectorBaseObject* DoubleVectorObject::newVector(uint32_t length)
     {
         return toplevel()->doubleVectorClass->newVector(length);
     }
@@ -537,7 +537,7 @@ namespace avmplus
         return 0;
     }
 
-    ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32 length)
+    ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32_t length)
     {
         Atom args[1] = {type->atom()};
 
@@ -565,7 +565,7 @@ namespace avmplus
         return v;
     }
 
-    ObjectVectorObject* ObjectVectorClass::newVector(uint32 length)
+    ObjectVectorObject* ObjectVectorClass::newVector(uint32_t length)
     {
         VTable* ivtable = this->ivtable();
         ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
@@ -575,11 +575,11 @@ namespace avmplus
         return v;
     }
 
-    Atom ObjectVectorObject::getUintProperty(uint32 index) const
+    Atom ObjectVectorObject::getUintProperty(uint32_t index) const
     {
         return _getUintProperty(index);
     }
-    Atom ObjectVectorObject::_getUintProperty(uint32 index) const
+    Atom ObjectVectorObject::_getUintProperty(uint32_t index) const
     {
         if (m_length <= index)
         {
@@ -592,11 +592,11 @@ namespace avmplus
         return 0;
     }
 
-    void ObjectVectorObject::setUintProperty(uint32 index, Atom value)
+    void ObjectVectorObject::setUintProperty(uint32_t index, Atom value)
     {
         return _setUintProperty(index, value);
     }
-    void ObjectVectorObject::_setUintProperty(uint32 index, Atom value)
+    void ObjectVectorObject::_setUintProperty(uint32_t index, Atom value)
     {
         if (m_length <= index)
         {
@@ -612,7 +612,7 @@ namespace avmplus
     {
         if (index >= 0)
         {
-            if (m_length <= (uint32)index)
+            if (m_length <= (uint32_t)index)
             {
                 toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
             }
@@ -642,7 +642,7 @@ namespace avmplus
             *a++ = nullObjectAtom;
     }
 
-    void ObjectVectorObject::set_length(uint32 newLength)
+    void ObjectVectorObject::set_length(uint32_t newLength)
     {
         if (newLength > m_length)
         {
@@ -672,7 +672,7 @@ namespace avmplus
         return t->atom();
     }
 
-    void ObjectVectorObject::grow(uint32 newCapacity, bool exact)
+    void ObjectVectorObject::grow(uint32_t newCapacity, bool exact)
     {
         if (newCapacity > m_capacity)
         {
@@ -698,7 +698,7 @@ namespace avmplus
         }
     }
 
-    VectorBaseObject* ObjectVectorObject::newVector(uint32 length)
+    VectorBaseObject* ObjectVectorObject::newVector(uint32_t length)
     {
         Atom args[1] = {t->atom()};
 
@@ -706,7 +706,7 @@ namespace avmplus
         return vecclass->newVector(length);
     }
 
-    void ObjectVectorObject::_spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)
+    void ObjectVectorObject::_spliceHelper(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, Atom args, int offset)
     {
         long l_shiftAmount = (long)insertCount - (long) deleteCount; // long because result could be negative
 
@@ -741,14 +741,14 @@ namespace avmplus
             if( vec_args && (offset+insertCount <= vec_args->m_length) )
             {
                 Atom* a = vec_args->m_array;
-                for (uint32 i=0; i<insertCount; i++)
+                for (uint32_t i=0; i<insertCount; i++)
                 {
                     _setUintProperty(insertPoint+i, a[i+offset]);
                 }
             }
             else if( so_args )
             {
-                for (uint32 i=0; i<insertCount; i++)
+                for (uint32_t i=0; i<insertCount; i++)
                 {
                     //setUintProperty(insertPoint+i, so_args->getUintProperty(i+offset));
                     _setUintProperty(insertPoint+i, so_args->getUintProperty(i+offset));
@@ -765,7 +765,7 @@ namespace avmplus
             toplevel()->throwRangeError(kVectorFixedError);
         if(m_length)
         {
-            uint32 l = m_length-1;
+            uint32_t l = m_length-1;
             Atom r = m_array[l];
             set_length(m_length-1);
             return r;
@@ -773,7 +773,7 @@ namespace avmplus
         return undefinedAtom;
     }
 
-    uint32 ObjectVectorObject::AS3_unshift(Atom* argv, int argc)
+    uint32_t ObjectVectorObject::AS3_unshift(Atom* argv, int argc)
     {
         // shift elements up by argc
         // inserts args into initial spots

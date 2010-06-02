@@ -215,7 +215,7 @@ namespace avmplus
                 E4XNode *node = x->getNode();
                 E4XNode *validNode = NULL;
 
-                for (uint32 i = 0; i < node->_length(); i++)
+                for (uint32_t i = 0; i < node->_length(); i++)
                 {
                     E4XNode *n = node->_getAt (i);
                     if (n->getClass() == E4XNode::kElement)
@@ -245,7 +245,7 @@ namespace avmplus
         }
     }
 
-    void XMLClass::set_ignoreComments(uint32 ignoreFlag)
+    void XMLClass::set_ignoreComments(uint32_t ignoreFlag)
     {
         if (ignoreFlag)
             m_flags |= kFlagIgnoreComments;
@@ -253,12 +253,12 @@ namespace avmplus
             m_flags &= ~kFlagIgnoreComments;
     }
 
-    uint32 XMLClass::get_ignoreComments()
+    uint32_t XMLClass::get_ignoreComments()
     {
         return ((m_flags & kFlagIgnoreComments) != 0);
     }
 
-    void XMLClass::set_ignoreProcessingInstructions(uint32 ignoreFlag)
+    void XMLClass::set_ignoreProcessingInstructions(uint32_t ignoreFlag)
     {
         if (ignoreFlag)
             m_flags |= kFlagIgnoreProcessingInstructions;
@@ -266,12 +266,12 @@ namespace avmplus
             m_flags &= ~kFlagIgnoreProcessingInstructions;
     }
 
-    uint32 XMLClass::get_ignoreProcessingInstructions()
+    uint32_t XMLClass::get_ignoreProcessingInstructions()
     {
         return ((m_flags & kFlagIgnoreProcessingInstructions) != 0);
     }
 
-    void XMLClass::set_ignoreWhitespace(uint32 ignoreFlag)
+    void XMLClass::set_ignoreWhitespace(uint32_t ignoreFlag)
     {
         if (ignoreFlag)
             m_flags |= kFlagIgnoreWhitespace;
@@ -279,12 +279,12 @@ namespace avmplus
             m_flags &= ~kFlagIgnoreWhitespace;
     }
 
-    uint32 XMLClass::get_ignoreWhitespace()
+    uint32_t XMLClass::get_ignoreWhitespace()
     {
         return ((m_flags & kFlagIgnoreWhitespace) != 0);
     }
 
-    void XMLClass::set_prettyPrinting(uint32 prettyFlag)
+    void XMLClass::set_prettyPrinting(uint32_t prettyFlag)
     {
         if (prettyFlag)
             m_flags |= kFlagPrettyPrinting;
@@ -292,7 +292,7 @@ namespace avmplus
             m_flags &= ~kFlagPrettyPrinting;
     }
 
-    uint32 XMLClass::get_prettyPrinting()
+    uint32_t XMLClass::get_prettyPrinting()
     {
         return ((m_flags & kFlagPrettyPrinting) != 0);
     }

@@ -52,8 +52,8 @@ void BigInteger::setFromDouble(double value)
     numWords = (2 + ((e > 0 ? e : -e) /32));
 
     AvmAssert(numWords <= kMaxBigIntegerBufferSize);
-    wordBuffer[1] = (uint32)(mantissa >> 32);
-    wordBuffer[0] = (uint32)(mantissa & 0xffffffff);
+    wordBuffer[1] = (uint32_t)(mantissa >> 32);
+    wordBuffer[0] = (uint32_t)(mantissa & 0xffffffff);
     numWords = (wordBuffer[1] == 0 ? 1 : 2);
 
     if(e < 0)
@@ -68,7 +68,7 @@ void BigInteger::setFromBigInteger(const BigInteger* from, int32 offset, int32 a
     AvmAssert(numWords <= kMaxBigIntegerBufferSize);
     VMPI_memcpy( (byte*)wordBuffer,
             (byte*)&(from->wordBuffer[offset]),
-            amount*sizeof(uint32));
+            amount*sizeof(uint32_t));
 }
 
 double BigInteger::doubleValueOf() const
@@ -79,7 +79,7 @@ double BigInteger::doubleValueOf() const
 
     // determine how many of bits are used by the top word
     int bitsInTopWord=1;
-    for(uint32 topWord = wordBuffer[numWords-1]; topWord > 1; topWord >>= 1)
+    for(uint32_t topWord = wordBuffer[numWords-1]; topWord > 1; topWord >>= 1)
         bitsInTopWord++;
 
     // start result with top word.  We will accumulate the most significant 53 bits of data into it.
@@ -192,7 +192,7 @@ int32 BigInteger::compare(const BigInteger *other) const
         result = -1;
     else
     {
-        // otherwise, they are they same number of uint32 words.  need to check numWords by numWords
+        // otherwise, they are they same number of uint32_t words.  need to check numWords by numWords
         for(int x = numWords-1; x > -1 ; x--)
         {
             if (wordBuffer[x] != other->wordBuffer[x])
@@ -218,14 +218,14 @@ void BigInteger::multAndIncrementBy(int32 factor, int32 addition)
     {
         opResult = (uint64_t)wordBuffer[x] * (uint64_t)factor + carry;
         carry = opResult >> 32;
-        wordBuffer[x] = (uint32)(opResult & 0xffffffff);
+        wordBuffer[x] = (uint32_t)(opResult & 0xffffffff);
     }
 
     // if carry goes over the existing top, may need to expand wordBuffer
     if (carry)
     {
         setNumWords(numWords+1);
-        wordBuffer[x] = (uint32)carry;
+        wordBuffer[x] = (uint32_t)carry;
     }
 
 }
@@ -258,7 +258,7 @@ BigInteger* BigInteger::mult(const BigInteger* smallerNum, BigInteger* result) c
         uint64_t factor = (uint64_t) smallerNum->wordBuffer[x];
         if (factor) // if 0, nothing to do.
         {
-            uint32* pResult = result->wordBuffer+x; // each pass we rewrite elements of result offset by the pass iteration
+            uint32_t* pResult = result->wordBuffer+x; // each pass we rewrite elements of result offset by the pass iteration
             uint64_t  product;
             uint64_t  carry = 0;
 
@@ -266,9 +266,9 @@ BigInteger* BigInteger::mult(const BigInteger* smallerNum, BigInteger* result) c
             {
                 product = (biggerNum->wordBuffer[y] * factor) + *pResult + carry;
                 carry = product >> 32;
-                *pResult++ = (uint32)(product & 0xffffffff);
+                *pResult++ = (uint32_t)(product & 0xffffffff);
             }
-            *pResult = (uint32)carry;
+            *pResult = (uint32_t)carry;
         }
     }
 
@@ -339,7 +339,7 @@ BigInteger* BigInteger::quickDivMod(const BigInteger* divisor, BigInteger* resid
         if (factor)
         {
             decrement.copyFrom(divisor);
-            decrement.multAndIncrementBy( (uint32)factor,0);
+            decrement.multAndIncrementBy( (uint32_t)factor,0);
             // check for overestimate
             // fix bug 121952: must check for larger overestimate, which
             // can occur despite the checks above in some rare cases.
@@ -364,7 +364,7 @@ BigInteger* BigInteger::quickDivMod(const BigInteger* divisor, BigInteger* resid
             factor++;
         }
 
-        result->wordBuffer[0] = (uint32)factor;
+        result->wordBuffer[0] = (uint32_t)factor;
 
     /* The above works for the division requirements of D2A, where divisor is always around 10 larger
         than the dividend and the result is always a digit 1-9.
@@ -415,10 +415,10 @@ BigInteger* BigInteger::divideByReciprocalMethod(const BigInteger* divisor, BigI
         return result;
     }
 
-    uint32 d2Prec = divisor->lg2();
-    uint32 e = 1 + d2Prec;
-    uint32 ag = 1;
-    uint32 ar = 31 + this->lg2() - d2Prec;
+    uint32_t d2Prec = divisor->lg2();
+    uint32_t e = 1 + d2Prec;
+    uint32_t ag = 1;
+    uint32_t ar = 31 + this->lg2() - d2Prec;
     BigInteger u;
     u.setFromInteger(1);
 
@@ -475,10 +475,10 @@ BigInteger* BigInteger::divBy(const BigInteger* divisor, BigInteger* divResult)
     return divResult;
 }
 
-uint32 BigInteger::lg2() const
+uint32_t BigInteger::lg2() const
 {
-    uint32 powersOf2 = (numWords-1)*32;
-    for(uint32 topWord = wordBuffer[numWords-1]; topWord > 1; topWord >>= 1)
+    uint32_t powersOf2 = (numWords-1)*32;
+    for(uint32_t topWord = wordBuffer[numWords-1]; topWord > 1; topWord >>= 1)
         powersOf2++;
     return powersOf2;
 }
@@ -486,7 +486,7 @@ uint32 BigInteger::lg2() const
 
 // Shift a BigInteger by <shiftBy> bits to left.  If
 //  result is not NULL, write result into it, else allocate a new BigInteger.
-BigInteger* BigInteger::lshift(uint32 shiftBy, BigInteger* result) const
+BigInteger* BigInteger::lshift(uint32_t shiftBy, BigInteger* result) const
 {
     // calculate how much larger the result will be
     int numNewWords = shiftBy >> 5; // i.e. div by 32
@@ -500,14 +500,14 @@ BigInteger* BigInteger::lshift(uint32 shiftBy, BigInteger* result) const
         result->setValue(0); // 0 << num is still 0
         return result;
     }
-    const uint32* pSourceBuff = wordBuffer;
-    uint32* pResultBuff = result->wordBuffer;
+    const uint32_t* pSourceBuff = wordBuffer;
+    uint32_t* pResultBuff = result->wordBuffer;
     for(int x = 0; x < numNewWords; x++)
             *pResultBuff++ = 0;
     // move bits from wordBuffer into result's wordBuffer shifted by (shiftBy % 32)
     shiftBy &= 0x1f;
     if (shiftBy) {
-        uint32 carry = 0;
+        uint32_t carry = 0;
         int    shiftCarry = 32 - shiftBy;
         for(int x=0; x < numWords; x++)
         {
@@ -530,7 +530,7 @@ BigInteger* BigInteger::lshift(uint32 shiftBy, BigInteger* result) const
 //  result is not NULL, write result into it, else allocate a new BigInteger.
 //  (todo: might be possible to combine rshift and lshift into a single function
 //  with argument specifying which direction to shift, but result might be messy/harder to get right)
-BigInteger* BigInteger::rshift(uint32 shiftBy, BigInteger* result) const
+BigInteger* BigInteger::rshift(uint32_t shiftBy, BigInteger* result) const
 {
     int numRemovedWords = shiftBy >> 5; // i.e. div by 32
 
@@ -546,13 +546,13 @@ BigInteger* BigInteger::rshift(uint32 shiftBy, BigInteger* result) const
     }
 
     // move bits from wordBuffer into result's wordBuffer shifted by (shiftBy % 32)
-    uint32* pResultBuff = &(result->wordBuffer[totalWords-1]);
-    const uint32* pSourceBuff = &(wordBuffer[numWords-1]);
+    uint32_t* pResultBuff = &(result->wordBuffer[totalWords-1]);
+    const uint32_t* pSourceBuff = &(wordBuffer[numWords-1]);
     shiftBy &= 0x1f;
     if (shiftBy)
     {
         int shiftCarry = 32 - shiftBy;
-        uint32 carry = 0;
+        uint32_t carry = 0;
 
         for(int x=totalWords-1; x > -1; x--)
         {
@@ -611,8 +611,8 @@ BigInteger *BigInteger::addOrSubtract(const BigInteger* smallerNum, bool isAdd, 
             x = ((uint64_t)biggerNum->wordBuffer[index]) + smallerNum->wordBuffer[index] + borrow;
         else
             x = ((uint64_t)biggerNum->wordBuffer[index]) - smallerNum->wordBuffer[index] - borrow; // note x is unsigned.  Ok even if result would be negative however
-        borrow = x >> 32 & (uint32)1;
-        result->wordBuffer[index] = (uint32)(x & 0xffffffff);
+        borrow = x >> 32 & (uint32_t)1;
+        result->wordBuffer[index] = (uint32_t)(x & 0xffffffff);
     }
 
     // loop over remaining words of the larger number, carying borrow/overflow forward
@@ -622,14 +622,14 @@ BigInteger *BigInteger::addOrSubtract(const BigInteger* smallerNum, bool isAdd, 
             x = ((uint64_t)biggerNum->wordBuffer[index]) + borrow;
         else
             x = ((uint64_t)biggerNum->wordBuffer[index]) - borrow;
-        borrow = x >> 32 & (uint32)1;
-        result->wordBuffer[index] = (uint32)(x & 0xffffffff);
+        borrow = x >> 32 & (uint32_t)1;
+        result->wordBuffer[index] = (uint32_t)(x & 0xffffffff);
     }
 
     // handle final overflow if this is add
     if (isAdd && borrow)
     {
-        result->wordBuffer[index] = (uint32)(borrow & 0xffffffff);
+        result->wordBuffer[index] = (uint32_t)(borrow & 0xffffffff);
         index++;
     }
     // loop backwards over result, removing leading zeros from our numWords count

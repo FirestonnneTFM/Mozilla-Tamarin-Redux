@@ -305,7 +305,7 @@ REALLY_INLINE int32_t AvmCore::getActiveAPIs()
 
 REALLY_INLINE /*static*/ uint32_t AvmCore::toUInt32(Atom atom)
 {
-    return (uint32)integer(atom);
+    return (uint32_t)integer(atom);
 }
 
 REALLY_INLINE /*static*/ double AvmCore::toInteger(Atom atom)
@@ -576,7 +576,7 @@ REALLY_INLINE /*static*/ bool AvmCore::isGenericObject(Atom a)
     return atomKind(a)==kDoubleType;
 }
 
-REALLY_INLINE /*static*/ bool AvmCore::getIndexFromAtom(Atom a, uint32 *result)
+REALLY_INLINE /*static*/ bool AvmCore::getIndexFromAtom(Atom a, uint32_t *result)
 {
     if (atomIsIntptr(a) && atomCanBeUint32(a))
     {

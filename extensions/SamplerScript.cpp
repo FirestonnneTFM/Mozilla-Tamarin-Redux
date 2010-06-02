@@ -176,7 +176,7 @@ namespace avmplus
         }
 
     private:
-        uint32 count;
+        uint32_t count;
         byte *cursor;
         Sampler *sampler;
         DRCWB(ScriptObject*) script;
@@ -262,7 +262,7 @@ namespace avmplus
         Sampler* s = self->core()->get_sampler();
         if (!s)
             return -1;
-        uint32 num;
+        uint32_t num;
         s->getSamples(num);
         return (double)num;
 #else
@@ -371,7 +371,7 @@ namespace avmplus
             StackFrameClass* sfcc = (StackFrameClass*)toplevel->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame);
             ArrayObject* stack = toplevel->arrayClass->newArray(sample.stack.depth);
             StackTrace::Element* e = (StackTrace::Element*)sample.stack.trace;
-            for(uint32 i=0; i < sample.stack.depth; i++, e++)
+            for(uint32_t i=0; i < sample.stack.depth; i++, e++)
             {
                 StackFrameObject* sf = (StackFrameObject*)sfcc->createInstance(sfcc->ivtable(), NULL);
 
@@ -592,7 +592,7 @@ namespace avmplus
 #endif
     }
 
-    double SamplerScript::_getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32 type)
+    double SamplerScript::_getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32_t type)
     {
 #ifdef DEBUGGER
         AvmCore* core = self->core();

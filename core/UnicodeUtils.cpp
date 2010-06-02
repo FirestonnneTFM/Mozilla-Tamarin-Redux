@@ -107,7 +107,7 @@ namespace avmplus
                         goto Encode3;
                     }
 
-                    uint32 ucs4 = ((ch-0xD800)<<10) + (ch2-0xDC00) + 0x10000;
+                    uint32_t ucs4 = ((ch-0xD800)<<10) + (ch2-0xDC00) + 0x10000;
                     if ((outMax -= 4) < 0) {
                         return -1;
                     }
@@ -315,7 +315,7 @@ namespace avmplus
         // The minUCS4 table enforces the security rule that an
         // overlong UTF-8 sequence is forbidden, if a shorter
         // sequence could encode the same character.
-        static uint32 minUCS4[] = {
+        static uint32_t minUCS4[] = {
             0x00000000,
             0x00000080,
             0x00000800,

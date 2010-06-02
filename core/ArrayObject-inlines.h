@@ -52,7 +52,7 @@ namespace avmplus
         return (m_denseArr.getLength() == m_length);
     }
 
-    REALLY_INLINE uint32 ArrayObject::getDenseLength() const
+    REALLY_INLINE uint32_t ArrayObject::getDenseLength() const
     {
         return m_denseArr.getLength();
     }
@@ -72,42 +72,42 @@ namespace avmplus
         return AS3_pop();
     }
 
-    REALLY_INLINE uint32 ArrayObject::push(Atom *args, int argc)
+    REALLY_INLINE uint32_t ArrayObject::push(Atom *args, int argc)
     {
         return AS3_push(args, argc);
     }
 
-    REALLY_INLINE uint32 ArrayObject::unshift(Atom *args, int argc)
+    REALLY_INLINE uint32_t ArrayObject::unshift(Atom *args, int argc)
     {
         return AS3_unshift(args, argc);
     }
 
     /*virtual*/
-    REALLY_INLINE void ArrayObject::setUintProperty(uint32 index, Atom value)
+    REALLY_INLINE void ArrayObject::setUintProperty(uint32_t index, Atom value)
     {
         _setUintProperty(index, value);
     }
 
     /*virtual*/
-    REALLY_INLINE Atom ArrayObject::getUintProperty(uint32 index) const
+    REALLY_INLINE Atom ArrayObject::getUintProperty(uint32_t index) const
     {
         return _getUintProperty(index);
     }
 
     // Non-virtual members for ActionScript method implementation.
     // Always calls thru to the virtual method to allow subclasses to override in C++.
-    REALLY_INLINE uint32 ArrayObject::get_length() const
+    REALLY_INLINE uint32_t ArrayObject::get_length() const
     {
         return getLength();
     }
 
-    REALLY_INLINE void ArrayObject::set_length(uint32 newLength)
+    REALLY_INLINE void ArrayObject::set_length(uint32_t newLength)
     {
         setLength(newLength);
     }
 
     /*virtual*/
-    REALLY_INLINE uint32 ArrayObject::getLength() const
+    REALLY_INLINE uint32_t ArrayObject::getLength() const
     {
         return m_length;
     }

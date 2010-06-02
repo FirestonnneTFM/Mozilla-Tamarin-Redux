@@ -80,14 +80,14 @@ namespace avmplus
 
     protected:
         PoolObject* parse(API api);
-        MethodInfo* resolveMethodInfo(uint32 index) const;
+        MethodInfo* resolveMethodInfo(uint32_t index) const;
 
         #if defined(VMCFG_AOT) || defined(AVMPLUS_VERBOSE)
         void parseTypeName(const byte* &p, Multiname& m) const;
         #endif
 
         Namespacep parseNsRef(const byte* &pc) const;
-        Stringp resolveUtf8(uint32 index) const;
+        Stringp resolveUtf8(uint32_t index) const;
         Stringp parseName(const byte* &pc) const;
         uint32_t resolveBindingName(const byte*& pc, Multiname& m) const;
         void computeInstanceSizeAndSlotsOffset(int class_id, Traits* base, uint16_t& sizeofInstance, uint16_t& offsetofSlots) const;

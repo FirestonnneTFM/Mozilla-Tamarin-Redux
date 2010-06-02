@@ -322,11 +322,11 @@ namespace avmplus
         static Stringp decode(AvmCore* core, Stringp in, bool decodeURIComponentFlag);
         static Stringp encode(AvmCore* core, Stringp in, bool encodeURIComponentFlag);
 
-        static const uint32 unescaped[];
-        static const uint32 uriUnescaped[];
-        static const uint32 uriReservedPlusPound[];
+        static const uint32_t unescaped[];
+        static const uint32_t uriUnescaped[];
+        static const uint32_t uriReservedPlusPound[];
 
-        static bool contains(const uint32 *uriSet, uint32 ch);
+        static bool contains(const uint32_t *uriSet, uint32_t ch);
 
         ClassClosure* resolveBuiltinClass(int class_id);
 

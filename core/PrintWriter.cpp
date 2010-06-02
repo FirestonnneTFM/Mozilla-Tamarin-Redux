@@ -133,7 +133,7 @@ namespace avmplus
             *this << (char)value;
         } else {
             uint8 Octets[7];
-            size_t OctetsLen = UnicodeUtils::Ucs4ToUtf8((uint32)value, Octets);
+            size_t OctetsLen = UnicodeUtils::Ucs4ToUtf8((uint32_t)value, Octets);
             Octets[OctetsLen] = '\0';
             write((const char*)Octets);
         }

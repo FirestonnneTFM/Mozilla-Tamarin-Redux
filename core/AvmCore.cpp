@@ -195,7 +195,7 @@ namespace avmplus
         MMGC_STATIC_ASSERT(sizeof(int16_t) == 2);
         MMGC_STATIC_ASSERT(sizeof(uint16_t) == 2);
         MMGC_STATIC_ASSERT(sizeof(int32) == 4);
-        MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
+        MMGC_STATIC_ASSERT(sizeof(uint32_t) == 4);
         MMGC_STATIC_ASSERT(sizeof(int64_t) == 8);
         MMGC_STATIC_ASSERT(sizeof(uint64_t) == 8);
         MMGC_STATIC_ASSERT(sizeof(intptr_t) == sizeof(void *));
@@ -1588,7 +1588,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 #ifdef AVMPLUS_VERBOSE
     /* static */
-    void AvmCore::formatMultiname(PrintWriter& out, uint32 index, PoolObject* pool)
+    void AvmCore::formatMultiname(PrintWriter& out, uint32_t index, PoolObject* pool)
     {
         if (index > 0 && index <= pool->cpool_mn_offsets.size())
         {
@@ -1611,7 +1611,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_pushstring:
             {
                 buffer << opcodeInfo[opcode].name;
-                uint32 index = readU32(pc);
+                uint32_t index = readU32(pc);
                 if (index < pool->constantStringCount)
                 {
                     buffer << " \"" << pool->getString(index) << "\"";
@@ -1624,7 +1624,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_pushint:
             {
                 buffer << opcodeInfo[opcode].name;
-                uint32 index = readU32(pc);
+                uint32_t index = readU32(pc);
                 if (index < pool->cpool_int.size())
                     buffer << " " << pool->cpool_int[index];
                 break;
@@ -1632,7 +1632,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_pushuint:
             {
                 buffer << opcodeInfo[opcode].name;
-                uint32 index = readU32(pc);
+                uint32_t index = readU32(pc);
                 if (index < pool->cpool_uint.size())
                     buffer << " " << (double)pool->cpool_uint[index];
                 break;
@@ -1640,7 +1640,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_pushdouble:
             {
                 buffer << opcodeInfo[opcode].name;
-                uint32 index = readU32(pc);
+                uint32_t index = readU32(pc);
                 if (index > 0 && index < pool->cpool_double.size())
                 {
                     buffer << " " << *pool->cpool_double[index];
@@ -1654,7 +1654,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_pushnamespace:
             {
                 buffer << opcodeInfo[opcode].name;
-                uint32 index = readU32(pc);
+                uint32_t index = readU32(pc);
                 if (index < pool->cpool_ns.size())
                 {
                     buffer << " " << pool->cpool_ns[index]->getURI();
@@ -1684,7 +1684,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_callsuper:
             case OP_callsupervoid:
             {
-                uint32 index = readU32(pc);
+                uint32_t index = readU32(pc);
                 int argc = readU32(pc);
                 buffer << opcodeInfo[opcode].name << " ";
                 formatMultiname(buffer, index, pool);
@@ -1785,7 +1785,7 @@ return the result of the comparison ToPrimitive(x) == y.
     }
 
 #ifdef VMCFG_WORDCODE
-    void AvmCore::formatBits(PrintWriter& buffer, uint32 bits)
+    void AvmCore::formatBits(PrintWriter& buffer, uint32_t bits)
     {
         Atom a = (Atom)(intptr_t)(int32)bits;
         if (isUndefined(a))
@@ -1806,7 +1806,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_debugfile:
             case WOP_pushstring: {
                 buffer << wopAttrs[opcode].name;
-                uint32 index = (uint32)*pc++;
+                uint32_t index = (uint32_t)*pc++;
                 if (index < pool->constantStringCount)
                     buffer << " \"" << pool->getString(index) << "\"";
                 else
@@ -1815,7 +1815,7 @@ return the result of the comparison ToPrimitive(x) == y.
             }
 
             case WOP_pushbits: {
-                uint32 bits = (uint32)*pc++;
+                uint32_t bits = (uint32_t)*pc++;
                 buffer << wopAttrs[opcode].name << " ";
                 formatBits(buffer, bits);
                 break;
@@ -1823,15 +1823,15 @@ return the result of the comparison ToPrimitive(x) == y.
 
             case WOP_push_doublebits: {
                 double_overlay d;
-                d.bits32[0] = (uint32)*pc++;
-                d.bits32[1] = (uint32)*pc++;
+                d.bits32[0] = (uint32_t)*pc++;
+                d.bits32[1] = (uint32_t)*pc++;
                 buffer << wopAttrs[opcode].name << " " << d.value;
                 break;
             }
 
             case WOP_pushdouble: {
                 buffer << wopAttrs[opcode].name;
-                uint32 index = (uint32)*pc++;
+                uint32_t index = (uint32_t)*pc++;
                 if (index < pool->cpool_double.size())
                     buffer << " " << *pool->cpool_double[index];
                 else
@@ -1841,7 +1841,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
             case WOP_pushnamespace: {
                 buffer << wopAttrs[opcode].name;
-                uint32 index = (uint32)*pc++;
+                uint32_t index = (uint32_t)*pc++;
                 if (index < pool->cpool_ns.size())
                     buffer << " " << pool->cpool_ns[index]->getURI();
                 else
@@ -1852,8 +1852,8 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_findpropglobal:
             case WOP_findpropglobalstrict: {
                 buffer << wopAttrs[opcode].name << " ";
-                formatMultiname(buffer, (uint32)*pc++, pool);
-                buffer << " " << (uint32)*pc++;
+                formatMultiname(buffer, (uint32_t)*pc++, pool);
+                buffer << " " << (uint32_t)*pc++;
                 break;
             }
 
@@ -1870,7 +1870,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_coerce:
             case WOP_astype: {
                 buffer << wopAttrs[opcode].name << " ";
-                formatMultiname(buffer, (uint32)*pc++, pool);
+                formatMultiname(buffer, (uint32_t)*pc++, pool);
                 break;
             }
 
@@ -1879,7 +1879,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_callproplex:
             case WOP_callsuper:
             case WOP_callsupervoid: {
-                uint32 index = (uint32)*pc++;
+                uint32_t index = (uint32_t)*pc++;
                 int argc = (int)*pc++;
                 buffer << wopAttrs[opcode].name << " ";
                 formatMultiname(buffer, index, pool);
@@ -1937,7 +1937,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_ifstricteq:
             case WOP_ifstrictne: {
                 int offset = (int)*pc++;
-                buffer << wopAttrs[opcode].name << " " << (uint32)(off + 2 + offset);
+                buffer << wopAttrs[opcode].name << " " << (uint32_t)(off + 2 + offset);
                 break;
             }
 
@@ -1948,8 +1948,8 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_bitand_lb:
             case WOP_bitor_lb:
             case WOP_bitxor_lb: {
-                uint32 r1 = (uint32)*pc++;
-                uint32 b1 = (uint32)*pc++;
+                uint32_t r1 = (uint32_t)*pc++;
+                uint32_t b1 = (uint32_t)*pc++;
                 buffer << wopAttrs[opcode].name << " " << r1 << " ";
                 formatBits(buffer, b1);
                 break;
@@ -1967,10 +1967,10 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_ifne_ll:
             case WOP_ifstricteq_ll:
             case WOP_ifstrictne_ll: {
-                uint32 r1 = (uint32)*pc++;
-                uint32 r2 = (uint32)*pc++;
+                uint32_t r1 = (uint32_t)*pc++;
+                uint32_t r2 = (uint32_t)*pc++;
                 int offset = (int)*pc++;
-                buffer << wopAttrs[opcode].name << " " << r1 << " " << r2 << " " << (uint32)(off + 4 + offset);
+                buffer << wopAttrs[opcode].name << " " << r1 << " " << r2 << " " << (uint32_t)(off + 4 + offset);
                 break;
             }
 
@@ -1986,12 +1986,12 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_ifne_lb:
             case WOP_ifstricteq_lb:
             case WOP_ifstrictne_lb: {
-                uint32 r1 = (uint32)*pc++;
-                uint32 b1 = (uint32)*pc++;
+                uint32_t r1 = (uint32_t)*pc++;
+                uint32_t b1 = (uint32_t)*pc++;
                 int offset = (int)*pc++;
                 buffer << wopAttrs[opcode].name << " " << r1 << " ";
                 formatBits(buffer, b1);
-                buffer << " " << (uint32)(off + 4 + offset);
+                buffer << " " << (uint32_t)(off + 4 + offset);
                 break;
             }
 #endif // VMCFG_WORDCODE_PEEPHOLE
@@ -3343,7 +3343,7 @@ return the result of the comparison ToPrimitive(x) == y.
         return internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
     }
 
-    Stringp AvmCore::internUint32 (uint32 ui)
+    Stringp AvmCore::internUint32 (uint32_t ui)
     {
         if (ui & 0x80000000)
             return internDouble(ui);
@@ -3854,7 +3854,7 @@ return the result of the comparison ToPrimitive(x) == y.
         return MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned);
     }
 
-    Stringp AvmCore::uintToString(uint32 value)
+    Stringp AvmCore::uintToString(uint32_t value)
     {
         return MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsUnsigned);
     }
@@ -4040,12 +4040,12 @@ return the result of the comparison ToPrimitive(x) == y.
         uint64_t i;
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
         struct {
-            uint32 il, ih;
+            uint32_t il, ih;
         } i32;
 #else
 #error("this routine does not work in PowerPC processors");
         struct {
-            uint32 ih, il;
+            uint32_t ih, il;
         } i32;
 #endif
     } double_int;
@@ -4056,7 +4056,7 @@ return the result of the comparison ToPrimitive(x) == y.
         double_int du, duh, two32;
         uint64_t sign_d;
         int64_t MASK;
-        uint32 DI_H, u_tmp, expon, shift_amount;
+        uint32_t DI_H, u_tmp, expon, shift_amount;
 
         //  Algorithm Outline
         //  Step 1.  If d is NaN, +/-Inf or |d|>=2^84 or |d|<1, then return 0
@@ -4115,7 +4115,7 @@ return the result of the comparison ToPrimitive(x) == y.
     int AvmCore::doubleToInt32(double d)
     {
         double_int du, duh, two32;
-        uint32 DI_H, u_tmp, expon, shift_amount;
+        uint32_t DI_H, u_tmp, expon, shift_amount;
         int32 mask32;
 
         //  Algorithm Outline
@@ -4198,7 +4198,7 @@ return the result of the comparison ToPrimitive(x) == y.
     // cn:  the ES3 test for a valid array index is
     //  "A property name P (in the form of a string value) is an array index if and
     //  only if ToString(ToUint32(P)) is equal to P and ToUint32(P) is not equal to 2^32-1."
-    bool AvmCore::getIndexFromString (Stringp s, uint32 *result)
+    bool AvmCore::getIndexFromString (Stringp s, uint32_t *result)
     {
         return s->parseIndex((uint32_t&) *result);
     }

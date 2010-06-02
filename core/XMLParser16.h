@@ -87,7 +87,7 @@ namespace avmplus
          * nextAttribute is used to iterate over the
          * attributes of a XML tag
          */
-        bool nextAttribute(uint32& index,
+        bool nextAttribute(uint32_t& index,
                            Stringp& name,
                            Stringp& value);
     };

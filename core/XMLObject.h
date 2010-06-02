@@ -151,13 +151,13 @@ namespace avmplus
 
         bool hasMultinameProperty(const Multiname* name) const;
         bool hasAtomProperty(Atom name) const;
-        bool hasUintProperty(uint32 i) const;
+        bool hasUintProperty(uint32_t i) const;
 
         Atom getDescendants(const Multiname* name) const;
 
-        Atom getUintProperty(uint32 i) const;
-        void setUintProperty(uint32 i, Atom value);
-        bool delUintProperty(uint32 i);
+        Atom getUintProperty(uint32_t i) const;
+        void setUintProperty(uint32_t i, Atom value);
+        bool delUintProperty(uint32_t i);
 
         // Iterator support - for in, for each
         Atom nextName(int index);
@@ -266,7 +266,7 @@ namespace avmplus
 
         // accessors to node functions
         int getClass() const;
-        uint32 _length() const;
+        uint32_t _length() const;
         XMLObject* getParent();
         void setValue(Stringp s);
         Stringp getValue();

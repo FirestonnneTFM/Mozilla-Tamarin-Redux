@@ -1017,7 +1017,7 @@ namespace nanojit
                 NanoAssert(p->isI());
                 MOVSXDR(r, r);
             } else if (ty == ARGTYPE_UI) {
-                // extend uint32 to uint64
+                // extend uint32_t to uint64
                 NanoAssert(p->isI());
                 MOVLR(r, r);
             } else {

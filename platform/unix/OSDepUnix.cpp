@@ -48,7 +48,7 @@ namespace avmplus
 #ifdef DEBUGGER
     struct IntWriteTimerData
     {
-        uint32 interval; // in microseconds
+        uint32_t interval; // in microseconds
         pthread_t thread;
         volatile int *addr;
     };
@@ -57,7 +57,7 @@ namespace avmplus
     {
         IntWriteTimerData *data = (IntWriteTimerData*)arg;
         volatile int *addr = data->addr;
-        uint32 interval = data->interval;
+        uint32_t interval = data->interval;
         while(data->addr)
         {
             usleep(interval);
@@ -67,7 +67,7 @@ namespace avmplus
         return NULL;
     }
 
-    uintptr_t OSDep::startIntWriteTimer(uint32 millis, volatile int *addr)
+    uintptr_t OSDep::startIntWriteTimer(uint32_t millis, volatile int *addr)
     {
         pthread_t p;
         IntWriteTimerData *data = mmfx_new( IntWriteTimerData() );

@@ -67,7 +67,7 @@ namespace avmplus
 
         // Paste up the translated code and install it in info.  Return the number
         // of words and install a pointer to the first word in 'code' if not NULL
-        virtual uint32 epilogue(uintptr_t** code_result = NULL);
+        virtual uint32_t epilogue(uintptr_t** code_result = NULL);
 
         // Handle specific instructions or instruction classes
         virtual void emitOp0(const uint8_t *pc, WordOpcode opcode);

@@ -113,7 +113,7 @@ namespace avmplus
         aa->push (AvmCore::genericObjectToAtom(childNode));
     }
 
-    uint32 ElementE4XNode::numChildren() const
+    uint32_t ElementE4XNode::numChildren() const
     {
         if (!m_children)
             return 0;
@@ -152,7 +152,7 @@ namespace avmplus
         }
     }
 
-    void ElementE4XNode::insertChild (uint32 i, E4XNode *x)
+    void ElementE4XNode::insertChild (uint32_t i, E4XNode *x)
     {
         // m_children->insert (i, a)
         convertToAtomArray();
@@ -160,7 +160,7 @@ namespace avmplus
         aa->insert (i, AvmCore::genericObjectToAtom(x));
     }
 
-    void ElementE4XNode::removeChild (uint32 i)
+    void ElementE4XNode::removeChild (uint32_t i)
     {
         // m_children->removeAt (i)
         convertToAtomArray();
@@ -168,7 +168,7 @@ namespace avmplus
         aa->removeAt (i);
     }
 
-    void ElementE4XNode::setChildAt (uint32 i, E4XNode *x)
+    void ElementE4XNode::setChildAt (uint32_t i, E4XNode *x)
     {
         if ((i == 0) && (m_children & SINGLECHILDBIT))
         {
@@ -182,7 +182,7 @@ namespace avmplus
         }
     }
 
-    E4XNode *ElementE4XNode::_getAt(uint32 i) const
+    E4XNode *ElementE4XNode::_getAt(uint32_t i) const
     {
         if (i >= _length())
             return 0;
@@ -303,7 +303,7 @@ namespace avmplus
 
         // step 2b + 2c
         int index = -1;
-        for (uint32 i = 0; i < numNamespaces(); i++)
+        for (uint32_t i = 0; i < numNamespaces(); i++)
         {
             Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
             if (ns2->getPrefix() == ns->getPrefix())
@@ -355,7 +355,7 @@ namespace avmplus
 
     int E4XNode::FindMatchingNamespace (AvmCore *core, Namespace *ns)
     {
-        for (uint32 i = 0; i < numNamespaces(); i++)
+        for (uint32_t i = 0; i < numNamespaces(); i++)
         {
             Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
             if (ns2->getURI() == ns->getURI())
@@ -398,7 +398,7 @@ namespace avmplus
         E4XNode *y = this;
         while (y)
         {
-            for (uint32 i = 0; i < y->numNamespaces(); i++)
+            for (uint32_t i = 0; i < y->numNamespaces(); i++)
             {
                 Namespace *ns = AvmCore::atomToNamespace(y->getNamespaces()->getAt(i));
                 if (((prefix == core->kEmptyString) && !ns->hasPrefix()) ||
@@ -430,10 +430,10 @@ namespace avmplus
         const E4XNode *y = this;
         while (y)
         {
-            for (uint32 i = 0; i < y->numNamespaces(); i++)
+            for (uint32_t i = 0; i < y->numNamespaces(); i++)
             {
                 Namespace *ns1 = AvmCore::atomToNamespace (y->getNamespaces()->getAt(i));
-                uint32 j;
+                uint32_t j;
                 for (j = 0; j < inScopeNS->getLength(); j++)
                 {
                     Namespace *ns2 = AvmCore::atomToNamespace (inScopeNS->getAt(j));
@@ -481,12 +481,12 @@ namespace avmplus
         m_attributes = 0;
         m_namespaces = 0;
 
-        uint32 numAttr = 0;
+        uint32_t numAttr = 0;
         int32_t len;
         // We first handle namespaces because the a attribute tag can reference a namespace
         // defined farther on in the same node...
         // <ns2:table2 ns2:bar=\"last\" xmlns:ns2=\"http://www.macromedia.com/home\">...
-        uint32 index = 0;
+        uint32_t index = 0;
         Stringp attributeName, attributeValue;
         while (tag.nextAttribute(index, attributeName, attributeValue))
         {
@@ -576,7 +576,7 @@ namespace avmplus
     //////////////////////////////////////////////////////////////////////
 
     // E4X 9.1.1.4, pg 15
-    void E4XNode::_deleteByIndex (uint32 i)
+    void E4XNode::_deleteByIndex (uint32_t i)
     {
         if (i < numChildren())
         {
@@ -633,7 +633,7 @@ namespace avmplus
             if (numNamespaces())
             {
                 y->m_namespaces = new (core->GetGC()) AtomArray (numNamespaces());
-                uint32 i;
+                uint32_t i;
                 for (i = 0; i < numNamespaces(); i++)
                 {
                     y->m_namespaces->push(getNamespaces()->getAt(i));
@@ -644,7 +644,7 @@ namespace avmplus
             if (numAttributes())
             {
                 y->m_attributes = new (core->GetGC()) AtomArray (numAttributes());
-                uint32 i;
+                uint32_t i;
                 for (i = 0; i < numAttributes(); i++)
                 {
                     E4XNode *ax = getAttribute (i);
@@ -659,7 +659,7 @@ namespace avmplus
             {
                 AvmAssert(y->m_children == 0);
                 y->m_children = uintptr_t(new (core->GetGC()) AtomArray (numChildren()));
-                for (uint32 k = 0; k < _length(); k++)
+                for (uint32_t k = 0; k < _length(); k++)
                 {
                     E4XNode *child = _getAt(k);
                     if (((child->getClass() == E4XNode::kComment) && toplevel->xmlClass()->get_ignoreComments()) ||
@@ -727,10 +727,10 @@ namespace avmplus
         // Order of namespaces does not matter
         AtomArray *ns1 = getNamespaces();
         AtomArray *ns2 = v->getNamespaces();
-        for (uint32 n1 = 0; n1 < numNamespaces(); n1++)
+        for (uint32_t n1 = 0; n1 < numNamespaces(); n1++)
         {
             Namespace *namespace1 = core->atomToNamespace (ns1->getAt (n1));
-            for (uint32 n2 = 0; n2 < numNamespaces(); n2++)
+            for (uint32_t n2 = 0; n2 < numNamespaces(); n2++)
             {
                 Namespace *namespace2 = core->atomToNamespace (ns2->getAt (n2));
                 if (namespace1->EqualTo (namespace2))
@@ -756,11 +756,11 @@ namespace avmplus
         // step 8
         // for each a in x.attributes
         // if v does not containing matching attribute, return failure
-        for (uint32 k1 = 0; k1 < numAttributes(); k1++)
+        for (uint32_t k1 = 0; k1 < numAttributes(); k1++)
         {
             E4XNode *x1 = getAttribute(k1);
             bool bFoundMatch = false;
-            for (uint32 k2 = 0; k2 < v->numAttributes(); k2++)
+            for (uint32_t k2 = 0; k2 < v->numAttributes(); k2++)
             {
                 if (x1->_equals(toplevel, core, v->getAttribute(k2)))
                 {
@@ -774,7 +774,7 @@ namespace avmplus
         }
 
         // step 9
-        for (uint32 i = 0; i < _length(); i++)
+        for (uint32_t i = 0; i < _length(); i++)
         {
             E4XNode *x1 = _getAt(i);
             E4XNode *x2 = v->_getAt(i);
@@ -786,12 +786,12 @@ namespace avmplus
     }
 
     // E4X 9.1.1.11, page 18
-    void E4XNode::_insert (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*entry*/, Atom /*value*/)
+    void E4XNode::_insert (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32_t /*entry*/, Atom /*value*/)
     {
         return;
     }
 
-    void ElementE4XNode::_insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value)
+    void ElementE4XNode::_insert (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value)
     {
 //      //step 1
 //      if (m_class & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
@@ -800,7 +800,7 @@ namespace avmplus
         // Spec says to throw a typeError if entry is not a number
         // We handle that in callingn functions
 
-        uint32 n = 1;
+        uint32_t n = 1;
         XMLListObject *xl = AvmCore::atomToXMLList(value);
         if (xl)
         {
@@ -833,7 +833,7 @@ namespace avmplus
         if (xl)
         {
             // insert each element of our XMLList into our array
-            for (uint32 j = 0; j < xl->_length(); j++)
+            for (uint32_t j = 0; j < xl->_length(); j++)
             {
                 E4XNode *child = AvmCore::atomToXML(xl->_getAt(j)->atom());
 
@@ -862,12 +862,12 @@ namespace avmplus
 
     // E4X 9.1.1.12, page 19
     // Autoconverts V into an XML object
-    E4XNode* E4XNode::_replace (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*i*/, Atom /*V*/, Atom /*pastValue*/)
+    E4XNode* E4XNode::_replace (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32_t /*i*/, Atom /*V*/, Atom /*pastValue*/)
     {
         return 0;
     }
 
-    E4XNode* ElementE4XNode::_replace (AvmCore *core, Toplevel *toplevel, uint32 i, Atom V, Atom pastValue)
+    E4XNode* ElementE4XNode::_replace (AvmCore *core, Toplevel *toplevel, uint32_t i, Atom V, Atom pastValue)
     {
         //step 1
         //if (getClass() & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
@@ -985,7 +985,7 @@ namespace avmplus
             return false;
 
         // for each prop in x, if x.class == element, return false
-        for (uint32 i = 0; i < _length(); i++)
+        for (uint32_t i = 0; i < _length(); i++)
         {
             E4XNode *child = _getAt(i);
 
@@ -1003,7 +1003,7 @@ namespace avmplus
         if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
             return false;
 
-        for (uint32 i = 0; i < _length(); i++)
+        for (uint32_t i = 0; i < _length(); i++)
         {
             E4XNode *child = _getAt(i);
 
@@ -1025,7 +1025,7 @@ namespace avmplus
 
         AvmAssert(m_parent->_length()); // this child's parent does not contain itself???
 
-        for (uint32 i = 0; i < m_parent->_length(); i++)
+        for (uint32_t i = 0; i < m_parent->_length(); i++)
         {
             E4XNode *x = m_parent->_getAt(i);
             if (x == this)
@@ -1113,16 +1113,16 @@ namespace avmplus
 
         uint64_t size = E4XNode::bytesUsedDown();
 
-        for (uint32 i=0, n=numNamespaces(); i<n; i++)
+        for (uint32_t i=0, n=numNamespaces(); i<n; i++)
         {
             Namespace *ns1 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
             size += ns1->bytesUsedDeep();
         }
 
-        for (uint32 i=0, n=numAttributes(); i<n; ++i)
+        for (uint32_t i=0, n=numAttributes(); i<n; ++i)
             size += getAttribute(i)->bytesUsedDown();
 
-        for (uint32 i=0, n=_length(); i<n; ++i)
+        for (uint32_t i=0, n=_length(); i<n; ++i)
             size += _getAt(i)->bytesUsedDown();
 
         return size;

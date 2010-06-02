@@ -82,7 +82,7 @@ namespace avmplus
         uint32_t const u32 = uint32_t(i);
         return i == intptr_t(u32);
 #else
-        // int atoms always fit in uint32 on 32-bit, if they are >= 0
+        // int atoms always fit in uint32_t on 32-bit, if they are >= 0
         return atom >= 0;
 #endif
     }

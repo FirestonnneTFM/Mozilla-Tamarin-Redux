@@ -176,7 +176,7 @@ namespace avmplus
         #if defined(_MSC_VER) && defined(AVMPLUS_64BIT)
         unsigned long index;
         _BitScanReverse(&index, value);
-        return (uint32)index;
+        return (uint32_t)index;
         #elif defined(__SUNPRO_C)||defined(__SUNPRO_CC)
         for (int i=0; i < 32; i++)
             if (value & (1<<i))
@@ -214,7 +214,7 @@ namespace avmplus
         #ifdef __GNUC__
         asm ("cntlzw %0,%1" : "=r" (index) : "r" (value));
         #else
-        register uint32 in = value;
+        register uint32_t in = value;
         asm { cntlzw index, in; }
         #endif
         return 31-index;

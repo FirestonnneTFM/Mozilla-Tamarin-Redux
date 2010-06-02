@@ -338,7 +338,7 @@ namespace avmplus
         }
     }
 
-    Atom ScriptObject::getUintProperty(uint32 i) const
+    Atom ScriptObject::getUintProperty(uint32_t i) const
     {
         AvmCore* core = this->core();
 
@@ -370,7 +370,7 @@ namespace avmplus
         }
     }
 
-    void ScriptObject::setUintProperty(uint32 i, Atom value)
+    void ScriptObject::setUintProperty(uint32_t i, Atom value)
     {
         AvmCore* core = this->core();
         if (!(i&MAX_INTEGER_MASK))
@@ -397,7 +397,7 @@ namespace avmplus
         }
     }
 
-    bool ScriptObject::delUintProperty(uint32 i)
+    bool ScriptObject::delUintProperty(uint32_t i)
     {
         AvmCore* core = this->core();
         if (!(i&MAX_INTEGER_MASK))
@@ -419,7 +419,7 @@ namespace avmplus
         }
     }
 
-    bool ScriptObject::hasUintProperty(uint32 i) const
+    bool ScriptObject::hasUintProperty(uint32_t i) const
     {
         AvmCore* core = this->core();
         if (!(i&MAX_INTEGER_MASK))

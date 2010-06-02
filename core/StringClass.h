@@ -65,7 +65,7 @@ namespace avmplus
         ArrayObject* _match(Stringp s, Atom pattern);
         Stringp _replace(Stringp in, Atom pattern, Atom replacementAtom);
         int _search(Stringp in, Atom regexpAtom);
-        ArrayObject* _split(Stringp in, Atom delimAtom, uint32 limit);
+        ArrayObject* _split(Stringp in, Atom delimAtom, uint32_t limit);
 
         // defined via rest args to allow length = 1 and support calling with no args... ES3 spec says length = 1
         Stringp AS3_fromCharCode(Atom *argv, int argc);
