@@ -1200,18 +1200,18 @@ const int kBufferPadding = 16;
                                                intptr_t pc,
                                                Exception *exception);
 
-        ExceptionHandler* beginCatch(ExceptionFrame *ef,
-                MethodInfo *info, intptr_t pc, Exception *exception);
-
         /**
          * Just like findExceptionHandler(), except that this function
          * returns NULL if it can't find an exception handler, whereas
          * findExceptionHandler() re-throws the passed-in exception if
-         * it can't find a handler.
+         * it can't find a handler.  Also, sets *ordinal to the index of
+         * the handler in the exception handler table, if a handler is
+         * found.
          */
         ExceptionHandler* findExceptionHandlerNoRethrow(MethodInfo *info,
                                                         intptr_t pc,
-                                                        Exception *exception);
+                                                        Exception *exception,
+                                                        int32_t  *ordinal);
 
         /**
          * Returns true if the passed atom is an XML object,

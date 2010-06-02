@@ -1093,7 +1093,8 @@ return the result of the comparison ToPrimitive(x) == y.
                         {
                             // Check if this particular frame of the callstack
                             // is going to catch the exception.
-                            if (findExceptionHandlerNoRethrow(info, *callStackNode->eip(), exception) != NULL)
+                            int32_t ordinal; // unused
+                            if (findExceptionHandlerNoRethrow(info, *callStackNode->eip(), exception, &ordinal) != NULL)
                                 return true;
                         }
                     }
@@ -2029,20 +2030,12 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif // VMCFG_WORDCODE
 #endif // AVMPLUS_VERBOSE
 
-    ExceptionHandler* AvmCore::beginCatch(ExceptionFrame *ef,
-        MethodInfo *info, intptr_t pc, Exception *exception)
-    {
-        ef->beginCatch();
-        ExceptionHandler* handler = findExceptionHandler(info,pc,exception);
-        ef->beginTry(this);
-        return handler;
-    }
-
     ExceptionHandler* AvmCore::findExceptionHandler(MethodInfo *info,
                                                     intptr_t pc,
                                                     Exception *exception)
     {
-        ExceptionHandler* handler = findExceptionHandlerNoRethrow(info, pc, exception);
+        int32_t ordinal; // unused
+        ExceptionHandler* handler = findExceptionHandlerNoRethrow(info, pc, exception, &ordinal);
         if (handler)
             return handler;
 
@@ -2053,20 +2046,20 @@ return the result of the comparison ToPrimitive(x) == y.
 
     ExceptionHandler* AvmCore::findExceptionHandlerNoRethrow(MethodInfo *info,
                                                              intptr_t pc,
-                                                             Exception *exception)
+                                                             Exception *exception,
+                                                             int32_t *ordinal)
     {
         // If this exception is an EXIT_EXCEPTION, it cannot
         // be caught by AS code.  Exit immediately.
         if (exception->flags & Exception::EXIT_EXCEPTION)
         {
+            *ordinal = -1;
             return NULL;
         }
 
         // Search the exception table for a catch clause
         // such that pc is between "from" and "to" and
         // the thrown atom matches the required type.
-
-        // if no handler found, re-throw the exception from here
 
         //[ed] we only call this from methods with catch blocks, when exceptions != NULL
         AvmAssert(info->abc_exceptions() != NULL);
@@ -2086,31 +2079,29 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 
         int exception_count = exceptions->exception_count;
-        ExceptionHandler* handler = exceptions->exceptions;
         Atom atom = exception->atom;
 
-        while (--exception_count >= 0)
+        for (int i = 0; i < exception_count; i++)
         {
-            if (pc >= handler->from &&
-                pc <  handler->to)
-            {
-                // verifier makes sure type is valid, resolves to Traits*
-                if (istype(atom, handler->traits))
-                {
-                    #ifdef AVMPLUS_VERBOSE
-                    if (isVerbose((uint32_t)~0)) // any verbose flag enabled we emit this...
-                    {
-                        console << "enter " << info << " catch " << handler->traits << '\n';
-                    }
-                    #endif // DEBUGGER
+            ExceptionHandler* handler = &exceptions->exceptions[i];
 
-                    return handler;
+            // verifier makes sure type is valid, resolves to Traits*
+            if (pc >= handler->from && pc < handler->to && istype(atom, handler->traits))
+            {
+                #ifdef AVMPLUS_VERBOSE
+                if (isVerbose((uint32_t)~0)) // any verbose flag enabled we emit this...
+                {
+                    console << "enter " << info << " catch " << handler->traits << '\n';
                 }
+                #endif // DEBUGGER
+
+                *ordinal = i;
+                return handler;
             }
-            handler++;
         }
 
         // We don't have a matching exception.
+        *ordinal = -1;
         return NULL;
     }
 
