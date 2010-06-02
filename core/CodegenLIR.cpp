@@ -1742,7 +1742,7 @@ namespace avmplus
         interruptable = ! info->isNonInterruptible();
 
         // then space for the exception frame, be safe if its an init stub
-        if (info->hasExceptions()) {
+        if (state->verifier->hasReachableExceptions()) {
             // [_save_eip][ExceptionFrame]
             // offsets of local vars, rel to current ESP
             _save_eip = insAlloc(sizeof(intptr_t));
@@ -1872,7 +1872,7 @@ namespace avmplus
                 tags,
                 csn,
                 vars,
-                info->hasExceptions() ? _save_eip : InsConstPtr(0)
+                state->verifier->hasReachableExceptions() ? _save_eip : InsConstPtr(0)
                 );
         }
         #endif // DEBUGGER
@@ -1901,7 +1901,7 @@ namespace avmplus
         redirectWriter->out = body;
         /// END SWITCH CODE
 
-        if (info->hasExceptions()) {
+        if (state->verifier->hasReachableExceptions()) {
             // _ef.beginTry(core);
             callIns(FUNCTIONID(beginTry), 2, _ef, coreAddr);
 
@@ -3731,7 +3731,7 @@ namespace avmplus
                 }
                 #endif // DEBUGGER
 
-                if (info->hasExceptions())
+                if (state->verifier->hasReachableExceptions())
                 {
                     // _ef.endTry();
                     callIns(FUNCTIONID(endTry), 1, _ef);
@@ -5153,37 +5153,47 @@ namespace avmplus
             callIns(FUNCTIONID(handleInterruptMethodEnv), 1, env_param);
         }
 
-        if (info->hasExceptions()) {
+        if (state->verifier->hasReachableExceptions()) {
             emitLabel(catch_label);
 
             // exception case
-            LIns *exptr = loadIns(LIR_ldp, offsetof(AvmCore, exceptionAddr), coreAddr, ACC_OTHER);
-            LIns *exAtom = loadIns(LIR_ldp, offsetof(Exception, atom), exptr, ACC_OTHER);
-            localSet(state->verifier->stackBase, exAtom, NULL);
-            // need to convert exception from atom to native rep, at top of
-            // catch handler.  can't do it here because it could be any type.
+            int stackBase = state->verifier->stackBase;
 
             // _ef.beginCatch()
             LIns* pc = loadIns(LIR_ldp, 0, _save_eip, ACC_OTHER);
-            LIns* handler = callIns(FUNCTIONID(beginCatch), 5,
-                coreAddr, _ef, InsConstPtr(info), pc, exptr);
+            LIns* slotAddr = leaIns(stackBase * 8, vars);
+            LIns* tagAddr = leaIns(stackBase, tags);
+            LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
             int handler_count = info->abc_exceptions()->exception_count;
-            // Jump to catch handler
-            LIns *handler_target = loadIns(LIR_ldi, offsetof(ExceptionHandler, target), handler, ACC_OTHER);
-            // Do a compare & branch to each possible target.
             const byte* tryBase = state->verifier->tryBase;
-            for (int i=0; i < handler_count; i++) {
+            // Jump to catch handler
+            // Find last handler, to optimize branches generated below.
+            int i;
+            for (i = handler_count-1; i >= 0; i--) {
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
-                int handler_pc_off = h->target;
-                if (state->verifier->hasFrameState(tryBase + handler_pc_off)) {
-                    CodegenLabel& label = getCodegenLabel(tryBase + handler_pc_off);
+                const byte* handler_pc = tryBase + h->target;
+                if (state->verifier->hasFrameState(handler_pc)) break;
+            }
+            int last_ordinal = i;
+            // There should be at least one reachable handler.
+            AvmAssert(last_ordinal >= 0);
+            // Do a compare & branch to each possible target.
+            for (int j = 0; j <= last_ordinal; j++) {
+                ExceptionHandler* h = &info->abc_exceptions()->exceptions[j];
+                const byte* handler_pc = tryBase + h->target;
+                if (state->verifier->hasFrameState(handler_pc)) {
+                    CodegenLabel& label = getCodegenLabel(handler_pc);
                     AvmAssert(label.labelIns != NULL);
-                    LIns* cond = binaryIns(LIR_eqi, handler_target, InsConst(handler_pc_off));
-                    // don't use branchIns() here because we don't want to check null bits;
-                    // this backedge is internal to exception handling and doesn't affect user
-                    // variable dataflow.
-                    lirout->insBranch(LIR_jt, cond, label.labelIns);
+                    if (j == last_ordinal) {
+                        lirout->insBranch(LIR_j, NULL, label.labelIns);
+                    } else {
+                        LIns* cond = binaryIns(LIR_eqi, handler_ordinal, InsConst(j));
+                        // Don't use branchToLabel() here because we don't want to check null bits;
+                        // this backedge is internal to exception handling and doesn't affect user
+                        // variable dataflow.
+                        lirout->insBranch(LIR_jt, cond, label.labelIns);
+                    }
                 }
             }
             livep(_ef);
@@ -5669,11 +5679,33 @@ namespace avmplus
         }
     }
 
+    // Treat the calculated address of addp(vars, const) as the target
+    // of a store to the variable pointed to, as well as its associated tag.
+    void analyze_addp_store(LIns* ins, LIns* vars, nanojit::BitSet& varlivein, nanojit::BitSet& taglivein)
+    {
+        AvmAssert(ins->isop(LIR_addp));
+        if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 8));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) >> 3);
+            varlivein.clear(d);
+            taglivein.clear(d);
+        }
+    }
+
     void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,)
             nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
             nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
     {
-        if (!ins->callInfo()->_isPure) {
+        if (ins->callInfo() == FUNCTIONID(beginCatch)) {
+            // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
+            LIns* varPtrArg = ins->arg(4);  // varPtrArg == vars, OR addp(vars, index)
+            if (varPtrArg == vars) {
+                varlivein.clear(0);
+                taglivein.clear(0);
+            } else if (varPtrArg->isop(LIR_addp)) {
+                analyze_addp_store(varPtrArg, vars, varlivein, taglivein);
+            }
+        } else if (!ins->callInfo()->_isPure) {
             if (catcher) {
                 // non-cse call is like a conditional forward branch to the catcher label.
                 // this could be made more precise by checking whether this call
@@ -5746,6 +5778,11 @@ namespace avmplus
                     break;
                 case LIR_addp:
                     // treat pointer calculations into vars as a read from vars
+                    // FIXME: Bug 569677
+                    // This is extremely fragile.  There is no reason to suppose
+                    // that the address will be used for a read rather than a store,
+                    // other than that to do so would break the deadvars analysis
+                    // because of the dodgy assumption made here.
                     analyze_addp(i, vars, varlivein);
                     break;
                 CASE64(LIR_ldq:)
@@ -6094,7 +6131,7 @@ namespace avmplus
         PERFM_NVPROF("IR-bytes", frag->lirbuf->byteCount());
         PERFM_NVPROF("IR", frag->lirbuf->insCount());
 
-        bool keep = //!info->hasExceptions() &&
+        bool keep = //!state->verifier->hasReachableExceptions() &&
             !assm->error();
 #ifdef AVMPLUS_JITMAX
         jitcount++;

@@ -472,6 +472,11 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
         double d;               // SST_double
     };
 
+    // Note that CodgegenLIR::analyze_call(), part of live variable
+    // analysis, has special knowledge of the signature and semantics
+    // of makeatom() and beginCatch() and may need to be updated if
+    // changes are made here.
+
     Atom makeatom(AvmCore* core, AnyVal* native, SlotStorageType tag)
     {
         switch (tag) {
@@ -502,6 +507,74 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
         }
     }
     PUREFUNCTION(FUNCADDR(makeatom), SIG3(A,P,P,I), makeatom)
+
+    void set_slot_from_atom(Atom atom, Traits* traits, AnyVal* slotPtr, uint8_t* tagPtr)
+    {
+        BuiltinType bt = Traits::getBuiltinType(traits);
+        SlotStorageType tag = valueStorageType(bt);
+
+        switch (tag) {
+        case SST_atom:
+            AvmAssert(atomKind(atom) != 0);
+            slotPtr->atom = atom;
+            break;
+        case SST_namespace:
+            AvmAssert(atomKind(atom) == kNamespaceType);
+            slotPtr->ns = (Namespace*)atomPtr(atom);
+            break;
+        case SST_string:
+            AvmAssert(atomKind(atom) == kStringType);
+            slotPtr->str = (String*)atomPtr(atom);
+            break;
+        case SST_scriptobject:
+            AvmAssert(atomKind(atom) == kObjectType);
+            slotPtr->obj = (ScriptObject*)atomPtr(atom);
+            break;
+        case SST_int32:
+            AvmAssert(atomKind(atom) == kIntptrType || atomKind(atom) == kDoubleType);
+            slotPtr->i = AvmCore::integer_i(atom);
+            break;
+        case SST_uint32:
+            AvmAssert(atomKind(atom) == kIntptrType || atomKind(atom) == kDoubleType);
+            slotPtr->u = AvmCore::integer_u(atom);
+            break;
+        case SST_bool32:
+            AvmAssert(atomKind(atom) == kBooleanType);
+            slotPtr->b = (int32_t)atomGetBoolean(atom);
+            break;
+        case SST_double:
+            AvmAssert(atomKind(atom) == kIntptrType || atomKind(atom) == kDoubleType);
+            slotPtr->d = AvmCore::number_d(atom);
+            break;
+        default:
+            AvmAssert(false);
+        }
+        *tagPtr = (uint8_t)tag;
+    }
+
+    int32_t beginCatch(AvmCore* core,
+                       ExceptionFrame* ef,
+                       MethodInfo* info,
+                       intptr_t pc,
+                       AnyVal* slotPtr, uint8_t* tagPtr)
+    {
+        int32_t ordinal;
+        ef->beginCatch();
+        Exception* exception = core->exceptionAddr;
+        ExceptionHandler* handler = core->findExceptionHandlerNoRethrow(info, pc, exception, &ordinal);
+        if (!handler) {
+            // No matching exception, so rethrow.
+            core->throwException(exception);
+        }
+        ef->beginTry(core);
+        set_slot_from_atom(exception->atom, handler->traits, slotPtr, tagPtr);
+        return ordinal;
+    }
+    FUNCTION(FUNCADDR(beginCatch), SIG6(I,P,P,P,P,P,P), beginCatch)
+
+    FUNCTION(SETJMP, SIG2(I,P,I), fsetjmp)
+    METHOD(EFADDR(ExceptionFrame::beginTry), SIG2(V,P,P), beginTry)
+    METHOD(EFADDR(ExceptionFrame::endTry), SIG1(V,P), endTry)
 
     void setprop_miss(SetCache& c, Atom obj, Atom val, MethodEnv* env);
 
@@ -862,11 +935,6 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
 
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), SIG3(V,P,P,A), initMultinameLateForDelete)
     PUREFUNCTION(FUNCADDR(MathUtils::doubleToBool), SIG1(I,F), doubleToBool)
-
-    METHOD(EFADDR(ExceptionFrame::endTry), SIG1(V,P), endTry)
-    METHOD(EFADDR(ExceptionFrame::beginTry), SIG2(V,P,P), beginTry)
-    FUNCTION(SETJMP, SIG2(I,P,I), fsetjmp)
-    METHOD(COREADDR(AvmCore::beginCatch), SIG5(P,P,P,P,P,P), beginCatch)
 
 SSE2_ONLY(
     PUREMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), SIG2(A,P,F), doubleToAtom_sse2)

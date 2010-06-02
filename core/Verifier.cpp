@@ -96,6 +96,7 @@ namespace avmplus
           , ms(info->getMethodSignature())
           , worklist(NULL)
           , blockStates(NULL)
+          , handlerIsReachable(false)
     {
 #ifdef AVMPLUS_VERBOSE
         this->secondTry = secondTry;
@@ -141,6 +142,13 @@ namespace avmplus
                 mmfx_delete( blockStates->at(i) );
             delete blockStates;
         }
+    }
+
+    bool Verifier::hasReachableExceptions()
+    {
+        // Valid during code generation only.
+        AvmAssert(emitPass);
+        return handlerIsReachable;
     }
 
     void Verifier::parseBodyHeader()
@@ -517,8 +525,9 @@ namespace avmplus
 
                         // add edge from try statement to catch block
                         const byte* target = code_pos + handler->target;
-                        // atom received as *, will coerce to correct type in catch handler.
-                        state->push(NULL); // type * is NULL
+                        // The thrown value is received as an atom but we will coerce it to
+                        // the expected type before handing control to the catch block.
+                        state->push(handler->traits);
                         checkTarget(pc, target);
                         state->pop();
 
@@ -526,19 +535,9 @@ namespace avmplus
                         state->scopeDepth = saveScopeDepth;
                         if (saveStackDepth > 0)
                             state->stackValue(0) = stackEntryZero;
-                    }
-                }
-            }
 
-            if (tryFrom >= code_pos && tryTo <= (code_pos + code_length) && pc >= tryFrom) {
-                // all catch targets must be after the earliest try range since from <= to <= catch
-                for (int i=0, n=exTable->exception_count; i < n; i++) {
-                    ExceptionHandler* handler = &exTable->exceptions[i];
-                    if (pc == code_pos + handler->target) {
-                        AvmAssert(sp == stackBase); // if not, a VerifyError should have already occurred.
-                        // FIXME: bug 538639: At the top of a catch block, we generate coerce when an unbox is all that is needed
-                        emitCoerce(handler->traits, sp);
-                        coder->writeOpcodeVerified(state, pc, opcode);
+                        // Note that an exception may be caught in this method.
+                        handlerIsReachable = true;
                     }
                 }
             }

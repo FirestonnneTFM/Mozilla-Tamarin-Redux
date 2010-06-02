@@ -100,6 +100,7 @@ namespace avmplus
         bool hasFrameState(const byte* pc);
         bool canAssign(Traits* lhs, Traits* rhs) const;
         int getBlockCount();
+        bool hasReachableExceptions();
 
         // provide access to known jitters
         #if defined FEATURE_NANOJIT
@@ -117,6 +118,7 @@ namespace avmplus
         GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
         FrameState *state;
         bool emitPass;
+        bool handlerIsReachable;
         FrameState* getFrameState(const byte* pc);
         const byte* verifyBlock(CodeWriter *, const byte*);
         void identifyBlocks(const byte*, int);
