@@ -100,7 +100,7 @@ namespace avmplus
         childNode->setParent (this);
         if (!m_children)
         {
-            m_children = uintptr(childNode) | SINGLECHILDBIT;
+            m_children = uintptr_t(childNode) | SINGLECHILDBIT;
             return;
         }
 
@@ -109,7 +109,7 @@ namespace avmplus
             convertToAtomArray();
         }
 
-        AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+        AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
         aa->push (AvmCore::genericObjectToAtom(childNode));
     }
 
@@ -122,7 +122,7 @@ namespace avmplus
             return 1;
         else
         {
-            AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+            AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
             return aa->getLength();
         }
     }
@@ -144,11 +144,11 @@ namespace avmplus
             E4XNode *firstChild = (E4XNode *) (m_children & ~SINGLECHILDBIT);
             AtomArray *aa = new (gc()) AtomArray(2);
             aa->push (AvmCore::genericObjectToAtom(firstChild));
-            m_children = uintptr(aa);
+            m_children = uintptr_t(aa);
         }
         else if (!m_children)
         {
-            m_children = uintptr(new (gc()) AtomArray (1));
+            m_children = uintptr_t(new (gc()) AtomArray (1));
         }
     }
 
@@ -156,7 +156,7 @@ namespace avmplus
     {
         // m_children->insert (i, a)
         convertToAtomArray();
-        AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+        AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
         aa->insert (i, AvmCore::genericObjectToAtom(x));
     }
 
@@ -164,7 +164,7 @@ namespace avmplus
     {
         // m_children->removeAt (i)
         convertToAtomArray();
-        AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+        AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
         aa->removeAt (i);
     }
 
@@ -172,12 +172,12 @@ namespace avmplus
     {
         if ((i == 0) && (m_children & SINGLECHILDBIT))
         {
-            m_children = uintptr(x) | SINGLECHILDBIT;
+            m_children = uintptr_t(x) | SINGLECHILDBIT;
         }
         else
         {
             convertToAtomArray();
-            AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+            AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
             aa->setAt (i, AvmCore::genericObjectToAtom(x));
         }
     }
@@ -193,7 +193,7 @@ namespace avmplus
         }
         else
         {
-            AtomArray *aa = (AtomArray *)(uintptr)this->m_children;
+            AtomArray *aa = (AtomArray *)(uintptr_t)this->m_children;
             E4XNode *x = (E4XNode *) AvmCore::atomToGenericObject(aa->getAt(i));
             return x;
         }
@@ -204,7 +204,7 @@ namespace avmplus
         if (!m_nameOrAux)
             return false;
 
-        uintptr nameOrAux = m_nameOrAux;
+        uintptr_t nameOrAux = m_nameOrAux;
         if (AUXBIT & nameOrAux)
         {
             E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
@@ -240,7 +240,7 @@ namespace avmplus
             name = core->internString(name);
 
         // If we already have an aux, use it.  (It may have notification atom set)
-        uintptr nameOrAux = m_nameOrAux;
+        uintptr_t nameOrAux = m_nameOrAux;
         if (AUXBIT & nameOrAux)
         {
             E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
@@ -259,13 +259,13 @@ namespace avmplus
             (ns->getPrefix() == core->kEmptyString->atom() && ns->getURI()->isEmpty()))
         {
             //m_nameOrAux = int (name);
-            WBRC(core->GetGC(), this, &m_nameOrAux, uintptr(name));
+            WBRC(core->GetGC(), this, &m_nameOrAux, uintptr_t(name));
             return;
         }
 
         E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (name, ns);
         //m_nameOrAux = AUXBIT | int(aux);
-        WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
+        WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr_t(aux));
     }
 
     void E4XNode::setQName (AvmCore *core, const Multiname *mn)
@@ -658,7 +658,7 @@ namespace avmplus
             if (numChildren())
             {
                 AvmAssert(y->m_children == 0);
-                y->m_children = uintptr(new (core->GetGC()) AtomArray (numChildren()));
+                y->m_children = uintptr_t(new (core->GetGC()) AtomArray (numChildren()));
                 for (uint32 k = 0; k < _length(); k++)
                 {
                     E4XNode *child = _getAt(k);
@@ -827,7 +827,7 @@ namespace avmplus
 
         if (!m_children)
         {
-            m_children = uintptr(new (core->GetGC()) AtomArray (n));
+            m_children = uintptr_t(new (core->GetGC()) AtomArray (n));
         }
 
         if (xl)
@@ -883,9 +883,9 @@ namespace avmplus
             i = _length();
             // add a blank spot for this child
             if (!m_children)
-                m_children = uintptr(new (core->GetGC()) AtomArray (1));
+                m_children = uintptr_t(new (core->GetGC()) AtomArray (1));
             convertToAtomArray();
-            AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+            AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
             aa->push (Atom(0));
         }
 
@@ -950,7 +950,7 @@ namespace avmplus
 
     void ElementE4XNode::setNotification(AvmCore *core, FunctionObject* f, Namespacep publicNS)
     {
-        uintptr nameOrAux = m_nameOrAux;
+        uintptr_t nameOrAux = m_nameOrAux;
         // We already have an aux structure
         if (AUXBIT & nameOrAux)
         {
@@ -963,13 +963,13 @@ namespace avmplus
             Stringp str = (String *)(nameOrAux);
             E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, publicNS, f);
             //m_nameOrAux = AUXBIT | int(aux);
-            WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
+            WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr_t(aux));
         }
     }
 
     FunctionObject* ElementE4XNode::getNotification() const
     {
-        uintptr nameOrAux = m_nameOrAux;
+        uintptr_t nameOrAux = m_nameOrAux;
         if (AUXBIT & m_nameOrAux)
         {
             E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
@@ -1090,7 +1090,7 @@ namespace avmplus
 
         if (m_nameOrAux)
         {
-            uintptr nameOrAux = m_nameOrAux;
+            uintptr_t nameOrAux = m_nameOrAux;
             if (AUXBIT & nameOrAux)
             {
                 E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);

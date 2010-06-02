@@ -391,7 +391,7 @@ namespace avmplus
         scanResources(abc, pool);
 
         // build a bridging table from pools to abcs
-        uintptr index = abcList.size();
+        uintptr_t index = abcList.size();
         pool2abcIndex.add(pool, (const void*)index);
 
         // at this point our abc object has been populated with
@@ -886,7 +886,7 @@ namespace avmplus
         // use the method info to locate the abcfile / source
         if (trace->info() && trace->filename() && debugger)
         {
-            uintptr index = (uintptr)debugger->pool2abcIndex.get(Atom(trace->info()->pool()));
+            uintptr_t index = (uintptr_t)debugger->pool2abcIndex.get(Atom(trace->info()->pool()));
 
             AbcFile* abc = (AbcFile*)debugger->abcAt((int)index);
             source = abc->sourceNamed(trace->filename());

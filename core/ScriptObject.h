@@ -59,7 +59,7 @@ namespace avmplus
         void setDelegate(ScriptObject *d) { delegate = d; }
 
         Atom atom() const {
-            return kObjectType|(uintptr)this;
+            return kObjectType|(uintptr_t)this;
         }
 
         virtual Atom toAtom() const {

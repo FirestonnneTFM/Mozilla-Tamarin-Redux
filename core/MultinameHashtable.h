@@ -99,7 +99,7 @@ namespace avmplus
          * quads.
          */
         // match if they are the same or if they have the same base ns and ns api is in apis
-        static bool matchNS(uintptr uri, API apis, Namespacep ns);
+        static bool matchNS(uintptr_t uri, API apis, Namespacep ns);
         static int find(Stringp name, Namespacep ns, const Quad *t, unsigned tLen);
         void rehash(const Quad *oldAtoms, int oldlen, Quad *newAtoms, int newlen);
 

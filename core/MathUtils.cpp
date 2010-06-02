@@ -784,26 +784,26 @@ namespace avmplus
         }
         else
         {
-            uintptr uVal;
+            uintptr_t uVal;
             bool negative=false;
 
             if (treatAs == kTreatAsUnsigned)
             {
-                uVal = (uintptr)value;
+                uVal = (uintptr_t)value;
             }
             else
             {
                 negative = (value < 0);
                 if (negative)
                     value = -value;
-                uVal = (uintptr)value;
+                uVal = (uintptr_t)value;
             }
 
             while (uVal != 0)
             {
                 // buffer too small?
                 AvmAssert(src >= buffer);
-                uintptr j = uVal;
+                uintptr_t j = uVal;
                 uVal = uVal / radix;
                 j -= (uVal * radix);
 

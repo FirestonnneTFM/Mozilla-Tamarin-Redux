@@ -67,7 +67,7 @@ namespace avmplus
         return NULL;
     }
 
-    uintptr OSDep::startIntWriteTimer(uint32 millis, volatile int *addr)
+    uintptr_t OSDep::startIntWriteTimer(uint32 millis, volatile int *addr)
     {
         pthread_t p;
         IntWriteTimerData *data = mmfx_new( IntWriteTimerData() );
@@ -75,10 +75,10 @@ namespace avmplus
         data->addr = addr;
         pthread_create(&p, NULL, timerThread, data);
         data->thread = p;
-        return (uintptr)data;
+        return (uintptr_t)data;
     }
 
-    void OSDep::stopTimer(uintptr handle)
+    void OSDep::stopTimer(uintptr_t handle)
     {
         IntWriteTimerData *data = (IntWriteTimerData*) handle;
         data->addr = NULL;

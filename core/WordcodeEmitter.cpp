@@ -500,7 +500,7 @@ namespace avmplus
         case OP_abs_jump:
         {
             #ifdef AVMPLUS_64BIT
-            const byte* new_pc = (const byte *) (uintptr(opd1) | (((uintptr) opd2) << 32));
+            const byte* new_pc = (const byte *) (uintptr_t(opd1) | (((uintptr_t) opd2) << 32));
             #else
             const byte* new_pc = (const byte*) opd1;
             #endif

@@ -56,9 +56,9 @@ namespace avmplus
     // The constant TIME_KILL_SYNCHRONOUS is only available if WINVER >= 0x0501 (== WinXP)
     static const UINT kTimeKillSynchronous = 0x0100;
 
-    uintptr OSDep::startIntWriteTimer(uint32 millis, volatile int *addr)
+    uintptr_t OSDep::startIntWriteTimer(uint32 millis, volatile int *addr)
     {
-        return (uintptr) timeSetEvent(millis, millis, (LPTIMECALLBACK)intWriteTimerProc, (DWORD_PTR)addr,
+        return (uintptr_t) timeSetEvent(millis, millis, (LPTIMECALLBACK)intWriteTimerProc, (DWORD_PTR)addr,
             TIME_PERIODIC | TIME_CALLBACK_FUNCTION
 #ifndef UNDER_CE
             | kTimeKillSynchronous
@@ -66,7 +66,7 @@ namespace avmplus
             );
     }
 
-    void OSDep::stopTimer(uintptr handle)
+    void OSDep::stopTimer(uintptr_t handle)
     {
         timeKillEvent((UINT)handle);
     }

@@ -67,7 +67,7 @@ namespace avmplus
 
     void Namespace::setUri(Stringp uri, NamespaceType flags)
     {
-        WBRC(GC::GetGC(this), this, &m_uri, (int32_t)flags | (uintptr) uri);
+        WBRC(GC::GetGC(this), this, &m_uri, (int32_t)flags | (uintptr_t) uri);
     }
 
     void Namespace::setPrefix(Atom pre)
@@ -86,7 +86,7 @@ namespace avmplus
 
     bool Namespace::isPublic() const
     {
-        Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
+        Stringp uri = (Stringp)(((uintptr_t)m_uri)&~7);
         return getType() == Namespace::NS_Public && uri->isEmpty();
     }
 

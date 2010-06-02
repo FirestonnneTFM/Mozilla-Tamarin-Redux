@@ -385,7 +385,7 @@ namespace avmplus
             case CONSTANT_Double:
                 if (index >= (maxcount = constantDoubleCount))
                     goto range_error;
-                value = kDoubleType|(uintptr)cpool_double[index];
+                value = kDoubleType|(uintptr_t)cpool_double[index];
                 break;
 
             case CONSTANT_Utf8:

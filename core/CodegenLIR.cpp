@@ -151,7 +151,7 @@ namespace avmplus
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
-        #define FUNCADDR(addr) (uintptr)addr
+        #define FUNCADDR(addr) (uintptr_t)addr
 
    #ifdef VTUNE
        extern void VTune_RegisterMethod(AvmCore* core, JITCodeInfo* inf);
@@ -212,11 +212,11 @@ namespace avmplus
     using namespace nanojit;
 
     #if defined _MSC_VER && !defined AVMPLUS_ARM
-    #  define SETJMP ((uintptr)_setjmp3)
+    #  define SETJMP ((uintptr_t)_setjmp3)
     #elif defined AVMPLUS_MAC_CARBON
     #  define SETJMP setjmpAddress
     #else
-    #  define SETJMP ((uintptr)VMPI_setjmpNoUnwind)
+    #  define SETJMP ((uintptr_t)VMPI_setjmpNoUnwind)
     #endif // _MSC_VER
 
     #include "../core/jit-calls.h"
@@ -2105,14 +2105,14 @@ namespace avmplus
             const bool do_emit = haveDebugger;
             #endif
             Stringp str = pool->getString(imm30);  // assume been checked already
-            if(do_emit) emit(opcode, (uintptr)str);
+            if(do_emit) emit(opcode, (uintptr_t)str);
 #endif
             break;
         }
         case OP_dxns:
         {
             Stringp str = pool->getString(imm30);  // assume been checked already
-            emit(opcode, (uintptr)str);
+            emit(opcode, (uintptr_t)str);
             break;
         }
         case OP_dxnslate:
@@ -2140,7 +2140,7 @@ namespace avmplus
         case OP_getdescendants:
         {
             const Multiname *name = pool->precomputedMultiname(imm30);
-            emit(opcode, (uintptr)name, 0, NULL);
+            emit(opcode, (uintptr_t)name, 0, NULL);
             break;
         }
 
@@ -2151,7 +2151,7 @@ namespace avmplus
         case OP_deleteproperty:
         {
             const Multiname *name = pool->precomputedMultiname(imm30);
-            emit(opcode, (uintptr)name, 0, BOOLEAN_TYPE);
+            emit(opcode, (uintptr_t)name, 0, BOOLEAN_TYPE);
             break;
         }
 
@@ -2159,7 +2159,7 @@ namespace avmplus
         {
             const Multiname *name = pool->precomputedMultiname(imm30);
             Traits *t = pool->getTraits(*name, state->verifier->getToplevel(this));
-            emit(OP_astype, (uintptr)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
+            emit(OP_astype, (uintptr_t)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
             break;
         }
         case OP_astypelate:
@@ -2610,21 +2610,21 @@ namespace avmplus
         case OP_findproperty:
         {
             const Multiname *name = pool->precomputedMultiname(opd1);
-            emit(opcode, (uintptr)name, 0, OBJECT_TYPE);
+            emit(opcode, (uintptr_t)name, 0, OBJECT_TYPE);
             break;
         }
         case OP_findpropglobalstrict:
         {
             // NOTE opcode not supported, deoptimizing
             const Multiname *name = pool->precomputedMultiname(opd1);
-            emit(OP_findpropstrict, (uintptr)name, 0, OBJECT_TYPE);
+            emit(OP_findpropstrict, (uintptr_t)name, 0, OBJECT_TYPE);
             break;
         }
         case OP_findpropglobal:
         {
             // NOTE opcode not supported, deoptimizing
             const Multiname *name = pool->precomputedMultiname(opd1);
-            emit(OP_findproperty, (uintptr)name, 0, OBJECT_TYPE);
+            emit(OP_findproperty, (uintptr_t)name, 0, OBJECT_TYPE);
             break;
         }
 
@@ -2632,7 +2632,7 @@ namespace avmplus
         {
             Traits* ctraits = pool->getClassTraits(opd1);
             AvmAssert(ctraits == type);
-            emit(opcode, (uintptr)(void*)ctraits, state->sp(), type);
+            emit(opcode, (uintptr_t)(void*)ctraits, state->sp(), type);
             break;
         }
 
@@ -2807,7 +2807,7 @@ namespace avmplus
                 // else, ignore write to readonly accessor
             }
             else {
-                emit(opcode, (uintptr)name);
+                emit(opcode, (uintptr_t)name);
             }
             break;
         }
@@ -2838,7 +2838,7 @@ namespace avmplus
                 emitCoerceCall(OP_callsuperid, disp_id, 0, f);
             }
             else {
-                emit(opcode, (uintptr)name, 0, propType);
+                emit(opcode, (uintptr_t)name, 0, propType);
             }
             break;
         }
@@ -2864,7 +2864,7 @@ namespace avmplus
             else {
 
                 // TODO optimize other cases
-                emit(opcode, (uintptr)name, argc, NULL);
+                emit(opcode, (uintptr_t)name, argc, NULL);
             }
 
             break;
@@ -2888,7 +2888,7 @@ namespace avmplus
             }
             else
             {
-                emit(opcode, (uintptr)name, argc, NULL);
+                emit(opcode, (uintptr_t)name, argc, NULL);
             }
             break;
         }
@@ -2950,7 +2950,7 @@ namespace avmplus
                 }
             }
             else {
-                emit(opcode, (uintptr)name);
+                emit(opcode, (uintptr_t)name);
             }
             break;
         }
@@ -3546,7 +3546,7 @@ namespace avmplus
 
     typedef const CallInfo *CallInfop;
 
-    void CodegenLIR::emit(AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
+    void CodegenLIR::emit(AbcOpcode opcode, uintptr_t op1, uintptr_t op2, Traits* result)
     {
         int sp = state->sp();
 

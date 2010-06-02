@@ -155,7 +155,7 @@ namespace avmplus
         // containing a name + namespace as well as a notification function.
         // E4XNodeAux *
         // String *
-        uintptr m_nameOrAux;
+        uintptr_t m_nameOrAux;
         #define AUXBIT 0x1
 
     public:
@@ -358,7 +358,7 @@ namespace avmplus
         // If the low bit of this integer is set, this value points directly
         // to a single child (one E4XNode *).  If there are multiple children,
         // this points to an AtomArray containing E4XNode pointers (NOT Atoms)
-        DWB(uintptr) m_children;
+        DWB(uintptr_t) m_children;
         #define SINGLECHILDBIT 0x1
 
         friend class E4XNode;
