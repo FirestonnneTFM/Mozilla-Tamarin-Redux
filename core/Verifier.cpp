@@ -1909,7 +1909,7 @@ namespace avmplus
                     verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
 
                 #ifdef AVMPLUS_64BIT
-                const byte* new_pc = (const byte *) (uintptr(imm30) | (((uintptr) imm30b) << 32));
+                const byte* new_pc = (const byte *) (uintptr_t(imm30) | (((uintptr_t) imm30b) << 32));
                 uint32_t new_len = AvmCore::readU32(nextpc);
                 #else
                 const byte* new_pc = (const byte*) imm30;

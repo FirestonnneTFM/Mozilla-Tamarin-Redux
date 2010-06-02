@@ -50,16 +50,16 @@ namespace avmplus
     class hexAddr
     {
     public:
-        hexAddr(uintptr _value) { this->value = _value; }
+        hexAddr(uintptr_t _value) { this->value = _value; }
         hexAddr(const hexAddr& toCopy) { value = toCopy.value; }
         hexAddr& operator= (const hexAddr& toCopy) {
             value = toCopy.value;
             return *this;
         }
-        uintptr getValue() const { return value; }
+        uintptr_t getValue() const { return value; }
 
     private:
-        uintptr value;
+        uintptr_t value;
     };
 
     /**
@@ -161,7 +161,7 @@ namespace avmplus
         void writeUTF16(const void* buffer, size_t count);
         void writeHexByte(uint8 value);
         void writeHexWord(uint16_t value);
-        void writeHexAddr(uintptr value);
+        void writeHexAddr(uintptr_t value);
 
         #ifdef AVMPLUS_VERBOSE
         void formatP(const char* format, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);

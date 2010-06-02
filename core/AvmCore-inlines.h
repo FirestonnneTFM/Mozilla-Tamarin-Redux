@@ -295,7 +295,7 @@ REALLY_INLINE /*static*/ bool AvmCore::isUndefined(Atom atom)
 
 REALLY_INLINE /*static*/ bool AvmCore::isNullOrUndefined(Atom atom)
 {
-    return ((uintptr)atom) <= (uintptr)kSpecialType;
+    return ((uintptr_t)atom) <= (uintptr_t)kSpecialType;
 }
 
 REALLY_INLINE int32_t AvmCore::getActiveAPIs()
@@ -598,7 +598,7 @@ REALLY_INLINE Atom AvmCore::allocDouble(double n)
     };
     v = GetGC()->AllocDouble();
     *d = n;
-    return kDoubleType | (uintptr)v;
+    return kDoubleType | (uintptr_t)v;
 }
 
 #ifdef VMCFG_LOOKUP_CACHE

@@ -59,7 +59,7 @@ namespace avmplus
         // Should these be Stringp's?
         Atom m_prefix;
         API m_api;
-        uintptr m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
+        uintptr_t m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
 
     public:
         enum NamespaceType

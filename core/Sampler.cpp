@@ -411,7 +411,7 @@ namespace avmplus
         write(currentSample, sotEmpty());
         write(currentSample, size);
 
-        AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.");
+        AvmAssertMsg((uintptr_t)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.");
         numSamples++;
 
         return uid;
@@ -463,7 +463,7 @@ namespace avmplus
         write(currentSample, sot);
         write(currentSample, s.alloc_size);
 
-        AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.");
+        AvmAssertMsg((uintptr_t)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.");
         currentSample = pos;
 
         return s.id;
@@ -489,7 +489,7 @@ namespace avmplus
 
             numSamples++;
 
-            AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.");
+            AvmAssertMsg((uintptr_t)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.");
         }
 
         // Nuke the ptr in the sample stream for the newobject sample

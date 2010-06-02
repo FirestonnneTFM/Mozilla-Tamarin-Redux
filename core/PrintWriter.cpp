@@ -337,7 +337,7 @@ namespace avmplus
         writeHexByte((uint8)(value&0xff));
     }
 
-    void PrintWriter::writeHexAddr(uintptr value)
+    void PrintWriter::writeHexAddr(uintptr_t value)
     {
 #ifdef AVMPLUS_64BIT
         writeHexByte(uint8((value>>56) & 0xff));

@@ -199,13 +199,13 @@ namespace avmplus
         MMGC_STATIC_ASSERT(sizeof(int64_t) == 8);
         MMGC_STATIC_ASSERT(sizeof(uint64_t) == 8);
         MMGC_STATIC_ASSERT(sizeof(intptr_t) == sizeof(void *));
-        MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
+        MMGC_STATIC_ASSERT(sizeof(uintptr_t) == sizeof(void *));
 #ifdef AVMPLUS_64BIT
         MMGC_STATIC_ASSERT(sizeof(intptr_t) == 8);
-        MMGC_STATIC_ASSERT(sizeof(uintptr) == 8);
+        MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 8);
 #else
         MMGC_STATIC_ASSERT(sizeof(intptr_t) == 4);
-        MMGC_STATIC_ASSERT(sizeof(uintptr) == 4);
+        MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);
 #endif
 
         // set default mode flags
@@ -3156,7 +3156,7 @@ return the result of the comparison ToPrimitive(x) == y.
         }
 
         // compute the hash function
-        int hashCode = (int)(((uintptr)ns->getURI())>>3);  // FIXME possibly hash api mask too
+        int hashCode = (int)(((uintptr_t)ns->getURI())>>3);  // FIXME possibly hash api mask too
 
         int bitMask = m - 1;
 
@@ -3175,7 +3175,7 @@ return the result of the comparison ToPrimitive(x) == y.
         int m = numNamespaces;
 
         // compute the hash function
-        int hashCode = (int)(((uintptr)uri)>>3);  // FIXME possibly hash api mask too
+        int hashCode = (int)(((uintptr_t)uri)>>3);  // FIXME possibly hash api mask too
 
         int bitMask = m - 1;
 

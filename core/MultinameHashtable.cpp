@@ -151,7 +151,7 @@ namespace avmplus
         // Note: Mask off MSB to avoid negative indices.  Mask off bottom
         // 3 bits because it doesn't contribute to hash.  Quad it
         // because names, namespaces, and values are stored adjacently.
-        unsigned i = ((0x7FFFFFF8 & (uintptr)name) >> 3) & bitmask;
+        unsigned i = ((0x7FFFFFF8 & (uintptr_t)name) >> 3) & bitmask;
 
         Stringp k;
         while (((k=t[i].name) != name || !(t[i].ns == ns || matchNS(t[i].ns->m_uri, t[i].apis(), ns))) && k != NULL)
@@ -190,7 +190,7 @@ namespace avmplus
         // Note: Mask off MSB to avoid negative indices.  Mask off bottom
         // 3 bits because it doesn't contribute to hash.  Quad it
         // because names, namespaces, and values are stored adjacently.
-        unsigned i = ((0x7FFFFFF8 & (uintptr)mnameName)>>3) & bitMask;
+        unsigned i = ((0x7FFFFFF8 & (uintptr_t)mnameName)>>3) & bitMask;
         Stringp atomName;
 
         const Quad* t = m_quads;
@@ -201,7 +201,7 @@ namespace avmplus
                 Namespacep probeNS = t[i].ns;
                 AvmAssert(probeNS->getURI()->isInterned());
                 API probeAPIs = t[i].apis();
-                uintptr probeURI = probeNS ? probeNS->m_uri : 0;
+                uintptr_t probeURI = probeNS ? probeNS->m_uri : 0;
                 for (j=0; j < nsCount; j++)
                 {
                     Namespacep ns = nsset->nsAt(j);
@@ -231,7 +231,7 @@ found1:
                     Namespacep probeNS = t[k].ns;
                     AvmAssert(probeNS->getURI()->isInterned());
                     API probeAPIs = t[k].apis();
-                    uintptr probeURI = t[k].ns->m_uri;
+                    uintptr_t probeURI = t[k].ns->m_uri;
                     for (j=0; j < nsCount; j++)
                     {
                         Namespacep ns = nsset->nsAt(j);
@@ -271,7 +271,7 @@ found1:
         {
             int n = 7;
             int const bitmask = (numQuads - 1);
-            unsigned i = ((0x7FFFFFF8 & (uintptr)name) >> 3) & bitmask;
+            unsigned i = ((0x7FFFFFF8 & (uintptr_t)name) >> 3) & bitmask;
             cur = quadbase + i;
             for (;;)
             {

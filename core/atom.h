@@ -183,7 +183,7 @@ namespace avmplus
     #define atomKind(a)     ((Atom)((uintptr_t(a) & 7)))
     #define atomPtr(a)      ((void*)(uintptr_t(a) & ~7))
 
-    #define ISNULL(a) (((uintptr)a) < (uintptr)kSpecialType)
+    #define ISNULL(a) (((uintptr_t)a) < (uintptr_t)kSpecialType)
 
     // returns true if atom type is int.
     // Note that this DOES NOT imply that the Atom's value will
@@ -216,7 +216,7 @@ namespace avmplus
     // WARNING: do not pass an (unsigned) uintptr_t value; you may get incorrect results.
     bool            atomIsValidIntptrValue(const intptr_t i);
 
-    // if the given uintptr can fit into an kIntptrType atom, return true.
+    // if the given uintptr_t can fit into an kIntptrType atom, return true.
     // if not (the magnitude is too large/small), return false.
     // WARNING: do not pass a (signed) intptr_t value; you may get incorrect results.
     bool            atomIsValidIntptrValue_u(const uintptr_t u);

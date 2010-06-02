@@ -2094,11 +2094,11 @@ namespace MMgc
                 void *fitem = _b->firstFree;
                 void *prev = 0;
                 while(fitem) {
-                    if((uintptr(fitem) & 7) != 0) {
+                    if((uintptr_t(fitem) & 7) != 0) {
                         _asm int 3;
                         break;
                     }
-                    if((uintptr(fitem) & ~0xfff) != uintptr(_b))
+                    if((uintptr_t(fitem) & ~0xfff) != uintptr_t(_b))
                         _asm int 3;
                     prev = fitem;
                     fitem = *(void**)fitem;
@@ -2718,7 +2718,7 @@ namespace MMgc
     // TODO: SSE2 version
     void GC::MarkItem_MMX(const void *ptr, size_t size)
     {
-         uintptr *p = (uintptr*) ptr;
+         uintptr_t *p = (uintptr_t*) ptr;
         // deleted things are removed from the queue by setting them to null
         if(!p)
             return;
@@ -2726,8 +2726,8 @@ namespace MMgc
         bytesMarked += size;
         marks++;
 
-        uintptr *end = p + (size / sizeof(void*));
-        uintptr thisPage = (uintptr)p & ~0xfff;
+        uintptr_t *end = p + (size / sizeof(void*));
+        uintptr_t thisPage = (uintptr_t)p & ~0xfff;
 
         // since MarkItem recurses we have to do this before entering the loop
         if(IsPointerToGCPage(ptr))

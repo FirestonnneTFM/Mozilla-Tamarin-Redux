@@ -40,7 +40,7 @@
 namespace avmplus
 {
 
-REALLY_INLINE bool MultinameHashtable::matchNS(uintptr uri, API apis, Namespacep ns)
+REALLY_INLINE bool MultinameHashtable::matchNS(uintptr_t uri, API apis, Namespacep ns)
 {
     AvmAssert(ns->getURI()->isInterned());
     return (apis & ns->m_api) && uri == ns->m_uri;

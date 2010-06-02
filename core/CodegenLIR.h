@@ -74,8 +74,8 @@ namespace avmplus
 
            MethodInfo* method;
            SortedMap<int, LineNumberRecord*, LIST_GCObjects> lineNumTable;       // populated during code generation
-           uintptr startAddr;
-           uintptr endAddr;
+           uintptr_t startAddr;
+           uintptr_t endAddr;
            iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
            uint32_t sid;  // code info id
 
@@ -526,7 +526,7 @@ namespace avmplus
         /** helper to coerce args to an early bound call to the required types */
         void coerceArgs(MethodSignaturep mms, int argc, int firstArg);
 
-        void emit(AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
+        void emit(AbcOpcode opcode, uintptr_t op1=0, uintptr_t op2=0, Traits* result=NULL);
         void emitIf(AbcOpcode opcode, const byte* target, int lhs, int rhs);
         void emitSwap(int i, int j);
         void emitCopy(int src, int dest);
