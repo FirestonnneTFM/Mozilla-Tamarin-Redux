@@ -1,4 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -53,10 +54,10 @@
 class SignalData : public MMgc::GCAllocObject
 {
 public:
-	SignalData(uint32_t *addr, HANDLE handle) 
-		: profilerAddr(addr), eventHandle(handle) {}
-	uint32_t *profilerAddr;
-	HANDLE eventHandle;
+    SignalData(uint32_t *addr, HANDLE handle)
+        : profilerAddr(addr), eventHandle(handle) {}
+    uint32_t *profilerAddr;
+    HANDLE eventHandle;
 };
 
 void WriteOnNamedSignal(const char* name, uint32_t *addr);
@@ -67,49 +68,49 @@ static vmpi_spin_lock_t lock;
 
 DWORD WINAPI WaitForMemorySignal(LPVOID)
 {
-	SignalData *sd = sig_data;
-	while(spyRunning) {
-		WaitForSingleObject(sig_data->eventHandle, INFINITE);	
-		// For some reason ReadMsgQueue does not clear the signal on the handle (even though it should), and we 
-		// end up setting the profilerAddr constantly, which makes the VM hang, since all it is doing is writing out profile data.
-		// so we have to call CloseMsgQueue, and then open a new queue, and wait on that.  
-		//char buff[256];
-		//DWORD bytesread;
-		//ReadMsgQueue(sig_data->eventHandle, buff, 256, &bytesread, INFINITE, 0);
-		CloseMsgQueue(sd->eventHandle);
-		if(spyRunning) {
-			VMPI_lockAcquire(&lock);
-			*(sig_data->profilerAddr) = true;		
-			VMPI_lockRelease(&lock);
-			WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", sd->profilerAddr);
-			break;
-		}
-	}		
-	delete sd;
-	return 0;
+    SignalData *sd = sig_data;
+    while(spyRunning) {
+        WaitForSingleObject(sig_data->eventHandle, INFINITE);
+        // For some reason ReadMsgQueue does not clear the signal on the handle (even though it should), and we
+        // end up setting the profilerAddr constantly, which makes the VM hang, since all it is doing is writing out profile data.
+        // so we have to call CloseMsgQueue, and then open a new queue, and wait on that.
+        //char buff[256];
+        //DWORD bytesread;
+        //ReadMsgQueue(sig_data->eventHandle, buff, 256, &bytesread, INFINITE, 0);
+        CloseMsgQueue(sd->eventHandle);
+        if(spyRunning) {
+            VMPI_lockAcquire(&lock);
+            *(sig_data->profilerAddr) = true;
+            VMPI_lockRelease(&lock);
+            WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", sd->profilerAddr);
+            break;
+        }
+    }
+    delete sd;
+    return 0;
 }
 
 void WriteOnNamedSignal(const char *name, uint32_t *addr)
 {
-	HANDLE m_namedSharedObject;
+    HANDLE m_namedSharedObject;
 
-	MSGQUEUEOPTIONS msgopts;
+    MSGQUEUEOPTIONS msgopts;
 
-	msgopts.dwFlags = MSGQUEUE_NOPRECOMMIT;
-	msgopts.dwMaxMessages = 1;
-	msgopts.cbMaxMessage = 256;
-	msgopts.bReadAccess = TRUE;
-	msgopts.dwSize = sizeof(MSGQUEUEOPTIONS);
+    msgopts.dwFlags = MSGQUEUE_NOPRECOMMIT;
+    msgopts.dwMaxMessages = 1;
+    msgopts.cbMaxMessage = 256;
+    msgopts.bReadAccess = TRUE;
+    msgopts.dwSize = sizeof(MSGQUEUEOPTIONS);
 
-	WCHAR wName[256];
-	
-	MultiByteToWideChar(CP_ACP, 0, name, -1, wName, 256);
+    WCHAR wName[256];
 
-	m_namedSharedObject = CreateMsgQueue(wName, &msgopts);
+    MultiByteToWideChar(CP_ACP, 0, name, -1, wName, 256);
 
-	sig_data = new SignalData(addr, m_namedSharedObject);
-	spyRunning = true;
-	CreateThread(NULL, 0, WaitForMemorySignal, NULL, 0, NULL);
+    m_namedSharedObject = CreateMsgQueue(wName, &msgopts);
+
+    sig_data = new SignalData(addr, m_namedSharedObject);
+    spyRunning = true;
+    CreateThread(NULL, 0, WaitForMemorySignal, NULL, 0, NULL);
 }
 
 #include "windows.h"
@@ -120,53 +121,53 @@ FILE* spyStream = NULL;
 
 void SpyLog(const char* message)
 {
-	fprintf(spyStream, "%s", message);
+    fprintf(spyStream, "%s", message);
 }
 
 extern void RedirectLogOutput(void (*)(const char*));
 
 void VMPI_spyCallback()
 {
-	if(mmgc_spy_signal) 
-	{
-		VMPI_lockAcquire(&lock);
-		if(mmgc_spy_signal) 
-		{
-			mmgc_spy_signal = 0;
+    if(mmgc_spy_signal)
+    {
+        VMPI_lockAcquire(&lock);
+        if(mmgc_spy_signal)
+        {
+            mmgc_spy_signal = 0;
 
-			spyStream = fopen("Temp\\gcstats.txt", "w");
+            spyStream = fopen("Temp\\gcstats.txt", "w");
 
-			GCAssert(spyStream != NULL);
-			RedirectLogOutput(SpyLog);
-			
-			MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
-			
-			fflush(spyStream);
-			
-			fclose(spyStream);
-			RedirectLogOutput(NULL);
-			spyStream = NULL;	
-		}
-		VMPI_lockRelase(&lock);
- 	}
+            GCAssert(spyStream != NULL);
+            RedirectLogOutput(SpyLog);
+
+            MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
+
+            fflush(spyStream);
+
+            fclose(spyStream);
+            RedirectLogOutput(NULL);
+            spyStream = NULL;
+        }
+        VMPI_lockRelase(&lock);
+    }
 }
 
 bool VMPI_spySetup()
 {
-	VMPI_lockInit(&lock);
-	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
-	return true;
+    VMPI_lockInit(&lock);
+    WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
+    return true;
 }
 
 void VMPI_spyTeardown()
 {
-	VMPI_lockDestroy(&lock);
-	spyRunning = false;
+    VMPI_lockDestroy(&lock);
+    spyRunning = false;
 }
 
 bool VMPI_hasSymbols()
 {
-	return false;
+    return false;
 }
 
 #endif //MMGC_MEMORY_PROFILER

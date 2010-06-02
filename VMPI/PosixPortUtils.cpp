@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -39,10 +41,10 @@
 
 #include <stdlib.h>
 #include <sys/time.h>
-#include <math.h> 
+#include <math.h>
 
 #ifdef AVMPLUS_UNIX
-	#include <time.h>
+    #include <time.h>
 #endif // AVMPLUS_UNIX
 
 #ifdef AVMPLUS_MAC
@@ -62,90 +64,90 @@
 
 double VMPI_getLocalTimeOffset()
 {
-	struct tm* t;
-	time_t current, localSec, globalSec;
+    struct tm* t;
+    time_t current, localSec, globalSec;
 
-	// The win32 implementation ignores the passed in time
-	// and uses current time instead, so to keep similar
-	// behaviour we will do the same
-	time( &current );
+    // The win32 implementation ignores the passed in time
+    // and uses current time instead, so to keep similar
+    // behaviour we will do the same
+    time( &current );
 
-	t = localtime( &current );
-	localSec = mktime( t );
+    t = localtime( &current );
+    localSec = mktime( t );
 
-	t = gmtime( &current );
-	globalSec = mktime( t );
+    t = gmtime( &current );
+    globalSec = mktime( t );
 
-	return double( localSec - globalSec ) * 1000.0;
+    return double( localSec - globalSec ) * 1000.0;
 }
 
 double VMPI_getDate()
 {
-	struct timeval tv;
-	struct timezone tz; // Unused
+    struct timeval tv;
+    struct timezone tz; // Unused
 
-	gettimeofday(&tv, &tz);
-	double v = (tv.tv_sec + (tv.tv_usec/kMicroPerSec)) * kMsecPerSecond;
-	double ip;
-	::modf(v, &ip); // strip fractional part
-	return ip;
+    gettimeofday(&tv, &tz);
+    double v = (tv.tv_sec + (tv.tv_usec/kMicroPerSec)) * kMsecPerSecond;
+    double ip;
+    ::modf(v, &ip); // strip fractional part
+    return ip;
 }
 
 //time is passed in as milliseconds from UTC.
 double VMPI_getDaylightSavingsTA(double newtime)
 {
-	struct tm *broken_down_time;
+    struct tm *broken_down_time;
 
-	//convert time from milliseconds
-	newtime=newtime/kMsecPerSecond;
+    //convert time from milliseconds
+    newtime=newtime/kMsecPerSecond;
 
-	time_t time_t_time=(time_t)newtime;
+    time_t time_t_time=(time_t)newtime;
 
-	//pull out a struct tm
-	broken_down_time = localtime( &time_t_time );
+    //pull out a struct tm
+    broken_down_time = localtime( &time_t_time );
 
-	if (!broken_down_time)
-	{
-		return 0;
-	}
+    if (!broken_down_time)
+    {
+        return 0;
+    }
 
-	if (broken_down_time->tm_isdst > 0)
-	{
-		//daylight saving is definitely in effect.
-		return kMsecPerHour;
-	}
+    if (broken_down_time->tm_isdst > 0)
+    {
+        //daylight saving is definitely in effect.
+        return kMsecPerHour;
+    }
 
-	//either daylight saving is not in effect, or we don't know (if tm_isdst is negative).
-	return 0;
+    //either daylight saving is not in effect, or we don't know (if tm_isdst is negative).
+    return 0;
 }
 
 
 uint64_t VMPI_getTime()
 {
-	struct timeval tv;
-	::gettimeofday(&tv, NULL);
-	uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	return result;
+    struct timeval tv;
+    ::gettimeofday(&tv, NULL);
+    uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+    return result;
 }
 
 
 void* VMPI_alloc(size_t size)
 {
-	return malloc(size);
+    return malloc(size);
 }
 
 void VMPI_free(void* ptr)
 {
-	free(ptr);
+    free(ptr);
 }
 
 size_t VMPI_size(void *ptr)
 {
 #ifdef AVMPLUS_MAC
-	return malloc_size(ptr);
+    return malloc_size(ptr);
 #else
-	(void)ptr;
-	return 0;
+    (void)ptr;
+    return 0;
 #endif
 }
 
@@ -155,22 +157,22 @@ LoggingFunction logFunc = NULL;
 
 void RedirectLogOutput(LoggingFunction func)
 {
-	logFunc = func;
+    logFunc = func;
 }
 
 void VMPI_log(const char* message)
 {
-	if(logFunc)
-		logFunc(message);
-	else
-		printf("%s",message);
+    if(logFunc)
+        logFunc(message);
+    else
+        printf("%s",message);
 }
 
 bool VMPI_isMemoryProfilingEnabled()
 {
-	//read the mmgc profiling option switch
-	const char *env = getenv("MMGC_PROFILE");
-	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+    //read the mmgc profiling option switch
+    const char *env = getenv("MMGC_PROFILE");
+    return (env && (VMPI_strncmp(env, "1", 1) == 0));
 }
 
 // Constraint: nbytes must be a multiple of the VM page size.
@@ -191,8 +193,8 @@ void *VMPI_allocateCodeMemory(size_t nbytes)
     if (nbytes % pagesize != 0) {
 #ifdef DEBUG
         char buf[256];
-        VMPI_snprintf(buf, 
-                      sizeof(buf), 
+        VMPI_snprintf(buf,
+                      sizeof(buf),
                       "VMPI_allocateCodeMemory invariants violated: request=%lu pagesize=%lu\nAborting.\n",
                       (unsigned long)nbytes,
                       (unsigned long)pagesize);
@@ -200,7 +202,7 @@ void *VMPI_allocateCodeMemory(size_t nbytes)
 #endif
         VMPI_abort();
     }
-    
+
     size_t nblocks = nbytes / MMgc::GCHeap::kBlockSize;
 
     heap->SignalCodeMemoryAllocation(nblocks, true);
@@ -233,15 +235,15 @@ void VMPI_freeCodeMemory(void* address, size_t nbytes)
         char buf[256];
         VMPI_snprintf(buf,
                       sizeof(buf),
-                      "VMPI_freeCodeMemory invariants violated: address=%lu provided=%lu actual=%lu\nAborting.\n", 
+                      "VMPI_freeCodeMemory invariants violated: address=%lu provided=%lu actual=%lu\nAborting.\n",
                       (unsigned long)address,
-                      (unsigned long)nbytes, 
+                      (unsigned long)nbytes,
                       (unsigned long)actualBytes);
         VMPI_log(buf);
 #endif
         VMPI_abort();
     }
-    
+
     heap->Free(address);
     heap->SignalCodeMemoryDeallocated(nblocks, true);
 }
@@ -263,8 +265,8 @@ void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
     if ((uintptr_t)address % pagesize != 0 || nbytes % pagesize != 0) {
 #ifdef DEBUG
         char buf[256];
-        VMPI_snprintf(buf, 
-                      sizeof(buf), 
+        VMPI_snprintf(buf,
+                      sizeof(buf),
                       "VMPI_makeCodeMemoryExecutable invariants violated: address=%lu size=%lu pagesize=%lu\nAborting.\n",
                       (unsigned long)address,
                       (unsigned long)nbytes,
@@ -273,7 +275,7 @@ void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
 #endif
         VMPI_abort();
     }
-    
+
     int flags = makeItSo ? PROT_EXEC|PROT_READ : PROT_WRITE|PROT_READ;
     int retval = mprotect((maddr_ptr)address, (unsigned int)nbytes, flags);
     AvmAssert(retval == 0);
@@ -282,7 +284,7 @@ void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
 
 const char *VMPI_getenv(const char *name)
 {
-	return getenv(name);
+    return getenv(name);
 }
 
 // Helper functions for VMPI_callWithRegistersSaved, kept in this file to prevent them from
@@ -291,68 +293,68 @@ const char *VMPI_getenv(const char *name)
 // Registers have been flushed; compute a stack pointer and call the user function.
 void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
-	(void)buf;
-	volatile int temp = 0;
-	fn((void*)((uintptr_t)&temp & ~7), arg);
+    (void)buf;
+    volatile int temp = 0;
+    fn((void*)((uintptr_t)&temp & ~7), arg);
 }
 
 // Do nothing - just called to prevent another call from being a tail call, and to keep some values alive
 void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
-	(void)buf;
-	(void)fn;
-	(void)arg;
+    (void)buf;
+    (void)fn;
+    (void)arg;
 }
 
 // Note: the linux #define provided by the compiler.
 
 uint32_t querySignalMask() {
 #if (defined(AVMPLUS_MAC) || defined(linux)) && defined(DEBUG)
-	// will save just the 32 signals to avoid exposing sigset_t in ExceptionFrame
-	sigset_t set;
-	uint32_t mask = 0;
-	if (sigprocmask(0, NULL, &set) == -1) {
-		VMPI_debugLog("signal mask query failed\n");
-		VMPI_debugBreak();
-	}
+    // will save just the 32 signals to avoid exposing sigset_t in ExceptionFrame
+    sigset_t set;
+    uint32_t mask = 0;
+    if (sigprocmask(0, NULL, &set) == -1) {
+        VMPI_debugLog("signal mask query failed\n");
+        VMPI_debugBreak();
+    }
 
-	for (int i = 0; i< 32; i++) {
-		if (sigismember(&set, i))
-			mask |= (1 << i);
-	}
-	return mask;
+    for (int i = 0; i< 32; i++) {
+        if (sigismember(&set, i))
+            mask |= (1 << i);
+    }
+    return mask;
 #else
-	// will use the setjmp/longjmp calls that do save and restore
-	// signal masks, so no need to verify that the signal mask
-	// hasn't changed.
-	return 0;
+    // will use the setjmp/longjmp calls that do save and restore
+    // signal masks, so no need to verify that the signal mask
+    // hasn't changed.
+    return 0;
 #endif
 }
 
 void assertSignalMask(uint32_t expected) {
-#if (defined(AVMPLUS_MAC) || defined(linux)) && defined(DEBUG)	
-	sigset_t current_mask;
-	sigemptyset(&current_mask);
-		
-	if (sigprocmask(0, NULL, &current_mask) == -1)  {
-		VMPI_debugLog("signal mask query failed\n");
-		VMPI_debugBreak();
-	} else {
-		for (int i = 0; i< 32; i++) {
-			bool result = sigismember(&current_mask, i);
-			if (result != (bool)(expected  & (1 << i))) {
-				VMPI_debugLog("masks not equal\n");
-				VMPI_debugBreak();
-			}
-		}
-	}
-#else // do nothing	
-	(void)expected;
-	// will use the setjmp/longjmp calls that do save and restore
-	// signal masks, so no need to verify that the signal mask
-	// hasn't changed.
+#if (defined(AVMPLUS_MAC) || defined(linux)) && defined(DEBUG)
+    sigset_t current_mask;
+    sigemptyset(&current_mask);
 
-#endif 
+    if (sigprocmask(0, NULL, &current_mask) == -1)  {
+        VMPI_debugLog("signal mask query failed\n");
+        VMPI_debugBreak();
+    } else {
+        for (int i = 0; i< 32; i++) {
+            bool result = sigismember(&current_mask, i);
+            if (result != (bool)(expected  & (1 << i))) {
+                VMPI_debugLog("masks not equal\n");
+                VMPI_debugBreak();
+            }
+        }
+    }
+#else // do nothing
+    (void)expected;
+    // will use the setjmp/longjmp calls that do save and restore
+    // signal masks, so no need to verify that the signal mask
+    // hasn't changed.
+
+#endif
 }
 
 

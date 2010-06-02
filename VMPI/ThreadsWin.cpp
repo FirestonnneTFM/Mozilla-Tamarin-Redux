@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -38,32 +40,32 @@
 #include "MMgc.h"
 
 #ifndef TLS_OUT_OF_INDEXES
-	#define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
+    #define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
 #endif
 
 bool VMPI_tlsCreate(uintptr_t* tlsId)
 {
-	DWORD id = TlsAlloc();
-	*tlsId = (uintptr_t)id;
-	return (id != TLS_OUT_OF_INDEXES);
+    DWORD id = TlsAlloc();
+    *tlsId = (uintptr_t)id;
+    return (id != TLS_OUT_OF_INDEXES);
 }
 
 void VMPI_tlsDestroy(uintptr_t tlsId)
 {
-	TlsFree((DWORD)tlsId);
+    TlsFree((DWORD)tlsId);
 }
 
 bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
 {
-	return TlsSetValue((DWORD)tlsId, value) == TRUE;
+    return TlsSetValue((DWORD)tlsId, value) == TRUE;
 }
 
 void* VMPI_tlsGetValue(uintptr_t tlsId)
 {
-	return TlsGetValue((DWORD)tlsId);
+    return TlsGetValue((DWORD)tlsId);
 }
 
 vmpi_thread_t VMPI_currentThread()
 {
-	return (vmpi_thread_t) (uintptr_t)GetCurrentThreadId();
+    return (vmpi_thread_t) (uintptr_t)GetCurrentThreadId();
 }

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -41,11 +43,11 @@
 
 namespace avmplus
 {
-	int WeekDay(double t);
-	double MakeDate(double day, double time);
-	double MakeDay(double year, double month, double date);
-	double MakeTime(double hour, double min, double sec, double ms);
-	int YearFromTime(double t);
+    int WeekDay(double t);
+    double MakeDate(double day, double time);
+    double MakeDay(double year, double month, double date);
+    double MakeTime(double hour, double min, double sec, double ms);
+    int YearFromTime(double t);
 }
 
 /*
@@ -58,133 +60,133 @@ static const double kMsecPerMinute    = 60000;
 
 static TIME_ZONE_INFORMATION UpdateTimeZoneInfo()
 {
-	static vmpi_spin_lock_t gTimeZoneInfoLock;		// protects gTimeZoneInfo and gGmtCache
-	static TIME_ZONE_INFORMATION gTimeZoneInfo;
-	static SYSTEMTIME gGmtCache;
-	
-	SYSTEMTIME gmt;
-	GetSystemTime(&gmt);
-	MMGC_LOCK(gTimeZoneInfoLock);
-	if ((gmt.wMinute != gGmtCache.wMinute) ||
-		(gmt.wHour != gGmtCache.wHour) ||
-		(gmt.wDay != gGmtCache.wDay) ||
-		(gmt.wMonth != gGmtCache.wMonth) ||
-		(gmt.wYear != gGmtCache.wYear)
-		) 
-	{
-		// Cache is invalid.
-		GetTimeZoneInformation(&gTimeZoneInfo);
-		gGmtCache = gmt;
-	}
-	TIME_ZONE_INFORMATION tz = gTimeZoneInfo;
-	return tz;
+    static vmpi_spin_lock_t gTimeZoneInfoLock;      // protects gTimeZoneInfo and gGmtCache
+    static TIME_ZONE_INFORMATION gTimeZoneInfo;
+    static SYSTEMTIME gGmtCache;
+
+    SYSTEMTIME gmt;
+    GetSystemTime(&gmt);
+    MMGC_LOCK(gTimeZoneInfoLock);
+    if ((gmt.wMinute != gGmtCache.wMinute) ||
+        (gmt.wHour != gGmtCache.wHour) ||
+        (gmt.wDay != gGmtCache.wDay) ||
+        (gmt.wMonth != gGmtCache.wMonth) ||
+        (gmt.wYear != gGmtCache.wYear)
+        )
+    {
+        // Cache is invalid.
+        GetTimeZoneInformation(&gTimeZoneInfo);
+        gGmtCache = gmt;
+    }
+    TIME_ZONE_INFORMATION tz = gTimeZoneInfo;
+    return tz;
 }
 
 double VMPI_getLocalTimeOffset()
 {
-	TIME_ZONE_INFORMATION tz = UpdateTimeZoneInfo();
-	return -tz.Bias * 60.0 * 1000.0;
+    TIME_ZONE_INFORMATION tz = UpdateTimeZoneInfo();
+    return -tz.Bias * 60.0 * 1000.0;
 }
 
 static double ConvertWin32DST(int year, SYSTEMTIME *st)
 {
-	// The StandardDate and DaylightDate members of
-	// TIMEZONE_INFORMATION may be specified in two ways:
-	// 1. An absolute time and date
-	// 2. A month, day of week and week in month, and a time of day
+    // The StandardDate and DaylightDate members of
+    // TIMEZONE_INFORMATION may be specified in two ways:
+    // 1. An absolute time and date
+    // 2. A month, day of week and week in month, and a time of day
 
-	if (st->wYear != 0) {
-		return avmplus::MakeDate(avmplus::MakeDay(year,
-			st->wMonth - 1,
-			st->wDay),
-			avmplus::MakeTime(st->wHour,
-			st->wMinute,
-			st->wSecond,
-			st->wMilliseconds));
-	}
+    if (st->wYear != 0) {
+        return avmplus::MakeDate(avmplus::MakeDay(year,
+            st->wMonth - 1,
+            st->wDay),
+            avmplus::MakeTime(st->wHour,
+            st->wMinute,
+            st->wSecond,
+            st->wMilliseconds));
+    }
 
-	double timeValue = avmplus::MakeDate(avmplus::MakeDay(year,
-		st->wMonth-1,
-		1),
-		avmplus::MakeTime(st->wHour,
-		st->wMinute,
-		st->wSecond,
-		st->wMilliseconds));
+    double timeValue = avmplus::MakeDate(avmplus::MakeDay(year,
+        st->wMonth-1,
+        1),
+        avmplus::MakeTime(st->wHour,
+        st->wMinute,
+        st->wSecond,
+        st->wMilliseconds));
 
-	double nextMonth;
-	if (st->wMonth < 12) {
-		nextMonth = avmplus::MakeDate(avmplus::MakeDay(year, st->wMonth, 1), 0);
-	} else {
-		nextMonth = avmplus::MakeDate(avmplus::MakeDay(year + 1, 0, 1), 0);
-	}
+    double nextMonth;
+    if (st->wMonth < 12) {
+        nextMonth = avmplus::MakeDate(avmplus::MakeDay(year, st->wMonth, 1), 0);
+    } else {
+        nextMonth = avmplus::MakeDate(avmplus::MakeDay(year + 1, 0, 1), 0);
+    }
 
-	int dayOfWeek = avmplus::WeekDay(timeValue);
-	if (dayOfWeek != st->wDayOfWeek) {
-		int dayDelta = st->wDayOfWeek - dayOfWeek;
-		if (dayDelta < 0) {
-			dayDelta += 7;
-		}
-		timeValue += (double)kMsecPerDay * dayDelta;
-	}
+    int dayOfWeek = avmplus::WeekDay(timeValue);
+    if (dayOfWeek != st->wDayOfWeek) {
+        int dayDelta = st->wDayOfWeek - dayOfWeek;
+        if (dayDelta < 0) {
+            dayDelta += 7;
+        }
+        timeValue += (double)kMsecPerDay * dayDelta;
+    }
 
-	// Advance appropriate # of weeks
-	timeValue += (double)kMsecPerDay * 7.0 * (st->wDay - 1);
+    // Advance appropriate # of weeks
+    timeValue += (double)kMsecPerDay * 7.0 * (st->wDay - 1);
 
-	// Cap it at the end of the month
-	while (timeValue >= nextMonth) {
-		timeValue -= (double)kMsecPerDay * 7.0;
-	}
+    // Cap it at the end of the month
+    while (timeValue >= nextMonth) {
+        timeValue -= (double)kMsecPerDay * 7.0;
+    }
 
-	return timeValue;
+    return timeValue;
 }
 
 double VMPI_getDaylightSavingsTA(double time)
 {
-	// On Windows, ask the OS what the daylight saving time bias
-	// is.  If it's zero, perform no adjustment.
-	TIME_ZONE_INFORMATION tz = UpdateTimeZoneInfo();
-	if (tz.DaylightBias != -60 || tz.DaylightDate.wMonth == 0) {
-		return 0;
-	}
+    // On Windows, ask the OS what the daylight saving time bias
+    // is.  If it's zero, perform no adjustment.
+    TIME_ZONE_INFORMATION tz = UpdateTimeZoneInfo();
+    if (tz.DaylightBias != -60 || tz.DaylightDate.wMonth == 0) {
+        return 0;
+    }
 
-	// In most of the US, Daylight Saving Time begins on the
-	// first Sunday of April at 2 AM.  It ends at 2 am on
-	// the last Sunday of October.
+    // In most of the US, Daylight Saving Time begins on the
+    // first Sunday of April at 2 AM.  It ends at 2 am on
+    // the last Sunday of October.
 
-	// 1. Compute year this time represents.
-	int year = avmplus::YearFromTime(time);
+    // 1. Compute year this time represents.
+    int year = avmplus::YearFromTime(time);
 
-	// 2. Compute time that daylight saving time begins
-	double timeD = ConvertWin32DST(year, &tz.DaylightDate);
+    // 2. Compute time that daylight saving time begins
+    double timeD = ConvertWin32DST(year, &tz.DaylightDate);
 
-	// 3. Compute time that standard time begins
-	double timeS = ConvertWin32DST(year, &tz.StandardDate);
+    // 3. Compute time that standard time begins
+    double timeS = ConvertWin32DST(year, &tz.StandardDate);
 
-	// Subtract the daylight bias from the standard transition time
-	timeS -= kMsecPerHour;
+    // Subtract the daylight bias from the standard transition time
+    timeS -= kMsecPerHour;
 
-	// The times we have calculated are in local time,
-	// but "time" was passed in as UTC.  Convert it to local time.
-	time += VMPI_getLocalTimeOffset();
+    // The times we have calculated are in local time,
+    // but "time" was passed in as UTC.  Convert it to local time.
+    time += VMPI_getLocalTimeOffset();
 
-	// Does time fall in the daylight saving period?
+    // Does time fall in the daylight saving period?
 
-	// Where Daylight savings time is earlier in the year than standard time
-	if(timeS > timeD)
-	{
-		if (time >= timeD && time < timeS) 
-			return kMsecPerHour;
-		else 
-			return 0;
-	}
-	// Where Daylight savings time is later in the year than standard time
-	else
-	{
-		if (time >= timeS && time < timeD) 
-			return 0;
-		else 
-			return kMsecPerHour;
-	}
+    // Where Daylight savings time is earlier in the year than standard time
+    if(timeS > timeD)
+    {
+        if (time >= timeD && time < timeS)
+            return kMsecPerHour;
+        else
+            return 0;
+    }
+    // Where Daylight savings time is later in the year than standard time
+    else
+    {
+        if (time >= timeS && time < timeD)
+            return 0;
+        else
+            return kMsecPerHour;
+    }
 
 }
 
@@ -193,30 +195,30 @@ double VMPI_getDaylightSavingsTA(double time)
 
 static double NormalizeFileTime(FILETIME* ft)
 {
-	LARGE_INTEGER li;
-	li.LowPart = ft->dwLowDateTime;
-	li.HighPart = ft->dwHighDateTime;
+    LARGE_INTEGER li;
+    li.LowPart = ft->dwLowDateTime;
+    li.HighPart = ft->dwHighDateTime;
 
-	return ((double) (li.QuadPart - FILETIME_EPOCH_BIAS)) / FILETIME_MS_FACTOR;
+    return ((double) (li.QuadPart - FILETIME_EPOCH_BIAS)) / FILETIME_MS_FACTOR;
 }
 
 static double NormalizeSystemTime(SYSTEMTIME* st)
 {
-	FILETIME ft;
-	SystemTimeToFileTime(st, &ft);
-	return NormalizeFileTime(&ft);
+    FILETIME ft;
+    SystemTimeToFileTime(st, &ft);
+    return NormalizeFileTime(&ft);
 }
 
 double VMPI_getDate()
 {
-	SYSTEMTIME stime;
-	GetSystemTime(&stime);
-	return NormalizeSystemTime(&stime);
+    SYSTEMTIME stime;
+    GetSystemTime(&stime);
+    return NormalizeSystemTime(&stime);
 }
 
 uint64_t VMPI_getTime()
-{	
-	return timeGetTime();
+{
+    return timeGetTime();
 }
 
 // On Windows, _vsnprintf isn't reliable (no NUL termination) and _vsnprintf_s
@@ -231,44 +233,44 @@ uint64_t VMPI_getTime()
 
 int VMPI_vsnprintf(char *s, size_t n, const char *format, va_list args)
 {
-	int ret = _vsnprintf(s, n, format, args);
-	if (ret == -1)
-		ret = int(n);
-	if (ret == int(n)) {
-		s[n-1] = 0;
-		ret--;
-	}
-	return ret;
+    int ret = _vsnprintf(s, n, format, args);
+    if (ret == -1)
+        ret = int(n);
+    if (ret == int(n)) {
+        s[n-1] = 0;
+        ret--;
+    }
+    return ret;
 }
 
 // On Windows, _snprintf isn't reliable (no NUL termination) and _snpritnf_s
-// is not compatible (throws an exception if the format is wrong).  Easy 
+// is not compatible (throws an exception if the format is wrong).  Easy
 // enough to create our own on top of VMPI_vsnprintf.
 //
 // Return what VMPI_vsnprintf returns; see notes above.
 
 int VMPI_snprintf(char *s, size_t n, const char *format, ...)
 {
-	va_list args;
-	va_start(args, format);
-	int ret = VMPI_vsnprintf(s, n, format, args);
-	va_end(format);
-	return ret;
+    va_list args;
+    va_start(args, format);
+    int ret = VMPI_vsnprintf(s, n, format, args);
+    va_end(format);
+    return ret;
 }
 
 void* VMPI_alloc(size_t size)
 {
-	return HeapAlloc(GetProcessHeap(), 0, size);
+    return HeapAlloc(GetProcessHeap(), 0, size);
 }
 
 void VMPI_free(void* ptr)
 {
-	HeapFree(GetProcessHeap(), 0, ptr);
+    HeapFree(GetProcessHeap(), 0, ptr);
 }
 
 size_t VMPI_size(void* ptr)
 {
-	return HeapSize(GetProcessHeap(), 0, ptr);
+    return HeapSize(GetProcessHeap(), 0, ptr);
 }
 
 typedef void (*LoggingFunction)(const char*);
@@ -277,31 +279,31 @@ LoggingFunction logFunc = NULL;
 
 void RedirectLogOutput(LoggingFunction func)
 {
-	logFunc = func;
+    logFunc = func;
 }
 
 void VMPI_log(const char* message)
 {
 #ifndef UNDER_CE
-	::OutputDebugStringA(message);
+    ::OutputDebugStringA(message);
 #endif
 
-	if(logFunc)
-		logFunc(message);
-	else {
-		printf("%s",message);
-		fflush(stdout);
-	}
+    if(logFunc)
+        logFunc(message);
+    else {
+        printf("%s",message);
+        fflush(stdout);
+    }
 }
 
 bool VMPI_isMemoryProfilingEnabled()
 {
 #if defined (UNDER_CE) && defined(MMGC_MEMORY_PROFILER)
-	return true;
+    return true;
 #else
-	//read the mmgc profiling option switch
-	const char *env = VMPI_getenv("MMGC_PROFILE");
-	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+    //read the mmgc profiling option switch
+    const char *env = VMPI_getenv("MMGC_PROFILE");
+    return (env && (VMPI_strncmp(env, "1", 1) == 0));
 #endif
 }
 
@@ -319,12 +321,12 @@ void *VMPI_allocateCodeMemory(size_t nbytes)
 {
     MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
     size_t pagesize = VMPI_getVMPageSize();
-    
+
     if (nbytes % pagesize != 0) {
 #ifdef DEBUG
         char buf[256];
-        VMPI_snprintf(buf, 
-                      sizeof(buf), 
+        VMPI_snprintf(buf,
+                      sizeof(buf),
                       "VMPI_allocateCodeMemory invariants violated: request=%lu pagesize=%lu\nAborting.\n",
                       (unsigned long)nbytes,
                       (unsigned long)pagesize);
@@ -332,7 +334,7 @@ void *VMPI_allocateCodeMemory(size_t nbytes)
 #endif
         VMPI_abort();
     }
-    
+
     size_t nblocks = nbytes / MMgc::GCHeap::kBlockSize;
     heap->SignalCodeMemoryAllocation(nblocks, true);
     return heap->Alloc(nblocks, MMgc::GCHeap::flags_Alloc, pagesize/MMgc::GCHeap::kBlockSize);
@@ -358,21 +360,21 @@ void VMPI_freeCodeMemory(void* address, size_t nbytes)
     size_t pagesize = VMPI_getVMPageSize();
     size_t nblocks = heap->Size(address);
     size_t actualBytes = nblocks * MMgc::GCHeap::kBlockSize;
-    
+
     if ((uintptr_t)address % pagesize != 0 || nbytes % pagesize != 0 || nbytes != actualBytes) {
 #ifdef DEBUG
         char buf[256];
         VMPI_snprintf(buf,
                       sizeof(buf),
-                      "VMPI_freeCodeMemory invariants violated: address=%lu provided=%lu actual=%lu\nAborting.\n", 
+                      "VMPI_freeCodeMemory invariants violated: address=%lu provided=%lu actual=%lu\nAborting.\n",
                       (unsigned long)address,
-                      (unsigned long)nbytes, 
+                      (unsigned long)nbytes,
                       (unsigned long)actualBytes);
         VMPI_log(buf);
 #endif
         VMPI_abort();
     }
-    
+
     heap->Free(address);
     heap->SignalCodeMemoryDeallocated(nblocks, true);
 }
@@ -386,12 +388,12 @@ void VMPI_freeCodeMemory(void* address, size_t nbytes)
 void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
 {
     size_t pagesize = VMPI_getVMPageSize();
-    
+
     if ((uintptr_t)address % pagesize != 0 || nbytes % pagesize != 0) {
 #ifdef DEBUG
         char buf[256];
-        VMPI_snprintf(buf, 
-                      sizeof(buf), 
+        VMPI_snprintf(buf,
+                      sizeof(buf),
                       "VMPI_makeCodeMemoryExecutable invariants violated: address=%lu size=%lu pagesize=%lu\nAborting.\n",
                       (unsigned long)address,
                       (unsigned long)nbytes,
@@ -401,35 +403,35 @@ void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
         VMPI_abort();
     }
 
-	DWORD oldProtectFlags = 0;
-	DWORD newProtectFlags = 0;
-	if ( makeItSo )
-		newProtectFlags = PAGE_EXECUTE_READWRITE;
-	else
-		newProtectFlags = PAGE_READWRITE;
+    DWORD oldProtectFlags = 0;
+    DWORD newProtectFlags = 0;
+    if ( makeItSo )
+        newProtectFlags = PAGE_EXECUTE_READWRITE;
+    else
+        newProtectFlags = PAGE_READWRITE;
 
-	BOOL retval;
-	do {
-        MEMORY_BASIC_INFORMATION mbi;	
-		VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
-		size_t markSize = nbytes > mbi.RegionSize ? mbi.RegionSize : nbytes;  // handle multiple adjoining regions
-		
-		retval = VirtualProtect(address, markSize, newProtectFlags, &oldProtectFlags);
-		AvmAssert(retval != 0);
+    BOOL retval;
+    do {
+        MEMORY_BASIC_INFORMATION mbi;
+        VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
+        size_t markSize = nbytes > mbi.RegionSize ? mbi.RegionSize : nbytes;  // handle multiple adjoining regions
 
-		address = (char*) address + markSize;
-		nbytes -= markSize;
-	} while(nbytes != 0 && retval != 0);
+        retval = VirtualProtect(address, markSize, newProtectFlags, &oldProtectFlags);
+        AvmAssert(retval != 0);
+
+        address = (char*) address + markSize;
+        nbytes -= markSize;
+    } while(nbytes != 0 && retval != 0);
 }
 
-const char *VMPI_getenv(const char *env) 
-{ 
-	const char *val = NULL;
-	(void)env;
+const char *VMPI_getenv(const char *env)
+{
+    const char *val = NULL;
+    (void)env;
 #ifndef UNDER_CE
-	val = getenv(env);
+    val = getenv(env);
 #endif
-	return val;
+    return val;
 }
 
 
@@ -438,14 +440,14 @@ const char *VMPI_getenv(const char *env)
 
 void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
-	(void)buf;
-	volatile int temp = 0;
-	fn((void*)((uintptr_t)&temp & ~7), arg);
+    (void)buf;
+    volatile int temp = 0;
+    fn((void*)((uintptr_t)&temp & ~7), arg);
 }
 
 void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
-	(void)buf;
-	(void)fn;
-	(void)arg;
+    (void)buf;
+    (void)fn;
+    (void)arg;
 }

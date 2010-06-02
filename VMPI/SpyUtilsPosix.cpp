@@ -1,4 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -40,8 +41,8 @@
 
 #ifdef MMGC_MEMORY_PROFILER
 
-#include <sys/types.h> 
-#include <sys/socket.h> 
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -50,7 +51,7 @@
 
 const char* spy_socket_channel = "/tmp/MMgc_Spy"; //name of unix domain for spy connections
 
-bool spy_connected  = false; 
+bool spy_connected  = false;
 bool spy_running = false;
 
 pthread_cond_t spy_cond; //condition variable for synchronizing spy signalling and socket communication
@@ -62,127 +63,127 @@ int clientSocket = -1; //fd for spy socket connection (one at a time)
 
 void* SpyConnectionLoop(void*)
 {
-	struct sockaddr_un sockAddr;
+    struct sockaddr_un sockAddr;
 
-	socklen_t len = sizeof(sockAddr.sun_family) + strlen(sockAddr.sun_path)+1;
-	while(spy_running)
-	{
-		//wait for spy socket connection
-		if((clientSocket = accept(serverSocket, (struct sockaddr*)&sockAddr, &len)) >= 0)
-		{
-			fd_set fds;
-			FD_ZERO(&fds);
-			FD_SET(clientSocket, &fds);
+    socklen_t len = sizeof(sockAddr.sun_family) + strlen(sockAddr.sun_path)+1;
+    while(spy_running)
+    {
+        //wait for spy socket connection
+        if((clientSocket = accept(serverSocket, (struct sockaddr*)&sockAddr, &len)) >= 0)
+        {
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(clientSocket, &fds);
 
-			select(clientSocket+1, NULL, &fds, NULL, NULL);
+            select(clientSocket+1, NULL, &fds, NULL, NULL);
 
-			if(FD_ISSET(clientSocket, &fds))
-			{
-				pthread_cond_signal(&spy_cond);
-				
-				pthread_mutex_lock(&spy_mutex);
-				spy_connected = true; //set the 
+            if(FD_ISSET(clientSocket, &fds))
+            {
+                pthread_cond_signal(&spy_cond);
 
-				//wait until we are woken up my the main program thread
-				//we do this to avoid processing any new incoming spy request
-				pthread_cond_wait(&spy_cond, &spy_mutex);
-				pthread_mutex_unlock(&spy_mutex);
-			}
-			close(clientSocket); //we are done, close this connection
-		}
-	}
-	
-	return NULL;
+                pthread_mutex_lock(&spy_mutex);
+                spy_connected = true; //set the
+
+                //wait until we are woken up my the main program thread
+                //we do this to avoid processing any new incoming spy request
+                pthread_cond_wait(&spy_cond, &spy_mutex);
+                pthread_mutex_unlock(&spy_mutex);
+            }
+            close(clientSocket); //we are done, close this connection
+        }
+    }
+
+    return NULL;
 }
 
 bool SetupSpyServer()
 {
-	//clear remnants of previous execution
-	unlink(spy_socket_channel);
+    //clear remnants of previous execution
+    unlink(spy_socket_channel);
 
-	struct sockaddr_un sockAddr;
+    struct sockaddr_un sockAddr;
 
-	//open a server socket
-	if((serverSocket = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-		return false;
+    //open a server socket
+    if((serverSocket = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+        return false;
 
-	memset(&sockAddr, 0, sizeof(struct sockaddr_un));
+    memset(&sockAddr, 0, sizeof(struct sockaddr_un));
 
-	sockAddr.sun_family = AF_UNIX;
-	strcpy(sockAddr.sun_path, spy_socket_channel);
+    sockAddr.sun_family = AF_UNIX;
+    strcpy(sockAddr.sun_path, spy_socket_channel);
 
-	//bind and listen
-	socklen_t len = sizeof(sockAddr.sun_family) + strlen(sockAddr.sun_path) + 1;
-	if( (bind(serverSocket, (struct sockaddr*)&sockAddr, len) < 0) || (listen(serverSocket, 5) < 0))
-	{
-		close(serverSocket);
-		return false;
-	}
+    //bind and listen
+    socklen_t len = sizeof(sockAddr.sun_family) + strlen(sockAddr.sun_path) + 1;
+    if( (bind(serverSocket, (struct sockaddr*)&sockAddr, len) < 0) || (listen(serverSocket, 5) < 0))
+    {
+        close(serverSocket);
+        return false;
+    }
 
-	//initialize synchronization variables
-	pthread_mutex_init(&spy_mutex, NULL);
-	pthread_cond_init(&spy_cond, NULL);
-	
-	//wait for spy connections on a separate thread
-	if(pthread_create(&spy_thread, NULL, SpyConnectionLoop, NULL))
-	{
-		close(serverSocket);
-		return false;
-	}
+    //initialize synchronization variables
+    pthread_mutex_init(&spy_mutex, NULL);
+    pthread_cond_init(&spy_cond, NULL);
 
-	return true;
+    //wait for spy connections on a separate thread
+    if(pthread_create(&spy_thread, NULL, SpyConnectionLoop, NULL))
+    {
+        close(serverSocket);
+        return false;
+    }
+
+    return true;
 }
 
 //log redirector function for outputting log messages to the spy
 void SpyLog(const char* message)
 {
-	send(clientSocket, message, VMPI_strlen(message)+1, 0);
+    send(clientSocket, message, VMPI_strlen(message)+1, 0);
 }
 
 extern void RedirectLogOutput(void (*)(const char*));
 
 void VMPI_spyCallback()
 {
-	if(spy_connected)
-	{
-		pthread_mutex_lock(&spy_mutex);
-		if(spy_connected)
-		{
-			spy_connected = false;
+    if(spy_connected)
+    {
+        pthread_mutex_lock(&spy_mutex);
+        if(spy_connected)
+        {
+            spy_connected = false;
 
-			RedirectLogOutput(SpyLog);
-			MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
-			RedirectLogOutput(NULL);
-			
-			//we are done dumping memory info to the spy
-			//signal the condition variable to 
-			//wake up SpyConnectionLoop thread
-			pthread_cond_signal(&spy_cond);
-		}
-		pthread_mutex_unlock(&spy_mutex);	
-	}
+            RedirectLogOutput(SpyLog);
+            MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
+            RedirectLogOutput(NULL);
+
+            //we are done dumping memory info to the spy
+            //signal the condition variable to
+            //wake up SpyConnectionLoop thread
+            pthread_cond_signal(&spy_cond);
+        }
+        pthread_mutex_unlock(&spy_mutex);
+    }
 }
 
 bool VMPI_spySetup()
 {
-	//setup server socket for spy connections
-	return SetupSpyServer();
+    //setup server socket for spy connections
+    return SetupSpyServer();
 }
 
 void VMPI_spyTeardown()
 {
-	spy_running = false;
+    spy_running = false;
 
-	if(spy_connected)
-	{
-		spy_connected = false;
-		pthread_cond_signal(&spy_cond);
-	}		
+    if(spy_connected)
+    {
+        spy_connected = false;
+        pthread_cond_signal(&spy_cond);
+    }
 }
 
 bool VMPI_hasSymbols()
 {
-	return true;
+    return true;
 }
 
 #endif //MMGC_MEMORY_PROFILER

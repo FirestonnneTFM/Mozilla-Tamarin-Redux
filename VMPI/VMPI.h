@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -92,7 +94,7 @@ typedef void * vmpi_thread_t;
     #define REALLY_INLINE inline
 #endif
 #ifndef FASTCALL
-    #define FASTCALL 
+    #define FASTCALL
 #endif
 
 
@@ -105,18 +107,18 @@ namespace avmplus
 //typedef int64_t    int64;
 //typedef int64_t    sint64;
 //typedef uint64_t   uint64;
-typedef uint32_t	uint32;
-typedef int32_t		int32;
+typedef uint32_t    uint32;
+typedef int32_t     int32;
 //typedef int32_t    sint32;
 //typedef uint16_t   uint16;
 //typedef int16_t    int16;
 //typedef int16_t    sint16;
-typedef uint8_t		uint8;
+typedef uint8_t     uint8;
 //typedef int8_t     int8;
 //typedef int8_t     sint8;
-typedef uintptr_t	uintptr;
+typedef uintptr_t   uintptr;
 //typedef intptr_t   sintptr;
-typedef uint8_t		byte;
+typedef uint8_t     byte;
 }
 /* wchar is our version of wchar_t, since wchar_t is different sizes
  on different platforms, but we want to use UTF-16 uniformly. */
@@ -126,26 +128,26 @@ typedef uint16_t wchar;
 * This method should return the difference in milliseconds between local time and UTC
 * @return offset in milliseconds
 */
-extern double		VMPI_getLocalTimeOffset();
+extern double       VMPI_getLocalTimeOffset();
 
 /**
 * This method should return the Daylight Savings time adjustment in milliseconds
 * @return number of milliseconds corresponding to daylight savings adjustment when active, 0 otherwise
 */
-extern double		VMPI_getDaylightSavingsTA(double time);
+extern double       VMPI_getDaylightSavingsTA(double time);
 
 /**
 * This method should return the current UTC date and time in milliseconds
 * @return UTC date and time in milliseconds
 */
-extern double		VMPI_getDate();
+extern double       VMPI_getDate();
 
 /**
 * This method should return the system time in milliseconds
 * The implementation of this method could either return the time elapsed since the system started or since epoc
 * @return number of milliseconds elapsed
 */
-extern uint64_t		VMPI_getTime();
+extern uint64_t     VMPI_getTime();
 
 /**
 * This method is called to output log messages
@@ -181,14 +183,14 @@ extern void VMPI_debugBreak();
 * @param size size, in bytes, of memory block requested
 * @return pointer to the start of memory block if allocation was successful, NULL otherwise
 */
-extern void*		VMPI_alloc(size_t size);
+extern void*        VMPI_alloc(size_t size);
 
 /**
 * This method is used to free a previously allocated block
 * @param ptr pointer to the memory that needs to be released
 * @return none
 */
-extern void			VMPI_free(void* ptr);
+extern void         VMPI_free(void* ptr);
 
 
 /**
@@ -196,27 +198,27 @@ extern void			VMPI_free(void* ptr);
 * @param ptr pointer to the memory that needs to be released
 * @return none
 */
-extern size_t			VMPI_size(void* ptr);
+extern size_t           VMPI_size(void* ptr);
 
 
 /**
 * This method is used to get the size of the memory page of the system
 * @return return the size, if bytes, of memory page
 */
-extern size_t		VMPI_getVMPageSize();
+extern size_t       VMPI_getVMPageSize();
 
 /**
 * Method to retrieve number of VM pages in virtual address space of a process
 * @return number of pages
 * @see VMPI_getVMPageSize()
 */
-extern size_t		VMPI_getPrivateResidentPageCount();
+extern size_t       VMPI_getPrivateResidentPageCount();
 
 /**
 * Method to find whether the platform supports merging of contiguous memory regions from heap
-* @return true if heap merging is supported, false otherwise	
+* @return true if heap merging is supported, false otherwise
 */
-extern bool			VMPI_canMergeContiguousHeapRegions();
+extern bool         VMPI_canMergeContiguousHeapRegions();
 
 /**
  * @return true if VMPI_commitMemory can operate on a memory range that contains a
@@ -240,7 +242,7 @@ extern bool VMPI_canCommitAlreadyCommittedMemory();
 * @return point to base address of the reserved region, NULL otherwise
 * @see VMPI_ReleaseMemoryRegion(), VMPI_CommitMemory()
 */
-extern void*		VMPI_reserveMemoryRegion(void* address, size_t size);
+extern void*        VMPI_reserveMemoryRegion(void* address, size_t size);
 
 /**
 * This method is called to release region(s) of memory previously reserved.
@@ -248,16 +250,16 @@ extern void*		VMPI_reserveMemoryRegion(void* address, size_t size);
 * @param size size, in bytes, of the region
 * @return true if the function succeeds, false otherwise
 */
-extern bool			VMPI_releaseMemoryRegion(void* address, size_t size);
+extern bool         VMPI_releaseMemoryRegion(void* address, size_t size);
 
 /**
 * This method is used to commit a pages(s) of memory in a previously reserved region
 * @param address base address of the memory region to commit
-* @param size size, in bytes, of the memory to commit 
+* @param size size, in bytes, of the memory to commit
 * @return true if the function succeeds, false otherwise
 * @see VMPI_ReserveMemoryRegion()
 */
-extern bool			VMPI_commitMemory(void* address, size_t size);
+extern bool         VMPI_commitMemory(void* address, size_t size);
 
 /**
 * This method is used to de-commit a pages(s) of memory that were previously commited
@@ -266,7 +268,7 @@ extern bool			VMPI_commitMemory(void* address, size_t size);
 * @return true if the function succeeds, false otherwise
 * @see VMPI_CommitMemory()
 */
-extern bool			VMPI_decommitMemory(char *address, size_t size);
+extern bool         VMPI_decommitMemory(char *address, size_t size);
 
 /**
  * Allocate memory for jitted code.
@@ -324,15 +326,15 @@ extern void* VMPI_allocateCodeMemory(size_t size);
 extern void VMPI_freeCodeMemory(void* address, size_t size);
 
 /**
- * VMPI_makeCodeMemoryExecutable makes a range of code memory executable (RX) 
+ * VMPI_makeCodeMemoryExecutable makes a range of code memory executable (RX)
  * or not (RW).
  *
  * This operation may be a no-op on some platforms, see comments to
  * VMPI_allocateCodeMemory and VMPI_freeCodeMemory.
- * 
+ *
  * @param address  Pointer to start of an acceptable protection boundary (typically
  * a VM page) within the block.
- * @param size  Size in bytes of the area to be protected in some acceptable 
+ * @param size  Size in bytes of the area to be protected in some acceptable
  * granule (typically one or more VM pages).
  * @param  makeItSo  If true then memory is made executable, otherwise it is made
  * not-executable.
@@ -342,7 +344,7 @@ extern void VMPI_freeCodeMemory(void* address, size_t size);
  * @note If VMPI_allocateCodeMemory uses GCHeap for its storage then it is possible
  * that the memory block pointed to by address could be acquired from more than
  * one call to VMPI_reserveMemoryRegion.  The implementation of this method is
- * expected to handle such cases and identify the region boundaries if the 
+ * expected to handle such cases and identify the region boundaries if the
  * underlying system requires setting the protection flags on blocks individually
  * if they were allocated separately.
  */
@@ -355,21 +357,21 @@ extern void VMPI_makeCodeMemoryExecutable(void *address, size_t size, bool makeI
 * @return pointer to start of the memory block if allocation was successful, NULL otherwise
 * @see VMPI_ReleaseAlignedMemory()
 */
-extern void*		VMPI_allocateAlignedMemory(size_t size);
+extern void*        VMPI_allocateAlignedMemory(size_t size);
 
 /**
 * This method is used to release a block of memory via VMPI_AllocateAlignedMemory
 * @param address pointer to the start of the memory block to be released
 * @return none
 */
-extern void			VMPI_releaseAlignedMemory(void* address);
+extern void         VMPI_releaseAlignedMemory(void* address);
 
 /**
 * This method is used to determind should MMgc zero initalize newly allocated memory,
 * either allocated with VMPI_commitMemory or VMPI_allocateAlignedMemory.
 * @return false if the memory is zero initialized by the OS, otherwise true
 */
-extern bool			VMPI_areNewPagesDirty();
+extern bool         VMPI_areNewPagesDirty();
 
 /**
 * Method to get the frequency of a high performance counter/timer on the system
@@ -378,7 +380,7 @@ extern bool			VMPI_areNewPagesDirty();
 * @return 64-bit value indicating the frequency of the system's performance counter or clock with highest resolution
 * @see VMPI_getPerformanceCounter()
 */
-extern uint64_t 	VMPI_getPerformanceFrequency();
+extern uint64_t     VMPI_getPerformanceFrequency();
 
 /**
 * Method to get the current value of the system's performance counter/timer
@@ -387,34 +389,34 @@ extern uint64_t 	VMPI_getPerformanceFrequency();
 * value that was used as a basis to calculate the frequency returned from VMPI_getPerformanceFrequency()
 * @return 64-bit value indicating the current value of the counter
 * @see VMPI_getPerformanceFrequency()
-*/extern uint64_t 	VMPI_getPerformanceCounter();
+*/extern uint64_t   VMPI_getPerformanceCounter();
 
 /**
 * Method to obtain the stack backtrace
 * Used by the MMgc memory profiler to get call stack information
 * @param buffer buffer to fill the call stack data with
 * @param bufferSize size, in bytes, of the buffer passed
-* @param framesToSkip number of function frames to skip from the start of trace 
+* @param framesToSkip number of function frames to skip from the start of trace
 * @return true if back trace was captured successfully, false otherwise
 */
-extern bool			VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip);
+extern bool         VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip);
 
 /**
 * Method to retrieve the name of the method/function given a specific address in code space
 * Used by the MMgc memory profiler to get and display function names
-* This method is expected to write a null terminated string representing the function name 
+* This method is expected to write a null terminated string representing the function name
 * in to the buffer
 * @param pc address whose corresponding function name should be returned
 * @param buffer buffer to write the function name to
 * @param bufferSize size, in bytes, of the buffer passed
 * @return true if the function name was retrieved, false otherwise
 */
-extern bool			VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize);
+extern bool         VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize);
 
 /**
 * Method to retrieve the source filename and line number given a specific address in a code space
 * Used by the MMgc memory profiler to display location info of source code
-* This method is expected to write a null terminated string representing the file name 
+* This method is expected to write a null terminated string representing the file name
 * in to the buffer
 * @param pc address of code whose corresponding location should be returned
 * @param buffer buffer to write the filename to
@@ -422,14 +424,14 @@ extern bool			VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t buff
 * @param out param to write the line number to
 * @return true if the file and line number info was retrieved successfully, false otherwise
 */
-extern bool			VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* lineNumber);
+extern bool         VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* lineNumber);
 
 /**
 * Method to create a new instance of vmpi_spin_lock_t
 * This instance will subsequently be passed to acquire/release lock methods
 * @return newly created vmpi_spin_lock_t instance
 */
-extern void			VMPI_lockInit(vmpi_spin_lock_t* lock);
+extern void         VMPI_lockInit(vmpi_spin_lock_t* lock);
 
 /**
 * Method to destroy the vmpi_spin_lock_t instance
@@ -441,7 +443,7 @@ extern void			VMPI_lockInit(vmpi_spin_lock_t* lock);
 * @return none
 * @see VMPI_lockCreate
 */
-extern void			VMPI_lockDestroy(vmpi_spin_lock_t* lock);
+extern void         VMPI_lockDestroy(vmpi_spin_lock_t* lock);
 
 /**
 * Method to acquire a lock on a vmpi_spin_lock_t instance
@@ -453,21 +455,21 @@ extern void			VMPI_lockDestroy(vmpi_spin_lock_t* lock);
 * @param lock instance to acquire the lock on
 * @return true if lock was successfully acquired, false in event of failure
 */
-extern bool			VMPI_lockAcquire(vmpi_spin_lock_t* lock);
+extern bool         VMPI_lockAcquire(vmpi_spin_lock_t* lock);
 
 /**
 * Method to release a lock on a vmpi_spin_lock_t instance
 * @param lock instance to release the lock on
 * @return true if lock was successfully release, false in event of failure
 */
-extern bool			VMPI_lockRelease(vmpi_spin_lock_t* lock);
+extern bool         VMPI_lockRelease(vmpi_spin_lock_t* lock);
 
 /**
 * Method to obtain a lock on a vmpi_spin_lock_t instance if it isn't locked
 * @param lock instance to release the lock on
 * @return true if lock was successfully aqcuired, false if another thread has it
 */
-extern bool			VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock);
+extern bool         VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock);
 
 /**
  * can two consecutive calls to VMPI_reserveMemoryRegion be freed with one VMP_releaseMemoryRegion call?
@@ -487,7 +489,7 @@ extern bool VMPI_useVirtualMemory();
 */
 extern bool VMPI_isMemoryProfilingEnabled();
 
-/** 
+/**
  * Method to setup a spy channel on MMgc/avmplus
  * If the platform intends to periodically retrieve information from MMgc/avmplus
  * then it can perform the necessary setup during this function call and return true
@@ -496,7 +498,7 @@ extern bool VMPI_isMemoryProfilingEnabled();
 */
 extern bool VMPI_spySetup();
 
-/** 
+/**
  * Callback method for spy
  * Currently called on every allocation in MMgc if VMPI_spySetup returned true
  * @return none
@@ -509,21 +511,21 @@ extern void VMPI_spyCallback();
  */
 extern void VMPI_cleanStack(size_t amt);
 
-/** 
+/**
  * MEthod to determine whether we have access to symbol information
- * @return a bool indicating whether we have 
+ * @return a bool indicating whether we have
 */
 extern bool VMPI_hasSymbols();
 
-/** 
- * Method to create a thread local storage (TLS) identifier 
+/**
+ * Method to create a thread local storage (TLS) identifier
  * This identifier will be used as a key to set/get thread-specific data
  * @param [out] pointer to store the value of newly created TLS identifier
  * @return true if TLS identifier was created successfully, false otherwise
 */
 extern bool VMPI_tlsCreate(uintptr_t* tlsId);
 
-/** 
+/**
  * Method to destroy a previously created TLS identifier
  * @param tlsId TLS identifier to be destroyed
  * @return none
@@ -531,7 +533,7 @@ extern bool VMPI_tlsCreate(uintptr_t* tlsId);
 */
 extern void VMPI_tlsDestroy(uintptr_t tlsId);
 
-/** 
+/**
  * Method to associate a thread-specific data with a TLS identifier
  * previously created by VMPI_tlsCreate
  * @param tlsId TLS identifier to associate the data with
@@ -540,7 +542,7 @@ extern void VMPI_tlsDestroy(uintptr_t tlsId);
 */
 extern bool VMPI_tlsSetValue(uintptr_t tlsId, void* value);
 
-/** 
+/**
  * Method to retrieve a data associated with a TLS identifier
  * that may have been previously set via VMPI_tlsSetValue
  * @param tlsId TLS identifier for which the associated data should be retrieved
@@ -565,7 +567,7 @@ extern vmpi_thread_t VMPI_currentThread();
 extern bool VMPI_spySetup();
 extern void VMPI_spyTeardown();
 
-/** 
+/**
  * Callback method for spy
  * Currently called on every allocation in MMgc if VMPI_spySetup returned true
  * @return none
