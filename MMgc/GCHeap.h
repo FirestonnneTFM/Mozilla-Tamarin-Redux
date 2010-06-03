@@ -268,12 +268,19 @@ namespace MMgc
         /** if this much of the heap is free un-reserve it */
         const static uint32_t kReleaseThresholdPercentage = 50;
 
+        // Poison values used by MMgc
         const static uintptr_t GCEndOfObjectPoison = 0xdeadbeef;// First word past legitimate payload in GC object
         const static uintptr_t GCFreedPoison = 0xcacacaca;      // Object fill when GC object has been freed
         const static uintptr_t GCSweptPoison = 0xbabababa;      // Object fill when GC object has been swept
         const static uintptr_t FXFreshPoison = 0xfafafafa;      // Object fill in fresh FixedAlloc object (before any zeroing)
         const static uintptr_t FXFreedPoison = 0xedededed;      // Object fill when FixedAlloc object has been freed
-        
+        const static uintptr_t MMFreedPoison = 0xfbfbfbfb;      // Object fill when heap block has been freed by GCHeap
+
+        // Tag values used for debugging in GCGlobalNew
+        const static uint32_t MMScalarTag         = 0xafafafafU;// Tag for a non-array object
+        const static uint32_t MMNormalArrayTag    = 0xbfbf0001U;// Tag for an array object with constructed/destructed elements
+        const static uint32_t MMPrimitiveArrayTag = 0xbfbf0002U;// Tag for an array object with primitive elements, must be one greater than the normal tag
+
         /**
          * Init must be called to set up the GCHeap singleton
          */
