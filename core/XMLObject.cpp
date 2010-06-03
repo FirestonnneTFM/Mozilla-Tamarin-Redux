@@ -364,7 +364,7 @@ namespace avmplus
             }
         }
 
-        if ( p != m_node && ! m_status )
+        if ( p && p != m_node && ! m_status )
         {
             Multiname m;
             p->getQName(&m, publicNS);
