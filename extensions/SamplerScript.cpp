@@ -177,7 +177,7 @@ namespace avmplus
 
     private:
         uint32_t count;
-        byte *cursor;
+        uint8_t *cursor;
         Sampler *sampler;
         DRCWB(ScriptObject*) script;
     };

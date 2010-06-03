@@ -101,13 +101,13 @@ typedef void * vmpi_thread_t;
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 // Legacy types used by some embedding host code, eg avmplus::uint64.
-// These types are not to be used inside the avm code.
+// These types are not used inside the avm code, please keep it that way.
 namespace avmplus
 {
 //typedef int64_t    int64;
 //typedef int64_t    sint64;
 //typedef uint64_t   uint64;
-//typedef uint32_t   uint32;
+typedef uint32_t   uint32;
 typedef int32_t     int32;
 //typedef int32_t    sint32;
 //typedef uint16_t   uint16;
@@ -116,7 +116,7 @@ typedef int32_t     int32;
 typedef uint8_t     uint8;
 //typedef int8_t     int8;
 //typedef int8_t     sint8;
-//typedef uintptr_t  uintptr;
+typedef uintptr_t  uintptr;
 //typedef intptr_t   sintptr;
 typedef uint8_t     byte;
 }

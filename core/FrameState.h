@@ -56,8 +56,8 @@ namespace avmplus
         // of this value.  The JIT uses this mask to handle control-flow merges
         // of incompatible values (e.g. int and String*).  At merge points, masks
         // are OR-ed together.
-        // if more than one byte is set, the type will be Object or *, and the JIT
-        // will use a separate tag byte to convert the native represenation to Atom.
+        // if more than one uint8_t is set, the type will be Object or *, and the JIT
+        // will use a separate tag uint8_t to convert the native represenation to Atom.
         // See CodegenLIR::localGetp().
         uint8_t sst_mask;
 #endif
@@ -76,7 +76,7 @@ namespace avmplus
     public:
         Verifier *verifier;  // ideally this would be const Verifier*
         FrameState* wl_next; // next block in verifier->worklist.  ideally this is only accessed by Verifier.
-        const byte* abc_pc;  // pointer into abc bytecode
+        const uint8_t* abc_pc;  // pointer into abc bytecode
         int32_t scopeDepth;
         int32_t stackDepth;
         int32_t withBase;

@@ -83,13 +83,13 @@ namespace avmplus
         MethodInfo* resolveMethodInfo(uint32_t index) const;
 
         #if defined(VMCFG_AOT) || defined(AVMPLUS_VERBOSE)
-        void parseTypeName(const byte* &p, Multiname& m) const;
+        void parseTypeName(const uint8_t* &p, Multiname& m) const;
         #endif
 
-        Namespacep parseNsRef(const byte* &pc) const;
+        Namespacep parseNsRef(const uint8_t* &pc) const;
         Stringp resolveUtf8(uint32_t index) const;
-        Stringp parseName(const byte* &pc) const;
-        uint32_t resolveBindingName(const byte*& pc, Multiname& m) const;
+        Stringp parseName(const uint8_t* &pc) const;
+        uint32_t resolveBindingName(const uint8_t*& pc, Multiname& m) const;
         void computeInstanceSizeAndSlotsOffset(int class_id, Traits* base, uint16_t& sizeofInstance, uint16_t& offsetofSlots) const;
         void parseMethodInfos();
         void parseMetadataInfos();
@@ -127,26 +127,26 @@ namespace avmplus
          * reads in 8 bytes in little endian order and stores in
          * memory as an ieee double, doing endian swapping as needed
          */
-        double readDouble(const byte* &p) const;
+        double readDouble(const uint8_t* &p) const;
 
         /**
          * Reads in 2 bytes and turns them into a 16 bit number.  Always reads in 2 bytes.  Currently
          * only used for version number of the ABC file and for version 11 support.
          */
-        int readU16(const byte* p) const;
+        int readU16(const uint8_t* p) const;
 
         /**
          * Read in a 32 bit number that is encoded with a variable number of bytes.  The value can
          * take up 1-5 bytes depending on its value.  0-127 takes 1 byte, 128-16383 takes 2 bytes, etc.
-         * The scheme is that if the current byte has the high bit set, then the following byte is also
+         * The scheme is that if the current uint8_t has the high bit set, then the following uint8_t is also
          * part of the value.
          *
          * Returns the value, and the 2nd argument is set to the number of bytes that were read to get that
          * value.
          */
-        int readS32(const byte *&p) const;
+        int readS32(const uint8_t *&p) const;
 
-        uint32_t readU30(const byte*& p) const;
+        uint32_t readU30(const uint8_t*& p) const;
 
     // ------------------------ DATA SECTION BEGIN
     private:
@@ -156,10 +156,10 @@ namespace avmplus
         Domain* const               domain;
         AvmCore*                    core;
         PoolObject*                 pool;
-        const byte*                 pos;
+        const uint8_t*              pos;
         const NativeInitializer*    natives;
-        byte*                       abcStart;
-        byte*                       abcEnd; // one past the end, actually
+        uint8_t*                    abcStart;
+        uint8_t*                    abcEnd; // one past the end, actually
         Stringp*                    metaNames;
         Stringp                     kNeedsDxns;
 #ifdef AVMPLUS_VERBOSE

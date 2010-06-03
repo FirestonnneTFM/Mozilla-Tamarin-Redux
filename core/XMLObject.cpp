@@ -698,7 +698,7 @@ namespace avmplus
         }
 
         // step 10
-        int32 i = -1; // -1 is undefined in spec
+        int32_t i = -1; // -1 is undefined in spec
         bool primitiveAssign = ((!AvmCore::isXML(c) && !AvmCore::isXMLList(c)) && (!m.isAnyName()));
 
         // step 12
@@ -2190,7 +2190,7 @@ namespace avmplus
         }
 
         // step 6+7
-        int32 i = m_node->FindMatchingNamespace (core, ns);
+        int32_t i = m_node->FindMatchingNamespace (core, ns);
         if (i != -1)
         {
             m_node->getNamespaces()->removeAt(i);

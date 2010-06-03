@@ -69,13 +69,13 @@ namespace avmplus
             {
             }
 
-            inline void setFromInteger(int32 initVal)
+            inline void setFromInteger(int32_t initVal)
             {
                 wordBuffer[0] = initVal;
                 numWords = 1;
             }
             void setFromDouble(double value);
-            void setFromBigInteger(const BigInteger* from,  int32 offset,  int32 amount);
+            void setFromBigInteger(const BigInteger* from,  int32_t offset,  int32_t amount);
 
             double doubleValueOf() const; // returns double approximation of this integer
 
@@ -85,10 +85,10 @@ namespace avmplus
 
             // Compare (sum = this+offset)  vs other.  if sum > other, return 1.  if sum < other,
             //  return -1, else return 0.  Note that all terms are assumed to be positive.
-            int32 compare(const BigInteger *other) const;
+            int32_t compare(const BigInteger *other) const;
 
             // same as above, but compare this+offset with other.
-            int32 compareOffset(const BigInteger *other, const BigInteger *offset)
+            int32_t compareOffset(const BigInteger *other, const BigInteger *offset)
             {
                 BigInteger tempInt;
                 tempInt.setFromInteger(0);
@@ -155,8 +155,8 @@ namespace avmplus
 
             // Multiply this by an integer factor and add an integer increment.  Store result back in this.
             //  Note, the addition is essentially free
-            void multAndIncrementBy( int32 factor,  int32 addition);
-            inline void multBy( int32 factor)
+            void multAndIncrementBy( int32_t factor,  int32_t addition);
+            inline void multBy( int32_t factor)
             {
                 multAndIncrementBy(factor,0);
             }
@@ -199,10 +199,10 @@ namespace avmplus
 
             //  copy words from another BigInteger.  By default, copy all words into this.  If copyOffsetWords
             //   is not -1, then copy numCopyWords starting at word copyOffsetWords.
-            void copyFrom(const BigInteger *other,  int32 copyOffsetWords=-1,  int32 numCopyWords=-1)
+            void copyFrom(const BigInteger *other,  int32_t copyOffsetWords=-1,  int32_t numCopyWords=-1)
             {
-                 int32 numCopy = (numCopyWords == -1) ? other->numWords : numCopyWords;
-                 int32 copyOffset = (copyOffsetWords == -1) ? 0 : copyOffsetWords;
+                 int32_t numCopy = (numCopyWords == -1) ? other->numWords : numCopyWords;
+                 int32_t copyOffset = (copyOffsetWords == -1) ? 0 : copyOffsetWords;
 
                 copyBuffer(other->wordBuffer+copyOffset, numCopy);
             }
@@ -211,7 +211,7 @@ namespace avmplus
             // --------------------------------------------------------
             static const int kMaxBigIntegerBufferSize=128;
             uint32_t wordBuffer[kMaxBigIntegerBufferSize+2];
-            int32  numWords;
+            int32_t  numWords;
 
         private:
             //  sign;  Simplifications are made assuming all numbers are positive
@@ -228,7 +228,7 @@ namespace avmplus
 
 
             // copy wordBuffer from another BigInteger
-            inline void copyBuffer(const uint32_t *newBuff,  int32 size)
+            inline void copyBuffer(const uint32_t *newBuff,  int32_t size)
             {
                 numWords = size;
                 AvmAssert(newBuff != wordBuffer);
@@ -236,14 +236,14 @@ namespace avmplus
                 VMPI_memcpy(wordBuffer, newBuff, numWords*sizeof(uint32_t));
             }
 
-            inline void setNumWords( int32 newNumWords,bool initToZero=false)
+            inline void setNumWords( int32_t newNumWords,bool initToZero=false)
             {
-                int32 oldNumWords = numWords;
+                int32_t oldNumWords = numWords;
                 numWords = newNumWords;
                 AvmAssert(numWords <= kMaxBigIntegerBufferSize);
                 if (initToZero && oldNumWords < numWords)
                 {
-                    for( int32 x = oldNumWords-1; x < numWords; x++)
+                    for( int32_t x = oldNumWords-1; x < numWords; x++)
                         wordBuffer[x] = 0;
                 }
             }
@@ -251,7 +251,7 @@ namespace avmplus
             // remove leading zero words from number.
             inline void trimLeadingZeros()
             {
-                int32 x;
+                int32_t x;
                 for( x = numWords-1; x >= 0 && wordBuffer[x] == 0; x--)
                     ;
                 this->numWords = (x == -1) ? 1 : x+1; // make sure a zero value has numWords = 1

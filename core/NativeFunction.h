@@ -64,7 +64,7 @@ namespace avmplus
     #define kAvmThunkNaN            (MathUtils::kNaN)
 
     typedef AvmObject       AvmRetType_AvmObject;
-    typedef bool            AvmRetType_AvmBool32;   // bools are passed in as int32, but returned as bool, for historic reasons
+    typedef bool            AvmRetType_AvmBool32;   // bools are passed in as int32_t, but returned as bool, for historic reasons
     typedef int32_t         AvmRetType_int32_t;
     typedef uint32_t        AvmRetType_uint32_t;
     typedef AvmNamespace    AvmRetType_AvmNamespace;

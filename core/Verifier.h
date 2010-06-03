@@ -76,12 +76,12 @@ namespace avmplus
             int local_count;
         };
 
-        int frameSize;          // local_count + max_scope + max_stack
-        int code_length;        // size of abc bytecode (bytes)
-        const byte* code_pos;   // start of abc bytecode
-        const byte* tryBase;   // code_pos that ExceptionHandler offsets use
-        const byte* tryFrom;   // start of earliest try region
-        const byte* tryTo;     // end of latest try region
+        int frameSize;            // local_count + max_scope + max_stack
+        int code_length;          // size of abc bytecode (bytes)
+        const uint8_t* code_pos;  // start of abc bytecode
+        const uint8_t* tryBase;   // code_pos that ExceptionHandler offsets use
+        const uint8_t* tryFrom;   // start of earliest try region
+        const uint8_t* tryTo;     // end of latest try region
 
         Verifier(MethodInfo *info, Toplevel* toplevel, AbcEnv* abc_env
 #ifdef AVMPLUS_VERBOSE
@@ -97,7 +97,7 @@ namespace avmplus
          */
         // Sun's C++ compiler wants "volatile" here because the definition has it
         void verify(CodeWriter * volatile coder);
-        bool hasFrameState(const byte* pc);
+        bool hasFrameState(const uint8_t* pc);
         bool canAssign(Traits* lhs, Traits* rhs) const;
         int getBlockCount();
         bool hasReachableExceptions();
@@ -115,21 +115,21 @@ namespace avmplus
         FrameState *worklist;
         Toplevel* toplevel;
         AbcEnv*   abc_env;
-        GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
+        GCSortedMap<const uint8_t*, FrameState*, LIST_NonGCObjects> *blockStates;
         FrameState *state;
         bool emitPass;
         bool handlerIsReachable;
-        FrameState* getFrameState(const byte* pc);
-        const byte* verifyBlock(CodeWriter *, const byte*);
-        void identifyBlocks(const byte*, int);
-        void dfsBlock(const byte*, int);
-        const byte* loadBlockState(FrameState* blk);
+        FrameState* getFrameState(const uint8_t* pc);
+        const uint8_t* verifyBlock(CodeWriter *, const uint8_t*);
+        void identifyBlocks(const uint8_t*, int);
+        void dfsBlock(const uint8_t*, int);
+        const uint8_t* loadBlockState(FrameState* blk);
         void checkParams();
         Value& checkLocal(int local);
         MethodInfo* checkDispId(Traits* traits, uint32_t disp_id);
         MethodInfo* checkMethodInfo(uint32_t method_id);
         Traits* checkClassInfo(uint32_t class_id);
-        void checkTarget(const byte* current, const byte* target);
+        void checkTarget(const uint8_t* current, const uint8_t* target);
         bool mergeState(FrameState*);
         void checkCpoolOperand(uint32_t index, int requiredAtomType);
         void checkConstantMultiname(uint32_t index, Multiname &m);
@@ -144,14 +144,14 @@ namespace avmplus
         void parseBodyHeader();
         void checkStack(uint32_t pop, uint32_t push);
         void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
-        void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);
-        void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc);
+        void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const uint8_t *pc);
+        void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const uint8_t *pc);
         Traits* checkGetGlobalScope();
         void emitNip();
 
-        void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
-        bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
-        bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const byte *pc);
+        void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc);
+        bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc);
+        bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const uint8_t *pc);
 #ifdef VMCFG_WORDCODE
         uint32_t allocateCacheSlot(uint32_t imm30);
 #endif
@@ -165,7 +165,7 @@ namespace avmplus
         bool secondTry;
         void printScope(const char* title, const ScopeTypeChain*);
         void printState(StringBuffer& prefix, FrameState* state);
-        void printOpcode(const byte* pc);
+        void printOpcode(const uint8_t* pc);
         void verifyWarn(int errorId, ...);
         #endif
 

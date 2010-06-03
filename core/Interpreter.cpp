@@ -103,7 +103,7 @@ namespace avmplus
 #  define SIGN_EXTEND(v)       (intptr_t(v))
 #endif
 
-// CLAMP_32 is equivalent to running an int atom thru AvmCore::integer (ie, truncate to int32 using the right rules),
+// CLAMP_32 is equivalent to running an int atom thru AvmCore::integer (ie, truncate to int32_t using the right rules),
 // but, like SIGN_EXTEND, it expects the argument to be upshifted 3 bit.
 #ifdef AVMPLUS_64BIT
 #  define CLAMP_32(v)       ((intptr_t(v) << 29) >> 29)

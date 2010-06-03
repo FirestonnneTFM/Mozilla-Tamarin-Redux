@@ -67,7 +67,7 @@ namespace avmplus
     {
         AvmAssert(info != NULL);
 
-        const byte* pos = info->abc_body_pos();
+        const uint8_t* pos = info->abc_body_pos();
         AvmCore::skipU32(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
         code_start = pos;
         pool = info->pool();
@@ -340,16 +340,16 @@ namespace avmplus
         return (WordOpcode)opcodeInfo[opcode].wordCode;
     }
 
-    void WordcodeEmitter::writePrologue(const FrameState* state, const byte *pc)
+    void WordcodeEmitter::writePrologue(const FrameState* state, const uint8_t *pc)
     {
         #if defined DEBUGGER
         if (core->debugger()) emitOp0(pc, WOP_debugenter);
         #else
         (void)pc;
         #endif
-        const byte* tryFrom = state->verifier->tryFrom;
-        const byte* tryTo = state->verifier->tryTo;
-        const byte* code_end = code_start + state->verifier->code_length;
+        const uint8_t* tryFrom = state->verifier->tryFrom;
+        const uint8_t* tryTo = state->verifier->tryTo;
+        const uint8_t* code_end = code_start + state->verifier->code_length;
         if (tryFrom >= code_start && tryTo <= code_end) {
             // we're in the same abc code that contains try blocks
             computeExceptionFixups();
@@ -369,15 +369,15 @@ namespace avmplus
         emitLabel(state->abc_pc);
     }
 
-    void WordcodeEmitter::writeOpcodeVerified(const FrameState*, const byte*, AbcOpcode)
+    void WordcodeEmitter::writeOpcodeVerified(const FrameState*, const uint8_t*, AbcOpcode)
     {}
 
-    void WordcodeEmitter::writeFixExceptionsAndLabels(const FrameState*, const byte *pc)
+    void WordcodeEmitter::writeFixExceptionsAndLabels(const FrameState*, const uint8_t *pc)
     {
         fixExceptionsAndLabels(pc);
     }
 
-    void WordcodeEmitter::writeOp1(const FrameState *state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+    void WordcodeEmitter::writeOp1(const FrameState *state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
     {
         (void)type;
         switch (opcode) {
@@ -400,7 +400,7 @@ namespace avmplus
             break;
         case OP_getslot:
         {
-            const byte* nextpc = pc;
+            const uint8_t* nextpc = pc;
             unsigned int imm30=0, imm30b=0;
             int imm8=0, imm24=0;
             AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
@@ -452,7 +452,7 @@ namespace avmplus
         }
     }
 
-    void WordcodeEmitter::writeNip(const FrameState* state, const byte *pc)
+    void WordcodeEmitter::writeNip(const FrameState* state, const uint8_t *pc)
     {
         write(state, pc, OP_swap);
         write(state, pc, OP_pop);
@@ -461,7 +461,7 @@ namespace avmplus
     void WordcodeEmitter::writeCheckNull(const FrameState*, uint32_t)
     {}
 
-    void WordcodeEmitter::writeMethodCall(const FrameState*, const byte *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits *)
+    void WordcodeEmitter::writeMethodCall(const FrameState*, const uint8_t *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits *)
     {
         (void)m;
         switch (opcode) {
@@ -481,7 +481,7 @@ namespace avmplus
         }
     }
 
-    void WordcodeEmitter::writeOp2(const FrameState*, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits*)
+    void WordcodeEmitter::writeOp2(const FrameState*, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits*)
     {
         (void)pc;
         switch (opcode) {
@@ -500,9 +500,9 @@ namespace avmplus
         case OP_abs_jump:
         {
             #ifdef AVMPLUS_64BIT
-            const byte* new_pc = (const byte *) (uintptr_t(opd1) | (((uintptr_t) opd2) << 32));
+            const uint8_t* new_pc = (const uint8_t *) (uintptr_t(opd1) | (((uintptr_t) opd2) << 32));
             #else
-            const byte* new_pc = (const byte*) opd1;
+            const uint8_t* new_pc = (const uint8_t*) opd1;
             #endif
             emitAbsJump(new_pc);
             break;
@@ -531,7 +531,7 @@ namespace avmplus
         }
     }
 
-    void WordcodeEmitter::write(const FrameState*, const byte* pc, AbcOpcode opcode, Traits*)
+    void WordcodeEmitter::write(const FrameState*, const uint8_t* pc, AbcOpcode opcode, Traits*)
     {
       //AvmLog("WordcodeEmitter::write %x\n", opcode);
         switch (opcode) {
@@ -1176,7 +1176,7 @@ namespace avmplus
     //   - If the optimizer inserts a branch then the address in the branch must
     //     be absolute.  If the branch is backward it must be the negative of the
     //     absolute word offset of the target.  If the branch is forward it must
-    //     be the positive absolute ABC byte offset of the branch target; a backpatch
+    //     be the positive absolute ABC uint8_t offset of the branch target; a backpatch
     //     structure will be created in the latter case.
 
     bool WordcodeEmitter::replace(uint32_t old_instr, uint32_t new_words, bool jump_has_been_translated)
@@ -1310,7 +1310,7 @@ namespace avmplus
             else
                 b2->next = b->next;
             // b is unlinked
-            // Install the ABC byte offset from the backpatch structure (will be positive)
+            // Install the ABC uint8_t offset from the backpatch structure (will be positive)
             I[nextI - 1][1] = uint32_t(b->target_pc - code_start);
             delete b;
         }

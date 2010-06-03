@@ -169,9 +169,9 @@ namespace avmplus
 
         enum { SAMPLE_FREQUENCY_MILLIS = 1 };
 
-        // should use opaque Cursor type instead of byte*
-        byte *getSamples(uint32_t &num);
-        void readSample(byte *&p, Sample &s);
+        // should use opaque Cursor type instead of uint8_t*
+        uint8_t *getSamples(uint32_t &num);
+        void readSample(uint8_t *&p, Sample &s);
 
         void init(bool sampling, bool autoStart);
         void sampleCheck() { if(takeSample) sample(); }
@@ -207,7 +207,7 @@ namespace avmplus
 
         void sample();
 
-        void rewind(byte*&b, uint32_t amount)
+        void rewind(uint8_t*&b, uint32_t amount)
         {
             b -= amount;
         }

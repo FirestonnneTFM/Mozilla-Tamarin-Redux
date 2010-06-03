@@ -207,7 +207,7 @@ namespace avmplus
 
         bool hasSimpleContent() const;
         bool hasComplexContent() const;
-        int32 childIndex() const;
+        int32_t childIndex() const;
         String* nodeKind(Toplevel* toplevel) const;
 
         virtual void addAttribute (E4XNode *x);

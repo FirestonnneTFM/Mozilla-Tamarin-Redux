@@ -46,30 +46,30 @@ namespace avmplus
     {
         if( v < 128 )
         {
-            bytes.add((byte)v);
+            bytes.add((uint8_t)v);
         }
         else if ( v < 16384 )
         {
-            byte first = (byte)((v & 0x7F) | 0x80);
-            byte second = (byte)(v>>7);
+            uint8_t first = (uint8_t)((v & 0x7F) | 0x80);
+            uint8_t second = (uint8_t)(v>>7);
             bytes.add(first);
             bytes.add(second);
         }
         else if ( v < 2097152 )
         {
-            byte first = (byte)((v & 0x7F) | 0x80);
-            byte second = (byte)(v>>7 | 0x80);
-            byte third = (byte)(v>>14);
+            uint8_t first = (uint8_t)((v & 0x7F) | 0x80);
+            uint8_t second = (uint8_t)(v>>7 | 0x80);
+            uint8_t third = (uint8_t)(v>>14);
             bytes.add(first);
             bytes.add(second);
             bytes.add(third);
         }
         else if ( v < 268435456 )
         {
-            byte first = (byte)((v & 0x7F) | 0x80);
-            byte second = (byte)(v>>7 | 0x80);
-            byte third = (byte)(v>>14 | 0x80);
-            byte fourth = (byte) ( v >>21 );
+            uint8_t first = (uint8_t)((v & 0x7F) | 0x80);
+            uint8_t second = (uint8_t)(v>>7 | 0x80);
+            uint8_t third = (uint8_t)(v>>14 | 0x80);
+            uint8_t fourth = (uint8_t) ( v >>21 );
             bytes.add(first);
             bytes.add(second);
             bytes.add(third);
@@ -77,11 +77,11 @@ namespace avmplus
         }
         else
         {
-            byte first = (byte)((v & 0x7F) | 0x80);
-            byte second = (byte)(v>>7 | 0x80);
-            byte third = (byte)(v>>14 | 0x80);
-            byte fourth = (byte) (v >>21 | 0x80);
-            byte fifth = (byte) (v >> 28);
+            uint8_t first = (uint8_t)((v & 0x7F) | 0x80);
+            uint8_t second = (uint8_t)(v>>7 | 0x80);
+            uint8_t third = (uint8_t)(v>>14 | 0x80);
+            uint8_t fourth = (uint8_t) (v >>21 | 0x80);
+            uint8_t fifth = (uint8_t) (v >> 28);
             bytes.add(first);
             bytes.add(second);
             bytes.add(third);

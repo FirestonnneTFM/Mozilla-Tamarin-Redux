@@ -267,7 +267,7 @@ namespace avmplus
 
         // sadly, it's still more efficient to stash this in Traits itself, as it's nontrivial to recover when
         // we rebuild the TraitMethodInfo.
-        void setMetadataPos(const byte* pos);
+        void setMetadataPos(const uint8_t* pos);
 
     private:
 
@@ -436,8 +436,8 @@ namespace avmplus
         //   * supertype_cache: a one-entry positive-hit cache
         //   * supertype_neg_cache: a one-entry negative-hit cache
         //   * supertype_offset: if this traits is a shallowly-inherited class, holds
-        //     the byte offset of this traits in any subclass's primary_supertypes array.
-        //     otherwise, holds the byte offset of supertype_cache.
+        //     the uint8_t offset of this traits in any subclass's primary_supertypes array.
+        //     otherwise, holds the uint8_t offset of supertype_cache.
         //
         // secondary_supertypes is shared as follows:
         //   * if a class is primary with no interfaces, we share an empty-list singleton
@@ -532,7 +532,7 @@ namespace avmplus
     public:     DWB(MethodInfo*)        init;               // not a call/init union b/c smart pointers and union's don't mix
     private:    CreateClassClosureProc  m_createClassClosure;
     private:    const TraitsPosPtr      m_traitsPos;        // ptr into our ABC definition, depending on m_posType
-    private:    const byte*             metadata_pos;
+    private:    const uint8_t*          metadata_pos;
     private:    FixedBitSet             m_slotDestroyInfo;
     private:    DWB(MMgc::GCWeakRef*)   m_tbref;                // our TraitsBindings
     private:    DWB(MMgc::GCWeakRef*)   m_tmref;                // our TraitsMetadata
@@ -545,8 +545,8 @@ namespace avmplus
     private:    uint16_t                m_offsetofSlots;    // offset of first slot.
     private:    uint32_t                m_hashTableOffset;  // offset to our hashtable (or 0 if none)
     private:    uint32_t                m_totalSize;        // total size, including sizeofInstance + slots + hashtable
-    public:     uint8_t                 builtinType;                // BuiltinType enumeration -- only need 5 bits but stored in byte for faster access
-    private:    const uint8_t           m_posType;                  // TraitsPosType enumeration -- only need 3 bits but stored in byte for faster access
+    public:     uint8_t                 builtinType;                // BuiltinType enumeration -- only need 5 bits but stored in uint8_t for faster access
+    private:    const uint8_t           m_posType;                  // TraitsPosType enumeration -- only need 3 bits but stored in uint8_t for faster access
     private:    uint8_t                 m_bindingCapLog2;           // if nonzero, log2 of the cap needed for bindings
     private:    uint8_t                 m_supertype_offset;         // if this traits is primary, == offset in primary_supertypes array; otherwise == offset of supertype_cache
     // 7 bits follow (8 in debug)

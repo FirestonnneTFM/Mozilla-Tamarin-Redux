@@ -40,14 +40,14 @@
 namespace avmplus
 {
 
-REALLY_INLINE int AbcParser::readU16(const byte* p) const
+REALLY_INLINE int AbcParser::readU16(const uint8_t* p) const
 {
     if (p < abcStart || p+1 >= abcEnd)
         toplevel->throwVerifyError(kCorruptABCError);
     return p[0] | p[1]<<8;
 }
 
-REALLY_INLINE int AbcParser::readS32(const byte *&p) const
+REALLY_INLINE int AbcParser::readS32(const uint8_t *&p) const
 {
     // We have added kBufferPadding bytes to the end of the main swf buffer.
     // Why?  Here we can read from 1 to 5 bytes.  If we were to

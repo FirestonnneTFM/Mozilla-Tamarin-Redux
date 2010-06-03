@@ -57,17 +57,17 @@ namespace avmplus
     // used to convert C parameters to impl32 style (argc, ap)
 
     // calculate size needed for ap style argument block
-    int32 argDescApSize(uintptr_t argDesc, MethodEnv* env);
-    int32 argDescApSize(char* argDesc, MethodEnv* env);
+    int32_t argDescApSize(uintptr_t argDesc, MethodEnv* env);
+    int32_t argDescApSize(char* argDesc, MethodEnv* env);
     // convert arguments to ap style argument block, returning "argc"
-    int32 argDescArgsToAp(void* args, uintptr_t argDesc, MethodEnv* env, va_list ap);
-    int32 argDescArgsToAp(void* args, char* argDesc, MethodEnv* env, va_list ap);
+    int32_t argDescArgsToAp(void* args, uintptr_t argDesc, MethodEnv* env, va_list ap);
+    int32_t argDescArgsToAp(void* args, char* argDesc, MethodEnv* env, va_list ap);
 
     // used to convert C parameters to Atom* style (argc, atomv)
 
     // return number of arguments in description
-    int32 argDescArgCount(uintptr_t argDesc);
-    int32 argDescArgCount(char* argDesc);
+    int32_t argDescArgCount(uintptr_t argDesc);
+    int32_t argDescArgCount(char* argDesc);
     // convert arguments to Atoms
     void argDescArgsToAtomv(Atom* args, uintptr_t argDesc, MethodEnv* env, va_list ap);
     void argDescArgsToAtomv(Atom* args, char* argDesc, MethodEnv* env, va_list ap);

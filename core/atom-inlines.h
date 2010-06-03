@@ -68,7 +68,7 @@ namespace avmplus
         int32_t const i32 = int32_t(i);
         return i == i32;
 #else
-        // int atoms always fit in int32 on 32-bit
+        // int atoms always fit in int32_t on 32-bit
         (void)atom;
         return true;
 #endif

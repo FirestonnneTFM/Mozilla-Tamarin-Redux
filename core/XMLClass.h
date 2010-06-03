@@ -65,7 +65,7 @@ namespace avmplus
         Atom ToXML(Atom arg);
 
         int m_prettyIndent;
-        uint8 m_flags;
+        uint8_t m_flags;
 
         enum flags
         {

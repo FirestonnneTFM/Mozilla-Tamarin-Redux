@@ -48,24 +48,24 @@ namespace avmplus
         CodeWriter();
         virtual ~CodeWriter();
 
-        virtual void write(const FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type);
-        virtual void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
-        virtual void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-        virtual void writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
-        virtual void writeNip(const FrameState* state, const byte *pc);
+        virtual void write(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, Traits *type);
+        virtual void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
+        virtual void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        virtual void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
+        virtual void writeNip(const FrameState* state, const uint8_t *pc);
         virtual void writeCheckNull(const FrameState* state, uint32_t index);
         virtual void writeCoerce(const FrameState* state, uint32_t index, Traits* type);
-        virtual void writePrologue(const FrameState* state, const byte *pc);
+        virtual void writePrologue(const FrameState* state, const uint8_t *pc);
         virtual void writeEpilogue(const FrameState* state);
         virtual void writeBlockStart(const FrameState* state);
-        virtual void writeOpcodeVerified(const FrameState* state, const byte *pc, AbcOpcode opcode);
-        virtual void writeFixExceptionsAndLabels(const FrameState* state, const byte *pc);
+        virtual void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
+        virtual void writeFixExceptionsAndLabels(const FrameState* state, const uint8_t *pc);
         virtual void cleanup();
 
         // convenience functions
-        void write(const FrameState* state, const byte *pc, AbcOpcode opcode);
-        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1);
-        void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2);
+        void write(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
+        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1);
+        void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2);
     };
 
 #if defined FEATURE_TEEWRITER
@@ -76,18 +76,18 @@ namespace avmplus
 
         TeeWriter(CodeWriter* coder1, CodeWriter* coder2);
         ~TeeWriter();
-        void write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
-        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
-        void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-        void writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
-        void writeNip(const FrameState* state, const byte *pc);
+        void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);
+        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
+        void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
+        void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
-        void writePrologue(const FrameState* state, const byte *pc);
+        void writePrologue(const FrameState* state, const uint8_t *pc);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
-        void writeOpcodeVerified(const FrameState* state, const byte *pc, AbcOpcode opcode);
-        void writeFixExceptionsAndLabels(const FrameState* state, const byte *pc);
+        void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
+        void writeFixExceptionsAndLabels(const FrameState* state, const uint8_t *pc);
         void cleanup();
     };
 #endif // FEATURE_TEEWRITER
@@ -98,18 +98,18 @@ namespace avmplus
 
         NullWriter(CodeWriter* coder);
         ~NullWriter();
-        void write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
-        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
-        void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-        void writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
-        void writeNip(const FrameState* state, const byte *pc);
+        void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);
+        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
+        void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
+        void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
-        void writePrologue(const FrameState* state, const byte *pc);
+        void writePrologue(const FrameState* state, const uint8_t *pc);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
-        void writeOpcodeVerified(const FrameState* state, const byte *pc, AbcOpcode opcode);
-        void writeFixExceptionsAndLabels(const FrameState* state, const byte *pc);
+        void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
+        void writeFixExceptionsAndLabels(const FrameState* state, const uint8_t *pc);
         void cleanup();
     };
 

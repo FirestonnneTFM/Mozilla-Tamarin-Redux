@@ -133,9 +133,9 @@ namespace avmplus
         #if defined(WIN32) && defined(AVMPLUS_IA32)
         // This routine will return 0x80000000 if the double value overflows
         // and integer and is not between -2^31 and 2^31-1.
-        static int32 real2int(double value);
+        static int32_t real2int(double value);
         #else
-        static int32 real2int(double val) { return (int32) val; }
+        static int32_t real2int(double val) { return (int32_t) val; }
         #endif
         /**
          * Enumeration values for the minimum buffer size required to convert

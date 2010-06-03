@@ -75,7 +75,7 @@ namespace avmplus
          */
         static int32_t Utf16ToUtf8(const wchar *in,
                                int32_t inLen,
-                               uint8 *out,
+                               uint8_t *out,
                                int32_t outMax);
 
         /**
@@ -111,13 +111,13 @@ namespace avmplus
          *      be represented in ECMAScript (code point >0x10FFFF),
          *      and strict is true
          */
-        static int32_t Utf8ToUtf16(const uint8 *in,
+        static int32_t Utf8ToUtf16(const uint8_t *in,
                                    int32_t inLen,
                                    wchar   *out,
                                    int32_t outMax,
                                    bool    strict);
 
-        inline int32_t Utf8Count(const uint8 *in, int32_t inLen, bool strict) {
+        inline int32_t Utf8Count(const uint8_t *in, int32_t inLen, bool strict) {
             return Utf8ToUtf16(in, inLen, NULL, 0, strict);
         }
 
@@ -129,7 +129,7 @@ namespace avmplus
          * The actual number of bytes consumed is returned, or
          * 0 is the UTF-8 sequence is malformed.
          */
-        static int32_t Utf8ToUcs4(const uint8 *chars,
+        static int32_t Utf8ToUcs4(const uint8_t *chars,
                                   int32_t len,
                                   uint32_t *out);
 
@@ -145,7 +145,7 @@ namespace avmplus
          * to UTF-8 (>0x7fffffff)
          */
         static int32_t Ucs4ToUtf8(uint32_t value,
-                                  uint8* out);
+                                  uint8_t* out);
     };
 }
 

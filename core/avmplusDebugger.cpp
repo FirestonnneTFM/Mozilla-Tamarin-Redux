@@ -429,22 +429,22 @@ namespace avmplus
      */
     bool Debugger::scanCode(AbcFile* file, PoolObject* pool, MethodInfo* m)
     {
-        const byte *abc_start = &m->pool()->code()[0];
+        const uint8_t *abc_start = &m->pool()->code()[0];
 
-        const byte *pos = m->abc_body_pos();
+        const uint8_t *pos = m->abc_body_pos();
 
         m->setFile(file);
 
         AvmCore::skipU32(pos, 4); // max_stack; local_count; init_stack_depth; max_stack_depth;
         int code_len = AvmCore::readU32(pos);
 
-        const byte *start = pos;
-        const byte *end = pos + code_len;
+        const uint8_t *start = pos;
+        const uint8_t *end = pos + code_len;
 
         int size = 0;
         int op_count;
         SourceFile* active = NULL; // current source file
-        for (const byte* pc=start; pc < end; pc += size)
+        for (const uint8_t* pc=start; pc < end; pc += size)
         {
             op_count = opcodeInfo[*pc].operandCount;
             if (op_count == -1 && *pc != OP_lookupswitch)
@@ -460,7 +460,7 @@ namespace avmplus
                 case OP_lookupswitch:
                 {
                     // variable length instruction
-                    const byte *pc2 = pc+4;
+                    const uint8_t *pc2 = pc+4;
                     int case_count = 1 + readU32(pc2);
                     size += case_count*3;
                     break;
@@ -470,7 +470,7 @@ namespace avmplus
                 {
                     // form is 8bit type followed by pool entry
                     // then 4Byte extra info
-                    int type = (uint8)*(pc+1);
+                    int type = (uint8_t)*(pc+1);
 
                     switch(type)
                     {
@@ -478,9 +478,9 @@ namespace avmplus
                         {
                             // in this case last word contains
                             // register and line number
-                            const byte* pc2 = pc+2;
+                            const uint8_t* pc2 = pc+2;
                             int index = readU32(pc2);
-                            int slot = (uint8)*(pc2);
+                            int slot = (uint8_t)*(pc2);
                             //int line = readS24(pc+5);
 
 
@@ -496,7 +496,7 @@ namespace avmplus
                 case OP_debugline:
                 {
                     // this means that we have a new source line for the given offset
-                    const byte* pc2 = pc+1;
+                    const uint8_t* pc2 = pc+1;
                     int line = readU32(pc2);
                     if (active != NULL)
                         active->addLine(line, m, (int)(pc - abc_start));
@@ -507,7 +507,7 @@ namespace avmplus
                 case OP_debugfile:
                 {
                     // new or existing source file
-                    const byte* pc2 = pc+1;
+                    const uint8_t* pc2 = pc+1;
                     Stringp name = pool->getString(readU32(pc2));
                     active = file->sourceNamed(name);
                     if (active == NULL)
