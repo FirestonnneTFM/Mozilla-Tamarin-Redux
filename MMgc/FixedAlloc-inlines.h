@@ -53,7 +53,7 @@ namespace MMgc
     /*static*/
     REALLY_INLINE FixedAlloc::FixedBlock* FixedAlloc::GetFixedBlock(const void *item)
     {
-        return (FixedBlock*) ((uintptr_t)item & ~((uintptr_t)GCHeap::kBlockSize-1));
+        return (FixedBlock*) ((uintptr_t)item & GCHeap::kBlockMask);
     }
     
     /*static*/
@@ -179,7 +179,7 @@ namespace MMgc
             GCAssert(b->firstFree == NULL ||
                     (b->firstFree >= b->items &&
                     (((uintptr_t)b->firstFree - (uintptr_t)b->items) % b->size) == 0 &&
-                     (uintptr_t) b->firstFree < ((uintptr_t)b & ~((uintptr_t)GCHeap::kBlockSize-1)) + GCHeap::kBlockSize));
+                     (uintptr_t) b->firstFree < ((uintptr_t)b & GCHeap::kBlockMask) + GCHeap::kBlockSize));
 #ifdef MMGC_MEMORY_INFO
             // Check for writes on deleted memory.
             VerifyFreeBlockIntegrity(item, b->size);

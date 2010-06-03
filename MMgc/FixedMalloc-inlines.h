@@ -114,7 +114,7 @@ namespace MMgc
         // Account for a debugging header, though.
 
         item = GetRealPointer(item);
-        return ((uintptr_t) item & (GCHeap::kBlockSize-1)) == 0;
+        return ((uintptr_t) item & GCHeap::kOffsetMask) == 0;
     }
 
     REALLY_INLINE FixedAllocSafe* FixedMalloc::FindAllocatorForSize(size_t size)

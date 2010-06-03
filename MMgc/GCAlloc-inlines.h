@@ -46,7 +46,7 @@ namespace MMgc
 {
     REALLY_INLINE GCBlockHeader* GetBlockHeader(const void* item)
     {
-        return (GCBlockHeader*)(uintptr_t(item) & ~0xFFF);
+        return (GCBlockHeader*)(uintptr_t(item) & GCHeap::kBlockMask);
     }
 
     /*static*/
@@ -308,7 +308,7 @@ namespace MMgc
 
     REALLY_INLINE int GCAlloc::GCBlock::GetCount() const
     {
-            return ((GCAlloc*)alloc)->m_itemsPerBlock;
+        return ((GCAlloc*)alloc)->m_itemsPerBlock;
     }
 
     REALLY_INLINE uint32_t *GCAlloc::GCBlock::GetBits() const

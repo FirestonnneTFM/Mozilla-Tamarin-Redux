@@ -110,7 +110,7 @@ namespace MMgc
 
     bool GCMarkStack::PushSegment(bool mustSucceed)
     {
-        GCAssert(sizeof(GCStackSegment) <= 4096);
+        GCAssert(sizeof(GCStackSegment) <= GCHeap::kBlockSize);
         GCAssert(m_top == m_limit);
         if (m_extraSegment == NULL) {
             void *memory = AllocStackSegment(mustSucceed);

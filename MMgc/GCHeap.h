@@ -222,6 +222,8 @@ namespace MMgc
         /** Size of a block */
         const static uint32_t kBlockSize = 4096;
         const static uint32_t kBlockShift = 12;
+        const static uintptr_t kBlockMask = ~(uintptr_t(kBlockSize) - 1);   // Clear lower 12 bits
+        const static uintptr_t kOffsetMask = (uintptr_t(kBlockSize) - 1);   // Clear upper 20 or 52 bits
 
         /**
          * Max allowable size for any allocation = 2^32 - 1  bytes
@@ -541,7 +543,7 @@ namespace MMgc
 
 
 
-        static size_t SizeToBlocks(size_t bytes) { return ((bytes + kBlockSize - 1) & ~(kBlockSize-1)) / kBlockSize; }
+        static size_t SizeToBlocks(size_t bytes) { return ((bytes + kBlockSize - 1) & size_t(kBlockMask)) / kBlockSize; }
 
 #ifdef MMGC_HOOKS
         /* Hooks are normally disabled in RELEASE builds, as there is a slight cost added
@@ -966,7 +968,7 @@ namespace MMgc
         {
             size_t bytes = numBlocks * sizeof(HeapBlock);
             // round up to nearest block
-            bytes = (bytes + kBlockSize - 1) & ~(kBlockSize-1);
+            bytes = (bytes + kBlockSize - 1) & size_t(kBlockMask);
             return bytes / kBlockSize;
         }
 

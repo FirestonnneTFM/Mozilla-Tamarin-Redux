@@ -75,7 +75,7 @@ namespace MMgc
     {
         // The pointer should be 4K aligned plus 16 bytes
         // Mac inserts 16 bytes for new[] so make it more general
-        return (((uintptr_t)item & 0xFFF) == sizeof(LargeBlock));
+        return (((uintptr_t)item & GCHeap::kOffsetMask) == sizeof(LargeBlock));
     }
 
     /*static*/
