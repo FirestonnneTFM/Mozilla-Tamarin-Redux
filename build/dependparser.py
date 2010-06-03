@@ -38,10 +38,31 @@
 
 
 """Pipes stdin | stdout and extracts a list of all header dependencies to
-a file."""
+a file.  It requires exactly two arguments.
+
+The input is expected to take form of C preprocessor output, where
+paths to originating input source files are indicated via the form
+# LINENO "PATH"
+
+The first argument to the script is the target file to be overwritten.
+It will contain the extracted dependencies (unquoted paths).
+
+The second argument to the script is the path of an originating source
+file.  It is used to resolve relative paths within the input.
+(Relative paths are unusual, but can arise via manual #line directives
+in the source code; e.g. see bug 477230.)"""
 
 import re
 import sys
+import os
+
+if len(sys.argv) != 3:
+    raise Exception("Unexpected command line argument.")
+
+outfile          = sys.argv[1]
+originating_file = sys.argv[2]
+
+relative_to_dir  = os.path.dirname(originating_file)
 
 _lineExp = re.compile("#(?:line)? ?\d+ \"([^\"<>]+[^/])\"");
 
@@ -51,12 +72,12 @@ for line in sys.stdin:
     sys.stdout.write(line)
     m = _lineExp.match(line)
     if m:
-        deps.add(m.group(1))
+        path = m.group(1)
+        if not os.path.isabs(path):
+            path = os.path.abspath(os.path.join(relative_to_dir, path))
+        deps.add(path)
 
-if len(sys.argv) != 2:
-    raise Exception("Unexpected command line argument.")
 
-outfile = sys.argv[1]
 ostream = open(outfile, "w")
 ostream.write("\n".join(deps))
 ostream.close()
