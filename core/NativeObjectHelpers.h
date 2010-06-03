@@ -98,7 +98,7 @@ namespace avmplus
         }
 
 
-        inline void ClampB(double& start, double& end, int32 length)
+        inline void ClampB(double& start, double& end, int32_t length)
         {
             AvmAssert(length >= 0);
 
@@ -128,7 +128,7 @@ namespace avmplus
             AvmAssert(start <= end);
         }
 
-        inline void ClampBInt(int& start, int& end, int32 length)
+        inline void ClampBInt(int& start, int& end, int32_t length)
         {
             AvmAssert(length >= 0);
 

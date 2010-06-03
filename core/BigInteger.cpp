@@ -62,12 +62,12 @@ void BigInteger::setFromDouble(double value)
         lshiftBy(e);
 }
 
-void BigInteger::setFromBigInteger(const BigInteger* from, int32 offset, int32 amount)
+void BigInteger::setFromBigInteger(const BigInteger* from, int32_t offset, int32_t amount)
 {
     numWords = amount;
     AvmAssert(numWords <= kMaxBigIntegerBufferSize);
-    VMPI_memcpy( (byte*)wordBuffer,
-            (byte*)&(from->wordBuffer[offset]),
+    VMPI_memcpy( (uint8_t*)wordBuffer,
+            (uint8_t*)&(from->wordBuffer[offset]),
             amount*sizeof(uint32_t));
 }
 
@@ -161,7 +161,7 @@ double BigInteger::doubleValueOf() const
         resultMantissa += 1;
 
     double result=0;
-    int32  expBase2 = lg2() + 1 - 53; // if negative, then we've already captured all the data in the mantissaResult and we can ignore.
+    int32_t  expBase2 = lg2() + 1 - 53; // if negative, then we've already captured all the data in the mantissaResult and we can ignore.
     result = (double)resultMantissa;
     if (expBase2 > 0)
     {
@@ -182,7 +182,7 @@ double BigInteger::doubleValueOf() const
 // Compare this vs other, return -1 if this < other, 0 if this == other, or 1 if this > other.
 //  (todo: optimization for D2A would be to check if comparison was larger than an argument value
 //  currently, we add the argument to this and compare the result with other).
-int32 BigInteger::compare(const BigInteger *other) const
+int32_t BigInteger::compare(const BigInteger *other) const
 {
     // if a is bigger than other, subtract has to be positive (assuming unsigned value)
     int result = 0;
@@ -207,7 +207,7 @@ int32 BigInteger::compare(const BigInteger *other) const
 
 // Multiply by an integer factor and add an integer increment.  The addition is essentially free,
 //  use this with a zero second argument for basic multiplication.
-void BigInteger::multAndIncrementBy(int32 factor, int32 addition)
+void BigInteger::multAndIncrementBy(int32_t factor, int32_t addition)
 {
     uint64_t opResult;
 
@@ -435,10 +435,10 @@ BigInteger* BigInteger::divideByReciprocalMethod(const BigInteger* divisor, BigI
         usq.multBy(&u);
         ush.subtract(&usq, &u); // u = ush - usq;
 
-        int32 ush2 = u.lg2(); // ilg2(u);
+        int32_t ush2 = u.lg2(); // ilg2(u);
         e *= 2;
         ag *= 2;
-        int32 usq2 = 4 + ag;
+        int32_t usq2 = 4 + ag;
         ush2 -= usq2; // BigInteger* diff = ush->subtract(usq); // ush -= usq;  ush > 0
         if (ush2 > 0) // (ush->compare(usq) == 1)
         {

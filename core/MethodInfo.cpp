@@ -850,7 +850,7 @@ namespace avmplus
         AvmCore* core = pool->core;
         GC* gc = core->GetGC();
 
-        const byte* pos = this->_abc_info_pos;
+        const uint8_t* pos = this->_abc_info_pos;
         const uint32_t param_count = pos ? AvmCore::readU32(pos) : 0;
         uint32_t optional_count = 0;
         uint32_t rest_offset = 0;
@@ -933,7 +933,7 @@ namespace avmplus
 
             if (!isNative())
             {
-                const byte* body_pos = this->abc_body_pos();
+                const uint8_t* body_pos = this->abc_body_pos();
                 if (body_pos)
                 {
                     ms->_max_stack = AvmCore::readU32(body_pos);

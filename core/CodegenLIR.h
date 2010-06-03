@@ -417,7 +417,7 @@ namespace avmplus
         CodegenLabel interrupt_label;
         CodegenLabel mop_rangeCheckFailed_label;
         CodegenLabel catch_label;
-        const byte* lastPcSave;
+        const uint8_t* lastPcSave;
         LIns *setjmpResult;
         VarTracker *varTracker;
         int framesize;
@@ -431,7 +431,7 @@ namespace avmplus
         CacheBuilder<SetCache> set_cache_builder;
         PrologWriter *prolog;
         LIns* prologLastIns;
-        HashMap<const byte*, CodegenLabel*> *blockLabels;
+        HashMap<const uint8_t*, CodegenLabel*> *blockLabels;
         LirWriter* redirectWriter;
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LInsPrinter* vbNames;)
@@ -460,7 +460,7 @@ namespace avmplus
         LIns *localGetf(int i);
         LIns *localCopy(int i); // sniff's type from FrameState
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
-        void branchToAbcPos(LOpcode op, LIns *cond, const byte* target);
+        void branchToAbcPos(LOpcode op, LIns *cond, const uint8_t* target);
         LIns *retIns(LIns *val);
         LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
         LIns *loadEnvScope();
@@ -479,14 +479,14 @@ namespace avmplus
         LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
         debug_only( bool isPointer(int i); )
-        void emitSetPc(const byte* pc);
+        void emitSetPc(const uint8_t* pc);
         void emitSampleCheck();
         bool verbose();
-        CodegenLabel& getCodegenLabel(const byte* pc);
+        CodegenLabel& getCodegenLabel(const uint8_t* pc);
         CodegenLabel& createLabel(const char *name);
         CodegenLabel& createLabel(const char *prefix, int id);
         void patchLater(LIns *br, CodegenLabel &);
-        void patchLater(LIns *jtbl, const byte* pc, uint32_t index);
+        void patchLater(LIns *jtbl, const uint8_t* pc, uint32_t index);
         void emitLabel(CodegenLabel &l);
         void deadvars();
         void deadvars_analyze(Allocator& alloc,
@@ -527,7 +527,7 @@ namespace avmplus
         void coerceArgs(MethodSignaturep mms, int argc, int firstArg);
 
         void emit(AbcOpcode opcode, uintptr_t op1=0, uintptr_t op2=0, Traits* result=NULL);
-        void emitIf(AbcOpcode opcode, const byte* target, int lhs, int rhs);
+        void emitIf(AbcOpcode opcode, const uint8_t* target, int lhs, int rhs);
         void emitSwap(int i, int j);
         void emitCopy(int src, int dest);
         void emitGetscope(int scope, int dest);
@@ -554,18 +554,18 @@ namespace avmplus
         void emitMD();
 
         // CodeWriter methods
-        void write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
-        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
-        void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-        void writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
-        void writeNip(const FrameState* state, const byte *pc);
+        void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);
+        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
+        void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
+        void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
-        void writePrologue(const FrameState* state, const byte *pc);
+        void writePrologue(const FrameState* state, const uint8_t *pc);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
-        void writeOpcodeVerified(const FrameState* state, const byte* pc, AbcOpcode opcode);
-        void writeFixExceptionsAndLabels(const FrameState* state, const byte* pc);
+        void writeOpcodeVerified(const FrameState* state, const uint8_t* pc, AbcOpcode opcode);
+        void writeFixExceptionsAndLabels(const FrameState* state, const uint8_t* pc);
         void cleanup();
     };
 

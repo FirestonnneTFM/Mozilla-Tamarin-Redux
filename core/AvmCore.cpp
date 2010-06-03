@@ -191,10 +191,10 @@ namespace avmplus
     {
         // sanity check for all our types
         MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
-        MMGC_STATIC_ASSERT(sizeof(uint8) == 1);
+        MMGC_STATIC_ASSERT(sizeof(uint8_t) == 1);
         MMGC_STATIC_ASSERT(sizeof(int16_t) == 2);
         MMGC_STATIC_ASSERT(sizeof(uint16_t) == 2);
-        MMGC_STATIC_ASSERT(sizeof(int32) == 4);
+        MMGC_STATIC_ASSERT(sizeof(int32_t) == 4);
         MMGC_STATIC_ASSERT(sizeof(uint32_t) == 4);
         MMGC_STATIC_ASSERT(sizeof(int64_t) == 8);
         MMGC_STATIC_ASSERT(sizeof(uint64_t) == 8);
@@ -444,7 +444,7 @@ namespace avmplus
         // nothing
     }
 
-    /*static*/ void AvmCore::readOperands(const byte* &pc, unsigned int& imm32, int& imm24, unsigned int& imm32b, int& imm8 )
+    /*static*/ void AvmCore::readOperands(const uint8_t* &pc, unsigned int& imm32, int& imm24, unsigned int& imm32b, int& imm8 )
     {
         AbcOpcode opcode = (AbcOpcode)*pc++;
         int op_count = opcodeInfo[opcode].operandCount;
@@ -1603,7 +1603,7 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    void AvmCore::formatOpcode(PrintWriter& buffer, const byte *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool)
+    void AvmCore::formatOpcode(PrintWriter& buffer, const uint8_t *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool)
     {
         pc++;
         switch (opcode)
@@ -1750,7 +1750,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 int imm24 = 0, imm8 = 0;
                 unsigned int imm30 = 0, imm30b = 0;
-                const byte* p2 = pc-1;
+                const uint8_t* p2 = pc-1;
                 readOperands(p2, imm30, imm24, imm30b, imm8);
                 int insWidth = (int)(p2-pc);
 
@@ -1788,7 +1788,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifdef VMCFG_WORDCODE
     void AvmCore::formatBits(PrintWriter& buffer, uint32_t bits)
     {
-        Atom a = (Atom)(intptr_t)(int32)bits;
+        Atom a = (Atom)(intptr_t)(int32_t)bits;
         if (isUndefined(a))
             buffer << "undefined";
         else if (isBoolean(a))
@@ -3351,7 +3351,7 @@ return the result of the comparison ToPrimitive(x) == y.
     Stringp AvmCore::findInternedString(const char *cs, int len8)
     {
         // NOTE: this works in strict UTF-8 conversion mode
-        int32_t len16 = UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, NULL, 0, true);
+        int32_t len16 = UnicodeUtils::Utf8ToUtf16((const uint8_t*)cs, len8, NULL, 0, true);
         AvmAssertMsg(len16 >= 0, "Malformed UTF-8 sequence");
         // use alloca to avoid heap allocations where possible
         MMgc::GC::AllocaAutoPtr _buffer;
@@ -3362,7 +3362,7 @@ return the result of the comparison ToPrimitive(x) == y.
             return NULL;
         }
 
-        UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, buffer, len16, true);
+        UnicodeUtils::Utf8ToUtf16((const uint8_t*)cs, len8, buffer, len16, true);
         buffer[len16] = 0;
         int i = findStringUTF16(buffer, len16);
         Stringp other;
@@ -3825,7 +3825,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
             MMgc::GC::AllocaAutoPtr _swapped;
             wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
-            for (int32 i = 0; i < len; i++)
+            for (int32_t i = 0; i < len; i++)
             {
                 swapped[i] = avmSwap16(s[i]);
             }
@@ -4070,7 +4070,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
         if(u_tmp < 0x01f00000) {
             // |d|<2^31
-            return int32(d);
+            return int32_t(d);
         }
 
         if(u_tmp > 0x01f00000) {
@@ -4100,14 +4100,14 @@ return the result of the comparison ToPrimitive(x) == y.
             du.d -= two32.d;
         }
 
-        return int32(du.d);
+        return int32_t(du.d);
     }
     #else // DBLTOINT32_INT64
     int AvmCore::doubleToInt32(double d)
     {
         double_int du, duh, two32;
         uint32_t DI_H, u_tmp, expon, shift_amount;
-        int32 mask32;
+        int32_t mask32;
 
         //  Algorithm Outline
         //  Step 1.  If d is NaN, +/-Inf or |d|>=2^84 or |d|<1, then return 0
@@ -4130,7 +4130,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
        if(u_tmp < 0x01f00000) {
            // |d|<2^31
-           return int32(d);
+           return int32_t(d);
        }
 
        if(u_tmp > 0x01f00000) {
@@ -4175,7 +4175,7 @@ return the result of the comparison ToPrimitive(x) == y.
             du.d -= two32.d;
         }
 
-        return int32(du.d);
+        return int32_t(du.d);
     }
    #endif // DBLTOINT32_INT64
 #endif // !(defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))

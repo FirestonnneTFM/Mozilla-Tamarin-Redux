@@ -511,9 +511,9 @@ namespace avmplus
         void traceCallback(int line);
         void traceArgumentsString(PrintWriter& prw);
 
-        static int readS24(const byte *pc) { return AvmCore::readS24(pc); }
-        static int readU16(const byte *pc) { return AvmCore::readU16(pc); }
-        static int readU32(const byte *&pc) { return AvmCore::readU32(pc); }
+        static int readS24(const uint8_t *pc) { return AvmCore::readS24(pc); }
+        static int readU16(const uint8_t *pc) { return AvmCore::readU16(pc); }
+        static int readU32(const uint8_t *&pc) { return AvmCore::readU32(pc); }
 
     };
 

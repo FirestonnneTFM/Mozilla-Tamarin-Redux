@@ -1737,7 +1737,7 @@ namespace avmplus
             result->setFromDouble(kPowersOfTen[21]);
             exp -= 21;
             while (exp-- > 0)
-                result->multBy((int32)10);
+                result->multBy((int32_t)10);
         } else { // we won't get here because we only deal in positive exponents
             result->setFromDouble(MathUtils::pow(10,exp)); // but just in case
         }
@@ -1780,7 +1780,7 @@ namespace avmplus
             BigInteger bigQuotient;
             bigQuotient.setFromInteger(0);
             r.divBy(&s, &bigQuotient); // r = r %s,  bigQuotient = r / s.
-            quotient = (int32)(bigQuotient.wordBuffer[0]); // todo: optimize away need for BigInteger result?  We know it should always be a single digit
+            quotient = (int32_t)(bigQuotient.wordBuffer[0]); // todo: optimize away need for BigInteger result?  We know it should always be a single digit
                                               // r <= mMinus               :  r < rMinus
             withinLowEndRoundRange  = (lowOk  ? (r.compare(&mMinus) != 1)  : (r.compare(&mMinus) == -1));
                                               // r+mPlus >= s                     :  r+mPlus > s
@@ -1806,9 +1806,9 @@ namespace avmplus
                 }
                 else
                 {
-                    r.multBy((int32)10);
-                    mPlus.multBy((int32)10);
-                    mMinus.multBy((int32)10);
+                    r.multBy((int32_t)10);
+                    mPlus.multBy((int32_t)10);
+                    mMinus.multBy((int32_t)10);
                 }
             }
             else
@@ -1863,9 +1863,9 @@ namespace avmplus
             }
             else
             {
-                r.multBy((int32)10);
-                mPlus.multBy((int32)10);
-                mMinus.multBy((int32)10);
+                r.multBy((int32_t)10);
+                mPlus.multBy((int32_t)10);
+                mMinus.multBy((int32_t)10);
                 correctedEstimate = exponentEstimate;
             }
         }

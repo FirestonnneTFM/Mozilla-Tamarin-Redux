@@ -54,19 +54,19 @@ namespace avmplus
     class ScriptBufferImpl : public MMgc::GCFinalizedObject
     {
     public:
-        operator byte* () const { return buffer; }
+        operator uint8_t* () const { return buffer; }
         size_t getSize() const { return size; }
-        byte* getBuffer() const { return (byte*)buffer; }
+        uint8_t* getBuffer() const { return (uint8_t*)buffer; }
 
-        byte operator[] (int index) const {
+        uint8_t operator[] (int index) const {
             return buffer[index];
         }
-        byte& operator[] (int index) {
+        uint8_t& operator[] (int index) {
             return buffer[index];
         }
     protected:
         ScriptBufferImpl() {}
-        byte *buffer;
+        uint8_t *buffer;
         size_t size;
     };
 
@@ -81,7 +81,7 @@ namespace avmplus
         : ScriptBufferImpl()
         {
             this->size = _size;
-            buffer = (byte*)(this+1);
+            buffer = (uint8_t*)(this+1);
         }
         // override to skip memset and prevent marking
         static void *operator new(size_t size, MMgc::GC *gc, size_t extra = 0)
@@ -98,11 +98,11 @@ namespace avmplus
     class ReadOnlyScriptBufferImpl : public ScriptBufferImpl
     {
     public:
-        ReadOnlyScriptBufferImpl(const byte * _buf, size_t _size)
+        ReadOnlyScriptBufferImpl(const uint8_t * _buf, size_t _size)
         : ScriptBufferImpl()
         {
             this->size = _size;
-            this->buffer = (byte*) _buf;
+            this->buffer = (uint8_t*) _buf;
         }
     };
 
@@ -133,19 +133,19 @@ namespace avmplus
         operator ScriptBufferImpl*() const {
             return m_impl;
         }
-        operator byte* () const {
+        operator uint8_t* () const {
             return m_impl->getBuffer();
         }
         size_t getSize() const {
             return m_impl->getSize();
         }
-        byte* getBuffer() const {
+        uint8_t* getBuffer() const {
             return m_impl->getBuffer();
         }
-        byte operator[] (int index) const {
+        uint8_t operator[] (int index) const {
             return (*m_impl)[index];
         }
-        byte& operator[] (int index) {
+        uint8_t& operator[] (int index) {
             return (*m_impl)[index];
         }
 

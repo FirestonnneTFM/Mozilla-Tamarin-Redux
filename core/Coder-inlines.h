@@ -43,17 +43,17 @@ REALLY_INLINE CodeWriter::CodeWriter()
 { }
 
 // convenience functions
-REALLY_INLINE void CodeWriter::write(const FrameState* state, const byte *pc, AbcOpcode opcode)
+REALLY_INLINE void CodeWriter::write(const FrameState* state, const uint8_t *pc, AbcOpcode opcode)
 {
     write(state, pc, opcode, NULL);
 }
 
-REALLY_INLINE void CodeWriter::writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1)
+REALLY_INLINE void CodeWriter::writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1)
 {
     writeOp1(state, pc, opcode, opd1, NULL);
 }
 
-REALLY_INLINE void CodeWriter::writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2)
+REALLY_INLINE void CodeWriter::writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2)
 {
     writeOp2(state, pc, opcode, opd1, opd2, NULL);
 }

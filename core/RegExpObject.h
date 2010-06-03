@@ -109,7 +109,7 @@ namespace avmplus
                                  int& newLastIndex,
                                  StringBuffer& resultBuffer);
 
-        int numBytesInUtf8Character(const uint8 *in);
+        int numBytesInUtf8Character(const uint8_t *in);
 
         DECLARE_SLOTS_RegExpObject;
     };

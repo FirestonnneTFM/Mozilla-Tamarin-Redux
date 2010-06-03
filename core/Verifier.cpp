@@ -60,13 +60,13 @@ namespace avmplus
             core = info->pool()->core;
         }
 
-        void write (const FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) {
+        void write (const FrameState* state, const uint8_t *pc, AbcOpcode opcode, Traits *type) {
             if (opcode == OP_newactivation)
                 core->enqTraits(type);
             coder->write(state, pc, opcode, type);
         }
 
-        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
+        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
             if (opcode == OP_newfunction) {
                 MethodInfo *f = info->pool()->getMethodInfo(opd1);
                 AvmAssert(f->declaringTraits() == type);
@@ -155,7 +155,7 @@ namespace avmplus
     {
         // note: reading of max_stack, etc (and validating the values)
         // is handled by MethodInfo::resolveSignature.
-        const byte* pos = info->abc_body_pos();
+        const uint8_t* pos = info->abc_body_pos();
         AvmCore::skipU32(pos, 4);
         code_length = AvmCore::readU32(pos);
         code_pos = pos;
@@ -176,7 +176,7 @@ namespace avmplus
             : NullWriter(coder), info(info), toplevel(toplevel)
         {}
 
-        void writeOp1(const FrameState* state, const byte* pc, AbcOpcode opcode, uint32_t imm30, Traits* type)
+        void writeOp1(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, uint32_t imm30, Traits* type)
         {
             if (opcode == OP_newfunction) {
                 PoolObject* pool = info->pool();
@@ -391,13 +391,13 @@ namespace avmplus
         parseBodyHeader();          // reset code_pos & code_length
         checkParams();
         coder->writePrologue(state, code_pos);
-        const byte* end_pos = code_pos;
+        const uint8_t* end_pos = code_pos;
         // typically, first block is not in blockStates: verify it explicitly
         if (!hasFrameState(code_pos))
             end_pos = verifyBlock(coder, code_pos);
         // visit blocks in linear order (blockStates is sorted by abc address)
         for (int i=0, n=getBlockCount(); i < n; i++) {
-            const byte* start_pos = loadBlockState(blockStates->at(i));
+            const uint8_t* start_pos = loadBlockState(blockStates->at(i));
             // overlapping blocks indicates a branch to the middle of an instruction
             if (start_pos < end_pos)
                 verifyFailed(kInvalidBranchTargetError);
@@ -412,7 +412,7 @@ namespace avmplus
         END_TRY
     }
 
-    const byte* Verifier::loadBlockState(FrameState* blk)
+    const uint8_t* Verifier::loadBlockState(FrameState* blk)
     {
         // now load the saved state at this block
         state->init(blk);
@@ -479,14 +479,14 @@ namespace avmplus
     // we reach a terminal opcode (jump, lookupswitch, returnvalue, returnvoid,
     // or throw), or when we fall into the beginning of another block.
     // returns the address of the next instruction after the block end.
-    const byte* Verifier::verifyBlock(CodeWriter *coder, const byte* start_pos)
+    const uint8_t* Verifier::verifyBlock(CodeWriter *coder, const uint8_t* start_pos)
     {
         _nvprof("verify-block", 1);
         ExceptionHandlerTable* exTable = info->abc_exceptions();
         bool isLoopHeader = state->targetOfBackwardsBranch;
         state->targetOfBackwardsBranch = false;
-        const byte* code_end = code_pos + code_length;
-        for (const byte *pc = start_pos, *nextpc = pc; pc < code_end; pc = nextpc)
+        const uint8_t* code_end = code_pos + code_length;
+        for (const uint8_t *pc = start_pos, *nextpc = pc; pc < code_end; pc = nextpc)
         {
             // should we make a new sample frame in this method?
             // SAMPLE_CHECK();
@@ -524,7 +524,7 @@ namespace avmplus
                         state->scopeDepth = 0;
 
                         // add edge from try statement to catch block
-                        const byte* target = code_pos + handler->target;
+                        const uint8_t* target = code_pos + handler->target;
                         // The thrown value is received as an atom but we will coerce it to
                         // the expected type before handing control to the catch block.
                         state->push(handler->traits);
@@ -1908,10 +1908,10 @@ namespace avmplus
                     verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
 
                 #ifdef AVMPLUS_64BIT
-                const byte* new_pc = (const byte *) (uintptr_t(imm30) | (((uintptr_t) imm30b) << 32));
+                const uint8_t* new_pc = (const uint8_t *) (uintptr_t(imm30) | (((uintptr_t) imm30b) << 32));
                 uint32_t new_len = AvmCore::readU32(nextpc);
                 #else
-                const byte* new_pc = (const byte*) imm30;
+                const uint8_t* new_pc = (const uint8_t*) imm30;
                 uint32_t new_len = imm30b;
                 #endif
 
@@ -1919,7 +1919,7 @@ namespace avmplus
                 if(!pool->isCodePointer(new_pc))
                     verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
 
-                const byte* old_pc = pc;
+                const uint8_t* old_pc = pc;
                 code_pos = pc = nextpc = new_pc;
                 code_length = new_len;
                 code_end = pc + new_len;
@@ -1968,7 +1968,7 @@ namespace avmplus
         }
     }
 
-    void Verifier::emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc)
+    void Verifier::emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc)
     {
         uint32_t n = argc+1;
         checkPropertyMultiname(n, multiname);
@@ -1994,7 +1994,7 @@ namespace avmplus
             state->pop();
     }
 
-    bool Verifier::emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc)
+    bool Verifier::emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc)
     {
         (void) multiname_index;  // FIXME remove
 
@@ -2040,7 +2040,7 @@ namespace avmplus
         return true;
     }
 
-    bool Verifier::emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const byte *pc)
+    bool Verifier::emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const uint8_t *pc)
     {
         if (!AvmCore::isSlotBinding(b) || argc != 1)
             return false;
@@ -2113,7 +2113,7 @@ namespace avmplus
         return true;
     }
 
-    void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc)
+    void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const uint8_t *pc)
     {
         bool skip_translation = false;
         const ScopeTypeChain* scope = info->declaringScope();
@@ -2206,7 +2206,7 @@ namespace avmplus
         state->pop_push(n-1, OBJECT_TYPE, true);
     }
 
-    void Verifier::emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc)
+    void Verifier::emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const uint8_t *pc)
     {
         Value& obj = state->peek(n);
 
@@ -2284,12 +2284,12 @@ namespace avmplus
         }
     }
 
-    FrameState *Verifier::getFrameState(const byte* pc)
+    FrameState *Verifier::getFrameState(const uint8_t* pc)
     {
         return blockStates ? blockStates->get(pc) : NULL;
     }
 
-    bool Verifier::hasFrameState(const byte* pc)
+    bool Verifier::hasFrameState(const uint8_t* pc)
     {
         return blockStates && blockStates->containsKey(pc);
     }
@@ -2562,7 +2562,7 @@ namespace avmplus
     // FrameState (getFrameState(target)), and report verify errors.
     // Fixme: Bug 558876 - |current| must not be dereferenced, it could point
     // outside the valid range of bytecodes.  Its only for back-edge detection.
-    void Verifier::checkTarget(const byte* current, const byte* target)
+    void Verifier::checkTarget(const uint8_t* current, const uint8_t* target)
     {
         if (emitPass) {
             AvmAssert(hasFrameState(target));
@@ -2580,7 +2580,7 @@ namespace avmplus
         bool targetChanged;
         if (!targetState) {
             if (!blockStates)
-                blockStates = new (core->GetGC()) GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects>(core->GetGC());
+                blockStates = new (core->GetGC()) GCSortedMap<const uint8_t*, FrameState*, LIST_NonGCObjects>(core->GetGC());
             targetState = mmfx_new( FrameState(this) );
             targetState->abc_pc = target;
             blockStates->put(target, targetState);
@@ -2832,7 +2832,7 @@ namespace avmplus
             return;
         }
 
-        const byte* pos = code_pos + code_length;
+        const uint8_t* pos = code_pos + code_length;
         int exception_count = toplevel->readU30(pos);   // will be nonnegative and less than 0xC0000000
 
         if (exception_count != 0)
@@ -2922,7 +2922,7 @@ namespace avmplus
     }
 
     #ifdef AVMPLUS_VERBOSE
-    void Verifier::printOpcode(const byte* pc)
+    void Verifier::printOpcode(const uint8_t* pc)
     {
         int offset = int(pc - code_pos);
         core->console << "  " << offset << ':';

@@ -46,7 +46,7 @@
 
 namespace avmplus
 {
-    PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startPos, uint32_t api) :
+    PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startPos, uint32_t api) :
         core(core),
         cpool_int(0),
         cpool_uint(0),
@@ -480,7 +480,7 @@ range_error:
         return undefinedAtom; // not reached
     }
 
-    void PoolObject::parseMultiname(const byte *pos, Multiname& m) const
+    void PoolObject::parseMultiname(const uint8_t *pos, Multiname& m) const
     {
         // the multiname has already been validated so we don't do
         // any checking here, we just fill in the Multiname object

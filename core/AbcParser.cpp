@@ -268,7 +268,7 @@ namespace avmplus
         offsetofSlots = uint16_t(sizeof(ScriptObject));
     }
 
-    Namespacep AbcParser::parseNsRef(const byte* &pc) const
+    Namespacep AbcParser::parseNsRef(const uint8_t* &pc) const
     {
         uint32_t index = readU30(pc);
         if (index == 0)
@@ -282,7 +282,7 @@ namespace avmplus
     }
 
 #if defined(VMCFG_AOT) || defined(AVMPLUS_VERBOSE)
-    void AbcParser::parseTypeName(const byte* &pc, Multiname& m) const
+    void AbcParser::parseTypeName(const uint8_t* &pc, Multiname& m) const
     {
         // only save the type name for now.  verifier will resolve to traits
         uint32_t index = readU30(pc);
@@ -301,7 +301,7 @@ namespace avmplus
     }
     #endif
 
-    uint32_t AbcParser::resolveBindingName(const byte* &p, Multiname &m) const
+    uint32_t AbcParser::resolveBindingName(const uint8_t* &p, Multiname &m) const
     {
         uint32_t index = readU30(p);
         if (index == 0 || index >= pool->cpool_mn_offsets.size())
@@ -343,7 +343,7 @@ namespace avmplus
         return NULL;
     }
 
-    Stringp AbcParser::parseName(const byte* &pc) const
+    Stringp AbcParser::parseName(const uint8_t* &pc) const
     {
         uint32_t index = readU30(pc);
         if (index == 0)
@@ -499,7 +499,7 @@ namespace avmplus
                 toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
             }
 
-            const byte* meta_pos = pos;
+            const uint8_t* meta_pos = pos;
             if (tag & ATTR_metadata)
             {
                 const uint32_t metadataCount = readU30(pos);
@@ -685,7 +685,7 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-        const byte* startpos = pos;
+        const uint8_t* startpos = pos;
 #endif
 
         for (int i=0; i < methodCount; i++)
@@ -693,13 +693,13 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
             int offset = (int)(pos-startpos);
 #endif
-            const byte* info_pos = pos;
+            const uint8_t* info_pos = pos;
 
             // MethodInfo
             const int param_count = readU30(pos);
 
 #ifdef VMCFG_AOT
-            const byte* ret_type_pos = pos;
+            const uint8_t* ret_type_pos = pos;
 #endif
 
         // @todo -- we should add an AbcParser equivalent of skipU32;
@@ -922,7 +922,7 @@ namespace avmplus
         #endif
 
 #ifdef AVMPLUS_VERBOSE
-        const byte* startpos = pos;
+        const uint8_t* startpos = pos;
 #endif
 
         for (int i=0; i < bodyCount; i++)
@@ -934,7 +934,7 @@ namespace avmplus
             uint32_t method_index = readU30(pos);
             MethodInfo* info = resolveMethodInfo(method_index);
 
-            const byte *body_pos = pos;
+            const uint8_t *body_pos = pos;
 
             int max_stack = readU30(pos);
             (void)max_stack;
@@ -1074,7 +1074,7 @@ namespace avmplus
                 // set.  So we parse the same way all the time.  We could reduce file size and
                 // memory by omitting the count + traits completely.
 
-                const byte* traits_pos = pos;
+                const uint8_t* traits_pos = pos;
                 int nameCount = readU30(pos);
                 if (info->needActivation() || nameCount > 0)
                 {
@@ -1173,7 +1173,7 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-        const byte* startpos = pos;
+        const uint8_t* startpos = pos;
 #endif
 
         for(uint32_t i = 1; i < int_count; ++i)
@@ -1272,7 +1272,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
             int offset = (int)(pos-startpos);
 #endif
-            // save the byte position into the cpool array
+            // save the uint8_t position into the cpool array
             (++dataP)->abcPtr = pos;
             // number of characters
             // todo - is compiler emitting no. of chars or no. of bytes?
@@ -1627,7 +1627,7 @@ namespace avmplus
         #endif
 
 #ifdef AVMPLUS_VERBOSE
-        const byte* startpos = pos;
+        const uint8_t* startpos = pos;
 #endif
 
         if (count == 0)
@@ -1644,7 +1644,7 @@ namespace avmplus
 
         for (uint32_t i=0; i < count; i++)
         {
-            const byte* script_pos = pos;
+            const uint8_t* script_pos = pos;
 
             int init_index = readU30(pos);
 
@@ -1705,7 +1705,7 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-        const byte* startpos = pos;
+        const uint8_t* startpos = pos;
 #endif
 
         if (classCount == 0)
@@ -1723,7 +1723,7 @@ namespace avmplus
 
         for (uint32_t i=0; i < classCount; i++)
         {
-            const byte* instancepos = pos;
+            const uint8_t* instancepos = pos;
 
             // CONSTANT_QName name of this class
 
@@ -1782,7 +1782,7 @@ namespace avmplus
             }
 
             int interfaceCount = readU30(pos);
-            const byte* interfacePos = pos;
+            const uint8_t* interfacePos = pos;
 
             if(interfaceCount)
             {
@@ -1902,7 +1902,7 @@ namespace avmplus
         }
 
 #ifdef AVMPLUS_VERBOSE
-        const byte* startpos = pos;
+        const uint8_t* startpos = pos;
 #endif
 
         for (uint32_t i=0; i < classCount; i++)
@@ -1912,7 +1912,7 @@ namespace avmplus
             Namespacep ns = itraits->ns();
             Stringp name = itraits->name();
 
-            const byte* class_pos = pos;
+            const uint8_t* class_pos = pos;
 
             uint32_t cinit_index = readU30(pos);
             MethodInfo* cinit = resolveMethodInfo(cinit_index);
@@ -1962,18 +1962,18 @@ namespace avmplus
         }
     }
 
-    uint32_t AbcParser::readU30(const byte*& p) const
+    uint32_t AbcParser::readU30(const uint8_t*& p) const
     {
         // We have added kBufferPadding bytes to the end of the main swf buffer.
         // Why?  Here we can read from 1 to 5 bytes.  If we were to
-        // put the required safety checks at each byte read, we would slow
+        // put the required safety checks at each uint8_t read, we would slow
         // parsing of the file down.  With this buffer, only one check at the
         // top of this function is necessary. (we will read on into our own memory)
         CHECK_POS(p);
         return toplevel->readU30(p);
     }
 
-    double AbcParser::readDouble(const byte* &p) const
+    double AbcParser::readDouble(const uint8_t* &p) const
     {
         // check to see if we are trying to read past the file end.
         if (p < abcStart || p+7 >= abcEnd )

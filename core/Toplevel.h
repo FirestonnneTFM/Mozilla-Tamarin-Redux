@@ -303,7 +303,7 @@ namespace avmplus
         ClassClosure* getBuiltinClass(int class_id) const;
         ErrorClass* getErrorClass(int class_id) const { return (ErrorClass*)getBuiltinClass(class_id); }
 
-        unsigned int readU30(const byte *&p) const;
+        unsigned int readU30(const uint8_t *&p) const;
 
         // implementations supporting any of our extensions should override this
         virtual ClassClosure *getBuiltinExtensionClass(int clsid);

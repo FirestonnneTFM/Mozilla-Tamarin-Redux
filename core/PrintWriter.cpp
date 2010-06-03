@@ -132,7 +132,7 @@ namespace avmplus
         if (value < 0x80) {
             *this << (char)value;
         } else {
-            uint8 Octets[7];
+            uint8_t Octets[7];
             size_t OctetsLen = UnicodeUtils::Ucs4ToUtf8((uint32_t)value, Octets);
             Octets[OctetsLen] = '\0';
             write((const char*)Octets);
@@ -316,7 +316,7 @@ namespace avmplus
 #undef PRINT_STAR_OPERATOR_SUPPORT_NULL
 #undef PRINT_AMP_OPERATOR_SUPPORT
 
-    void PrintWriter::writeHexNibble(uint8 value)
+    void PrintWriter::writeHexNibble(uint8_t value)
     {
         if (value < 10) {
             *this << (char)(value+'0');
@@ -325,7 +325,7 @@ namespace avmplus
         }
     }
 
-    void PrintWriter::writeHexByte(uint8 value)
+    void PrintWriter::writeHexByte(uint8_t value)
     {
         writeHexNibble(value>>4);
         writeHexNibble(value&0x0f);
@@ -333,22 +333,22 @@ namespace avmplus
 
     void PrintWriter::writeHexWord(uint16_t value)
     {
-        writeHexByte((uint8)(value>>8));
-        writeHexByte((uint8)(value&0xff));
+        writeHexByte((uint8_t)(value>>8));
+        writeHexByte((uint8_t)(value&0xff));
     }
 
     void PrintWriter::writeHexAddr(uintptr_t value)
     {
 #ifdef AVMPLUS_64BIT
-        writeHexByte(uint8((value>>56) & 0xff));
-        writeHexByte(uint8((value>>48) & 0xff));
-        writeHexByte(uint8((value>>40) & 0xff));
-        writeHexByte(uint8((value>>32) & 0xff));
+        writeHexByte(uint8_t((value>>56) & 0xff));
+        writeHexByte(uint8_t((value>>48) & 0xff));
+        writeHexByte(uint8_t((value>>40) & 0xff));
+        writeHexByte(uint8_t((value>>32) & 0xff));
 #endif
-        writeHexByte(uint8((value>>24) & 0xff));
-        writeHexByte(uint8((value>>16) & 0xff));
-        writeHexByte(uint8(value>>8));
-        writeHexByte(uint8(value&0xff));
+        writeHexByte(uint8_t((value>>24) & 0xff));
+        writeHexByte(uint8_t((value>>16) & 0xff));
+        writeHexByte(uint8_t(value>>8));
+        writeHexByte(uint8_t(value&0xff));
     }
 
 #ifdef AVMPLUS_VERBOSE

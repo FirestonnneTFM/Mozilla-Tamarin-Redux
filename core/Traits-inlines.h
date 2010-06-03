@@ -224,7 +224,7 @@ REALLY_INLINE uint32_t Traits::getExtraSize() const
 
 // sadly, it's still more efficient to stash this in Traits itself, as it's nontrivial to recover when
 // we rebuild the TraitMethodInfo.
-REALLY_INLINE void Traits::setMetadataPos(const byte* pos)
+REALLY_INLINE void Traits::setMetadataPos(const uint8_t* pos)
 {
     AvmAssert(metadata_pos == NULL);
     metadata_pos = pos;

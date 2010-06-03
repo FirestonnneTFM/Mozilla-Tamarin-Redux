@@ -69,7 +69,7 @@ namespace avmplus
 
     int UnicodeUtils::Utf16ToUtf8(const wchar *in,
                                   int inLen,
-                                  uint8 *out,
+                                  uint8_t *out,
                                   int outMax)
     {
         int outLen = 0;
@@ -84,15 +84,15 @@ namespace avmplus
                     if (--outMax < 0) {
                         return -1;
                     }
-                    *out++ = (uint8)ch;
+                    *out++ = (uint8_t)ch;
                     outLen++;
                 }
                 else if (ch < 0x800) {
                     if ((outMax -= 2) < 0) {
                         return -1;
                     }
-                    *out++ = (uint8)(0xC0 | ((ch>>6)&0x1F));
-                    *out++ = (uint8)(0x80 | (ch&0x3F));
+                    *out++ = (uint8_t)(0xC0 | ((ch>>6)&0x1F));
+                    *out++ = (uint8_t)(0x80 | (ch&0x3F));
                     outLen += 2;
                 }
                 else if (ch >= 0xD800 && ch <= 0xDBFF) {
@@ -111,10 +111,10 @@ namespace avmplus
                     if ((outMax -= 4) < 0) {
                         return -1;
                     }
-                    *out++ = (uint8)(0xF0 | ((ucs4>>18)&0x07));
-                    *out++ = (uint8)(0x80 | ((ucs4>>12)&0x3F));
-                    *out++ = (uint8)(0x80 | ((ucs4>>6)&0x3F));
-                    *out++ = (uint8)(0x80 | (ucs4&0x3F));
+                    *out++ = (uint8_t)(0xF0 | ((ucs4>>18)&0x07));
+                    *out++ = (uint8_t)(0x80 | ((ucs4>>12)&0x3F));
+                    *out++ = (uint8_t)(0x80 | ((ucs4>>6)&0x3F));
+                    *out++ = (uint8_t)(0x80 | (ucs4&0x3F));
                     outLen += 4;
                 }
                 else {
@@ -127,9 +127,9 @@ namespace avmplus
                     if ((outMax -= 3) < 0) {
                         return -1;
                     }
-                    *out++ = (uint8)(0xE0 | ((ch>>12)&0x0F));
-                    *out++ = (uint8)(0x80 | ((ch>>6)&0x3F));
-                    *out++ = (uint8)(0x80 | (ch&0x3F));
+                    *out++ = (uint8_t)(0xE0 | ((ch>>12)&0x0F));
+                    *out++ = (uint8_t)(0x80 | ((ch>>6)&0x3F));
+                    *out++ = (uint8_t)(0x80 | (ch&0x3F));
                     outLen += 3;
                 }
                 in++;
@@ -170,7 +170,7 @@ namespace avmplus
         return outLen;
     }
 
-    int32_t UnicodeUtils::Utf8ToUtf16(const uint8 *in,
+    int32_t UnicodeUtils::Utf8ToUtf16(const uint8_t *in,
                                       int32_t inLen,
                                       wchar *out,
                                       int32_t outMax,
@@ -301,7 +301,7 @@ namespace avmplus
         return outLen;
     }
 
-    int32_t UnicodeUtils::Utf8ToUcs4(const uint8 *chars,
+    int32_t UnicodeUtils::Utf8ToUcs4(const uint8_t *chars,
                                      int32_t len,
                                      uint32_t *out)
     {
@@ -379,7 +379,7 @@ namespace avmplus
     }
 
     int32_t UnicodeUtils::Ucs4ToUtf8(uint32_t value,
-                                     uint8 *chars)
+                                     uint8_t *chars)
     {
         // U-00000000 - U-0000007F:     0xxxxxxx
         // U-00000080 - U-000007FF:     110xxxxx 10xxxxxx
@@ -388,42 +388,42 @@ namespace avmplus
         // U-00200000 - U-03FFFFFF:     111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
         // U-04000000 - U-7FFFFFFF:     1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
         if (value < 0x80) {
-            *chars = (uint8)value;
+            *chars = (uint8_t)value;
             return 1;
         }
         if (value < 0x800) {
-            chars[0] = (uint8)(0xC0 | ((value>>6)&0x1F));
-            chars[1] = (uint8)(0x80 | (value&0x3F));
+            chars[0] = (uint8_t)(0xC0 | ((value>>6)&0x1F));
+            chars[1] = (uint8_t)(0x80 | (value&0x3F));
             return 2;
         }
         if (value < 0x10000) {
-            chars[0] = (uint8)(0xE0 | ((value>>12)&0x0F));
-            chars[1] = (uint8)(0x80 | ((value>>6)&0x3F));
-            chars[2] = (uint8)(0x80 | (value&0x3F));
+            chars[0] = (uint8_t)(0xE0 | ((value>>12)&0x0F));
+            chars[1] = (uint8_t)(0x80 | ((value>>6)&0x3F));
+            chars[2] = (uint8_t)(0x80 | (value&0x3F));
             return 3;
         }
         if (value < 0x200000) {
-            chars[0] = (uint8)(0xF0 | ((value>>18)&0x07));
-            chars[1] = (uint8)(0x80 | ((value>>12)&0x3F));
-            chars[2] = (uint8)(0x80 | ((value>>6)&0x3F));
-            chars[3] = (uint8)(0x80 | (value&0x3F));
+            chars[0] = (uint8_t)(0xF0 | ((value>>18)&0x07));
+            chars[1] = (uint8_t)(0x80 | ((value>>12)&0x3F));
+            chars[2] = (uint8_t)(0x80 | ((value>>6)&0x3F));
+            chars[3] = (uint8_t)(0x80 | (value&0x3F));
             return 4;
         }
         if (value < 0x4000000) {
-            chars[0] = (uint8)(0xF8 | ((value>>24)&0x03));
-            chars[1] = (uint8)(0x80 | ((value>>18)&0x3F));
-            chars[2] = (uint8)(0x80 | ((value>>12)&0x3F));
-            chars[3] = (uint8)(0x80 | ((value>>6)&0x3F));
-            chars[4] = (uint8)(0x80 | (value&0x3F));
+            chars[0] = (uint8_t)(0xF8 | ((value>>24)&0x03));
+            chars[1] = (uint8_t)(0x80 | ((value>>18)&0x3F));
+            chars[2] = (uint8_t)(0x80 | ((value>>12)&0x3F));
+            chars[3] = (uint8_t)(0x80 | ((value>>6)&0x3F));
+            chars[4] = (uint8_t)(0x80 | (value&0x3F));
             return 5;
         }
         if (value < 0x80000000) {
-            chars[0] = (uint8)(0xFC | ((value>>30)&0x01));
-            chars[1] = (uint8)(0x80 | ((value>>24)&0x3F));
-            chars[2] = (uint8)(0x80 | ((value>>18)&0x3F));
-            chars[3] = (uint8)(0x80 | ((value>>12)&0x3F));
-            chars[4] = (uint8)(0x80 | ((value>>6)&0x3F));
-            chars[5] = (uint8)(0x80 | (value&0x3F));
+            chars[0] = (uint8_t)(0xFC | ((value>>30)&0x01));
+            chars[1] = (uint8_t)(0x80 | ((value>>24)&0x3F));
+            chars[2] = (uint8_t)(0x80 | ((value>>18)&0x3F));
+            chars[3] = (uint8_t)(0x80 | ((value>>12)&0x3F));
+            chars[4] = (uint8_t)(0x80 | ((value>>6)&0x3F));
+            chars[5] = (uint8_t)(0x80 | (value&0x3F));
             return 6;
         }
         return 0;

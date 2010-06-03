@@ -97,7 +97,7 @@ namespace avmplus
         List<uint32_t> cpool_mn_offsets;
 
         /** metadata -- ptrs into ABC, not gc-allocated */
-        List<const byte*> metadata_infos;
+        List<const uint8_t*> metadata_infos;
 
         /** domain */
         DWB(Domain*) domain;
@@ -133,14 +133,14 @@ namespace avmplus
         CodeMgr* codeMgr;
         #endif
 
-        PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos, uint32_t api);
+        PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api);
         ~PoolObject();
 
         MethodInfo* getNamedScript(const Multiname* multiname) const;
 
         // search metadata record at meta_pos for name, return true if present
         bool hasMetadataName(const uint8_t* meta_pos, const String* name);
-        const byte* getMetadataInfoPos(uint32_t index);
+        const uint8_t* getMetadataInfoPos(uint32_t index);
 
         Traits* getTraits(Stringp name, Namespacep ns) const;
         Traits* getTraits(const Multiname& n, const Toplevel* toplevel) const;
@@ -153,13 +153,13 @@ namespace avmplus
         Traits* addUniqueParameterizedITraits(AvmCore* core, const Toplevel* toplevel, Traits* base, Traits* param_traits);
 
         /** deferred parsing */
-        void parseMultiname(const byte *pos, Multiname& m) const;
+        void parseMultiname(const uint8_t *pos, Multiname& m) const;
 
         Traits* resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid=false) const;
-        Traits* resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid=false) const;
+        Traits* resolveTypeName(const uint8_t*& pc, const Toplevel* toplevel, bool allowVoid=false) const;
 
         void resolveBindingNameNoCheck(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
-        void resolveBindingNameNoCheck(const byte* &p, Multiname &m, const Toplevel* toplevel) const;
+        void resolveBindingNameNoCheck(const uint8_t* &p, Multiname &m, const Toplevel* toplevel) const;
 
         Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
 
@@ -176,7 +176,7 @@ namespace avmplus
         int32_t version;
 
         ScriptBuffer code();
-        bool isCodePointer(const byte* pos);
+        bool isCodePointer(const uint8_t* pos);
 
     public:
         uint32_t classCount() const;
@@ -200,7 +200,7 @@ namespace avmplus
         union ConstantStringData
         {
             Stringp     str;
-            const byte* abcPtr;
+            const uint8_t* abcPtr;
         };
         class ConstantStrings : public MMgc::GCRoot
         {
@@ -213,11 +213,11 @@ namespace avmplus
         DWB(MultinameHashtable*)                    _namedTraits;
         DWB(MultinameHashtable*)                    _privateNamedScripts;
         DWB(ScriptBufferImpl*)                      _code;
-        const byte * const                          _abcStart;
+        const uint8_t * const                       _abcStart;
         // start of static ABC string data
-        const byte *                                _abcStringStart;
+        const uint8_t *                             _abcStringStart;
         // points behind end of ABC string data - see AbcParser.cpp
-        const byte *                                _abcStringEnd;
+        const uint8_t *                             _abcStringEnd;
         ConstantStrings                             _abcStrings;
         List<Traits*, LIST_GCObjects>               _classes;
         List<Traits*, LIST_GCObjects>               _scripts;

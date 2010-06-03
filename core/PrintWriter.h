@@ -159,7 +159,7 @@ namespace avmplus
         void writeAtom(Atom atom);
         void writeAtomHex(Atom atom);
         void writeUTF16(const void* buffer, size_t count);
-        void writeHexByte(uint8 value);
+        void writeHexByte(uint8_t value);
         void writeHexWord(uint16_t value);
         void writeHexAddr(uintptr_t value);
 
@@ -171,7 +171,7 @@ namespace avmplus
         OutputStream *m_stream;
         AvmCore *m_core;
 
-        void writeHexNibble(uint8 value);
+        void writeHexNibble(uint8_t value);
 
         // These are defined for not DEBUGGER builds but fire asserts
     public:

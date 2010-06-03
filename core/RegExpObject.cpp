@@ -225,7 +225,7 @@ namespace avmplus
         return matchIndex;
     }
 
-    int RegExpObject::numBytesInUtf8Character(const uint8 *in)
+    int RegExpObject::numBytesInUtf8Character(const uint8_t *in)
     {
         unsigned int c = *in;
         switch(c>>4)
@@ -268,7 +268,7 @@ namespace avmplus
             //  position between characters.  Although we've "matched", its zero length so just break out.
             if (matchLen == 0 ) {
                 matchLen = 0;
-                matchIndex = startIndex+numBytesInUtf8Character((uint8*)(utf8Subject.c_str())+startIndex); // +1char  will advance startIndex, extract just one char
+                matchIndex = startIndex+numBytesInUtf8Character((uint8_t*)(utf8Subject.c_str())+startIndex); // +1char  will advance startIndex, extract just one char
                 if( !isEmptyRE )
                 {
                     // don't break if we're processing an empty regex - then we want to split the string into each character
@@ -681,10 +681,10 @@ namespace avmplus
             if (newLastIndex < subjectLength)
             {
                 uint32_t ch;
-                int n = UnicodeUtils::Utf8ToUcs4((const uint8*)src+newLastIndex, subjectLength-newLastIndex, &ch);
+                int n = UnicodeUtils::Utf8ToUcs4((const uint8_t*)src+newLastIndex, subjectLength-newLastIndex, &ch);
                 if (n <= 0)
                 {
-                    // Invalid UTF8 sequence, advance one byte
+                    // Invalid UTF8 sequence, advance one uint8_t
                     n = 1;
                 }
                 resultBuffer.writeN(src+newLastIndex, n);

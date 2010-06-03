@@ -461,7 +461,7 @@ extern "C" {
     }
 
 #ifdef X86_MATH
-    int32 MathUtils::real2int(double value)
+    int32_t MathUtils::real2int(double value)
     {
         uint16_t oldcw, newcw;
         int32_t intval;

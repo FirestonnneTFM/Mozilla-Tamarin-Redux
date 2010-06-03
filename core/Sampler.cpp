@@ -190,10 +190,10 @@ namespace avmplus
         this->autoStartSampling = autoStart;
     }
 
-    byte *Sampler::getSamples(uint32_t &num)
+    uint8_t *Sampler::getSamples(uint32_t &num)
     {
         num = numSamples;
-        byte *start = samples;
+        uint8_t *start = samples;
         return start;
     }
 
@@ -295,7 +295,7 @@ namespace avmplus
     {
         CallStackNode *csn = core->callStack;
         uint32_t depth = csn ? csn->depth() : 0;
-        byte *p = currentSample;
+        uint8_t *p = currentSample;
         if (sampleTimeMicros == 0)
             sampleTimeMicros = nowMicros();
         write(p, sampleTimeMicros);
@@ -333,7 +333,7 @@ namespace avmplus
         currentSample = p;
     }
 
-    void Sampler::readSample(byte *&p, Sample &s)
+    void Sampler::readSample(uint8_t *&p, Sample &s)
     {
         VMPI_memset(&s, 0, sizeof(Sample));
         read(p, s.micros);
@@ -436,7 +436,7 @@ namespace avmplus
             }
         }
 
-        byte* old_sample = lastAllocSample;
+        uint8_t* old_sample = lastAllocSample;
         Sample s;
         readSample(old_sample, s);
         old_sample = lastAllocSample;
@@ -448,7 +448,7 @@ namespace avmplus
         AvmAssertMsg(s.sampleType == NEW_AUX_SAMPLE, "Sample stream corrupt - can only add info to an AUX sample.");
         AvmAssertMsg(s.ptr == (void*)obj, "Sample stream corrupt - last sample is not for same object.");
 
-        byte* pos = currentSample;
+        uint8_t* pos = currentSample;
         currentSample = old_sample;
         // Rewrite the sample as a NEW_OBJECT_SAMPLE
         writeRawSample(NEW_OBJECT_SAMPLE);
@@ -496,8 +496,8 @@ namespace avmplus
         if( samples )
         {
 
-        byte* oldptr = 0;
-        if( (oldptr = (byte*)ptrSamples.get(item)) != 0 )
+        uint8_t* oldptr = 0;
+        if( (oldptr = (uint8_t*)ptrSamples.get(item)) != 0 )
         {
 #ifdef _DEBUG
                 void* oldval = 0;
@@ -532,7 +532,7 @@ namespace avmplus
             int megs = (callback != NULL) ? 16 : 256;
             while(!currentSample && megs > 0) {
                 samples_size = megs*1024*1024;
-                currentSample = samples = (byte*)VMPI_alloc(samples_size);
+                currentSample = samples = (uint8_t*)VMPI_alloc(samples_size);
                 megs >>= 1;
             }
             if(!currentSample) {
@@ -641,7 +641,7 @@ namespace avmplus
     void Sampler::presweep()
     {
         uint32_t num;
-        byte *p = getSamples(num);
+        uint8_t *p = getSamples(num);
 
         MMgc::GC * const gc = core->gc;
 

@@ -373,7 +373,7 @@ namespace avmplus
         }
         int lastIndexOf(T value) const
         {
-            for(int32 i=len-1; i>=0; i--)
+            for(int32_t i=len-1; i>=0; i--)
                 if (data[i] == value)
                     return i;
             return -1;

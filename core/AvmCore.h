@@ -631,7 +631,7 @@ const int kBufferPadding = 16;
         static bool isDouble(Atom atom);
 
         // removed, because it was being (erroneously) used to ask
-        // "will you fit in int32?", which was never right for 64-bit.
+        // "will you fit in int32_t?", which was never right for 64-bit.
         // instead, use atomIsIntptr(), which asks "will you fit in intptr?"
         // static bool isInteger(Atom atom);
 
@@ -651,7 +651,7 @@ const int kBufferPadding = 16;
 
 #ifdef AVMPLUS_VERBOSE
         /** Disassembles an opcode and places the text in str. */
-        void formatOpcode(PrintWriter& out, const byte *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
+        void formatOpcode(PrintWriter& out, const uint8_t *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
 # ifdef VMCFG_WORDCODE
         void formatOpcode(PrintWriter& out, const uintptr_t *pc, WordOpcode opcode, ptrdiff_t off, PoolObject* pool);
         void formatBits(PrintWriter& buffer, uint32_t bits);
@@ -903,27 +903,27 @@ const int kBufferPadding = 16;
         Namespacep internNamespace(Namespacep ns);
 
         /** Helper function; reads a signed 24-bit integer from pc */
-        static int readS24(const byte *pc);
+        static int readS24(const uint8_t *pc);
 
         /**
          * Returns the size of the instruction + all it's operands.  For OP_lookupswitch the size will not include
          * the size for the case targets.
          */
-        static int calculateInstructionWidth(const byte* p);
+        static int calculateInstructionWidth(const uint8_t* p);
 
         /**
          * Read in some operands for the instruction located at *pc.
          * Returns the size of the instruction, but will not read in all the case targets for
          * an OP_lookupswitch, since there will be a variable number of them.
          */
-        static void readOperands(const byte* &pc, unsigned int& imm32, int& imm24, unsigned int& imm32b, int& imm8 );
+        static void readOperands(const uint8_t* &pc, unsigned int& imm32, int& imm24, unsigned int& imm32b, int& imm8 );
 
         /**
          * Helper function; reads an unsigned 32-bit integer from pc
          * See AbcParser::readS32 for more explanation of the variable length
          * encoding scheme.
          */
-        static uint32_t readU32(const byte *&p)
+        static uint32_t readU32(const uint8_t *&p)
         {
             // @todo -- needs to be moved into AvmCore-inlines.h,
             // but first we must determine whether it should be inline, REALLY_INLINE, etc...
@@ -977,7 +977,7 @@ const int kBufferPadding = 16;
         }
 
         /** Helper function; reads an unsigned 16-bit integer from pc */
-        static int32_t readU16(const byte *pc);
+        static int32_t readU16(const uint8_t *pc);
 
     private:
         static const int k_atomDoesNotNeedCoerce_Masks[8];

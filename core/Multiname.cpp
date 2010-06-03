@@ -106,7 +106,7 @@ namespace avmplus
         // find a matching namespace between m2 and this
         // if no match return false
         Stringp u2 = qname->getNamespace()->getURI();
-        uint8 type2 = (uint8)(qname->getNamespace()->getType());
+        uint8_t type2 = (uint8_t)(qname->getNamespace()->getType());
         //Stringp s2 = core->string(u2);
 
         for (int i = 0; i < this->namespaceCount(); i++)
@@ -115,7 +115,7 @@ namespace avmplus
             // to check URIs since two namespaces with different prefixes
             // are considered a match
             Stringp u1 = getNamespace(i)->getURI();
-            uint8 type1 = (uint8)(getNamespace(i)->getType());
+            uint8_t type1 = (uint8_t)(getNamespace(i)->getType());
             //Stringp s1 = core->string(u1);
             if (u1 == u2 && type1 == type2)
                 return true;

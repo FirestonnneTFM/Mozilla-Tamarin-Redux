@@ -52,17 +52,17 @@ REALLY_INLINE int32_t PoolObject::getAPI()
     return api;
 }
 
-REALLY_INLINE const byte* PoolObject::getMetadataInfoPos(uint32_t index)
+REALLY_INLINE const uint8_t* PoolObject::getMetadataInfoPos(uint32_t index)
 {
     return metadata_infos[index];
 }
 
-REALLY_INLINE Traits* PoolObject::resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid) const
+REALLY_INLINE Traits* PoolObject::resolveTypeName(const uint8_t*& pc, const Toplevel* toplevel, bool allowVoid) const
 {
     return resolveTypeName(AvmCore::readU32(pc), toplevel, allowVoid);
 }
 
-REALLY_INLINE void PoolObject::resolveBindingNameNoCheck(const byte* &p, Multiname &m, const Toplevel* toplevel) const
+REALLY_INLINE void PoolObject::resolveBindingNameNoCheck(const uint8_t* &p, Multiname &m, const Toplevel* toplevel) const
 {
     resolveBindingNameNoCheck(AvmCore::readU32(p), m, toplevel);
 }
@@ -83,7 +83,7 @@ REALLY_INLINE ScriptBuffer PoolObject::code()
     return (ScriptBufferImpl*)_code;
 }
 
-REALLY_INLINE bool PoolObject::isCodePointer(const byte* pos)
+REALLY_INLINE bool PoolObject::isCodePointer(const uint8_t* pos)
 {
     return pos > &code()[0] && pos < _code->getBuffer() + code().getSize();
 }

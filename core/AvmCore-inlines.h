@@ -429,7 +429,7 @@ REALLY_INLINE ScriptObject* AvmCore::newObject(VTable *vtable, ScriptObject *del
 }
 
 /** Helper function; reads a signed 24-bit integer from pc */
-REALLY_INLINE /*static*/ int AvmCore::readS24(const byte *pc)
+REALLY_INLINE /*static*/ int AvmCore::readS24(const uint8_t *pc)
 {
     #ifdef VMCFG_UNALIGNED_INT_ACCESS
         // unaligned short access still faster than 2 byte accesses
@@ -443,17 +443,17 @@ REALLY_INLINE /*static*/ int AvmCore::readS24(const byte *pc)
  * Returns the size of the instruction + all it's operands.  For OP_lookupswitch the size will not include
  * the size for the case targets.
  */
-REALLY_INLINE /*static*/ int AvmCore::calculateInstructionWidth(const byte* p)
+REALLY_INLINE /*static*/ int AvmCore::calculateInstructionWidth(const uint8_t* p)
 {
     int a, b;
     unsigned int c, d;
-    const byte* p2 = p;
+    const uint8_t* p2 = p;
     readOperands(p2, c, a, d, b);
     return int(p2-p);
 }
 
 /** Helper function; reads an unsigned 16-bit integer from pc */
-REALLY_INLINE /*static*/ int32_t AvmCore::readU16(const byte *pc)
+REALLY_INLINE /*static*/ int32_t AvmCore::readU16(const uint8_t *pc)
 {
     #ifdef VMCFG_UNALIGNED_INT_ACCESS
         // unaligned short access still faster than 2 byte accesses

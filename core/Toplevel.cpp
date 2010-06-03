@@ -904,7 +904,7 @@ namespace avmplus
                 buffer.writeHexWord(ch);
             } else {
                 buffer << '%';
-                buffer.writeHexByte((uint8)ch);
+                buffer.writeHexByte((uint8_t)ch);
             }
         }
 
@@ -1048,7 +1048,7 @@ namespace avmplus
                     V = ch;
                     src++;
                 }
-                uint8 Octets[6];
+                uint8_t Octets[6];
                 int OctetsLen = UnicodeUtils::Ucs4ToUtf8(V, Octets);
                 if (!OctetsLen) {
                     return NULL;
@@ -1085,7 +1085,7 @@ namespace avmplus
                     return NULL;
                 }
                 k += 2;
-                uint8 B = (uint8)((v1<<4) | v2);
+                uint8_t B = (uint8_t)((v1<<4) | v2);
                 uint32_t V;
                 if (!(B & 0x80)) {
                     V = (wchar)B;
@@ -1102,7 +1102,7 @@ namespace avmplus
                     if (n == 1 || n > 4) {
                         return NULL;
                     }
-                    uint8 Octets[4];
+                    uint8_t Octets[4];
                     Octets[0] = B;
                     if (k + 3*(n-1) >= length) {
                         return NULL;
@@ -1120,7 +1120,7 @@ namespace avmplus
                         if (v2 == -1) {
                             return NULL;
                         }
-                        B = (uint8)((v1<<4) | v2);
+                        B = (uint8_t)((v1<<4) | v2);
 
                         // 23. If the two most significant bits
                         //     in B are not 10, throw a URIError exception.
@@ -1211,7 +1211,7 @@ namespace avmplus
         return self->core()->isXMLName(v);
     }
 
-    unsigned int Toplevel::readU30(const byte *&p) const
+    unsigned int Toplevel::readU30(const uint8_t *&p) const
     {
         unsigned int result = AvmCore::readU32(p);
         if (result & 0xc0000000)

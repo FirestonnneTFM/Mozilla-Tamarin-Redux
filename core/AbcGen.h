@@ -51,7 +51,7 @@ namespace avmplus
          */
         AbcGen(MMgc::GC *gc, int initCapacity=128) : bytes(gc, initCapacity) {}
 
-        List<byte>& getBytes() { return bytes; }
+        List<uint8_t>& getBytes() { return bytes; }
         void construct_super() { bytes.add(OP_constructsuper); }
         void pushnan() { bytes.add(OP_pushnan); }
         void pushundefined() { bytes.add(OP_pushundefined); }
@@ -63,11 +63,11 @@ namespace avmplus
             // commented out due to over-aggressive compiler warnings
             //AvmAssert((int)kind >=0 && (int)kind <= CONSTANT_StaticProtectedNs && kindToPushOp[kind] != 0);
             int op = kindToPushOp[kind];
-            bytes.add((byte)op);
+            bytes.add((uint8_t)op);
             if(opcodeInfo[op].operandCount > 0)
                 writeInt(index);
         }
-        void getlocalN(int N) { bytes.add((byte)(OP_getlocal0+N)); }
+        void getlocalN(int N) { bytes.add((uint8_t)(OP_getlocal0+N)); }
         void setslot(int slot) { bytes.add(OP_setslot); writeInt(slot+1); }
         void abs_jump(const uint8_t* pc, uint32_t code_length)
         {
@@ -81,11 +81,11 @@ namespace avmplus
             writeInt(code_length);
         }
         void returnvoid() { bytes.add(OP_returnvoid); }
-        void writeBytes(List<byte>& b) { bytes.add(b); }
+        void writeBytes(List<uint8_t>& b) { bytes.add(b); }
         void writeInt(uint32_t n);
         size_t size() { return bytes.size(); }
     private:
-        List<byte> bytes;
+        List<uint8_t> bytes;
     };
 }
 
