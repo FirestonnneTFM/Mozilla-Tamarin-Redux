@@ -51,8 +51,8 @@ namespace avmplus
 
         VMPI_vsnprintf(buf, sizeof(buf), format, args);
         // Belt and suspenders, remove when we're sure VMPI_vsnprintf is completely reliable
-        buf[sizeof(buf-2)] = '\n';
-        buf[sizeof(buf-1)] = '\0';
+        buf[sizeof(buf)-2] = '\n';
+        buf[sizeof(buf)-1] = '\0';
         va_end(args);
         AvmDebugMsg(buf, debuggerBreak);
     #else
