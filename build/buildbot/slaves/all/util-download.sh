@@ -65,7 +65,13 @@ echo "Downloading $source to $dest"
 test -f download.log && {
    rm -f download.log
 }
-wget -o download.log -O $dest $source
+
+# wget "-O -" tells wget to print download to stdout.  This is then piped to our
+# $dest file.  The reason for using this and not doing a "-O $dest" is if there
+# is an error midstream, wget will retry the download and APPEND to $dest (which
+# already is a partially downloaded file) resulting in a corrupt download
+
+wget -o download.log --progress=bar:force -O - $source > $dest
 cat download.log
 response=`cat download.log | grep ERROR`
 if [ ! -z "${response}" ]; then
