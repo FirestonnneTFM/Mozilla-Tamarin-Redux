@@ -1033,7 +1033,7 @@ namespace MMgc
     size_t GCHeap::SafeSize(const void *item)
     {
         MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
-        GCAssert((uintptr_t(item) & (kBlockSize-1)) == 0);
+        GCAssert((uintptr_t(item) & kOffsetMask) == 0);
         HeapBlock *block = AddrToBlock(item);
         if (block)
             return block->size;
@@ -2704,7 +2704,7 @@ namespace MMgc
 
     bool GCHeap::IsAddressInHeap(void *addr)
     {
-        void *block = (void*)(uintptr_t(addr) & ~(uintptr_t(kBlockSize-1)));
+        void *block = (void*)(uintptr_t(addr) & kBlockMask);
         return SafeSize(block) != (size_t)-1;
     }
 

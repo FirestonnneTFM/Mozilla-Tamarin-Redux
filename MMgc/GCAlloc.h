@@ -185,7 +185,7 @@ namespace MMgc
 #endif
 
     private:
-        const static int kBlockSize = 4096;
+        const static int kBlockSize = 4096;         // This must be the same as GCHeap::kBlockSize, we check it in GCAlloc::GCAlloc
 
         const static short kFlagNeedsSweeping = 1;  // set if the block had finalized objects and needs to be swept
         const static short kFlagWeakRefs = 2;       // set if the block may have weak refs and we should check during free

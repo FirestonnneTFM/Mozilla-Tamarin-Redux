@@ -331,7 +331,7 @@ namespace MMgc
     // Called at the start
     void GCPolicyManager::adjustPolicyInitially()
     {
-        remainingMajorAllocationBudget = double(lowerLimitCollectionThreshold()) * 4096.0;
+        remainingMajorAllocationBudget = double(lowerLimitCollectionThreshold()) * double(GCHeap::kBlockSize);
 
         if (gc->incremental)
             remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
@@ -353,7 +353,7 @@ namespace MMgc
         adjustL(H);
 
         // The budget is H(L-1), with a floor
-        double remainingBeforeGC = double(lowerLimitCollectionThreshold()) * 4096.0 - H;
+        double remainingBeforeGC = double(lowerLimitCollectionThreshold()) * double(GCHeap::kBlockSize) - H;
         remainingMajorAllocationBudget = H * (L_actual - 1.0);
         if (remainingMajorAllocationBudget < remainingBeforeGC)
             remainingMajorAllocationBudget = remainingBeforeGC;
@@ -635,10 +635,10 @@ namespace MMgc
         {
             GCLog("[gcbehavior] occupancy-before: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
                   (unsigned)heapAllocatedBeforeSweep, (unsigned)heapUsedBeforeSweep,
-                  (unsigned)gcAllocatedBeforeSweep, (unsigned)(gcBytesUsedBeforeSweep + 4095)/4096);
+                  (unsigned)gcAllocatedBeforeSweep, (unsigned)(gcBytesUsedBeforeSweep + GCHeap::kBlockSize - 1)/GCHeap::kBlockSize);
             GCLog("[gcbehavior] occupancy-after: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
                   (unsigned)heapAllocated, (unsigned)(heapAllocated - heap->GetFreeHeapSize()),
-                  (unsigned)gc->GetNumBlocks(), (unsigned)(bytesInUse + 4095)/4096);
+                  (unsigned)gc->GetNumBlocks(), (unsigned)(bytesInUse + GCHeap::kBlockSize - 1)/GCHeap::kBlockSize);
             GCLog("[gcbehavior] user-data: kbytes-before-sweep=%u kbytes-after-sweep=%u ratio=%.2f\n",
                   unsigned(gcBytesUsedBeforeSweep/1024),
                   unsigned(bytesInUse/1024),
@@ -658,7 +658,7 @@ namespace MMgc
                   (unsigned)heapAllocated,
                   (unsigned)(heapAllocated - heap->GetFreeHeapSize()),
                   (unsigned)gc->GetNumBlocks(),
-                  (unsigned)(bytesInUse + 4095)/4096,
+                  (unsigned)(bytesInUse + GCHeap::kBlockSize - 1)/GCHeap::kBlockSize,
                   (unsigned)maxBlocksOwned);
             GCLog("[gcbehavior] user-data: kbytes=%u\n",
                   unsigned(bytesInUse/1024));
@@ -1066,7 +1066,7 @@ namespace MMgc
             uint32_t* bitsFreelist = m_bitsFreelists[i];
             while(bitsFreelist) {
                 uint32_t *next = *(uint32_t**)bitsFreelist;
-                if(((uintptr_t)bitsFreelist & 0xfff) == 0) {
+                if((uintptr_t(bitsFreelist) & GCHeap::kOffsetMask) == 0) {
                     *((void**)bitsFreelist) = pageList;
                     pageList = (void**)bitsFreelist;
                 }
@@ -1742,7 +1742,7 @@ namespace MMgc
             sweepResults += int(heapSize - heap->GetUsedHeapSize());
             double millis = duration(sweepStart);
             gclog("[mem] sweep(%d) reclaimed %d whole pages (%d kb) in %.2f millis (%.4f s)\n",
-                sweeps, sweepResults, sweepResults*GCHeap::kBlockSize>>10, millis,
+                sweeps, sweepResults, sweepResults*GCHeap::kBlockSize / 1024, millis,
                 duration(t0)/1000);
         }
 
@@ -2098,7 +2098,7 @@ namespace MMgc
                         _asm int 3;
                         break;
                     }
-                    if((uintptr_t(fitem) & ~0xfff) != uintptr_t(_b))
+                    if((uintptr_t(fitem) & GCHeap::kBlockMask) != uintptr_t(_b))
                         _asm int 3;
                     prev = fitem;
                     fitem = *(void**)fitem;
@@ -2176,7 +2176,7 @@ namespace MMgc
 
     bool GC::IsRCObject(const void *item)
     {
-        if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item&0xfff) == 0)
+        if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item & GCHeap::kOffsetMask) == 0)
             return false;
 
         int bits = GetPageMapValue((uintptr_t)item);
@@ -2481,7 +2481,6 @@ namespace MMgc
         GCDebugMsg(false, "[%d] Probing for pointers to : 0x%08x\n", currentDepth, me);
         while(m < memEnd)
         {
-            // divide by 4K to get index
             int bits = GetPageMapValue(m);
             if(bits == kNonGC)
             {
@@ -2727,7 +2726,7 @@ namespace MMgc
         marks++;
 
         uintptr_t *end = p + (size / sizeof(void*));
-        uintptr_t thisPage = (uintptr_t)p & ~0xfff;
+        uintptr_t thisPage = (uintptr_t)p & GCHeap::kBlockMask;
 
         // since MarkItem recurses we have to do this before entering the loop
         if(IsPointerToGCPage(ptr))
@@ -2926,7 +2925,7 @@ namespace MMgc
         policy.signalMarkWork(size);
 
         uintptr_t *end = p + (size / sizeof(void*));
-        uintptr_t thisPage = (uintptr_t)p & ~0xfff;
+        uintptr_t thisPage = (uintptr_t)p & GCHeap::kBlockMask;
 #ifdef MMGC_POINTINESS_PROFILING
         uint32_t could_be_pointer = 0;
         uint32_t actually_is_pointer = 0;
@@ -2968,7 +2967,7 @@ namespace MMgc
             {
                 const void *item;
                 int itemNum;
-                GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) (val & ~0xFFF);
+                GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) (val & GCHeap::kBlockMask);
 
                 if (wi.HasInteriorPtrs())
                 {
@@ -3026,7 +3025,7 @@ namespace MMgc
                     {
                         const void *realItem = GetUserPointer(item);
                         GCWorkItem newItem(realItem, itemSize, GCWorkItem::kGCObject);
-                        if(((uintptr_t)realItem & ~0xfff) != thisPage || mark_item_recursion_control == 0)
+                        if(((uintptr_t)realItem & GCHeap::kBlockMask) != thisPage || mark_item_recursion_control == 0)
                         {
                             *pbits = bits2 | (GCAlloc::kQueued << shift);
                             PushWorkItem(newItem);
@@ -3058,10 +3057,10 @@ namespace MMgc
                     if (bits == kGCLargeAllocPageFirst)
                     {
                         // guard against bogus pointers to the block header
-                        if ((val & 0xffff) < sizeof(GCLargeAlloc::LargeBlock))
+                        if ((val & GCHeap::kOffsetMask) < sizeof(GCLargeAlloc::LargeBlock))
                             continue;
 
-                        item = (void *) ((val & ~0xfff) | sizeof(GCLargeAlloc::LargeBlock));
+                        item = (void *) ((val & GCHeap::kBlockMask) | sizeof(GCLargeAlloc::LargeBlock));
                     }
                     else
                     {
@@ -3075,7 +3074,7 @@ namespace MMgc
 
                     // If |item| doesn't point to the start of the page, it's not
                     // really a pointer.
-                    if(((uintptr_t) item & 0xfff) != sizeof(GCLargeAlloc::LargeBlock))
+                    if(((uintptr_t) item & GCHeap::kOffsetMask) != sizeof(GCLargeAlloc::LargeBlock))
                         continue;
                 }
 
@@ -3458,7 +3457,7 @@ namespace MMgc
             m_bitsNext = (uint32_t*)heapAlloc(1);
         }
 
-        int leftOver = GCHeap::kBlockSize - ((uintptr_t)m_bitsNext & 0xfff);
+        int leftOver = GCHeap::kBlockSize - ((uintptr_t)m_bitsNext & GCHeap::kOffsetMask);
         if(leftOver >= numBytes) {
             bits = m_bitsNext;
             if(leftOver == numBytes)

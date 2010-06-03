@@ -151,6 +151,8 @@ namespace MMgc
         containsRCObjects(_isRC),
         m_gc(_gc)
     {
+        GCAssert((unsigned)kBlockSize == GCHeap::kBlockSize);
+
         // Round itemSize to the nearest boundary of 8
         _itemSize = (_itemSize+7)&~7;
 
@@ -197,7 +199,7 @@ namespace MMgc
         m_bitsInPage = containsPointers && kBlockSize - usedSpace >= m_numBitmapBytes;
 
         // compute values that let us avoid division
-        GCAssert(m_itemSize <= 0xffff);
+        GCAssert(m_itemSize < GCHeap::kBlockSize);
         ComputeMultiplyShift((uint16_t)m_itemSize, multiple, shift);
     }
 

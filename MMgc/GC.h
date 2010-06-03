@@ -1427,9 +1427,6 @@ namespace MMgc
 
         const static int kNumSizeClasses = 40;
 
-        // FIXME: only used for FixedAlloc, GCAlloc sized dynamically
-        const static int kPageUsableSpace = 3936;
-
         uint32_t *AllocBits(int numBytes, int sizeClass);
 
         void FreeBits(uint32_t *bits, int sizeClass);
