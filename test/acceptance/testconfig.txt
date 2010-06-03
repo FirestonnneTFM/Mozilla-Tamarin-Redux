@@ -419,3 +419,18 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
 abcasm/bug_554915b, .*wordcode.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
 
+####################
+# Bug 569939 - Solaris failures
+####################
+
+ecma3/Statements/etry_007, sparc-sol.*(?<!-Dinterp)$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+spidermonkey/js1_5/Regress/regress-511859, sparc-sol.*(?<!-Dinterp)$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+e4x/XML/e13_4_2, sparc-sol-.*-Ojit, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+e4x/XML/e13_4_4_18, sparc-sol-.*-Ojit, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+e4x/XML/e13_4_4_19, sparc-sol-.*-Ojit, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+e4x/XML/e13_4_4_23, sparc-sol-.*-Ojit, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+e4x/XML/e13_4_4_3, sparc-sol-.*-Ojit, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+spidermonkey/js1_5/Regress/regress-407323, sparc-sol-tvm-(release|debug|release-Ojit), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+spidermonkey/js1_5/Regress/regress-420919, sparc-sol-tvm-(release|debug|release-Ojit), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+ecma3/Exceptions/binding_001, sparc-sol-tvm-debugdebugger, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
+ecma3/Statements/block, sparc-sol-tvm-.*debugger, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=569939
