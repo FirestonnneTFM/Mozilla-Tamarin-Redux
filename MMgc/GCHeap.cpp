@@ -1552,7 +1552,7 @@ namespace MMgc
 
 #ifdef _DEBUG
         // trash it. fb == free block
-        VMPI_memset(block->baseAddr, 0xfb, block->size * kBlockSize);
+        VMPI_memset(block->baseAddr, uint8_t(MMFreedPoison), block->size * kBlockSize);
 #endif
 
         AddToFreeList(block, true);

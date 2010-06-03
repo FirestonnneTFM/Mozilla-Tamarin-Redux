@@ -39,10 +39,6 @@
 
 #include "MMgc.h"
 
-#define MMGC_SCALAR_GUARD       0xafafafafU
-#define MMGC_NORM_ARRAY_GUARD   0xbfbf0001U
-#define MMGC_PRIM_ARRAY_GUARD   (MMGC_NORM_ARRAY_GUARD + 1) // Code depends on this fact
-
 namespace MMgc
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
@@ -143,7 +139,7 @@ namespace MMgc
     {
         GCAssertMsg(GCHeap::GetGCHeap()->IsStackEntered() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
 
-        return TaggedAlloc(size, opts, MMGC_SCALAR_GUARD);
+        return TaggedAlloc(size, opts, GCHeap::MMScalarTag);
     }
 
     void* NewTaggedArray(size_t count, size_t elsize, FixedMallocOpts opts, bool isPrimitive)
@@ -154,7 +150,7 @@ namespace MMgc
         if(!isPrimitive)
             size = GCHeap::CheckForAllocSizeOverflow(size, MMGC_ARRAYHEADER_SIZE);
 
-        void *p = TaggedAlloc(size, opts, MMGC_NORM_ARRAY_GUARD + uint32_t(isPrimitive));
+        void *p = TaggedAlloc(size, opts, GCHeap::MMNormalArrayTag + uint32_t(isPrimitive));
 
         if (!isPrimitive && p != NULL)
         {
@@ -179,13 +175,13 @@ namespace MMgc
 
     REALLY_INLINE bool IsScalarAllocation(void* p)
     {
-        return CheckForAllocationGuard(p, MMGC_SCALAR_GUARD);
+        return CheckForAllocationGuard(p, GCHeap::MMScalarTag);
     }
 
     REALLY_INLINE bool IsArrayAllocation(void* p, bool primitive)
     {
         // Check if we have array guard right before the pointer.
-        uint32_t guard = MMGC_NORM_ARRAY_GUARD + uint32_t(primitive);
+        uint32_t guard = GCHeap::MMNormalArrayTag + uint32_t(primitive);
         return CheckForAllocationGuard(p, guard)                                    // simple array
             || CheckForAllocationGuard((char*)p - MMGC_ARRAYHEADER_SIZE, guard);    // array with header
     }
