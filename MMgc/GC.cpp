@@ -957,6 +957,13 @@ namespace MMgc
         MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);
         #endif
 
+        // The size tables above are derived based on a block size of 4096; this
+        // assert keeps us honest.  Talk to Lars if you get into trouble here.
+        //
+        // Also it appears that some DEBUG-mode guards in SetPageMapValue,
+        // GetPageMapValue, ClearPageMapValue know that the block size is 4096.
+        GCAssert(GCHeap::kBlockSize == 4096);
+        
         GCAssert(!(greedy && incremental));
         zct.SetGC(this);
 
@@ -1855,6 +1862,9 @@ namespace MMgc
 
     void GC::MarkGCPages(void *item, uint32_t numPages, int to)
     {
+        // Constants used in this method depend on the block size being 4K.
+        GCAssert(GCHeap::kBlockSize == 4096);
+        
         uintptr_t addr = (uintptr_t)item;
         size_t shiftAmount=0;
         unsigned char *dst = pageMap;

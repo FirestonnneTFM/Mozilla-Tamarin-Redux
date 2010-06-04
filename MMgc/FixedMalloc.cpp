@@ -145,6 +145,10 @@ namespace MMgc
 
     void FixedMalloc::InitInstance(GCHeap* heap)
     {
+        // The size tables above are derived based on a block size of 4096; this
+        // assert keeps us honest.  Talk to Lars if you get into trouble here.
+        GCAssert(GCHeap::kBlockSize == 4096);
+        
         m_heap = heap;
         numLargeBlocks = 0;
         VMPI_lockInit(&m_largeAllocInfoLock);

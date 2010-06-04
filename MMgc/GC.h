@@ -217,7 +217,7 @@ namespace MMgc
      *
      * The policy manager centralizes policy decisions about how and when to run garbage
      * collection.  It is queried from the collector code, and collector code signals
-     * to the policy manager at the occurence of certain events.
+     * to the policy manager at the occurrence of certain events.
      *
      * Typically the GCPolicyManager is simply embedded inside a GC instance, and manages
      * policy for that GC.
@@ -870,7 +870,11 @@ namespace MMgc
             kCanFail=16
         };
 
-        // FIXME: why is this public?
+        // Note that 'two bits per page' is ingrained deeply in the GC at this point, see
+        // eg GetPageMapValue, SetPageMapValue, ClearPageMapValue, MarkGCPages, and search
+        // for occurrences of 33333333 in the code.
+        //
+        // API cleanup: why is this public?
         enum PageType
         {
             kNonGC = 0,
