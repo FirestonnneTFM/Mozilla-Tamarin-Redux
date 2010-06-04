@@ -341,6 +341,7 @@ namespace avmplus
         LIns* vcallIns(const CallInfo *, uint32_t argc, va_list args);
         LIns* eqp(LIns* a, Atom b);
         LIns* eqp(LIns* a, LIns* b);
+        LIns* ltup(LIns* a, LIns* b);
         LIns* choose(LIns* c, Atom t, LIns* f);
         LIns* addp(LIns* a, Atom imm);
         LIns* addi(LIns* a, int32_t imm);
@@ -414,6 +415,7 @@ namespace avmplus
         LIns *undefConst;
         bool interruptable;
         CodegenLabel npe_label;
+        CodegenLabel upe_label;
         CodegenLabel interrupt_label;
         CodegenLabel mop_rangeCheckFailed_label;
         CodegenLabel catch_label;

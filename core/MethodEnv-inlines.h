@@ -117,7 +117,6 @@ REALLY_INLINE Namespacep MethodEnv::traitsNs() const
     return vtable()->traits->ns();
 }
 
-/** null pointer check called from jit code */
 REALLY_INLINE void MethodEnv::nullcheck(Atom atom)
 {
     // Shark recommends inlining the isNullOrUndefined call
