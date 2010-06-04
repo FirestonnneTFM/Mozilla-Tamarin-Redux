@@ -664,11 +664,6 @@ namespace avmplus
         }
     }
 
-    void MethodEnv::npe()
-    {
-        toplevel()->throwTypeError(kConvertNullToObjectError);
-    }
-
     ArrayObject* MethodEnv::createRest(Atom* argv, int32_t argc)
     {
         // create arguments Array using argv[param_count..argc]

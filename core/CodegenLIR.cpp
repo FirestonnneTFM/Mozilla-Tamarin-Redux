@@ -743,6 +743,7 @@ namespace avmplus
         mopsRangeCheckFilter(NULL),
         interruptable(true),
         npe_label("npe"),
+        upe_label("upe"),
         interrupt_label("interrupt"),
         mop_rangeCheckFailed_label("mop_rangeCheckFailed"),
         catch_label("catch"),
@@ -3163,9 +3164,14 @@ namespace avmplus
         if (!isNullable(t) || varTracker->isNotNull(ptr))
             return;
         _nvprof("nullcheck",1);
-        if (valueStorageType(bt(t)) == SST_atom) {
+        BuiltinType ty = bt(t);
+        if (valueStorageType(ty) == SST_atom) {
             _nvprof("nullcheck atom", 1);
-            callIns(FUNCTIONID(nullcheck), 2, env_param, ptr);  // checking atom for null or undefined (AvmCore::isNullOrUndefined())
+            if (ty != BUILTIN_object) {
+                // If we know atom value is an object, it cannot be undefined.
+                branchToLabel(LIR_jt, eqp(ptr, undefConst), upe_label); // if (p == undefined) throw undefined pointer error
+            }
+            branchToLabel(LIR_jt, ltup(ptr, undefConst), npe_label);    // if (p < undefined) throw null pointer error
         } else {
             _nvprof("nullcheck ptr", 1);
             branchToLabel(LIR_jt, eqp0(ptr), npe_label);
@@ -5145,6 +5151,12 @@ namespace avmplus
             emitLabel(npe_label);
             Ins(LIR_regfence);
             callIns(FUNCTIONID(npe), 1, env_param);
+        }
+
+        if (upe_label.unpatchedEdges) {
+            emitLabel(upe_label);
+            Ins(LIR_regfence);
+            callIns(FUNCTIONID(upe), 1, env_param);
         }
 
         if (interrupt_label.unpatchedEdges) {

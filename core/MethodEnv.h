@@ -119,6 +119,9 @@ namespace avmplus
         Atom coerceEnter(Atom thisArg, int32_t argc, Atom* argv);
         Atom coerceEnter(int32_t argc, Atom* argv);
 
+        // Called from the interpreter
+        void nullcheck(Atom atom);    // null pointer check
+
     private:
         static Atom coerceEnter_interp(MethodEnv* env, int32_t argc, Atom* argv);
         static Atom coerceEnter_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* argv);
@@ -142,8 +145,6 @@ namespace avmplus
     // helper functions used from compiled code
     public:
         void argcError(int32_t argc); // never returns; throws argument count error
-        void nullcheck(Atom atom);    // null pointer check
-        void npe();                   // never returns; throws null pointer error
 
         ArrayObject* createRest(Atom* argv, int32_t argc);
         Atom getpropertylate_i(Atom obj, int32_t index) const;

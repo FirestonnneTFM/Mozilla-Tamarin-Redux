@@ -435,7 +435,6 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     }
     FUNCTION(FUNCADDR(getprop_late), SIG3(A,P,A,P), getprop_late)
 
-    METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
     FUNCTION(FUNCADDR(AvmCore::handleInterruptMethodEnv), SIG1(V,P), handleInterruptMethodEnv)
     FASTFUNCTION(FUNCADDR(AvmCore::handleStackOverflowMethodEnv), SIG1(V,P), handleStackOverflowMethodEnv)
     METHOD(ENVADDR(MethodEnv::nextname), SIG3(A,P,A,I), nextname)
@@ -456,7 +455,26 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     PUREFUNCTION(FUNCADDR(AVMCORE_integer), SIG1(I,A), integer)
     PUREFUNCTION(FUNCADDR(AvmCore::number), SIG1(F,A), number)
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
-    METHOD(ENVADDR(MethodEnv::nullcheck), SIG2(V,P,A), nullcheck)
+
+    // FIXME: Bug 570049
+    // Note that Toplevel::throwTypeError() assumes that Toplevel::typeErrorClass()
+    // returns non-null.  In contrast, the interpreter signals a nullcheck failure
+    // with MethodEnv::nullcheckfail(), which allows for a null return from typeErrorClass()
+    // and reports a different diagnostic.  It is unclear that this error is actually
+    // possible, but we should get to the bottom of it and do the same thing in both the
+    // interpreter and the JIT.
+
+    void upe(MethodEnv* env)
+    {
+        env->toplevel()->throwTypeError(kConvertUndefinedToObjectError);
+    }
+    FUNCTION(FUNCADDR(upe), SIG1(V,P), upe)
+
+    void npe(MethodEnv* env)
+    {
+        env->toplevel()->throwTypeError(kConvertNullToObjectError);
+    }
+    FUNCTION(FUNCADDR(npe), SIG1(V,P), npe)
 
     typedef VTable* (*toVTable_Toplevel)(Toplevel*, Atom);
     PUREFUNCTION(FUNCADDR((toVTable_Toplevel)&toVTable<Toplevel*>), SIG2(P,P,A), toVTable)
