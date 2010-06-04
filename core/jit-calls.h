@@ -1024,6 +1024,12 @@ SSE2_ONLY(
         _jvprof(id, value);
     }
 
+    void jitProfileHist32(void* id, int32_t value)
+    {
+        _jhprof(id, value);
+    }
+
     FUNCTION(FUNCADDR(jitProfileEvent), SIG1(V,P), jitProfileEvent)
     FUNCTION(FUNCADDR(jitProfileValue32), SIG2(V,P,I), jitProfileValue32)
+    FUNCTION(FUNCADDR(jitProfileHist32), SIG2(V,P,I), jitProfileHist32)
 #endif

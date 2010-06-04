@@ -120,9 +120,17 @@ return *((intptr_t*)&_method);
         _jnvprof_init(&id, #id, NULL); \
         callIns(FUNCTIONID(jitProfileValue32), 2, InsConstPtr(id), val); \
     } while (0)
+#define JIT_TAGVAL(id, val) \
+    do { \
+        static void* id; \
+        _jnhprof_init(&id, #id, 8, 1, 2, 3, 4, 5, 6, 7, 8); \
+        LIns* jit_tagval_tag = p2i(andp((val), 7)); \
+        callIns(FUNCTIONID(jitProfileHist32), 2, InsConstPtr(id), jit_tagval_tag); \
+    } while (0)
 #else
 #define JIT_EVENT(id)       do { } while (0)
 #define JIT_VALUE(id, val)  do { } while (0)
+#define JIT_TAGVAL(id, val) do { } while (0)
 #endif
 
 #ifdef AVMPLUS_64BIT
