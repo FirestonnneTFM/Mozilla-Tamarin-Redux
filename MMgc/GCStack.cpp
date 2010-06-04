@@ -80,6 +80,10 @@ namespace MMgc
         , m_maxDepth(0)
 #endif
     {
+        // The value of kMarkStackItems is derived from on a block size of 4096; this
+        // assert keeps us honest.  Talk to Lars if you get into trouble here.
+        GCAssert(GCHeap::kBlockSize == 4096);
+        
         GCAssert(sizeof(GCMarkStack::GCStackSegment) <= GCHeap::kBlockSize);
         PushSegment(true);
         GCAssert(Invariants());
