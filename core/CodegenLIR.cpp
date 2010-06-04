@@ -5177,6 +5177,9 @@ namespace avmplus
             LIns* tagAddr = leaIns(stackBase, tags);
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
+            // FIXME: Temporary workaround for bug 569939
+            Ins(LIR_regfence);
+
             int handler_count = info->abc_exceptions()->exception_count;
             const uint8_t* tryBase = state->verifier->tryBase;
             // Jump to catch handler
