@@ -1265,7 +1265,7 @@ namespace avmplus
         // (only really necessary to do this if we calced slotSizeInfo, but simpler & harmless
         // to just do it unconditionally)
         thisData->m_slotSize = (thisData->m_slotSize + (sizeof(uintptr_t)-1)) & ~(sizeof(uintptr_t)-1);
-
+        
         // remember the cap we need
         if (m_bindingCapLog2 == 0)
             m_bindingCapLog2 = calcLog2(thisData->m_bindings->numQuads);    // remember capacity, not count
@@ -1565,7 +1565,51 @@ namespace avmplus
         tb->buildSlotDestroyInfo(core->GetGC(), m_slotDestroyInfo, slotAreaCount, slotAreaSize);
 
         m_resolved = true;
+#ifdef AVMPLUS_VERBOSE
+        if (core->isVerbose(VB_traits)) {
+            core->console << "Resolved ";
+            printExtended(core->console) << "\n";
+        }
+#endif
     }
+
+#ifdef AVMPLUS_VERBOSE
+    PrintWriter& Traits::printExtended(PrintWriter& pw) 
+    {
+        const char* desc = NULL;
+        switch (posType()) {
+        case TRAITSTYPE_INTERFACE:
+            desc = "interface"; break;
+        case TRAITSTYPE_INSTANCE:
+            desc = "instance"; break;
+        case TRAITSTYPE_CLASS:
+            desc = "class"; break;
+        case TRAITSTYPE_SCRIPT:
+            desc = "script"; break;
+        case TRAITSTYPE_ACTIVATION:
+            desc = "activation"; break;
+        case TRAITSTYPE_CATCH:
+            desc = "catch"; break;
+        case TRAITSTYPE_NVA: // null/void/any
+            desc = "singleton"; break; 
+        case TRAITSTYPE_RT:
+            desc = "rt"; break;
+        default:
+            AvmAssert(false);
+        }
+        const char* domainString = core->identifyDomain(pool->domain);
+        pw << ns() << "::" << name() << ", type:" << desc << ",domain:";
+        if (domainString) {
+            pw << domainString;
+        } else {
+            // not a well known domain, print the address to help distinguish distinct domains
+            pw << "@" << hexAddr((intptr_t)pool->domain.value());
+        }
+        return pw;
+    }
+
+#endif
+
 
 #ifdef VMCFG_AOT
 

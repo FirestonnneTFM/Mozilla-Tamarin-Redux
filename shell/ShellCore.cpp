@@ -454,6 +454,12 @@ namespace avmshell
         END_TRY
     }
 
+#ifdef AVMPLUS_VERBOSE
+    const char* ShellCore::identifyDomain(Domain* domain) {
+        return domain == builtinDomain ? "builtin" : (domain == shell_domain ? "shell" : NULL);
+    }
+#endif
+
     int ShellCore::evaluateFile(ShellCoreSettings& settings, const char* filename)
     {
 #ifdef VMCFG_AOT

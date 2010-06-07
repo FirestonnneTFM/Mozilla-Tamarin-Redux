@@ -198,6 +198,9 @@ namespace avmshell
         DebugCLI* debugCLI() { return (DebugCLI*)debugger(); }
 #endif
 
+#ifdef AVMPLUS_VERBOSE
+        virtual const char* identifyDomain(Domain* domain);
+#endif
         SystemClass* systemClass;
         PoolObject* shellPool;
         OutputStream *consoleOutputStream;
