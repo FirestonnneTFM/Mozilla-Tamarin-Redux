@@ -95,8 +95,7 @@ namespace avmplus
          * an exception will be thrown, of type VerifyError.
          * @param info the method to verify
          */
-        // Sun's C++ compiler wants "volatile" here because the definition has it
-        void verify(CodeWriter * volatile coder);
+        void verify(CodeWriter* coder);
         bool hasFrameState(const uint8_t* pc);
         bool canAssign(Traits* lhs, Traits* rhs) const;
         int getBlockCount();
