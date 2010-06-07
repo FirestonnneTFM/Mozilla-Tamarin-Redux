@@ -605,7 +605,7 @@ void mop_sf32(void* addr, double value)
     };
     a = float(value);
     uint8_t* u = (uint8_t*)addr;
-    
+
     // Bugzilla 569691: Do not try to be clever here by storing from 'b' into
     // '*(uint32_t*)u', even if both VMCFG_UNALIGNED_INT_ACCESS and
     // AVMPLUS_LITTLE_ENDIAN are set - gcc will emit code that stores directly
