@@ -1227,94 +1227,94 @@ namespace avmplus
 
         index = handleSign(s, index, negate);
 
-		// Pass 1: Validate input and determine exponents.
-		int32_t start = index;
-		int32_t slength = s->length();
-		while (index < slength) {
-			ch = s[index];
-			if (ch >= '0' && ch <= '9') {
-				numDigits++;
-				index++;
-			}
-			else
-			{
-				// https://bugzilla.mozilla.org/show_bug.cgi?id=564839 -- stop parsing at null char
-				if (ch == 0)
-				{
-					slength = index;
-				}
-				break;
+        // Pass 1: Validate input and determine exponents.
+        int32_t start = index;
+        int32_t slength = s->length();
+        while (index < slength) {
+            ch = s[index];
+            if (ch >= '0' && ch <= '9') {
+                numDigits++;
+                index++;
             }
-		}
-
-		// If decimal point encountered, read past digits
-		// to right of decimal point.
-		if (ch == '.') {
-			while (++index < slength) {
-				ch = s[index];
-				if (ch >= '0' && ch <= '9') {
-					numDigits++;
-				}
-				else
+            else
+            {
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=564839 -- stop parsing at null char
+                if (ch == 0)
                 {
-                    // https://bugzilla.mozilla.org/show_bug.cgi?id=564839 -- stop parsing at null char
-                    if (ch == 0 && index < slength)
-                    {
-                        slength = index;
-                    }
-					break;
+                    slength = index;
                 }
-			}
-		}
+                break;
+            }
+        }
 
-		// Handle exponent
-		if (index < slength && (s[index] == 'e' || s[index] == 'E')) {
-			int32_t num = 0;
-			bool negexp;
-			index = handleSign(s, ++index, negexp);
-			if (negexp && index >= slength) // fail if string ends in "e-" with no exponent value specified.
-				return false;
-    
-			while (index < slength) {
-				ch = s[index];
-				if (ch >= '0' && ch <= '9') {
-					num = num * 10 + (ch - '0');
-					index++;
-				}
-				else
+        // If decimal point encountered, read past digits
+        // to right of decimal point.
+        if (ch == '.') {
+            while (++index < slength) {
+                ch = s[index];
+                if (ch >= '0' && ch <= '9') {
+                    numDigits++;
+                }
+                else
                 {
                     // https://bugzilla.mozilla.org/show_bug.cgi?id=564839 -- stop parsing at null char
                     if (ch == 0 && index < slength)
                     {
                         slength = index;
                     }
-					break;
-				}
-			}
-			if (negexp) {
-				num = -num;
-			}
-			exp10 += num;
-		}
-		// ecma3 compliant to allow leading and trailing whitespace
-		index = skipSpaces(s, index);
+                    break;
+                }
+            }
+        }
 
-		// If we got no digits, check for Infinity/-Infinity, else fail
-		if (numDigits == 0) {
-			// check for the strings "Infinity" and "-Infinity"
-			if (s->matchesLatin1("Infinity", 8, index)) {
-				index += 8;
-				// there may be trailing whitespace
-				if (index < slength && skipSpaces(s, index) == index)
-					return false;
-				*value = (negate ? MathUtils::kNegInfinity : MathUtils::kInfinity);
-				return true;
-			}
-			return false;
-		}
+        // Handle exponent
+        if (index < slength && (s[index] == 'e' || s[index] == 'E')) {
+            int32_t num = 0;
+            bool negexp;
+            index = handleSign(s, ++index, negexp);
+            if (negexp && index >= slength) // fail if string ends in "e-" with no exponent value specified.
+                return false;
+
+            while (index < slength) {
+                ch = s[index];
+                if (ch >= '0' && ch <= '9') {
+                    num = num * 10 + (ch - '0');
+                    index++;
+                }
+                else
+                {
+                    // https://bugzilla.mozilla.org/show_bug.cgi?id=564839 -- stop parsing at null char
+                    if (ch == 0 && index < slength)
+                    {
+                        slength = index;
+                    }
+                    break;
+                }
+            }
+            if (negexp) {
+                num = -num;
+            }
+            exp10 += num;
+        }
+        // ecma3 compliant to allow leading and trailing whitespace
+        index = skipSpaces(s, index);
+
+        // If we got no digits, check for Infinity/-Infinity, else fail
+        if (numDigits == 0) {
+            // check for the strings "Infinity" and "-Infinity"
+            if (s->matchesLatin1("Infinity", 8, index)) {
+                index += 8;
+                // there may be trailing whitespace
+                if (index < slength && skipSpaces(s, index) == index)
+                    return false;
+                *value = (negate ? MathUtils::kNegInfinity : MathUtils::kInfinity);
+                return true;
+            }
+            return false;
+        }
 
         // If we got digits, but we're in strict mode and not at end of string, fail.
-		if (index < slength && strict) {
+        if (index < slength && strict) {
             return false;
         }
 
@@ -1336,7 +1336,7 @@ namespace avmplus
             BigInteger exactInt;
             exactInt.setFromInteger(0);
             int32_t decimalDigits= -1;
-			while (index < slength) {
+            while (index < slength) {
                 ch = s[index];
                 if ((ch >= '0' && ch <= '9') || ch == '.') {
                     if (decimalDigits != -1) {
@@ -1374,7 +1374,7 @@ namespace avmplus
         else // we can use double
         {
             int32_t decimalDigits= -1;
-			while (index < slength)
+            while (index < slength)
             {
                 ch = s[index];
                 if ((ch >= '0' && ch <= '9') || ch == '.') {
