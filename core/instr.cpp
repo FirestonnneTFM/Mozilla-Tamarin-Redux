@@ -524,14 +524,17 @@ double FASTCALL mop_lf32(const void* addr)
         float b;
     };
     const uint8_t* u = (const uint8_t*)addr;
-#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
-    a = *(uint32_t*)u;
-#else
+
+    // Bugzilla 569691: Do not try to be clever here by loading from
+    // '*(uint32_t*)u' into 'a', even if both VMCFG_UNALIGNED_INT_ACCESS and
+    // AVMPLUS_LITTLE_ENDIAN are set - gcc may emit code that loads directly
+    // from the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
+
     a = (uint32_t(u[3]) << 24) |
         (uint32_t(u[2]) << 16) |
         (uint32_t(u[1]) << 8) |
         uint32_t(u[0]);
-#endif
+
     return b;
 #endif
 }
@@ -602,14 +605,16 @@ void mop_sf32(void* addr, double value)
     };
     a = float(value);
     uint8_t* u = (uint8_t*)addr;
-#if defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
-    *(uint32_t*)u = b;
-#else
+    
+    // Bugzilla 569691: Do not try to be clever here by storing from 'b' into
+    // '*(uint32_t*)u', even if both VMCFG_UNALIGNED_INT_ACCESS and
+    // AVMPLUS_LITTLE_ENDIAN are set - gcc will emit code that stores directly
+    // from the ARM VFP register, and that requires VMCFG_UNALIGNED_FP_ACCESS.
+
     u[0] = uint8_t(b);
     u[1] = uint8_t(b >> 8);
     u[2] = uint8_t(b >> 16);
     u[3] = uint8_t(b >> 24);
-#endif
 #endif
 }
 
