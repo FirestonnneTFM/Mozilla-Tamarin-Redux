@@ -310,6 +310,7 @@ const int kBufferPadding = 16;
         bool isVerbose(uint32_t b) const;
         static bool isBitSet(uint32_t v, uint32_t bit);
         static uint32_t parseVerboseFlags(const char* arg, char*& badFlag);
+        virtual const char* identifyDomain(Domain* domain);
         #endif
 
         void SetJITEnabled(bool isEnabled);

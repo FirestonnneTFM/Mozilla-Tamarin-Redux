@@ -269,6 +269,10 @@ namespace avmplus
         // we rebuild the TraitMethodInfo.
         void setMetadataPos(const uint8_t* pos);
 
+#ifdef AVMPLUS_VERBOSE
+        PrintWriter& printExtended(PrintWriter& pw);
+#endif
+
     private:
 
         // in bytes. size of the slots not included in the size of instance.  Includes size of slots for bases classes that are not native.

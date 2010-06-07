@@ -145,6 +145,11 @@ namespace avmplus
 
         return r;
     }
+
+    const char* AvmCore::identifyDomain(Domain* domain) {
+        return domain == builtinDomain  ? "builtin" : NULL;
+    }
+
 #endif
 
     // a single string with characters 0x00...0x7f (inclusive)
