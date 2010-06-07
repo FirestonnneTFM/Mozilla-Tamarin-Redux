@@ -120,7 +120,7 @@ namespace avmplus
         bool emitPass;
         bool handlerIsReachable;
         FrameState* getFrameState(const uint8_t* pc);
-        const uint8_t* verifyBlock(CodeWriter *, const uint8_t*);
+        const uint8_t* verifyBlock(const uint8_t*);
         void identifyBlocks(const uint8_t*, int);
         void dfsBlock(const uint8_t*, int);
         const uint8_t* loadBlockState(FrameState* blk);

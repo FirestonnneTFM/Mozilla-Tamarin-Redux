@@ -309,17 +309,17 @@ namespace avmplus
      * @param pool
      * @param info
      */
-    // Sun's C++ compiler wants "volatile" here because the declaration has it
-    // Presumably it's here to remove a warning about variable clobbered by longjmp
-    void Verifier::verify(CodeWriter * volatile emitter)
+    void Verifier::verify(CodeWriter *emitter)
     {
         SAMPLE_FRAME("[verify]", core);
         PERFM_NVPROF("abc-bytes", code_length);
 
-        TRY(core, kCatchAction_Rethrow) {
-
-        CodeWriter stubWriter;
-        CodeWriter* coder = &stubWriter;
+        // CodeWriter warning: Verify exceptions are thrown from here
+        // and callees, so any CodeWriters declared with function scope
+        // will not be destructed.  Presently, only CodeWriter, VerifyallWriter,
+        // and ScopeWriter are declared this way, and none require cleanup.
+        // if you add a new one, or add allocations in one of these,
+        // a TRY/CATCH will be required.
 
         #ifdef AVMPLUS_VERBOSE
         if (verbose)
@@ -338,7 +338,8 @@ namespace avmplus
 
         emitPass = false;
         // phase 1 - iterate to a fixed point
-        this->coder = coder;
+        CodeWriter stubWriter;
+        coder = &stubWriter;
         parseBodyHeader();          // set code_pos & code_length
         parseExceptionHandlers();   // resolve catch block types
         checkParams();
@@ -357,12 +358,12 @@ namespace avmplus
         } else {
             // inital sequence of code is only reachable from procedure
             // entry, no block will be created, so verify it explicitly
-            verifyBlock(coder, code_pos);
+            verifyBlock(code_pos);
         }
         for (FrameState* succ = worklist; succ != NULL; succ = worklist) {
             worklist = succ->wl_next;
             succ->wl_pending = false;
-            verifyBlock(coder, loadBlockState(succ));
+            verifyBlock(loadBlockState(succ));
         }
         coder->writeEpilogue(state);
 
@@ -394,22 +395,16 @@ namespace avmplus
         const uint8_t* end_pos = code_pos;
         // typically, first block is not in blockStates: verify it explicitly
         if (!hasFrameState(code_pos))
-            end_pos = verifyBlock(coder, code_pos);
+            end_pos = verifyBlock(code_pos);
         // visit blocks in linear order (blockStates is sorted by abc address)
         for (int i=0, n=getBlockCount(); i < n; i++) {
             const uint8_t* start_pos = loadBlockState(blockStates->at(i));
             // overlapping blocks indicates a branch to the middle of an instruction
             if (start_pos < end_pos)
                 verifyFailed(kInvalidBranchTargetError);
-            end_pos = verifyBlock(coder, start_pos);
+            end_pos = verifyBlock(start_pos);
         }
         coder->writeEpilogue(state);
-
-        } CATCH (Exception *exception) {
-            core->throwException(exception); // re-throw
-        }
-        END_CATCH
-        END_TRY
     }
 
     const uint8_t* Verifier::loadBlockState(FrameState* blk)
@@ -479,9 +474,10 @@ namespace avmplus
     // we reach a terminal opcode (jump, lookupswitch, returnvalue, returnvoid,
     // or throw), or when we fall into the beginning of another block.
     // returns the address of the next instruction after the block end.
-    const uint8_t* Verifier::verifyBlock(CodeWriter *coder, const uint8_t* start_pos)
+    const uint8_t* Verifier::verifyBlock(const uint8_t* start_pos)
     {
         _nvprof("verify-block", 1);
+        CodeWriter *coder = this->coder; // Load into local var for expediency.
         ExceptionHandlerTable* exTable = info->abc_exceptions();
         bool isLoopHeader = state->targetOfBackwardsBranch;
         state->targetOfBackwardsBranch = false;
