@@ -71,7 +71,7 @@ test -f download.log && {
 # is an error midstream, wget will retry the download and APPEND to $dest (which
 # already is a partially downloaded file) resulting in a corrupt download
 
-wget -o download.log --progress=bar:force -O - $source > $dest
+wget -o download.log --progress=dot:mega -O - $source > $dest
 cat download.log
 response=`cat download.log | grep ERROR`
 if [ ! -z "${response}" ]; then
