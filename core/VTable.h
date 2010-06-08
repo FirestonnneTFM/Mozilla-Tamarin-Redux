@@ -40,53 +40,16 @@
 #ifndef __avmplus_VTable__
 #define __avmplus_VTable__
 
-
 namespace avmplus
 {
-#if defined FEATURE_NANOJIT
-    class ImtThunkEnv;
-
-    typedef uintptr_t GprImtThunkProcRetType;
-
-    typedef GprImtThunkProcRetType (*GprImtThunkProc)(ImtThunkEnv*, int, uint32_t*, uintptr_t);
-
-#endif
-
     class VTable : public MMgc::GCObject
     {
-#if defined FEATURE_NANOJIT
         friend class CodegenLIR;
         friend class ImtThunkEnv;
-#endif
+        friend class BaseExecMgr;
+
     private:
         MethodEnv* makeMethodEnv(MethodInfo* method, ScopeChain* scope);
-
-#if defined FEATURE_NANOJIT
-        void resolveImtSlot(uint32_t slot);
-
-        // Helpers for resolveImtSlot
-        void resolveImtSlotFromBase(uint32_t slot);
-        bool resolveImtSlotSelf(uint32_t slot);
-
-        // return uint64_t, not uintptr_t: see note for GprImtThunkProc
-        static GprImtThunkProcRetType resolveImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
-        static GprImtThunkProcRetType dispatchImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
-
-    public:
-#if defined FEATURE_NANOJIT
-        // choose a number that is relatively prime to sizeof(MethodInfo)/8
-        // since we use the MethodInfo pointer as the interface method id
-        // smaller = dense table, few large conflict stubs
-        // larger  = sparse table, many small conflict stubs
-
-    #ifdef _DEBUG
-        enum { IMT_SIZE = 3 };  // good for testing all code paths
-    #else
-        enum { IMT_SIZE = 7 };  // good for performance
-    #endif
-#endif // FEATURE_NANOJIT
-
-#endif
 
     public:
         VTable(Traits* traits, VTable* base, Toplevel* toplevel);
@@ -124,8 +87,10 @@ namespace avmplus
         bool pad[2];
 
 #if defined FEATURE_NANOJIT
-        ImtThunkEnv* imt[VTable::IMT_SIZE];
+    private:
+        class ImtHolder imt;
 #endif
+    public:
         MethodEnv* methods[1]; // virtual method table
     // ------------------------ DATA SECTION END
     };

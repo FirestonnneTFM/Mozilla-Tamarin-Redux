@@ -62,8 +62,6 @@ namespace avmplus
 
 const int kBufferPadding = 16;
 
-    enum Runmode { RM_mixed, RM_jit_all, RM_interp_all };
-
     enum VB_Bits {
         // Output control bits for verbose mode
         VB_builtins     = 1<<31, // display output for builtins (default is to ignore any builtins)
@@ -228,16 +226,6 @@ const int kBufferPadding = 16;
             bool                passAllExceptionsToDebugger;
         #endif
 
-#ifdef VMCFG_VERIFYALL
-    private:
-        List<MethodInfo*, LIST_GCObjects> verifyFunctionQueue;
-        List<Traits*, LIST_GCObjects> verifyTraitsQueue;
-    public:
-        void enqFunction(MethodInfo* f);
-        void enqTraits(Traits* t);
-        void verifyEarly(Toplevel* toplevel, AbcEnv* abc_env);
-#endif
-
     private:
         class LivePoolNode : public MMgc::GCRoot
         {
@@ -301,6 +289,9 @@ const int kBufferPadding = 16;
 
         Config config;
 
+        // execution manager, responsible for all invocation
+        ExecMgr* exec;
+
         #ifdef FEATURE_NANOJIT // accessors
             #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
             bool use_sse2() const;
@@ -312,10 +303,6 @@ const int kBufferPadding = 16;
         static uint32_t parseVerboseFlags(const char* arg, char*& badFlag);
         virtual const char* identifyDomain(Domain* domain);
         #endif
-
-        void SetJITEnabled(bool isEnabled);
-        bool IsJITEnabled() const;
-        bool JITMustSucceed() const;
 
         enum InterruptReason {
             // normal state.  must be 0 to allow efficient code for interrupt checks

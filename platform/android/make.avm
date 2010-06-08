@@ -74,6 +74,9 @@ AVMPLUS_SRCS := \
 	E4XNode.cpp \
 	ErrorClass.cpp \
 	ErrorConstants.cpp \
+	exec.cpp \
+	exec-jit.cpp \
+	exec-verifyall.cpp \
 	Exception.cpp \
 	FrameState.cpp \
 	FunctionClass.cpp \

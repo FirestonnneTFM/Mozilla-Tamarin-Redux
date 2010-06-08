@@ -39,37 +39,6 @@
 
 namespace avmplus
 {
-#ifdef VMCFG_METHODENV_IMPL32
-REALLY_INLINE MethodEnvProcHolder::MethodEnvProcHolder(GprMethodProc p)
-    : _implGPR(p)
-{ }
-
-REALLY_INLINE GprMethodProc MethodEnvProcHolder::implGPR() const
-{
-    return _implGPR;
-}
-
-REALLY_INLINE FprMethodProc MethodEnvProcHolder::implFPR() const
-{
-    return _implFPR;
-}
-
-#else
-
-REALLY_INLINE MethodEnvProcHolder::MethodEnvProcHolder(MethodInfo* m)
-    : method(m)
-{ }
-
-REALLY_INLINE GprMethodProc MethodEnvProcHolder::implGPR() const
-{
-    return method->implGPR();
-}
-
-REALLY_INLINE FprMethodProc MethodEnvProcHolder::implFPR() const
-{
-    return method->implFPR();
-}
-#endif
 
 REALLY_INLINE AbcEnv* MethodEnv::abcEnv() const
 {
@@ -159,23 +128,25 @@ REALLY_INLINE VTable* MethodEnv::vtable() const
     return _scope->vtable();
 }
 
+REALLY_INLINE MethodSignaturep MethodEnv::get_ms()
+{
+    if (!method->isResolved())
+        method->resolveSignature(this->toplevel());
+    return method->getMethodSignature();
+}
+
 // specialized for calling init/get functions with no parameters
 REALLY_INLINE Atom MethodEnv::coerceEnter(Atom thisArg)
 {
-    return method->invoke(this, 0, &thisArg);
+    return (*method->_invoker)(this, 0, &thisArg);
 }
 
 // general case for method calls
 REALLY_INLINE Atom MethodEnv::coerceEnter(int32_t argc, Atom* args)
 {
-    Atom result = method->invoke(this, argc, args);
+    Atom result = (*method->_invoker)(this, argc, args);
     AvmAssert(VMPI_memset(args, 0, (argc+1)*sizeof(Atom)) == args); // clobber incoming args in DEBUG
     return result;
-}
-
-REALLY_INLINE bool MethodEnv::isInterpreted()
-{
-    return method->isInterpreted();
 }
 
 REALLY_INLINE ScriptEnv::ScriptEnv(MethodInfo* _method, ScopeChain* _scope)
@@ -187,41 +158,5 @@ REALLY_INLINE ScriptEnv::ScriptEnv(MethodInfo* _method, ScopeChain* _scope)
 REALLY_INLINE FunctionEnv::FunctionEnv(MethodInfo* _method, ScopeChain* _scope)
     : MethodEnv(_method, _scope)
 { }
-
-#ifdef FEATURE_NANOJIT
-
-#ifdef VMCFG_METHODENV_IMPL32
-
-REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, VTable* v)
-    : MethodEnvProcHolder((GprMethodProc)p), vtable(v)
-{ }
-
-REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, uint32_t c)
-    : MethodEnvProcHolder((GprMethodProc)p), imtMapCount(c)
-{ }
-
-#else // !VMCFG_METHODENV_IMPL32
-
-REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, VTable* v)
-    : MethodEnvProcHolder((MethodInfo*)&methodProcHolder), vtable(v), methodProcHolder((GprMethodProc)p)
-{ }
-
-REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, uint32_t c)
-    : MethodEnvProcHolder((MethodInfo*)&methodProcHolder), imtMapCount(c), methodProcHolder((GprMethodProc)p)
-{ }
-
-#endif // VMCFG_METHODENV_IMPL32
-
-REALLY_INLINE GprImtThunkProc ImtThunkEnv::implImtGPR() const
-{
-    return (GprImtThunkProc)this->implGPR();
-}
-
-REALLY_INLINE ImtThunkEntry* ImtThunkEnv::entries() const
-{
-    return (ImtThunkEntry*)(this+1);
-}
-
-#endif // FEATURE_NANOJIT
 
 } // namespace avmplus

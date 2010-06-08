@@ -738,7 +738,6 @@ namespace avmplus
 
     CodegenLIR::CodegenLIR(MethodInfo* i) :
         LirHelper(i->pool()),
-        overflow(false),
 #ifdef VTUNE
         hasDebugInfo(false),
         jitInfoList(i->core()->gc),
@@ -2749,7 +2748,7 @@ namespace avmplus
         case OP_callproplex:
         case OP_callpropvoid:
             AvmAssert(m->declaringTraits()->isInterface());
-            emitTypedCall(OP_callinterface, disp_id /* iid */, argc, type, m);
+            emitTypedCall(OP_callinterface, ImtHolder::getIID(m), argc, type, m);
             break;
         case OP_callmethod:
             emitTypedCall(OP_callmethod, disp_id, argc, type, m);
@@ -2923,7 +2922,7 @@ namespace avmplus
                     emitTypedCall(OP_callmethod, disp_id, 0, type, f);
                 }
                 else {
-                    emitTypedCall(OP_callinterface, f->iid(), 0, type, f);
+                    emitTypedCall(OP_callinterface, ImtHolder::getIID(f), 0, type, f);
                 }
                 AvmAssert(type == f->getMethodSignature()->returnTraits());
             }
@@ -2955,7 +2954,7 @@ namespace avmplus
                     emitTypedCall(OP_callmethod, disp_id, 1, type, f);
                 }
                 else {
-                    emitTypedCall(OP_callinterface, f->iid(), 1, type, f);
+                    emitTypedCall(OP_callinterface, ImtHolder::getIID(f), 1, type, f);
                 }
             }
             else {
@@ -3295,10 +3294,10 @@ namespace avmplus
         case OP_callinterface:
         {
             // method_id is pointer to interface method name (multiname)
-            int index = int(method_id % VTable::IMT_SIZE);
+            uint32_t index = ImtHolder::hashIID(method_id);
             LIns* vtable = loadVTable(obj, objType);
             // note, could be MethodEnv* or ImtThunkEnv*
-            method = loadIns(LIR_ldp, offsetof(VTable,imt)+sizeof(ImtThunkEnv*)*index, vtable, ACC_READONLY);
+            method = loadIns(LIR_ldp, offsetof(VTable, imt.entries) + index * sizeof(ImtThunkEnv*), vtable, ACC_READONLY);
             iid = InsConstPtr((void*)method_id);
             break;
         }
@@ -3376,12 +3375,7 @@ namespace avmplus
         // patch the size to what we actually need
         ap->setSize(disp);
 
-#ifdef VMCFG_METHODENV_IMPL32
         LIns* target = loadIns(LIR_ldp, offsetof(MethodEnvProcHolder,_implGPR), method, ACC_OTHER);
-#else
-        LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnvProcHolder, method), method, ACC_OTHER);
-        LIns* target = loadIns(LIR_ldp, offsetof(MethodInfoProcHolder, _implGPR), meth, ACC_OTHER);
-#endif
         LIns* apAddr = leaIns(pad, ap);
 
         LIns *out;
@@ -6099,7 +6093,8 @@ namespace avmplus
     }
 #endif
 
-    void CodegenLIR::emitMD()
+    // return pointer to generated code on success, NULL on failure (frame size too large)
+    GprMethodProc CodegenLIR::emitMD()
     {
         deadvars();  // deadvars_kill() will add livep(vars) or livep(tags) if necessary
 
@@ -6162,21 +6157,14 @@ namespace avmplus
         //AvmLog(stderr, "jitcount %d keep %d\n", jitcount, (int)keep);
 #endif
         //_nvprof("keep",keep);
+        GprMethodProc code;
         if (keep) {
 #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())
                 AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
 #endif
             // save pointer to generated code
-            union {
-                GprMethodProc fp;
-                void *vp;
-            } u;
-            u.vp = frag->code();
-            info->setNativeImpl(u.fp);
-            // mark method as been JIT'd
-            info->_flags |= MethodInfo::JIT_IMPL;
-            InvokerCompiler::initCompilerHook(info);
+            code = (GprMethodProc) frag->code();
             _nvprof("JIT method bytes", CodeAlloc::size(assm->codeList));
         } else {
 #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
@@ -6185,7 +6173,7 @@ namespace avmplus
 #endif
             mgr->codeAlloc.freeAll(assm->codeList);
             // assm puked, or we did something untested, so interpret.
-            overflow = true;
+            code = NULL;
             if (assm->codeList)
                 mgr->codeAlloc.freeAll(assm->codeList);
             PERFM_NVPROF("lir-error",1);
@@ -6207,6 +6195,7 @@ namespace avmplus
             jitInfoList.clear();
         }
         #endif /* VTUNE */
+        return code;
     }
 
 #ifdef VTUNE
@@ -6392,7 +6381,7 @@ namespace nanojit
 //
 namespace avmplus
 {
-    void InvokerCompiler::initCompilerHook(MethodInfo* method)
+    bool InvokerCompiler::canCompileInvoker(MethodInfo* method)
     {
         MethodSignaturep ms = method->getMethodSignature();
         int32_t rest_offset = ms->rest_offset();
@@ -6425,34 +6414,9 @@ namespace avmplus
             // Given the current JIT and native ABI, we can't support shifting and
             // copying the extra unknown number of args.  With changes to the native
             // ABI, we could pass a reference to the extra args without any copying.
-            return;
+            return false;
         }
-
-        // install hook that jit-compiles coerceEnter on second call.
-        method->_invoker = &InvokerCompiler::jitInvokerNext;
-    }
-
-    Atom InvokerCompiler::jitInvokerNext(MethodEnv* env, int argc, Atom* args)
-    {
-        env->method->setNativeImpl(env->method->_implGPR); // also resets invoker
-        AtomMethodProc invoker = env->method->_invoker; // generic stub
-        env->method->_invoker = jitInvokerNow; // install stub to compile on next call
-        return invoker(env, argc, args);
-    }
-
-    // first call after compiling method; compile a custom invoker and run it
-    Atom InvokerCompiler::jitInvokerNow(MethodEnv* env, int argc, Atom* args)
-    {
-        env->method->setNativeImpl(env->method->_implGPR); // also resets invoker
-        AtomMethodProc invoker = compile(env->method);
-        if (invoker) {
-            // success: install generated invoker
-            env->method->_invoker = invoker;
-        } else {
-            // fail: use generic invoker from now on
-            invoker = env->method->_invoker;
-        }
-        return invoker(env, argc, args);
+        return true;
     }
 
     // compiler driver
@@ -6697,15 +6661,15 @@ namespace avmplus
         })
         switch (ms->returnTraitsBT()) {
         case BUILTIN_number:
-            call->_address = (uintptr_t) method->implFPR();
+            call->_address = (uintptr_t) method->_implFPR;
             call->_typesig = SIG3(F,P,I,P);
             break;
         case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
-            call->_address = (uintptr_t) method->implGPR();
+            call->_address = (uintptr_t) method->_implGPR;
             call->_typesig = SIG3(I,P,I,P);
             break;
         default:
-            call->_address = (uintptr_t) method->implGPR();
+            call->_address = (uintptr_t) method->_implGPR;
             call->_typesig = SIG3(A,P,I,P);
             break;
         }

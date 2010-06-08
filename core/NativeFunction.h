@@ -77,9 +77,6 @@ namespace avmplus
     typedef avmplus::String AvmStringT;
     typedef avmplus::Namespace AvmNamespaceT;
 
-    typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-    typedef double (*AvmThunkNativeThunkerN)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
     typedef void (AvmPlusScriptableObject::*AvmThunkNativeMethodHandler)();
     typedef void (*AvmThunkNativeFunctionHandler)(AvmPlusScriptableObject* obj);
@@ -200,7 +197,7 @@ namespace avmplus
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
         AvmThunkNativeHandler handler;
 #endif
-        AvmThunkNativeThunker thunker;
+        GprMethodProc thunker;
 #ifdef AVMPLUS_STATIC_POINTERS
         int32_t method_id;
 #endif
@@ -336,10 +333,10 @@ namespace avmplus
 
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-        { { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+        { { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 #else
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-        { (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+        { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 #endif
 
     #define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
@@ -354,7 +351,7 @@ namespace avmplus
 #ifdef VMCFG_AOT
     // AOT build env is ok with designated inits
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        { { function: reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+        { { function: reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { { NULL }, NULL, -1 } };
 #else
@@ -370,14 +367,14 @@ namespace avmplus
     }
 
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        { { _to_method_handler(reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL)) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+        { { _to_method_handler(reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL)) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { { NULL }, NULL, -1 } };
 #else
 
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        { (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+        { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { NULL, -1 } };
@@ -426,10 +423,10 @@ namespace avmplus
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
         m[METHID].handler.method = _NATIVE_METHOD_CAST_PTR(CLS, &IMPL); \
-        m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk;
+        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
 #else
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-        m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk;
+        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
 #endif
 
     #define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
@@ -444,10 +441,10 @@ namespace avmplus
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
         m[METHID].handler.function = reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL); \
-        m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk;
+        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
 #else
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk;
+        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
 #endif
 
     #define AVMTHUNK_END_NATIVE_METHODS()

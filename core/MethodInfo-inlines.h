@@ -83,35 +83,6 @@ REALLY_INLINE DebuggerMethodInfo::DebuggerMethodInfo(int32_t _local_count, uint3
 {}
 #endif
 
-REALLY_INLINE MethodInfoProcHolder::MethodInfoProcHolder()
-    : _implGPR(MethodInfo::verifyEnterGPR), _invoker(MethodInfo::verifyCoerceEnter)
-{}
-
-REALLY_INLINE GprMethodProc MethodInfoProcHolder::implGPR() const
-{
-    return _implGPR;
-}
-
-REALLY_INLINE FprMethodProc MethodInfoProcHolder::implFPR() const
-{
-    return _implFPR;
-}
-
-REALLY_INLINE bool MethodInfoProcHolder::isInterpreted() const
-{
-    return _implGPR == interpGPR || _implFPR == interpFPR;
-}
-
-REALLY_INLINE Atom MethodInfoProcHolder::invoke(MethodEnv* env, int32_t argc, Atom* args)
-{
-    return _invoker(env, argc, args);
-}
-
-REALLY_INLINE uintptr_t MethodInfo::iid() const
-{
-    return ((uintptr_t)this)>>3;
-}
-
 REALLY_INLINE int32_t MethodInfo::allowExtraArgs() const
 {
     return _flags & (NEED_REST|NEED_ARGUMENTS|IGNORE_REST);
@@ -230,27 +201,10 @@ REALLY_INLINE void MethodInfo::setKind(TraitKind kind)
         _flags |= MethodInfo::IS_SETTER;
 }
 
-#ifdef VMCFG_VERIFYALL
-REALLY_INLINE int32_t MethodInfo::isVerified() const
+REALLY_INLINE int32_t MethodInfo::isInterpreted() const
 {
-    return _flags & VERIFIED;
+    return _flags & INTERP_IMPL;
 }
-
-REALLY_INLINE int32_t MethodInfo::isVerifyPending() const
-{
-    return _flags & VERIFY_PENDING;
-}
-
-REALLY_INLINE void MethodInfo::setVerified()
-{
-    _flags = (_flags | VERIFIED) & ~VERIFY_PENDING;
-}
-
-REALLY_INLINE void MethodInfo::setVerifyPending()
-{
-    _flags |= VERIFY_PENDING;
-}
-#endif
 
 #ifdef VMCFG_AOT
 REALLY_INLINE int32_t MethodInfo::compiledMethodFlags()
@@ -272,12 +226,6 @@ REALLY_INLINE void MethodInfo::setCompiledMethod()
 REALLY_INLINE PoolObject* MethodInfo::pool() const
 {
     return _pool;
-}
-
-REALLY_INLINE AvmThunkNativeThunker MethodInfo::thunker() const
-{
-    AvmAssert(isNative());
-    return _native.thunker;
 }
 
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS

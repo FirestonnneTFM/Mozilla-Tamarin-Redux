@@ -39,6 +39,7 @@
 
 
 #include "avmplus.h"
+#include "Interpreter.h"
 
 #ifdef AVMPLUS_MAC
 #ifndef __GNUC__
@@ -208,34 +209,6 @@ namespace avmplus
     static void showState(MethodInfo* info, const bytecode_t *code_start, const bytecode_t *pc,
                           Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep, int max_scope);
 #endif
-
-    uintptr_t interpGPR(MethodEnv* env, int argc, uint32_t *ap)
-    {
-        Atom* const atomv = (Atom*)ap;
-        MethodSignaturep ms = env->method->getMethodSignature();
-        ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
-        Atom a = interpBoxed(env, argc, atomv);
-        const BuiltinType bt = ms->returnTraitsBT();
-        const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
-        if ((1U<<bt) & ATOM_MASK)
-            return a;
-        if (bt == BUILTIN_int)
-            return AvmCore::integer_i(a);
-        if (bt == BUILTIN_uint)
-            return AvmCore::integer_u(a);
-        if (bt == BUILTIN_boolean)
-            return a>>3;
-        return a & ~7; // possibly null pointer
-    }
-
-    double interpFPR(MethodEnv* env, int argc, uint32_t * ap)
-    {
-        Atom* const atomv = (Atom*)ap;
-        MethodSignaturep ms = env->method->getMethodSignature();
-        ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
-        Atom a = interpBoxed(env, argc, atomv);
-        return AvmCore::number_d(a);
-    }
 
     /**
      * on a backwards branch, check if the interrupt flag is enabled.

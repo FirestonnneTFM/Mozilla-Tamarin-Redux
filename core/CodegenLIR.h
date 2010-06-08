@@ -386,7 +386,6 @@ namespace avmplus
      */
     class CodegenLIR : public LirHelper, public CodeWriter {
     public:
-       bool overflow;
 
        #ifdef VTUNE
        bool hasDebugInfo;
@@ -553,7 +552,7 @@ namespace avmplus
     public:
         CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
-        void emitMD();
+        GprMethodProc emitMD();
 
         // CodeWriter methods
         void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);
@@ -584,18 +583,13 @@ namespace avmplus
      */
     class InvokerCompiler: public LirHelper {
     public:
-        // installs hook to enable lazy compilation
-        static void initCompilerHook(MethodInfo* info);
-    private:
-        // hook called on the first invocation; installs jitInvokerNow, yielding a 1-call delay
-        static Atom jitInvokerNext(MethodEnv* env, int argc, Atom* args);
-
-        // compile and invoke
-        static Atom jitInvokerNow(MethodEnv* env, int argc, Atom* args);
+        // true if we are able to compile an invoker for this method
+        static bool canCompileInvoker(MethodInfo* info);
 
         // main compiler driver
         static AtomMethodProc compile(MethodInfo* info);
 
+    private:
         // sets up compiler pipeline
         InvokerCompiler(MethodInfo*);
 

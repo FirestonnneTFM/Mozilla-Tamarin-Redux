@@ -41,10 +41,6 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
-#if defined FEATURE_NANOJIT
-#include "../nanojit/nanojit.h"
-#endif
-
 #ifdef VMCFG_AOT
 #include "AOTCompiler.h"
 #endif
@@ -177,14 +173,11 @@ namespace avmplus
         , langID(-1)
         , passAllExceptionsToDebugger(false)
 #endif
-#ifdef VMCFG_VERIFYALL
-        , verifyFunctionQueue(g, 0)
-        , verifyTraitsQueue(g, 0)
-#endif
         , livePools(NULL)
         , m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
         , m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
         , m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))
+        , exec(NULL)
         , currentMethodFrame(NULL)
 #ifdef VMCFG_LOOKUP_CACHE
         , lookup_cache_timestamp(1)
@@ -320,9 +313,6 @@ namespace avmplus
 
 #ifdef AVMPLUS_WITH_JNI
         java = NULL;
-        #endif
-#ifdef SUPERWORD_PROFILING
-        WordcodeTranslator::swprofStart();
 #endif
 
         _emptySupertypeList = Traits::allocSupertypeList(gc, 0);
@@ -351,6 +341,8 @@ namespace avmplus
         m_tmCache = NULL;
         m_msCache = NULL;
 
+        delete exec;
+
         // Free the numbers and strings tables
         mmfx_delete_array(strings);
         if (gc)
@@ -363,9 +355,6 @@ namespace avmplus
         mmfx_delete_array(namespaces);
         namespaces = NULL;
 
-#ifdef SUPERWORD_PROFILING
-        WordcodeTranslator::swprofStop();
-#endif
 #ifdef DEBUGGER
         delete _profiler;
         _profiler = NULL;
@@ -386,6 +375,9 @@ namespace avmplus
 #endif
     )
     {
+        // Create the singleton ExecMgr instance.
+        exec = new (gc) BaseExecMgr(this);
+
         #ifdef DEBUGGER
         _debugger = createDebugger(tracelevel);
         _profiler = createProfiler();
@@ -584,13 +576,7 @@ namespace avmplus
             initScript(this, toplevel, abcEnv, pool->getScriptTraits(i));
         }
 
-#ifdef VMCFG_VERIFYALL
-        if (config.verifyall) {
-            for (int i=0, n=pool->scriptCount(); i < n; i++)
-                enqTraits(pool->getScriptTraits(i));
-            verifyEarly(toplevel, abcEnv);
-        }
-#endif
+        exec->notifyAbcPrepared(toplevel, abcEnv);
 
         return main;
     }
@@ -603,12 +589,8 @@ namespace avmplus
         bool createdToplevel = (toplevel == NULL);
 
         ScriptEnv* main = prepareActionPool(pool, domainEnv, toplevel, codeContext);
-#ifdef VMCFG_VERIFYALL
-        if (config.verifyonly)
-            return undefinedAtom;
-#endif
 
-        if (!createdToplevel)
+        if (!createdToplevel && toplevel->objectClass != NULL)
         {
             main->initGlobal();
         }
@@ -4338,54 +4320,6 @@ return the result of the comparison ToPrimitive(x) == y.
         }
         // return a non-RC atom, makes atomWriteBarrier do the right thing
         return (Atom)obj|kDoubleType;
-    }
-#endif
-
-#ifdef VMCFG_VERIFYALL
-    void AvmCore::enqFunction(MethodInfo* f) {
-        if (config.verifyall &&
-                f && !f->isVerified() && !f->isVerifyPending()) {
-            f->setVerifyPending();
-            verifyFunctionQueue.add(f);
-        }
-    }
-
-    void AvmCore::enqTraits(Traits* t) {
-        if (config.verifyall && !t->isInterface()) {
-            if (verifyTraitsQueue.indexOf(t) < 0)
-                verifyTraitsQueue.add(t);
-        }
-    }
-
-    void AvmCore::verifyEarly(Toplevel* toplevel, AbcEnv* abc_env) {
-        List<MethodInfo*, LIST_GCObjects> verifyQueue2(GetGC());
-        int verified = 0;
-        do {
-            verified = 0;
-            while (!verifyTraitsQueue.isEmpty()) {
-                Traits* t = verifyTraitsQueue.removeFirst();
-                t->resolveSignatures(toplevel);
-                TraitsBindingsp td = t->getTraitsBindings();
-                enqFunction(t->init);
-                for (int i=0, n=td->methodCount; i < n; i++)
-                    enqFunction(td->getMethod(i));
-            }
-            while (!verifyFunctionQueue.isEmpty()) {
-                MethodInfo* f = verifyFunctionQueue.removeLast();
-                if (!f->isVerified()) {
-                    if (f->declaringTraits()->init != f && f->declaringScope() == NULL) {
-                        verifyQueue2.add(f);
-                        continue;
-                    }
-                    verified++;
-                    //console << "pre verify " << f << "\n";
-                    f->verify(toplevel, abc_env);
-                    f->setVerified();
-                }
-            }
-            while (!verifyQueue2.isEmpty())
-                verifyFunctionQueue.add(verifyQueue2.removeLast());
-        } while (verified > 0);
     }
 #endif
 

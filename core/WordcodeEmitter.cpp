@@ -40,6 +40,7 @@
 #include "avmplus.h"
 
 #ifdef VMCFG_WORDCODE
+#include "Interpreter.h"
 
 namespace avmplus
 {
