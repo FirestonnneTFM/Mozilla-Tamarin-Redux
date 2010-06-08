@@ -61,14 +61,6 @@ namespace avmplus
          void setScope(MMgc::GC* gc, void* container, const ScopeTypeChain* s);
      };
 
-    // signature for method invocation when caller coerces args and boxes results
-    typedef uintptr_t (*GprMethodProc)(MethodEnv*, int32_t, uint32_t *);
-    typedef double (*FprMethodProc)(MethodEnv*, int32_t, uint32_t *);
-
-    // signature for invocation when callee coerces & boxes,
-    // caller is calling an unknown function with an unknown signature
-    typedef Atom (*AtomMethodProc)(MethodEnv*, int, Atom*);
-
 #ifdef DEBUGGER
     class AbcFile;
     class DebuggerMethodInfo : public MMgc::GCObject
@@ -93,28 +85,6 @@ namespace avmplus
 
     class MethodSignature;
 
-    class MethodInfoProcHolder : public MMgc::GCObject
-    {
-        friend class ImtThunkEnv;
-        friend class InvokerCompiler;
-    protected:
-        union
-        {
-            GprMethodProc _implGPR;
-            FprMethodProc _implFPR;
-        };
-
-        /** pointer to invoker used when callee must coerce args */
-        AtomMethodProc _invoker;
-
-        MethodInfoProcHolder();
-    public:
-        GprMethodProc implGPR() const;
-        FprMethodProc implFPR() const;
-        bool isInterpreted() const;
-        Atom invoke(MethodEnv*, int32_t, Atom*);
-    };
-
     /**
      * MethodInfo is the base class for all functions that
      * can be executed by the VM: Actionscript functions,
@@ -123,6 +93,7 @@ namespace avmplus
     class MethodInfo : public MethodInfoProcHolder
     {
         friend class CodegenLIR;
+        friend class BaseExecMgr;
     public:
         /** @name flags from .abc - limited to a BYTE */
         /*@{*/
@@ -174,9 +145,7 @@ namespace avmplus
 
         static const int32_t VERIFIED               = 0x00010000;
 
-#ifdef VMCFG_VERIFYALL
         static const int32_t VERIFY_PENDING         = 0x00020000;
-#endif
 
         /** indicates method is final, no overrides allowed */
         static const int32_t FINAL                  = 0x00040000;
@@ -224,7 +193,10 @@ namespace avmplus
         // reuse the AOT_COMPILED flag for this.
         static const int32_t NONTRIVIAL             = 0x10000000;
 
-        // unused:                              = 0x20000000;
+        // true if execution mechanism is the interpreter (comparing implGPR
+        // to known functions is fragile and breaks encapsulation).
+        static const int32_t INTERP_IMPL            = 0x20000000;
+
         // unused:                              = 0x40000000;
         // unused:                              = 0x80000000;
 
@@ -246,12 +218,6 @@ namespace avmplus
         MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info);
 #endif
 
-        static uintptr_t verifyEnterGPR(MethodEnv* env, int32_t argc, uint32_t* ap);
-        static double verifyEnterFPR(MethodEnv* env, int32_t argc, uint32_t* ap);
-        static Atom verifyCoerceEnter(MethodEnv* env, int32_t argc, Atom* args);
-
-        uintptr_t iid() const;
-
         bool usesCallerContext() const;
 
         // Builtin + non-native functions always need the dxns code emitted
@@ -264,9 +230,6 @@ namespace avmplus
 
 #ifdef DEBUGGER
     public:
-        static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-        static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-
         Atom boxOneLocal(FramePtr src, int32_t srcPos, const uint8_t* sstArr);
         void unboxOneLocal(Atom src, FramePtr dst, int32_t dstPos, const uint8_t* sstArr);
 
@@ -295,13 +258,6 @@ namespace avmplus
 #endif
 
     public:
-
-        void verify(Toplevel* toplevel, AbcEnv* abc_env);
-        void setInterpImpl();
-        void setNativeImpl(GprMethodProc p);
-
-    public:
-
         void makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope);
         bool makeMethodOf(Traits* type);
 
@@ -319,6 +275,7 @@ namespace avmplus
         int32_t needRestOrArguments() const;
         int32_t setsDxns() const;
         int32_t isStaticInit() const;
+        int32_t isInterpreted() const;
         int32_t unboxThis() const;
 
         void setUnboxThis();
@@ -329,13 +286,6 @@ namespace avmplus
         void setOverride();
         void makeNonInterruptible();
         void setKind(TraitKind kind);
-
-#ifdef VMCFG_VERIFYALL
-        int32_t isVerified() const;
-        int32_t isVerifyPending() const;
-        void setVerified();
-        void setVerifyPending();
-#endif
 
 #ifdef VMCFG_AOT
         static int32_t compiledMethodFlags();
@@ -363,7 +313,6 @@ namespace avmplus
     public:
 
         PoolObject* pool() const;
-        AvmThunkNativeThunker thunker() const;
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
         AvmThunkNativeMethodHandler handler_method() const;
         AvmThunkNativeFunctionHandler handler_function() const;
@@ -427,7 +376,7 @@ namespace avmplus
     private:
         struct NativeInfo
         {
-            AvmThunkNativeThunker thunker;
+            GprMethodProc thunker;
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
             AvmThunkNativeHandler handler;
 #endif

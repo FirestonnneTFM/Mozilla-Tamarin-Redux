@@ -104,7 +104,7 @@ namespace avmplus
     Atom FunctionObject::AS3_call(Atom thisArg, Atom *argv, int argc)
     {
         thisArg = get_coerced_receiver(thisArg);
-        return _call->coerceEnter(thisArg, argc, argv);
+        return core()->exec->call(_call, thisArg, argc, argv);
     }
 
     /**
@@ -125,7 +125,7 @@ namespace avmplus
             if (!AvmCore::istype(argArray, ARRAY_TYPE))
                 toplevel()->throwTypeError(kApplyError);
 
-            return _call->coerceEnter(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
+            return core->exec->apply(_call, thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
         }
         else
         {

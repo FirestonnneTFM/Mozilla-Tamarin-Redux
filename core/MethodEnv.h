@@ -43,36 +43,11 @@
 
 namespace avmplus
 {
-    class MethodEnvProcHolder : public MMgc::GCObject
-    {
-        friend class CodegenLIR;
-
-#ifdef VMCFG_METHODENV_IMPL32
-    protected:
-        MethodEnvProcHolder(GprMethodProc p);
-        union {
-            GprMethodProc _implGPR;
-            FprMethodProc _implFPR;
-        };
-#else
-    protected:
-        MethodEnvProcHolder(MethodInfo* m);
-    public:
-        MethodInfo* const method;
-#endif
-    public:
-        GprMethodProc implGPR() const;
-        FprMethodProc implFPR() const;
-    };
-
     class MethodEnv : public MethodEnvProcHolder
     {
         friend class CodegenLIR;
-        friend class MethodInfo;
-        friend class MethodInfoProcHolder;
-    #ifdef VMCFG_METHODENV_IMPL32
-        static uintptr_t delegateInvoke(MethodEnv* env, int32_t argc, uint32_t *ap);
-    #endif
+        friend class BaseExecMgr;
+
     public:
         /** vtable for the activation scope inside this method */
         ScriptObject* newActivation();
@@ -115,30 +90,14 @@ namespace avmplus
          *         to the required type
          */
         Atom coerceEnter(Atom thisArg);
-        Atom coerceEnter(Atom thisArg, ArrayObject* a);
-        Atom coerceEnter(Atom thisArg, int32_t argc, Atom* argv);
         Atom coerceEnter(int32_t argc, Atom* argv);
 
         // Called from the interpreter
         void nullcheck(Atom atom);    // null pointer check
 
     private:
-        static Atom coerceEnter_interp(MethodEnv* env, int32_t argc, Atom* argv);
-        static Atom coerceEnter_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* argv);
-        static Atom coerceEnter_generic(MethodEnv* env, int32_t argc, Atom* argv);
-
         MethodSignaturep get_ms();
-        bool isInterpreted();
-        Atom endCoerce(int32_t argc, uint32_t *ap, MethodSignaturep ms);
-        int32_t  startCoerce(int32_t argc, MethodSignaturep ms);
-        Atom coerceUnboxEnter(int32_t argc, Atom* atomv);
-        void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms);
-        void unboxCoerceArgs(int32_t argc, Atom* in, uint32_t *ap, MethodSignaturep ms);
-        void unboxCoerceArgs(Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms);
         void FASTCALL nullcheckfail(Atom atom);
-        Atom* FASTCALL coerceUnbox1(Atom atom, Traits* t, Atom* args);
-        Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args);
-
         VTable* getActivationVTable();
         VTable* buildActivationVTable();
 
@@ -309,13 +268,8 @@ namespace avmplus
         VTable* vtable() const;
 
     // ------------------------ DATA SECTION BEGIN
-#ifdef VMCFG_METHODENV_IMPL32
     public:
         MethodInfo* const method;
-#else
-    // inherit "method" from MethodEnvProcHolder. yeah, this is ugly,
-    // but allows us to eliminate an otherwise-useless field from ImtThunkEnv.
-#endif
     protected:
         // pointers are write-once so we don't need WB's
         ScopeChain* const           _scope;
@@ -356,37 +310,6 @@ namespace avmplus
         DRCWB(ClassClosure*) closure;
     // ------------------------ DATA SECTION END
     };
-
-#if defined FEATURE_NANOJIT
-    struct ImtThunkEntry
-    {
-        uintptr_t iid;
-        uintptr_t disp_id; // only needs to be uint32_t, is this size for alignment purposes
-    };
-
-    class ImtThunkEnv;
-
-    class ImtThunkEnv : public MethodEnvProcHolder
-    {
-    public:
-        ImtThunkEnv(GprImtThunkProc p, VTable* v);
-        ImtThunkEnv(GprImtThunkProc p, uint32_t c);
-        GprImtThunkProc implImtGPR() const;
-        ImtThunkEntry* entries() const;
-
-    // ------------------------ DATA SECTION BEGIN
-    public:
-        union
-        {
-            VTable* vtable;
-            uint32_t imtMapCount;
-        };
-#if !defined(VMCFG_METHODENV_IMPL32)
-        MethodInfoProcHolder methodProcHolder;
-#endif
-    // ------------------------ DATA SECTION END
-    };
-#endif // FEATURE_NANOJIT
 }
 
 #endif // __avmplus_MethodEnv__

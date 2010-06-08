@@ -83,7 +83,8 @@ namespace avmplus
         const uint8_t* tryFrom;   // start of earliest try region
         const uint8_t* tryTo;     // end of latest try region
 
-        Verifier(MethodInfo *info, Toplevel* toplevel, AbcEnv* abc_env
+        Verifier(MethodInfo *info, MethodSignaturep ms,
+                 Toplevel* toplevel, AbcEnv* abc_env
 #ifdef AVMPLUS_VERBOSE
             , bool secondTry=false
 #endif

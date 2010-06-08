@@ -340,6 +340,12 @@
 		07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
 		191659990FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
+		198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91811B973BD00A939C7 /* exec-jit.cpp */; };
+		198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91911B973BD00A939C7 /* exec-verifyall.cpp */; };
+		198CF91E11B973BD00A939C7 /* exec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91A11B973BD00A939C7 /* exec.cpp */; };
+		198CF91F11B973BD00A939C7 /* exec-jit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91811B973BD00A939C7 /* exec-jit.cpp */; };
+		198CF92011B973BD00A939C7 /* exec-verifyall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91911B973BD00A939C7 /* exec-verifyall.cpp */; };
+		198CF92111B973BD00A939C7 /* exec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91A11B973BD00A939C7 /* exec.cpp */; };
 		1992FDA3102869D10032FBBF /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1992FDA1102869D10032FBBF /* Containers.cpp */; };
 		1992FDA4102869D10032FBBF /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1992FDA1102869D10032FBBF /* Containers.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
@@ -834,6 +840,11 @@
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
 		19382D9F106CFC64004612EA /* atom-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "atom-inlines.h"; path = "../../../core/atom-inlines.h"; sourceTree = SOURCE_ROOT; };
+		198CF91711B973BD00A939C7 /* exec-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "exec-inlines.h"; path = "../../../core/exec-inlines.h"; sourceTree = SOURCE_ROOT; };
+		198CF91811B973BD00A939C7 /* exec-jit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "exec-jit.cpp"; path = "../../../core/exec-jit.cpp"; sourceTree = SOURCE_ROOT; };
+		198CF91911B973BD00A939C7 /* exec-verifyall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "exec-verifyall.cpp"; path = "../../../core/exec-verifyall.cpp"; sourceTree = SOURCE_ROOT; };
+		198CF91A11B973BD00A939C7 /* exec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exec.cpp; path = ../../../core/exec.cpp; sourceTree = SOURCE_ROOT; };
+		198CF91B11B973BD00A939C7 /* exec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = exec.h; path = ../../../core/exec.h; sourceTree = SOURCE_ROOT; };
 		1992FDA1102869D10032FBBF /* Containers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Containers.cpp; path = ../../../nanojit/Containers.cpp; sourceTree = SOURCE_ROOT; };
 		1992FDA2102869D10032FBBF /* Containers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Containers.h; path = ../../../nanojit/Containers.h; sourceTree = SOURCE_ROOT; };
 		1998F9E81072A6ED00780913 /* CodegenLIR-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "CodegenLIR-inlines.h"; path = "../../../core/CodegenLIR-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1076,6 +1087,11 @@
 				079DF7EC0F3A882D0031D1B4 /* E4XNode.h */,
 				079DF7ED0F3A882D0031D1B4 /* Exception.cpp */,
 				079DF7EE0F3A882D0031D1B4 /* Exception.h */,
+				198CF91A11B973BD00A939C7 /* exec.cpp */,
+				198CF91B11B973BD00A939C7 /* exec.h */,
+				198CF91711B973BD00A939C7 /* exec-inlines.h */,
+				198CF91811B973BD00A939C7 /* exec-jit.cpp */,
+				198CF91911B973BD00A939C7 /* exec-verifyall.cpp */,
 				079DF7EF0F3A882D0031D1B4 /* FrameState.cpp */,
 				079DF7F00F3A882D0031D1B4 /* FrameState.h */,
 				07E65EE110BC19A7000D1EB6 /* FrameState-inlines.h */,
@@ -1835,6 +1851,9 @@
 				07E2E7AE114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC651116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 				0749E7751173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
+				198CF91F11B973BD00A939C7 /* exec-jit.cpp in Sources */,
+				198CF92011B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
+				198CF92111B973BD00A939C7 /* exec.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2019,6 +2038,9 @@
 				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 				0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
+				198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */,
+				198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
+				198CF91E11B973BD00A939C7 /* exec.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

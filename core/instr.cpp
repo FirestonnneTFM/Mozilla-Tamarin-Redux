@@ -269,7 +269,7 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
  * implements ECMA implicit coersion.  returns the coerced value,
  * or throws a TypeError if coersion is not possible.
  */
-// NOTE: parts of this function have been explicitly inlined into MethodEnv::unbox1 for
+// NOTE: parts of this function have been explicitly inlined into BaseExecMgr::unbox1 for
 // efficiency. If you change/fix this method, you may need to change/fix MethodEnv::unbox1 as well.
 Atom coerceImpl(const Toplevel* toplevel, Atom atom, Traits* expected)
 {

@@ -1916,6 +1916,26 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\exec.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\exec.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\exec-inlines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\exec-jit.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\exec-verifyall.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Exception.cpp"
 				>
 			</File>

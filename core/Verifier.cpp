@@ -39,61 +39,23 @@
 
 #include "avmplus.h"
 
-#ifdef FEATURE_NANOJIT
-#include "CodegenLIR.h"
-#endif
-
 //#define DOPROF
 #include "../vprof/vprof.h"
 
 namespace avmplus
 {
-#ifdef VMCFG_VERIFYALL
-    class VerifyallWriter : public NullWriter {
-        MethodInfo *info;
-        AvmCore *core;
-
-    public:
-        VerifyallWriter(MethodInfo *info, CodeWriter *coder)
-            : NullWriter(coder)
-            , info(info) {
-            core = info->pool()->core;
-        }
-
-        void write (const FrameState* state, const uint8_t *pc, AbcOpcode opcode, Traits *type) {
-            if (opcode == OP_newactivation)
-                core->enqTraits(type);
-            coder->write(state, pc, opcode, type);
-        }
-
-        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
-            if (opcode == OP_newfunction) {
-                MethodInfo *f = info->pool()->getMethodInfo(opd1);
-                AvmAssert(f->declaringTraits() == type);
-                core->enqFunction(f);
-                core->enqTraits(type);
-            }
-            else if (opcode == OP_newclass) {
-                core->enqTraits(type);
-                core->enqTraits(type->itraits);
-            }
-            coder->writeOp1(state, pc, opcode, opd1, type);
-        }
-    };
-#endif // VMCFG_VERIFYALL
-
 #ifdef VMCFG_WORDCODE
     inline WordOpcode wordCode(AbcOpcode opcode) {
         return (WordOpcode)opcodeInfo[opcode].wordCode;
     }
 #endif
 
-    Verifier::Verifier(MethodInfo* info, Toplevel* toplevel, AbcEnv* abc_env
+    Verifier::Verifier(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel, AbcEnv* abc_env
 #ifdef AVMPLUS_VERBOSE
         , bool secondTry
 #endif
-        ) : tryBase(NULL), tryFrom(NULL), tryTo(NULL)
-          , ms(info->getMethodSignature())
+        ) : tryFrom(NULL), tryTo(NULL)
+          , ms(ms)
           , worklist(NULL)
           , blockStates(NULL)
           , handlerIsReachable(false)
@@ -106,16 +68,6 @@ namespace avmplus
         this->pool   = info->pool();
         this->toplevel = toplevel;
         this->abc_env  = abc_env;
-
-        // do these checks early before we allocate any resources.
-        if (!info->abc_body_pos()) {
-            // no body was supplied in abc
-            toplevel->throwVerifyError(kNotImplementedError, core->toErrorString(info));
-        }
-        if (info->declaringTraits() == NULL) {
-            // scope hasn't been captured yet.
-            verifyFailed(kCannotVerifyUntilReferencedError);
-        }
 
         max_stack = ms->max_stack();
         local_count = ms->local_count();
@@ -314,6 +266,15 @@ namespace avmplus
         SAMPLE_FRAME("[verify]", core);
         PERFM_NVPROF("abc-bytes", code_length);
 
+        if (!info->abc_body_pos()) {
+            // no body was supplied in abc
+            toplevel->throwVerifyError(kNotImplementedError, core->toErrorString(info));
+        }
+        if (info->declaringTraits() == NULL) {
+            // scope hasn't been captured yet.
+            verifyFailed(kCannotVerifyUntilReferencedError);
+        }
+
         // CodeWriter warning: Verify exceptions are thrown from here
         // and callees, so any CodeWriters declared with function scope
         // will not be destructed.  Presently, only CodeWriter, VerifyallWriter,
@@ -370,13 +331,6 @@ namespace avmplus
         // phase 2 - traverse code in abc order and emit
         mmfx_delete(state);
         coder = emitter;
-
-        #ifdef VMCFG_VERIFYALL
-        // push the verifyall filter onto the front of the coder pipeline
-        VerifyallWriter verifyallWriter(info, coder);
-        if (core->config.verifyall)
-            coder = &verifyallWriter;
-        #endif
 
         // save computed ScopeTypeChain for OP_newfunction and OP_newclass
         ScopeWriter scopeWriter(coder, info, toplevel);
@@ -2024,7 +1978,7 @@ namespace avmplus
         {
             // NOTE when the interpreter knows how to dispatch through an
             // interface, we can rewrite this call as a 'writeOp2'.
-            coder->writeMethodCall(state, pc, opcode, m, m->iid(), argc, resultType);
+            coder->writeMethodCall(state, pc, opcode, m, 0, argc, resultType);
         }
 
         state->pop_push(n, resultType);
@@ -2526,7 +2480,7 @@ namespace avmplus
         #ifdef AVMPLUS_VERBOSE
         if (!secondTry && !verbose) {
             // capture the verify trace even if verbose is false.
-            Verifier v2(info, toplevel, abc_env, true);
+            Verifier v2(info, ms, toplevel, abc_env, true);
             v2.verbose = true;
             v2.tryBase = tryBase;
             v2.tryFrom = tryFrom;

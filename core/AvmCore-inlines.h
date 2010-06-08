@@ -117,33 +117,6 @@ REALLY_INLINE bool AvmCore::isVerbose(uint32_t b) const
 }
 #endif // AVMPLUS_VERBOSE
 
-REALLY_INLINE void AvmCore::SetJITEnabled(bool isEnabled)
-{
-#if defined FEATURE_NANOJIT
-    config.runmode = (isEnabled) ? RM_mixed : RM_interp_all;
-#else
-    (void)isEnabled;
-#endif
-}
-
-REALLY_INLINE bool AvmCore::IsJITEnabled() const
-{
-#if defined FEATURE_NANOJIT
-    return (config.runmode == RM_mixed || config.runmode == RM_jit_all) ? true : false;
-#else
-    return false;
-#endif
-}
-
-REALLY_INLINE bool AvmCore::JITMustSucceed() const
-{
-#if defined FEATURE_NANOJIT
-    return config.jitordie;
-#else
-    return false;
-#endif
-}
-
 REALLY_INLINE void AvmCore::stackCheck(MethodEnv* env)
 {
     // Take the address of a local variable to get stack pointer

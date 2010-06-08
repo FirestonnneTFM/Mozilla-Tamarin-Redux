@@ -17,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,19 +37,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_Interpreter__
-#define __avmplus_Interpreter__
-
 namespace avmplus
 {
-    // main interpreter method.  Signature should correspond to AtomMethodProc to allow tail calls to here
-    Atom interpBoxed(MethodEnv* method, int argc, Atom* ap);
 
-#ifdef VMCFG_DIRECT_THREADED
-    void** interpGetOpcodeLabels();
-#endif
+REALLY_INLINE MethodEnvProcHolder::MethodEnvProcHolder()
+{}
+
+REALLY_INLINE MethodInfoProcHolder::MethodInfoProcHolder()
+{}
+
+REALLY_INLINE bool BaseExecMgr::isInterpreted(MethodEnv* env)
+{
+    return env->method->isInterpreted() != 0;
 }
 
-//#  define LAST_SUPERWORD_OPCODE    ((50<<8) | OP_ext)
+REALLY_INLINE uintptr_t ImtHolder::getIID(MethodInfo* m)
+{
+    AvmAssert(m->declaringTraits()->isInterface());
+    return (uintptr_t) m;
+}
 
-#endif // __avmplus_Interpreter__
+REALLY_INLINE uint32_t ImtHolder::hashIID(uintptr_t iid)
+{
+    return iid % IMT_SIZE;
+}
+
+REALLY_INLINE uint32_t ImtHolder::hashIID(MethodInfo* m)
+{
+    return hashIID(getIID(m));
+}
+
+} // namespace avmplus

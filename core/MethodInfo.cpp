@@ -40,10 +40,6 @@
 
 #include "avmplus.h"
 
-#ifdef FEATURE_NANOJIT
-#include "CodegenLIR.h"
-#endif
-
 //#define DOPROF
 //#include "../vprof/vprof.h"
 
@@ -57,7 +53,6 @@ namespace avmplus
      * object traits and catch-block activation traits.
      */
     MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
-        MethodInfoProcHolder(),
         _msref(declTraits->pool->core->GetGC()->emptyWeakRef),
         _declarer(declTraits),
         _activation(NULL),
@@ -66,6 +61,7 @@ namespace avmplus
         _flags(RESOLVED),
         _method_id(-1)
     {
+        declTraits->core->exec->init(this, NULL);
     }
 
 #ifdef VMCFG_AOT
@@ -94,7 +90,6 @@ namespace avmplus
                             const uint8_t* abc_info_pos,
                             uint8_t abcFlags,
                             const NativeMethodInfo* native_info) :
-        MethodInfoProcHolder(),
         _msref(pool->core->GetGC()->emptyWeakRef),
         _declarer(NULL),
         _activation(NULL),
@@ -104,336 +99,16 @@ namespace avmplus
         _method_id(method_id)
     {
         AvmAssert(method_id >= 0);
-#if !defined(MEMORY_INFO)
-        MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
-#endif
-
-#ifdef VMCFG_VERIFYALL
-        if (abcFlags & MethodInfo::NATIVE && !native_info && pool->core->config.verifyonly)
-            _flags |= ABSTRACT_METHOD;
-#endif
 
         if (native_info)
-        {
-            this->_native.thunker = native_info->thunker;
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-            this->_native.handler = native_info->handler;
-#endif
             this->_flags |= NEEDS_CODECONTEXT | NEEDS_DXNS | ABSTRACT_METHOD;
-        }
+        pool->core->exec->init(this, native_info);
     }
 
     void MethodInfo::init_activationTraits(Traits* t)
     {
         AvmAssert(_activation.getTraits() == NULL);
         _activation.setTraits(pool()->core->GetGC(), this, t);
-    }
-
-    static bool hasTypedArgs(MethodSignaturep ms)
-    {
-        int32_t param_count = ms->param_count();
-        for (int32_t i = 1; i <= param_count; i++) {
-            if (ms->paramTraits(i) != NULL) {
-                // at least one parameter is typed; need full coerceEnter
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void MethodInfo::setInterpImpl()
-    {
-        MethodSignaturep ms = getMethodSignature();
-        if (ms->returnTraitsBT() == BUILTIN_number)
-            _implFPR = avmplus::interpFPR;
-        else
-            _implGPR = avmplus::interpGPR;
-        AvmAssert(isInterpreted());
-        _invoker = hasTypedArgs(ms) ? MethodEnv::coerceEnter_interp : MethodEnv::coerceEnter_interp_nocoerce;
-    }
-
-    void MethodInfo::setNativeImpl(GprMethodProc p)
-    {
-        _implGPR = p;
-        _invoker = MethodEnv::coerceEnter_generic;
-        AvmAssert(!isInterpreted());
-    }
-
-#ifdef DEBUGGER
-    /*static*/ AvmBox MethodInfo::debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
-    {
-        CallStackNode csn(CallStackNode::kEmpty);
-        env->debugEnter(/*frametraits*/0, &csn, /*framep*/0, /*eip*/0);
-        const AvmBox result = env->method->thunker()(env, argc, argv);
-        env->debugExit(&csn);
-        return result;
-    }
-
-    /*static*/ double MethodInfo::debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
-    {
-        CallStackNode csn(CallStackNode::kEmpty);
-        env->debugEnter(/*frametraits*/0, &csn, /*framep*/0, /*eip*/0);
-        const double result = (reinterpret_cast<AvmThunkNativeThunkerN>(env->method->thunker()))(env, argc, argv);
-        env->debugExit(&csn);
-        return result;
-    }
-#endif
-
-    /*static*/ uintptr_t MethodInfo::verifyEnterGPR(MethodEnv* env, int32_t argc, uint32_t* ap)
-    {
-        MethodInfo* f = env->method;
-
-        #ifdef VMCFG_VERIFYALL
-        // never verify late in verifyall mode
-        AvmAssert(!f->pool()->core->config.verifyall);
-        #endif
-
-        f->verify(env->toplevel(), env->abcEnv());
-
-#ifdef VMCFG_METHODENV_IMPL32
-        // we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
-        // but next time we want to call the real code, not verifyEnter again.
-        // All other MethodEnv's in their default state will call the target method
-        // directly and never go through verifyEnter().
-        env->_implGPR = f->implGPR();
-#endif
-
-        AvmAssert(f->implGPR() != MethodInfo::verifyEnterGPR);
-        return f->implGPR()(env, argc, ap);
-    }
-
-    /*static*/ double MethodInfo::verifyEnterFPR(MethodEnv* env, int32_t argc, uint32_t* ap)
-    {
-        MethodInfo* f = env->method;
-
-        #ifdef VMCFG_VERIFYALL
-        // never verify late in verifyall mode
-        AvmAssert(!f->pool()->core->config.verifyall);
-        #endif
-
-        f->verify(env->toplevel(), env->abcEnv());
-
-#ifdef VMCFG_METHODENV_IMPL32
-        // we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
-        // but next time we want to call the real code, not verifyEnter again.
-        // All other MethodEnv's in their default state will call the target method
-        // directly and never go through verifyEnter().
-        env->_implFPR = f->implFPR();
-#endif
-
-        AvmAssert(f->implFPR() != MethodInfo::verifyEnterFPR);
-        return f->implFPR()(env, argc, ap);
-    }
-
-    // entry point when the first call to the method is late bound.
-    /*static*/ Atom MethodInfo::verifyCoerceEnter(MethodEnv* env, int argc, Atom* args)
-    {
-        MethodInfo* f = env->method;
-
-        #ifdef VMCFG_VERIFYALL
-        // never verify late in verifyall mode
-        AvmAssert(!f->pool()->core->config.verifyall);
-        #endif
-
-        f->verify(env->toplevel(), env->abcEnv());
-
-#ifdef VMCFG_METHODENV_IMPL32
-        // we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
-        // but next time we want to call the real code, not verifyEnter again.
-        // All other MethodEnv's in their default state will call the target method
-        // directly and never go through verifyEnter().
-        env->_implGPR = f->implGPR();
-#endif
-
-        AvmAssert(f->_invoker != MethodInfo::verifyCoerceEnter);
-        return f->invoke(env, argc, args);
-    }
-
-    void MethodInfo::verify(Toplevel *toplevel, AbcEnv* abc_env)
-    {
-        AvmAssert(declaringTraits()->isResolved());
-        resolveSignature(toplevel);
-        AvmCore* core = this->pool()->core;
-        if (isNative())
-        {
-            union {
-                GprMethodProc implGPR;
-                AvmThunkNativeThunker thunker;
-                AvmThunkNativeThunkerN thunkerN;
-            } u;
-    #ifdef DEBUGGER
-            if (core->debugger())
-            {
-                MethodSignaturep ms = getMethodSignature();
-                if (ms->returnTraitsBT() == BUILTIN_number)
-                    u.thunkerN = MethodInfo::debugEnterExitWrapperN;
-                else
-                    u.thunker = MethodInfo::debugEnterExitWrapper32;
-            }
-            else
-    #endif
-            {
-                u.thunker = this->thunker();
-            }
-            this->setNativeImpl(u.implGPR);
-#ifdef FEATURE_NANOJIT
-            InvokerCompiler::initCompilerHook(this);
-#endif
-        }
-        else
-        {
-            #ifdef DEBUGGER
-            // just a fake CallStackNode here, so that if we throw a verify error,
-            // we get a stack trace with the method being verified as its top entry.
-            CallStackNode callStackNode(this);
-            #endif /* DEBUGGER */
-
-            PERFM_NTPROF_BEGIN("verify-ticks");
-
-            CodeWriter* volatile coder = NULL;
-            Verifier verifier(this, toplevel, abc_env);
-
-            /*
-                These "buf" declarations are an unfortunate but expedient hack:
-                the existing CodeWriter classes (eg CodegenLIR, etc) have historically
-                always been stack-allocated, thus they have no WB protection on member
-                fields. Recent changes were made to allow for explicit cleanup() of them
-                in the event of exception, but there was a latent bug waiting to happen:
-                the actual automatic var was going out of scope, but still being referenced
-                (via the 'coder' pointer) in the exception handler, but the area being
-                pointed to may or may not still be valid. The ideal fix for this would
-                simply be to heap-allocate the CodeWriters, but that would require going
-                thru the existing code carefully and inserting WB where appropriate.
-                Instead, this "expedient" hack uses placement new to ensure the memory
-                stays valid into the exception handler.
-
-                Note: the lack of a call to the dtor of the CodeWriter(s) is not an oversight.
-                Calling cleanup() on coder is equivalent to running the dtor for all
-                of the CodeWriters here.
-
-                Note: allocated using arrays of intptr_t (rather than char) to ensure alignment is acceptable.
-            */
-        #define MAKE_BUF(name, type) \
-            intptr_t name##_data[(sizeof(type)+sizeof(intptr_t)-1)/sizeof(intptr_t)];\
-            type* const name = (type*) name##_data /* no semi */
-
-        #if defined FEATURE_NANOJIT
-            MAKE_BUF(jit_buf, CodegenLIR);
-            #if defined VMCFG_WORDCODE
-            MAKE_BUF(teeWriter_buf, TeeWriter);
-            #endif
-        #endif
-            #if defined VMCFG_WORDCODE
-            MAKE_BUF(translator_buf, WordcodeEmitter);
-            #else
-            MAKE_BUF(stubWriter_buf, CodeWriter);
-            #endif
-
-            TRY(core, kCatchAction_Rethrow)
-            {
-#if defined FEATURE_NANOJIT
-                Runmode runmode = core->config.runmode;
-                if (runmode == RM_jit_all || (runmode == RM_mixed && !isStaticInit()))
-                {
-                    PERFM_NTPROF_BEGIN("verify & IR gen");
-
-                    // note placement-new usage!
-                    CodegenLIR* jit = new(jit_buf) CodegenLIR(this);
-                    #if defined VMCFG_WORDCODE
-                    WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
-                    TeeWriter* teeWriter = new(teeWriter_buf) TeeWriter(translator, jit);
-                    coder = teeWriter;
-                    #else
-                    coder = jit;
-                    #endif
-
-                    verifier.verify(coder);
-                    PERFM_NTPROF_END("verify & IR gen");
-
-                    if (!jit->overflow) {
-                        // assembler LIR into native code
-                        jit->emitMD();
-                    }
-
-                    // the MD buffer can overflow so we need to re-iterate
-                    // over the whole thing, since we aren't yet robust enough
-                    // to just rebuild the MD code.
-
-                    // mark it as interpreted and try to limp along
-                    if (jit->overflow) {
-                        if (core->JITMustSucceed()) {
-                            Exception* e = new (core->GetGC()) Exception(core, core->newStringLatin1("JIT failed")->atom());
-                            e->flags |= Exception::EXIT_EXCEPTION;
-                            core->throwException(e);
-                        }
-                        setInterpImpl();
-                    }
-                    #ifdef VMCFG_WORDCODE
-                    else {
-                        if (_abc.word_code.translated_code)
-                        {
-                            set_word_code(core->GetGC(), NULL);
-                        }
-                        if (_abc.word_code.exceptions)
-                        {
-                            _abc.word_code.exceptions = NULL;
-                        }
-                    }
-                    #endif
-                }
-                else
-                {
-                    // NOTE copied below
-                    #if defined VMCFG_WORDCODE
-                    WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
-                    coder = translator;
-                    #else
-                    CodeWriter* stubWriter = new(stubWriter_buf) CodeWriter();
-                    coder = stubWriter;
-                    #endif
-                    verifier.verify(coder); // pass2 dataflow
-                    setInterpImpl();
-                    // NOTE end copy
-                }
-#else // FEATURE_NANOJIT
-
-                // NOTE copied from above
-                #if defined VMCFG_WORDCODE
-                WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
-                coder = translator;
-                #else
-                CodeWriter* stubWriter = new(stubWriter_buf) CodeWriter();
-                coder = stubWriter;
-                #endif
-                verifier.verify(coder); // pass2 dataflow
-                setInterpImpl();
-                // NOTE end copy
-
-#endif // FEATURE_NANOJIT
-
-                if (coder)
-                {
-                    coder->cleanup();
-                    coder = NULL;
-                }
-            }
-            CATCH (Exception *exception)
-            {
-                // clean up verifier
-                verifier.~Verifier();
-
-                // call cleanup all the way down the chain
-                // each stage calls cleanup on the next one
-                if (coder)
-                    coder->cleanup();
-
-                // re-throw exception
-                core->throwException(exception);
-            }
-            END_CATCH
-            END_TRY
-            PERFM_NTPROF_END("verify-ticks");
-        }
     }
 
     REALLY_INLINE double unpack_double(const void* src)
@@ -1012,7 +687,7 @@ namespace avmplus
 
     void MethodInfo::resolveSignature(const Toplevel* toplevel)
     {
-        if (!(_flags & RESOLVED))
+        if (!isResolved())
         {
             MethodSignature* ms = _buildMethodSignature(toplevel);
 
@@ -1026,9 +701,7 @@ namespace avmplus
                 _flags |= ABSTRACT_METHOD;
 
             _flags |= RESOLVED;
-
-            if (ms->returnTraitsBT() == BUILTIN_number && _implGPR == MethodInfo::verifyEnterGPR)
-                _implFPR = MethodInfo::verifyEnterFPR;
+            pool()->core->exec->notifyMethodResolved(this, ms);
         }
     }
 
