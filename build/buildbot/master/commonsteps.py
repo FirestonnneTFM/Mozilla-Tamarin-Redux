@@ -114,7 +114,8 @@ def test_emulator_generic(name, shellname, vmargs, config, scriptargs):
             description='starting to run %s vmtests...' % name,
             descriptionDone='finished %s vmtests' % name,
             name="Testsuite_%s" % name,
-            workdir="../repo/build/buildbot/slaves/scripts"
+            workdir="../repo/build/buildbot/slaves/scripts",
+            timeout=3600,
             )
 
 
