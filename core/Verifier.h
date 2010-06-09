@@ -121,12 +121,9 @@ namespace avmplus
         bool handlerIsReachable;
         FrameState* getFrameState(const uint8_t* pc);
         const uint8_t* verifyBlock(const uint8_t*);
-        void identifyBlocks(const uint8_t*, int);
-        void dfsBlock(const uint8_t*, int);
         const uint8_t* loadBlockState(FrameState* blk);
         void checkParams();
         Value& checkLocal(int local);
-        MethodInfo* checkDispId(Traits* traits, uint32_t disp_id);
         MethodInfo* checkMethodInfo(uint32_t method_id);
         Traits* checkClassInfo(uint32_t class_id);
         void checkTarget(const uint8_t* current, const uint8_t* target);
