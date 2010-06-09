@@ -2460,21 +2460,6 @@ namespace avmplus
         return t;
     }
 
-    MethodInfo* Verifier::checkDispId(Traits* traits, uint32_t disp_id)
-    {
-        TraitsBindingsp td = traits->getTraitsBindings();
-        if (disp_id > td->methodCount)
-        {
-            verifyFailed(kDispIdExceedsCountError, core->toErrorString(disp_id), core->toErrorString(td->methodCount), core->toErrorString(traits));
-        }
-        MethodInfo* m = td->getMethod(disp_id);
-        if (!m)
-        {
-            verifyFailed(kDispIdUndefinedError, core->toErrorString(disp_id), core->toErrorString(traits));
-        }
-        return m;
-    }
-
     void Verifier::verifyFailed(int errorID, Stringp arg1, Stringp arg2, Stringp arg3) const
     {
         #ifdef AVMPLUS_VERBOSE
