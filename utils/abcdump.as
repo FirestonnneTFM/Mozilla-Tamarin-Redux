@@ -376,6 +376,7 @@ package abcdump
                 dumpPrint(indent+"// local_count="+local_count+
                           " max_scope=" + max_scope +
                           " max_stack=" + max_stack +
+                          " framesize=" + (local_count + max_scope + max_stack) +
                           " code_len=" + code.length +
                           " code_offset=" + code_offset) 
                 code.position = 0
