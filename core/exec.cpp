@@ -238,22 +238,24 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
 // On normal return the CodeWriters declared here get cleaned via their
 // destructors, and passed-in CodeWriters are still valid.
 void BaseExecMgr::verifyCommon(MethodInfo* m, MethodSignaturep ms,
-        Toplevel* toplevel, AbcEnv* abc_env, CodeWriter* coder)
+        Toplevel* toplevel, AbcEnv* abc_env, CodeWriter* const coder)
 {
+    CodeWriter* volatile vcoder = coder; // Volatile for setjmp safety.
+
 #ifdef VMCFG_VERIFYALL
-    VerifyallWriter verifyall(m, this, coder);
+    VerifyallWriter verifyall(m, this, vcoder);
     if (config.verifyall)
-        coder = &verifyall;
+        vcoder = &verifyall;
 #endif
 
-    Verifier verifier(m, ms, toplevel, abc_env); // does not throw
+    Verifier verifier(m, ms, toplevel, abc_env); // Does not throw.
     TRY(core, kCatchAction_Rethrow) {
-        verifier.verify(coder);  // verify and generate IR
+        verifier.verify(vcoder);  // Verify and fill vcoder pipeline.
     }
     CATCH (Exception *exception) {
-        verifier.~Verifier();   // clean up verifier
-        coder->cleanup();       // cleans up all coders
-        core->throwException(exception); // re-throw exception
+        verifier.~Verifier();   // Clean up verifier.
+        vcoder->cleanup();      // Cleans up all coders.
+        core->throwException(exception);
     }
     END_CATCH
     END_TRY
