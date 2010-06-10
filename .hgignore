@@ -76,4 +76,6 @@ utils/wmremote/ceremoteshell/Debug/**
 utils/wmremote/ceremoteshell/Release/**
 utils/wmremote/wmrunner/Debug/**
 utils/wmremote/wmrunner/Release/**
-
+*.sdf
+*.opensdf
+*.ipch
