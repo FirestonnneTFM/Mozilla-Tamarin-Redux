@@ -4384,6 +4384,9 @@ return the result of the comparison ToPrimitive(x) == y.
     void AvmCore::setPCREContext(Toplevel* /*env*/)
     {
     }
+    void AvmCore::releasePCREContext()
+    {
+    }
     
 #else
     
@@ -4403,6 +4406,12 @@ return the result of the comparison ToPrimitive(x) == y.
     void AvmCore::setPCREContext(Toplevel* env)
     {
         PCREContext = env;
+    }
+
+    /* static */
+    void AvmCore::releasePCREContext()
+    {
+        PCREContext.destroy();
     }
 
 #endif // VMCFG_EPOC_EMULATOR
