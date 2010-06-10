@@ -347,6 +347,14 @@ const int kBufferPadding = 16;
          */
         static void setPCREContext(Toplevel* env);
 
+        /**
+         * Calls destroy on PCREContext to release the thread local variable key
+         * back to the system. This is only used on platforms (e.g. Android) that do not
+         * call the destructor of the static variable when the library is unloaded 
+         * (on Android this is an OS bug in Android 2.2, and probably earlier).
+         */
+        static void releasePCREContext();
+
     private:
         /**
          * Stack limit set by host and checked by executing AS3 code.
