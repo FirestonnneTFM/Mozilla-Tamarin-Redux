@@ -117,6 +117,7 @@
 #undef VMCFG_TEST_API_VERSIONING
 
 #undef VMCFG_TWEAK_SIN_COS_NONFINITE
+#undef VMCFG_EPOC_EMULATOR
 
 
 
@@ -589,6 +590,19 @@
 #  error "AVMTWEAK_SIN_COS_NONFINITE must be defined and 0 or 1 (only)."
 #endif
 
+
+/* AVMTWEAK_EPOC_EMULATOR
+ *
+ * The current (June 2010) EPOC/Symbian emulator has certain limitations,
+ * described throughout the code where this tweak is used.
+ */
+#if !defined AVMTWEAK_EPOC_EMULATOR
+#  define AVMTWEAK_EPOC_EMULATOR 0
+#endif
+#if AVMTWEAK_EPOC_EMULATOR != 0 && AVMTWEAK_EPOC_EMULATOR != 1
+#  error "AVMTWEAK_EPOC_EMULATOR must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -669,6 +683,7 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
 
 
 
@@ -924,6 +939,9 @@
 
 #if AVMTWEAK_SIN_COS_NONFINITE
 #  define VMCFG_TWEAK_SIN_COS_NONFINITE
+#endif
+#if AVMTWEAK_EPOC_EMULATOR
+#  define VMCFG_EPOC_EMULATOR
 #endif
 
 #ifdef AVMSHELL_BUILD

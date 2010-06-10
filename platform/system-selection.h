@@ -167,6 +167,10 @@
     #define AVMSYSTEM_IA32 0
   #endif
 
+  #ifdef __WINSCW__
+    #define AVMTWEAK_EPOC_EMULATOR 1
+  #endif
+
 #endif // symbian
 
 #ifdef SIXTYFOURBIT

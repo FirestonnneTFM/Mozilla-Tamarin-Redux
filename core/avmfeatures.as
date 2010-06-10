@@ -621,6 +621,14 @@ var FEATURES =
     <default> false </default>
   </tweak>
 
+  <tweak>
+    <desc> The current (June 2010) EPOC/Symbian emulator has certain limitations,
+           described throughout the code where this tweak is used. </desc>
+    <name> AVMTWEAK_EPOC_EMULATOR </name>
+    <defines> VMCFG_EPOC_EMULATOR </defines>
+    <default> false </default>
+  </tweak>
+
 </features>;
 
 /****************************************************************************

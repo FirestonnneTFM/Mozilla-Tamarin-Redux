@@ -161,4 +161,9 @@ def featureSettings(o):
         args += "-DAVMTWEAK_SIN_COS_NONFINITE=1 "
     if (arg == False):
         args += "-DAVMTWEAK_SIN_COS_NONFINITE=0 "
+    arg = o.getBoolArg("epoc-emulator")
+    if (arg == True):
+        args += "-DAVMTWEAK_EPOC_EMULATOR=1 "
+    if (arg == False):
+        args += "-DAVMTWEAK_EPOC_EMULATOR=0 "
     return args
