@@ -4374,6 +4374,19 @@ return the result of the comparison ToPrimitive(x) == y.
         core->stackOverflow(toplevel);
     }
 
+#ifdef VMCFG_EPOC_EMULATOR
+
+    // Current (June 2010) Symbian emulator can not handle PCREContext because the constructor
+    // calls OS methods, disable for emulator build.
+    void AvmCore::checkPCREStackOverflow()
+    {
+    }
+    void AvmCore::setPCREContext(Toplevel* /*env*/)
+    {
+    }
+    
+#else
+    
     static GCThreadLocal<Toplevel*> PCREContext;
 
     /* static */
@@ -4391,6 +4404,8 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         PCREContext = env;
     }
+
+#endif // VMCFG_EPOC_EMULATOR
 
     void AvmCore::raiseInterrupt(InterruptReason reason)
     {
