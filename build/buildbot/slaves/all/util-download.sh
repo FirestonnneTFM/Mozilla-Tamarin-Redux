@@ -59,35 +59,67 @@ mkdir -p $dest_dir
 ##
 # Download the requested file
 ##
-
 echo "Downloading $source to $dest"
 
-test -f download.log && {
-   rm -f download.log
-}
+maxtries=5
+x=1
 
-# wget "-O -" tells wget to print download to stdout.  This is then piped to our
-# $dest file.  The reason for using this and not doing a "-O $dest" is if there
-# is an error midstream, wget will retry the download and APPEND to $dest (which
-# already is a partially downloaded file) resulting in a corrupt download
-
-wget -o download.log --progress=dot:mega -O - $source > $dest
-cat download.log
-response=`cat download.log | grep ERROR`
-if [ ! -z "${response}" ]; then
-        echo "Did not find $source, exit run"
-        exit 1
-fi
-
-##
-# Check that the source file has some size
-##
-filesize=`ls -l $dest | awk '{print $5}'`
-echo "Downloaded file is $filesize bytes"
-test "$filesize" = "0" && {
-    echo "Download appears to have failed"
-    exit 1
-}
-
+while [ $x -le $maxtries ]
+do
+    
+    test -f download.log && {
+       rm -f download.log
+    }
+    
+    # wget "-O -" tells wget to print download to stdout.  This is then piped to our
+    # $dest file.  The reason for using this and not doing a "-O $dest" is if there
+    # is an error midstream, wget will retry the download and APPEND to $dest (which
+    # already is a partially downloaded file) resulting in a corrupt download
+    
+    wget -o download.log --progress=dot:mega -O - $source > $dest
+    cat download.log
+    response=`cat download.log | grep ERROR`
+    if [ ! -z "${response}" ]; then
+            echo "Did not find $source, exit run"
+            exit 1
+    fi
+    
+    ##
+    # Check that the source file is the same size that wget indicated
+    ##
+    
+    # use nawk if present (due to solaris awk not being compatible)
+    AWK=awk
+    test `which nawk` && {
+        AWK=nawk
+    }
+    
+    # awk command breakdown - need to account for variation in wget output on diff platforms:
+    # /(saved|written to stdout).*\[/ = find the line with "saved [" or "written to stdout ["
+    # match(...) = using the line above regexp match a "[" followed by digits followed by either "]" or "/"
+    # match defines RSTART = index of where the pattern starts; RLENGTH = length of pattern match
+    # if ... print = if there's a match, print the pattern minus the surrounding chars
+    expectedFilesize=`$AWK  '/(saved|written to stdout) \[/ {match($0,/\[([0-9]+)(\]|\/)/); if (RSTART) print substr($0, RSTART+1, RLENGTH-2)}' download.log`
+    if [ "$expectedFilesize" = "" ]; then
+        expectedFilesize=-1
+    fi
+    filesize=`ls -l $dest | awk '{print $5}'`
+    echo "Downloaded file is $filesize bytes"
+    if [ "$filesize" -eq "$expectedFilesize" ]; then
+        echo "Download successful"
+        exit 0
+    else
+        echo "Download appears to have failed"
+        rm $dest
+        if [ $x -lt $maxtries ]; then
+            x=$(( $x + 1 ))
+            echo "Attempting download again.  Attempt $x of $maxtries."
+            sleep 5
+        else 
+            echo "Download failed after $maxtries tries.  Aborting Download."
+            exit 1
+        fi
+    fi
+done
 
 exit 0
