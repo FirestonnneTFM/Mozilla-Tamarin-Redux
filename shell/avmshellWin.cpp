@@ -179,14 +179,14 @@ namespace avmshell
                 PMINIDUMP_CALLBACK_INFORMATION CallbackParam
                 );
 
-            HMODULE hDbgHelp = LoadLibrary("dbghelp.dll");
+            HMODULE hDbgHelp = LoadLibraryW(L"dbghelp.dll");
             MINIDUMP_WRITE_DUMP MiniDumpWriteDump_ = (MINIDUMP_WRITE_DUMP)GetProcAddress(hDbgHelp,
                 "MiniDumpWriteDump");
 
             if (MiniDumpWriteDump_)
             {
                 MINIDUMP_EXCEPTION_INFORMATION  M;
-                const char DumpPath[] = "avmplusCrash.dmp";
+                const WCHAR DumpPath[] = L"avmplusCrash.dmp";
 
                 M.ThreadId = GetCurrentThreadId();
                 M.ExceptionPointers = pException;
@@ -194,7 +194,7 @@ namespace avmshell
 
                 AvmLog("Writing minidump crash log to %s\n", DumpPath);
 
-                HANDLE hDumpFile = CreateFile(DumpPath, GENERIC_WRITE, 0,
+                HANDLE hDumpFile = CreateFileW(DumpPath, GENERIC_WRITE, 0,
                     NULL, CREATE_ALWAYS,
                     FILE_ATTRIBUTE_NORMAL, NULL);
 
