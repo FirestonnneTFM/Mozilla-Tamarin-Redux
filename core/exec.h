@@ -320,8 +320,8 @@ class VerifyallWriter : public NullWriter
     BaseExecMgr* exec;
 public:
     VerifyallWriter(MethodInfo*, BaseExecMgr*, CodeWriter*);
-    void write(const FrameState*, const byte *pc, AbcOpcode, Traits*);
-    void writeOp1(const FrameState*, const byte *pc, AbcOpcode, uint32_t opd1, Traits*);
+    void write(const FrameState*, const uint8_t *pc, AbcOpcode, Traits*);
+    void writeOp1(const FrameState*, const uint8_t *pc, AbcOpcode, uint32_t opd1, Traits*);
 };
 
 /**

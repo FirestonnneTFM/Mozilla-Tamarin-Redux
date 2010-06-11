@@ -64,14 +64,14 @@ VerifyallWriter::VerifyallWriter(MethodInfo* m, BaseExecMgr* exec, CodeWriter *c
     , exec(exec)
 {}
 
-void VerifyallWriter::write(const FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type)
+void VerifyallWriter::write(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, Traits *type)
 {
     if (opcode == OP_newactivation)
         exec->enqTraits(type);
     coder->write(state, pc, opcode, type);
 }
 
-void VerifyallWriter::writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+void VerifyallWriter::writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
 {
     if (opcode == OP_newfunction) {
         MethodInfo *f = pool->getMethodInfo(opd1);
