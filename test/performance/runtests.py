@@ -72,7 +72,9 @@ class PerformanceRuntest(RuntestBase):
     iterations = 1
     vmname = 'unknown'
     memory = False
+    avmrevision = ''
     avm2version = ''
+    avm2revision = ''
     vmargs2 = ''
     optimize = True
     perfm = False
@@ -252,10 +254,14 @@ class PerformanceRuntest(RuntestBase):
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
             if not self.avmversion:
                 self.avmversion = self.getAvmVersion(self.avm)
+            if not self.avmrevision:
+                self.avmrevision = self.getAvmRevision(self.avmversion)
             if self.avm2:
                 self.checkExecutable(self.avm2, '--avm2 must be set to avmplus')
                 if not self.avm2version:
                     self.avm2version = self.getAvmVersion(self.avm2)
+                if not self.avm2revision:
+                    self.avm2revision = self.getAvmRevision(self.avm2version)
 
         # Print run info and headers
         self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True, csv=False)
@@ -529,7 +535,8 @@ class PerformanceRuntest(RuntestBase):
                     self.js_print("%-50s %7s %7s" % (testName,formatMemory(memoryhigh), metric))
                 config = "%s" % self.vmargs.replace(" ", "")
                 config = config.replace("-memstats","")
-                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmversion, self.vmname))
+
+                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
         else:
             if len(self.avm2)>0:
                 if self.iterations == 1:
@@ -607,14 +614,14 @@ class PerformanceRuntest(RuntestBase):
                                 #calc confidence and mean for each stat
                                 def perfmSocketlog(metric,key):
                                   self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" %
-                                           (testName, metric,min(perfm1Dict[key]), conf95(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.avmversion, self.vmname))
+                                           (testName, metric,min(perfm1Dict[key]), conf95(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
                                 perfmSocketlog('vprof-compile-time','compile')
                                 perfmSocketlog('vprof-code-size','code')
                                 perfmSocketlog('vprof-verify-time','verify')
                                 perfmSocketlog('vprof-ir-bytes','irbytes')
                                 perfmSocketlog('vprof-ir-time','ir')
                                 perfmSocketlog('vprof-count','count')
-                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmversion, self.vmname))
+                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
                         runResults = ''
                         if self.csv:
                             for i in range(self.iterations):

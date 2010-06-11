@@ -1325,6 +1325,12 @@ class RuntestBase:
         except:
             return 'unknown'
 
+    def getAvmRevision(self, avmVerStr):
+        try:
+            return re.compile('(\d+):').search(avmVerStr).group(1)
+        except:
+            return '0'
+
     def compareAbcAsmOutput(self, file, output):
         # return diff
         try:
