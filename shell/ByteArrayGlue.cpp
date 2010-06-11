@@ -187,7 +187,7 @@ namespace avmshell
         {
             AvmAssert(m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE);
 
-            GlobalMemorySubscriber* subscriber = (GlobalMemorySubscriber*)curLink->weakSubscriber->get();
+            GlobalMemorySubscriber* subscriber = (GlobalMemorySubscriber*)(void*)curLink->weakSubscriber->get();
 
             if (subscriber)
             {
@@ -226,7 +226,7 @@ namespace avmshell
 
         while(curLink)
         {
-            if ((GlobalMemorySubscriber*)curLink->weakSubscriber->get() == subscriber)
+            if ((GlobalMemorySubscriber*)(void*)curLink->weakSubscriber->get() == subscriber)
             {
                 MMgc::GC::WriteBarrier(prevNext, curLink->next);
                 return true;
@@ -398,7 +398,7 @@ namespace avmshell
                 //UTF-16 big endian
                 c += 2;
                 len = (len - 2) >> 1;
-                return core()->newStringEndianUTF16(/*littleEndian*/false, (wchar*)c, len);
+                return core()->newStringEndianUTF16(/*littleEndian*/false, (wchar*)(void*)c, len);
             }
             else if ((c[0] == 0xff) && (c[1] == 0xfe))
             {
