@@ -748,6 +748,8 @@ namespace avmplus
         pool(i->pool()),
         state(NULL),
         mopsRangeCheckFilter(NULL),
+        restArgc(NULL),
+        restLocal(-1),
         interruptable(true),
         npe_label("npe"),
         upe_label("upe"),
@@ -885,6 +887,7 @@ namespace avmplus
         LIns* vars;                     // LIns that defines the vars[] array
         LIns* tags;                     // LIns that defines the tags[] array
         int nvar;                       // this method's frame size.
+        int restLocal;                  // -1 or, if it's lazily allocated, the local holding the rest array
 
         // false after an unconditional control flow instruction (jump, throw, return),
         // true from the start and after we start a block via trackLabel()
@@ -902,9 +905,9 @@ namespace avmplus
 #endif
 
     public:
-        VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out, int nvar)
+        VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out, int nvar, int restLocal)
             : LirWriter(out), alloc(alloc),
-              vars(NULL), tags(NULL), nvar(nvar), reachable(true)
+              vars(NULL), tags(NULL), nvar(nvar), restLocal(restLocal), reachable(true)
 #ifdef DEBUGGER
             , haveDebugger(info->pool()->core->debugger() != NULL)
 #endif
@@ -1199,6 +1202,11 @@ namespace avmplus
                 clearVarState(); // debugger might have modified locals, so make sure we reload after call.
             if (alwaysThrows(call))
                 reachable = false;
+            if (call->_address == (uintptr_t)&restargHelper) {
+                // That helper has a by-reference argument which points into the vars array
+                AvmAssert(restLocal != -1);
+                varTracker[restLocal] = 0;
+            }
             return out->insCall(call, args);
         }
     };
@@ -1627,6 +1635,9 @@ namespace avmplus
         this->state = state;
         framesize = state->verifier->frameSize;
 
+        if (info->needRest() && info->lazyRest())
+            restLocal = ms->param_count()+1;
+
         frag = new (*lir_alloc) Fragment(pc verbose_only(, 0));
         LirBuffer *prolog_buf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         prolog_buf->abi = ABI_CDECL;
@@ -1675,7 +1686,7 @@ namespace avmplus
         emitStart(*alloc1, prolog_buf, lirout);
 
         // add the VarTracker filter last because we want it to be first in line.
-        lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout, framesize);
+        lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout, framesize, restLocal);
 
         // last pc value that we generated a store for
         lastPcSave = NULL;
@@ -1846,11 +1857,51 @@ namespace avmplus
         // capture remaining args
         if (info->needRest())
         {
-            //framep[info->param_count+1] = createRest(env, argv, argc);
-            // use csop so if rest value never used, we don't bother creating array
-            LIns* rest = callIns(FUNCTIONID(createRestHelper), 3,
-                env_param, argc_param, apArg);
-            localSet(firstLocal, rest, ARRAY_TYPE);
+            if (info->lazyRest())
+            {
+                // Optimized rest arguments.
+                //
+                // We aim to avoid constructing the rest array if at all possible.
+                // An analysis in the verifier sets the LAZY_REST bit if access patterns
+                // to the rest argument are only OBJ.length or OBJ[prop] for arbitrary
+                // propery; see comments in Verifier::verify.  The former pattern
+                // results in an OP_restargc instruction, while the latter results in an
+                // OP_restarg instruction.  Those instructions will access an unconsed
+                // rest array when possible, and otherwise access a constructed rest array.
+                // (For example, if prop turns out to be "slice" we must construct the
+                // array.  This will almost never happen.) They're implemented via
+                // helper functions restargcHelper and restargHelper.
+                //
+                // The unconsed rest array, the argument count, the consed array, and the
+                // flag that determines whether to use the unconsed or the consed array,
+                // are represented as follows:
+                //
+                //  - The unconsed rest array is represented indirectly via ap_param
+                //    and argc_param.
+                //  - The rest parameter local is an array, it is either null (no
+                //    rest array consed) or a raw array pointer, so it doubles as the
+                //    flag.  The offset of this variable is 1+param_count.
+                //  - The argument count is a stack-allocated (LIR_allocp) native uint32.
+                //
+                // The rest parameter local is passed by reference to restargHelper, which
+                // may update it.
+
+                // Compute and store the argument count
+                LIns* x0 = binaryIns(LIR_subi, argc_param, InsConst(param_count));
+                LIns* x1 = binaryIns(LIR_lti, x0, InsConst(0));
+                restArgc = lirout->insChoose(x1, InsConst(0), x0, true);
+                
+                // Store a NULL array pointer
+                localSet(firstLocal, InsConstPtr(0), ARRAY_TYPE);
+            }
+            else 
+            {
+                //framep[info->param_count+1] = createRest(env, argv, argc);
+                // use csop so if rest value never used, we don't bother creating array
+                LIns* rest = callIns(FUNCTIONID(createRestHelper), 3,
+                    env_param, argc_param, apArg);
+                localSet(firstLocal, rest, ARRAY_TYPE);
+            }
             firstLocal++;
         }
         else if (info->needArguments())
@@ -2467,6 +2518,18 @@ namespace avmplus
             // ignored
             break;
 
+        case OP_restargc:
+        {
+            // See documentation in writePrologue regarding rest arguments
+            AvmAssert(info->needRest() && info->lazyRest());
+            LIns* out = callIns(FUNCTIONID(restargcHelper), 
+                                2,
+                                localGetp(restLocal),
+                                restArgc);
+            localSet(sp, out, UINT_TYPE);
+            break;
+        }
+
         default:
             AvmAssertMsg(false, "unhandled opcode in CodegenLIR::write()");
             break;
@@ -2657,6 +2720,25 @@ namespace avmplus
             LIns* slot = InsConst(finddef_cache_builder.allocateCacheSlot(opd1));
             LIns* out = callIns(FUNCTIONID(finddef_cache), 3, env_param, InsConstPtr(multiname), slot);
             localSet(dest_index, ptrToNativeRep(type, out), type);
+            break;
+        }
+                
+        case OP_restarg:
+        {
+            // See documentation in writePrologue regarding rest arguments
+            AvmAssert(info->needRest() && info->lazyRest());
+            const Multiname *multiname = pool->precomputedMultiname(opd1);
+            // The by-reference parameter &restLocal is handled specially for this
+            // helper function in VarTracker::insCall and in CodegenLIR::analyze_call.
+            LIns* out = callIns(FUNCTIONID(restargHelper), 
+                                6,
+                                InsConstPtr(state->verifier->getToplevel(this)),
+                                InsConstPtr(multiname),
+                                localGetp(state->sp()),
+                                leaIns(restLocal*8, vars),
+                                restArgc,
+                                binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))));
+            localSet(state->sp()-1, out, type);
             break;
         }
 
@@ -5222,7 +5304,8 @@ namespace avmplus
         if (prolog->env_abcenv)     livep(prolog->env_abcenv);
         if (prolog->env_domainenv)  livep(prolog->env_domainenv);
         if (prolog->env_toplevel)   livep(prolog->env_toplevel);
-
+        if (restArgc)               livep(restArgc);
+    
         #ifdef DEBUGGER
         if (haveDebugger)
             livep(csn);
@@ -5751,6 +5834,15 @@ namespace avmplus
         else if (ins->callInfo() == FUNCTIONID(makeatom)) {
             // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
             LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
+            if (varPtrArg == vars)
+                varlivein.set(0);
+            else if (varPtrArg->isop(LIR_addp))
+                analyze_addp(varPtrArg, vars, varlivein);
+        }
+        else if (ins->callInfo() == FUNCTIONID(restargHelper)) {
+            // restargHelper(Toplevel*, Multiname*, Atom, ArrayObject**, uint32_t, Atom*)
+            // The ArrayObject** is a reference to a var
+            LIns* varPtrArg = ins->arg(3);  // varPtrArg == vars, OR addp(vars, index)
             if (varPtrArg == vars)
                 varlivein.set(0);
             else if (varPtrArg->isop(LIR_addp))

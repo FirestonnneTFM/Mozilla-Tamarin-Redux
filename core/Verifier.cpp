@@ -77,6 +77,8 @@ namespace avmplus
         frameSize = stackBase + max_stack;
         state = NULL;
 
+        restArgAnalyzer.init(core, info, frameSize);
+
         #ifdef AVMPLUS_VERBOSE
         verbose = pool->isVerbose(VB_verify);
         #endif
@@ -234,6 +236,470 @@ namespace avmplus
         }
     };
 
+    // Most interesting things happen in init()
+    RestArgAnalyzer::RestArgAnalyzer()
+        : NullWriter(NULL)
+        , optimize(true)
+        , core(NULL)
+        , info(NULL)
+        , pool(NULL)
+        , frameSize(0)
+        , restVar(0)
+        , isRestArray(NULL)
+    {
+    }
+        
+    void RestArgAnalyzer::init(AvmCore* _core, MethodInfo* _info, uint32_t _frameSize)
+    {
+        core = _core;
+        info = _info;
+        pool = _info->pool();
+        frameSize = _frameSize;
+        
+#if defined VMCFG_WORDCODE || !defined VMCFG_NANOJIT
+        optimize = false;
+#else
+        if (_info->needRest() && !_info->needActivation())
+            restVar = _info->getMethodSignature()->param_count() + 1;
+        else
+            optimize = false;
+#ifdef DEBUGGER
+        if (core->debugger() != NULL)
+            optimize = false;
+#endif
+        if (optimize) {
+            isRestArray = mmfx_new_array(bool, frameSize);
+            VMPI_memset(isRestArray, 0, frameSize*sizeof(bool));
+        }
+#endif
+    }
+
+    RestArgAnalyzer::~RestArgAnalyzer()
+    {
+        mmfx_delete_array(isRestArray);
+        isRestArray = NULL;
+    }
+
+    CodeWriter* RestArgAnalyzer::hookup(CodeWriter* next, bool pass2)
+    {
+        if (optimize) {
+            if (pass2)
+                info->setLazyRest();
+            coder = next;
+            return this;
+        }
+        return next;
+    }
+
+    // Called when the analysis fails (but not during setup).  Factored out to
+    // allow easy breakpointing, etc.
+    inline void RestArgAnalyzer::fail()
+    {
+        optimize = false;
+    }
+
+    void RestArgAnalyzer::endBlock()
+    {
+        if (!optimize)
+            return;
+        for ( uint32_t i=0 ; i < frameSize ; i++ )
+            if (isRestArray[i])
+                fail();
+    }
+
+    void RestArgAnalyzer::write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type)
+    {
+        if (optimize)
+            operate(state, pc, opcode);
+        coder->write(state, pc, opcode, type);
+    }
+
+    void RestArgAnalyzer::writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits* type)
+    {
+        if (optimize)
+            operate(state, pc, opcode);
+        coder->writeOp1(state, pc, opcode, opd1, type);
+    }
+
+    void RestArgAnalyzer::writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+    {
+        if (optimize)
+            operate(state, pc, opcode);
+        coder->writeOp2(state, pc, opcode, opd1, opd2, type);
+    }
+
+    void RestArgAnalyzer::writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits* type)
+    {
+        if (optimize)
+            operate(state, pc, opcode);
+        coder->writeMethodCall(state, pc, opcode, m, disp_id, argc, type);
+    }
+
+    bool RestArgAnalyzer::getProperty(const FrameState* state, const Multiname& multiname, int obj_offset)
+    {
+        if (!optimize)
+            return false;
+
+        uint32_t sp = state->sp();
+        
+        // Be sure the arguments to run-time names aren't the rest array.
+        uint32_t numprops = (multiname.isRtname() != 0) + (multiname.isRtns() != 0);
+        if (numprops > 0) {
+            if (isRestArray[sp])
+                fail();
+        }
+        if (numprops > 1) {
+            if (isRestArray[sp-1])
+                fail();
+        }
+        if (!optimize)
+            return false;
+
+        if (isRestArray[sp-obj_offset+1])
+        {
+            isRestArray[sp-obj_offset+1] = false;
+
+            if (multiname.isRtname() && multiname.containsAnyPublicNamespace())
+            {
+                // OP_restarg candidate
+                // containsAnyPublicNamespace should imply n==2 - the multiname must have ns or nsset
+                AvmAssert(obj_offset == 2);
+            }
+            else if (multiname.getName() == core->klength && multiname.containsAnyPublicNamespace())
+            {
+                // OP_restargc candidate
+                AvmAssert(obj_offset == 1);
+            }
+            else
+            {
+                fail();
+            }
+            return optimize;
+        }
+        else {
+            return false;
+        }
+    }
+
+    void RestArgAnalyzer::writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode)
+    {
+        if (!optimize)
+            return;
+        switch (opcode)
+        {
+            case OP_getlocal:
+            {
+                uint32_t imm30=0, imm30b=0;
+                int32_t imm8=0, imm24=0;
+                AvmCore::readOperands(pc, imm30, imm24, imm30b, imm8);
+                if (restVar == imm30)
+                    isRestArray[state->sp()] = true;
+                break;
+            }
+            case OP_getlocal0:
+            case OP_getlocal1:
+            case OP_getlocal2:
+            case OP_getlocal3:
+            {
+                if (restVar == uint32_t(opcode-OP_getlocal0))
+                    isRestArray[state->sp()] = true;
+                break;
+            }
+                
+            case OP_iflt:
+            case OP_ifle:
+            case OP_ifnlt:
+            case OP_ifnle:
+            case OP_ifgt:
+            case OP_ifge:
+            case OP_ifngt:
+            case OP_ifnge:
+            case OP_ifeq:
+            case OP_ifstricteq:
+            case OP_ifne:
+            case OP_ifstrictne:
+            case OP_iftrue:
+            case OP_iffalse:
+            case OP_jump:
+            case OP_lookupswitch:
+            case OP_throw:
+            case OP_returnvalue:
+            case OP_returnvoid:
+                endBlock();
+                break;
+        }
+        coder->writeOpcodeVerified(state, pc, opcode);
+    }
+    
+    // This would be less painful if we had a table stating the number of operands read
+    // by most instructions.
+
+    void RestArgAnalyzer::operate(const FrameState* state, const uint8_t *pc, AbcOpcode opcode)
+    {
+        uint32_t imm30=0, imm30b=0;
+        int32_t imm8=0, imm24=0;
+        uint32_t numprops = 0;
+        
+        AvmCore::readOperands(pc, imm30, imm24, imm30b, imm8);
+        
+        switch (opcode) {
+            // Ignored because they are generated post-analysis when the analysis succeeds.
+            case OP_restarg:
+            case OP_restargc:
+                break;
+
+            // Handled in writeOpcodeVerified
+            case OP_getlocal:
+            case OP_getlocal0:
+            case OP_getlocal1:
+            case OP_getlocal2:
+            case OP_getlocal3:
+                break;
+                
+            // Handled in getProperty
+            case OP_getproperty:
+                break;
+
+            // Op0 
+            case OP_bkpt:
+            case OP_bkptline:
+            case OP_timestamp:
+            case OP_nop:
+            case OP_pushbyte:
+            case OP_pushshort:
+            case OP_pushtrue:
+            case OP_pushfalse:
+            case OP_pushnan:
+            case OP_pushnull:
+            case OP_pushundefined:
+            case OP_pushstring:
+            case OP_pushint:
+            case OP_pushuint:
+            case OP_pushdouble:
+            case OP_pushnamespace:
+            case OP_dxns:
+            case OP_label:
+            case OP_jump:
+            case OP_pop:        // Does not 'read' the value
+            case OP_popscope:
+            case OP_abs_jump:
+            case OP_newfunction:
+            case OP_returnvoid:
+            case OP_newactivation:
+            case OP_newcatch:
+            case OP_finddef:
+            case OP_getlex:
+            case OP_getglobalscope:
+            case OP_getscopeobject:
+            case OP_getouterscope:
+            case OP_getglobalslot:
+            case OP_debugline:
+            case OP_debugfile:
+            case OP_debug:
+            case OP_findpropglobalstrict:   // Internal, poorly documented
+            case OP_findpropglobal:         // Internal, poorly documented
+                break;
+                
+            // Op1
+            case OP_throw:
+            case OP_iftrue:
+            case OP_iffalse:
+            case OP_convert_i:
+            case OP_convert_u:
+            case OP_convert_d:
+            case OP_convert_b:
+            case OP_convert_o:
+            case OP_convert_s:
+            case OP_coerce_b:
+            case OP_coerce_a:
+            case OP_coerce_i:
+            case OP_coerce_d:
+            case OP_coerce_s:
+            case OP_coerce_u:
+            case OP_coerce_o:
+            case OP_coerce:
+            case OP_dxnslate:
+            case OP_li8:
+            case OP_li16:
+            case OP_li32:
+            case OP_lf32:
+            case OP_lf64:
+            case OP_sxi1:
+            case OP_sxi8:
+            case OP_sxi16:
+            case OP_pushwith:
+            case OP_lookupswitch:
+            case OP_increment:
+            case OP_decrement:
+            case OP_typeof:
+            case OP_not:
+            case OP_bitnot:
+            case OP_increment_i:
+            case OP_decrement_i:
+            case OP_astype:
+            case OP_pushscope:
+            case OP_negate:
+            case OP_negate_i:
+            case OP_dup:
+            case OP_checkfilter:
+            case OP_esc_xelem:
+            case OP_esc_xattr:
+            case OP_returnvalue:
+            case OP_newclass:
+            case OP_getslot:
+            case OP_setglobalslot:
+                if (isRestArray[state->sp()])
+                    fail();
+                break;
+    
+            // Op2
+            case OP_add:
+            case OP_subtract:
+            case OP_multiply:
+            case OP_divide:
+            case OP_modulo:
+            case OP_lshift:
+            case OP_rshift:
+            case OP_urshift:
+            case OP_bitand:
+            case OP_bitor:
+            case OP_bitxor:
+            case OP_equals:
+            case OP_strictequals:
+            case OP_lessthan:
+            case OP_lessequals:
+            case OP_greaterthan:
+            case OP_greaterequals:
+            case OP_instanceof:
+            case OP_istype:
+            case OP_istypelate:
+            case OP_in:
+            case OP_ifnlt:
+            case OP_ifnle:
+            case OP_ifngt:
+            case OP_ifnge:
+            case OP_ifeq:
+            case OP_ifne:
+            case OP_iflt:
+            case OP_ifle:
+            case OP_ifgt:
+            case OP_ifge:
+            case OP_ifstricteq:
+            case OP_ifstrictne:
+            case OP_si8:
+            case OP_si16:
+            case OP_si32:
+            case OP_sf32:
+            case OP_sf64:
+            case OP_add_i:
+            case OP_subtract_i:
+            case OP_multiply_i:
+            case OP_astypelate:
+            case OP_swap:
+            case OP_nextname:
+            case OP_nextvalue:
+            case OP_hasnext:
+            case OP_setslot:
+                if (isRestArray[state->sp()] || isRestArray[state->sp()-1])
+                    fail();
+                break;
+
+            // Locals
+            case OP_inclocal:
+            case OP_declocal:
+            case OP_inclocal_i:
+            case OP_declocal_i:
+            case OP_setlocal:
+            case OP_kill:
+            update_local:
+                if (imm30 == restVar)
+                    fail();
+                break;
+            case OP_setlocal0:
+            case OP_setlocal1:
+            case OP_setlocal2:
+            case OP_setlocal3:
+                imm30 -= OP_setlocal0;
+                goto update_local;
+            
+            // Locals
+            case OP_hasnext2:
+                if (imm30 == restVar || imm30b == restVar)
+                    fail();
+                break;
+
+            // Workhorses for variable-number-of-operands instructions
+            checkMultiname:
+            {
+                const Multiname* m = pool->precomputedMultiname(imm30);
+                numprops += (m->isRtname() != 0) + (m->isRtns() != 0);
+            }
+            checkVariable:
+            {
+                uint32_t top = state->sp();
+                for ( uint32_t i=0 ; i < numprops ; i++ )
+                    if (isRestArray[top-i])
+                        fail();
+                break;
+            }
+                
+            // 0 + 0/1/2 name components
+            case OP_findpropstrict:
+            case OP_findproperty:
+                numprops = 0;
+                goto checkMultiname;
+            
+            // 1 + 0/1/2 name components
+            case OP_getsuper:
+            case OP_getdescendants:
+            case OP_deleteproperty:
+                numprops = 1;
+                goto checkMultiname;
+                
+            // 2 + 0/1/2 name components
+            case OP_setsuper:
+            case OP_setproperty:
+            case OP_initproperty:
+                numprops = 2;
+                goto checkMultiname;
+                
+            case OP_call:
+                numprops = 2 + imm30;
+                goto checkVariable;
+                
+            case OP_construct:
+            case OP_constructsuper:
+            case OP_applytype:
+                numprops = 1 + imm30;
+                goto checkVariable;
+                
+            case OP_callmethod:
+            case OP_callstatic:
+                numprops = 1 + imm30b;
+                goto checkVariable;
+    
+            case OP_callsuper:
+            case OP_callsupervoid:
+            case OP_callproperty:
+            case OP_callproplex:
+            case OP_callpropvoid:
+            case OP_constructprop:
+                numprops = 1 + imm30b;
+                goto checkMultiname;
+                
+            case OP_newobject:
+                numprops = 2 * imm30;
+                goto checkMultiname;
+
+            case OP_newarray:
+                numprops = imm30;
+                goto checkMultiname;
+                
+            default:
+                AvmAssert(!"Can't happen");
+        }
+    }
+    
     /**
      * (done) branches stay in code block
      * (done) branches end on even instr boundaries
@@ -300,7 +766,7 @@ namespace avmplus
         emitPass = false;
         // phase 1 - iterate to a fixed point
         CodeWriter stubWriter;
-        coder = &stubWriter;
+        coder = restArgAnalyzer.hookup(&stubWriter);
         parseBodyHeader();          // set code_pos & code_length
         parseExceptionHandlers();   // resolve catch block types
         checkParams();
@@ -330,7 +796,7 @@ namespace avmplus
 
         // phase 2 - traverse code in abc order and emit
         mmfx_delete(state);
-        coder = emitter;
+        coder = restArgAnalyzer.hookup(emitter, true);
 
         // save computed ScopeTypeChain for OP_newfunction and OP_newclass
         ScopeWriter scopeWriter(coder, info, toplevel);
@@ -921,8 +1387,39 @@ namespace avmplus
                 checkStackMulti(1, 1, &multiname);
 
                 uint32_t n=1;
+                bool emitOptimizedRestArg = restArgAnalyzer.optimize;
                 checkPropertyMultiname(n, multiname);
-                emitGetProperty(multiname, n, imm30, pc);
+
+                if (emitOptimizedRestArg)
+                    emitOptimizedRestArg = restArgAnalyzer.getProperty(state, multiname, n);
+
+                if (emitPass && emitOptimizedRestArg) 
+                {
+                    Value& obj = state->peek(n);
+                    if (multiname.isRtname())
+                    {
+                        // restarg assumes the property name is an atom, so we must coerce it to an atom on input
+                        emitCoerce(NULL, state->sp());
+                        coder->writeOp1(state, pc, OP_restarg, imm30, NULL);
+                        state->pop_push(n, NULL);
+                    }
+                    else if (multiname.getName() == core->klength)
+                    {
+                        Binding b = toplevel->getBinding(obj.traits, &multiname);
+                        Traits* propType = readBinding(obj.traits, b);
+                        coder->write(state, pc, OP_restargc, propType);
+                        state->pop_push(n, UINT_TYPE);
+                        // restargc produces an uint, so we must coerce to the target type on return
+                        emitCoerce(propType, sp);
+                    }
+                    else {
+                        AvmAssert(!"Can't happen");
+                    }
+
+                }
+                else {
+                    emitGetProperty(multiname, n, imm30, pc);
+                }
                 break;
             }
 

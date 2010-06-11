@@ -197,7 +197,11 @@ namespace avmplus
         // to known functions is fragile and breaks encapsulation).
         static const int32_t INTERP_IMPL            = 0x20000000;
 
-        // unused:                              = 0x40000000;
+        // Set by setLazyRest when the verifier discovers that the method's rest array
+        // can be allocated lazily (usually not at all).  Only makes sense in
+        // combination with NEED_REST.
+        static const int32_t LAZY_REST              = 0x40000000;
+
         // unused:                              = 0x80000000;
 
         /*@}*/
@@ -272,6 +276,7 @@ namespace avmplus
         int32_t needArguments() const;
         int32_t needClosure() const;
         int32_t needRest() const;
+        int32_t lazyRest() const;   // Valid only during pass2 of verification or later
         int32_t needRestOrArguments() const;
         int32_t setsDxns() const;
         int32_t isStaticInit() const;
@@ -281,6 +286,7 @@ namespace avmplus
         void setUnboxThis();
         void setStaticInit();
         void setHasExceptions();
+        void setLazyRest();
         void setNeedsDxns();
         void setFinal();
         void setOverride();

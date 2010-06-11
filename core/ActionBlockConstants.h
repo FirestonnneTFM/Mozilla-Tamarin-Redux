@@ -278,8 +278,10 @@ namespace avmplus
             OP_debug = 0xEF,
             OP_debugline = 0xF0,
             OP_debugfile = 0xF1,
-                        OP_bkptline = 0xF2, // unused, ignored
-            OP_timestamp = 0xF3 // unused, ignored
+            OP_bkptline = 0xF2, // unused, ignored
+            OP_timestamp = 0xF3, // unused, ignored
+            OP_restargc = 0xF4,  // internal only
+            OP_restarg = 0xF5  // internal only
         };
 
         struct AbcOpcodeInfo

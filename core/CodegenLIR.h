@@ -412,6 +412,8 @@ namespace avmplus
         LIns *methodFrame;
         LIns *csn;
         LIns *undefConst;
+        LIns *restArgc; // NULL or the expression that computes the number of rest arguments
+        int restLocal;  // -1 or the local var that holds the rest array
         bool interruptable;
         CodegenLabel npe_label;
         CodegenLabel upe_label;
