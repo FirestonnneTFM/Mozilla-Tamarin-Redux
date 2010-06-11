@@ -5304,7 +5304,7 @@ namespace avmplus
         if (prolog->env_abcenv)     livep(prolog->env_abcenv);
         if (prolog->env_domainenv)  livep(prolog->env_domainenv);
         if (prolog->env_toplevel)   livep(prolog->env_toplevel);
-        if (restArgc)               livep(restArgc);
+        if (restArgc)               lirout->ins1(LIR_livei, restArgc);
     
         #ifdef DEBUGGER
         if (haveDebugger)
