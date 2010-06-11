@@ -61,7 +61,114 @@ namespace avmplus
     #if defined FEATURE_NANOJIT
     class CodegenLIR;
     #endif
+    
+    // Helper used for optimization of ...rest parameters.
+    //
+    // We recognize benign uses of the rest array and rewrite generic code
+    // sequences to instead use new instructions RESTARGC and RESTARG, and set
+    // the LAZY_REST attribute.  The optimization kicks in if the rest array 
+    // is not closed over and all uses of the rest array are to extract its
+    // length or extract a property from it.  Even then the RESTARGC/RESTARG
+    // instructions may fall back to the full array, if the extracted property
+    // names are not integer values in the range of the actual argument count.
+    //
+    // See Bugzilla 569321 for discussion, further work, etc.
+    //
+    // Recognition is based on a lightweight escape analysis during pass1,
+    // implemented by RestArgAnalyzer.  (The analysis is repeated during pass2
+    // to drive optimized code generation.)
+    //
+    // Analysis:
+    //
+    // We aim to determine whether the 'rest array' is used in only two ways:
+    // 
+    // - to access the 'length' property with either the public namespace or a public
+    //   namespace in the namespace set
+    //
+    // - to access an unknown property with either the public namespace or a public
+    //   namespace in the namespace set
+    //
+    // If those are the only uses of the rest array then the rest array is eligible
+    // for a speculative optimization that delays or avoids its construction.
+    //
+    // We say the analysis "fails" if the optimization is rejected because we can't
+    // prove that the rest array does not escape.
+    //
+    // Nested methods cause the array to escape; the analysis fails if the code
+    // requires an activation record.  (It is possible to do better.)
+    //
+    // A debugger causes the array to escape; the analysis fails if a debugger is
+    // present.
+    //
+    // The rest array is stored in a distinguished local slot in the ABC code, and we
+    // know which slot this is.  We assume ASC does not do something clever with the
+    // array, eg, by moving it to a different local slot. (It is possible to do better.)
+    //
+    // The analysis needs to prove the following:
+    // 
+    // * If the rest local is read by a GETLOCAL and the rest array value is produced,
+    //   and if that value is consumed by an instruction (rather  than being discarded
+    //   by an exception) then that value must be consumed by a GETPROPERTY instruction
+    //   of one of two forms:
+    //
+    //   - It reads a "length" property with a public namespace or a public namespace
+    //     in its namespace set.
+    //
+    //   - It reads a property with a run-time name, with a public namespace or a
+    //     public namespace in its namespace set.
+    //
+    // * If the rest local is read by any other instruction than a GETLOCAL, or is
+    //   consumed or inspected by any other instruction than a GETPROPERTY of the
+    //   two forms above, then the analysis fails. 
+    //
+    // The analysis is fairly weak but handles code that occurs in practice.
+    //
+    // A bit on each value in the FrameState, isRestArray, tracks whether a value is a
+    // rest array.  This bit is set by GETLOCAL.  The bit is checked by every other
+    // instruction: the operands to the instruction are checked.  If the bit is set
+    // but the instruction is not a GETPROPERTY of the correct form then the analysis
+    // fails.  (This means the bit does not propagate with the value as the value is
+    // duplicated, moved into locals, etc.)
+    //
+    // The analysis checks the values that remain in the FrameState at block
+    // boundaries.  If isRestArray is set on any value, the analysis fails.  (It is
+    // possible to do better but not necessary to do so at this point.)
+    
+    class RestArgAnalyzer : public NullWriter
+    {
+    public:
+        RestArgAnalyzer();
+        ~RestArgAnalyzer();
+        
+        void init(AvmCore* core, MethodInfo* info, uint32_t frameSize);
+        
+        // Insert this CodeWriter into the pipeline before next, or not.  On pass2,
+        // set the LAZY_REST flag on the MethodInfo if appropriate.
+        CodeWriter* hookup(CodeWriter* next, bool pass2=false);
 
+        void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);
+        void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
+        void writeOp2(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeMethodCall(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
+        void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
+        
+        bool getProperty(const FrameState* state, const Multiname& multiname, int obj_offset);
+        
+        bool optimize;
+        
+    private:
+        AvmCore* core;
+        MethodInfo* info;
+        PoolObject* pool;
+        uint32_t frameSize;
+        uint32_t restVar;
+        bool *isRestArray;
+        
+        void operate(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
+        void endBlock();
+        void fail();
+    };
+    
     class Verifier
     {
     public:
@@ -119,8 +226,9 @@ namespace avmplus
         FrameState *state;
         bool emitPass;
         bool handlerIsReachable;
+        RestArgAnalyzer restArgAnalyzer;
         FrameState* getFrameState(const uint8_t* pc);
-        const uint8_t* verifyBlock(const uint8_t*);
+        const uint8_t* verifyBlock(const uint8_t* pc);
         const uint8_t* loadBlockState(FrameState* blk);
         void checkParams();
         Value& checkLocal(int local);

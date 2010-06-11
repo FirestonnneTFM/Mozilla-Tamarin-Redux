@@ -138,6 +138,15 @@ REALLY_INLINE int32_t MethodInfo::needRest() const
     return _flags & NEED_REST;
 }
 
+// This can be called only during pass2 of verification or later, as the attribute
+// is computed during pass1 of verification.
+
+REALLY_INLINE int32_t MethodInfo::lazyRest() const
+{
+    AvmAssert(needRest());
+    return _flags & LAZY_REST;
+}
+    
 REALLY_INLINE int32_t MethodInfo::needRestOrArguments() const
 {
     return _flags & (NEED_REST|NEED_ARGUMENTS);
@@ -171,6 +180,11 @@ REALLY_INLINE void MethodInfo::setStaticInit()
 REALLY_INLINE void MethodInfo::setHasExceptions()
 {
     _flags |= HAS_EXCEPTIONS;
+}
+
+REALLY_INLINE void MethodInfo::setLazyRest()
+{
+    _flags |= LAZY_REST;
 }
 
 REALLY_INLINE void MethodInfo::setNeedsDxns()

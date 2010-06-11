@@ -859,6 +859,60 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     }
     PUREFUNCTION(FUNCADDR(istype), SIG2(I,A,P), istype)
 
+    uint32_t restargcHelper(ArrayObject* restLocal, uint32_t argc)
+    {
+        if (restLocal == 0) // Array has not been created lazily
+            return argc;
+
+        // The array has been created lazily; get the array length.
+        // We know it is a proper Array, earlier analysis guarantees
+        // that there are no assignments to the variable.
+        return ((ArrayObject*)restLocal)->get_length();
+    }
+    FUNCTION(FUNCADDR(restargcHelper), SIG2(U,P,U), restargcHelper)
+
+    Atom restargHelper(Toplevel* toplevel, const Multiname* m, Atom val, ArrayObject** restLocal, uint32_t argc, Atom* restArea)
+    {
+        uint32_t index;
+        
+        if (*restLocal != 0)    // Array has been created lazily
+            goto exception;
+
+        if (atomIsIntptr(val) && atomCanBeUint32(val)) {
+            index = (uint32_t)atomGetIntptr(val);
+            if (index >= argc) // Out of range
+                goto exception;
+        }
+        else if (atomKind(val) == kDoubleType) {
+            // Non-int index, check for Number values that are in the int range and nonnegative
+            double d = AvmCore::atomToDouble(val);
+            if (d >= 0 && d <= 0xFFFFFFFFU && MathUtils::floor(d) == d)
+                index = (uint32_t)d;
+            else 
+                goto exception;
+        }
+        else
+            goto exception;
+
+        return restArea[index];
+
+    exception:
+        // Corner cases for which we cons the array if it hasn't been
+        // consed already: non-int or out-of-range property name.
+        if (*restLocal == 0)
+            *restLocal = toplevel->arrayClass->newarray(restArea, argc);
+
+        // Obvious optimization
+        if (atomIsIntptr(val) && atomCanBeUint32(val))
+            return ((ArrayObject*)*restLocal)->getUintProperty((uint32_t)atomGetIntptr(val));
+
+        ArrayObject* array = *restLocal;
+        Multiname m2(*m);
+        m2.setName(toplevel->core()->string(val));
+        return toplevel->getproperty(array->atom(), &m2, array->vtable);
+    }
+    FUNCTION(FUNCADDR(restargHelper), SIG6(A,P,P,A,P,U,P), restargHelper)
+
     PUREMETHOD(COREADDR(AvmCore::stricteq), SIG3(A,P,A,A), stricteq)
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     PUREMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)

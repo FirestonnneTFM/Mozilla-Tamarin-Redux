@@ -212,6 +212,11 @@ regress/bug_558442a, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.o
 
 
 ####################
+# Skip some optimization testing if the debugger or interpreter is present
+####################
+as3/Definitions/Function/RestOptimization, debugger|interp, skip, Optimization not enabled unless running JIT with -Dnodebugger
+
+####################
 # skip slow tests in test phase, -Dgreedy passes
 ####################
 ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests

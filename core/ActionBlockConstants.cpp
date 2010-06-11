@@ -394,8 +394,8 @@ namespace avmplus
 #endif
         {    1,  0,   0    W(0)                   N("bkptline") },
         {    0,  0,   0    W(0)                   N("timestamp") },
-        {   -1,  0,   0    W(0)                   N("OP_0xF4") },
-        {   -1,  0,   0    W(0)                   N("OP_0xF5") },
+        {   -1,  1,   0    W(0)                   N("restargc") },      // internal only
+        {   -1,  1,   0    W(0)                   N("restarg") },       // internal only
         {   -1,  0,   0    W(0)                   N("OP_0xF6") },
         {   -1,  0,   0    W(0)                   N("OP_0xF7") },
         {   -1,  0,   0    W(0)                   N("OP_0xF8") },

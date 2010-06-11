@@ -132,7 +132,6 @@ namespace avmplus
 
     NullWriter::NullWriter(CodeWriter* coder)
         : coder(coder) {
-        AvmAssert(coder != NULL);
     }
 
     NullWriter::~NullWriter()
