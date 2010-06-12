@@ -240,7 +240,6 @@ namespace avmplus
         void checkConstantMultiname(uint32_t index, Multiname &m);
         Traits* checkSlot(Traits* traits, int slot_id);
         Traits* findCommonBase(Traits* t1, Traits* t2);
-        void printValue(Value& v);
         void checkEarlySlotBinding(Traits* traits);
         Traits* peekType(Traits* requiredType, int n=1);
         Traits* emitCoerceSuper(int index);
@@ -252,7 +251,6 @@ namespace avmplus
         void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const uint8_t *pc);
         void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const uint8_t *pc);
         Traits* checkGetGlobalScope();
-        void emitNip();
 
         void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc);
         bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc);
@@ -264,15 +262,16 @@ namespace avmplus
         Binding findStringFunction(TraitsBindingsp string, const Multiname& name, Binding b, int argc);
         void parseExceptionHandlers();
 
-        #ifdef AVMPLUS_VERBOSE
+#ifdef AVMPLUS_VERBOSE
     public:
         bool verbose;
         bool secondTry;
         void printScope(const char* title, const ScopeTypeChain*);
         void printState(StringBuffer& prefix, FrameState* state);
         void printOpcode(const uint8_t* pc);
-        void verifyWarn(int errorId, ...);
-        #endif
+    private:
+        void printValue(Value& v);
+#endif
 
     public:
         // NOTE these methods used to be private but the jit needs access to
