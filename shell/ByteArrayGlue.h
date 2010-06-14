@@ -136,6 +136,7 @@ namespace avmshell
         virtual bool hasAtomProperty(Atom name) const;
         virtual void setAtomProperty(Atom name, Atom value);
         virtual Atom getAtomProperty(Atom name) const;
+        virtual bool hasUintProperty(uint32_t i) const;
         virtual Atom getUintProperty(uint32_t i) const;
         virtual void setUintProperty(uint32_t i, Atom value);
 
