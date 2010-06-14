@@ -77,7 +77,7 @@ namespace avmplus
 #endif
 
     // Find next appropriate value for m_lowHTentry; assumes we just
-    // deleted property at m_lowHTentry
+    // deleted property at m_lowHTentry.  (See bug 559565.)
     void ArrayObject::updateToSucceedingLowHtEntry()
     {
         // If our low entry happened to match our length, we're out of HT entries
@@ -283,19 +283,29 @@ namespace avmplus
     // This does NOT affect the length of the array
     bool ArrayObject::deleteAtomProperty(Atom name)
     {
+        uint32_t index; // well-defined only if is_index true
+        bool is_index = AvmCore::getIndexFromAtom(name, &index);
+
         if (traits()->needsHashtable())
         {
             if (hasDense())
             {
-                uint32_t index;
-                if (AvmCore::getIndexFromAtom(name, &index) && index < getDenseLength())
+                if (is_index && index < getDenseLength())
                 {
                     return delUintProperty(index);
                 }
             }
         }
 
-        return ScriptObject::deleteAtomProperty(name);
+        bool retval = ScriptObject::deleteAtomProperty(name);
+
+        if (is_index && index == m_lowHTentry)
+        {
+            AvmAssert(retval); // all numeric properties are deletable.
+            updateToSucceedingLowHtEntry();
+        }
+
+        return retval;
     }
 
     bool ArrayObject::delUintProperty(uint32_t index)
@@ -321,10 +331,22 @@ namespace avmplus
                     m_denseArr.splice (index, 0, (getDenseLength() - index), 0);
                 }
 
+                if (index == m_lowHTentry)
+                    updateToSucceedingLowHtEntry();
+
                 return true;
             }
         }
-        return ScriptObject::delUintProperty(index);
+
+        bool retval = ScriptObject::delUintProperty(index);
+
+        if (index == m_lowHTentry)
+        {
+            AvmAssert(retval); // all numeric properties are deletable
+            updateToSucceedingLowHtEntry();
+        }
+
+        return retval;
     }
 
     bool ArrayObject::getAtomPropertyIsEnumerable(Atom name) const
