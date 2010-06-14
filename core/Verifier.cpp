@@ -130,6 +130,22 @@ namespace avmplus
             : NullWriter(coder), info(info), toplevel(toplevel)
         {}
 
+        void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits* type)
+        {
+            if (opcode == OP_newactivation) {
+                // Capture activation scope the first time the method is verified.
+                const ScopeTypeChain *scope = info->activationScope();
+                if (scope == NULL) {
+                    AvmAssert(type == info->activationTraits());
+                    GC* gc = info->pool()->core->GetGC();
+                    scope = info->declaringScope()->cloneWithNewTraits(gc, type);
+                    type->setDeclaringScopes(scope);
+                    info->init_activationScope(scope);
+                }
+            }
+            coder->write(state, pc, opcode, type);
+        }
+
         void writeOp1(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, uint32_t imm30, Traits* type)
         {
             if (opcode == OP_newfunction) {
@@ -1933,11 +1949,13 @@ namespace avmplus
                 checkStack(0, 1);
                 if (!info->needActivation())
                     verifyFailed(kInvalidNewActivationError);
-                Traits* atraits = info->resolveActivation(toplevel);
+                Traits* atraits = info->activationTraits();
+                atraits->resolveSignatures(toplevel);
                 coder->write(state, pc, opcode, atraits);
                 state->push(atraits, true);
                 break;
             }
+
             case OP_newcatch:
             {
                 checkStack(0, 1);
