@@ -76,6 +76,50 @@ namespace avmplus
     }
 #endif
 
+    // Find next appropriate value for m_lowHTentry; assumes we just
+    // deleted property at m_lowHTentry
+    void ArrayObject::updateToSucceedingLowHtEntry()
+    {
+        // If our low entry happened to match our length, we're out of HT entries
+        // and we can just quit.
+        if ((m_lowHTentry + 1) == m_length)
+        {
+            m_lowHTentry = NO_LOW_HTENTRY;
+        }
+        else
+        {
+            // Find the next integer HT prop and update m_lowHTentry
+            // This is tricky.  Our HT section could be huge but very sparse
+            // Do we want to linearly walk from index+1 to m_length or do
+            // we want to walk the entire HT looking for a low integer value?
+
+            if (ScriptObject::hasUintProperty (m_lowHTentry + 1))
+            {
+                m_lowHTentry++;
+            }
+            else
+            {
+                // assume we don't find an entry
+                m_lowHTentry = NO_LOW_HTENTRY;
+                int index = ScriptObject::nextNameIndex(0);
+                while (index)
+                {
+                    Atom name = ScriptObject::nextName (index);
+                    uint32_t nameIndex;
+                    if (AvmCore::getIndexFromAtom(name, &nameIndex))
+                    {
+                        if ((m_lowHTentry == NO_LOW_HTENTRY) || (nameIndex < m_lowHTentry))
+                        {
+                            m_lowHTentry = nameIndex;
+                        }
+                    }
+
+                    index = ScriptObject::nextNameIndex(index);
+                }
+            }
+        }
+    }
+
     // This routine checks to see if our dense portion is directly next
     // to any entries in our HT.  If so, the HT entries are deleted and added
     // to the dense portion.  If the HT is completely emptied, it is cleared.
@@ -99,44 +143,7 @@ namespace avmplus
             // Delete prop from HT
             ScriptObject::delUintProperty (m_lowHTentry);
 
-            // If our low entry happened to match our length, we're out of HT entries
-            // and we can just quit.
-            if ((m_lowHTentry + 1) == m_length)
-            {
-                m_lowHTentry = NO_LOW_HTENTRY;
-            }
-            else
-            {
-                // Find the next integer HT prop and update m_lowHTentry
-                // This is tricky.  Our HT section could be huge but very sparse
-                // Do we want to linearly walk from index+1 to m_length or do
-                // we want to walk the entire HT looking for a low integer value?
-
-                if (ScriptObject::hasUintProperty (m_lowHTentry + 1))
-                {
-                    m_lowHTentry++;
-                }
-                else
-                {
-                    // assume we don't find an entry
-                    m_lowHTentry = NO_LOW_HTENTRY;
-                    int index = ScriptObject::nextNameIndex(0);
-                    while (index)
-                    {
-                        Atom name = ScriptObject::nextName (index);
-                        uint32_t nameIndex;
-                        if (AvmCore::getIndexFromAtom(name, &nameIndex))
-                        {
-                            if ((m_lowHTentry == NO_LOW_HTENTRY) || (nameIndex < m_lowHTentry))
-                            {
-                                m_lowHTentry = nameIndex;
-                            }
-                        }
-
-                        index = ScriptObject::nextNameIndex(index);
-                    }
-                }
-            }
+            updateToSucceedingLowHtEntry();
         }
 
         // We're done moving our sparse entries over to our dense part of our array.
