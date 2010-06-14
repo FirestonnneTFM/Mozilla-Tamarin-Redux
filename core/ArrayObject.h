@@ -114,6 +114,7 @@ namespace avmplus
         uint32_t push(Atom *args, int argc);
         uint32_t unshift(Atom *args, int argc);
 
+        void updateToSucceedingLowHtEntry();
         void checkForSparseToDenseConversion();
 
 #ifdef DEBUGGER
