@@ -93,7 +93,7 @@ Atom BaseExecMgr::jitInvokerNow(MethodEnv* env, int argc, Atom* args)
 
 void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplevel, AbcEnv* abc_env)
 {
-    CodegenLIR jit(m);
+    CodegenLIR jit(m, ms, toplevel);
     PERFM_NTPROF_BEGIN("verify & IR gen");
     verifyCommon(m, ms, toplevel, abc_env, &jit);
     PERFM_NTPROF_END("verify & IR gen");
