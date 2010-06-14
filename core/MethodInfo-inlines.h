@@ -44,9 +44,14 @@ REALLY_INLINE ScopeOrTraits::ScopeOrTraits(Traits* t) : _scopeOrTraits((uintptr_
 {
 }
 
+REALLY_INLINE bool ScopeOrTraits::hasScope() const
+{
+    return (_scopeOrTraits & IS_SCOPE) != 0;
+}
+
 REALLY_INLINE Traits* ScopeOrTraits::getTraits() const
 {
-    if (!(_scopeOrTraits & IS_SCOPE))
+    if (!hasScope())
         return (Traits*)(_scopeOrTraits);
 
     const ScopeTypeChain* sc = (const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE);
@@ -55,7 +60,7 @@ REALLY_INLINE Traits* ScopeOrTraits::getTraits() const
 
 REALLY_INLINE const ScopeTypeChain* ScopeOrTraits::getScope() const
 {
-    if (!(_scopeOrTraits & IS_SCOPE))
+    if (!hasScope())
         return _scopeOrTraits ? ((Traits*)(_scopeOrTraits))->declaringScope() : NULL;
 
     return ((const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE));

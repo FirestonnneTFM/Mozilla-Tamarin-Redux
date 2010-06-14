@@ -111,6 +111,12 @@ namespace avmplus
         _activation.setTraits(pool()->core->GetGC(), this, t);
     }
 
+    void MethodInfo::init_activationScope(const ScopeTypeChain* scope)
+    {
+        AvmAssert(!_activation.hasScope());
+        _activation.setScope(pool()->core->GetGC(), this, scope);
+    }
+
     REALLY_INLINE double unpack_double(const void* src)
     {
     #if defined(AVMPLUS_64BIT) || defined(VMCFG_UNALIGNED_FP_ACCESS)
@@ -703,20 +709,6 @@ namespace avmplus
             _flags |= RESOLVED;
             pool()->core->exec->notifyMethodResolved(this, ms);
         }
-    }
-
-    Traits* MethodInfo::resolveActivation(const Toplevel* toplevel)
-    {
-        Traits* atraits = this->activationTraits();
-
-        const ScopeTypeChain* ascope = this->declaringScope()->cloneWithNewTraits(pool()->core->GetGC(), atraits);
-
-        atraits->resolveSignatures(toplevel);
-        atraits->setDeclaringScopes(ascope);
-
-        _activation.setScope(pool()->core->GetGC(), this, ascope);
-
-        return atraits;
     }
 
 #ifdef DEBUGGER

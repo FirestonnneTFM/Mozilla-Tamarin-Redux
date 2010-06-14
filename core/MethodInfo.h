@@ -55,6 +55,7 @@ namespace avmplus
         uintptr_t _scopeOrTraits;   // if LSB clr, Traits*   if LSB set, ScopeTypeChain*
      public:
          explicit ScopeOrTraits(Traits* t);
+         bool hasScope() const;
          Traits* getTraits() const;
          const ScopeTypeChain* getScope() const;
          void setTraits(MMgc::GC* gc, void* container, Traits* t);
@@ -230,8 +231,6 @@ namespace avmplus
 
         void resolveSignature(const Toplevel* toplevel);
 
-        Traits* resolveActivation(const Toplevel* toplevel);
-
 #ifdef DEBUGGER
     public:
         Atom boxOneLocal(FramePtr src, int32_t srcPos, const uint8_t* sstArr);
@@ -351,6 +350,7 @@ namespace avmplus
         const ScopeTypeChain* activationScope() const;
 
         void init_activationTraits(Traits* t);
+        void init_activationScope(const ScopeTypeChain*);
 
         MethodSignaturep getMethodSignature();
         void update_max_stack(int32_t max_stack);
