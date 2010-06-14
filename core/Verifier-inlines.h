@@ -39,13 +39,4 @@
 
 namespace avmplus
 {
-
-#if defined FEATURE_NANOJIT
-// provide access to known jitters
-REALLY_INLINE Toplevel* Verifier::getToplevel(CodegenLIR*)
-{
-    return toplevel;
-}
-#endif
-
 } // namespace avmplus

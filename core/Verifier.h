@@ -209,11 +209,6 @@ namespace avmplus
         int getBlockCount();
         bool hasReachableExceptions();
 
-        // provide access to known jitters
-        #if defined FEATURE_NANOJIT
-        Toplevel* getToplevel(CodegenLIR* jit);
-        #endif
-
     private:
         MethodInfo *info;
         const MethodSignaturep ms;

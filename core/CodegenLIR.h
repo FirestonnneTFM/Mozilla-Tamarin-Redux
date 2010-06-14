@@ -403,6 +403,7 @@ namespace avmplus
     private:
         MethodInfo *info;
         const MethodSignaturep ms;
+        Toplevel* toplevel;
         PoolObject *pool;
         const FrameState *state;
         MopsRangeCheckFilter* mopsRangeCheckFilter;
@@ -552,7 +553,7 @@ namespace avmplus
         LIns* coerceToType(int i, Traits*);
 
     public:
-        CodegenLIR(MethodInfo* info);
+        CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel);
         ~CodegenLIR();
         GprMethodProc emitMD();
 

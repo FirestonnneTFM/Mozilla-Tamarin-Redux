@@ -736,7 +736,7 @@ namespace avmplus
     }
 #endif
 
-    CodegenLIR::CodegenLIR(MethodInfo* i) :
+    CodegenLIR::CodegenLIR(MethodInfo* i, MethodSignaturep ms, Toplevel* toplevel) :
         LirHelper(i->pool()),
 #ifdef VTUNE
         hasDebugInfo(false),
@@ -744,7 +744,8 @@ namespace avmplus
         jitPendingRecords(i->core()->gc),
 #endif
         info(i),
-        ms(i->getMethodSignature()),
+        ms(ms),
+        toplevel(toplevel),
         pool(i->pool()),
         state(NULL),
         mopsRangeCheckFilter(NULL),
@@ -2217,7 +2218,7 @@ namespace avmplus
         case OP_astype:
         {
             const Multiname *name = pool->precomputedMultiname(imm30);
-            Traits *t = pool->getTraits(*name, state->verifier->getToplevel(this));
+            Traits *t = pool->getTraits(*name, toplevel);
             emit(OP_astype, (uintptr_t)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
             break;
         }
@@ -2267,7 +2268,7 @@ namespace avmplus
             // used when operator "is" RHS is a compile-time type constant
             //sp[0] = istype(sp[0], itraits);
             const Multiname *name = pool->precomputedMultiname(imm30);
-            Traits* itraits = pool->getTraits(*name, state->verifier->getToplevel(this));
+            Traits* itraits = pool->getTraits(*name, toplevel);
             LIns* obj = loadAtomRep(sp);
             LIns* out = callIns(FUNCTIONID(istype), 2, obj, InsConstPtr(itraits));
             localSet(sp, out, BOOLEAN_TYPE);
@@ -2732,7 +2733,7 @@ namespace avmplus
             // helper function in VarTracker::insCall and in CodegenLIR::analyze_call.
             LIns* out = callIns(FUNCTIONID(restargHelper), 
                                 6,
-                                InsConstPtr(state->verifier->getToplevel(this)),
+                                loadEnvToplevel(),
                                 InsConstPtr(multiname),
                                 localGetp(state->sp()),
                                 leaIns(restLocal*8, vars),
@@ -2869,7 +2870,6 @@ namespace avmplus
 
             const Multiname* name = pool->precomputedMultiname(index);
 
-            Toplevel* toplevel = state->verifier->getToplevel(this);
             Binding b = toplevel->getBinding(base, name);
             Traits* propType = state->verifier->readBinding(base, b);
             const TraitsBindingsp basetd = base->getTraitsBindings();
@@ -2909,7 +2909,6 @@ namespace avmplus
 
             const Multiname* name = pool->precomputedMultiname(index);
 
-            Toplevel* toplevel = state->verifier->getToplevel(this);
             Binding b = toplevel->getBinding(base, name);
             Traits* propType = state->verifier->readBinding(base, b);
 
@@ -2942,7 +2941,6 @@ namespace avmplus
 
             const Multiname *name = pool->precomputedMultiname(index);
 
-            Toplevel* toplevel = state->verifier->getToplevel(this);
             Binding b = toplevel->getBinding(base, name);
 
             if (AvmCore::isMethodBinding(b))
@@ -2966,7 +2964,6 @@ namespace avmplus
             const Multiname* name = pool->precomputedMultiname(opd1);
 
             const Value& obj = state->peek(argc+1); // object
-            Toplevel* toplevel = state->verifier->getToplevel(this);
             Binding b = toplevel->getBinding(obj.traits, name);
 
             if (AvmCore::isSlotBinding(b))
@@ -2988,7 +2985,6 @@ namespace avmplus
             // NOTE opd2 is the stack offset to the reciever
             const Multiname* name = pool->precomputedMultiname(opd1);
             const Value& obj = state->peek(opd2); // object
-            Toplevel* toplevel = state->verifier->getToplevel(this);
             Binding b = toplevel->getBinding(obj.traits, name);
 
             // early bind accessor
@@ -3020,7 +3016,6 @@ namespace avmplus
             // opd2=n the stack offset to the reciever
             const Multiname *name = pool->precomputedMultiname(opd1);
             const Value& obj = state->peek(opd2); // object
-            Toplevel* toplevel = state->verifier->getToplevel(this);
             Binding b = toplevel->getBinding(obj.traits, name);
 
             // early bind accessor
@@ -4138,7 +4133,7 @@ namespace avmplus
                 LIns* ap = storeAtomArgs(receiver, argc, argv);
 
                 Traits* baseTraits = state->value(baseDisp).traits;
-                Binding b = state->verifier->getToplevel(this)->getBinding(baseTraits, name);
+                Binding b = toplevel->getBinding(baseTraits, name);
 
                 LIns* out;
                 if (AvmCore::isSlotBinding(b)) {
