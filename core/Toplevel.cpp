@@ -482,7 +482,7 @@ namespace avmplus
 
     Traits* Toplevel::toClassITraits(Atom atom)
     {
-        if (!AvmCore::isObject(atom)) // includes null check
+        if (!AvmCore::isObject(atom)) // isObject(null) => false
         {
             // TypeError in ECMA
             // ISSUE the error message should say "whatever" is not a class
@@ -500,12 +500,25 @@ namespace avmplus
     Atom Toplevel::in_operator(Atom nameatom, Atom obj)
     {
         AvmCore* core = this->core();
-        Traits* t = this->toTraits(obj); // includes null check
+        Traits* t = this->toTraits(obj); // toTraits(null) => exception
 
         bool has_interned = false;
         if (!AvmCore::isDictionaryLookup(nameatom, obj))
         {
-            Stringp name = core->intern(nameatom);
+            Stringp name;
+
+            if (avmplus::atomIsIntptr(nameatom) &&
+                avmplus::atomCanBeUint32(nameatom))
+            {
+                ScriptObject* o = (atomKind(obj) == kObjectType) ?
+                    AvmCore::atomToScriptObject(obj) :
+                    this->toPrototype(obj);
+                return o->hasUintProperty((uint32_t)atomGetIntptr(nameatom)) ?
+                    trueAtom :
+                    falseAtom;
+            }
+
+            name = core->intern(nameatom);
             has_interned = true;
 
             // ISSUE should we try this on each object on the proto chain or just the first?

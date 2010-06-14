@@ -305,6 +305,11 @@ namespace avmshell
         c.set(&m_byteArray, sizeof(ByteArrayFile));
     }
 
+    bool ByteArrayObject::hasUintProperty(uint32_t i) const
+    {
+        return (i < (uint32_t)m_byteArray.GetLength());
+    }
+
     Atom ByteArrayObject::getUintProperty(uint32_t i) const
     {
         if (i < (uint32_t)m_byteArray.GetLength()) {

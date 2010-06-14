@@ -115,6 +115,11 @@ namespace avmplus
         Atom _filter(ScriptObject* callback, Atom thisObject) { return filter(callback, thisObject); }
         Atom _map(ScriptObject* callback, Atom thisObject) { return map(callback, thisObject); }
 
+        virtual bool hasUintProperty(uint32_t index) const
+        {
+            return _hasUintProperty(index);
+        }
+
         virtual Atom getUintProperty(uint32_t index) const
         {
             return _getUintProperty(index);
@@ -163,6 +168,11 @@ namespace avmplus
                 m_length = index+1;
             }
             m_array[index] = value;
+        }
+
+        bool _hasUintProperty(uint32_t index) const
+        {
+            return (index < m_length);
         }
 
         Atom _getUintProperty(uint32_t index) const
