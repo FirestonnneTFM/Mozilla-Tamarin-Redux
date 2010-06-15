@@ -1085,7 +1085,7 @@ namespace avmshell
         AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 #endif
 #ifdef AVMPLUS_VERBOSE
-        AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,jit,minaddr,memstats,sweep,occupancy]] \n");
+        AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,jit,minaddr,memstats,sweep,occupancy,execpolicy]] \n");
         AvmLog("                        With no options, enables extreme! output mode.  Otherwise the\n");
         AvmLog("                        options are mostly self-descriptive except for the following: \n");
         AvmLog("                           builtins - includes output from builtin methods\n");
@@ -1093,6 +1093,7 @@ namespace avmshell
         AvmLog("                           memstats - generate statistics on memory usage \n");
         AvmLog("                           sweep - [memstats] include detailed sweep information \n");
         AvmLog("                           occupancy - [memstats] include occupancy bit graph \n");
+        AvmLog("                           execpolicy - shows which execution method (interpretation, compilation) was chosen and why \n");
         AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
         AvmLog("                        are contained in [ ] For example, 'minaddr' requires 'jit' \n");
 #endif

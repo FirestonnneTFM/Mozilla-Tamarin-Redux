@@ -69,7 +69,8 @@ const int kBufferPadding = 16;
         VB_verify       = 1<<29, // verification information
         VB_interp       = 1<<28, // interpreter information
         VB_jit          = 1<<27, // jit information
-        VB_traits       = 1<<26  // traits creation information
+        VB_traits       = 1<<26, // traits creation information
+        VB_execpolicy   = 1<<25  // traits creation information
         // @warning make sure these don't collide with LC_xxx bits
     };
 

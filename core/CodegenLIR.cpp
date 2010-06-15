@@ -6247,7 +6247,7 @@ namespace avmplus
         GprMethodProc code;
         if (keep) {
 #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
-            if (verbose())
+            if (pool->isVerbose(VB_execpolicy))
                 AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
 #endif
             // save pointer to generated code
@@ -6255,7 +6255,7 @@ namespace avmplus
             _nvprof("JIT method bytes", CodeAlloc::size(assm->codeList));
         } else {
 #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
-            if (verbose())
+            if (pool->isVerbose(VB_execpolicy))
                 AvmLog("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
 #endif
             mgr->codeAlloc.freeAll(assm->codeList);

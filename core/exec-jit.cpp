@@ -72,6 +72,10 @@ void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
     m->_invoker = InvokerCompiler::canCompileInvoker(m)
         ? jitInvokerNext
         : invoke_generic;
+#ifdef AVMPLUS_VERBOSE
+    if (m->pool()->isVerbose(VB_execpolicy)) 
+        core->console << "execpolicy jit " << m << "\n";
+#endif
 }
 
 Atom BaseExecMgr::jitInvokerNext(MethodEnv* env, int argc, Atom* args)
@@ -85,8 +89,19 @@ Atom BaseExecMgr::jitInvokerNext(MethodEnv* env, int argc, Atom* args)
 Atom BaseExecMgr::jitInvokerNow(MethodEnv* env, int argc, Atom* args)
 {
     AtomMethodProc invoker = InvokerCompiler::compile(env->method);
-    if (!invoker)
+    if (!invoker) {
+#ifdef AVMPLUS_VERBOSE
+        if (env->method->pool()->isVerbose(VB_execpolicy)) 
+            env->core()->console << "execpolicy generic-invoker " << env->method 
+                                 << " invoker-jit-failed\n";
+#endif
         invoker = invoke_generic; // Fail: install generic invoker.
+    } else {
+#ifdef AVMPLUS_VERBOSE
+        if (env->method->pool()->isVerbose(VB_execpolicy)) 
+            env->core()->console << "execpolicy jit-invoker " << env->method << "\n";
+#endif
+    }
     env->method->_invoker = invoker;
     return invoker(env, argc, args);
 }
@@ -105,9 +120,17 @@ void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplev
         Exception* e = new (core->GetGC())
                 Exception(core, core->newStringLatin1("JIT failed")->atom());
         e->flags |= Exception::EXIT_EXCEPTION;
+#ifdef AVMPLUS_VERBOSE
+        if (m->pool()->isVerbose(VB_execpolicy)) 
+            core->console << "execpolicy die " << this << " method-jit-failed\n";
+#endif
         core->throwException(e);
     } else {
         // Mark it as interpreted and limp along.
+#ifdef AVMPLUS_VERBOSE
+        if (m->pool()->isVerbose(VB_execpolicy)) 
+            core->console << "execpolicy interp " << this << " method-jit-failed\n";
+#endif
         setInterp(m, ms);
     }
 }
@@ -120,6 +143,11 @@ void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
     if (InvokerCompiler::canCompileInvoker(m))
         m->_invoker = jitInvokerNext;
 #endif
+#ifdef AVMPLUS_VERBOSE 
+    if (m->pool()->isVerbose(VB_execpolicy)) 
+        core->console<< "execpolicy native " << m << "\n";
+#endif
+
 }
 
 //
