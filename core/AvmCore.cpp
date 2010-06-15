@@ -118,6 +118,8 @@ namespace avmplus
                 r |= VB_traits;
             else if (substrMatches("builtins", p, e))
                 r |= VB_builtins;
+            else if (substrMatches("execpolicy", p, e))
+                r |= VB_execpolicy;
             else if (substrMatches("memstats", p, e))
                 MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
             else if (substrMatches("sweep", p, e))

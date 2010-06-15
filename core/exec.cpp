@@ -230,6 +230,10 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
     CodeWriter coder;
 #endif
     verifyCommon(m, ms, toplevel, abc_env, &coder);
+#ifdef AVMPLUS_VERBOSE
+    if (m->pool()->isVerbose(VB_execpolicy)) // Currently shouldn't print "unknown", accounting for code evolution.
+        core->console << "execpolicy interp " << m << (shouldJit(m) ? " unknown\n" : " jit-policy\n");
+#endif
     setInterp(m, ms);
 }
 
