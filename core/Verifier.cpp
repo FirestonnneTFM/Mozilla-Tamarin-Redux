@@ -1585,6 +1585,7 @@ namespace avmplus
                 break;
             }
             case OP_istype:
+            {
                 checkStack(1,1);
                 // resolve operand into a traits, and test if value is that type
                 Traits* t = checkTypeName(imm30); // CONSTANT_Multiname
@@ -1592,7 +1593,7 @@ namespace avmplus
                 state->pop(1);
                 state->push(BOOLEAN_TYPE);
                 break;
-
+            }
             case OP_istypelate:
                 checkStack(2,1);
                 coder->write(state, pc, opcode);
