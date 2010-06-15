@@ -1488,7 +1488,7 @@ namespace avmplus
                     // then result type is Object.
                     if (t && t->isMachineType())
                         resultType = OBJECT_TYPE;
-                    coder->write(state, pc, opcode);
+                    coder->write(state, pc, opcode, t);
                     state->pop_push(1, resultType);
                 }
                 break;
@@ -1503,7 +1503,7 @@ namespace avmplus
                 if (ct && (t=ct->itraits) != 0)
                     if (t->isMachineType())
                         t = OBJECT_TYPE;
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, t);
                 state->pop_push(2, t);
                 break;
             }
@@ -1587,8 +1587,8 @@ namespace avmplus
             case OP_istype:
                 checkStack(1,1);
                 // resolve operand into a traits, and test if value is that type
-                checkTypeName(imm30); // CONSTANT_Multiname
-                coder->write(state, pc, opcode);
+                Traits* t = checkTypeName(imm30); // CONSTANT_Multiname
+                coder->write(state, pc, opcode, t);
                 state->pop(1);
                 state->push(BOOLEAN_TYPE);
                 break;

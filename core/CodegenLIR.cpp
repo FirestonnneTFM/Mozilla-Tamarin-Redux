@@ -2217,20 +2217,12 @@ namespace avmplus
 
         case OP_astype:
         {
-            const Multiname *name = pool->precomputedMultiname(imm30);
-            Traits *t = pool->getTraits(*name, toplevel);
-            emit(OP_astype, (uintptr_t)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
+            emit(OP_astype, (uintptr_t)type, sp, type && type->isMachineType() ? OBJECT_TYPE : type);
             break;
         }
         case OP_astypelate:
         {
-            const Value& classValue = state->peek(1); // rhs - class
-            Traits* ct = classValue.traits;
-            Traits* t = NULL;
-            if (ct && (t=ct->itraits) != 0)
-                if (t->isMachineType())
-                    t = OBJECT_TYPE;
-            emit(opcode, 0, 0, t);
+            emit(OP_astypelate, 0, 0, type);
             break;
         }
 
@@ -2264,13 +2256,10 @@ namespace avmplus
 
         case OP_istype:
         {
-            // expects a CONSTANT_Multiname cpool index
             // used when operator "is" RHS is a compile-time type constant
             //sp[0] = istype(sp[0], itraits);
-            const Multiname *name = pool->precomputedMultiname(imm30);
-            Traits* itraits = pool->getTraits(*name, toplevel);
             LIns* obj = loadAtomRep(sp);
-            LIns* out = callIns(FUNCTIONID(istype), 2, obj, InsConstPtr(itraits));
+            LIns* out = callIns(FUNCTIONID(istype), 2, obj, InsConstPtr(type));
             localSet(sp, out, BOOLEAN_TYPE);
             break;
         }
