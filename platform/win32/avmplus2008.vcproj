@@ -2012,6 +2012,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MathUtilsWin-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\MethodClosure.cpp"
 				>
 			</File>

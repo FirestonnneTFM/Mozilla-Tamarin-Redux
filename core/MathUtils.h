@@ -100,17 +100,17 @@ namespace avmplus
         static double exp(double value);
         static double floor(double value);
         static uint64_t  frexp(double x, int32_t *eptr);
-        inline static double infinity() { return kInfinity; }
-        inline static double neg_infinity() { return kNegInfinity; }
+        REALLY_INLINE static double infinity() { return kInfinity; }
+        REALLY_INLINE static double neg_infinity() { return kNegInfinity; }
         /// Return 1 if value is +Infinity, -1 if -Infinity, 0 otherwise.
         static int32_t isInfinite(double value);
         static bool isNaN(double value);
         static bool isNegZero(double x);
         static double log(double value);
-        static double max(double x, double y) { return (x > y) ? x : y; }
-        static double min(double x, double y) { return (x < y) ? x : y; }
+        REALLY_INLINE static double max(double x, double y) { return (x > y) ? x : y; }
+        REALLY_INLINE static double min(double x, double y) { return (x < y) ? x : y; }
         static double mod(double x, double y);
-        inline static double nan() { return kNaN; }
+        REALLY_INLINE static double nan() { return kNaN; }
         static int32_t nextPowerOfTwo(int32_t n);
         static double parseInt(Stringp s, int32_t radix=10, bool strict=true);
         static double pow(double x, double y);
@@ -135,7 +135,7 @@ namespace avmplus
         // and integer and is not between -2^31 and 2^31-1.
         static int32_t real2int(double value);
         #else
-        static int32_t real2int(double val) { return (int32_t) val; }
+        REALLY_INLINE static int32_t real2int(double val) { return (int32_t) val; }
         #endif
         /**
          * Enumeration values for the minimum buffer size required to convert
@@ -318,6 +318,32 @@ namespace avmplus
                                                 //  in the base 10 exponent estimate.  Returns exact base10 exponent of number.
 
     };
+
+}
+
+#if AVMSYSTEM_WIN32
+    #include "win32/MathUtilsWin-inlines.h"
+#elif AVMSYSTEM_UNIX
+    #ifdef SOLARIS
+        #include "unix/MathUtilsSolaris-inlines.h"
+    #elif AVMSYSTEM_ARM
+        #include "arm/MathUtilsUnix-inlines.h"
+    #else
+        #include "unix/MathUtilsUnix-inlines.h"
+    #endif
+#elif AVMSYSTEM_MAC
+    #include "unix/MathUtilsUnix-inlines.h"
+#elif AVMSYSTEM_SYMBIAN
+    // No inlines presently defined for the Symbian platform.
+#endif
+
+namespace avmplus
+{
+
+    REALLY_INLINE double MathUtils::round(double value)
+    {
+        return MathUtils::floor(value + 0.5);
+    }
 
 }
 

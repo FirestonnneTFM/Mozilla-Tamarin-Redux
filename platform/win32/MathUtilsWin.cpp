@@ -62,7 +62,6 @@ namespace avmplus
         return r;
     }
 
-
     // sin, cos, tan all function incorrectly when called with really large values on windows mobile
     // they all start failing at different values, but all start failing somewhere with values
     // greater than 210 million.
@@ -91,54 +90,11 @@ namespace avmplus
         return v;
     }
 
-#endif
+#endif /* AVMPLUS_ARM */
 
-    double MathUtils::abs(double value)
-    {
-#ifdef X86_MATH
-        _asm fld [value];
-        _asm fabs;
-#else
-        return ::fabs(value);
-#endif /* X86_MATH */
-    }
-
-    double MathUtils::acos(double value)
-    {
-#ifdef X86_MATH
-        return MathUtils::atan2(MathUtils::sqrt(1.0-value*value), value);
-#else
-        return ::acos(value);
-#endif /* X86_MATH */
-    }
-
-    double MathUtils::asin(double value)
-    {
-#ifdef X86_MATH
-        return MathUtils::atan2(value, MathUtils::sqrt(1.0-value*value));
-#else
-        return ::asin(value);
-#endif /* X86_MATH */
-    }
-
-    double MathUtils::atan(double value)
-    {
-#ifdef X86_MATH
-        _asm fld [value];
-        _asm fld1;
-        _asm fpatan;
-#else
-        return ::atan(value);
-#endif /* X86_MATH */
-    }
-
+#ifdef AVMPLUS_ARM
     double MathUtils::atan2(double y, double x)
     {
-#ifdef X86_MATH
-        _asm fld [y];
-        _asm fld [x];
-        _asm fpatan;
-#elif defined(AVMPLUS_ARM)
         int32_t zx = isZero(x);
         int32_t zy = isZero(y);
         if (zx==-1 && zy!=0)
@@ -155,14 +111,12 @@ namespace avmplus
                 r = MathUtils::isInfinite(y) * PI3_BY_4;
         }
         return r;
-#else
-        return ::atan2(y,x);
-#endif /* X86_MATH */
     }
+#endif /* AVMPLUS_ARM */
 
+#ifdef X86_MATH
     double MathUtils::ceil(double value)
     {
-#ifdef X86_MATH
         // todo avoid control word modification
         short oldcw, newcw;
         _asm fnstcw [oldcw];
@@ -174,35 +128,26 @@ namespace avmplus
         _asm fld [value];
         _asm frndint;
         _asm fldcw [oldcw];
-#else
-        return ::ceil(value);
-#endif /* X86_MATH */
     }
+#endif /* X86_MATH */
 
+#ifdef AVMPLUS_ARM
     double MathUtils::cos(double value)
     {
-#ifdef X86_MATH
-        _asm fld [value];
-        _asm fcos;
-#else
-
-#if defined AVMPLUS_ARM
-
         if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
         {
             return ::cos(adjustValueForTrigFuncs(value));
         }
         else
-#endif /* AVMPLUS_ARM */
         {
             return ::cos(value);
         }
-#endif /* X86_MATH */
     }
+#endif AVMPLUS_ARM
 
 #ifdef X86_MATH
     // Utility function, this module only.
-    static double expInternal(double x)
+    REALLY_INLINE static double expInternal(double x)
     {
         double value, exponent;
         _asm fld [x];
@@ -229,11 +174,10 @@ namespace avmplus
         _asm _emit 0xDD; // fstp st(0);
         _asm _emit 0xD8;
     }
-#endif /* X86_MATH */
 
+    // Inlined on other architectures
     double MathUtils::exp(double value)
     {
-#ifdef X86_MATH
         switch (isInfinite(value)) {
         case 1:
             return kInfinity;
@@ -242,14 +186,12 @@ namespace avmplus
         default:
             return expInternal(value);
         }
-#else
-        return ::exp(value);
-#endif /* X86_MATH */
     }
+#endif /* X86_MATH */
 
+#ifdef X86_MATH
     double MathUtils::floor(double value)
     {
-#ifdef X86_MATH
         // todo avoid control word modification
         short oldcw, newcw;
         _asm fnstcw [oldcw];
@@ -261,10 +203,8 @@ namespace avmplus
         _asm fld [value];
         _asm frndint;
         _asm fldcw [oldcw];
-#else
-        return ::floor(value);
-#endif /* X86_MATH */
     }
+#endif /* X86_MATH */
 
     /* @(#)s_frexp.c 5.1 93/09/24 */
     /*
@@ -297,7 +237,7 @@ namespace avmplus
 #define GET_HIGH_WORD(hx, x) {DWORD *ptr = (DWORD*)&x; hx=ptr[1];}
     static const double two54 =  1.80143985094819840000e+16; /* 0x43500000, 0x00000000 */
 
-    static double ExtractFraction(double x, int *eptr)
+    REALLY_INLINE static double ExtractFraction(double x, int *eptr)
     {
         DWORD hx, ix, lx;
         EXTRACT_WORDS(hx,lx,x);
@@ -325,23 +265,14 @@ namespace avmplus
         return (uint64_t)((fracMantissa) * (double)(1LL << 53));
     }
 
-    double MathUtils::log(double value)
-    {
 #ifdef X86_MATH
-        _asm fld [value];
-        _asm fldln2;
-        _asm fxch;
-        _asm fyl2x;
-#else
-        return ::log(value);
-#endif /* X86_MATH */
-    }
-
-#ifdef X86_MATH
-    // utility function for mod
+    // VC++ 2008 refuses to inline this, issues warning on _forceinline
     #pragma warning ( disable : 4740 ) // flow in or out of inline asm code suppresses global optimization
-    static double modInternal(double x, double y)
+    double MathUtils::mod(double x, double y)
     {
+        if (!y) {
+            return kNaN;
+        }
         _asm    fld [y];
         _asm    fld [x];
       ModLoop:
@@ -353,26 +284,12 @@ namespace avmplus
         _asm _emit 0xD9;
     }
     #pragma warning ( default : 4740 )
-#elif defined(UNDER_CE)
-    double modInternal(double x, double y) { return ::fmod(x, y); };
-#else
-extern "C" {
-    double modInternal(double x, double y);
-}
 #endif /* X86_MATH */
 
-    double MathUtils::mod(double x, double y)
-    {
-        if (!y) {
-            return kNaN;
-        }
-        return modInternal(x, y);
-    }
-
+#ifdef X86_MATH
     // Std. library pow()
     double MathUtils::powInternal(double x, double y)
     {
-#ifdef X86_MATH
         double value, exponent;
 
         _asm fld1;
@@ -403,62 +320,45 @@ extern "C" {
         _asm fxch;
         _asm _emit 0xDD; // fstp st(0);
         _asm _emit 0xD8;
-#else
-        return ::pow(x, y);
-#endif /* X86_MATH */
     }
+#endif /* X86_MATH */
 
+#ifdef AVMPLUS_ARM
     double MathUtils::sin(double value)
     {
-#ifdef X86_MATH
-        _asm fld [value];
-        _asm fsin;
-#else
-
-#if defined AVMPLUS_ARM
         if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
         {
             return ::sin(adjustValueForTrigFuncs(value));
         }
         else
-#endif /* AVMPLUS_ARM */
         {
             return ::sin(value);
         }
-#endif /* X86_MATH */
     }
+#endif /* AVMPLUS_ARM */
 
-    double MathUtils::sqrt(double value)
-    {
 #ifdef X86_MATH
-        _asm fld [value];
-        _asm fsqrt;
-#else
-        return ::sqrt(value);
-#endif /* X86_MATH */
-    }
-
     double MathUtils::tan(double value)
     {
-#ifdef X86_MATH
+        // This is a good candidate for inlining, but VC++ 2008 chokes on it.
         _asm fld [value];
         _asm fptan;
         _asm _emit 0xDD; // fstp st(0);
         _asm _emit 0xD8;
-#else
-
-#if defined AVMPLUS_ARM
+    }
+#elif defined(AVMPLUS_ARM)
+    double MathUtils::tan(double value)
+    {
         if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
         {
             return ::tan(adjustValueForTrigFuncs(value));
         }
         else
-#endif /* AVMPLUS_ARM */
         {
             return ::tan(value);
         }
-#endif /* X86_MATH */
     }
+#endif /* X86_MATH */
 
 #ifdef X86_MATH
     int32_t MathUtils::real2int(double value)
@@ -475,6 +375,6 @@ extern "C" {
         _asm fldcw [oldcw];
         return intval;
     }
-#endif
+#endif /* X86_MATH */
 
 }

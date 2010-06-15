@@ -436,11 +436,6 @@ namespace avmplus
         return value;
     }
 
-    double MathUtils::round(double value)
-    {
-        return MathUtils::floor(value + 0.5);
-    }
-
     // apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
     /*static*/
     REALLY_INLINE int32_t real_to_int(double value)
