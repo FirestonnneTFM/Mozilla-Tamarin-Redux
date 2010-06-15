@@ -122,14 +122,14 @@ void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplev
         e->flags |= Exception::EXIT_EXCEPTION;
 #ifdef AVMPLUS_VERBOSE
         if (m->pool()->isVerbose(VB_execpolicy)) 
-            core->console << "execpolicy die " << this << " method-jit-failed\n";
+            core->console << "execpolicy die " << m << " method-jit-failed\n";
 #endif
         core->throwException(e);
     } else {
         // Mark it as interpreted and limp along.
 #ifdef AVMPLUS_VERBOSE
         if (m->pool()->isVerbose(VB_execpolicy)) 
-            core->console << "execpolicy interp " << this << " method-jit-failed\n";
+            core->console << "execpolicy interp " << m << " method-jit-failed\n";
 #endif
         setInterp(m, ms);
     }
