@@ -215,7 +215,7 @@ regress/bug_558442a, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.o
 # Skip some optimization testing if the debugger or interpreter is present
 ####################
 #as3/Definitions/Function/RestOptimization, debugger|interp, skip, Optimization not enabled unless running JIT with -Dnodebugger
-as3/Definitions/Function/RestOptimization, .* , skip, Currently skip always
+as3/Definitions/Function/RestOptimization, .* , skip, Currently skip always until we get the test selection right
 
 ####################
 # skip slow tests in test phase, -Dgreedy passes
