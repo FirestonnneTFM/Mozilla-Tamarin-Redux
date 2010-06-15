@@ -1970,7 +1970,8 @@ namespace avmplus
             LIns* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
             setjmpResult = callIns(FUNCTIONID(fsetjmp), 2, jmpbuf, InsConst(0));
 
-            // if (setjmp() != 0) goto catch dispatcher, which we generate in the epilog.
+            // If (setjmp() != 0) goto catch dispatcher, which we generate in the epilog.
+            // Note that register contents following setjmp return via longjmp are not predictable.
             branchToLabel(LIR_jf, eqi0(setjmpResult), catch_label);
         }
         verbose_only( if (vbWriter) { vbWriter->flush();} )
@@ -5236,17 +5237,16 @@ namespace avmplus
         if (state->verifier->hasReachableExceptions()) {
             emitLabel(catch_label);
 
-            // exception case
-            int stackBase = state->verifier->stackBase;
+            // This regfence is necessary for correctness,
+            // as register contents after a longjmp are unpredictable.
+            Ins(LIR_regfence);
 
             // _ef.beginCatch()
+            int stackBase = state->verifier->stackBase;
             LIns* pc = loadIns(LIR_ldp, 0, _save_eip, ACC_OTHER);
             LIns* slotAddr = leaIns(stackBase * 8, vars);
             LIns* tagAddr = leaIns(stackBase, tags);
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
-
-            // FIXME: Temporary workaround for bug 569939
-            Ins(LIR_regfence);
 
             int handler_count = info->abc_exceptions()->exception_count;
             const uint8_t* tryBase = state->verifier->tryBase;
