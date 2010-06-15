@@ -48,12 +48,6 @@
 
 namespace avmplus
 {
-    // todo need asm versions from Player
-
-    double MathUtils::abs(double value)
-    {
-        return ::fabs(value);
-    }
 
     double MathUtils::acos(double value)
     {
@@ -73,11 +67,6 @@ namespace avmplus
         return result;
     }
 
-    double MathUtils::atan(double value)
-    {
-        return ::atan(value);
-    }
-
     double MathUtils::atan2(double y, double x)
     {
         double result = ::atan2(y, x);
@@ -95,36 +84,6 @@ namespace avmplus
         return result;
     }
 
-    double MathUtils::ceil(double value)
-    {
-        return ::ceil(value);
-    }
-
-    double MathUtils::cos(double value)
-    {
-        return ::cos(value);
-    }
-
-    double MathUtils::exp(double value)
-    {
-        return ::exp(value);
-    }
-
-    double MathUtils::floor(double value)
-    {
-        return ::floor(value);
-    }
-
-    uint64_t MathUtils::frexp(double value, int *eptr)
-    {
-        double fracMantissa = ::frexp(value, eptr);
-
-        // correct mantissa and eptr to get integer values
-        //  for both
-        *eptr -= 53; // 52 mantissa bits + the hidden bit
-        return (uint64_t)(fracMantissa * (double)(1LL << 53));
-    }
-
     double MathUtils::log(double value)
     {
         if( value >= 0 )
@@ -133,28 +92,4 @@ namespace avmplus
             return MathUtils::nan();
     }
 
-    double MathUtils::mod(double x, double y)
-    {
-        return ::fmod(x, y);
-    }
-
-    double MathUtils::powInternal(double x, double y)
-    {
-        return ::pow(x, y);
-    }
-
-    double MathUtils::sin(double value)
-    {
-        return ::sin(value);
-    }
-
-    double MathUtils::sqrt(double value)
-    {
-        return ::sqrt(value);
-    }
-
-    double MathUtils::tan(double value)
-    {
-        return ::tan(value);
-    }
 }

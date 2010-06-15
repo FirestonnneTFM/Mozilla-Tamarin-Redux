@@ -896,6 +896,7 @@
 		E8B532041069A1DE00ED299A /* instr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = instr.cpp; path = ../../../core/instr.cpp; sourceTree = SOURCE_ROOT; };
 		E8B532051069A1DE00ED299A /* instr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = instr.h; path = ../../../core/instr.h; sourceTree = SOURCE_ROOT; };
 		E8B532201069A28F00ED299A /* jit-calls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "jit-calls.h"; path = "../../../core/jit-calls.h"; sourceTree = SOURCE_ROOT; };
+		FF74129B10FD70BB0024C84E /* MathUtilsUnix-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MathUtilsUnix-inlines.h"; path = "../../unix/MathUtilsUnix-inlines.h"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1399,6 +1400,7 @@
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
 				077494590F8C9D5E00230F6D /* manifest.mk */,
+				FF74129B10FD70BB0024C84E /* MathUtilsUnix-inlines.h */,
 			);
 			name = platform;
 			sourceTree = "<group>";

@@ -37,12 +37,95 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 #include <math.h>
-
-#include "avmplus.h"
 
 namespace avmplus
 {
-    /* Nothing here.  All are inlined on this platform. */
+    // todo need asm versions from Player
+
+    REALLY_INLINE double MathUtils::abs(double value)
+    {
+        return ::fabs(value);
+    }
+
+    REALLY_INLINE double MathUtils::acos(double value)
+    {
+        return ::acos(value);
+    }
+
+    REALLY_INLINE double MathUtils::asin(double value)
+    {
+        return ::asin(value);
+    }
+
+    REALLY_INLINE double MathUtils::atan(double value)
+    {
+        return ::atan(value);
+    }
+
+    REALLY_INLINE double MathUtils::atan2(double y, double x)
+    {
+        return ::atan2(y, x);
+    }
+
+    REALLY_INLINE double MathUtils::ceil(double value)
+    {
+        return ::ceil(value);
+    }
+
+    REALLY_INLINE double MathUtils::cos(double value)
+    {
+        return ::cos(value);
+    }
+
+    REALLY_INLINE double MathUtils::exp(double value)
+    {
+        return ::exp(value);
+    }
+
+    REALLY_INLINE double MathUtils::floor(double value)
+    {
+        return ::floor(value);
+    }
+
+    REALLY_INLINE uint64_t MathUtils::frexp(double value, int *eptr)
+    {
+        double fracMantissa = ::frexp(value, eptr);
+
+        // correct mantissa and eptr to get integer values
+        //  for both
+        *eptr -= 53; // 52 mantissa bits + the hidden bit
+        return (uint64_t)(fracMantissa * (double)(1LL << 53));
+    }
+
+    REALLY_INLINE double MathUtils::log(double value)
+    {
+        return ::log(value);
+    }
+
+    REALLY_INLINE double MathUtils::mod(double x, double y)
+    {
+        return ::fmod(x, y);
+    }
+
+    REALLY_INLINE double MathUtils::powInternal(double x, double y)
+    {
+        return ::pow(x, y);
+    }
+
+    REALLY_INLINE double MathUtils::sin(double value)
+    {
+        return ::sin(value);
+    }
+
+    REALLY_INLINE double MathUtils::sqrt(double value)
+    {
+        return ::sqrt(value);
+    }
+
+    REALLY_INLINE double MathUtils::tan(double value)
+    {
+        return ::tan(value);
+    }
+
 }
