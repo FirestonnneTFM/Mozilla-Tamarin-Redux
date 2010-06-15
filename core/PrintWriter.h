@@ -167,6 +167,8 @@ namespace avmplus
         void formatP(const char* format, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
         #endif
 
+        AvmCore* core() { return m_core; }
+
     private:
         OutputStream *m_stream;
         AvmCore *m_core;
