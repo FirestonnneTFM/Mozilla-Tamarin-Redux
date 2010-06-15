@@ -2735,7 +2735,7 @@ namespace avmplus
                                 6,
                                 loadEnvToplevel(),
                                 InsConstPtr(multiname),
-                                localGetp(state->sp()),
+                                loadAtomRep(state->sp()),
                                 leaIns(restLocal*8, vars),
                                 restArgc,
                                 binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))));
@@ -5299,7 +5299,10 @@ namespace avmplus
         if (prolog->env_abcenv)     livep(prolog->env_abcenv);
         if (prolog->env_domainenv)  livep(prolog->env_domainenv);
         if (prolog->env_toplevel)   livep(prolog->env_toplevel);
-        if (restArgc)               lirout->ins1(LIR_livei, restArgc);
+        if (restArgc) {
+            lirout->ins1(LIR_livei, restArgc);
+            livep(ap_param);
+        }
     
         #ifdef DEBUGGER
         if (haveDebugger)

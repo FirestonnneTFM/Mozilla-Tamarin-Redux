@@ -255,7 +255,7 @@ namespace avmplus
     // Most interesting things happen in init()
     RestArgAnalyzer::RestArgAnalyzer()
         : NullWriter(NULL)
-        , optimize(false)
+        , optimize(true)
         , core(NULL)
         , info(NULL)
         , pool(NULL)
