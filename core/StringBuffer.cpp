@@ -43,9 +43,9 @@ namespace avmplus
 {
     using namespace MMgc;
 
-    StringOutputStream::StringOutputStream(GC *gc)
+    StringOutputStream::StringOutputStream(GC* gc)
     {
-        GCAssert(!gc->IsPointerToGCPage(this));
+        m_gc = gc;
         m_buffer = (char*) gc->Alloc(kInitialCapacity);
         m_buffer[0] = 0;
         m_length = 0;
@@ -53,10 +53,12 @@ namespace avmplus
 
     StringOutputStream::~StringOutputStream()
     {
-        if (m_buffer) {
-            GC* gc = MMgc::GC::GetGC(m_buffer);
-            gc->Free(m_buffer);
+        if (m_gc && m_buffer) {
+            m_gc->Free(m_buffer);
         }
+        m_gc = 0;
+        m_buffer = 0;
+        m_length = 0;
     }
 
     void StringOutputStream::write(const char* utf8)
@@ -68,12 +70,14 @@ namespace avmplus
     {
         if (m_length + count >= (size_t)GC::Size(m_buffer))
         {
-            GC* gc = MMgc::GC::GetGC(m_buffer);
             size_t newCapacity = (m_length+count+1)*2;
-            char* newBuffer = (char*) gc->Alloc(newCapacity);
+            char* newBuffer = (char*) m_gc->Alloc(newCapacity);
             VMPI_memcpy(newBuffer, m_buffer, m_length);
-            gc->Free(m_buffer);
-            m_buffer = newBuffer;
+            m_gc->Free(m_buffer);
+            if (m_gc->IsPointerToGCPage(this))
+                WB(m_gc, m_gc->FindBeginningFast(this), &m_buffer, newBuffer);
+            else
+                m_buffer = newBuffer;
         }
         VMPI_memcpy(m_buffer+m_length, buffer, count);
         m_length += (int)count;
