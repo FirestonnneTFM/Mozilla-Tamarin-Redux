@@ -3455,11 +3455,11 @@ namespace avmplus
         Traits* t = v.traits;
         PrintWriter& out = core->console;
         if (!t) {
-            out << (v.notNull ? "*!" : "*");
+            out << (v.notNull ? "*~" : "*");
         } else {
             out << t;
             if (!t->isNumeric() && t != BOOLEAN_TYPE && t != NULL_TYPE && t != VOID_TYPE)
-                out << (v.notNull ? "" : "?");
+                out << (v.notNull ? "~" : "");
         }
 #ifdef VMCFG_NANOJIT
         if (v.sst_mask) {
