@@ -2071,7 +2071,7 @@ AVMTHUNK_NATIVE_CLASS_GLUE(DictionaryClass, DictionaryClass, SlotOffsetsAndAsser
 AVMTHUNK_NATIVE_CLASS_GLUE(JObjectClass, JObjectClass, SlotOffsetsAndAsserts::doJObjectClassAsserts)
 
 AVMTHUNK_BEGIN_NATIVE_TABLES(shell_toplevel)
-    
+
     AVMTHUNK_BEGIN_NATIVE_METHODS(shell_toplevel)
         AVMTHUNK_NATIVE_METHOD(avmplus_MI_plus, ::avmshell::MIObjectImpl::plus)
         AVMTHUNK_NATIVE_METHOD(avmplus_System_exit, ::avmshell::SystemClass::exit)
@@ -2164,7 +2164,7 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(shell_toplevel)
         AVMTHUNK_NATIVE_METHOD(avmplus_JObject_methodSignature, JObjectClass::methodSignature)
         AVMTHUNK_NATIVE_METHOD(avmplus_JObject_fieldSignature, JObjectClass::fieldSignature)
     AVMTHUNK_END_NATIVE_METHODS()
-    
+
     AVMTHUNK_BEGIN_NATIVE_CLASSES(shell_toplevel)
         AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_MI, MIClass, ::avmshell::MIClass, SlotOffsetsAndAsserts::s_slotsOffsetMIClass, ::avmshell::MIObject, SlotOffsetsAndAsserts::s_slotsOffsetMIObject)
         AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_System, SystemClass, ::avmshell::SystemClass, SlotOffsetsAndAsserts::s_slotsOffsetSystemClass, ScriptObject, SlotOffsetsAndAsserts::s_slotsOffsetScriptObject)
@@ -2179,7 +2179,7 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(shell_toplevel)
         AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_Dictionary, DictionaryClass, DictionaryClass, SlotOffsetsAndAsserts::s_slotsOffsetDictionaryClass, DictionaryObject, SlotOffsetsAndAsserts::s_slotsOffsetDictionaryObject)
         AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_JObject, JObjectClass, JObjectClass, SlotOffsetsAndAsserts::s_slotsOffsetJObjectClass, JObject, SlotOffsetsAndAsserts::s_slotsOffsetJObject)
     AVMTHUNK_END_NATIVE_CLASSES()
-    
+
 AVMTHUNK_END_NATIVE_TABLES()
 
 AVMTHUNK_DEFINE_NATIVE_INITIALIZER(shell_toplevel)
