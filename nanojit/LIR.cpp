@@ -178,7 +178,6 @@ namespace nanojit
     {
         _unused = (uintptr_t) _allocator.alloc(CHUNK_SZB);
         NanoAssert(_unused != 0); // Allocator.alloc() never returns null. See Allocator.h
-        _bytesAllocated += CHUNK_SZB;
         _limit = _unused + CHUNK_SZB;
     }
 
@@ -189,7 +188,6 @@ namespace nanojit
 
     size_t LirBuffer::byteCount()
     {
-        AvmAssert(_bytesAllocated >= (_limit - _unused));
         return _bytesAllocated - (_limit - _unused);
     }
 
