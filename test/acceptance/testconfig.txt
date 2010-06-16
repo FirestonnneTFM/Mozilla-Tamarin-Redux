@@ -262,7 +262,12 @@ spidermonkey/js1_5/Regress/regress-360969-0(5|6), .*deep, include, include slow 
 spidermonkey/js1_5/Regress/regress-80981, .*deep, include, include slow tests in deep phase
 spidermonkey/js1_5/Regress/regress-96128-n, .*deep, include, include slow tests in deep phase
 spidermonkey/js1_6/extensions/regress-456826, .*deep, include, include slow tests in deep phase
-misc/testJitordieSwitch, .*deep, include, include slow tests in deep phase
+# Do not run test on windows mobile due to bug 570848. Once this bug
+# is fixed will also need to find a way to not run on testcase with
+# wordcode shell, which currently only runs on winmo in the deep
+# phase, all other platforms run it in the first phase
+misc/testJitordieSwitch, ^((?!arm-winmobile-).).*deep, include, include slow tests in deep phase
+
 
 ####################
 # verifier
