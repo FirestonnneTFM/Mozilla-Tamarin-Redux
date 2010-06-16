@@ -1018,8 +1018,9 @@ class IndentingPrintWriter:
         self.f.write(s)
 
     def println(self, s):
-        self.dent();
-        self.f.write(s)
+        if s != "":
+            self.dent();
+            self.f.write(s)
         self.f.write("\n")
         self.do_indent = True
 

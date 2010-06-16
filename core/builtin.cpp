@@ -5997,7 +5997,7 @@ AVMTHUNK_NATIVE_CLASS_GLUE(XMLListClass, XMLListClass, SlotOffsetsAndAsserts::do
 AVMTHUNK_NATIVE_CLASS_GLUE(QNameClass, QNameClass, SlotOffsetsAndAsserts::doQNameClassAsserts)
 
 AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
-    
+
     AVMTHUNK_BEGIN_NATIVE_METHODS(builtin)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_avmplus_getQualifiedSuperclassName, DescribeTypeClass::getQualifiedSuperclassName)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_avmplus_getQualifiedClassName, DescribeTypeClass::getQualifiedClassName)
@@ -6294,7 +6294,7 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
         AVMTHUNK_NATIVE_METHOD(QName_localName_get, QNameObject::get_localName)
         AVMTHUNK_NATIVE_METHOD(QName_uri_get, QNameObject::get_uri)
     AVMTHUNK_END_NATIVE_METHODS()
-    
+
     AVMTHUNK_BEGIN_NATIVE_CLASSES(builtin)
         AVMTHUNK_NATIVE_CLASS(abcclass_Object, ObjectClass, ObjectClass, SlotOffsetsAndAsserts::s_slotsOffsetObjectClass, ScriptObject, SlotOffsetsAndAsserts::s_slotsOffsetScriptObject)
         AVMTHUNK_NATIVE_CLASS(abcclass_Class, ClassClass, ClassClass, SlotOffsetsAndAsserts::s_slotsOffsetClassClass, ClassClosure, SlotOffsetsAndAsserts::s_slotsOffsetClassClosure)
@@ -6331,7 +6331,7 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
         AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, XMLListClass, SlotOffsetsAndAsserts::s_slotsOffsetXMLListClass, XMLListObject, SlotOffsetsAndAsserts::s_slotsOffsetXMLListObject)
         AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, QNameClass, SlotOffsetsAndAsserts::s_slotsOffsetQNameClass, QNameObject, SlotOffsetsAndAsserts::s_slotsOffsetQNameObject)
     AVMTHUNK_END_NATIVE_CLASSES()
-    
+
 AVMTHUNK_END_NATIVE_TABLES()
 
 AVMTHUNK_DEFINE_NATIVE_INITIALIZER(builtin)
