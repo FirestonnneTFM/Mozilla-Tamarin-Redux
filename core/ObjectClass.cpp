@@ -123,10 +123,12 @@ namespace avmplus
             {
                 // ISSUE should this look in traits and dynamic vars, or just dynamic vars.
                 ScriptObject* obj = AvmCore::atomToScriptObject(thisAtom);
-                if (obj->hasStringProperty(name))
-                    return true;
-                t = obj->traits();
-                break;
+                // TODO
+                // The change below is important as otherwise we will throw error in a call to hasAtomProperty for ByteArrayObject.
+                // This gets us back to the behaviour which we had in Marlin.
+                // A bugzilla bug [ 562224 ] has been created to address this issue more cleanly in near future
+                return obj->traits()->getTraitsBindings()->findBinding(name, core->findPublicNamespace()) != BIND_NONE ||
+                    obj->hasStringProperty(name);
             }
             case kNamespaceType:
             case kStringType:

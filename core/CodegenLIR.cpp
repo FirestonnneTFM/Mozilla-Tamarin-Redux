@@ -919,7 +919,7 @@ namespace avmplus
             (void) info; // suppress warning if !DEBUGGER && !AVMPLUS_VERBOSE
             varTracker = new (alloc) LIns*[nvar];
             tagTracker = new (alloc) LIns*[nvar];
-            checked = new (alloc) HashMap<LIns*,bool>(alloc, nvar);
+            checked = new (alloc) HashMap<LIns*,bool>(alloc, 16700); // allocate a large value until https://bugzilla.mozilla.org/show_bug.cgi?id=565489 is resolved
             notnull = new (alloc) nanojit::BitSet(alloc, nvar);
             clearState();
         }
@@ -5279,6 +5279,15 @@ namespace avmplus
                     }
                 }
             }
+            // FIXME: Bug 565184
+            // It is possible to fall through here for some ill-formed cases
+            // not presently rejected by the verifier.  We cannot handle the
+            // exception here, so rethrow.  We set _save_eip to an invalid value
+            // so that no handlers will match in the current method, allowing the
+            // stack to be unwound and a handler located higher up in the call chain.
+            stp(InsConstPtr((void*)(-1)), _save_eip, 0);
+            callIns(FUNCTIONID(throwException), 2, coreAddr, exptr);
+
             livep(_ef);
             livep(_save_eip);
         }

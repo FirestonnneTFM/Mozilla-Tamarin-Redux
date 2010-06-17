@@ -735,6 +735,7 @@ namespace MMgc
         friend class GCAlloc;
         friend class GCLargeAlloc;
         friend class GCMarkStack;
+        friend class GCWeakRef;
         friend class RCObject;
         friend class ZCT;
         friend class AutoRCRootSegment;
@@ -1313,6 +1314,11 @@ namespace MMgc
         bool Collecting();
 
         /**
+         * True during the Sweep phase, while the GC is calling presweep callbacks.
+         */
+        bool Presweeping();
+
+        /**
          * @return true if the item points to a page containing managed objects.
          * Any pointer can be passed in here.
          */
@@ -1376,7 +1382,8 @@ namespace MMgc
         // a WeakRef that always refers to null. useful if you need one.
         GCWeakRef* emptyWeakRef;
 
-        void ClearWeakRef(const void *obj);
+        // The allowRehash argument should not be 'false' willy-nilly.
+        void ClearWeakRef(const void *obj, bool allowRehash=true);
 
         // @return The highest stack address, ie the stack 'base' in common parlance.
         // @fixme This is misnamed, 'GetStackBase' would be better.  We can't
@@ -1399,7 +1406,6 @@ namespace MMgc
         bool onThread();
 
     private:
-
         // heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
         // if the allocation succeeded.
         void *heapAlloc(size_t size, int flags=GCHeap::flags_Alloc);
@@ -1440,6 +1446,9 @@ namespace MMgc
 
         GCHashtable weakRefs;
 
+        // Remove all weak references whose non-NULL objects are unmarked from the table.
+        void ClearUnmarkedWeakRefs();
+
         // BEGIN FLAGS
         // The flags are hot, group them and hope they end up in the same cache line
 
@@ -1469,6 +1478,13 @@ namespace MMgc
          * It is possible for marking==true and collecting==false but not vice versa.
          */
         bool collecting;
+
+        /**
+         * True during the sweep phase of collection, while we're calling presweep
+         * callbacks.  We use this to implement the read barrier in GCWeakRef::get,
+         * when a presweep resurrects an unmarked object.
+         */
+        bool presweeping;
 
         /**
          * Nonzero if IncrementalMark is currently active.  This is more specific than 'marking';

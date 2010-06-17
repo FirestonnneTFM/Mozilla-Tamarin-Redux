@@ -52,13 +52,33 @@ namespace MMgc
     {
         friend class GC;
     public:
-        GCObject *get() { return (GCObject*)m_obj; }
+        // Use 'get' to read a value that may be stored in a data structure, used as the 'this'
+        // value in a call, or may in any other way escape the local context.  'get' has
+        // a read barrier that causes the object to be marked if it is unmarked and is read
+        // during presweep and finalization.
+
+        GCObject *get();
+
+        // Use 'peek' to read a value that is used for conditions, assertions, etc - basically
+        // this is when you need to know whether it's NULL or not, so you'd be much better off
+        // using 'isNull' instead.
+        //
+        // (Wizards: Use 'peek' also if it is necessary to avoid marking the object when it
+        // is read from a presweep handler; this is almost never the case.)
+
+        GCObject *peek() { return (GCObject*)m_obj; }
+
+        // @return true iff the weak ref has been cleared and no longer holds onto an object.
+
+        bool isNull() { return m_obj == NULL; }
+
         ~GCWeakRef()
         {
             if(m_obj) {
                 GC::GetGC(this)->ClearWeakRef(m_obj);
             }
         }
+
     private:
         /**
          * When allocating a GCWeakRef, tell the GC we don't contain pointers

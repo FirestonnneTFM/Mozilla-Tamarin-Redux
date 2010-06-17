@@ -2887,7 +2887,7 @@ return the result of the comparison ToPrimitive(x) == y.
         LivePoolNode* node = livePools;
         while (node)
         {
-            PoolObject* pool = (PoolObject*)(void*)(node->pool->get());
+            PoolObject* pool = (PoolObject*)(void*)(node->pool->peek());
             if (pool)
             {
                 // pool is still alive -- if about to get collected, dynamicize the strings
@@ -2955,7 +2955,9 @@ return the result of the comparison ToPrimitive(x) == y.
         {
             for (LivePoolNode* node = livePools; node != NULL; node = node->next)
             {
-                PoolObject* pool = (PoolObject*)(void*)(node->pool->get());
+                // Use 'peek' here because we're in postsweep where 'get' could cause trouble;
+                // we're OK because the reference does not escape.
+                PoolObject* pool = (PoolObject*)(void*)(node->pool->peek());
                 if (pool && pool->codeMgr)
                     pool->codeMgr->flushBindingCaches();
             }

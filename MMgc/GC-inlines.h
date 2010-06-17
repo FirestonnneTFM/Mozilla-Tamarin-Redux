@@ -430,6 +430,11 @@ namespace MMgc
         return collecting;
     }
 
+    REALLY_INLINE bool GC::Presweeping()
+    {
+        return presweeping;
+    }
+
     REALLY_INLINE void *GC::FindBeginning(const void *gcItem)
     {
         return FindBeginningGuarded(gcItem);

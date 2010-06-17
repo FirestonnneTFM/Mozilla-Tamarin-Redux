@@ -58,7 +58,7 @@ namespace MMgc
 
         REALLY_INLINE const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
         REALLY_INLINE const void* get(intptr_t key) { return get((const void*)key); }
-        const void* remove(const void* key);
+        const void* remove(const void* key, bool allowRehash=true);
         // updates value if present, adds and grows if necessary if not
         void put(const void* key, const void* value);
         REALLY_INLINE void add(const void* key, const void* value) { put(key, value); }
@@ -68,6 +68,9 @@ namespace MMgc
         int32_t nextIndex(int32_t index);
         const void* keyAt(int32_t index) const { return table[index<<1]; }
         const void* valueAt(int32_t index) const { return table[((index)<<1)+1]; }
+
+        // Useful to call this after a lot of removals with allowRehash==false
+        void prune();
 
         class Iterator
         {
