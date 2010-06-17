@@ -552,10 +552,77 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
     #ifdef MMGC_ARM
         bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip)
         {
+            // Android: Filter in gcc and armcc(RVCT)
+    #if defined(ANDROID) && (defined(__GNUC__) || defined(__ARMCC_VERSION))
+            /*
+              The following code will work only when the code is compiled with the full apcs frame,
+              For gcc this option is -mapcs-frame
+              For APCS - ARM Procedue call standard as done by GCC register naming convention
+              ------------------------------------
+              Prolog
+                ; store old sp -> ip
+                mov ip, sp
+                ; push regs, fp, ip, lr, pc onto stack -> regs are pushed last, they are at a lowed memory location, pc was pushed first, it is at a higher location
+                push    {r4, fp, ip, lr, pc}
+                ; The previous instruction modified sp, so take the old sp (which is in ip) and make it point to stored pc (stored pc = old sp - 4 bytes)
+                sub fp, ip, #4  ; 0x4
+                ; Now mess with sp, grow the stack the size of your local variables
+                sub sp, sp, #28 ; 0x1c
+
+              Epilog
+                ; sp = topmost stored regs (fp is already = stored pc, subtracrt 4(3 + nStoredRegs))
+                sub sp, fp, #16 ; 0x10
+                ; restore the stored values, cool stuff!! Restore r4, then fp, then sp (this replaces the current sp with the stored ip, which is the old sp), move lr to pc (return) 
+                ldm sp, {r4, fp, sp, pc}
+
+              The fp register points to the place the pc is stored inside the stack.
+              The __builtin_frame_address(0) call returns the current contents of the fp
+
+                *(fp - 0) = (pc when the push was executed)
+                *(fp - 1) = (lr when the push was executed)
+                *(fp - 2) = (ip when the push was executed)
+                *(fp - 3) = (fp when the push was executed)
+              */
+            
+            // Current fp.
+            void ** pCurrentFrame = (void **)__builtin_frame_address(0);
+        
+            // Things like dl_iterate_phdr and dlinfo are not present on some platforms.
+            // Platforms which have ways to know the load address should use that information
+            // if they do not want to traverse inside the stack of other modules.
+            void * pCurrentReturnAddress = __builtin_return_address(0);
+            uintptr_t iProbableLoadAddress = (uint32_t)pCurrentReturnAddress & 0xF0000000;
+                 
+            for(int32_t iDepth = -framesToSkip; iDepth < (signed)bufferSize && pCurrentFrame; iDepth++)
+            {
+                // *(fp - 1) = (lr when the push was executed) - which is the return location,
+                // subtract 4 bytes to reach the instruction which actually called the current function.
+                uintptr_t lr =  (((uintptr_t)*(pCurrentFrame - 1) - 4));
+            
+                // Do not store for the first 'framesToSkip' frames.
+                if(iDepth >= 0)
+                    buffer[iDepth] = lr;
+            
+                // Old fp, *(fp - 3) = (fp when the push was executed).
+                void * pNextFrame = *(pCurrentFrame - 3);
+            
+                // Make sure you are moving deeper in the stack.
+                // Make sure not to do this for other modules, they might not be built with apcs enforced.
+                //
+                // Stack grows up in memory, next frame should be above the current frame.
+
+                if(pNextFrame > pCurrentFrame && ((lr & 0xF0000000) == iProbableLoadAddress)
+                    pCurrentFrame = (void **)pNextFrame;
+                else
+                    pCurrentFrame = 0;
+            }
+            return true;
+    #else
             (void) buffer;
             (void) bufferSize;
             (void) framesToSkip;
             return false;
+    #endif
         }
     #endif
 
