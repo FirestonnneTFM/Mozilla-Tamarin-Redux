@@ -419,7 +419,7 @@ namespace avmplus
 		for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
 			if(AvmCore::isGenericObject(atoms[i])) {
 				GCWeakRef *ref = (GCWeakRef*)AvmCore::atomToGenericObject(atoms[i]);
-				if(ref && ref->get() == NULL) {
+                if(ref && ref->isNull()) {
                     ht.deletePairAt(i);
 				}
 			}
@@ -440,7 +440,7 @@ namespace avmplus
             if (AvmCore::isGenericObject(a)) 
             {
                 GCWeakRef* weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
-                if (weakRef->get())
+                if (!weakRef->isNull())
                     return (index>>1)+1;
                 
                 ht.deletePairAt(index);
@@ -458,10 +458,12 @@ namespace avmplus
 	{
 		if(AvmCore::isGenericObject(value)) {
 			GCWeakRef *wr = (GCWeakRef*)AvmCore::atomToGenericObject(value);
-			if(wr->get() != NULL) {
-				// note wr could be a pointer to a double, that's what this is for
+            if(!wr->isNull()) {
+                // Note wr could be a pointer to a double, that's what this is for.
+                // Use 'peek' to avoid marking the object unless it actually is an 
+                // RCObject.
 				Atom* atoms = ht.getAtoms();
-				if(GC::GetGC(atoms)->IsRCObject(wr->get())) {
+                if(GC::GetGC(atoms)->IsRCObject(wr->peek())) {
 					union {
 						GCObject* o;
 						AvmPlusScriptableObject* so;
@@ -515,7 +517,7 @@ namespace avmplus
 		for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
 			if(AvmCore::isPointer(atoms[i+1])) {
 				GCWeakRef *ref = (GCWeakRef*)atomPtr(atoms[i+1]);
-				if(ref && ref->get() == NULL) {
+                if(ref && ref->isNull()) {
                     ht.deletePairAt(i);
 				}
 			}

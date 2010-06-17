@@ -475,8 +475,8 @@ namespace avmplus
         // assume everything in builtin pools have custom construct unless stated otherwise
         hasCustomConstruct(_pool->isBuiltin)
     {
-        AvmAssert(m_tbref->get() == NULL);
-        AvmAssert(m_tmref->get() == NULL);
+        AvmAssert(m_tbref->isNull());
+        AvmAssert(m_tmref->isNull());
         AvmAssert(BUILTIN_COUNT <= 32);
         AvmAssert(m_slotDestroyInfo.allocatedSize() == 0);
 #ifdef _DEBUG
@@ -1284,7 +1284,7 @@ namespace avmplus
         }
 #endif
 
-        AvmAssert(m_tbref->get() == NULL);
+        AvmAssert(m_tbref->isNull());
         m_tbref = thisData->GetWeakRef();
         core->tbCache()->add(thisData);
         return thisData;
@@ -1355,7 +1355,7 @@ namespace avmplus
             }
         } // for i
 
-        AvmAssert(m_tmref->get() == NULL);
+        AvmAssert(m_tmref->isNull());
         m_tmref = tm->GetWeakRef();
         core->tmCache()->add(tm);
         return tm;

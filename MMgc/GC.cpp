@@ -913,6 +913,7 @@ namespace MMgc
 		destroying(false),
 		marking(false),
 		collecting(false),
+        presweeping(false),
         markerActive(0),
 		stackCleaned(true),
 		rememberedStackTop(0),
@@ -1534,6 +1535,8 @@ namespace MMgc
 
 	void GC::Finalize()
 	{
+        ClearUnmarkedWeakRefs();
+
 		for(int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->Finalize();
 			containsPointersAllocs[i]->Finalize();
@@ -1585,6 +1588,19 @@ namespace MMgc
 		m_incrementalWork.Clear();
 	}
 	
+    void GC::ClearUnmarkedWeakRefs()
+    {
+        GCHashtable::Iterator it(&weakRefs);
+        
+        while (it.nextKey() != NULL) {
+            GCWeakRef* w = (GCWeakRef*)it.value();
+            GCObject* o = w->peek();
+            if (o != NULL && !GC::GetMark(o))
+                this->ClearWeakRef(o, false);
+        }
+        weakRefs.prune();
+    }
+
 	void GC::ForceSweepAtShutdown()
 	{
 		// There are two preconditions for Sweep: the mark stacks must be empty, and
@@ -1643,10 +1659,12 @@ namespace MMgc
 		GCAssert(m_incrementalWork.Count() == 0);
 		GCAssert(m_barrierWork.Count() == 0);
 		
+        presweeping = true;
 		// invoke presweep on all callbacks
 		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
 			cb->presweep();
-
+        presweeping = false;
+        
 		SAMPLE_CHECK();
 
 		// The presweep callbacks can't drive marking or trigger write barriers as the barrier is disabled, 
@@ -3527,6 +3545,33 @@ namespace MMgc
 			cb->nextCB->prevCB = cb->prevCB;
 	}
 
+    GCObject *GCWeakRef::get()
+    {
+        // Bugzilla 572331.
+        // It is possible for presweep handlers to extract pointers to unmarked objects
+        // from weakrefs and store them into marked objects.  Since the write barrier is
+        // disabled during collecting we must ensure that the unmarked object becomes
+        // marked by some other means in that situation, and we do that here by introducing
+        // a local read barrier that resurrects those objects.
+        //
+        // The read barrier just pushes the to-be-resurrected object onto the mark
+        // stack; the marker will be run in Sweep() after the presweep calls are done.
+        
+        if (m_obj != 0) {
+            GC *gc = GC::GetGC(m_obj);
+            if (gc->Collecting() && !GC::GetMark(m_obj)) {
+                // If this assertion fails then we have a finalizer (C++ destructor on a
+                // GCFinalizableObject) resurrecting an object.  That should not happen,
+                // because we clear all GCWeakRefs pointing to unmarked objects before
+                // running finalizers.
+                GCAssert(gc->Presweeping());
+                gc->PushWorkItem(GCWorkItem(m_obj, uint32_t(GC::Size(m_obj)), GCWorkItem::kGCObject));
+            }
+        }
+
+        return (GCObject*)m_obj;
+    }
+
 	GCWeakRef* GC::GetWeakRef(const void *item) 
 	{
 		GC *gc = GetGC(item);
@@ -3547,13 +3592,13 @@ namespace MMgc
 		return ref;
 	}
 
-	void GC::ClearWeakRef(const void *item)
+    void GC::ClearWeakRef(const void *item, bool allowRehash)
 	{
-		GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item);
+        GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item, allowRehash);
 		GCAssert(weakRefs.get(item) == NULL);
 		GCAssert(ref != NULL || heap->GetStatus() == kMemAbort);
 		if(ref) {
-			GCAssert(ref->get() == item || ref->get() == NULL);
+            GCAssert(ref->isNull() || ref->peek() == item);
 			ref->m_obj = NULL;
 			item = GetRealPointer(item);
 			if (GCLargeAlloc::IsLargeBlock(item)) {
