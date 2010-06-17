@@ -106,7 +106,7 @@ namespace avmplus
             MethodClosure* mc;
         };
 
-        if (!ref || !ref->get())
+        if (!ref || ref->isNull())
         {
             VTable* ivtable = this->ivtable();
             mc = (new (core()->GetGC(), ivtable->getExtraSize()) MethodClosure(ivtable, m, obj));

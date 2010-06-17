@@ -87,7 +87,7 @@ namespace MMgc
         gc->CleanStack(true);
         collect();
         (void)ref;
-        GCAssert(ref->get() == NULL);
+        GCAssert(ref->isNull());
     }
 
     void weakRefSweepLarge()
@@ -97,21 +97,21 @@ namespace MMgc
         gc->CleanStack(true);
         collect();
         (void)ref;
-        GCAssert(ref->get() == NULL);
+        GCAssert(ref->isNull());
     }
 
     void weakRefFreeSmall()
     {
         GCWeakRef *ref = createWeakRef();
         delete ref->get();
-        GCAssert(ref->get() == NULL);
+        GCAssert(ref->isNull());
     }
 
     void weakRefFreeLarge()
     {
         GCWeakRef *ref = createWeakRef(5000);
         delete ref->get();
-        GCAssert(ref->get() == NULL);
+        GCAssert(ref->isNull());
     }
 
     class RCObjectAddRefInDtor : public RCObject
@@ -165,7 +165,7 @@ namespace MMgc
         }
 
         // it may still be alive if we had a dirty stack
-        if(wr->get())
+        if(!wr->isNull())
             delete wr->get();
     }
 

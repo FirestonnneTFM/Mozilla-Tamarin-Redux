@@ -159,7 +159,7 @@ namespace MMgc
     }
 
     template <class KEYHANDLER, class ALLOCHANDLER>
-    const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key)
+    const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key, bool allowRehash)
     {
         const void* ret = NULL;
         uint32_t i = find(key, table, tableSize);
@@ -171,12 +171,24 @@ namespace MMgc
             numDeleted++;
             // this helps a bit on pathologic memory profiler use case, needs more investigation
             // 20% deleted == rehash
-            if ((numValues - numDeleted) * 10 < tableSize)
+            if (allowRehash && (numValues - numDeleted) * 10 < tableSize)
             {
                 grow(true);
             }
         }
         return ret;
+    }
+
+    template <class KEYHANDLER, class ALLOCHANDLER>
+    void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::prune()
+    {
+        // this helps a bit on pathologic memory profiler use case, needs more investigation
+        // 20% deleted == rehash
+        // FIXME: Bugzilla
+        if ((numValues - numDeleted) * 10 < tableSize)
+        {
+            grow(true);
+        }
     }
 
     template <class KEYHANDLER, class ALLOCHANDLER>

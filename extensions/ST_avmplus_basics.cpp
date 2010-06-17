@@ -55,11 +55,12 @@ void test3();
 void test4();
 void test5();
 void test6();
+void test7();
 };
 ST_avmplus_basics::ST_avmplus_basics(AvmCore* core)
     : Selftest(core, "avmplus", "basics", ST_avmplus_basics::ST_names)
 {}
-const char* ST_avmplus_basics::ST_names[] = {"unsigned_int","signed_int","equalsLatin1","containsLatin1","indexOfLatin1","matchesLatin1","matchesLatin1_caseless", NULL };
+const char* ST_avmplus_basics::ST_names[] = {"unsigned_int","signed_int","equalsLatin1","containsLatin1","indexOfLatin1","matchesLatin1","matchesLatin1_caseless","bug562101", NULL };
 void ST_avmplus_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -69,6 +70,7 @@ case 3: test3(); return;
 case 4: test4(); return;
 case 5: test5(); return;
 case 6: test6(); return;
+case 7: test7(); return;
 }
 }
 void ST_avmplus_basics::test0() {
@@ -121,6 +123,29 @@ void ST_avmplus_basics::test6() {
 verifyPass(matches2 == true, "matches2 == true", __FILE__, __LINE__);
 
 
+}
+void ST_avmplus_basics::test7() {
+// XMLParser omits the last char of a DOCTYPE node
+Stringp str = core->newConstantStringLatin1("<?xml version=\"1.0\"?><!DOCTYPE greeting SYSTEM><greeting>Hello, world!</greeting>");
+XMLParser parser(core, str);
+MMgc::GC *gc = core->GetGC();
+XMLTag tag(gc);
+int m_status;
+bool pass = false;
+while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
+{
+    switch (tag.nodeType)
+    {
+        case XMLTag::kDocTypeDeclaration:
+        {
+            pass = false;
+            pass = tag.text->equalsLatin1("<!DOCTYPE greeting SYSTEM>");
+        }
+    break;
+    }
+}
+
+verifyPass(pass == true, "pass == true", __FILE__, __LINE__);
 
 }
 void create_avmplus_basics(AvmCore* core) { new ST_avmplus_basics(core); }

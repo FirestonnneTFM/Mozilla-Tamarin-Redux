@@ -665,7 +665,7 @@ namespace avmplus
         WB(gc, ms, &ms->_returnTraits, returnType);
         WB(gc, ms, &ms->_args[0].paramType, receiverType);
 
-        AvmAssert(_msref->get() == NULL);
+        AvmAssert(_msref->isNull());
         _msref = ms->GetWeakRef();
         core->msCache()->add(ms);
         return ms;
