@@ -78,8 +78,15 @@ namespace MMgc
         // Wizard API:
         //
         // Use 'peek' to read the value from a presweep handler when it is important that that
-        // value not be marked if it is not already marked.  (If you don't know what that means
-        // then you are not sufficiently wizardly, and you should not use 'peek' but 'get'.)
+        // value not be marked if it is not already marked, because you sincerely want the value
+        // to be garbage collected.  You promise not to store the value read by 'peek' into any
+        // heap variable or location where it may subsequently be found by, or given to, the garbage
+        // collector, and you acknowledge that the storage pointed to by the value (if not NULL
+        // and not marked) almost certainly will be reclaimed by the garbage collector once all
+        // presweep handlers have run (absent a call to 'get').
+        //
+        // If you don't know what all that means then you are not sufficiently wizardly, and you
+        // should not use 'peek' but 'get'.
 
         GCObject *peek() { return (GCObject*)m_obj; }
 
