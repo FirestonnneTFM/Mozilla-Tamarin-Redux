@@ -1604,7 +1604,7 @@ namespace MMgc
             GCWeakRef* w = (GCWeakRef*)it.value();
             GCObject* o = w->peek();
             if (o != NULL && !GC::GetMark(o))
-                this->ClearWeakRef(o, false);
+                ClearWeakRef(o, false);
         }
         weakRefs.prune();
     }
@@ -1677,7 +1677,8 @@ namespace MMgc
 
         // The presweep callbacks can't drive marking or trigger write barriers as the barrier is disabled,
         // but they can cause elements to be pushed onto the mark stack explicitly and it's necessary to call mark.
-        // One example of callback that pushes work items is the Sampler::presweep().
+        // One example of callback that pushes work items is the Sampler::presweep().  Another is the read
+        // barrier in GCWeakRef::get() - see Bugzilla 572331.
         do {
             if (m_markStackOverflow) {
                 m_markStackOverflow = false;
