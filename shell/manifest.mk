@@ -71,6 +71,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_mmgc_basics.cpp \
   $(curdir)/../extensions/ST_mmgc_dependent.cpp \
   $(curdir)/../extensions/ST_mmgc_threads.cpp \
+  $(curdir)/../extensions/ST_mmgc_weakref.cpp \
   $(curdir)/../extensions/ST_mmgc_543560.cpp \
   $(curdir)/../extensions/ST_mmgc_gcheap.cpp \
   $(curdir)/../VMPI/AvmAssert.cpp \

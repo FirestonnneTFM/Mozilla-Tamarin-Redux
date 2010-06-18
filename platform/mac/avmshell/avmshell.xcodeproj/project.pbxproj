@@ -26,6 +26,8 @@
 		0715396E0F507325004E398F /* eval-avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0715396B0F507325004E398F /* eval-avmplus.cpp */; };
 		0721CA0B111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */; };
 		0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */; };
+		07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */; };
+		07246FE511CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */; };
 		072EA0EA0F4C1CE9009F11E6 /* eval-abc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D20F4C1CE9009F11E6 /* eval-abc.cpp */; };
 		072EA0EB0F4C1CE9009F11E6 /* eval-cogen-expr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D50F4C1CE9009F11E6 /* eval-cogen-expr.cpp */; };
 		072EA0EC0F4C1CE9009F11E6 /* eval-cogen-stmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D70F4C1CE9009F11E6 /* eval-cogen-stmt.cpp */; };
@@ -433,6 +435,8 @@
 		0715396C0F507325004E398F /* eval-avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-avmplus.h"; path = "../../../eval/eval-avmplus.h"; sourceTree = SOURCE_ROOT; };
 		0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_543560.st; path = ../../../extensions/ST_mmgc_543560.st; sourceTree = SOURCE_ROOT; };
 		0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_543560.cpp; path = ../../../extensions/ST_mmgc_543560.cpp; sourceTree = SOURCE_ROOT; };
+		07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_weakref.cpp; path = ../../../extensions/ST_mmgc_weakref.cpp; sourceTree = SOURCE_ROOT; };
+		07246FE311CBBC2F005D3F1F /* ST_mmgc_weakref.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_weakref.st; path = ../../../extensions/ST_mmgc_weakref.st; sourceTree = SOURCE_ROOT; };
 		072EA0D10F4C1CE9009F11E6 /* eval-abc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-abc-inlines.h"; path = "../../../eval/eval-abc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		072EA0D20F4C1CE9009F11E6 /* eval-abc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-abc.cpp"; path = "../../../eval/eval-abc.cpp"; sourceTree = SOURCE_ROOT; };
 		072EA0D30F4C1CE9009F11E6 /* eval-abc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-abc.h"; path = "../../../eval/eval-abc.h"; sourceTree = SOURCE_ROOT; };
@@ -994,6 +998,7 @@
 				07E2E7AD114EE67C00B3AFCD /* ST_mmgc_dependent.st */,
 				073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */,
 				D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */,
+				07246FE311CBBC2F005D3F1F /* ST_mmgc_weakref.st */,
 				0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */,
 			);
 			name = sources;
@@ -1386,6 +1391,7 @@
 				07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */,
 				073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */,
 				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
+				07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */,
 				0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */,
 			);
 			name = selftest;
@@ -1856,6 +1862,7 @@
 				198CF91F11B973BD00A939C7 /* exec-jit.cpp in Sources */,
 				198CF92011B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
 				198CF92111B973BD00A939C7 /* exec.cpp in Sources */,
+				07246FE511CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2043,6 +2050,7 @@
 				198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */,
 				198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
 				198CF91E11B973BD00A939C7 /* exec.cpp in Sources */,
+				07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

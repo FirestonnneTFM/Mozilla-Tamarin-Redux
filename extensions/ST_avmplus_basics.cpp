@@ -145,6 +145,7 @@ while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
     }
 }
 
+#line 102 "ST_avmplus_basics.st"
 verifyPass(pass == true, "pass == true", __FILE__, __LINE__);
 
 }
