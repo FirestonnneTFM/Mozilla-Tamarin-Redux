@@ -52,25 +52,36 @@ namespace MMgc
     {
         friend class GC;
     public:
-        // Use 'get' to read a value that may be stored in a data structure, used as the 'this'
-        // value in a call, or may in any other way escape the local context.  'get' has
-        // a read barrier that causes the object to be marked if it is unmarked and is read
-        // during presweep and finalization.
+        // Use 'get' to read the value in almost every situation.
+        //
+        // In particular use 'get' to read a value that may be stored in a data structure,
+        // used as the 'this' value in a call, or may in any other way escape the local
+        // context.
+        //
+        // If you're just checking whether the object is NULL you should use 'isNull'.
+        //
+        // If you are calling 'get' from a presweep handler and it is important that the
+        // value you are reading should not be marked if it has not been marked already,
+        // and you're sure you know what that means, then call 'peek' instead.
+        //
+        // Wizards' technical note:
+        //
+        // 'get' contains a read barrier that causes the object to be marked if it is read
+        // during presweep and is unmarked at that time - see Bugzilla 572331.
 
         GCObject *get();
 
-        // Use 'peek' to read a value that is used for conditions, assertions, etc - basically
-        // this is when you need to know whether it's NULL or not, so you'd be much better off
-        // using 'isNull' instead.
+        // @return true iff the weak ref has been cleared and no longer holds onto its object.
+        
+        bool isNull() { return m_obj == NULL; }
+
+        // Wizard API:
         //
-        // (Wizards: Use 'peek' also if it is necessary to avoid marking the object when it
-        // is read from a presweep handler; this is almost never the case.)
+        // Use 'peek' to read the value from a presweep handler when it is important that that
+        // value not be marked if it is not already marked.  (If you don't know what that means
+        // then you are not sufficiently wizardly, and you should not use 'peek' but 'get'.)
 
         GCObject *peek() { return (GCObject*)m_obj; }
-
-        // @return true iff the weak ref has been cleared and no longer holds onto an object.
-
-        bool isNull() { return m_obj == NULL; }
 
         ~GCWeakRef()
         {
