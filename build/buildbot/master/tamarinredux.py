@@ -160,19 +160,21 @@ class tamarinredux:
                                     "windows-deep",
                                     "windows-p3-deep",
                                     "windows-frr",
+                                    "mac-deep",
                                     "mac-ppc-deep",
                                     "solaris-sparc-deep",
                                     "windows64-deep",
                                     "linux-deep",
                                     "linux-arm-deep",
                                     "winmobile-emulator-deep",
-                                 ],
+                                                                    ],
                     builderDependencies=[
                                   ["linux-deep", "linux-test"],
                                   ["linux-arm-deep", "linux-arm-test"],
                                   ["windows-deep", "windows-test"],
                                   ["windows-p3-deep", "windows-test"],
                                   ["windows-frr", "windows-test"], 
+                                  ["mac-deep","mac-intel-10.5-test"],
                                   ["mac-ppc-deep", "mac-ppc-10.5a-test"], 
                                   ["solaris-sparc-deep", "solaris-sparc-test"], 
                                   ["windows64-deep", "windows64-test"], 
@@ -1771,6 +1773,32 @@ class tamarinredux:
                 'slavename': "asteamwin10",
                 'factory': windows_deep_factory,
                 'builddir': './windows-deep',
+    }
+
+    ##################################
+    #### builder for mac-deep ####
+    ##################################
+    mac_deep_factory = factory.BuildFactory()
+    mac_deep_factory.addStep(sync_clean)
+    mac_deep_factory.addStep(sync_update)
+    mac_deep_factory.addStep(bb_slaveupdate(slave="mac-deep"))
+    mac_deep_factory.addStep(download_testmedia)
+    mac_deep_factory.addStep(TestSuiteCommand(
+                     command=['./run-brightspot.sh', WithProperties('%s','revision')],
+                     description='running brightspot tests...',
+                     descriptionDone='finished running brightspot tests.',
+                     name="RunBrightspot",
+                     workdir="../scripts",
+                     timeout=3600)
+    )
+    mac_deep_factory.addStep(util_process_clean)
+    mac_deep_factory.addStep(util_clean_buildsdir)
+
+    mac_deep_builder = {
+                'name': "mac-deep",
+                'slavename': "asteammac1",
+                'factory': mac_deep_factory,
+                'builddir': './mac-deep',
     }
 
     ##################################
