@@ -193,7 +193,9 @@ class PerformanceRuntest(RuntestBase):
         args.append('-import %s' % self.shellabc)
         if self.optimize:
             args.append('-optimize -AS3')
-        RuntestBase.compile_test(self, as_file, args)
+        debugoutput = []
+        RuntestBase.compile_test(self, as_file, args, debugoutput)
+        self.printOutput(None, debugoutput)
         RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
 
     def formatExceptionInfo(maxTBlevel=5):
@@ -247,7 +249,6 @@ class PerformanceRuntest(RuntestBase):
                 dic['count'].append(int(line.strip().split(' ')[-1]))
         except:
             pass
-
 
     def preProcessTests(self):
         if not self.aotsdk:
@@ -314,6 +315,125 @@ class PerformanceRuntest(RuntestBase):
                 memoryhigh=val
         return memoryhigh
 
+    def loadTestSettings(self, dir, testname):
+        settings = {}
+        includes = self.includes #list
+
+        # get settings for this test (from main testconfig file loaded into self.settings)
+        for k in self.settings.keys():
+            if re.search('^'+k+'$', testname):
+                for k2 in self.settings[k].keys():
+                    if k2 in settings:
+                        settings[k2].update(self.settings[k][k2])
+                    else:
+                        settings[k2] = self.settings[k][k2].copy()
+
+
+        if isfile(join(dir,self.testconfig)):
+            localIncludes, localSettings = self.parseTestConfig(dir)
+            # have a local testconfig, so we create a copy of the global settings to not overwrite
+            includes = list(self.includes) #copy list - don't use reference
+            includes.extend(localIncludes)
+            if localSettings.has_key(testname):
+                settings.update(localSettings[testname])
+
+        return settings, includes
+
+    def parsePerfTestOutput(self, output, resultList, perfmDict):
+        metric = ''
+        for line in output:
+            if self.memory:
+                if '[mem]' in line and 'private' in line:
+                    memoryhigh = self.parseMemHigh(line)
+            elif 'metric' in line:
+                rl=[]
+                rl=line.rsplit()
+                if len(rl)>2:
+                    if '.' in rl[2]:
+                        resultList.append(float(rl[2]))
+                    else:
+                        resultList.append(int(rl[2]))
+                    metric=rl[1]
+            elif self.perfm:
+                self.parsePerfm(line, perfmDict)
+        if self.memory:
+            metric="memory"
+            resultList.append(memoryhigh)
+        return metric
+
+    def calculateSpeedup(self, resultList, resultList2, largerIsFaster):
+        spdup = 9999
+        result1 = result2 = 0
+        memoryhigh = memoryhigh2 = 0
+        if largerIsFaster:
+            result1 = max(resultList)
+            if resultList2:
+                result2 = max(resultList2)
+        else:
+            result1 = min(resultList)
+            if resultList2:
+                result2 = min(resultList2)
+        if self.memory:
+            memoryhigh = max(resultList)
+            if self.avm2:
+                memoryhigh2 = max(resultList2)
+                if memoryhigh<=0:
+                    spdup = 9999
+                else:
+                    spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
+        elif self.avm2:
+            if result1==0 or result2==0:
+                spdup = 9999
+            else:
+                if largerIsFaster:
+                    spdup = float(result2-result1)/result1*100.0
+                else:
+                    spdup = float(result1-result2)/result1*100.0
+        return spdup, result1, result2, memoryhigh, memoryhigh2
+
+    def perfmOutput(self, perfm1Dict, perfm2Dict):
+        def calcPerfm(desc, key):
+        # calculate min, max, average and %diff of averages
+            try:
+                if self.iterations == 1:
+                    self.js_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
+                                ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
+                else:
+                    avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
+                    avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
+                    self.js_print('     %-45s [%7s :%7s] %7s   [%7s :%7s] %7s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
+                                                                 min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
+                                                                 ((avg1-avg2)/float(avg2))*100.0))
+            except:
+                pass
+
+        calcPerfm('verify & IR gen (time)','verify')
+        calcPerfm('compile (time)','compile')
+        calcPerfm('code size (bytes)','code')
+        calcPerfm('mir/lir bytes', 'irbytes')
+        calcPerfm('mir/lir (# of inst)', 'ir')
+        calcPerfm('count', 'count')
+        self.js_print('-------------------------------------------------------------------------------------------------------------')
+
+    def perfmLog(self, config, perfm1Dict, perfm2Dict):
+        #calc confidence and mean for each stat
+        def perfmSocketlog(metric,key):
+            self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" %
+                   (testName, metric,min(perfm1Dict[key]), conf95(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
+        perfmSocketlog('vprof-compile-time','compile')
+        perfmSocketlog('vprof-code-size','code')
+        perfmSocketlog('vprof-verify-time','verify')
+        perfmSocketlog('vprof-ir-bytes','irbytes')
+        perfmSocketlog('vprof-ir-time','ir')
+        perfmSocketlog('vprof-count','count')
+
+    def abnormalExit(self, explanation, extraOutput=[]):
+        print 'Abnormal Exit!!'
+        print explanation
+        for line in extraOutput:
+            print(line.strip())
+        sys.exit(1)
+
     def runTest(self, testAndNum):
         ast = testAndNum[0]
         testName = ast
@@ -332,26 +452,7 @@ class PerformanceRuntest(RuntestBase):
         tname = root[root.rfind('/')+1:]
         abc = "%s.abc" % root
 
-        includes = self.includes #list
-        settings = {}
-
-        # get settings for this test (from main testconfig file loaded into self.settings)
-        for k in self.settings.keys():
-            if re.search('^'+k+'$', root):
-                for k2 in self.settings[k].keys():
-                    if k2 in settings:
-                        settings[k2].update(self.settings[k][k2])
-                    else:
-                        settings[k2] = self.settings[k][k2].copy()
-
-
-        if isfile(join(dir,self.testconfig)):
-            localIncludes, localSettings = self.parseTestConfig(dir)
-            # have a local testconfig, so we create a copy of the global settings to not overwrite
-            includes = list(self.includes) #copy list - don't use reference
-            includes.extend(localIncludes)
-            if localSettings.has_key(root):
-                settings.update(localSettings[root])
+        settings, includes = self.loadTestSettings(dir, root)
 
         #TODO: possibly handle includes by building test list?  This works for now...
         if includes and not list_match(includes,root):
@@ -362,12 +463,10 @@ class PerformanceRuntest(RuntestBase):
             self.allskips += 1
             return
 
-
         if settings.has_key('.*') and settings['.*'].has_key('largerValuesFaster'):
             largerIsFaster = 'largerValuesFaster'
         else:
             largerIsFaster = ''
-
 
         self.verbose_print("%d running %s" % (testnum, testName));
         if self.forcerebuild and isfile(abc):
@@ -380,25 +479,26 @@ class PerformanceRuntest(RuntestBase):
             if not isfile(abc):
                 self.js_print("compile FAILED!, file not found " + abc)
 
+        # determine current config
+        config = "%s" % self.vmargs.replace(" ", "")
+        config = "%s" % config.replace("\"", "")
+        if config.find("-memlimit")>-1:
+            config=config[0:config.find("-memlimit")]
+
         result1=9999999
         result2=9999999
         resultList=[]
         resultList2=[]
-        out1=[]
-        out2=[]
         if self.memory and self.vmargs.find("-memstats")==-1:
             self.vmargs="%s -memstats" % self.vmargs
         if self.memory and len(self.vmargs2)>0 and self.vmargs2.find("-memstats")==-1:
             self.vmargs2="%s -memstats" % self.vmargs2
 
         # setup dictionary for vprof (perfm) results
-        if self.perfm:
-            perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
-            perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
+        perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
+        perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
 
         for i in range(self.iterations):
-            memoryhigh = 0
-            memoryhigh2 = 0
             if self.aotsdk and self.aotout:
                 progname = string.replace(testName, ".as", "")
                 progname = string.replace(progname, "/", ".")
@@ -407,99 +507,42 @@ class PerformanceRuntest(RuntestBase):
                 exitcode = 0 # hack!
             else:
                 (f1,err,exitcode) = self.run_pipe("%s %s %s" % (self.avm, self.vmargs, abc))
-            out1.append(f1)
-            if len(self.avm2)>0:
-                if len(self.vmargs2)>0:
-                    (f2,err2,exitcode2) = self.run_pipe("%s %s %s" % (self.avm2, self.vmargs2, abc))
-                else:
-                    (f2,err2,exitcode2) = self.run_pipe("%s %s %s" % (self.avm2, self.vmargs, abc))
-                out2.append(f2)
+                self.debug_print("%s %s %s" % (self.avm, self.vmargs, abc))
+                self.debug_print(f1)
+            if self.avm2:
+                (f2,err2,exitcode2) = self.run_pipe("%s %s %s" % (self.avm2, self.vmargs2 if self.vmargs2 else self.vmargs, abc))
+                self.debug_print("%s %s %s" % (self.avm2, self.vmargs2 if self.vmargs2 else self.vmargs, abc))
+                self.debug_print(f2)
             try:
                 if exitcode!=0:
                     self.finalexitcode=1
-                    memoryhigh=0
+                    self.js_print("%-50s %7s %s" % (testName,'Avm1 Error: Test Exited with exit code:', exitcode))
+                    return
                 else:
-                    for line in f1:
-                        if self.memory:
-                            if "[mem]" in line and "private" in line:
-                                memoryhigh = self.parseMemHigh(line)
-                        elif "metric" in line:
-                            rl=[]
-                            rl=line.rsplit()
-                            if len(rl)>2:
-                                if "." in rl[2]:
-                                    resultList.append(float(rl[2]))
-                                else:
-                                    resultList.append(int(rl[2]))
-                                metric=rl[1]
-                        elif self.perfm:
-                            self.parsePerfm(line, perfm1Dict)
-                if self.memory:
-                    metric="memory"
-                    resultList.append(memoryhigh)
-                if len(self.avm2)>0:
+                    metric = self.parsePerfTestOutput(f1, resultList, perfm1Dict)
+                if self.avm2:
                     if exitcode2!=0:
                         self.finalexitcode=1
-                        memoryhigh2=0
+                        self.js_print("%-50s %7s %s" % (testName,'Avm2 Error: Test Exited with exit code:', exitcode))
+                        return
                     else:
-                        for line in f2:
-                            if self.memory:
-                                if "[mem]" in line and "private" in line:
-                                    memoryhigh2 = self.parseMemHigh(line)
-                            elif "metric" in line:
-                                rl=[]
-                                rl=line.rsplit()
-                                if len(rl)>2:
-                                    if "." in rl[2]:
-                                        resultList2.append(float(rl[2]))
-                                    else:
-                                        resultList2.append(int(rl[2]))
-                            elif self.perfm:
-                                self.parsePerfm(line, perfm2Dict)
-                    if self.memory:
-                        resultList2.append(memoryhigh2)
+                        self.parsePerfTestOutput(f2, resultList2, perfm2Dict)
             except:
                 print self.formatExceptionInfo()
                 exit(-1)
         # end for i in range(iterations)
-        # calculate best result
+
         if len(resultList)!=self.iterations:
-            for f in out1:
-                for line in f:
-                    print(line.strip())
-            result1=9999999
-            result2=9999999
-        else:
-            if largerIsFaster:
-                result1 = max(resultList)
-                if resultList2:
-                    result2 = max(resultList2)
-            else:
-                result1 = min(resultList)
-                if resultList2:
-                    result2 = min(resultList2)
-            if self.memory:
-                memoryhigh = max(resultList)
-                if len(self.avm2)>0:
-                    memoryhigh2 = max(resultList2)
-                if memoryhigh<=0:
-                    spdup = 9999
-                else:
-                    spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
-            elif len(self.avm2)>0:
-                if len(resultList2)!=self.iterations:
-                    for f in out2:
-                        for line in f:
-                            print(line.strip())
-                if result1==0 or result2==0:
-                    spdup = 9999
-                else:
-                    if largerIsFaster:
-                        spdup = float(result2-result1)/result1*100.0
-                    else:
-                        spdup = float(result1-result2)/result1*100.0
+            # something went wrong, dump output
+            self.abnormalExit('avm resultlist: %s is not the same length as the # of iterations (%s)' % (resultList, self.iterations), f1)
+        if self.avm2 and (len(resultList2) != self.iterations):
+            self.abnormalExit('avm2 resultlist: %s is not the same length as the # of iterations (%s)' % (resultList2, self.iterations), f2)
+        
+        # calculate best result
+        spdup, result1, result2, memoryhigh, memoryhigh2 = self.calculateSpeedup(resultList, resultList2, largerIsFaster)
+
         if self.memory:
-            if len(self.avm2)>0:
+            if self.avm2:
                 if self.iterations == 1:
                     self.js_print("%-50s %7s %7s %7.1f %7s %s" % (testName,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric, largerIsFaster))
                 else:
@@ -533,12 +576,10 @@ class PerformanceRuntest(RuntestBase):
                     self.js_print(("%-50s %7s %10.1f%%  %7s "+runResults) % (testName,formatMemory(memoryhigh),confidence, "memory"))
                 else:
                     self.js_print("%-50s %7s %7s" % (testName,formatMemory(memoryhigh), metric))
-                config = "%s" % self.vmargs.replace(" ", "")
                 config = config.replace("-memstats","")
-
                 self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
         else:
-            if len(self.avm2)>0:
+            if self.avm2:
                 if self.iterations == 1:
                     self.js_print('%-50s %7s %7s %7.1f %7s %s' % (testName,result1,result2,spdup, metric, largerIsFaster))
                 else:
@@ -575,52 +616,15 @@ class PerformanceRuntest(RuntestBase):
                     except:
                         print sys.exc_info
                         self.js_print('%-50s [%7s :%7s] %7.1f %6s   [%7s :%7s] %7.1f %6s %6.1f%% %6s %2s %7s %s' % (testName, '', '', result1,'', '', '', result2,'', spdup, '', '', metric, largerIsFaster))
-                #TODO: clean up / reformat
-                if self.perfm:
-                    if perfm1Dict['verify']:    # only calc if data present
-                        def calcPerfm(desc, key):
-                        # calculate min, max, average and %diff of averages
-                            try:
-                                if self.iterations == 1:
-                                    self.js_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
-                                                ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
-                                else:
-                                    avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
-                                    avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
-                                    self.js_print('     %-45s [%7s :%7s] %7s   [%7s :%7s] %7s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
-                                                                                 min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
-                                                                                 ((avg1-avg2)/float(avg2))*100.0))
-                            except:
-                                pass
-
-                        calcPerfm('verify & IR gen (time)','verify')
-                        calcPerfm('compile (time)','compile')
-                        calcPerfm('code size (bytes)','code')
-                        calcPerfm('mir/lir bytes', 'irbytes')
-                        calcPerfm('mir/lir (# of inst)', 'ir')
-                        calcPerfm('count', 'count')
-                        self.js_print('-------------------------------------------------------------------------------------------------------------')
-            else: #only one avm tested
-                if result1 < 9999999 and len(resultList)==self.iterations:
+                if self.perfm and perfm1Dict['verify']: # only calc if data present
+                    self.perfmOutput(perfm1Dict, perfm2Dict)
+            else: # only one avm tested
+                if result1 < 9999999:   # TODO: would be nice to not rely on arbitrary number to determine if results are valid
                     meanRes = mean(resultList)
                     if (self.iterations > 2):
                         confidence = conf95(resultList)
-                        config = "%s" % self.vmargs.replace(" ", "")
-                        config = "%s" % config.replace("\"", "")
-                        if config.find("-memlimit")>-1:
-                            config=config[0:config.find("-memlimit")]
-                        if self.perfm:  #send vprof results to db
-                            if perfm1Dict['verify']:    # only calc if data present
-                                #calc confidence and mean for each stat
-                                def perfmSocketlog(metric,key):
-                                  self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" %
-                                           (testName, metric,min(perfm1Dict[key]), conf95(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
-                                perfmSocketlog('vprof-compile-time','compile')
-                                perfmSocketlog('vprof-code-size','code')
-                                perfmSocketlog('vprof-verify-time','verify')
-                                perfmSocketlog('vprof-ir-bytes','irbytes')
-                                perfmSocketlog('vprof-ir-time','ir')
-                                perfmSocketlog('vprof-count','count')
+                        if self.perfm and perfm1Dict['verify']:  #send vprof results to db
+                                self.perfmLog(config, perfm1Dict, perfm2Dict)
                         self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
                         runResults = ''
                         if self.csv:
@@ -634,6 +638,8 @@ class PerformanceRuntest(RuntestBase):
                 else:
                         self.js_print("%-50s %7s %s" % (testName,'no test result - test output: ',f1))
                         self.finalexitcode=1
+
+
 
 runtest = PerformanceRuntest()
 exit(runtest.finalexitcode)

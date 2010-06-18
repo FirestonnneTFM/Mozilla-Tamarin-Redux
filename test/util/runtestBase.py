@@ -40,8 +40,8 @@
 #
 #
 # simple script that executes tamarin certification tests.  you have to build the
-# stand-alone, avmplus executable.  
-# see http://developer.mozilla.org/en/docs/Tamarin_Build_Documentation 
+# stand-alone, avmplus executable.
+# see http://developer.mozilla.org/en/docs/Tamarin_Build_Documentation
 #
 # this test looks for an executable avmplus shell in
 # %MOZ_SRC/mozilla/js/tamarin/platform/,
@@ -77,7 +77,7 @@ try:
     import pexpect
 except ImportError:
     pexpect = False
-    
+
 
 class RuntestBase:
     abcasmExt = '.abs'
@@ -114,10 +114,10 @@ class RuntestBase:
     remoteip = None
     remoteuser = None
     aotextraargs = ""
-    
+
     args = []
     ashErrors = []
-    # ats template code 
+    # ats template code
     atstemplate = [
         'import flash.display.*;\n',
         'import flash.util.*;\n',
@@ -133,7 +133,7 @@ class RuntestBase:
     longOptions = []
     tests = []
     winceProcesses = []
-    
+
     apiVersioning = False
     csv = False
     cygwin = False
@@ -154,16 +154,16 @@ class RuntestBase:
     verbose = False
     verify = False
     writeResultProperties = False   # used by the asc runtests.py to write to a result.properties file used by the asc ant scripts
-    
+
     randomSeed = None # can be specified so that random run runs in same order
     start_time = None
     testTimeOut = -1 #by default tests will NOT timeout
     threads = 1
     timeout = 0 # in seconds
     timeoutStartTime = 0
-    
+
     lock = threadpool.threading.Lock()  # global lock used when threading
-    
+
     def __init__(self):
         # Result Vars
         self.allpasses=0
@@ -180,8 +180,8 @@ class RuntestBase:
         self.timeoutmsgs=[]
         self.assertmsgs=[]
         self.altsearchpath=None
-        
-        self.run()        
+
+        self.run()
 
     def usage(self, c):
         print 'usage: %s [options] [tests]' % basename(argv[0])
@@ -211,8 +211,8 @@ class RuntestBase:
         print '    --javaargs      arguments to pass to java'
         print '    --random        run tests in random order'
         print '    --seed          explicitly specify random seed for --random'
-        
-        
+
+
 
     def setOptions(self):
         '''set the valid command line options.
@@ -231,10 +231,10 @@ class RuntestBase:
             opts, self.args = getopt(argv[1:], self.options, self.longOptions )
         except:
             self.usage(2)
-        
+
         if not self.args:
             self.args = ['.']
-        
+
         for o, v in opts:
             if o in ('-v', '--verbose'):
                 self.verbose = True
@@ -302,26 +302,26 @@ class RuntestBase:
                 self.random = True
             elif o in ('--seed',):
                 self.randomSeed = int(v)
-            
+
         return opts
-    
-    
+
+
     ### Config and Settings ###
 
     def determineConfig(self, vm='tvm'):
         # ================================================
-        # Determine the configruation if it has not been 
+        # Determine the configruation if it has not been
         # passed into the script:
         # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
         # ================================================
-        
+
         try:
             # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
             cputype = ''
             (f,err,exitcode) = self.run_pipe('file "%s"' % (self.avm))
             f = ' '.join(f).replace(self.avm, '');
             self.verbose_print('determineConfig: %s' % f)
-    
+
             if re.search('\(console\) 32-bit', f):
                 cputype='arm'
                 self.osName='winmobile-emulator'
@@ -340,7 +340,7 @@ class RuntestBase:
                         cputype = 'ppc'
                     elif machine == 'i386':
                         cputype = 'x86'
-            # Need to do the SPARC check before the x86 check as the x86 check 
+            # Need to do the SPARC check before the x86 check as the x86 check
             # will find the "32-bit" string and think that it is x86.
             elif re.search('(SPARC)', f):
                 cputype='sparc'
@@ -356,10 +356,10 @@ class RuntestBase:
                 cputype='x86'
             elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f):
                 cputype='x64'
-            
+
             if cputype == '':
                 raise Exception()
-                
+
         except:
             try:
                 cputype={'AMD64':'x86','x86':'x86','i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','mips':'mips','armv7l':'arm','':'x86'}[platform.machine()]
@@ -368,7 +368,7 @@ class RuntestBase:
             except:
                 print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
                 exit(1)
-                
+
         self.vmtype = 'release'
         if self.osName=='winmobile-emulator':
             # try to determine vmtype by filename
@@ -399,24 +399,24 @@ class RuntestBase:
                         self.vmtype = 'debug'
                     else:
                         self.vmtype = 'release'
-            
+
                 # get the build number and hash
                 self.avmversion = self.getAvmVersion(txt=f[1])
             except:
                 # Error getting shell info
                 self.vmtype = 'unknown'
                 self.avmversion = 'unknown'
-            
-            
+
+
             f = ' '.join(f)
             # determine if api versioning switch is available
             if re.search('(api)', f):
                 self.apiVersioning = True
-            
+
         wordcode = '-wordcode' if re.search('wordcode', self.avm) else ''
-        
+
         self.config = cputype+'-'+self.osName+'-'+vm+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
-    
+
     def determineOS(self):
         _os = platform.system()
         ostype = ''
@@ -426,7 +426,7 @@ class RuntestBase:
         # the self.cygwin boolean:
         # self.osName='win' and not self.cygwin == windows python
         # self.cygwin = cygwin python
-        
+
         if re.search('(CYGWIN_NT)', _os):
             ostype='win'
             self.cygwin = True
@@ -439,11 +439,11 @@ class RuntestBase:
             ostype='lnx'
         if re.search('(SunOS)', _os):
             ostype='sol'
-            
+
         if ostype == '':
             print("ERROR: os %s is unknown, expected values are (win,mac,lnx,sol), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.system()))
             exit(1)
-            
+
         self.osName = ostype
 
     def loadPropertiesFile(self):
@@ -465,7 +465,7 @@ class RuntestBase:
                         val = self.__class__.__dict__[nm] + ' ' + val  # concat
                     self.__class__.__dict__[nm] = val
             fd.close()
-            
+
     def setEnvironVars(self):
         if 'ASC' in environ:
             self.asc = environ['ASC'].strip()
@@ -489,7 +489,7 @@ class RuntestBase:
             self.shellabc = environ['TOPLEVELABC'].strip()
         if 'VMARGS' in environ:
             self.vmargs = environ['VMARGS'].strip()
-        
+
     ### File and Directory functions ###
 
     def build_incfiles(self, as_file):
@@ -541,17 +541,17 @@ class RuntestBase:
                     except:
                         pass
                 return cygpath
-            
+
             selfVarsToCheck = ['avm','asc','builtinabc','shellabc','java']
             selfVarsToCheck.extend(additionalVars)
             for var in selfVarsToCheck:
                 setattr(self, var, convertFromCygwin(getattr(self,var)).strip())
-                
+
             newargs = []
             for t in self.args:
                 newargs.append(convertFromCygwin(t).strip())
             self.args = newargs
-        
+
         if not self.rebuildtests and self.aotsdk==None:
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
 
@@ -564,11 +564,11 @@ class RuntestBase:
                 self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
                 if not isfile(self.js_output):
                     break
-        
+
         print 'Writing results to %s' % self.js_output
         self.js_output_f = open(self.js_output, 'w')
         self.js_output_f.close()
-        
+
     def getTestsList(self, startDir):
         fileExtentions = (self.sourceExt,) + self.executableExtensions + self.otherTestExtensions
         if self.altsearchpath!=None:
@@ -598,7 +598,7 @@ class RuntestBase:
         # when more than one filename regexp matches, we choose to use the longest:
         # e.g: given asc/.* and asc/testname - asc/testname will take precedence
         # since it has longer total length
-        longestKeyMatch = 0 
+        longestKeyMatch = 0
         for k in self.settings.keys():
             if re.search('^'+k+'$', root):
                 if len(k) > longestKeyMatch:
@@ -608,7 +608,7 @@ class RuntestBase:
                             settings[k2].update(self.settings[k][k2])
                         else:
                             settings[k2] = self.settings[k][k2].copy()
-        
+
         if isfile(join(dir,self.testconfig)):
             localSettings, localIncludes = self.parseTestConfig(dir)
             # have a local testconfig, so we create a copy of the global settings to not overwrite
@@ -617,11 +617,11 @@ class RuntestBase:
             if localSettings.has_key(root):
                 settings.update(localSettings[root])
         return settings
-    
+
     def istest(self,f, fileExtentions):
         return f.endswith(fileExtentions) and basename(f) != ('shell'+self.sourceExt) \
                and not f.endswith('Util'+self.sourceExt)
-        
+
     def parents(self, d):
         while d != abspath(self.args[0]) and d != '':
             yield d
@@ -633,7 +633,7 @@ class RuntestBase:
         includes=[]
         names=None
         lines=[]
-        
+
         if isfile(join(dir,self.testconfig)):
             if join(dir, '') == './':
                 for line in open(join(dir,self.testconfig)).read().splitlines():
@@ -669,28 +669,28 @@ class RuntestBase:
                         settings[names[0]][names[1]] = {}
                     settings[names[0]][names[1]][fields[2]]=fields[3]
         return settings, includes
-    
+
     def parseRootConfigFiles(self):
         # Load any root .asc_args and .java_args files so they don' have to be
         # loaded over and over again when compiling tests
-        
+
         # Loads root asc_args file and modifies arglist accordingly
-        
+
         if isfile('./dir.asc_args'):  # load root dir.asc_args
             ascArgsList = parseArgStringToList(self.ascargs)
             ascArgsList = self.parseAscArgs(ascArgsList, './dir.asc_args', './')
             self.ascargs = ' '.join(ascArgsList)
-            
-        
+
+
         # Loads root asc_args file and modifies arglist accordingly
         if isfile('./dir.java_args'):  # load root dir.asc_args
             javaArgsList = parseArgStringToList(self.javaargs)
             javaArgsList = self.parseAscArgs(javaArgsList, './dir.java_args', './')
             self.javaargs = ' '.join(javaArgsList)
-        
-        
+
+
     ### Output / Printing functions ###
-    
+
     def err_print(self, m):
         self.js_print(m, '<font color=#990000>', '</font><br/>')
 
@@ -698,7 +698,7 @@ class RuntestBase:
         msg = msg.strip()
         self.err_print('   %s' % msg)
         failmsgs += ['%s : %s' % (abc, msg)]
-        
+
     def js_print(self, m, start_tag='<p><tt>', end_tag='</tt></p>', overrideQuiet=False, csv=True, csvOut=True):
         # Print output
         # csv - if True and if outputting csv, convert line into csv (spaces and []: chars)
@@ -738,7 +738,7 @@ class RuntestBase:
                     print(sys.exc_info())
                     print('outputCalls: %s' % outputCalls)
                     print('If you see this, please send the above exception info to actionscriptqe@adobe.com')
-    
+
     def quiet_print(self, m, start=None, end=None):
         if self.quiet:
             sys.stdout.write('.')
@@ -747,13 +747,13 @@ class RuntestBase:
                 self.js_print(m)
             else:
                 self.js_print(m, start, end)
-                
+
     ### The *ignored here is to mask a bug, https://bugzilla.mozilla.org/show_bug.cgi?id=564124
 
     def verbose_print(self, m, start='', end='', *ignored):
       if self.verbose:
         self.js_print(m, start, end)
-    
+
     def debug_print(self, m, start='', end=''):
       if self.debug:
         self.js_print(m, start, end)
@@ -767,26 +767,26 @@ class RuntestBase:
                 output = os.path.dirname(abcfile)
                 if self.aotout:
                     output = self.aotout
-                
+
                 outname = string.replace(abcfile, "./", "")
                 outname = string.replace(outname, ".abc", "")
                 outname = string.replace(outname, "/", ".")
                 outabc = os.path.join(output, outname + ".abc")
-                
+
                 shutil.copyfile(abcfile, outabc)
                 self.js_print('AOT compilation of %s' % (outabc))
-        
+
                 t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
                 (f,err,exitcode) = self.run_pipe('python2.5 %s %s --output %s --name %s %s %s %s' % (
                     os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
-                
+
                 for line in f:
                     self.js_print(("file '%s'>>> " % abcfile) + line.strip())
                 for line in err:
                     self.js_print(("file '%s'>>> " % abcfile) + line.strip())
             except:
                 self.js_print('AOT compilation of %s FAILED' % (abcfile))
-    
+
     def compile_test(self, as_file, extraArgs=[], outputCalls = None):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
         # if there is a .build file available (which is an executable script) run that file instead
@@ -804,27 +804,27 @@ class RuntestBase:
 
         if not isfile(asc):
             exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
-           
+
         (dir, file) = split(as_file)
-        
-        
+
+
         if self.genAtsSwfs:
             # get settings as ats excluded files are defined there
             settings = self.getLocalSettings(as_file)
             if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
                 self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*']['ats_skip']))
                 return
-    
+
         # additional .as file compiler args
         if as_file.endswith(self.sourceExt):
             if not isfile(builtinabc):
                 exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
-        
 
-        
+
+
             javaArgList = parseArgStringToList(self.javaargs)
             javaArgList = self.loadArgsFile(javaArgList, dir, as_file, 'java_args')
-            
+
             if asc.endswith('.jar'):
                 cmd = self.java
                 for arg in javaArgList:
@@ -922,7 +922,7 @@ class RuntestBase:
             child.logfile = None
             child.expect("\(ash\)")
             child.expect("\(ash\)")
-    
+
             for test in tests:
                 if test.endswith(self.abcasmExt):
                     self.compile_test(test)
@@ -931,10 +931,10 @@ class RuntestBase:
                     continue
                 else:
                     arglist = parseArgStringToList(self.ascargs)
-                
+
                     (dir, file) = split(test)
                     (testdir, ext) = splitext(test)
-                    
+
                     # Check for a local .java_args file (either dir or file specific)
                     # Not ideal - but we try to load a .java_args file, and if one is loaded, then we revert to compiling
                     # without ash, as there is no way to pass new java args to the already running ash process
@@ -945,7 +945,7 @@ class RuntestBase:
                     else:
                         # look for .asc_args files to specify dir / file level compile args
                         arglist = self.loadArgsFile(arglist, dir, test, 'asc_args')
-                        
+
                         if self.genAtsSwfs:
                             # get settings as ats excluded files are defined there
                             settings = self.getLocalSettings(testdir)
@@ -953,11 +953,11 @@ class RuntestBase:
                                 self.js_print('ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip']))
                                 continue
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
-                        
+
                         cmd = "asc -import %s " % (self.builtinabc)
                         for arg in arglist:
                             cmd += ' %s' % arg
-                        
+
                         for p in self.parents(dir):
                             if p=='':
                                 p='.'
@@ -965,43 +965,43 @@ class RuntestBase:
                             if isfile(shell):
                                 cmd += " -in " + shell
                                 break
-                        
+
                         deps = glob(join(testdir,"*.as"))
                         deps.sort()
                         for util in deps + glob(join(dir,"*Util.as")):
                             cmd += " -in %s" % util #no need to prepend \ to $ when using ash
                         cmd += " %s" % test
-                        
+
                         if exists(testdir+".abc"):
                             os.unlink(testdir+".abc")
                         child.sendline(cmd)
                         child.expect("\(ash\)")
-                        
+
                     if not exists(testdir+".abc"):
                         print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                         self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                     total -= 1
-                    
+
                     if self.genAtsSwfs:
                         moveAtsSwf(dir,file, self.atsDir)
-                    
+
                     #print("%d remaining, %s" % (total,cmd))
-        end_time = datetime.today() 
-    
+        end_time = datetime.today()
+
     def loadArgsFile(self, arglist,dir,file, filetype='asc_args'):
         # It is possible that file is actually a partial path rooted to acceptance,
         # so make sure that we are only dealing with the actual filename
         file = split(file)[1]
-        
+
         if isfile('%s/dir.%s' % (dir, filetype)):  # dir takes precedence over root
             arglist = self.parseAscArgs(arglist, '%s/dir.%s' % (dir, filetype), dir)
-        
+
         if file and isfile('%s/%s.%s' % (dir, file, filetype)):  # file takes precendence over directory
             arglist = self.parseAscArgs(arglist, '%s/%s.%s' % (dir, file, filetype), dir)
 
         return arglist
-    
-    
+
+
     def parseAscArgs(self, currentArgList, ascArgFile, currentdir):
         # reads an .asc_args file and returns a tuple of the arg mode (override or merge) and a list of args
         f = open(ascArgFile,'r')
@@ -1017,7 +1017,7 @@ class RuntestBase:
             ascargs[0] = 'merge'
         # replace the $DIR keyword with actual directory
         ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
-        if ascargs[1].find('$SHELLABC') != -1:  
+        if ascargs[1].find('$SHELLABC') != -1:
             if not isfile(self.shellabc):   # TODO: not the best place to check for this
                 exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % self.shellabc)
             ascargs[1] = string.replace(ascargs[1], '$SHELLABC', self.shellabc)
@@ -1029,7 +1029,7 @@ class RuntestBase:
                 removeArgList.append(a[3:])
             else:
                 argList.append(a)
-        
+
         mode = ascargs[0]
         if mode == 'merge':
             currentArgList.extend(argList)
@@ -1043,30 +1043,30 @@ class RuntestBase:
                     currentArgList.remove(removeArg)
                 except:
                     pass
-                
+
         return currentArgList
-    
-    
+
+
     def rebuildTests(self):
         if self.genAtsSwfs:
             if not exists(self.atsDir):
                 os.mkdir(self.atsDir)
-    
+
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
             self.compileWithAsh(self.tests)
         else: # run using threads
             # split tests into number of threads
             testGroups = splitList(self.tests, self.threads)
-            
+
             # generate threadpool
             requests = threadpool.makeRequests(self.compileWithAsh, testGroups, self.printOutput)
             main = threadpool.ThreadPool(self.threads)
             # que requests
             [main.putRequest(req) for req in requests]
-            
+
             # ...and wait for the results to arrive in the result queue
             # wait() will return when results for all work requests have arrived
-            
+
             try:
               main.wait()
             except (TimeOutException, KeyboardInterrupt):
@@ -1081,15 +1081,15 @@ class RuntestBase:
                 self.lock.acquire()
                 print e
                 exit(0)
-        
+
         if self.genAtsSwfs:
             try:
                 os.remove('./ats_temp.as')
             except:
-                pass  
-    
-    ### Process Management ###  
-    
+                pass
+
+    ### Process Management ###
+
     def killCurrentPids(self):
         # Kill all pids in the self.currentPids list
         self.lock.acquire()
@@ -1101,7 +1101,7 @@ class RuntestBase:
                     pass
         finally:
             self.lock.release()
-    
+
     def run_pipe(self, cmd, outputCalls=None):
         # run a command and return a tuple of (output, stdErr, exitCode)
         if outputCalls != None:
@@ -1113,7 +1113,7 @@ class RuntestBase:
                 self.currentPids.append(p)
             finally:
                 self.lock.release()
-            
+
             starttime=time()
             (output, err) = p.communicate()
             output = output.split('\n') if output else []
@@ -1124,7 +1124,7 @@ class RuntestBase:
                 err = err[:-1]
 
             exitCode = p.returncode
-            
+
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return ('', err, exitCode)
 
@@ -1133,13 +1133,13 @@ class RuntestBase:
                 self.currentPids.remove(p)
             finally:
                 self.lock.release()
-            
+
             return (output,err,exitCode)
         except KeyboardInterrupt:
             self.killCurrentPids()
-            
+
     ### Run Tests ###
-    
+
     def preProcessTests(self):  # don't need AVM if rebuilding tests
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         if self.avmversion:
@@ -1157,18 +1157,18 @@ class RuntestBase:
             self.js_print('Running tests in random order.  Random Seed = %s' % self.randomSeed)
             random.seed(self.randomSeed)
             random.shuffle(testList)
-            
+
         if self.verify:
             if not re.search('debug', self.config):
                 print 'Avm Debugger build must be used when running --verify'
                 sys.exit(1)
             if not isfile(self.abcdump+'.abc'): # check that abcdump.abc is built
                 self.run_pipe('"%s" -jar %s -import %s -import %s %s' % (self.java, self.asc, self.builtinabc, self.shellabc, self.abcdump+'.as'))
-        
+
         if self.timeout:
             self.js_print("will run tests until timeout of %ds is exceeded" % self.timeout)
             self.timeoutStartTime = time()
-        
+
         # threads on cygwin randomly lock up
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
             for t in testList:
@@ -1188,7 +1188,7 @@ class RuntestBase:
             main = threadpool.ThreadPool(self.threads)
             # que requests
             [main.putRequest(req) for req in requests]
-            
+
             try:
                 while True:
                     try:
@@ -1213,7 +1213,7 @@ class RuntestBase:
                 self.lock.acquire()
                 print e
                 exit(0)
-    
+
     #
     # cleanup
     #
@@ -1221,31 +1221,31 @@ class RuntestBase:
         # Turn off quiet to display failure summary
         if self.quiet and not self.summaryonly:
             self.quiet = False
-        
+
         if self.failmsgs:
             self.js_print('\nFAILURES:', '', '<br/>')
             for m in self.failmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
-        
+
         if self.expfailmsgs:
             self.js_print('\nEXPECTED FAILURES:', '', '<br/>')
             for m in self.expfailmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
-        
+
         if self.unpassmsgs:
             self.js_print('\nUNEXPECTED PASSES:', '', '<br/>')
             for m in self.unpassmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
-    
+
         if self.assertmsgs:
             self.js_print('\nASSERTIONS:', '', '<br/>')
             for m in self.assertmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
-        
-        
+
+
         if self.quiet and self.summaryonly:
-            self.quiet = False    
-        
+            self.quiet = False
+
         if self.rebuildtests:
             if self.ashErrors:
                 self.js_print('\ntest run FAILED!')
@@ -1261,14 +1261,14 @@ class RuntestBase:
                 self.js_print('\ntest run PASSED!')
             else:
                 self.js_print('\ntest run FAILED!')
-        
+
         if self.timestamps:
             end_time = datetime.today()
             self.js_print('Tests complete at %s' % end_time, '<hr><tt>', '</tt>')
             self.js_print('Start Date: %s' % self.start_time, '<tt><br>', '')
             self.js_print('End Date  : %s' % end_time, '<br>', '')
             self.js_print('Test Time : %s' % (end_time-self.start_time), '<br>', '')
-            
+
         if not self.rebuildtests:
             self.js_print('passes               : %d' % self.allpasses, '<br>', '')
             self.js_print('failures             : %d' % self.allfails, '<br>', '')
@@ -1284,7 +1284,7 @@ class RuntestBase:
                 self.js_print('test timeouts        : %d' % self.alltimeouts, '<br>', '')
             if self.allasserts>0:
                 self.js_print('assertions           : %d' % self.allasserts, '<br>', '')
-                
+
             if self.js_output:
                 print 'Results were written to %s' % self.js_output
 
@@ -1293,7 +1293,7 @@ class RuntestBase:
             if self.allfails>0:
               logfile.write("failures=%d" % self.allfails)
             else:
-              logfile.write("no failures")  
+              logfile.write("no failures")
 
         if self.ashErrors:
             exit(1)
@@ -1305,14 +1305,14 @@ class RuntestBase:
             cmd = '"%s" -jar %s' % (self.java,asc)
         else:
             cmd = asc
-         
+
         (f,err,exitcode) = self.run_pipe(cmd)
-        
+
         try:
             return re.compile('.*build (\d+|\S+)').search(f[1]).group(1)
         except:
             return 'unknown'
-    
+
     def getAvmVersion(self, vm=None, txt=None):
         '''Pull the avm version out of the vm info or description string if provided.'''
         if vm:
@@ -1386,7 +1386,7 @@ class RuntestBase:
         # * the avm variable is replaced with the ../util/wmemulatorshell.py file, when called it copies the test abc to the wm /Storage Card/media
         #   directory and creates nextvm.txt, then waits for the wmrunner.exe to delete the nextvm.txt to signal the test is finished
         #
-        
+
         emulator="c:/Program Files/Microsoft Device Emulator/1.0/DeviceEmulator.exe"
         emulator_image="c:/Program Files/Windows Mobile 6 SDK/PocketPC/DeviceemulationV650/0409/PPC_USA_GSM_VR.BIN"
         cwd=os.getcwd()
@@ -1397,7 +1397,7 @@ class RuntestBase:
             cwd=cwd[1:]
         if cwd[1]!=':':
             cwd=cwd[0:1]+':'+cwd[1:]
-        
+
         shared=cwd+"/../util/emulator_files"
         cerunner=cwd+"/../../utils/wmremote/wmrunner/Release/wmrunner.exe"
         emthreads=self.threads
@@ -1462,7 +1462,7 @@ class RuntestBase:
                 print "WARNING: the emulator has an open lock file, removing it"
                 os.unlink(sharedir+"/lock")
             if os.path.isfile(sharedir+'/running.txt'):
-                print "detected emulator is already running, if not delete %s/running.txt" % sharedir 
+                print "detected emulator is already running, if not delete %s/running.txt" % sharedir
             if os.path.isdir(sharedir+"/shell")==False:
                 os.mkdir(sharedir+"/shell")
             if os.path.isdir(sharedir+"/media")==False:
@@ -1476,7 +1476,7 @@ class RuntestBase:
             file=open(sharedir+"/nextvm.txt","w")
             file.write(" -log \"\\Storage Card\\media\\version.abc\" ")
             file.close()
-        
+
         winceProcesses=range(emthreads)
         for num in range(emthreads):
             if os.path.isfile("%s/share%d/running.txt" % (shared,num)):
@@ -1484,7 +1484,7 @@ class RuntestBase:
             else:
                 args=[emulator]+emulator_args.split()+['/sharedfolder','%s/share%d' %(shared,num),emulator_image]
                 winceProcesses[num]=subprocess.Popen(args)
-        
+
         versions=range(emthreads)
         timestart=time()
         while len(versions)>0:
@@ -1513,4 +1513,3 @@ class RuntestBase:
                 os.unlink(cwd+"/version.abc")
         except:
             print 'exception deleting %s/version.as or %s/version.abc' % (cwd,cwd)
-            
