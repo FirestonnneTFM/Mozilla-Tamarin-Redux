@@ -243,7 +243,15 @@ namespace avmshell
         {
             // Destruction order matters.
             MMgc::GC* gc = core->GetGC();
-            delete core;
+            {
+                MMGC_GCENTER(gc);
+#ifdef _DEBUG
+                core->codeContextThread = VMPI_currentThread();
+#endif 
+                delete core;
+            }
+
+
             delete gc;
         }
 
@@ -257,6 +265,7 @@ namespace avmshell
         ThreadNode(MultiworkerState& state, int id)
             : state(state)
             , id(id)
+            , pendingWork(false)
             , corenode(NULL)
             , filename(NULL)
             , next(NULL)
@@ -278,6 +287,7 @@ namespace avmshell
             pthread_mutex_lock(&m);
             this->corenode = corenode;
             this->filename = filename;
+            this->pendingWork = true;
             pthread_cond_signal(&c);
             pthread_mutex_unlock(&m);
         }
@@ -285,6 +295,7 @@ namespace avmshell
         MultiworkerState& state;
         pthread_t thread;
         const int id;
+        bool pendingWork;
         pthread_cond_t c;
         pthread_mutex_t m;          // Protects corenode, filename, next, c
         CoreNode* corenode;         // The core running (or about to run, or just finished running) on this thread
@@ -497,7 +508,10 @@ namespace avmshell
             // the thread structure.
 
             pthread_mutex_lock(&self->m);
-            pthread_cond_wait(&self->c, &self->m);
+            // Don't wait when pendingWork == true,
+            // slave might have been already signalled but it didn't notice because it wasn't waiting yet.
+            while (self->pendingWork == false) 
+                pthread_cond_wait(&self->c, &self->m);
             pthread_mutex_unlock(&self->m);
 
             if (self->corenode == NULL) {
@@ -509,9 +523,18 @@ namespace avmshell
             LOGGING( AvmLog("T%d: Work starting\n", self->id); )
             {
                 MMGC_GCENTER(self->corenode->core->GetGC());
+#ifdef _DEBUG
+                self->corenode->core->codeContextThread = VMPI_currentThread();
+#endif 
                 self->corenode->core->evaluateFile(state.settings, self->filename); // Ignore the exit code for now
             }
             LOGGING( AvmLog("T%d: Work completed\n", self->id); )
+
+            pthread_mutex_lock(&self->m);
+            self->pendingWork = false;
+            pthread_mutex_unlock(&self->m);
+
+
         }
         return (void*) NULL;
     }
