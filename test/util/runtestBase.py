@@ -832,7 +832,8 @@ class RuntestBase:
                 cmd += ' -jar %s' %  asc
             else:
                 cmd = asc
-            
+
+            ascargs += ' '.join(extraArgs)
             ascArgList = parseArgStringToList(ascargs)
         
             # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
@@ -842,11 +843,7 @@ class RuntestBase:
             
             if self.genAtsSwfs:
                 ascArgList.extend(genAtsArgs(dir,file,self.atstemplate))
-            
-            for arg in extraArgs:
-                cmd += ' %s' % arg
-        
-                                  
+
             cmd += ' -import %s' % builtinabc
             for arg in ascArgList:
                 cmd += ' %s' % arg
@@ -879,6 +876,7 @@ class RuntestBase:
             return
         
         try:
+            self.verbose_print('compiling: %s %s' % (cmd,as_file))
             (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file), outputCalls=outputCalls)
             if self.genAtsSwfs:
                 moveAtsSwf(dir,file, self.atsDir)
@@ -1015,7 +1013,7 @@ class RuntestBase:
         ascargs[0] = ascargs[0].strip()
         if (len(ascargs) == 1): #treat no keyword as a merge
             ascargs.insert(0,'merge')
-        elif (ascargs[0] != 'override') or (ascargs[0] != 'merge'): # default to merge if mode not recognized
+        elif (ascargs[0] != 'override') and (ascargs[0] != 'merge'): # default to merge if mode not recognized
             ascargs[0] = 'merge'
         # replace the $DIR keyword with actual directory
         ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
@@ -1036,7 +1034,7 @@ class RuntestBase:
         if mode == 'merge':
             currentArgList.extend(argList)
         elif mode == 'override':
-            currentArgList = newArgList
+            currentArgList = argList
         # remove any duplicate args
         currentArgList = list(set(currentArgList))
         if removeArgList:
