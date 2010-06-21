@@ -833,7 +833,7 @@ class RuntestBase:
             else:
                 cmd = asc
 
-            ascargs += ' '.join(extraArgs)
+            ascargs += ' ' + ' '.join(extraArgs)
             ascArgList = parseArgStringToList(ascargs)
         
             # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
