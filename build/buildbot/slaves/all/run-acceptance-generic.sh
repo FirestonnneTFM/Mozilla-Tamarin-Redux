@@ -152,7 +152,7 @@ else
 fi
 
 test "$silent" = "true" && {
-    logfile=`echo acceptance-$shell$vmargs.log | sed 's/ //g'`
+    logfile=`echo acceptance-$shell$vmargs.log | sed 's/ //g' | sed 's/\.exe//g'`
     silentoptions="-l $logfile --summaryonly"
 }
 
