@@ -124,7 +124,7 @@ class AggregateMailNotifier(MailNotifier):
         return True
     
     def buildFinished(self, name, build, results):
-  
+        # Called every time a machine finishes a phase
         if self.builderGroups:
             currentBuilder = build.getBuilder()
             currentBuilderName = currentBuilder.getName()
@@ -140,23 +140,6 @@ class AggregateMailNotifier(MailNotifier):
                                 if builderGroup.sent < self.schedulerGroupsSendFirst:
                                     builderGroup.sent += 1
                                     MailNotifier.buildFinished(self, name, build, results)
-                        # Are there any builders left? if not send the grouped message
-                        for builder in builderGroup.builderNames:
-                            # The current builder will always have a building state,
-                            # so do not check state if current builder
-                            if builder != currentBuilderName:
-                                state = self.status.getBuilder(builder).getState()[0]
-                                if state == "building":     # if any are building we can return
-                                    return
-                        # Nothing is building - send out the aggregated message
-                        if len(builderGroup.cachedMessages) == builderGroup.sent:
-                            # We've already sent out all the messages in the cache
-                            # so there is no need to send out the aggregated messages
-                            return
-                        d = self.sendAggregateMail(builderGroup.cachedMessages)
-                        builderGroup.reset()
-                        return d
-                        
                     elif builderGroup.currentBuild != revision:
                         # new revision - reset BuilderGroup just in case
                         builderGroup.reset()
@@ -168,7 +151,23 @@ class AggregateMailNotifier(MailNotifier):
                                 builderGroup.sent = 1
                                 # send this email out
                                 return MailNotifier.buildFinished(self, name, build, results)
-                    break
+                    # Are there any builders left? if not send the grouped message
+                    for builder in builderGroup.builderNames:
+                        # The current builder will always have a building state,
+                        # so do not check state if current builder
+                        if builder != currentBuilderName:
+                            state = self.status.getBuilder(builder).getState()[0]
+                            if state == "building":     # if any are building we can return
+                                return
+                    # Nothing is building - send out the aggregated message
+                    if len(builderGroup.cachedMessages) == builderGroup.sent:
+                        # We've already sent out all the messages in the cache
+                        # so there is no need to send out the aggregated messages
+                        return
+                    # Note that this code will only get run if the two conditions above are not met (both return nothing)
+                    d = self.sendAggregateMail(builderGroup.cachedMessages)
+                    builderGroup.reset()
+                    return d
                     
         else:   # send message like regular MailNotifier
             # this comment copied from MailNotifier:
