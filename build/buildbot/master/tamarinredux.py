@@ -1783,7 +1783,7 @@ class tamarinredux:
     mac_deep_factory.addStep(sync_update)
     mac_deep_factory.addStep(bb_slaveupdate(slave="mac-deep"))
     mac_deep_factory.addStep(download_testmedia)
-    mac_deep_factory.addStep(TestSuiteCommand(
+    mac_deep_factory.addStep(TestSuiteShellCommand(
                      command=['./run-brightspot.sh', WithProperties('%s','revision')],
                      description='running brightspot tests...',
                      descriptionDone='finished running brightspot tests.',
@@ -2110,6 +2110,7 @@ class tamarinredux:
 
                 windows_deep_builder,
                 windows_p3_deep_builder,
+                mac_deep_builder,
                 mac_ppc_deep_builder,
                 windows_64_deep_builder,
                 solaris_sparc_deep_builder,
