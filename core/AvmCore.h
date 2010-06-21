@@ -200,13 +200,13 @@ const int kBufferPadding = 16;
          */
         MMgc::GC * const gc;
 
-        private:
+
     #ifdef _DEBUG
             // Only the thread used to create the AvmCore is allowed to modify currentMethodFrame (and thus, use EnterCodeContext).
             // We don't enforce this in Release builds, but check for it and assert in Debug builds.
             vmpi_thread_t       codeContextThread;
     #endif
-
+        private:
 
         #ifdef DEBUGGER
         private:
