@@ -294,3 +294,92 @@ class CustomMail(AggregateMailNotifier):
         ds.append(sendmail(self.relayhost, self.fromaddr, recipients, s))
         return defer.DeferredList(ds)
 
+class PassedMailNotifier(CustomMail):
+    '''Mail class that sends out mail for an all-passed build'''
+    
+    def __init__(self, fromaddr, mode="all", categories=None, builders=None, branch="",
+                 addLogs=False, relayhost="localhost",
+                 subject="[buildbot-%(result)s] %(blamelist)s: %(branch)s rev %(src)s",
+                 lookup=None, extraRecipients=[],
+                 sendToInterestedUsers=True,
+                 schedulerGroups = [],
+                 schedulerGroupsSendFirst = 0
+                 ):
+        
+        # regardless of mode given, override to "all" (required to know if some steps failed)
+        mode = "all"
+        
+        CustomMail.__init__(self, fromaddr, mode, categories, builders, branch,
+                 addLogs, relayhost,
+                 subject,
+                 lookup, extraRecipients,
+                 sendToInterestedUsers,
+                 schedulerGroups,
+                 schedulerGroupsSendFirst
+                 )
+        
+    def sendAggregateMail(self, cachedResults):
+        # cachedResults is a list of dicts: {'name':name, 'build':build, 'results':results}
+        projectName = self.status.getProjectName()
+        
+        # build will be the same for all messages, so just use the first one
+        build = cachedResults[0]['build']
+        
+        source = build.getSourceStamp().revision
+        
+        # Delimiting wht "," causes email subject line to contain a TAB character for some reason
+        blamelist = "|".join(build.getResponsibleUsers())
+        p = re.compile(" <[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?>")
+        blamelist = p.sub("", blamelist)
+        
+        slaves = []
+        results = []
+        for result in cachedResults:
+            slaves.append(result['name'])
+            results.append(result['results'])
+
+        # If _any_ build failed, then we do not send this email (failure emails are dealt with separately)
+        if FAILURE in results:
+            return
+
+        text = ''
+        text += "Change: %s\n" % source
+        text += "\n"
+        text += "Congratulations, your %s build has passed all acceptance tests!" % self.branch
+        
+        
+        m = Message()
+        m.set_payload(text)
+        
+        m['Date'] = formatdate(localtime=True)
+        m['Subject'] = self.subject % { 'result': 'pass',
+                                        'blamelist': blamelist,
+                                        'branch': self.branch,
+                                        'src': source,
+                                        }
+
+        m['From'] = self.fromaddr
+        # m['To'] is added later
+
+        if self.addLogs:
+            for result in cachedResults:
+                build = result['build']
+                for log in build.getLogs():
+                    name = "%s.%s" % (log.getStep().getName(),
+                                      log.getName())
+                    a = MIMEText(log.getText())
+                    a.add_header('Content-Disposition', "attachment",
+                                 filename=name)
+                    m.attach(a)
+
+        # now, who is this message going to?
+        dl = []
+        recipients = self.extraRecipients[:]
+        if self.sendToInterestedUsers and self.lookup:
+            for u in build.getInterestedUsers():
+                d = defer.maybeDeferred(self.lookup.getAddress, u)
+                d.addCallback(recipients.append)
+                dl.append(d)
+        d = defer.DeferredList(dl)
+        d.addCallback(self._gotRecipients, recipients, m)
+        return d
