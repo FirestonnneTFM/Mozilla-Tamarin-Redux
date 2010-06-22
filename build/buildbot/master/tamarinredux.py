@@ -1789,10 +1789,11 @@ class tamarinredux:
     mac_deep_factory.addStep(download_testmedia)
     mac_deep_factory.addStep(TestSuiteShellCommand(
                      command=['./run-brightspot.sh', WithProperties('%s','revision')],
+                     env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                      description='running brightspot tests...',
                      descriptionDone='finished running brightspot tests.',
                      name="RunBrightspot",
-                     workdir="../scripts",
+                     workdir="../repo/build/buildbot/slaves/scripts",
                      timeout=3600)
     )
     mac_deep_factory.addStep(util_process_clean)
