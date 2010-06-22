@@ -248,7 +248,7 @@ class sandbox:
 
     sb_mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile-sandbox",
-                'slavename': "asteammac1",
+                'slavename': "asteammac12-10_5",
                 'factory': sb_mac_intel_105_compile_factory,
                 'builddir': './sandbox-mac-intel-10_5-compile',
     }
@@ -278,7 +278,7 @@ class sandbox:
 
     sb_mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile-sandbox",
-                'slavename': "asteammac1-64bit",
+                'slavename': "asteammac12-64bit",
                 'factory': sb_mac_intel_64_compile_factory,
                 'builddir': './sandbox-mac64-intel-compile',
     }
@@ -733,7 +733,7 @@ class sandbox:
 
     sb_mac_intel_105_smoke_builder = {
                 'name': "mac-intel-10.5-smoke-sandbox",
-                'slavename': "asteammac1",
+                'slavename': "asteammac12-10_5",
                 'factory': sb_mac_intel_105_smoke_factory,
                 'builddir': './sandbox-mac-intel-10_5-smoke',
     }
@@ -749,7 +749,7 @@ class sandbox:
 
     sb_mac_intel_64_smoke_builder = {
                 'name': "mac64-intel-smoke-sandbox",
-                'slavename': "asteammac1-64bit",
+                'slavename': "asteammac12-64bit",
                 'factory': sb_mac_intel_64_smoke_factory,
                 'builddir': './sandbox-mac64-intel-smoke',
     }
@@ -1082,7 +1082,7 @@ class sandbox:
 
     sb_mac_intel_105_test_builder = {
                 'name': "mac-intel-10.5-test-sandbox",
-                'slavename': "asteammac1",
+                'slavename': "asteammac12-10_5",
                 'factory': sb_mac_intel_105_test_factory,
                 'builddir': './sandbox-mac-intel-10_5-test',
     }
@@ -1105,7 +1105,7 @@ class sandbox:
 
     sb_mac_intel_64_test_builder = {
                 'name': "mac64-intel-test-sandbox",
-                'slavename': "asteammac1-64bit",
+                'slavename': "asteammac12-64bit",
                 'factory': sb_mac_intel_64_test_factory,
                 'builddir': './sandbox-mac64-intel-test',
     }

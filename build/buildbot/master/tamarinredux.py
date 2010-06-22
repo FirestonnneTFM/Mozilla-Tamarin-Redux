@@ -311,7 +311,7 @@ class tamarinredux:
 
     mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile",
-                'slavename': "asteammac1",
+                'slavename': "asteammac12-10_5",
                 'factory': mac_intel_105_compile_factory,
                 'builddir': './mac-intel-10_5-compile',
     }
@@ -341,7 +341,7 @@ class tamarinredux:
 
     mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile",
-                'slavename': "asteammac1-64bit",
+                'slavename': "asteammac12-64bit",
                 'factory': mac_intel_64_compile_factory,
                 'builddir': './mac64-intel-compile',
     }
@@ -848,7 +848,7 @@ class tamarinredux:
 
     mac_intel_105_smoke_builder = {
                 'name': "mac-intel-10.5-smoke",
-                'slavename': "asteammac1",
+                'slavename': "asteammac12-10_5",
                 'factory': mac_intel_105_smoke_factory,
                 'builddir': './mac-intel-10_5-smoke',
     }
@@ -864,7 +864,7 @@ class tamarinredux:
 
     mac_intel_64_smoke_builder = {
                 'name': "mac64-intel-smoke",
-                'slavename': "asteammac1-64bit",
+                'slavename': "asteammac12-64bit",
                 'factory': mac_intel_64_smoke_factory,
                 'builddir': './mac64-intel-smoke',
     }
@@ -1224,7 +1224,7 @@ class tamarinredux:
 
     mac_intel_105_test_builder = {
                 'name': "mac-intel-10.5-test",
-                'slavename': "asteammac1",
+                'slavename': "asteammac12-10_5",
                 'factory': mac_intel_105_test_factory,
                 'builddir': './mac-intel-10_5-test',
     }
@@ -1248,7 +1248,7 @@ class tamarinredux:
 
     mac_intel_64_test_builder = {
                 'name': "mac64-intel-test",
-                'slavename': "asteammac1-64bit",
+                'slavename': "asteammac12-64bit",
                 'factory': mac_intel_64_test_factory,
                 'builddir': './mac64-intel-test',
     }
