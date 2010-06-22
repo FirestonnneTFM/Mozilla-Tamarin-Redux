@@ -66,6 +66,7 @@ class sandbox:
                                    "solaris-sparc-compile-sandbox", "solaris-sparc2-compile-sandbox",
                                    "android-compile-sandbox",
                                    "linux-arm-compile-sandbox", "linux-arm2-compile-sandbox",
+                                   "linux-mips-compile-sandbox"
                                    ])
 
     smoke = BuilderDependent(name="smoke-sandbox",upstream=compile, callbackInterval=60, properties={'silent':'true'},
@@ -78,7 +79,8 @@ class sandbox:
                                    "winmobile-emulator-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox", "solaris-sparc2-smoke-sandbox",
                                    "android-smoke-sandbox",
-                                   "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox"],
+                                   "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox",
+                                   "linux-mips-smoke-sandbox"],
                     builderDependencies=[
                                   ["windows-smoke-sandbox", "windows-compile-sandbox"], 
                                   ["windows64-smoke-sandbox", "windows64-compile-sandbox"], 
@@ -98,6 +100,7 @@ class sandbox:
                                   ["android-smoke-sandbox","android-compile-sandbox"],
                                   ["linux-arm-smoke-sandbox","linux-compile-sandbox"],
                                   ["linux-arm2-smoke-sandbox","linux-compile-sandbox"],
+                                  ["linux-mips-smoke-sandbox","linux-mips-compile-sandbox"],
                                  ])
 
     test = BuilderDependent(name="test-sandbox",upstream=smoke, callbackInterval=60, properties={'silent':'true'},
@@ -110,7 +113,8 @@ class sandbox:
                                    "winmobile-emulator-test-sandbox",
                                    "solaris-sparc-test-sandbox", "solaris-sparc2-test-sandbox",
                                    "android-test-sandbox",
-                                   "linux-arm-test-sandbox", "linux-arm2-test-sandbox"],
+                                   "linux-arm-test-sandbox", "linux-arm2-test-sandbox",
+                                   "linux-mips-test-sandbox"],
                     builderDependencies=[
                                   ["windows-test-sandbox", "windows-smoke-sandbox"], 
                                   ["windows64-test-sandbox", "windows64-smoke-sandbox"], 
@@ -130,6 +134,7 @@ class sandbox:
                                   ["android-test-sandbox", "android-smoke-sandbox"],
                                   ["linux-arm-test-sandbox", "linux-arm-smoke-sandbox"],
                                   ["linux-arm2-test-sandbox", "linux-arm2-smoke-sandbox"],
+                                  ["linux-mips-test-sandbox", "linux-mips-smoke-sandbox"]
                                  ])
 
     schedulers = [compile, smoke, test]
@@ -663,6 +668,56 @@ class sandbox:
                 'factory': sb_linux_arm2_compile_factory,
                 'builddir': './sandbox-linux-arm2-compile',
     }
+    
+    
+    ################################
+    #### builder for linux-mips ####
+    ################################
+    sb_linux_mips_compile_factory = factory.BuildFactory()
+    sb_linux_mips_compile_factory.addStep(sync_clean)
+    sb_linux_mips_compile_factory.addStep(sync_clone_sandbox)
+    sb_linux_mips_compile_factory.addStep(sync_update)
+    sb_linux_mips_compile_factory.addStep(bb_slaveupdate(slave="linux-mips"))
+    sb_linux_mips_compile_factory.addStep(compile_builtin)
+    sb_linux_mips_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=mips-linux', 'avmshell_mips', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'mipsel-linux-uclibc-g++ -static',
+                    'CC' : 'mipsel-linux-uclibc-gcc -static',
+                    'LD' : 'mipsel-linux-uclibc-ld',
+                    'AR' : 'mipsel-linux-uclibc-ar',
+                },
+                description='starting Release-mips-linux build...',
+                descriptionDone='finished Release-mips-linux build.',
+                name="Release_mips-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_linux_mips_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=mips-linux', 'avmshell_mips_d', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'mipsel-linux-uclibc-g++ -static',
+                    'CC' : 'mipsel-linux-uclibc-gcc -static',
+                    'LD' : 'mipsel-linux-uclibc-ld',
+                    'AR' : 'mipsel-linux-uclibc-ar',
+                },
+                description='starting Debug-mips-linux build...',
+                descriptionDone='finished Debug-mips-linux build.',
+                name="Debug_mips-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_linux_mips_compile_factory.addStep(compile_buildcheck_local)
+    sb_linux_mips_compile_factory.addStep(util_upload_asteam_local)
+    
+    sb_linux_mips_compile_builder = {
+                'name': "linux-mips-compile-sandbox",
+                'slavename': "asteamlin1-mips",
+                'factory': sb_linux_mips_compile_factory,
+                'builddir': './sandbox-linux-mips-compile',
+    }
+
+
 
     ################################################################################
     ################################################################################
@@ -977,6 +1032,30 @@ class sandbox:
                 'factory': sb_linux_arm2_smoke_factory,
                 'builddir': './sandbox-linux-arm2-smoke',
     }
+    
+    #########################################
+    #### builder for linux-mips-smoke    ####
+    #########################################
+    sb_linux_mips_smoke_factory = factory.BuildFactory()
+    sb_linux_mips_smoke_factory.addStep(download_testmedia)
+    sb_linux_mips_smoke_factory.addStep(TestSuiteShellCommand(
+                command=['./run-smoketests.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    sb_linux_mips_smoke_factory.addStep(util_process_clean)
+
+    sb_linux_mips_smoke_builder = {
+                'name': "linux-mips-smoke-sandbox",
+                'slavename': "asteamlin1-mips",
+                'factory': sb_linux_mips_smoke_factory,
+                'builddir': './sandbox-linux-mips-smoke',
+    }
+
 
     ################################################################################
     ################################################################################
@@ -1375,6 +1454,19 @@ class sandbox:
                 'builddir': './sandbox-linux-arm2-test',
     }
     
+    ##########################################
+    #### builder for linux-mips-test      ####
+    ##########################################
+    sb_linux_mips_test_factory = factory.BuildFactory()
+    sb_linux_mips_test_factory.addStep(util_process_clean)
+    sb_linux_mips_test_factory.addStep(util_clean_buildsdir)
+
+    sb_linux_mips_test_builder = {
+                'name': "linux-mips-test-sandbox",
+                'slavename': "asteamlin1-mips",
+                'factory': sb_linux_mips_test_factory,
+                'builddir': './sandbox-linux-mips-test',
+    }
     
     
     
@@ -1397,6 +1489,7 @@ class sandbox:
                 sb_android_compile_builder,
                 sb_linux_arm_compile_builder,
                 sb_linux_arm2_compile_builder,
+                sb_linux_mips_compile_builder,
                 
                 sb_windows_smoke_builder,
                 sb_windows_64_smoke_builder,
@@ -1416,6 +1509,7 @@ class sandbox:
                 sb_android_smoke_builder,
                 sb_linux_arm_smoke_builder,
                 sb_linux_arm2_smoke_builder,
+                sb_linux_mips_smoke_builder,
                 
                 sb_windows_test_builder,
                 sb_windows_64_test_builder,
@@ -1435,6 +1529,7 @@ class sandbox:
                 sb_android_test_builder,
                 sb_linux_arm_test_builder,
                 sb_linux_arm2_test_builder,
+                sb_linux_mips_test_builder,
 
                 ]
 
