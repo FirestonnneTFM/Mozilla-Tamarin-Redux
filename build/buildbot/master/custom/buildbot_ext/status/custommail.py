@@ -200,6 +200,22 @@ class CustomMail(AggregateMailNotifier):
         d.addCallback(self._gotRecipients, recipients, m)
         return d
 
+    def getChangesText(changes):
+        text = 'Changes in this build:\n'
+        for n, change in enumerate(changes):
+            text += '\n'
+            text += '%s.\n' % (n+1)
+            text += '    Revision: %s\n' % change.revision
+            text += '    User: %s\n' % change.who
+            commentsList = change.comments.split('\n')
+            if commentsList:
+                text += '    Comments: %s\n' % commentsList.pop(0)
+                # print the rest of the comments (if any)
+                for comment in commentsList:
+                    text += '              %s\n' % comment
+        text += '\n'
+        return text
+    
     def sendAggregateMail(self, cachedResults):
         # cachedResults is a list of dicts: {'name':name, 'build':build, 'results':results}
         projectName = self.status.getProjectName()
@@ -207,7 +223,8 @@ class CustomMail(AggregateMailNotifier):
         # build will be the same for all messages, so just use the first one
         build = cachedResults[0]['build']
         
-        source = build.getSourceStamp().revision
+        sourcestamp = build.getSourceStamp()
+        source = sourcestamp.revision
         
         # Delimiting wht "," causes email subject line to contain a TAB character for some reason
         blamelist = "|".join(build.getResponsibleUsers())
@@ -221,14 +238,10 @@ class CustomMail(AggregateMailNotifier):
             results.append(result['results'])
 
         text = ''
-        text += "Blame:  %s\n" % blamelist
         text += "Slave(s):  %s\n" % ', '.join(slaves)
         text += "Branch:    %s\n" % self.branch
-        text += "        %s\n" % self.status.getBuildbotURL()
-        text += "Change: %s\n" % source
-        # TODO - handle results other than FAILURE
-        text += "Status: fail"
-        text += "\n"
+        
+        text += self.getChangesText(sourcestamp.changes)
         
         if FAILURE in results:
             text += "Log(s) of failed build steps:\n"
@@ -322,10 +335,14 @@ class PassedMailNotifier(CustomMail):
         # cachedResults is a list of dicts: {'name':name, 'build':build, 'results':results}
         projectName = self.status.getProjectName()
         
+        from dbgp.client import brk
+        brk(host="localhost", port=9000)
+        
         # build will be the same for all messages, so just use the first one
         build = cachedResults[0]['build']
         
-        source = build.getSourceStamp().revision
+        sourcestamp = build.getSourceStamp()
+        source = sourcestamp.revision
         
         # Delimiting wht "," causes email subject line to contain a TAB character for some reason
         blamelist = "|".join(build.getResponsibleUsers())
@@ -343,10 +360,10 @@ class PassedMailNotifier(CustomMail):
             return
 
         text = ''
-        text += "Change: %s\n" % source
-        text += "\n"
-        text += "Congratulations, your %s build has passed all acceptance tests!" % self.branch
+        text += 'Congratulations, your %s build has passed all acceptance tests!\n' % self.branch
         
+        text += '\n'
+        text += self.getChangesText(sourcestamp.changes)
         
         m = Message()
         m.set_payload(text)

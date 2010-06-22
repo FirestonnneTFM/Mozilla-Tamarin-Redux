@@ -1055,7 +1055,7 @@ class argo:
     ##################################
     windows_test_factory = factory.BuildFactory()
     windows_test_factory.addStep(test_commandline)
-    windows_test_factory.addStep(test_selftest)
+    windows_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
     windows_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
     windows_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
     windows_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1080,7 +1080,7 @@ class argo:
     ####################################
     windows_64_test_factory = factory.BuildFactory()
     windows_64_test_factory.addStep(test_commandline)
-    windows_64_test_factory.addStep(test_selftest)
+    windows_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64"))
     windows_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64", vmargs="", config="", scriptargs=""))
     windows_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64", vmargs="-Dinterp", config="", scriptargs=""))
     windows_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1104,7 +1104,7 @@ class argo:
     #########################################
     mac_intel_104_test_factory = factory.BuildFactory()
     mac_intel_104_test_factory.addStep(test_commandline)
-    mac_intel_104_test_factory.addStep(test_selftest)
+    mac_intel_104_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_104"))
     mac_intel_104_test_factory.addStep(test_generic(name="Release", shellname="avmshell_104", vmargs="", config="", scriptargs=""))
     mac_intel_104_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_104", vmargs="-Dinterp", config="", scriptargs=""))
     mac_intel_104_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_104", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1129,7 +1129,7 @@ class argo:
     #########################################
     mac_intel_105_test_factory = factory.BuildFactory()
     mac_intel_105_test_factory.addStep(test_commandline)
-    mac_intel_105_test_factory.addStep(test_selftest)
+    mac_intel_105_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
     mac_intel_105_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
     mac_intel_105_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
     mac_intel_105_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1154,7 +1154,7 @@ class argo:
     ######################################
     mac_intel_64_test_factory = factory.BuildFactory()
     mac_intel_64_test_factory.addStep(test_commandline)
-    mac_intel_64_test_factory.addStep(test_selftest)
+    mac_intel_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64"))
     mac_intel_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64", vmargs="", config="", scriptargs=""))
     mac_intel_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64", vmargs="-Dinterp", config="", scriptargs=""))
     mac_intel_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1177,7 +1177,7 @@ class argo:
     ########################################
     mac_ppc_104a_test_factory = factory.BuildFactory()
     mac_ppc_104a_test_factory.addStep(test_commandline)
-    mac_ppc_104a_test_factory.addStep(test_selftest)
+    mac_ppc_104a_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_104_ppc"))
     mac_ppc_104a_test_factory.addStep(test_generic(name="Release", shellname="avmshell_104_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_104a_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_104_ppc", vmargs="-Dinterp", config="", scriptargs=""))
     mac_ppc_104a_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_104_ppc", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1216,7 +1216,7 @@ class argo:
     ########################################
     mac_ppc_105a_test_factory = factory.BuildFactory()
     mac_ppc_105a_test_factory.addStep(test_commandline)
-    mac_ppc_105a_test_factory.addStep(test_selftest)
+    mac_ppc_105a_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_ppc"))
     mac_ppc_105a_test_factory.addStep(test_generic(name="Release", shellname="avmshell_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_105a_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_ppc", vmargs="-Dinterp", config="", scriptargs=""))
     mac_ppc_105a_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_ppc", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1255,7 +1255,7 @@ class argo:
     ####################################
     mac_ppc_64_test_factory = factory.BuildFactory()
     mac_ppc_64_test_factory.addStep(test_commandline)
-    mac_ppc_64_test_factory.addStep(test_selftest)
+    mac_ppc_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64_ppc"))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1279,7 +1279,7 @@ class argo:
     ################################
     linux_test_factory = factory.BuildFactory()
     linux_test_factory.addStep(test_commandline)
-    linux_test_factory.addStep(test_selftest)
+    linux_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
     linux_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
     linux_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
     linux_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1304,7 +1304,7 @@ class argo:
     ##################################
     linux_64_test_factory = factory.BuildFactory()
     linux_64_test_factory.addStep(test_commandline)
-    linux_64_test_factory.addStep(test_selftest)
+    linux_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64"))
     linux_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64", vmargs="", config="", scriptargs=""))
     linux_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64", vmargs="-Dinterp", config="", scriptargs=""))
     linux_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1347,7 +1347,7 @@ class argo:
     ########################################
     solaris_sparc_test_factory = factory.BuildFactory()
     solaris_sparc_test_factory.addStep(test_commandline)
-    solaris_sparc_test_factory.addStep(test_selftest)
+    solaris_sparc_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
     solaris_sparc_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(util_process_clean)
@@ -1408,7 +1408,7 @@ class argo:
     #### builder for linux-arm-test       ####
     ##########################################
     linux_arm_test_factory = factory.BuildFactory()
-    linux_arm_test_factory.addStep(test_selftest)
+    linux_arm_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_neon_arm"))
     linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
@@ -1691,7 +1691,7 @@ class argo:
     windows_p3_deep_factory.addStep(download_testmedia)
     windows_p3_deep_factory.addStep(test_smoke)
     windows_p3_deep_factory.addStep(test_commandline)
-    windows_p3_deep_factory.addStep(test_selftest)
+    windows_p3_deep_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
     windows_p3_deep_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
     windows_p3_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
     windows_p3_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
