@@ -128,7 +128,8 @@ class CustomMail(AggregateMailNotifier):
     def buildMessage(self, name, build, results):
         
         projectName = self.status.getProjectName()
-        source = build.getSourceStamp().revision
+        sourcestamp = build.getSourceStamp()
+        source = sourcestamp.revision
         buildurl = "%sbuilders/%s/builds/%d" % (self.status.getBuildbotURL(),name,build.getNumber())
         
         # Delimiting wht "," causes email subject line to contain a TAB character for some reason
