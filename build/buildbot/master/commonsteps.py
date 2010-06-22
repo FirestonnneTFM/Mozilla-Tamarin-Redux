@@ -241,13 +241,16 @@ test_emulator_smoke_mobile = TestSuiteShellCommand(
             name="SmokeTest",
             workdir="../repo/build/buildbot/slaves/scripts")
 
-test_selftest = TestSuiteShellCommand(
-            command=['../all/run-selftest.sh', WithProperties('%s','revision')],
+def test_selftest(name, shellname):
+    # factory.addStep(test_selftest("Release", "avmshell"))
+    return TestSuiteShellCommand(
+            command=['../all/run-selftest-generic.sh', WithProperties('%s','revision'), '%s' % shellname],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-            description='starting selftest release...',
-            descriptionDone='finished selftest release.',
-            name="Testsuite_Selftest",
-            workdir="../repo/build/buildbot/slaves/scripts")
+            description='starting selftest %s...' % name,
+            descriptionDone='finished selftest %s.' % name,
+            name="Testsuite_Selftest_%s" % name,
+            workdir="../repo/build/buildbot/slaves/scripts"
+            )
 
 test_commandline = TestSuiteShellCommand(
             command=['../all/run-commandline-tests.sh', WithProperties('%s','revision')],
