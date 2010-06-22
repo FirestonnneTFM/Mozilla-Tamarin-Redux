@@ -139,15 +139,12 @@ class CustomMail(AggregateMailNotifier):
         res = "pass"
         if results == FAILURE:
             res = "fail"
-        text = ""
-
-        text += "Blame:  %s\n" % blamelist
-        text += "Slave:  %s\n" % name
-        text += "Branch:    %s\n" % self.branch
-        text += "        %s\n" % self.status.getBuildbotURL()
-        text += "Change: %s\n" % source
-        text += "Status: %s\n" % res
-        text += "\n"
+        
+        text = ''
+        text += 'Slave(s):  %s\n' % ', '.join(slaves)
+        text += 'Branch:    %s\n' % self.branch
+        
+        text += self.getChangesText(sourcestamp.changes)
         
         if results == FAILURE:
             text += "Log(s) of failed build steps:\n"
@@ -200,7 +197,7 @@ class CustomMail(AggregateMailNotifier):
         d.addCallback(self._gotRecipients, recipients, m)
         return d
 
-    def getChangesText(changes):
+    def getChangesText(self, changes):
         text = 'Changes in this build:\n'
         for n, change in enumerate(changes):
             text += '\n'
@@ -238,8 +235,8 @@ class CustomMail(AggregateMailNotifier):
             results.append(result['results'])
 
         text = ''
-        text += "Slave(s):  %s\n" % ', '.join(slaves)
-        text += "Branch:    %s\n" % self.branch
+        text += 'Slave(s):  %s\n' % ', '.join(slaves)
+        text += 'Branch:    %s\n' % self.branch
         
         text += self.getChangesText(sourcestamp.changes)
         
