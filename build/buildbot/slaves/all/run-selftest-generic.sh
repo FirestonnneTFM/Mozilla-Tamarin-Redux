@@ -94,6 +94,15 @@ cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean.sh
 
 AVM=$buildsdir/$change-${changeid}/$platform/$shell
+echo AVM=$AVM
+echo "`$AVM`"
+test -f $AVM || {
+  echo "ERROR: $AVM not found"
+  exit 1
+}
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
+echo ""
 
 $AVM -Dselftest > selftest.out 2>&1
 ret=$?
