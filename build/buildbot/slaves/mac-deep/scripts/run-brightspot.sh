@@ -62,12 +62,9 @@ fi
 export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_release_debugger
 
 test "$BRIGHTSPOT" = "" && {
-    echo "BRIGHTSPOT must be set to the url of brighspot"
+    echo "BRIGHTSPOT must be set to the url of brightspot"
     exit 1
 }
-
-logfile=brightspot.log
-beginSilent
 
 # download the avmglue.abc, requiring for running swfs in vm
 echo "Download avmglue.abc"
@@ -81,13 +78,5 @@ cd $basedir/test/brightspot
 chmod +x ./runtests.py
 
 # run the testsuite
-$py ./runtests.py
-
-endSilent
-
-test "$silent" = "true" && {
-    # display smoke results to stdout so that buildbot parses the results
-    grep "^ *passes" $logfile
-    grep "^ *failures" $logfile
-}
+$py ./runtests.py --quiet
 
