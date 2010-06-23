@@ -38,6 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
+#include "../vprof/vprof.h"
 #include "Interpreter.h"
 
 namespace avmplus {
