@@ -43,7 +43,10 @@
 
 #include "avmplus.h"
 
-//#define DOPROF
+#ifdef PERFM
+#define DOPROF
+#endif /* PERFM */
+
 #include "../vprof/vprof.h"
 
 namespace avmplus
