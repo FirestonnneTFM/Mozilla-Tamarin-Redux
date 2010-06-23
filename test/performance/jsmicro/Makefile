@@ -38,6 +38,8 @@
 .SUFFIXES:
 .SUFFIXES: .as .abc .js
 
+AVM ?= ../../../platform/mac/avmshell/build/Release/shell
+
 TARGETS=alloc-1.abc \
 	alloc-2.abc \
 	alloc-3.abc \
@@ -111,7 +113,7 @@ TARGETS=alloc-1.abc \
 all: $(TARGETS)
 
 run: $(TARGETS)
-	for i in $(TARGETS); do ../../../platform/mac/avmshell/build/Release/shell $$i ; done
+	for i in $(TARGETS); do $(AVM) $$i ; done
 
 clean:
 	rm -f *.abc *~
