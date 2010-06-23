@@ -111,3 +111,7 @@ v8.*/.*           ,  .*  , largerValuesFaster, reports v8 metric: http://v8.goog
 
 # jsmicro tests: larger values are faster
 jsmicro/.*        , .*   , largerValuesFaster, uses v8 metric
+
+# asmicro tests: larger values are faster
+asmicro/.*       , .*   , largerValuesFaster, uses v8 metric
+asmicro/driver.as, .* , skip, included by test files
