@@ -36,12 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "String.prototype.toUpperCase/toLowerCase on a string of 10 ASCII chars"
+include "driver.as"
 
-function loop() {
-    var a = "abcdefghij"
-    for ( var i=0 ; i < 100000 ; i++ ) {
-	a = a.toUpperCase();
-	a = a.toLowerCase();
+function loop():uint {
+    var a:String = "abcdefghij"
+    for ( var i:uint=0 ; i < 100000 ; i++ ) {
+        a = a.toUpperCase();
+        a = a.toLowerCase();
     }
     return a.length;
 }

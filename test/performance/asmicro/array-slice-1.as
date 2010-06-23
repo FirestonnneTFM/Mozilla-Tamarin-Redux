@@ -36,12 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "Array.prototype.slice a subarray of length 8 from an array of length 10";
+include "driver.as"
 
-function loop() {
-    var a = [0,1,2,3,4,5,6,7,8,9];
-    var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = a.slice(1,9);
+function loop():uint {
+    var a:Array = [0,1,2,3,4,5,6,7,8,9];
+    var v:Array;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = a.slice(1,9);
     return a.length + v.length;
 }
 

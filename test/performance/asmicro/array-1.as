@@ -37,17 +37,18 @@
 
 // Test sequential reading of an Array
 // Observe that if int arithmetic/looping are slow then they may mask array access time
+include "driver.as"
 
-var A = new Array();
-for ( var i=0 ; i < 100 ; i++ )
+var A:Array = new Array();
+for ( var i:uint=0 ; i < 100 ; i++ )
     A[i] = true;
 
-function readloop() {
-    var a = A;
-    var v;
-    for ( var i=0 ; i < 1000 ; i++ )
-	for ( var j=0 ; j < 100 ; j++ )
-	    v = a[j];
+function readloop():uint {
+    var a:Array = A;
+    var v:Boolean;
+    for ( var i:uint=0 ; i < 1000 ; i++ )
+        for ( var j:uint=0 ; j < 100 ; j++ )
+            v = a[j];
     return i;
 }
 

@@ -36,27 +36,28 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "Array.prototype.sort on arrays of length 10, integer values, default predicate";
+include "driver.as"
 
-var arrays = [];
-var alen = 10;
+var arrays:Array = [];
+var alen:uint = 10;
 
-function makeArrays() {
-    function makeArray(n) {
-	var a = [];
-	for ( var i=0 ; i < n ; i++ )
-	    a[i] = Math.random() >= 0.5 ? 1 : 0;
-	return a;
+function makeArrays():void {
+    function makeArray(n:uint):Array {
+        var a:Array = [];
+        for ( var i:uint=0 ; i < n ; i++ )
+            a[i] = Math.random() >= 0.5 ? 1 : 0;
+        return a;
     }
-    for ( var i=0 ; i < 100000/alen ; i++ )
-	arrays[i] = makeArray(alen);
+    for ( var i:uint=0 ; i < 100000/alen ; i++ )
+        arrays[i] = makeArray(alen);
 }
 
-function loop() {
-    var k=alen;
-    var t=0;
-    for ( var i=0 ; i < 100000 ; i+=k ) {
-	var a = arrays[t++];
-	a.sort();
+function loop():uint {
+    var k:uint=alen;
+    var t:uint=0;
+    for ( var i:uint=0 ; i < 100000 ; i+=k ) {
+        var a:Array = arrays[t++];
+        a.sort();
     }
     return i;
 }

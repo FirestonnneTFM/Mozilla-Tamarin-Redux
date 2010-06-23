@@ -36,12 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "String.prototype.slice a substring of length 8 from an string of length 10";
+include "driver.as"
 
-function loop() {
-    var a = "0123456789";
-    var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = a.slice(1,9);
+function loop():uint {
+    var a:String = "0123456789";
+    var v:String;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = a.slice(1,9);
     return a.length + v.length;
 }
 

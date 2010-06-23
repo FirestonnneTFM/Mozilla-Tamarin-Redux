@@ -36,12 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "Object allocation, four int properties, one self-reference";
+include "driver.as"
 
-function allocloop() {
+function allocloop():uint {
     var v;
-    for ( var i=0 ; i < 100000 ; i++ ) {
-	v = {a:i, b:i, c:i, d:i};
-	v.e = v;
+    for ( var i:uint=0 ; i < 100000 ; i++ ) {
+        v = {a:i, b:i, c:i, d:i};
+        v.e = v;
     }
     return i;
 }

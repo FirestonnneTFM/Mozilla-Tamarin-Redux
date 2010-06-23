@@ -36,21 +36,22 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "Array.prototype.unshift single value into array of length 0..9";
+include "driver.as"
 
-function unshiftloop() {
-    var a = [0,1,2,3,4,5,6,7,8,9];
-    for ( var i=0 ; i < 100000 ; i+=10 ) {
-	a.length = 0;
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
-	a.unshift(i);
+function unshiftloop():uint {
+    var a:Array = [0,1,2,3,4,5,6,7,8,9];
+    for ( var i:uint=0 ; i < 100000 ; i+=10 ) {
+        a.length = 0;
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
+        a.unshift(i);
     }
     return a.length;
 }

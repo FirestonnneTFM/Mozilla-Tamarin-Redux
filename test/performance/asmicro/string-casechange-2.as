@@ -40,12 +40,13 @@
 // have case conversions, presumably.
 
 var DESC = "String.prototype.toUpperCase/toLowerCase on a string of 9 non-8-bit chars and one ASCII"
+include "driver.as"
 
-function loop() {
-    var a = String.fromCharCode(200, 201, 202, 203, 204, 205, 97, 207, 208, 209);
-    for ( var i=0 ; i < 100000 ; i++ ) {
-	a = a.toUpperCase();
-	a = a.toLowerCase();
+function loop():uint {
+    var a:String = String.fromCharCode(200, 201, 202, 203, 204, 205, 97, 207, 208, 209);
+    for ( var i:uint=0 ; i < 100000 ; i++ ) {
+        a = a.toUpperCase();
+        a = a.toLowerCase();
     }
     return a.length;
 }

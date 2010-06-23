@@ -37,14 +37,15 @@
 
 // Test 'switch'.  The key is an string value and the keys are all
 // variable-length strings.
+include "driver.as"
 
-function switchloop() {
+function switchloop():uint {
     return switchloop2("10");
 }
 
-function switchloop2(k) {
-    var i=0;
-    var v=0;
+function switchloop2(k:String):uint {
+    var i:uint=0;
+    var v:uint=0;
     while (i < 100000) {
         i++;
         switch (k) {
@@ -60,7 +61,7 @@ function switchloop2(k) {
         case "9": v += 55; break;
         case "10": v += 89; break;
         case "11": v += 144; break;
-	}
+        }
     }
     return v;
 }

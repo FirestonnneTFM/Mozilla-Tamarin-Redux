@@ -38,10 +38,11 @@
 // Test simple 'for' loop with floats.  Note the iterator is a Number but
 // the bound is an integer value.
 // It is highly appropriate to compare this to 'while-1' and 'do-1'.
+include "driver.as"
 
-function forloop() {
-    for ( var i=0.5 ; i < 100000 ; i++ )
-	;
+function forloop():Number {
+    for ( var i:Number=0.5 ; i < 100000 ; i++ )
+        ;
     return i;
 }
 

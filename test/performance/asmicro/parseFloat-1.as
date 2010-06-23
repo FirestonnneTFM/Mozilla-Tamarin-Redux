@@ -36,15 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test <global>.parseFloat
+include "driver.as"
 
-function libloop() {
+function libloop():Number {
     return libloop2("3.14159");
 }
 
-function libloop2(s) {
-    var sum = 0;
-    for ( var i=0 ; i < 100000 ; i++ )
-	sum += parseFloat(s);
+function libloop2(s:String):Number {
+    var sum:Number = 0;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        sum += parseFloat(s);
     return sum;
 }
 

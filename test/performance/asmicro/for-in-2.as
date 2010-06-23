@@ -36,16 +36,17 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test not-so-simple 'for-in' loop - every other element is defined
+include "driver.as"
 
-var A = new Array();
-for ( var i=0 ; i < 200 ; i += 2 )
+var A:Array = new Array();
+for ( var i:uint=0 ; i < 200 ; i += 2 )
     A[i] = true;
 
-function for_in_loop() {
-    var a = A;
-    for ( var i=0 ; i < 100000 ; )
-	for ( var j in a )
-	    i++;
+function for_in_loop():uint {
+    var a:Array = A;
+    for ( var i:uint=0 ; i < 100000 ; )
+        for ( var j in a ) // saying "var j:String" may slow this down
+            i++;
     return i;
 }
 

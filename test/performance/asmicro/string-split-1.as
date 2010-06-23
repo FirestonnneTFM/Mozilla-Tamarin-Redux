@@ -36,12 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "String.prototype.split a string into 10 pieces, single character separator"
+include "driver.as"
 
-function loop() {
-    var a = "0,1,2,3,4,5,6,7,8,9";
-    var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = a.split(",");
+function loop():uint {
+    var a:String = "0,1,2,3,4,5,6,7,8,9";
+    var v:Array;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = a.split(",");
     return a.length + v.length;
 }
 

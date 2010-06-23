@@ -39,13 +39,14 @@
 // Test global write
 // Compare against 'globalvar-read-1' and 'closedvar-write-2'
 // (only additional work should be closed var write and local var read)
+include "driver.as"
 
 var global_var = 1;
 
-function mkwriteloop(closed_over_var) {
-    function writeloop() {
-        var v = 2;
-	for ( var i=0; i < 100000 ; i++ )
+function mkwriteloop(closed_over_var:int):Function {
+    function writeloop():uint {
+        var v:int = 2;
+        for ( var i:uint=0; i < 100000 ; i++ )
             closed_over_var = v;
         return i;
     }

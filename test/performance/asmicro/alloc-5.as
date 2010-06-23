@@ -36,11 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test simple array allocation: array with ten integer properties
+include "driver.as"
 
-function allocloop() {
+function allocloop():uint {
     var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = [i,1,2,3,4,5,6,7,8,9];
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = [i,1,2,3,4,5,6,7,8,9];
     return i;
 }
 

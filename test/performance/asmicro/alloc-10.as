@@ -36,24 +36,25 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Closure creation: deep.
+include "driver.as"
 
-var g = function () { return 1; }
+var g = function ():int { return 1; }
 
-function allocloop() {
-    var v1=g();
-    function f1(a) {
-	var v2=g();
-	function f2(b) {
-	    var v3=g();
-	    function f3(c) {
-		var v;
-		for ( var i=0 ; i < 100000 ; i++ )
-		    v = function (x) { return x+v1+v2+v3+a+b+c }
-		return i;
-	    }
-	    return f3(v1);
-	}
-	return f2(v1);
+function allocloop():int {
+    var v1:int=g();
+    function f1(a:int):int {
+        var v2:int=g();
+        function f2(b:int):int {
+            var v3:int=g();
+            function f3(c:int):int {
+                var v:Function;
+                for ( var i:uint=0 ; i < 100000 ; i++ )
+                    v = function (x:int):int { return x+v1+v2+v3+a+b+c }
+                return i;
+            }
+            return f3(v1);
+        }
+        return f2(v1);
     }
     return f1(v1);
 }

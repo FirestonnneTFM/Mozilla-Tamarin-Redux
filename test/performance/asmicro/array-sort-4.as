@@ -36,28 +36,29 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "Array.prototype.sort on arrays of length 1000, string values, custom predicate";
+include "driver.as"
 
-var arrays = [];
-var alen = 1000;
+var arrays:Array = [];
+var alen:uint = 1000;
 
-function makeArrays() {
-    function makeArray(n) {
-	var a = [];
-	for ( var i=0 ; i < n ; i++ )
-	    a[i] = Math.floor(Math.random()*alen).toString();
-	return a;
+function makeArrays():void {
+    function makeArray(n:uint):Array {
+        var a:Array = [];
+        for ( var i:uint=0 ; i < n ; i++ )
+            a[i] = Math.floor(Math.random()*alen).toString();
+        return a;
     }
-    for ( var i=0 ; i < 100000/alen ; i++ )
-	arrays[i] = makeArray(alen);
+    for ( var i:uint=0 ; i < 100000/alen ; i++ )
+        arrays[i] = makeArray(alen);
 }
 
-function loop() {
-    var k=alen;
-    var t=0;
-    function cmp(a,b) { if (a < b) return -1; if (a == b) return 0; return 1; }
-    for ( var i=0 ; i < 100000 ; i+=k ) {
-	var a = arrays[t++];
-	a.sort(cmp);
+function loop():uint {
+    var k:uint=alen;
+    var t:uint=0;
+    function cmp(a:String,b:String) { if (a < b) return -1; if (a == b) return 0; return 1; }
+    for ( var i:uint=0 ; i < 100000 ; i+=k ) {
+        var a:Array = arrays[t++];
+        a.sort(cmp);
     }
     return i;
 }

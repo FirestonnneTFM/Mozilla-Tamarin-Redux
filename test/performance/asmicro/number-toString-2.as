@@ -36,15 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test int.prototype.toString, probably
+include "driver.as"
 
-function loop() {
+function loop():String {
     return loop2(37);
 }
 
-function loop2(s) {
+function loop2(s:int):String {
     var x = "";
-    for ( var i=0 ; i < 100000 ; i++ )
-	x = "" + s;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        x = "" + s;
     return x;
 }
 

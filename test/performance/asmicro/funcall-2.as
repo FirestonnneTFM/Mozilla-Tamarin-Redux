@@ -36,16 +36,17 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test calls to empty function taking three args
+include "driver.as"
 
-function caller(f) {
-    for ( var i=0 ; i < 100000 ; i++ )
-	f(1, 2, 3);
+function caller(f):void {
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        f(1, 2, 3);
 }
 
-function emptyfun2(a, b, c) {
+function emptyfun2(a:int, b:int, c:int):void {
 }
 
-function emptyfun() {
+function emptyfun():void {
     caller(emptyfun2);
 }
 

@@ -37,14 +37,15 @@
 
 // Test simple string allocation: accumulate a number of long
 // strings.
+include "driver.as"
 
-function allocloop() {
-    var s;
-    for ( var i=0 ; i < 100 ; i++ ) {
-	s = "abracadabra";
-	for ( var j=0 ; j < 1000 ; j++ ) {
-	    s += "supercallifragilisticexpialidocious";
-	}
+function allocloop():uint {
+    var s:String;
+    for ( var i:uint=0 ; i < 100 ; i++ ) {
+        s = "abracadabra";
+        for ( var j:uint=0 ; j < 1000 ; j++ ) {
+            s += "supercallifragilisticexpialidocious";
+        }
     }
     return i;
 }

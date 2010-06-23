@@ -36,15 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "String.prototype.indexOf, finding character at the start of a string";
+include "driver.as"
 
-function loop() {
+function loop():void {
     loop2("abcde");
 }
 
-function loop2(s) {
-    var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = s.indexOf("a");
+function loop2(s):int {
+    var v:int;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = s.indexOf("a");
     return v;
 }
 

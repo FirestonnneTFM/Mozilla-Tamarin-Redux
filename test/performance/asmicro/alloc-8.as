@@ -36,11 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Simple closure creation: no free variables
+include "driver.as"
 
-function allocloop() {
+function allocloop():uint {
     var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = function (x) { return x }
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = function (x) { return x }
     return i;
 }
 

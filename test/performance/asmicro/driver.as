@@ -38,15 +38,15 @@
 // Run the function 'run' until at least a second has passed.  The
 // metric is the number of iterations per second, rounded down.
 
-function TEST(run, tag) {
+function TEST(run:Function, tag:String) {
     var then = new Date();
-    var iterations = 0;
+    var iterations:uint = 0;
     for (;;) {
-	var now = new Date();
-	if (now - then > 1000.0)
-	    break;
-	iterations++;
-	run();
+        var now = new Date();
+        if (now - then > 1000.0)
+            break;
+        iterations++;
+        run();
     }
     print('name ' + tag);
     print('metric v8 ' + Math.floor(iterations*((now-then)/1000.0)));
@@ -56,18 +56,18 @@ function TEST(run, tag) {
 // the time spent in the latter until at least a second has passed.
 // The metric is the number of iterations per second, rounded down.
 
-function TEST3(init, run, tag) {
+function TEST3(init:Function, run:Function, tag:String) {
     var time = 0;
-    var iterations = 0;
+    var iterations:uint = 0;
     for (;;) {
-	if (time > 1000.0)
-	    break;
-	iterations++;
-	init();
-	var then = new Date();
-	run();
-	var now = new Date();
-	time += (now - then);
+        if (time > 1000.0)
+            break;
+        iterations++;
+        init();
+        var then = new Date();
+        run();
+        var now = new Date();
+        time += (now - then);
     }
     print('name ' + tag);
     print('metric v8 ' + Math.floor(iterations*((time)/1000.0)));

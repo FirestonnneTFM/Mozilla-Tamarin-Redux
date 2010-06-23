@@ -36,11 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "Object allocation, five int properties";
+include "driver.as"
 
-function allocloop() {
+function allocloop():uint {
     var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = {a:i, b:i, c:i, d:i, e:i};
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = {a:i, b:i, c:i, d:i, e:i};
     return i;
 }
 

@@ -36,16 +36,17 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test simple 'charAt' loop where the characters are all ASCII
+include "driver.as"
 
-function loop() {
+function loop():void {
     loop2("abcdefghijklmnopqrstuvwxyz");
 }
 
-function loop2(s) {
-    var v;
-    for ( var i=0 ; i < 100000 ; i += 25 )
-	for ( var j=0 ; j < 25 ; j++ )
-	    v = s.charAt(j);
+function loop2(s:String):String {
+    var v:String;
+    for ( var i:uint=0 ; i < 100000 ; i += 25 )
+        for ( var j:uint=0 ; j < 25 ; j++ )
+            v = s.charAt(j);
     return v;
 }
 
