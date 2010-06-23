@@ -60,6 +60,9 @@ array-sort-2.js        Array.prototype.sort on arrays of length 1000, integer va
 array-sort-3.js        Array.prototype.sort on arrays of length 1000, string values, default predicate
 array-sort-4.js        Array.prototype.sort on arrays of length 1000, string values, custom predicate
 array-unshift-1.js     Array.prototype.unshift single value into array of length 0..9
+closedvar-read-1.js    Reads of closure-bound free variable
+closedvar-write-1.js   Writes of closure-bound free variable, opportunity for local escape analysis
+closedvar-write-2.js   Writes of closure-bound free variable, without much hope for analysis
 do-1.js                'do' loop, comparable to 'for-1' and 'while-1'.
 for-1.js               'for' loop, comparable to 'do-1' and 'while-1'
 for-2.js               'for' loop over Number values with int bound, update
@@ -70,7 +73,13 @@ funcall-1.js           Empty function call with no args
 funcall-2.js           Empty function call with three args
 funcall-3.js           Empty function call with three args to function expecting seven
 funcall-4.js           Call with many arguments to a function referencing, but not touching, 'arguments'
+globalvar-read-1.js    Reads of globally-bound free variable
+globalvar-write-1.js   Writes of globally-bound free variable
 isNaN-1.js             <global>.isNaN on Math.PI
+lookup-array-fetch-1.js   Check index prop present in array via operator[]
+lookup-array-in-1.js      Check index prop present in array via operator in
+lookup-object-fetch-1.js  Check index prop present in object via operator[]
+lookup-object-in-1.js     Check index prop present in object via operator in
 number-toString-1.js   <type>.prototype.toString on 3.14159
 number-toString-2.js   <type>.prototype.toString on 37
 oop-1.js               Object-oriented programming using prototype methods
