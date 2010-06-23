@@ -45,11 +45,29 @@ package
     {
         // String.length = 1 per ES3
         // E262 {ReadOnly, DontDelete, DontEnum }
-        public static const length:int = 1
+        public static const length:int = 1;
 
-        AS3 native static function fromCharCode(... arguments):String
-        String.fromCharCode = function(... arguments) {
-            return AS3::fromCharCode.AS3::apply(String,arguments)
+        AS3 native static function fromCharCode(...charcodes):String;
+
+        // Bugzilla 573456: Optimize for the one-argument common case,
+        // and for a small number of additional arguments.  The standard 
+        // rest arguments optimization ensures that the rest array is 
+        // not allocated.
+
+        String.fromCharCode = function(...charcodes)
+        {
+            var argc:uint = charcodes.length;
+
+            if (argc == 1)
+                return AS3::fromCharCode(charcodes[0]);
+
+            var s:String  = "";
+            var i:uint    = 0;
+            while (i < argc) {
+                s += AS3::fromCharCode(charcodes[i]);
+                i++;
+            }
+            return s;
         }
 
         // E262 {DontEnum, DontDelete, ReadOnly}
@@ -101,7 +119,6 @@ package
 
         prototype.concat = function(... args):String
         {
-            // todo: use function.apply or array.join?
             var s:String = String(this)
             for (var i:uint = 0, n:uint = args.length; i < n; i++)
                 s = s + String(args[i])
