@@ -65,6 +65,9 @@ TARGETS=alloc-1.abc \
 	array-sort-3.abc \
 	array-sort-4.abc \
 	array-unshift-1.abc \
+	closedvar-read-1.abc \
+	closedvar-write-1.abc \
+	closedvar-write-2.abc \
 	do-1.abc \
 	for-1.abc \
 	for-2.abc \
@@ -75,7 +78,13 @@ TARGETS=alloc-1.abc \
 	funcall-2.abc \
 	funcall-3.abc \
 	funcall-4.abc \
+	globalvar-read-1.abc \
+	globalvar-write-1.abc \
 	isNaN-1.abc \
+	lookup-array-fetch-1.abc \
+	lookup-array-in-1.abc \
+	lookup-object-fetch-1.abc \
+	lookup-object-in-1.abc \
 	number-toString-1.abc \
 	number-toString-2.abc \
 	oop-1.abc \
