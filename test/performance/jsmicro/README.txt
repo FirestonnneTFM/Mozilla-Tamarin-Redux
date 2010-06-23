@@ -93,6 +93,8 @@ string-charCodeAt-1.js String.prototype.charCodeAt, characters are all ASCII
 string-charCodeAt-2.js String.prototype.charCodeAt, characters are all outside the 8-bit range
 string-fromCharCode-1.js  String.fromCharCode, one ASCII value
 string-fromCharCode-2.js  String.fromCharCode, one non-8-bit value
+string-fromCharCode-3.js  String.fromCharCode, ten ASCII values (1/10 the iterations)
+string-fromCharCode-4.js  String.fromCharCode, 100 ASCII values (1/100 the iterations)
 string-indexOf-1.js    String.prototype.indexOf, finding character at the start of a string
 string-indexOf-2.js    String.prototype.indexOf, finding character at the end of a long string
 string-indexOf-3.js    String.prototype.indexOf, finding moderate substring at the end of a long string

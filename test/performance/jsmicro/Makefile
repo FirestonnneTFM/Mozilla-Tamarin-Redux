@@ -98,6 +98,8 @@ TARGETS=alloc-1.abc \
 	string-charCodeAt-2.abc \
 	string-fromCharCode-1.abc \
 	string-fromCharCode-2.abc \
+	string-fromCharCode-3.abc \
+	string-fromCharCode-4.abc \
 	string-indexOf-1.abc \
 	string-indexOf-2.abc \
 	string-indexOf-3.abc \

@@ -35,13 +35,5 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var DESC = "String.fromCharCode, one ASCII value";
-
-function loop() {
-    var x;
-    for ( var i=0 ; i < 100000 ; i++ )
-	x = String.fromCharCode(37);
-    return x;
-}
-
-TEST(loop, "string-fromCharCode-1");
+include "driver.js"
+include "string-fromCharCode-3.js"

@@ -35,13 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var DESC = "String.fromCharCode, one ASCII value";
+var DESC = "String.fromCharCode, 100 ASCII values";
 
 function loop() {
     var x;
-    for ( var i=0 ; i < 100000 ; i++ )
-	x = String.fromCharCode(37);
+    for ( var i=0 ; i < 1000 ; i++ )
+	x = String.fromCharCode(65,66,67,68,69,70,71,72,73,74,65,66,67,68,69,70,71,72,73,74,65,66,67,68,69,70,71,72,73,74,
+				65,66,67,68,69,70,71,72,73,74,65,66,67,68,69,70,71,72,73,74,65,66,67,68,69,70,71,72,73,74,
+				65,66,67,68,69,70,71,72,73,74,65,66,67,68,69,70,71,72,73,74,65,66,67,68,69,70,71,72,73,74,
+				65,66,67,68,69,70,71,72,73,74);
     return x;
 }
 
-TEST(loop, "string-fromCharCode-1");
+TEST(loop, "string-fromCharCode-4");

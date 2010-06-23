@@ -38,9 +38,10 @@
 var DESC = "String.fromCharCode, one non-8-bit value";
 
 function loop() {
+    var x;
     for ( var i=0 ; i < 100000 ; i++ )
-	String.fromCharCode(1037);
-    return i;
+	x = String.fromCharCode(1037);
+    return x;
 }
 
 TEST(loop, "string-fromCharCode-2");
