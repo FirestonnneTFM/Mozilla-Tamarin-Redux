@@ -36,15 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test <global>.isNaN
+include "driver.as"
 
-function libloop() {
+function libloop():Boolean {
     return libloop2(Math.PI);
 }
 
-function libloop2(v) {
+function libloop2(v:Number):Boolean {
     var x = false;
-    for ( var i=0 ; i < 100000 ; i++ )
-	x = isNaN(v);
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        x = isNaN(v);
     return x;
 }
 

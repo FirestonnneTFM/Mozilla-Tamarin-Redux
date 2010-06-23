@@ -38,14 +38,15 @@
 // Test simple 'switch'.  The key is an int and the case values are
 // all distinct ints, all implementations should be able to do well
 // here.
+include "driver.as"
 
-function switchloop() {
+function switchloop():uint {
     return switchloop2(10);
 }
 
-function switchloop2(k) {
-    var i=0;
-    var v=0;
+function switchloop2(k:uint):uint {
+    var i:uint=0;
+    var v:uint=0;
     while (i < 100000) {
         i++;
         switch (k) {
@@ -61,7 +62,7 @@ function switchloop2(k) {
         case 9: v += 55; break;
         case 10: v += 89; break;
         case 11: v += 144; break;
-	}
+        }
     }
     return v;
 }

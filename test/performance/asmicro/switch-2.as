@@ -38,14 +38,15 @@
 // Test simple 'switch'.  The key is an single-char string and the
 // case values are all distinct single-char strings.  The compiler can
 // compile this as a table lookup, if it's clever.
+include "driver.as"
 
-function switchloop() {
+function switchloop():uint {
     return switchloop2("k");
 }
 
-function switchloop2(k) {
-    var i=0;
-    var v=0;
+function switchloop2(k:String):uint {
+    var i:uint=0;
+    var v:uint=0;
     while (i < 100000) {
         i++;
         switch (k) {
@@ -61,7 +62,7 @@ function switchloop2(k) {
         case "j": v += 55; break;
         case "k": v += 89; break;
         case "l": v += 144; break;
-	}
+        }
     }
     return v;
 }

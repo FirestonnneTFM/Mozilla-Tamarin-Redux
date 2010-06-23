@@ -37,20 +37,21 @@
 
 // Test calls to empty function passing forty args to a function that
 // uses 'arguments' but does not actually touch the arguments object
+include "driver.as"
 
-function caller(f) {
-    for ( var i=0 ; i < 10000 ; i++ )
-	f(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-	  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+function caller(f:Function):void {
+    for ( var i:uint=0 ; i < 10000 ; i++ )
+        f(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
 }
 
-function argumentsfun(x) {
+function argumentsfun(x:int):uint {
     if (x > 1)
-	return arguments.length;
+        return arguments.length;
     return 1;
 }
 
-function trampoline() {
+function trampoline():void {
     caller(argumentsfun);
 }
 

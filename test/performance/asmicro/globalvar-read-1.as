@@ -39,12 +39,13 @@
 // Test global read
 // Compare against 'for-1'
 // (only additional work should be global var read and local var write)
+include "driver.as"
 
-var global_var = -1;
+var global_var:int = -1;
 
-function readloop() {
-    var v;
-    for ( var i=0; i < 100000 ; i++ )
+function readloop():int {
+    var v:int;
+    for ( var i:uint=0; i < 100000 ; i++ )
         v = global_var
     return v;
 }

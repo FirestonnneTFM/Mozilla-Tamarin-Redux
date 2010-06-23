@@ -47,6 +47,7 @@
 //
 // The "in" variants are timing lookup via the in operator;
 // and "fetch" via operator[] (yields undefined if key absent).
+include "driver.as"
 
 function fresh_store() {
     return [];
@@ -68,10 +69,10 @@ function populate_sparse(store) {
     return store;
 }
 
-function iterate_lookup(store) {
-    var hits = 0;
-    for (var i = 0; i < 5; i++) {
-        for (var j = 0; j < 100000; j += 50) {
+function iterate_lookup(store):int {
+    var hits:int = 0;
+    for (var i:uint = 0; i < 5; i++) {
+        for (var j:uint = 0; j < 100000; j += 50) {
             if (j in store) {
                 hits += 1;
             }

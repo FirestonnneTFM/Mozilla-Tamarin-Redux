@@ -36,18 +36,19 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test simple 'charCodeAt' loop where the characters are all in the unicode 16-bit range
+include "driver.as"
 
-function loop() {
+function loop():void {
     loop2(String.fromCharCode(200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
-			      210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
-			      220, 221, 222, 223, 224));
+                              210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+                              220, 221, 222, 223, 224));
 }
 
-function loop2(s) {
-    var v;
-    for ( var i=0 ; i < 100000 ; i += 25 )
-	for ( var j=0 ; j < 25 ; j++ )
-	    v = s.charCodeAt(j);
+function loop2(s:String):Number {
+    var v:Number;
+    for ( var i:uint=0 ; i < 100000 ; i += 25 )
+        for ( var j:uint=0 ; j < 25 ; j++ )
+            v = s.charCodeAt(j);
     return v;
 }
 

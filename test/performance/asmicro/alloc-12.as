@@ -36,21 +36,22 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Array allocation: explicit initialization, and not starting at 0
+include "driver.as"
 
-function allocloop() {
-    var v;
-    for ( var i=0 ; i < 100000 ; i++ ) {
-	v = [];
-	v[1] = i;
-	v[2] = 2;
-	v[3] = 3;
-	v[4] = 4;
-	v[5] = 5;
-	v[6] = 6;
-	v[7] = 7;
-	v[8] = 8;
-	v[9] = 9;
-	v[10] = 10;
+function allocloop():uint {
+    var v:Array;
+    for ( var i:uint=0 ; i < 100000 ; i++ ) {
+        v = [];
+        v[1] = i;
+        v[2] = 2;
+        v[3] = 3;
+        v[4] = 4;
+        v[5] = 5;
+        v[6] = 6;
+        v[7] = 7;
+        v[8] = 8;
+        v[9] = 9;
+        v[10] = 10;
     }
     return i;
 }

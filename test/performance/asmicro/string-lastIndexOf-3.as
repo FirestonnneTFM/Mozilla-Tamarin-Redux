@@ -36,15 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "String.prototype.lastIndexOf, finding moderate substring at the beginning of a long string";
+include "driver.as"
 
-function loop() {
+function loop():void {
     loop2("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 }
 
-function loop2(s) {
-    var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = s.indexOf("abcde");
+function loop2(s:String):int {
+    var v:int;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = s.indexOf("abcde");
     return v;
 }
 

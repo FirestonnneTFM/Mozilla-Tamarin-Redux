@@ -39,13 +39,14 @@
 // Test read of closure-bound variable
 // Compare against 'for-1' and 'globalvar-read-1.js'
 // (only additional work should be closure var read and local var write)
+include "driver.as"
 
-function mkreadloop(closed_over_var) {
-    function readloop() {
-        var v;
-        for ( var i=0; i < 100000 ; i++ )
+function mkreadloop(closed_over_var:int):Function {
+    function readloop():int {
+        var v:int;
+        for ( var i:uint=0; i < 100000 ; i++ )
             v = closed_over_var;
-	return v;
+        return v;
     }
     return readloop;
 }

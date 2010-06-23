@@ -36,15 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test Number.prototype.toString
+include "driver.as"
 
-function loop() {
+function loop():String {
     return loop2(3.14159);
 }
 
-function loop2(s) {
+function loop2(s:Number):String {
     var x = "";
-    for ( var i=0 ; i < 100000 ; i++ )
-	x = "" + s;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        x = "" + s;
     return x;
 }
 

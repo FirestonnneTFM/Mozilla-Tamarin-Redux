@@ -37,15 +37,18 @@
 
 // Test simple object allocation: basic function constructor building
 // objects with one integer property.
+include "driver.as"
 
-function C(x) {
+function Corig(x:uint):void {
     this.x = x;
 }
 
-function allocloop() {
+var C:Function = Corig;
+
+function allocloop():uint {
     var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = new C(i);
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = new C(i);
     return i;
 }
 

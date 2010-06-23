@@ -36,11 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "Array allocation, one int property by initializer";
+include "driver.as"
 
-function allocloop() {
+function allocloop():uint {
     var v;
-    for ( var i=0 ; i < 100000 ; i++ )
-	v = [i];
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        v = [i];
     return i;
 }
 

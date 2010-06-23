@@ -37,25 +37,26 @@
 
 // Test simple loop that sets up handler, calls a function that sets up another
 // handler and returns past a 'finally'
+include "driver.as"
 
-var glob;
+var glob:uint;
 
-function f(i) {
+function f(i:uint):* {
     try {
-	return null;
+        return null;
     }
     finally {
-	glob = i;
+        glob = i;
     }
 }
 
-function tryloop() {
-    for ( var i=0 ; i < 100000 ; i++ ) {
-	try {
-	    f(i);
-	}
-	catch (e) {
-	}
+function tryloop():uint {
+    for ( var i:uint=0 ; i < 100000 ; i++ ) {
+        try {
+            f(i);
+        }
+        catch (e:*) {
+        }
     }
     return i;
 }

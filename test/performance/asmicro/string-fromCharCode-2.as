@@ -36,10 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 
 var DESC = "String.fromCharCode, one non-8-bit value";
+include "driver.as"
 
-function loop() {
-    for ( var i=0 ; i < 100000 ; i++ )
-	String.fromCharCode(1037);
+function loop():uint {
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        String.fromCharCode(1037);
     return i;
 }
 

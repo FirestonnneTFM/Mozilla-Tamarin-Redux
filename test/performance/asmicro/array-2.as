@@ -37,16 +37,17 @@
 
 // Test sequential writing of an Array with non-pointer data
 // Observe that if int arithmetic/looping are slow then they may mask array access/update time
+include "driver.as"
 
-var A = new Array();
-for ( var i=0 ; i < 100 ; i++ )
+var A:Array = new Array();
+for ( var i:uint=0 ; i < 100 ; i++ )
     A[i] = true;
 
-function writeloop() {
-    var a = A;
-    for ( var i=0 ; i < 1000 ; i++ )
-	for ( var j=0 ; j < 100 ; j++ )
-	    a[j] = i;
+function writeloop():uint {
+    var a:Array = A;
+    for ( var i:uint=0 ; i < 1000 ; i++ )
+        for ( var j:uint=0 ; j < 100 ; j++ )
+            a[j] = i;
     return i;
 }
 

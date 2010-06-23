@@ -39,12 +39,13 @@
 // Test global write
 // Compare against 'for-1' and 'globalvar-read-1'
 // (only additional work should be global var write and local var read)
+include "driver.as"
 
-var global_var = 1;
+var global_var:int = 1;
 
-function writeloop() {
-    var v = 2;
-    for ( var i=0; i < 100000 ; i++ )
+function writeloop():int {
+    var v:int = 2;
+    for ( var i:uint=0; i < 100000 ; i++ )
         global_var = v;
     return i;
 }

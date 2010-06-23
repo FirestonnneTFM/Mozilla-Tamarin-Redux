@@ -36,15 +36,16 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test <global>.parseInt
+include "driver.as"
 
-function libloop() {
+function libloop():int {
     return libloop2("37");
 }
 
-function libloop2(s) {
-    var sum = 0;
-    for ( var i=0 ; i < 100000 ; i++ )
-	sum += parseInt(s);
+function libloop2(s:String):int {
+    var sum:int = 0;
+    for ( var i:uint=0 ; i < 100000 ; i++ )
+        sum += parseInt(s);
     return sum;
 }
 

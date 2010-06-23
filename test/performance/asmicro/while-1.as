@@ -37,9 +37,10 @@
 
 // Test simple 'while' loop
 // It is highly appropriate to compare this to 'for-1' and 'do-1'.
+include "driver.as"
 
-function whileloop() {
-    var i=0;
+function whileloop():uint {
+    var i:uint=0;
     while (i < 100000)
         i++;
     return i;

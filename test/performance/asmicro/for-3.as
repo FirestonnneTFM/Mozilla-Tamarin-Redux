@@ -38,10 +38,11 @@
 // Test simple 'for' loop with floats.  Note the iterator, the bound,
 // and the update value are all Number.  Compare this to 'for-2',
 // where there is mixed arithmetic.
+include "driver.as"
 
-function forloop() {
-    for ( var i=0.5 ; i < 50000.5 ; i+=0.5 )
-	;
+function forloop():Number {
+    for ( var i:Number=0.5 ; i < 50000.5 ; i+=0.5 )
+        ;
     return i;
 }
 

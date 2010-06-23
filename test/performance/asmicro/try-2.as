@@ -36,18 +36,19 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Test simple loop that sets up handler, calls a function that throws
+include "driver.as"
 
-function f() {
+function f():void {
     throw null;
 }
 
-function tryloop() {
-    for ( var i=0 ; i < 100000 ; i++ ) {
-	try {
-	    f();
-	}
-	catch (e) {
-	}
+function tryloop():uint {
+    for ( var i:uint=0 ; i < 100000 ; i++ ) {
+        try {
+            f();
+        }
+        catch (e:*) {
+        }
     }
     return i;
 }
