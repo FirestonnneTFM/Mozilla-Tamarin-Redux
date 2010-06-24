@@ -3322,7 +3322,18 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internInt(int value)
     {
-        return internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
+        // todo, bug 561092: avoid string buffer conversion by
+        // calculating hashcode from int value directly.
+        //
+        // below: manual inlining and specialization of
+        // MathUtils::convertIntegerToStringBase10.
+        char buffer[MathUtils::kMinSizeForInt32_t_base10_toString];
+        int32_t len = MathUtils::kMinSizeForInt32_t_base10_toString;
+        intptr_t wideVal = (intptr_t)value;
+        MathUtils::UnsignedTreatment treatAs = MathUtils::kTreatAsSigned;
+        char *p = MathUtils::convertIntegerToStringBuffer(wideVal, buffer,
+                                                          len, 10, treatAs);
+        return internStringLatin1( p, len );
     }
 
     Stringp AvmCore::internUint32 (uint32_t ui)
