@@ -51,6 +51,7 @@ virtual void prologue();
 virtual void epilogue();
 private:
 static const char* ST_names[];
+static const bool ST_explicits[];
 void test0();
 
 private:
@@ -60,9 +61,10 @@ private:
 
 };
 ST_avmplus_peephole::ST_avmplus_peephole(AvmCore* core)
-    : Selftest(core, "avmplus", "peephole", ST_avmplus_peephole::ST_names)
+    : Selftest(core, "avmplus", "peephole", ST_avmplus_peephole::ST_names,ST_avmplus_peephole::ST_explicits)
 {}
 const char* ST_avmplus_peephole::ST_names[] = {"get2locals", NULL };
+const bool ST_avmplus_peephole::ST_explicits[] = {false, false };
 void ST_avmplus_peephole::run(int n) {
 switch(n) {
 case 0: test0(); return;

@@ -70,7 +70,7 @@
  *   methods   ::= SOL "%%methods" EOL text
  *   prologue  ::= SOL "%%prologue" EOL text
  *   epilogue  ::= SOL "%%epilogue" EOL text
- *   test      ::= SOL "%%test" ident EOL (text | verify)*
+ *   test      ::= SOL ( "%%test" | %%explicit ) ident EOL (text | verify)*
  *   verify    ::= SOL "%%verify" expr EOL
  *   expr      ::= text but not newline
  *   text      ::= arbitrary text not containing "%%" at SOL
@@ -120,12 +120,14 @@
  *   They are typically used to initialize instance data (declared by
  *   %%decls).
  *
- *   Each %%test is enclosed in an anonymous method of the generated
- *   class.  Each %%verify that appears in the test will test its
- *   condition, and if it does not hold that test function will be
- *   aborted and the error recorded.  Subsequent %%verify statements
- *   in that test will not be executed; however, subsequent tests in
- *   the same selftest spec will be executed.
+ *   Each %%test or %%explicit is enclosed in an anonymous method of
+ *   the generated class.  They have the same meaning but if
+ *   %%explicit is used then the test must be selected explicitly by
+ *   component, category, and test.  Each %%verify that appears in the
+ *   test will test its condition, and if it does not hold that test
+ *   function will be aborted and the error recorded.  Subsequent
+ *   %%verify statements in that test will not be executed; however,
+ *   subsequent tests in the same selftest spec will be executed.
  *
  *   Comment lines preceding directives are copied verbatim to the output.
  */
@@ -215,12 +217,13 @@ package selftest
                     throw "Epilogue already defined";
                 st.epilogue = text();
             }
-            else if (res = /^\s*%%test\s+([a-zA-Z_][a-zA-Z0-9_]+)\s*$/.exec(line)) {
+            else if (res = /^\s*(%%test|%%explicit)\s+([a-zA-Z_][a-zA-Z0-9_]+)\s*$/.exec(line)) {
                 state = 3;
                 var loc = i;
                 var t = [];
                 var vs = 0;
-                var name = res[1];
+                var name = res[2];
+                var explicit = res[1] == "%%explicit";
                 while (i < l) {
                     pushMultiple(t, text());
                     if (i == l)
@@ -236,7 +239,7 @@ package selftest
                 }
                 if (vs == 0)
                     throw "No %%verify statements for test on line " + loc;
-                st.tests.push([name, t]);
+                st.tests.push([name, explicit, t]);
             }
             else if (line.match(/^\s*\/\//)) {
                 if (state < 0)
@@ -311,17 +314,21 @@ package selftest
             s.push("virtual void epilogue();");
         s.push("private:");
         s.push("static const char* ST_names[];");
+        s.push("static const bool ST_explicits[];");
         for ( var i=0 ; i < st.tests.length ; i++ )
             s.push("void test" + i + "();");
         pushMultiple(s, st.decls);
         s.push("};");
 
         s.push(classname + "::" + classname + "(AvmCore* core)");
-        s.push("    : Selftest(core, \"" + st.component + "\", \"" + st.category + "\", " + classname + "::ST_names)");
+        s.push("    : Selftest(core, \"" + st.component + "\", \"" + st.category + "\", " + classname + "::ST_names," + classname + "::ST_explicits)");
         s.push("{}");
 
         s.push("const char* " + classname + "::ST_names[] = {" +
                st.tests.map(function (t) { return '"' + t[0] + '"' }).join(",") + ", NULL };");
+
+        s.push("const bool " + classname + "::ST_explicits[] = {" +
+               st.tests.map(function (t) { return t[1] }).join(",") + ", false };");
 
         s.push("void " + classname + "::run(int n) {");
         s.push("switch(n) {");
@@ -348,7 +355,7 @@ package selftest
 
         for ( var i=0 ; i < st.tests.length ; i++ ) {
             s.push("void " + classname + "::test" + i + "() {");
-            pushMultiple(s, st.tests[i][1]);
+            pushMultiple(s, st.tests[i][2]);
             s.push("}");
         }
 

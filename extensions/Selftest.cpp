@@ -113,21 +113,25 @@ namespace avmplus
                         test_name = t->names[n];
                         if (test_name == NULL)
                             break;
+                        bool isExplicit = t->explicits[n];
                         if (name_glob == NULL || match(name_glob, test_name))
                         {
-                            TRY(core, kCatchAction_Ignore)
+                            if (!isExplicit || (component_glob != NULL && category_glob != NULL && name_glob != NULL))
                             {
-                                logTest();
-                                t->run(n);
-                                logPass();
+                                TRY(core, kCatchAction_Ignore)
+                                {
+                                    logTest();
+                                    t->run(n);
+                                    logPass();
+                                }
+                                CATCH (Exception* e)
+                                {
+                                    if (e->atom != token)
+                                        logException();
+                                }
+                                END_CATCH
+                                END_TRY
                             }
-                            CATCH (Exception* e)
-                            {
-                                if (e->atom != token)
-                                    logException();
-                            }
-                            END_CATCH
-                            END_TRY
                         }
                     }
                     t->epilogue();
@@ -200,11 +204,12 @@ namespace avmplus
         return *glob == '*' || *glob == *s;
     }
 
-    Selftest::Selftest(AvmCore* core, const char* component, const char* category, const char** names)
+    Selftest::Selftest(AvmCore* core, const char* component, const char* category, const char** names, const bool* explicits)
         : core(core)
         , component(component)
         , category(category)
         , names(names)
+        , explicits(explicits)
         , next(NULL)
     {
         selftestRunner->join(this);
