@@ -122,7 +122,7 @@ namespace avmplus
         friend class SelftestRunner;
 
     public:
-        Selftest(AvmCore* core, const char* component, const char* category, const char** names);
+        Selftest(AvmCore* core, const char* component, const char* category, const char** names, const bool* explicits);
         virtual ~Selftest();
 
         virtual void prologue();
@@ -136,6 +136,7 @@ namespace avmplus
         const char*  component;   // component, eg 'avmplus' or 'player'
         const char*  category;    // category, eg 'peephole' or 'jit'
         const char** names;       // test names
+        const bool*  explicits;   // explicitness flags
 
     private:
         Selftest*    next;        // next test in a list owned by the SelftestRunner

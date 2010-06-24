@@ -57,15 +57,17 @@ virtual void prologue();
 virtual void epilogue();
 private:
 static const char* ST_names[];
+static const bool ST_explicits[];
 void test0();
 private:
     MMgc::GC *gc;
 
 };
 ST_mmgc_bugzilla_543560::ST_mmgc_bugzilla_543560(AvmCore* core)
-    : Selftest(core, "mmgc", "bugzilla_543560", ST_mmgc_bugzilla_543560::ST_names)
+    : Selftest(core, "mmgc", "bugzilla_543560", ST_mmgc_bugzilla_543560::ST_names,ST_mmgc_bugzilla_543560::ST_explicits)
 {}
 const char* ST_mmgc_bugzilla_543560::ST_names[] = {"bugzilla_543560", NULL };
+const bool ST_mmgc_bugzilla_543560::ST_explicits[] = {false, false };
 void ST_mmgc_bugzilla_543560::run(int n) {
 switch(n) {
 case 0: test0(); return;

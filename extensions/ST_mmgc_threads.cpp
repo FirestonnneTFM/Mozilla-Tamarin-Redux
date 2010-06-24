@@ -51,6 +51,7 @@ virtual void prologue();
 virtual void epilogue();
 private:
 static const char* ST_names[];
+static const bool ST_explicits[];
 void test0();
 
 private:
@@ -126,9 +127,10 @@ private:
 
 };
 ST_mmgc_threads::ST_mmgc_threads(AvmCore* core)
-    : Selftest(core, "mmgc", "threads", ST_mmgc_threads::ST_names)
+    : Selftest(core, "mmgc", "threads", ST_mmgc_threads::ST_names,ST_mmgc_threads::ST_explicits)
 {}
 const char* ST_mmgc_threads::ST_names[] = {"mmgc_gc_root_thread", NULL };
+const bool ST_mmgc_threads::ST_explicits[] = {false, false };
 void ST_mmgc_threads::run(int n) {
 switch(n) {
 case 0: test0(); return;

@@ -47,13 +47,15 @@ ST_mmgc_gcheap(AvmCore* core);
 virtual void run(int n);
 private:
 static const char* ST_names[];
+static const bool ST_explicits[];
 void test0();
 void test1();
 };
 ST_mmgc_gcheap::ST_mmgc_gcheap(AvmCore* core)
-    : Selftest(core, "mmgc", "gcheap", ST_mmgc_gcheap::ST_names)
+    : Selftest(core, "mmgc", "gcheap", ST_mmgc_gcheap::ST_names,ST_mmgc_gcheap::ST_explicits)
 {}
 const char* ST_mmgc_gcheap::ST_names[] = {"largeAlloc","largeAllocAlignment", NULL };
+const bool ST_mmgc_gcheap::ST_explicits[] = {false,false, false };
 void ST_mmgc_gcheap::run(int n) {
 switch(n) {
 case 0: test0(); return;

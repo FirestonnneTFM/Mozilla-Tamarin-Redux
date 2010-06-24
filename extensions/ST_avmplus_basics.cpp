@@ -48,6 +48,7 @@ ST_avmplus_basics(AvmCore* core);
 virtual void run(int n);
 private:
 static const char* ST_names[];
+static const bool ST_explicits[];
 void test0();
 void test1();
 void test2();
@@ -58,9 +59,10 @@ void test6();
 void test7();
 };
 ST_avmplus_basics::ST_avmplus_basics(AvmCore* core)
-    : Selftest(core, "avmplus", "basics", ST_avmplus_basics::ST_names)
+    : Selftest(core, "avmplus", "basics", ST_avmplus_basics::ST_names,ST_avmplus_basics::ST_explicits)
 {}
 const char* ST_avmplus_basics::ST_names[] = {"unsigned_int","signed_int","equalsLatin1","containsLatin1","indexOfLatin1","matchesLatin1","matchesLatin1_caseless","bug562101", NULL };
+const bool ST_avmplus_basics::ST_explicits[] = {false,false,false,false,false,false,false,false, false };
 void ST_avmplus_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;

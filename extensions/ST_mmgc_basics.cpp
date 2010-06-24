@@ -50,6 +50,7 @@ virtual void prologue();
 virtual void epilogue();
 private:
 static const char* ST_names[];
+static const bool ST_explicits[];
 void test0();
 void test1();
 void test2();
@@ -73,9 +74,10 @@ private:
 
 };
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
-    : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names)
+    : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names,ST_mmgc_basics::ST_explicits)
 {}
 const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcheapAlign","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete","nestedGCs","collectDormantGC","regression_551169", NULL };
+const bool ST_mmgc_basics::ST_explicits[] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false, false };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;

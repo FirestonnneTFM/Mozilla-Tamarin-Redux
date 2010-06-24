@@ -76,15 +76,17 @@ virtual void prologue();
 virtual void epilogue();
 private:
 static const char* ST_names[];
+static const bool ST_explicits[];
 void test0();
 private:
     MMgc::GC *gc;
 
 };
 ST_mmgc_dependent::ST_mmgc_dependent(AvmCore* core)
-    : Selftest(core, "mmgc", "dependent", ST_mmgc_dependent::ST_names)
+    : Selftest(core, "mmgc", "dependent", ST_mmgc_dependent::ST_names,ST_mmgc_dependent::ST_explicits)
 {}
 const char* ST_mmgc_dependent::ST_names[] = {"dependent_alloc", NULL };
+const bool ST_mmgc_dependent::ST_explicits[] = {false, false };
 void ST_mmgc_dependent::run(int n) {
 switch(n) {
 case 0: test0(); return;
