@@ -35,7 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test sequential writing of an Array with non-pointer data
+var DESC = "Sequential writing of array with non-pointer data";
+
 // Observe that if int arithmetic/looping are slow then they may mask array access/update time
 
 var A = new Array();

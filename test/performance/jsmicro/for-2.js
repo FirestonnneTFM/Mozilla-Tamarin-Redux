@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'for' loop with floats.  Note the iterator is a Number but
-// the bound is an integer value.
+var DESC = "'for' loop over Number values with int bound, update";
+
 // It is highly appropriate to compare this to 'while-1' and 'do-1'.
 
 function forloop() {

@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'do' loop
-// It is highly appropriate to compare this to 'for-1' and 'while-1'.
+var DESC = "'do' loop, comparable to 'for-1' and 'while-1'";
 
 function doloop() {
     var i=0;

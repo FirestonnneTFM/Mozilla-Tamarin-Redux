@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test <global>.parseInt
+var DESC = "<global>.parseInt on '37'";
 include "driver.as"
 
 function libloop():int {

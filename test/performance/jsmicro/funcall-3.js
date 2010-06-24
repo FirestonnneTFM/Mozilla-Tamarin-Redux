@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test calls to empty function taking seven args, passing three
+var DESC = "Empty function call with three args to function expecting seven";
 
 function caller(f) {
     for ( var i=0 ; i < 100000 ; i++ )

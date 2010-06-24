@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'charAt' loop where the characters are all in the unicode 16-bit range
+var DESC = "String.prototype.charAt, characters are all outside the 8-bit range";
 include "driver.as"
 
 function loop():void {

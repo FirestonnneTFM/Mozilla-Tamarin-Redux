@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test int.prototype.toString, probably
+var DESC = "<type>.prototype.toString on 37";
 include "driver.as"
 
 function loop():String {

@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'charCodeAt' loop where the characters are all ASCII
+var DESC = "String.prototype.charCodeAt, characters are all ASCII";
 include "driver.as"
 
 function loop():void {

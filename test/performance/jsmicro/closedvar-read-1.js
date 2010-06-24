@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test read of closure-bound variable
+var DESC = "Reads of closure-bound free variable";
+
 // Compare against 'for-1' and 'globalvar-read-1.js'
 // (only additional work should be closure var read and local var write)
 

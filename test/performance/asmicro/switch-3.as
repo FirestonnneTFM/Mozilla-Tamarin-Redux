@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test 'switch'.  The key is an string value and the keys are all
-// variable-length strings.
+var DESC = "Switch on string value, var-length string keys";
 include "driver.as"
 
 function switchloop():uint {

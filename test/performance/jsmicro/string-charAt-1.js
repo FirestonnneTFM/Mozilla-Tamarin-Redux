@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'charAt' loop where the characters are all ASCII
+var DESC = "String.prototype.charAt, characters are all ASCII";
 
 function loop() {
     loop2("abcdefghijklmnopqrstuvwxyz");

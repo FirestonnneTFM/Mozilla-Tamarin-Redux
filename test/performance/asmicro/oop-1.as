@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Object-oriented programming
+var DESC = "Object-oriented programming using prototype methods";
 include "driver.as"
 
 function makePrototype(proto, methods) {

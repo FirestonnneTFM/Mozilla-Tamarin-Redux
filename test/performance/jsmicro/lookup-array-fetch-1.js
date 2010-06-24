@@ -37,6 +37,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var DESC = "Check index prop present in array via operator[], compare to 'in'";
+
 // Bugzilla 555982
 // Keep all of following in sync:
 // lookup-object-fetch-1.as, lookup-object-in-1.as,

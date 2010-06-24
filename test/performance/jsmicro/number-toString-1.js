@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test Number.prototype.toString
+var DESC = "<type>.prototype.toString on 3.14159";
 
 function loop() {
     return loop2(3.14159);

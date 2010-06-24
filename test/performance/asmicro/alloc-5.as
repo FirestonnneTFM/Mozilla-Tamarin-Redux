@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple array allocation: array with ten integer properties
+var DESC = "Array allocation, ten int properties by initializer";
 include "driver.as"
 
 function allocloop():uint {

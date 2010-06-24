@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Closure creation: deep.
+var DESC = "Closure creation, deep environment and many free variables";
 include "driver.as"
 
 var g = function ():int { return 1; }

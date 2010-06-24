@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Simple closure creation: one free variable
+var DESC = "Closure creation, one free variable";
 include "driver.as"
 
 function allocloop():uint {

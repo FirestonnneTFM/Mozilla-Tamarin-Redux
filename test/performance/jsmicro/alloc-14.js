@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple string allocation: accumulate a number of long
-// strings.
+var DESC = "String allocation, accumulating long strings (~25000 chars)";
 
 function allocloop() {
     var s;

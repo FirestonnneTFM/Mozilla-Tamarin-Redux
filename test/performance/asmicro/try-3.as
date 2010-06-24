@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple loop that sets up handler, calls a function that sets up another
-// handler and returns past a 'finally'
+var DESC = "'try-catch-finally', return past 'finally'";
 include "driver.as"
 
 var glob:uint;

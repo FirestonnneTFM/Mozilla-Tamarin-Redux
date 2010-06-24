@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple loop that sets up handler, calls a function that does not throw
+var DESC = "'try-catch', no exceptions thrown";
 
 function f() {
 }

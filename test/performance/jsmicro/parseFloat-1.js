@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test <global>.parseFloat
+var DESC = "<global>.parseFloat on '3.14159'";
 
 function libloop() {
     return libloop2("3.14159");
