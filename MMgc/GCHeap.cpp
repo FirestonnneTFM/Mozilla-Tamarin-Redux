@@ -150,6 +150,17 @@ namespace MMgc
             heapSoftLimit = VMPI_strtol(envValue, 0, 10);
     }
 
+    /* static */
+    void GCHeap::ResetStatics()
+    {
+        instance = NULL;
+#ifdef MMGC_MEMORY_PROFILER
+        if(profiler && IsProfilerInitialized())
+            delete profiler;
+        profiler = (MemoryProfiler*)-1;
+#endif
+    }
+
     void GCHeap::Init(const GCHeapConfig& config)
     {
         GCAssert(instance == NULL);
@@ -162,7 +173,6 @@ namespace MMgc
         EnterLock();
         GCAssert(instance != NULL);
         instance->DestroyInstance();
-        instance = NULL;
         EnterRelease();
         return leakedBytes;
     }
@@ -202,6 +212,9 @@ namespace MMgc
     {
         VMPI_lockInit(&m_spinlock);
         VMPI_lockInit(&gclog_spinlock);
+
+        // ResetStatics should be called at the start here before using/initializing any statics
+        ResetStatics();
 
         // Initialize free lists
         HeapBlock *block = freelists;
@@ -259,8 +272,6 @@ namespace MMgc
         fixedMalloc.DestroyInstance();
         GCAssertMsg(leakedBytes == 0 || GetStatus() == kMemAbort, "Leaks!");
 
-        instance = NULL;
-
         size_t internalNum = AddrToBlock(blocks)->size + numRegionBlocks;
 
         // numAlloc should just be the size of the HeapBlock's space
@@ -288,17 +299,15 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_PROFILER
         hooksEnabled = false;
-        if(profiler)
-            delete profiler;
 
         if(hasSpy)
             VMPI_spyTeardown();
-        profiler = (MemoryProfiler *)-1;
 #endif
 
         FreeAll();
+        ResetStatics();
 
-        // Acquire all the locks before destroying them to make reasonably 
+        // Acquire all the locks before destroying them to make reasonably
         // sure we're the last consumers.  This is probably not exactly
         // right, see https://bugzilla.mozilla.org/show_bug.cgi?id=548347
         // and linked bugs for a discussion.  Note we can't acquire these
@@ -2345,7 +2354,6 @@ namespace MMgc
 
         // last one out of the pool pulls the plug
         if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent && preventDestruct == 0) {
-            GCHeap::instance = NULL;
             DestroyInstance();
         }
         EnterRelease();

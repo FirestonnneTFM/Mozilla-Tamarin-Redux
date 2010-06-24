@@ -734,6 +734,12 @@ namespace MMgc
         GCHeap(const GCHeapConfig &config);
         void DestroyInstance();
 
+        /** Resets the GCHeap statics. This is called from both GCHeap::GCHeap() and GCHeap::DestroyInstance()
+            It sould be called at the start and end of GCHeap's lifetime. It avoids any mismatch in the static
+            variable initial values
+         */
+        static void ResetStatics();
+
 #ifdef MMGC_MEMORY_PROFILER
         static void InitProfiler();
         inline static bool IsProfilerInitialized()
