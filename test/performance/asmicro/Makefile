@@ -90,6 +90,10 @@ TARGETS=alloc-1.abc \
 	oop-1.abc \
 	parseFloat-1.abc \
 	parseInt-1.abc \
+	restarg-1.abc \
+	restarg-2.abc \
+	restarg-3.abc \
+	restarg-4.abc \
 	string-casechange-1.abc \
 	string-casechange-2.abc \
 	string-charAt-1.abc \
