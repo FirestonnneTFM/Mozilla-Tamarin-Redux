@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test calls to empty function taking no args
+var DESC = "Empty function call with no args";
 include "driver.as"
 
 function caller(f:Function):void {

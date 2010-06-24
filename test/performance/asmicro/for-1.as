@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'for' loop
-// It is highly appropriate to compare this to 'while-1' and 'do-1'.
+var DESC = "'for' loop, comparable to 'do-1' and 'while-1'";
 include "driver.as"
 
 function forloop():uint {

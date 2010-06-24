@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Array allocation: explicit initialization
+var DESC = "Array allocation, ten int properties, but by assignment not initializer";
 
 function allocloop() {
     var v;

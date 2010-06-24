@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test not-so-simple 'for-in' loop - every other element is defined
+var DESC = "'for-in' loop but only every other element defined";
 
 var A = new Array();
 for ( var i=0 ; i < 200 ; i += 2 )

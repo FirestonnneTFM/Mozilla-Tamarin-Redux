@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'charAt' loop where the characters are all in the unicode 16-bit range
+var DESC = "String.prototype.charAt, characters are all outside the 8-bit range";
 
 function loop() {
     loop2(String.fromCharCode(200, 201, 202, 203, 204, 205, 206, 207, 208, 209,

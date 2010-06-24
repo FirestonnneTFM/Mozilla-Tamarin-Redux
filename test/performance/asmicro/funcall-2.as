@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test calls to empty function taking three args
+var DESC = "Empty function call with three args";
 include "driver.as"
 
 function caller(f):void {

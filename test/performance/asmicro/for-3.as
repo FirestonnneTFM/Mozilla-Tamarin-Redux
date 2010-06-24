@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'for' loop with floats.  Note the iterator, the bound,
-// and the update value are all Number.  Compare this to 'for-2',
-// where there is mixed arithmetic.
+var DESC = "'for' loop over Number values with Number bound, update";
+
+// Compare this to 'for-2', where there is mixed arithmetic.
 include "driver.as"
 
 function forloop():Number {

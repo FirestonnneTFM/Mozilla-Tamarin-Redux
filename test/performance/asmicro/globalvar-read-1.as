@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test global read
+var DESC = "Reads of globally-bound free variable";
+
 // Compare against 'for-1'
 // (only additional work should be global var read and local var write)
 include "driver.as"

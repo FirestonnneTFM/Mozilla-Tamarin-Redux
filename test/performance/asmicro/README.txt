@@ -35,14 +35,25 @@ NOTE that the default compilation mode when run with runtests.py is
 the AS3:: counterparts then compiler switch overrides must be
 provided.
 
-(FIXME: the next paragraph needs to be cleaned up, the xref is
-probably not appropriate, it'll be easier if the suite stands on its
-own.)
+To see brief descriptions of the benchmarks, evaluate this:
 
-See ../jsmicro/README.txt for information about the base test set.
+  grep DESC *.as | sed -e 's/:[^"]*\"/ --- /g' -e 's/"[^"]*$//g'
 
-Brief description of benchmarks not present in jsmicro:
-[no such benchmarks yet!]
+or maybe even this:
+
+  grep DESC *.as | \
+    sed -e 's/:[^"]*\"/---/g' -e 's/"[^"]*$//g' | \
+    awk -F--- \
+      'BEGIN { max=0; k=0 } 
+             { if (length($1) > max) max=length($1); f[k]=$1; d[k]=$2; k++ }
+       END   { for ( i=0 ; i < k ; i++ ) 
+                   print(sprintf("%-" (max+4) "s%s", f[i], d[i]))
+             }'
+
+To print all benchmarks missing a DESC definition (or confirm that
+they all have one), evaluate this:
+
+  for f in *-[0-9].as ; do if ! grep -q DESC $f; then echo $f; fi; done
 
 
 /* ***** BEGIN LICENSE BLOCK *****

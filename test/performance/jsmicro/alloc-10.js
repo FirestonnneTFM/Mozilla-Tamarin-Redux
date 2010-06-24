@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Closure creation: deep.
+var DESC = "Closure creation, deep environment and many free variables";
 
 var g = function () { return 1; }
 

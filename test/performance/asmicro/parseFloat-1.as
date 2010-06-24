@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test <global>.parseFloat
+var DESC = "<global>.parseFloat on '3.14159'";
 include "driver.as"
 
 function libloop():Number {

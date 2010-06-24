@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'switch'.  The key is an int and the case values are
-// all distinct ints, all implementations should be able to do well
-// here.
+var DESC = "Switch on int value, keys";
+
+// All implementations should be able to do well here.
 
 function switchloop() {
     return switchloop2(10);

@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple object allocation: basic function constructor building
-// objects with one integer property.
+var DESC = "JS-style constructor function, one int property";
 include "driver.as"
 
 function Corig(x:uint):void {

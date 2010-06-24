@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'for-in' loop
+var DESC = "'for-in' loop over dense array";
 
 // It is probably not appropriate to compare this to 'for-1', but a good implementation
 // might approach that level of performance, so why not...

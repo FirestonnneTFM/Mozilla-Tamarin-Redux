@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test calls to empty function passing forty args to a function that
-// uses 'arguments' but does not actually touch the arguments object
+var DESC = "Call with many arguments to a function referencing, but not touching, 'arguments'";
 
 function caller(f) {
     for ( var i=0 ; i < 10000 ; i++ )

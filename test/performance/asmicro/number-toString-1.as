@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test Number.prototype.toString
+var DESC = "<type>.prototype.toString on 3.14159";
 include "driver.as"
 
 function loop():String {

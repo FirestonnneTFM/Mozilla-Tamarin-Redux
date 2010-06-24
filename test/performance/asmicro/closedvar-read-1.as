@@ -36,8 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test read of closure-bound variable
-// Compare against 'for-1' and 'globalvar-read-1.js'
+var DESC = "Reads of closure-bound free variable";
+// Compare against 'for-1' and 'globalvar-read-1.as'
 // (only additional work should be closure var read and local var write)
 include "driver.as"
 

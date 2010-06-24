@@ -35,7 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test sequential reading of an Array
+var DESC = "Sequential reading of array";
+
 // Observe that if int arithmetic/looping are slow then they may mask array access time
 include "driver.as"
 

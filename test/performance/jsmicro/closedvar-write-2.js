@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test global write
+var DESC = "Writes of closure-bound free variable, without much hope for analysis";
+
 // Compare against 'closedvar-write-1'
 // (only additional work should be closed var write and local var read)
 

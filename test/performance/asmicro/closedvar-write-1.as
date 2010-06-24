@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test global write
+var DESC = "Writes of closure-bound free variable, opportunity for local escape analysis";
+
 // Compare against 'globalvar-read-1' and 'closedvar-write-2'
 // (only additional work should be closed var write and local var read)
 include "driver.as"

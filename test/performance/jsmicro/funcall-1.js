@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test calls to empty function taking no args
+var DESC = "Empty function call with no args";
 
 function caller(f) {
     for ( var i=0 ; i < 100000 ; i++ )

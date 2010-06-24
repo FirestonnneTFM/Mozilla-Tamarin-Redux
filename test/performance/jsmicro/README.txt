@@ -31,87 +31,20 @@ As the AVM+ is incompatible with the ECMAScript spec in corner cases
 drill down) the .js files should avoid tickling those
 incompatibilities.
 
-Brief description of benchmarks (eventually we want to extract these
-from the DESC values of each benchmark but not all benchmarks have
-DESC values yet):
+To see brief descriptions of the benchmarks, evaluate this:
 
-alloc-1.js             Object allocation, one int property
-alloc-2.js             Object allocation, five int properties
-alloc-3.js             Object allocation, four int properties, one self-reference
-alloc-4.js             Array allocation, one int property by initializer
-alloc-5.js             Array allocation, ten int properties by initializer
-alloc-6.js             simple String allocation, accumulating short/medium-length strings (~250 chars)
-alloc-7.js             JS-style constructor function, one int property
-alloc-8.js             Closure creation, no free variables
-alloc-9.js             Closure creation, one free variable
-alloc-10.js            Closure creation, deep environment and many free variables
-alloc-11.js            Array allocation, ten int properties, but by assignment not initializer
-alloc-12.js            Array allocation, ten int properties by assignment, not starting at 0
-alloc-13.js            String allocation, accumulating medium/long-length strings (~2500 chars)
-alloc-14.js            String allocation, accumulating long strings (~25000 chars)
-array-1.js             Sequential reading of array
-array-2.js             Sequential writing of array with non-pointer data
-array-push-1.js        Array.prototype.push single value into array of length 0..9
-array-pop-1.js         Array.prototype.pop from array of length 10..1
-array-shift-1.js       Array.prototype.shift from array of length 10..1
-array-slice-1.js       Array.prototype.slice a subarray of length 8 from an array of length 10
-array-sort-1.js        Array.prototype.sort on arrays of length 10, integer values, default predicate
-array-sort-2.js        Array.prototype.sort on arrays of length 1000, integer values (but may be boxed), default predicate
-array-sort-3.js        Array.prototype.sort on arrays of length 1000, string values, default predicate
-array-sort-4.js        Array.prototype.sort on arrays of length 1000, string values, custom predicate
-array-unshift-1.js     Array.prototype.unshift single value into array of length 0..9
-closedvar-read-1.js    Reads of closure-bound free variable
-closedvar-write-1.js   Writes of closure-bound free variable, opportunity for local escape analysis
-closedvar-write-2.js   Writes of closure-bound free variable, without much hope for analysis
-do-1.js                'do' loop, comparable to 'for-1' and 'while-1'.
-for-1.js               'for' loop, comparable to 'do-1' and 'while-1'
-for-2.js               'for' loop over Number values with int bound, update
-for-3.js               'for' loop over Number values with Number bound, update
-for-in-1.js            'for-in' loop over dense array
-for-in-2.js            'for-in' loop but only every other element defined
-funcall-1.js           Empty function call with no args
-funcall-2.js           Empty function call with three args
-funcall-3.js           Empty function call with three args to function expecting seven
-funcall-4.js           Call with many arguments to a function referencing, but not touching, 'arguments'
-globalvar-read-1.js    Reads of globally-bound free variable
-globalvar-write-1.js   Writes of globally-bound free variable
-isNaN-1.js             <global>.isNaN on Math.PI
-lookup-array-fetch-1.js   Check index prop present in array via operator[]
-lookup-array-in-1.js      Check index prop present in array via operator in
-lookup-object-fetch-1.js  Check index prop present in object via operator[]
-lookup-object-in-1.js     Check index prop present in object via operator in
-number-toString-1.js   <type>.prototype.toString on 3.14159
-number-toString-2.js   <type>.prototype.toString on 37
-oop-1.js               Object-oriented programming using prototype methods
-parseFloat-1.js        <global>.parseFloat on "3.14159"
-parseInt-1.js          <global>.parseInt on "37"
-string-casechange-1.js String.prototype.toUpperCase/toLowerCase on a string of 10 ASCII chars
-string-casechange-2.js String.prototype.toUpperCase/toLowerCase on a string of 9 non-8-bit chars and one ASCII
-string-charAt-1.js     String.prototype.charAt, characters are all ASCII
-string-charAt-2.js     String.prototype.charAt, characters are all outside the 8-bit range
-string-charCodeAt-1.js String.prototype.charCodeAt, characters are all ASCII
-string-charCodeAt-2.js String.prototype.charCodeAt, characters are all outside the 8-bit range
-string-fromCharCode-1.js  String.fromCharCode, one ASCII value
-string-fromCharCode-2.js  String.fromCharCode, one non-8-bit value
-string-fromCharCode-3.js  String.fromCharCode, ten ASCII values (1/10 the iterations)
-string-fromCharCode-4.js  String.fromCharCode, 100 ASCII values (1/100 the iterations)
-string-indexOf-1.js    String.prototype.indexOf, finding character at the start of a string
-string-indexOf-2.js    String.prototype.indexOf, finding character at the end of a long string
-string-indexOf-3.js    String.prototype.indexOf, finding moderate substring at the end of a long string
-string-lastIndexOf-1.js String.prototype.lastIndexOf, finding character at the end of a string
-string-lastIndexOf-2.js String.prototype.lastIndexOf, finding character at the beginning of a long string
-string-lastIndexOf-3.js String.prototype.lastIndexOf, finding moderate substring at the beginning of a long string
-string-slice-1.js      String.prototype.slice a substring of length 8 from an string of length 10
-string-split-1.js      String.prototype.split a string into 10 pieces, single character separator
-string-split-2.js      String.prototype.split a string into 10 pieces, multi-character separator"
-string-substring-1.js  String.prototype.substring a substring of length 8 from an string of length 10
-switch-1.js            Switch on int value, keys
-switch-2.js            Switch on char value, keys
-switch-3.js            Switch on char value, string keys
-try-1.js               'try-catch', no exceptions thrown
-try-2.js               'try-catch', exception thrown
-try-3.js               'try-catch-finally', return past 'finally'
-while-1.js             'while' loop, comparable to 'do-1' and 'for-1'.
+  grep DESC *.js | sed -e 's/:[^"]*\"/ --- /g' -e 's/"[^"]*$//g'
+
+or maybe even this:
+
+  grep DESC *.js | \
+    sed -e 's/:[^"]*\"/---/g' -e 's/"[^"]*$//g' | \
+    awk -F--- \
+      'BEGIN { max=0; k=0 } 
+             { if (length($1) > max) max=length($1); f[k]=$1; d[k]=$2; k++ }
+       END   { for ( i=0 ; i < k ; i++ ) 
+                   print(sprintf("%-" (max+4) "s%s", f[i], d[i]))
+             }'
 
 
 // What we need:

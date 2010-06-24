@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test global write
+var DESC = "Writes of globally-bound free variable";
+
 // Compare against 'for-1' and 'globalvar-read-1'
 // (only additional work should be global var write and local var read)
 include "driver.as"

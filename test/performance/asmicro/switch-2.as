@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple 'switch'.  The key is an single-char string and the
-// case values are all distinct single-char strings.  The compiler can
-// compile this as a table lookup, if it's clever.
+var DESC = "Switch on char value, keys";
+
+// The compiler can compile this as a table lookup, if it's clever.
 include "driver.as"
 
 function switchloop():uint {

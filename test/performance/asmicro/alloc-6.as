@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test simple string allocation: accumulate a number of not-too-long
-// strings.
+var DESC = "simple String allocation, accumulating short/medium-length strings (~250 chars)";
 include "driver.as"
 
 function allocloop():uint {

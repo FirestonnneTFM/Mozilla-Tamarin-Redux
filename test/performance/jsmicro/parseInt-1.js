@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test <global>.parseInt
+var DESC = "<global>.parseInt on '37'";
 
 function libloop() {
     return libloop2("37");

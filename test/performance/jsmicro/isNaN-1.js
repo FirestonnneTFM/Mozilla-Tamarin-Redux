@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Test <global>.isNaN
+var DESC = "<global>.isNaN on Math.PI";
 
 function libloop() {
     return libloop2(Math.PI);
