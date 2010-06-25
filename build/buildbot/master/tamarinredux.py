@@ -167,6 +167,7 @@ class tamarinredux:
                                     "linux-deep",
                                     "linux-arm-deep",
                                     "winmobile-emulator-deep",
+                                    "linux-mips-deep",
                                                                     ],
                     builderDependencies=[
                                   ["linux-deep", "linux-test"],
@@ -179,6 +180,7 @@ class tamarinredux:
                                   ["solaris-sparc-deep", "solaris-sparc-test"], 
                                   ["windows64-deep", "windows64-test"], 
                                   ["winmobile-emulator-deep", "winmobile-emulator-test"],
+                                  ["linux-mips-deep", "linux-mips-test"],
                                  ])
 
 
@@ -375,7 +377,7 @@ class tamarinredux:
 
     mac_ppc_104b_compile_builder = {
                 'name': "mac-ppc-10.4b-compile",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': mac_ppc_104b_compile_factory,
                 'builddir': './mac-ppc-10_4b-compile',
     }
@@ -895,7 +897,7 @@ class tamarinredux:
 
     mac_ppc_104b_smoke_builder = {
                 'name': "mac-ppc-10.4b-smoke",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': mac_ppc_104b_smoke_factory,
                 'builddir': './mac-ppc-10_4b-smoke',
     }
@@ -1286,7 +1288,7 @@ class tamarinredux:
 
     mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': mac_ppc_104b_test_factory,
                 'builddir': './mac-ppc-10_4b-test',
     }
@@ -2083,6 +2085,28 @@ class tamarinredux:
                 'factory': linux_arm_deep_factory,
                 'builddir': './linux-arm-deep',
     }
+
+
+    #######################################
+    #### builder for linux-mips-deep   ####
+    #######################################
+    linux_mips_deep_factory = factory.BuildFactory()
+    linux_mips_deep_factory.addStep(sync_clean)
+    linux_mips_deep_factory.addStep(sync_clone(url=HG_URL))
+    linux_mips_deep_factory.addStep(sync_update)
+    linux_mips_deep_factory.addStep(bb_slaveupdate(slave="linux-mips-deep"))
+    linux_mips_deep_factory.addStep(download_testmedia)
+    linux_mips_deep_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs="--threads=1"))
+    linux_mips_deep_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs="--threads=1"))
+    linux_mips_deep_factory.addStep(util_process_clean)
+    linux_mips_deep_factory.addStep(util_clean_buildsdir)
+
+    linux_mips_deep_builder = {
+                'name': "linux-mips-deep",
+                'slavename': "asteamlin1-mips-deep",
+                'factory': linux_mips_deep_factory,
+                'builddir': './linux-mips-deep',
+    }
     
     builders = [
                 windows_compile_builder,
@@ -2162,6 +2186,7 @@ class tamarinredux:
                 winmobile_emulator_deep_builder,
                 linux_deep_builder,
                 linux_arm_deep_builder,
+                linux_mips_deep_builder,
                 windows_frr_builder
                 ]
 

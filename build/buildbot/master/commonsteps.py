@@ -106,6 +106,18 @@ def test_generic(name, shellname, vmargs, config, scriptargs):
             )
     
 
+def test_generic_ssh(name, shellname, vmargs, config, scriptargs):
+    # factory.addStep(test_generic_ssh("Release", "avmshell", "", "", ""))
+    return TestSuiteShellCommand(
+            command=['../all/run-acceptance-generic-ssh.sh', WithProperties('%s','revision'), '%s' % shellname, '%s' % vmargs, '%s' % config, '%s' % scriptargs],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='starting to run %s vmtests...' % name,
+            descriptionDone='finished %s vmtests' % name,
+            name="Testsuite_%s" % name,
+            workdir="../repo/build/buildbot/slaves/scripts"
+            )
+ 
+
 def test_emulator_generic(name, shellname, vmargs, config, scriptargs):
     # factory.addStep(test_emulator_generic("Release", "avmshell", "", "", ""))
     return TestSuiteShellCommand(

@@ -75,13 +75,15 @@ else
        fi
     done
     # workaround for not returning exit code, run a shell script and print exit code to stdout
-    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./ssh-shell-runner.sh $args" > /tmp/stdout
-    ret=`cat /tmp/stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./ssh-shell-runner.sh $args" > ./stdout
+    ret=`cat ./stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     for a in $filelist
     do
         ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm $a"
     done
-    cat /tmp/stdout
-    rm -f /tmp/stdout
+    # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
+    cat ./stdout | sed 's/^EXITCODE=[0-9][0-9]*$//g' > ./stdout_clean
+    cat ./stdout_clean
+    rm -f ./stdout ./stdout_clean
     exit $ret
 fi

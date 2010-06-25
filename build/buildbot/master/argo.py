@@ -366,7 +366,7 @@ class argo:
 
     mac_ppc_104b_compile_builder = {
                 'name': "mac-ppc-10.4b-compile-argo",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': mac_ppc_104b_compile_factory,
                 'builddir': './argo-mac-ppc-10_4b-compile',
     }
@@ -836,7 +836,7 @@ class argo:
 
     mac_ppc_104b_smoke_builder = {
                 'name': "mac-ppc-10.4b-smoke-argo",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': mac_ppc_104b_smoke_factory,
                 'builddir': './argo-mac-ppc-10_4b-smoke',
     }
@@ -1205,7 +1205,7 @@ class argo:
 
     mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test-argo",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': mac_ppc_104b_test_factory,
                 'builddir': './argo-mac-ppc-10_4b-test',
     }
