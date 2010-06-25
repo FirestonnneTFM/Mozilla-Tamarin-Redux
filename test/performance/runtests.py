@@ -43,7 +43,7 @@
 #
 
 import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, traceback
-import subprocess
+import subprocess, math
 from math import sqrt
 from os.path import *
 from os import getcwd,environ,walk
@@ -67,14 +67,17 @@ except ImportError:
 
 class PerformanceRuntest(RuntestBase):
     avm2 = ''
-    avmname = 'avm'
-    avm2name = 'avm2'
+    avmname = ''
+    avmDefaultName = 'avm'
+    avm2DefaultName = 'avm2'
+    avm2name = ''
     iterations = 1
-    vmname = 'unknown'
+    vmname = 'unknown'  # name sent to socketserver
     memory = False
     avmrevision = ''
     avm2version = ''
     avm2revision = ''
+    detail = False
     vmargs2 = ''
     optimize = True
     perfm = False
@@ -86,6 +89,8 @@ class PerformanceRuntest(RuntestBase):
     serverPort = 1188
     finalexitcode=0
     prettyprint = False
+    currentMetric = ''
+    testFieldLen = 30   # field length for test name and path
 
     def __init__(self):
         RuntestBase.__init__(self)
@@ -105,6 +110,7 @@ class PerformanceRuntest(RuntestBase):
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
         self.preProcessTests()
+        self.printHeader()
         self.runTests(self.tests)
         #self.cleanup()
 
@@ -121,6 +127,7 @@ class PerformanceRuntest(RuntestBase):
         print " -S --avm2          second avmplus command to use"
         print "    --avmname       nickname for avm to use as column header"
         print "    --avm2name      nickname for avm2 to use as column header"
+        print "    --detail        output with more details about each run"
         print " -i --iterations    number of times to repeat test"
         print " -l --log           logs results to a file"
         print " -k --socketlog     logs results to a socket server"
@@ -143,7 +150,7 @@ class PerformanceRuntest(RuntestBase):
         self.options += 'S:i:lkr:mp'
         self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log','socketlog',
                                  'runtime=','memory','larger','vmversion=', 'vm2version=','vmargs2=','nooptimize',
-                                 'perfm','csv','prettyprint'])
+                                 'perfm','csv','prettyprint', 'detail'])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -185,6 +192,9 @@ class PerformanceRuntest(RuntestBase):
                 self.csv = True
             elif o in ('-p', '--prettyprint'):
                 self.prettyprint = True
+            elif o in ('--detail',):
+                print 'self.detail = True'
+                self.detail = True
 
     def compile_test(self, as_file):
         if not isfile(self.shellabc):
@@ -251,6 +261,7 @@ class PerformanceRuntest(RuntestBase):
             pass
 
     def preProcessTests(self):
+        'Code that must be executed before beginning a testrun'
         if not self.aotsdk:
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
             if not self.avmversion:
@@ -264,33 +275,44 @@ class PerformanceRuntest(RuntestBase):
                 if not self.avm2revision:
                     self.avm2revision = self.getAvmRevision(self.avm2version)
 
-        # Print run info and headers
-        self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True, csv=False)
 
-        self.js_print("%s: %s %s version: %s" % (self.avmname, self.avm, self.vmargs, self.avmversion))
+    def printHeader(self):
+        'Print run info and headers'
+        self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True, csv=False)
+        self.js_print("%s: %s %s version: %s" % (self.avmname or self.avmDefaultName, self.avm, self.vmargs, self.avmversion))
         if self.avm2:
-            self.js_print("%s: %s %s version: %s" % (self.avm2name, self.avm2, self.vmargs2, self.avm2version))
+            self.js_print("%s: %s %s version: %s" % (self.avm2name or self.avm2DefaultName, self.avm2, self.vmargs2, self.avm2version))
+        self.avmDefaultName += ':'+self.avmrevision
         self.js_print('iterations: %s' % self.iterations)
         if self.avm2:
+            self.avm2DefaultName += ':'+self.avm2revision
             if self.iterations == 1:
-                self.js_print("\n%-50s %7s %7s %7s %7s\n" % ("test",self.avmname,self.avm2name, "%sp", "metric"))
+                self.js_print('\n%-*s %5s %7s %7s\n' % (self.testFieldLen, 'test', self.avmname or self.avmDefaultName,
+                                                        self.avm2name or self.avm2DefaultName, '%diff'))
             else:
                 if self.memory:
                     self.js_print('Note that %diff is calculated using the largest memory value (not avg) from all runs', csv=False)
                 else:
                     self.js_print('Note that %diff is calculated using the fastest value (not avg) of all runs', csv=False)
-                self.js_print("\n%-50s %-33s   %-33s" % ('',self.avmname,self.avm2name))
-                self.js_print('%-50s  %7s :%7s  %7s %6s    %7s :%7s  %7s %6s %7s %8s %8s' % ('test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  ','metric'))
-                self.js_print('                                                   ---------------------------------   ---------------------------------   -----  --------  ------', csvOut=False)
+                if self.detail:
+                    self.js_print('\n%-*s %-33s %-33s' % (self.testFieldLen, '', self.avmname or self.avmDefaultName, self.avm2name or self.avm2DefaultName))
+                    self.js_print('%-*s  %7s :%7s  %7s %6s    %7s :%7s  %7s %6s %7s %8s %8s' % (self.testFieldLen, 'test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  ','metric'))
+                    self.js_print('%*s ---------------------------------   ---------------------------------   -----  --------  ------' % (self.testFieldLen, '') )
+                else:
+                    self.js_print('\n%-*s   %-13s %s' % (self.testFieldLen, '',
+                                                         self.avmname or self.avmDefaultName,
+                                                         self.avm2name or self.avm2DefaultName))
+                    self.js_print('%-*s %6s %6s %6s %6s %6s %4s' % (self.testFieldLen, 'test', 'best','avg','best','avg','%diff','sig'))
         else:
             if (self.iterations>2):
                 runFormatStr = ''
                 if self.csv:
                     for i in range(1,self.iterations+1):
                         runFormatStr += '%7s' % 'run'+str(i)
-                self.js_print(("\n\n%-50s %7s %12s %7s "+runFormatStr+"\n") % ("test",self.avmname,"95% conf", "metric"))
+                self.js_print(("\n\n%-*s %5s %7s "+runFormatStr+"\n") % (self.testFieldLen, "test",self.avmname or self.avmDefaultName,"95%_conf"))
             else:
-                self.js_print("\n\n%-50s %7s %7s\n" % ("test",self.avmname, "metric"))
+                self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", self.avmname or self.avmDefaultName))
+
 
     def runTests(self, testList):
         testnum = len(testList)
@@ -427,14 +449,33 @@ class PerformanceRuntest(RuntestBase):
         perfmSocketlog('vprof-ir-time','ir')
         perfmSocketlog('vprof-count','count')
 
+
     def abnormalExit(self, explanation, extraOutput=[]):
+        'Print out explanation for exiting and exit w/ exitcode 1'
         print 'Abnormal Exit!!'
         print explanation
         for line in extraOutput:
             print(line.strip())
         sys.exit(1)
 
+    def checkForMetricChange(self, metric, largerIsFaster):
+        'If the test metric has changed, print out a line indicating so'
+        if self.currentMetric != metric:
+            self.currentMetric = metric
+            self.js_print('Metric: %s %s' % (metric, ('('+largerIsFaster+')') if largerIsFaster else '') )
+
+    def getSigString(self, sig, spdup):
+        'generate a string of +/- to give a quick visual representation of the perf difference'
+        return '--' if (sig < -2.0 and spdup < -5.0) else '- ' if sig < -1.0 \
+            else '++' if (sig > 2.0 and spdup > 5.0) else '+ ' if sig > 1.0 else '  '
+
+
+    def truncateTestname(self, testName):
+        'Return testName truncated to self.testFieldLen'
+        return testName if len(testName) <= self.testFieldLen else testName[(len(testName) - self.testFieldLen):]
+
     def runTest(self, testAndNum):
+        'Run a singe performance testcase self.iterations times and print out results'
         ast = testAndNum[0]
         testName = ast
 
@@ -537,14 +578,18 @@ class PerformanceRuntest(RuntestBase):
             self.abnormalExit('avm resultlist: %s is not the same length as the # of iterations (%s)' % (resultList, self.iterations), f1)
         if self.avm2 and (len(resultList2) != self.iterations):
             self.abnormalExit('avm2 resultlist: %s is not the same length as the # of iterations (%s)' % (resultList2, self.iterations), f2)
-        
+
         # calculate best result
         spdup, result1, result2, memoryhigh, memoryhigh2 = self.calculateSpeedup(resultList, resultList2, largerIsFaster)
 
         if self.memory:
             if self.avm2:
                 if self.iterations == 1:
-                    self.js_print("%-50s %7s %7s %7.1f %7s %s" % (testName,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric, largerIsFaster))
+                    self.checkForMetricChange(metric, largerIsFaster)
+                    self.js_print('%-*s %5s %7s %7.1f' %
+                                  (self.testFieldLen, self.truncateTestname(testName),
+                                   formatMemory(memoryhigh),formatMemory(memoryhigh2),
+                                   spdup))
                 else:
                     mem1_avg = formatMemory(sum(resultList)/float(len(resultList)))
                     mem2_avg = formatMemory(sum(resultList2)/float(len(resultList2)))
@@ -554,15 +599,23 @@ class PerformanceRuntest(RuntestBase):
                         sig = spdup / (relStdDev1+relStdDev2)
                     except ZeroDivisionError:
                         sig = cmp(spdup,0) * (3.0 if abs(spdup) > 5.0 else 2.0 if abs(spdup) > 1.0 else 0.0)
-                    sig_str = '--' if (sig < -2.0 and spdup < -5.0) else '- ' if sig < -1.0 \
-                              else '++' if (sig > 2.0 and spdup > 5.0) else '+ ' if sig > 1.0 else '  '
+                    sig_str = self.getSigString(sig, spdup)
                     bold = '\033[1m' if (abs(sig)>1.0 and self.prettyprint) else ''
                     endbold = '\033[0;0m' if bold else ''
-                    self.js_print('%s%-50s [%7s :%7s] %7s ±%4.1f%%   [%7s :%7s] %7s ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
-                                  (bold,testName,formatMemory(min(resultList)),formatMemory(memoryhigh),mem1_avg,
-                                    rel_std_dev(resultList), formatMemory(min(resultList2)),
-                                    formatMemory(memoryhigh2),mem2_avg,rel_std_dev(resultList2),
-                                    spdup, sig, sig_str, metric, largerIsFaster,endbold) )
+                    if self.detail:
+                        self.js_print('%s%-50s [%7s :%7s] %7s ±%4.1f%%   [%7s :%7s] %7s ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
+                                      (bold,testName,formatMemory(min(resultList)),formatMemory(memoryhigh),mem1_avg,
+                                        rel_std_dev(resultList), formatMemory(min(resultList2)),
+                                        formatMemory(memoryhigh2),mem2_avg,rel_std_dev(resultList2),
+                                        spdup, sig, sig_str, metric, largerIsFaster,endbold) )
+                    else:
+                        self.checkForMetricChange(metric, largerIsFaster)
+                        self.js_print('%s%-*s %6s %6s %6s %6s %6s % 3.1f %2s%s' %
+                                      (bold,self.testFieldLen, self.truncateTestname(testName),
+                                       formatMemory(min(resultList)), mem1_avg,
+                                       formatMemory(min(resultList2)), mem2_avg,
+                                       format(spdup,'3.1f') if abs(spdup) < 1000 else int(spdup),
+                                       sig, sig_str, endbold) )
             else:
                 confidence=0
                 meanRes=memoryhigh
@@ -581,7 +634,8 @@ class PerformanceRuntest(RuntestBase):
         else:
             if self.avm2:
                 if self.iterations == 1:
-                    self.js_print('%-50s %7s %7s %7.1f %7s %s' % (testName,result1,result2,spdup, metric, largerIsFaster))
+                    self.checkForMetricChange(metric, largerIsFaster)
+                    self.js_print('%-*s %5s %7s %6.1f' % (self.testFieldLen, self.truncateTestname(testName),result1,result2,spdup))
                 else:
                     try:
                         rl1_avg=sum(resultList)/float(len(resultList))
@@ -595,8 +649,12 @@ class PerformanceRuntest(RuntestBase):
                         try:
                             if largerIsFaster:
                                 spdup = 100.0*(max2-max1)/max1
+                                best1 = max1
+                                best2 = min2
                             else:
                                 spdup = 100.0*(min1-min2)/min1
+                                best1 = min1
+                                best2 = min2
                         except ZeroDivisionError:
                             spdup = 9999
                         try:
@@ -604,18 +662,31 @@ class PerformanceRuntest(RuntestBase):
                         except ZeroDivisionError:
                             # determine sig by %diff (spdup) only
                             sig = cmp(spdup,0) * (3.0 if abs(spdup) > 5.0 else 2.0 if abs(spdup) > 1.0 else 0.0)
-                        sig_str = '--' if (sig < -2.0 and spdup < -5.0) else '- ' if sig < -1.0 \
-                                  else '++' if (sig > 2.0 and spdup > 5.0) else '+ ' if sig > 1.0 else '  '
+                        sig_str = self.getSigString(sig, spdup)
                         # only bold if abs > 1 and averages are > 3 ms apart
                         bold = '\033[1m' if (abs(sig)>1.0 and abs(rl1_avg-rl2_avg) > 3 and self.prettyprint) else ''
                         endbold = '\033[0;0m' if bold else ''
-                        self.js_print('%s%-50s [%7s :%7s] %7.1f ±%4.1f%%   [%7s :%7s] %7.1f ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
-                                      (bold,testName, min1, max1, rl1_avg, relStdDev1,
-                                       min2, max2, rl2_avg, relStdDev2,
-                                       spdup, sig,sig_str, metric, largerIsFaster,endbold))
+                        if self.detail:
+                            self.js_print('%s%-*s [%7s :%7s] %7.1f ±%4.1f%%   [%7s :%7s] %7.1f ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
+                                          (bold, self.testFieldLen, self.truncateTestname(testName), min1, max1, rl1_avg, relStdDev1,
+                                           min2, max2, rl2_avg, relStdDev2,
+                                           spdup, sig,sig_str, metric, largerIsFaster,endbold))
+                        else:
+                            self.checkForMetricChange(metric, largerIsFaster)
+                            self.js_print('%s%-*s %6s %6s %6s %6s %6s % 3.1f %2s%s' %
+                                          (bold,
+                                           self.testFieldLen,
+                                           self.truncateTestname(testName),
+                                           int(best1) if best1 == int(best1) else best1,
+                                           format(rl1_avg, '6.1f') if rl1_avg < 10000 else int(rl1_avg) ,
+                                           int(best2) if best2 == int(best2) else best2,
+                                           format(rl2_avg, '6.1f') if rl2_avg < 10000 else int(rl2_avg),
+                                           format(spdup,'3.1f') if abs(spdup) < 1000 else int(spdup),
+                                           sig,
+                                           sig_str, endbold))
                     except:
-                        print sys.exc_info
-                        self.js_print('%-50s [%7s :%7s] %7.1f %6s   [%7s :%7s] %7.1f %6s %6.1f%% %6s %2s %7s %s' % (testName, '', '', result1,'', '', '', result2,'', spdup, '', '', metric, largerIsFaster))
+                        import traceback
+                        traceback.print_exc()
                 if self.perfm and perfm1Dict['verify']: # only calc if data present
                     self.perfmOutput(perfm1Dict, perfm2Dict)
             else: # only one avm tested
@@ -632,11 +703,13 @@ class PerformanceRuntest(RuntestBase):
                                 runResults += '%8s' % resultList[i]
                         else:
                             runResults = str(resultList)
-                        self.js_print(("%-50s %7s %10.1f%% %7s  "+runResults+" %s") % (ast,result1,confidence,metric, largerIsFaster))
+                        self.checkForMetricChange(metric, largerIsFaster)
+                        self.js_print(("%-*s %5s %4.1f%% "+runResults) % (self.testFieldLen, self.truncateTestname(ast),result1,confidence))
                     else: #one iteration
-                        self.js_print("%-50s %7s %7s %s" % (testName,result1,metric,largerIsFaster))
+                        self.checkForMetricChange(metric, largerIsFaster)
+                        self.js_print("%-*s %7s" % (self.testFieldLen, self.truncateTestname(testName),result1))
                 else:
-                        self.js_print("%-50s %7s %s" % (testName,'no test result - test output: ',f1))
+                        self.js_print("%-*s %5s %s" % (self.testFieldLen, truncateTestname(testName),'no test result - test output: ',f1))
                         self.finalexitcode=1
 
 
