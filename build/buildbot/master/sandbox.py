@@ -317,7 +317,7 @@ class sandbox:
 
     sb_mac_ppc_104b_compile_builder = {
                 'name': "mac-ppc-10.4b-compile-sandbox",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': sb_mac_ppc_104b_compile_factory,
                 'builddir': './sandbox-mac-ppc-10_4b-compile',
     }
@@ -835,7 +835,7 @@ class sandbox:
 
     sb_mac_ppc_104b_smoke_builder = {
                 'name': "mac-ppc-10.4b-smoke-sandbox",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': sb_mac_ppc_104b_smoke_factory,
                 'builddir': './sandbox-mac-ppc-10_4b-smoke',
     }
@@ -1223,7 +1223,7 @@ class sandbox:
 
     sb_mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test-sandbox",
-                'slavename': "asteammac9",
+                'slavename': "asteammac17",
                 'factory': sb_mac_ppc_104b_test_factory,
                 'builddir': './sandbox-mac-ppc-10_4b-test',
     }
