@@ -1816,6 +1816,14 @@ class tamarinredux:
                      workdir="../repo/build/buildbot/slaves/scripts",
                      timeout=3600)
     )
+    mac_deep_factory.addStep(TestSuiteCommand(
+                     command=['./run-code-coverage.sh', WithProperties('%s','revision')],
+                     description='running code coverage tests...',
+                     descriptionDone='finished running code coverage tests.',
+                     name="RunCodeCoverage",
+                     workdir="../scripts",
+                     timeout=3600)
+    )
     mac_deep_factory.addStep(util_process_clean)
     mac_deep_factory.addStep(util_clean_buildsdir)
 

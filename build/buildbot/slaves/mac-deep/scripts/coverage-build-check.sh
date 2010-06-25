@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2010
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -38,39 +38,47 @@
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 ##
-# Set any variables that my be needed higher up the chain
+# Bring in the environment variables
 ##
-export shell_extension=
+. ./environment.sh
+
 
 ##
-# Bring in the BRANCH environment variables
+# Calculate the change number and change id
 ##
-. ../all/environment.sh
+. ../all/util-calculate-change.sh $1
 
-export platform=mac
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
 
-## Used by make in the build scripts
-export make_opt="-j4"
 
-# List of processes that should NEVER be running when the build is not
-# currently running any tests. This list of process will be killed if the
-# process is found. Process must not contain extension as cygwin will return
-# the process without the extension. Used in all/util-process-clean.sh
-export proc_names="${shell_release}$ ${shell_release_wordcode}$ ${shell_debug}$ ${shell_release_debugger}$ ${shell_debug_debugger}$ ${shell_selftest}$"
+# Release
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_cov || {
+  echo "message: Release Failed"
+  fail=1
+}
 
-export bullseyedir=~/tools/bullseye/bin
+# Release_Debugger
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger_cov || {
+  echo "message: Release_Debugger Failed"
+  fail=1
+}
 
-export shell_release_cov=avmshell_cov
-export shell_release_debugger_cov=avmshell_s_cov
-export shell_debug_cov=avmshell_d_cov
-export shell_debug_debugger_cov=avmshell_sd_cov
+# Debug
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_cov || {
+  echo "message: Debug Failed"
+  fail=1
+}
 
-export build_shell_release_cov=avmshell_cov
-export build_shell_release_debugger_cov=avmshell_s_cov
-export build_shell_debug_cov=avmshell_d_cov
-export build_shell_debug_debugger_cov=avmshell_sd_cov
+#Debug_Debugger
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger_cov || {
+  echo "message: Debug_Debugger Failed"
+  fail=1
+}
 
-export COVFILE=$buildsdir/${change}-${changeid}/$platform/avm.cov
+
+if test "${fail}" = 1; then
+   echo Failing the build
+   exit 1
+fi
+
+
+

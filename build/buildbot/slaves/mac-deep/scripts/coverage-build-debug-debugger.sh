@@ -37,40 +37,50 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
+. ./environment.sh
 
-export platform=mac
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
 
-## Used by make in the build scripts
-export make_opt="-j4"
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
 
-# List of processes that should NEVER be running when the build is not
-# currently running any tests. This list of process will be killed if the
-# process is found. Process must not contain extension as cygwin will return
-# the process without the extension. Used in all/util-process-clean.sh
-export proc_names="${shell_release}$ ${shell_release_wordcode}$ ${shell_debug}$ ${shell_release_debugger}$ ${shell_debug_debugger}$ ${shell_selftest}$"
 
-export bullseyedir=~/tools/bullseye/bin
 
-export shell_release_cov=avmshell_cov
-export shell_release_debugger_cov=avmshell_s_cov
-export shell_debug_cov=avmshell_d_cov
-export shell_debug_debugger_cov=avmshell_sd_cov
+##
+# Update the version string
+##
+. ../all/util-update-version.sh
 
-export build_shell_release_cov=avmshell_cov
-export build_shell_release_debugger_cov=avmshell_s_cov
-export build_shell_debug_cov=avmshell_d_cov
-export build_shell_debug_debugger_cov=avmshell_sd_cov
 
-export COVFILE=$buildsdir/${change}-${changeid}/$platform/avm.cov
+export COVFILE=$buildsdir/${change}-${changeid}/$platform/debug_debugger.cov
+# MUST set COVSRCDIR otherwise some file will be relative and other absolute
+# Seems like cpp files are relative and header files are absolute, this was
+# causing some problems with viewing coverage based on directory, since there
+# would be 2 directories, one relative and one absolute
+export COVSRCDIR=/
+
+# Make sure that the directory structure is created, bullseye will fail otherwise
+mkdir -p $buildsdir/${change}-${changeid}/$platform
+
+# Remove the generated coverage file if it already exists
+test -f $COVFILE && rm -f $COVFILE
+
+# Turn on bullseye code coverage
+$bullseyedir/cov01 --on
+export PATH=$bullseyedir:$PATH
+
+##
+# Execute the common build script.
+# Just need to pass in a dummy additional args string ($2) and then the 
+# name of the executable that we want ($3)
+##
+cd $basedir/build/buildbot/slaves/scripts/
+../all/compile-generic.sh $change "--enable-shell --enable-debug --enable-debugger" ${build_shell_debug_debugger_cov}
+
+
+

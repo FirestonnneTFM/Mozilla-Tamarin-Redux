@@ -37,40 +37,39 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
+. ./environment.sh
 
-export platform=mac
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
 
-## Used by make in the build scripts
-export make_opt="-j4"
+set -x  # activate debugging
+../all/build-builtinabc.sh $change:$changeid
+./coverage-build-release.sh $change:$changeid
+./coverage-build-debug.sh $change:$changeid
+./coverage-build-release-debugger.sh $change:$changeid
+./coverage-build-debug-debugger.sh $change:$changeid
 
-# List of processes that should NEVER be running when the build is not
-# currently running any tests. This list of process will be killed if the
-# process is found. Process must not contain extension as cygwin will return
-# the process without the extension. Used in all/util-process-clean.sh
-export proc_names="${shell_release}$ ${shell_release_wordcode}$ ${shell_debug}$ ${shell_release_debugger}$ ${shell_debug_debugger}$ ${shell_selftest}$"
 
-export bullseyedir=~/tools/bullseye/bin
+./coverage-build-check.sh $change:$changeid
+res=$?
+test "$res" = "0" || {
+    echo "Build check failed"
+    exit 1
+}
 
-export shell_release_cov=avmshell_cov
-export shell_release_debugger_cov=avmshell_s_cov
-export shell_debug_cov=avmshell_d_cov
-export shell_debug_debugger_cov=avmshell_sd_cov
+../all/download-acceptance-tests.sh $change:$changeid
+./coverage-run-selftest.sh $change:$changeid
+./coverage-run-acceptance-release.sh $change:$changeid
+./coverage-run-acceptance-release-interp.sh $change:$changeid
+./coverage-run-acceptance-release-jit.sh $change:$changeid
+./coverage-run-acceptance-release-debugger.sh $change:$changeid
+./coverage-run-acceptance-debug.sh $change:$changeid
+./coverage-run-acceptance-debug-debugger.sh $change:$changeid
 
-export build_shell_release_cov=avmshell_cov
-export build_shell_release_debugger_cov=avmshell_s_cov
-export build_shell_debug_cov=avmshell_d_cov
-export build_shell_debug_debugger_cov=avmshell_sd_cov
-
-export COVFILE=$buildsdir/${change}-${changeid}/$platform/avm.cov
+./coverage-process.sh $change:$changeid
