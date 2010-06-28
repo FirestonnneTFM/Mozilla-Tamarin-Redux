@@ -72,7 +72,7 @@ test -f $COVFILE && rm -f $COVFILE
 
 # Turn on bullseye code coverage
 $bullseyedir/cov01 --on
-export PATH=$bullseyepath:$PATH
+export PATH=$bullseyedir:$PATH
 
 ##
 # Execute the common build script.
