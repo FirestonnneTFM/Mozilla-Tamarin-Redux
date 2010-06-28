@@ -72,5 +72,3 @@ export build_shell_release_cov=avmshell_cov
 export build_shell_release_debugger_cov=avmshell_s_cov
 export build_shell_debug_cov=avmshell_d_cov
 export build_shell_debug_debugger_cov=avmshell_sd_cov
-
-export COVFILE=$buildsdir/${change}-${changeid}/$platform/avm.cov
