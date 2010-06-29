@@ -1892,11 +1892,11 @@ namespace avmplus
                 LIns* x0 = binaryIns(LIR_subi, argc_param, InsConst(param_count));
                 LIns* x1 = binaryIns(LIR_lti, x0, InsConst(0));
                 restArgc = lirout->insChoose(x1, InsConst(0), x0, true);
-                
+
                 // Store a NULL array pointer
                 localSet(firstLocal, InsConstPtr(0), ARRAY_TYPE);
             }
-            else 
+            else
             {
                 //framep[info->param_count+1] = createRest(env, argv, argc);
                 // use csop so if rest value never used, we don't bother creating array
@@ -2514,7 +2514,7 @@ namespace avmplus
         {
             // See documentation in writePrologue regarding rest arguments
             AvmAssert(info->needRest() && info->lazyRest());
-            LIns* out = callIns(FUNCTIONID(restargcHelper), 
+            LIns* out = callIns(FUNCTIONID(restargcHelper),
                                 2,
                                 localGetp(restLocal),
                                 restArgc);
@@ -2714,7 +2714,7 @@ namespace avmplus
             localSet(dest_index, ptrToNativeRep(type, out), type);
             break;
         }
-                
+
         case OP_restarg:
         {
             // See documentation in writePrologue regarding rest arguments
@@ -2722,7 +2722,7 @@ namespace avmplus
             const Multiname *multiname = pool->precomputedMultiname(opd1);
             // The by-reference parameter &restLocal is handled specially for this
             // helper function in VarTracker::insCall and in CodegenLIR::analyze_call.
-            LIns* out = callIns(FUNCTIONID(restargHelper), 
+            LIns* out = callIns(FUNCTIONID(restargHelper),
                                 6,
                                 loadEnvToplevel(),
                                 InsConstPtr(multiname),
@@ -5293,7 +5293,7 @@ namespace avmplus
             lirout->ins1(LIR_livei, restArgc);
             livep(ap_param);
         }
-    
+
         #ifdef DEBUGGER
         if (haveDebugger)
             livep(csn);

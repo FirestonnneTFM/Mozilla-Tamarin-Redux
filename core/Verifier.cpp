@@ -264,14 +264,14 @@ namespace avmplus
         , isRestArray(NULL)
     {
     }
-        
+
     void RestArgAnalyzer::init(AvmCore* _core, MethodInfo* _info, uint32_t _frameSize)
     {
         core = _core;
         info = _info;
         pool = _info->pool();
         frameSize = _frameSize;
-        
+
 #if defined VMCFG_WORDCODE || !defined VMCFG_NANOJIT
         optimize = false;
 #else
@@ -357,7 +357,7 @@ namespace avmplus
             return false;
 
         uint32_t sp = state->sp();
-        
+
         // Be sure the arguments to run-time names aren't the rest array.
         uint32_t numprops = (multiname.isRtname() != 0) + (multiname.isRtns() != 0);
         if (numprops > 0) {
@@ -421,7 +421,7 @@ namespace avmplus
                     isRestArray[state->sp()] = true;
                 break;
             }
-                
+
             case OP_iflt:
             case OP_ifle:
             case OP_ifnlt:
@@ -446,7 +446,7 @@ namespace avmplus
         }
         coder->writeOpcodeVerified(state, pc, opcode);
     }
-    
+
     // This would be less painful if we had a table stating the number of operands read
     // by most instructions.
 
@@ -455,9 +455,9 @@ namespace avmplus
         uint32_t imm30=0, imm30b=0;
         int32_t imm8=0, imm24=0;
         uint32_t numprops = 0;
-        
+
         AvmCore::readOperands(pc, imm30, imm24, imm30b, imm8);
-        
+
         switch (opcode) {
             // Ignored because they are generated post-analysis when the analysis succeeds.
             case OP_restarg:
@@ -471,12 +471,12 @@ namespace avmplus
             case OP_getlocal2:
             case OP_getlocal3:
                 break;
-                
+
             // Handled in getProperty
             case OP_getproperty:
                 break;
 
-            // Op0 
+            // Op0
             case OP_bkpt:
             case OP_bkptline:
             case OP_timestamp:
@@ -515,7 +515,7 @@ namespace avmplus
             case OP_findpropglobalstrict:   // Internal, poorly documented
             case OP_findpropglobal:         // Internal, poorly documented
                 break;
-                
+
             // Op1
             case OP_throw:
             case OP_iftrue:
@@ -567,7 +567,7 @@ namespace avmplus
                 if (isRestArray[state->sp()])
                     fail();
                 break;
-    
+
             // Op2
             case OP_add:
             case OP_subtract:
@@ -637,7 +637,7 @@ namespace avmplus
             case OP_setlocal3:
                 imm30 -= OP_setlocal0;
                 goto update_local;
-            
+
             // Locals
             case OP_hasnext2:
                 if (imm30 == restVar || imm30b == restVar)
@@ -658,42 +658,42 @@ namespace avmplus
                         fail();
                 break;
             }
-                
+
             // 0 + 0/1/2 name components
             case OP_findpropstrict:
             case OP_findproperty:
                 numprops = 0;
                 goto checkMultiname;
-            
+
             // 1 + 0/1/2 name components
             case OP_getsuper:
             case OP_getdescendants:
             case OP_deleteproperty:
                 numprops = 1;
                 goto checkMultiname;
-                
+
             // 2 + 0/1/2 name components
             case OP_setsuper:
             case OP_setproperty:
             case OP_initproperty:
                 numprops = 2;
                 goto checkMultiname;
-                
+
             case OP_call:
                 numprops = 2 + imm30;
                 goto checkVariable;
-                
+
             case OP_construct:
             case OP_constructsuper:
             case OP_applytype:
                 numprops = 1 + imm30;
                 goto checkVariable;
-                
+
             case OP_callmethod:
             case OP_callstatic:
                 numprops = 1 + imm30b;
                 goto checkVariable;
-    
+
             case OP_callsuper:
             case OP_callsupervoid:
             case OP_callproperty:
@@ -702,7 +702,7 @@ namespace avmplus
             case OP_constructprop:
                 numprops = 1 + imm30b;
                 goto checkMultiname;
-                
+
             case OP_newobject:
                 numprops = 2 * imm30;
                 goto checkMultiname;
@@ -710,12 +710,12 @@ namespace avmplus
             case OP_newarray:
                 numprops = imm30;
                 goto checkMultiname;
-                
+
             default:
                 AvmAssert(!"Can't happen");
         }
     }
-    
+
     /**
      * (done) branches stay in code block
      * (done) branches end on even instr boundaries
@@ -1409,7 +1409,7 @@ namespace avmplus
                 if (emitOptimizedRestArg)
                     emitOptimizedRestArg = restArgAnalyzer.getProperty(state, multiname, n);
 
-                if (emitPass && emitOptimizedRestArg) 
+                if (emitPass && emitOptimizedRestArg)
                 {
                     Value& obj = state->peek(n);
                     if (multiname.isRtname())
@@ -3457,7 +3457,7 @@ namespace avmplus
         out << t;
         if (!t || (!t->isNumeric() && t != BOOLEAN_TYPE && t != NULL_TYPE && t != VOID_TYPE))
             out << (v.notNull ? "~" : "");
-        
+
 #ifdef VMCFG_NANOJIT
         if (v.sst_mask) {
             out << '[';
