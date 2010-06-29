@@ -60,7 +60,7 @@ class argo:
                                    "mac-intel-10.4-compile-argo", "mac-intel-10.5-compile-argo", "mac64-intel-compile-argo",
                                    "mac-ppc-10.4a-compile-argo", "mac-ppc-10.4b-compile-argo", 
                                    "mac-ppc-10.5a-compile-argo", "mac-ppc-10.5b-compile-argo", 
-                                   "mac64-ppc-compile-argo",
+                                   "mac64-ppc-compile-argo", "mac64b-ppc-compile-argo",
                                    "linux-compile-argo", "linux64-compile-argo",
                                    "winmobile-emulator-compile-argo",
                                    "solaris-sparc-compile-argo", "solaris-sparc2-compile-argo",
@@ -72,7 +72,7 @@ class argo:
                                    "mac-intel-10.4-smoke-argo", "mac-intel-10.5-smoke-argo", "mac64-intel-smoke-argo",
                                    "mac-ppc-10.4a-smoke-argo", "mac-ppc-10.4b-smoke-argo", 
                                    "mac-ppc-10.5a-smoke-argo", "mac-ppc-10.5b-smoke-argo", 
-                                   "mac64-ppc-smoke-argo",
+                                   "mac64-ppc-smoke-argo", "mac64b-ppc-smoke-argo",
                                    "linux-smoke-argo", "linux64-smoke-argo",
                                    "winmobile-emulator-smoke-argo",
                                    "solaris-sparc-smoke-argo", "solaris-sparc2-smoke-argo",
@@ -89,6 +89,7 @@ class argo:
                                   ["mac-ppc-10.5a-smoke-argo", "mac-intel-10.5-compile-argo"],
                                   ["mac-ppc-10.5b-smoke-argo", "mac-intel-10.5-compile-argo"],
                                   ["mac64-ppc-smoke-argo", "mac64-intel-compile-argo"],
+                                  ["mac64b-ppc-smoke-argo", "mac64-intel-compile-argo"],
                                   ["linux-smoke-argo", "linux-compile-argo"],
                                   ["linux64-smoke-argo", "linux64-compile-argo"],
                                   ["winmobile-emulator-smoke-argo", "winmobile-emulator-compile-argo"],
@@ -104,7 +105,7 @@ class argo:
                                    "mac-intel-10.4-test-argo", "mac-intel-10.5-test-argo", "mac64-intel-test-argo",
                                    "mac-ppc-10.4a-test-argo", "mac-ppc-10.4b-test-argo", 
                                    "mac-ppc-10.5a-test-argo", "mac-ppc-10.5b-test-argo", 
-                                   "mac64-ppc-test-argo",
+                                   "mac64-ppc-test-argo", "mac64b-ppc-test-argo",
                                    "linux-test-argo", "linux64-test-argo",
                                    "winmobile-emulator-test-argo",
                                    "solaris-sparc-test-argo", "solaris-sparc2-test-argo",
@@ -121,6 +122,7 @@ class argo:
                                   ["mac-ppc-10.5a-test-argo", "mac-ppc-10.5a-smoke-argo"],
                                   ["mac-ppc-10.5b-test-argo", "mac-ppc-10.5b-smoke-argo"],
                                   ["mac64-ppc-test-argo", "mac64-ppc-smoke-argo"],
+                                  ["mac64b-ppc-test-argo", "mac64b-ppc-smoke-argo"],
                                   ["linux-test-argo", "linux-smoke-argo"],
                                   ["linux64-test-argo", "linux64-smoke-argo"],
                                   ["winmobile-emulator-test-argo", "winmobile-emulator-smoke-argo"],
@@ -420,6 +422,23 @@ class argo:
                 'slavename': "asteammac5-64bit",
                 'factory': mac_ppc_64_compile_factory,
                 'builddir': './argo-mac64-ppc-compile',
+    }
+    
+
+    #########################################
+    #### builder for mac-ppc-64b-compile ####
+    #########################################
+    mac_ppc_64b_compile_factory = factory.BuildFactory()
+    mac_ppc_64b_compile_factory.addStep(sync_clean)
+    mac_ppc_64b_compile_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_64b_compile_factory.addStep(sync_update)
+    mac_ppc_64b_compile_factory.addStep(bb_slaveupdate(slave="mac64-ppc"))
+
+    mac_ppc_64b_compile_builder = {
+                'name': "mac64b-ppc-compile-argo",
+                'slavename': "asteammac15",
+                'factory': mac_ppc_64b_compile_factory,
+                'builddir': './argo-mac64b-ppc-compile',
     }
 
 
@@ -889,6 +908,21 @@ class argo:
     }
 
 
+    ######################################
+    #### builder for mac64b-ppc-smoke ####
+    ######################################
+    mac_ppc_64b_smoke_factory = factory.BuildFactory()
+    mac_ppc_64b_smoke_factory.addStep(download_testmedia)
+    mac_ppc_64b_smoke_factory.addStep(test_smoke)
+    mac_ppc_64b_smoke_factory.addStep(util_process_clean)
+
+    mac_ppc_64b_smoke_builder = {
+                'name': "mac64b-ppc-smoke-argo",
+                'slavename': "asteammac15",
+                'factory': mac_ppc_64b_smoke_factory,
+                'builddir': './argo-mac64b-ppc-smoke',
+    }
+
     #################################
     #### builder for linux-smoke ####
     #################################
@@ -1258,11 +1292,8 @@ class argo:
     mac_ppc_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64_ppc"))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_64_ppc", vmargs="-Ojit", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(util_process_clean)
     mac_ppc_64_test_factory.addStep(util_clean_buildsdir)
 
@@ -1271,6 +1302,24 @@ class argo:
                 'slavename': "asteammac5-64bit",
                 'factory': mac_ppc_64_test_factory,
                 'builddir': './argo-mac64-ppc-test',
+    }
+
+
+    #####################################
+    #### builder for mac64b-ppc-test ####
+    #####################################
+    mac_ppc_64b_test_factory = factory.BuildFactory()
+    mac_ppc_64b_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_64b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64b_test_factory.addStep(util_process_clean)
+    mac_ppc_64b_test_factory.addStep(util_clean_buildsdir)
+
+    mac_ppc_64b_test_builder = {
+                'name': "mac64b-ppc-test-argo",
+                'slavename': "asteammac15",
+                'factory': mac_ppc_64b_test_factory,
+                'builddir': './argo-mac64b-ppc-test',
     }
 
 
@@ -1930,6 +1979,7 @@ class argo:
                 mac_ppc_105a_compile_builder,
                 mac_ppc_105b_compile_builder,
                 mac_ppc_64_compile_builder,
+                mac_ppc_64b_compile_builder,
                 linux_compile_builder,
                 linux_64_compile_builder,
                 winmobile_emulator_compile_builder,
@@ -1949,6 +1999,7 @@ class argo:
                 mac_ppc_105a_smoke_builder,
                 mac_ppc_105b_smoke_builder,
                 mac_ppc_64_smoke_builder,
+                mac_ppc_64b_smoke_builder,
                 linux_smoke_builder,
                 linux_64_smoke_builder,
                 winmobile_emulator_smoke_builder,
@@ -1968,6 +2019,7 @@ class argo:
                 mac_ppc_105a_test_builder,
                 mac_ppc_105b_test_builder,
                 mac_ppc_64_test_builder,
+                mac_ppc_64b_test_builder,
                 linux_test_builder,
                 linux_64_test_builder,
                 winmobile_emulator_test_builder,

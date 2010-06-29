@@ -60,7 +60,7 @@ class sandbox:
                                    "mac-intel-10.4-compile-sandbox", "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
                                    "mac-ppc-10.4a-compile-sandbox", "mac-ppc-10.4b-compile-sandbox", 
                                    "mac-ppc-10.5a-compile-sandbox", "mac-ppc-10.5b-compile-sandbox", 
-                                   "mac64-ppc-compile-sandbox",
+                                   "mac64-ppc-compile-sandbox", "mac64b-ppc-compile-sandbox",
                                    "linux-compile-sandbox", "linux64-compile-sandbox",
                                    "winmobile-emulator-compile-sandbox",
                                    "solaris-sparc-compile-sandbox", "solaris-sparc2-compile-sandbox",
@@ -74,7 +74,7 @@ class sandbox:
                                    "mac-intel-10.4-smoke-sandbox", "mac-intel-10.5-smoke-sandbox", "mac64-intel-smoke-sandbox",
                                    "mac-ppc-10.4a-smoke-sandbox", "mac-ppc-10.4b-smoke-sandbox", 
                                    "mac-ppc-10.5a-smoke-sandbox", "mac-ppc-10.5b-smoke-sandbox", 
-                                   "mac64-ppc-smoke-sandbox",
+                                   "mac64-ppc-smoke-sandbox", "mac64b-ppc-smoke-sandbox",
                                    "linux-smoke-sandbox", "linux64-smoke-sandbox",
                                    "winmobile-emulator-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox", "solaris-sparc2-smoke-sandbox",
@@ -92,6 +92,7 @@ class sandbox:
                                   ["mac-ppc-10.5a-smoke-sandbox", "mac-intel-10.5-compile-sandbox"],
                                   ["mac-ppc-10.5b-smoke-sandbox", "mac-intel-10.5-compile-sandbox"],
                                   ["mac64-ppc-smoke-sandbox", "mac64-intel-compile-sandbox"],
+                                  ["mac64b-ppc-smoke-sandbox", "mac64-intel-compile-sandbox"],
                                   ["linux-smoke-sandbox", "linux-compile-sandbox"],
                                   ["linux64-smoke-sandbox", "linux64-compile-sandbox"],
                                   ["winmobile-emulator-smoke-sandbox", "winmobile-emulator-compile-sandbox"],
@@ -108,7 +109,7 @@ class sandbox:
                                    "mac-intel-10.4-test-sandbox", "mac-intel-10.5-test-sandbox", "mac64-intel-test-sandbox",
                                    "mac-ppc-10.4a-test-sandbox", "mac-ppc-10.4b-test-sandbox", 
                                    "mac-ppc-10.5a-test-sandbox", "mac-ppc-10.5b-test-sandbox", 
-                                   "mac64-ppc-test-sandbox",
+                                   "mac64-ppc-test-sandbox", "mac64b-ppc-test-sandbox",
                                    "linux-test-sandbox", "linux64-test-sandbox",
                                    "winmobile-emulator-test-sandbox",
                                    "solaris-sparc-test-sandbox", "solaris-sparc2-test-sandbox",
@@ -126,6 +127,7 @@ class sandbox:
                                   ["mac-ppc-10.5a-test-sandbox", "mac-ppc-10.5a-smoke-sandbox"],
                                   ["mac-ppc-10.5b-test-sandbox", "mac-ppc-10.5b-smoke-sandbox"],
                                   ["mac64-ppc-test-sandbox", "mac64-ppc-smoke-sandbox"],
+                                  ["mac64b-ppc-test-sandbox", "mac64b-ppc-smoke-sandbox"],
                                   ["linux-test-sandbox", "linux-smoke-sandbox"],
                                   ["linux64-test-sandbox", "linux64-smoke-sandbox"],
                                   ["winmobile-emulator-test-sandbox", "winmobile-emulator-smoke-sandbox"],
@@ -372,6 +374,23 @@ class sandbox:
                 'slavename': "asteammac5-64bit",
                 'factory': sb_mac_ppc_64_compile_factory,
                 'builddir': './sandbox-mac64-ppc-compile',
+    }
+    
+
+    #################################################
+    #### builder for mac-ppc-64b-compile-sandbox ####
+    #################################################
+    sb_mac_ppc_64b_compile_factory = factory.BuildFactory()
+    sb_mac_ppc_64b_compile_factory.addStep(sync_clean)
+    sb_mac_ppc_64b_compile_factory.addStep(sync_clone_sandbox)
+    sb_mac_ppc_64b_compile_factory.addStep(sync_update)
+    sb_mac_ppc_64b_compile_factory.addStep(bb_slaveupdate(slave="mac64-ppc"))
+
+    sb_mac_ppc_64b_compile_builder = {
+                'name': "mac64b-ppc-compile-sandbox",
+                'slavename': "asteammac15",
+                'factory': sb_mac_ppc_64b_compile_factory,
+                'builddir': './sandbox-mac64b-ppc-compile',
     }
 
 
@@ -888,6 +907,22 @@ class sandbox:
     }
 
 
+
+    ##############################################
+    #### builder for mac64b-ppc-smoke-sandbox ####
+    ##############################################
+    sb_mac_ppc_64b_smoke_factory = factory.BuildFactory()
+    sb_mac_ppc_64b_smoke_factory.addStep(download_testmedia)
+    sb_mac_ppc_64b_smoke_factory.addStep(test_smoke)
+    sb_mac_ppc_64b_smoke_factory.addStep(util_process_clean)
+
+    sb_mac_ppc_64b_smoke_builder = {
+                'name': "mac64b-ppc-smoke-sandbox",
+                'slavename': "asteammac15",
+                'factory': sb_mac_ppc_64b_smoke_factory,
+                'builddir': './sandbox-mac64b-ppc-smoke',
+    }
+
     #########################################
     #### builder for linux-smoke-sandbox ####
     #########################################
@@ -1275,11 +1310,8 @@ class sandbox:
     sb_mac_ppc_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64_ppc"))
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    sb_mac_ppc_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_64_ppc", vmargs="-Ojit", config="", scriptargs=""))
-    sb_mac_ppc_64_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64_ppc", vmargs="", config="", scriptargs=""))
-    sb_mac_ppc_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(util_process_clean)
     sb_mac_ppc_64_test_factory.addStep(util_clean_buildsdir)
 
@@ -1288,6 +1320,24 @@ class sandbox:
                 'slavename': "asteammac5-64bit",
                 'factory': sb_mac_ppc_64_test_factory,
                 'builddir': './sandbox-mac64-ppc-test',
+    }
+
+
+    #############################################
+    #### builder for mac64b-ppc-test-sandbox ####
+    #############################################
+    sb_mac_ppc_64b_test_factory = factory.BuildFactory()
+    sb_mac_ppc_64b_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    sb_mac_ppc_64b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
+    sb_mac_ppc_64b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
+    sb_mac_ppc_64b_test_factory.addStep(util_process_clean)
+    sb_mac_ppc_64b_test_factory.addStep(util_clean_buildsdir)
+
+    sb_mac_ppc_64b_test_builder = {
+                'name': "mac64b-ppc-test-sandbox",
+                'slavename': "asteammac15",
+                'factory': sb_mac_ppc_64b_test_factory,
+                'builddir': './sandbox-mac64b-ppc-test',
     }
 
 
@@ -1481,6 +1531,7 @@ class sandbox:
                 sb_mac_ppc_105a_compile_builder,
                 sb_mac_ppc_105b_compile_builder,
                 sb_mac_ppc_64_compile_builder,
+                sb_mac_ppc_64b_compile_builder,
                 sb_linux_compile_builder,
                 sb_linux_64_compile_builder,
                 sb_winmobile_emulator_compile_builder,
@@ -1501,6 +1552,7 @@ class sandbox:
                 sb_mac_ppc_105a_smoke_builder,
                 sb_mac_ppc_105b_smoke_builder,
                 sb_mac_ppc_64_smoke_builder,
+                sb_mac_ppc_64b_smoke_builder,
                 sb_linux_smoke_builder,
                 sb_linux_64_smoke_builder,
                 sb_winmobile_emulator_smoke_builder,
@@ -1521,6 +1573,7 @@ class sandbox:
                 sb_mac_ppc_105a_test_builder,
                 sb_mac_ppc_105b_test_builder,
                 sb_mac_ppc_64_test_builder,
+                sb_mac_ppc_64b_test_builder,
                 sb_linux_test_builder,
                 sb_linux_64_test_builder,
                 sb_winmobile_emulator_test_builder,

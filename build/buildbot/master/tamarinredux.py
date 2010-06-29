@@ -60,7 +60,7 @@ class tamarinredux:
                                    "mac-intel-10.4-compile", "mac-intel-10.5-compile", "mac64-intel-compile",
                                    "mac-ppc-10.4a-compile", "mac-ppc-10.4b-compile", 
                                    "mac-ppc-10.5a-compile", "mac-ppc-10.5b-compile", 
-                                   "mac64-ppc-compile",
+                                   "mac64-ppc-compile", "mac64b-ppc-compile",
                                    "linux-compile", "linux64-compile",
                                    "winmobile-emulator-compile",
                                    "solaris-sparc-compile", "solaris-sparc2-compile",
@@ -73,7 +73,7 @@ class tamarinredux:
                                    "mac-intel-10.4-smoke", "mac-intel-10.5-smoke", "mac64-intel-smoke",
                                    "mac-ppc-10.4a-smoke", "mac-ppc-10.4b-smoke", 
                                    "mac-ppc-10.5a-smoke", "mac-ppc-10.5b-smoke", 
-                                   "mac64-ppc-smoke",
+                                   "mac64-ppc-smoke", "mac64b-ppc-smoke",
                                    "linux-smoke", "linux64-smoke",
                                    "winmobile-emulator-smoke",
                                    "solaris-sparc-smoke", "solaris-sparc2-smoke",
@@ -91,6 +91,7 @@ class tamarinredux:
                                   ["mac-ppc-10.5a-smoke", "mac-intel-10.5-compile"],
                                   ["mac-ppc-10.5b-smoke", "mac-intel-10.5-compile"],
                                   ["mac64-ppc-smoke", "mac64-intel-compile"],
+                                  ["mac64b-ppc-smoke", "mac64-intel-compile"],
                                   ["linux-smoke", "linux-compile"],
                                   ["linux64-smoke", "linux64-compile"],
                                   ["winmobile-emulator-smoke", "winmobile-emulator-compile"],
@@ -107,7 +108,7 @@ class tamarinredux:
                                    "mac-intel-10.4-test", "mac-intel-10.5-test", "mac64-intel-test",
                                    "mac-ppc-10.4a-test", "mac-ppc-10.4b-test", 
                                    "mac-ppc-10.5a-test", "mac-ppc-10.5b-test", 
-                                   "mac64-ppc-test",
+                                   "mac64-ppc-test", "mac64b-ppc-test",
                                    "linux-test", "linux64-test",
                                    "winmobile-emulator-test",
                                    "solaris-sparc-test", "solaris-sparc2-test",
@@ -125,6 +126,7 @@ class tamarinredux:
                                   ["mac-ppc-10.5a-test", "mac-ppc-10.5a-smoke"],
                                   ["mac-ppc-10.5b-test", "mac-ppc-10.5b-smoke"],
                                   ["mac64-ppc-test", "mac64-ppc-smoke"],
+                                  ["mac64b-ppc-test", "mac64b-ppc-smoke"],
                                   ["linux-test", "linux-smoke"],
                                   ["linux64-test", "linux64-smoke"],
                                   ["winmobile-emulator-test", "winmobile-emulator-smoke"],
@@ -431,6 +433,23 @@ class tamarinredux:
                 'slavename': "asteammac5-64bit",
                 'factory': mac_ppc_64_compile_factory,
                 'builddir': './mac64-ppc-compile',
+    }
+
+
+    #########################################
+    #### builder for mac-ppc-64b-compile ####
+    #########################################
+    mac_ppc_64b_compile_factory = factory.BuildFactory()
+    mac_ppc_64b_compile_factory.addStep(sync_clean)
+    mac_ppc_64b_compile_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_64b_compile_factory.addStep(sync_update)
+    mac_ppc_64b_compile_factory.addStep(bb_slaveupdate(slave="mac64-ppc"))
+
+    mac_ppc_64b_compile_builder = {
+                'name': "mac64b-ppc-compile",
+                'slavename': "asteammac15",
+                'factory': mac_ppc_64b_compile_factory,
+                'builddir': './mac64b-ppc-compile',
     }
 
 
@@ -950,6 +969,22 @@ class tamarinredux:
     }
 
 
+    ######################################
+    #### builder for mac64b-ppc-smoke ####
+    ######################################
+    mac_ppc_64b_smoke_factory = factory.BuildFactory()
+    mac_ppc_64b_smoke_factory.addStep(download_testmedia)
+    mac_ppc_64b_smoke_factory.addStep(test_smoke)
+    mac_ppc_64b_smoke_factory.addStep(util_process_clean)
+
+    mac_ppc_64b_smoke_builder = {
+                'name': "mac64b-ppc-smoke",
+                'slavename': "asteammac15",
+                'factory': mac_ppc_64b_smoke_factory,
+                'builddir': './mac64b-ppc-smoke',
+    }
+
+
     #################################
     #### builder for linux-smoke ####
     #################################
@@ -1341,11 +1376,8 @@ class tamarinredux:
     mac_ppc_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64_ppc"))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_64_ppc", vmargs="-Ojit", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(util_process_clean)
     mac_ppc_64_test_factory.addStep(util_clean_buildsdir)
 
@@ -1354,6 +1386,24 @@ class tamarinredux:
                 'slavename': "asteammac5-64bit",
                 'factory': mac_ppc_64_test_factory,
                 'builddir': './mac64-ppc-test',
+    }
+
+
+    #####################################
+    #### builder for mac64b-ppc-test ####
+    #####################################
+    mac_ppc_64b_test_factory = factory.BuildFactory()
+    mac_ppc_64b_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_64b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64b_test_factory.addStep(util_process_clean)
+    mac_ppc_64b_test_factory.addStep(util_clean_buildsdir)
+
+    mac_ppc_64b_test_builder = {
+                'name': "mac64b-ppc-test",
+                'slavename': "asteammac15",
+                'factory': mac_ppc_64b_test_factory,
+                'builddir': './mac64b-ppc-test',
     }
 
 
@@ -2119,6 +2169,7 @@ class tamarinredux:
                 mac_ppc_105a_compile_builder,
                 mac_ppc_105b_compile_builder,
                 mac_ppc_64_compile_builder,
+                mac_ppc_64b_compile_builder,
                 linux_compile_builder,
                 linux_64_compile_builder,
                 winmobile_emulator_compile_builder,
@@ -2139,6 +2190,7 @@ class tamarinredux:
                 mac_ppc_105a_smoke_builder,
                 mac_ppc_105b_smoke_builder,
                 mac_ppc_64_smoke_builder,
+                mac_ppc_64b_smoke_builder,
                 linux_smoke_builder,
                 linux_64_smoke_builder,
                 winmobile_emulator_smoke_builder,
@@ -2159,6 +2211,7 @@ class tamarinredux:
                 mac_ppc_105a_test_builder,
                 mac_ppc_105b_test_builder,
                 mac_ppc_64_test_builder,
+                mac_ppc_64b_test_builder,
                 linux_test_builder,
                 linux_64_test_builder,
                 winmobile_emulator_test_builder,
