@@ -2875,9 +2875,14 @@ return the result of the comparison ToPrimitive(x) == y.
 
     void AvmCore::addLivePool(PoolObject* pool)
     {
+        // Ordering is significant (Bugzilla 574427): GetWeakRef can trigger a collection,
+        // and AvmCore::presweep may update the livePools list, specifically it may delete
+        // the first element of that list.  Thus we should not touch that value until after
+        // we've gotten the weak ref.
+
         LivePoolNode* node = new LivePoolNode(GetGC());
-        node->next = livePools;
         node->pool = pool->GetWeakRef();
+        node->next = livePools;
         livePools = node;
     }
 
