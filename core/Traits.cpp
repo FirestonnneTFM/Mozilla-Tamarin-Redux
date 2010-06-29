@@ -1574,7 +1574,7 @@ namespace avmplus
     }
 
 #ifdef AVMPLUS_VERBOSE
-    PrintWriter& Traits::printExtended(PrintWriter& pw) 
+    PrintWriter& Traits::printExtended(PrintWriter& pw)
     {
         const char* desc = NULL;
         switch (posType()) {
@@ -1591,7 +1591,7 @@ namespace avmplus
         case TRAITSTYPE_CATCH:
             desc = "catch"; break;
         case TRAITSTYPE_NVA: // null/void/any
-            desc = "singleton"; break; 
+            desc = "singleton"; break;
         case TRAITSTYPE_RT:
             desc = "rt"; break;
         default:
