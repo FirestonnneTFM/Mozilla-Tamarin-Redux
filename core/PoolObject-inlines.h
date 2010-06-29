@@ -140,7 +140,7 @@ REALLY_INLINE void PoolObject::ConstantStrings::setup(uint32_t size)
     // Always allocate slot 0 in the data array, which will be
     // initialized to an empty String* in AbcParser::parseCpool().
     // We also avoid invoking mmfx_alloc() with a size of zero,
-    // which will violate an assertion.
+    // which will cause an assertion to fail.
     // TODO: If there are no strings, we should be able to set
     // data = NULL, size = 0, and avoid calling the allocator.
     // Slot 0 should never be accessed, and the code guards against
@@ -148,8 +148,12 @@ REALLY_INLINE void PoolObject::ConstantStrings::setup(uint32_t size)
     // With the guards spread over much code, it is safer to do
     // as we do here.  This problem extends to other constant pool
     // entry types, and should be cleaned up.  See bug 557684.
+    //
+    // Be sure to zero the memory or garbage will be touched by
+    // the presweep handler that cleans up the string pool, see
+    // Bugzilla 574427.
     size = (size ? size : 1) * sizeof(ConstantStringData);
-    data = (ConstantStringData*) mmfx_alloc(size);
+    data = (ConstantStringData*) mmfx_alloc_opt(size, MMgc::kZero);
     Set(data, size);
 }
 
