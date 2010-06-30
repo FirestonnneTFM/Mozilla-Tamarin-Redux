@@ -91,6 +91,7 @@ class RuntestBase:
     avm = ''
     avmce = ''
     avmversion = ''
+    avm_features = ''
     builtinabc = ''
     config = ''
     escbin = ''
