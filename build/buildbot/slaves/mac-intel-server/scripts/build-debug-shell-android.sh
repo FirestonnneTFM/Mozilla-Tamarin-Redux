@@ -52,6 +52,11 @@
 logfile=build-$platform-$shell_debug.log
 beginSilent
 
+##
+# Update the version string
+##
+. ../all/util-update-version.sh
+
 cd $basedir/platform/android
 test -f avmshell && {
    rm -f ./avmshell
