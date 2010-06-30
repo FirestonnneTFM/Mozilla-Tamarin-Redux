@@ -110,7 +110,7 @@ namespace avmplus
         xmlList_itraits->set_needsHashtable(false);
 
         // set the types that don't have custom construct (default is true)
-//      array_itraits->hasCustomConstruct           = true;
+        array_itraits->hasCustomConstruct           = false;
 //      boolean_itraits->hasCustomConstruct         = true;
 //      class_itraits->hasCustomConstruct           = true;
 //      date_itraits->hasCustomConstruct            = true;
@@ -135,7 +135,6 @@ namespace avmplus
 //      void_itraits->hasCustomConstruct            = true;
 //      xmlList_itraits->hasCustomConstruct         = true;
 //      xml_itraits->hasCustomConstruct             = true;
-
 
         vectordouble_itraits->set_names(vectordouble_itraits->ns(), core->internConstantStringLatin1("Vector.<Number>"));
         vectorint_itraits->set_names(vectorint_itraits->ns(), core->internConstantStringLatin1("Vector.<int>"));
