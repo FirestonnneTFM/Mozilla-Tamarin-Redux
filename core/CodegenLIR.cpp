@@ -2561,16 +2561,11 @@ namespace avmplus
      * Verifier::emitCoerceArgs() and writeMethodCall(), from within the jit, is being
      * expressly avoided because we don't want the JIT to mutate FrameState.
      */
-    void CodegenLIR::emitCoerceCall(AbcOpcode opcode, intptr_t method_id, int argc, MethodInfo* m)
+    void CodegenLIR::emitCoerceCall(AbcOpcode opcode, intptr_t method_id, int argc, MethodSignaturep mms)
     {
         AvmAssert(state->value(state->sp() - argc).notNull);  // make sure null check happened
         AvmAssert(opcode != OP_construct);
-        MethodSignaturep mms = m->getMethodSignature();
-
-        // should we check this sooner and not early bind?  assert here?
-        if (!mms->argcOk(argc))
-            state->verifier->verifyFailed(kWrongArgumentCountError, core->toErrorString(m), core->toErrorString(mms->requiredParamCount()), core->toErrorString(argc));
-
+        AvmAssert(mms->argcOk(argc));
         coerceArgs(mms, argc, 0);
         emitCall(opcode, method_id, argc, mms->returnTraits(), mms);
     }
@@ -2865,31 +2860,31 @@ namespace avmplus
             Traits* propType = state->verifier->readBinding(base, b);
             const TraitsBindingsp basetd = base->getTraitsBindings();
 
-            if (AvmCore::isSlotBinding(b))
-            {
-                if (AvmCore::isVarBinding(b))
-                {
-                    int slot_id = AvmCore::bindingToSlotId(b);
-                    LIns* value = coerceToType(sp, propType);
-                    emitSetslot(OP_setslot, slot_id, ptrIndex, value);
+            if (AvmCore::isSlotBinding(b)) {
+                if (!AvmCore::isVarBinding(b)) {
+                    // else, ignore write to readonly accessor
+                    break;
                 }
-                // else, ignore write to readonly accessor
+                int slot_id = AvmCore::bindingToSlotId(b);
+                LIns* value = coerceToType(sp, propType);
+                emitSetslot(OP_setslot, slot_id, ptrIndex, value);
+                break;
             }
-            else
-            if (AvmCore::isAccessorBinding(b))
-            {
-                if (AvmCore::hasSetterBinding(b))
-                {
-                    // Invoke the setter
-                    int disp_id = AvmCore::bindingToSetterId(b);
-                    MethodInfo *f = basetd->getMethod(disp_id);
-                    emitCoerceCall(OP_callsuperid, disp_id, 1, f);
+            if (AvmCore::isAccessorBinding(b)) {
+                if (!AvmCore::hasSetterBinding(b)) {
+                    // ignore write to readonly accessor
+                    break;
                 }
-                // else, ignore write to readonly accessor
+                // Invoke the setter
+                int disp_id = AvmCore::bindingToSetterId(b);
+                MethodSignaturep mms = basetd->getMethod(disp_id)->getMethodSignature();
+                if (mms->argcOk(1)) {
+                    emitCoerceCall(OP_callsuperid, disp_id, 1, mms);
+                    break;
+                }
             }
-            else {
-                emit(opcode, (uintptr_t)name);
-            }
+            // generic late bound case
+            emit(opcode, (uintptr_t)name);
             break;
         }
         case OP_getsuper:
@@ -2903,23 +2898,24 @@ namespace avmplus
             Binding b = toplevel->getBinding(base, name);
             Traits* propType = state->verifier->readBinding(base, b);
 
-            if (AvmCore::isSlotBinding(b))
-            {
+            if (AvmCore::isSlotBinding(b)) {
                 int slot_id = AvmCore::bindingToSlotId(b);
                 emitGetslot(slot_id, state->sp()-(n-1), propType);
+                break;
             }
-            else
-            if (AvmCore::hasGetterBinding(b))
-            {
+            if (AvmCore::hasGetterBinding(b)) {
                 // Invoke the getter
                 int disp_id = AvmCore::bindingToGetterId(b);
                 const TraitsBindingsp basetd = base->getTraitsBindings();
-                MethodInfo *f = basetd->getMethod(disp_id);
-                emitCoerceCall(OP_callsuperid, disp_id, 0, f);
+                MethodSignaturep mms = basetd->getMethod(disp_id)->getMethodSignature();
+                if (mms->argcOk(0)) {
+                    emitCoerceCall(OP_callsuperid, disp_id, 0, mms);
+                    break;
+                }
             }
-            else {
-                emit(opcode, (uintptr_t)name, 0, propType);
-            }
+
+            // generic late-bound case
+            emit(opcode, (uintptr_t)name, 0, propType);
             break;
         }
         case OP_callsuper:
@@ -2934,18 +2930,16 @@ namespace avmplus
 
             Binding b = toplevel->getBinding(base, name);
 
-            if (AvmCore::isMethodBinding(b))
-            {
+            if (AvmCore::isMethodBinding(b)) {
                 int disp_id = AvmCore::bindingToMethodId(b);
-                MethodInfo* m = basetd->getMethod(disp_id);
-                emitCoerceCall(OP_callsuperid, disp_id, argc, m);
+                MethodSignaturep mms = basetd->getMethod(disp_id)->getMethodSignature();
+                if (mms->argcOk(argc)) {
+                    emitCoerceCall(OP_callsuperid, disp_id, argc, mms);
+                    break;
+                }
             }
-            else {
-
-                // TODO optimize other cases
-                emit(opcode, (uintptr_t)name, argc, NULL);
-            }
-
+            // generic late bound case
+            emit(opcode, (uintptr_t)name, argc, NULL);
             break;
         }
 
