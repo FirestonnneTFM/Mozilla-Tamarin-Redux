@@ -121,6 +121,7 @@ namespace avmplus
     class ClassClosure;
     class Closure;
     class CodeContext;
+    class CompiledRegExp;
     class Console;
     class Date;
     class DateClass;

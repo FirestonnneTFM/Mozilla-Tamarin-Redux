@@ -60,134 +60,179 @@ namespace avmplus
 
 #define OVECTOR_SIZE 99 // 32 matches = (32+1)*3
 
-    // This variant is only used for creating the prototype
-    RegExpObject::RegExpObject(RegExpClass *regExpClass,
-                               ScriptObject *objectPrototype)
-        : ScriptObject(regExpClass->ivtable(), objectPrototype)
+    CompiledRegExp::~CompiledRegExp()
     {
-        AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
+        // NOTE: we do not set the PCRE_STATE here, because we don't have a toplevel
+        // that we can use to pass to AvmCore::setPCREContext.  It's OK: pcre_free
+        // just frees a char[], it does not go deep like the compilation step does.
 
-        GC::SetFinalize(this);
-
-        int         errptr;
-        const char  *error;
-        AvmCore     *core = this->core();
-        m_optionFlags = PCRE_UTF8;
-        m_hasNamedGroups = false;
-        m_source = core->newConstantStringLatin1("(?:)");
-
-        StUTF8String utf8Pattern(m_source);
-        PCRE_STATE(toplevel());
-        m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
+        (pcre_free)((void*)(pcre*)regex);
+        regex = NULL;
     }
+    
+    // This variant is only used for creating the prototype - we create an empty regex.
+
+    RegExpObject::RegExpObject(RegExpClass *regExpClass, ScriptObject *objectPrototype)
+        : ScriptObject(regExpClass->ivtable(), objectPrototype)
+        , m_source(core()->newConstantStringLatin1("(?:)"))
+        , m_lastIndex(0)
+        , m_optionFlags(PCRE_UTF8)
+        , m_global(false)
+        , m_hasNamedGroups(false)
+    {
+        completeInitialization(core()->kEmptyString);
+    }
+
+    // This variant is used for "new RegExp( re )" where "re" is a RegExp - we copy it.
 
     RegExpObject::RegExpObject(RegExpObject *toCopy)
-        : ScriptObject(toCopy->vtable, toCopy->getDelegate()), m_source(toCopy->m_source.value())
+        : ScriptObject(toCopy->vtable, toCopy->getDelegate())
+        , m_source(toCopy->m_source.value())
+        , m_pcreInst(toCopy->m_pcreInst.value())
+        , m_lastIndex(0)
+        , m_optionFlags(toCopy->m_optionFlags)
+        , m_global(toCopy->m_global)
+        , m_hasNamedGroups(toCopy->m_hasNamedGroups)
     {
-        AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
-
         GC::SetFinalize(this);
-
-        // m_source = toCopy->m_source; -- no, now done in the initializer list above
-        m_global = toCopy->m_global;
-        m_lastIndex = 0;
-        m_optionFlags = toCopy->m_optionFlags;
-        m_hasNamedGroups = toCopy->m_hasNamedGroups;
-
-        StUTF8String utf8Pattern(m_source);
-        int errptr;
-        const char *error;
-        PCRE_STATE(toplevel());
-        m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
     }
 
-    RegExpObject::RegExpObject(RegExpClass *type,
-                               Stringp pattern,
-                               Stringp options)
-       : ScriptObject(type->ivtable(), type->prototypePtr()), m_source(pattern)
+    // This variant is used for "new RegExp(s)" and "new RegExp(s,f)" where s is not
+    // a RegExp object.  In the one-argument case "s" may have a trailing flags string.
+
+    RegExpObject::RegExpObject(RegExpClass *type, Stringp pattern, Stringp options)
+        : ScriptObject(type->ivtable(), type->prototypePtr())
+        , m_source(pattern)
+        , m_lastIndex(0)
+        , m_optionFlags(PCRE_UTF8)
+        , m_global(false)
+        , m_hasNamedGroups(false)
     {
-        AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
-        // m_source = pattern;  -- no, now done in the initializer list above
+        // Skip the precompilation if the pattern and options hit the cache.
 
-        GC::SetFinalize(this);
-
-        m_lastIndex = 0;
-        m_global = false;
-        int errptr;
-        const char *error;
-
-        m_optionFlags = PCRE_UTF8;
-
-        StUTF8String utf8Pattern(pattern);
-
-        // Check for named groups and embedded options if optionStr is NULL. ( Needed to handle
-        //  new RegExp( existingRegExpValue.toString() ) )
-        const char *ptr = utf8Pattern.c_str();
-        StUTF8String optionUTF8(options);
-        const char* optionStr = options ? optionUTF8.c_str() : NULL;
-
-        m_hasNamedGroups = false;
-        int numSlashSeen = 0;
-
-        while (*ptr) {
-            if (ptr[0] == '(' &&
-                ptr[1] == '?' &&
-                ptr[2] == 'P' &&
-                ptr[3] == '<')
-            {
-                m_hasNamedGroups = true;
-            }
-            else if (optionStr == NULL && ptr[0] == '/' && (ptr == utf8Pattern.c_str() || ptr[-1] != '\\') && numSlashSeen++ > 0)
-            {
-                optionStr = ptr;
-            }
-
-            ptr++;
-        }
-
-        // check options
-        if (optionStr)
+        if (!core()->m_regexCache.testCachedRegex(pattern, options))
         {
-            for(; *optionStr; optionStr++)
+            // Precompilation: check for named groups, and split out the options if no options were
+            // passed in, as for new RegExp( regex.toString() ).
+            
+            int32_t numSlashSeen = 0;
+            int32_t pos = 0;
+            int32_t length = pattern->length();
+            int32_t optionpos = 0;
+
+            // Scan the pattern, look for options.
+            
+            while (pos < length) 
             {
-                switch(*optionStr)
+                wchar c = pattern->charAt(pos);
+                if (c == 0)
+                    break;
+                if (c == '(' && 
+                    pos+3 < length &&
+                    pattern->charAt(pos+1) == '?' &&
+                    pattern->charAt(pos+2) == 'P' &&
+                    pattern->charAt(pos+3) == '<')
                 {
-                case 'g':
-                    m_global = true;
-                    break;
-                case 'i':
-                    m_optionFlags |= PCRE_CASELESS;
-                    break;
-                case 'm':
-                    m_optionFlags |= PCRE_MULTILINE;
-                    break;
-                case 's':
-                    m_optionFlags |= PCRE_DOTALL;
-                    break;
-                case 'x':
-                    m_optionFlags |= PCRE_EXTENDED;
-                    break;
+                    m_hasNamedGroups = true;
+                }
+                else if (options == NULL && c == '/' && (pos == 0 || pattern->charAt(pos-1) != '\\') && numSlashSeen++ > 0)
+                {
+                    options = pattern;
+                    optionpos = pos+1;
+                }
+                pos++;
+            }
+
+            // Scan the options.
+
+            if (options != NULL)
+            {
+                pos = optionpos;
+                length = options->length();
+                while (pos < length)
+                {
+                    switch(options->charAt(pos))
+                    {
+                    case 'g':
+                        m_global = true;
+                        break;
+                    case 'i':
+                        m_optionFlags |= PCRE_CASELESS;
+                        break;
+                    case 'm':
+                        m_optionFlags |= PCRE_MULTILINE;
+                        break;
+                    case 's':
+                        m_optionFlags |= PCRE_DOTALL;
+                        break;
+                    case 'x':
+                        m_optionFlags |= PCRE_EXTENDED;
+                        break;
+                    }
+                    pos++;
                 }
             }
         }
 
-        PCRE_STATE(toplevel());
-
-        m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
-        // FIXME: make errors available to actionscript
+        completeInitialization(options);
     }
 
     RegExpObject::~RegExpObject()
     {
-        PCRE_STATE(toplevel());
-        (pcre_free)((void*)(pcre*)m_pcreInst);
         m_global = false;
         m_lastIndex = 0;
         m_optionFlags = 0;
         m_hasNamedGroups = false;
-        m_pcreInst = NULL;
     }
 
+    // Note 'options' may be the same as m_source, and the options substring
+    // will then start in the middle somewhere.  So don't go inspecting that
+    // string too closely, it's used for the cache.
+    //
+    // If it is known that m_source and options hit the cache then only m_source
+    // need have the correct value, all others will be loaded from the cache.
+    // Otherwise, all fields apart from m_pcreInst must have correct values.
+
+    void RegExpObject::completeInitialization(String* options)
+    {
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
+        
+        GC::SetFinalize(this);
+        
+        bool found = false;
+        RegexCacheEntry& r = core()->m_regexCache.findCachedRegex(found, m_source, options);
+
+        if (found)
+        {
+            m_global = r.global;
+            m_optionFlags = r.optionFlags;
+            m_hasNamedGroups = r.hasNamedGroups;
+            m_pcreInst = r.regex;
+        }
+        else 
+        {
+            PCRE_STATE(toplevel());
+            
+            int errptr;
+            const char *error;
+            StUTF8String patternz(m_source);
+            void* pcreInst = (void*)pcre_compile(patternz.c_str(), m_optionFlags, &error, &errptr, NULL);
+            CompiledRegExp* regex = new (gc()) CompiledRegExp(pcreInst);
+            
+            if (!core()->m_regexCache.disabled())
+            {
+                r.pattern = m_source;
+                r.options = options;
+                r.global = m_global;
+                r.optionFlags = m_optionFlags;
+                r.hasNamedGroups = m_hasNamedGroups;
+                r.regex = regex;
+            }
+
+            m_pcreInst = regex;
+        }
+    }
+    
     // this = argv[0]
     // arg1 = argv[1]
     // argN = argv[argc]
@@ -353,7 +398,7 @@ namespace avmplus
         PCRE_STATE(toplevel());
         if( startIndex < 0 ||
             startIndex > subjectLength ||
-            (results = pcre_exec((pcre*)m_pcreInst,
+            (results = pcre_exec((pcre*)(m_pcreInst->regex),
                                 NULL,
                                 utf8Subject.c_str(),
                                 subjectLength,
@@ -391,14 +436,14 @@ namespace avmplus
         if (m_hasNamedGroups)
         {
             int entrySize;
-            pcre_fullinfo((pcre*)m_pcreInst, NULL, PCRE_INFO_NAMEENTRYSIZE, &entrySize);
+            pcre_fullinfo((pcre*)(m_pcreInst->regex), NULL, PCRE_INFO_NAMEENTRYSIZE, &entrySize);
 
             int nameCount;
-            pcre_fullinfo((pcre*)m_pcreInst, NULL, PCRE_INFO_NAMECOUNT, &nameCount);
+            pcre_fullinfo((pcre*)(m_pcreInst->regex), NULL, PCRE_INFO_NAMECOUNT, &nameCount);
 
             // this space is freed when (pcre*)m_pcreInst is freed
             char *nameTable;
-            pcre_fullinfo((pcre*)m_pcreInst, NULL, PCRE_INFO_NAMETABLE, &nameTable);
+            pcre_fullinfo((pcre*)(m_pcreInst->regex), NULL, PCRE_INFO_NAMETABLE, &nameTable);
 
             /* nameTable is a series of fixed length entries (entrySize)
                the first two bytes are the index into the ovector and the result
@@ -491,7 +536,7 @@ namespace avmplus
         // get start/end index of all matches
         int matchCount;
         while (lastIndex <= subjectLength &&
-               (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, (const char*)src,
+               (matchCount = pcre_exec((pcre*)(m_pcreInst->regex), NULL, (const char*)src,
                subjectLength, lastIndex, PCRE_NO_UTF8_CHECK, ovector, OVECTOR_SIZE)) > 0)
         {
             int captureCount = matchCount-1;
@@ -608,7 +653,7 @@ namespace avmplus
         // get start/end index of all matches
         int matchCount;
         while (lastIndex < subjectLength &&
-               (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, (const char*)src,
+               (matchCount = pcre_exec((pcre*)(m_pcreInst->regex), NULL, (const char*)src,
                          subjectLength, lastIndex, PCRE_NO_UTF8_CHECK, ovector, OVECTOR_SIZE)) > 0)
         {
             int captureCount = matchCount-1;

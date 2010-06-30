@@ -140,6 +140,114 @@ const int kBufferPadding = 16;
         uint64_t bits64;
     };
 
+    // Regular expression compilation cache.
+    //
+    // The cache is used by AvmCore and is a cache for compiled regular expressions.
+    // The cache significantly reduces the cost of using literal regular expressions 
+    // in loops (rather than manually hoisting them out of the loop), and it does so
+    // at low complexity.
+    //
+    // See Bugzilla 573504 for more information.
+
+    // A single entry in the regex cache.
+
+    class RegexCacheEntry
+    {
+        friend class RegexCache;
+        
+    private:
+        RegexCacheEntry()
+            : timestamp(0)
+            , hits(0)
+            , optionFlags(0)
+            , global(false)
+            , hasNamedGroups(false)
+        {
+        }
+
+        void clear()
+        {
+            pattern = NULL;
+            options = NULL;
+            regex = NULL;
+            timestamp = 0;
+            hits = 0;
+        }
+
+    public:
+        bool match(String* pattern, String* options)
+        {
+            return pattern == this->pattern && options == this->options;
+        }
+        
+        // Since RegexCacheEntry is embedded in RegexCache which is embedded in AvmCore
+        // which is a GCRoot, we only need DRC here not DRCWB.
+
+        DRC(String*)         pattern;
+        DRC(String*)         options;
+        DRC(CompiledRegExp*) regex;
+        uint64_t             timestamp;
+        uint32_t             hits;
+        int                  optionFlags;
+        bool                 global;
+        bool                 hasNamedGroups;
+    };
+    
+    // Cache replacement is LRU based on a simple timestamping mechanism.  There's also
+    // a mechanism to disable the cache if the number of entries that are used just once
+    // significantly outweigh the uses of the entries that are used more than once,
+    // that mechanism cuts the overhead of cache maintenance for programs that don't
+    // benefit from the cache.
+    
+    class RegexCache
+    {
+        friend class AvmCore;
+        
+    public:
+        /**
+         * Search for a match in the regex cache, set found to 'true' if there was
+         * a match, otherwise evict a member, set found to 'false'.  In all cases
+         * return a structure that can be updated.
+         */
+        RegexCacheEntry& findCachedRegex(bool& found, String* source, String* options);
+        
+        /**
+         * Search for a match in the regex cache, return 'true' if it's there or
+         * 'false' if not.
+         */
+        bool testCachedRegex(String* source, String* options);
+
+        /**
+         * Return true iff the cache has been disabled.  Note the cache is re-enabled
+         * following every GC.
+         */
+        bool disabled() { return m_disabled; }
+
+    private:
+        RegexCache();
+
+        /**
+         * Clear the cache, reenable it if it was disabled, reset utilization data.
+         */
+        void clear();
+
+    private:
+        // These parameters are not subject to a lot of experimental validation, in
+        // particular, the parameters for cache enabling/disabling are really just
+        // gut feelings.  More experimental validation would be good but we don't
+        // have a lot of content that uses regular expressions.
+
+        static const size_t cacheSize = 4;                  // Gut feeling: 4 is about right
+        static const uint64_t wastedWorkMultiplier = 10;    // Gut feeling: utilization should be above 10%
+        static const uint64_t warmupTicks = 1000;           // Number of ticks before we start worrying about hit rate
+
+        RegexCacheEntry m_entries[cacheSize];   // Cache storage
+        uint64_t        m_timestamp;            // Timestamp value for LRU
+        uint64_t        m_wasted;               // Utility of wasted cache entries (sum of usage counts == 1)
+        uint64_t        m_useful;               // Utility of useful cache entries (sum of usage counts > 1)
+        bool            m_disabled;             // true iff the cache has been (temporarily) disabled
+    };
+    
     /**
      * The main class of the AVM+ virtual machine.  This is the
      * main entry point to the VM for running ActionScript code.
@@ -272,6 +380,9 @@ const int kBufferPadding = 16;
         // don't call cavalierly
         void setCacheSizes(const CacheSizes& cs);
 
+    public:
+        RegexCache m_regexCache;
+        
     public:
         /**
          * Redirects the standard output of the VM to the specified
