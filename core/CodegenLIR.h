@@ -522,7 +522,7 @@ namespace avmplus
         void emitTypedCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo*);
 
         /** emit a JIT-discovered early bound call.  JIT must coerce args and receiver to the proper type */
-        void emitCoerceCall(AbcOpcode opcode, intptr_t method_id, int argc, MethodInfo*);
+        void emitCoerceCall(AbcOpcode opcode, intptr_t method_id, int argc, MethodSignaturep mms);
 
         /** emit a JIT-discovered early bound call to newInstance and invoke the initializer function */
         void emitConstructCall(intptr_t method_id, int argc, LIns* ctor, Traits* ctraits);
