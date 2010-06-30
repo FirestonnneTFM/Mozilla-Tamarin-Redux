@@ -378,16 +378,17 @@ class RuntestBase:
             else:
                 self.vmtype = 'release'
         elif not self.runSource and not self.rebuildtests:
-            (f,err,exitcode) = self.run_pipe('%s' % self.avm)
+            (f,err,exitcode) = self.run_pipe('%s -Dversion' % self.avm)
             try:
+                self.avm_features = f[1]    # save feature list
                 # determine avmshell type
-                if re.search('debug-debugger',f[1]):
+                if re.search('debug-debugger',f[0]):
                     self.vmtype = 'debugdebugger'
-                elif re.search('release-debugger',f[1]):
+                elif re.search('release-debugger',f[0]):
                     self.vmtype = 'releasedebugger'
-                elif re.search('debug',f[1]):
+                elif re.search('debug',f[0]):
                     self.vmtype = 'debug'
-                elif re.search('release',f[1]):
+                elif re.search('release',f[0]):
                     self.vmtype = 'release'
                 else:   # try to determine vmtype by filename
                     vm_name = splitext(split(self.avm)[1])[0]
@@ -401,19 +402,17 @@ class RuntestBase:
                         self.vmtype = 'release'
 
                 # get the build number and hash
-                self.avmversion = self.getAvmVersion(txt=f[1])
+                self.avmversion = self.getAvmVersion(txt=f[0])
             except:
                 # Error getting shell info
                 self.vmtype = 'unknown'
                 self.avmversion = 'unknown'
 
-
-            f = ' '.join(f)
             # determine if api versioning switch is available
-            if re.search('(api)', f):
+            if re.search('AVMFEATURE_API_VERSIONING', self.avm_features):
                 self.apiVersioning = True
 
-        wordcode = '-wordcode' if re.search('wordcode', self.avm) else ''
+        wordcode = '-wordcode' if re.search('AVMFEATURE_WORDCODE_INTERP', self.avm_features) else ''
 
         self.config = cputype+'-'+self.osName+'-'+vm+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
 
@@ -1142,6 +1141,7 @@ class RuntestBase:
 
     def preProcessTests(self):  # don't need AVM if rebuilding tests
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
+        self.verbose_print(self.avm_features)
         if self.avmversion:
             self.js_print('avm version: %s' % self.avmversion)
         if self.ascversion:
