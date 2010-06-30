@@ -52,6 +52,11 @@
 logfile=build-$platform-$shell_release.log
 beginSilent
 
+##
+# Update the version string
+##
+. ../all/util-update-version.sh
+
 cd $basedir/platform/android
 test -f avmshell && {
    rm -f ./avmshell
@@ -72,7 +77,6 @@ then
 else
     echo "avmshell was not created"
     endSilent
-#    exit 1
-    exit 0
+    exit 1
 fi
 
