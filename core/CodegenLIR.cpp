@@ -3586,18 +3586,20 @@ namespace avmplus
     }
 
     /**
-     * emit a constructor call, or a late bound constructor call.
-     * early binding is possible when we know the constructor (class) being
-     * used, and we know that it doesn't use custom native instance initializer
-     * code, as indicated by the itraits->hasCustomConstruct flag.
+     * Emit a constructor call, or a late bound constructor call.
+     * Early binding is possible when we know the constructor (class) being
+     * used, and we know it doesn't override ClassClosure::construct(),
+     * as indicated by the itraits->hasCustomConstruct flag.
      */
     void CodegenLIR::emitConstruct(int argc, LIns* ctor, Traits* ctraits)
     {
-        // attempt to early bind to constructor method.
+        // Attempt to early bind to constructor method.
         Traits* itraits = NULL;
         if (ctraits) {
             itraits = ctraits->itraits;
             if (itraits && !itraits->hasCustomConstruct) {
+                // Inline the body of ClassClosure::construct() and early bind the call
+                // to the constructor method, if it's resolved and argc is legal.
                 // Cannot resolve signatures now because that could cause a premature verification failure,
                 // one that should occur in the class's script-init.
                 // If it's already resolved then we're good to go.
@@ -3609,7 +3611,7 @@ namespace avmplus
             }
         }
 
-        // generic path, could not early bind to a constructor method
+        // Generic path: could not early bind to a constructor method.
         // stack in: ctor-object arg1..N
         // sp[-argc] = construct(env, sp[-argc], argc, null, arg1..N)
         int ctor_index = state->sp() - argc;
