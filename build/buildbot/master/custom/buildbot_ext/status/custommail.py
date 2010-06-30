@@ -142,7 +142,7 @@ class CustomMail(AggregateMailNotifier):
             res = "fail"
         
         text = ''
-        text += 'Slave(s):  %s\n' % ', '.join(slaves)
+        text += 'Slave:  %s\n' % name
         text += 'Branch:    %s\n' % self.branch
         
         text += self.getChangesText(sourcestamp.changes)
