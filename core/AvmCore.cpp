@@ -58,6 +58,84 @@ namespace avmplus
 {
     using namespace MMgc;
 
+    // Regex compilation cache.
+
+    RegexCache::RegexCache()
+        : m_timestamp(0)
+        , m_wasted(0)
+        , m_useful(0)
+        , m_disabled(false)
+    {
+    }
+    
+    RegexCacheEntry& RegexCache::findCachedRegex(bool& found, String* source, String* options)
+    {
+        if (m_disabled) {
+            found = false;
+            return m_entries[0];
+        }
+        
+        size_t smallest = 0;
+
+        for ( size_t i=0 ; i < ARRAY_SIZE(m_entries) ; i++ ) {
+            RegexCacheEntry& it = m_entries[i];
+            if (it.match(source, options)) {
+                it.timestamp = ++m_timestamp;
+                it.hits++;
+                found = true;
+                return it;
+            }
+            if (it.timestamp < m_entries[smallest].timestamp)
+                smallest = i;
+        }
+
+        // A miss.  Evict an entry and account for its utility.
+
+        RegexCacheEntry& it = m_entries[smallest];
+        
+        // If a cache entry was used just once then it was wasted work;
+        // if wasted work dominates then disable the cache.
+
+        if (it.hits == 1)
+            m_wasted++;
+        else if (it.hits > 1)
+            m_useful+=it.hits-1;
+        if (m_timestamp > warmupTicks && m_wasted > m_useful*wastedWorkMultiplier) {
+            //printf("DISABLED!\n");
+            m_disabled = true;
+        }
+        
+        // New entry
+
+        it.clear();
+        it.timestamp = ++m_timestamp;
+        it.hits++;
+        found = false;
+        return it;
+    }
+    
+    bool RegexCache::testCachedRegex(String* source, String* options)
+    {
+        if (m_disabled)
+            return false;
+        
+        for ( size_t i=0 ; i < ARRAY_SIZE(m_entries) ; i++ )
+            if (m_entries[i].match(source, options))
+                return true;
+
+        return false;
+    }
+    
+    void RegexCache::clear()
+    {
+        for ( size_t i=0 ; i < ARRAY_SIZE(m_entries) ; i++ )
+            m_entries[i].clear();
+        m_timestamp = 0;
+        m_wasted = 0;
+        m_useful = 0;
+        m_disabled = false;
+    }
+    
     void AvmCore::setCacheSizes(const CacheSizes& cs)
     {
         #ifdef AVMPLUS_VERBOSE
@@ -2946,6 +3024,11 @@ return the result of the comparison ToPrimitive(x) == y.
             if (rehashFlag)
                 rehashNamespaces(numNamespaces);
         }
+
+        // Clear out the regex compile cache, just to prevent big strings or regexes from
+        // hanging around.
+        
+        m_regexCache.clear();
 
 #ifdef DEBUGGER
         if (_sampler)

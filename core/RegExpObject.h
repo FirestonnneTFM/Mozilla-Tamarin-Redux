@@ -42,6 +42,15 @@
 
 namespace avmplus
 {
+    class CompiledRegExp : public MMgc::RCObject
+    {
+    public:
+        CompiledRegExp(void* regex) : regex(regex) {}
+        ~CompiledRegExp();
+
+        void * regex; // The compiled regular expression
+    };
+    
     /**
      * The RegExpObject class is the C++ implementation of instances
      * of the "RegExp" class, as defined in the ECMAScript standard.
@@ -86,12 +95,14 @@ namespace avmplus
         bool get_extended();
 
     private:
-        DRCWB(Stringp) m_source;
-        bool           m_global;
-        int            m_lastIndex;
-        int            m_optionFlags;
-        bool           m_hasNamedGroups;
-        void*          m_pcreInst;
+        DRCWB(Stringp)         m_source;
+        DRCWB(CompiledRegExp*) m_pcreInst;
+        int                    m_lastIndex;
+        int                    m_optionFlags;
+        bool                   m_global;
+        bool                   m_hasNamedGroups;
+
+        void completeInitialization(String* options);
 
         Atom stringFromUTF8(const char *buffer, int len);
 
