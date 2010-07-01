@@ -203,14 +203,12 @@ class Configuration:
                 'LIBPATH'   : '-LIBPATH:'
                 })
             if self._target[1] == "arm":
-				self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib" -ENTRY:"mainWCRTStartup"'})
-				
-				if sys.platform.startswith('cygwin'):
-					self._acvars.update({'ASM' : '$(topsrcdir)/build/cygwin-wrapper.sh armasm.exe -nologo -arch 5T'})
-				else:
-					self._acvars.update({'ASM' : 'armasm.exe -nologo -arch 5T'})
-				
-				
+                self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib" -ENTRY:"mainWCRTStartup"'})
+                if sys.platform.startswith('cygwin'):
+                    self._acvars.update({'ASM' : '$(topsrcdir)/build/cygwin-wrapper.sh armasm.exe -nologo -arch 5T'})
+                else:
+                    self._acvars.update({'ASM' : 'armasm.exe -nologo -arch 5T'})
+
             if self._target[1] == "x86_64":
                 if sys.platform.startswith('cygwin'):
                     self._acvars.update({'MASM' : '$(topsrcdir)/build/cygwin-wrapper.sh ml64.exe -nologo -c '})
@@ -298,7 +296,7 @@ class Configuration:
                 self._acvars.update({'zlib_EXTRA_CFLAGS' : ''})
                 
         elif self._target[0] == 'sunos':
-	    if options.getBoolArg("gcc", False):
+            if options.getBoolArg("gcc", False):
                 self._acvars.update({
                 'CPPFLAGS'     : os.environ.get('CPPFLAGS', '') + "-DBROKEN_OFFSETOF",
                 'CXX'          : os.environ.get('CXX', 'g++'),
@@ -312,7 +310,7 @@ class Configuration:
                 'MKDLL'        : '$(CXX) -shared -o $(1)',
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
- 	    else:
+            else:
                 self._compiler = 'SunStudio'
                 self._acvars.update({
                 'I_SUFFIX': 'i',

@@ -45,7 +45,7 @@ _arg = re.compile(r"^--(enable|disable|with|without)-([\w-]+)(?:=(.*)|$)$")
 _yes = re.compile("^(t|true|yes|y|1)$", re.I)
 _no = re.compile("^(f|false|no|n|0)$", re.I)
 _help = re.compile("^(-h|--help)$")
-
+_sdk = re.compile("^--mac-sdk=(.*)$")
 
 class Options:
     def __init__(self, argv = sys.argv):
@@ -55,6 +55,7 @@ class Options:
         self.ignore_unknown_flags = False
         self.help = False
         self._allargs = {}
+        self.sdk_version = None
 
 
         unknown_args = []
@@ -67,6 +68,11 @@ class Options:
             m = _host.search(arg)
             if m:
                 self.host = m.group(1)
+                continue
+
+            m = _sdk.search(arg)
+            if m:
+                self.sdk_version = m.group(1)
                 continue
 
             if _ignore.search(arg) is not None:
@@ -106,7 +112,7 @@ class Options:
                 self._args[n] = False
 
         if unknown_args and not self.ignore_unknown_flags:
-            raise Exception("Unrecognized command line parameters: "
+            raise Exception("Unrecognized command line parameter(s): "
                             + ', '.join(unknown_args))
 
 

@@ -46,6 +46,7 @@ import os.path
 import sys
 import build.process
 import re
+import subprocess
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -55,6 +56,30 @@ sys.path.append(thisdir)
 from build.configuration import *
 import build.getopt
 import build.avmfeatures
+
+
+def _setSDKParams(sdk_version,os_ver):
+    # On 10.5/6 systems, if "--mac-sdk=104u" is passed in, compile for the 10.4u SDK and override CC/CXX to use gcc/gxx 4.0.x
+    if sdk_version == '104u':
+        os_ver,sdk_number = '10.4','10.4u'
+        config._acvars['CXX'] = 'g++-4.0'
+        config._acvars['CC']  = 'gcc-4.0'
+    elif sdk_version == '105':
+        os_ver,sdk_number = '10.5','10.5'
+    elif sdk_version == '106':
+        os_ver,sdk_number = '10.6','10.6'
+    # For future expansion
+    #elif sdk_version == '107':
+        #os_ver,sdk_number = '10.7','10.7'
+    else:
+        print'Unknown SDK version -> %s. Expected values are 104u, 105 or 106.' % sdk_version
+        sys.exit(2)
+
+    if not os.path.exists("/Developer/SDKs/MacOSX%s.sdk" % sdk_number):
+        print'Could not find /Developer/SDKs/MacOSX%s.sdk' % sdk_number
+        sys.exit(2)
+    else:
+        return os_ver,sdk_number
 
 o = build.getopt.Options()
 
@@ -108,8 +133,8 @@ if MMGC_DYNAMIC:
     MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
 
-arm_fpu = o.getBoolArg("arm-fpu",False)  
-arm_neon = o.getBoolArg("arm-neon",False)  
+arm_fpu = o.getBoolArg("arm-fpu",False)
+arm_neon = o.getBoolArg("arm-neon",False)
 
 the_os, cpu = config.getTarget()
 
@@ -154,7 +179,7 @@ elif config.getCompiler() == 'VS':
             APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- -Zc:forScope "
         else:
             OPT_CXXFLAGS = "-O2 -GR- "
-            
+
         if arm_fpu:
             OPT_CXXFLAGS += "-QRfpe- -QRarch6"  # compile to use hardware fpu and armv6
     else:
@@ -200,6 +225,12 @@ if sys_root_dir is not None:
     OPT_CXXFLAGS += " --sysroot=%s " % sys_root_dir
 
 if the_os == "darwin":
+    # Get machine's OS version number and trim off anything after '10.x'
+    p = subprocess.Popen('sw_vers -productVersion', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    os_ver = p.stdout.read()
+    parts = os_ver.split('.')
+    os_ver = parts[0] + '.' + parts[1]
+
     AVMSHELL_LDFLAGS += " -exported_symbols_list "  + thisdir + "/platform/mac/avmshell/exports.exp"
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
@@ -207,23 +238,25 @@ if the_os == "darwin":
                          'AVMPLUS_MAC': None,
                          'TARGET_RT_MAC_MACHO': 1})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
-    if cpu == 'x86_64' or cpu == 'ppc64':
-        # 64-bit mac targets require the 10.5 sdk.
-        # Note that we don't override CC/CXX here; the calling script is expected to do that if desired 
-        # (thus we can support 10.5sdk with either 4.0 or 4.2)
-        APP_CXXFLAGS += "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk "
-        config.subst("MACOSX_DEPLOYMENT_TARGET",10.5)
-        if cpu == 'x86_64':
-            APP_CXXFLAGS += "-arch x86_64 "
-            APP_CFLAGS += "-arch x86_64 "
-            OS_LDFLAGS += "-arch x86_64 "
-        else:
-            APP_CXXFLAGS += "-arch ppc64 "
-            APP_CFLAGS += "-arch ppc64 "
-            OS_LDFLAGS += "-arch ppc64 "
+
+    # If an sdk is selected align OS and gcc/g++ versions to it
+    if o.sdk_version is not None:
+        os_ver,sdk_number = _setSDKParams(o.sdk_version, os_ver)
+        APP_CXXFLAGS += "-mmacosx-version-min=%s -isysroot /Developer/SDKs/MACOSX%s.sdk " % (os_ver,sdk_number)
     else:
-        APP_CXXFLAGS += "-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
-        config.subst("MACOSX_DEPLOYMENT_TARGET",10.4)
+        APP_CXXFLAGS += "-mmacosx-version-min=%s " % os_ver
+
+    config.subst("MACOSX_DEPLOYMENT_TARGET",os_ver)
+
+    if cpu == 'ppc64':
+        APP_CXXFLAGS += "-arch ppc64 "
+        APP_CFLAGS += "-arch ppc64 "
+        OS_LDFLAGS += "-arch ppc64 "
+    elif cpu == 'x86_64':
+        APP_CXXFLAGS += "-arch x86_64 "
+        APP_CFLAGS += "-arch x86_64 "
+        OS_LDFLAGS += "-arch x86_64 "
+
 elif the_os == "windows" or the_os == "cygwin":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
@@ -328,4 +361,3 @@ config.subst("MMGC_DYNAMIC", MMGC_DYNAMIC and 1 or '')
 config.generate("Makefile")
 
 o.finish()
-
