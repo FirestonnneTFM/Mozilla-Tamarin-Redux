@@ -202,15 +202,14 @@ class CustomMail(AggregateMailNotifier):
         text = 'Changes in this build:\n'
         for n, change in enumerate(changes):
             text += '\n'
-            text += '%s.\n' % (n+1)
-            text += '    Revision: %s\n' % change.revision
-            text += '    User: %s\n' % change.who
+            text += '%s.\tRevision: %s\n' % ((n+1), change.revision)
+            text += '\tUser: %s\n' % change.who
             commentsList = change.comments.split('\n')
             if commentsList:
-                text += '    Comments: %s\n' % commentsList.pop(0)
+                text += '\tComments: %s\n' % commentsList.pop(0)
                 # print the rest of the comments (if any)
                 for comment in commentsList:
-                    text += '              %s\n' % comment
+                    text += '\t\t%s\n' % comment
         text += '\n'
         return text
     
