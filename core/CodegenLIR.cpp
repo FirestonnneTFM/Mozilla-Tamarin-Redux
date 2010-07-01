@@ -4890,10 +4890,27 @@ namespace avmplus
 
             case OP_in:
             {
-                LIns* lhs = loadAtomRep(sp-1);
-                LIns* rhs = loadAtomRep(sp);
-                LIns* out = callIns(FUNCTIONID(op_in), 3, env_param, lhs, rhs);
-                out = atomToNativeRep(result, out);
+                // sp[-1] = env->in_operator(sp[-1], sp[0])
+                int lhsDisp = sp-1;
+                LIns *lhs;
+                LIns *rhs = loadAtomRep(sp);
+                LIns *out;
+                Traits *lhsType = state->value(lhsDisp).traits;
+                switch (bt(lhsType)) {
+                case BUILTIN_uint:
+                    lhs = localGet(lhsDisp);
+                    out = callIns(FUNCTIONID(haspropertylate_u), 3, env_param, rhs, lhs);
+                    break;
+                case BUILTIN_int:
+                    lhs = localGet(lhsDisp);
+                    out = callIns(FUNCTIONID(haspropertylate_i), 3, env_param, rhs, lhs);
+                    break;
+                default:
+                    lhs = loadAtomRep(lhsDisp);
+                    out = callIns(FUNCTIONID(op_in), 3, env_param, lhs, rhs);
+                    out = atomToNativeRep(result, out);
+                    break;
+                }
                 localSet(sp-1, out, result);
                 break;
             }

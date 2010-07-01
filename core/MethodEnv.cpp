@@ -431,6 +431,32 @@ namespace avmplus
 
 #endif // FEATURE_NANOJIT
 
+    /*bool*/ int32_t MethodEnv::haspropertylate_u(Atom obj, uint32_t index) const
+    {
+        // keep in sync with Toplevel::in_operator
+        ScriptObject *o = (atomKind(obj) == kObjectType) ?
+            AvmCore::atomToScriptObject(obj) :
+            this->toplevel()->toPrototype(obj);
+        bool present = o->hasUintProperty(index);
+        return (int32_t)present;
+    }
+
+    /*bool*/ int32_t MethodEnv::haspropertylate_i(Atom obj, int32_t index) const
+    {
+        // keep in sync with Toplevel::in_operator
+        ScriptObject *o = (atomKind(obj) == kObjectType) ?
+            AvmCore::atomToScriptObject(obj) :
+            this->toplevel()->toPrototype(obj);
+        bool present;
+        if (index >= 0) {
+            present = o->hasUintProperty((uint32_t)index);
+        } else {
+            Atom interned = this->core()->internInt(index)->atom();
+            present = o->hasAtomProperty(interned);
+        }
+        return (int32_t)present;
+    }
+
     Atom MethodEnv::getpropertylate_i(Atom obj, int32_t index) const
     {
         // here we put the case for bind-none, since we know there are no bindings
