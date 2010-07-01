@@ -108,6 +108,8 @@ namespace avmplus
         ArrayObject* createRest(Atom* argv, int32_t argc);
         Atom getpropertylate_i(Atom obj, int32_t index) const;
         Atom getpropertylate_u(Atom obj, uint32_t index) const;
+        /*bool*/ int32_t haspropertylate_i(Atom obj, int32_t index) const;
+        /*bool*/ int32_t haspropertylate_u(Atom obj, uint32_t index) const;
 
 #if defined FEATURE_NANOJIT || defined VMCFG_AOT
         void setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);

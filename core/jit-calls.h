@@ -960,6 +960,8 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeIntProperty), SIG2(U,P,I), UIntVectorObject_getNativeIntProperty)
     METHOD(ARRAYADDR(ArrayObject::_getIntProperty), SIG2(A,P,I), ArrayObject_getIntProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_getIntProperty), SIG2(A,P,I), ObjectVectorObject_getIntProperty)
+    METHOD(ENVADDR(MethodEnv::haspropertylate_u), SIG3(I,P,A,U), haspropertylate_u)
+    METHOD(ENVADDR(MethodEnv::haspropertylate_i), SIG3(I,P,A,I), haspropertylate_i)
     METHOD(ENVADDR(MethodEnv::findproperty), SIG7(A,P,P,P,I,P,B,P), findproperty)
     METHOD(ENVADDR(MethodEnv::checkfilter), SIG2(V,P,A), checkfilter)
     METHOD(ENVADDR(MethodEnv::getdescendants), SIG3(A,P,A,P), getdescendants)
