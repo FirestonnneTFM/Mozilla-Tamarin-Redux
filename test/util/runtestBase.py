@@ -413,8 +413,13 @@ class RuntestBase:
             if re.search('AVMFEATURE_API_VERSIONING', self.avm_features):
                 self.apiVersioning = True
 
-        wordcode = '-wordcode' if re.search('AVMFEATURE_WORDCODE_INTERP', self.avm_features) else ''
-
+        # need to also check for wordcode in the avm name for winmo
+        if re.search('AVMFEATURE_WORDCODE_INTERP', self.avm_features) \
+           or re.search('wordcode', self.avm):
+            wordcode = '-wordcode'
+        else:
+            wordcode = ''
+            
         self.config = cputype+'-'+self.osName+'-'+vm+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
 
     def determineOS(self):
