@@ -3906,7 +3906,7 @@ namespace MMgc
     void GC::ThreadLeave( bool doCollectionWork, GC *prevGC)
     {
 
-        if(--enterCount == 0) {
+        if(enterCount-1 == 0) {
             if(doCollectionWork) {
                 ThreadEdgeWork();
             }
@@ -3920,7 +3920,7 @@ namespace MMgc
             heap->SetActiveGC(prevGC);
         GCAssert(curgc == this);
 
-        if(enterCount == 0) {
+        if(--enterCount == 0) {
             stackEnter = NULL;
             // cleared so we remain thread ambivalent
             rememberedStackTop = NULL;
