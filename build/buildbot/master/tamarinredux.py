@@ -1069,15 +1069,7 @@ class tamarinredux:
     #########################################
     android_smoke_factory = factory.BuildFactory()
     android_smoke_factory.addStep(download_testmedia)
-    android_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['./run-smoketests-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
+    android_smoke_factory.addStep(test_smoke_local)
     android_smoke_factory.addStep(util_process_clean)
 
     android_smoke_builder = {
@@ -1138,15 +1130,7 @@ class tamarinredux:
     #########################################
     linux_mips_smoke_factory = factory.BuildFactory()
     linux_mips_smoke_factory.addStep(download_testmedia)
-    linux_mips_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['./run-smoketests.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
+    linux_mips_smoke_factory.addStep(test_smoke_local)
     linux_mips_smoke_factory.addStep(util_process_clean)
 
     linux_mips_smoke_builder = {
@@ -1517,15 +1501,7 @@ class tamarinredux:
     #### builder for android-test       ####
     ########################################
     android_test_factory = factory.BuildFactory()
-    android_test_factory.addStep(TestSuiteShellCommand(
-                command=['./run-acceptancetests-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run acceptance tests...',
-                descriptionDone='finished acceptance tests.',
-                name="Testsuite_Release",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
+    android_test_factory.addStep(test_generic_adb(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
     android_test_factory.addStep(util_process_clean)
     android_test_factory.addStep(util_clean_buildsdir)
 

@@ -1005,15 +1005,7 @@ class sandbox:
     #########################################
     sb_android_smoke_factory = factory.BuildFactory()
     sb_android_smoke_factory.addStep(download_testmedia)
-    sb_android_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['./run-smoketests-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
+    sb_android_smoke_factory.addStep(test_smoke_local)
     sb_android_smoke_factory.addStep(util_process_clean)
 
     sb_android_smoke_builder = {
@@ -1073,15 +1065,7 @@ class sandbox:
     #########################################
     sb_linux_mips_smoke_factory = factory.BuildFactory()
     sb_linux_mips_smoke_factory.addStep(download_testmedia)
-    sb_linux_mips_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['./run-smoketests.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
+    sb_linux_mips_smoke_factory.addStep(test_smoke_local)
     sb_linux_mips_smoke_factory.addStep(util_process_clean)
 
     sb_linux_mips_smoke_builder = {
@@ -1450,15 +1434,7 @@ class sandbox:
     #### builder for android-test       ####
     ########################################
     sb_android_test_factory = factory.BuildFactory()
-    sb_android_test_factory.addStep(TestSuiteShellCommand(
-                command=['./run-acceptancetests-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-                description='starting to run acceptance tests...',
-                descriptionDone='finished acceptance tests.',
-                name="Testsuite_Release",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
+    sb_android_test_factory.addStep(test_generic_adb(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
     sb_android_test_factory.addStep(util_process_clean)
     sb_android_test_factory.addStep(util_clean_buildsdir)
 
