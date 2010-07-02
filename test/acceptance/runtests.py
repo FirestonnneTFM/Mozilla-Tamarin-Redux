@@ -301,7 +301,7 @@ class AcceptanceRuntest(RuntestBase):
     def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
         if self.androidthreads:
             try:
-                n=int(threading.currentThread().name[7:])-1
+                n=int(threading.currentThread().getName()[7:])-1
                 if n<len(self.androiddevices):
                    extraVmArgs+=" --androidid=%s" % self.androiddevices[n]
             except:
