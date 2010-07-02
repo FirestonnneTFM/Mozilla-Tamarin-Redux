@@ -312,6 +312,15 @@ package abcdump
             return this[target] = "L" + (++count)
         }
     }
+
+    class ExceptionInfo
+    {
+        var from:int
+        var to:int
+        var target:int
+        var type
+        var name
+    }
     
     class MethodInfo extends MemberInfo
     {
@@ -328,6 +337,7 @@ package abcdump
         var code_offset:uint
         var code_length:uint
         var code:ByteArray
+        var exceptions // ExceptionInfo[]
         var activation:Traits
 
         public function toString():String
@@ -530,6 +540,11 @@ package abcdump
                     totalSize += size
                     opSizes[opcode] = int(opSizes[opcode]) + size
                     dumpPrint(s)
+                }
+                if (exceptions) {
+                    for each (var ex in exceptions)
+                        dumpPrint(indent + "// handler [" + ex.from + ", " + ex.to + "] -> " + ex.target +
+                            (ex.name ? (" " + ex.name + ":" + ex.type) : (" :" + ex.type)));
                 }
                 dumpPrint(oldindent+"}\n")
             }
@@ -1132,16 +1147,21 @@ package abcdump
                     data.readBytes(m.code, 0, code_length)
                 }
                 var ex_count = readU32()
-                for (var j:int = 0; j < ex_count; j++)
-                {
-                    var from = readU32()
-                    var to = readU32()
-                    var target = readU32()
-                    var type = names[readU32()]
-                    //print("magic " + magic.toString(16))
-                    //if (magic >= (46<<16|16))
-                        var name = names[readU32()];
-                    infoPrint("exception method_id=" + i + " [" + from + ", " + to + "] " + type + " -> " + target)
+                if (ex_count > 0) {
+                    m.exceptions = []
+                    for (var j:int = 0; j < ex_count; j++)
+                    {
+                        var ex = new ExceptionInfo()
+                        m.exceptions.push(ex)
+                        ex.from = readU32()
+                        ex.to = readU32()
+                        ex.target = readU32()
+                        ex.type = names[readU32()]
+                        //print("magic " + magic.toString(16))
+                        //if (magic >= (46<<16|16))
+                            ex.name = names[readU32()];
+                        //infoPrint("exception method_id=" + i + " [" + ex.from + ", " + ex.to + "] " + ex.type + " -> " + ex.target)
+                    }
                 }
                 parseTraits(m.activation = new Traits)
             }
