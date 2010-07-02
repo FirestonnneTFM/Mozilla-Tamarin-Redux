@@ -94,6 +94,6 @@ else
     # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
     tr -d '\r' < /tmp/stdout${id} | sed 's/^EXITCODE=[0-9][0-9]*//g' > /tmp/stdout_clean${id}
     cat /tmp/stdout_clean${id}
-    rm -f /tmp/stdout${id} /tmp/stdout$_clean{id}
+    rm -f /tmp/stdout${id} /tmp/stdout_clean${id}
     exit $ret
 fi
