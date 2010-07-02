@@ -48,40 +48,32 @@
 ##
 . ../all/util-calculate-change.sh $1
 
-# silence output if silent=true (function defined in environment.sh)
-logfile=smokes-android.log
-beginSilent
 
-echo "running android shell remotely on host: $SHELLSERVER"
-test "$SHELLSERVER" = "" && {
-    echo "message: ERROR: SHELLSERVER is not set, should be set to the shell socket server"
-    endSilent
-    exit 1
-}
-test "$SHELLPORT" = "" && {
-    echo "message: ERROR: SHELLPORT is not set, should be set to the shell socket server port"
-    endSilent
-    exit 1
-}
 
-echo "lock get"
-./socketserver-client.py lock get
-res=$?
-test "$res" = "0" || {
-    echo "message: lock acquire failed"
-    endSilent
-    exit 1
-}
+##
+# Download the AVMSHELL if it does not exist
+##
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
+    echo "Download AVMSHELL: ${$shell_release}"
+    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release $buildsdir/$change-${changeid}/$platform/$shell_release
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of $shell failed"
+        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release
+        exit 1
+    }
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
+fi
+
 
 echo "setup $branch/${change}-${changeid}"
-./socketserver-client.py setup_android $branch/${change}-${changeid}
+../all/adb-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell_release
 res=$?
 test "$res" = "0" || {
     echo "message: setup failed"
-    $workdir/socketserver-client.py lock release
-    endSilent
     exit 1
 }
+
 if [ ! -e "$basedir/utils/asc.jar" ]; then
     echo "Download asc.jar"
     ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
@@ -89,7 +81,6 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
-        endSilent
         exit 1
     }
 fi
@@ -106,20 +97,46 @@ else
     export py=$PYTHONWIN
 fi
 
-export AVM=$workdir/shell-client-android.py
+export AVM=$basedir/platform/android/android_shell.sh
 export avmr=$AVM
 export avmrd=$AVM
 export avmd=$AVM
 export avmdd=$AVM
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=smokes-android.log
+beginSilent
+
+echo ""
+echo "*******************************************************************************"
+# Since the adb-shell-deployer ensures that ALL devices are setup with the same shell
+# we just need to find one device to query the AVM_FEATURE set 
+adboutput=`adb devices`
+deviceid=''
+IFS=$'\n'
+for i in ${adboutput}; do
+    if echo $i | grep -q 'device$'; then
+	deviceid=`echo $i | awk '{print $1}'`
+	break
+    fi
+done
+unset IFS
+
+echo AVM="$AVM --androidid=${deviceid}"
+echo "`$AVM --androidid=${deviceid}`"
+echo ""
+echo "shell compiled with these features:"
+features=`$AVM --androidid=${deviceid} -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
+for i in ${features}; do
+    echo feature: $i
+done
+echo ""
+echo "*******************************************************************************"
+echo ""
+
 cd $basedir/test
 $py ./runsmokes.py --testfile=./runsmokes-arm-android.txt --time=120
 ret=$?
-
-echo "lock release"
-cd $workdir
-
-$workdir/socketserver-client.py lock release
 
 exitcode=0
 test "$ret" = "0" ||

@@ -41,34 +41,59 @@
 #
 filelist=""
 flatfilelist=""
-if [ "$1" = "" ]
+adbargs=
+id=
+
+if [ "$1" = "" ] || [ "$1" = "-Dversion" ]
 then
-    adb shell "cd /data/app;./avmshell"
+    # Since the adb-shell-deployer ensures that ALL devices are setup with the same shell
+    # we just need to find one device to query 
+    adboutput=`adb devices`
+    deviceid=''
+    IFS=$'\n'
+    for i in ${adboutput}; do
+	if echo $i | grep -q 'device$'; then
+	    deviceid=`echo $i | awk '{print $1}'`
+	    break
+	fi
+    done
+    unset IFS
+    adb -s ${deviceid} shell "cd /data/app;./avmshell $1"
 else
     args=""
     for a in $*
     do
-       echo "$a" | grep ".*\.abc" > /dev/null
+       echo "$a" | grep -q "\-\-androidid="
        res=$?
        if [ "$res" = "0" ]
        then
-           file=$a
-           flatfile=`basename $a`
-           filelist="$filelist $flatfile"
-           adb push $file /data/app/$flatfile 2> /dev/null
-           args="$args $flatfile"       
+           id=`echo $a | awk -F= '{print $2}'`
+           adbargs="-s $id"
        else
-           args="$args $a"
+           echo "$a" | grep -q ".*\.abc"
+           res=$?
+           if [ "$res" = "0" ]
+           then
+               file=$a
+               flatfile=`basename $a`
+               filelist="$filelist $flatfile"
+               adb $adbargs push $file /data/app/$flatfile 2> /dev/null
+               args="$args $flatfile"       
+           else
+               args="$args $a"
+           fi
        fi
     done
     # workaround for adb not returning exit code, run a shell script and print exit code to stdout
-    adb shell "/data/app/android_runner.sh $args" > /tmp/stdout
-    ret=`cat /tmp/stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
+    adb $adbargs shell "/data/app/android_runner.sh $args" > /tmp/stdout${id}
+    ret=`cat /tmp/stdout${id} | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     for a in $filelist
     do
-        adb shell "rm /data/app/$a"
+        adb $adbargs shell "rm /data/app/$a"
     done
-    cat /tmp/stdout
-    rm -f /tmp/stdout
+    # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
+    tr -d '\r' < /tmp/stdout${id} | sed 's/^EXITCODE=[0-9][0-9]*//g' > /tmp/stdout_clean${id}
+    cat /tmp/stdout_clean${id}
+    rm -f /tmp/stdout${id} /tmp/stdout$_clean{id}
     exit $ret
 fi

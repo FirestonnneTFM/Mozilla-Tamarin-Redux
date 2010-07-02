@@ -38,7 +38,7 @@
 # ***** END LICENSE BLOCK ***** */
 #
 
-import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform
+import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, threading
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -63,7 +63,8 @@ class AcceptanceRuntest(RuntestBase):
     abcOnlyExt = '.abc_'  # only run, don't compile these abc files - underscore is used so that tests are not deleted when removing old abc files
     runESC = False
     escbin = '../../esc/bin/'
-
+    androidthreads = False
+    androiddevices = []
 
     def __init__(self):
         # Set threads to # of available cpus/cores
@@ -84,6 +85,7 @@ class AcceptanceRuntest(RuntestBase):
         print '    --ats           generate ats swfs instead of running tests'
         print '    --atsdir        base output directory for ats swfs - defaults to ATS_SWFS'
         print '    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially'
+        print '    --androidthreads    assign a thread for each android device connected.'
         print '    --verify        run a verify pass instead of running abcs'
         print '    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.'
         print '    --aotout        where the resulting binaries should be put (defaults to the location of the as file).'
@@ -94,7 +96,7 @@ class AcceptanceRuntest(RuntestBase):
 
     def setOptions(self):
         RuntestBase.setOptions(self)
-        self.longOptions.extend(['ext=','esc','escbin=','eval','threads=','ats','atsdir=','verify'])
+        self.longOptions.extend(['ext=','esc','escbin=','eval','threads=','ats','atsdir=','verify','androidthreads'])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -109,6 +111,8 @@ class AcceptanceRuntest(RuntestBase):
                 self.eval = True
             elif o in ('--threads',):
                 self.threads=int(v)
+            elif o in ('--androidthreads',):
+                self.androidthreads=True
             elif o in ('--ats',):
                 self.genAtsSwfs = True
                 self.rebuildtests = True
@@ -175,7 +179,20 @@ class AcceptanceRuntest(RuntestBase):
                 self.avm += ' %s%s.es.abc' % (self.escbin, f)
             self.avm += ' -- '
             self.avm += ' %s../test/spidermonkey-prefix.es' % self.escbin  #needed to run shell harness
-
+        if self.androidthreads:
+            p=subprocess.Popen('adb devices',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            (out,err)=p.communicate()
+            for line in out.split('\n'):
+                items=line.split()
+                if len(items)==2 and items[1]=='device':
+                    self.androiddevices.append(items[0])
+            if len(self.androiddevices)==0:
+                print("error: adb did not detect any attached devices")
+                print("adb devices stdout: %s stderr: %s" % (out,err))
+                sys.exit(1)
+            print("detected %d android devices" % len(self.androiddevices))
+            self.threads=len(self.androiddevices)
+            
     def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
         testnum = testAndNum[1]
@@ -282,6 +299,14 @@ class AcceptanceRuntest(RuntestBase):
         return outputCalls
 
     def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
+        if self.androidthreads:
+            try:
+                n=int(threading.currentThread().name[7:])-1
+                if n<len(self.androiddevices):
+                   extraVmArgs+=" --androidid=%s" % self.androiddevices[n]
+            except:
+                None
+
         outputCalls = []
         lpass = 0
         lfail = 0

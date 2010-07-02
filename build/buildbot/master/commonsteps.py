@@ -116,7 +116,19 @@ def test_generic_ssh(name, shellname, vmargs, config, scriptargs):
             name="Testsuite_%s" % name,
             workdir="../repo/build/buildbot/slaves/scripts"
             )
- 
+
+
+def test_generic_adb(name, shellname, vmargs, config, scriptargs):
+    # factory.addStep(test_generic_adb("Release", "avmshell", "", "", ""))
+    return TestSuiteShellCommand(
+            command=['../all/run-acceptance-generic-adb.sh', WithProperties('%s','revision'), '%s' % shellname, '%s' % vmargs, '%s' % config, '%s' % scriptargs],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='starting to run %s vmtests...' % name,
+            descriptionDone='finished %s vmtests' % name,
+            name="Testsuite_%s" % name,
+            workdir="../repo/build/buildbot/slaves/scripts"
+            )
+
 
 def test_emulator_generic(name, shellname, vmargs, config, scriptargs):
     # factory.addStep(test_emulator_generic("Release", "avmshell", "", "", ""))
@@ -239,6 +251,14 @@ download_testmedia = BuildShellCommand(
 
 test_smoke = TestSuiteShellCommand(
             command=['../all/run-smoketests.sh', WithProperties('%s','revision')],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='starting to run smoke tests...',
+            descriptionDone='finished smoke tests.',
+            name="SmokeTest",
+            workdir="../repo/build/buildbot/slaves/scripts")
+
+test_smoke_local = TestSuiteShellCommand(
+            command=['../run-smoketests.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to run smoke tests...',
             descriptionDone='finished smoke tests.',

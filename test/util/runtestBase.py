@@ -327,7 +327,8 @@ class RuntestBase:
                 cputype='arm'
                 self.osName='winmobile-emulator'
             elif (re.search('Bourne-Again shell script', f) or re.search('python script', f)) and re.search('android',self.avm):
-                cputype='arm-android'
+                cputype='arm'
+                self.osName='android'
             elif re.search('(Mach-O universal binary)', f):
                 # multiple architectures
                 machine = platform.machine()
