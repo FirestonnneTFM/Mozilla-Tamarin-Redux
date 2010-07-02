@@ -258,7 +258,7 @@ test_smoke = TestSuiteShellCommand(
             workdir="../repo/build/buildbot/slaves/scripts")
 
 test_smoke_local = TestSuiteShellCommand(
-            command=['../run-smoketests.sh', WithProperties('%s','revision')],
+            command=['./run-smoketests.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to run smoke tests...',
             descriptionDone='finished smoke tests.',

@@ -108,7 +108,7 @@ logfile=smokes-mips.log
 beginSilent
 
 cd $basedir/test
-$py ./runsmokes.py --testfile=./runsmokes-arm-android.txt --time=120
+$py ./runsmokes.py --testfile=./runsmokes-arm-mips.txt --time=120
 ret=$?
 
 exitcode=0
