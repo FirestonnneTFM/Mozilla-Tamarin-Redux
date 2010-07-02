@@ -2040,6 +2040,7 @@ namespace MMgc
 
     void GCRoot::Set(const void * _object, size_t _size)
     {
+        SetMarkStackSentinelPointer(NULL);
         this->object = _object;
         this->size = _size;
     }
@@ -2066,7 +2067,6 @@ namespace MMgc
 
     void GCRoot::Destroy()
     {
-        SetMarkStackSentinelPointer(NULL);
         Set(NULL, 0);
         if(gc) {
             gc->RemoveRoot(this);
