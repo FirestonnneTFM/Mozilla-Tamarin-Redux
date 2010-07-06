@@ -179,6 +179,7 @@ namespace MMgc
 #include "GCHashtable-inlines.h"
 #include "FixedAlloc-inlines.h"
 #include "FixedMalloc-inlines.h"
+#include "GCHeap-inlines.h"
 #include "GCAlloc-inlines.h"
 #include "GCLargeAlloc-inlines.h"
 #include "ZCT-inlines.h"
