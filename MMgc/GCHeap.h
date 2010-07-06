@@ -107,9 +107,9 @@ namespace MMgc
          * set to 'false' will not be properly registered, and when trying to free
          * them with the value subsequently set to 'true' an assert may be triggered.)
          */
-        bool checkFixedMemory() { return _checkFixedMemory; }
+        bool checkFixedMemory();
 
-        void clearCheckFixedMemory() { _checkFixedMemory = false; }
+        void clearCheckFixedMemory();
         
         bool verbose;
         bool returnMemory;
@@ -149,12 +149,12 @@ namespace MMgc
         /**
          * Register the GC with the manager.  GC must not already be registered.
          */
-        bool tryAddGC(GC* gc) { return collectors.TryAdd(gc); }
+        bool tryAddGC(GC* gc);
 
         /**
          * Unregister the GC with the manager.  The GC must be registered.
          */
-        void removeGC(GC* gc) { collectors.Remove(gc); }
+        void removeGC(GC* gc);
 
         /**
          * Tell every other GC that 'gc' is starting a collection (ie there may be memory pressure there).
@@ -166,7 +166,10 @@ namespace MMgc
          */
         void signalEndCollection(GC* gc);
 
-        BasicList<GC*>& gcs() { return collectors; }
+        /**
+         * @return the registered GC's.
+         */
+        BasicList<GC*>& gcs();
 
     private:
         BasicList<GC*> collectors;          // array of collectors
@@ -289,14 +292,7 @@ namespace MMgc
         static void Init(const GCHeapConfig& props);
 
         /* legacy API */
-        static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128)
-        {
-            (void)malloc;
-            (void)free;
-            GCHeapConfig props;
-            props.initialSize = initialSize;
-            Init(props);
-        }
+        static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128);
 
         /**
          * Destroy the GCHeap singleton, returns the number of bytes still allocated in FixedMalloc (ie leaked)
@@ -304,30 +300,22 @@ namespace MMgc
         static size_t Destroy();
 
         /**
-         * Get the GCHeap singleton
+         * Get the GCHeap singleton; can be NULL (e.g. on OOM).
          */
-        inline static GCHeap *GetGCHeap()
-        {
-            // when OOM occurs the last EnterFrame macro destroys the
-            // heap so this can be NULL, clients should detect NULL
-            // and re-create the heap if desired
-            return instance;
-        }
+        static GCHeap *GetGCHeap();
 
         static void EnterLockInit();
         static void EnterLockDestroy();
 
-        inline static bool EnterLock()
-        {
-            GCAssert(instanceEnterLockInitialized);
-            return VMPI_lockAcquire(&instanceEnterLock);
-        }
+        /**
+         * Acquires global Enter mutex.
+         */
+        static bool EnterLock();
 
-        inline static bool EnterRelease()
-        {
-            GCAssert(instanceEnterLockInitialized);
-            return VMPI_lockRelease(&instanceEnterLock);
-        }
+        /**
+         * Releases global Enter mutex.
+         */
+        static bool EnterRelease();
 
         /**
          * Signal a too-large allocation request.  This /will/ cause an immediate shutdown of
@@ -398,7 +386,7 @@ namespace MMgc
         static void SignalExternalFreeMemory(size_t bytesToFree = kMaxObjectSize);
 
 
-        inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
+        FixedMalloc* GetFixedMalloc();
 
         /**
         * flags to be passed as second argument to alloc
@@ -435,7 +423,7 @@ namespace MMgc
          * You can call this without kCanFail but a failed allocation will result in
          * an immediate abort.
          */
-        void *AllocNoOOM(size_t size, uint32_t flags=flags_Alloc) { return Alloc(size, flags|kNoOOMHandling); }
+        void *AllocNoOOM(size_t size, uint32_t flags=flags_Alloc);
 
         /**
          * Signal that code memory is about to be allocated (accounting).  May invoke
@@ -454,16 +442,19 @@ namespace MMgc
          *             pointer that was previously returned by
          *             a call to Alloc.
          */
-        void Free(void *item) { FreeInternal(item, true, true); }
+        void Free(void *item);
 
         /**
          * Frees a block, but is guaranteed never to run OOM handling (which could
          * happen if internal data structures are shuffled in response to
          * a large part of the heap becoming free and being decommitted, say).
          */
-        void FreeNoOOM(void* item) { FreeInternal(item, true, false); }
+        void FreeNoOOM(void* item);
 
-        void FreeNoProfile(void *item) { FreeInternal(item, false, true); }
+        /**
+         * Frees a block; does not record the deallocation even if profiler enabled.
+         */
+        void FreeNoProfile(void *item);
 
         /**
          * Signal that code memory was deallocated (accounting).
@@ -471,18 +462,12 @@ namespace MMgc
          * @param gcheap_memory  true if the memory was allocated from GCHeap and has
          * been accounted for and we're just tracking that it is code memory.
          */
-        void SignalCodeMemoryDeallocated(size_t size, bool gcheap_memory)
-        {
-            if (gcheap_memory)
-                gcheapCodeMemory -= size;
-            else
-                externalCodeMemory -= size;
-        }
+        void SignalCodeMemoryDeallocated(size_t size, bool gcheap_memory);
 
         /**
          * Added for NJ's portability needs cause it doesn't always MMgc
          */
-        void Free(void *item, size_t /*ignore*/) { FreeInternal(item, true, true); }
+        void Free(void *item, size_t /*ignore*/);
 
         // Return the size (in blocks) of a valid item
         size_t Size(const void *item);
@@ -495,20 +480,20 @@ namespace MMgc
          * space actually used by allocated objects.
          * @return the minimum heap size in pages (kBlockSize bytes apiece)
          */
-        size_t GetUsedHeapSize() const { return numAlloc; }
+        size_t GetUsedHeapSize() const;
 
         /**
          * Returns the "free heap size", that is, the difference in the
          * total heap size and the used heap size
          * @return the minimum heap size in pages (kBlockSize bytes apiece)
          */
-        size_t GetFreeHeapSize() const { return GetTotalHeapSize()-numAlloc; }
+        size_t GetFreeHeapSize() const;
 
         /**
          * @return the amount of code memory currently allocated.  GCHeap does not
          * have a notion of "free" and "used" code memory.
          */
-        size_t GetTotalCodeSize() const { return gcheapCodeMemory + externalCodeMemory; }
+        size_t GetTotalCodeSize() const;
 
 #ifdef MMGC_POLICY_PROFILING
         /**
@@ -516,11 +501,7 @@ namespace MMgc
          * and the amount of private memory at the point where the maximum heap
          * number was recorded.
          */
-        void GetMaxTotalHeapSize(size_t& heapBlocks, size_t& privateBlocks)
-        {
-            heapBlocks = maxTotalHeapSize / kBlockSize;
-            privateBlocks = maxPrivateMemory / kBlockSize;
-        }
+        void GetMaxTotalHeapSize(size_t& heapBlocks, size_t& privateBlocks);
 #endif
 
         /**
@@ -529,7 +510,7 @@ namespace MMgc
          * free space.
          * @return the total heap size in pages (kBlockSize bytes apiece)
          */
-        size_t GetTotalHeapSize() const { return blocksLen - numDecommitted + largeAllocs; }
+        size_t GetTotalHeapSize() const;
 
         /**
          * gives memory back to the OS when there hasn't been any memory activity in a while
@@ -537,20 +518,20 @@ namespace MMgc
          */
         void Decommit();
 
-        void PreventDestruct(){preventDestruct++;}
-        void AllowDestruct(){GCAssert(preventDestruct > 0); preventDestruct--; }
+        void PreventDestruct();
+        void AllowDestruct();
 
 
 
 
-        static size_t SizeToBlocks(size_t bytes) { return ((bytes + kBlockSize - 1) & size_t(kBlockMask)) / kBlockSize; }
+        static size_t SizeToBlocks(size_t bytes);
 
 #ifdef MMGC_HOOKS
         /* Hooks are normally disabled in RELEASE builds, as there is a slight cost added
            to some hot paths.  */
         /* controls whether AllocHook and FreeHook are called */
-        void EnableHooks() { hooksEnabled = true; }
-        REALLY_INLINE bool HooksEnabled() const { return hooksEnabled; }
+        void EnableHooks();
+        bool HooksEnabled() const;
         void AllocHook(const void *item, size_t askSize, size_t gotSize);
         // called when object is determined to be garbage but we can't write to it yet
         void FinalizeHook(const void *item, size_t size);
@@ -561,8 +542,8 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_MEMORY_PROFILER
-        MemoryProfiler *GetProfiler() { return profiler; }
-        void DumpFatties() { profiler->DumpFatties(); }
+        MemoryProfiler *GetProfiler();
+        void DumpFatties();
 #endif
 
         // Every new GC must register itself with the GCHeap.
@@ -589,7 +570,7 @@ namespace MMgc
         void Abort();
 #endif
 
-        MemoryStatus GetStatus() { return status; }
+        MemoryStatus GetStatus();
 
         /**
          * CheckForAllocSizeOverflow checks whether an allocation request
@@ -611,23 +592,7 @@ namespace MMgc
          * @note This method may not return.  It is designed to terminate
          * the program if an overflow is detected.
          */
-        REALLY_INLINE static size_t CheckForAllocSizeOverflow(size_t size, size_t extra)
-        {
-            //calculate the total requested size
-            uint64_t total = (uint64_t)size + (uint64_t)extra;
-
-            //check if request size exceeds kMaxObjectSize
-            // or for sizeof(size_t) = 8 bytes check for wraparound on the total value
-#ifdef MMGC_64BIT
-            if ((total > (uint64_t)kMaxObjectSize) || (total < size) || (total < extra))
-                SignalObjectTooLarge();
-#else
-            // This is the 32-bit implementation, it avoids unnecessary checks for overflow.
-            if (total > (uint64_t)kMaxObjectSize)
-                SignalObjectTooLarge();
-#endif
-            return size_t(total);
-        }
+        static size_t CheckForAllocSizeOverflow(size_t size, size_t extra);
 
         /**
          * CheckForCallocSizeOverflow
@@ -650,29 +615,12 @@ namespace MMgc
          * @return: None.  This method is designed to call Abort() which in turn terminates
          * the program if an overflow is detected.
          */
-        REALLY_INLINE static size_t CheckForCallocSizeOverflow(size_t count, size_t elsize)
-        {
-            //If either of the size of requested bytes
-            //or the number of requested size
-            //or if their product exceeds kMaxObjectSize
-            //we treat that as overflow and abort
-            uint64_t total = (uint64_t)elsize * (uint64_t)count;
-#ifdef MMGC_64BIT
-            if(   elsize > kMaxObjectSize
-               || count >= kMaxObjectSize
-               || total > (uint64_t)kMaxObjectSize)
-                SignalObjectTooLarge();
-#else
-            if(total > (uint64_t)kMaxObjectSize)
-                SignalObjectTooLarge();
-#endif
-            return size_t(total);
-        }
+        static size_t CheckForCallocSizeOverflow(size_t count, size_t elsize);
 
         /** The native VM page size (in bytes) for the current architecture */
         const size_t kNativePageSize;
 
-        GCHeapConfig &Config() { return config; }
+        GCHeapConfig &Config();
 
         void log_percentage(const char *, size_t bytes, size_t relativeTo);
 
@@ -685,18 +633,15 @@ namespace MMgc
 #endif //MMGC_USE_SYSTEM_MALLOC
 #endif
 
-        void *GetStackEntryAddress() { return (void*)GetEnterFrame(); }
-        EnterFrame *GetEnterFrame() { return enterFrame; }
+        void *GetStackEntryAddress();
+        EnterFrame *GetEnterFrame();
 
-        GC* SetActiveGC(GC* gc)
-        {
-            GCAssertMsg(IsStackEntered(), "A MMGC_ENTER macro must exist to use GCHeap memory");
-            return GetEnterFrame()->SetActiveGC(gc);
-        }
-        inline bool IsStackEntered() { return !entryChecksEnabled || GetEnterFrame() != NULL; }
+        GC* SetActiveGC(GC* gc);
+
+        bool IsStackEntered();
 
         // remove this and make them always enabled once its possible
-        inline void SetEntryChecks(bool to) { entryChecksEnabled = to; }
+        void SetEntryChecks(bool to);
 
         // Heap regions
         // (ought to be private but some VMPI implementations
@@ -742,10 +687,7 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_PROFILER
         static void InitProfiler();
-        inline static bool IsProfilerInitialized()
-        {
-            return profiler != (MemoryProfiler*)-1;
-        }
+        static bool IsProfilerInitialized();
 #endif
 
         /**
@@ -822,41 +764,17 @@ namespace MMgc
             StackTrace *allocTrace;
             StackTrace *freeTrace;
 #endif
-            bool inUse() const { return prev == NULL; }
-            bool isSentinel() const { return baseAddr == 0; }
-            char *endAddr() const { return baseAddr + size*kBlockSize; }
-            void Clear()
-            {
-                baseAddr = NULL;
-                size = 0;
-                sizePrevious = 0;
-                prev = NULL;
-                next = NULL;
-                committed = false;
-                dirty = false;
-#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
-                allocTrace = 0;
-                freeTrace = 0;
-#endif
-            }
+            bool inUse() const;
 
-            void Init(char *baseAddr, size_t size, bool dirty)
-            {
-                Clear();
-                this->baseAddr     = baseAddr;
-                this->size         = size;
-                committed = true;
-                this->dirty = dirty;
-            }
+            bool isSentinel() const;
 
-            void FreelistInit()
-            {
-                Clear();
-                prev         = this;
-                next         = this;
-                committed    = true;
-                dirty       = true;
-            }
+            char *endAddr() const;
+
+            void Clear();
+
+            void Init(char *baseAddr, size_t size, bool dirty);
+
+            void FreelistInit();
         };
 
         // Core methods
@@ -907,14 +825,7 @@ namespace MMgc
         void RemoveRegion(Region *r, bool release=true);
 
         // debug only freelist consistency checks
-#ifdef _DEBUG
         void CheckFreelist();
-#else
-        REALLY_INLINE void CheckFreelist()
-        {
-            // nothing
-        }
-#endif
 
         bool BlocksAreContiguous(void *item1, void *item2);
 
@@ -925,26 +836,10 @@ namespace MMgc
         void LogChar(char c, size_t count);
 
         // Remove a block from a free list (inlined for speed)
-        inline void RemoveFromList(HeapBlock *block)
-        {
-            GCAssert(!block->inUse());
-            block->prev->next = block->next;
-            block->next->prev = block->prev;
-            block->next = block->prev = 0;
-        }
+        void RemoveFromList(HeapBlock *block);
 
         // Map a number of blocks to the appropriate large block free list index
-        // (inlined for speed)
-        inline uint32_t GetFreeListIndex(size_t size)
-        {
-            if (size <= kUniqueThreshold) {
-                return (uint32_t)size-1;
-            } else if (size >= kHugeThreshold) {
-                return kNumFreeLists-1;
-            } else {
-                return (uint32_t) ((size-kUniqueThreshold)/kFreeListCompression+kUniqueThreshold-1);
-            }
-        }
+        uint32_t GetFreeListIndex(size_t size);
 
         bool HardLimitExceeded(size_t additionalAllocationAmt = 0);
         bool SoftLimitExceeded(size_t additionalAllocationAmt = 0);
@@ -965,18 +860,9 @@ namespace MMgc
 
         bool statusNotificationBeingSent();
 
-        bool statusNotNormalOrAbort()
-        {
-            return status != kMemNormal && status != kMemAbort;
-        }
+        bool statusNotNormalOrAbort();
 
-        size_t numHeapBlocksToNumBlocks(size_t numBlocks)
-        {
-            size_t bytes = numBlocks * sizeof(HeapBlock);
-            // round up to nearest block
-            bytes = (bytes + kBlockSize - 1) & size_t(kBlockMask);
-            return bytes / kBlockSize;
-        }
+        size_t numHeapBlocksToNumBlocks(size_t numBlocks);
 
         void CheckForNewMaxTotalHeapSize();
 
@@ -1049,45 +935,7 @@ namespace MMgc
         bool abortStatusNotificationSent;
     };
 
-    // Move the following to GCHeap-inlines.h when we have it.
 
-    REALLY_INLINE size_t GCHeap::LargeAllocSize(const void *item)
-    {
-        GCAssert(config.useVirtualMemory);
-
-        Region *r = AddrToRegion(item);
-        // Note: we can't use r->baseAddr or r->reserveTop b/c
-        // alignment might have shifted the start down and we may
-        // not have committed the whole region
-        return (r->commitTop - (char*)item) / kBlockSize;
-    }
-
-    REALLY_INLINE size_t GCHeap::Size(const void *item)
-    {
-        MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
-        GCAssert((uintptr_t(item) & (kBlockSize-1)) == 0);
-        HeapBlock *block = AddrToBlock(item);
-        if(block)
-            return block->size;
-        else if(AddrToRegion(item))
-            return LargeAllocSize((void*)item);
-        return 0;
-    }
-
-    REALLY_INLINE bool GCHeap::statusNotificationBeingSent()
-    {
-        return m_notificationThread != NULL;
-    }
-
-    REALLY_INLINE bool GCHeap::HaveFreeRegion() const
-    {
-        return nextRegion != NULL || freeRegion != NULL;
-    }
-
-    REALLY_INLINE bool GCHeap::newPagesDirty()
-    {
-        return config.useVirtualMemory ? VMPI_areNewPagesDirty() : true;
-    }
 }
 
 #endif /* __GCHeap__ */

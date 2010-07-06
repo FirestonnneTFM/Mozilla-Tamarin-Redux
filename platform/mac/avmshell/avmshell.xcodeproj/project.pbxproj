@@ -858,6 +858,7 @@
 		19BDA442100CC20200172A70 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = ../../../nanojit/Allocator.h; sourceTree = SOURCE_ROOT; };
 		19C97B9D1097822700AE4BEE /* VTable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VTable-inlines.h"; path = "../../../core/VTable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19D4054F109610FF00BD696E /* Traits-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Traits-inlines.h"; path = "../../../core/Traits-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19DA6B8B119CA42700688989 /* GCHeap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHeap-inlines.h"; path = "../../../MMgc/GCHeap-inlines.h"; sourceTree = SOURCE_ROOT; };
 		3F5B2BC70F54B223009A93FE /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../../shell/Platform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC80F54B223009A93FE /* PosixFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixFile.cpp; path = ../../../shell/PosixFile.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BC90F54B223009A93FE /* PosixFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PosixFile.h; path = ../../../shell/PosixFile.h; sourceTree = SOURCE_ROOT; };
@@ -1457,6 +1458,7 @@
 				079DFA970F3A96BD0031D1B4 /* GCHashtable.h */,
 				079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */,
 				079DFA990F3A96BD0031D1B4 /* GCHeap.h */,
+				19DA6B8B119CA42700688989 /* GCHeap-inlines.h */,
 				079DFA9B0F3A96BD0031D1B4 /* GCLargeAlloc.cpp */,
 				079DFA9C0F3A96BD0031D1B4 /* GCLargeAlloc.h */,
 				075CBF191074B252009E599C /* GCLargeAlloc-inlines.h */,
