@@ -604,12 +604,24 @@ namespace MMgc
         }
 #endif
 
+        // We must set the kFreelist bit here.
+        //
         // Sweeping and finalization depend on kFreelist being set on free objects:
-        // both skip items on the free list.  For sweeping we set it in the already
-        // expensive must-be-swept logic.  For finalization we move the setting
-        // into CoalesceQuickList, where it will be set only for objects flushed to
-        // the regular free lists.  It's a savings overall if the quick list is busy,
-        // as we expect it to be.
+        // both skip items on the free list.  For sweeping we could set it in the already
+        // expensive must-be-swept logic.  For finalization we could  move the setting
+        // into CoalesceQuickList, where it would be set only for objects flushed to
+        // the regular free lists.  It would be a savings overall if the quick list is
+        // busy, as we expect it to be.
+        //
+        // However, when an object is freed explicitly, or freed by the reaper, there
+        // may still be pointers to that object in the GC'd heap (these could be
+        // uncleared pointers, untracked pointers, or misidentified pointers).  If
+        // the object is not marked as free the dead object may be be marked, which
+        // would mean that it may end up on both a free list and on the mark stack, and
+        // that would be bad; it could also mean that objects reachable from the
+        // dead object would be marked in turn and would be retained for a GC cycle.
+
+        SetBit(b, index, kFreelist);
 
         if (b->slowFlags)   // needs sweeping, or may have weak refs
         {
@@ -642,7 +654,8 @@ namespace MMgc
 #endif
 
         if (b->needsSweeping()) {
-            SetBit(b, index, kFreelist);
+            // See comment in GCAlloc::Free
+            //SetBit(b, index, kFreelist);
 
             // We know that the quick list does not have any items from the block b,
             // so we can push the object onto the block's free list and sweep the block.
@@ -713,9 +726,10 @@ namespace MMgc
             if (b->numFree == 0)
                 AddToFreeList(b);
 
-            int index = GetIndex(b, item);
             b->numFree++;
-            SetBit(b, index, kFreelist);
+            // See comment in GCAlloc::Free
+            //int index = GetIndex(b, item);
+            //SetBit(b, index, kFreelist);
 
             // The object was cleared in Free() or will be cleared in Alloc(), but
             // we need to link it onto the block's free list.
