@@ -159,11 +159,13 @@ if config.getCompiler() == 'GCC':
         else: # gcc 4.3 or later
             APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
     if arm_fpu:
-        OPT_CXXFLAGS += "-mfloat-abi=softfp -mfpu=vfp -march=armv6 -Wno-cast-align "  # compile to use hardware fpu and armv6
-        DEBUG_CXXFLAGS += OPT_CXXFLAGS
+        ARM_FPU_FLAGS = "-mfloat-abi=softfp -mfpu=vfp -march=armv6 -Wno-cast-align " # compile to use hardware fpu and armv6
+        OPT_CXXFLAGS += ARM_FPU_FLAGS
+        DEBUG_CXXFLAGS += ARM_FPU_FLAGS
     if arm_neon:
-        OPT_CXXFLAGS += "-mfloat-abi=softfp -mfpu=neon -march=armv7-a -Wno-cast-align "  # compile to use neon vfp and armv7
-        DEBUG_CXXFLAGS += OPT_CXXFLAGS
+        ARM_NEON_FLAGS = "-mfloat-abi=softfp -mfpu=neon -march=armv7-a -Wno-cast-align "  # compile to use neon vfp and armv7
+        OPT_CXXFLAGS += ARM_NEON_FLAGS  # compile to use neon vfp and armv7
+        DEBUG_CXXFLAGS += ARM_NEON_FLAGS
     if config.getDebug():
         APP_CXXFLAGS += ""
     else:
