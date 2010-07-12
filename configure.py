@@ -141,16 +141,16 @@ the_os, cpu = config.getTarget()
 # For -Wreorder, see https://bugzilla.mozilla.org/show_bug.cgi?id=475750
 if config.getCompiler() == 'GCC':
     if 'CXX' in os.environ:
-		rawver = build.process.run_for_output(['$CXX', '--version'])
+        rawver = build.process.run_for_output(['$CXX', '--version'])
     else:
-		rawver = build.process.run_for_output(['gcc', '--version'])
+        rawver = build.process.run_for_output(['gcc', '--version'])
     vre = re.compile(".* ([3-9]\.[0-9]+\.[0-9]+)[ \n]")
     ver = vre.match(rawver).group(1)
     ver_arr = ver.split('.')
     GCC_MAJOR_VERSION = int(ver_arr[0])
     GCC_MINOR_VERSION = int(ver_arr[1])
     #  can't enable -Werror for gcc prior to 4.3 due to unavoidable "clobbered" warnings in Interpreter.cpp
-	# warnings have been updated to try to include all those enabled by current Flash/AIR builds -- disable with caution, or risk integration pain
+    # warnings have been updated to try to include all those enabled by current Flash/AIR builds -- disable with caution, or risk integration pain
     APP_CXXFLAGS = "-Wall -Wcast-align -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof -Wno-switch -Wparentheses -Wpointer-arith -Wreorder -Wsign-compare -Wunused-parameter -Wwrite-strings -Wno-ctor-dtor-privacy -Woverloaded-virtual -Wsign-promo -Wno-char-subscripts -fmessage-length=0 -fno-exceptions -fno-rtti -fno-check-new -fstrict-aliasing -fsigned-char  "
     if GCC_MAJOR_VERSION >= 4:
         APP_CXXFLAGS += "-Wstrict-null-sentinel "
@@ -185,11 +185,11 @@ elif config.getCompiler() == 'VS':
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
         APP_CFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
-	if cpu == 'x86_64':
-		pass # 64 bit VC does NaN comparisons incorrectly with fp:fast
-	else:
-		APP_CXXFLAGS += "-fp:fast "
-		APP_CFLAGS += "-fp:fast "
+    if cpu == 'x86_64':
+        pass # 64 bit VC does NaN comparisons incorrectly with fp:fast
+    else:
+        APP_CXXFLAGS += "-fp:fast "
+        APP_CFLAGS += "-fp:fast "
         OS_LDFLAGS += "-MAP "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
