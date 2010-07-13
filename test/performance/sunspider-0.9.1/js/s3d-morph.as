@@ -40,6 +40,8 @@ function morph(a, f) {
 }
 
     
+// main entry point for running testcase
+function runTest(){
 var a = Array()
 for (var i=0; i < nx*nz*3; ++i) 
     a[i] = 0
@@ -52,3 +54,11 @@ testOutput = 0;
 for (var i = 0; i < nx; i++)
     testOutput += a[3*(i*nx+i)+1];
 a = null;
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

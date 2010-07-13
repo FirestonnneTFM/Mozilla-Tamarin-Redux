@@ -46,6 +46,16 @@ function spectralnorm(n) {
   return Math.sqrt(vBv/vv);
 }
 
+// main entry point for running testcase
+function runTest(){
 for (var i = 6; i <= 48; i *= 2) {
     spectralnorm(i);
 }
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

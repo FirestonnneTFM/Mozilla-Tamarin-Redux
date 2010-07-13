@@ -23,6 +23,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
+// main entry point for running testcase
+function runTest(){
 bitwiseAndValue = 4294967296;
 for (var i = 0; i < 600000; i++)
     bitwiseAndValue = bitwiseAndValue & i;
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

@@ -151,6 +151,8 @@ NBodySystem.prototype.energy = function(){
    return e;
 }
 
+// main entry point for running testcase
+function runTest(){
 var ret;
 
 for ( var n = 3; n <= 24; n *= 2 ) {
@@ -167,3 +169,11 @@ for ( var n = 3; n <= 24; n *= 2 ) {
         ret = bodies.energy();
     })();
 }
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

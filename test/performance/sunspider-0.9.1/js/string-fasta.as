@@ -77,9 +77,19 @@ function fastaRandom(n, table) {
 }
 
 var ret;
+// main entry point for running testcase
+function runTest(){
 
 var count = 7;
 ret = fastaRepeat(2*count*100000, ALU);
 ret = fastaRandom(3*count*1000, IUB);
 ret = fastaRandom(5*count*1000, HomoSap);
 
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

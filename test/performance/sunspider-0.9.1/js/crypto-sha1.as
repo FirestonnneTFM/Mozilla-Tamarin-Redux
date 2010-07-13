@@ -201,7 +201,8 @@ function binb2b64(binarray)
   return str;
 }
 
-
+// main entry point for running testcase
+function runTest(){
 var plainText = "Two households, both alike in dignity,\n\
 In fair Verona, where we lay our scene,\n\
 From ancient grudge break to new mutiny,\n\
@@ -222,3 +223,11 @@ for (var i = 0; i <4; i++) {
 }
 
 var sha1Output = hex_sha1(plainText);
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

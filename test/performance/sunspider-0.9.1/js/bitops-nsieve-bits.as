@@ -29,4 +29,14 @@ function sieve() {
     }
 }
 
+// main entry point for running testcase
+function runTest(){
 sieve();
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

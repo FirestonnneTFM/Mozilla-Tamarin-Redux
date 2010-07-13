@@ -92,4 +92,14 @@ function cordic( runs ) {
   return end.getTime() - start.getTime();
 }
 
+// main entry point for running testcase
+function runTest(){
 cordic(25000);
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

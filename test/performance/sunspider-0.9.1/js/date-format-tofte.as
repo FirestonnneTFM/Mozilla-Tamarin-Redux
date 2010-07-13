@@ -289,6 +289,8 @@ Date.prototype.formatDate = function (input,time) {
     return ia.join("");
 }
 
+// main entry point for running testcase
+function runTest(){
 var date = new Date("1/1/2007 1:11:11");
 
 for (i = 0; i < 500; ++i) {
@@ -296,4 +298,11 @@ for (i = 0; i < 500; ++i) {
     var longFormat = date.formatDate("l, F d, Y g:i:s A");
     date.setTime(date.getTime() + 84266956);
 }
+} //runTest()
 
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

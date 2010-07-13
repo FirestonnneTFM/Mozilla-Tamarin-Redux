@@ -18,8 +18,18 @@ function tak(x,y,z) {
     return tak(tak(x-1,y,z), tak(y-1,z,x), tak(z-1,x,y));
 }
 
+// main entry point for running testcase
+function runTest(){
 for ( var i = 3; i <= 5; i++ ) {
     ack(3,i);
     fib(17.0+i);
     tak(3*i+3,2*i+2,i+1);
 }
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

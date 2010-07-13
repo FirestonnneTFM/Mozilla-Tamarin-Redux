@@ -323,15 +323,26 @@ function Init(CubeSize) {
   Loop();
 }
 
+// main entry point for running testcase
+function runTest(){
 for ( var i = 20; i <= 160; i *= 2 ) {
   Init(i);
 }
 
-Q = null;
-MTrans = null;
-MQube = null;
-I = null;
-Origin = null;
-Testing = null;
-LoopTime = null;
-DisplArea = null;
+Q = new Array();
+MTrans = new Array();  // transformation matrix
+MQube = new Array();  // position information of qube
+I = new Array();      // entity matrix
+Origin = new Object();
+Testing = new Object();
+DisplArea = new Object();
+DisplArea.Width = 300;
+DisplArea.Height = 300;
+}
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

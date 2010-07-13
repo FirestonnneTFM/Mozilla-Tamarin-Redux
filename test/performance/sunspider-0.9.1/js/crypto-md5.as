@@ -254,7 +254,8 @@ function binl2b64(binarray)
   }
   return str;
 }
-
+// main entry point for running testcase
+function runTest(){
 var plainText = "Rebellious subjects, enemies to peace,\n\
 Profaners of this neighbour-stained steel,--\n\
 Will they not hear? What, ho! you men, you beasts,\n\
@@ -284,3 +285,11 @@ for (var i = 0; i <4; i++) {
 }
 
 var md5Output = hex_md5(plainText);
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);
