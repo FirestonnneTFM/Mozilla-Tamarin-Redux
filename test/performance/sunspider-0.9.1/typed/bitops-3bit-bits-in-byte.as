@@ -2,8 +2,11 @@
 
 // 1 op = 6 ANDs, 3 SHRs, 3 SHLs, 4 assigns, 2 ADDs
 // O(1)
-function fast3bitlookup(b) {
-var c, bi3b = 0xE994; // 0b1110 1001 1001 0100; // 3 2 2 1  2 1 1 0
+
+package {
+    
+function fast3bitlookup(b:uint):uint {
+var c:uint, bi3b:uint = 0xE994; // 0b1110 1001 1001 0100; // 3 2 2 1  2 1 1 0
 c  = 3 & (bi3b >> ((b << 1) & 14));
 c += 3 & (bi3b >> ((b >> 2) & 14));
 c += 3 & (bi3b >> ((b >> 5) & 6));
@@ -23,20 +26,22 @@ addr3,r3,r10
 }
 
 
-function TimeFunc(func) {
-var x, y, t;
-for(var x=0; x<500; x++)
-for(var y=0; y<256; y++) func(y);
+function TimeFunc(func:Function):void {
+var x:uint, y:uint, t:uint;
+for(x=0; x<500; x++)
+for(y=0; y<256; y++) func(y);
 }
 
 // main entry point for running testcase
-function runTest(){
+function runTest():void{
 TimeFunc(fast3bitlookup);
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

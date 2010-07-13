@@ -71,7 +71,7 @@ var decompressedPrototype = function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);

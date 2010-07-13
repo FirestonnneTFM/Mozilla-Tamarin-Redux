@@ -3,17 +3,19 @@
 //
 // modified by Isaac Gouy
 
-function pad(number,width){
-   var s = number.toString();
-   var prefixWidth = width - s.length;
+package {
+    
+function pad(number:uint,width:uint):String{
+   var s:String = number.toString();
+   var prefixWidth:uint = width - s.length;
    if (prefixWidth>0){
-      for (var i=1; i<=prefixWidth; i++) s = " " + s;
+      for (var i:uint=1; i<=prefixWidth; i++) s = " " + s;
    }
    return s;
 }
 
-function nsieve(m, isPrime){
-   var i, k, count;
+function nsieve(m:uint, isPrime:Array):uint{
+   var i:uint, k:uint, count:uint;
 
    for (i=2; i<=m; i++) { isPrime[i] = true; }
    count = 0;
@@ -27,22 +29,24 @@ function nsieve(m, isPrime){
    return count;
 }
 
-function sieve() {
-    for (var i = 1; i <= 3; i++ ) {
-        var m = (1<<i)*10000;
-        var flags = Array(m+1);
+function sieve():void {
+    for (var i:uint = 1; i <= 3; i++ ) {
+        var m:uint = (1<<i)*10000;
+        var flags:Array = new Array(m+1);
         nsieve(m, flags);
     }
 }
 
 // main entry point for running testcase
-function runTest(){
+function runTest():void{
 sieve();
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:int = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:int = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

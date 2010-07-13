@@ -11,25 +11,28 @@
  * Configurable variables. You may need to tweak these to be compatible with
  * the server-side, but the defaults work in most cases.
  */
-var hexcase = 0;  /* hex output format. 0 - lowercase; 1 - uppercase        */
-var b64pad  = ""; /* base-64 pad character. "=" for strict RFC compliance   */
-var chrsz   = 8;  /* bits per input character. 8 - ASCII; 16 - Unicode      */
+
+package {
+
+var hexcase:uint = 0;  /* hex output format. 0 - lowercase; 1 - uppercase        */
+var b64pad:String  = ""; /* base-64 pad character. "=" for strict RFC compliance   */
+var chrsz:uint   = 8;  /* bits per input character. 8 - ASCII; 16 - Unicode      */
 
 /*
  * These are the functions you'll usually want to call
  * They take string arguments and return either hex or base-64 encoded strings
  */
-function hex_md5(s){ return binl2hex(core_md5(str2binl(s), s.length * chrsz));}
-function b64_md5(s){ return binl2b64(core_md5(str2binl(s), s.length * chrsz));}
-function str_md5(s){ return binl2str(core_md5(str2binl(s), s.length * chrsz));}
-function hex_hmac_md5(key, data) { return binl2hex(core_hmac_md5(key, data)); }
-function b64_hmac_md5(key, data) { return binl2b64(core_hmac_md5(key, data)); }
-function str_hmac_md5(key, data) { return binl2str(core_hmac_md5(key, data)); }
+function hex_md5(s:String):String{ return binl2hex(core_md5(str2binl(s), s.length * chrsz));}
+function b64_md5(s:String):String{ return binl2b64(core_md5(str2binl(s), s.length * chrsz));}
+function str_md5(s:String):String{ return binl2str(core_md5(str2binl(s), s.length * chrsz));}
+function hex_hmac_md5(key:String, data:String):String { return binl2hex(core_hmac_md5(key, data)); }
+function b64_hmac_md5(key:String, data:String):String { return binl2b64(core_hmac_md5(key, data)); }
+function str_hmac_md5(key:String, data:String):String { return binl2str(core_hmac_md5(key, data)); }
 
 /*
  * Perform a simple self-test to see if the VM is working
  */
-function md5_vm_test()
+function md5_vm_test():Boolean
 {
   return hex_md5("abc") == "900150983cd24fb0d6963f7d28e17f72";
 }
@@ -37,23 +40,23 @@ function md5_vm_test()
 /*
  * Calculate the MD5 of an array of little-endian words, and a bit length
  */
-function core_md5(x, len)
+function core_md5(x:Array, len:uint):Array
 {
   /* append padding */
   x[len >> 5] |= 0x80 << ((len) % 32);
   x[(((len + 64) >>> 9) << 4) + 14] = len;
 
-  var a =  1732584193;
-  var b = -271733879;
-  var c = -1732584194;
-  var d =  271733878;
+  var a:int =  1732584193;
+  var b:int = -271733879;
+  var c:int = -1732584194;
+  var d:int =  271733878;
 
-  for(var i = 0; i < x.length; i += 16)
+  for(var i:uint = 0; i < x.length; i += 16)
   {
-    var olda = a;
-    var oldb = b;
-    var oldc = c;
-    var oldd = d;
+    var olda:int = a;
+    var oldb:int = b;
+    var oldc:int = c;
+    var oldd:int = d;
 
     a = md5_ff(a, b, c, d, x[i+ 0], 7 , -680876936);
     d = md5_ff(d, a, b, c, x[i+ 1], 12, -389564586);
@@ -128,30 +131,30 @@ function core_md5(x, len)
     c = safe_add(c, oldc);
     d = safe_add(d, oldd);
   }
-  return Array(a, b, c, d);
+  return [a, b, c, d];
 
 }
 
 /*
  * These functions implement the four basic operations the algorithm uses.
  */
-function md5_cmn(q, a, b, x, s, t)
+function md5_cmn(q:int, a:int, b:int, x:int, s:int, t:int):int
 {
   return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s),b);
 }
-function md5_ff(a, b, c, d, x, s, t)
+function md5_ff(a:int, b:int, c:int, d:int, x:int, s:int, t:int):int
 {
   return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
 }
-function md5_gg(a, b, c, d, x, s, t)
+function md5_gg(a:int, b:int, c:int, d:int, x:int, s:int, t:int):int
 {
   return md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
 }
-function md5_hh(a, b, c, d, x, s, t)
+function md5_hh(a:int, b:int, c:int, d:int, x:int, s:int, t:int):int
 {
   return md5_cmn(b ^ c ^ d, a, b, x, s, t);
 }
-function md5_ii(a, b, c, d, x, s, t)
+function md5_ii(a:int, b:int, c:int, d:int, x:int, s:int, t:int):int
 {
   return md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
 }
@@ -159,19 +162,19 @@ function md5_ii(a, b, c, d, x, s, t)
 /*
  * Calculate the HMAC-MD5, of a key and some data
  */
-function core_hmac_md5(key, data)
+function core_hmac_md5(key:String, data:String):Array
 {
-  var bkey = str2binl(key);
+  var bkey:Array = str2binl(key);
   if(bkey.length > 16) bkey = core_md5(bkey, key.length * chrsz);
 
-  var ipad = Array(16), opad = Array(16);
-  for(var i = 0; i < 16; i++)
+  var ipad:Array = Array(16), opad:Array = Array(16);
+  for(var i:uint = 0; i < 16; i++)
   {
     ipad[i] = bkey[i] ^ 0x36363636;
     opad[i] = bkey[i] ^ 0x5C5C5C5C;
   }
 
-  var hash = core_md5(ipad.concat(str2binl(data)), 512 + data.length * chrsz);
+  var hash:Array = core_md5(ipad.concat(str2binl(data)), 512 + data.length * chrsz);
   return core_md5(opad.concat(hash), 512 + 128);
 }
 
@@ -179,17 +182,17 @@ function core_hmac_md5(key, data)
  * Add integers, wrapping at 2^32. This uses 16-bit operations internally
  * to work around bugs in some JS interpreters.
  */
-function safe_add(x, y)
+function safe_add(x:uint, y:uint):uint
 {
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  var lsw:uint = (x & 0xFFFF) + (y & 0xFFFF);
+  var msw:uint = (x >> 16) + (y >> 16) + (lsw >> 16);
   return (msw << 16) | (lsw & 0xFFFF);
 }
 
 /*
  * Bitwise rotate a 32-bit number to the left.
  */
-function bit_rol(num, cnt)
+function bit_rol(num:uint, cnt:uint):uint
 {
   return (num << cnt) | (num >>> (32 - cnt));
 }
@@ -198,11 +201,11 @@ function bit_rol(num, cnt)
  * Convert a string to an array of little-endian words
  * If chrsz is ASCII, characters >255 have their hi-byte silently ignored.
  */
-function str2binl(str)
+function str2binl(str:String):Array
 {
-  var bin = Array();
-  var mask = (1 << chrsz) - 1;
-  for(var i = 0; i < str.length * chrsz; i += chrsz)
+  var bin:Array = new Array();
+  var mask:uint = (1 << chrsz) - 1;
+  for(var i:uint = 0; i < str.length * chrsz; i += chrsz)
     bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (i%32);
   return bin;
 }
@@ -210,11 +213,11 @@ function str2binl(str)
 /*
  * Convert an array of little-endian words to a string
  */
-function binl2str(bin)
+function binl2str(bin:Array):String
 {
-  var str = "";
-  var mask = (1 << chrsz) - 1;
-  for(var i = 0; i < bin.length * 32; i += chrsz)
+  var str:String = "";
+  var mask:uint = (1 << chrsz) - 1;
+  for(var i:uint = 0; i < bin.length * 32; i += chrsz)
     str += String.fromCharCode((bin[i>>5] >>> (i % 32)) & mask);
   return str;
 }
@@ -222,11 +225,11 @@ function binl2str(bin)
 /*
  * Convert an array of little-endian words to a hex string.
  */
-function binl2hex(binarray)
+function binl2hex(binarray:Array):String
 {
-  var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
-  var str = "";
-  for(var i = 0; i < binarray.length * 4; i++)
+  var hex_tab:String = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+  var str:String = "";
+  for(var i:uint = 0; i < binarray.length * 4; i++)
   {
     str += hex_tab.charAt((binarray[i>>2] >> ((i%4)*8+4)) & 0xF) +
            hex_tab.charAt((binarray[i>>2] >> ((i%4)*8  )) & 0xF);
@@ -237,16 +240,16 @@ function binl2hex(binarray)
 /*
  * Convert an array of little-endian words to a base-64 string
  */
-function binl2b64(binarray)
+function binl2b64(binarray:Array):String
 {
-  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  var str = "";
-  for(var i = 0; i < binarray.length * 4; i += 3)
+  var tab:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  var str:String = "";
+  for(var i:uint = 0; i < binarray.length * 4; i += 3)
   {
-    var triplet = (((binarray[i   >> 2] >> 8 * ( i   %4)) & 0xFF) << 16)
+    var triplet:uint = (((binarray[i   >> 2] >> 8 * ( i   %4)) & 0xFF) << 16)
                 | (((binarray[i+1 >> 2] >> 8 * ((i+1)%4)) & 0xFF) << 8 )
                 |  ((binarray[i+2 >> 2] >> 8 * ((i+2)%4)) & 0xFF);
-    for(var j = 0; j < 4; j++)
+    for(var j:uint = 0; j < 4; j++)
     {
       if(i * 8 + j * 6 > binarray.length * 32) str += b64pad;
       else str += tab.charAt((triplet >> 6*(3-j)) & 0x3F);
@@ -255,8 +258,8 @@ function binl2b64(binarray)
   return str;
 }
 // main entry point for running testcase
-function runTest(){
-var plainText = "Rebellious subjects, enemies to peace,\n\
+function runTest():void{
+var plainText:String = "Rebellious subjects, enemies to peace,\n\
 Profaners of this neighbour-stained steel,--\n\
 Will they not hear? What, ho! you men, you beasts,\n\
 That quench the fire of your pernicious rage\n\
@@ -280,16 +283,19 @@ To know our further pleasure in this case,\n\
 To old Free-town, our common judgment-place.\n\
 Once more, on pain of death, all men depart."
 
-for (var i = 0; i <4; i++) {
+for (var i:uint = 0; i <4; i++) {
     plainText += plainText;
 }
 
-var md5Output = hex_md5(plainText);
+var md5Output:String = hex_md5(plainText);
+
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

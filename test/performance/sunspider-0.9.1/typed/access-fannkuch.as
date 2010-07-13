@@ -2,53 +2,54 @@
    http://shootout.alioth.debian.org/
    contributed by Isaac Gouy */
 
-function fannkuch(n) {
-   var check = 0;
-   var perm = Array(n);
-   var perm1 = Array(n);
-   var count = Array(n);
-   var maxPerm = Array(n);
-   var maxFlipsCount = 0;
-   var m = n - 1;
+package {
+function fannkuch(n:uint) {
+   var check:uint = 0;
+   var perm:Array = new Array(n);
+   var perm1:Array = new Array(n);
+   var count:Array = new Array(n);
+   var maxPerm:Array = new Array(n);
+   var maxFlipsCount:uint = 0;
+   var m:uint = n - 1;
 
-   for (var i = 0; i < n; i++) perm1[i] = i;
-   var r = n;
+   for (var i:uint = 0; i < n; i++) perm1[i] = i;
+   var r:uint = n;
 
    while (true) {
       // write-out the first 30 permutations
       if (check < 30){
-         var s = "";
-         for(var i=0; i<n; i++) s += (perm1[i]+1).toString();
+         var s:String = "";
+         for(var i:uint=0; i<n; i++) s += (perm1[i]+1).toString();
          check++;
       }
 
       while (r != 1) { count[r - 1] = r; r--; }
       if (!(perm1[0] == 0 || perm1[m] == m)) {
-         for (var i = 0; i < n; i++) perm[i] = perm1[i];
+         for (var i:uint = 0; i < n; i++) perm[i] = perm1[i];
 
-         var flipsCount = 0;
-         var k;
+         var flipsCount:uint = 0;
+         var k:uint;
 
          while (!((k = perm[0]) == 0)) {
             var k2 = (k + 1) >> 1;
-            for (var i = 0; i < k2; i++) {
-               var temp = perm[i]; perm[i] = perm[k - i]; perm[k - i] = temp;
+            for (var i:uint = 0; i < k2; i++) {
+               var temp:uint = perm[i]; perm[i] = perm[k - i]; perm[k - i] = temp;
             }
             flipsCount++;
          }
 
          if (flipsCount > maxFlipsCount) {
             maxFlipsCount = flipsCount;
-            for (var i = 0; i < n; i++) maxPerm[i] = perm1[i];
+            for (var i:uint = 0; i < n; i++) maxPerm[i] = perm1[i];
          }
       }
 
       while (true) {
          if (r == n) return maxFlipsCount;
-         var perm0 = perm1[0];
-         var i = 0;
+         var perm0:uint = perm1[0];
+         var i:uint = 0;
          while (i < r) {
-            var j = i + 1;
+            var j:uint = i + 1;
             perm1[i] = perm1[j];
             i = j;
          }
@@ -60,16 +61,18 @@ function fannkuch(n) {
       }
    }
 }
-
+    
 // main entry point for running testcase
-function runTest(){
-var n = 8;
-var ret = fannkuch(n);
+function runTest():void{
+var n:uint = 8;
+var ret:uint = fannkuch(n);
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

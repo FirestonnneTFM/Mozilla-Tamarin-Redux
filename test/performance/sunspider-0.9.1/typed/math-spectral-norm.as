@@ -3,35 +3,39 @@
 //
 // contributed by Ian Osgood
 
-function A(i,j) {
+package {
+
+function A(i:uint,j:uint):Number {
   return 1/((i+j)*(i+j+1)/2+i+1);
 }
 
-function Au(u,v) {
-  for (var i=0; i<u.length; ++i) {
-    var t = 0;
-    for (var j=0; j<u.length; ++j)
+function Au(u,v):void {
+  for (var i:uint=0; i<u.length; ++i) {
+    var t:Number = 0;
+    for (var j:uint=0; j<u.length; ++j)
       t += A(i,j) * u[j];
     v[i] = t;
   }
 }
 
-function Atu(u,v) {
-  for (var i=0; i<u.length; ++i) {
-    var t = 0;
-    for (var j=0; j<u.length; ++j)
+function Atu(u:Array,v:Array):void {
+  for (var i:uint=0; i<u.length; ++i) {
+    var t:Number = 0;
+    for (var j:uint=0; j<u.length; ++j)
       t += A(j,i) * u[j];
     v[i] = t;
   }
 }
 
-function AtAu(u,v,w) {
+function AtAu(u:Array,v:Array,w:Array):void {
   Au(u,w);
   Atu(w,v);
 }
 
-function spectralnorm(n) {
-  var i, u=[], v=[], w=[], vv=0, vBv=0;
+function spectralnorm(n:uint):Number {
+  var i:uint = 0;
+  var u:Array = new Array(), v:Array = new Array(), w:Array = new Array();
+  var vv:Number=0, vBv:Number=0;
   for (i=0; i<n; ++i) {
     u[i] = 1; v[i] = w[i] = 0;
   }
@@ -47,15 +51,17 @@ function spectralnorm(n) {
 }
 
 // main entry point for running testcase
-function runTest(){
-for (var i = 6; i <= 48; i *= 2) {
+function runTest():void{
+for (var i:uint = 6; i <= 48; i *= 2) {
     spectralnorm(i);
 }
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

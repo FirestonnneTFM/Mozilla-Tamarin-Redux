@@ -23,17 +23,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-var loops = 15
-var nx = 120
-var nz = 120
+package {
 
-function morph(a, f) {
-    var PI2nx = Math.PI * 8/nx
-    var sin = Math.sin
-    var f30 = -(50 * sin(f*Math.PI*2))
+var loops:uint = 15
+var nx:uint = 120
+var nz:uint = 120
+
+function morph(a:Array, f:Number):void {
+    var PI2nx:Number = Math.PI * 8/nx
+    var sin:Function = Math.sin
+    var f30:Number = -(50 * sin(f*Math.PI*2))
     
-    for (var i = 0; i < nz; ++i) {
-        for (var j = 0; j < nx; ++j) {
+    for (var i:uint = 0; i < nz; ++i) {
+        for (var j:uint = 0; j < nx; ++j) {
             a[3*(i*nx+j)+1]    = sin((j-1) * PI2nx ) * -f30
         }
     }
@@ -41,24 +43,26 @@ function morph(a, f) {
 
     
 // main entry point for running testcase
-function runTest(){
-var a = Array()
-for (var i=0; i < nx*nz*3; ++i) 
+function runTest():void{
+var a:Array = new Array()
+for (var i:uint=0; i < nx*nz*3; ++i)
     a[i] = 0
 
-for (var i = 0; i < loops; ++i) {
+for (var i:uint = 0; i < loops; ++i) {
     morph(a, i/loops)
 }
 
-testOutput = 0;
-for (var i = 0; i < nx; i++)
+var testOutput:uint = 0;
+for (var i:uint = 0; i < nx; i++)
     testOutput += a[3*(i*nx+i)+1];
 a = null;
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

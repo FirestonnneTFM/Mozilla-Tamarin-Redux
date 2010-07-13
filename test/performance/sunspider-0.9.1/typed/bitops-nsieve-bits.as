@@ -3,40 +3,44 @@
 //
 //  Contributed by Ian Osgood
 
-function pad(n,width) {
-  var s = n.toString();
+package {
+
+function pad(n:uint,width:uint):String {
+  var s:String = n.toString();
   while (s.length < width) s = ' ' + s;
   return s;
 }
 
-function primes(isPrime, n) {
-  var i, count = 0, m = 10000<<n, size = m+31>>5;
+function primes(isPrime:Array, n:uint) {
+  var i:uint, count:uint = 0, m:uint = 10000<<n, size:uint = m+31>>5;
 
   for (i=0; i<size; i++) isPrime[i] = 0xffffffff;
 
   for (i=2; i<m; i++)
     if (isPrime[i>>5] & 1<<(i&31)) {
-      for (var j=i+i; j<m; j+=i)
+      for (var j:uint=i+i; j<m; j+=i)
         isPrime[j>>5] &= ~(1<<(j&31));
       count++;
     }
 }
 
-function sieve() {
-    for (var i = 4; i <= 4; i++) {
-        var isPrime = new Array((10000<<i)+31>>5);
+function sieve():void {
+    for (var i:uint = 4; i <= 4; i++) {
+        var isPrime:Array = new Array((10000<<i)+31>>5);
         primes(isPrime, i);
     }
 }
 
 // main entry point for running testcase
-function runTest(){
+function runTest():void{
 sieve();
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

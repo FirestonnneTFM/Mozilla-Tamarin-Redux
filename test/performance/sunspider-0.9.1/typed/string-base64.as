@@ -38,14 +38,17 @@
 
 // From: http://lxr.mozilla.org/mozilla/source/extensions/xml-rpc/src/nsXmlRpcClient.js#956
 
+package {
 /* Convert data (an array of integers) to a Base64 string. */
-var toBase64Table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-var base64Pad = '=';
+var toBase64TableString:String = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+var toBase64Table:Array = toBase64TableString.split('');
 
-function toBase64(data) {
-    var result = '';
-    var length = data.length;
-    var i;
+var base64Pad:String = '=';
+
+function toBase64(data:String):String {
+    var result:String = '';
+    var length:uint = data.length;
+    var i:uint;
     // Convert every three bytes to 4 ascii characters.
     for (i = 0; i < (length - 2); i += 3) {
         result += toBase64Table[data.charCodeAt(i) >> 2];
@@ -72,7 +75,7 @@ function toBase64(data) {
 }
 
 /* Convert Base64 data to a string */
-var toBinaryTable = [
+var toBinaryTable:Array = [
     -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
     -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
     -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,62, -1,-1,-1,63,
@@ -83,15 +86,15 @@ var toBinaryTable = [
     41,42,43,44, 45,46,47,48, 49,50,51,-1, -1,-1,-1,-1
 ];
 
-function base64ToString(data) {
+function base64ToString(data:String):String {
     var result = '';
-    var leftbits = 0; // number of bits decoded, but yet to be appended
-    var leftdata = 0; // bits decoded, but yet to be appended
+    var leftbits:uint = 0; // number of bits decoded, but yet to be appended
+    var leftdata:uint = 0; // bits decoded, but yet to be appended
 
     // Convert one by one.
-    for (var i = 0; i < data.length; i++) {
-        var c = toBinaryTable[data.charCodeAt(i) & 0x7f];
-        var padding = (data.charCodeAt(i) == base64Pad.charCodeAt(0));
+    for (var i:uint = 0; i < data.length; i++) {
+        var c:int = toBinaryTable[data.charCodeAt(i) & 0x7f];
+        var padding:Boolean = (data.charCodeAt(i) == base64Pad.charCodeAt(0));
         // Skip illegal characters and whitespace
         if (c == -1) continue;
         
@@ -111,19 +114,19 @@ function base64ToString(data) {
 
     // If there are any bits left, the base64 string was corrupted
     if (leftbits)
-        throw Components.Exception('Corrupted base64 string');
+        throw new Error('Corrupted base64 string');
 
     return result;
 }
 
 // main entry point for running testcase
-function runTest(){
-var str = "";
+function runTest():void {
+var str:String = "";
 
-for ( var i = 0; i < 8192; i++ )
+for ( var i:uint = 0; i < 8192; i++ )
         str += String.fromCharCode( (25 * Math.random()) + 97 );
 
-for ( var i = 8192; i <= 16384; i *= 2 ) {
+for ( var i:uint = 8192; i <= 16384; i *= 2 ) {
 
     var base64;
 
@@ -139,7 +142,9 @@ for ( var i = 8192; i <= 16384; i *= 2 ) {
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+} //package

@@ -3,14 +3,25 @@
 //
 //  Contributed by Ian Osgood
 
-var last = 42, A = 3877, C = 29573, M = 139968;
+package {
 
-function rand(max) {
+public class frequency {
+    public var c:String;
+    public var p:Number;
+    public function frequency(c:String, p:Number) {
+        this.c = c;
+        this.p = p;
+    }
+}
+
+var last:int = 42, A:int = 3877, C:int = 29573, M:int = 139968;
+
+function rand(max:int):Number {
   last = (last * A + C) % M;
   return max * last / M;
 }
 
-var ALU =
+var ALU:String =
   "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG" +
   "GAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTCGAGA" +
   "CCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACTAAAAAT" +
@@ -19,54 +30,67 @@ var ALU =
   "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC" +
   "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
 
-var IUB = {
-  a:0.27, c:0.12, g:0.12, t:0.27,
-  B:0.02, D:0.02, H:0.02, K:0.02,
-  M:0.02, N:0.02, R:0.02, S:0.02,
-  V:0.02, W:0.02, Y:0.02
+var IUB:Array = new Array();
+IUB.push(new frequency("a", 0.27));
+IUB.push(new frequency("c", 0.12));
+IUB.push(new frequency("g", 0.12));
+IUB.push(new frequency("t", 0.27));
+IUB.push(new frequency("B", 0.02));
+IUB.push(new frequency("D", 0.02));
+IUB.push(new frequency("H", 0.02));
+IUB.push(new frequency("K", 0.02));
+IUB.push(new frequency("M", 0.02));
+IUB.push(new frequency("N", 0.02));
+IUB.push(new frequency("R", 0.02));
+IUB.push(new frequency("S", 0.02));
+IUB.push(new frequency("V", 0.02));
+IUB.push(new frequency("W", 0.02));
+IUB.push(new frequency("Y", 0.02));
+
+
+var HomoSap:Array = new Array();
+HomoSap.push(new frequency("a", 0.3029549426680));
+HomoSap.push(new frequency("c", 0.1979883004921));
+HomoSap.push(new frequency("g", 0.1975473066391));
+HomoSap.push(new frequency("t", 0.3015094502008));
+
+function makeCumulative(table:Array):void {
+    var cp:Number = 0.0;
+    for (var i:int = 0; i < table.length; i++) {
+        cp += table[i].p;
+        table[i].p = cp;
+    }
 }
 
-var HomoSap = {
-  a: 0.3029549426680,
-  c: 0.1979883004921,
-  g: 0.1975473066391,
-  t: 0.3015094502008
-}
-
-function makeCumulative(table) {
-  var last = null;
-  for (var c in table) {
-    if (last) table[c] += table[last];
-    last = c;
-  }
-}
-
-function fastaRepeat(n, seq) {
-  var seqi = 0, lenOut = 60;
+function fastaRepeat(n:int, seq:String):String {
+  var seqi:int = 0, lenOut:int = 60;
+  var ret:String;
   while (n>0) {
     if (n<lenOut) lenOut = n;
     if (seqi + lenOut < seq.length) {
       ret = seq.substring(seqi, seqi+lenOut);
       seqi += lenOut;
     } else {
-      var s = seq.substring(seqi);
+      var s:String = seq.substring(seqi);
       seqi = lenOut - s.length;
       ret = s + seq.substring(0, seqi);
     }
     n -= lenOut;
   }
+  return ret;
 }
 
-function fastaRandom(n, table) {
-  var line = new Array(60);
+function fastaRandom(n:int, table:Array):String {
+  var line:Array = new Array(60);
+  var ret:String;
   makeCumulative(table);
   while (n>0) {
     if (n<line.length) line = new Array(n);
-    for (var i=0; i<line.length; i++) {
-      var r = rand(1);
-      for (var c in table) {
-        if (r < table[c]) {
-          line[i] = c;
+    for (var i:int=0; i<line.length; i++) {
+      var r:Number = rand(1);
+      for (var c:int=0; c < table.length; c++){
+        if (r < table[c].p) {
+          line[i] = table[c].c;
           break;
         }
       }
@@ -74,13 +98,13 @@ function fastaRandom(n, table) {
     ret = line.join('');
     n -= line.length;
   }
+  return ret;
 }
 
-var ret;
 // main entry point for running testcase
-function runTest(){
-
-var count = 7;
+function runTest():void{
+var ret:String;
+var count:uint = 7;
 ret = fastaRepeat(2*count*100000, ALU);
 ret = fastaRandom(3*count*1000, IUB);
 ret = fastaRandom(5*count*1000, HomoSap);
@@ -89,7 +113,9 @@ ret = fastaRandom(5*count*1000, HomoSap);
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

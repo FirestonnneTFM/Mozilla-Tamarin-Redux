@@ -25,24 +25,26 @@
 
 /////. Start CORDIC
 
-var AG_CONST = 0.6072529350;
+package {
 
-function FIXED(X)
+var AG_CONST:Number = 0.6072529350;
+
+function FIXED(X:Number):Number
 {
   return X * 65536.0;
 }
 
-function FLOAT(X)
+function FLOAT(X:Number):Number
 {
   return X / 65536.0;
 }
 
-function DEG2RAD(X)
+function DEG2RAD(X:Number):Number
 {
   return 0.017453 * (X);
 }
 
-var Angles = [
+var Angles:Array = [
   FIXED(45.0), FIXED(26.565), FIXED(14.0362), FIXED(7.12502),
   FIXED(3.57633), FIXED(1.78991), FIXED(0.895174), FIXED(0.447614),
   FIXED(0.223811), FIXED(0.111906), FIXED(0.055953),
@@ -50,12 +52,12 @@ var Angles = [
               ];
 
 
-function cordicsincos() {
-    var X;
-    var Y;
-    var TargetAngle;
-    var CurrAngle;
-    var Step;
+function cordicsincos():void {
+    var X:Number;
+    var Y:Number;
+    var TargetAngle:Number;
+    var CurrAngle:Number;
+    var Step:uint;
  
     X = FIXED(AG_CONST);         /* AG_CONST * cos(0) */
     Y = 0;                       /* AG_CONST * sin(0) */
@@ -63,7 +65,7 @@ function cordicsincos() {
     TargetAngle = FIXED(28.027);
     CurrAngle = 0;
     for (Step = 0; Step < 12; Step++) {
-        var NewX;
+        var NewX:Number;
         if (TargetAngle > CurrAngle) {
             NewX = X - (Y >> Step);
             Y = (X >> Step) + Y;
@@ -80,26 +82,28 @@ function cordicsincos() {
 
 ///// End CORDIC
 
-function cordic( runs ) {
-  var start = new Date();
+function cordic( runs:uint ):uint {
+  var start:Date = new Date();
 
-  for ( var i = 0 ; i < runs ; i++ ) {
+  for ( var i:uint = 0 ; i < runs ; i++ ) {
       cordicsincos();
   }
 
-  var end = new Date();
+  var end:Date = new Date();
 
   return end.getTime() - start.getTime();
 }
 
 // main entry point for running testcase
-function runTest(){
+function runTest():void{
 cordic(25000);
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}
