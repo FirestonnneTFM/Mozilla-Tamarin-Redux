@@ -1435,6 +1435,9 @@ class sandbox:
     ########################################
     sb_android_test_factory = factory.BuildFactory()
     sb_android_test_factory.addStep(test_generic_adb(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
+    sb_android_test_factory.addStep(test_generic_adb(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
+    sb_android_test_factory.addStep(test_generic_adb(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
+    sb_android_test_factory.addStep(test_generic_adb(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     sb_android_test_factory.addStep(util_process_clean)
     sb_android_test_factory.addStep(util_clean_buildsdir)
 
