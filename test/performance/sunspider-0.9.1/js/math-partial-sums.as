@@ -27,7 +27,16 @@ function partial(n){
     }
 }
 
+// main entry point for running testcase
+function runTest(){
 for (var i = 1024; i <= 16384; i *= 2) {
     partial(i);
 }
+} //runTest()
 
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

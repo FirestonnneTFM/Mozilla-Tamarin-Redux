@@ -116,6 +116,8 @@ function base64ToString(data) {
     return result;
 }
 
+// main entry point for running testcase
+function runTest(){
 var str = "";
 
 for ( var i = 0; i < 8192; i++ )
@@ -132,4 +134,12 @@ for ( var i = 8192; i <= 16384; i *= 2 ) {
     str += str;
 }
 
-toBinaryTable = null;
+//toBinaryTable = null;
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

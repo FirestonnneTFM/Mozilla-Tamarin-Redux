@@ -438,4 +438,14 @@ for (var y = 0; y < size; y++) {\n\
     return s;
 }
 
+// main entry point for running testcase
+function runTest(){
 testOutput = arrayToCanvasCommands(raytraceScene());
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

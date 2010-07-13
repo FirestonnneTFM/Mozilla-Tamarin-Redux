@@ -61,6 +61,15 @@ function fannkuch(n) {
    }
 }
 
+// main entry point for running testcase
+function runTest(){
 var n = 8;
 var ret = fannkuch(n);
+} //runTest()
 
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

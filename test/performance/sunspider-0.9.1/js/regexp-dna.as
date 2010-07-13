@@ -4,6 +4,8 @@
 // contributed by Jesse Millikan
 // Base on the Ruby version by jose fco. gonzalez
 
+// main entry point for running testcase
+function runTest(){
 var l;
 var dnaInput = ">ONE Homo sapiens alu\n\
 GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGGGAGGCCGAGGCGGGCGGA\n\
@@ -1710,3 +1712,12 @@ for(i in seqs)
 for(k in subs)
  dnaInput = dnaInput.replace(k, subs[k]) // FIXME: Would like this to be a global substitution in a future version of SunSpider.
  // search string, replacement string, flags
+
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

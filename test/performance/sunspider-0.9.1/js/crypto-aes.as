@@ -381,7 +381,8 @@ function byteArrayToHexStr(b) {  // convert byte array to hex string for display
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-
+// main entry point for running testcase
+function runTest(){
 var plainText = "ROMEO: But, soft! what light through yonder window breaks?\n\
 It is the east, and Juliet is the sun.\n\
 Arise, fair sun, and kill the envious moon,\n\
@@ -420,3 +421,11 @@ var password = "O Romeo, Romeo! wherefore art thou Romeo?";
 
 var cipherText = AESEncryptCtr(plainText, password, 256);
 var decryptedText = AESDecryptCtr(cipherText, password, 256);
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

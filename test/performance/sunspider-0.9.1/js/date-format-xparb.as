@@ -408,6 +408,8 @@ Date.patterns = {
     UniversalSortableDateTimePattern: "Y-m-d H:i:sO",
     YearMonthPattern: "F, Y"};
 
+// main entry point for running testcase
+function runTest(){
 var date = new Date("1/1/2007 1:11:11");
 
 for (i = 0; i < 4000; ++i) {
@@ -415,3 +417,11 @@ for (i = 0; i < 4000; ++i) {
     var longFormat = date.dateFormat("l, F d, Y g:i:s A");
     date.setTime(date.getTime() + 84266956);
 }
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

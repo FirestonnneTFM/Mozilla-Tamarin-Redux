@@ -26,6 +26,8 @@ function bottomUpTree(item,depth){
    }
 }
 
+// main entry point for running testcase
+function runTest(){
 var ret;
 
 for ( var n = 4; n <= 7; n += 1 ) {
@@ -48,3 +50,11 @@ for ( var n = 4; n <= 7; n += 1 ) {
 
     ret = longLivedTree.itemCheck();
 }
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);

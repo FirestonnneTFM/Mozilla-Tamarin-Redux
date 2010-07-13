@@ -18,4 +18,14 @@ for(var x=0; x<350; x++)
 for(var y=0; y<256; y++) func(y);
 }
 
+// main entry point for running testcase
+function runTest(){
 TimeFunc(bitsinbyte);
+} //runTest()
+
+// warm up run of testcase
+runTest();
+var startTime = new Date();
+runTest();
+var time = new Date() - startTime;
+print("metric time " + time);
