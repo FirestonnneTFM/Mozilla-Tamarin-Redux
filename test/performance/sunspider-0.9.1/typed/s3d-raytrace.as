@@ -22,81 +22,82 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
+package {
 
-function createVector(x,y,z) {
+function createVector(x:int,y:int,z:int):Array {
     return new Array(x,y,z);
 }
 
-function sqrLengthVector(self) {
+function sqrLengthVector(self:Array):Number {
     return self[0] * self[0] + self[1] * self[1] + self[2] * self[2];
 }
 
-function lengthVector(self) {
+function lengthVector(self:Array):Number {
     return Math.sqrt(self[0] * self[0] + self[1] * self[1] + self[2] * self[2]);
 }
 
-function addVector(self, v) {
+function addVector(self:Array, v:Array):Array {
     self[0] += v[0];
     self[1] += v[1];
     self[2] += v[2];
     return self;
 }
 
-function subVector(self, v) {
+function subVector(self:Array, v:Array):Array {
     self[0] -= v[0];
     self[1] -= v[1];
     self[2] -= v[2];
     return self;
 }
 
-function scaleVector(self, scale) {
+function scaleVector(self:Array, scale:Number):Array {
     self[0] *= scale;
     self[1] *= scale;
     self[2] *= scale;
     return self;
 }
 
-function normaliseVector(self) {
-    var len = Math.sqrt(self[0] * self[0] + self[1] * self[1] + self[2] * self[2]);
+function normaliseVector(self:Array):Array {
+    var len:Number = Math.sqrt(self[0] * self[0] + self[1] * self[1] + self[2] * self[2]);
     self[0] /= len;
     self[1] /= len;
     self[2] /= len;
     return self;
 }
 
-function add(v1, v2) {
+function add(v1:Array, v2:Array):Array {
     return new Array(v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]);
 }
 
-function sub(v1, v2) {
+function sub(v1:Array, v2:Array):Array {
     return new Array(v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]);
 }
 
-function scalev(v1, v2) {
+function scalev(v1:Array, v2:Array):Array {
     return new Array(v1[0] * v2[0], v1[1] * v2[1], v1[2] * v2[2]);
 }
 
-function dot(v1, v2) {
+function dot(v1:Array, v2:Array):Number {
     return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 }
 
-function scale(v, scale) {
+function scale(v:Array, scale:Number):Array {
     return [v[0] * scale, v[1] * scale, v[2] * scale];
 }
 
-function cross(v1, v2) {
+function cross(v1:Array, v2:Array):Array {
     return [v1[1] * v2[2] - v1[2] * v2[1], 
             v1[2] * v2[0] - v1[0] * v2[2],
             v1[0] * v2[1] - v1[1] * v2[0]];
 
 }
 
-function normalise(v) {
-    var len = lengthVector(v);
+function normalise(v:Array):Array {
+    var len:Number = lengthVector(v);
     return [v[0] / len, v[1] / len, v[2] / len];
 }
 
-function transformMatrix(self, v) {
+function transformMatrix(self:Array, v:Array):Array {
     var vals = self;
     var x  = vals[0] * v[0] + vals[1] * v[1] + vals[2] * v[2] + vals[3];
     var y  = vals[4] * v[0] + vals[5] * v[1] + vals[6] * v[2] + vals[7];
@@ -104,15 +105,15 @@ function transformMatrix(self, v) {
     return [x, y, z];
 }
 
-function invertMatrix(self) {
-    var temp = new Array(16);
-    var tx = -self[3];
-    var ty = -self[7];
-    var tz = -self[11];
-    for (h = 0; h < 3; h++) 
-        for (v = 0; v < 3; v++) 
+function invertMatrix(self:Array):Array {
+    var temp:Array = new Array(16);
+    var tx:Number = -self[3];
+    var ty:Number = -self[7];
+    var tz:Number = -self[11];
+    for (var h:uint = 0; h < 3; h++)
+        for (var v:uint = 0; v < 3; v++)
             temp[h + v * 4] = self[v + h * 4];
-    for (i = 0; i < 11; i++)
+    for (var i:uint = 0; i < 11; i++)
         self[i] = temp[i];
     self[3] = tx * self[0] + ty * self[1] + tz * self[2];
     self[7] = tx * self[4] + ty * self[5] + tz * self[6];
@@ -122,10 +123,24 @@ function invertMatrix(self) {
 
 
 // Triangle intersection using barycentric coord method
-function Triangle(p1, p2, p3) {
-    var edge1 = sub(p3, p1);
-    var edge2 = sub(p2, p1);
-    var normal = cross(edge1, edge2);
+public class Triangle {
+    var normal:Array;
+    var nu:Number;
+    var nv:Number;
+    var nd:Number;
+    var eu:uint;
+    var ev:uint;
+    var nu1:Number;
+    var nv1:Number;
+    var nu2:Number;
+    var nv2:Number;
+    var material:Array;
+    var axis:uint;
+    var shader:Function;
+public function Triangle(p1:Array, p2:Array, p3:Array):void {
+    var edge1:Array = sub(p3, p1);
+    var edge2:Array = sub(p2, p1);
+    var normal:Array = cross(edge1, edge2);
     if (Math.abs(normal[0]) > Math.abs(normal[1]))
         if (Math.abs(normal[0]) > Math.abs(normal[2]))
             this.axis = 0; 
@@ -136,18 +151,18 @@ function Triangle(p1, p2, p3) {
             this.axis = 1;
         else 
             this.axis = 2;
-    var u = (this.axis + 1) % 3;
-    var v = (this.axis + 2) % 3;
-    var u1 = edge1[u];
-    var v1 = edge1[v];
+    var u:int = (this.axis + 1) % 3;
+    var v:int = (this.axis + 2) % 3;
+    var u1:int = edge1[u];
+    var v1:int = edge1[v];
     
-    var u2 = edge2[u];
-    var v2 = edge2[v];
+    var u2:int = edge2[u];
+    var v2:int = edge2[v];
     this.normal = normalise(normal);
     this.nu = normal[u] / normal[this.axis];
     this.nv = normal[v] / normal[this.axis];
     this.nd = dot(normal, p1) / normal[this.axis];
-    var det = u1 * v2 - v1 * u2;
+    var det:int = u1 * v2 - v1 * u2;
     this.eu = p1[u];
     this.ev = p1[v]; 
     this.nu1 = u1 / det;
@@ -157,19 +172,19 @@ function Triangle(p1, p2, p3) {
     this.material = [0.7, 0.7, 0.7];
 }
 
-Triangle.prototype.intersect = function(orig, dir, near, far) {
-    var u = (this.axis + 1) % 3;
-    var v = (this.axis + 2) % 3;
-    var d = dir[this.axis] + this.nu * dir[u] + this.nv * dir[v];
-    var t = (this.nd - orig[this.axis] - this.nu * orig[u] - this.nv * orig[v]) / d;
+public function intersect(orig:Array, dir:Array, near:Number, far:Number):* {   // returntype is * due to returning of nulls
+    var u:uint = (this.axis + 1) % 3;
+    var v:uint = (this.axis + 2) % 3;
+    var d:uint = dir[this.axis] + this.nu * dir[u] + this.nv * dir[v];
+    var t:Number = (this.nd - orig[this.axis] - this.nu * orig[u] - this.nv * orig[v]) / d;
     if (t < near || t > far)
         return null;
-    var Pu = orig[u] + t * dir[u] - this.eu;
-    var Pv = orig[v] + t * dir[v] - this.ev;
-    var a2 = Pv * this.nu1 + Pu * this.nv1;
+    var Pu:uint = orig[u] + t * dir[u] - this.eu;
+    var Pv:uint = orig[v] + t * dir[v] - this.ev;
+    var a2:uint = Pv * this.nu1 + Pu * this.nv1;
     if (a2 < 0) 
         return null;
-    var a3 = Pu * this.nu2 + Pv * this.nv2;
+    var a3:uint = Pu * this.nu2 + Pv * this.nv2;
     if (a3 < 0) 
         return null;
 
@@ -177,20 +192,27 @@ Triangle.prototype.intersect = function(orig, dir, near, far) {
         return null;
     return t;
 }
+} // class Triangle
 
-function Scene(a_triangles) {
+public class Scene {
+    var zero:Array = new Array(0,0,0);
+    var triangles:Array;
+    var lights:Array;
+    var ambient:Array;
+    var background:Array;
+public function Scene(a_triangles):void {
     this.triangles = a_triangles;
     this.lights = [];
     this.ambient = [0,0,0];
     this.background = [0.8,0.8,1];
 }
-var zero = new Array(0,0,0);
 
-Scene.prototype.intersect = function(origin, dir, near, far) {
-    var closest = null;
-    for (i = 0; i < this.triangles.length; i++) {
-        var triangle = this.triangles[i];   
-        var d = triangle.intersect(origin, dir, near, far);
+
+public function intersect(origin:Array, dir:Array, near:Number = 0, far:Number = 0):Array {
+    var closest:Triangle = null;
+    for (var i:uint = 0; i < this.triangles.length; i++) {
+        var triangle:Triangle = this.triangles[i];
+        var d:* = triangle.intersect(origin, dir, near, far);
         if (d == null || d > far || d < near)
             continue;
         far = d;
@@ -200,12 +222,12 @@ Scene.prototype.intersect = function(origin, dir, near, far) {
     if (!closest)
         return [this.background[0],this.background[1],this.background[2]];
         
-    var normal = closest.normal;
-    var hit = add(origin, scale(dir, far)); 
+    var normal:Array = closest.normal;
+    var hit:Array = add(origin, scale(dir, far));
     if (dot(dir, normal) > 0)
         normal = [-normal[0], -normal[1], -normal[2]];
     
-    var colour = null;
+    var colour:Array = null;
     if (closest.shader) {
         colour = closest.shader(closest, hit, dir);
     } else {
@@ -213,24 +235,24 @@ Scene.prototype.intersect = function(origin, dir, near, far) {
     }
     
     // do reflection
-    var reflected = null;
+    var reflected:Array = null;
     if (colour.reflection > 0.001) {
-        var reflection = addVector(scale(normal, -2*dot(dir, normal)), dir);
+        var reflection:Array = addVector(scale(normal, -2*dot(dir, normal)), dir);
         reflected = this.intersect(hit, reflection, 0.0001, 1000000);
         if (colour.reflection >= 0.999999)
             return reflected;
     }
     
-    var l = [this.ambient[0], this.ambient[1], this.ambient[2]];
-    for (var i = 0; i < this.lights.length; i++) {
-        var light = this.lights[i];
-        var toLight = sub(light, hit);
-        var distance = lengthVector(toLight);
+    var l:Array = [this.ambient[0], this.ambient[1], this.ambient[2]];
+    for (var i:uint = 0; i < this.lights.length; i++) {
+        var light:Array = this.lights[i];
+        var toLight:Array = sub(light, hit);
+        var distance:Number = lengthVector(toLight);
         scaleVector(toLight, 1.0/distance);
         distance -= 0.0001;
         if (this.blocked(hit, toLight, distance))
             continue;
-        var nl = dot(normal, toLight);
+        var nl:Number = dot(normal, toLight);
         if (nl > 0)
             addVector(l, scale(light.colour, nl));
     }
@@ -241,12 +263,12 @@ Scene.prototype.intersect = function(origin, dir, near, far) {
     return l;
 }
 
-Scene.prototype.blocked = function(O, D, far) {
-    var near = 0.0001;
-    var closest = null;
-    for (i = 0; i < this.triangles.length; i++) {
+public function blocked(O:Array, D:Array, far:Number):Boolean {
+    var near:Number = 0.0001;
+    var closest:Array = null;
+    for (var i:uint = 0; i < this.triangles.length; i++) {
         var triangle = this.triangles[i];   
-        var d = triangle.intersect(O, D, near, far);
+        var d:* = triangle.intersect(O, D, near, far);
         if (d == null || d > far || d < near)
             continue;
         return true;
@@ -254,11 +276,14 @@ Scene.prototype.blocked = function(O, D, far) {
     
     return false;
 }
-
+} // class Scene
 
 // this camera code is from notes i made ages ago, it is from *somewhere* -- i cannot remember where
 // that somewhere is
-function Camera(origin, lookat, up) {
+public class Camera {
+    var directions:Array;
+    var origin:Array;
+public function Camera(origin:Array, lookat:Array, up:Array):void {
     var zaxis = normaliseVector(subVector(lookat, origin));
     var xaxis = normaliseVector(cross(up, zaxis));
     var yaxis = normaliseVector(cross(xaxis, subVector([0,0,0], zaxis)));
@@ -280,8 +305,8 @@ function Camera(origin, lookat, up) {
     this.directions[3] = transformMatrix(m, this.directions[3]);
 }
 
-Camera.prototype.generateRayPair = function(y) {
-    rays = new Array(new Object(), new Object());
+public function generateRayPair(y:Number):Array {
+    var rays:Array = new Array(new Object(), new Object());
     rays[0].origin = this.origin;
     rays[1].origin = this.origin;
     rays[0].dir = addVector(scale(this.directions[0], y), scale(this.directions[3], 1 - y));
@@ -289,44 +314,47 @@ Camera.prototype.generateRayPair = function(y) {
     return rays;
 }
 
-function renderRows(camera, scene, pixels, width, height, starty, stopy) {
-    for (var y = starty; y < stopy; y++) {
-        var rays = camera.generateRayPair(y / height);
-        for (var x = 0; x < width; x++) {
-            var xp = x / width;
-            var origin = addVector(scale(rays[0].origin, xp), scale(rays[1].origin, 1 - xp));
-            var dir = normaliseVector(addVector(scale(rays[0].dir, xp), scale(rays[1].dir, 1 - xp)));
-            var l = scene.intersect(origin, dir);
+public function render(scene:Scene, pixels:Array, width:uint, height:uint):void {
+    var cam:Camera = this;
+    var row:int = 0;
+    renderRows(cam, scene, pixels, width, height, 0, height);
+}
+} // class Camera
+
+function renderRows(camera:Camera, scene:Scene, pixels:Array, width:uint, height:uint, starty:uint, stopy:uint):void {
+    for (var y:uint = starty; y < stopy; y++) {
+        var rays:Array = camera.generateRayPair(y / height);
+        for (var x:uint = 0; x < width; x++) {
+            var xp:Number = x / width;
+            var origin:Array = addVector(scale(rays[0].origin, xp), scale(rays[1].origin, 1 - xp));
+            var dir:Array = normaliseVector(addVector(scale(rays[0].dir, xp), scale(rays[1].dir, 1 - xp)));
+            var l:Array = scene.intersect(origin, dir);
             pixels[y][x] = l;
         }
     }
 }
 
-Camera.prototype.render = function(scene, pixels, width, height) {
-    var cam = this;
-    var row = 0;
-    renderRows(cam, scene, pixels, width, height, 0, height);
-}
 
 
 
-function raytraceScene()
+
+function raytraceScene():Array
 {
-    var startDate = new Date().getTime();
-    var numTriangles = 2 * 6;
-    var triangles = new Array();//numTriangles);
-    var tfl = createVector(-10,  10, -10);
-    var tfr = createVector( 10,  10, -10);
-    var tbl = createVector(-10,  10,  10);
-    var tbr = createVector( 10,  10,  10);
-    var bfl = createVector(-10, -10, -10);
-    var bfr = createVector( 10, -10, -10);
-    var bbl = createVector(-10, -10,  10);
-    var bbr = createVector( 10, -10,  10);
+    var startDate:uint = new Date().getTime();
+    var numTriangles:uint = 2 * 6;
+    var triangles:Array = new Array();//numTriangles);
+    var tfl:Array = createVector(-10,  10, -10);
+    var tfr:Array = createVector( 10,  10, -10);
+    var tbl:Array = createVector(-10,  10,  10);
+    var tbr:Array = createVector( 10,  10,  10);
+    var bfl:Array = createVector(-10, -10, -10);
+    var bfr:Array = createVector( 10, -10, -10);
+    var bbl:Array = createVector(-10, -10,  10);
+    var bbr:Array = createVector( 10, -10,  10);
     
     // cube!!!
     // front
-    var i = 0;
+    var i:uint = 0;
     
     triangles[i++] = new Triangle(tfl, tfr, bfr);
     triangles[i++] = new Triangle(tfl, bfr, bfl);
@@ -351,12 +379,12 @@ function raytraceScene()
     triangles[i++] = new Triangle(bbl, bfr, bfl);
     
     //Floor!!!!
-    var green = createVector(0.0, 0.4, 0.0);
-    var grey = createVector(0.4, 0.4, 0.4);
+    var green:Array = createVector(0.0, 0.4, 0.0);
+    var grey:Array = createVector(0.4, 0.4, 0.4);
     grey.reflection = 1.0;
-    var floorShader = function(tri, pos, view) {
-        var x = ((pos[0]/32) % 2 + 2) % 2;
-        var z = ((pos[2]/32 + 0.3) % 2 + 2) % 2;
+    var floorShader:Function = function(tri:Triangle, pos:Array, view:Array) {
+        var x:Number = ((pos[0]/32) % 2 + 2) % 2;
+        var z:Number = ((pos[2]/32 + 0.3) % 2 + 2) % 2;
         if (x < 1 != z < 1) {
             //in the real world we use the fresnel term...
             //    var angle = 1-dot(view, tri.normal);
@@ -368,16 +396,16 @@ function raytraceScene()
         } else 
             return green;
     }
-    var ffl = createVector(-1000, -30, -1000);
-    var ffr = createVector( 1000, -30, -1000);
-    var fbl = createVector(-1000, -30,  1000);
-    var fbr = createVector( 1000, -30,  1000);
+    var ffl:Array = createVector(-1000, -30, -1000);
+    var ffr:Array = createVector( 1000, -30, -1000);
+    var fbl:Array = createVector(-1000, -30,  1000);
+    var fbr:Array = createVector( 1000, -30,  1000);
     triangles[i++] = new Triangle(fbl, fbr, ffr);
     triangles[i-1].shader = floorShader;
     triangles[i++] = new Triangle(fbl, ffr, ffl);
     triangles[i-1].shader = floorShader;
     
-    var _scene = new Scene(triangles);
+    var _scene:Scene = new Scene(triangles);
     _scene.lights[0] = createVector(20, 38, -22);
     _scene.lights[0].colour = createVector(0.7, 0.3, 0.3);
     _scene.lights[1] = createVector(-23, 40, 17);
@@ -387,22 +415,22 @@ function raytraceScene()
     _scene.ambient = createVector(0.1, 0.1, 0.1);
     //  _scene.background = createVector(0.7, 0.7, 1.0);
     
-    var size = 30;
-    var pixels = new Array();
-    for (var y = 0; y < size; y++) {
+    var size:uint = 30;
+    var pixels:Array = new Array();
+    for (var y:uint = 0; y < size; y++) {
         pixels[y] = new Array();
         for (var x = 0; x < size; x++) {
             pixels[y][x] = 0;
         }
     }
 
-    var _camera = new Camera(createVector(-40, 40, 40), createVector(0, 0, 0), createVector(0, 1, 0));
+    var _camera:Camera = new Camera(createVector(-40, 40, 40), createVector(0, 0, 0), createVector(0, 1, 0));
     _camera.render(_scene, pixels, size, size);
 
     return pixels;
 }
 
-function arrayToCanvasCommands(pixels)
+function arrayToCanvasCommands(pixels:Array):String
 {
     var s = '<canvas id="renderCanvas" width="30px" height="30px"></canvas><scr' + 'ipt>\nvar pixels = [';
     var size = 30;
@@ -439,13 +467,15 @@ for (var y = 0; y < size; y++) {\n\
 }
 
 // main entry point for running testcase
-function runTest(){
-testOutput = arrayToCanvasCommands(raytraceScene());
+function runTest():void{
+var testOutput:String = arrayToCanvasCommands(raytraceScene());
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+} // package

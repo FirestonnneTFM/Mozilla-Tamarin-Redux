@@ -1,11 +1,13 @@
-function arrayExists(array, x) {
-    for (var i = 0; i < array.length; i++) {
+package {
+
+function arrayExists(array:Array, x:*):Boolean {
+    for (var i:uint = 0; i < array.length; i++) {
         if (array[i] == x) return true;
     }
     return false;
 }
 
-Date.prototype.formatDate = function (input,time) {
+function formatDate (self:Date, input:String, time:uint = 0) {
     // formatDate :
     // a PHP date like function, for formatting date strings
     // See: http://www.php.net/date
@@ -23,102 +25,134 @@ Date.prototype.formatDate = function (input,time) {
     // unsupported:
     // I (capital i), T, Z    
 
-    var switches =    ["a", "A", "B", "d", "D", "F", "g", "G", "h", "H", 
-                       "i", "j", "l", "L", "m", "M", "n", "O", "r", "s", 
+    var switches:Array =    ["a", "A", "B", "d", "D", "F", "g", "G", "h", "H",
+                       "i", "j", "l", "L", "m", "M", "n", "O", "r", "s",
                        "S", "t", "U", "w", "W", "y", "Y", "z"];
-    var daysLong =    ["Sunday", "Monday", "Tuesday", "Wednesday", 
+    // js code called eval("a"+"()")
+    var switchFunctions:Object = new Object();
+    switchFunctions["a"] = a;
+    switchFunctions["A"] = A;
+    switchFunctions["B"] = B;
+    switchFunctions["d"] = d;
+    switchFunctions["D"] = D;
+    switchFunctions["F"] = F;
+    switchFunctions["g"] = g;
+    switchFunctions["G"] = G;
+    switchFunctions["h"] = h;
+    switchFunctions["H"] = H;
+    switchFunctions["i"] = i;
+    switchFunctions["j"] = j;
+    switchFunctions["l"] = l;
+    switchFunctions["L"] = L;
+    switchFunctions["m"] = m;
+    switchFunctions["M"] = M;
+    switchFunctions["n"] = n;
+    switchFunctions["O"] = O;
+    switchFunctions["r"] = r;
+    switchFunctions["s"] = s;
+    switchFunctions["S"] = S;
+    switchFunctions["t"] = t;
+    switchFunctions["U"] = U;
+    switchFunctions["w"] = w;
+    switchFunctions["W"] = W;
+    switchFunctions["y"] = y;
+    switchFunctions["Y"] = Y;
+    switchFunctions["z"] = z;
+    
+    var daysLong:Array =    ["Sunday", "Monday", "Tuesday", "Wednesday",
                        "Thursday", "Friday", "Saturday"];
-    var daysShort =   ["Sun", "Mon", "Tue", "Wed", 
+    var daysShort:Array =   ["Sun", "Mon", "Tue", "Wed",
                        "Thu", "Fri", "Sat"];
-    var monthsShort = ["Jan", "Feb", "Mar", "Apr",
+    var monthsShort:Array = ["Jan", "Feb", "Mar", "Apr",
                        "May", "Jun", "Jul", "Aug", "Sep",
                        "Oct", "Nov", "Dec"];
-    var monthsLong =  ["January", "February", "March", "April",
+    var monthsLong:Array =  ["January", "February", "March", "April",
                        "May", "June", "July", "August", "September",
                        "October", "November", "December"];
-    var daysSuffix = ["st", "nd", "rd", "th", "th", "th", "th", // 1st - 7th
+    var daysSuffix:Array = ["st", "nd", "rd", "th", "th", "th", "th", // 1st - 7th
                       "th", "th", "th", "th", "th", "th", "th", // 8th - 14th
                       "th", "th", "th", "th", "th", "th", "st", // 15th - 21st
                       "nd", "rd", "th", "th", "th", "th", "th", // 22nd - 28th
                       "th", "th", "st"];                        // 29th - 31st
 
-    function a() {
+    function a():String {
         // Lowercase Ante meridiem and Post meridiem
         return self.getHours() > 11? "pm" : "am";
     }
-    function A() {
+    function A():String {
         // Uppercase Ante meridiem and Post meridiem
         return self.getHours() > 11? "PM" : "AM";
     }
 
-    function B(){
+    function B():String{
         // Swatch internet time. code simply grabbed from ppk,
         // since I was feeling lazy:
         // http://www.xs4all.nl/~ppk/js/beat.html
-        var off = (self.getTimezoneOffset() + 60)*60;
-        var theSeconds = (self.getHours() * 3600) + 
-                         (self.getMinutes() * 60) + 
+        var off:uint = (self.getTimezoneOffset() + 60)*60;
+        var theSeconds:uint = (self.getHours() * 3600) +
+                         (self.getMinutes() * 60) +
                           self.getSeconds() + off;
-        var beat = Math.floor(theSeconds/86.4);
+        var beat:uint = Math.floor(theSeconds/86.4);
         if (beat > 1000) beat -= 1000;
         if (beat < 0) beat += 1000;
-        if ((""+beat).length == 1) beat = "00"+beat;
-        if ((""+beat).length == 2) beat = "0"+beat;
-        return beat;
+        var beatStr:String = String(beat);
+        if ((""+beatStr).length == 1) return "00"+beatStr;
+        if ((""+beatStr).length == 2) return "0"+beatStr;
+        return beatStr
     }
     
-    function d() {
+    function d():String {
         // Day of the month, 2 digits with leading zeros
         return new String(self.getDate()).length == 1?
-        "0"+self.getDate() : self.getDate();
+        "0"+self.getDate() : String(self.getDate());
     }
-    function D() {
+    function D():String {
         // A textual representation of a day, three letters
         return daysShort[self.getDay()];
     }
-    function F() {
+    function F():String {
         // A full textual representation of a month
         return monthsLong[self.getMonth()];
     }
-    function g() {
+    function g():uint {
         // 12-hour format of an hour without leading zeros
         return self.getHours() > 12? self.getHours()-12 : self.getHours();
     }
-    function G() {
+    function G():uint {
         // 24-hour format of an hour without leading zeros
         return self.getHours();
     }
-    function h() {
+    function h():String {
         // 12-hour format of an hour with leading zeros
         if (self.getHours() > 12) {
-          var s = new String(self.getHours()-12);
+          var s:String = new String(self.getHours()-12);
           return s.length == 1?
-          "0"+ (self.getHours()-12) : self.getHours()-12;
-        } else { 
-          var s = new String(self.getHours());
+          "0"+ (self.getHours()-12) : String(self.getHours()-12);
+        } else {
+          var s:String = new String(self.getHours());
           return s.length == 1?
-          "0"+self.getHours() : self.getHours();
+          "0"+self.getHours() : String(self.getHours());
         }  
     }
-    function H() {
+    function H():String {
         // 24-hour format of an hour with leading zeros
         return new String(self.getHours()).length == 1?
-        "0"+self.getHours() : self.getHours();
+        "0"+self.getHours() : String(self.getHours());
     }
-    function i() {
+    function i():String {
         // Minutes with leading zeros
-        return new String(self.getMinutes()).length == 1? 
-        "0"+self.getMinutes() : self.getMinutes(); 
+        return new String(self.getMinutes()).length == 1?
+        "0"+self.getMinutes() : String(self.getMinutes());
     }
-    function j() {
+    function j():uint {
         // Day of the month without leading zeros
         return self.getDate();
     }    
-    function l() {
+    function l():String {
         // A full textual representation of the day of the week
         return daysLong[self.getDay()];
     }
-    function L() {
+    function L():Boolean {
         // leap year or not. 1 if leap year, 0 if not.
         // the logic should match iso's 8601 standard.
         var y_ = Y();
@@ -131,21 +165,21 @@ Date.prototype.formatDate = function (input,time) {
             return 0;
         }
     }
-    function m() {
+    function m():String {
         // Numeric representation of a month, with leading zeros
         return self.getMonth() < 9?
         "0"+(self.getMonth()+1) : 
-        self.getMonth()+1;
+        String(self.getMonth()+1);
     }
-    function M() {
+    function M():String {
         // A short textual representation of a month, three letters
         return monthsShort[self.getMonth()];
     }
-    function n() {
+    function n():uint {
         // Numeric representation of a month, without leading zeros
         return self.getMonth()+1;
     }
-    function O() {
+    function O():String {
         // Difference to Greenwich time (GMT) in hours
         var os = Math.abs(self.getTimezoneOffset());
         var h = ""+Math.floor(os/60);
@@ -154,52 +188,52 @@ Date.prototype.formatDate = function (input,time) {
         m.length == 1? m = "0"+m:1;
         return self.getTimezoneOffset() < 0 ? "+"+h+m : "-"+h+m;
     }
-    function r() {
+    function r():String {
         // RFC 822 formatted date
-        var r; // result
+        var r:String; // result
         //  Thu    ,     21          Dec         2000
         r = D() + ", " + j() + " " + M() + " " + Y() +
         //        16     :    01     :    07          +0200
             " " + H() + ":" + i() + ":" + s() + " " + O();
         return r;
     }
-    function S() {
+    function S():String {
         // English ordinal suffix for the day of the month, 2 characters
         return daysSuffix[self.getDate()-1];
     }
-    function s() {
+    function s():String {
         // Seconds, with leading zeros
         return new String(self.getSeconds()).length == 1?
-        "0"+self.getSeconds() : self.getSeconds();
+        "0"+self.getSeconds() : String(self.getSeconds());
     }
-    function t() {
+    function t():uint {
 
         // thanks to Matt Bannon for some much needed code-fixes here!
         var daysinmonths = [null,31,28,31,30,31,30,31,31,30,31,30,31];
         if (L()==1 && n()==2) return 29; // leap day
         return daysinmonths[n()];
     }
-    function U() {
+    function U():uint {
         // Seconds since the Unix Epoch (January 1 1970 00:00:00 GMT)
         return Math.round(self.getTime()/1000);
     }
-    function W() {
+    function W():uint {
         // Weeknumber, as per ISO specification:
         // http://www.cl.cam.ac.uk/~mgk25/iso-time.html
         
         // if the day is three days before newyears eve,
         // there's a chance it's "week 1" of next year.
         // here we check for that.
-        var beforeNY = 364+L() - z();
-        var afterNY  = z();
-        var weekday = w()!=0?w()-1:6; // makes sunday (0), into 6.
+        var beforeNY:uint = 364+L() - z();
+        var afterNY:uint  = z();
+        var weekday:uint = w()!=0?w()-1:6; // makes sunday (0), into 6.
         if (beforeNY <= 2 && weekday <= 2-beforeNY) {
             return 1;
         }
         // similarly, if the day is within threedays of newyears
         // there's a chance it belongs in the old year.
-        var ny = new Date("January 1 " + Y() + " 00:00:00");
-        var nyDay = ny.getDay()!=0?ny.getDay()-1:6;
+        var ny:Date = new Date("January 1 " + Y() + " 00:00:00");
+        var nyDay:uint = ny.getDay()!=0?ny.getDay()-1:6;
         if (
             (afterNY <= 2) && 
             (nyDay >=4)  && 
@@ -209,7 +243,7 @@ Date.prototype.formatDate = function (input,time) {
             // i call the function here again, using the last day
             // of the previous year, as the date, and then just
             // return that week.
-            var prevNY = new Date("December 31 " + (Y()-1) + " 00:00:00");
+            var prevNY:Date = new Date("December 31 " + (Y()-1) + " 00:00:00");
             return prevNY.formatDate("W");
         }
         
@@ -223,20 +257,20 @@ Date.prototype.formatDate = function (input,time) {
             return 1 + Math.floor( ( z() - ( 7 - nyDay ) ) / 7 );
         }
     }
-    function w() {
+    function w():uint {
         // Numeric representation of the day of the week
         return self.getDay();
     }
     
-    function Y() {
+    function Y():uint {
         // A full numeric representation of a year, 4 digits
 
         // we first check, if getFullYear is supported. if it
         // is, we just use that. ppks code is nice, but wont
         // work with dates outside 1900-2038, or something like that
-        if (self.getFullYear) {
-            var newDate = new Date("January 1 2001 00:00:00 +0000");
-            var x = newDate .getFullYear();
+        if ((new Date()).getFullYear) {
+            var newDate:Date = new Date("Jan 1 2001");
+            var x:uint = newDate.getFullYear();
             if (x == 2001) {              
                 // i trust the method now
                 return self.getFullYear();
@@ -245,39 +279,38 @@ Date.prototype.formatDate = function (input,time) {
         // else, do this:
         // codes thanks to ppk:
         // http://www.xs4all.nl/~ppk/js/introdate.html
-        var x = self.getYear();
-        var y = x % 100;
+        var x:uint = self.getYear();
+        var y:uint = x % 100;
         y += (y < 38) ? 2000 : 1900;
         return y;
     }
-    function y() {
+    function y():String {
         // A two-digit representation of a year
-        var y = Y()+"";
+        var y:String = Y()+"";
         return y.substring(y.length-2,y.length);
     }
-    function z() {
+    function z():uint {
         // The day of the year, zero indexed! 0 through 366
-        var t = new Date("January 1 " + Y() + " 00:00:00");
-        var diff = self.getTime() - t.getTime();
+        var t:Date = new Date("January 1 " + Y() + " 00:00:00");
+        var diff:uint = self.getTime() - t.getTime();
         return Math.floor(diff/1000/60/60/24);
     }
         
-    var self = this;
     if (time) {
         // save time
-        var prevTime = self.getTime();
+        var prevTime:uint = self.getTime();
         self.setTime(time);
     }
     
-    var ia = input.split("");
-    var ij = 0;
+    var ia:Array = input.split("");
+    var ij:uint = 0;
     while (ia[ij]) {
         if (ia[ij] == "\\") {
             // this is our way of allowing users to escape stuff
             ia.splice(ij,1);
         } else {
             if (arrayExists(switches,ia[ij])) {
-                ia[ij] = eval(ia[ij] + "()");
+                ia[ij] = switchFunctions[ia[ij]](); //eval(ia[ij] + "()");
             }
         }
         ij++;
@@ -287,22 +320,25 @@ Date.prototype.formatDate = function (input,time) {
         self.setTime(prevTime);
     }
     return ia.join("");
-}
+}   // function formatDate
 
 // main entry point for running testcase
-function runTest(){
-var date = new Date("1/1/2007 1:11:11");
+function runTest():void{
 
-for (i = 0; i < 500; ++i) {
-    var shortFormat = date.formatDate("Y-m-d");
-    var longFormat = date.formatDate("l, F d, Y g:i:s A");
+var date:Date = new Date("1/1/2007 1:11:11");
+
+for (var i:uint = 0; i < 500; ++i) {
+    var shortFormat:String = formatDate(date, "Y-m-d");
+    var longFormat:String = formatDate(date, "l, F d, Y g:i:s A");
     date.setTime(date.getTime() + 84266956);
 }
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+} // package

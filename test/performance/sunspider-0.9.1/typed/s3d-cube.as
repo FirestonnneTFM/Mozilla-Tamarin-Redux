@@ -1,34 +1,35 @@
 // 3D Cube Rotation
 // http://www.speich.net/computer/moztesting/3d.htm
 // Created by Simon Speich
+package {
 
-var Q = new Array();
-var MTrans = new Array();  // transformation matrix
-var MQube = new Array();  // position information of qube
-var I = new Array();      // entity matrix
-var Origin = new Object();
-var Testing = new Object();
-var LoopTimer;
+var Q:Array = new Array();
+var MTrans:Array = new Array();  // transformation matrix
+var MQube:Array = new Array();  // position information of qube
+var I:Array = new Array();      // entity matrix
+var Origin:Object = new Object();
+var Testing:Object = new Object();
+var LoopTimer:uint;
 
-var DisplArea = new Object();
+var DisplArea:Object = new Object();
 DisplArea.Width = 300;
 DisplArea.Height = 300;
 
-function DrawLine(From, To) {
-  var x1 = From.V[0];
-  var x2 = To.V[0];
-  var y1 = From.V[1];
-  var y2 = To.V[1];
-  var dx = Math.abs(x2 - x1);
-  var dy = Math.abs(y2 - y1);
-  var x = x1;
-  var y = y1;
-  var IncX1, IncY1;
-  var IncX2, IncY2;  
-  var Den;
-  var Num;
-  var NumAdd;
-  var NumPix;
+function DrawLine(From:Object, To:Object):void {
+  var x1:int = From.V[0];
+  var x2:int = To.V[0];
+  var y1:int = From.V[1];
+  var y2:int = To.V[1];
+  var dx:int = Math.abs(x2 - x1);
+  var dy:int = Math.abs(y2 - y1);
+  var x:int = x1;
+  var y:int = y1;
+  var IncX1:int, IncY1:int;
+  var IncX2:int, IncY2:int;
+  var Den:int;
+  var Num:int;
+  var NumAdd:int;
+  var NumPix:int;
 
   if (x2 >= x1) {  IncX1 = 1; IncX2 = 1;  }
   else { IncX1 = -1; IncX2 = -1; }
@@ -53,7 +54,7 @@ function DrawLine(From, To) {
 
   NumPix = Math.round(Q.LastPx + NumPix);
 
-  var i = Q.LastPx;
+  var i:int = Q.LastPx;
   for (; i < NumPix; i++) {
     Num += NumAdd;
     if (Num >= Den) {
@@ -67,36 +68,39 @@ function DrawLine(From, To) {
   Q.LastPx = NumPix;
 }
 
-function CalcCross(V0, V1) {
-  var Cross = new Array();
+function CalcCross(V0:Array, V1:Array):Array {
+  var Cross:Array = new Array();
   Cross[0] = V0[1]*V1[2] - V0[2]*V1[1];
   Cross[1] = V0[2]*V1[0] - V0[0]*V1[2];
   Cross[2] = V0[0]*V1[1] - V0[1]*V1[0];
   return Cross;
 }
 
-function CalcNormal(V0, V1, V2) {
-  var A = new Array();   var B = new Array(); 
-  for (var i = 0; i < 3; i++) {
+function CalcNormal(V0:Array, V1:Array, V2:Array):Array {
+  var A:Array = new Array();   var B:Array = new Array();
+  for (var i:uint = 0; i < 3; i++) {
     A[i] = V0[i] - V1[i];
     B[i] = V2[i] - V1[i];
   }
   A = CalcCross(A, B);
   var Length = Math.sqrt(A[0]*A[0] + A[1]*A[1] + A[2]*A[2]); 
-  for (var i = 0; i < 3; i++) A[i] = A[i] / Length;
+  for (i = 0; i < 3; i++) A[i] = A[i] / Length;
   A[3] = 1;
   return A;
 }
 
-function CreateP(X,Y,Z) {
+public class CreateP {
+  var V:Array;
+public function CreateP(X:int,Y:int,Z:int):void {
   this.V = [X,Y,Z,1];
+}
 }
 
 // multiplies two matrices
-function MMulti(M1, M2) {
-  var M = [[],[],[],[]];
-  var i = 0;
-  var j = 0;
+function MMulti(M1:Array, M2:Array):Array {
+  var M:Array = [[],[],[],[]];
+  var i:uint = 0;
+  var j:uint = 0;
   for (; i < 4; i++) {
     j = 0;
     for (; j < 4; j++) M[i][j] = M1[i][0] * M2[0][j] + M1[i][1] * M2[1][j] + M1[i][2] * M2[2][j] + M1[i][3] * M2[3][j];
@@ -105,25 +109,25 @@ function MMulti(M1, M2) {
 }
 
 //multiplies matrix with vector
-function VMulti(M, V) {
-  var Vect = new Array();
-  var i = 0;
+function VMulti(M:Array, V:Array):Array {
+  var Vect:Array = new Array();
+  var i:uint = 0;
   for (;i < 4; i++) Vect[i] = M[i][0] * V[0] + M[i][1] * V[1] + M[i][2] * V[2] + M[i][3] * V[3];
   return Vect;
 }
 
-function VMulti2(M, V) {
-  var Vect = new Array();
-  var i = 0;
+function VMulti2(M:Array, V:Array):Array {
+  var Vect:Array = new Array();
+  var i:uint = 0;
   for (;i < 3; i++) Vect[i] = M[i][0] * V[0] + M[i][1] * V[1] + M[i][2] * V[2];
   return Vect;
 }
 
 // add to matrices
-function MAdd(M1, M2) {
-  var M = [[],[],[],[]];
-  var i = 0;
-  var j = 0;
+function MAdd(M1:Array, M2:Array):Array {
+  var M:Array = [[],[],[],[]];
+  var i:uint = 0;
+  var j:uint = 0;
   for (; i < 4; i++) {
     j = 0;
     for (; j < 4; j++) M[i][j] = M1[i][j] + M2[i][j];
@@ -131,8 +135,8 @@ function MAdd(M1, M2) {
   return M;
 }
 
-function Translate(M, Dx, Dy, Dz) {
-  var T = [
+function Translate(M:Array, Dx:int, Dy:int, Dz:int):Array {
+  var T:Array = [
   [1,0,0,Dx],
   [0,1,0,Dy],
   [0,0,1,Dz],
@@ -141,12 +145,12 @@ function Translate(M, Dx, Dy, Dz) {
   return MMulti(T, M);
 }
 
-function RotateX(M, Phi) {
-  var a = Phi;
+function RotateX(M:Array, Phi:Number):Array {
+  var a:Number = Phi;
   a *= Math.PI / 180;
-  var Cos = Math.cos(a);
-  var Sin = Math.sin(a);
-  var R = [
+  var Cos:Number = Math.cos(a);
+  var Sin:Number = Math.sin(a);
+  var R:Array = [
   [1,0,0,0],
   [0,Cos,-Sin,0],
   [0,Sin,Cos,0],
@@ -155,12 +159,12 @@ function RotateX(M, Phi) {
   return MMulti(R, M);
 }
 
-function RotateY(M, Phi) {
-  var a = Phi;
+function RotateY(M:Array, Phi:Number):Array {
+  var a:Number = Phi;
   a *= Math.PI / 180;
-  var Cos = Math.cos(a);
-  var Sin = Math.sin(a);
-  var R = [
+  var Cos:Number = Math.cos(a);
+  var Sin:Number = Math.sin(a);
+  var R:Array = [
   [Cos,0,Sin,0],
   [0,1,0,0],
   [-Sin,0,Cos,0],
@@ -169,12 +173,12 @@ function RotateY(M, Phi) {
   return MMulti(R, M);
 }
 
-function RotateZ(M, Phi) {
-  var a = Phi;
+function RotateZ(M:Array, Phi:Number):Array {
+  var a:Number = Phi;
   a *= Math.PI / 180;
-  var Cos = Math.cos(a);
-  var Sin = Math.sin(a);
-  var R = [
+  var Cos:Number = Math.cos(a);
+  var Sin:Number = Math.sin(a);
+  var R:Array = [
   [Cos,-Sin,0,0],
   [Sin,Cos,0,0],
   [0,0,1,0],   
@@ -183,10 +187,10 @@ function RotateZ(M, Phi) {
   return MMulti(R, M);
 }
 
-function DrawQube() {
+function DrawQube():void {
   // calc current normals
-  var CurN = new Array();
-  var i = 5;
+  var CurN:Array = new Array();
+  var i:int = 5;
   Q.LastPx = 0;
   for (; i > -1; i--) CurN[i] = VMulti2(MQube, Q.Normal[i]);
   if (CurN[0][2] < 0) {
@@ -229,9 +233,9 @@ function DrawQube() {
   Q.LastPx = 0;
 }
 
-function Loop() {
+function Loop():void {
   if (Testing.LoopCount > Testing.LoopMax) return;
-  var TestingStr = String(Testing.LoopCount);
+  var TestingStr:String = String(Testing.LoopCount);
   while (TestingStr.length < 3) TestingStr = "0" + TestingStr;
   MTrans = Translate(I, -Q[8].V[0], -Q[8].V[1], -Q[8].V[2]);
   MTrans = RotateX(MTrans, 1);
@@ -239,7 +243,7 @@ function Loop() {
   MTrans = RotateZ(MTrans, 5);
   MTrans = Translate(MTrans, Q[8].V[0], Q[8].V[1], Q[8].V[2]);
   MQube = MMulti(MTrans, MQube);
-  var i = 8;
+  var i:int = 8;
   for (; i > -1; i--) {
     Q[i].V = VMulti(MTrans, Q[i].V);
   }
@@ -248,7 +252,7 @@ function Loop() {
   Loop();
 }
 
-function Init(CubeSize) {
+function Init(CubeSize:int):void {
   // init/reset vars
   Origin.V = [150,150,20,1];
   Testing.LoopCount = 0;
@@ -302,19 +306,19 @@ function Init(CubeSize) {
   
   // calculate squad normals
   Q.Normal = new Array();
-  for (var i = 0; i < Q.Edge.length; i++) Q.Normal[i] = CalcNormal(Q[Q.Edge[i][0]].V, Q[Q.Edge[i][1]].V, Q[Q.Edge[i][2]].V);
+  for (var i:uint = 0; i < Q.Edge.length; i++) Q.Normal[i] = CalcNormal(Q[Q.Edge[i][0]].V, Q[Q.Edge[i][1]].V, Q[Q.Edge[i][2]].V);
   
   // line drawn ?
   Q.Line = [false,false,false,false,false,false,false,false,false,false,false,false];
   
   // create line pixels
   Q.NumPx = 9 * 2 * CubeSize;
-  for (var i = 0; i < Q.NumPx; i++) CreateP(0,0,0);
+  for (var i:uint = 0; i < Q.NumPx; i++) new CreateP(0,0,0);
   
   MTrans = Translate(MTrans, Origin.V[0], Origin.V[1], Origin.V[2]);
   MQube = MMulti(MTrans, MQube);
 
-  var i = 0;
+  var i:uint = 0;
   for (; i < 9; i++) {
     Q[i].V = VMulti(MTrans, Q[i].V);
   }
@@ -324,8 +328,8 @@ function Init(CubeSize) {
 }
 
 // main entry point for running testcase
-function runTest(){
-for ( var i = 20; i <= 160; i *= 2 ) {
+function runTest():void{
+for ( var i:uint = 20; i <= 160; i *= 2 ) {
   Init(i);
 }
 
@@ -342,7 +346,9 @@ DisplArea.Height = 300;
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+} // package

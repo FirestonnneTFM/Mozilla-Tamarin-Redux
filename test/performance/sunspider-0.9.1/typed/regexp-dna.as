@@ -4,10 +4,12 @@
 // contributed by Jesse Millikan
 // Base on the Ruby version by jose fco. gonzalez
 
+package {
+
 // main entry point for running testcase
-function runTest(){
-var l;
-var dnaInput = ">ONE Homo sapiens alu\n\
+function runTest():void{
+var l; // not used
+var dnaInput:String = ">ONE Homo sapiens alu\n\
 GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGGGAGGCCGAGGCGGGCGGA\n\
 TCACCTGAGGTCAGGAGTTCGAGACCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACT\n\
 AAAAATACAAAAATTAGCCGGGCGTGGTGGCGCGCGCCTGTAATCCCAGCTACTCGGGAG\n\
@@ -1681,18 +1683,19 @@ gagatacctttgcaattttt\n";
 
 dnaInput = dnaInput + dnaInput + dnaInput;
 
-var ilen, clen,
- seqs = [
-  /agggtaaa|tttaccct/ig,
-  /[cgt]gggtaaa|tttaccc[acg]/ig,
-  /a[act]ggtaaa|tttacc[agt]t/ig,
-  /ag[act]gtaaa|tttac[agt]ct/ig,
-  /agg[act]taaa|ttta[agt]cct/ig,
-  /aggg[acg]aaa|ttt[cgt]ccct/ig,
-  /agggt[cgt]aa|tt[acg]accct/ig,
-  /agggta[cgt]a|t[acg]taccct/ig,
-  /agggtaa[cgt]|[acg]ttaccct/ig],
- subs = {
+var ilen:uint, clen:uint,
+ seqs:Array = new Array(
+  new RegExp("/agggtaaa|tttaccct/ig"),
+  new RegExp("/[cgt]gggtaaa|tttaccc[acg]/ig"),
+  new RegExp("/a[act]ggtaaa|tttacc[agt]t/ig"),
+  new RegExp("/ag[act]gtaaa|tttac[agt]ct/ig"),
+  new RegExp("/agg[act]taaa|ttta[agt]cct/ig"),
+  new RegExp("/aggg[acg]aaa|ttt[cgt]ccct/ig"),
+  new RegExp("/agggt[cgt]aa|tt[acg]accct/ig"),
+  new RegExp("/agggta[cgt]a|t[acg]taccct/ig"),
+  new RegExp("/agggtaa[cgt]|[acg]ttaccct/ig"))
+    
+ var subs:Object = {
   B: '(c|g|t)', D: '(a|g|t)', H: '(a|c|t)', K: '(g|t)',
   M: '(a|c)', N: '(a|c|g|t)', R: '(a|g)', S: '(c|t)',
   V: '(a|c|g)', W: '(a|t)', Y: '(c|t)' }
@@ -1703,13 +1706,14 @@ ilen = dnaInput.length;
 dnaInput = dnaInput.replace(/>.*\n|\n/g,"")
 clen = dnaInput.length
 
-var dnaOutputString;
+var dnaOutputString:String;
 
-for(i in seqs)
+for(var i:uint = 0; i < seqs.length; i++)
     dnaOutputString += seqs[i].source + " " + (dnaInput.match(seqs[i]) || []).length + "\n";
  // match returns null if no matches, so replace with empty
 
-for(k in subs)
+
+for(var k:String in subs)
  dnaInput = dnaInput.replace(k, subs[k]) // FIXME: Would like this to be a global substitution in a future version of SunSpider.
  // search string, replacement string, flags
 
@@ -1717,7 +1721,9 @@ for(k in subs)
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

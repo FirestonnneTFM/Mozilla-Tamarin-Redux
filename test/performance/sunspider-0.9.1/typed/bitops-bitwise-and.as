@@ -23,16 +23,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
+package {
+
 // main entry point for running testcase
-function runTest(){
-bitwiseAndValue = 4294967296;
-for (var i = 0; i < 600000; i++)
+function runTest():void{
+var bitwiseAndValue:uint = 4294967296;
+for (var i:uint = 0; i < 600000; i++)
     bitwiseAndValue = bitwiseAndValue & i;
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}

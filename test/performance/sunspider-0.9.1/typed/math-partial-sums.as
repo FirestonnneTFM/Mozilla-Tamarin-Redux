@@ -2,13 +2,17 @@
 // http://shootout.alioth.debian.org/
 // contributed by Isaac Gouy
 
-function partial(n){
-    var a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 = 0.0;
-    var twothirds = 2.0/3.0;
-    var alt = -1.0;
-    var k2 = k3 = sk = ck = 0.0;
+package {
+
+function partial(n:uint){
+    var a1:Number,a2:Number,a3:Number,a4:Number,a5:Number,a6:Number,a7:Number,a8:Number,a9:Number;
+    a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 = 0.0;
+    var twothirds:Number = 2.0/3.0;
+    var alt:Number = -1.0;
+    var k2:uint = 0, k3:uint = 0;
+    var sk:Number = 0.0, ck:Number = 0.0;
     
-    for (var k = 1; k <= n; k++){
+    for (var k:uint = 1; k <= n; k++){
         k2 = k*k;
         k3 = k2*k;
         sk = Math.sin(k);
@@ -28,15 +32,17 @@ function partial(n){
 }
 
 // main entry point for running testcase
-function runTest(){
-for (var i = 1024; i <= 16384; i *= 2) {
+function runTest():void{
+for (var i:uint = 1024; i <= 16384; i *= 2) {
     partial(i);
 }
 } //runTest()
 
 // warm up run of testcase
 runTest();
-var startTime = new Date();
+var startTime:uint = new Date().getTime();
 runTest();
-var time = new Date() - startTime;
+var time:uint = new Date().getTime() - startTime;
 print("metric time " + time);
+
+}
