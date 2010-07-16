@@ -355,8 +355,7 @@ namespace avmplus
             // we're in the same abc code that contains try blocks
             computeExceptionFixups();
         } else {
-            // we're in vm-generated abc code preceding an OP_abs_jump,
-            // or the method doesn't have try blocks.
+            // the method doesn't have try blocks.
         }
     }
 
@@ -497,17 +496,6 @@ namespace avmplus
         case OP_callsupervoid:
             emitOp2(wordCode(opcode), opd1, opd2);
             break;
-
-        case OP_abs_jump:
-        {
-            #ifdef AVMPLUS_64BIT
-            const uint8_t* new_pc = (const uint8_t *) (uintptr_t(opd1) | (((uintptr_t) opd2) << 32));
-            #else
-            const uint8_t* new_pc = (const uint8_t*) opd1;
-            #endif
-            emitAbsJump(new_pc);
-            break;
-        }
 
         case OP_getproperty:
         case OP_setproperty:
@@ -969,32 +957,6 @@ namespace avmplus
         // need a forward declaration for toplevel.
 //      AvmAssert(toplevel[OP_lookupswitch] == 0);
 #endif
-    }
-
-    // 'OP_abs_jump' is an ABC-only construct, it boils away in the translation,
-    // both here and to LIR.  It says: My first operand (one word in 32-bit
-    // mode, two words in 64-bit mode) is a raw pointer into a buffer of ABC code.
-    // My second operand is the number of bytes of code starting at that address.
-    // Continue translating from that address as if it were a linear part
-    // of the current code vector.  In other words, it's a forwarding pointer.
-
-    void WordcodeEmitter::emitAbsJump(const uint8_t *new_pc)
-    {
-        code_start = new_pc;
-
-        // When performing a jump:
-        //  - require that backpatches and labels no longer reference the old
-        //    code vector; those sets must both be empty.  (We could clear out
-        //    labels, alternatively, but that appears not to be required.)
-        //  - recompute all the exception information, and require that none of it
-        //    has been consumed -- this is the only thing that makes sense, and appears
-        //    to be the view the verifier sanctions.  (A full definition for the
-        //    semantics of abs_jump is sorely needed.)
-
-        AvmAssert(!exceptions_consumed);
-        AvmAssert(backpatches == NULL);
-        AvmAssert(labels == NULL);
-        computeExceptionFixups();
     }
 
     uint32_t WordcodeEmitter::epilogue(uintptr_t** code_result)

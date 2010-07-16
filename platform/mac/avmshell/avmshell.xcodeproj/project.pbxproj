@@ -66,7 +66,6 @@
 		079C96F10F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
 		079DF8350F3A882D0031D1B4 /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B50F3A882D0031D1B4 /* AbcData.cpp */; };
 		079DF8360F3A882D0031D1B4 /* AbcEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */; };
-		079DF8370F3A882D0031D1B4 /* AbcGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B80F3A882D0031D1B4 /* AbcGen.cpp */; };
 		079DF8380F3A882D0031D1B4 /* AbcParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */; };
 		079DF83A0F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */; };
 		079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
@@ -119,7 +118,6 @@
 		079DF86C0F3A882D0031D1B4 /* XMLParser16.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF8330F3A882D0031D1B4 /* XMLParser16.cpp */; };
 		079DF86D0F3A882D0031D1B4 /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B50F3A882D0031D1B4 /* AbcData.cpp */; };
 		079DF86E0F3A882D0031D1B4 /* AbcEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */; };
-		079DF86F0F3A882D0031D1B4 /* AbcGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B80F3A882D0031D1B4 /* AbcGen.cpp */; };
 		079DF8700F3A882D0031D1B4 /* AbcParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */; };
 		079DF8720F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */; };
 		079DF8730F3A882D0031D1B4 /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
@@ -512,8 +510,6 @@
 		079DF7B50F3A882D0031D1B4 /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcEnv.cpp; path = ../../../core/AbcEnv.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7B70F3A882D0031D1B4 /* AbcEnv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AbcEnv.h; path = ../../../core/AbcEnv.h; sourceTree = SOURCE_ROOT; };
-		079DF7B80F3A882D0031D1B4 /* AbcGen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcGen.cpp; path = ../../../core/AbcGen.cpp; sourceTree = SOURCE_ROOT; };
-		079DF7B90F3A882D0031D1B4 /* AbcGen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AbcGen.h; path = ../../../core/AbcGen.h; sourceTree = SOURCE_ROOT; };
 		079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcParser.cpp; path = ../../../core/AbcParser.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7BB0F3A882D0031D1B4 /* AbcParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AbcParser.h; path = ../../../core/AbcParser.h; sourceTree = SOURCE_ROOT; };
 		079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ActionBlockConstants.cpp; path = ../../../core/ActionBlockConstants.cpp; sourceTree = SOURCE_ROOT; };
@@ -1030,8 +1026,6 @@
 				079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */,
 				07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */,
 				079DF7B70F3A882D0031D1B4 /* AbcEnv.h */,
-				079DF7B80F3A882D0031D1B4 /* AbcGen.cpp */,
-				079DF7B90F3A882D0031D1B4 /* AbcGen.h */,
 				079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */,
 				079DF7BB0F3A882D0031D1B4 /* AbcParser.h */,
 				07E65EDF10BC19A7000D1EB6 /* AbcParser-inlines.h */,
@@ -1686,7 +1680,6 @@
 			files = (
 				079DF86D0F3A882D0031D1B4 /* AbcData.cpp in Sources */,
 				079DF86E0F3A882D0031D1B4 /* AbcEnv.cpp in Sources */,
-				079DF86F0F3A882D0031D1B4 /* AbcGen.cpp in Sources */,
 				079DF8700F3A882D0031D1B4 /* AbcParser.cpp in Sources */,
 				079DF8720F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */,
 				079DF8730F3A882D0031D1B4 /* AtomArray.cpp in Sources */,
@@ -1874,7 +1867,6 @@
 			files = (
 				079DF8350F3A882D0031D1B4 /* AbcData.cpp in Sources */,
 				079DF8360F3A882D0031D1B4 /* AbcEnv.cpp in Sources */,
-				079DF8370F3A882D0031D1B4 /* AbcGen.cpp in Sources */,
 				079DF8380F3A882D0031D1B4 /* AbcParser.cpp in Sources */,
 				079DF83A0F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */,
 				079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */,

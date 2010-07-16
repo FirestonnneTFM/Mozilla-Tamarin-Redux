@@ -380,7 +380,7 @@ namespace avmplus
         {   -1,  0,   0    W(0)                   N("OP_0xEB") },
         {   -1,  0,   0    W(0)                   N("OP_0xEC") },
         {   -1,  0,   0    W(0)                   N("OP_0xED") },
-        {    2,  0,   0    W(0)                   N("abs_jump") },
+        {   -1,  0,   0    W(0)                   N("OP_0xEE") },  // was OP_abs_jump
 #  if defined DEBUGGER || !defined VMCFG_WORDCODE
         {    4,  1,   0    W(WOP_debug)           N("debug") },
         {    1,  1,   0    W(WOP_debugline)       N("debugline") },

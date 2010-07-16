@@ -235,6 +235,14 @@ namespace avmplus
 
     typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
 
+    // Interface for default-value-initializer visitors.  Invoked by Triats.visitInitBody().
+    class InitVisitor
+    {
+    public:
+        virtual ~InitVisitor() {}
+        virtual void defaultVal(Atom val, uint32_t slot_id, Traits* slotType) = 0;
+    };
+
     /**
      * Traits objects describe the layout of objects.  Traits are
      * used to describe a variety of things in the VM, such as
@@ -367,8 +375,8 @@ namespace avmplus
         void resolveSignaturesSelf(const Toplevel* toplevel);
 
     public:
-        void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;
         void genInitBody(const Toplevel* toplevel, TraitsBindings* tb);
+        void visitInitBody(InitVisitor*, const Toplevel* toplevel, const TraitsBindings* tb);
 
         void verifyBindings(const Toplevel* toplevel);
         void resolveSignatures(const Toplevel* toplevel);

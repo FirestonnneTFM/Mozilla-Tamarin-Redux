@@ -274,7 +274,6 @@ namespace avmplus
             OP_setlocal1 = 0xD5,
             OP_setlocal2 = 0xD6,
             OP_setlocal3 = 0xD7,
-            OP_abs_jump = 0xEE,
             OP_debug = 0xEF,
             OP_debugline = 0xF0,
             OP_debugfile = 0xF1,

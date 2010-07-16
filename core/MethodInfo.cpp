@@ -856,6 +856,11 @@ namespace avmplus
 #endif
     }
 
+    bool MethodInfo::isConstructor() const
+    {
+        return declaringTraits()->init == this;
+    }
+
 #if VMCFG_METHOD_NAMES
     Stringp MethodInfo::getMethodName(bool includeAllNamespaces) const
     {

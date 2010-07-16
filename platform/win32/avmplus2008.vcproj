@@ -1452,14 +1452,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AbcGen.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\AbcGen.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\AbcParser-inlines.h"
 				>
 			</File>

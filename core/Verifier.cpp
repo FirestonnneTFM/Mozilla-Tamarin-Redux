@@ -498,7 +498,6 @@ namespace avmplus
             case OP_jump:
             case OP_pop:        // Does not 'read' the value
             case OP_popscope:
-            case OP_abs_jump:
             case OP_newfunction:
             case OP_returnvoid:
             case OP_newactivation:
@@ -979,9 +978,8 @@ namespace avmplus
             AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
 
             // make sure U30 operands are within bounds,
-            // except for OP_pushshort, whose operand is sign extended from 16 bits,
-            // and except for OP_abs_jump which can be full 32bit.
-            if (opcode != OP_pushshort && ((imm30|imm30b) & 0xc0000000) && (opcode != OP_abs_jump || (imm30b & 0xc0000000)))
+            // except for OP_pushshort, whose operand is sign extended from 16 bits
+            if (opcode != OP_pushshort && ((imm30|imm30b) & 0xc0000000))
                 verifyFailed(kCorruptABCError);
             if (nextpc > code_end)
                 verifyFailed(kLastInstExceedsCodeSizeError);
@@ -2066,10 +2064,7 @@ namespace avmplus
             {
                 checkStack(2,0);
                 Value& obj = state->peek(2); // object
-                // if code isn't in pool, its our generated init function which we always
-                // allow early binding on
-                if(pool->isCodePointer(info->abc_body_pos()))
-                    checkEarlySlotBinding(obj.traits);
+                checkEarlySlotBinding(obj.traits);
                 Traits* slotTraits = checkSlot(obj.traits, imm30-1);
                 emitCoerce(slotTraits, state->sp());
                 emitCheckNull(state->sp()-1);
@@ -2367,33 +2362,6 @@ namespace avmplus
                 state->pop(2);
                 break;
 
-            case OP_abs_jump:
-            {
-                // first ensure the executing code isn't user code (only VM generated abc can use this op)
-                if (pool->isCodePointer(pc))
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
-
-                #ifdef AVMPLUS_64BIT
-                const uint8_t* new_pc = (const uint8_t *) (uintptr_t(imm30) | (((uintptr_t) imm30b) << 32));
-                uint32_t new_len = AvmCore::readU32(nextpc);
-                #else
-                const uint8_t* new_pc = (const uint8_t*) imm30;
-                uint32_t new_len = imm30b;
-                #endif
-
-                // now ensure target points to within pool's script buffer
-                if(!pool->isCodePointer(new_pc))
-                    verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
-
-                const uint8_t* old_pc = pc;
-                code_pos = pc = nextpc = new_pc;
-                code_length = new_len;
-                code_end = pc + new_len;
-                parseExceptionHandlers();
-                exTable = info->abc_exceptions();
-                coder->writeOp2(state, old_pc, opcode, imm30, imm30b);
-                break;
-            }
             default:
                 // size was nonzero, but no case handled the opcode.  someone asleep at the wheel!
                 AvmAssertMsg(false, "Unhandled opcode");
@@ -2983,7 +2951,6 @@ namespace avmplus
             // capture the verify trace even if verbose is false.
             Verifier v2(info, ms, toplevel, abc_env, true);
             v2.verbose = true;
-            v2.tryBase = tryBase;
             v2.tryFrom = tryFrom;
             v2.tryTo = tryTo;
             CodeWriter stubWriter;
@@ -3291,8 +3258,6 @@ namespace avmplus
             if (exception_count == 0 || (size_t)(exception_count-1) > SIZE_T_MAX / sizeof(ExceptionHandler))
                 verifyFailed(kIllegalExceptionHandlerError);
 
-            // save code_pos as the base that offsets in the handler table will use
-            tryBase = code_pos;
             size_t extra = sizeof(ExceptionHandler)*(exception_count-1);
             ExceptionHandlerTable* table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
             ExceptionHandler *handler = table->exceptions;
@@ -3346,10 +3311,10 @@ namespace avmplus
                 }
 
                 // save maximum try range
-                if (!tryFrom || (tryBase + handler->from) < tryFrom)
-                    tryFrom = tryBase + handler->from;
-                if (tryBase + handler->to > tryTo)
-                    tryTo = tryBase + handler->to;
+                if (!tryFrom || (code_pos + handler->from) < tryFrom)
+                    tryFrom = code_pos + handler->from;
+                if (code_pos + handler->to > tryTo)
+                    tryTo = code_pos + handler->to;
 
                 // note: since we require (code_len > target >= to >= from >= 0),
                 // all implicit exception edges are forward edges.

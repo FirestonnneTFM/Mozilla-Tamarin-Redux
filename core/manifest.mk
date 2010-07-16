@@ -39,7 +39,6 @@ avmplus_BUILD_ALL = 1
 
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/AbcEnv.cpp \
-  $(curdir)/AbcGen.cpp \
   $(curdir)/AbcParser.cpp \
   $(curdir)/ActionBlockConstants.cpp \
   $(curdir)/ArrayClass.cpp \

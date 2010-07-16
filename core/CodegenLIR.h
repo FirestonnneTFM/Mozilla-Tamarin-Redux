@@ -401,6 +401,7 @@ namespace avmplus
        #endif /* VTUNE */
 
     private:
+        friend struct JitInitVisitor;
         MethodInfo *info;
         const MethodSignaturep ms;
         Toplevel* toplevel;
@@ -551,6 +552,7 @@ namespace avmplus
         LIns* coerceToNumber(int i);
         LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
         LIns* coerceToType(int i, Traits*);
+        void emitInitializers();
 
     public:
         CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel);

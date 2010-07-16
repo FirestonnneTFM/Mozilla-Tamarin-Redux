@@ -149,15 +149,73 @@ static bool hasTypedArgs(MethodSignaturep ms)
     return false;
 }
 
+// Initialize the declared slots of the given object by iterating
+// through the ABC traits record and assigning to nonzero slots.
+void initObj(MethodEnv* env, ScriptObject* obj)
+{
+    struct InterpInitVisitor: public InitVisitor {
+        ScriptObject* obj;
+        InterpInitVisitor(ScriptObject* obj) : obj(obj) {}
+        ~InterpInitVisitor() {}
+        void defaultVal(Atom val, uint32_t slot, Traits*) {
+            // Assign the default value.
+            // Keep in sync with interpreter INSTR(setslot).
+            obj->coerceAndSetSlotAtom(slot, val);
+        }
+    };
+    InterpInitVisitor visitor(obj);
+    Traits* t = env->method->declaringTraits();
+    const TraitsBindings *tb = t->getTraitsBindings();
+    t->visitInitBody(&visitor, env->toplevel(), tb);
+}
+
+uintptr_t BaseExecMgr::init_interpGPR(MethodEnv* env, int argc, uint32_t* ap)
+{
+    initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
+    return interpGPR(env, argc, ap);
+}
+
+double BaseExecMgr::init_interpFPR(MethodEnv* env, int argc, uint32_t* ap)
+{
+    initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
+    return interpFPR(env, argc, ap);
+}
+
+Atom BaseExecMgr::init_invoke_interp(MethodEnv* env, int argc, Atom* args)
+{
+    initObj(env, (ScriptObject*) atomPtr(args[0]));
+    return invoke_interp(env, argc, args);
+}
+
+Atom BaseExecMgr::init_invoke_interp_nocoerce(MethodEnv* env, int argc, Atom* args)
+{
+    initObj(env, (ScriptObject*) atomPtr(args[0]));
+    return invoke_interp_nocoerce(env, argc, args);
+}
+
 void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
+{
+    if (m->isConstructor()) {
+        if (ms->returnTraitsBT() == BUILTIN_number)
+            m->_implFPR = init_interpFPR;
+        else
+            m->_implGPR = init_interpGPR;
+        m->_flags |= MethodInfo::INTERP_IMPL;
+        m->_invoker = hasTypedArgs(ms)
+            ? init_invoke_interp
+            : init_invoke_interp_nocoerce;
+    } else {
+        setInterpDirectly(m, ms);
+    }
+}
+
+void BaseExecMgr::setInterpDirectly(MethodInfo* m, MethodSignaturep ms)
 {
     if (ms->returnTraitsBT() == BUILTIN_number)
         m->_implFPR = interpFPR;
     else
         m->_implGPR = interpGPR;
     m->_flags |= MethodInfo::INTERP_IMPL;
-
-    AvmAssert(m->isInterpreted());
     m->_invoker = hasTypedArgs(ms)
         ? invoke_interp
         : invoke_interp_nocoerce;
