@@ -1703,71 +1703,6 @@ namespace avmplus
     }
 #endif
 
-    void Traits::genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const
-    {
-        // toplevel actually can be null, when resolving the builtin classes...
-        // but they should never cause verification errors in functioning builds
-        //AvmAssert(toplevel != NULL);
-
-        Atom value = pool->getLegalDefaultValue(toplevel, value_index, kind, slotType);
-        switch (Traits::getBuiltinType(slotType))
-        {
-            case BUILTIN_any:
-            case BUILTIN_object:
-            {
-                if (value == 0)
-                    return;
-
-                break;
-            }
-            case BUILTIN_number:
-            {
-                if (AvmCore::number_d(value) == 0)
-                    return;
-                break;
-            }
-            case BUILTIN_boolean:
-            {
-                AvmAssert((uintptr_t(falseAtom)>>3) == 0);
-                if (value == falseAtom)
-                    return;
-
-                AvmAssert(value == trueAtom);
-                break;
-            }
-            case BUILTIN_uint:
-            case BUILTIN_int:
-            {
-                if (value == (zeroIntAtom))
-                    return;
-
-                break;
-            }
-            case BUILTIN_namespace:
-            case BUILTIN_string:
-            default:
-            {
-                if (AvmCore::isNull(value))
-                    return;
-
-                break;
-            }
-        }
-
-        gen.getlocalN(0);
-        if (value == undefinedAtom)
-            gen.pushundefined();
-        else if (AvmCore::isNull(value))
-            gen.pushnull();
-        else if (value == core->kNaN)
-            gen.pushnan();
-        else if (value == trueAtom)
-            gen.pushtrue();
-        else
-            gen.pushconstant(kind, value_index);
-        gen.setslot(slot_id);
-    }
-
     void Traits::genInitBody(const Toplevel* toplevel, TraitsBindings* tb)
     {
 #if defined(VMCFG_AOT)
@@ -1775,13 +1710,45 @@ namespace avmplus
             return;
 #endif
 
-        MMgc::GC* gc = core->GetGC();
-        AbcGen gen(gc);
+        struct ValidateInitVisitor: public InitVisitor
+        {
+            bool hasDefaults;
+            ValidateInitVisitor() : hasDefaults(false) {}
+            ~ValidateInitVisitor() {}
+            void defaultVal(Atom, uint32_t, Traits*)
+            {
+                hasDefaults = true;
+            }
+        };
+        ValidateInitVisitor visitor;
+        visitInitBody(&visitor, toplevel, tb);
 
+        // if initialization code gen is required, create a new method body and write it to traits->init->body_pos
+        if (visitor.hasDefaults && !this->init)
+        {
+            // Make a do-nothing init method.
+            this->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, this);
+            AvmAssert(this->init->declaringTraits() == this);
+            static const uint8_t body[] = {
+                2, // max_stack
+                1, // local_count
+                1, // init_scope_depth
+                1, // max_scope_depth
+                1, // code_length
+                (uint8_t)OP_returnvoid, // code
+                0 // exception_count
+                // the verifier and interpreter don't read the activation traits so stop here
+            };
+
+            // The synthetic MethodInfo points directly to the static const ABC above.
+            this->init->set_abc_body_pos(body);
+        }
+    }
+
+    void Traits::visitInitBody(InitVisitor *visitor, const Toplevel* toplevel, const TraitsBindings* tb)
+    {
         const uint8_t* pos = traitsPosStart();
-
         SlotIdCalcer sic(tb->base ? tb->base->slotCount : 0, this->allowEarlyBinding());
-
         NameEntry ne;
         const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
         for (uint32_t i = 0; i < nameCount; i++)
@@ -1789,85 +1756,52 @@ namespace avmplus
             ne.readNameEntry(pos);
             switch (ne.kind)
             {
-                case TRAIT_Slot:
-                case TRAIT_Const:
-                case TRAIT_Class:
+            case TRAIT_Slot:
+            case TRAIT_Const:
+            case TRAIT_Class:
+            {
+                uint32_t slotid = sic.calc_id(ne.id);
+                // note, for TRAIT_Class, AbcParser::parseTraits has already verified that pool->cinits[ne.info] is not null
+                Traitsp slotType = (ne.kind == TRAIT_Class) ?
+                                    pool->getClassTraits(ne.info) :
+                                    pool->resolveTypeName(ne.info, NULL);
+                uint32_t value_index = ne.value_index;
+                CPoolKind kind = ne.value_kind;
+                Atom value = pool->getLegalDefaultValue(toplevel, value_index, kind, slotType);
+                switch (Traits::getBuiltinType(slotType))
                 {
-                    uint32_t slotid = sic.calc_id(ne.id);
-                    // note, for TRAIT_Class, AbcParser::parseTraits has already verified that pool->cinits[ne.info] is not null
-                    Traitsp slotType = (ne.kind == TRAIT_Class) ?
-                                        pool->getClassTraits(ne.info) :
-                                        pool->resolveTypeName(ne.info, NULL);
-                    genDefaultValue(ne.value_index, slotid, toplevel, slotType, ne.value_kind, gen);
+                case BUILTIN_any:
+                case BUILTIN_object:
+                    if (value == 0)
+                        continue;
+                    break;
+                case BUILTIN_number:
+                    if (AvmCore::number_d(value) == 0)
+                        continue;
+                    break;
+                case BUILTIN_boolean:
+                    AvmAssert((uintptr_t(falseAtom)>>3) == 0);
+                    if (value == falseAtom)
+                        continue;
+                    AvmAssert(value == trueAtom);
+                    break;
+                case BUILTIN_uint:
+                case BUILTIN_int:
+                    if (value == (zeroIntAtom))
+                        continue;
+                    break;
+                case BUILTIN_namespace:
+                case BUILTIN_string:
+                default:
+                    if (AvmCore::isNull(value))
+                        continue;
                     break;
                 }
+                visitor->defaultVal(value, slotid, slotType);
+                break;
+            }
             }
         } // for i
-
-        // if initialization code gen is required, create a new method body and write it to traits->init->body_pos
-        if (gen.size() == 0)
-            return;
-
-        AbcGen newMethodBody(gc, uint32_t(16 + gen.size()));    // @todo 16 is a magic value that was here before I touched the code -- I don't know the significance
-
-        // insert body preamble
-        if (this->init)
-        {
-            const uint8_t* pos = this->init->abc_body_pos();
-            if (!pos)
-                toplevel->throwVerifyError(kCorruptABCError);
-
-            uint32_t maxStack = AvmCore::readU32(pos);
-            // the code we're generating needs at least 2
-            maxStack = maxStack > 1 ? maxStack : 2;
-            newMethodBody.writeInt(maxStack); // max_stack
-            newMethodBody.writeInt(AvmCore::readU32(pos)); //local_count
-            newMethodBody.writeInt(AvmCore::readU32(pos)); //init_scope_depth
-            newMethodBody.writeInt(AvmCore::readU32(pos)); //max_scope_depth
-
-            // skip real code length
-            uint32_t code_length = AvmCore::readU32(pos);
-
-            // if first instruction is OP_constructsuper keep it as first instruction
-            if (*pos == OP_constructsuper)
-            {
-                gen.getBytes().insert(0, OP_constructsuper);
-                // don't invoke it again later
-                pos++;
-                code_length--;
-            }
-            gen.abs_jump(pos, code_length);
-
-            // this handles an obscure case: we have already resolved the signature for this
-            // and have a MethodSignature cached, but we just (potentially) increased the value of
-            // max_stack above. This updates the cached value of max_stack (iff we have
-            // a MethodSignature cached for this->init)
-            this->init->update_max_stack(maxStack);
-        }
-        else
-        {
-            // make one
-            this->init = new (gc) MethodInfo(MethodInfo::kInitMethodStub, this);
-            AvmAssert(this->init->declaringTraits() == this);
-
-            newMethodBody.writeInt(2); // max_stack
-            newMethodBody.writeInt(1); //local_count
-            newMethodBody.writeInt(1); //init_scope_depth
-            newMethodBody.writeInt(1); //max_scope_depth
-
-            gen.returnvoid();
-        }
-
-        newMethodBody.writeInt((uint32_t)gen.size()); // code length
-        newMethodBody.writeBytes(gen.getBytes());
-
-        // no exceptions, when we jump to the real code, we'll read the exceptions for that code
-        newMethodBody.writeInt(0);
-
-        // the verifier and interpreter don't read the activation traits so stop here
-        uint8_t* newBytes = (uint8_t*) gc->Alloc(newMethodBody.size());
-        VMPI_memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
-        this->init->set_abc_body_pos_wb(gc, newBytes);
     }
 
     void Traits::destroyInstance(ScriptObject* obj) const

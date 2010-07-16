@@ -103,7 +103,6 @@ using namespace avmplus::ErrorConstants;
  */
 namespace avmplus
 {
-    class AbcGen;
     class AbcEnv;
     class AbcParser;
     class Accessor;
@@ -328,7 +327,6 @@ namespace avmplus
 #include "XMLParser16.h"
 #include "avmplusDebugger.h"
 #include "E4XNode.h"
-#include "AbcGen.h"
 #include "instr.h"
 #ifdef VMCFG_AOT
 #include "AOTCompiler.h"

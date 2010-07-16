@@ -87,9 +87,6 @@ namespace avmplus
         virtual void emitPushuint(const uint8_t *pc);
         virtual void emitGetscopeobject(const uint8_t *pc);
 
-        // In this case, new_pc is the pc being jumped to
-        virtual void emitAbsJump(const uint8_t *new_pc);
-
         // CodeWriter
         void write(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, Traits *type = NULL);
         void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);

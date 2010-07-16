@@ -153,6 +153,14 @@ private:
     // any arguments, either because there are none, or they're all type *.
     static Atom invoke_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* argv);
 
+    // Thunks used for invoking interpreted constructor methods; these
+    // initialize default values of the new object before invoking the
+    // interpreter.  See initObj() in exec.cpp.
+    static uintptr_t init_interpGPR(MethodEnv*, int, uint32_t*);
+    static double init_interpFPR(MethodEnv*, int, uint32_t*);
+    static Atom init_invoke_interp(MethodEnv*, int, Atom*);
+    static Atom init_invoke_interp_nocoerce(MethodEnv*, int, Atom*);
+
     // Generic interpretive invoker for JIT and native methods that
     // iterates over argument types and coerces each one.
     static Atom invoke_generic(MethodEnv* env, int32_t argc, Atom* argv);
@@ -178,8 +186,11 @@ private:
     // Just unbox a single argument that is known to be the correct type already.
     static Atom* FASTCALL unbox1(MethodEnv*, Atom atom, Traits* t, Atom* args);
 
-    // Set trampolines and flags for the interpreter.
+    // Set trampolines and flags for the interpreter, possibly including an initObj trampoline.
     void setInterp(MethodInfo*, MethodSignaturep);
+
+    // Set trampolines and flags for the interpreter.
+    void setInterpDirectly(MethodInfo*, MethodSignaturep);
 
     // Set trampolines and flags for a native method.
     void setNative(MethodInfo*, GprMethodProc p);

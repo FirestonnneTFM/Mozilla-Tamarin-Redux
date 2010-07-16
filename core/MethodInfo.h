@@ -263,6 +263,7 @@ namespace avmplus
     public:
         void makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope);
         bool makeMethodOf(Traits* type);
+        bool isConstructor() const;
 
         int32_t allowExtraArgs() const;
         int32_t hasExceptions() const;
@@ -325,7 +326,6 @@ namespace avmplus
 
         const uint8_t* abc_body_pos() const;
         void set_abc_body_pos(const uint8_t* p);
-        void set_abc_body_pos_wb(MMgc::GC* gc, const uint8_t* p);
 
         ExceptionHandlerTable* abc_exceptions() const;
         void set_abc_exceptions(MMgc::GC* gc, ExceptionHandlerTable* e);

@@ -45,7 +45,6 @@ AVMPLUS_DIR := ../..
 AVMPLUS_SRCS := \
 	AbcEnv.cpp \
 	AbcData.cpp \
-	AbcGen.cpp \
 	AbcParser.cpp \
 	ActionBlockConstants.cpp \
 	ArrayClass.cpp \

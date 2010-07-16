@@ -1270,7 +1270,7 @@ namespace avmplus
         if (!ci->_isPure && pc >= state->verifier->tryFrom && pc < state->verifier->tryTo) {
             // inside exception handler range, calling a function that could throw
             ExceptionHandlerTable *exTable = info->abc_exceptions();
-            const uint8_t* tryBase = state->verifier->tryBase;
+            const uint8_t* tryBase = state->verifier->code_pos;
             for (int i=0, n=exTable->exception_count; i < n; i++) {
                 ExceptionHandler* handler = &exTable->exceptions[i];
                 const uint8_t* from   = tryBase + handler->from;
@@ -1922,6 +1922,13 @@ namespace avmplus
             localSet(i, undefConst, NULL); // void would be more precise
         }
 
+        varTracker->initNotNull(state);
+
+        // Generate code to initialize the object, if we are compiling an initializer.
+        // This is intentionally before debugEnter(), to match interpreter behavior.
+        if (info->isConstructor())
+            emitInitializers();
+
         #ifdef DEBUGGER
         if (haveDebugger) {
             for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i) {
@@ -1937,8 +1944,6 @@ namespace avmplus
                 );
         }
         #endif // DEBUGGER
-
-        varTracker->initNotNull(state);
 
         /// SWITCH PIPELINE FROM PROLOG TO BODY
         verbose_only( if (vbWriter) { vbWriter->flush();} )
@@ -1976,6 +1981,30 @@ namespace avmplus
             branchToLabel(LIR_jf, eqi0(setjmpResult), catch_label);
         }
         verbose_only( if (vbWriter) { vbWriter->flush();} )
+    }
+
+    void CodegenLIR::emitInitializers()
+    {
+        struct JitInitVisitor: public InitVisitor {
+            CodegenLIR *jit;
+            JitInitVisitor(CodegenLIR *jit) : jit(jit) {}
+            ~JitInitVisitor() {}
+            void defaultVal(Atom value, uint32_t slot, Traits* slotType) {
+#ifdef NJ_VERBOSE
+                if (jit->verbose()) {
+                    jit->vbWriter->flush();
+                    jit->core->console << "init [" << slot << "] = " << asAtom(value) << "\n";
+                }
+#endif
+                LIns* defaultVal = jit->InsConstAtom(value);
+                defaultVal = jit->atomToNativeRep(slotType, defaultVal);
+                jit->emitSetslot(OP_setslot, slot, 0, defaultVal);
+            }
+        };
+        JitInitVisitor visitor(this);
+        Traits* t = info->declaringTraits();
+        const TraitsBindings *tb = t->getTraitsBindings();
+        t->visitInitBody(&visitor, toplevel, tb);
     }
 
     void CodegenLIR::copyParam(int i, int& offset) {
@@ -3029,9 +3058,6 @@ namespace avmplus
             emitSetslot(OP_setslot, opd1, opd2);
             break;
 
-        case OP_abs_jump:
-            break;
-
         case OP_callproperty:
         case OP_callproplex:
         case OP_callpropvoid:
@@ -3254,7 +3280,7 @@ namespace avmplus
         AvmAssert(state->abc_pc == pc);
         // update bytecode ip if necessary
         if (_save_eip && lastPcSave != pc) {
-            const uint8_t* tryBase = state->verifier->tryBase;
+            const uint8_t* tryBase = state->verifier->code_pos;
             stp(InsConstPtr((void*)(pc - tryBase)), _save_eip, 0, ACC_OTHER);
             lastPcSave = pc;
         }
@@ -5263,7 +5289,7 @@ namespace avmplus
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
             int handler_count = info->abc_exceptions()->exception_count;
-            const uint8_t* tryBase = state->verifier->tryBase;
+            const uint8_t* tryBase = state->verifier->code_pos;
             // Jump to catch handler
             // Find last handler, to optimize branches generated below.
             int i;

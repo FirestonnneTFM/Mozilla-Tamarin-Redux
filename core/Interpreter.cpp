@@ -532,7 +532,7 @@ namespace avmplus
              XXX(0xEB)
              XXX(0xEC)
              XXX(0xED)
-             XXX(0xEE) /* OP_abs_jump */
+             XXX(0xEE)
              IID(0xEF, L_debug)
              IID(0xF0, L_debugline)
              IID(0xF1, L_debugfile)
@@ -2839,28 +2839,6 @@ namespace avmplus
                 sp--;
                 NEXT;
             }
-
-            // 'OP_abs_jump' always boils away in the translation to word code, see
-            // comments in WordcodeTranslator.cpp.
-#ifndef VMCFG_WORDCODE
-
-            INSTR(abs_jump) {
-                if (core->interruptCheck(interruptable)) {
-                    SAVE_EXPC;
-                    AvmCore::handleInterruptMethodEnv(env);
-                }
-#  ifdef AVMPLUS_64BIT
-                uint32_t target_lo = U30ARG;
-                uint32_t target_hi = U30ARG;
-                const uint8_t *target = (const uint8_t *)((uint64_t(target_hi) << 32) | uint64_t(target_lo));
-#  else // !AVMPLUS_64BIT
-                const uint8_t *target = (const uint8_t *) U30ARG;
-#  endif // AVMPLUS_64BIT
-                codeStart = pc = target;
-                NEXT;
-            }
-
-#endif // !VMCFG_WORDCODE
 
 #if defined(VMCFG_WORDCODE) && !defined(VMCFG_DIRECT_THREADED)
             // Fleshes out the dispatch table so that it's 0..255, allows

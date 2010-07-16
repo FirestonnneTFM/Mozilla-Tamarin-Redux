@@ -273,12 +273,6 @@ REALLY_INLINE void MethodInfo::set_abc_body_pos(const uint8_t* p)
     _abc.body_pos = p;
 }
 
-REALLY_INLINE void MethodInfo::set_abc_body_pos_wb(MMgc::GC* gc, const uint8_t* p)
-{
-    AvmAssert(!isNative());
-    WB(gc, this, &_abc.body_pos, p);
-}
-
 REALLY_INLINE ExceptionHandlerTable* MethodInfo::abc_exceptions() const
 {
 #ifdef VMCFG_AOT

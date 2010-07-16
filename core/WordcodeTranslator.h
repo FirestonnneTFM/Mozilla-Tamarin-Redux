@@ -90,9 +90,6 @@ namespace avmplus
         virtual void emitPushuint(const uint8_t *pc) = 0;
         virtual void emitGetscopeobject(const uint8_t *pc) = 0;
 
-        // In this case, new_pc is the pc being jumped to
-        virtual void emitAbsJump(const uint8_t *new_pc) = 0;
-
 #ifdef SUPERWORD_PROFILING
         static void swprofStart();
         static void swprofStop();
