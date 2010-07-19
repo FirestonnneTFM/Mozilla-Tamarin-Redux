@@ -1319,17 +1319,25 @@ package abcdump
         "ImportAssets2",        // 71
 
         "DoABC",                // 72
-        "73 (invalid)",         // 73
-        "74 (invalid)",         // 74
-        "75 (invalid)",         // 75
+        "DefineFontAlignZones", // 73
+        "CSMSettings",          // 74
+        "DefineFont3",          // 75
         "SymbolClass",          // 76
         "Metadata",             // 77
-        "78 (invalid)",         // 78
-        "79 (invalid)",         // 79
+        "DefineScalingGrid",    // 78
+        "DefineDeviceVideo",    // 79
         "80 (invalid)",         // 80
         "81 (invalid)",         // 81
         "DoABC2",               // 82
-        "83 (invalid)"          // 83
+        "DefineShape4",         // 83
+        "DefineMorphShape2",    // 84
+        "PlaceImagePrivate",    // 85
+        "DefineSceneAndFrameLabelData", // 86
+        "DefineBinaryData",     // 87
+        "DefineFontName",       // 88
+        "StartSound",           // 89
+        "DefineBitsJPEG64",     // 90
+        "DefineFont4",          // 91
     ]
     
     
@@ -1361,7 +1369,11 @@ package abcdump
                 if (((length = h & 0x3F) == 0x3F))
                     length = data.readInt();
 
-                infoPrint(tagNames[type]+" "+length+"b "+int(100*length/data.length)+"%")
+                var tagN = tagNames[type]
+                if (type >= tagNames.length)
+                    tagN = type+" (unknown)"
+
+                infoPrint(tagN+" "+length+"b "+int(100*length/data.length)+"%")
                 switch (type)
                 {
                 case 0: return
