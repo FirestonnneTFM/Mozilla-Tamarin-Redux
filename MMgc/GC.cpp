@@ -3469,8 +3469,19 @@ namespace MMgc
                 // GCFinalizableObject) resurrecting an object.  That should not happen,
                 // because we clear all GCWeakRefs pointing to unmarked objects before
                 // running finalizers.
-                GCAssert(gc->Presweeping());
-                gc->PushWorkItem(GCWorkItem(m_obj, uint32_t(GC::Size(m_obj)), GCWorkItem::kGCObject));
+ 
+                // Bugzilla 575631 (explanation below)
+                // GCAssert(gc->Presweeping());
+
+                // Bugzilla 575631: GCAlloc::Finalize's interleaving
+                // of mark-bit resets and finalizer invocations means
+                // that the conditions above don't imply we're in
+                // Presweep.  Nonetheless, marking an object with
+                // cleared mark bits isn't legal in GCAlloc::Finalize,
+                // so instead of asserting that we are presweeping, we
+                // use that condition as a guard.
+                if (gc->Presweeping())
+                    gc->PushWorkItem(GCWorkItem(m_obj, uint32_t(GC::Size(m_obj)), GCWorkItem::kGCObject));
             }
         }
 
