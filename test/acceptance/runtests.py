@@ -109,10 +109,11 @@ class AcceptanceRuntest(RuntestBase):
                 self.escbin = v
             elif o in ('--eval',):
                 self.eval = True
-            elif o in ('--threads',):
-                self.threads=int(v)
             elif o in ('--androidthreads',):
                 self.androidthreads=True
+                self.threads=1
+            elif o in ('--threads',):
+                self.threads=int(v)
             elif o in ('--ats',):
                 self.genAtsSwfs = True
                 self.rebuildtests = True
@@ -185,12 +186,13 @@ class AcceptanceRuntest(RuntestBase):
             for line in out.split('\n'):
                 items=line.split()
                 if len(items)==2 and items[1]=='device':
-                    self.androiddevices.append(items[0])
+                    for i in range(self.threads):
+                        self.androiddevices.append(items[0])
             if len(self.androiddevices)==0:
                 print("error: adb did not detect any attached devices")
                 print("adb devices stdout: %s stderr: %s" % (out,err))
                 sys.exit(1)
-            print("detected %d android devices" % len(self.androiddevices))
+            print("detected %d android devices" % (len(self.androiddevices)/self.threads))
             self.threads=len(self.androiddevices)
             
     def runTestPrep(self, testAndNum):
@@ -301,12 +303,14 @@ class AcceptanceRuntest(RuntestBase):
     def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
         if self.androidthreads:
             try:
-                n=int(threading.currentThread().getName()[7:])-1
+                if threading.currentThread().getName()=='MainThread':
+                    n=0
+                else:
+                    n=int(threading.currentThread().getName()[7:])-1
                 if n<len(self.androiddevices):
-                   extraVmArgs+=" --androidid=%s" % self.androiddevices[n]
+                   extraVmArgs+=" --threadid=%d --androidid=%s %s" % (n,self.androiddevices[n],extraVmArgs)
             except:
-                None
-
+                print(sys.exc_info())
         outputCalls = []
         lpass = 0
         lfail = 0

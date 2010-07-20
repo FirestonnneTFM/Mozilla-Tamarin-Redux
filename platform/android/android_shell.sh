@@ -63,37 +63,45 @@ else
     args=""
     for a in $*
     do
-       echo "$a" | grep -q "\-\-androidid="
+       echo "$a" | grep -q "\-\-threadid="
        res=$?
        if [ "$res" = "0" ]
        then
-           id=`echo $a | awk -F= '{print $2}'`
-           adbargs="-s $id"
+           logid=`echo $a | awk -F= '{print $2}'`
        else
-           echo "$a" | grep -q ".*\.abc"
+           echo "$a" | grep -q "\-\-androidid="
            res=$?
            if [ "$res" = "0" ]
            then
-               file=$a
-               flatfile=`basename $a`
-               filelist="$filelist $flatfile"
-               adb $adbargs push $file /data/app/$flatfile 2> /dev/null
-               args="$args $flatfile"       
+               id=`echo $a | awk -F= '{print $2}'`
+               adbargs="-s $id"
            else
-               args="$args $a"
+               echo "$a" | grep -q ".*\.abc"
+               res=$?
+               if [ "$res" = "0" ]
+               then
+                   file=$a
+                   flatfile=`basename $a`
+                   filelist="$filelist $flatfile"
+                   adb $adbargs push $file /data/app/$flatfile 2> /dev/null
+                   args="$args $flatfile"       
+               else
+                   args="$args $a"
+               fi
            fi
        fi
     done
     # workaround for adb not returning exit code, run a shell script and print exit code to stdout
-    adb $adbargs shell "/data/app/android_runner.sh $args" > /tmp/stdout${id}
-    ret=`cat /tmp/stdout${id} | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
+    echo adb $adbargs shell "/data/app/android_runner.sh $args" > /tmp/stdout${id}-${logid}
+    adb $adbargs shell "/data/app/android_runner.sh $args" > /tmp/stdout${id}-${logid}
+    ret=`cat /tmp/stdout${id}-${logid} | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     for a in $filelist
     do
         adb $adbargs shell "rm /data/app/$a"
     done
     # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
-    tr -d '\r' < /tmp/stdout${id} | sed 's/^EXITCODE=[0-9][0-9]*//g' > /tmp/stdout_clean${id}
-    cat /tmp/stdout_clean${id}
-    rm -f /tmp/stdout${id} /tmp/stdout_clean${id}
+    tr -d '\r' < /tmp/stdout${id}-${logid} | sed 's/^EXITCODE=[0-9][0-9]*//g' > /tmp/stdout_clean${id}-${logid}
+    cat /tmp/stdout_clean${id}-${logid}
+    rm -f /tmp/stdout${id}-${logid} /tmp/stdout_clean${id}-${logid}
     exit $ret
 fi

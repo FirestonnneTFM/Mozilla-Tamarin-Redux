@@ -65,6 +65,11 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
 fi
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean-adb.sh
 
 echo "setup $branch/${change}-${changeid}"
 ../all/adb-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell_release
@@ -97,7 +102,7 @@ else
     export py=$PYTHONWIN
 fi
 
-export AVM=$basedir/platform/android/android_shell.sh
+export AVM=$basedir/platform/android/android_shell.py
 export avmr=$AVM
 export avmrd=$AVM
 export avmd=$AVM

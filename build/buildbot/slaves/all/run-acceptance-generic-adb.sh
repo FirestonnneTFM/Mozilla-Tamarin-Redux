@@ -119,6 +119,12 @@ echo "Missing media will be compiled using the following ASC version:"
 echo "`java -jar $basedir/utils/asc.jar`"
 echo ""
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean-adb.sh
+
 echo "setup $branch/${change}-${changeid}"
 ../all/adb-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell
 res=$?
@@ -130,7 +136,7 @@ test "$res" = "0" || {
 export ASC=$basedir/utils/asc.jar
 export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
-export AVM=$basedir/platform/android/android_shell.sh
+export AVM=$basedir/platform/android/android_shell.py
 # If available, use windows python (instead of cygwin python)
 # Threading only works with windows python, $PYTHONWIN env variable must point to windows install
 # $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
@@ -175,12 +181,6 @@ echo "**************************************************************************
 echo ""
 
 
-##
-# Ensure that the system is clean and ready
-##
-cd $basedir/build/buildbot/slaves/scripts
-../all/util-acceptance-clean.sh
-
 cd $basedir/test/acceptance
 
 
@@ -192,11 +192,11 @@ test "$silent" = "true" && {
 
 if [ "$config" != "" ]
 then
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck --androidthreads ${scriptargs} ${silentoptions}"
-    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck --androidthreads ${scriptargs} ${silentoptions}
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck --androidthreads --threads=1 ${scriptargs} ${silentoptions}"
+    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck --androidthreads --threads=1 ${scriptargs} ${silentoptions}
 else
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck --androidthreads ${scriptargs} ${silentoptions}" 
-    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck --androidthreads ${scriptargs} ${silentoptions}
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck --androidthreads --threads=1 ${scriptargs} ${silentoptions}" 
+    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck --androidthreads --threads=1 ${scriptargs} ${silentoptions}
 fi
 
 test "$silent" = "true" && {
