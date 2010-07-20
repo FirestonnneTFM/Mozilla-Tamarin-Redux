@@ -37,64 +37,79 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
 . ./environment.sh
 
+
+
+echo
+echo "+++++++++++++++++++++++++++++++++++++++++"
+echo "Ensure that the system is clean and ready"
+echo "+++++++++++++++++++++++++++++++++++++++++"
+echo
 ##
-# Calculate the change number and change id
+# get list of connected devices
 ##
-. ../all/util-calculate-change.sh $1
+devices=`adb devices | awk '{ if ( $2  ~ /device/ ) print $1 }'`
 
-filename=$2
-test "$filename" = "" && {
-    filename=$shell_release
-}
+#
+# for each device look for avmshell processes and kill them
+#
 
-
-# Determine the number of devices attached to the machine and their ids
-adboutput=`adb devices`
-deviceids=''
-devicecount=0
-IFS=$'\n'
-for i in ${adboutput}; do
-    if echo $i | grep -q 'device$'; then
-	deviceids="${deviceids} `echo $i | awk '{print $1}'`"
-	let devicecount=devicecount+1
-    fi
+echo "========================================="
+echo "cleaning up any avmshell processes on device..."
+for device in $devices
+do
+    echo "Looking for avmshell processes on device - $device"
+    ps=`adb -s $device shell ps | grep avmshell | awk '{print $2}'`
+    for p in $ps
+    do
+	echo "found avmshell process: `adb -s $device shell ps | grep avmshell | grep $p`"
+        echo "killing $p"
+        adb -s $device shell kill $p
+    done
 done
-unset IFS
-
 echo ""
-echo "Found ${devicecount} devices"
-echo""
-echo "Installing $filename"
 
-for device in ${deviceids};do
-    # Make sure that the device is rooted
-    adb -s ${device} root
-    sleep 2 # give the adb root call a second to complete
-
-    # Copy the shell and runner script to the device
-    adb -s ${device} push $filename /data/app/avmshell 2> /dev/null
-    adb -s ${device} shell 'chmod 777 /data/app/avmshell' 2> /dev/null
-    adb -s ${device} push ${basedir}/platform/android/android_runner.sh /data/app 2> /dev/null
-    adb -s ${device} shell 'chmod 777 /data/app/android_runner.sh' 2> /dev/null
-
-    # Make sure that the version running on the device is the expected revision
-    adb -s ${device} shell 'cd /data/app; ./avmshell' > /tmp/stdout${device}
-    # Verify that the shell was successfully deployed
-    # Remove CR from the stdout as they really mess up shell commands on mac, 
-    # causing really weird output, characters getting moved around 
-    deploy_rev=`tr -d '\r' < /tmp/stdout${device} | grep "avmplus shell" | awk '{print $6}'`
-    if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ]; 
-    then
-	echo $0 FAILED!!!
-	echo "requested build $change:$changeid is not what is deployed ${deploy_rev%:*}:${deploy_rev#*:}"
-	exit 1
-    fi
-    echo "device ${device} setup with ${filename}"
+#
+# remove old abc and shells from the device
+#
+echo "========================================="
+echo "cleanup up /data/app directories on device..."
+for device in $devices
+do
+    echo "cleaning up device - $device"
+    adb -s $device shell rm -r /data/app
+    adb -s $device shell mkdir /data/app
 done
+echo ""
 
-exit
+#
+# kill any rogue adb processes running on host
+#
+echo "========================================="
+echo "kill any rogue adb processes running on host..."
+adbp=`ps -ef | grep adb | grep android_runner | awk '{print $2}'`
+for p in $adbp
+do
+    echo "Found adb process: `ps -ef | grep adb | grep android_runner | grep $p`"
+    echo "Found running adb process: $p"
+    kill $p
+done
+echo ""
+sleep 2
+
+echo "========================================="
+echo "restarting adb server..."
+adb kill-server
+sleep 10
+adb start-server
+echo ""
+echo "cleanup finished"
+
+echo; echo;
+
+
