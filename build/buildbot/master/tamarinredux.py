@@ -1521,7 +1521,6 @@ class tamarinredux:
     ##########################################
     linux_arm_test_factory = factory.BuildFactory()
     linux_arm_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_neon_arm"))
-    linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
     linux_arm_test_factory.addStep(util_process_clean)
@@ -1539,8 +1538,8 @@ class tamarinredux:
     #### builder for linux-arm2-test      ####
     ##########################################
     linux_arm2_test_factory = factory.BuildFactory()
+    linux_arm2_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     linux_arm2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    linux_arm2_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     linux_arm2_test_factory.addStep(util_process_clean)
     linux_arm2_test_factory.addStep(util_clean_buildsdir)
 
@@ -2101,6 +2100,7 @@ class tamarinredux:
     linux_arm_deep_factory.addStep(bb_slaveupdate(slave="linux-arm-deep"))
     linux_arm_deep_factory.addStep(download_testmedia)
     linux_arm_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_neon_arm_d"))
+    linux_arm_deep_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     linux_arm_deep_factory.addStep(test_generic(name="Debug-softfloat", shellname="avmshell_neon_arm_d", vmargs="", config="", scriptargs=""))
     linux_arm_deep_factory.addStep(test_generic(name="Release-softfloat-deep", shellname="avmshell_neon_arm", vmargs="", config="arm-lnx-tvm-release-deep", scriptargs=""))
     linux_arm_deep_factory.addStep(test_generic(name="Release-deep", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="arm-lnx-tvm-release-deep", scriptargs=""))

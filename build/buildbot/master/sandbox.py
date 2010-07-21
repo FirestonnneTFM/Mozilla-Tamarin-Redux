@@ -1453,7 +1453,6 @@ class sandbox:
     ##########################################
     sb_linux_arm_test_factory = factory.BuildFactory()
     sb_linux_arm_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_neon_arm"))
-    sb_linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(util_process_clean)
@@ -1471,8 +1470,8 @@ class sandbox:
     #### builder for linux-arm2-test      ####
     ##########################################
     sb_linux_arm2_test_factory = factory.BuildFactory()
+    sb_linux_arm2_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     sb_linux_arm2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    sb_linux_arm2_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     sb_linux_arm2_test_factory.addStep(util_process_clean)
     sb_linux_arm2_test_factory.addStep(util_clean_buildsdir)
 
