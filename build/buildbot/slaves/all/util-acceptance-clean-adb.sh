@@ -50,6 +50,30 @@ echo "+++++++++++++++++++++++++++++++++++++++++"
 echo "Ensure that the system is clean and ready"
 echo "+++++++++++++++++++++++++++++++++++++++++"
 echo
+
+#
+# kill any rogue adb processes running on host
+#
+echo "========================================="
+echo "kill any rogue adb processes running on host..."
+adbp=`ps -ef | grep adb | grep android_runner | awk '{print $2}'`
+for p in $adbp
+do
+    echo "Found adb process: `ps -ef | grep adb | grep android_runner | grep $p`"
+    echo "Found running adb process: $p"
+    kill $p
+done
+echo ""
+sleep 2
+
+echo "========================================="
+echo "restarting adb server..."
+adb kill-server
+sleep 10
+adb start-server
+echo ""
+
+
 ##
 # get list of connected devices
 ##
@@ -87,27 +111,7 @@ do
 done
 echo ""
 
-#
-# kill any rogue adb processes running on host
-#
-echo "========================================="
-echo "kill any rogue adb processes running on host..."
-adbp=`ps -ef | grep adb | grep android_runner | awk '{print $2}'`
-for p in $adbp
-do
-    echo "Found adb process: `ps -ef | grep adb | grep android_runner | grep $p`"
-    echo "Found running adb process: $p"
-    kill $p
-done
-echo ""
-sleep 2
 
-echo "========================================="
-echo "restarting adb server..."
-adb kill-server
-sleep 10
-adb start-server
-echo ""
 echo "cleanup finished"
 
 echo; echo;
