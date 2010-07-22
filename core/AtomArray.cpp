@@ -159,7 +159,7 @@ namespace avmplus
         {
             int numberBeingDeleted = -l_shiftAmount;
 
-            // whack deleted items so they're ref count goes down
+            // whack deleted items so their ref count goes down
             AvmCore::decrementAtomRegion(arr + insertPoint + insertCount, numberBeingDeleted);
 
             // shift elements down
