@@ -193,10 +193,6 @@
 #endif
 #endif
 
-#ifndef AVMFEATURE_API_VERSIONING
-    #define AVMFEATURE_API_VERSIONING 1
-#endif
-
 #ifndef AVMFEATURE_CACHE_GQCN
   #define AVMFEATURE_CACHE_GQCN 1
 #endif

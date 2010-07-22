@@ -604,13 +604,6 @@ var FEATURES =
     <defines> VMCFG_CACHE_GQCN </defines>
   </feature>
 
-  <feature>
-    <desc> Enabling this will enable api-versioning in the avmshell
-      </desc>
-    <name> AVMFEATURE_API_VERSIONING </name>
-    <defines> VMCFG_TEST_API_VERSIONING </defines>
-  </feature>
-
   <!-- VM adjustments for various oddities: AVMTWEAK_* -->
 
   <tweak>

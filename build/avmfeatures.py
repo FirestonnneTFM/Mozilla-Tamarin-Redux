@@ -151,11 +151,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_CACHE_GQCN=1 "
     if (arg == False):
         args += "-DAVMFEATURE_CACHE_GQCN=0 "
-    arg = o.getBoolArg("api-versioning")
-    if (arg == True):
-        args += "-DAVMFEATURE_API_VERSIONING=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_API_VERSIONING=0 "
     arg = o.getBoolArg("sin-cos-nonfinite")
     if (arg == True):
         args += "-DAVMTWEAK_SIN_COS_NONFINITE=1 "
