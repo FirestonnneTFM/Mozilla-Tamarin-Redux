@@ -114,7 +114,6 @@
 #undef MMGC_OVERRIDE_GLOBAL_NEW
 #undef MMGC_MEMORY_PROFILER
 #undef VMCFG_CACHE_GQCN
-#undef VMCFG_TEST_API_VERSIONING
 
 #undef VMCFG_TWEAK_SIN_COS_NONFINITE
 #undef VMCFG_EPOC_EMULATOR
@@ -568,15 +567,6 @@
 #endif
 
 
-/* AVMFEATURE_API_VERSIONING
- *
- * Enabling this will enable api-versioning in the avmshell
- */
-#if !defined AVMFEATURE_API_VERSIONING || AVMFEATURE_API_VERSIONING != 0 && AVMFEATURE_API_VERSIONING != 1
-#  error "AVMFEATURE_API_VERSIONING must be defined and 0 or 1 (only)."
-#endif
-
-
 
 /* AVMTWEAK_SIN_COS_NONFINITE
  *
@@ -683,7 +673,6 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
-
 
 
 
@@ -932,9 +921,6 @@
 #endif
 #if AVMFEATURE_CACHE_GQCN
 #  define VMCFG_CACHE_GQCN
-#endif
-#if AVMFEATURE_API_VERSIONING
-#  define VMCFG_TEST_API_VERSIONING
 #endif
 
 #if AVMTWEAK_SIN_COS_NONFINITE

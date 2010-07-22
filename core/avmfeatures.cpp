@@ -170,9 +170,6 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_CACHE_GQCN
     "AVMFEATURE_CACHE_GQCN;"
   #endif
-  #if AVMFEATURE_API_VERSIONING
-    "AVMFEATURE_API_VERSIONING;"
-  #endif
   #if AVMTWEAK_SIN_COS_NONFINITE
     "AVMTWEAK_SIN_COS_NONFINITE;"
   #endif

@@ -410,10 +410,6 @@ class RuntestBase:
                 self.vmtype = 'unknown'
                 self.avmversion = 'unknown'
 
-            # determine if api versioning switch is available
-            if re.search('AVMFEATURE_API_VERSIONING', self.avm_features):
-                self.apiVersioning = True
-
         # need to also check for wordcode in the avm name for winmo
         if re.search('AVMFEATURE_WORDCODE_INTERP', self.avm_features) \
            or re.search('wordcode', self.avm):
