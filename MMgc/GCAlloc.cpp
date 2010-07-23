@@ -852,9 +852,13 @@ namespace MMgc
                     if (marks & kFinalize)
                     {
                         GCFinalizedObject *obj = (GCFinalizedObject*)GetUserPointer(item);
-                        GCAssert(*(intptr_t*)obj != 0);
                         bits[i] &= ~(kFinalize<<(j*4));     // Clear bits first so we won't get second finalization if finalizer longjmps out
-                        obj->~GCFinalizedObject();
+
+                        /* See https://bugzilla.mozilla.org/show_bug.cgi?id=573737 for the case where the object might remain in
+                         * uninitialized state and thus crash occurs while calling the dtor below. 
+                         */
+                        if(*(intptr_t*)obj != 0)
+                            obj->~GCFinalizedObject();
 
 #if defined(_DEBUG)
                         if(((GCAlloc*)b->alloc)->ContainsRCObjects()) {
