@@ -380,6 +380,8 @@
 		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
 		D942369A0F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */; };
 		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
+		D95B635611FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */; };
+		D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */; };
 		D9AA8809103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
@@ -885,6 +887,7 @@
 		D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UnixDebugUtils.cpp; path = ../../../VMPI/UnixDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinDebugUtils.cpp; path = ../../../VMPI/WinDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinPortUtils.cpp; path = ../../../VMPI/WinPortUtils.cpp; sourceTree = SOURCE_ROOT; };
+		D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_finalize_uninit.cpp; path = ../../../extensions/ST_mmgc_finalize_uninit.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
 		D9854B961090D05700F30404 /* AvmCore-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AvmCore-inlines.h"; path = "../../../core/AvmCore-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1388,6 +1391,7 @@
 				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
 				07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */,
 				0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */,
+				D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */,
 			);
 			name = selftest;
 			sourceTree = "<group>";
@@ -1858,6 +1862,7 @@
 				198CF92011B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
 				198CF92111B973BD00A939C7 /* exec.cpp in Sources */,
 				07246FE511CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
+				D95B635611FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2045,6 +2050,7 @@
 				198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
 				198CF91E11B973BD00A939C7 /* exec.cpp in Sources */,
 				07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
+				D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
