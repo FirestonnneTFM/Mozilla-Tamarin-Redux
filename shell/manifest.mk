@@ -70,6 +70,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_avmplus_peephole.cpp \
   $(curdir)/../extensions/ST_mmgc_basics.cpp \
   $(curdir)/../extensions/ST_mmgc_dependent.cpp \
+  $(curdir)/../extensions/ST_mmgc_finalize_uninit.cpp \
   $(curdir)/../extensions/ST_mmgc_threads.cpp \
   $(curdir)/../extensions/ST_mmgc_weakref.cpp \
   $(curdir)/../extensions/ST_mmgc_543560.cpp \
