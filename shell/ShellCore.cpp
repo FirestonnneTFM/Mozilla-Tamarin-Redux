@@ -180,10 +180,8 @@ namespace avmshell
         Toplevel* toplevel = initTopLevel();
 
         // Initialize the shell builtins in the new Toplevel
-        handleActionPool(shellPool,
-                         toplevel->domainEnv(),
-                         toplevel,
-                         NULL);
+        CodeContext* shell_codeContext = new(GetGC()) CodeContext(toplevel->domainEnv());
+		handleActionPool(shellPool, toplevel, shell_codeContext);
 
         return toplevel;
     }
@@ -250,9 +248,6 @@ namespace avmshell
     {
         setStackLimit();
 
-        ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-        codeContext->m_domainEnv = shell_domainEnv;
-
         TRY(this, kCatchAction_ReportAsError)
         {
             // Always Latin-1 here
@@ -261,7 +256,7 @@ namespace avmshell
             if (record_time)
                 then = VMPI_getDate();
             uint32_t api = this->getAPI(NULL);
-            Atom result = handleActionSource(input, NULL, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+			Atom result = handleActionSource(input, /*filename*/NULL, shell_toplevel, /*ninit*/NULL, shell_codeContext, api);
             if (record_time)
                 now = VMPI_getDate();
             if (result != undefinedAtom)
@@ -424,11 +419,11 @@ namespace avmshell
             // init toplevel internally
             shell_toplevel = initShellBuiltins();
 
-            // Create a new Domain for the user code
-            shell_domain = new (GetGC()) Domain(this, builtinDomain);
-
-            // Return a new DomainEnv for the user code
-            shell_domainEnv = new (GetGC()) DomainEnv(this, shell_domain, shell_toplevel->domainEnv());
+			// Create a new Domain/DomainEnv for the user code
+			Domain* shell_domain = new (GetGC()) Domain(this, builtinDomain);
+			DomainEnv* shell_domainEnv = new (GetGC()) DomainEnv(this, shell_domain, shell_toplevel->domainEnv());
+            
+            shell_codeContext = new(GetGC()) CodeContext(shell_domainEnv);
 
 #ifdef AVMPLUS_VERBOSE
             config.verbose_vb = settings.do_verbose;  // builtins is done, so propagate verbose
@@ -456,7 +451,7 @@ namespace avmshell
 
 #ifdef AVMPLUS_VERBOSE
     const char* ShellCore::identifyDomain(Domain* domain) {
-        return domain == builtinDomain ? "builtin" : (domain == shell_domain ? "shell" : NULL);
+        return domain == builtinDomain ? "builtin" : (domain == shell_codeContext->domainEnv()->domain() ? "shell" : NULL);
     }
 #endif
 
@@ -508,12 +503,9 @@ namespace avmshell
 
         TRY(this, kCatchAction_ReportAsError)
         {
-            ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-            codeContext->m_domainEnv = shell_domainEnv;
-
 #ifdef VMCFG_AOT
             if (filename == NULL) {
-                handleAOT(this, shell_domain, shell_domainEnv, shell_toplevel, codeContext);
+				handleAOT(this, shell_codeContext->domainEnv()->domain(), shell_codeContext->domainEnv(), shell_toplevel, shell_codeContext);
             } else
 #endif
             if (AbcParser::canParse(code) == 0) {
@@ -522,14 +514,14 @@ namespace avmshell
                     console << "ABC " << filename << "\n";
                 #endif
                 uint32_t api = this->getAPI(NULL);
-                handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+				handleActionBlock(code, 0, shell_toplevel, NULL, shell_codeContext, api);
             }
             else if (isSwf(code)) {
                 #ifdef VMCFG_VERIFYALL
                 if (config.verbose_vb & VB_verify)
                     console << "SWF " << filename << "\n";
                 #endif
-                handleSwf(filename, code, shell_domainEnv, shell_toplevel, codeContext);
+				handleSwf(filename, code, shell_toplevel, shell_codeContext);
             }
             else {
 #ifdef VMCFG_EVAL
@@ -541,7 +533,7 @@ namespace avmshell
                     ScriptBuffer empty;     // With luck: allow the
                     code = empty;           //    buffer to be garbage collected
                     uint32_t api = this->getAPI(NULL);
-                    handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+                    handleActionSource(code_string, filename_string, shell_toplevel, NULL, shell_codeContext, api);
                 }
 #else
                 console << "unknown input format in file: " << filename << "\n";

@@ -540,25 +540,20 @@ const int kBufferPadding = 16;
          * PoolObject.
          * @param pool PoolObject containing the ABC file to
          *             execute
-         * @param domainEnv The DomainEnv object to execute
-         *                  against, or NULL if a new DomainEnv
-         *                  should be created
          * @param toplevel the Toplevel object to execute against,
          *                 or NULL if a Toplevel should be
          *                 created.
-         * @param codeContext FIXME
+         * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
          * @throws Exception If an error occurs, an Exception object will
          *         be thrown using the AVM+ exceptions mechanism.
          *         Calls to handleActionBlock should be bracketed
          *         in TRY/CATCH.
          */
         Atom handleActionPool(PoolObject* pool,
-                                   DomainEnv* domainEnv,
                                    Toplevel* &toplevel,
                                    CodeContext *codeContext);
 
         ScriptEnv* prepareActionPool(PoolObject* pool,
-                                     DomainEnv* domainEnv,
                                      Toplevel*& toplevel,
                                      CodeContext *codeContext);
 
@@ -593,12 +588,11 @@ const int kBufferPadding = 16;
          * @param code buffer holding the ABC block to execute
          * @param start zero-indexed offset, in bytes, into the
          *              buffer where the code begins
-         * @param domainEnv FIXME
          * @param toplevel the Toplevel object to execute against,
          *                 or NULL if a Toplevel should be
          *                 created.
          * @param ninit FIXME
-         * @param codeContext FIXME
+         * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
          * @param api The api version of the code being parsed. It must
          *            coorespond to one of the versions in api-versions.h
          * @throws Exception If an error occurs, an Exception object will
@@ -608,7 +602,6 @@ const int kBufferPadding = 16;
          */
         Atom handleActionBlock(ScriptBuffer code,
                                     int start,
-                                    DomainEnv* domainEnv,
                                     Toplevel* &toplevel,
                                     const NativeInitializer* ninit,
                                     CodeContext *codeContext,
@@ -629,12 +622,11 @@ const int kBufferPadding = 16;
          *                 If not NULL then ActionScript's 'include' directive will
          *                 be allowed in the program and files will be loaded
          *                 relative to 'filename'.
-         * @param domainEnv FIXME
          * @param toplevel the Toplevel object to execute against,
          *                 or NULL if a Toplevel should be
          *                 created.
          * @param ninit FIXME
-         * @param codeContext FIXME
+         * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
          * @param api The api version of the code being parsed. It must
          *            coorespond to one of the versions in api-versions.h
          * @throws Exception If an error occurs, an Exception object will
@@ -644,7 +636,6 @@ const int kBufferPadding = 16;
          */
         Atom handleActionSource(String* code,
                                 String* filename,
-                                DomainEnv* domainEnv,
                                 Toplevel* &toplevel,
                                 const NativeInitializer* ninit,
                                 CodeContext *codeContext,

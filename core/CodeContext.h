@@ -46,11 +46,12 @@ namespace avmplus
     // When an AS3 method is called, the AS3 method will ensure that core->codeContext() will return its context.
     class CodeContext : public MMgc::GCObject
     {
-    public:
-        virtual ~CodeContext() {}
-#ifdef DEBUGGER
-        virtual DomainEnv* domainEnv() const = 0;
-#endif
+    public:   
+        explicit CodeContext(DomainEnv* env) : m_domainEnv(env) { AvmAssert(env != NULL); }
+        REALLY_INLINE DomainEnv* domainEnv() const { return m_domainEnv; }
+
+    private:
+        DWB(DomainEnv*) m_domainEnv;
     };
 
     class EnterCodeContext

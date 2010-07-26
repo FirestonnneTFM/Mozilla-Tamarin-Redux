@@ -953,17 +953,12 @@ namespace avmplus
         if (AvmCore::isString(input)) {
             AvmCore* core = self->core();
             CodeContext* codeContext = core->codeContext();
-# ifdef DEBUGGER
-            DomainEnv* domainEnv = codeContext->domainEnv();
-#else
-            DomainEnv* domainEnv = NULL;
-#endif
             String* filename = NULL;                        // should be NULL to denote eval code, for now
             NativeInitializer* nativeInitializer = NULL;    // "native" not supported for eval code
             Toplevel* toplevel = (Toplevel*)self;
             String *newsrc = AvmCore::atomToString(input)->appendLatin1("\0", 1);
             uint32_t api = core->getAPI(NULL);
-            return core->handleActionSource(newsrc, filename, domainEnv, toplevel, nativeInitializer, codeContext, api);
+            return core->handleActionSource(newsrc, filename, toplevel, nativeInitializer, codeContext, api);
         }
 #endif // VMCFG_EVAL
         return undefinedAtom;

@@ -133,7 +133,7 @@ namespace avmshell
     static const int stagDoABC2 = 82;
 
     void handleDoABC(int type, SwfParser &parser, int taglen,
-                  DomainEnv* domainEnv, Toplevel*& toplevel, CodeContext* codeContext,
+                  Toplevel*& toplevel, CodeContext* codeContext,
                   List<PoolObject*> &deferred)
     {
         AvmCore *core = toplevel->core();
@@ -165,11 +165,11 @@ namespace avmshell
         // FIXME get api from the SWF
         uint32_t api = core->getAPI(NULL);
         if (flags & kDoAbcLazyInitializeFlag) {
-            PoolObject* pool = core->parseActionBlock(code, 0, toplevel, domainEnv->domain(), NULL, api);
+            PoolObject* pool = core->parseActionBlock(code, 0, toplevel, codeContext->domainEnv()->domain(), NULL, api);
             deferred.add(pool);
             // defer: handleActionPool(pool/* result of parse */, domainEnv, toplevel, codeContext);
         } else {
-            core->handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext, api);
+            core->handleActionBlock(code, 0, toplevel, NULL, codeContext, api);
         }
         parser.pos += abclen;
     }
@@ -182,7 +182,7 @@ namespace avmshell
      * else
      *   run it via handleActionBlock() just as if it were on the commandline
      */
-    void handleSwf(const char *filename, ScriptBuffer swf, DomainEnv* domainEnv,
+    void handleSwf(const char *filename, ScriptBuffer swf, 
               Toplevel*& toplevel, CodeContext* codeContext)
     {
         SwfParser parser(swf);
@@ -218,12 +218,12 @@ namespace avmshell
             if (taglen == 63)
                 taglen = parser.readU32();
             if (type == stagDoABC || type == stagDoABC2)
-                handleDoABC(type, parser, taglen, domainEnv, toplevel, codeContext, deferred);
+				handleDoABC(type, parser, taglen, toplevel, codeContext, deferred);		
             else
                 parser.pos += taglen;
         }
         for (int i = 0, n = deferred.size(); i < n; i++) {
-            core->handleActionPool(deferred[i], domainEnv, toplevel, codeContext);
+			core->handleActionPool(deferred[i], toplevel, codeContext);
         }
     }
 }
