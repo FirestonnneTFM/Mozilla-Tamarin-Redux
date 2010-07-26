@@ -98,7 +98,6 @@ namespace avmshell
 {
     class ByteArray;
     class Shell;
-    class ShellCodeContext;
     class ShellCore;
     class ShellCoreImpl;
     class ShellSettings;
@@ -151,7 +150,7 @@ namespace avmshell
 
     // swf support, impl code in swf.cpp
     bool isSwf(ScriptBuffer);
-    void handleSwf(const char *, ScriptBuffer, DomainEnv*, Toplevel*&, CodeContext*);
+    void handleSwf(const char *, ScriptBuffer, Toplevel*&, CodeContext*);
 
 #ifdef VMCFG_AOT
     // AOT support, impl code in aot.cpp

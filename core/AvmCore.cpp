@@ -563,7 +563,9 @@ namespace avmplus
     Toplevel* AvmCore::initTopLevel()
     {
         Toplevel* toplevel = NULL;
-        handleActionPool(builtinPool, NULL, toplevel, NULL);
+        DomainEnv* builtinDomainEnv = new (GetGC()) DomainEnv(this, builtinDomain, NULL);
+        CodeContext* builtinCodeContext = new(GetGC()) CodeContext(builtinDomainEnv);
+        handleActionPool(builtinPool, toplevel, builtinCodeContext);
         return toplevel;
     }
 
@@ -611,7 +613,6 @@ namespace avmplus
     }
 
     ScriptEnv* AvmCore::prepareActionPool(PoolObject* pool,
-                                          DomainEnv* domainEnv,
                                           Toplevel*& toplevel,
                                           CodeContext* codeContext)
     {
@@ -623,11 +624,11 @@ namespace avmplus
             toplevel->throwVerifyError(kMissingEntryPointError);
         }
 
-        if (domainEnv == NULL)
-        {
-            // create a new DomainEnv based on the builtinDomain
-            domainEnv = new (GetGC()) DomainEnv(this, builtinDomain, NULL);
-        }
+        AvmAssert(codeContext != NULL);
+        DomainEnv* domainEnv = codeContext->domainEnv();
+        
+        AvmAssert(domainEnv != NULL);
+        AvmAssert(domainEnv->domain() == pool->domain);
 
         AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(pool)) AbcEnv(pool, domainEnv, codeContext);
 
@@ -662,13 +663,12 @@ namespace avmplus
     }
 
     Atom AvmCore::handleActionPool(PoolObject* pool,
-                                        DomainEnv* domainEnv,
                                         Toplevel* &toplevel,
                                         CodeContext* codeContext)
     {
         bool createdToplevel = (toplevel == NULL);
 
-        ScriptEnv* main = prepareActionPool(pool, domainEnv, toplevel, codeContext);
+        ScriptEnv* main = prepareActionPool(pool, toplevel, codeContext);
 
         if (!createdToplevel && toplevel->objectClass != NULL)
         {
@@ -765,13 +765,13 @@ namespace avmplus
 
     Atom AvmCore::handleActionBlock(ScriptBuffer code,
                                          int start,
-                                         DomainEnv* domainEnv,
                                          Toplevel* &toplevel,
                                          const NativeInitializer* ninit,
                                          CodeContext *codeContext,
                                          uint32_t api)
     {
-        Domain* domain = domainEnv ? domainEnv->domain() : builtinDomain;
+        AvmAssert(codeContext != NULL);
+        Domain* domain = codeContext->domainEnv()->domain();
 
         // parse constants and attributes.
         PoolObject *pool = parseActionBlock(code,
@@ -780,20 +780,19 @@ namespace avmplus
                                 domain,
                                 ninit,
                                 api);
-        return handleActionPool(pool, domainEnv, toplevel, codeContext);
+        return handleActionPool(pool, toplevel, codeContext);
     }
 
 #ifdef VMCFG_EVAL
     Atom AvmCore::handleActionSource(String* code,
                                      String* filename,
-                                     DomainEnv* domainEnv,
                                      Toplevel* &toplevel,
                                      const NativeInitializer* ninit,
                                      CodeContext *codeContext,
                                      uint32_t api)
     {
         ScriptBuffer buffer = avmplus::compileProgram(this, toplevel, code, filename);
-        return handleActionBlock(buffer, 0, domainEnv, toplevel, ninit, codeContext, api);
+        return handleActionBlock(buffer, 0, toplevel, ninit, codeContext, api);
     }
 #endif // VMCFG_EVAL
 

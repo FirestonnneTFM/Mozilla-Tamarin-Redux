@@ -79,8 +79,7 @@ namespace avmshell
         if (!b)
             toplevel()->throwTypeError(kNullArgumentError, core->toErrorString("bytes"));
 
-        ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext();
-        codeContext->m_domainEnv = domainEnv;
+		CodeContext* codeContext = new (core->GetGC()) CodeContext(domainEnv);
 
         // parse new bytecode
         size_t len = b->get_length();
@@ -90,9 +89,8 @@ namespace avmshell
 
         uint32_t api = core->getAPI(NULL);
         return core->handleActionBlock(code, 0,
-                                  domainEnv,
                                   toplevel,
-                                  NULL, codeContext,
+								  /*ninit*/NULL, codeContext, 
                                   api);
     }
 
@@ -173,7 +171,7 @@ namespace avmshell
 
     DomainObject* DomainClass::get_currentDomain()
     {
-        ShellCodeContext* codeContext = (ShellCodeContext*)core()->codeContext();
+        CodeContext* codeContext = core()->codeContext();
 
         DomainObject* domainObject = (DomainObject*) createInstance(ivtable(), prototypePtr());
         domainObject->domainEnv = codeContext->domainEnv();

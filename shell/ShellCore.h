@@ -44,14 +44,6 @@ using namespace avmplus;
 
 namespace avmshell
 {
-    class ShellCodeContext : public CodeContext
-    {
-    public:
-        DWB(DomainEnv*) m_domainEnv;
-        virtual ~ShellCodeContext() {}
-        virtual DomainEnv *domainEnv() const { return m_domainEnv; }
-    };
-
     /**
      * Settings for ShellCore.  The command line parser uses this, but the initial state
      * is set in ShellCore.cpp, and it's propagated throughout various parts of the
@@ -208,8 +200,7 @@ namespace avmshell
         bool inStackOverflow;
         int allowDebugger;
         Toplevel* shell_toplevel;
-        Domain* shell_domain;
-        DomainEnv* shell_domainEnv;
+		CodeContext* shell_codeContext;
         uint32_t defaultAPIVersion;
     };
 
