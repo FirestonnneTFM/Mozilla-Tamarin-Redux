@@ -49,6 +49,7 @@ extern void create_mmgc_bugzilla_543560(AvmCore* core);
 #endif
 extern void create_mmgc_basics(AvmCore* core);
 extern void create_mmgc_dependent(AvmCore* core);
+extern void create_mmgc_finalize_uninit(AvmCore* core);
 extern void create_mmgc_gcheap(AvmCore* core);
 #if defined VMCFG_WORKERTHREADS
 extern void create_mmgc_threads(AvmCore* core);
@@ -66,6 +67,7 @@ create_mmgc_bugzilla_543560(core);
 #endif
 create_mmgc_basics(core);
 create_mmgc_dependent(core);
+create_mmgc_finalize_uninit(core);
 create_mmgc_gcheap(core);
 #if defined VMCFG_WORKERTHREADS
 create_mmgc_threads(core);
