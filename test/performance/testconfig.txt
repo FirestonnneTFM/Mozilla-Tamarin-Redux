@@ -47,6 +47,7 @@
 sunspider/.*          , sunspider , include , sunspider testsuite
 jsbench/.*            , jsbench   , include , jsbench testsuite
 v8/.*                 , v8        , include , v8 testsuite 
+v8.5/.*               , v8        , include , v8 testsuite 
 scimark/.*            , scimark   , include , scimark testsuite
 language/.*           , language  , include , language micro-benchmarks testsuite
 mmgc/.*               , mmgc      , include  , mmgc testsuite
