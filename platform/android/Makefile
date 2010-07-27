@@ -357,6 +357,7 @@ SHELL_SRCS :=  ../../shell/ByteArrayGlue.cpp \
   ../../shell/../extensions/ST_mmgc_weakref.cpp \
   ../../shell/../extensions/ST_mmgc_dependent.cpp \
   ../../shell/../extensions/ST_mmgc_gcheap.cpp \
+  ../../shell/../extensions/ST_mmgc_finalize_uninit.cpp \
 	android_cpuid.cpp
 
 #****************************************************************************
