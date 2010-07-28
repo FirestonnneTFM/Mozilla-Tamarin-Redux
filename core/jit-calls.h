@@ -41,16 +41,29 @@ static const ArgType ARGTYPE_U = ARGTYPE_UI; // uint32_t
 static const ArgType ARGTYPE_F = ARGTYPE_D;  // double
 static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
 
-#define ARGMASK(a,n) (ARGTYPE_##a << (ARGTYPE_SHIFT*(n)))
-#define SIG0(r) ARGMASK(r,0)
-#define SIG1(r,a1) (SIG0(r) | ARGMASK(a1,1))
-#define SIG2(r,a2,a1) (SIG1(r,a1) | ARGMASK(a2,2))
-#define SIG3(r,a3,a2,a1) (SIG2(r,a2,a1) | ARGMASK(a3,3))
-#define SIG4(r,a4,a3,a2,a1) (SIG3(r,a3,a2,a1) | ARGMASK(a4,4))
-#define SIG5(r,a5,a4,a3,a2,a1) (SIG4(r,a4,a3,a2,a1) | ARGMASK(a5,5))
-#define SIG6(r,a6,a5,a4,a3,a2,a1) (SIG5(r,a5,a4,a3,a2,a1) | ARGMASK(a6,6))
-#define SIG7(r,a7,a6,a5,a4,a3,a2,a1) (SIG6(r,a6,a5,a4,a3,a2,a1) | ARGMASK(a7,7))
-#define SIG8(r,a8,a7,a6,a5,a4,a3,a2,a1) (SIG7(r,a7,a6,a5,a4,a3,a2,a1) | ARGMASK(a8,8))
+#define SIG0(r)\
+    nanojit::CallInfo::typeSig0(ARGTYPE_##r)
+#define SIG1(r,a1)\
+    nanojit::CallInfo::typeSig1(ARGTYPE_##r, ARGTYPE_##a1)
+#define SIG2(r,a1,a2)\
+    nanojit::CallInfo::typeSig2(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2)
+#define SIG3(r,a1,a2,a3)\
+    nanojit::CallInfo::typeSig3(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3)
+#define SIG4(r,a1,a2,a3,a4)\
+    nanojit::CallInfo::typeSig4(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4)
+#define SIG5(r,a1,a2,a3,a4,a5)\
+    nanojit::CallInfo::typeSig5(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4, ARGTYPE_##a5)
+#define SIG6(r,a1,a2,a3,a4,a5,a6)\
+    nanojit::CallInfo::typeSig6(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6)
+#define SIG7(r,a1,a2,a3,a4,a5,a6,a7)\
+    nanojit::CallInfo::typeSig7(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                                ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6, ARGTYPE_##a7)
+#define SIG8(r,a1,a2,a3,a4,a5,a6,a7,a8)\
+    nanojit::CallInfo::typeSig8(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
+                        ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6, ARGTYPE_##a7, ARGTYPE_##a8)
 
 #define FUNCTIONID(n) &ci_##n
 
