@@ -79,6 +79,30 @@ echo ""
 ##
 devices=`adb devices | awk '{ if ( $2  ~ /device/ ) print $1 }'`
 
+
+#
+# for each device look for avmshell processes and kill them
+#
+echo "========================================="
+echo "rebooting devices..."
+for device in $devices
+do
+    echo "Rebooting device - $device"
+    adb -s $device reboot
+done
+sleep 60
+echo ""
+
+echo "========================================="
+echo "rooting devices..."
+for device in $devices
+do
+    echo "Rooting device - $device"
+    adb -s $device root
+done
+sleep 5
+echo ""
+
 #
 # for each device look for avmshell processes and kill them
 #

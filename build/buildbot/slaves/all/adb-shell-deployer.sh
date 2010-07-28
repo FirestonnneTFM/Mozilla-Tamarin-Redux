@@ -72,9 +72,6 @@ echo""
 echo "Installing $filename"
 
 for device in ${deviceids};do
-    # Make sure that the device is rooted
-    adb -s ${device} root
-    sleep 2 # give the adb root call a second to complete
 
     # Copy the shell and runner script to the device
     adb -s ${device} push $filename /data/app/avmshell 2> /dev/null
