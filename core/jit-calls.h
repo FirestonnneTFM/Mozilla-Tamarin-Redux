@@ -91,16 +91,16 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
 #endif
 
 #define FUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 0, ACC_STORE_ANY, name)
+    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 0, ACCSET_STORE_ANY, name)
 #define FASTFUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_FAST, 0, ACC_STORE_ANY, name)
+    DEFINE_CALLINFO(f, sig, ABI_FAST, 0, ACCSET_STORE_ANY, name)
 #define PUREFUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 1, ACC_NONE, name)
+    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 1, ACCSET_NONE, name)
 
 #define METHOD(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_METHOD, 0, ACC_STORE_ANY, name)
+    DEFINE_CALLINFO(f, sig, ABI_METHOD, 0, ACCSET_STORE_ANY, name)
 #define PUREMETHOD(f, sig, name) \
-    DEFINE_CALLINFO(f, sig, ABI_METHOD, 1, ACC_NONE, name)
+    DEFINE_CALLINFO(f, sig, ABI_METHOD, 1, ACCSET_NONE, name)
 
     FUNCTION(CALL_INDIRECT, SIG4(U,P,P,I,P), icalli)
     FUNCTION(CALL_INDIRECT, SIG4(A,P,P,I,P), acalli)

@@ -505,7 +505,7 @@ namespace avmplus
         // on successful jit, allocate memory for BindingCache instances, if necessary
         void initBindingCache();
 
-        LIns *loadIns(LOpcode op, int32_t disp, LIns *base, AccSet);
+        LIns *loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet, LoadQual loadQual=LOAD_NORMAL);
         LIns *Ins(LOpcode op);
         LIns *Ins(LOpcode op, LIns *a);
         LIns *i2dIns(LIns* v);
