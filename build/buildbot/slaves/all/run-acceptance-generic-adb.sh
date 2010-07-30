@@ -125,6 +125,12 @@ echo ""
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean-adb.sh
 
+# Clean up the adb_failures log file, this file tracks any adb calls that timeout
+if [ -e "/tmp/adb_failures" ]; then
+    rm /tmp/adb_failures
+fi
+
+
 echo "setup $branch/${change}-${changeid}"
 ../all/adb-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell
 res=$?
@@ -210,6 +216,15 @@ test "$silent" = "true" && {
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
+
+# Clean up the adb_failures log file, this file tracks any adb calls that timeout
+if [ -e "/tmp/adb_failures" ]; then
+    echo ""
+    echo "message: adb call failures"
+    cat /tmp/adb_failures
+    rm /tmp/adb_failures
+fi
+
 
 exit 0
 
