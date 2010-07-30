@@ -52,9 +52,9 @@ test "$filename" = "" && {
     filename=$shell_release
 }
 
-
+adb=$basedir/platform/android/adb_proxy.py
 # Determine the number of devices attached to the machine and their ids
-adboutput=`adb devices`
+adboutput=`${adb} devices`
 deviceids=''
 devicecount=0
 IFS=$'\n'
@@ -74,10 +74,10 @@ echo "Installing $filename"
 for device in ${deviceids};do
 
     # Copy the shell and runner script to the device
-    adb -s ${device} push $filename /data/app/avmshell 2> /dev/null
-    adb -s ${device} shell 'chmod 777 /data/app/avmshell' 2> /dev/null
-    adb -s ${device} push ${basedir}/platform/android/android_runner.sh /data/app 2> /dev/null
-    adb -s ${device} shell 'chmod 777 /data/app/android_runner.sh' 2> /dev/null
+    ${adb} -s ${device} push $filename /data/app/avmshell 2> /dev/null
+    ${adb} -s ${device} shell 'chmod 777 /data/app/avmshell' 2> /dev/null
+    ${adb} -s ${device} push ${basedir}/platform/android/android_runner.sh /data/app 2> /dev/null
+    ${adb} -s ${device} shell 'chmod 777 /data/app/android_runner.sh' 2> /dev/null
 
     # Make sure that the version running on the device is the expected revision
     adb -s ${device} shell 'cd /data/app; ./avmshell' > /tmp/stdout${device}

@@ -68,6 +68,13 @@ fi
 ##
 # Ensure that the system is clean and ready
 ##
+# Clean up the adb_failures log file, this file tracks any adb calls that timeout
+if [ -e "/tmp/adb_failures" ]; then
+    echo ""
+    echo "message: adb call failures"
+    cat /tmp/adb_failures
+    rm /tmp/adb_failures
+fi
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean-adb.sh
 
@@ -114,24 +121,11 @@ beginSilent
 
 echo ""
 echo "*******************************************************************************"
-# Since the adb-shell-deployer ensures that ALL devices are setup with the same shell
-# we just need to find one device to query the AVM_FEATURE set 
-adboutput=`adb devices`
-deviceid=''
-IFS=$'\n'
-for i in ${adboutput}; do
-    if echo $i | grep -q 'device$'; then
-	deviceid=`echo $i | awk '{print $1}'`
-	break
-    fi
-done
-unset IFS
-
-echo AVM="$AVM --androidid=${deviceid}"
-echo "`$AVM --androidid=${deviceid}`"
+echo AVM="$AVM"
+echo "`$AVM`"
 echo ""
 echo "shell compiled with these features:"
-features=`$AVM --androidid=${deviceid} -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
+features=`$AVM -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
 for i in ${features}; do
     echo feature: $i
 done
@@ -160,5 +154,13 @@ test "$silent" = "true" && {
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
+
+# Clean up the adb_failures log file, this file tracks any adb calls that timeout
+if [ -e "/tmp/adb_failures" ]; then
+    echo ""
+    echo "message: adb call failures"
+    cat /tmp/adb_failures
+    rm /tmp/adb_failures
+fi
 
 exit $exitcode
