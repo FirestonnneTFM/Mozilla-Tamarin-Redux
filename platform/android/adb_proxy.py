@@ -80,9 +80,9 @@ def main(argv=None):
         # -9 and 127 are returned by killableprocess when a timeout happens
         if  p.returncode == -9 or p.returncode == 127:
             failure=file('/tmp/adb_failures', 'a')
-            f.write('%s, %s, %s\n' % (datetime.datetime.now(), attempt, cmd))
-            f.flush()
-            f.close()
+            failure.write('%s, %s, %s\n' % (datetime.datetime.now(), attempt, cmd))
+            failure.flush()
+            failure.close()
             continue
 
         stdout=""
