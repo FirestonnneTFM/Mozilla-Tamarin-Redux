@@ -40,7 +40,7 @@
 # assumes the android shell is deployed to /data/app/avmshell
 #
 
-import os,re,sys,subprocess,killableprocess,datetime
+import os,re,sys,subprocess,killableprocess,datetime,adb_proxy
 
 # Return either the USAGE or the -Dversion information
 if len(sys.argv)==1 or sys.argv[1]=='-Dversion':
@@ -51,17 +51,13 @@ if len(sys.argv)==1 or sys.argv[1]=='-Dversion':
 
     # find all connected devices
     devices=[]
-    cmd='adb devices'
-    p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    (stdout,stderr)=p.communicate()
+    stdout=adb_proxy.main(['devices'])
     for line in stdout.split('\n'):
         tokens=line.split()
         if len(tokens)==2 and tokens[1]=='device':
             devices.append(tokens[0])
 
-    cmd="adb -s %s shell \"cd /data/app;./avmshell %s\"" % (devices[0],arg)
-    p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    (stdout,stderr)=p.communicate()
+    stdout=adb_proxy.main(["-s %s shell \"cd /data/app;./avmshell %s\"" % (devices[0],arg)])
     print(stdout)
     sys.exit(0)
 
@@ -86,55 +82,24 @@ for arg in sys.argv[1:]:
     elif re.search(".abc",arg):
         flatfile=os.path.basename(arg)
         filelist.append(arg)
-        cmd="adb %s push %s /data/app/%s" % (adbargs,arg,flatfile)
-        p=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        p.communicate()
+        stdout=adb_proxy.main(["%s push %s /data/app/%s" % (adbargs,arg,flatfile)])
         args+=" %s" % flatfile
     else:
         args+=" %s" % arg
 
 
-
-ADB_TIMEOUT=os.getenv('ADB_TIMEOUT', 120)
-ADB_MAX_ATTEMPTS=os.getenv('ADB_MAX_ATTEMPTS', 2)
-attempt=0
-cmd="adb %s shell \"/data/app/android_runner.sh %s\"" % (adbargs,args)
-
-while attempt < ADB_MAX_ATTEMPTS:
-    
-    attempt=attempt+1
-    # Need to call the subprocess using a file object for stdout. There have been
-    # problems with the OS blocking when large amounts of data is being returned
-    # in stdout when making the call to adb. Poth processes must be buffering and
-    # causing the process to become blocked.
-    f=file('%s-%s.out' % (androidid, threadid), 'w')
-    p=killableprocess.Popen(cmd, shell=True, stdout=f ,stderr=subprocess.PIPE)
-    p.wait(ADB_TIMEOUT)
-    f.close()
-
-    # -9 and 127 are returned by killableprocess when a timeout happens
-    if  p.returncode == -9 or p.returncode == 127:
-        f=file('/tmp/adb_failures', 'a')
-        f.write('%s, %s, %s\n' % (datetime.datetime.now(), attempt, cmd))
-        f.flush()
-        f.close()
-        continue
-    
-    f = open('%s-%s.out' % (androidid, threadid), 'r')
-    for line in f:
-        if re.search("EXITCODE=",line):
-            exitcode=1
-            try:
-                exitcode=int(line[line.find("EXITCODE=")+9:])
-            except:
-                print(sys.exc_info())
-            sys.exit(exitcode)
-        else:
-            sys.stdout.write(line)
-    f.close()
-    os.remove('%s-%s.out' % (androidid, threadid))
-
-
+stdout=adb_proxy.main(["%s shell \"/data/app/android_runner.sh %s\"" % (adbargs,args)])
+for line in stdout.split('\n'):
+    if re.search("EXITCODE=",line):
+        exitcode=1
+        try:
+            exitcode=int(line[line.find("EXITCODE=")+9:])
+        except:
+            print(sys.exc_info())
+        sys.exit(exitcode)
+    else:
+        print(line)
+            
 
 print("error: stdout did not contain EXITCODE=")
 sys.exit(1)

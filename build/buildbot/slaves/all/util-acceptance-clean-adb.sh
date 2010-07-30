@@ -44,7 +44,7 @@
 . ./environment.sh
 
 
-
+adb=$basedir/platform/android/adb_proxy.py
 echo
 echo "+++++++++++++++++++++++++++++++++++++++++"
 echo "Ensure that the system is clean and ready"
@@ -68,16 +68,16 @@ sleep 2
 
 echo "========================================="
 echo "restarting adb server..."
-adb kill-server
+${adb} kill-server
 sleep 10
-adb start-server
+${adb} start-server
 echo ""
 
 
 ##
 # get list of connected devices
 ##
-devices=`adb devices | awk '{ if ( $2  ~ /device/ ) print $1 }'`
+devices=`${adb} devices | awk '{ if ( $2  ~ /device/ ) print $1 }'`
 
 
 #
@@ -88,7 +88,7 @@ echo "rebooting devices..."
 for device in $devices
 do
     echo "Rebooting device - $device"
-    adb -s $device reboot
+    ${adb} -s $device reboot
 done
 sleep 60
 echo ""
@@ -98,7 +98,7 @@ echo "rooting devices..."
 for device in $devices
 do
     echo "Rooting device - $device"
-    adb -s $device root
+    ${adb} -s $device root
 done
 sleep 5
 echo ""
@@ -112,12 +112,12 @@ echo "cleaning up any avmshell processes on device..."
 for device in $devices
 do
     echo "Looking for avmshell processes on device - $device"
-    ps=`adb -s $device shell ps | grep avmshell | awk '{print $2}'`
+    ps=`${adb} -s $device shell ps | grep avmshell | awk '{print $2}'`
     for p in $ps
     do
-	echo "found avmshell process: `adb -s $device shell ps | grep avmshell | grep $p`"
+	echo "found avmshell process: `${adb} -s $device shell ps | grep avmshell | grep $p`"
         echo "killing $p"
-        adb -s $device shell kill $p
+        ${adb} -s $device shell kill $p
     done
 done
 echo ""
@@ -130,8 +130,8 @@ echo "cleanup up /data/app directories on device..."
 for device in $devices
 do
     echo "cleaning up device - $device"
-    adb -s $device shell rm -r /data/app
-    adb -s $device shell mkdir /data/app
+    ${adb} -s $device shell rm -r /data/app
+    ${adb} -s $device shell mkdir /data/app
 done
 echo ""
 
