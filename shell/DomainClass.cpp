@@ -67,7 +67,7 @@ namespace avmshell
         if (parentDomain) {
             domainToplevel = parentDomain->domainToplevel;
         } else {
-            domainToplevel = core->initShellBuiltins();
+            domainToplevel = core->createShellToplevel();
         }
 
         domainEnv = new (core->GetGC()) DomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);

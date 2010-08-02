@@ -52,7 +52,7 @@ namespace avmplus
         #endif
 
     public:
-        AbcEnv(PoolObject* _pool, DomainEnv* _domainEnv, CodeContext * _codeContext);
+        AbcEnv(PoolObject* _pool, CodeContext * _codeContext);
         ~AbcEnv();
 
         PoolObject* pool() const;
@@ -82,7 +82,7 @@ namespace avmplus
     // ------------------------ DATA SECTION BEGIN
     private:
         PoolObject* const           m_pool;
-        DomainEnv* const            m_domainEnv;
+        DomainEnv* const            m_domainEnv;    // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code
         CodeContext* const          m_codeContext;
         DWB(MultinameHashtable*)    m_privateScriptEnvs;
 #ifdef DEBUGGER

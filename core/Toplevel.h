@@ -55,7 +55,8 @@ namespace avmplus
     class Toplevel : public MMgc::GCFinalizedObject
     {
     public:
-        Toplevel(AbcEnv*);
+        Toplevel(AbcEnv* abcEnv);
+        void init_mainEntryPoint(ScriptEnv* main);
         virtual ~Toplevel() {} // silence compiler warnings
 
         AbcEnv* abcEnv() const;
@@ -64,7 +65,6 @@ namespace avmplus
         MMgc::GC* gc() const;
         ScriptObject* global() const;
         Atom atom() const;
-        ScriptEnv* mainEntryPoint() const;
 
         DateClass* dateClass();
         RegExpClass* regexpClass();
@@ -313,6 +313,8 @@ namespace avmplus
         // allows but FlashPlayer takes advantage of this.
         virtual bool sampler_trusted(ScriptObject* /*sampler*/);
 
+        ScopeChain* toplevel_scope();
+
     protected:
         ClassClosure* findClassInPool(int class_id, PoolObject* pool);
 
@@ -334,14 +336,13 @@ namespace avmplus
     private:
         DWB(AbcEnv*)                _abcEnv;
         DWB(ClassClosure**)         _builtinClasses;
-        DRCWB(ScriptObject*)        _global; // the toplevel script that's run
+        DWB(ScriptEnv*)             _mainEntryPoint;
     public:
         DWB(VTable*)                object_ivtable;
         DWB(VTable*)                class_ivtable;
         DWB(ScopeChain*)            object_cscope;
         DWB(ScopeChain*)            vectorobj_cscope;
         DWB(ScopeChain*)            vectorobj_iscope;
-        DWB(ScopeChain*)            toplevel_scope;
     public:
         DRCWB(ArrayClass*)          arrayClass;
         DRCWB(BooleanClass*)        booleanClass;

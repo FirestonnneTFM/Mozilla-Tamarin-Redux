@@ -525,6 +525,11 @@ const int kBufferPadding = 16;
          */
         DRC(Namespacep) publicNamespace;
 
+    private:
+        ScriptEnv* initOneScript(Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits);
+        ScriptEnv* initAllScripts(Toplevel* toplevel, AbcEnv* abcEnv);
+        Atom callScriptEnvEntryPoint(ScriptEnv* main);
+
     public:
         /**
          * The unnamed public namespaces
@@ -540,9 +545,7 @@ const int kBufferPadding = 16;
          * PoolObject.
          * @param pool PoolObject containing the ABC file to
          *             execute
-         * @param toplevel the Toplevel object to execute against,
-         *                 or NULL if a Toplevel should be
-         *                 created.
+         * @param toplevel the Toplevel object to execute against.
          * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
          * @throws Exception If an error occurs, an Exception object will
          *         be thrown using the AVM+ exceptions mechanism.
@@ -550,11 +553,11 @@ const int kBufferPadding = 16;
          *         in TRY/CATCH.
          */
         Atom handleActionPool(PoolObject* pool,
-                                   Toplevel* &toplevel,
+                                   Toplevel* toplevel,
                                    CodeContext *codeContext);
 
         ScriptEnv* prepareActionPool(PoolObject* pool,
-                                     Toplevel*& toplevel,
+                                     Toplevel* toplevel,
                                      CodeContext *codeContext);
 
         void exportDefs(Traits* traits, ScriptEnv* scriptEnv);
@@ -588,9 +591,7 @@ const int kBufferPadding = 16;
          * @param code buffer holding the ABC block to execute
          * @param start zero-indexed offset, in bytes, into the
          *              buffer where the code begins
-         * @param toplevel the Toplevel object to execute against,
-         *                 or NULL if a Toplevel should be
-         *                 created.
+         * @param toplevel the Toplevel object to execute against.
          * @param ninit FIXME
          * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
          * @param api The api version of the code being parsed. It must
@@ -602,7 +603,7 @@ const int kBufferPadding = 16;
          */
         Atom handleActionBlock(ScriptBuffer code,
                                     int start,
-                                    Toplevel* &toplevel,
+                                    Toplevel* toplevel,
                                     const NativeInitializer* ninit,
                                     CodeContext *codeContext,
                                     uint32_t api);
@@ -622,9 +623,7 @@ const int kBufferPadding = 16;
          *                 If not NULL then ActionScript's 'include' directive will
          *                 be allowed in the program and files will be loaded
          *                 relative to 'filename'.
-         * @param toplevel the Toplevel object to execute against,
-         *                 or NULL if a Toplevel should be
-         *                 created.
+         * @param toplevel the Toplevel object to execute against.
          * @param ninit FIXME
          * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
          * @param api The api version of the code being parsed. It must
@@ -636,7 +635,7 @@ const int kBufferPadding = 16;
          */
         Atom handleActionSource(String* code,
                                 String* filename,
-                                Toplevel* &toplevel,
+                                Toplevel* toplevel,
                                 const NativeInitializer* ninit,
                                 CodeContext *codeContext,
                                 uint32_t api);
@@ -826,8 +825,13 @@ const int kBufferPadding = 16;
          * Initializes the specified Toplevel object by running
          * builtin.abc
          */
-        Toplevel* initTopLevel();
+        Toplevel* initToplevel();
 
+        /**
+         * If a client need to subclass Toplevel, it should override this
+         * method to create the proper subclass. (AvmCore will never create a
+         * a Toplevel directly, it will use this as a factory method.)
+         */
         virtual Toplevel* createToplevel(AbcEnv* abcEnv);
 
         /**

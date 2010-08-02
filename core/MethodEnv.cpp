@@ -548,10 +548,12 @@ namespace avmplus
 
     ScriptObject* ScriptEnv::initGlobal()
     {
+        AvmAssert(this->global == NULL);
         // object not defined yet.  define it by running the script that exports it
         this->vtable()->resolveSignatures(this->scope());
         // resolving the vtable also resolves the traits, if necessary
-        ScriptObject* delegate = this->toplevel()->objectClass->prototypePtr();
+        ObjectClass* const objectClass = this->toplevel()->objectClass;
+        ScriptObject* const delegate = objectClass ? objectClass->prototypePtr() : NULL;
         return global = this->core()->newObject(this->vtable(), delegate);
     }
 
@@ -842,7 +844,7 @@ namespace avmplus
                 VTable* toplevel_vtable = toplevel->global()->vtable;
                 toplevel_vtable->base = ivtable;
                 toplevel_vtable->linked = false;
-                toplevel_vtable->resolveSignatures(toplevel->toplevel_scope);
+                toplevel_vtable->resolveSignatures(toplevel->toplevel_scope());
                 break;
             }
             case BUILTIN_class:
