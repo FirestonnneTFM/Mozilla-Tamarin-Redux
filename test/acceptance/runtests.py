@@ -237,13 +237,6 @@ class AcceptanceRuntest(RuntestBase):
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
 
-        # skip apiversioning tests if api versioning not enabled
-        if not self.apiVersioning and settings.has_key('.*') and settings['.*'].has_key('apiversioning'):
-            outputCalls.append((self.js_print,('  skipping... reason: apiversioning not enabled',)))
-            self.allskips += 1
-            outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
-            return outputCalls
-
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName) and ext not in self.executableExtensions:
             os.unlink(testName)

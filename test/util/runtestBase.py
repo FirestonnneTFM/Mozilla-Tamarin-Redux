@@ -135,7 +135,6 @@ class RuntestBase:
     tests = []
     winceProcesses = []
 
-    apiVersioning = False
     csv = False
     cygwin = False
     debug = False
