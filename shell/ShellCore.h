@@ -177,7 +177,8 @@ namespace avmshell
     private:
         static void interruptTimerCallback(void* data);
 
-        Toplevel* initShellBuiltins();
+        ShellToplevel* createShellToplevel();
+        
         void interrupt(Toplevel*, InterruptReason);
         void stackOverflow(Toplevel *toplevel);
         void setEnv(Toplevel *toplevel, int argc, char *argv[]);
@@ -199,7 +200,7 @@ namespace avmshell
         bool gracePeriod;
         bool inStackOverflow;
         int allowDebugger;
-        Toplevel* shell_toplevel;
+        ShellToplevel* shell_toplevel;
 		CodeContext* shell_codeContext;
         uint32_t defaultAPIVersion;
     };

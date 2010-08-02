@@ -132,8 +132,8 @@ namespace avmshell
     static const int stagDoABC  = 72;
     static const int stagDoABC2 = 82;
 
-    void handleDoABC(int type, SwfParser &parser, int taglen,
-                  Toplevel*& toplevel, CodeContext* codeContext,
+    static void handleDoABC(int type, SwfParser &parser, int taglen,
+                  Toplevel* toplevel, CodeContext* codeContext,
                   List<PoolObject*> &deferred)
     {
         AvmCore *core = toplevel->core();
@@ -183,7 +183,7 @@ namespace avmshell
      *   run it via handleActionBlock() just as if it were on the commandline
      */
     void handleSwf(const char *filename, ScriptBuffer swf, 
-              Toplevel*& toplevel, CodeContext* codeContext)
+              Toplevel* toplevel, CodeContext* codeContext)
     {
         SwfParser parser(swf);
         parser.pos = 4; // skip magic #

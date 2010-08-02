@@ -150,11 +150,11 @@ namespace avmshell
 
     // swf support, impl code in swf.cpp
     bool isSwf(ScriptBuffer);
-    void handleSwf(const char *, ScriptBuffer, Toplevel*&, CodeContext*);
+    void handleSwf(const char *, ScriptBuffer, Toplevel*, CodeContext*);
 
 #ifdef VMCFG_AOT
     // AOT support, impl code in aot.cpp
-    void handleAOT(AvmCore*, Domain*, DomainEnv*, Toplevel*&, CodeContext*);
+    void handleAOT(AvmCore*, Domain*, DomainEnv*, Toplevel*, CodeContext*);
 #endif
 
     class ShellSettings : public ShellCoreSettings

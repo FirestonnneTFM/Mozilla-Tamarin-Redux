@@ -42,10 +42,9 @@
 namespace avmplus
 {
     AbcEnv::AbcEnv(PoolObject* _pool,
-           DomainEnv* _domainEnv,
            CodeContext * _codeContext)
         : m_pool(_pool),
-          m_domainEnv(_domainEnv),
+          m_domainEnv(_codeContext->domainEnv()),
           m_codeContext(_codeContext),
           m_privateScriptEnvs(new(_pool->core->GetGC()) MultinameHashtable())
 #ifdef DEBUGGER

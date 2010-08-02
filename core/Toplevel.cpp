@@ -43,41 +43,20 @@
 
 namespace avmplus
 {
-    Toplevel::Toplevel(AbcEnv* abcEnv) :
-        _abcEnv(abcEnv),
-        _builtinClasses(NULL),
-        _global(NULL)
+    Toplevel::Toplevel(AbcEnv* abcEnv) : _abcEnv(abcEnv)
     {
         _builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->classCount(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 
         AvmCore* core = this->core();
         MMgc::GC* gc = core->GetGC();
-        PoolObject* pool = abcEnv->pool();
-        Traits* mainTraits = pool->getScriptTraits(pool->scriptCount()-1);
 
-            // create a temp object vtable to use, since the real one isn't created yet
-            // later, in OP_newclass, we'll replace with the real Object vtable, so methods
-            // of Object and Class have the right scope.
+        // create a temp object vtable to use, since the real one isn't created yet
+        // later, in OP_newclass, we'll replace with the real Object vtable, so methods
+        // of Object and Class have the right scope.
         object_ivtable = core->newVTable(core->traits.object_itraits, NULL, this);
         Namespacep publicNS = core->getPublicNamespace(core->getDefaultAPI());
         ScopeChain* object_iscope = ScopeChain::create(gc, object_ivtable, abcEnv, core->traits.object_istc, NULL, publicNS);
         object_ivtable->resolveSignatures(object_iscope);
-
-        // global objects are subclasses of Object
-        VTable* mainVTable = core->newVTable(mainTraits, object_ivtable, this);
-        const ScopeTypeChain* toplevel_STC = mainTraits->declaringScope();
-        if (!toplevel_STC)
-        {
-            toplevel_STC = ScopeTypeChain::createEmpty(core->GetGC(), mainTraits);
-            mainTraits->setDeclaringScopes(toplevel_STC);
-        }
-        toplevel_scope = ScriptEnv::createScriptScope(toplevel_STC, mainVTable, abcEnv);
-        ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, toplevel_scope);
-        mainVTable->init = main;
-        mainVTable->resolveSignatures(toplevel_scope);
-
-        _global = new (gc, mainVTable->getExtraSize()) ScriptObject(mainVTable, NULL);
-        main->global = _global;
 
         // create temporary vtable for Class, so we have something for OP_newclass
         // to use when it creates Object$ and Class$.  once that happens, we replace
@@ -85,23 +64,14 @@ namespace avmplus
         class_ivtable = core->newVTable(core->traits.class_itraits, object_ivtable, this);
         ScopeChain* class_iscope = ScopeChain::create(gc, class_ivtable, abcEnv, core->traits.class_istc, NULL, publicNS);
         class_ivtable->resolveSignatures(class_iscope);
-
-        core->exportDefs(mainTraits, main);
-    }
-
-    ScriptEnv* Toplevel::mainEntryPoint() const
-    {
-        MethodEnv* me = this->global()->vtable->init;
-        AvmAssert(me->isScriptEnv());
-        return (ScriptEnv*)(me);
     }
 
     ClassClosure* Toplevel::findClassInPool(int class_id, PoolObject* pool)
     {
         Traits* traits = pool->getClassTraits(class_id)->itraits;
         Multiname qname(traits->ns(), traits->name());
-        AvmAssert(_global != NULL);
-        ScriptObject* container = _global->vtable->init->finddef(&qname);
+        AvmAssert(_mainEntryPoint == global()->vtable->init);
+        ScriptObject* container = _mainEntryPoint->finddef(&qname);
 
         Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
         ClassClosure* cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
@@ -955,7 +925,7 @@ namespace avmplus
             CodeContext* codeContext = core->codeContext();
             String* filename = NULL;                        // should be NULL to denote eval code, for now
             NativeInitializer* nativeInitializer = NULL;    // "native" not supported for eval code
-            Toplevel* toplevel = (Toplevel*)self;
+            Toplevel* toplevel = self->toplevel();
             String *newsrc = AvmCore::atomToString(input)->appendLatin1("\0", 1);
             uint32_t api = core->getAPI(NULL);
             return core->handleActionSource(newsrc, filename, toplevel, nativeInitializer, codeContext, api);

@@ -560,15 +560,6 @@ namespace avmplus
         }
     }
 
-    Toplevel* AvmCore::initTopLevel()
-    {
-        Toplevel* toplevel = NULL;
-        DomainEnv* builtinDomainEnv = new (GetGC()) DomainEnv(this, builtinDomain, NULL);
-        CodeContext* builtinCodeContext = new(GetGC()) CodeContext(builtinDomainEnv);
-        handleActionPool(builtinPool, toplevel, builtinCodeContext);
-        return toplevel;
-    }
-
     static void initScriptActivationTraits(AvmCore* core, Toplevel* toplevel, MethodInfo* method)
     {
 #ifdef VMCFG_AOT
@@ -595,28 +586,99 @@ namespace avmplus
 #endif
     }
 
-    static ScriptEnv* initScript(AvmCore* core, Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits)
+    ScriptEnv* AvmCore::initOneScript(Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits)
     {
-        VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, toplevel);
+        VTable* scriptVTable = this->newVTable(scriptTraits, toplevel->object_ivtable, toplevel);
         const ScopeTypeChain* scriptSTC = scriptTraits->declaringScope();
         if (!scriptSTC)
         {
-            scriptSTC = ScopeTypeChain::createEmpty(core->GetGC(), scriptTraits);
+            scriptSTC = ScopeTypeChain::createEmpty(this->GetGC(), scriptTraits);
             scriptTraits->setDeclaringScopes(scriptSTC);
         }
         ScopeChain* scriptScope = ScriptEnv::createScriptScope(scriptSTC, scriptVTable, abcEnv);
-        ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptScope);
+        ScriptEnv* scriptEnv = new (this->GetGC()) ScriptEnv(scriptTraits->init, scriptScope);
         scriptVTable->init = scriptEnv;
-        core->exportDefs(scriptTraits, scriptEnv);
-        initScriptActivationTraits(core, toplevel, scriptTraits->init);
+        this->exportDefs(scriptTraits, scriptEnv);
+        initScriptActivationTraits(this, toplevel, scriptTraits->init);
         return scriptEnv;
     }
 
+    ScriptEnv* AvmCore::initAllScripts(Toplevel* toplevel, AbcEnv* abcEnv)
+    {
+        PoolObject* pool = abcEnv->pool();
+        
+        // some code relies on the final script being initialized first, so we
+        // must continue that behavior
+        uint32_t const last = pool->scriptCount()-1;
+        ScriptEnv* main = initOneScript(toplevel, abcEnv, pool->getScriptTraits(last));
+
+        // skip the final one, it's already been done
+        for (uint32_t i=0; i < last; i++)
+        {
+            initOneScript(toplevel, abcEnv, pool->getScriptTraits(i));
+        }
+
+        exec->notifyAbcPrepared(toplevel, abcEnv);
+
+        return main;
+    }
+
+    Atom AvmCore::callScriptEnvEntryPoint(ScriptEnv* main)
+    {
+        main->initGlobal();
+
+        Atom result = 0; // init to zero to make GCC happy
+
+        #ifndef DEBUGGER
+        result = main->coerceEnter(main->global->atom());
+        #else
+        TRY(this, kCatchAction_Rethrow)
+        {
+            result = main->coerceEnter(main->global->atom());
+        }
+        CATCH(Exception* exception)
+        {
+            // Re-throw exception
+            this->throwException(exception);
+        }
+        END_CATCH
+        END_TRY
+        #endif
+        
+        return result;
+    }
+
+    Toplevel* AvmCore::initToplevel()
+    {
+        DomainEnv* builtinDomainEnv = new (GetGC()) DomainEnv(this, builtinDomain, NULL);
+        CodeContext* builtinCodeContext = new(GetGC()) CodeContext(builtinDomainEnv);
+
+        AvmAssert(builtinPool != NULL);
+        AvmAssert(builtinPool->scriptCount() != 0);
+
+        AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext);
+
+        Toplevel* toplevel = createToplevel(abcEnv);
+
+        // save toplevel since it was initially null
+        builtinDomainEnv->setToplevel(toplevel);
+
+        ScriptEnv* main = initAllScripts(toplevel, abcEnv);
+        toplevel->init_mainEntryPoint(main);
+
+        callScriptEnvEntryPoint(main); // ignore result
+
+        exec->notifyAbcPrepared(toplevel, abcEnv);
+
+        return toplevel;
+    }
+
     ScriptEnv* AvmCore::prepareActionPool(PoolObject* pool,
-                                          Toplevel*& toplevel,
+                                          Toplevel* toplevel,
                                           CodeContext* codeContext)
     {
         AvmAssert(pool != NULL);
+        AvmAssert(toplevel != NULL);
 
         // get the main entry point and its global traits
         if (pool->scriptCount() == 0)
@@ -625,74 +687,22 @@ namespace avmplus
         }
 
         AvmAssert(codeContext != NULL);
-        DomainEnv* domainEnv = codeContext->domainEnv();
-        
-        AvmAssert(domainEnv != NULL);
-        AvmAssert(domainEnv->domain() == pool->domain);
+        AvmAssert(codeContext->domainEnv() != NULL);
+        AvmAssert(codeContext->domainEnv()->domain() == pool->domain);
 
-        AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(pool)) AbcEnv(pool, domainEnv, codeContext);
-
-        ScriptEnv* main = NULL;
-
-        if (toplevel == NULL)
-        {
-            toplevel = createToplevel(abcEnv);
-
-            // save toplevel since it was initially null
-            domainEnv->setToplevel(toplevel);
-
-            main = toplevel->mainEntryPoint();
-            initScriptActivationTraits(this, toplevel, main->method);
-        }
-        else
-        {
-            // some code relies on the final script being initialized first, so we
-            // must continue that behavior
-            main = initScript(this, toplevel, abcEnv, pool->getScriptTraits(pool->scriptCount()-1));
-        }
-
-        // skip the final one, it's already been done
-        for (int i=0, n=pool->scriptCount()-1; i < n; i++)
-        {
-            initScript(this, toplevel, abcEnv, pool->getScriptTraits(i));
-        }
-
-        exec->notifyAbcPrepared(toplevel, abcEnv);
-
-        return main;
+        AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(pool)) AbcEnv(pool, codeContext);
+        return initAllScripts(toplevel, abcEnv);
     }
 
     Atom AvmCore::handleActionPool(PoolObject* pool,
-                                        Toplevel* &toplevel,
+                                        Toplevel* toplevel,
                                         CodeContext* codeContext)
     {
-        bool createdToplevel = (toplevel == NULL);
+        AvmAssert(toplevel != NULL);
 
         ScriptEnv* main = prepareActionPool(pool, toplevel, codeContext);
-
-        if (!createdToplevel && toplevel->objectClass != NULL)
-        {
-            main->initGlobal();
-        }
-
-        Atom result = 0; // init to zero to make GCC happy
-        #ifndef DEBUGGER
-        result = main->coerceEnter(main->global->atom());
-        #else
-        TRY(this, kCatchAction_Rethrow)
-        {
-            result = main->coerceEnter(main->global->atom());
-        }
-        CATCH(Exception *exception)
-        {
-            // Re-throw exception
-            throwException(exception);
-        }
-        END_CATCH
-        END_TRY
-        #endif
-
-        return result;
+        AvmAssert(toplevel->objectClass != NULL);
+        return callScriptEnvEntryPoint(main); 
     }
 
     void AvmCore::exportDefs(Traits* scriptTraits, ScriptEnv* scriptEnv)
@@ -765,12 +775,14 @@ namespace avmplus
 
     Atom AvmCore::handleActionBlock(ScriptBuffer code,
                                          int start,
-                                         Toplevel* &toplevel,
+                                         Toplevel* toplevel,
                                          const NativeInitializer* ninit,
                                          CodeContext *codeContext,
                                          uint32_t api)
     {
         AvmAssert(codeContext != NULL);
+        AvmAssert(toplevel != NULL);
+
         Domain* domain = codeContext->domainEnv()->domain();
 
         // parse constants and attributes.
@@ -786,11 +798,12 @@ namespace avmplus
 #ifdef VMCFG_EVAL
     Atom AvmCore::handleActionSource(String* code,
                                      String* filename,
-                                     Toplevel* &toplevel,
+                                     Toplevel* toplevel,
                                      const NativeInitializer* ninit,
                                      CodeContext *codeContext,
                                      uint32_t api)
     {
+        AvmAssert(toplevel != NULL);
         ScriptBuffer buffer = avmplus::compileProgram(this, toplevel, code, filename);
         return handleActionBlock(buffer, 0, toplevel, ninit, codeContext, api);
     }

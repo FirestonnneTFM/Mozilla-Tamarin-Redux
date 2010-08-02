@@ -144,17 +144,34 @@ REALLY_INLINE MMgc::GC* Toplevel::gc() const
 
 REALLY_INLINE ScriptObject* Toplevel::global() const
 {
-    return _global;
+    AvmAssert(_mainEntryPoint != NULL);
+    AvmAssert(_mainEntryPoint->global != NULL);
+    return _mainEntryPoint->global;
 }
 
 REALLY_INLINE Atom Toplevel::atom() const
 {
-    return _global->atom();
+    AvmAssert(_mainEntryPoint != NULL);
+    AvmAssert(_mainEntryPoint->global != NULL);
+    return _mainEntryPoint->global->atom();
 }
 
 REALLY_INLINE Atom Toplevel::add2(Atom val1, Atom val2)
 {
     return avmplus::op_add(this->core(), val1, val2);
+}
+
+REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main)
+{
+    AvmAssert(_mainEntryPoint == NULL);
+    _mainEntryPoint = main;
+    
+}
+
+REALLY_INLINE ScopeChain* Toplevel::toplevel_scope()
+{
+    AvmAssert(_mainEntryPoint != NULL);
+    return _mainEntryPoint->scope();
 }
 
 } // namespace avmplus

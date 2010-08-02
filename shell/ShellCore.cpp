@@ -173,11 +173,11 @@ namespace avmshell
 #endif
     }
 
-    Toplevel* ShellCore::initShellBuiltins()
+    ShellToplevel* ShellCore::createShellToplevel()
     {
         // Initialize a new Toplevel.  This will also create a new
         // DomainEnv based on the builtinDomain.
-        Toplevel* toplevel = initTopLevel();
+        ShellToplevel* toplevel = (ShellToplevel*)initToplevel();
 
         // Initialize the shell builtins in the new Toplevel
         CodeContext* shell_codeContext = new(GetGC()) CodeContext(toplevel->domainEnv());
@@ -186,7 +186,7 @@ namespace avmshell
         return toplevel;
     }
 
-    Toplevel* ShellCore::createToplevel(AbcEnv* abcEnv)
+    /*virtual*/ Toplevel* ShellCore::createToplevel(AbcEnv* abcEnv)
     {
         return new (GetGC()) ShellToplevel(abcEnv);
     }
@@ -417,7 +417,7 @@ namespace avmshell
             initShellPool();
 
             // init toplevel internally
-            shell_toplevel = initShellBuiltins();
+            shell_toplevel = createShellToplevel();
 
 			// Create a new Domain/DomainEnv for the user code
 			Domain* shell_domain = new (GetGC()) Domain(this, builtinDomain);
