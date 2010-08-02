@@ -39,7 +39,6 @@
 #    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase even if the parent has been skipped - overrides any skip command defined for the same configuration
 #    ats_skip - don't generate an ATS swf as these files are not ATS compatible
-#    apiversioning - define test to require apiversioning in the vm
 #    verify_skip - skip test when doing a verify run
 #
 # comments: please include bug reference, date, and reason for the entry
@@ -311,12 +310,6 @@ ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow test
 ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow tests
 ecma3/Unicode/uE000_PrivateUseArea, .*, ats_skip, bug 499685 skip slow tests
 ecma3/Unicode/uAC00_HangulSyllables, .*, ats_skip, bug 499685 skip slow tests
-
-####################
-#  API Versioning Tests
-####################
-versioning/.*, .*, apiversioning, skip versioning when not defined in avm
-
 
 ####################
 #  --verify skips
