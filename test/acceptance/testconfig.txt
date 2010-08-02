@@ -97,8 +97,11 @@ abcasm/nullCheck/CallStatic , .*verifyall.* , expectedfail, Expected failure in 
 ####################
 # sampling only works on debugger for avmdiff skip
 as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
+
 # mmgc tests fail on avmdiff, does not support passing args to vm
 mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
+versioning/.*, .*diff, skip, skip since avmdiff does not support passing args bug 487841
+
 # trim down tests to save time
 ecma3/Unicode/.*, .*diff, skip , trim down tests
 ecma3/Date/.*, .*diff, skip, trim down tests
