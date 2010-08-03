@@ -169,6 +169,7 @@ ecma3/RegExp/eperlstress_002, arm-winmobile.*-debug, expectedfail, bug https://b
 ecma3/GlobalObject/e15_1_2_3_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
 ecma3/String/e15_5_3_2_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
 ecma3/TypeConversion/e9_3_1_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
+versioning/.*, arm-winmobile.*, skip, passing args to abc does not work with winmo tools that we use
 
 
 ####################
