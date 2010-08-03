@@ -6276,7 +6276,7 @@ namespace avmplus
 #endif
             // save pointer to generated code
             code = (GprMethodProc) frag->code();
-            _nvprof("JIT method bytes", CodeAlloc::size(assm->codeList));
+            PERFM_NVPROF("JIT method bytes", CodeAlloc::size(assm->codeList));
         } else {
 #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (pool->isVerbose(VB_execpolicy))
@@ -6792,9 +6792,9 @@ namespace avmplus
         );
         if (!assm->error()) {
             if (method->isNative()) {
-                _nvprof("C++ invoker bytes", CodeAlloc::size(assm->codeList));
+                PERFM_NVPROF("C++ invoker bytes", CodeAlloc::size(assm->codeList));
             } else {
-                _nvprof("JIT invoker bytes", CodeAlloc::size(assm->codeList));
+                PERFM_NVPROF("JIT invoker bytes", CodeAlloc::size(assm->codeList));
             }
             return frag->code();
         } else {
