@@ -1016,13 +1016,13 @@ namespace avmplus
 #endif
 
 #ifndef VMCFG_WORDCODE
-                        INSTR(bkpt) {
+            INSTR(bkpt) {
                 NEXT;
             }
 #endif
 
 #ifndef VMCFG_WORDCODE
-                        INSTR(bkptline) {
+            INSTR(bkptline) {
                 U30ARG;
                 NEXT;
             }
