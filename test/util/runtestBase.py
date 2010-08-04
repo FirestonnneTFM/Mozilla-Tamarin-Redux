@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- Mode: Python; indent-tabs-mode: nil; tab-width: 4 -*-
+# vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
 #
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -107,6 +109,7 @@ class RuntestBase:
     settings = None
     shellabc = ''
     sourceExt = '.as'
+    supportFolderExt = '_support'
     testconfig = 'testconfig.txt'
     vmargs = ''
     vmtype = ''
@@ -586,8 +589,19 @@ class RuntestBase:
                 if d.startswith('./'):
                     d=d[2:]
                 tests += [(d+'/'+f) for f in files if self.istest(f, fileExtentions)]
-                utils = [d for d in dirs if d+self.sourceExt in files]
-                for x in [x for x in self.exclude+utils if x in dirs]:
+                # utilDirs contains all dirs that hold support files, and therefore
+                # are excluded from the tests list
+                # There are two kinds of util directories:
+                # 1. directory with the same name as the test: all files in that dir
+                #    are included when compiling the test
+                # 2. directory with the same name as the test + _support (string is defined in self.supportFolderExt):
+                #    all files in that dir are compiled, but not run - these files are
+                #    normally passed in as args to the test itself
+                utilDirs = [d for d in dirs if (d+self.sourceExt in files) or
+                         (d.endswith(self.supportFolderExt) and
+                          d[:-len(self.supportFolderExt)]+self.sourceExt in files)
+                         ]
+                for x in [x for x in self.exclude+utilDirs if x in dirs]:
                     dirs.remove(x)
         return tests
 
@@ -735,10 +749,8 @@ class RuntestBase:
                 except TypeError:
                     # intermittent issue: TypeError: verbose_print() takes at most 4 arguments (53 given)
                     # see https://bugzilla.mozilla.org/show_bug.cgi?id=564124
-                    print('Exception Info:')
                     print(sys.exc_info())
-                    print('outputCalls: %s' % outputCalls)
-                    print('If you see this, please send the above exception info to actionscriptqe@adobe.com')
+                    print('If you see this, please send the exception info above to actionscriptqe@adobe.com')
 
     def quiet_print(self, m, start=None, end=None):
         if self.quiet:
@@ -790,8 +802,8 @@ class RuntestBase:
 
     def compile_test(self, as_file, extraArgs=[], outputCalls = None):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
-        # if there is a .build file available (which is an executable script) run that file instead
-        # of compiling with asc
+        # if there is a .build file available (which is an executable script)
+        # run that file instead of compiling with asc
         as_base = as_file[0:as_file.rfind('.')]
         if isfile(as_base+'.build'):
             (dir,file)=split(as_base)
@@ -857,6 +869,9 @@ class RuntestBase:
             for arg in ascArgList:
                 cmd += ' %s' % arg
             
+            # look for a subdirectory of the same name as the .as file
+            # if it exists, include all of the files within that dir when
+            # compiling the test
             deps = glob(join(testdir,'*'+self.sourceExt))
             deps.sort()
             for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
