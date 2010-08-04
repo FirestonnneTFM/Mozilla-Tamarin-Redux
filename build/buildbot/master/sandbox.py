@@ -482,7 +482,7 @@ class sandbox:
     sb_winmobile_emulator_compile_factory.addStep(sync_clean)
     sb_winmobile_emulator_compile_factory.addStep(sync_clone_sandbox)
     sb_winmobile_emulator_compile_factory.addStep(sync_update)
-    sb_winmobile_emulator_compile_factory.addStep(bb_slaveupdate(slave="winmobile-arm"))
+    sb_winmobile_emulator_compile_factory.addStep(bb_slaveupdate(slave="winmobile-emulator"))
     sb_winmobile_emulator_compile_factory.addStep(compile_builtin)
     sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="ReleaseARM", shellname="avmshell_arm", args="--enable-shell --target=arm-windows", upload="false"))
     sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --target=arm-windows", upload="false"))
@@ -609,7 +609,7 @@ class sandbox:
     sb_android_compile_factory.addStep(sync_clean)
     sb_android_compile_factory.addStep(sync_clone_sandbox)
     sb_android_compile_factory.addStep(sync_update)
-    sb_android_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-server"))
+    sb_android_compile_factory.addStep(bb_slaveupdate(slave="android"))
     sb_android_compile_factory.addStep(compile_builtin)
     sb_android_compile_factory.addStep(BuildShellCommand(
                 command=['./build-debug-shell-android.sh', WithProperties('%s','revision')],

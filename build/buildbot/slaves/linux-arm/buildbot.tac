@@ -44,7 +44,7 @@ port = 9750
 slavename = 'linux-arm'
 passwd = 'asteam'
 keepalive = 600
-usepty = 1
+usepty = 0
 umask = None
 
 application = service.Application('buildslave')
