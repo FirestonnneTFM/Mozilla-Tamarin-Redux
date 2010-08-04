@@ -541,7 +541,7 @@ class tamarinredux:
     winmobile_emulator_compile_factory.addStep(sync_clean)
     winmobile_emulator_compile_factory.addStep(sync_clone(url=HG_URL))
     winmobile_emulator_compile_factory.addStep(sync_update)
-    winmobile_emulator_compile_factory.addStep(bb_slaveupdate(slave="winmobile-arm"))
+    winmobile_emulator_compile_factory.addStep(bb_slaveupdate(slave="winmobile-emulator"))
     winmobile_emulator_compile_factory.addStep(compile_builtin)
     winmobile_emulator_compile_factory.addStep(compile_generic(name="ReleaseARM", shellname="avmshell_arm", args="--enable-shell --target=arm-windows", upload="false"))
     winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --target=arm-windows", upload="false"))
@@ -671,7 +671,7 @@ class tamarinredux:
     android_compile_factory.addStep(sync_clean)
     android_compile_factory.addStep(sync_clone(url=HG_URL))
     android_compile_factory.addStep(sync_update)
-    android_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-server"))
+    android_compile_factory.addStep(bb_slaveupdate(slave="android"))
     android_compile_factory.addStep(compile_builtin)
     android_compile_factory.addStep(BuildShellCommand(
                 command=['./build-debug-shell-android.sh', WithProperties('%s','revision')],
@@ -2026,7 +2026,7 @@ class tamarinredux:
     winmobile_emulator_deep_factory.addStep(sync_clean)
     winmobile_emulator_deep_factory.addStep(sync_clone(url=HG_URL))
     winmobile_emulator_deep_factory.addStep(sync_update)
-    winmobile_emulator_deep_factory.addStep(bb_slaveupdate(slave="winmobile-arm-deep"))
+    winmobile_emulator_deep_factory.addStep(bb_slaveupdate(slave="winmobile-emulator-deep"))
     winmobile_emulator_deep_factory.addStep(download_testmedia)
     winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="arm-winmobile-emulator-tvm-release-deep", scriptargs=""))
     winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="arm-winmobile-emulator-tvm-release-Dinterp-deep", scriptargs=""))

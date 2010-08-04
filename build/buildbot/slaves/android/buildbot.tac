@@ -15,7 +15,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -38,10 +38,10 @@
 from twisted.application import service
 from buildbot.slave.bot import BuildSlave
 
-basedir = r'/c/buildbot/tamarin-redux/winmobile-arm'
+basedir = r'/Users/build/buildbot/tamarin-redux/android'
 host = '10.171.22.12'
 port = 9750
-slavename = 'winmobile-arm'
+slavename = 'android'
 passwd = 'asteam'
 keepalive = 600
 usepty = 1
@@ -51,4 +51,3 @@ application = service.Application('buildslave')
 s = BuildSlave(host, port, slavename, passwd, basedir, keepalive, usepty,
                umask=umask)
 s.setServiceParent(application)
-
