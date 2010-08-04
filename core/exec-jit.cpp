@@ -58,11 +58,6 @@ bool BaseExecMgr::shouldJit(const MethodInfo* m) const
     return runmode == RM_jit_all || (runmode == RM_mixed && !m->isStaticInit());
 }
 
-bool BaseExecMgr::jitMustSucceed() const
-{
-    return config.jitordie;
-}
-
 void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
 {
     // Mark method as been JIT compiled.
