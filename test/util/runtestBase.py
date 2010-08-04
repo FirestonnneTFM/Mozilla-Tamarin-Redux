@@ -837,6 +837,14 @@ class RuntestBase:
             ascargs += ' ' + ' '.join(extraArgs)
             ascArgList = parseArgStringToList(ascargs)
         
+            for p in self.parents(dir):
+                if p=='':
+                    p='.'
+                shell = join(p,'shell'+self.sourceExt)
+                if isfile(shell):
+                    ascArgList.append(' -in ' + shell)
+                    break
+            
             # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
             ascArgList = self.loadArgsFile(ascArgList, dir, as_file, 'asc_args')
             
@@ -848,14 +856,6 @@ class RuntestBase:
             cmd += ' -import %s' % builtinabc
             for arg in ascArgList:
                 cmd += ' %s' % arg
-            
-            for p in self.parents(dir):
-                if p=='':
-                    p='.'
-                shell = join(p,'shell'+self.sourceExt)
-                if isfile(shell):
-                    cmd += ' -in ' + shell
-                    break
             
             deps = glob(join(testdir,'*'+self.sourceExt))
             deps.sort()
@@ -944,6 +944,14 @@ class RuntestBase:
                     if javaArgList:
                         self.compile_test(test)
                     else:
+                        for p in self.parents(dir):
+                            if p=='':
+                                p='.'
+                            shell = join(p,"shell.as")
+                            if isfile(shell):
+                                arglist.append(' -in ' + shell)
+                                break
+                        
                         # look for .asc_args files to specify dir / file level compile args
                         arglist = self.loadArgsFile(arglist, dir, test, 'asc_args')
 
@@ -958,14 +966,6 @@ class RuntestBase:
                         cmd = "asc -import %s " % (self.builtinabc)
                         for arg in arglist:
                             cmd += ' %s' % arg
-
-                        for p in self.parents(dir):
-                            if p=='':
-                                p='.'
-                            shell = join(p,"shell.as")
-                            if isfile(shell):
-                                cmd += " -in " + shell
-                                break
 
                         deps = glob(join(testdir,"*.as"))
                         deps.sort()
