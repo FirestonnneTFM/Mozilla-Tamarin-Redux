@@ -141,4 +141,14 @@
 //There are only a few informational asserts in the source code.
 //#define VMCFG_FUZZTESTING
 
+// This is here because the conditions under which this optimization is used
+// depends on other settings and is not an external-facing concern, nor should
+// code implementing the optimization know directly which external settings that
+// trigger it.
+//
+// We could use this for the wordcode interpreter, too; it might be a win.
+#ifdef VMCFG_NANOJIT
+    #define VMCFG_RESTARG_OPTIMIZATION
+#endif
+
 #endif /* __avmbuild__ */

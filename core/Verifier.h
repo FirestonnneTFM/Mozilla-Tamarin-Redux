@@ -62,6 +62,7 @@ namespace avmplus
     class CodegenLIR;
     #endif
 
+#ifdef VMCFG_RESTARG_OPTIMIZATION
     // Helper used for optimization of ...rest parameters.
     //
     // We recognize benign uses of the rest array and rewrite generic code
@@ -168,6 +169,7 @@ namespace avmplus
         void endBlock();
         void fail();
     };
+#endif // VMCFG_RESTARG_OPTIMIZATION
 
     class Verifier
     {
@@ -221,7 +223,9 @@ namespace avmplus
         FrameState *state;
         bool emitPass;
         bool handlerIsReachable;
+#ifdef VMCFG_RESTARG_OPTIMIZATION
         RestArgAnalyzer restArgAnalyzer;
+#endif
         FrameState* getFrameState(const uint8_t* pc);
         const uint8_t* verifyBlock(const uint8_t* pc);
         const uint8_t* loadBlockState(FrameState* blk);
