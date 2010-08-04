@@ -252,9 +252,6 @@ private:
     // Should we eagerly JIT or always interpret?
     bool shouldJit(const MethodInfo*) const;
 
-    // True if the jit must not fail back to the interpreter.
-    bool jitMustSucceed() const;
-
     // True if the JIT is enabled.
     bool isJitEnabled() const;
 
