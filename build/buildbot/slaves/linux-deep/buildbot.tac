@@ -41,7 +41,7 @@ from buildbot.slave.bot import BuildSlave
 basedir = r'/home/build/buildbot/tamarin-redux/linux-deep'
 host = '10.171.22.12'
 port = 9750
-slavename = 'asteamlin9'
+slavename = 'linux-deep'
 passwd = 'asteam'
 keepalive = 600
 usepty = 0

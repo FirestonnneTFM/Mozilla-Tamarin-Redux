@@ -235,7 +235,7 @@ class tamarinredux:
 
     windows_compile_builder = {
                 'name': "windows-compile",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': windows_compile_factory,
                 'builddir': './windows-compile',
     }
@@ -254,7 +254,7 @@ class tamarinredux:
 
     windows_64_compile_builder = {
                 'name': "windows64-compile",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': windows_64_compile_factory,
                 'builddir': './windows64-compile',
     }
@@ -284,7 +284,7 @@ class tamarinredux:
 
     mac_intel_104_compile_builder = {
                 'name': "mac-intel-10.4-compile",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': mac_intel_104_compile_factory,
                 'builddir': './mac-intel-10_4-compile',
     }
@@ -315,7 +315,7 @@ class tamarinredux:
 
     mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': mac_intel_105_compile_factory,
                 'builddir': './mac-intel-10_5-compile',
     }
@@ -345,7 +345,7 @@ class tamarinredux:
 
     mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': mac_intel_64_compile_factory,
                 'builddir': './mac64-intel-compile',
     }
@@ -362,7 +362,7 @@ class tamarinredux:
 
     mac_ppc_104a_compile_builder = {
                 'name': "mac-ppc-10.4a-compile",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': mac_ppc_104a_compile_factory,
                 'builddir': './mac-ppc-10_4a-compile',
     }
@@ -379,7 +379,7 @@ class tamarinredux:
 
     mac_ppc_104b_compile_builder = {
                 'name': "mac-ppc-10.4b-compile",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': mac_ppc_104b_compile_factory,
                 'builddir': './mac-ppc-10_4b-compile',
     }
@@ -397,7 +397,7 @@ class tamarinredux:
 
     mac_ppc_105a_compile_builder = {
                 'name': "mac-ppc-10.5a-compile",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': mac_ppc_105a_compile_factory,
                 'builddir': './mac-ppc-10_5a-compile',
     }
@@ -413,7 +413,7 @@ class tamarinredux:
 
     mac_ppc_105b_compile_builder = {
                 'name': "mac-ppc-10.5b-compile",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': mac_ppc_105b_compile_factory,
                 'builddir': './mac-ppc-10_5b-compile',
     }
@@ -430,7 +430,7 @@ class tamarinredux:
 
     mac_ppc_64_compile_builder = {
                 'name': "mac64-ppc-compile",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': mac_ppc_64_compile_factory,
                 'builddir': './mac64-ppc-compile',
     }
@@ -447,7 +447,7 @@ class tamarinredux:
 
     mac_ppc_64b_compile_builder = {
                 'name': "mac64b-ppc-compile",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': mac_ppc_64b_compile_factory,
                 'builddir': './mac64b-ppc-compile',
     }
@@ -501,7 +501,7 @@ class tamarinredux:
 
     linux_compile_builder = {
                 'name': "linux-compile",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': linux_compile_factory,
                 'builddir': './linux-compile',
     }
@@ -527,7 +527,7 @@ class tamarinredux:
 
     linux_64_compile_builder = {
                 'name': "linux64-compile",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': linux_64_compile_factory,
                 'builddir': './linux64-compile',
     }
@@ -616,7 +616,7 @@ class tamarinredux:
 
     winmobile_emulator_compile_builder = {
                 'name': "winmobile-emulator-compile",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': winmobile_emulator_compile_factory,
                 'builddir': './winmobile-emulator-compile',
     }
@@ -641,7 +641,7 @@ class tamarinredux:
 
     solaris_sparc_compile_builder = {
                 'name': "solaris-sparc-compile",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': solaris_sparc_compile_factory,
                 'builddir': './solaris-sparc-compile',
     }
@@ -658,7 +658,7 @@ class tamarinredux:
     
     solaris_sparc2_compile_builder = {
                 'name': "solaris-sparc2-compile",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': solaris_sparc2_compile_factory,
                 'builddir': './solaris-sparc2-compile',
     }
@@ -712,7 +712,7 @@ class tamarinredux:
 
     android_compile_builder = {
                 'name': "android-compile",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': android_compile_factory,
                 'builddir': './android-compile',
     }
@@ -728,7 +728,7 @@ class tamarinredux:
 
     linux_arm_compile_builder = {
                 'name': "linux-arm-compile",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': linux_arm_compile_factory,
                 'builddir': './linux-arm-compile',
     }
@@ -745,7 +745,7 @@ class tamarinredux:
 
     linux_arm2_compile_builder = {
                 'name': "linux-arm2-compile",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': linux_arm2_compile_factory,
                 'builddir': './linux-arm2-compile',
     }
@@ -793,7 +793,7 @@ class tamarinredux:
     
     linux_mips_compile_builder = {
                 'name': "linux-mips-compile",
-                'slavename': "asteamlin1-mips",
+                'slavename': "linux-mips",
                 'factory': linux_mips_compile_factory,
                 'builddir': './linux-mips-compile',
     }
@@ -821,7 +821,7 @@ class tamarinredux:
 
     windows_smoke_builder = {
                 'name': "windows-smoke",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': windows_smoke_factory,
                 'builddir': './windows-smoke',
     }
@@ -837,7 +837,7 @@ class tamarinredux:
 
     windows_64_smoke_builder = {
                 'name': "windows64-smoke",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': windows_64_smoke_factory,
                 'builddir': './windows64-smoke',
     }
@@ -853,7 +853,7 @@ class tamarinredux:
 
     mac_intel_104_smoke_builder = {
                 'name': "mac-intel-10.4-smoke",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': mac_intel_104_smoke_factory,
                 'builddir': './mac-intel-10_4-smoke',
     }
@@ -869,7 +869,7 @@ class tamarinredux:
 
     mac_intel_105_smoke_builder = {
                 'name': "mac-intel-10.5-smoke",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': mac_intel_105_smoke_factory,
                 'builddir': './mac-intel-10_5-smoke',
     }
@@ -885,7 +885,7 @@ class tamarinredux:
 
     mac_intel_64_smoke_builder = {
                 'name': "mac64-intel-smoke",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': mac_intel_64_smoke_factory,
                 'builddir': './mac64-intel-smoke',
     }
@@ -900,7 +900,7 @@ class tamarinredux:
 
     mac_ppc_104a_smoke_builder = {
                 'name': "mac-ppc-10.4a-smoke",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': mac_ppc_104a_smoke_factory,
                 'builddir': './mac-ppc-10_4a-smoke',
     }
@@ -916,7 +916,7 @@ class tamarinredux:
 
     mac_ppc_104b_smoke_builder = {
                 'name': "mac-ppc-10.4b-smoke",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': mac_ppc_104b_smoke_factory,
                 'builddir': './mac-ppc-10_4b-smoke',
     }
@@ -932,7 +932,7 @@ class tamarinredux:
 
     mac_ppc_105a_smoke_builder = {
                 'name': "mac-ppc-10.5a-smoke",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': mac_ppc_105a_smoke_factory,
                 'builddir': './mac-ppc-10_5a-smoke',
     }
@@ -947,7 +947,7 @@ class tamarinredux:
 
     mac_ppc_105b_smoke_builder = {
                 'name': "mac-ppc-10.5b-smoke",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': mac_ppc_105b_smoke_factory,
                 'builddir': './mac-ppc-10_5b-smoke',
     }
@@ -963,7 +963,7 @@ class tamarinredux:
 
     mac_ppc_64_smoke_builder = {
                 'name': "mac64-ppc-smoke",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': mac_ppc_64_smoke_factory,
                 'builddir': './mac64-ppc-smoke',
     }
@@ -979,7 +979,7 @@ class tamarinredux:
 
     mac_ppc_64b_smoke_builder = {
                 'name': "mac64b-ppc-smoke",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': mac_ppc_64b_smoke_factory,
                 'builddir': './mac64b-ppc-smoke',
     }
@@ -995,7 +995,7 @@ class tamarinredux:
 
     linux_smoke_builder = {
                 'name': "linux-smoke",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': linux_smoke_factory,
                 'builddir': './linux-smoke',
     }
@@ -1011,7 +1011,7 @@ class tamarinredux:
 
     linux_64_smoke_builder = {
                 'name': "linux64-smoke",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': linux_64_smoke_factory,
                 'builddir': './linux64-smoke',
     }
@@ -1027,7 +1027,7 @@ class tamarinredux:
 
     winmobile_emulator_smoke_builder = {
                 'name': "winmobile-emulator-smoke",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': winmobile_emulator_smoke_factory,
                 'builddir': './winmobile-emulator-smoke',
     }
@@ -1043,7 +1043,7 @@ class tamarinredux:
 
     solaris_sparc_smoke_builder = {
                 'name': "solaris-sparc-smoke",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': solaris_sparc_smoke_factory,
                 'builddir': './solaris-sparc-smoke',
     }
@@ -1059,7 +1059,7 @@ class tamarinredux:
 
     solaris_sparc2_smoke_builder = {
                 'name': "solaris-sparc2-smoke",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': solaris_sparc2_smoke_factory,
                 'builddir': './solaris-sparc2-smoke',
     }
@@ -1074,7 +1074,7 @@ class tamarinredux:
 
     android_smoke_builder = {
                 'name': "android-smoke",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': android_smoke_factory,
                 'builddir': './android-smoke',
     }
@@ -1096,7 +1096,7 @@ class tamarinredux:
 
     linux_arm_smoke_builder = {
                 'name': "linux-arm-smoke",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': linux_arm_smoke_factory,
                 'builddir': './linux-arm-smoke',
     }
@@ -1119,7 +1119,7 @@ class tamarinredux:
 
     linux_arm2_smoke_builder = {
                 'name': "linux-arm2-smoke",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': linux_arm2_smoke_factory,
                 'builddir': './linux-arm2-smoke',
     }
@@ -1135,7 +1135,7 @@ class tamarinredux:
 
     linux_mips_smoke_builder = {
                 'name': "linux-mips-smoke",
-                'slavename': "asteamlin1-mips",
+                'slavename': "linux-mips",
                 'factory': linux_mips_smoke_factory,
                 'builddir': './linux-mips-smoke',
     }
@@ -1171,7 +1171,7 @@ class tamarinredux:
     
     windows_test_builder = {
                 'name': "windows-test",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': windows_test_factory,
                 'builddir': './windows-test',
     }
@@ -1195,7 +1195,7 @@ class tamarinredux:
 
     windows_64_test_builder = {
                 'name': "windows64-test",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': windows_64_test_factory,
                 'builddir': './windows64-test',
     }
@@ -1220,7 +1220,7 @@ class tamarinredux:
 
     mac_intel_104_test_builder = {
                 'name': "mac-intel-10.4-test",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': mac_intel_104_test_factory,
                 'builddir': './mac-intel-10_4-test',
     }
@@ -1245,7 +1245,7 @@ class tamarinredux:
 
     mac_intel_105_test_builder = {
                 'name': "mac-intel-10.5-test",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': mac_intel_105_test_factory,
                 'builddir': './mac-intel-10_5-test',
     }
@@ -1269,7 +1269,7 @@ class tamarinredux:
 
     mac_intel_64_test_builder = {
                 'name': "mac64-intel-test",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': mac_intel_64_test_factory,
                 'builddir': './mac64-intel-test',
     }
@@ -1290,7 +1290,7 @@ class tamarinredux:
 
     mac_ppc_104a_test_builder = {
                 'name': "mac-ppc-10.4a-test",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': mac_ppc_104a_test_factory,
                 'builddir': './mac-ppc-10_4a-test',
     }
@@ -1307,7 +1307,7 @@ class tamarinredux:
 
     mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': mac_ppc_104b_test_factory,
                 'builddir': './mac-ppc-10_4b-test',
     }
@@ -1329,7 +1329,7 @@ class tamarinredux:
 
     mac_ppc_105a_test_builder = {
                 'name': "mac-ppc-10.5a-test",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': mac_ppc_105a_test_factory,
                 'builddir': './mac-ppc-10_5a-test',
     }
@@ -1346,7 +1346,7 @@ class tamarinredux:
 
     mac_ppc_105b_test_builder = {
                 'name': "mac-ppc-10.5b-test",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': mac_ppc_105b_test_factory,
                 'builddir': './mac-ppc-10_5b-test',
     }
@@ -1367,7 +1367,7 @@ class tamarinredux:
 
     mac_ppc_64_test_builder = {
                 'name': "mac64-ppc-test",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': mac_ppc_64_test_factory,
                 'builddir': './mac64-ppc-test',
     }
@@ -1385,7 +1385,7 @@ class tamarinredux:
 
     mac_ppc_64b_test_builder = {
                 'name': "mac64b-ppc-test",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': mac_ppc_64b_test_factory,
                 'builddir': './mac64b-ppc-test',
     }
@@ -1410,7 +1410,7 @@ class tamarinredux:
 
     linux_test_builder = {
                 'name': "linux-test",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': linux_test_factory,
                 'builddir': './linux-test',
     }
@@ -1434,7 +1434,7 @@ class tamarinredux:
 
     linux_64_test_builder = {
                 'name': "linux64-test",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': linux_64_test_factory,
                 'builddir': './linux64-test',
     }
@@ -1453,7 +1453,7 @@ class tamarinredux:
 
     winmobile_emulator_test_builder = {
                 'name': "winmobile-emulator-test",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': winmobile_emulator_test_factory,
                 'builddir': './winmobile-emulator-test',
     }
@@ -1472,7 +1472,7 @@ class tamarinredux:
 
     solaris_sparc_test_builder = {
                 'name': "solaris-sparc-test",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': solaris_sparc_test_factory,
                 'builddir': './solaris-sparc-test',
     }
@@ -1492,7 +1492,7 @@ class tamarinredux:
 
     solaris_sparc2_test_builder = {
                 'name': "solaris-sparc2-test",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': solaris_sparc2_test_factory,
                 'builddir': './solaris-sparc2-test',
     }
@@ -1510,7 +1510,7 @@ class tamarinredux:
 
     android_test_builder = {
                 'name': "android-test",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': android_test_factory,
                 'builddir': './android-test',
     }
@@ -1528,7 +1528,7 @@ class tamarinredux:
 
     linux_arm_test_builder = {
                 'name': "linux-arm-test",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': linux_arm_test_factory,
                 'builddir': './linux-arm-test',
     }
@@ -1545,7 +1545,7 @@ class tamarinredux:
 
     linux_arm2_test_builder = {
                 'name': "linux-arm2-test",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': linux_arm2_test_factory,
                 'builddir': './linux-arm2-test',
     }
@@ -1560,7 +1560,7 @@ class tamarinredux:
 
     linux_mips_test_builder = {
                 'name': "linux-mips-test",
-                'slavename': "asteamlin1-mips",
+                'slavename': "linux-mips",
                 'factory': linux_mips_test_factory,
                 'builddir': './linux-mips-test',
     }
@@ -1594,7 +1594,7 @@ class tamarinredux:
 
     windows_performance_builder = {
                 'name': "windows-performance",
-                'slavename': "asteamwin1",
+                'slavename': "windows-performance",
                 'factory': windows_performance_factory,
                 'builddir': './windows-performance',
     }
@@ -1619,7 +1619,7 @@ class tamarinredux:
 
     mac_performance_builder = {
                 'name': "mac-performance",
-                'slavename': "asteammac2",
+                'slavename': "mac-performance",
                 'factory': mac_performance_factory,
                 'builddir': './mac-performance',
     }
@@ -1644,7 +1644,7 @@ class tamarinredux:
 
     mac_64_performance_builder = {
                 'name': "mac64-performance",
-                'slavename': "asteammac7",
+                'slavename': "mac64-performance",
                 'factory': mac_64_performance_factory,
                 'builddir': './mac64-performance',
     }
@@ -1669,7 +1669,7 @@ class tamarinredux:
 
     mac_ppc_performance_builder = {
                 'name': "mac-ppc-performance",
-                'slavename': "asteammac3",
+                'slavename': "mac-ppc-performance",
                 'factory': mac_ppc_performance_factory,
                 'builddir': './mac-ppc-performance',
     }
@@ -1694,7 +1694,7 @@ class tamarinredux:
 
     linux_performance_builder = {
                 'name': "linux-performance",
-                'slavename': "asteamlin4",
+                'slavename': "linux-performance",
                 'factory': linux_performance_factory,
                 'builddir': './linux-performance',
     }
@@ -1740,7 +1740,7 @@ class tamarinredux:
 
     android_performance_builder = {
                 'name': "android-performance",
-                'slavename': "asteammac1-android",
+                'slavename': "android-performance",
                 'factory': android_performance_factory,
                 'builddir': './android-performance',
     }
@@ -1763,7 +1763,7 @@ class tamarinredux:
 
     winmobile_performance_builder = {
                 'name': "winmobile-performance",
-                'slavename': "asteamwin5",
+                'slavename': "winmobile-performance",
                 'factory': winmobile_performance_factory,
                 'builddir': './winmobile-performance',
     }
@@ -1801,7 +1801,7 @@ class tamarinredux:
 
     windows_deep_builder = {
                 'name': "windows-deep",
-                'slavename': "asteamwin10",
+                'slavename': "windows-deep",
                 'factory': windows_deep_factory,
                 'builddir': './windows-deep',
     }
@@ -1846,7 +1846,7 @@ class tamarinredux:
 
     mac_deep_builder = {
                 'name': "mac-deep",
-                'slavename': "asteammac1",
+                'slavename': "mac-deep",
                 'factory': mac_deep_factory,
                 'builddir': './mac-deep',
     }
@@ -1879,7 +1879,7 @@ class tamarinredux:
 
     windows_p3_deep_builder = {
                 'name': "windows-p3-deep",
-                'slavename': "asteamwin13",
+                'slavename': "windows-p3-deep",
                 'factory': windows_p3_deep_factory,
                 'builddir': './windows-p3-deep',
     }
@@ -1910,7 +1910,7 @@ class tamarinredux:
 
     windows_frr_builder = {
                 'name': "windows-frr",
-                'slavename': "asteamwin12",
+                'slavename': "windows-frr",
                 'factory': windows_frr_factory,
                 'builddir': './windows-frr',
     }
@@ -1945,7 +1945,7 @@ class tamarinredux:
 
     mac_ppc_deep_builder = {
                 'name': "mac-ppc-deep",
-                'slavename': "asteammac10",
+                'slavename': "mac-ppc-deep",
                 'factory': mac_ppc_deep_factory,
                 'builddir': './mac-ppc-deep',
     }
@@ -1973,7 +1973,7 @@ class tamarinredux:
 
     solaris_sparc_deep_builder = {
                 'name': "solaris-sparc-deep",
-                'slavename': "asteamsol1",
+                'slavename': "solaris-sparc-deep",
                 'factory': solaris_sparc_deep_factory,
                 'builddir': './solaris-sparc-deep',
     }
@@ -2014,7 +2014,7 @@ class tamarinredux:
 
     windows_64_deep_builder = {
                 'name': "windows64-deep",
-                'slavename': "asteamwin11",
+                'slavename': "windows64-deep",
                 'factory': windows_64_deep_factory,
                 'builddir': './windows64-deep',
     }
@@ -2037,7 +2037,7 @@ class tamarinredux:
 
     winmobile_emulator_deep_builder = {
                 'name': "winmobile-emulator-deep",
-                'slavename': "asteamwin20",
+                'slavename': "winmobile-emulator-deep",
                 'factory': winmobile_emulator_deep_factory,
                 'builddir': './winmobile-emulator-deep',
     }
@@ -2072,7 +2072,7 @@ class tamarinredux:
 
     linux_deep_builder = {
                 'name': "linux-deep",
-                'slavename': "asteamlin9",
+                'slavename': "linux-deep",
                 'factory': linux_deep_factory,
                 'builddir': './linux-deep',
     }
@@ -2098,7 +2098,7 @@ class tamarinredux:
 
     linux_arm_deep_builder = {
                 'name': "linux-arm-deep",
-                'slavename': "asteambeagleboard3",
+                'slavename': "linux-arm-deep",
                 'factory': linux_arm_deep_factory,
                 'builddir': './linux-arm-deep',
     }
@@ -2120,7 +2120,7 @@ class tamarinredux:
 
     linux_mips_deep_builder = {
                 'name': "linux-mips-deep",
-                'slavename': "asteamlin1-mips-deep",
+                'slavename': "linux-mips-deep",
                 'factory': linux_mips_deep_factory,
                 'builddir': './linux-mips-deep',
     }

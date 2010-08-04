@@ -41,7 +41,7 @@ from buildbot.slave.bot import BuildSlave
 basedir = r'/home/build/buildbot/tamarin-redux/linux64'
 host = '10.171.22.12'
 port = 9750
-slavename = 'asteamlin5'
+slavename = 'linux64'
 passwd = 'asteam'
 keepalive = 600
 usepty = 0
