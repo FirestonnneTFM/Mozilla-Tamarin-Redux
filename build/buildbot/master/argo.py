@@ -224,7 +224,7 @@ class argo:
 
     windows_compile_builder = {
                 'name': "windows-compile-argo",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': windows_compile_factory,
                 'builddir': './argo-windows-compile',
     }
@@ -243,7 +243,7 @@ class argo:
 
     windows_64_compile_builder = {
                 'name': "windows64-compile-argo",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': windows_64_compile_factory,
                 'builddir': './argo-windows64-compile',
     }
@@ -273,7 +273,7 @@ class argo:
 
     mac_intel_104_compile_builder = {
                 'name': "mac-intel-10.4-compile-argo",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': mac_intel_104_compile_factory,
                 'builddir': './argo-mac-intel-10_4-compile',
     }
@@ -304,7 +304,7 @@ class argo:
 
     mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile-argo",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': mac_intel_105_compile_factory,
                 'builddir': './argo-mac-intel-10_5-compile',
     }
@@ -334,7 +334,7 @@ class argo:
 
     mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile-argo",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': mac_intel_64_compile_factory,
                 'builddir': './argo-mac64-intel-compile',
     }
@@ -351,7 +351,7 @@ class argo:
 
     mac_ppc_104a_compile_builder = {
                 'name': "mac-ppc-10.4a-compile-argo",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': mac_ppc_104a_compile_factory,
                 'builddir': './argo-mac-ppc-10_4a-compile',
     }
@@ -368,7 +368,7 @@ class argo:
 
     mac_ppc_104b_compile_builder = {
                 'name': "mac-ppc-10.4b-compile-argo",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': mac_ppc_104b_compile_factory,
                 'builddir': './argo-mac-ppc-10_4b-compile',
     }
@@ -386,7 +386,7 @@ class argo:
 
     mac_ppc_105a_compile_builder = {
                 'name': "mac-ppc-10.5a-compile-argo",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': mac_ppc_105a_compile_factory,
                 'builddir': './argo-mac-ppc-10_5a-compile',
     }
@@ -402,7 +402,7 @@ class argo:
 
     mac_ppc_105b_compile_builder = {
                 'name': "mac-ppc-10.5b-compile-argo",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': mac_ppc_105b_compile_factory,
                 'builddir': './argo-mac-ppc-10_5b-compile',
     }
@@ -419,7 +419,7 @@ class argo:
 
     mac_ppc_64_compile_builder = {
                 'name': "mac64-ppc-compile-argo",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': mac_ppc_64_compile_factory,
                 'builddir': './argo-mac64-ppc-compile',
     }
@@ -436,7 +436,7 @@ class argo:
 
     mac_ppc_64b_compile_builder = {
                 'name': "mac64b-ppc-compile-argo",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': mac_ppc_64b_compile_factory,
                 'builddir': './argo-mac64b-ppc-compile',
     }
@@ -489,7 +489,7 @@ class argo:
 
     linux_compile_builder = {
                 'name': "linux-compile-argo",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': linux_compile_factory,
                 'builddir': './argo-linux-compile',
     }
@@ -515,7 +515,7 @@ class argo:
 
     linux_64_compile_builder = {
                 'name': "linux64-compile-argo",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': linux_64_compile_factory,
                 'builddir': './argo-linux64-compile',
     }
@@ -604,7 +604,7 @@ class argo:
 
     winmobile_emulator_compile_builder = {
                 'name': "winmobile-emulator-compile-argo",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': winmobile_emulator_compile_factory,
                 'builddir': './argo-winmobile-emulator-compile',
     }
@@ -629,7 +629,7 @@ class argo:
 
     solaris_sparc_compile_builder = {
                 'name': "solaris-sparc-compile-argo",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': solaris_sparc_compile_factory,
                 'builddir': './argo-solaris-sparc-compile',
     }
@@ -646,7 +646,7 @@ class argo:
     
     solaris_sparc2_compile_builder = {
                 'name': "solaris-sparc2-compile-argo",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': solaris_sparc2_compile_factory,
                 'builddir': './argo-solaris-sparc2-compile',
     }
@@ -700,7 +700,7 @@ class argo:
 
     android_compile_builder = {
                 'name': "android-compile-argo",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': android_compile_factory,
                 'builddir': './argo-android-compile',
     }
@@ -717,7 +717,7 @@ class argo:
 
     linux_arm_compile_builder = {
                 'name': "linux-arm-compile-argo",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': linux_arm_compile_factory,
                 'builddir': './argo-linux-arm-compile',
     }
@@ -734,7 +734,7 @@ class argo:
 
     linux_arm2_compile_builder = {
                 'name': "linux-arm2-compile-argo",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': linux_arm2_compile_factory,
                 'builddir': './argo-linux-arm2-compile',
     }
@@ -760,7 +760,7 @@ class argo:
 
     windows_smoke_builder = {
                 'name': "windows-smoke-argo",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': windows_smoke_factory,
                 'builddir': './argo-windows-smoke',
     }
@@ -776,7 +776,7 @@ class argo:
 
     windows_64_smoke_builder = {
                 'name': "windows64-smoke-argo",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': windows_64_smoke_factory,
                 'builddir': './argo-windows64-smoke',
     }
@@ -792,7 +792,7 @@ class argo:
 
     mac_intel_104_smoke_builder = {
                 'name': "mac-intel-10.4-smoke-argo",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': mac_intel_104_smoke_factory,
                 'builddir': './argo-mac-intel-10_4-smoke',
     }
@@ -808,7 +808,7 @@ class argo:
 
     mac_intel_105_smoke_builder = {
                 'name': "mac-intel-10.5-smoke-argo",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': mac_intel_105_smoke_factory,
                 'builddir': './argo-mac-intel-10_5-smoke',
     }
@@ -824,7 +824,7 @@ class argo:
 
     mac_intel_64_smoke_builder = {
                 'name': "mac64-intel-smoke-argo",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': mac_intel_64_smoke_factory,
                 'builddir': './argo-mac64-intel-smoke',
     }
@@ -839,7 +839,7 @@ class argo:
 
     mac_ppc_104a_smoke_builder = {
                 'name': "mac-ppc-10.4a-smoke-argo",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': mac_ppc_104a_smoke_factory,
                 'builddir': './argo-mac-ppc-10_4a-smoke',
     }
@@ -855,7 +855,7 @@ class argo:
 
     mac_ppc_104b_smoke_builder = {
                 'name': "mac-ppc-10.4b-smoke-argo",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': mac_ppc_104b_smoke_factory,
                 'builddir': './argo-mac-ppc-10_4b-smoke',
     }
@@ -871,7 +871,7 @@ class argo:
 
     mac_ppc_105a_smoke_builder = {
                 'name': "mac-ppc-10.5a-smoke-argo",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': mac_ppc_105a_smoke_factory,
                 'builddir': './argo-mac-ppc-10_5a-smoke',
     }
@@ -886,7 +886,7 @@ class argo:
 
     mac_ppc_105b_smoke_builder = {
                 'name': "mac-ppc-10.5b-smoke-argo",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': mac_ppc_105b_smoke_factory,
                 'builddir': './argo-mac-ppc-10_5b-smoke',
     }
@@ -902,7 +902,7 @@ class argo:
 
     mac_ppc_64_smoke_builder = {
                 'name': "mac64-ppc-smoke-argo",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': mac_ppc_64_smoke_factory,
                 'builddir': './argo-mac64-ppc-smoke',
     }
@@ -918,7 +918,7 @@ class argo:
 
     mac_ppc_64b_smoke_builder = {
                 'name': "mac64b-ppc-smoke-argo",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': mac_ppc_64b_smoke_factory,
                 'builddir': './argo-mac64b-ppc-smoke',
     }
@@ -933,7 +933,7 @@ class argo:
 
     linux_smoke_builder = {
                 'name': "linux-smoke-argo",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': linux_smoke_factory,
                 'builddir': './argo-linux-smoke',
     }
@@ -949,7 +949,7 @@ class argo:
 
     linux_64_smoke_builder = {
                 'name': "linux64-smoke-argo",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': linux_64_smoke_factory,
                 'builddir': './argo-linux64-smoke',
     }
@@ -965,7 +965,7 @@ class argo:
 
     winmobile_emulator_smoke_builder = {
                 'name': "winmobile-emulator-smoke-argo",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': winmobile_emulator_smoke_factory,
                 'builddir': './argo-winmobile-emulator-smoke',
     }
@@ -981,7 +981,7 @@ class argo:
 
     solaris_sparc_smoke_builder = {
                 'name': "solaris-sparc-smoke-argo",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': solaris_sparc_smoke_factory,
                 'builddir': './argo-solaris-sparc-smoke',
     }
@@ -997,7 +997,7 @@ class argo:
 
     solaris_sparc2_smoke_builder = {
                 'name': "solaris-sparc2-smoke-argo",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': solaris_sparc2_smoke_factory,
                 'builddir': './argo-solaris-sparc2-smoke',
     }
@@ -1013,7 +1013,7 @@ class argo:
 
     android_smoke_builder = {
                 'name': "android-smoke-argo",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': android_smoke_factory,
                 'builddir': './argo-android-smoke',
     }
@@ -1036,7 +1036,7 @@ class argo:
 
     linux_arm_smoke_builder = {
                 'name': "linux-arm-smoke-argo",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': linux_arm_smoke_factory,
                 'builddir': './argo-linux-arm-smoke',
     }
@@ -1059,7 +1059,7 @@ class argo:
 
     linux_arm2_smoke_builder = {
                 'name': "linux-arm2-smoke-argo",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': linux_arm2_smoke_factory,
                 'builddir': './argo-linux-arm2-smoke',
     }
@@ -1095,7 +1095,7 @@ class argo:
 
     windows_test_builder = {
                 'name': "windows-test-argo",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': windows_test_factory,
                 'builddir': './argo-windows-test',
     }
@@ -1119,7 +1119,7 @@ class argo:
 
     windows_64_test_builder = {
                 'name': "windows64-test-argo",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': windows_64_test_factory,
                 'builddir': './argo-windows64-test',
     }
@@ -1144,7 +1144,7 @@ class argo:
 
     mac_intel_104_test_builder = {
                 'name': "mac-intel-10.4-test-argo",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': mac_intel_104_test_factory,
                 'builddir': './argo-mac-intel-10_4-test',
     }
@@ -1169,7 +1169,7 @@ class argo:
 
     mac_intel_105_test_builder = {
                 'name': "mac-intel-10.5-test-argo",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': mac_intel_105_test_factory,
                 'builddir': './argo-mac-intel-10_5-test',
     }
@@ -1193,7 +1193,7 @@ class argo:
 
     mac_intel_64_test_builder = {
                 'name': "mac64-intel-test-argo",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': mac_intel_64_test_factory,
                 'builddir': './argo-mac64-intel-test',
     }
@@ -1214,7 +1214,7 @@ class argo:
 
     mac_ppc_104a_test_builder = {
                 'name': "mac-ppc-10.4a-test-argo",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': mac_ppc_104a_test_factory,
                 'builddir': './argo-mac-ppc-10_4a-test',
     }
@@ -1231,7 +1231,7 @@ class argo:
 
     mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test-argo",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': mac_ppc_104b_test_factory,
                 'builddir': './argo-mac-ppc-10_4b-test',
     }
@@ -1253,7 +1253,7 @@ class argo:
 
     mac_ppc_105a_test_builder = {
                 'name': "mac-ppc-10.5a-test-argo",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': mac_ppc_105a_test_factory,
                 'builddir': './argo-mac-ppc-10_5a-test',
     }
@@ -1270,7 +1270,7 @@ class argo:
 
     mac_ppc_105b_test_builder = {
                 'name': "mac-ppc-10.5b-test-argo",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': mac_ppc_105b_test_factory,
                 'builddir': './argo-mac-ppc-10_5b-test',
     }
@@ -1291,7 +1291,7 @@ class argo:
 
     mac_ppc_64_test_builder = {
                 'name': "mac64-ppc-test-argo",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': mac_ppc_64_test_factory,
                 'builddir': './argo-mac64-ppc-test',
     }
@@ -1309,7 +1309,7 @@ class argo:
 
     mac_ppc_64b_test_builder = {
                 'name': "mac64b-ppc-test-argo",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': mac_ppc_64b_test_factory,
                 'builddir': './argo-mac64b-ppc-test',
     }
@@ -1334,7 +1334,7 @@ class argo:
 
     linux_test_builder = {
                 'name': "linux-test-argo",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': linux_test_factory,
                 'builddir': './argo-linux-test',
     }
@@ -1358,7 +1358,7 @@ class argo:
 
     linux_64_test_builder = {
                 'name': "linux64-test-argo",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': linux_64_test_factory,
                 'builddir': './argo-linux64-test',
     }
@@ -1377,7 +1377,7 @@ class argo:
 
     winmobile_emulator_test_builder = {
                 'name': "winmobile-emulator-test-argo",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': winmobile_emulator_test_factory,
                 'builddir': './argo-winmobile-emulator-test',
     }
@@ -1396,7 +1396,7 @@ class argo:
 
     solaris_sparc_test_builder = {
                 'name': "solaris-sparc-test-argo",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': solaris_sparc_test_factory,
                 'builddir': './argo-solaris-sparc-test',
     }
@@ -1416,7 +1416,7 @@ class argo:
 
     solaris_sparc2_test_builder = {
                 'name': "solaris-sparc2-test-argo",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': solaris_sparc2_test_factory,
                 'builddir': './argo-solaris-sparc2-test',
     }
@@ -1434,7 +1434,7 @@ class argo:
 
     android_test_builder = {
                 'name': "android-test-argo",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': android_test_factory,
                 'builddir': './argo-android-test',
     }
@@ -1453,7 +1453,7 @@ class argo:
 
     linux_arm_test_builder = {
                 'name': "linux-arm-test-argo",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': linux_arm_test_factory,
                 'builddir': './argo-linux-arm-test',
     }
@@ -1470,7 +1470,7 @@ class argo:
 
     linux_arm2_test_builder = {
                 'name': "linux-arm2-test-argo",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': linux_arm2_test_factory,
                 'builddir': './argo-linux-arm2-test',
     }
@@ -1505,7 +1505,7 @@ class argo:
 
     windows_performance_builder = {
                 'name': "windows-performance-argo",
-                'slavename': "asteamwin1",
+                'slavename': "windows-performance",
                 'factory': windows_performance_factory,
                 'builddir': './argo-windows-performance',
     }
@@ -1530,7 +1530,7 @@ class argo:
 
     mac_performance_builder = {
                 'name': "mac-performance-argo",
-                'slavename': "asteammac2",
+                'slavename': "mac-performance",
                 'factory': mac_performance_factory,
                 'builddir': './argo-mac-performance',
     }
@@ -1555,7 +1555,7 @@ class argo:
 
     mac_64_performance_builder = {
                 'name': "mac64-performance-argo",
-                'slavename': "asteammac7",
+                'slavename': "mac64-performance",
                 'factory': mac_64_performance_factory,
                 'builddir': './argo-mac64-performance',
     }
@@ -1580,7 +1580,7 @@ class argo:
 
     mac_ppc_performance_builder = {
                 'name': "mac-ppc-performance-argo",
-                'slavename': "asteammac3",
+                'slavename': "mac-ppc-performance",
                 'factory': mac_ppc_performance_factory,
                 'builddir': './argo-mac-ppc-performance',
     }
@@ -1605,7 +1605,7 @@ class argo:
 
     linux_performance_builder = {
                 'name': "linux-performance-argo",
-                'slavename': "asteamlin4",
+                'slavename': "linux-performance",
                 'factory': linux_performance_factory,
                 'builddir': './argo-linux-performance',
     }
@@ -1651,7 +1651,7 @@ class argo:
 
     android_performance_builder = {
                 'name': "android-performance-argo",
-                'slavename': "asteammac1-android",
+                'slavename': "android-performance",
                 'factory': android_performance_factory,
                 'builddir': './argo-android-performance',
     }
@@ -1674,7 +1674,7 @@ class argo:
 
     winmobile_performance_builder = {
                 'name': "winmobile-performance-argo",
-                'slavename': "asteamwin5",
+                'slavename': "winmobile-performance",
                 'factory': winmobile_performance_factory,
                 'builddir': './argo-winmobile-performance',
     }
@@ -1709,7 +1709,7 @@ class argo:
 
     windows_deep_builder = {
                 'name': "windows-deep-argo",
-                'slavename': "asteamwin10",
+                'slavename': "windows-deep",
                 'factory': windows_deep_factory,
                 'builddir': './argo-windows-deep',
     }
@@ -1739,7 +1739,7 @@ class argo:
 
     windows_p3_deep_builder = {
                 'name': "windows-p3-deep-argo",
-                'slavename': "asteamwin13",
+                'slavename': "windows-p3-deep",
                 'factory': windows_p3_deep_factory,
                 'builddir': './argo-windows-p3-deep',
     }
@@ -1770,7 +1770,7 @@ class argo:
 
     windows_frr_builder = {
                 'name': "windows-frr-argo",
-                'slavename': "asteamwin12",
+                'slavename': "windows-frr",
                 'factory': windows_frr_factory,
                 'builddir': './argo-windows-frr',
     }
@@ -1799,7 +1799,7 @@ class argo:
 
     mac_ppc_deep_builder = {
                 'name': "mac-ppc-deep-argo",
-                'slavename': "asteammac10",
+                'slavename': "mac-ppc-deep",
                 'factory': mac_ppc_deep_factory,
                 'builddir': './argo-mac-ppc-deep',
     }
@@ -1824,7 +1824,7 @@ class argo:
 
     solaris_sparc_deep_builder = {
                 'name': "solaris-sparc-deep-argo",
-                'slavename': "asteamsol1",
+                'slavename': "solaris-sparc",
                 'factory': solaris_sparc_deep_factory,
                 'builddir': './argo-solaris-sparc-deep',
     }
@@ -1862,7 +1862,7 @@ class argo:
 
     windows_64_deep_builder = {
                 'name': "windows64-deep-argo",
-                'slavename': "asteamwin11",
+                'slavename': "windows64-deep",
                 'factory': windows_64_deep_factory,
                 'builddir': './argo-windows64-deep',
     }
@@ -1885,7 +1885,7 @@ class argo:
 
     winmobile_emulator_deep_builder = {
                 'name': "winmobile-emulator-deep-argo",
-                'slavename': "asteamwin20",
+                'slavename': "winmobile-emulator-deep",
                 'factory': winmobile_emulator_deep_factory,
                 'builddir': './argo-winmobile-emulator-deep',
     }
@@ -1917,7 +1917,7 @@ class argo:
 
     linux_deep_builder = {
                 'name': "linux-deep-argo",
-                'slavename': "asteamlin9",
+                'slavename': "linux-deep",
                 'factory': linux_deep_factory,
                 'builddir': './argo-linux-deep',
     }
@@ -1941,7 +1941,7 @@ class argo:
 
     linux_arm_deep_builder = {
                 'name': "linux-arm-deep-argo",
-                'slavename': "asteambeagleboard3",
+                'slavename': "linux-arm-deep",
                 'factory': linux_arm_deep_factory,
                 'builddir': './argo-linux-arm-deep',
     }

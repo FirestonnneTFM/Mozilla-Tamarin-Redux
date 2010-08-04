@@ -41,7 +41,7 @@ from buildbot.slave.bot import BuildSlave
 basedir = r'/home/build/buildbot/tamarin-redux/linux-arm'
 host = '10.171.22.12'
 port = 9750
-slavename = 'asteamlinarm1'
+slavename = 'linux-arm'
 passwd = 'asteam'
 keepalive = 600
 usepty = 1

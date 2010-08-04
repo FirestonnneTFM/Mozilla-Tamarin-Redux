@@ -41,7 +41,7 @@ from buildbot.slave.bot import BuildSlave
 basedir = r'/export/home/build/buildbot/tamarin-redux/solaris-sparc'
 host = '10.171.22.12'
 port = 9750
-slavename = 'asteamsol4'
+slavename = 'solaris-sparc'
 passwd = 'asteam'
 keepalive = 600
 usepty = 1

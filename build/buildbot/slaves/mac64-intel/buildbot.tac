@@ -41,7 +41,7 @@ from buildbot.slave.bot import BuildSlave
 basedir = r'/Users/build/buildbot/tamarin-redux/mac64-intel'
 host = '10.171.22.12'
 port = 9750
-slavename = 'asteammac12-64bit'
+slavename = 'mac64-intel'
 passwd = 'asteam'
 keepalive = 600
 usepty = 1

@@ -41,7 +41,7 @@ from buildbot.slave.bot import BuildSlave
 basedir = r'/c/buildbot/tamarin-redux/winmobile-performance'
 host = '10.171.22.12'
 port = 9750
-slavename = 'asteamwin5'
+slavename = 'winmobile-performance'
 passwd = 'asteam'
 keepalive = 600
 usepty = 1

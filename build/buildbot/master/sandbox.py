@@ -178,7 +178,7 @@ class sandbox:
 
     sb_windows_compile_builder = {
                 'name': "windows-compile-sandbox",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': sb_windows_compile_factory,
                 'builddir': './sandbox-windows-compile',
     }
@@ -195,7 +195,7 @@ class sandbox:
 
     sb_windows_64_compile_builder = {
                 'name': "windows64-compile-sandbox",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': sb_windows_64_compile_factory,
                 'builddir': './sandbox-windows64-compile',
     }
@@ -225,7 +225,7 @@ class sandbox:
 
     sb_mac_intel_104_compile_builder = {
                 'name': "mac-intel-10.4-compile-sandbox",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': sb_mac_intel_104_compile_factory,
                 'builddir': './sandbox-mac-intel-10_4-compile',
     }
@@ -255,7 +255,7 @@ class sandbox:
 
     sb_mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile-sandbox",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': sb_mac_intel_105_compile_factory,
                 'builddir': './sandbox-mac-intel-10_5-compile',
     }
@@ -285,7 +285,7 @@ class sandbox:
 
     sb_mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile-sandbox",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': sb_mac_intel_64_compile_factory,
                 'builddir': './sandbox-mac64-intel-compile',
     }
@@ -302,7 +302,7 @@ class sandbox:
 
     sb_mac_ppc_104a_compile_builder = {
                 'name': "mac-ppc-10.4a-compile-sandbox",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': sb_mac_ppc_104a_compile_factory,
                 'builddir': './sandbox-mac-ppc-10_4a-compile',
     }
@@ -319,7 +319,7 @@ class sandbox:
 
     sb_mac_ppc_104b_compile_builder = {
                 'name': "mac-ppc-10.4b-compile-sandbox",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': sb_mac_ppc_104b_compile_factory,
                 'builddir': './sandbox-mac-ppc-10_4b-compile',
     }
@@ -337,7 +337,7 @@ class sandbox:
 
     sb_mac_ppc_105a_compile_builder = {
                 'name': "mac-ppc-10.5a-compile-sandbox",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': sb_mac_ppc_105a_compile_factory,
                 'builddir': './sandbox-mac-ppc-10_5a-compile',
     }
@@ -354,7 +354,7 @@ class sandbox:
 
     sb_mac_ppc_105b_compile_builder = {
                 'name': "mac-ppc-10.5b-compile-sandbox",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': sb_mac_ppc_105b_compile_factory,
                 'builddir': './sandbox-mac-ppc-10_5b-compile',
     }
@@ -371,7 +371,7 @@ class sandbox:
 
     sb_mac_ppc_64_compile_builder = {
                 'name': "mac64-ppc-compile-sandbox",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': sb_mac_ppc_64_compile_factory,
                 'builddir': './sandbox-mac64-ppc-compile',
     }
@@ -388,7 +388,7 @@ class sandbox:
 
     sb_mac_ppc_64b_compile_builder = {
                 'name': "mac64b-ppc-compile-sandbox",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': sb_mac_ppc_64b_compile_factory,
                 'builddir': './sandbox-mac64b-ppc-compile',
     }
@@ -443,7 +443,7 @@ class sandbox:
 
     sb_linux_compile_builder = {
                 'name': "linux-compile-sandbox",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': sb_linux_compile_factory,
                 'builddir': './sandbox-linux-compile',
     }
@@ -469,7 +469,7 @@ class sandbox:
 
     sb_linux_64_compile_builder = {
                 'name': "linux64-compile-sandbox",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': sb_linux_64_compile_factory,
                 'builddir': './sandbox-linux64-compile',
     }
@@ -554,7 +554,7 @@ class sandbox:
 
     sb_winmobile_emulator_compile_builder = {
                 'name': "winmobile-emulator-compile-sandbox",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': sb_winmobile_emulator_compile_factory,
                 'builddir': './sandbox-winmobile-emulator-compile',
     }
@@ -579,7 +579,7 @@ class sandbox:
 
     sb_solaris_sparc_compile_builder = {
                 'name': "solaris-sparc-compile-sandbox",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': sb_solaris_sparc_compile_factory,
                 'builddir': './sandbox-solaris-sparc-compile',
     }
@@ -596,7 +596,7 @@ class sandbox:
     
     sb_solaris_sparc2_compile_builder = {
                 'name': "solaris-sparc2-compile-sandbox",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': sb_solaris_sparc2_compile_factory,
                 'builddir': './sandbox-solaris-sparc2-compile',
     }
@@ -650,7 +650,7 @@ class sandbox:
 
     sb_android_compile_builder = {
                 'name': "android-compile-sandbox",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': sb_android_compile_factory,
                 'builddir': './sandbox-android-compile',
     }
@@ -666,7 +666,7 @@ class sandbox:
 
     sb_linux_arm_compile_builder = {
                 'name': "linux-arm-compile-sandbox",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': sb_linux_arm_compile_factory,
                 'builddir': './sandbox-linux-arm-compile',
     }
@@ -683,7 +683,7 @@ class sandbox:
 
     sb_linux_arm2_compile_builder = {
                 'name': "linux-arm2-compile-sandbox",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': sb_linux_arm2_compile_factory,
                 'builddir': './sandbox-linux-arm2-compile',
     }
@@ -702,6 +702,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=mips-linux', 'avmshell_mips', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'CXX': 'mipsel-linux-uclibc-g++ -static',
                     'CC' : 'mipsel-linux-uclibc-gcc -static',
                     'LD' : 'mipsel-linux-uclibc-ld',
@@ -716,6 +717,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=mips-linux', 'avmshell_mips_d', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'CXX': 'mipsel-linux-uclibc-g++ -static',
                     'CC' : 'mipsel-linux-uclibc-gcc -static',
                     'LD' : 'mipsel-linux-uclibc-ld',
@@ -731,7 +733,7 @@ class sandbox:
     
     sb_linux_mips_compile_builder = {
                 'name': "linux-mips-compile-sandbox",
-                'slavename': "asteamlin1-mips",
+                'slavename': "linux-mips",
                 'factory': sb_linux_mips_compile_factory,
                 'builddir': './sandbox-linux-mips-compile',
     }
@@ -759,7 +761,7 @@ class sandbox:
 
     sb_windows_smoke_builder = {
                 'name': "windows-smoke-sandbox",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': sb_windows_smoke_factory,
                 'builddir': './sandbox-windows-smoke',
     }
@@ -775,7 +777,7 @@ class sandbox:
 
     sb_windows_64_smoke_builder = {
                 'name': "windows64-smoke-sandbox",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': sb_windows_64_smoke_factory,
                 'builddir': './sandbox-windows64-smoke',
     }
@@ -791,7 +793,7 @@ class sandbox:
 
     sb_mac_intel_104_smoke_builder = {
                 'name': "mac-intel-10.4-smoke-sandbox",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': sb_mac_intel_104_smoke_factory,
                 'builddir': './sandbox-mac-intel-10_4-smoke',
     }
@@ -807,7 +809,7 @@ class sandbox:
 
     sb_mac_intel_105_smoke_builder = {
                 'name': "mac-intel-10.5-smoke-sandbox",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': sb_mac_intel_105_smoke_factory,
                 'builddir': './sandbox-mac-intel-10_5-smoke',
     }
@@ -823,7 +825,7 @@ class sandbox:
 
     sb_mac_intel_64_smoke_builder = {
                 'name': "mac64-intel-smoke-sandbox",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': sb_mac_intel_64_smoke_factory,
                 'builddir': './sandbox-mac64-intel-smoke',
     }
@@ -838,7 +840,7 @@ class sandbox:
 
     sb_mac_ppc_104a_smoke_builder = {
                 'name': "mac-ppc-10.4a-smoke-sandbox",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': sb_mac_ppc_104a_smoke_factory,
                 'builddir': './sandbox-mac-ppc-10_4a-smoke',
     }
@@ -854,7 +856,7 @@ class sandbox:
 
     sb_mac_ppc_104b_smoke_builder = {
                 'name': "mac-ppc-10.4b-smoke-sandbox",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': sb_mac_ppc_104b_smoke_factory,
                 'builddir': './sandbox-mac-ppc-10_4b-smoke',
     }
@@ -870,7 +872,7 @@ class sandbox:
 
     sb_mac_ppc_105a_smoke_builder = {
                 'name': "mac-ppc-10.5a-smoke-sandbox",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': sb_mac_ppc_105a_smoke_factory,
                 'builddir': './sandbox-mac-ppc-10_5a-smoke',
     }
@@ -885,7 +887,7 @@ class sandbox:
 
     sb_mac_ppc_105b_smoke_builder = {
                 'name': "mac-ppc-10.5b-smoke-sandbox",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': sb_mac_ppc_105b_smoke_factory,
                 'builddir': './sandbox-mac-ppc-10_5b-smoke',
     }
@@ -901,7 +903,7 @@ class sandbox:
 
     sb_mac_ppc_64_smoke_builder = {
                 'name': "mac64-ppc-smoke-sandbox",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': sb_mac_ppc_64_smoke_factory,
                 'builddir': './sandbox-mac64-ppc-smoke',
     }
@@ -918,7 +920,7 @@ class sandbox:
 
     sb_mac_ppc_64b_smoke_builder = {
                 'name': "mac64b-ppc-smoke-sandbox",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': sb_mac_ppc_64b_smoke_factory,
                 'builddir': './sandbox-mac64b-ppc-smoke',
     }
@@ -933,7 +935,7 @@ class sandbox:
 
     sb_linux_smoke_builder = {
                 'name': "linux-smoke-sandbox",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': sb_linux_smoke_factory,
                 'builddir': './sandbox-linux-smoke',
     }
@@ -949,7 +951,7 @@ class sandbox:
 
     sb_linux_64_smoke_builder = {
                 'name': "linux64-smoke-sandbox",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': sb_linux_64_smoke_factory,
                 'builddir': './sandbox-linux64-smoke',
     }
@@ -965,7 +967,7 @@ class sandbox:
 
     sb_winmobile_emulator_smoke_builder = {
                 'name': "winmobile-emulator-smoke-sandbox",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': sb_winmobile_emulator_smoke_factory,
                 'builddir': './sandbox-winmobile-emulator-smoke',
     }
@@ -980,7 +982,7 @@ class sandbox:
 
     sb_solaris_sparc_smoke_builder = {
                 'name': "solaris-sparc-smoke-sandbox",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': sb_solaris_sparc_smoke_factory,
                 'builddir': './sandbox-solaris-sparc-smoke',
     }
@@ -995,7 +997,7 @@ class sandbox:
 
     sb_solaris_sparc2_smoke_builder = {
                 'name': "solaris-sparc2-smoke-sandbox",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': sb_solaris_sparc2_smoke_factory,
                 'builddir': './sandbox-solaris-sparc2-smoke',
     }
@@ -1010,7 +1012,7 @@ class sandbox:
 
     sb_android_smoke_builder = {
                 'name': "android-smoke-sandbox",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': sb_android_smoke_factory,
                 'builddir': './sanbox-android-smoke',
     }
@@ -1032,7 +1034,7 @@ class sandbox:
 
     sb_linux_arm_smoke_builder = {
                 'name': "linux-arm-smoke-sandbox",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': sb_linux_arm_smoke_factory,
                 'builddir': './sandbox-linux-arm-smoke',
     }
@@ -1055,7 +1057,7 @@ class sandbox:
 
     sb_linux_arm2_smoke_builder = {
                 'name': "linux-arm2-smoke-sandbox",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': sb_linux_arm2_smoke_factory,
                 'builddir': './sandbox-linux-arm2-smoke',
     }
@@ -1070,7 +1072,7 @@ class sandbox:
 
     sb_linux_mips_smoke_builder = {
                 'name': "linux-mips-smoke-sandbox",
-                'slavename': "asteamlin1-mips",
+                'slavename': "linux-mips",
                 'factory': sb_linux_mips_smoke_factory,
                 'builddir': './sandbox-linux-mips-smoke',
     }
@@ -1106,7 +1108,7 @@ class sandbox:
 
     sb_windows_test_builder = {
                 'name': "windows-test-sandbox",
-                'slavename': "asteamwin2",
+                'slavename': "windows",
                 'factory': sb_windows_test_factory,
                 'builddir': './sandbox-windows-test',
     }
@@ -1129,7 +1131,7 @@ class sandbox:
 
     sb_windows_64_test_builder = {
                 'name': "windows64-test-sandbox",
-                'slavename': "asteamwin3",
+                'slavename': "windows64",
                 'factory': sb_windows_64_test_factory,
                 'builddir': './sandbox-windows64-test',
     }
@@ -1154,7 +1156,7 @@ class sandbox:
 
     sb_mac_intel_104_test_builder = {
                 'name': "mac-intel-10.4-test-sandbox",
-                'slavename': "asteammac4",
+                'slavename': "mac-intel-10_4",
                 'factory': sb_mac_intel_104_test_factory,
                 'builddir': './sandbox-mac-intel-10_4-test',
     }
@@ -1180,7 +1182,7 @@ class sandbox:
 
     sb_mac_intel_105_test_builder = {
                 'name': "mac-intel-10.5-test-sandbox",
-                'slavename': "asteammac12-10_5",
+                'slavename': "mac-intel-10_5",
                 'factory': sb_mac_intel_105_test_factory,
                 'builddir': './sandbox-mac-intel-10_5-test',
     }
@@ -1203,7 +1205,7 @@ class sandbox:
 
     sb_mac_intel_64_test_builder = {
                 'name': "mac64-intel-test-sandbox",
-                'slavename': "asteammac12-64bit",
+                'slavename': "mac64-intel",
                 'factory': sb_mac_intel_64_test_factory,
                 'builddir': './sandbox-mac64-intel-test',
     }
@@ -1225,7 +1227,7 @@ class sandbox:
 
     sb_mac_ppc_104a_test_builder = {
                 'name': "mac-ppc-10.4a-test-sandbox",
-                'slavename': "asteammac6",
+                'slavename': "mac-ppc-10_4a",
                 'factory': sb_mac_ppc_104a_test_factory,
                 'builddir': './sandbox-mac-ppc-10_4a-test',
     }
@@ -1242,7 +1244,7 @@ class sandbox:
 
     sb_mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test-sandbox",
-                'slavename': "asteammac17",
+                'slavename': "mac-ppc-10_4b",
                 'factory': sb_mac_ppc_104b_test_factory,
                 'builddir': './sandbox-mac-ppc-10_4b-test',
     }
@@ -1264,7 +1266,7 @@ class sandbox:
 
     sb_mac_ppc_105a_test_builder = {
                 'name': "mac-ppc-10.5a-test-sandbox",
-                'slavename': "tamarin-xserve",
+                'slavename': "mac-ppc-10_5a",
                 'factory': sb_mac_ppc_105a_test_factory,
                 'builddir': './sandbox-mac-ppc-10_5a-test',
     }
@@ -1280,7 +1282,7 @@ class sandbox:
 
     sb_mac_ppc_105b_test_builder = {
                 'name': "mac-ppc-10.5b-test-sandbox",
-                'slavename': "tamarin-xserve2",
+                'slavename': "mac-ppc-10_5b",
                 'factory': sb_mac_ppc_105b_test_factory,
                 'builddir': './sandbox-mac-ppc-10_5b-test',
     }
@@ -1301,7 +1303,7 @@ class sandbox:
 
     sb_mac_ppc_64_test_builder = {
                 'name': "mac64-ppc-test-sandbox",
-                'slavename': "asteammac5-64bit",
+                'slavename': "mac64a-ppc",
                 'factory': sb_mac_ppc_64_test_factory,
                 'builddir': './sandbox-mac64-ppc-test',
     }
@@ -1319,7 +1321,7 @@ class sandbox:
 
     sb_mac_ppc_64b_test_builder = {
                 'name': "mac64b-ppc-test-sandbox",
-                'slavename': "asteammac15",
+                'slavename': "mac64b-ppc",
                 'factory': sb_mac_ppc_64b_test_factory,
                 'builddir': './sandbox-mac64b-ppc-test',
     }
@@ -1344,7 +1346,7 @@ class sandbox:
 
     sb_linux_test_builder = {
                 'name': "linux-test-sandbox",
-                'slavename': "asteamlin1",
+                'slavename': "linux",
                 'factory': sb_linux_test_factory,
                 'builddir': './sandbox-linux-test',
     }
@@ -1368,7 +1370,7 @@ class sandbox:
 
     sb_linux_64_test_builder = {
                 'name': "linux64-test-sandbox",
-                'slavename': "asteamlin5",
+                'slavename': "linux64",
                 'factory': sb_linux_64_test_factory,
                 'builddir': './sandbox-linux64-test',
     }
@@ -1386,7 +1388,7 @@ class sandbox:
 
     sb_winmobile_emulator_test_builder = {
                 'name': "winmobile-emulator-test-sandbox",
-                'slavename': "asteamwin19",
+                'slavename': "winmobile-emulator",
                 'factory': sb_winmobile_emulator_test_factory,
                 'builddir': './sandbox-winmobile-emulator-test',
     }
@@ -1405,7 +1407,7 @@ class sandbox:
 
     sb_solaris_sparc_test_builder = {
                 'name': "solaris-sparc-test-sandbox",
-                'slavename': "asteamsol4",
+                'slavename': "solaris-sparc",
                 'factory': sb_solaris_sparc_test_factory,
                 'builddir': './sandbox-solaris-sparc-test',
     }
@@ -1425,7 +1427,7 @@ class sandbox:
 
     sb_solaris_sparc2_test_builder = {
                 'name': "solaris-sparc2-test-sandbox",
-                'slavename': "asteamsol3",
+                'slavename': "solaris-sparc2",
                 'factory': sb_solaris_sparc2_test_factory,
                 'builddir': './sandbox-solaris-sparc2-test',
     }
@@ -1443,7 +1445,7 @@ class sandbox:
 
     sb_android_test_builder = {
                 'name': "android-test-sandbox",
-                'slavename': "asteammac12",
+                'slavename': "android",
                 'factory': sb_android_test_factory,
                 'builddir': './sandbox-android-test',
     }
@@ -1460,7 +1462,7 @@ class sandbox:
 
     sb_linux_arm_test_builder = {
                 'name': "linux-arm-test-sandbox",
-                'slavename': "asteambeagleboard2",
+                'slavename': "linux-arm",
                 'factory': sb_linux_arm_test_factory,
                 'builddir': './sandbox-linux-arm-test',
     }
@@ -1477,7 +1479,7 @@ class sandbox:
 
     sb_linux_arm2_test_builder = {
                 'name': "linux-arm2-test-sandbox",
-                'slavename': "asteambeagle4",
+                'slavename': "linux-arm2",
                 'factory': sb_linux_arm2_test_factory,
                 'builddir': './sandbox-linux-arm2-test',
     }
@@ -1491,7 +1493,7 @@ class sandbox:
 
     sb_linux_mips_test_builder = {
                 'name': "linux-mips-test-sandbox",
-                'slavename': "asteamlin1-mips",
+                'slavename': "linux-mips",
                 'factory': sb_linux_mips_test_factory,
                 'builddir': './sandbox-linux-mips-test',
     }
