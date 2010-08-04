@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- Mode: Python; indent-tabs-mode: nil; tab-width: 4 -*-
+# vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5)
+#
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -194,7 +197,7 @@ class AcceptanceRuntest(RuntestBase):
                 sys.exit(1)
             print("detected %d android devices" % (len(self.androiddevices)/self.threads))
             self.threads=len(self.androiddevices)
-            
+     
     def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
         testnum = testAndNum[1]
@@ -241,8 +244,22 @@ class AcceptanceRuntest(RuntestBase):
         if self.forcerebuild and isfile(testName) and ext not in self.executableExtensions:
             os.unlink(testName)
         if isfile(testName) and getmtime(ast)>getmtime(testName) and self.timestampcheck:
-            outputCalls.append((self.verbose_print, ("%s has been modified, recompiling" % ast)))
+            outputCalls.append((self.verbose_print, ("%s has been modified, recompiling" % ast,)))
             os.unlink(testName)
+        # process support dir
+        if exists(root+self.supportFolderExt):
+            for p, dirs, files in walk(root+self.supportFolderExt):
+                for f in files:
+                    if f.endswith(self.sourceExt):
+                        f = p+'/'+f
+                        binFile = splitext(f)[0]+'.abc'
+                        if exists(binFile) and (self.forcerebuild or (self.timestampcheck and getmtime(f)>getmtime(binFile))):
+                            os.unlink(binFile)
+                        if not isfile(binFile):
+                            compileOutput = self.compile_test(f, outputCalls=outputCalls)
+                            if not isfile(binFile):
+                                outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
+                                outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
         if not isfile(testName):
             compileOutput = self.compile_test(ast, outputCalls=outputCalls)
             if not isfile(testName):
