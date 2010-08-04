@@ -701,7 +701,11 @@ namespace avmplus
         AvmAssert(toplevel != NULL);
 
         ScriptEnv* main = prepareActionPool(pool, toplevel, codeContext);
+#ifdef VMCFG_VERIFYALL
+        AvmAssert(config.verifyonly ? true : toplevel->objectClass != NULL);
+#else
         AvmAssert(toplevel->objectClass != NULL);
+#endif
         return callScriptEnvEntryPoint(main); 
     }
 
