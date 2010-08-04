@@ -77,7 +77,9 @@ namespace avmplus
         frameSize = stackBase + max_stack;
         state = NULL;
 
+        #ifdef VMCFG_RESTARG_OPTIMIZATION
         restArgAnalyzer.init(core, info, frameSize);
+        #endif
 
         #ifdef AVMPLUS_VERBOSE
         verbose = pool->isVerbose(VB_verify);
@@ -252,6 +254,8 @@ namespace avmplus
         }
     };
 
+#ifdef VMCFG_RESTARG_OPTIMIZATION
+    
     // Most interesting things happen in init()
     RestArgAnalyzer::RestArgAnalyzer()
         : NullWriter(NULL)
@@ -272,9 +276,6 @@ namespace avmplus
         pool = _info->pool();
         frameSize = _frameSize;
 
-#if defined VMCFG_WORDCODE || !defined VMCFG_NANOJIT
-        optimize = false;
-#else
         if (_info->needRest() && !_info->needActivation())
             restVar = _info->getMethodSignature()->param_count() + 1;
         else
@@ -287,7 +288,6 @@ namespace avmplus
             isRestArray = mmfx_new_array(bool, frameSize);
             VMPI_memset(isRestArray, 0, frameSize*sizeof(bool));
         }
-#endif
     }
 
     RestArgAnalyzer::~RestArgAnalyzer()
@@ -714,6 +714,7 @@ namespace avmplus
                 AvmAssert(!"Can't happen");
         }
     }
+#endif // VMCFG_RESTARG_OPTIMIZATION
 
     /**
      * (done) branches stay in code block
@@ -781,7 +782,11 @@ namespace avmplus
         emitPass = false;
         // phase 1 - iterate to a fixed point
         CodeWriter stubWriter;
+#ifdef VMCFG_RESTARG_OPTIMIZATION
         coder = restArgAnalyzer.hookup(&stubWriter);
+#else
+        coder = &stubWriter;
+#endif
         parseBodyHeader();          // set code_pos & code_length
         parseExceptionHandlers();   // resolve catch block types
         checkParams();
@@ -811,7 +816,11 @@ namespace avmplus
 
         // phase 2 - traverse code in abc order and emit
         mmfx_delete(state);
+#ifdef VMCFG_RESTARG_OPTIMIZATION
         coder = restArgAnalyzer.hookup(emitter, true);
+#else
+        coder = emitter;
+#endif
 
         // save computed ScopeTypeChain for OP_newfunction and OP_newclass
         ScopeWriter scopeWriter(coder, info, toplevel);
@@ -1401,8 +1410,10 @@ namespace avmplus
                 checkStackMulti(1, 1, &multiname);
 
                 uint32_t n=1;
-                bool emitOptimizedRestArg = restArgAnalyzer.optimize;
                 checkPropertyMultiname(n, multiname);
+
+#ifdef VMCFG_RESTARG_OPTIMIZATION
+                bool emitOptimizedRestArg = restArgAnalyzer.optimize;
 
                 if (emitOptimizedRestArg)
                     emitOptimizedRestArg = restArgAnalyzer.getProperty(state, multiname, n);
@@ -1434,6 +1445,9 @@ namespace avmplus
                 else {
                     emitGetProperty(multiname, n, imm30, pc);
                 }
+#else
+                emitGetProperty(multiname, n, imm30, pc);
+#endif
                 break;
             }
 
