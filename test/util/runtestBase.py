@@ -311,7 +311,7 @@ class RuntestBase:
 
     ### Config and Settings ###
 
-    def determineConfig(self, vm='tvm'):
+    def determineConfig(self, vm_str='tvm'):
         # ================================================
         # Determine the configruation if it has not been
         # passed into the script:
@@ -419,7 +419,9 @@ class RuntestBase:
         else:
             wordcode = ''
             
-        self.config = cputype+'-'+self.osName+'-'+vm+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
+        self.config = cputype+'-'+self.osName+'-'+vm_str+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
+        
+        
 
     def determineOS(self):
         _os = platform.system()
@@ -714,21 +716,11 @@ class RuntestBase:
         self.err_print('   %s' % msg)
         failmsgs += ['%s : %s' % (abc, msg)]
 
-    def js_print(self, m, start_tag='<p><tt>', end_tag='</tt></p>', overrideQuiet=False, csv=True, csvOut=True):
+    def js_print(self, m, start_tag='<p><tt>', end_tag='</tt></p>', overrideQuiet=False):
         # Print output
-        # csv - if True and if outputting csv, convert line into csv (spaces and []: chars)
-        # csvOut - if False and if outputing csv, do not print out this line
         if self.quiet and not overrideQuiet:
             sys.stdout.write('.')
             sys.stdout.flush()
-        elif self.csv:
-            if csvOut:
-                if csv:
-                    print convertToCsv(m)
-                else:
-                    if m.find(',') != -1:
-                        m = '"%s"' % m
-                    print m
         else:
             print m
             sys.stdout.flush()
@@ -1202,6 +1194,9 @@ class RuntestBase:
               testsTuples.append([t,testsLen-i])
             # generate threadpool
             requests = threadpool.makeRequests(self.runTestPrep, testsTuples, self.printOutput, self.handle_exception)
+            
+            
+            
             main = threadpool.ThreadPool(self.threads)
             # que requests
             [main.putRequest(req) for req in requests]
@@ -1386,7 +1381,7 @@ class RuntestBase:
         if self.timestamps:
             # get the start time
             self.start_time = datetime.today()
-            self.js_print('Tamarin tests started: %s' % self.start_time, overrideQuiet=True, csv=False)
+            self.js_print('Tamarin tests started: %s' % self.start_time, overrideQuiet=True)
 
 
     def setupCEEmulators(self):

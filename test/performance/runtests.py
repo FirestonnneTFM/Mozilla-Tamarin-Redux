@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 # -*- Mode: Python; indent-tabs-mode: nil -*-
 # vi: set ts=4 sw=4 expandtab:
 
@@ -42,9 +42,9 @@
 # ***** END LICENSE BLOCK ***** */
 #
 
-import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, traceback
-import subprocess, math
-from math import sqrt
+import os, sys, getopt, datetime, pipes, glob, itertools
+import tempfile, string, re, platform, traceback
+import subprocess, math, types
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -65,6 +65,9 @@ except ImportError:
     print "Import error.  Please make sure that the test/acceptance/util directory has been deleted."
     print "   (directory has been moved to test/util)."
 
+# Constants
+DEFAULT_TRUNCATE_LEN = 6  # default len of number fields when displaying results
+
 class PerformanceRuntest(RuntestBase):
     avm2 = ''
     avmname = ''
@@ -78,6 +81,7 @@ class PerformanceRuntest(RuntestBase):
     avm2version = ''
     avm2revision = ''
     detail = False
+    raw = False
     vmargs2 = ''
     optimize = True
     perfm = False
@@ -88,9 +92,42 @@ class PerformanceRuntest(RuntestBase):
     serverHost = '10.60.48.47'
     serverPort = 1188
     finalexitcode=0
-    prettyprint = False
+    
+    # testData structure:
+    # { testName : { metric : { results1/2 : [], best1/2 : num, avg1/2 : num, spdup : num }}}
+    testData = {}   # dict that stores all test results and calculations
+    
+    csvAppend = False
+    metricInfo = {} # dict that holds info on each metric run
     currentMetric = ''
+
+    indexFile = ''      # indexFile that is used to compute normalized results
+    testIndexDict = {}  # dict used to store test indexes
+    saveIndex = False   # save results from avm1 to saveIndexFile
+    score = False       # compute scores ?
+    
+    # score1 & 2  hold the geometric mean of all tests run.  Means are kept seperate for each
+    # metric, so the dictionary keeps a key for each metric:
+    # e.g: {'metric' : {'score':runningScore, 'count':count}, 'v8' : {'score':3.14, 'count':1} }
+    score1 = {}
+    score2 = {}
+
+    # formatting vars
     testFieldLen = 30   # field length for test name and path
+    resultWidth = 7     # width of result columns
+
+    # Index file header
+    testIndexHeaderString = '''
+# The testindex file contains a list of test results that are used to normalize
+# all current results using these provided values.  This enables us to equally
+# weight the results of each test irrespective of the actual test runtime.
+
+# In order to simplify the importing and processing of this file, the values are
+# kept in a python dictionary which MUST be named testIndexDict
+
+# The dictionary format is:
+# 'testName':{'metric':value}
+'''
 
     def __init__(self):
         RuntestBase.__init__(self)
@@ -109,10 +146,37 @@ class PerformanceRuntest(RuntestBase):
         self.settings, self.includes = self.parseTestConfig('.')
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
+        self.loadMetricInfo()
         self.preProcessTests()
         self.printHeader()
         self.runTests(self.tests)
+        if self.csv:
+            self.outputCsvToFile()
+        if self.score:
+            self.printScoreSummary()
+        if self.saveIndex:
+            self.outputTestIndexFile()
         #self.cleanup()
+
+    def getTestsList(self, args):
+        '''If an index file is being used, we only run the files in the index list'''
+        # when --saveIndex is specified along with --index, run the specified files
+        # and merge it with the --index values
+        if self.indexFile and not self.saveIndex:
+            indexTests = sorted(self.testIndexDict.keys())
+            if args[0] == '.':
+                return indexTests
+            else:
+                # only run the union of tests in indexTests and testsToRun
+                testsToRun = list(set(indexTests) &
+                                  set(RuntestBase.getTestsList(self, args)))
+                if not testsToRun:
+                    exit('There are no tests in the indexfile %s that match %s'
+                         % (self.indexFile, args))
+                return testsToRun
+                
+        return RuntestBase.getTestsList(self, args)
+
 
     def setEnvironVars(self):
         RuntestBase.setEnvironVars(self)
@@ -127,7 +191,8 @@ class PerformanceRuntest(RuntestBase):
         print " -S --avm2          second avmplus command to use"
         print "    --avmname       nickname for avm to use as column header"
         print "    --avm2name      nickname for avm2 to use as column header"
-        print "    --detail        output with more details about each run"
+        print "    --detail        display results in 'old-style' format"
+        print "    --raw           output all raw test values"
         print " -i --iterations    number of times to repeat test"
         print " -l --log           logs results to a file"
         print " -k --socketlog     logs results to a socket server"
@@ -141,16 +206,20 @@ class PerformanceRuntest(RuntestBase):
         print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
         print "    --nooptimize    do not optimize files when compiling"
         print "    --perfm         parse the perfm results from avm"
-        print "    --csv           output in csv format"
-        print " -p --prettyprint   enhanced terminal coloring"
+        print "    --csv=          also output to csv file, filename required"
+        print "    --csvappend     append to csv file instead of overwriting"
+        print "    --score         compute and print geometric mean of scores"
+        print "    --index=        index file to use (must end with .py)"
+        print "    --saveindex=    save results to given index file name"
         exit(c)
 
     def setOptions(self):
         RuntestBase.setOptions(self)
         self.options += 'S:i:lkr:mp'
         self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log','socketlog',
-                                 'runtime=','memory','larger','vmversion=', 'vm2version=','vmargs2=','nooptimize',
-                                 'perfm','csv','prettyprint', 'detail'])
+                                 'runtime=','memory','larger','vmversion=', 'vm2version=',
+                                 'vmargs2=','nooptimize', 'score', 'saveindex=', 'index=',
+                                 'perfm','csv=', 'csvappend','prettyprint', 'detail', 'raw'])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -188,13 +257,38 @@ class PerformanceRuntest(RuntestBase):
                 self.optimize = False
             elif o in ('--perfm',):
                 self.perfm = True
+                self.resultWidth = 8    # perfm results can be pretty large
             elif o in ('--csv',):
                 self.csv = True
-            elif o in ('-p', '--prettyprint'):
-                self.prettyprint = True
+                self.csvfile = v
+            elif o in ('--csvappend',):
+                self.csvAppend = True
+            elif o in ('--score',):
+                self.score = True
             elif o in ('--detail',):
-                print 'self.detail = True'
                 self.detail = True
+            elif o in ('--raw',):
+                self.raw = True
+            elif o in ('--index',):
+                self.loadIndexFile(v)
+            elif o in ('--saveindex',):
+                self.saveIndex = True
+                self.saveIndexFile = v
+
+    def loadIndexFile(self, indexFile):
+        # The indexFile contains values used to normalize
+        # the test run results.  For simplicity it is a python
+        # file that defines a single dictionary: testIndexDict
+        # That dicitonary is dynamically loaded here and then assigned
+        # to the classvar of the same name
+        self.indexFile = indexFile[:-3] if indexFile.endswith('.py') else indexFile
+        try:
+            exec 'from %s import testIndexDict' % self.indexFile
+            self.testIndexDict = testIndexDict
+        except ImportError:
+            # TODO: friendlyfy this error message
+            print 'Error attempting to import %s:' % self.indexFile
+            raise
 
     def compile_test(self, as_file):
         if not isfile(self.shellabc):
@@ -208,60 +302,60 @@ class PerformanceRuntest(RuntestBase):
         self.printOutput(None, debugoutput)
         RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
 
-    def formatExceptionInfo(maxTBlevel=5):
-        cla, exc, trbk = sys.exc_info()
-        excName = cla.__name__
-        try:
-            excArgs = exc.__dict__["args"]
-        except KeyError:
-            excArgs = "<no args>"
-        excTb = traceback.format_tb(trbk, maxTBlevel)
-        return (excName, excArgs, excTb)
-
-
     def socketlog(self, msg):
-        if self.logresults:
-            if not self.socketlogFile:
-                file="socketlog-%s.txt" % self.avmversion
-                ctr=0
-                while os.path.exists(file):
-                    ctr += 1
-                    file = "socketlog-%s-%s.txt" % (self.avmversion,ctr)
-                self.socketlogFile=file
-            open(self.socketlogFile,'a').write(msg)
-            try:
-                s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
-                s.connect((self.serverHost, self.serverPort)) # connect to server on the port
-                s.send("%s;exit\r\n" % msg)         # send the data
-                data = s.recv(1024)
-                #print('Sent: %s' % msg)
-                #print('Received: %s \n\n' % data)
-                #s.shutdown(SHUT_RDWR)
-                s.close()
-            except :
-                print("Socket error occured:")
-                print(sys.exc_info())
-                print('buildbot_status: WARNINGS')
-
-    def parsePerfm(self, line,dic):
+        if not self.socketlogFile:
+            file="socketlog-%s.txt" % self.avmversion
+            ctr=0
+            while os.path.exists(file):
+                ctr += 1
+                file = "socketlog-%s-%s.txt" % (self.avmversion,ctr)
+            self.socketlogFile=file
+        open(self.socketlogFile,'a').write(msg)
         try:
-            result = line.strip().split(' ')[-2]
-            if 'verify & IR gen' in line:
-                dic['verify'].append(int(result))
-            elif 'code ' in line:
-                dic['code'].append(int(result))
-            elif 'compile ' in line:
-                dic['compile'].append(int(result))
-            elif ('IR-bytes' in line) or ('mir bytes' in line):
-                dic['irbytes'].append(int(result))
-            elif ('IR ' in line) or ('mir ' in line): #note trailing space
-                dic['ir'].append(int(result))
-                dic['count'].append(int(line.strip().split(' ')[-1]))
-        except:
-            pass
+            s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
+            s.connect((self.serverHost, self.serverPort)) # connect to server on the port
+            s.send("%s;exit\r\n" % msg)         # send the data
+            data = s.recv(1024)
+            #print('Sent: %s' % msg)
+            #print('Received: %s \n\n' % data)
+            #s.shutdown(SHUT_RDWR)
+            s.close()
+        except :
+            print("Socket error occured:")
+            print(sys.exc_info())
+            print('buildbot_status: WARNINGS')
+
+    def loadMetricInfo(self):
+        '''load metric information from metricinfo.py'''
+        try:
+            from metricinfo import metric_info
+        except ImportError:
+            print 'Error loading metricinfo.py file.'
+            raise
+
+        # verify that the loaded metric_info dictionary is valid
+        for metric in metric_info:
+            if 'best' not in metric_info[metric]:
+                print '\nWarning: metricinfo.py - the %s metric does not have a "best" key defined - defaulting to min\n' % metric
+            elif not isinstance(metric_info[metric]['best'],(types.FunctionType,types.BuiltinFunctionType)):
+                print '\nWarning: metricinfo.py - the "best" value for the %s metric must be a function - defaulting to min' % metric
+            # if the metric does not have a largerIsFaster value defined, default it to False
+            if 'largerIsFaster' not in metric_info[metric]:
+                metric_info[metric]['largerIsFaster'] = False
+        
+        self.metricInfo = metric_info
 
     def preProcessTests(self):
         'Code that must be executed before beginning a testrun'
+
+        if self.logresults:
+            # determine current config string for socketlog
+            self.log_config = "%s" % self.vmargs.replace(" ", "")
+            self.log_config = "%s" % self.log_config.replace("\"", "")
+            if self.log_config.find("-memlimit")>-1:
+                self.log_config=self.log_config[0:self.log_config.find("-memlimit")]
+            self.log_config = self.log_config.replace("-memstats","")
+
         if not self.aotsdk:
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
             if not self.avmversion:
@@ -274,42 +368,46 @@ class PerformanceRuntest(RuntestBase):
                     self.avm2version = self.getAvmVersion(self.avm2)
                 if not self.avm2revision:
                     self.avm2revision = self.getAvmRevision(self.avm2version)
+            else:   # only one avm being run
+                self.testFieldLen = 50
 
 
     def printHeader(self):
         'Print run info and headers'
-        self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True, csv=False)
+        self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True)
         self.js_print("%s: %s %s version: %s" % (self.avmname or self.avmDefaultName, self.avm, self.vmargs, self.avmversion))
         if self.avm2:
             self.js_print("%s: %s %s version: %s" % (self.avm2name or self.avm2DefaultName, self.avm2, self.vmargs2, self.avm2version))
         self.avmDefaultName += ':'+self.avmrevision
         self.js_print('iterations: %s' % self.iterations)
+        if self.indexFile:
+            self.js_print('index mode enabled, values of -1 indicate that no index value is present for that test')
         if self.avm2:
             self.avm2DefaultName += ':'+self.avm2revision
             if self.iterations == 1:
                 self.js_print('\n%-*s %5s %7s %7s\n' % (self.testFieldLen, 'test', self.avmname or self.avmDefaultName,
                                                         self.avm2name or self.avm2DefaultName, '%diff'))
-            else:
-                if self.memory:
-                    self.js_print('Note that %diff is calculated using the largest memory value (not avg) from all runs', csv=False)
-                else:
-                    self.js_print('Note that %diff is calculated using the fastest value (not avg) of all runs', csv=False)
+            else:   # multiple iterations
                 if self.detail:
                     self.js_print('\n%-*s %-33s %-33s' % (self.testFieldLen, '', self.avmname or self.avmDefaultName, self.avm2name or self.avm2DefaultName))
-                    self.js_print('%-*s  %7s :%7s  %7s %6s    %7s :%7s  %7s %6s %7s %8s %8s' % (self.testFieldLen, 'test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  ','metric'))
-                    self.js_print('%*s ---------------------------------   ---------------------------------   -----  --------  ------' % (self.testFieldLen, '') )
+                    self.js_print('%-*s  %7s :%7s  %7s %6s    %7s :%7s  %7s %6s %7s %8s' % (self.testFieldLen, 'test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  '))
+                    self.js_print('%*s ---------------------------------   ---------------------------------   -----  --------' % (self.testFieldLen, '') )
                 else:
-                    self.js_print('\n%-*s   %-13s %s' % (self.testFieldLen, '',
-                                                         self.avmname or self.avmDefaultName,
-                                                         self.avm2name or self.avm2DefaultName))
-                    self.js_print('%-*s %6s %6s %6s %6s %6s %4s' % (self.testFieldLen, 'test', 'best','avg','best','avg','%diff','sig'))
-        else:
-            if (self.iterations>2):
-                runFormatStr = ''
-                if self.csv:
-                    for i in range(1,self.iterations+1):
-                        runFormatStr += '%7s' % 'run'+str(i)
-                self.js_print(("\n\n%-*s %5s %7s "+runFormatStr+"\n") % (self.testFieldLen, "test",self.avmname or self.avmDefaultName,"95%_conf"))
+                    self.js_print('\n%-*s %-*s  %-*s' % (self.testFieldLen+self.resultWidth-4, '',
+                                                         self.resultWidth*2, self.avmname or self.avmDefaultName,
+                                                         self.resultWidth*2, self.avm2name or self.avm2DefaultName))
+                    self.js_print('%-*s %*s %*s %*s %*s %*s %*s' % (self.testFieldLen, 'test',
+                                                                    self.resultWidth, 'best',
+                                                                    self.resultWidth, 'avg',
+                                                                    self.resultWidth, 'best',
+                                                                    self.resultWidth, 'avg',
+                                                                    self.resultWidth, '%dBst',
+                                                                    self.resultWidth, '%dAvg'))
+        else:   # only one avm
+            if (self.iterations>1):
+                self.js_print(('\n\n%-*s %5s %6s %6s\n') % (self.testFieldLen, 'test',
+                                                        self.avmname or self.avmDefaultName,
+                                                        'avg','95%_conf'))
             else:
                 self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", self.avmname or self.avmDefaultName))
 
@@ -361,118 +459,167 @@ class PerformanceRuntest(RuntestBase):
 
         return settings, includes
 
-    def parsePerfTestOutput(self, output, resultList, perfmDict):
-        metric = ''
-        for line in output:
-            if self.memory:
+    def parsePerfTestOutput(self, output, resultDict):
+        '''Parse the given lines of output for test results'''
+        if self.debug:
+            print output
+
+        if self.memory:
+            # we only want the LAST [mem] private reading
+            for line in reversed(output):
                 if '[mem]' in line and 'private' in line:
                     memoryhigh = self.parseMemHigh(line)
-            elif 'metric' in line:
-                rl=[]
+                    break
+            resultDict.setdefault('memory', []).append(memoryhigh)
+            # When running in memory mode, we only want the memory metric and
+            # ignore all others
+            return
+            
+
+        if self.perfm:
+            # These metrics are NOT prefaced with the metric keyword
+            for line in output:
+                result = line.strip().split(' ')[-2]
+                if 'verify & IR gen' in line:
+                    resultDict.setdefault('vprof-verify-time', []).append(int(result))
+                elif 'code ' in line:
+                    resultDict.setdefault('vprof-code-size', []).append(int(result))
+                elif 'compile ' in line:
+                    resultDict.setdefault('vprof-compile-time', []).append(int(result))
+                elif ('IR-bytes' in line) or ('mir bytes' in line):
+                    resultDict.setdefault('vprof-ir-bytes', []).append(int(result))
+                elif ('IR ' in line) or ('mir ' in line): #note trailing space
+                    resultDict.setdefault('vprof-ir-time', []).append(int(result))
+                    resultDict.setdefault('vprof-count', []).append(int(line.strip().split(' ')[-1]))
+
+        # get all other metrics displayed
+        for line in output:
+            # results must have the form of 'metric metric_name value'
+            if 'metric' in line:
                 rl=line.rsplit()
                 if len(rl)>2:
                     if '.' in rl[2]:
-                        resultList.append(float(rl[2]))
+                        resultDict.setdefault(rl[1], []).append(float(rl[2]))
                     else:
-                        resultList.append(int(rl[2]))
-                    metric=rl[1]
-            elif self.perfm:
-                self.parsePerfm(line, perfmDict)
-        if self.memory:
-            metric="memory"
-            resultList.append(memoryhigh)
-        return metric
+                        resultDict.setdefault(rl[1], []).append(int(rl[2]))
 
-    def calculateSpeedup(self, resultList, resultList2, largerIsFaster):
-        spdup = 9999
-        result1 = result2 = 0
-        memoryhigh = memoryhigh2 = 0
-        if largerIsFaster:
-            result1 = max(resultList)
-            if resultList2:
-                result2 = max(resultList2)
-        else:
-            result1 = min(resultList)
-            if resultList2:
-                result2 = min(resultList2)
-        if self.memory:
-            memoryhigh = max(resultList)
-            if self.avm2:
-                memoryhigh2 = max(resultList2)
-                if memoryhigh<=0:
-                    spdup = 9999
-                else:
-                    spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
-        elif self.avm2:
-            if result1==0 or result2==0:
-                spdup = 9999
-            else:
-                if largerIsFaster:
-                    spdup = float(result2-result1)/result1*100.0
-                else:
-                    spdup = float(result1-result2)/result1*100.0
-        return spdup, result1, result2, memoryhigh, memoryhigh2
+    def calculateSpeedup(self, testName, resultDict, resultDict2):
+        '''calculate speed diff between vms
+            stores all information into self.testData
+        '''
+        # TODO cpeyer: I'm still not certain that the correct thing to do re: index is to
+        # immediately change the raw values to indexed values
 
-    def perfmOutput(self, perfm1Dict, perfm2Dict):
-        def calcPerfm(desc, key):
-        # calculate min, max, average and %diff of averages
-            try:
-                if self.iterations == 1:
-                    self.js_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
-                                ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
-                else:
-                    avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
-                    avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
-                    self.js_print('     %-45s [%7s :%7s] %7s   [%7s :%7s] %7s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
-                                                                 min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
-                                                                 ((avg1-avg2)/float(avg2))*100.0))
-            except:
-                pass
+        # testData structure:
+        # { testName : { metric : { results1/2 : [], best1/2 : num, avg1/2 : num, spdup : num }}}
 
-        calcPerfm('verify & IR gen (time)','verify')
-        calcPerfm('compile (time)','compile')
-        calcPerfm('code size (bytes)','code')
-        calcPerfm('mir/lir bytes', 'irbytes')
-        calcPerfm('mir/lir (# of inst)', 'ir')
-        calcPerfm('count', 'count')
-        self.js_print('-------------------------------------------------------------------------------------------------------------')
+        # calc values for each metric in resultDict
+        for metric in resultDict:
+            # if using the index file, compute the indexes and use those as results instead of raw values
+            if self.indexFile and not self.saveIndex:
+                resultDict[metric] = [self.computeIndex(testName, metric, x) for x in resultDict[metric]]
+            # Store the results
+            self.testData.setdefault(testName, {}).setdefault(metric, {}).setdefault('results1', []).extend(resultDict[metric])
+            # calculate the best result
+            r1 = self.testData[testName][metric]['best1'] = self.metricInfo[metric]['best'](resultDict[metric])
+            a1 = self.testData[testName][metric]['avg1'] = mean(resultDict[metric])
 
-    def perfmLog(self, config, perfm1Dict, perfm2Dict):
-        #calc confidence and mean for each stat
-        def perfmSocketlog(metric,key):
-            self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" %
-                   (testName, metric,min(perfm1Dict[key]), conf95(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
-        perfmSocketlog('vprof-compile-time','compile')
-        perfmSocketlog('vprof-code-size','code')
-        perfmSocketlog('vprof-verify-time','verify')
-        perfmSocketlog('vprof-ir-bytes','irbytes')
-        perfmSocketlog('vprof-ir-time','ir')
-        perfmSocketlog('vprof-count','count')
+            if self.logresults and len(resultDict[metric]) > 1:
+                # only send results if there are multiple iterations (TODO: why only multi iteration?)
+                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" %
+                                   (testName, metric, r1, conf95(resultDict[metric]),
+                                    self.testData[testName][metric]['avg1'],
+                                    len(resultDict[metric]),
+                                    self.osName.upper(), self.log_config,
+                                    self.avmrevision, self.vmname))
 
+            if self.score:
+                self.updateScore(self.score1, metric, r1)
 
-    def abnormalExit(self, explanation, extraOutput=[]):
-        'Print out explanation for exiting and exit w/ exitcode 1'
-        print 'Abnormal Exit!!'
-        print explanation
-        for line in extraOutput:
-            print(line.strip())
-        sys.exit(1)
+            if resultDict2:
+                if self.indexFile and not self.saveIndex:
+                    resultDict2[metric] = [self.computeIndex(testName, metric, x) for x in resultDict2[metric]]
+                # Store the results
+                self.testData.setdefault(testName, {}).setdefault(metric, {}).setdefault('results2', []).extend(resultDict2[metric])
+                # calculate the best result
+                r2 = self.testData[testName][metric]['best2'] = self.metricInfo[metric]['best'](resultDict2[metric])
+                a2 = self.testData[testName][metric]['avg2'] = mean(resultDict2[metric])
+                if self.score:
+                    self.updateScore(self.score2, metric, r2)
+                # calculate speedup btwn vms
+                # if the best value is the max value, reverse the sign of the spdup
+                sign = -1 if self.metricInfo[metric]['largerIsFaster'] else 1
+                self.testData[testName][metric]['spdup'] = sign * float(r1-r2)/r1 * 100.0
+                self.testData[testName][metric]['avg_spdup'] = sign * float(a1-a2)/a1 * 100.0
 
-    def checkForMetricChange(self, metric, largerIsFaster):
-        'If the test metric has changed, print out a line indicating so'
+    def checkForMetricChange(self, metric):
+        ''' If the test metric has changed, print out a line indicating so.
+            Function only used when displaying results sorted by metric.
+            (Or only a single metric is being displayed)
+        '''
         if self.currentMetric != metric:
             self.currentMetric = metric
-            self.js_print('Metric: %s %s' % (metric, ('('+largerIsFaster+')') if largerIsFaster else '') )
+            self.js_print('Metric: %s%s %s' % (self.metricInfo[metric].get('name',metric),
+                                                ' (indexed)' if self.indexFile else '',
+                                                self.metricInfo[metric].get('desc','')))
+
+    def getBestResult(self, metric, resultList):
+        return max(resultList) if self.metricInfo[metric]['largerIsFaster'] else min(resultList)
 
     def getSigString(self, sig, spdup):
         'generate a string of +/- to give a quick visual representation of the perf difference'
         return '--' if (sig < -2.0 and spdup < -5.0) else '- ' if sig < -1.0 \
             else '++' if (sig > 2.0 and spdup > 5.0) else '+ ' if sig > 1.0 else '  '
 
+    def computeIndex(self, testname, metric, value):
+        'Compute the index value for given testname and index from self.testIndexDict'
+        indexValue = self.testIndexDict.get(testname, {}).get(metric)
+        if indexValue:
+            return (float(value)/indexValue)
+        else:
+            return -1
 
-    def truncateTestname(self, testName):
-        'Return testName truncated to self.testFieldLen'
-        return testName if len(testName) <= self.testFieldLen else testName[(len(testName) - self.testFieldLen):]
+    def truncateDescField(self, desc):
+        'Return desc truncated to self.testFieldLen'
+        return desc if len(desc) <= self.testFieldLen else desc[(len(desc) - self.testFieldLen):]
+
+    def updateScore(self, scoreDict, metric, result):
+        'Update the given score dict with newest result'
+        if not metric in scoreDict:
+            scoreDict[metric] = {'score':float(result), 'count':1}
+        else:
+            scoreDict[metric] = {'score':scoreDict[metric]['score'] * float(result),
+                                       'count':scoreDict[metric]['count']+1}
+
+    def printScoreSummary(self):
+        print 'Score for %s:' % (self.avmname or self.avmDefaultName,)
+        for k,v in self.score1.iteritems():
+            print '  %s = %s' % (k, str(pow(v['score'],1.0/v['count'])))
+        if self.score2:
+            print 'Score for %s' % (self.avm2name or self.avm2DefaultName,)
+            for k,v in self.score2.iteritems():
+                print '  %s = %s' % (k, str(pow(v['score'],1.0/v['count'])))
+
+    def formatResult(self, result, truncateLen=DEFAULT_TRUNCATE_LEN, sigFigs = 1, metric = ''):
+        '''Format the test result for display'''
+        # use currentMetric if no metric specified
+        metric = metric or self.currentMetric
+        if self.indexFile:
+            # automatically format as 2 sigfigs float unless its an int
+            if int(result) == result:
+                return int(result)
+            else:
+                return ('%% %s.%sf' % ((truncateLen, 2))) % result
+        if metric == 'memory':
+            return formatMemory(result)
+        else:
+            if int(result) == result or abs(result) > 10**(truncateLen-1):
+                return int(result)
+            else:
+                return ('%% %s.%sf' % ((truncateLen, sigFigs))) % result
+                # line below requires python >= 2.6
+                #return format(result, '%s.%sf' % (truncateLen, decimalPlaces))
+
 
     def runTest(self, testAndNum):
         'Run a singe performance testcase self.iterations times and print out results'
@@ -504,12 +651,6 @@ class PerformanceRuntest(RuntestBase):
             self.allskips += 1
             return
 
-        if settings.has_key('.*') and settings['.*'].has_key('largerValuesFaster'):
-            largerIsFaster = 'largerValuesFaster'
-        else:
-            largerIsFaster = ''
-
-        self.verbose_print("%d running %s" % (testnum, testName));
         if self.forcerebuild and isfile(abc):
             os.unlink(abc)
         if isfile(abc) and getmtime(ast)>getmtime(abc):
@@ -526,18 +667,14 @@ class PerformanceRuntest(RuntestBase):
         if config.find("-memlimit")>-1:
             config=config[0:config.find("-memlimit")]
 
-        result1=9999999
-        result2=9999999
-        resultList=[]
-        resultList2=[]
+        # results are stored in a dictionary using the metric as key
+        # e.g.: {'time':[1,2,3,4]}
+        resultsDict1 = {}
+        resultsDict2 = {}
         if self.memory and self.vmargs.find("-memstats")==-1:
             self.vmargs="%s -memstats" % self.vmargs
         if self.memory and len(self.vmargs2)>0 and self.vmargs2.find("-memstats")==-1:
             self.vmargs2="%s -memstats" % self.vmargs2
-
-        # setup dictionary for vprof (perfm) results
-        perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
-        perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
 
         for i in range(self.iterations):
             if self.aotsdk and self.aotout:
@@ -560,159 +697,257 @@ class PerformanceRuntest(RuntestBase):
                     self.js_print("%-50s %7s %s" % (testName,'Avm1 Error: Test Exited with exit code:', exitcode))
                     return
                 else:
-                    metric = self.parsePerfTestOutput(f1, resultList, perfm1Dict)
+                    self.parsePerfTestOutput(f1, resultsDict1)
                 if self.avm2:
                     if exitcode2!=0:
                         self.finalexitcode=1
                         self.js_print("%-50s %7s %s" % (testName,'Avm2 Error: Test Exited with exit code:', exitcode))
                         return
                     else:
-                        self.parsePerfTestOutput(f2, resultList2, perfm2Dict)
+                        self.parsePerfTestOutput(f2, resultsDict2)
             except:
-                print self.formatExceptionInfo()
+                traceback.print_exc()
                 exit(-1)
         # end for i in range(iterations)
 
-        if len(resultList)!=self.iterations:
+        # check the resultlists for the correct # of iterations
+        if len(resultsDict1[resultsDict1.keys()[0]]) != self.iterations:
             # something went wrong, dump output
-            self.abnormalExit('avm resultlist: %s is not the same length as the # of iterations (%s)' % (resultList, self.iterations), f1)
-        if self.avm2 and (len(resultList2) != self.iterations):
-            self.abnormalExit('avm2 resultlist: %s is not the same length as the # of iterations (%s)' % (resultList2, self.iterations), f2)
+            self.js_print('avm resultlist is not the same length as the # of iterations (%s)' % self.iterations)
+            self.js_print('output from %s: %s' % (testName, f1))
+            return
+        if self.avm2 and (len(resultsDict2[resultsDict2.keys()[0]]) != self.iterations):
+            self.js_print('avm2 resultlist is not the same length as the # of iterations (%s)' % self.iterations)
+            self.js_print('output from %s: %s' % (testName, f2))
+            return
 
-        # calculate best result
-        spdup, result1, result2, memoryhigh, memoryhigh2 = self.calculateSpeedup(resultList, resultList2, largerIsFaster)
+        # calculate best results and store to self.testData
+        self.calculateSpeedup(testName, resultsDict1, resultsDict2)
 
-        if self.memory:
-            if self.avm2:
-                if self.iterations == 1:
-                    self.checkForMetricChange(metric, largerIsFaster)
-                    self.js_print('%-*s %5s %7s %7.1f' %
-                                  (self.testFieldLen, self.truncateTestname(testName),
-                                   formatMemory(memoryhigh),formatMemory(memoryhigh2),
-                                   spdup))
-                else:
-                    mem1_avg = formatMemory(sum(resultList)/float(len(resultList)))
-                    mem2_avg = formatMemory(sum(resultList2)/float(len(resultList2)))
-                    relStdDev1 = rel_std_dev(resultList)
-                    relStdDev2 = rel_std_dev(resultList2)
-                    try:
-                        sig = spdup / (relStdDev1+relStdDev2)
-                    except ZeroDivisionError:
-                        sig = cmp(spdup,0) * (3.0 if abs(spdup) > 5.0 else 2.0 if abs(spdup) > 1.0 else 0.0)
-                    sig_str = self.getSigString(sig, spdup)
-                    bold = '\033[1m' if (abs(sig)>1.0 and self.prettyprint) else ''
-                    endbold = '\033[0;0m' if bold else ''
-                    if self.detail:
-                        self.js_print('%s%-50s [%7s :%7s] %7s ±%4.1f%%   [%7s :%7s] %7s ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
-                                      (bold,testName,formatMemory(min(resultList)),formatMemory(memoryhigh),mem1_avg,
-                                        rel_std_dev(resultList), formatMemory(min(resultList2)),
-                                        formatMemory(memoryhigh2),mem2_avg,rel_std_dev(resultList2),
-                                        spdup, sig, sig_str, metric, largerIsFaster,endbold) )
-                    else:
-                        self.checkForMetricChange(metric, largerIsFaster)
-                        self.js_print('%s%-*s %6s %6s %6s %6s %6s % 3.1f %2s%s' %
-                                      (bold,self.testFieldLen, self.truncateTestname(testName),
-                                       formatMemory(min(resultList)), mem1_avg,
-                                       formatMemory(min(resultList2)), mem2_avg,
-                                       format(spdup,'3.1f') if abs(spdup) < 1000 else int(spdup),
-                                       sig, sig_str, endbold) )
-            else:
-                confidence=0
-                meanRes=memoryhigh
-                if self.iterations>2:
-                    meanRes=mean(resultList)
-                    if meanRes>0:
-                        confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
-                    runResults = ''
-                    for i in range(self.iterations):
-                        runResults += '%8s' % formatMemory(resultList[i])
-                    self.js_print(("%-50s %7s %10.1f%%  %7s "+runResults) % (testName,formatMemory(memoryhigh),confidence, "memory"))
-                else:
-                    self.js_print("%-50s %7s %7s" % (testName,formatMemory(memoryhigh), metric))
-                config = config.replace("-memstats","")
-                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
+        self.printTestResults(testName)
+
+    def printTestResults(self, testName):
+        '''Print the results for a single test'''
+        # Support two output modes:
+        # 1. Sorted by test, each metric gets a seperate line after each testname (default)
+        # 2. Sorted by metric.  Output the results for a single metric (TODO: how do i determine?  command switch?)
+        #    and then when the entire testrun is finished, output results for all other metrics
+
+        testData = self.testData
+
+        # How many metrics are stored for this test?
+        numMetrics = len(testData[testName])
+
+        if numMetrics == 1:
+            metric = testData[testName].keys()[0]
+            # print out metric info if needed
+            self.checkForMetricChange(metric)
+
+        if self.avm2:
+            if self.iterations == 1:
+                if numMetrics == 1:
+                    self.printSingleIterationComparison(testName, testName, metric)
+                else:   # numMetrics > 1
+                    self.js_print(testName)
+                    for metric in testData[testName].keys():
+                        self.printSingleIterationComparison('  %s' % self.metricInfo[metric].get('name',metric), testName, metric)
+            else:   # multiple iterations
+                if numMetrics == 1:
+                    self.printMultiIterationComparison(testName, testName, metric)
+                else: # numMetrics > 1
+                    self.js_print(testName)
+                    for metric in testData[testName].keys():
+                        self.printMultiIterationComparison('  %s' % self.metricInfo[metric].get('name',metric), testName, metric)
+        else: # only one avm tested
+            if self.iterations == 1:
+                if numMetrics == 1:
+                    self.js_print('%-*s %*s' % (self.testFieldLen, self.truncateDescField(testName),
+                                            self.resultWidth, self.formatResult(testData[testName][metric]['best1'], metric=metric)))
+                else:   # numMetrics > 1
+                    self.js_print(testName)
+                    for metric in testData[testName].keys():
+                        self.js_print('  %-*s %*s' % (self.testFieldLen-2, self.metricInfo[metric].get('name',metric),
+                                            self.resultWidth, self.formatResult(testData[testName][metric]['best1'], metric=metric)))
+
+            else:   # multiple iterations
+                if numMetrics == 1:
+                    self.js_print(('%-*s %*s %6s %4.1f%% %s') %
+                        (self.testFieldLen, self.truncateDescField(testName), self.resultWidth,
+                          self.formatResult(testData[testName][metric]['best1'], metric=metric),
+                          self.formatResult(testData[testName][metric]['avg1'], metric=metric),
+                          conf95(self.testData[testName][metric]['results1']),
+                         [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else ''
+                         ))
+                else:   # numMetrics > 1
+                    self.js_print(testName)
+                    for metric in testData[testName].keys():
+                        self.js_print(('  %-*s %*s %6s %4.1f%% %s') %
+                        (self.testFieldLen-2, self.metricInfo[metric].get('name',metric),
+                         self.resultWidth,
+                         self.formatResult(testData[testName][metric]['best1'], metric=metric),
+                         self.formatResult(testData[testName][metric]['avg1'], metric=metric),
+                         conf95(self.testData[testName][metric]['results1']),
+                         [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else ''
+                         ))
+            #else:
+            #        self.js_print("%-*s %5s %s" % (self.testFieldLen, truncateTestname(testName),
+            #                                       'no test result - test output: ',f1))
+            #        self.finalexitcode=1
+
+    def printSingleIterationComparison(self, descStr, testName, metric):
+        '''Print output for single iteration when comparing 2 vms'''
+        spdup = self.testData[testName][metric]['spdup']
+        avg_spdup = self.testData[testName][metric]['avg_spdup']
+        self.js_print('%-*s %5s %7s %6.1f %6.1f' % (self.testFieldLen, self.truncateDescField(descStr),
+                                                      self.formatResult(self.testData[testName][metric]['best1'], metric=metric),
+                                                      self.formatResult(self.testData[testName][metric]['best2'], metric=metric),
+                                                      spdup, avg_spdup))
+
+    def printMultiIterationComparison(self, descStr, testName, metric):
+        '''Print output for multiple iterations when comparing 2 vms'''
+        relStdDev1 = rel_std_dev(self.testData[testName][metric]['results1'])
+        relStdDev2 = rel_std_dev(self.testData[testName][metric]['results2'])
+        spdup = self.testData[testName][metric]['spdup']
+        avg_spdup = self.testData[testName][metric]['avg_spdup']
+
+        try:
+            sig = spdup / (relStdDev1+relStdDev2)
+        except ZeroDivisionError:
+            # determine sig by %diff (spdup) only
+            sig = cmp(spdup,0) * (3.0 if abs(spdup) > 5.0 else 2.0 if abs(spdup) > 1.0 else 0.0)
+        sig_str = self.getSigString(sig, spdup)
+        if self.detail:
+            self.js_print('%-*s [%7s :%7s] %7s ±%4.1f%%   [%7s :%7s] %7s ±%4.1f%% %6.1f%% %6.1f %2s %s %s' %
+                          (self.testFieldLen, self.truncateDescField(descStr),
+                           self.formatResult(min(self.testData[testName][metric]['results1']), metric=metric),
+                           self.formatResult(max(self.testData[testName][metric]['results1']), metric=metric),
+                           self.formatResult(self.testData[testName][metric]['avg1'], metric=metric),
+                           relStdDev1,
+                           self.formatResult(min(self.testData[testName][metric]['results2']), metric=metric),
+                           self.formatResult(max(self.testData[testName][metric]['results2']), metric=metric),
+                           self.formatResult(self.testData[testName][metric]['avg2'], metric=metric),
+                           relStdDev2,
+                           spdup, avg_spdup,sig_str,
+                           [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else '',
+                           [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results2']] if self.raw else ''
+                           ))
         else:
-            if self.avm2:
-                if self.iterations == 1:
-                    self.checkForMetricChange(metric, largerIsFaster)
-                    self.js_print('%-*s %5s %7s %6.1f' % (self.testFieldLen, self.truncateTestname(testName),result1,result2,spdup))
-                else:
-                    try:
-                        rl1_avg=sum(resultList)/float(len(resultList))
-                        rl2_avg=sum(resultList2)/float(len(resultList2))
-                        min1 = float(min(resultList))
-                        min2 = float(min(resultList2))
-                        max1 = float(max(resultList))
-                        max2 = float(max(resultList2))
-                        relStdDev1 = rel_std_dev(resultList)
-                        relStdDev2 = rel_std_dev(resultList2)
-                        try:
-                            if largerIsFaster:
-                                spdup = 100.0*(max2-max1)/max1
-                                best1 = max1
-                                best2 = min2
-                            else:
-                                spdup = 100.0*(min1-min2)/min1
-                                best1 = min1
-                                best2 = min2
-                        except ZeroDivisionError:
-                            spdup = 9999
-                        try:
-                            sig = spdup / (relStdDev1+relStdDev2)
-                        except ZeroDivisionError:
-                            # determine sig by %diff (spdup) only
-                            sig = cmp(spdup,0) * (3.0 if abs(spdup) > 5.0 else 2.0 if abs(spdup) > 1.0 else 0.0)
-                        sig_str = self.getSigString(sig, spdup)
-                        # only bold if abs > 1 and averages are > 3 ms apart
-                        bold = '\033[1m' if (abs(sig)>1.0 and abs(rl1_avg-rl2_avg) > 3 and self.prettyprint) else ''
-                        endbold = '\033[0;0m' if bold else ''
-                        if self.detail:
-                            self.js_print('%s%-*s [%7s :%7s] %7.1f ±%4.1f%%   [%7s :%7s] %7.1f ±%4.1f%% %6.1f%% %6.1f %2s %7s %s%s' %
-                                          (bold, self.testFieldLen, self.truncateTestname(testName), min1, max1, rl1_avg, relStdDev1,
-                                           min2, max2, rl2_avg, relStdDev2,
-                                           spdup, sig,sig_str, metric, largerIsFaster,endbold))
-                        else:
-                            self.checkForMetricChange(metric, largerIsFaster)
-                            self.js_print('%s%-*s %6s %6s %6s %6s %6s % 3.1f %2s%s' %
-                                          (bold,
-                                           self.testFieldLen,
-                                           self.truncateTestname(testName),
-                                           int(best1) if best1 == int(best1) else best1,
-                                           format(rl1_avg, '6.1f') if rl1_avg < 10000 else int(rl1_avg) ,
-                                           int(best2) if best2 == int(best2) else best2,
-                                           format(rl2_avg, '6.1f') if rl2_avg < 10000 else int(rl2_avg),
-                                           format(spdup,'3.1f') if abs(spdup) < 1000 else int(spdup),
-                                           sig,
-                                           sig_str, endbold))
-                    except:
-                        import traceback
-                        traceback.print_exc()
-                if self.perfm and perfm1Dict['verify']: # only calc if data present
-                    self.perfmOutput(perfm1Dict, perfm2Dict)
-            else: # only one avm tested
-                if result1 < 9999999:   # TODO: would be nice to not rely on arbitrary number to determine if results are valid
-                    meanRes = mean(resultList)
-                    if (self.iterations > 2):
-                        confidence = conf95(resultList)
-                        if self.perfm and perfm1Dict['verify']:  #send vprof results to db
-                                self.perfmLog(config, perfm1Dict, perfm2Dict)
-                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmrevision, self.vmname))
-                        runResults = ''
-                        if self.csv:
-                            for i in range(self.iterations):
-                                runResults += '%8s' % resultList[i]
-                        else:
-                            runResults = str(resultList)
-                        self.checkForMetricChange(metric, largerIsFaster)
-                        self.js_print(("%-*s %5s %4.1f%% "+runResults) % (self.testFieldLen, self.truncateTestname(ast),result1,confidence))
-                    else: #one iteration
-                        self.checkForMetricChange(metric, largerIsFaster)
-                        self.js_print("%-*s %7s" % (self.testFieldLen, self.truncateTestname(testName),result1))
-                else:
-                        self.js_print("%-*s %5s %s" % (self.testFieldLen, truncateTestname(testName),'no test result - test output: ',f1))
-                        self.finalexitcode=1
+            self.js_print('%-*s %*s %*s %*s %*s %*s %*s %2s %s %s' %
+                          (self.testFieldLen, self.truncateDescField(descStr),
+                           self.resultWidth, self.formatResult(self.testData[testName][metric]['best1'], metric=metric),
+                           self.resultWidth, self.formatResult(self.testData[testName][metric]['avg1'], metric=metric),
+                           self.resultWidth, self.formatResult(self.testData[testName][metric]['best2'], metric=metric),
+                           self.resultWidth, self.formatResult(self.testData[testName][metric]['avg2'], metric=metric),
+                           self.resultWidth, self.formatResult(spdup, 4, 2, 'percent'),
+                           self.resultWidth, self.formatResult(avg_spdup, 4, 2, 'percent'),
+                           sig_str,
+                           [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else '',
+                           [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results2']] if self.raw else ''
+                           ))
+
+    def convertAvmOptionsDictToList(self):
+        '''Convert self.avmOptions to lists that can be used by csvwriter'''
+        avmOptionsHeader = []
+        avmOptions = []
+        avm2Options = []
+        
+        # get all the keys from both option dictionaries
+        # uniquify the list so there are no duplicates using set
+        keys = sorted(set(self.avmOptionsDict.keys() + self.avm2OptionsDict.keys()))
+        
+        for key in keys:
+            avmOptionsHeader.append(key)
+            avmOptions.append(self.avmOptionsDict.get(key, False))
+            avm2Options.append(self.avm2OptionsDict.get(key, False))
+                        
+        return avmOptionsHeader, avmOptions, avm2Options
+            
+    
+    def outputCsvToFile(self):
+        # testData structure:
+        # { testName : { metric : { results1/2 : [], best1/2 : num, avg1/2 : num, spdup : num }}}
+        import csv
+        try:
+            csvwriter = csv.writer(open(self.csvfile, 'a' if self.csvAppend else 'w'))
+        except IOError:
+            if self.csvfile != 'output.csv':
+                print 'Error attempting to open %s.  Saving to ./output.csv instead'
+                self.csvfile = 'output.csv'
+                self.outputCsvToFile()
+            else:
+                print 'Error attempting to write to output.csv file - aborting.'
+            return
+        
+        print 'Writing out csv data to %s' % self.csvfile
+        
+        # TODO: generation of the options dict needs to be moved to runtestBase
+        # more work is needed to get that working there
+        # This here is proof of concept that needs to be fleshed out
+        self.avmOptionsDict = {
+            'avm' : self.avmname or self.avmDefaultName,
+        }
+        
+        self.avm2OptionsDict = {
+            'avm' : self.avm2name or self.avm2DefaultName,
+        }
+        
+        avmOptionsHeader, avmOptions, avm2Options = self.convertAvmOptionsDictToList()
+        
+        # write the header
+        csvwriter.writerow(avmOptionsHeader + ['testname', 'metric', 'metricunit', 'iteration', 'value'])
+        
+        # Write out all the data contained in self.testData to the csv file
+        for testname, testDict in self.testData.iteritems():
+            for metric, metricDict in testDict.iteritems():
+                for iteration, value in enumerate(metricDict['results1']):
+                    csvwriter.writerow(avmOptions + \
+                        [testname, metric,
+                         self.metricInfo[metric].get('unit', ''),
+                         iteration+1, # use iteration+1 so that iteration values are not zero based
+                         value])
+                if metricDict.get('results2'):
+                    for iteration, value in enumerate(metricDict['results2']):
+                        csvwriter.writerow(avm2Options + \
+                            [testname, metric,
+                             self.metricInfo[metric].get('unit', ''),
+                             iteration+1, # use iteration+1 so that iteration values are not zero based
+                             value])
+
+                    
+    def outputTestIndexFile(self):
+        '''write out a testIndex file'''
+        output =  [self.testIndexHeaderString]
+
+        # update testIndexDict with newest results
+        for testname, testDict in self.testData.iteritems():
+            for metric, metricDict in testDict.iteritems():
+                self.testIndexDict.setdefault(testname, {}).update({metric:metricDict['best1']})
+                
+        output.append('testIndexDict = ')
+        
+        print('Saving values to index file: %s' % self.saveIndexFile)
+        try:
+            f = open(self.saveIndexFile, 'w')
+        except IOError:
+            print('Error attempting to open %s for write.' % self.saveIndexFile)
+            print('Aborting saving of index file.')
+            return
+        
+        f.writelines(output)
+
+        import pprint
+        pprint.pprint(self.testIndexDict, f)
 
 
 
-runtest = PerformanceRuntest()
-exit(runtest.finalexitcode)
+try:
+    runtest = PerformanceRuntest()
+    exit(runtest.finalexitcode)
+except SystemExit:
+    raise
+except TypeError:
+    # This is the error thrown when ctrl-c'ing out of a testrun
+    print '\nKeyboard Interupt'
+except:
+    print 'Runtest Abnormal Exit'
+    raise
