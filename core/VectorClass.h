@@ -345,33 +345,23 @@ namespace avmplus
         }
 #endif
 
-    protected:
+    private:
 
         enum { kGrowthIncr = 4096 };
 
-        void atomToValue(Atom atom, int16_t& value)
-        {
-            value = (int16_t) AvmCore::integer(atom);
-        }
-        void atomToValue(Atom atom, uint16_t& value)
-        {
-            value = (uint16_t) AvmCore::integer_u(atom);
-        }
         void atomToValue(Atom atom, int32_t& value)
         {
             value = AvmCore::integer(atom);
         }
+#ifdef VMCFG_64BIT
         void atomToValue(Atom atom, int64_t& value)
         {
             value = AvmCore::integer(int(atom));
         }
+#endif
         void atomToValue(Atom atom, uint32_t& value)
         {
             value = AvmCore::toUInt32(atom);
-        }
-        void atomToValue(Atom atom, float& value)
-        {
-            value = (float) AvmCore::number(atom);
         }
         void atomToValue(Atom atom, double& value)
         {
@@ -382,14 +372,6 @@ namespace avmplus
             value = AvmCore::atomToScriptObject(atom);
         }
 
-        Atom valueToAtom(int16_t value) const
-        {
-            return core()->intToAtom(value);
-        }
-        Atom valueToAtom(uint16_t value) const
-        {
-            return core()->uintToAtom(value);
-        }
         Atom valueToAtom(int32_t value) const
         {
             return core()->intToAtom(value);
@@ -398,21 +380,15 @@ namespace avmplus
         {
             return core()->uintToAtom(value);
         }
+#ifdef VMCFG_64BIT
         Atom valueToAtom(int64_t value) const
         {
             return core()->intToAtom(int(value));
         }
-        Atom valueToAtom(float value) const
-        {
-            return core()->doubleToAtom((double)value);
-        }
+#endif
         Atom valueToAtom(double value) const
         {
             return core()->doubleToAtom(value);
-        }
-        Atom valueToAtom(ScriptObject* value) const
-        {
-            return value ? value->atom() : nullObjectAtom;
         }
 
         TypedVectorObject<T>* isVector(Atom instance)
@@ -622,12 +598,14 @@ namespace avmplus
          */
         ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
+#if 0 // Potentially useful optimization, currently unused
         /**
          *  Apply type arguments and call the specialized class' newVector().
          *  @pre The type must be an Object type.
          *
          */
         ObjectVectorObject* newVector(ClassClosure* type, uint32_t length = 0);
+#endif
 
         virtual Atom applyTypeArgs(int argc, Atom* argv);
 

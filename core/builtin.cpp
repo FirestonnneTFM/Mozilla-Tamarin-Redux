@@ -5551,105 +5551,174 @@ private:
 public:
     static const uint16_t s_slotsOffsetObjectClass = offsetof(ObjectClass, m_slots_ObjectClass);
     static const uint16_t s_slotsOffsetScriptObject = 0;
+    #ifdef DEBUG
     static void doObjectClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetClassClass = offsetof(ClassClass, m_slots_ClassClass);
     static const uint16_t s_slotsOffsetClassClosure = 0;
+    #ifdef DEBUG
     static void doClassClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetFunctionClass = offsetof(FunctionClass, m_slots_FunctionClass);
     static const uint16_t s_slotsOffsetFunctionObject = 0;
+    #ifdef DEBUG
     static void doFunctionClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetNamespaceClass = offsetof(NamespaceClass, m_slots_NamespaceClass);
     static const uint16_t s_slotsOffsetNamespace = 0;
+    #ifdef DEBUG
     static void doNamespaceClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetBooleanClass = offsetof(BooleanClass, m_slots_BooleanClass);
     static const uint16_t s_slotsOffsetbool = 0;
+    #ifdef DEBUG
     static void doBooleanClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetNumberClass = offsetof(NumberClass, m_slots_NumberClass);
     static const uint16_t s_slotsOffsetdouble = 0;
+    #ifdef DEBUG
     static void doNumberClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetIntClass = offsetof(IntClass, m_slots_IntClass);
     static const uint16_t s_slotsOffsetint32_t = 0;
+    #ifdef DEBUG
     static void doIntClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetUIntClass = offsetof(UIntClass, m_slots_UIntClass);
     static const uint16_t s_slotsOffsetuint32_t = 0;
+    #ifdef DEBUG
     static void doUIntClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetStringClass = offsetof(StringClass, m_slots_StringClass);
     static const uint16_t s_slotsOffsetString = 0;
+    #ifdef DEBUG
     static void doStringClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetArrayClass = offsetof(ArrayClass, m_slots_ArrayClass);
     static const uint16_t s_slotsOffsetArrayObject = 0;
+    #ifdef DEBUG
     static void doArrayClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetVectorClass = 0;
     static const uint16_t s_slotsOffsetObjectVectorObject = 0;
+    #ifdef DEBUG
     static void doVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetObjectVectorClass = 0;
+    #ifdef DEBUG
     static void doObjectVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetIntVectorClass = 0;
     static const uint16_t s_slotsOffsetIntVectorObject = 0;
+    #ifdef DEBUG
     static void doIntVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetUIntVectorClass = 0;
     static const uint16_t s_slotsOffsetUIntVectorObject = 0;
+    #ifdef DEBUG
     static void doUIntVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetDoubleVectorClass = 0;
     static const uint16_t s_slotsOffsetDoubleVectorObject = 0;
+    #ifdef DEBUG
     static void doDoubleVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetMethodClosureClass = 0;
     static const uint16_t s_slotsOffsetMethodClosure = 0;
+    #ifdef DEBUG
     static void doMethodClosureClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetMathClass = offsetof(MathClass, m_slots_MathClass);
+    #ifdef DEBUG
     static void doMathClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetErrorClass = offsetof(ErrorClass, m_slots_ErrorClass);
     static const uint16_t s_slotsOffsetErrorObject = offsetof(ErrorObject, m_slots_ErrorObject);
+    #ifdef DEBUG
     static void doErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetDefinitionErrorClass = offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass);
     static const uint16_t s_slotsOffsetDefinitionErrorObject = 0;
+    #ifdef DEBUG
     static void doDefinitionErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetEvalErrorClass = offsetof(EvalErrorClass, m_slots_EvalErrorClass);
     static const uint16_t s_slotsOffsetEvalErrorObject = 0;
+    #ifdef DEBUG
     static void doEvalErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetRangeErrorClass = offsetof(RangeErrorClass, m_slots_RangeErrorClass);
     static const uint16_t s_slotsOffsetRangeErrorObject = 0;
+    #ifdef DEBUG
     static void doRangeErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetReferenceErrorClass = offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass);
     static const uint16_t s_slotsOffsetReferenceErrorObject = 0;
+    #ifdef DEBUG
     static void doReferenceErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetSecurityErrorClass = offsetof(SecurityErrorClass, m_slots_SecurityErrorClass);
     static const uint16_t s_slotsOffsetSecurityErrorObject = 0;
+    #ifdef DEBUG
     static void doSecurityErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetSyntaxErrorClass = offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass);
     static const uint16_t s_slotsOffsetSyntaxErrorObject = 0;
+    #ifdef DEBUG
     static void doSyntaxErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetTypeErrorClass = offsetof(TypeErrorClass, m_slots_TypeErrorClass);
     static const uint16_t s_slotsOffsetTypeErrorObject = 0;
+    #ifdef DEBUG
     static void doTypeErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetURIErrorClass = offsetof(URIErrorClass, m_slots_URIErrorClass);
     static const uint16_t s_slotsOffsetURIErrorObject = 0;
+    #ifdef DEBUG
     static void doURIErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetVerifyErrorClass = offsetof(VerifyErrorClass, m_slots_VerifyErrorClass);
     static const uint16_t s_slotsOffsetVerifyErrorObject = 0;
+    #ifdef DEBUG
     static void doVerifyErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetUninitializedErrorClass = offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass);
     static const uint16_t s_slotsOffsetUninitializedErrorObject = 0;
+    #ifdef DEBUG
     static void doUninitializedErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetArgumentErrorClass = offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass);
     static const uint16_t s_slotsOffsetArgumentErrorObject = 0;
+    #ifdef DEBUG
     static void doArgumentErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetDateClass = offsetof(DateClass, m_slots_DateClass);
     static const uint16_t s_slotsOffsetDateObject = 0;
+    #ifdef DEBUG
     static void doDateClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetRegExpClass = offsetof(RegExpClass, m_slots_RegExpClass);
     static const uint16_t s_slotsOffsetRegExpObject = 0;
+    #ifdef DEBUG
     static void doRegExpClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetXMLClass = offsetof(XMLClass, m_slots_XMLClass);
     static const uint16_t s_slotsOffsetXMLObject = 0;
+    #ifdef DEBUG
     static void doXMLClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetXMLListClass = offsetof(XMLListClass, m_slots_XMLListClass);
     static const uint16_t s_slotsOffsetXMLListObject = 0;
+    #ifdef DEBUG
     static void doXMLListClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
     static const uint16_t s_slotsOffsetQNameClass = offsetof(QNameClass, m_slots_QNameClass);
     static const uint16_t s_slotsOffsetQNameObject = 0;
+    #ifdef DEBUG
     static void doQNameClassAsserts(Traits* cTraits, Traits* iTraits);
+    #endif
 };
+#ifdef DEBUG
 REALLY_INLINE void SlotOffsetsAndAsserts::doObjectClassAsserts(Traits* cTraits, Traits* iTraits)
 {
     (void)cTraits; (void)iTraits;
@@ -5960,6 +6029,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* cTraits, T
     AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(QNameClass, m_slots_QNameClass) + offsetof(QNameClassSlots, m_length)));
     // MMGC_STATIC_ASSERT(sizeof(QNameObject::EmptySlotsStruct_QNameObject) >= 0);
 }
+#endif // DEBUG
 
 AVMTHUNK_NATIVE_CLASS_GLUE(ObjectClass, ObjectClass, SlotOffsetsAndAsserts::doObjectClassAsserts)
 AVMTHUNK_NATIVE_CLASS_GLUE(ClassClass, ClassClass, SlotOffsetsAndAsserts::doClassClassAsserts)

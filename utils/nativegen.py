@@ -1663,10 +1663,13 @@ class AbcThunkGen:
                             , u'slotsInstance' : self.slotsInstanceNameForTraits(c.itraits, False) } )
                     else:
                         out_c.println(u'static const uint16_t s_slotsOffset%s = 0;' % self.__baseNINameForNIName(c.ni.instance_name))
+                out_c.println(u'#ifdef DEBUG')
                 out_c.println(u'static void do%sAsserts(Traits* cTraits, Traits* iTraits);' % self.__baseNINameForNIName(c.ni.class_name))
+                out_c.println(u'#endif');
 
         out_c.indent -= 1
         out_c.println(u'};')
+        out_c.println(u'#ifdef DEBUG');
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]
             if (c.ni.class_name is not None):
@@ -1688,6 +1691,7 @@ class AbcThunkGen:
 
                 out_c.indent -= 1
                 out_c.println(u'}')
+        out_c.println(u'#endif // DEBUG')
 
     def printStructAssertsForTraits(self, namesDict, out_c, t, isClassTraits, traitsVarName):
         if (len(t.slots) == 0):
