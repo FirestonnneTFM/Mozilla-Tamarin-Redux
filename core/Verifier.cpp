@@ -255,7 +255,7 @@ namespace avmplus
     };
 
 #ifdef VMCFG_RESTARG_OPTIMIZATION
-    
+
     // Most interesting things happen in init()
     RestArgAnalyzer::RestArgAnalyzer()
         : NullWriter(NULL)

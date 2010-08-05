@@ -205,7 +205,7 @@ prototype.pop = function() {
 prototype.push = function (...args) {
     // Type check - Vector methods are not generic.
     castToThisType(this);
-  
+
     // FP 10.1 throws this error specifically, the setting of the element in the
     // loop below will generate error 1125 instead.
     if (this.fixed)

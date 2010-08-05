@@ -50,7 +50,7 @@ namespace avmplus
 
         void * regex; // The compiled regular expression
     };
-    
+
     /**
      * The RegExpObject class is the C++ implementation of instances
      * of the "RegExp" class, as defined in the ECMAScript standard.

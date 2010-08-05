@@ -6464,7 +6464,7 @@ namespace nanojit
         "?", "?", "?", "?", "?", "?", "?", "?", "?", "?",   // 11..20 (unused)
         "?", "?", "?", "?", "?", "?", "?", "?", "?", "?",   // 21..30 (unused)
         "?"                                                 //     31 (unused)
-    };  
+    };
     #endif
 
     void* Allocator::allocChunk(size_t size) {
@@ -6501,13 +6501,13 @@ namespace nanojit
     {
         LIns* vars = checkAccSetIns1;
         LIns* tags = checkAccSetIns2;
-        
+
         bool isTags = base == tags;
         bool isVars = base == vars;
         bool isUnknown = !isTags && !isVars;
 
         bool ok;
-        
+
         NanoAssert(accSet != ACCSET_NONE);
         switch (accSet) {
         case avmplus::ACCSET_VARS:   ok = isVars;        break;

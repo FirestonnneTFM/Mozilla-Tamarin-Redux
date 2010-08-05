@@ -64,7 +64,7 @@ namespace avmplus
 
     private:
         enum { kInitialCapacity = 256 };
-        
+
         MMgc::GC* m_gc;
         char* m_buffer;
         int m_length;
