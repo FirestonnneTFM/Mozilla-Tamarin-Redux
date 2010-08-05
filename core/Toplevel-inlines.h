@@ -165,7 +165,7 @@ REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main)
 {
     AvmAssert(_mainEntryPoint == NULL);
     _mainEntryPoint = main;
-    
+
 }
 
 REALLY_INLINE ScopeChain* Toplevel::toplevel_scope()

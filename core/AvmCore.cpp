@@ -67,14 +67,14 @@ namespace avmplus
         , m_disabled(false)
     {
     }
-    
+
     RegexCacheEntry& RegexCache::findCachedRegex(bool& found, String* source, String* options)
     {
         if (m_disabled) {
             found = false;
             return m_entries[0];
         }
-        
+
         size_t smallest = 0;
 
         for ( size_t i=0 ; i < ARRAY_SIZE(m_entries) ; i++ ) {
@@ -92,7 +92,7 @@ namespace avmplus
         // A miss.  Evict an entry and account for its utility.
 
         RegexCacheEntry& it = m_entries[smallest];
-        
+
         // If a cache entry was used just once then it was wasted work;
         // if wasted work dominates then disable the cache.
 
@@ -104,7 +104,7 @@ namespace avmplus
             //printf("DISABLED!\n");
             m_disabled = true;
         }
-        
+
         // New entry
 
         it.clear();
@@ -113,19 +113,19 @@ namespace avmplus
         found = false;
         return it;
     }
-    
+
     bool RegexCache::testCachedRegex(String* source, String* options)
     {
         if (m_disabled)
             return false;
-        
+
         for ( size_t i=0 ; i < ARRAY_SIZE(m_entries) ; i++ )
             if (m_entries[i].match(source, options))
                 return true;
 
         return false;
     }
-    
+
     void RegexCache::clear()
     {
         for ( size_t i=0 ; i < ARRAY_SIZE(m_entries) ; i++ )
@@ -135,7 +135,7 @@ namespace avmplus
         m_useful = 0;
         m_disabled = false;
     }
-    
+
     void AvmCore::setCacheSizes(const CacheSizes& cs)
     {
         #ifdef AVMPLUS_VERBOSE
@@ -606,7 +606,7 @@ namespace avmplus
     ScriptEnv* AvmCore::initAllScripts(Toplevel* toplevel, AbcEnv* abcEnv)
     {
         PoolObject* pool = abcEnv->pool();
-        
+
         // some code relies on the final script being initialized first, so we
         // must continue that behavior
         uint32_t const last = pool->scriptCount()-1;
@@ -644,7 +644,7 @@ namespace avmplus
         END_CATCH
         END_TRY
         #endif
-        
+
         return result;
     }
 
@@ -706,7 +706,7 @@ namespace avmplus
 #else
         AvmAssert(toplevel->objectClass != NULL);
 #endif
-        return callScriptEnvEntryPoint(main); 
+        return callScriptEnvEntryPoint(main);
     }
 
     void AvmCore::exportDefs(Traits* scriptTraits, ScriptEnv* scriptEnv)
@@ -3043,7 +3043,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
         // Clear out the regex compile cache, just to prevent big strings or regexes from
         // hanging around.
-        
+
         m_regexCache.clear();
 
 #ifdef DEBUGGER
@@ -4506,9 +4506,9 @@ return the result of the comparison ToPrimitive(x) == y.
     void AvmCore::releasePCREContext()
     {
     }
-    
+
 #else
-    
+
     static GCThreadLocal<Toplevel*> PCREContext;
 
     /* static */

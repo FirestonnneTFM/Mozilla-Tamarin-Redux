@@ -50,8 +50,8 @@ package
         AS3 native static function fromCharCode(...charcodes):String;
 
         // Bugzilla 573456: Optimize for the one-argument common case,
-        // and for a small number of additional arguments.  The standard 
-        // rest arguments optimization ensures that the rest array is 
+        // and for a small number of additional arguments.  The standard
+        // rest arguments optimization ensures that the rest array is
         // not allocated.
 
         String.fromCharCode = function(...charcodes)

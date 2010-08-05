@@ -887,7 +887,7 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     Atom restargHelper(Toplevel* toplevel, const Multiname* m, Atom val, ArrayObject** restLocal, uint32_t argc, Atom* restArea)
     {
         uint32_t index;
-        
+
         if (*restLocal != 0)    // Array has been created lazily
             goto exception;
 
@@ -901,7 +901,7 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
             double d = AvmCore::atomToDouble(val);
             if (d >= 0 && d <= 0xFFFFFFFFU && MathUtils::floor(d) == d)
                 index = (uint32_t)d;
-            else 
+            else
                 goto exception;
         }
         else

@@ -69,7 +69,7 @@ namespace avmplus
         (pcre_free)((void*)(pcre*)regex);
         regex = NULL;
     }
-    
+
     // This variant is only used for creating the prototype - we create an empty regex.
 
     RegExpObject::RegExpObject(RegExpClass *regExpClass, ScriptObject *objectPrototype)
@@ -114,20 +114,20 @@ namespace avmplus
         {
             // Precompilation: check for named groups, and split out the options if no options were
             // passed in, as for new RegExp( regex.toString() ).
-            
+
             int32_t numSlashSeen = 0;
             int32_t pos = 0;
             int32_t length = pattern->length();
             int32_t optionpos = 0;
 
             // Scan the pattern, look for options.
-            
-            while (pos < length) 
+
+            while (pos < length)
             {
                 wchar c = pattern->charAt(pos);
                 if (c == 0)
                     break;
-                if (c == '(' && 
+                if (c == '(' &&
                     pos+3 < length &&
                     pattern->charAt(pos+1) == '?' &&
                     pattern->charAt(pos+2) == 'P' &&
@@ -196,9 +196,9 @@ namespace avmplus
     void RegExpObject::completeInitialization(String* options)
     {
         AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
-        
+
         GC::SetFinalize(this);
-        
+
         bool found = false;
         RegexCacheEntry& r = core()->m_regexCache.findCachedRegex(found, m_source, options);
 
@@ -209,16 +209,16 @@ namespace avmplus
             m_hasNamedGroups = r.hasNamedGroups;
             m_pcreInst = r.regex;
         }
-        else 
+        else
         {
             PCRE_STATE(toplevel());
-            
+
             int errptr;
             const char *error;
             StUTF8String patternz(m_source);
             void* pcreInst = (void*)pcre_compile(patternz.c_str(), m_optionFlags, &error, &errptr, NULL);
             CompiledRegExp* regex = new (gc()) CompiledRegExp(pcreInst);
-            
+
             if (!core()->m_regexCache.disabled())
             {
                 r.pattern = m_source;
@@ -232,7 +232,7 @@ namespace avmplus
             m_pcreInst = regex;
         }
     }
-    
+
     // this = argv[0]
     // arg1 = argv[1]
     // argN = argv[argc]

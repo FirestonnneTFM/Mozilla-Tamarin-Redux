@@ -143,7 +143,7 @@ const int kBufferPadding = 16;
     // Regular expression compilation cache.
     //
     // The cache is used by AvmCore and is a cache for compiled regular expressions.
-    // The cache significantly reduces the cost of using literal regular expressions 
+    // The cache significantly reduces the cost of using literal regular expressions
     // in loops (rather than manually hoisting them out of the loop), and it does so
     // at low complexity.
     //
@@ -154,7 +154,7 @@ const int kBufferPadding = 16;
     class RegexCacheEntry
     {
         friend class RegexCache;
-        
+
     private:
         RegexCacheEntry()
             : timestamp(0)
@@ -179,7 +179,7 @@ const int kBufferPadding = 16;
         {
             return pattern == this->pattern && options == this->options;
         }
-        
+
         // Since RegexCacheEntry is embedded in RegexCache which is embedded in AvmCore
         // which is a GCRoot, we only need DRC here not DRCWB.
 
@@ -192,17 +192,17 @@ const int kBufferPadding = 16;
         bool                 global;
         bool                 hasNamedGroups;
     };
-    
+
     // Cache replacement is LRU based on a simple timestamping mechanism.  There's also
     // a mechanism to disable the cache if the number of entries that are used just once
     // significantly outweigh the uses of the entries that are used more than once,
     // that mechanism cuts the overhead of cache maintenance for programs that don't
     // benefit from the cache.
-    
+
     class RegexCache
     {
         friend class AvmCore;
-        
+
     public:
         /**
          * Search for a match in the regex cache, set found to 'true' if there was
@@ -210,7 +210,7 @@ const int kBufferPadding = 16;
          * return a structure that can be updated.
          */
         RegexCacheEntry& findCachedRegex(bool& found, String* source, String* options);
-        
+
         /**
          * Search for a match in the regex cache, return 'true' if it's there or
          * 'false' if not.
@@ -247,7 +247,7 @@ const int kBufferPadding = 16;
         uint64_t        m_useful;               // Utility of useful cache entries (sum of usage counts > 1)
         bool            m_disabled;             // true iff the cache has been (temporarily) disabled
     };
-    
+
     /**
      * The main class of the AVM+ virtual machine.  This is the
      * main entry point to the VM for running ActionScript code.
@@ -382,7 +382,7 @@ const int kBufferPadding = 16;
 
     public:
         RegexCache m_regexCache;
-        
+
     public:
         /**
          * Redirects the standard output of the VM to the specified
@@ -462,7 +462,7 @@ const int kBufferPadding = 16;
         /**
          * Calls destroy on PCREContext to release the thread local variable key
          * back to the system. This is only used on platforms (e.g. Android) that do not
-         * call the destructor of the static variable when the library is unloaded 
+         * call the destructor of the static variable when the library is unloaded
          * (on Android this is an OS bug in Android 2.2, and probably earlier).
          */
         static void releasePCREContext();
