@@ -98,6 +98,7 @@ namespace avmshell
 {
     class ByteArray;
     class Shell;
+    class ShellCodeContext;
     class ShellCore;
     class ShellCoreImpl;
     class ShellSettings;

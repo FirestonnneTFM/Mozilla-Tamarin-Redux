@@ -986,6 +986,22 @@ namespace avmshell
                     settings.api = VMPI_atoi(argv[i+1]);
                     i++;
                 }
+                else if (VMPI_strcmp(arg, "-bugcompat") == 0 && i+1 < argc) {
+                    int j;
+                    for (j = 0; j < BugCompatibility::VersionCount; ++j)
+                    {
+                        if (VMPI_strcmp(argv[i+1], BugCompatibility::kNames[j]) == 0)
+                        {
+                            settings.bugCompatibilityVersion = (BugCompatibility::Version)j;
+                            i++;
+                            break;
+                        }
+                    }
+                    if (j == BugCompatibility::VersionCount) {
+                        AvmLog("Unrecognized -bugcompat version %s\n", argv[i+1]);
+                        usage();
+                    }
+                }
                 else {
                     // Unrecognized command line option
                     AvmLog("Unrecognized option %s\n", arg);
@@ -1163,6 +1179,14 @@ namespace avmshell
         AvmLog("                        workers than threads, and at least two threads.\n");
         AvmLog("                        If R > 0 is provided then it is the number of times the list of files is repeated.\n");
 #endif
+        AvmLog("          [-bugcompat version]\n");
+        AvmLog("                        Run with a given bug-compatibility version in use by default.\n");
+        AvmLog("                        (This can be overridden on a per-ABC basis by embedded metadata.)\n");
+        AvmLog("                        Legal versions include:\n");
+        for (int j = 0; j < BugCompatibility::VersionCount; ++j)
+        {
+        AvmLog("                            %s\n",BugCompatibility::kNames[j]);
+        }
         AvmLog("          [-log]\n");
         AvmLog("          [-api N] execute ABCs as version N (see api-versions.h)\n");
         AvmLog("          [-jargs ... ;] args passed to Java runtime\n");

@@ -44,14 +44,27 @@ namespace avmplus
 {
     // CodeContext is used to track which security context we are in.
     // When an AS3 method is called, the AS3 method will ensure that core->codeContext() will return its context.
+    // Note that CodeContext should not be instantiated directly (except in certain situations
+    // by AvmCore); client code should create a concrete subclass.
     class CodeContext : public MMgc::GCObject
     {
+        friend class AvmCore;
+
+    protected:   
+        explicit CodeContext(DomainEnv* env, const BugCompatibility* bugCompatibility) 
+            : m_domainEnv(env) 
+            , m_bugCompatibility(bugCompatibility)
+        { 
+            AvmAssert(env != NULL); 
+        }
+    
     public:
-        explicit CodeContext(DomainEnv* env) : m_domainEnv(env) { AvmAssert(env != NULL); }
         REALLY_INLINE DomainEnv* domainEnv() const { return m_domainEnv; }
+        REALLY_INLINE const BugCompatibility* bugCompatibility() const { return m_bugCompatibility; }
 
     private:
-        DWB(DomainEnv*) m_domainEnv;
+        DWB(DomainEnv*)                 m_domainEnv;
+        DWB(const BugCompatibility*)    m_bugCompatibility;
     };
 
     class EnterCodeContext
@@ -84,6 +97,8 @@ namespace avmplus
         AvmCore* m_core;
         MethodFrame m_frame;
     };
+
+
 }
 
 #endif /* __avmplus_CodeContext__ */

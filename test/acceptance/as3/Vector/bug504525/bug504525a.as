@@ -1,5 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,46 +35,35 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmshell_DomainClass__
-#define __avmshell_DomainClass__
+package {
+    import avmplus.System
 
+    var SECTION = "Vector";
+    var VERSION = "as3";
+    startTest();
+    var TITLE   = "bug 504525";
 
-namespace avmshell
-{
-    class DomainObject : public ScriptObject
+    writeHeaderToLog( SECTION + " "+ TITLE );
+
+    public function vtest()
     {
-    public:
-        DomainObject(VTable *vtable, ScriptObject *delegate);
-        ~DomainObject();
+        var v1 = new Vector.<int>(); v1.push( 1 );
+        var v2 = new Vector.<int>(); v2.push( 2 );
+        var v3 = new Vector.<int>(); v3.push( 3 );
+        var v4 = new Vector.<int>(); v4.push( 4 );
 
-        void init(DomainObject *base);
-        Atom loadBytes(ByteArrayObject* bytes, String* bugCompatibilityStr);
-        ClassClosure* getClass(Stringp name);
-        // AS3 declaration requires these are ByteArrayObject
-        ByteArrayObject* get_domainMemory() const;
-        void set_domainMemory(ByteArrayObject* mem);
+        return v1.concat( v2, v3, v4 );
+    }
 
-        DWB(DomainEnv*) domainEnv;
-        DWB(Toplevel*) domainToplevel;
+    AddTestCase("Verify bugCompatibility flag",
+      "SWF9",
+      System.bugCompatibility);
 
-      private:
-        ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
+    var result = vtest();
+    AddTestCase("Test Vector.concat with FP_9_0 behavior",
+      "1,4,3,2",
+      result.toString());
 
-        DECLARE_SLOTS_DomainObject;
-    };
+    test();
 
-    class DomainClass : public ClassClosure
-    {
-    public:
-        DomainClass(VTable* cvtable);
-
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-
-        DomainObject* get_currentDomain();
-        int get_MIN_DOMAIN_MEMORY_LENGTH();
-
-        DECLARE_SLOTS_DomainClass;
-    };
 }
-
-#endif /* __avmshell_DomainClass__ */

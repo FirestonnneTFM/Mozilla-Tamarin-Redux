@@ -89,10 +89,11 @@ AS3 function join(separator: String=","): String {
 private function _concat(items:Array) {
     var v  = newThisType();
     v.private::_spliceHelper(0, length, 0, this, 0);
-
+    const bug504525:Boolean = bugzilla(504525);
     for ( var j:uint=0, limit=items.length ; j < limit ; j++ ) {
         var item = castToThisType(items[j]);
-        v.private::_spliceHelper(length, item.length, 0, item, 0);
+        const insertPoint:uint = bug504525 ? v.length : length;
+        v.private::_spliceHelper(insertPoint, item.length, 0, item, 0);
     }
 
     return v;

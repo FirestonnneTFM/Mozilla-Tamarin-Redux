@@ -295,6 +295,7 @@ namespace avmplus
         static bool isFinite(ScriptObject*, double d);
         static double parseInt(ScriptObject*, Stringp in, int radix);
         static double parseFloat(ScriptObject*, Stringp in);
+        static bool bugzilla(ScriptObject*, int32_t n);
         /*@}*/
 
         // For E4X
@@ -314,6 +315,8 @@ namespace avmplus
         virtual bool sampler_trusted(ScriptObject* /*sampler*/);
 
         ScopeChain* toplevel_scope();
+
+        const BugCompatibility* currentBugCompatibility() const;
 
     protected:
         ClassClosure* findClassInPool(int class_id, PoolObject* pool);

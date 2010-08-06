@@ -59,7 +59,6 @@ namespace avmplus
 #endif
         cpool_mn_offsets(0),
         metadata_infos(0),
-        bugFlags(0),
         _namedTraits(new(core->GetGC()) MultinameHashtable()),
         _privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
         _code(sb.getImpl()),

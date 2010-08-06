@@ -150,6 +150,8 @@ namespace avmshell
         double get_freeMemory();
         double get_privateMemory();
 
+        String* get_bugCompatibility();
+
         // Initiate a garbage collection; future versions will not return before completed.
         void forceFullCollection();
 

@@ -1,5 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,46 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmshell_DomainClass__
-#define __avmshell_DomainClass__
+package {
+    import avmplus.Domain
 
-
-namespace avmshell
-{
-    class DomainObject : public ScriptObject
+    public class testclass
     {
-    public:
-        DomainObject(VTable *vtable, ScriptObject *delegate);
-        ~DomainObject();
+        public function testclass()
+        {
+        }
 
-        void init(DomainObject *base);
-        Atom loadBytes(ByteArrayObject* bytes, String* bugCompatibilityStr);
-        ClassClosure* getClass(Stringp name);
-        // AS3 declaration requires these are ByteArrayObject
-        ByteArrayObject* get_domainMemory() const;
-        void set_domainMemory(ByteArrayObject* mem);
-
-        DWB(DomainEnv*) domainEnv;
-        DWB(Toplevel*) domainToplevel;
-
-      private:
-        ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
-
-        DECLARE_SLOTS_DomainObject;
-    };
-
-    class DomainClass : public ClassClosure
-    {
-    public:
-        DomainClass(VTable* cvtable);
-
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-
-        DomainObject* get_currentDomain();
-        int get_MIN_DOMAIN_MEMORY_LENGTH();
-
-        DECLARE_SLOTS_DomainClass;
-    };
+        public function vtest(pathToLoad:String, parent_domain:Domain, bugCompat:String)
+        {
+            var domain = new Domain(parent_domain);
+            domain.load(pathToLoad, bugCompat);
+            var cl = domain.getClass("leafclass");
+            var o = new cl;
+            return o.vtest();
+        }
+    }
 }
-
-#endif /* __avmshell_DomainClass__ */

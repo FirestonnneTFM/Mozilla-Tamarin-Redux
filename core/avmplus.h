@@ -115,6 +115,7 @@ namespace avmplus
     class MethodFrame;
     class BooleanClass;
     class BuiltinTraits;
+    class BugCompatibility;
     class CallStackNode;
     class ClassClass;
     class ClassClosure;

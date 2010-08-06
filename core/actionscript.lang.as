@@ -42,6 +42,12 @@ package
 {
     public namespace AS3 = "http://adobe.com/AS3/2006/builtin";
 
+    // Query whether a particular bugfix is in effect for this object.
+    // information. Note that we use AIR_SYS to hide it from non-builtin code.
+    [native("Toplevel::bugzilla")]
+    [API(CONFIG::AIR_SYS)]
+    public native function bugzilla(n:int):Boolean;
+
     /**
     * @name Toplevel Function Properties
     * Function properties of the global object (ECMA 15.1.2)

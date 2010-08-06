@@ -1546,11 +1546,20 @@ namespace avmplus
         return this;
     }
 
-    XMLObject *XMLObject::AS3_appendChild (Atom child)
+    bool XMLObject::escapeAppendedEntities() const
     {
-        AvmCore *core = this->core();
+        const BugCompatibility* bugCompatibility = toplevel()->currentBugCompatibility();
 
-        if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
+        // fix is in effect: don't do anything
+        return (bugCompatibility->bugzilla444630) ? 
+                false :
+                core()->bugzilla444630;
+    }
+    
+    Atom XMLObject::maybeEscapeChild(Atom child)
+    {
+        // fix is in effect: don't do anything
+        if (!escapeAppendedEntities())
         {
             if (AvmCore::isXML(child))
             {
@@ -1562,9 +1571,17 @@ namespace avmplus
             }
             else // all other types go through XML constructor as a string
             {
-                child = xmlClass()->ToXML (core->string(child)->atom());
+                child = xmlClass()->ToXML(core()->string(child)->atom());
             }
         }
+        return child;
+    }
+
+    XMLObject *XMLObject::AS3_appendChild(Atom child)
+    {
+        AvmCore *core = this->core();
+
+        child = maybeEscapeChild(child);
 
         Atom children = getStringProperty(core->kAsterisk);
 
@@ -1763,21 +1780,7 @@ namespace avmplus
         if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
             return undefinedAtom;
 
-        if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
-        {
-            if (AvmCore::isXML(child2))
-            {
-                child2 = AvmCore::atomToXMLObject(child2)->atom();
-            }
-            else if (AvmCore::isXMLList(child2))
-            {
-                child2 = AvmCore::atomToXMLList(child2)->atom();
-            }
-            else // all other types go through XML constructor as a string
-            {
-                child2 = xmlClass()->ToXML (core->string(child2)->atom());
-            }
-        }
+        child2 = maybeEscapeChild(child2);
 
         if (AvmCore::isNull(child1))
         {
@@ -1823,21 +1826,7 @@ namespace avmplus
         if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
             return undefinedAtom;
 
-        if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
-        {
-            if (AvmCore::isXML(child2))
-            {
-                child2 = AvmCore::atomToXMLObject(child2)->atom();
-            }
-            else if (AvmCore::isXMLList(child2))
-            {
-                child2 = AvmCore::atomToXMLList(child2)->atom();
-            }
-            else // all other types go through XML constructor as a string
-            {
-                child2 = xmlClass()->ToXML (core->string(child2)->atom());
-            }
-        }
+        child2 = maybeEscapeChild(child2);
 
         if (AvmCore::isNull(child1))
         {
@@ -2128,21 +2117,7 @@ namespace avmplus
         AvmCore *core = this->core();
         Toplevel *toplevel = this->toplevel();
 
-        if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
-        {
-            if (AvmCore::isXML(value))
-            {
-                value = AvmCore::atomToXMLObject(value)->atom();
-            }
-            else if (AvmCore::isXMLList(value))
-            {
-                value = AvmCore::atomToXMLList(value)->atom();
-            }
-            else // all other types go through XML constructor as a string
-            {
-                value = xmlClass()->ToXML (core->string(value)->atom());
-            }
-        }
+        value = maybeEscapeChild(value);
 
         m_node->_insert (core, toplevel, 0, value);
 
@@ -2235,10 +2210,9 @@ namespace avmplus
         }
         else
         {
-            if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
-                c = xmlClass()->ToXML (core->string(value)->atom());
-            else
-                c = core->string(value)->atom();
+            c = core->string(value)->atom();
+            if (!escapeAppendedEntities())
+                c = xmlClass()->ToXML(c);
         }
 
         uint32_t index;
