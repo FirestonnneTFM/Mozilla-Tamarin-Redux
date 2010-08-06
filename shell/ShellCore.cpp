@@ -71,9 +71,7 @@ namespace avmshell
         , st_category(NULL)
         , st_name(NULL)
         , api(0xffffffff)
-// FIXME -- should default to kLatest but acceptance tests are not yet ready for that
-//      , bugCompatibilityVersion(BugCompatibility::kLatest)
-        , bugCompatibilityVersion(BugCompatibility::kSWF9)
+        , bugCompatibilityVersion(BugCompatibility::kLatest)
     {
     }
 
