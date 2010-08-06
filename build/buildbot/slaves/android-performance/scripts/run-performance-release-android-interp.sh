@@ -158,7 +158,7 @@ else
 # standard performance run
     #echo ""
     #echo "===========   JSBench   ==========="
-    #python ./runtests.py --config=jsbench --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Dinterp"
+    #python ./runtests.py --config=jsbench -r $branch -k -f -i 3 --vmargs="-Dinterp"
     #test "$?" = "0" || { 
     #    result="1"; 
     #    resultmessage="jsbench time test run failed. " 
@@ -172,7 +172,7 @@ else
     #}
     echo ""
     echo "===========   Misc   ==========="
-    python ./runtests.py --config=misc-mobile-Dinterp --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Dinterp"
+    python ./runtests.py --config=misc-mobile-Dinterp -r $branch -k -f -i 3 --vmargs="-Dinterp"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nmisc time test run failed. " 
@@ -186,7 +186,7 @@ else
     }
     echo ""
     echo "===========   SunSpider   ==========="
-    python ./runtests.py --config=sunspider-mobile-Dinterp --vmversion=${change} -r $branch -k -f -i 10 --vmargs="-Dinterp"
+    python ./runtests.py --config=sunspider-mobile-Dinterp -r $branch -k -f -i 10 --vmargs="-Dinterp"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nsunspider time test run failed. " 
@@ -201,7 +201,7 @@ else
     
     echo ""
     echo "===========   V8   ==========="
-    python ./runtests.py --config=v8 --vmversion=${change} -r $branch -k -f -i 3 --larger --vmargs="-Dinterp"
+    python ./runtests.py --config=v8 -r $branch -k -f -i 3 --larger --vmargs="-Dinterp"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nv8 time test run failed. " 
