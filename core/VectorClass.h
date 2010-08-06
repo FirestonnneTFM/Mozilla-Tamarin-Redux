@@ -598,14 +598,13 @@ namespace avmplus
          */
         ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
-#if 0 // Potentially useful optimization, currently unused
+        // Potentially useful optimization; used in Player code.
         /**
          *  Apply type arguments and call the specialized class' newVector().
          *  @pre The type must be an Object type.
          *
          */
         ObjectVectorObject* newVector(ClassClosure* type, uint32_t length = 0);
-#endif
 
         virtual Atom applyTypeArgs(int argc, Atom* argv);
 

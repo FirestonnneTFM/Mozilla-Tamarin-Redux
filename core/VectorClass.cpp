@@ -537,7 +537,7 @@ namespace avmplus
         return 0;
     }
 
-#if 0 // Potentially useful optimization, currently unused
+    // Potentially useful optimization; used in Player code.
     ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32_t length)
     {
         Atom args[1] = {type->atom()};
@@ -545,7 +545,6 @@ namespace avmplus
         ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(applyTypeArgs(1, args));
         return vecclass->newVector(length);
     }
-#endif
 
     //
     // ObjectVectorClass
