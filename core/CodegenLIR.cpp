@@ -898,7 +898,7 @@ namespace avmplus
 #endif
 
     public:
-        VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out, int nvar, int restLocal)
+        VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out, int nvar, int restLocal, int code_len)
             : LirWriter(out), alloc(alloc),
               vars(NULL), tags(NULL), nvar(nvar), restLocal(restLocal), reachable(true)
 #ifdef DEBUGGER
@@ -911,7 +911,8 @@ namespace avmplus
             (void) info; // suppress warning if !DEBUGGER && !AVMPLUS_VERBOSE
             varTracker = new (alloc) LIns*[nvar];
             tagTracker = new (alloc) LIns*[nvar];
-            checked = new (alloc) HashMap<LIns*,bool>(alloc, 16700); // allocate a large value until https://bugzilla.mozilla.org/show_bug.cgi?id=565489 is resolved
+            // allocate a large value until https://bugzilla.mozilla.org/show_bug.cgi?id=565489 is resolved
+            checked = new (alloc) HashMap<LIns*,bool>(alloc, code_len < 16700 ? code_len : 16700);
             notnull = new (alloc) nanojit::BitSet(alloc, nvar);
             clearState();
         }
@@ -1680,7 +1681,8 @@ namespace avmplus
         emitStart(*alloc1, prolog_buf, lirout);
 
         // add the VarTracker filter last because we want it to be first in line.
-        lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout, framesize, restLocal);
+        lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout, framesize, restLocal,
+                state->verifier->code_length);
 
         // last pc value that we generated a store for
         lastPcSave = NULL;
