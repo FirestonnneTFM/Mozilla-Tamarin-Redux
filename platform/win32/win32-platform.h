@@ -200,7 +200,7 @@ typedef void *maddr_ptr;
   #endif
   #include <emmintrin.h>
 
-  #ifdef VTUNE
+  #ifdef VMCFG_VTUNE
     #include "JITProfiling.h"
   #endif
 #endif

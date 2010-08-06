@@ -83,7 +83,7 @@
 #undef DEBUGGER
 #undef VMCFG_DEBUGGER_STUB
 #undef AVMPLUS_SAMPLER
-#undef VTUNE
+#undef VMCFG_VTUNE
 #undef AVMPLUS_VERBOSE
 #undef VMCFG_NANOJIT
 #undef VMCFG_PRECOMP_NAMES
@@ -334,11 +334,20 @@
 
 
 /* AVMFEATURE_VTUNE
- *
- * Selects vtune profiling.  FIXME: more information needed.
+ * Selects vtune profiling of jit'd code.  Requires Windows x86,
+ * and could support windows x64 after more testing.
+ * turns on AVMPLUS_VERBOSE solely to get method/class names for profiling
  */
 #if !defined AVMFEATURE_VTUNE || AVMFEATURE_VTUNE != 0 && AVMFEATURE_VTUNE != 1
 #  error "AVMFEATURE_VTUNE must be defined and 0 or 1 (only)."
+#endif
+#if AVMFEATURE_VTUNE
+#  if !AVMSYSTEM_WIN32
+#    error "AVMSYSTEM_WIN32 is required for AVMFEATURE_VTUNE"
+#  endif
+#  if !AVMSYSTEM_IA32
+#    error "AVMSYSTEM_IA32 is required for AVMFEATURE_VTUNE"
+#  endif
 #endif
 
 
@@ -830,7 +839,7 @@
 #  define AVMPLUS_SAMPLER
 #endif
 #if AVMFEATURE_VTUNE
-#  define VTUNE
+#  define VMCFG_VTUNE
 #endif
 #if AVMFEATURE_VTUNE
 #  define AVMPLUS_VERBOSE

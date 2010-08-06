@@ -301,10 +301,6 @@ namespace avmplus
         config.runmode = runmode_default;
         config.jitordie = jitordie_default;
 
-#ifdef VTUNE
-        VTuneStatus = CheckVTuneStatus();
-#endif // VTUNE
-
         config.interrupts = interrupts_default;
 
         gcInterface.SetCore(this);

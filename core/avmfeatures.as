@@ -372,10 +372,16 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc> Selects vtune profiling.  FIXME: more information needed. </desc>
+    <desc> Selects vtune profiling of jit'd code.  Requires Windows x86,
+           and could support windows x64 after more testing.
+           turns on AVMPLUS_VERBOSE solely to get method/class names for profiling
+    </desc>
 
     <name>     AVMFEATURE_VTUNE  </name>
-    <defines>  VTUNE </defines>    <!-- FIXME: legacy name -->
+    <requires> AVMSYSTEM_WIN32 </requires>
+    <requires> AVMSYSTEM_IA32 </requires>
+    <defines>  VMCFG_VTUNE </defines>
+
     <defines>  AVMPLUS_VERBOSE </defines>
   </feature>
 
