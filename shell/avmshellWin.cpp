@@ -192,7 +192,7 @@ namespace avmshell
                 M.ExceptionPointers = pException;
                 M.ClientPointers = 0;
 
-                AvmLog("Writing minidump crash log to %s\n", DumpPath);
+                AvmLog("Writing minidump crash log to %ls\n", DumpPath);
 
                 HANDLE hDumpFile = CreateFileW(DumpPath, GENERIC_WRITE, 0,
                     NULL, CREATE_ALWAYS,
