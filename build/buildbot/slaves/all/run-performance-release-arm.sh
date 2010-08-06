@@ -132,8 +132,8 @@ then
         vmargs=""
         iter=3
     fi
-    echo "python ./runtests.py -r $branch -k -f -i $iter --vmargs='$vmargs' $2"
-    python ./runtests.py -r $branch -k -f -i $iter --vmargs="$vmargs" $2
+    echo "python ./runtests.py --vmversion=${change} -r $branch -k -f -i $iter --vmargs='$vmargs' $2"
+    python ./runtests.py --vmversion=${change} -r $branch -k -f -i $iter --vmargs="$vmargs" $2
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$2 time test run failed. " 
@@ -207,7 +207,7 @@ else
         
     echo ""
     echo "===========   MMGC   ==========="
-    python ./runtests.py --config=mmgc -r $branch -k -f -i 3
+    python ./runtests.py --config=mmgc --vmversion=${change} -r $branch -k -f -i 3
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nmmgc time test run failed. " 

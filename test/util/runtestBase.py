@@ -1339,7 +1339,7 @@ class RuntestBase:
         try:
             return re.compile('(\d+):').search(avmVerStr).group(1)
         except:
-            return '0'
+            return avmVerStr
 
     def compareAbcAsmOutput(self, file, output):
         # return diff
