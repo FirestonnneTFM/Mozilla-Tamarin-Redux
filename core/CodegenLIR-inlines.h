@@ -42,24 +42,6 @@ namespace avmplus {
 
 using namespace nanojit;
 
-#ifdef VTUNE
-REALLY_INLINE LineNumberRecord* JITCodeInfo::add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
-{
-    LineNumberRecord* record = new (gc) LineNumberRecord(file,line);
-    lineNumTable.put(loc,record);
-    return record;
-}
-
-REALLY_INLINE void JITCodeInfo::clear()
-{
-    lineNumTable.clear();
-    method = 0;
-    vtune = 0;
-    startAddr = 0;
-    endAddr = 0;
-}
-#endif // VTUNE
-
 REALLY_INLINE BuiltinType LirHelper::bt(Traits *t)
 {
     return Traits::getBuiltinType(t);

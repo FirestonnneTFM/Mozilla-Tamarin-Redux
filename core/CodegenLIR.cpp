@@ -49,6 +49,16 @@
 #include <cmnintrin.h>
 #endif
 
+#ifdef VMCFG_VTUNE
+namespace vtune {
+    using namespace avmplus;
+    void* vtuneInit(String*);
+    void vtuneCleanup(void*);
+}
+using namespace vtune;
+#endif // VMCFG_VTUNE
+
+
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
 # define SSE2_ONLY(...) __VA_ARGS__
 #else
@@ -160,10 +170,6 @@ namespace avmplus
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
         #define FUNCADDR(addr) (uintptr_t)addr
-
-   #ifdef VTUNE
-       extern void VTune_RegisterMethod(AvmCore* core, JITCodeInfo* inf);
-   #endif  // VTUNE
 
         intptr_t coreAddr( int (AvmCore::*f)() )
         {
@@ -729,11 +735,6 @@ namespace avmplus
 
     CodegenLIR::CodegenLIR(MethodInfo* i, MethodSignaturep ms, Toplevel* toplevel) :
         LirHelper(i->pool()),
-#ifdef VTUNE
-        hasDebugInfo(false),
-        jitInfoList(i->core()->gc),
-        jitPendingRecords(i->core()->gc),
-#endif
         info(i),
         ms(ms),
         toplevel(toplevel),
@@ -2181,16 +2182,13 @@ namespace avmplus
             break;
         case OP_debugfile:
         {
-#if defined(DEBUGGER) || defined(VTUNE)
-            #ifdef VTUNE
-            const bool do_emit = true;
-            #else
-            const bool do_emit = haveDebugger;
-            #endif
-            Stringp str = pool->getString(imm30);  // assume been checked already
-            if(do_emit) emit(opcode, (uintptr_t)str);
+#if defined VMCFG_VTUNE
+            emit(opcode, (uintptr_t)pool->getString(imm30));
+#elif defined DEBUGGER
+            if (haveDebugger)
+                emit(opcode, (uintptr_t)pool->getString(imm30));
 #endif
-            break;
+           break;
         }
         case OP_dxns:
         {
@@ -2429,16 +2427,15 @@ namespace avmplus
 
         case OP_debugline:
         {
-            #if defined(DEBUGGER) || defined(VTUNE)
-            #ifdef VTUNE
-            const bool do_emit = true;
-            #else
-            const bool do_emit = haveDebugger;
-            #endif
-            // we actually do generate code for these, in debugger mode
-            if (do_emit) emit(opcode, imm30);
-            #endif
-            break;
+#if defined VMCFG_VTUNE
+            emit(opcode, imm30);
+#elif defined DEBUGGER
+            if (haveDebugger) {
+                // we actually do generate code for these, in debugger mode
+                emit(opcode, imm30);
+            }
+#endif
+           break;
         }
         case OP_nextvalue:
         case OP_nextname:
@@ -4962,9 +4959,9 @@ namespace avmplus
                         InsConstPtr((String*)op1));
             }
             #endif // DEBUGGER
-           #ifdef VTUNE
+            #ifdef VMCFG_VTUNE
                 Ins(LIR_file, InsConstPtr((String*)op1));
-           #endif /* VTUNE */
+            #endif /* VMCFG_VTUNE */
                 break;
             }
 
@@ -4979,10 +4976,9 @@ namespace avmplus
                         InsConst((int32_t)op1));
             }
             #endif // DEBUGGER
-            #ifdef VTUNE
+            #ifdef VMCFG_VTUNE
                 Ins(LIR_line, InsConst((int32_t)op1));
-                hasDebugInfo = true;
-           #endif /* VTUNE */
+            #endif /* VMCFG_VTUNE */
                 break;
             }
 
@@ -6237,9 +6233,9 @@ namespace avmplus
         #endif
 
         Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log, core->config.njconfig);
-        #ifdef VTUNE
-        assm->cgen = this;
-        #endif
+        #ifdef VMCFG_VTUNE
+        assm->vtuneHandle = vtuneInit(info->getMethodName());
+        #endif /* VMCFG_VTUNE */
 
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
@@ -6290,86 +6286,13 @@ namespace avmplus
             PERFM_NVPROF("lir-error",1);
         }
 
-        #ifdef VTUNE
-        if (keep) x{
-            AvmAssert(!jitPendingRecords.size());  // all should be resolved by now
-            int32_t count = jitInfoList.size();
-            uint32_t id = 0;
-            for(int i=0; i<count; i++) {
-                JITCodeInfo* jitInfo = jitInfoList.get(i);
-                if (jitInfo->lineNumTable.size()) {
-                    jitInfo->sid = id++;
-                    VTune_RegisterMethod(core, jitInfo);
-                }
-                jitInfo->clear();
-            }
-            jitInfoList.clear();
+        #ifdef VMCFG_VTUNE
+        if (assm->vtuneHandle) {
+            vtuneCleanup(assm->vtuneHandle);
         }
-        #endif /* VTUNE */
+        #endif /* VMCFG_VTUNE */
         return code;
     }
-
-#ifdef VTUNE
-   JITCodeInfo* CodegenLIR::jitCurrentInfo()
-   {
-       if (jitInfoList.size()<1)
-           jitPushInfo();
-       return jitInfoList[jitInfoList.size()-1];
-   }
-
-   void CodegenLIR::jitPushInfo()
-   {
-       JITCodeInfo* inf = new (gc) JITCodeInfo(gc);
-       jitInfoList.add(inf);
-       inf->method = info;
-   }
-
-   LineNumberRecord* CodegenLIR::jitAddRecord(uint32_t pos, uint32_t filename, uint32_t line, bool pending)
-   {
-       // create a new record in the table; possibly overwriting an existing one.
-       // for pending (i.e. reverse code gen) we want to keep the first line entry we, see
-       // for forwards generation we'll take the last one then we encounter
-       AvmAssert(pending || (filename && line));
-       if (pending && jitCurrentInfo()->lineNumTable.containsKey(pos)) return 0;
-       LineNumberRecord* rec = new (gc) LineNumberRecord((Stringp)filename, line);
-       jitCurrentInfo()->lineNumTable.put(pos,rec);
-       if (pending) jitPendingRecords.add(rec);
-       return rec;
-   }
-
-   void CodegenLIR::jitFilenameUpdate(uint32_t filename)
-   {
-       AvmAssert(filename);
-       int32_t size = jitPendingRecords.size();
-       for(int32_t i=size-1; i>=0; i--)    {
-           LineNumberRecord* rec = jitPendingRecords.get(i);
-           if (!rec->filename) {
-               rec->filename = (Stringp)filename;
-               if (rec->lineno && rec->filename) jitPendingRecords.removeAt(i); // has both fields set?
-           }
-       }
-   }
-
-   void CodegenLIR::jitLineNumUpdate(uint32_t num)
-   {
-       AvmAssert(num);
-       int32_t size = jitPendingRecords.size();
-       for(int32_t i=size-1; i>=0; i--)    {
-           LineNumberRecord* rec = jitPendingRecords.get(i);
-           if (!rec->lineno)   {
-               rec->lineno = num;
-               if (rec->lineno && rec->filename) jitPendingRecords.removeAt(i); // has both fields set?
-           }
-       }
-   }
-
-   void CodegenLIR::jitCodePosUpdate(uint32_t pos)
-   {
-       JITCodeInfo* inf = jitCurrentInfo();
-       if (!inf->endAddr) inf->endAddr = pos;
-       inf->startAddr = pos;
-   }
-#endif
 
     REALLY_INLINE BindingCache::BindingCache(const Multiname* name, BindingCache* next)
         : name(name), next(next)

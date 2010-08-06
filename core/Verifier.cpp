@@ -1120,7 +1120,7 @@ namespace avmplus
 
             case OP_debugfile:
                 //checkStack(0,0)
-                #if defined(DEBUGGER) || defined(VTUNE)
+                #if defined(DEBUGGER) || defined(VMCFG_VTUNE)
                 checkCpoolOperand(imm30, kStringType);
                 #endif
                 coder->write(state, pc, opcode);

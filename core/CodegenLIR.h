@@ -54,37 +54,6 @@ namespace avmplus
 {
     using namespace nanojit;
 
-   #ifdef VTUNE
-   class LineNumberRecord : public MMgc::GCObject
-   {
-       public:
-           LineNumberRecord(Stringp fn, uint32_t ln)
-           : filename(fn)
-           , lineno(ln)
-           { }
-
-       String*  filename;
-       uint32_t lineno;
-   };
-
-   class JITCodeInfo : public MMgc::GCObject
-   {
-       public:
-           JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
-
-           MethodInfo* method;
-           SortedMap<int, LineNumberRecord*, LIST_GCObjects> lineNumTable;       // populated during code generation
-           uintptr_t startAddr;
-           uintptr_t endAddr;
-           iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
-           uint32_t sid;  // code info id
-
-           LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line);
-           void clear();
-   };
-   #endif /* VTUNE */
-
-
    /**
     * Each InEdge record tracks an unpatched branch.  When the target code
     * is generated in emitLabel(), we patch each tracked instruction or

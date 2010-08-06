@@ -297,12 +297,6 @@ const int kBufferPadding = 16;
          */
         PrintWriter console;
 
-#ifdef VTUNE
-        iJIT_IsProfilingActiveFlags VTuneStatus;
-
-        iJIT_IsProfilingActiveFlags CheckVTuneStatus();
-#endif // VTUNE
-
         /**
          * The GC used by this AVM instance
          */

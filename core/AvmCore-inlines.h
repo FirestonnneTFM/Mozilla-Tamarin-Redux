@@ -43,14 +43,6 @@
 namespace avmplus
 {
 
-#ifdef VTUNE
-REALLY_INLINE iJIT_IsProfilingActiveFlags AvmCore::CheckVTuneStatus()
-{
-    iJIT_IsProfilingActiveFlags profiler = iJIT_IsProfilingActive();
-    return profiler;
-}
-#endif // VTUNE
-
 #ifdef DEBUGGER
 REALLY_INLINE Debugger* AvmCore::debugger() const
 {

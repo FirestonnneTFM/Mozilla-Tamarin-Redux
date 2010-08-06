@@ -689,7 +689,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\VMPI;..\..\MMgc;..\..\core;..\..\eval;..\..\platform;..\..\shell"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE;VTUNE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE;AVMFEATURE_VTUNE=1"
 				StringPooling="true"
 				ExceptionHandling="0"
 				TreatWChar_tAsBuiltInType="false"
@@ -1295,7 +1295,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="VTUNE;WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="AVMFEATURE_VTUNE=1;WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
