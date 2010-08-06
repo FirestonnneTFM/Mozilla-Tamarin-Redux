@@ -246,6 +246,7 @@ namespace avmplus
 #ifdef _DEBUG
         , codeContextThread(VMPI_currentThread())
 #endif
+        , bugzilla444630(false)
 #ifdef DEBUGGER
         , _debugger(NULL)
         , _profiler(NULL)
@@ -647,7 +648,15 @@ namespace avmplus
     Toplevel* AvmCore::initToplevel()
     {
         DomainEnv* builtinDomainEnv = new (GetGC()) DomainEnv(this, builtinDomain, NULL);
-        CodeContext* builtinCodeContext = new(GetGC()) CodeContext(builtinDomainEnv);
+        
+        // builtins always use BugCompatibility::kLatest
+        const BugCompatibility* bugCompatibility = createBugCompatibility(BugCompatibility::kLatest);
+
+        // note that this is the one-and-only place that a naked CodeContext
+        // should ever be constructed (ie, when initializing the VM's own builtins);
+        // this is because it is also the one-and-only place where we can be certain
+        // that no native code will be expecting a subclass of CodeContext.
+        CodeContext* builtinCodeContext = new (GetGC()) CodeContext(builtinDomainEnv, bugCompatibility);
 
         AvmAssert(builtinPool != NULL);
         AvmAssert(builtinPool->scriptCount() != 0);
@@ -2963,6 +2972,11 @@ return the result of the comparison ToPrimitive(x) == y.
         return new (GetGC()) Toplevel(abcEnv);
     }
 
+    const BugCompatibility* AvmCore::createBugCompatibility(BugCompatibility::Version v)
+    {
+        return new (GetGC()) BugCompatibility(v);
+    }
+
     void AvmCore::addLivePool(PoolObject* pool)
     {
         // Ordering is significant (Bugzilla 574427): GetWeakRef can trigger a collection,
@@ -4787,4 +4801,32 @@ return the result of the comparison ToPrimitive(x) == y.
         AvmAssert(x<core->apis_count);
         return core->apis_start+x;
     }
+
+    BugCompatibility::BugCompatibility(BugCompatibility::Version v)
+    {
+        // We rely on the fact that we are allocated pre-zeroed by MMgc,
+        // thus ensuring that the default state of all compatibility bits is zero.
+        // Thus we only need to set bits based on versions, we don't have to clear anything.
+  
+        // Primordial version did not fix any bugs (it only introduced them)
+        // if (v >= kSWF9) { nothing to do }
+        
+        // kSWF10 is also a no-op, since the one bug that used to live here actually needs
+        // to be controlled by a global (!) flag for backwards compatibility in this case.
+        // see class BugCompatibility for more information.
+        // if (v >= kSWF10) { nothing to do here, either }
+        
+        if (v >= kSWF11)
+        {
+            bugzilla444630 = 1;     // Entities are not escaped when appending String content to XML
+            bugzilla504525 = 1;     // Vector.concat processes arguments in reverse order
+        }
+    }
+
+    /*static*/ const char* const BugCompatibility::kNames[BugCompatibility::VersionCount] = 
+    {
+        "SWF9",
+        "SWF10",
+        "SWF11"
+    };
 }

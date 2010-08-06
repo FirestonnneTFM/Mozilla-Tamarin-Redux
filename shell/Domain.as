@@ -51,14 +51,18 @@ public class Domain
     {
         init(base);
     }
-
-    public native function loadBytes(byteArray:ByteArray);
+    
+    // If bugCompatibility is not null, then load the given ABC with the specific BugCompatibility
+    // (overriding the default passed to -bugcompat). Note that bugCompatibility must be a known
+    // value, or an exception will be thrown.
+    public native function loadBytes(byteArray:ByteArray, bugCompatibility:String = null);
+    
     public native function getClass(className:String):Class;
     public native static function get currentDomain():Domain;
 
-    public function load(filename:String)
+    public function load(filename:String, bugCompatibility:String = null)
     {
-        return loadBytes(ByteArray.readFile(filename))
+        return loadBytes(ByteArray.readFile(filename), bugCompatibility)
     }
 
     /**

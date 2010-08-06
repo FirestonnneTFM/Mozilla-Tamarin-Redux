@@ -113,14 +113,7 @@ namespace avmplus
         uint32_t constantStringCount;
         uint32_t constantNsCount;
         uint32_t constantNsSetCount;
-
-        /** flags to control certain bugfix behavior */
-        uint32_t bugFlags;
-        // Numbers here correspond to Bugzilla bug numbers (i.e. bugzilla bug 444630 is kbug444630
-        enum {
-            kbug444630 = 0x00000001
-        };
-
+    
 #ifdef VMCFG_PRECOMP_NAMES
     private:
         DWB(PrecomputedMultinames*) precompNames;   // a GCFinalizedObject

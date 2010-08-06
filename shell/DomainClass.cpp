@@ -51,47 +51,68 @@ namespace avmshell
     {
     }
 
-    void DomainObject::init(DomainObject *parentDomain)
+    void DomainObject::init(DomainObject* parentDomain)
     {
-        ShellCore *core = (ShellCore*) this->core();
+        ShellCore* core = (ShellCore*) this->core();
+ 
+        DomainEnv* baseDomainEnv = parentDomain ?
+                                parentDomain->domainEnv :
+                                (DomainEnv*)NULL;
+        Domain* baseDomain = baseDomainEnv ?
+                                baseDomainEnv->domain() :
+                                NULL;
 
-        Domain* baseDomain;
-        if (parentDomain) {
-            baseDomain = parentDomain->domainEnv->domain();
-        } else {
-            baseDomain = core->builtinDomain;
-        }
+        domainToplevel = parentDomain ? 
+                            (Toplevel*)parentDomain->domainToplevel :
+                            core->createShellToplevel();
 
         Domain* domain = new (core->GetGC()) Domain(core, baseDomain);
-
-        if (parentDomain) {
-            domainToplevel = parentDomain->domainToplevel;
-        } else {
-            domainToplevel = core->createShellToplevel();
-        }
-
-        domainEnv = new (core->GetGC()) DomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
+        domainEnv = new (core->GetGC()) DomainEnv(core, domain, baseDomainEnv);
     }
 
-    Atom DomainObject::loadBytes(ByteArrayObject *b)
+    Atom DomainObject::loadBytes(ByteArrayObject* b, String* bugCompatibilityStr)
     {
         AvmCore* core = this->core();
         if (!b)
             toplevel()->throwTypeError(kNullArgumentError, core->toErrorString("bytes"));
 
-		CodeContext* codeContext = new (core->GetGC()) CodeContext(domainEnv);
-
         // parse new bytecode
         size_t len = b->get_length();
         ScriptBuffer code = core->newScriptBuffer(len);
         VMPI_memcpy(code.getBuffer(), &b->GetByteArray()[0], len);
-        Toplevel *toplevel = domainToplevel;
 
+        Toplevel* toplevel = domainToplevel;
         uint32_t api = core->getAPI(NULL);
-        return core->handleActionBlock(code, 0,
-                                  toplevel,
-								  /*ninit*/NULL, codeContext, 
-                                  api);
+
+        // parse constants and attributes.
+        PoolObject* pool = core->parseActionBlock(code,
+                                /*start*/0,
+                                toplevel,
+                                domainEnv->domain(),
+                                /*ninit*/NULL,
+                                api);
+
+
+        // by default, use the same bugCompatibility as the builtins use
+        const BugCompatibility* bugCompatibility = toplevel->abcEnv()->codeContext()->bugCompatibility();
+        if (bugCompatibilityStr != NULL)
+        {
+            // ...unless specified otherwise.
+            for (int j = 0; j < BugCompatibility::VersionCount; ++j)
+            {
+                if (bugCompatibilityStr->equalsLatin1(BugCompatibility::kNames[j]))
+                {
+                    bugCompatibility = core->createBugCompatibility((BugCompatibility::Version)j);
+                    goto done;
+                }
+            }
+            // if we get here, didn't find a valid name
+            toplevel->throwTypeError(kInvalidArgumentError, core->toErrorString("bugCompatibility"));
+        }
+done:
+
+		ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext(domainEnv, bugCompatibility);
+        return core->handleActionPool(pool, toplevel, codeContext);
     }
 
     ScriptObject* DomainObject::finddef(const Multiname& multiname,
@@ -195,5 +216,4 @@ namespace avmshell
         if(!domainEnv->set_globalMemory(mem))
             toplevel()->throwError(kEndOfFileError);
     }
-
 }

@@ -248,6 +248,86 @@ const int kBufferPadding = 16;
         bool            m_disabled;             // true iff the cache has been (temporarily) disabled
     };
 
+    class BugCompatibility : public MMgc::GCObject
+    {
+    public:
+        enum Version 
+        {   
+            kSWF9,              // SWF9  (Flash Player 9.x)
+            kSWF10,             // SWF10 (Flash Player 10.0 & 10.1)
+            kSWF11,             // SWF11 (Flash Player TBD)
+
+            VersionCount,
+            
+            kLatest = kSWF11    // alias for "most recent"; will be changed as new versions are added.
+                                // note that this comes *after* VersionCount.
+        };
+        
+        static const char* const kNames[BugCompatibility::VersionCount];
+
+        /** Compatibility bug fixes in the AVM - an overview.
+         *
+         * The AVM provides bug-compatible behavior to specific released versions
+         * in both AS3 and C++ code.  The compatibility problem is orthogonal to
+         * the API versioning problem (where names may be introduced globally or
+         * in classes and interfaces but are visible only to certain versions).
+         * However, groups of bug fixes appear in specific named verions of the AVM,
+         * and since the API versioning mechansim already deals with named versions
+         * the API mechanism can be used to control bug-compatibility at a high
+         * level.  When the host code requests that a certain API version be enabled,
+         * the bug-compatibility flags for that version are turned on, enabling
+         * bug fixes appropriate for that version.
+         *
+         * In the C++ level bug-compatibility is handled by having one flag for each
+         * bug for which we provide a compatibility switch.  C++ code tests
+         * these flags, it never checks for a specific version name.
+         *
+         * The flags are made available to AS3 code through an global function,
+         * 'bugzilla(n:int)', which is in an internal namespace (part of the
+         * 'AIR_SYS' API).  It returns true if the flag for the numbered bug is
+         * set, otherwise false.
+         * 
+         * The flags always name a bug in Bugzilla, which means that bugs named here
+         * can /only/ be about the one thing that is fixed.
+         *
+         * A short description is usually good to have by each of these, eg the subject
+         * line from the bug report.  If the subject line is not very good then please
+         * fix it first.
+         *
+         * Keep them in numeric order, please.
+         *
+         * DO NOT SET THESE FLAGS EXPLICITLY!  ALWAYS CALL THE CONSTRUCTOR!
+         */
+        struct {
+            // Entities are not escaped when appending String content to XML
+            //
+            // This and the "root" variant are the one and only special case we support,
+            // due to existing usage we need to maintain. The rules are:
+            //
+            // -- if bugzilla444630 is set, we always escape the entities
+            // -- if bugzilla444630 is clr,
+            //      then we use AvmCore::bugzilla444630 to determine whether to escape
+            //
+            // The reason for this hackery is that existing Flash9/10 content assumes that
+            // the root SWF defines the behavior, and all subordinate SWFs will follow it,
+            // regardless of their version. 
+            // 
+            // This is some ugly hackery, but a necessary evil for legacy content. Please don't
+            // ever use this antipattern for new bugs.
+            unsigned bugzilla444630:1;      
+            
+            unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
+        };
+        
+    protected:
+        friend class AvmCore;
+
+        // You should never construct a BugCompatibility directly; 
+        // instead, call AvmCore::createBugCompatibility, so that embedders
+        // can create concrete subclasses if they so desire.
+        explicit BugCompatibility(Version v);
+    };
+
     /**
      * The main class of the AVM+ virtual machine.  This is the
      * main entry point to the VM for running ActionScript code.
@@ -308,7 +388,13 @@ const int kBufferPadding = 16;
             // We don't enforce this in Release builds, but check for it and assert in Debug builds.
             vmpi_thread_t       codeContextThread;
     #endif
-        private:
+
+    public:
+    
+        // Please see BugCompatibility for an explanation of this field.
+        bool bugzilla444630;
+
+    private:
 
         #ifdef DEBUGGER
         private:
@@ -512,7 +598,7 @@ const int kBufferPadding = 16;
 
         /** Domain for built-in classes */
         Domain* builtinDomain;
-
+    
     private:
         /**
          * The default namespace, "public"
@@ -827,6 +913,13 @@ const int kBufferPadding = 16;
          * a Toplevel directly, it will use this as a factory method.)
          */
         virtual Toplevel* createToplevel(AbcEnv* abcEnv);
+
+        /**
+         * If a client need to subclass BugCompatibility, it should override this
+         * method to create the proper subclass. (AvmCore will never create a
+         * a BugCompatibility directly, it will use this as a factory method.)
+         */
+        virtual const BugCompatibility* createBugCompatibility(BugCompatibility::Version v);
 
         /**
          * Support for API versioning

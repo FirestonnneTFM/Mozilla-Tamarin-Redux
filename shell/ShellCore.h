@@ -84,6 +84,7 @@ namespace avmshell
         const char* st_category;
         const char* st_name;
         uint32_t api;
+        BugCompatibility::Version bugCompatibilityVersion;
 
         MMgc::GC::GCMode gcMode()
         {
@@ -92,6 +93,13 @@ namespace avmshell
             else if (incremental)   return MMgc::GC::kIncrementalGC;
             else                    return MMgc::GC::kNonincrementalGC;
         }
+    };
+
+    class ShellCodeContext : public CodeContext
+    {
+    public:
+        inline ShellCodeContext(DomainEnv* env, const BugCompatibility* bugCompatibility) 
+            : CodeContext(env, bugCompatibility) { }
     };
 
     /**
@@ -158,6 +166,8 @@ namespace avmshell
 
         inline int32_t getDefaultAPI() { return ApiUtils::toAPI(this, defaultAPIVersion); }
 
+        inline BugCompatibility::Version getDefaultBugCompatibilityVersion() const { return defaultBugCompatibilityVersion; }
+
     protected:
         virtual void setStackLimit() = 0;
 
@@ -201,8 +211,12 @@ namespace avmshell
         bool inStackOverflow;
         int allowDebugger;
         ShellToplevel* shell_toplevel;
-		CodeContext* shell_codeContext;
+        // Note that this has been renamed to emphasize the fact that it is
+        // the CodeContext/DomainEnv that user code will run in (as opposed
+        // to the Shell's builtin classes, eg System, File, Domain).
+        ShellCodeContext* user_codeContext;
         uint32_t defaultAPIVersion;
+        BugCompatibility::Version defaultBugCompatibilityVersion;
     };
 
     class ShellToplevel : public Toplevel

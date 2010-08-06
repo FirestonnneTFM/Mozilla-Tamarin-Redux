@@ -1,5 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,46 +35,52 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmshell_DomainClass__
-#define __avmshell_DomainClass__
+package {
+    import avmplus.Domain
+    import avmplus.System
 
+    var SECTION = "BugCompatibility";
+    var VERSION = "BugCompatibility";
+    startTest();
+    var TITLE   = "Bug 535770";
 
-namespace avmshell
-{
-    class DomainObject : public ScriptObject
-    {
-    public:
-        DomainObject(VTable *vtable, ScriptObject *delegate);
-        ~DomainObject();
+    writeHeaderToLog( SECTION + " "+ TITLE );
 
-        void init(DomainObject *base);
-        Atom loadBytes(ByteArrayObject* bytes, String* bugCompatibilityStr);
-        ClassClosure* getClass(Stringp name);
-        // AS3 declaration requires these are ByteArrayObject
-        ByteArrayObject* get_domainMemory() const;
-        void set_domainMemory(ByteArrayObject* mem);
+    var leaf_path:String = System.argv[0];
+    var test_path:String = System.argv[1];
 
-        DWB(DomainEnv*) domainEnv;
-        DWB(Toplevel*) domainToplevel;
+    var SWF10_domain = new Domain(Domain.currentDomain);
+    SWF10_domain.load(test_path, "SWF10");
+    var SWF10_cl = SWF10_domain.getClass("testclass");
+    var SWF10_helper = new SWF10_cl;
 
-      private:
-        ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
+    var SWF11_domain = new Domain(Domain.currentDomain);
+    SWF11_domain.load(test_path, "SWF11");
+    var SWF11_cl = SWF11_domain.getClass("testclass");
+    var SWF11_helper = new SWF11_cl;
 
-        DECLARE_SLOTS_DomainObject;
-    };
+    var result;
 
-    class DomainClass : public ClassClosure
-    {
-    public:
-        DomainClass(VTable* cvtable);
+    result = SWF10_helper.vtest(leaf_path, SWF10_domain, "SWF10");
+    AddTestCase("Test Vector.concat with SWF10 loading SWF10 behavior",
+      "1,4,3,2",
+      result.toString());
 
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+    result = SWF11_helper.vtest(leaf_path, SWF11_domain, "SWF11");
+    AddTestCase("Test Vector.concat with SWF11 loading SWF11 behavior",
+      "1,2,3,4",
+      result.toString());
 
-        DomainObject* get_currentDomain();
-        int get_MIN_DOMAIN_MEMORY_LENGTH();
+    result = SWF10_helper.vtest(leaf_path, SWF10_domain, "SWF11");
+    AddTestCase("Test Vector.concat with SWF10 loading SWF11 behavior",
+      "1,2,3,4",
+      result.toString());
 
-        DECLARE_SLOTS_DomainClass;
-    };
+    result = SWF11_helper.vtest(leaf_path, SWF11_domain, "SWF10");
+    AddTestCase("Test Vector.concat with SWF11 loading SWF10 behavior",
+      "1,4,3,2",
+      result.toString());
+
+    test();
+
 }
-
-#endif /* __avmshell_DomainClass__ */
