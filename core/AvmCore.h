@@ -298,26 +298,25 @@ const int kBufferPadding = 16;
          *
          * DO NOT SET THESE FLAGS EXPLICITLY!  ALWAYS CALL THE CONSTRUCTOR!
          */
-        struct {
-            // Entities are not escaped when appending String content to XML
-            //
-            // This and the "root" variant are the one and only special case we support,
-            // due to existing usage we need to maintain. The rules are:
-            //
-            // -- if bugzilla444630 is set, we always escape the entities
-            // -- if bugzilla444630 is clr,
-            //      then we use AvmCore::bugzilla444630 to determine whether to escape
-            //
-            // The reason for this hackery is that existing Flash9/10 content assumes that
-            // the root SWF defines the behavior, and all subordinate SWFs will follow it,
-            // regardless of their version. 
-            // 
-            // This is some ugly hackery, but a necessary evil for legacy content. Please don't
-            // ever use this antipattern for new bugs.
-            unsigned bugzilla444630:1;      
-            
-            unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
-        };
+
+        // Entities are not escaped when appending String content to XML
+        //
+        // This and the "root" variant are the one and only special case we support,
+        // due to existing usage we need to maintain. The rules are:
+        //
+        // -- if bugzilla444630 is set, we always escape the entities
+        // -- if bugzilla444630 is clr,
+        //      then we use AvmCore::bugzilla444630 to determine whether to escape
+        //
+        // The reason for this hackery is that existing Flash9/10 content assumes that
+        // the root SWF defines the behavior, and all subordinate SWFs will follow it,
+        // regardless of their version. 
+        // 
+        // This is some ugly hackery, but a necessary evil for legacy content. Please don't
+        // ever use this antipattern for new bugs.
+        unsigned bugzilla444630:1;      
+        
+        unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
         
     protected:
         friend class AvmCore;
