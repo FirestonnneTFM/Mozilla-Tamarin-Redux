@@ -46,6 +46,7 @@ _yes = re.compile("^(t|true|yes|y|1)$", re.I)
 _no = re.compile("^(f|false|no|n|0)$", re.I)
 _help = re.compile("^(-h|--help)$")
 _sdk = re.compile("^--mac-sdk=(.*)$")
+_arm_arch = re.compile("^--arm_arch=(.*)$")
 
 class Options:
     def __init__(self, argv = sys.argv):
@@ -55,8 +56,8 @@ class Options:
         self.ignore_unknown_flags = False
         self.help = False
         self._allargs = {}
-        self.sdk_version = None
-
+        self.mac_sdk_version = None
+        self.arm_arch = None
 
         unknown_args = []
         for arg in argv[1:]:
@@ -72,7 +73,12 @@ class Options:
 
             m = _sdk.search(arg)
             if m:
-                self.sdk_version = m.group(1)
+                self.mac_sdk_version = m.group(1)
+                continue
+
+            m = _arm_arch.search(arg)
+            if m:
+                self.arm_arch = m.group(1)
                 continue
 
             if _ignore.search(arg) is not None:

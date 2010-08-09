@@ -135,6 +135,7 @@ if MMGC_DYNAMIC:
 
 arm_fpu = o.getBoolArg("arm-fpu",False)
 arm_neon = o.getBoolArg("arm-neon",False)
+arm_arch = o.arm_arch
 
 the_os, cpu = config.getTarget()
 
@@ -158,14 +159,19 @@ if config.getCompiler() == 'GCC':
             APP_CXXFLAGS += "-Wstrict-aliasing=0 "
         else: # gcc 4.3 or later
             APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
+
     if arm_fpu:
-        ARM_FPU_FLAGS = "-mfloat-abi=softfp -mfpu=vfp -march=armv6 -Wno-cast-align " # compile to use hardware fpu and armv6
+        ARM_FPU_FLAGS = "-mfloat-abi=softfp -mfpu=vfp -march=%s -Wno-cast-align " % arm_arch # compile to use hardware fpu
         OPT_CXXFLAGS += ARM_FPU_FLAGS
         DEBUG_CXXFLAGS += ARM_FPU_FLAGS
     if arm_neon:
-        ARM_NEON_FLAGS = "-mfloat-abi=softfp -mfpu=neon -march=armv7-a -Wno-cast-align "  # compile to use neon vfp and armv7
-        OPT_CXXFLAGS += ARM_NEON_FLAGS  # compile to use neon vfp and armv7
+        ARM_NEON_FLAGS = "-mfloat-abi=softfp -mfpu=neon -march=%s -Wno-cast-align " % arm_arch # compile to use neon vfp
+        OPT_CXXFLAGS += ARM_NEON_FLAGS
         DEBUG_CXXFLAGS += ARM_NEON_FLAGS
+    #if arm_arch:
+        #OPT_CXXFLAGS += "-march=%s " % arm_arch
+        #DEBUG_CXXFLAGS += "-march=%s " % arm_arch
+
     if config.getDebug():
         APP_CXXFLAGS += ""
     else:
@@ -181,9 +187,10 @@ elif config.getCompiler() == 'VS':
             APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- -Zc:forScope "
         else:
             OPT_CXXFLAGS = "-O2 -GR- "
-
+        if arm_arch:
+            OPT_CXXFLAGS += "-QR%s " % arm_arch
         if arm_fpu:
-            OPT_CXXFLAGS += "-QRfpe- -QRarch6"  # compile to use hardware fpu and armv6
+            OPT_CXXFLAGS += "-QRfpe- " # compile to use hardware fpu
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
         APP_CFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
@@ -242,8 +249,8 @@ if the_os == "darwin":
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
 
     # If an sdk is selected align OS and gcc/g++ versions to it
-    if o.sdk_version is not None:
-        os_ver,sdk_number = _setSDKParams(o.sdk_version, os_ver)
+    if o.mac_sdk_version is not None:
+        os_ver,sdk_number = _setSDKParams(o.mac_sdk_version, os_ver)
         APP_CXXFLAGS += "-mmacosx-version-min=%s -isysroot /Developer/SDKs/MACOSX%s.sdk " % (os_ver,sdk_number)
     else:
         APP_CXXFLAGS += "-mmacosx-version-min=%s " % os_ver
