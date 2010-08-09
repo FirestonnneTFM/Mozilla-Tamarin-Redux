@@ -513,15 +513,27 @@ class PerformanceRuntest(RuntestBase):
         # testData structure:
         # { testName : { metric : { results1/2 : [], best1/2 : num, avg1/2 : num, spdup : num }}}
 
-        # calc values for each metric in resultDict
-        for metric in resultDict:
+        # calc values for each metric in resultDict and resultDic2 if defined
+        if resultDict2:
+            # it's possible that there are different metrics being reported by each vm
+            # only calculate the common metrics (intersection of the dict keys)
+            metrics = set(resultDict.keys()) & set(resultDict2.keys())
+        else:
+            metrics = resultDict.keys()
+        for metric in metrics:
             # if using the index file, compute the indexes and use those as results instead of raw values
             if self.indexFile and not self.saveIndex:
                 resultDict[metric] = [self.computeIndex(testName, metric, x) for x in resultDict[metric]]
             # Store the results
             self.testData.setdefault(testName, {}).setdefault(metric, {}).setdefault('results1', []).extend(resultDict[metric])
             # calculate the best result
-            r1 = self.testData[testName][metric]['best1'] = self.metricInfo[metric]['best'](resultDict[metric])
+            try:
+                r1 = self.testData[testName][metric]['best1'] = self.metricInfo[metric]['best'](resultDict[metric])
+            except KeyError:
+                # metric is not defined in metricinfo, default to using min
+                r1 = self.testData[testName][metric]['best1'] = min(resultDict[metric])
+                # also add the metric to metricinfo
+                self.metricInfo[metric] = {'best':min, 'largerIsFaster':False}
             a1 = self.testData[testName][metric]['avg1'] = mean(resultDict[metric])
 
             if self.logresults and len(resultDict[metric]) > 1:
