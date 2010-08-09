@@ -409,7 +409,7 @@ class sandbox:
     sb_linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     sb_linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     sb_linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
                     'silent':WithProperties('%s','silent'),
@@ -424,7 +424,7 @@ class sandbox:
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
     sb_linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm_d', 'false'],
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm_d', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
                     'silent':WithProperties('%s','silent'),
@@ -484,11 +484,11 @@ class sandbox:
     sb_winmobile_emulator_compile_factory.addStep(sync_update)
     sb_winmobile_emulator_compile_factory.addStep(bb_slaveupdate(slave="winmobile-emulator"))
     sb_winmobile_emulator_compile_factory.addStep(compile_builtin)
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="ReleaseARM", shellname="avmshell_arm", args="--enable-shell --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-fpu-ARM", shellname="avmshell_fpu_arm", args="--enable-shell --enable-arm-fpu --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Debug-fpu-ARM", shellname="avmshell_fpu_arm_d", args="--enable-shell --enable-debug --enable-arm-fpu --target=arm-windows", upload="false"))
+    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="ReleaseARM", shellname="avmshell_arm", args="--enable-shell --arm-arch=arch5 --target=arm-windows", upload="false"))
+    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --arm-arch=arch5 --target=arm-windows", upload="false"))
+    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-fpu-ARM", shellname="avmshell_fpu_arm", args="--enable-shell --enable-arm-fpu --arm-arch=arch6 --target=arm-windows", upload="false"))
+    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --arm-arch=arch5 --target=arm-windows", upload="false"))
+    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Debug-fpu-ARM", shellname="avmshell_fpu_arm_d", args="--enable-shell --enable-debug --enable-arm-fpu --arm-arch=arch6 --target=arm-windows", upload="false"))
     sb_winmobile_emulator_compile_factory.addStep(BuildShellCommand(
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=x86_64-win', 'avmshell_64', 'false'],
                 env={
