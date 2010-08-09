@@ -722,21 +722,31 @@ class PerformanceRuntest(RuntestBase):
                 exit(-1)
         # end for i in range(iterations)
 
-        # check the resultlists for the correct # of iterations
-        if len(resultsDict1[resultsDict1.keys()[0]]) != self.iterations:
-            # something went wrong, dump output
-            self.js_print('avm resultlist is not the same length as the # of iterations (%s)' % self.iterations)
-            self.js_print('output from %s: %s' % (testName, f1))
+        if not self.validResultsDictionary('avm', resultsDict1, testName, f1):
             return
-        if self.avm2 and (len(resultsDict2[resultsDict2.keys()[0]]) != self.iterations):
-            self.js_print('avm2 resultlist is not the same length as the # of iterations (%s)' % self.iterations)
-            self.js_print('output from %s: %s' % (testName, f2))
+        if self.avm2 and not self.validResultsDictionary('avm2', resultsDict2, testName, f2):
             return
-
+        
         # calculate best results and store to self.testData
         self.calculateSpeedup(testName, resultsDict1, resultsDict2)
 
         self.printTestResults(testName)
+    
+    def validResultsDictionary(self, avmName, resultsDict, testName, output):
+        '''Make sure that the results dictionary has valid number of results for each metric
+            Return True if valid, False if not valid
+        '''
+        if not resultsDict:
+            self.js_print('%s : No metrics returned from test!' % testName)
+            self.js_print('  test output: %s' % [l for l in output])
+            return False
+        # check to make sure every metric has the right number of results
+        for metric in resultsDict.keys():
+            if len(resultsDict[metric]) != self.iterations:
+                self.js_print('%s : %s number of results for the %s metric is != # of iterations (%s)' %
+                              (testName, avmName, metric, self.iterations))
+                return False
+        return True
 
     def printTestResults(self, testName):
         '''Print the results for a single test'''
