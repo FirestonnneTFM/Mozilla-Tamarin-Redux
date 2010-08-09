@@ -101,6 +101,7 @@ as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebu
 # mmgc tests fail on avmdiff, does not support passing args to vm
 mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
 versioning/.*, .*diff, skip, skip since avmdiff does not support passing args bug 487841
+as3/Vector/bug504525/.*, .*diff, skip, skip since avmdiff does not support passing args bug 487841
 
 # trim down tests to save time
 ecma3/Unicode/.*, .*diff, skip , trim down tests
