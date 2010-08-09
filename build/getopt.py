@@ -46,7 +46,7 @@ _yes = re.compile("^(t|true|yes|y|1)$", re.I)
 _no = re.compile("^(f|false|no|n|0)$", re.I)
 _help = re.compile("^(-h|--help)$")
 _sdk = re.compile("^--mac-sdk=(.*)$")
-_arm_arch = re.compile("^--arm_arch=(.*)$")
+_arm_arch = re.compile("^--arm-arch=(.*)$")
 
 class Options:
     def __init__(self, argv = sys.argv):
