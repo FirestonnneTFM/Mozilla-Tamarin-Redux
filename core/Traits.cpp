@@ -2140,4 +2140,57 @@ failure:
     {
         return (Traits**) gc->Alloc((size+1) * sizeof(Traits*), MMgc::GC::kZero);
     }
+
+    // Returns true if a value of type rhs can be assigned to a variable
+    // or parameter of type lhs without modifying the representation of the value.
+    // It is not just a subtypeof test, for example int is a subtype of Object
+    // but they use different representations.
+    bool Traits::canAssign(Traits* lhs, Traits* rhs)
+    {
+        if (!Traits::isMachineCompatible(lhs,rhs)) {
+            // no machine type is assignment-compatible with any other
+            return false;
+        }
+
+        if (!lhs)
+            return true;
+
+        // type on right must be same class or subclass of type on left.
+        Traits* t = rhs;
+        while (t != lhs && t != NULL)
+            t = t->base;
+        return t != NULL;
+    }
+
+    // Return the slot type (if slot), return type (if getter), or NULL.
+    Traits* Traits::readBinding(Traits* traits, Binding b)
+    {
+    	AvmAssert((!traits && AvmCore::bindingKind(b) == BKIND_NONE) ||
+    			  (traits && traits->isResolved()));
+        switch (AvmCore::bindingKind(b))
+        {
+        default:
+            AvmAssert(false); // internal error - illegal binding type
+        case BKIND_GET:
+        case BKIND_GETSET:
+        {
+            int m = AvmCore::bindingToGetterId(b);
+            MethodInfo *f = traits->getTraitsBindings()->getMethod(m);
+            MethodSignaturep fms = f->getMethodSignature();
+            return fms->returnTraits();
+        }
+        case BKIND_SET:
+            // TODO lookup type here. get/set must have same type.
+        case BKIND_NONE:
+            // dont know what this is
+            // fall through
+        case BKIND_METHOD:
+            // extracted method or dynamic data, don't know which
+            return NULL;
+        case BKIND_VAR:
+        case BKIND_CONST:
+            return traits->getTraitsBindings()->getSlotTraits(AvmCore::bindingToSlotId(b));
+        }
+    }
+
 }

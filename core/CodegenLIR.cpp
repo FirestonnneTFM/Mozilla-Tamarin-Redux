@@ -739,6 +739,7 @@ namespace avmplus
         ms(ms),
         toplevel(toplevel),
         pool(i->pool()),
+        driver(NULL),
         state(NULL),
         mopsRangeCheckFilter(NULL),
         restArgc(NULL),
@@ -879,7 +880,9 @@ namespace avmplus
         nanojit::BitSet *notnull;       // stack locations we know are not null
         LIns* vars;                     // LIns that defines the vars[] array
         LIns* tags;                     // LIns that defines the tags[] array
-        int nvar;                       // this method's frame size.
+        const int nvar;                 // this method's frame size.
+        const int scopeBase;            // index of first local scope
+        const int stackBase;            // index of first stack slot
         int restLocal;                  // -1 or, if it's lazily allocated, the local holding the rest array
 
         // false after an unconditional control flow instruction (jump, throw, return),
@@ -898,9 +901,13 @@ namespace avmplus
 #endif
 
     public:
-        VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out, int nvar, int restLocal, int code_len)
+        VarTracker(MethodInfo* info, Allocator& alloc, LirWriter *out,
+                int nvar, int scopeBase, int stackBase, int restLocal,
+                uint32_t code_len)
             : LirWriter(out), alloc(alloc),
-              vars(NULL), tags(NULL), nvar(nvar), restLocal(restLocal), reachable(true)
+              vars(NULL), tags(NULL),
+              nvar(nvar), scopeBase(scopeBase), stackBase(stackBase),
+              restLocal(restLocal), reachable(true)
 #ifdef DEBUGGER
             , haveDebugger(info->pool()->core->debugger() != NULL)
 #endif
@@ -936,13 +943,12 @@ namespace avmplus
         }
 
         // We're at the start of an AS3 basic block; syncronize our
-        // notnull bits for that block with ones from the verifier.
+        // notnull bits for that block with ones from the driver.
         void syncNotNull(nanojit::BitSet* bits, const FrameState* state) {
-            int scopeTop = state->verifier->scopeBase + state->scopeDepth;
-            int stackBase = state->verifier->stackBase;
+            int scopeTop = scopeBase + state->scopeDepth;
             int stackTop = stackBase + state->stackDepth;
             if (state->targetOfBackwardsBranch) {
-                // clear any bits that are not set in verifier state
+                // Clear any notNull bits that are not set in FrameState.
                 for (int i=0, n=nvar; i < n; i++) {
                     const Value& v = state->value(i);
                     bool stateNotNull = v.notNull && isNullable(v.traits);
@@ -953,7 +959,7 @@ namespace avmplus
                 }
                 printNotNull(bits, "loop label");
             } else {
-                // set any bits that are set in verifier state
+                // Set any notNull bits that are set in FrameState.
                 for (int i=0, n=nvar; i < n; i++) {
                     const Value& v = state->value(i);
                     bool stateNotNull = v.notNull && isNullable(v.traits);
@@ -1019,8 +1025,7 @@ namespace avmplus
             if (target.notnull) {
                 printNotNull(notnull, "current");
                 printNotNull(target.notnull, "target");
-                int scopeTop = state->verifier->scopeBase + state->scopeDepth;
-                int stackBase = state->verifier->stackBase;
+                int scopeTop = scopeBase + state->scopeDepth;
                 int stackTop = stackBase + state->stackDepth;
                 // make sure our notnull bits at the target of the backedge were safe.
                 for (int i=0, n=nvar; i < n; i++) {
@@ -1224,7 +1229,7 @@ namespace avmplus
         return lirout->insLoad(LIR_ldd, vars, i*8, ACCSET_VARS);
     }
 
-    // load a pointer-sized var, and update null tracking state if the verifier
+    // Load a pointer-sized var, and update null tracking state if the driver
     // informs us that it is not null via FrameState.value.
     LIns* CodegenLIR::localGetp(int i)
     {
@@ -1253,23 +1258,22 @@ namespace avmplus
     {
         const uint8_t* pc = state->abc_pc;
 
-        // each exception edge needs to be tracked to make sure we correctly
+        // Each exception edge needs to be tracked to make sure we correctly
         // model the notnull state at the starts of catch blocks.  Treat any function
         // with side effects as possibly throwing an exception.
 
-        // we must Ignore catch blocks that the verifier has determined are not reachable,
+        // We must ignore catch blocks that the driver has determined are not reachable,
         // because we emit a call to debugExit (modeled as possibly throwing) as part of
         // OP_returnvoid/returnvalue, which ordinarily don't throw.
-        if (!ci->_isPure && pc >= state->verifier->tryFrom && pc < state->verifier->tryTo) {
+        if (!ci->_isPure && pc >= try_from && pc < try_to) {
             // inside exception handler range, calling a function that could throw
             ExceptionHandlerTable *exTable = info->abc_exceptions();
-            const uint8_t* tryBase = state->verifier->code_pos;
             for (int i=0, n=exTable->exception_count; i < n; i++) {
                 ExceptionHandler* handler = &exTable->exceptions[i];
-                const uint8_t* from   = tryBase + handler->from;
-                const uint8_t* to     = tryBase + handler->to;
-                const uint8_t* target = tryBase + handler->target;
-                if (pc >= from && pc < to && state->verifier->hasFrameState(target))
+                const uint8_t* from   = code_pos + handler->from;
+                const uint8_t* to     = code_pos + handler->to;
+                const uint8_t* target = code_pos + handler->target;
+                if (pc >= from && pc < to && driver->hasFrameState(target))
                     varTracker->trackForwardEdge(getCodegenLabel(target));
             }
         }
@@ -1594,8 +1598,8 @@ namespace avmplus
     // is local_count + scope_depth + stack_depth, i.e. enough for the whole ABC frame.
     // values at any given point in the jit code are are represented according to the
     // statically known type of the variable at that point in the code.  (the type and
-    // representation may change at different points.  verifier->frameState maintains
-    // the known static types of variables.
+    // representation may change at different points.  CodegenDriver maintains
+    // the known static types of variables and exposes them via FrameState.
     //
     // tags (LIR_allocp) SlotStorageType of each var in vars, one byte per variable.
     //
@@ -1625,10 +1629,15 @@ namespace avmplus
     // jump forward, pick a catch block, then jump backwards to the catch block.
     //
 
-    void CodegenLIR::writePrologue(const FrameState* state, const uint8_t* pc)
+    void CodegenLIR::writePrologue(const FrameState* state, const uint8_t* pc,
+            CodegenDriver* driver)
     {
         this->state = state;
-        framesize = state->verifier->frameSize;
+        this->driver = driver;
+        this->code_pos = pc;
+        this->try_from = driver->getTryFrom();
+        this->try_to = driver->getTryTo();
+        framesize = ms->frame_size();
 
         if (info->needRest() && info->lazyRest())
             restLocal = ms->param_count()+1;
@@ -1668,7 +1677,7 @@ namespace avmplus
         lirout = new (*alloc1) Specializer(lirout, core->config.njconfig);
 
         #ifdef DEBUGGER
-        dbg_framesize = state->verifier->local_count + state->verifier->max_scope;
+        dbg_framesize = ms->local_count() + ms->max_scope();
         #ifdef DEBUG
         DebuggerCheck *checker = NULL;
         if (haveDebugger) {
@@ -1681,8 +1690,9 @@ namespace avmplus
         emitStart(*alloc1, prolog_buf, lirout);
 
         // add the VarTracker filter last because we want it to be first in line.
-        lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout, framesize, restLocal,
-                state->verifier->code_length);
+        lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout,
+                framesize, ms->scope_base(), ms->stack_base(), restLocal,
+                info->parse_code_length());
 
         // last pc value that we generated a store for
         lastPcSave = NULL;
@@ -1757,7 +1767,7 @@ namespace avmplus
         interruptable = ! info->isNonInterruptible();
 
         // then space for the exception frame, be safe if its an init stub
-        if (state->verifier->hasReachableExceptions()) {
+        if (driver->hasReachableExceptions()) {
             // [_save_eip][ExceptionFrame]
             // offsets of local vars, rel to current ESP
             _save_eip = insAlloc(sizeof(intptr_t));
@@ -1911,7 +1921,7 @@ namespace avmplus
         }
 
         // set remaining locals to undefined
-        for (int i=firstLocal, n = state->verifier->local_count; i < n; i++) {
+        for (int i=firstLocal, n = ms->local_count(); i < n; i++) {
             AvmAssert(state->value(i).traits == NULL);
             localSet(i, undefConst, NULL); // void would be more precise
         }
@@ -1925,7 +1935,7 @@ namespace avmplus
 
         #ifdef DEBUGGER
         if (haveDebugger) {
-            for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i) {
+            for (int i = ms->scope_base(), n = ms->stack_base(); i < n; ++i) {
                 localSet(i, undefConst, VOID_TYPE);
             }
 
@@ -1934,7 +1944,7 @@ namespace avmplus
                 tags,
                 csn,
                 vars,
-                state->verifier->hasReachableExceptions() ? _save_eip : InsConstPtr(0)
+                driver->hasReachableExceptions() ? _save_eip : InsConstPtr(0)
                 );
         }
         #endif // DEBUGGER
@@ -1961,7 +1971,7 @@ namespace avmplus
         redirectWriter->out = body;
         /// END SWITCH CODE
 
-        if (state->verifier->hasReachableExceptions()) {
+        if (driver->hasReachableExceptions()) {
             // _ef.beginTry(core);
             callIns(FUNCTIONID(beginTry), 2, _ef, coreAddr);
 
@@ -2061,7 +2071,6 @@ namespace avmplus
 #endif
 
         // If this is a backwards branch, generate an interrupt check.
-        // current verifier state, includes tack pointer.
         if (interruptable && core->config.interrupts && state->targetOfBackwardsBranch) {
             LIns* interrupted = loadIns(LIR_ldi, offsetof(AvmCore,interrupted),
                     coreAddr, ACCSET_OTHER, LOAD_VOLATILE);
@@ -2075,9 +2084,9 @@ namespace avmplus
         verbose_only( if (vbWriter) { vbWriter->flush();} )
 #ifdef DEBUG
         this->state = NULL; // prevent access to stale state
-        int scopeTop = state->verifier->scopeBase + state->scopeDepth;
+        int scopeTop = ms->scope_base() + state->scopeDepth;
         for (int i=0, n=state->sp()+1; i < n; i++) {
-            if (i >= scopeTop && i < state->verifier->stackBase)
+            if (i >= scopeTop && i < ms->stack_base())
                 continue;
             const Value& v = state->value(i);
             AvmAssert(!jit_sst[i] || jit_sst[i] == v.sst_mask);
@@ -2576,10 +2585,8 @@ namespace avmplus
 
     /**
      * emitCoerceCall is used when the jit finds an opportunity to early bind that the
-     * verifier did not.  It does the coersions using the signature of the callee, and
-     * does not mutate FrameState.  (using the combination of
-     * Verifier::emitCoerceArgs() and writeMethodCall(), from within the jit, is being
-     * expressly avoided because we don't want the JIT to mutate FrameState.
+     * driver did not.  It does the coersions using the signature of the callee, and
+     * does not mutate FrameState.
      */
     void CodegenLIR::emitCoerceCall(AbcOpcode opcode, intptr_t method_id, int argc, MethodSignaturep mms)
     {
@@ -2603,7 +2610,7 @@ namespace avmplus
         {
             // local scope
             AvmAssert(state->scopeDepth > 0); // verifier checked.
-            emitCopy(state->verifier->scopeBase, dest);
+            emitCopy(ms->scope_base(), dest);
         }
     }
 
@@ -2648,7 +2655,7 @@ namespace avmplus
             emitGetslot(opd1, state->sp(), type);
             break;
         case OP_getglobalslot: {
-            int32_t dest_index = state->sp(); // verifier already incremented it
+            int32_t dest_index = state->sp(); // driver already incremented it
             uint32_t slot = opd1;
             emitGetGlobalScope(dest_index);
             emitGetslot(slot, dest_index, type /* slot type */);
@@ -2674,7 +2681,7 @@ namespace avmplus
             emitGetscope(opd1, state->sp()+1);
             break;
         case OP_getscopeobject:
-            emitCopy(opd1+state->verifier->scopeBase, state->sp()+1);
+            emitCopy(opd1 + ms->scope_base(), state->sp()+1);
             break;
         case OP_newfunction:
             AvmAssert(pool->getMethodInfo(opd1)->declaringTraits() == type);
@@ -2750,7 +2757,7 @@ namespace avmplus
         }
 
         default:
-            // verifier has called writeOp1 improperly
+            // writeOp1() called with an improper opcode.
             AvmAssert(false);
             break;
         }
@@ -2877,7 +2884,7 @@ namespace avmplus
             const Multiname* name = pool->precomputedMultiname(index);
 
             Binding b = toplevel->getBinding(base, name);
-            Traits* propType = state->verifier->readBinding(base, b);
+            Traits* propType = Traits::readBinding(base, b);
             const TraitsBindingsp basetd = base->getTraitsBindings();
 
             if (AvmCore::isSlotBinding(b)) {
@@ -2916,7 +2923,7 @@ namespace avmplus
             const Multiname* name = pool->precomputedMultiname(index);
 
             Binding b = toplevel->getBinding(base, name);
-            Traits* propType = state->verifier->readBinding(base, b);
+            Traits* propType = Traits::readBinding(base, b);
 
             if (AvmCore::isSlotBinding(b)) {
                 int slot_id = AvmCore::bindingToSlotId(b);
@@ -3206,7 +3213,7 @@ namespace avmplus
         else if (in && !in->isMachineType() && !result->isMachineType()
                && in != STRING_TYPE && in != NAMESPACE_TYPE)
         {
-            if (!state->verifier->canAssign(result, in)) {
+            if (!Traits::canAssign(result, in)) {
                 // coerceobj_obj() is void, but we mustn't optimize it out; we only call it when required
                 callIns(FUNCTIONID(coerceobj_obj), 3,
                     env_param, localGetp(loc), InsConstPtr(result));
@@ -3271,8 +3278,7 @@ namespace avmplus
         AvmAssert(state->abc_pc == pc);
         // update bytecode ip if necessary
         if (_save_eip && lastPcSave != pc) {
-            const uint8_t* tryBase = state->verifier->code_pos;
-            stp(InsConstPtr((void*)(pc - tryBase)), _save_eip, 0, ACCSET_OTHER);
+            stp(InsConstPtr((void*)(pc - code_pos)), _save_eip, 0, ACCSET_OTHER);
             lastPcSave = pc;
         }
     }
@@ -3302,7 +3308,7 @@ namespace avmplus
         AvmAssert(ms->argcOk(argc));
         int objDisp = state->sp() - argc;
         for (int arg = 0; arg <= argc && arg <= ms->param_count(); arg++)
-            AvmAssert(state->verifier->canAssign(state->value(objDisp+arg).traits, ms->paramTraits(arg)));
+            AvmAssert(Traits::canAssign(state->value(objDisp+arg).traits, ms->paramTraits(arg)));
         for (int arg = ms->param_count()+1; arg <= argc; arg++) {
             BuiltinType t = bt(state->value(objDisp+arg).traits);
             AvmAssert(valueStorageType(t) == SST_atom);
@@ -3548,7 +3554,7 @@ namespace avmplus
             if (scopeTypes->size == 0)
             {
                 // no captured scopes, so global is local scope 0
-                ptr_index = state->verifier->scopeBase;
+                ptr_index = ms->scope_base();
                 t = state->value(ptr_index).traits;
                 ptr = localGetp(ptr_index);
                 AvmAssert(state->value(ptr_index).notNull);
@@ -3820,7 +3826,7 @@ namespace avmplus
                 }
                 #endif // DEBUGGER
 
-                if (state->verifier->hasReachableExceptions())
+                if (driver->hasReachableExceptions())
                 {
                     // _ef.endTry();
                     callIns(FUNCTIONID(endTry), 1, _ef);
@@ -4084,7 +4090,7 @@ namespace avmplus
                 int extraScopes = state->scopeDepth;
 
                 // prepare scopechain args for call
-                LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
+                LIns* ap = storeAtomArgs(extraScopes, ms->scope_base());
 
                 LIns* outer = loadEnvScope();
 
@@ -4142,7 +4148,7 @@ namespace avmplus
                 LIns* out;
                 if (AvmCore::isSlotBinding(b)) {
                     // can early bind call to closure in slot
-                    Traits* slotType = state->verifier->readBinding(baseTraits, b);
+                    Traits* slotType = Traits::readBinding(baseTraits, b);
                     // todo if funcValue is already a ScriptObject then don't box it, use a different helper.
                     LIns* funcValue = loadFromSlot(baseDisp, AvmCore::bindingToSlotId(b), slotType);
                     LIns* funcAtom = nativeToAtom(funcValue, slotType);
@@ -4308,7 +4314,7 @@ namespace avmplus
                 LIns* base = localGetp(localindex);
 
                 // prepare scopechain args for call
-                LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
+                LIns* ap = storeAtomArgs(extraScopes, ms->scope_base());
 
                 LIns* i3 = callIns(FUNCTIONID(newclass), 5,
                     env_param, InsConstPtr(ctraits), base, outer, ap);
@@ -4357,7 +4363,7 @@ namespace avmplus
                 int extraScopes = state->scopeDepth;
 
                 // prepare scopechain args for call
-                LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
+                LIns* ap = storeAtomArgs(extraScopes, ms->scope_base());
 
                 LIns* outer = loadEnvScope();
 
@@ -5238,7 +5244,7 @@ namespace avmplus
     void CodegenLIR::writeEpilogue(const FrameState *state)
     {
         this->state = state;
-        this->labelCount = state->verifier->getBlockCount();
+        this->labelCount = driver->getBlockCount();
 
         if (mop_rangeCheckFailed_label.unpatchedEdges) {
             emitLabel(mop_rangeCheckFailed_label);
@@ -5264,7 +5270,8 @@ namespace avmplus
             callIns(FUNCTIONID(handleInterruptMethodEnv), 1, env_param);
         }
 
-        if (state->verifier->hasReachableExceptions()) {
+        if (driver->hasReachableExceptions()) {
+            // exception case
             emitLabel(catch_label);
 
             // This regfence is necessary for correctness,
@@ -5272,21 +5279,20 @@ namespace avmplus
             Ins(LIR_regfence);
 
             // _ef.beginCatch()
-            int stackBase = state->verifier->stackBase;
+            int stackBase = ms->stack_base();
             LIns* pc = loadIns(LIR_ldp, 0, _save_eip, ACCSET_OTHER);
             LIns* slotAddr = leaIns(stackBase * 8, vars);
             LIns* tagAddr = leaIns(stackBase, tags);
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
             int handler_count = info->abc_exceptions()->exception_count;
-            const uint8_t* tryBase = state->verifier->code_pos;
             // Jump to catch handler
             // Find last handler, to optimize branches generated below.
             int i;
             for (i = handler_count-1; i >= 0; i--) {
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
-                const uint8_t* handler_pc = tryBase + h->target;
-                if (state->verifier->hasFrameState(handler_pc)) break;
+                const uint8_t* handler_pc = code_pos + h->target;
+                if (driver->hasFrameState(handler_pc)) break;
             }
             int last_ordinal = i;
             // There should be at least one reachable handler.
@@ -5294,8 +5300,8 @@ namespace avmplus
             // Do a compare & branch to each possible target.
             for (int j = 0; j <= last_ordinal; j++) {
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[j];
-                const uint8_t* handler_pc = tryBase + h->target;
-                if (state->verifier->hasFrameState(handler_pc)) {
+                const uint8_t* handler_pc = code_pos + h->target;
+                if (driver->hasFrameState(handler_pc)) {
                     CodegenLabel& label = getCodegenLabel(handler_pc);
                     AvmAssert(label.labelIns != NULL);
                     if (j == last_ordinal) {
@@ -5681,9 +5687,9 @@ namespace avmplus
     }
 
     CodegenLabel& CodegenLIR::getCodegenLabel(const uint8_t* pc) {
-        AvmAssert(state->verifier->hasFrameState(pc));
+        AvmAssert(driver->hasFrameState(pc));
         if (!blockLabels)
-            blockLabels = new (*alloc1) HashMap<const uint8_t*,CodegenLabel*>(*alloc1, state->verifier->getBlockCount());
+            blockLabels = new (*alloc1) HashMap<const uint8_t*,CodegenLabel*>(*alloc1, driver->getBlockCount());
         CodegenLabel* label = blockLabels->get(pc);
         if (!label) {
             label = new (*alloc1) CodegenLabel();
@@ -5692,7 +5698,7 @@ namespace avmplus
 #ifdef NJ_VERBOSE
         if (!label->name && vbNames) {
             char *name = new (*lir_alloc) char[16];
-            VMPI_sprintf(name, "B%d", int(pc - state->verifier->code_pos));
+            VMPI_sprintf(name, "B%d", int(pc - code_pos));
             label->name = name;
         }
 #endif
@@ -6167,9 +6173,9 @@ namespace avmplus
         Allocator dv_alloc;
 
         // map of label -> bitset, tracking what is livein at each label.
-        // populated by deadvars_analyze, then used by deadvars_kill
-        // estimate number of required buckets based on the verifier's labelCount,
-        // which is slightly below the actual # of labels in LIR.  being slightly low
+        // populated by deadvars_analyze, then used by deadvars_kill.
+        // Estimated number of required buckets is based on the driver's block count,
+        // which is slightly below the actual # of labels in LIR.  Being slightly low
         // is okay for a bucket hashtable.  note: labelCount is 0 for simple 1-block
         // methods, so use labelCount+1 as the estimate to ensure we have >0 buckets.
         HashMap<LIns*, nanojit::BitSet*> varlabels(dv_alloc, labelCount + 1);
@@ -6258,7 +6264,7 @@ namespace avmplus
         PERFM_NVPROF("IR-bytes", frag->lirbuf->byteCount());
         PERFM_NVPROF("IR", frag->lirbuf->insCount());
 
-        bool keep = //!state->verifier->hasReachableExceptions() &&
+        bool keep = //!driver->hasReachableExceptions() &&
             !assm->error();
 #ifdef AVMPLUS_JITMAX
         jitcount++;

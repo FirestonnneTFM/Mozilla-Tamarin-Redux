@@ -55,7 +55,7 @@ namespace avmplus
         , bool secondTry
 #endif
         ) : tryFrom(NULL), tryTo(NULL)
-          , ms(ms)
+          , info(info), ms(ms)
           , worklist(NULL)
           , blockStates(NULL)
           , handlerIsReachable(false)
@@ -63,22 +63,15 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
         this->secondTry = secondTry;
 #endif
-        this->info   = info;
         this->core   = info->pool()->core;
         this->pool   = info->pool();
         this->toplevel = toplevel;
         this->abc_env  = abc_env;
 
-        max_stack = ms->max_stack();
-        local_count = ms->local_count();
-        max_scope = ms->max_scope();
-
-        stackBase = scopeBase + max_scope;
-        frameSize = stackBase + max_stack;
         state = NULL;
 
         #ifdef VMCFG_RESTARG_OPTIMIZATION
-        restArgAnalyzer.init(core, info, frameSize);
+        restArgAnalyzer.init(core, info, ms->frame_size());
         #endif
 
         #ifdef AVMPLUS_VERBOSE
@@ -100,7 +93,7 @@ namespace avmplus
         }
     }
 
-    bool Verifier::hasReachableExceptions()
+    bool Verifier::hasReachableExceptions() const
     {
         // Valid during code generation only.
         AvmAssert(emitPass);
@@ -127,9 +120,12 @@ namespace avmplus
     {
         MethodInfo* info;
         Toplevel* toplevel;
+        Verifier *verifier;
     public:
-        ScopeWriter(CodeWriter* coder, MethodInfo* info, Toplevel* toplevel)
-            : NullWriter(coder), info(info), toplevel(toplevel)
+        ScopeWriter(CodeWriter* coder, MethodInfo* info,
+                Toplevel* toplevel, Verifier* verifier)
+            : NullWriter(coder), info(info),
+              toplevel(toplevel), verifier(verifier)
         {}
 
         void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits* type)
@@ -195,8 +191,8 @@ namespace avmplus
                 }
 
                 #ifdef AVMPLUS_VERBOSE
-                if (state->verifier->verbose)
-                    state->verifier->printScope("function-scope", fscope);
+                if (verifier->verbose)
+                    verifier->printScope("function-scope", fscope);
                 #endif
             } else if (opcode == OP_newclass) {
                 PoolObject* pool = info->pool();
@@ -219,7 +215,7 @@ namespace avmplus
                     // construct the instance.  See ScriptObject::createInstance()
                     Traits* baseCTraits = state->scopeValue(state->scopeDepth-1).traits;
                     if (!baseCTraits || baseCTraits->itraits != itraits->base)
-                        state->verifier->verifyFailed(kCorruptABCError);
+                        verifier->verifyFailed(kCorruptABCError);
                 }
 
                 // add a type constraint for the "this" scope of instance methods
@@ -246,8 +242,8 @@ namespace avmplus
                     iscope = cur_iscope;
                 }
                 #ifdef AVMPLUS_VERBOSE
-                if (state->verifier->verbose)
-                    state->verifier->printScope("class-scope", cscope);
+                if (verifier->verbose)
+                    verifier->printScope("class-scope", cscope);
                 #endif
             }
             coder->writeOp1(state, pc, opcode, imm30, type);
@@ -797,7 +793,7 @@ namespace avmplus
             printState(buf, state);
         }
         #endif
-        coder->writePrologue(state, code_pos);
+        coder->writePrologue(state, code_pos, this);
         if (code_length > 0 && code_pos[0] == OP_label) {
             // a reachable block starts at code_pos; explicitly create it,
             // which puts it on the worklist.
@@ -823,7 +819,7 @@ namespace avmplus
 #endif
 
         // save computed ScopeTypeChain for OP_newfunction and OP_newclass
-        ScopeWriter scopeWriter(coder, info, toplevel);
+        ScopeWriter scopeWriter(coder, info, toplevel, this);
         coder = &scopeWriter;
 
         #ifdef AVMPLUS_VERBOSE
@@ -835,7 +831,7 @@ namespace avmplus
         this->coder = coder;
         parseBodyHeader();          // reset code_pos & code_length
         checkParams();
-        coder->writePrologue(state, code_pos);
+        coder->writePrologue(state, code_pos, this);
         const uint8_t* end_pos = code_pos;
         // typically, first block is not in blockStates: verify it explicitly
         if (!hasFrameState(code_pos))
@@ -875,7 +871,7 @@ namespace avmplus
     {
         const int param_count = ms->param_count();
 
-        if (local_count < param_count+1) {
+        if (ms->local_count() < param_count+1) {
             // must have enough locals to hold all parameters including this
             toplevel->throwVerifyError(kCorruptABCError);
         }
@@ -890,7 +886,7 @@ namespace avmplus
             verifyFailed(kNoScopeError, core->toErrorString(info));
         }
 
-        state = mmfx_new( FrameState(this) );
+        state = mmfx_new( FrameState(ms) );
 
         // initialize method param types.
         // We already verified param_count is a legal register so
@@ -910,7 +906,7 @@ namespace avmplus
             checkLocal(param_count);  // ensure param_count <= max_reg
         }
 
-        for (int i=first_local; i < local_count; i++)
+        for (int i=first_local, n = ms->local_count(); i < n; i++)
             state->setType(i, NULL); // void would be more precise.
     }
 
@@ -1493,7 +1489,7 @@ namespace avmplus
                 Traits *t = checkTypeName(imm30); // CONSTANT_Multiname
                 int index = sp;
                 Traits* rhs = state->value(index).traits;
-                if (!canAssign(t, rhs))
+                if (!Traits::canAssign(t, rhs))
                 {
                     Traits* resultType = t;
                     // result is typed value or null, so if type can't hold null,
@@ -1913,7 +1909,7 @@ namespace avmplus
             case OP_pushscope:
             {
                 checkStack(1,0);
-                if (state->scopeDepth+1 > max_scope)
+                if (state->scopeDepth + 1 > ms->max_scope())
                     verifyFailed(kScopeStackOverflowError);
 
                 Traits* scopeTraits = state->peek().traits;
@@ -1929,9 +1925,9 @@ namespace avmplus
                 }
 
                 emitCheckNull(sp);
-                coder->writeOp1(state, pc, opcode, scopeBase+state->scopeDepth);
+                coder->writeOp1(state, pc, opcode, ms->scope_base() + state->scopeDepth);
                 state->pop();
-                state->setType(scopeBase+state->scopeDepth, scopeTraits, true, false);
+                state->setType(ms->scope_base() + state->scopeDepth, scopeTraits, true, false);
                 state->scopeDepth++;
                 break;
             }
@@ -1940,15 +1936,15 @@ namespace avmplus
             {
                 checkStack(1,0);
 
-                if (state->scopeDepth+1 > max_scope)
+                if (state->scopeDepth + 1 > ms->max_scope())
                     verifyFailed(kScopeStackOverflowError);
 
                 emitCheckNull(sp);
-                coder->writeOp1(state, pc, opcode, scopeBase+state->scopeDepth);
+                coder->writeOp1(state, pc, opcode, ms->scope_base() + state->scopeDepth);
 
                 Traits* scopeTraits = state->peek().traits;
                 state->pop();
-                state->setType(scopeBase+state->scopeDepth, scopeTraits, true, true);
+                state->setType(ms->scope_base() + state->scopeDepth, scopeTraits, true, true);
 
                 if (state->withBase == -1)
                     state->withBase = state->scopeDepth;
@@ -2567,8 +2563,9 @@ namespace avmplus
         const ScopeTypeChain* scope = info->declaringScope();
         if (multiname.isBinding())
         {
-            int index = scopeBase + state->scopeDepth - 1;
-            int base = scopeBase;
+            int scope_base = ms->scope_base();
+            int base = scope_base;
+            int index = base + state->scopeDepth - 1;
             if (scope->size == 0)
             {
                 // if scope->size = 0, then global is a local
@@ -2581,7 +2578,7 @@ namespace avmplus
                 Binding b = toplevel->getBinding(v.traits, &multiname);
                 if (b != BIND_NONE)
                 {
-                    coder->writeOp1(state, pc, OP_getscopeobject, index-scopeBase);
+                    coder->writeOp1(state, pc, OP_getscopeobject, index - scope_base);
                     state->push(v);
                     return;
                 }
@@ -2737,14 +2734,24 @@ namespace avmplus
         return blockStates ? blockStates->get(pc) : NULL;
     }
 
-    bool Verifier::hasFrameState(const uint8_t* pc)
+    bool Verifier::hasFrameState(const uint8_t* pc) const
     {
         return blockStates && blockStates->containsKey(pc);
     }
 
-    int Verifier::getBlockCount()
+    int Verifier::getBlockCount() const
     {
         return blockStates ? blockStates->size() : 0;
+    }
+
+    const uint8_t* Verifier::getTryFrom() const
+    {
+    	return tryFrom;
+    }
+
+    const uint8_t* Verifier::getTryTo() const
+    {
+    	return tryTo;
     }
 
     void Verifier::emitCheckNull(int i)
@@ -2828,29 +2835,11 @@ namespace avmplus
         emitCoerce(mms->paramTraits(0), state->sp()-(n-1));
     }
 
-    bool Verifier::canAssign(Traits* lhs, Traits* rhs) const
-    {
-        if (!Traits::isMachineCompatible(lhs,rhs))
-        {
-            // no machine type is compatible with any other
-            return false;
-        }
-
-        if (!lhs)
-            return true;
-
-        // type on right must be same class or subclass of type on left.
-        Traits* t = rhs;
-        while (t != lhs && t != NULL)
-            t = t->base;
-        return t != NULL;
-    }
-
     void Verifier::checkStack(uint32_t pop, uint32_t push)
     {
         if (uint32_t(state->stackDepth) < pop)
             verifyFailed(kStackUnderflowError);
-        if (state->stackDepth-pop+push > uint32_t(max_stack))
+        if (state->stackDepth - pop + push > uint32_t(ms->max_stack()))
             verifyFailed(kStackOverflowError);
     }
 
@@ -2863,7 +2852,7 @@ namespace avmplus
 
     Value& Verifier::checkLocal(int local)
     {
-        if (local < 0 || local >= local_count)
+        if (local < 0 || local >= ms->local_count())
             verifyFailed(kInvalidRegisterError, core->toErrorString(local));
         return state->value(local);
     }
@@ -2882,7 +2871,7 @@ namespace avmplus
         return td->getSlotTraits(slot);
     }
 
-    Traits* Verifier::readBinding(Traits* traits, Binding b)
+    Traits* Verifier::readBinding(Traits* traits, Binding b) const
     {
         if (traits)
         {
@@ -2892,31 +2881,7 @@ namespace avmplus
         {
             AvmAssert(AvmCore::bindingKind(b) == BKIND_NONE);
         }
-
-        switch (AvmCore::bindingKind(b))
-        {
-        default:
-            AvmAssert(false); // internal error - illegal binding type
-        case BKIND_GET:
-        case BKIND_GETSET:
-        {
-            int m = AvmCore::bindingToGetterId(b);
-            MethodInfo *f = traits->getTraitsBindings()->getMethod(m);
-            MethodSignaturep fms = f->getMethodSignature();
-            return fms->returnTraits();
-        }
-        case BKIND_SET:
-            // TODO lookup type here. get/set must have same type.
-        case BKIND_NONE:
-            // dont know what this is
-            // fall through
-        case BKIND_METHOD:
-            // extracted method or dynamic data, don't know which
-            return NULL;
-        case BKIND_VAR:
-        case BKIND_CONST:
-            return traits->getTraitsBindings()->getSlotTraits(AvmCore::bindingToSlotId(b));
-        }
+        return Traits::readBinding(traits, b);
     }
 
     MethodInfo* Verifier::checkMethodInfo(uint32_t id)
@@ -3013,7 +2978,7 @@ namespace avmplus
         if (!targetState) {
             if (!blockStates)
                 blockStates = new (core->GetGC()) GCSortedMap<const uint8_t*, FrameState*, LIST_NonGCObjects>(core->GetGC());
-            targetState = mmfx_new( FrameState(this) );
+            targetState = mmfx_new( FrameState(ms) );
             targetState->abc_pc = target;
             blockStates->put(target, targetState);
 
@@ -3079,12 +3044,12 @@ namespace avmplus
         // they like, if it produces better code.
 
         bool targetChanged = false;
-        const int scopeTop  = scopeBase + targetState->scopeDepth;
-        const int stackTop  = stackBase + targetState->stackDepth;
+        const int scopeTop  = ms->scope_base() + targetState->scopeDepth;
+        const int stackTop  = ms->stack_base() + targetState->stackDepth;
         for (int i=0, n=stackTop; i < n; i++)
         {
             // ignore empty locations between scopeTop and stackBase
-            if (i >= scopeTop && i < stackBase)
+            if (i >= scopeTop && i < ms->stack_base())
                 continue;
 
             const Value& curValue = state->value(i);
@@ -3375,7 +3340,8 @@ namespace avmplus
         }
 
         // locals
-        for (int i=0, n = scopeBase; i < n; i++) {
+        int scope_base = ms->scope_base();
+        for (int i=0, n = scope_base; i < n; i++) {
             printValue(state->value(i));
             if (i+1 < n)
                 out << ' ';
@@ -3383,7 +3349,7 @@ namespace avmplus
         out << "] {";
 
         // scope chain
-        for (int i = scopeBase, n = scopeBase + state->scopeDepth; i < n; i++) {
+        for (int i = scope_base, n = scope_base + state->scopeDepth; i < n; i++) {
             printValue(state->value(i));
             if (i+1 < n)
                 out << ' ';
@@ -3394,12 +3360,12 @@ namespace avmplus
         int stackStart;
         const int stackLimit = 20; // don't display more than this, to reduce verbosity
         if (state->stackDepth > stackLimit) {
-            stackStart = stackBase + state->stackDepth - stackLimit;
+            stackStart = ms->stack_base() + state->stackDepth - stackLimit;
             out << "..." << stackStart << ": ";
         } else {
-            stackStart = stackBase;
+            stackStart = ms->stack_base();
         }
-        for (int i = stackStart, n = stackBase + state->stackDepth; i < n; i++) {
+        for (int i = stackStart, n = ms->stack_base() + state->stackDepth; i < n; i++) {
             printValue(state->value(i));
             if (i+1 < n)
                 out << ' ';
@@ -3453,17 +3419,4 @@ namespace avmplus
 #endif
     }
     #endif /* AVMPLUS_VERBOSE */
-
-    FrameState::FrameState(Verifier* verifier)
-        : verifier(verifier), wl_next(NULL),
-          abc_pc(NULL), scopeDepth(0), stackDepth(0), withBase(-1),
-          targetOfBackwardsBranch(false),
-          wl_pending(false)
-    {
-        locals = (Value*)mmfx_alloc_opt(sizeof(Value) * verifier->frameSize, MMgc::kZero);
-    }
-
-    FrameState::~FrameState() {
-        mmfx_free( locals );
-    }
 }

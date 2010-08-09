@@ -95,10 +95,10 @@ namespace avmplus
         coder2->writeCoerce(state, index, type);
     }
 
-    void TeeWriter::writePrologue(const FrameState* state, const uint8_t *pc)
+    void TeeWriter::writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver *dr)
     {
-        coder1->writePrologue(state, pc);
-        coder2->writePrologue(state, pc);
+        coder1->writePrologue(state, pc, dr);
+        coder2->writePrologue(state, pc, dr);
     }
 
     void TeeWriter::writeEpilogue(const FrameState* state)
@@ -172,9 +172,9 @@ namespace avmplus
         coder->writeCoerce(state, index, type);
     }
 
-    void NullWriter::writePrologue(const FrameState* state, const uint8_t *pc)
+    void NullWriter::writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver* dr)
     {
-        coder->writePrologue(state, pc);
+        coder->writePrologue(state, pc, dr);
     }
 
     void NullWriter::writeEpilogue(const FrameState* state)
@@ -265,7 +265,7 @@ namespace avmplus
     void CodeWriter::writeCoerce(const FrameState*, uint32_t, Traits*)
     { }
 
-    void CodeWriter::writePrologue(const FrameState*, const uint8_t *)
+    void CodeWriter::writePrologue(const FrameState*, const uint8_t *, CodegenDriver*)
     { }
 
     void CodeWriter::writeEpilogue(const FrameState*)

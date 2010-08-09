@@ -42,6 +42,21 @@
 
 namespace avmplus
 {
+    /**
+     * CodegenDriver defines the interface by which CodeWriters may call back
+     * to their top-level driver, e.g. CodegenLIR calling back to Verifier.
+     */
+    class CodegenDriver {
+    public:
+        virtual ~CodegenDriver() {}
+
+        virtual const uint8_t* getTryFrom() const = 0;
+        virtual const uint8_t* getTryTo() const = 0;
+        virtual bool hasFrameState(const uint8_t* pc) const = 0;
+        virtual int getBlockCount() const = 0;
+        virtual bool hasReachableExceptions() const = 0;
+    };
+
     class CodeWriter {
     public:
 
@@ -55,7 +70,7 @@ namespace avmplus
         virtual void writeNip(const FrameState* state, const uint8_t *pc);
         virtual void writeCheckNull(const FrameState* state, uint32_t index);
         virtual void writeCoerce(const FrameState* state, uint32_t index, Traits* type);
-        virtual void writePrologue(const FrameState* state, const uint8_t *pc);
+        virtual void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         virtual void writeEpilogue(const FrameState* state);
         virtual void writeBlockStart(const FrameState* state);
         virtual void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
@@ -83,7 +98,7 @@ namespace avmplus
         void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
-        void writePrologue(const FrameState* state, const uint8_t *pc);
+        void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
         void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
@@ -105,7 +120,7 @@ namespace avmplus
         void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
-        void writePrologue(const FrameState* state, const uint8_t *pc);
+        void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
         void writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode);
