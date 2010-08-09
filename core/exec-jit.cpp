@@ -134,10 +134,8 @@ void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
 {
     m->_implGPR = p;
     m->_invoker = invoke_generic;
-#ifdef FEATURE_NANOJIT
     if (InvokerCompiler::canCompileInvoker(m))
         m->_invoker = jitInvokerNext;
-#endif
 #ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy))
         core->console<< "execpolicy native " << m << "\n";
