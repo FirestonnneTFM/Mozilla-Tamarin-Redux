@@ -415,6 +415,18 @@ REALLY_INLINE int32_t MethodSignature::frame_size() const
     return _frame_size;
 }
 
+REALLY_INLINE int32_t MethodSignature::stack_base() const
+{
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
+    return _local_count + _max_scope;
+}
+
+REALLY_INLINE int32_t MethodSignature::scope_base() const
+{
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
+    return _local_count;
+}
+
 #ifdef VMCFG_WORDCODE
 #else
 REALLY_INLINE const uint8_t* MethodSignature::abc_code_start() const

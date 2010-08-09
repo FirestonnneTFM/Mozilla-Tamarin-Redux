@@ -691,6 +691,14 @@ namespace avmplus
         }
     }
 
+    uint32_t MethodInfo::parse_code_length() const
+    {
+        // Parse the code length out of ABC sice it is not stored elsewhere.
+        const uint8_t* pos = abc_body_pos();
+        AvmCore::skipU32(pos, 4);
+        return AvmCore::readU32(pos);
+    }
+
     void MethodInfo::resolveSignature(const Toplevel* toplevel)
     {
         if (!isResolved())

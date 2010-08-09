@@ -341,22 +341,14 @@ namespace avmplus
         return (WordOpcode)opcodeInfo[opcode].wordCode;
     }
 
-    void WordcodeEmitter::writePrologue(const FrameState* state, const uint8_t *pc)
+    void WordcodeEmitter::writePrologue(const FrameState*, const uint8_t *pc, CodegenDriver*)
     {
         #if defined DEBUGGER
         if (core->debugger()) emitOp0(pc, WOP_debugenter);
         #else
         (void)pc;
         #endif
-        const uint8_t* tryFrom = state->verifier->tryFrom;
-        const uint8_t* tryTo = state->verifier->tryTo;
-        const uint8_t* code_end = code_start + state->verifier->code_length;
-        if (tryFrom >= code_start && tryTo <= code_end) {
-            // we're in the same abc code that contains try blocks
-            computeExceptionFixups();
-        } else {
-            // the method doesn't have try blocks.
-        }
+        computeExceptionFixups();
     }
 
     void WordcodeEmitter::writeEpilogue(const FrameState*)

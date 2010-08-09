@@ -364,6 +364,8 @@ namespace avmplus
         bool containsInterface(Traitsp t); // legacy name
         bool subtypeof(Traitsp t);
         static Traits** allocSupertypeList(MMgc:: GC*, uint32_t size);
+        static bool canAssign(Traits* lhs, Traits* rhs);
+        static Traits* readBinding(Traits* t, Binding b);
 
     private:
         void build_primary_supertypes();
