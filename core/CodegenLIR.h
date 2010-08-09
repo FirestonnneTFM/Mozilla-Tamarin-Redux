@@ -375,7 +375,11 @@ namespace avmplus
         const MethodSignaturep ms;
         Toplevel* toplevel;
         PoolObject *pool;
+        CodegenDriver* driver;
         const FrameState *state;
+        const uint8_t* code_pos;
+        const uint8_t* try_from;
+        const uint8_t* try_to;
         MopsRangeCheckFilter* mopsRangeCheckFilter;
         LIns *vars, *tags;
         LIns *env_param, *argc_param, *ap_param;
@@ -536,7 +540,7 @@ namespace avmplus
         void writeNip(const FrameState* state, const uint8_t *pc);
         void writeCheckNull(const FrameState* state, uint32_t index);
         void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
-        void writePrologue(const FrameState* state, const uint8_t *pc);
+        void writePrologue(const FrameState* state, const uint8_t *pc, CodegenDriver*);
         void writeEpilogue(const FrameState* state);
         void writeBlockStart(const FrameState* state);
         void writeOpcodeVerified(const FrameState* state, const uint8_t* pc, AbcOpcode opcode);

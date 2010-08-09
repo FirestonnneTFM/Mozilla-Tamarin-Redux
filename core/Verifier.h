@@ -171,26 +171,10 @@ namespace avmplus
     };
 #endif // VMCFG_RESTARG_OPTIMIZATION
 
-    class Verifier
+    class Verifier: public CodegenDriver
     {
+        friend class ScopeWriter;
     public:
-        AvmCore *core;
-
-        int max_scope;
-        int max_stack;
-        int stackBase;   // same as info->local_count + max_scope
-
-        union {
-            int scopeBase;
-            int local_count;
-        };
-
-        int frameSize;            // local_count + max_scope + max_stack
-        int code_length;          // size of abc bytecode (bytes)
-        const uint8_t* code_pos;  // start of abc bytecode
-        const uint8_t* tryBase;   // code_pos that ExceptionHandler offsets use
-        const uint8_t* tryFrom;   // start of earliest try region
-        const uint8_t* tryTo;     // end of latest try region
 
         Verifier(MethodInfo *info, MethodSignaturep ms,
                  Toplevel* toplevel, AbcEnv* abc_env
@@ -198,7 +182,7 @@ namespace avmplus
             , bool secondTry=false
 #endif
             );
-        ~Verifier();
+        virtual ~Verifier();
 
         /**
          * Verifies the method specified by info.  If verification fails,
@@ -206,12 +190,20 @@ namespace avmplus
          * @param info the method to verify
          */
         void verify(CodeWriter* coder);
-        bool hasFrameState(const uint8_t* pc);
-        bool canAssign(Traits* lhs, Traits* rhs) const;
-        int getBlockCount();
-        bool hasReachableExceptions();
+
+    public:
+        // CodegenDriver interface
+        const uint8_t* getTryFrom() const;
+        const uint8_t* getTryTo() const;
+        bool hasFrameState(const uint8_t* pc) const;
+        int getBlockCount() const;
+        bool hasReachableExceptions() const;
 
     private:
+        const uint8_t* code_pos;  // start of abc bytecode
+        int code_length;
+        const uint8_t* tryFrom;   // start of earliest try region
+        const uint8_t* tryTo;     // end of latest try region
         MethodInfo *info;
         const MethodSignaturep ms;
         PoolObject *pool;
@@ -223,9 +215,11 @@ namespace avmplus
         FrameState *state;
         bool emitPass;
         bool handlerIsReachable;
+        AvmCore *core;
 #ifdef VMCFG_RESTARG_OPTIMIZATION
         RestArgAnalyzer restArgAnalyzer;
 #endif
+
         FrameState* getFrameState(const uint8_t* pc);
         const uint8_t* verifyBlock(const uint8_t* pc);
         const uint8_t* loadBlockState(FrameState* blk);
@@ -250,6 +244,7 @@ namespace avmplus
         void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const uint8_t *pc);
         void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const uint8_t *pc);
         Traits* checkGetGlobalScope();
+        void emitNip();
 
         void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc);
         bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const uint8_t* pc);
@@ -260,6 +255,12 @@ namespace avmplus
         Binding findMathFunction(TraitsBindingsp math, const Multiname& name, Binding b, int argc);
         Binding findStringFunction(TraitsBindingsp string, const Multiname& name, Binding b, int argc);
         void parseExceptionHandlers();
+        void emitCoerceArgs(MethodInfo* m, int argc);
+        void emitCoerce(Traits* target, int i);
+        void emitCheckNull(int index);
+        Traits* checkTypeName(uint32_t name_index);
+        Traits* readBinding(Traits* traits, Binding b) const;
+        void verifyFailed(int errorID, Stringp a1=0, Stringp a2=0, Stringp a3=0) const;
 
 #ifdef AVMPLUS_VERBOSE
     public:
@@ -271,17 +272,6 @@ namespace avmplus
     private:
         void printValue(Value& v);
 #endif
-
-    public:
-        // NOTE these methods used to be private but the jit needs access to
-        // them for now. further refactoring should attempt to remove such back
-        // references
-        void verifyFailed(int errorID, Stringp a1=0, Stringp a2=0, Stringp a3=0) const;
-        void emitCoerceArgs(MethodInfo* m, int argc);
-        Traits* readBinding(Traits* traits, Binding b);
-        void emitCoerce(Traits* target, int i);
-        void emitCheckNull(int index);
-        Traits* checkTypeName(uint32_t name_index);
     };
 }
 

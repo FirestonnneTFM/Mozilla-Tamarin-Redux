@@ -42,12 +42,28 @@
 
 namespace avmplus
 {
-    void FrameState::init(FrameState* other)
+    FrameState::FrameState(MethodSignaturep ms)
+        : wl_next(NULL), abc_pc(NULL),
+          scopeDepth(0), stackDepth(0), withBase(-1),
+          frameSize(ms->frame_size()),
+          scopeBase(ms->scope_base()),
+          stackBase(ms->stack_base()),
+          targetOfBackwardsBranch(false),
+          wl_pending(false)
     {
-        AvmAssert(other->verifier == this->verifier);
+        locals = (Value*)mmfx_alloc_opt(sizeof(Value) * frameSize, MMgc::kZero);
+    }
+
+    FrameState::~FrameState()
+    {
+        mmfx_free( locals );
+    }
+
+    void FrameState::init(const FrameState* other)
+    {
         scopeDepth = other->scopeDepth;
         stackDepth = other->stackDepth;
         withBase = other->withBase;
-        VMPI_memcpy(locals, other->locals, verifier->frameSize*sizeof(Value));
+        VMPI_memcpy(locals, other->locals, frameSize * sizeof(Value));
     }
 }

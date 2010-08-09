@@ -56,8 +56,8 @@ namespace avmplus
         // of this value.  The JIT uses this mask to handle control-flow merges
         // of incompatible values (e.g. int and String*).  At merge points, masks
         // are OR-ed together.
-        // if more than one uint8_t is set, the type will be Object or *, and the JIT
-        // will use a separate tag uint8_t to convert the native represenation to Atom.
+        // If more than one bit is set, the type will be Object or *, and the JIT
+        // will use a separate tag byte to convert the native representation to Atom.
         // See CodegenLIR::localGetp().
         uint8_t sst_mask;
 #endif
@@ -70,24 +70,29 @@ namespace avmplus
      */
     class FrameState
     {
-        // info about each local var in this frame.
-        // length is verifier->frameSize, one entry per local, scope, and stack operand
+        // Info about each local var in this frame.
+        // Length is frameConsts->frameSize, one entry per local, scope, and stack operand.
+    private:
         Value *locals;
     public:
-        Verifier *verifier;  // ideally this would be const Verifier*
         FrameState* wl_next; // next block in verifier->worklist.  ideally this is only accessed by Verifier.
         const uint8_t* abc_pc;  // pointer into abc bytecode
         int32_t scopeDepth;
         int32_t stackDepth;
         int32_t withBase;
+    private:
+        const int32_t frameSize;
+        const int32_t scopeBase;
+        const int32_t stackBase;
+    public:
         bool targetOfBackwardsBranch; // true if this block is reachable from later code (in linear ABC order)
         bool wl_pending;    // true if this is in verifier->worklist.  Verifier::checkTarget() sets to true.
 
     public:
-        FrameState(Verifier*);
+        FrameState(MethodSignaturep);
         ~FrameState();
 
-        void init(FrameState* other);
+        void init(const FrameState* other);
         Value& value(int32_t i);
         const Value& value(int32_t i) const;
         Value& scopeValue(int32_t i);

@@ -326,6 +326,7 @@ namespace avmplus
 
         const uint8_t* abc_body_pos() const;
         void set_abc_body_pos(const uint8_t* p);
+        uint32_t parse_code_length() const; // Parse code_len from ABC.
 
         ExceptionHandlerTable* abc_exceptions() const;
         void set_abc_exceptions(MMgc::GC* gc, ExceptionHandlerTable* e);
@@ -449,6 +450,8 @@ namespace avmplus
         int32_t local_count() const;
         int32_t max_scope() const;
         int32_t frame_size() const;
+        int32_t stack_base() const;
+        int32_t scope_base() const;
 
     #ifdef VMCFG_WORDCODE
     #else
