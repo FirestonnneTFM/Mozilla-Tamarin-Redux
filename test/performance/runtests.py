@@ -549,8 +549,8 @@ class PerformanceRuntest(RuntestBase):
                 # calculate speedup btwn vms
                 # if the best value is the max value, reverse the sign of the spdup
                 sign = -1 if self.metricInfo[metric]['largerIsFaster'] else 1
-                self.testData[testName][metric]['spdup'] = sign * float(r1-r2)/r1 * 100.0
-                self.testData[testName][metric]['avg_spdup'] = sign * float(a1-a2)/a1 * 100.0
+                self.testData[testName][metric]['spdup'] = 0 if r1 == 0 else sign * float(r1-r2)/r1 * 100.0
+                self.testData[testName][metric]['avg_spdup'] = 0 if a1 == 0 else sign * float(a1-a2)/a1 * 100.0
 
     def checkForMetricChange(self, metric):
         ''' If the test metric has changed, print out a line indicating so.
