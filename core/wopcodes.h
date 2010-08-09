@@ -47,6 +47,24 @@ namespace avmplus
 
     enum WordOpcode
     {
+        // These are unused but the table generation in ActionBlockConstants.cpp
+        // and the enum generation in ActionBlockConstants.h requires them to be
+        // known.  We map them to 0.
+        WOP_bkpt = 0,
+        WOP_label = 0,
+        WOP_pushbyte = 0,
+        WOP_pushshort = 0,
+        WOP_pushint = 0,
+        WOP_pushuint = 0,
+        WOP_callsuperid = 0,
+        WOP_callinterface = 0,
+        WOP_coerce_a = 0,
+        WOP_bkptline = 0,
+        WOP_timestamp = 0,
+        WOP_restargc = 0,
+        WOP_restarg = 0,
+        
+        // Normal operations
         WOP_nop = 0x02,
         WOP_throw = 0x03,
         WOP_getsuper = 0x04,
@@ -143,9 +161,13 @@ namespace avmplus
         WOP_esc_xelem = 0x71,
         WOP_esc_xattr = 0x72,
         WOP_convert_i = 0x73,
+        WOP_coerce_i = 0x73, // coerce_i -> convert_i, they are the same
         WOP_convert_u = 0x74,
+        WOP_coerce_u = 0x64, // coerce_u -> convert_u, they are the same
         WOP_convert_d = 0x75,
+        WOP_coerce_d = 0x75, // coerce_d -> convert_d, they are the same
         WOP_convert_b = 0x76,
+        WOP_coerce_b = 0x76, // coerce_b -> convert_b, they are the same
         WOP_convert_o = 0x77,
         WOP_checkfilter = 0x78,
         WOP_coerce = 0x80,

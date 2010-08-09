@@ -409,6 +409,7 @@ spidermonkey/js1_5/Scope/scope-004:Section (6|7).*, ^((?!diff).)*$, expectedfail
 # spidermonkey wordcode issues
 spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|Ojit|jitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|Ojit|jitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
+spidermonkey/js1_5/Regress/regress-146596, .*wordcode.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
 
 spidermonkey/js1_5/Array/regress-157652, (arm|mips).*, skip, test runs out of memory on devices
 spidermonkey/js1_5/Function/regress-338121-.*, (arm|mips).*, skip, test runs out of memory on devices
@@ -429,5 +430,6 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 ####################
 
 as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
-abcasm/bug_554915b, .*wordcode.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
+abcasm/bug_554915a, .*wordcode.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
+abcasm/bug_554915b, .*wordcode.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
 

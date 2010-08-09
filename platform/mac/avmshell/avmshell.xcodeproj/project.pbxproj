@@ -437,6 +437,7 @@
 		0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_543560.cpp; path = ../../../extensions/ST_mmgc_543560.cpp; sourceTree = SOURCE_ROOT; };
 		07246FE211CBBC2F005D3F1F /* ST_mmgc_weakref.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_weakref.cpp; path = ../../../extensions/ST_mmgc_weakref.cpp; sourceTree = SOURCE_ROOT; };
 		07246FE311CBBC2F005D3F1F /* ST_mmgc_weakref.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_weakref.st; path = ../../../extensions/ST_mmgc_weakref.st; sourceTree = SOURCE_ROOT; };
+		07275CE6120C4F0A00037C3D /* opcodes.tbl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opcodes.tbl; path = ../../../core/opcodes.tbl; sourceTree = SOURCE_ROOT; };
 		072EA0D10F4C1CE9009F11E6 /* eval-abc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-abc-inlines.h"; path = "../../../eval/eval-abc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		072EA0D20F4C1CE9009F11E6 /* eval-abc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-abc.cpp"; path = "../../../eval/eval-abc.cpp"; sourceTree = SOURCE_ROOT; };
 		072EA0D30F4C1CE9009F11E6 /* eval-abc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-abc.h"; path = "../../../eval/eval-abc.h"; sourceTree = SOURCE_ROOT; };
@@ -1128,6 +1129,7 @@
 				079DF8050F3A882D0031D1B4 /* NativeFunction.cpp */,
 				079DF8060F3A882D0031D1B4 /* NativeFunction.h */,
 				079DF8070F3A882D0031D1B4 /* NativeObjectHelpers.h */,
+				07275CE6120C4F0A00037C3D /* opcodes.tbl */,
 				079DF8080F3A882D0031D1B4 /* OSDep.h */,
 				079DF8090F3A882D0031D1B4 /* OutputStream.h */,
 				079DF80A0F3A882D0031D1B4 /* peephole.cpp */,
