@@ -94,7 +94,7 @@ def compile_generic(name, shellname, args, upload):
             )
 
 
-def test_generic(name, shellname, vmargs, config, scriptargs, timeout=1200):
+def test_generic(name, shellname, vmargs, config, scriptargs, _timeout=1200):
     # factory.addStep(test_generic("Release", "avmshell", "", "", ""))
     return TestSuiteShellCommand(
             command=['../all/run-acceptance-generic.sh', WithProperties('%s','revision'), '%s' % shellname, '%s' % vmargs, '%s' % config, '%s' % scriptargs],
@@ -103,7 +103,7 @@ def test_generic(name, shellname, vmargs, config, scriptargs, timeout=1200):
             descriptionDone='finished %s vmtests' % name,
             name="Testsuite_%s" % name,
             workdir="../repo/build/buildbot/slaves/scripts",
-            timeout="%s" % timeout
+            timeout=_timeout
             )
     
 
