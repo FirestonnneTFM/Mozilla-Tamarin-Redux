@@ -1635,7 +1635,7 @@ namespace avmplus
                 //  data structures being checked have not been initialized.
                 //  Need to either rearrange the initialization sequence or
                 //  mark this verify pass as "needs late retry."
-                if ( ! abc_env->getMethod(imm30) )
+                if ( imm30 >= pool->methodCount() || ! abc_env->getMethod(imm30) )
                     verifyFailed(kCorruptABCError);
 
                 MethodInfo* m = checkMethodInfo(imm30);
@@ -2279,8 +2279,19 @@ namespace avmplus
                 break;
 
             case OP_debug:
+            {
+#ifdef DEBUGGER
+                uint8 type = (uint8)*(pc + 1);
+                if (type == DI_LOCAL) {
+                    // see Debugger::scanCode
+                    const byte* pc2 = pc + 2;
+                    uint32 index = AvmCore::readU32(pc2);
+                    checkCpoolOperand(index, kStringType);
+                }
+#endif
                 coder->write(state, pc, opcode);
                 break;
+            }
 
             case OP_label:
                 coder->write(state, pc, opcode);

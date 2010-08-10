@@ -1705,6 +1705,10 @@ return the result of the comparison ToPrimitive(x) == y.
                 {
                     buffer << " \"" << pool->getString(index) << "\"";
                 }
+                else 
+                {
+                    buffer << " invalid string index=" << index;
+                }
                 break;
             }
             case OP_pushbyte:
@@ -1714,8 +1718,14 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index < pool->cpool_int.size())
+                if (index < pool->cpool_int.size()) 
+                {
                     buffer << " " << pool->cpool_int[index];
+                }
+                else 
+                {
+                    buffer << " invalid index=" << index;
+                }
                 break;
             }
             case OP_pushuint:
@@ -1723,7 +1733,13 @@ return the result of the comparison ToPrimitive(x) == y.
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
                 if (index < pool->cpool_uint.size())
+                {
                     buffer << " " << (double)pool->cpool_uint[index];
+                } 
+                else 
+                {
+                    buffer  << " invalid index=" << index;
+                }
                 break;
             }
             case OP_pushdouble:
@@ -1747,6 +1763,10 @@ return the result of the comparison ToPrimitive(x) == y.
                 if (index < pool->cpool_ns.size())
                 {
                     buffer << " " << pool->cpool_ns[index]->getURI();
+                }
+                else 
+                {
+                    buffer << " invalid index=" << index;
                 }
                 break;
             }
@@ -1783,18 +1803,17 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_callstatic:
             case OP_newfunction:
             {
-                int method_id = readU32(pc);
-                MethodInfo* f = pool->getMethodInfo(method_id);
-                buffer << opcodeInfo[opcode].name << " method_id=" << method_id;
+                uint32 method_id = readU32(pc);
+                buffer << opcodeInfo[opcode].name;
+                if (method_id < pool->methodCount()) 
+                    buffer << " invalid";
+                buffer << " method_id=" << method_id;
                 if (opcode == OP_callstatic)
                 {
                     buffer << " argc=" << (int)readU32(pc); // argc
                 }
-                Stringp fname = f->getMethodName();
-                if (fname)
-                    buffer << " " << fname;
-                else
-                    buffer << " null";
+                if (method_id < pool->methodCount()) 
+                    buffer << " " << pool->getMethodInfo(method_id)->getMethodName();
                 break;
             }
 
@@ -1979,22 +1998,28 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_callstatic:
             case WOP_newfunction: {
                 int method_id = (int)*pc++;
-                MethodInfo* f = pool->getMethodInfo(method_id);
-                buffer << wopAttrs[opcode].name << " method_id=" << method_id;
+                buffer << wopAttrs[opcode].name;
+                if (method_id < pool->methodCount()) 
+                    buffer << " invalid";
+                buffer << " method_id=" << method_id;
                 if (opcode == WOP_callstatic)
                     buffer << " argc=" << (int)*pc++; // argc
-                Stringp fname = f->getMethodName();
-                if (fname)
-                    buffer << " " << fname;
-                else
-                    buffer << " null";
+                if (method_id < pool->methodCount())  
+                    buffer << " " << pool->getMethodInfo(method_id)->getMethodName();
                 break;
             }
 
             case WOP_newclass: {
                 uint32_t id = (uint32_t)*pc++;
-                Traits* c = pool->getClassTraits(id);
-                buffer << wopAttrs[opcode].name << " " << c;
+                if (id < pool->classCount()) 
+                {
+                    Traits* c = pool->getClassTraits(id);
+                    buffer << wopAttrs[opcode].name << " " << c;
+                } 
+                else 
+                {
+                    buffer << wopAttrs[opcode].name << " invalid class index " << id;
+                }
                 break;
             }
 
