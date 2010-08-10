@@ -65,7 +65,8 @@ namespace avmplus
         setCapacity(capacity*2);
         AvmAssert(getCapacity());
         MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
-        setAtoms((Atom *)gc->Calloc(getCapacity(), sizeof(Atom), GC::kContainsPointers|GC::kZero));
+        uint32_t const cap = getCapacity() + (hasIterIndex() ? 2 : 0);
+		setAtoms((Atom *)gc->Calloc(cap, sizeof(Atom), GC::kContainsPointers|GC::kZero));
     }
 
     void InlineHashtable::destroy()
@@ -73,6 +74,7 @@ namespace avmplus
         Atom* atoms = getAtoms();
         if(atoms) {
             GC *gc = GC::GetGC(atoms);
+            // deliberately ignore the final two entries if hasIterIndex(), since they aren't Atoms
             AvmCore::decrementAtomRegion(atoms, getCapacity());
             gc->Free (atoms);
         }
@@ -91,7 +93,6 @@ namespace avmplus
     void InlineHashtable::put(Atom name, Atom value)
     {
         AvmAssert(name != EMPTY && value != EMPTY);
-
         Atom* atoms = getAtoms();
         int i = find(name, atoms, getCapacity());
         GC *gc = GC::GetGC(atoms);
@@ -261,7 +262,18 @@ namespace avmplus
         const Atom* atoms = getAtoms();
         GC* gc = GC::GetGC(atoms);
         MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
-        Atom* newAtoms = (Atom*)gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+        const uint32_t newCapacityAlloc = newCapacity + (hasIterIndex() ? 2 : 0);
+		Atom* newAtoms = (Atom*)gc->Calloc(newCapacityAlloc, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+        // WE#2621977 -- the behavior of growing-during-enumeration has always been ill-defined,
+        // but this change caused that to (effectively) terminate the enumeration. This is a hack:
+        // if we have an iter index, copy it over to preserve the previous oddball behavior. (srj)
+        if (m_atomsAndFlags & kHasIterIndex)
+        {
+            intptr_t* oldIterIndices = (intptr_t*)(atoms + oldCapacity);
+            intptr_t* newIterIndices = (intptr_t*)(newAtoms + newCapacity);
+            newIterIndices[0] = oldIterIndices[0];
+            newIterIndices[1] = oldIterIndices[1];
+        }
         m_size = rehash(atoms, oldCapacity, newAtoms, newCapacity);
         gc->Free(atoms);
         setAtoms(newAtoms);
@@ -269,23 +281,247 @@ namespace avmplus
         clrHasDeletedItems();
     }
 
+    // this function is slow -- however, for "normal", well-mannered ABC code, it should
+    // be called only once per iteration, at the start. (For handcrafted ABC it could be 
+    // called repeatedly, which would dramatically slow such cases, but that's acceptable.)
+    int InlineHashtable::publicIterIndexToRealIndex(int publicIndex)
+    {
+        // keep in mind that a "public" index goes from 1...N (0 is the start-and-finish value)
+        AvmAssert(publicIndex > 0);
+        
+        // for "well-formed" (ie, generated with ASC or other reasonable compiler), 
+        // we should only end up calling this function once per iteration, with publicIndex == 1 ....
+        // however, we don't assert here because it *is* legal to call it with other values
+        // (in fact, our abcasm tests do so), but such usage is now dramatically slower than
+        // it used to be.
+        // AvmAssert(publicIndex == 1);
+
+		const Atom* const atoms = getAtoms();
+        int const cap = getCapacity();
+        uintptr_t const dontEnumMask = (m_atomsAndFlags & kDontEnumBit);
+        for (int i = 0; i < cap; i += 2)
+        {
+            Atom const a = atoms[i];
+
+            // don't need to check against EMPTY and DELETED since they won't be kIntptrType
+            MMGC_STATIC_ASSERT(atomKind(EMPTY) != kIntptrType);
+            MMGC_STATIC_ASSERT(atomKind(DELETED) != kIntptrType);
+            // don't need to check for dontEnumMask because it will make kIntptrType appear as kDoubleType
+            MMGC_STATIC_ASSERT((kIntptrType | kDontEnumBit) != kIntptrType);
+
+            if (atomKind(a) == kIntptrType)
+            {
+                if (--publicIndex == 0)
+                    return i | kIterIndexIsIntptr;
+            }
+        }
+        for (int i = 0; i < cap; i += 2)
+        {
+            Atom const a = atoms[i];
+            if (a != EMPTY && a != DELETED && atomKind(a) != kIntptrType && !(uintptr_t(a) & dontEnumMask))
+            {
+                if (--publicIndex == 0)
+                    return i;
+            }
+        }
+        
+        // well-formed code can get here if there are no enumerable keys in the table.
+        // return a value that is always > getCapacity;
+        // since all callers check vs. cap this neuters the result
+        return cap+1;
+    }
+
     // call this method using the previous value returned
     // by this method starting with 0, until 0 is returned.
     int InlineHashtable::next(int index)
     {
-        if (index != 0) {
-            index = index<<1;
+		Atom* atoms = getAtoms();
+		int const cap = getCapacity();
+
+        // we need our iter-index fields to iterate. 
+        // since most objects don't ever iterate this way,
+        // they aren't always preallocated... if we get here and
+        // they aren't, reallocate first.
+        if (!hasIterIndex())
+        {
+            GC* gc = GC::GetGC(atoms);
+            MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
+            Atom* newAtoms = (Atom*)gc->Calloc(cap+2, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+            // no need to rehash: size is the same as far as atoms are concerned
+            VMPI_memcpy(newAtoms, atoms, cap*sizeof(Atom));
+            gc->Free(atoms);
+            atoms = newAtoms;
+            m_atomsAndFlags |= kHasIterIndex;
+            setAtoms(newAtoms);
         }
-        // Advance to first non-empty slot.
-        const Atom* atoms = getAtoms();
-        int cap = getCapacity();
-        while (index < cap) {
-            if (enumerable(atoms[index])) {
-                return (index>>1)+1;
+
+        AvmAssert(hasIterIndex()); // @todo
+
+        intptr_t* iterIndices = (intptr_t*)(atoms + cap);
+        // 
+        // iterIndices[0] == the expected public index we receive as arg
+        // iterIndices[1] == the real internal index that corresponds to it,
+        //  with bit 31 set if the entry was an intptr.
+        // 
+        int publicIndex = iterIndices[0];
+        int realIndex = iterIndices[1];
+        if (!index)
+        {
+            // if index == 0, we're starting the iteration; prime the pump by finding
+            // the first enumerable int atom (or first enumerable non-int if we have no ints)
+            // in this case we ignore whatever is currently in iterIndices
+            publicIndex = 1;
+            realIndex = publicIterIndexToRealIndex(1);
+            if ((realIndex & ~kIterIndexIsIntptr) >= cap)
+            {
+                publicIndex = realIndex = 0;
+                goto done;
             }
-            index += 2;
         }
-        return 0;
+        else 
+        {
+            // we'll never return an index larger than cap, but malicious ABC could try to feed us one
+            if (index > cap)
+            {
+                // the spec doesn't explicitly say this is an error, handle gracefully
+                publicIndex = realIndex = 0;
+                goto done;
+            }
+
+            if (publicIndex == 0 || publicIndex != index)
+            {
+                // if publicIndex == 0, it's an uninitialized value (eg post-grow()),and realIndex is garbage.
+                //
+                // if publicIndex is nonzero but doesn't match index, someone is passing 
+                // us an arbitrary value, rather than the value we
+                // last returned; this won't happen with "normal" ABC but hand-assembled 
+                // ABC could do so, so be prepared to do something reasonable. 
+                publicIndex = index;
+                realIndex = publicIterIndexToRealIndex(index);
+                if ((realIndex & ~kIterIndexIsIntptr) >= cap)
+                {
+                    publicIndex = realIndex = 0;
+                    goto done;
+                }
+            }
+            else
+            {
+                // You'd think this assert would be appropriate, but you'd be wrong:
+                // if code iterates over properties and marks them dontEnum,
+                // this will not hold true
+                // AvmAssert(realIndex == publicIterIndexToRealIndex(publicIndex));
+            }
+            
+            // realIndex should now always point to a valid key
+            AvmAssert((realIndex & ~kIterIndexIsIntptr) < cap);
+            AvmAssert(!(realIndex & 1));
+
+            // ok, advance to the next candidate... if we are currently on an int atom,
+            // advance to the next int atom. if we run out, advance to non-ints. Note,
+            // test kIterIndexIsIntptr in realIndex to determine the type,
+            // since the value there could have been changed to DELETED since we
+            // were last called...
+
+            publicIndex += 1; // assume we'll find something
+            uintptr_t dontEnumMask = (m_atomsAndFlags & kDontEnumBit);
+            if (realIndex & kIterIndexIsIntptr)
+            {
+                realIndex &= ~kIterIndexIsIntptr;
+                for (realIndex += 2; realIndex < cap; realIndex += 2)
+                {
+                    Atom const a = atoms[realIndex];
+                    // don't need to check against EMPTY and DELETED since they won't be kIntptrType.
+                    // don't need to check for dontEnumMask because it will make kIntptrType appear as kDoubleType
+                    if (atomKind(a) == kIntptrType)
+                    {
+                        realIndex |= kIterIndexIsIntptr;
+                        goto done;
+                    }
+                }
+                // reset for search thru object list (-2 so we start at zero)
+                realIndex = -2;
+            }
+            
+            // No enumerable kIntptrType entries left, try the non-kIntptrType
+
+            for (realIndex += 2; realIndex < cap; realIndex += 2)
+            {
+                Atom const a = atoms[realIndex];
+                if (a != EMPTY && a != DELETED && atomKind(a) != kIntptrType && !(uintptr_t(a) & dontEnumMask))
+                {
+                    goto done;
+                }
+            }
+            
+            // oh well, nothing left
+            publicIndex = realIndex = 0;
+        }
+
+    done:
+        iterIndices[0] = publicIndex;
+        iterIndices[1] = realIndex;
+        return publicIndex;
+    }
+
+    Atom InlineHashtable::keyAt(int i) 
+    {
+        // if we get here without this bit being set, someone called us without
+        // calling next() first -- a no-no. We'll still work, but we will have
+        // to search for the right index, which is slower.
+        AvmAssert(hasIterIndex()); 
+        AvmAssert(i > 0);
+
+		Atom* const atoms = getAtoms();
+		int const cap = getCapacity();
+        intptr_t* const iterIndices = (intptr_t*)(atoms + cap);
+        int realIndex = (hasIterIndex() && iterIndices[0] == i) ?
+                            (int)iterIndices[1] :
+                            publicIterIndexToRealIndex(i);
+        realIndex &= ~kIterIndexIsIntptr;
+        return realIndex < cap ? removeDontEnumMask(atoms[realIndex]) : nullStringAtom;
+    }
+
+    Atom InlineHashtable::valueAt(int i) 
+    {
+        // if we get here without this bit being set, someone called us without
+        // calling next() first -- a no-no. We'll still work, but we will have
+        // to search for the right index, which is slower.
+        AvmAssert(hasIterIndex()); 
+        AvmAssert(i > 0);
+
+		Atom* const atoms = getAtoms();
+		int const cap = getCapacity();
+        intptr_t* const iterIndices = (intptr_t*)(atoms + cap);
+        int realIndex = (hasIterIndex() && iterIndices[0] == i) ?
+                            (int)iterIndices[1] :
+                            publicIterIndexToRealIndex(i);
+        realIndex &= ~kIterIndexIsIntptr;
+        realIndex += 1;
+        return realIndex < cap ? atoms[realIndex] : undefinedAtom;
+    }
+
+    void InlineHashtable::removeKeyValuePairAtPublicIndex(int i)
+    {
+        AvmAssert(hasIterIndex()); 
+        AvmAssert(i > 0);
+
+		Atom* const atoms = getAtoms();
+		int const cap = getCapacity();
+        intptr_t* const iterIndices = (intptr_t*)(atoms + cap);
+        int realIndex = (hasIterIndex() && iterIndices[0] == i) ?
+                            (int)iterIndices[1] :
+                            publicIterIndexToRealIndex(i);
+        realIndex &= ~kIterIndexIsIntptr;
+        if (realIndex < cap)
+        {
+            // decrement refcount as necessary.
+            AvmCore::atomWriteBarrier_dtor(&atoms[realIndex]);
+            AvmCore::atomWriteBarrier_dtor(&atoms[realIndex+1]);
+            // calls above set the slot to 0, we want DELETED
+            atoms[realIndex] = DELETED;
+			atoms[realIndex+1] = DELETED;
+			setHasDeletedItems();
+        }
     }
 
     bool InlineHashtable::getAtomPropertyIsEnumerable(Atom name) const
@@ -430,30 +666,24 @@ namespace avmplus
 
     /*virtual*/ int WeakKeyHashtable::next(int index)
     {
-        if (index != 0) {
-            index = index<<1;
-        }
-        // Advance to first non-empty slot.
-        Atom* const atoms = ht.getAtoms();
-        int const cap = ht.getCapacity();
-        while (index < cap)
+        for (;;)
         {
-            Atom const a = atoms[index];
-            if (AvmCore::isGenericObject(a))
+            index = ht.next(index);
+            if (index != 0)
             {
-                GCWeakRef* weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
-                if (!weakRef->isNull())
-                    return (index>>1)+1;
-
-                ht.deletePairAt(index);
+                Atom const a = ht.keyAt(index);
+                if (AvmCore::isGenericObject(a)) 
+                {
+                    GCWeakRef* weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
+                    if (!weakRef->get())
+                    {
+                        ht.removeKeyValuePairAtPublicIndex(index);
+                        continue;
+                    }
+                }
             }
-            else if (ht.enumerable(a))
-            {
-                return (index>>1)+1;
-            }
-            index += 2;
+            return index;
         }
-        return 0;
     }
 
     Atom WeakValueHashtable::getValue(Atom key, Atom value)

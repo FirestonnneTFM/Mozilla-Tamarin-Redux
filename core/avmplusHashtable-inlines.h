@@ -76,9 +76,9 @@ namespace avmplus
         return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0;
     }
 
-    REALLY_INLINE uintptr_t InlineHashtable::hasDontEnumSupport() const
+    REALLY_INLINE bool InlineHashtable::hasDontEnumSupport() const 
     {
-        return (m_atomsAndFlags & kDontEnumBit);
+        return (m_atomsAndFlags & kDontEnumBit) != 0; 
     }
 
     REALLY_INLINE Atom InlineHashtable::removeDontEnumMask(Atom a) const
@@ -91,16 +91,21 @@ namespace avmplus
         return a != EMPTY && a != DELETED && !(uintptr_t(a) & (m_atomsAndFlags & kDontEnumBit));
     }
 
+	REALLY_INLINE bool InlineHashtable::hasIterIndex() const
+	{
+		return (m_atomsAndFlags & kHasIterIndex) != 0;
+	}
+
 #ifdef DEBUGGER
     REALLY_INLINE uint64_t InlineHashtable::bytesUsed() const
     {
-        return getCapacity() * sizeof(Atom);
+        return (getCapacity() + (hasIterIndex() ? 2 : 0)) * sizeof(Atom);
     }
 #endif
 
-    REALLY_INLINE uintptr_t InlineHashtable::hasDeletedItems() const
+    REALLY_INLINE bool InlineHashtable::hasDeletedItems() const 
     {
-        return (m_atomsAndFlags & kHasDeletedItems);
+        return (m_atomsAndFlags & kHasDeletedItems) != 0; 
     }
 
     REALLY_INLINE void InlineHashtable::reset()
@@ -151,20 +156,6 @@ namespace avmplus
     REALLY_INLINE const Atom* InlineHashtable::getAtoms() const
     {
         return (const Atom*)(m_atomsAndFlags & ~kAtomFlags);
-    }
-
-    REALLY_INLINE Atom InlineHashtable::keyAt(int i) const
-    {
-        int const index = (i-1)<<1;
-        int const cap = getCapacity();
-        return index < cap ? removeDontEnumMask(getAtoms()[index]) : nullStringAtom;
-    }
-
-    REALLY_INLINE Atom InlineHashtable::valueAt(int i) const
-    {
-        int const index = ((i-1)<<1)+1;
-        int const cap = getCapacity();
-        return index < cap ? getAtoms()[index] : undefinedAtom;
     }
 
     // @todo -- move this mess to VMPI, see https://bugzilla.mozilla.org/show_bug.cgi?id=546354

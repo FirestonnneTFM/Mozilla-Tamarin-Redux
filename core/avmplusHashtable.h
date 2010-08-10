@@ -149,8 +149,8 @@ namespace avmplus
          */
 
         int next(int index);
-        Atom keyAt(int index) const;
-        Atom valueAt(int index) const;
+        Atom keyAt(int index);
+		Atom valueAt(int index);
 
     protected:
 
@@ -200,7 +200,15 @@ namespace avmplus
         static const uintptr_t kDontEnumBit     = 0x01;
         // kHasDeletedItems is or'd into m_atomsAndFlags (but not individual atoms)
         static const uintptr_t kHasDeletedItems = 0x02;
-        static const uintptr_t kAtomFlags       = (kDontEnumBit | kHasDeletedItems);
+        // if kHasIterIndex is set, there are two extra Atoms allocated at the end of our
+        // array (giving it capacity+2) that are used to cache the current value of next()
+		static const uintptr_t kHasIterIndex	= 0x04;
+		static const uintptr_t kAtomFlags		= (kDontEnumBit | kHasDeletedItems | kHasIterIndex);
+
+        // if an iter index has a key of kIntptrType, we set this bit; this allows us to 
+        // continue iteration in the expected order even if the current item is deleted
+        // during iteration. Since iter indices can't be negative or >2^31, this is a safe value.
+        static const int kIterIndexIsIntptr = 0x80000000;
 
         //
         // "capacity" is the total number of atoms we allocate.
@@ -234,7 +242,7 @@ namespace avmplus
         // do NOT make this virtual; we want InlineHashtable to NOT have ANY virtual methods, not even a dtor
         ~InlineHashtable();
 
-        uintptr_t hasDeletedItems() const;
+		bool hasDeletedItems() const;
         void setCapacity(uint32_t cap);
         void put(Atom name, Atom value);
         int rehash(const Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen) const;
@@ -246,7 +254,11 @@ namespace avmplus
         Atom removeDontEnumMask(Atom a) const;
         bool enumerable(Atom a) const;
         uint32_t getCapacity() const;
-        uintptr_t hasDontEnumSupport() const;
+		bool hasDontEnumSupport() const;
+        bool hasIterIndex() const;
+        int publicIterIndexToRealIndex(int i);
+        void removeKeyValuePairAtPublicIndex(int i);
+
 
         void deletePairAt(int i);
 
