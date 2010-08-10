@@ -1745,10 +1745,11 @@ namespace avmplus
         })
 
         debug_only(
-            validate1->setCheckAccSetIns1(vars);
-            validate1->setCheckAccSetIns2(tags);
-            validate2->setCheckAccSetIns1(vars);
-            validate2->setCheckAccSetIns2(tags);
+            void** extras = new (*alloc1) void*[2];
+            extras[0] = vars;
+            extras[1] = tags;
+            validate1->setCheckAccSetExtras(extras);
+            validate2->setCheckAccSetExtras(extras);
         )
 
         // stack overflow check - use methodFrame address as comparison
@@ -1980,8 +1981,7 @@ namespace avmplus
         LirWriter *body = new (*alloc1) LirBufWriter(body_buf, core->config.njconfig);
         debug_only(
             body = validate3 = new (*alloc1) ValidateWriter(body, vbNames, "writePrologue(body)");
-            validate3->setCheckAccSetIns1(vars);
-            validate3->setCheckAccSetIns2(tags);
+            validate3->setCheckAccSetExtras(extras);
         )
         verbose_only(
             if (verbose()) {
@@ -6453,10 +6453,11 @@ namespace nanojit
     }
 
 #ifdef DEBUG
-    void ValidateWriter::checkAccSet(LOpcode op, LIns* base, AccSet accSet)
+    void ValidateWriter::checkAccSet(LOpcode op, LIns* base, int32_t disp, AccSet accSet)
     {
-        LIns* vars = checkAccSetIns1;
-        LIns* tags = checkAccSetIns2;
+        (void)disp;
+        LIns* vars = checkAccSetExtras ? (LIns*)checkAccSetExtras[0] : 0;
+        LIns* tags = checkAccSetExtras ? (LIns*)checkAccSetExtras[1] : 0;
 
         bool isTags = base == tags;
         bool isVars = base == vars;
