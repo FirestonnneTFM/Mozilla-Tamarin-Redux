@@ -656,6 +656,7 @@ namespace avmplus
         }
 
         uint32_t slotCount() const { return m_slotCount; }
+        bool earlySlotBinding() const { return m_earlySlotBinding; }
     };
 
     struct NameEntry
@@ -781,8 +782,10 @@ namespace avmplus
                         // done in AbcParser::parseTraits but require the base class to be resolved first, so we
                         // now defer it to here.
 
-                        // illegal raw slot id.
-                        if (ne.id > nameCount)
+                        // illegal raw slot id -- reject IF we are early binding. (theoretically it's always illegal,
+                        // but won't cause any problems if earlySlotBinding=false, and rejecting in this case
+                        // will break existing content.)
+                        if (ne.id > nameCount && sic.earlySlotBinding())
                             toplevel->throwVerifyError(kCorruptABCError);
 
                         // slots are final.
@@ -895,7 +898,19 @@ namespace avmplus
         } // for i
         slotCount = sic.slotCount();
         if (slotSizeInfo)
-            slotSizeInfo->pointerSlotCount = slotCount - (slotSizeInfo->nonPointer32BitSlotCount + slotSizeInfo->nonPointer64BitSlotCount + baseSlotCount);
+        {
+            uint32_t const c = slotSizeInfo->nonPointer32BitSlotCount + slotSizeInfo->nonPointer64BitSlotCount + baseSlotCount;
+            if (c > slotCount)
+            {
+                // This can happen for fuzzed files that duplicate slots in certain orders; we'd detect these later
+                // on, in finishSlotsAndMethods, but not before we fired an assert. This just detects the obvious naughtiness 
+                // earlier.
+                if (toplevel)
+                    toplevel->throwVerifyError(kCorruptABCError);
+                AvmAssert(!"unhandled verify error");
+            }
+            slotSizeInfo->pointerSlotCount = slotCount - c;
+        }
     }
 
     namespace
