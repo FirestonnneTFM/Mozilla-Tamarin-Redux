@@ -63,7 +63,10 @@ namespace avmplus
     #endif
 
 #ifdef VMCFG_RESTARG_OPTIMIZATION
-    // Helper used for optimization of ...rest parameters.
+    // Helper used for optimization of ...rest parameters and the 'arguments' array.
+    //
+    // The analysis is virtually the same for the two cases; for 'rest array'
+    // read 'rest array or arguments array' except as noted.
     //
     // We recognize benign uses of the rest array and rewrite generic code
     // sequences to instead use new instructions RESTARGC and RESTARG, and set
@@ -73,7 +76,15 @@ namespace avmplus
     // instructions may fall back to the full array, if the extracted property
     // names are not integer values in the range of the actual argument count.
     //
-    // See Bugzilla 569321 for discussion, further work, etc.
+    // The RESTARGC/RESTARG instructions are only valid if the excess arguments
+    // are all represented as atoms.  That's always true for ...rest arguments,
+    // but it's only true for the 'arguments' object if all fixed and optional
+    // arguments are untyped, so the analysis must be guarded on that.  (It is
+    // possible to do better, maybe, but the 'arguments' object is supported for
+    // the sake of JS compatibility and in that case the arguments will usually
+    // be untyped.  We can expect typed arguments to be used with ...rest.)
+    //
+    // See Bugzilla 569321 and 571469 for discussion, further work, etc.
     //
     // Recognition is based on a lightweight escape analysis during pass1,
     // implemented by RestArgAnalyzer.  (The analysis is repeated during pass2
@@ -95,9 +106,6 @@ namespace avmplus
     // We say the analysis "fails" if the optimization is rejected because we can't
     // prove that the rest array does not escape.
     //
-    // Nested methods cause the array to escape; the analysis fails if the code
-    // requires an activation record.  (It is possible to do better.)
-    //
     // A debugger causes the array to escape; the analysis fails if a debugger is
     // present.
     //
@@ -108,7 +116,7 @@ namespace avmplus
     // The analysis needs to prove the following:
     //
     // * If the rest local is read by a GETLOCAL and the rest array value is produced,
-    //   and if that value is consumed by an instruction (rather  than being discarded
+    //   and if that value is consumed by an instruction (rather than being discarded
     //   by an exception) then that value must be consumed by a GETPROPERTY instruction
     //   of one of two forms:
     //

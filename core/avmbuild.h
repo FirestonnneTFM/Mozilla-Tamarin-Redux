@@ -141,6 +141,8 @@
 //There are only a few informational asserts in the source code.
 //#define VMCFG_FUZZTESTING
 
+// Optimize ...rest arguments and the 'arguments' array.
+//
 // This is here because the conditions under which this optimization is used
 // depends on other settings and is not an external-facing concern, nor should
 // code implementing the optimization know directly which external settings that
