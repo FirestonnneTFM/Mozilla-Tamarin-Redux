@@ -55,9 +55,17 @@ namespace avmshell
     class WinPlatform : public Platform
     {
     public:
+        WinPlatform()
+        {
+            // Increase the accuracy of getTimer and Date to 1 ms from the 16 ms default
+            timeBeginPeriod(1);
+        }
 
-        virtual ~WinPlatform(){}
-
+        virtual ~WinPlatform()
+        {
+            // Restore default timer accuracy
+            timeEndPeriod(1);
+        }
         virtual void exit(int code);
 
         virtual File* createFile();
