@@ -95,12 +95,10 @@ sunspider/(as3/|)string-tagcloud.as ,.*       ,skip, contains eval
 language/string/timetest.as, .*, skip, included in test files
 
 # util files for v8 tests
-v8.*/base.as,         .*, skip, included by test files
-v8.*/run.as ,         .*, skip, file used to run entire suite at once
-v8.*/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_bug.cgi?id=464134
-v8.*/.*/base.as,   .*, skip, included by test files
-v8.*/.*/run.as ,   .*, skip, file used to run entire suite at once
-v8.*/.*/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_bug.cgi?id=464134
+v8/base.as,         .*, skip, included by test files
+v8/run.as ,         .*, skip, file used to run entire suite at once
+v8.*/.*/base.as,    .*, skip, included by test files
+v8.*/.*/run.as ,    .*, skip, file used to run entire suite at once
 
 # util files for jsmicro tests
 jsmicro/generate-drivers.as , .* , skip , run manually to generate driver files during development
