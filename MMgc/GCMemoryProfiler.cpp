@@ -400,7 +400,7 @@ namespace MMgc
         GCHashtable_VMPI packageTable(128);
 
         size_t residentSize=0;
-        uint32_t residentCount=0;
+        size_t residentCount=0;
         size_t packageCount=0;
 
         // rip through all allocation sites and sort into package and categories
@@ -482,7 +482,12 @@ namespace MMgc
             }
         }
 
-        GCLog("\n\nMemory allocation report for %u allocations, totaling %u kb (%u ave) across %u packages\n", residentCount, residentSize>>10, residentSize / residentCount, packageCount);
+        GCLog("\n\nMemory allocation report for %llu allocations, totaling %llu kb (%llu ave) across %llu packages\n", 
+              (unsigned long long)residentCount, 
+              (unsigned long long)(residentSize>>10),
+              (unsigned long long)(residentSize / residentCount),
+              (unsigned long long)packageCount);
+
         for(unsigned i=0; i<packageCount; i++)
         {
             PackageGroup* pg = packages[i];
@@ -518,7 +523,12 @@ namespace MMgc
                 }
             }
 
-            GCLog("%s - %3.1f%% - %u kb %u items, avg %u b\n", pg->name, PERCENT(residentSize, pg->size),  (unsigned int)(pg->size>>10), pg->count, (unsigned int)(pg->count ? pg->size/pg->count : 0));
+            GCLog("%s - %3.1f%% - %llu kb %u items, avg %llu b\n", 
+                  pg->name,
+                  PERCENT(residentSize, pg->size),
+                  (unsigned long long)(pg->size>>10), 
+                  (unsigned)pg->count,
+                  (unsigned long long)(pg->count ? pg->size/pg->count : 0));
 
             // result capping
             if(numTypes > kNumTypes)
@@ -529,7 +539,12 @@ namespace MMgc
                 CategoryGroup *tg = residentFatties[i];
                 if(!tg)
                     break;
-                GCLog("\t%s - %3.1f%% - %u kb %u items, avg %u b\n", tg->name, PERCENT(residentSize, tg->size), (unsigned int)(tg->size>>10), tg->count, (unsigned int)(tg->count ? tg->size/tg->count : 0));
+                GCLog("\t%s - %3.1f%% - %llu kb %u items, avg %llu b\n",
+                      tg->name,
+                      PERCENT(residentSize, tg->size),
+                      (unsigned long long)(tg->size>>10),
+                      (unsigned)tg->count,
+                      (unsigned long long)(tg->count ? tg->size/tg->count : 0));
                 for(int j=0; j < kNumTracesPerType; j++) {
                     StackTrace *trace = tg->traces[j];
                     if(trace) {
@@ -542,7 +557,10 @@ namespace MMgc
                             size = trace->totalSize;
                             count = trace->totalCount;
                         }
-                        GCLog("\t\t %3.1f%% - %u kb - %u items - ", PERCENT(tg->size, size), size>>10, count);
+                        GCLog("\t\t %3.1f%% - %llu kb - %u items - ", 
+                              PERCENT(tg->size, size),
+                              (unsigned long long)(size>>10),
+                              (unsigned)count);
                         PrintStackTrace(trace);
                     }
                 }
@@ -581,7 +599,7 @@ namespace MMgc
 
         VMPI_captureStackTrace(trace, kMaxStackTrace, 1);
 
-        GCLog("ReferenceAddress VMPI_captureStackTrace 0x%x \n", trace[0]);
+        GCLog("ReferenceAddress VMPI_captureStackTrace 0x%llx \n", (unsigned long long)trace[0]);
 
         while((obj = iter.nextKey()) != NULL)
         {
@@ -604,10 +622,10 @@ namespace MMgc
             if(size == 0)
                 continue;
 
-            GCLog("%u b - %u items - ", size, count);
+            GCLog("%llu b - %u items - ", (unsigned long long)size, (unsigned)count);
             PrintStackTrace(trace);
         }
-        GCLog("%u traces");
+        GCLog("%llu traces", (unsigned long long)num_traces);
     }
 
     void SetMemTag(const char *s)
@@ -632,14 +650,16 @@ namespace MMgc
 
     void DumpStackTraceHelper(uintptr_t *trace)
     {
-        char out[2048];
+        char out[2048];         // This should be at least 3 times as large as 'buff', below
         char *tp = out;
         *tp++ = '\n';
         for(int i=0; trace[i] != 0; i++) {
-            char buff[256];
+            char buff[256];     // 'out', above, should be at least 3 times as large as this
             if( !simpleDump )
             {
-            *tp++ = '\t';       *tp++ = '\t';       *tp++ = '\t';
+                *tp++ = '\t';
+                *tp++ = '\t';
+                *tp++ = '\t';
             }
 
             bool found_name;
@@ -653,16 +673,17 @@ namespace MMgc
             uint32_t lineNum;
             if(VMPI_getFileAndLineInfoFromPC(trace[i], buff, sizeof(buff), &lineNum))
             {
-                VMPI_snprintf(buff, sizeof(buff), "%s:%d", buff, lineNum);
-
                 // Don't bother with file, linenumber, and address if we're just printing the address anyways
-                if( found_name )
+                if (found_name)
                 {
+                    size_t x = VMPI_strlen(buff);
+                    VMPI_snprintf(buff+x, sizeof(buff)-x, ":%u", (unsigned)lineNum);
+
                     *tp++ = '(';
                     VMPI_strcpy(tp, buff);
                     tp += VMPI_strlen(buff);
                     *tp++ = ')';
-                    tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
+                    tp += VMPI_sprintf(tp, " - 0x%llx", (unsigned long long) trace[i]);
                 }
             }
             *tp++ = '\n';
@@ -805,7 +826,7 @@ namespace MMgc
 
     void ReportDeletedMemoryWrite(const void* item)
     {
-        GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:", item);
+        GCDebugMsg(false, "Object 0x%llx was written to after it was deleted, allocation trace:", (unsigned long long)item);
         PrintAllocStackTrace(GetUserPointer(item));
         GCDebugMsg(false, "Deletion trace:");
         PrintDeleteStackTrace(GetUserPointer(item));
