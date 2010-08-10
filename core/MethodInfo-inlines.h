@@ -162,6 +162,11 @@ REALLY_INLINE int32_t MethodInfo::needRestOrArguments() const
     return _flags & (NEED_REST|NEED_ARGUMENTS);
 }
 
+REALLY_INLINE int32_t MethodInfo::isFinal() const
+{
+    return _flags & FINAL;
+}
+
 REALLY_INLINE int32_t MethodInfo::setsDxns() const
 {
     return _flags & SETS_DXNS;

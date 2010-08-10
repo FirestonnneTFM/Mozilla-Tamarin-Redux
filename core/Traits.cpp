@@ -1103,6 +1103,12 @@ namespace avmplus
                     const Binding b = tb->m_bindings->get(name, ns);
                     AvmAssert(b != BIND_NONE);
                     const uint32_t disp_id = uint32_t(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
+                    Binding base = this->getOverride(basetb, ns, name, ne.tag, toplevel);
+                    if (AvmCore::isMethodBinding(base)
+                        || (AvmCore::hasGetterBinding(base) && (ne.kind == TRAIT_Getter))
+                        || (AvmCore::hasSetterBinding(base) && (ne.kind == TRAIT_Setter))) {
+                        ensureNonFinal(basetb->getMethod(disp_id), toplevel);
+                    }
                     MethodInfo* f = this->pool->getMethodInfo(ne.id);
                     //AvmAssert(f->declaringTraits() == this);
                     tb->setMethodInfo(disp_id, f);
@@ -1997,6 +2003,18 @@ failure:
         return BIND_NONE;
     }
 
+    void Traits::ensureNonFinal(MethodInfo* minfo, const Toplevel* toplevel) const 
+    {
+        if (!minfo->isFinal())
+            return;
+#ifdef AVMPLUS_VERBOSE
+        if (pool->isVerbose(VB_traits))
+            core->console << "illegal override of final "<< minfo << " in " << this <<"\n";
+#endif
+        toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(minfo), toplevel->core()->toErrorString(this));
+        AvmAssert(!"unhandled verify error");
+    }
+    
     TraitsBindings* FASTCALL Traits::_getTraitsBindings()
     {
         AvmAssert(m_bindingsVerified);

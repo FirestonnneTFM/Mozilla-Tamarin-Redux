@@ -417,7 +417,8 @@ namespace avmplus
                                     MethodInfo* script,
                                     TraitsPosPtr traitsPos,
                                     TraitsPosType posType,
-                                    Namespacep protectedNamespace)
+                                    Namespacep protectedNamespace,
+                                    bool makeFinal)
     {
         uint32_t nameCount = readU30(pos);
 
@@ -615,8 +616,8 @@ namespace avmplus
                     toplevel->throwVerifyError(kCorruptABCError);
 
                 f->setKind(kind); // sets the IS_GETTER/IS_SETTER flags
-                if (tag & ATTR_final)
-                    f->setFinal();
+                if ((tag & ATTR_final) || makeFinal)
+                     f->setFinal();
                 if (tag & ATTR_override)
                     f->setOverride();
                 if (needsDxns)
@@ -648,6 +649,8 @@ namespace avmplus
 #endif
         }
 
+        if (makeFinal)
+            traits->final = true;
         traits->verifyBindings(toplevel);
         return traits;
     }
@@ -1099,7 +1102,6 @@ namespace avmplus
                                                                 traits_pos,
                                                                 TRAITSTYPE_ACTIVATION,
                                                                 NULL);
-                    act->final = true;
                     info->init_activationTraits(act);
                 }
                 else
@@ -1133,7 +1135,6 @@ namespace avmplus
                                               pos,
                                               TRAITSTYPE_ACTIVATION,
                                               NULL);
-                        act->final = true;
                         info->init_activationTraits(act);
                         pool->aotInfo->activationTraits[method_index] = act;
                 } else
@@ -1735,7 +1736,6 @@ namespace avmplus
 
             // global object, make it dynamic
             traits->set_needsHashtable(true);
-            traits->final = true;
 
             script->makeMethodOf(traits);
             traits->init = script;
@@ -1890,7 +1890,8 @@ namespace avmplus
                                           0,
                                           instancepos,
                                           postype,
-                                          protectedNamespace);
+                                          protectedNamespace,
+                                          (flags&2) != 0);
             if( !itraits ) return false;
             if (!baseTraits && core->traits.object_itraits == NULL)
             {
@@ -1901,7 +1902,6 @@ namespace avmplus
 
             // AS3 language decision: dynamic is not inherited.
             itraits->set_needsHashtable((flags&1) == 0);
-            itraits->final   = (flags&2) != 0;
 
             if (itraits->isInterface())
             {
@@ -2009,7 +2009,6 @@ namespace avmplus
             cinit->makeMethodOf(ctraits);
             ctraits->init = cinit;
             ctraits->itraits = itraits;
-            ctraits->final = true;
             ctraits->set_needsHashtable(true);
             cinit->setStaticInit();
 
