@@ -275,6 +275,7 @@ namespace avmplus
         int32_t isNative() const;
         int32_t isNonInterruptible();
         int32_t isResolved() const;
+        int32_t isFinal() const;
         int32_t needActivation() const;
         int32_t needArguments() const;
         int32_t needClosure() const;

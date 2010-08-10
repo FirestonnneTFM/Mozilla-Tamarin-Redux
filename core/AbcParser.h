@@ -106,7 +106,8 @@ namespace avmplus
                             MethodInfo* script,
                             TraitsPosPtr traitsPos,
                             TraitsPosType posType,
-                            Namespacep protectedNamespace);
+                            Namespacep protectedNamespace,
+                            bool makeFinal=true);
 
         /**
          * add script to VM-wide table

@@ -316,6 +316,7 @@ namespace avmplus
         TraitsPosPtr traitsPosStart() const;
         TraitsPosPtr skipToInstanceInitPos(TraitsPosPtr pos) const;
         Binding getOverride(TraitsBindingsp basetb, Namespacep ns, Stringp name, int tag, const Toplevel *toplevel) const;
+        void ensureNonFinal(MethodInfo* minfo, const Toplevel* toplevel) const;
 
         void addVersionedBindings(MultinameHashtable* bindings,
                                   Stringp name,
