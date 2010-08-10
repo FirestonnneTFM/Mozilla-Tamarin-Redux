@@ -68,6 +68,7 @@ class AcceptanceRuntest(RuntestBase):
     escbin = '../../esc/bin/'
     androidthreads = False
     androiddevices = []
+    verifyonly = False
 
     def __init__(self):
         # Set threads to # of available cpus/cores
@@ -90,6 +91,7 @@ class AcceptanceRuntest(RuntestBase):
         print '    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially'
         print '    --androidthreads    assign a thread for each android device connected.'
         print '    --verify        run a verify pass instead of running abcs'
+        print '    --verifyonly    run a -Dverifyonly pass: only checks test exitcode'
         print '    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.'
         print '    --aotout        where the resulting binaries should be put (defaults to the location of the as file).'
         print '    --aotargs       any extra arguments to pass to compile.py.'
@@ -99,7 +101,8 @@ class AcceptanceRuntest(RuntestBase):
 
     def setOptions(self):
         RuntestBase.setOptions(self)
-        self.longOptions.extend(['ext=','esc','escbin=','eval','threads=','ats','atsdir=','verify','androidthreads'])
+        self.longOptions.extend(['ext=','esc','escbin=','eval','threads=','ats',
+                                 'atsdir=','verify','verifyonly','androidthreads'])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -125,6 +128,10 @@ class AcceptanceRuntest(RuntestBase):
             elif o in ('--verify',):
                 self.verify = True
                 self.vmargs = '-Dverifyall -Dverbose=verify'
+            elif o in ('--verifyonly',):
+                self.verifyonly = True
+                if '-Dverifyonly' not in self.vmargs:
+                    self.vmargs += ' -Dverifyonly'
             elif o in ('--aotsdk',):
                 self.aotsdk = v
             elif o in ('--aotout',):
@@ -145,6 +152,8 @@ class AcceptanceRuntest(RuntestBase):
         self.checkPath()
         if not self.config:
             self.determineConfig()
+        if self.verifyonly and 'debugger' not in self.vmtype:
+            exit('You must be running a debugger build in order to use the -Dverifyonly option')
         if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
             if re.search('^arm-winmobile-emulator',self.config)==None:
                 print 'ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe'
@@ -392,8 +401,15 @@ class AcceptanceRuntest(RuntestBase):
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName), outputCalls=outputCalls)
 
         # Test has been run, handle output
-
-        if not self.verify:
+        if self.verifyonly:
+            # only check the exit code when running a verifyonly pass
+            ec_lfail, ec_lexpfail, expectedExitcode = self.checkExitCode(exitcode, root, testName, f, err, settings, outputCalls)
+            if ec_lfail or ec_lexpfail:
+                lfail += ec_lfail
+                lexpfail += ec_lexpfail
+            else:
+                lpass += 1
+        elif not self.verify:
             try:
                 outputLines = []
                 if isfile(root+'.out'):
@@ -464,35 +480,12 @@ class AcceptanceRuntest(RuntestBase):
             except:
                 print 'exception running avm'
                 raise
-            expectedExitcode=0
-            if isfile(root+'.err'):
-                # .err file holds both the expected (non-catchable) error (usually a VerifyError) and the expected exitcode
-                expectedErr,expectedExitcode = self.loadExpectedErr(root+'.err')
-                # check the expectedErr - error is always the last (non-empty) line of output
-                actualErr = ''
-                for line in reversed(f):
-                    # make sure we have an error
-                    if re.search('.*Error:.*', line):
-                        actualErr = self.getError(line.strip())
-                        break
-                if actualErr != expectedErr:
-                    outputCalls.append((self.fail,(testName, 'unexpected error message. expected: %s actual: %s' % (expectedErr, actualErr), self.failmsgs)))
-                    lfail += 1
-            elif isfile(root+".exitcode"):
-                try:
-                    expectedExitcode=int(open(root+".exitcode").read())
-                except:
-                    print("ERROR: reading exit code file '%s' should contain an integer")
-            res=dict_match(settings,'exitcode','expectedfail')
-            if exitcode!=expectedExitcode:
-                res2=dict_match(settings,'exitcode','skip')
-                if res2==None and res:
-                    outputCalls.append((self.js_print,(testName, 'expected failure: exitcode reason: %s'%res,self.expfailmsgs)))
-                    lexpfail += 1
-                elif res2==None:
-                    outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d Signal Name: %s FAILED!' % (expectedExitcode,exitcode,getSignalName(abs(exitcode))), self.failmsgs)))
-                    outputCalls.append((self.fail,(testName, 'captured output: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
-                    lfail+= 1
+
+            # exitcode check
+            ec_lfail, ec_lexpfail, expectedExitcode = self.checkExitCode(exitcode, root, testName, f, err, settings, outputCalls)
+            if ec_lfail or ec_lexpfail:
+                lfail += ec_lfail
+                lexpfail += ec_lexpfail
             elif err:
                 # TODO: When needed, add support for expected stderr output - see https://bugzilla.mozilla.org/show_bug.cgi?id=561892
                 outputCalls.append((self.fail,(testName, "unexpected stderr expected:'%s' actual:'%s'" % ('',err), self.failmsgs)))
@@ -528,6 +521,52 @@ class AcceptanceRuntest(RuntestBase):
 
 
         return outputCalls
+
+    def checkExitCode(self, exitcode, root, testName, f, err, settings, outputCalls):
+        '''Check the exitcode for a test against any expected non-zero exitcodes
+            Return the fail and the expected exitcode if non-zero
+        '''
+        lfail = 0
+        lexpfail = 0
+        expectedExitcode=0
+        if isfile(root+'.err'):
+            # .err file holds both the expected (non-catchable) error (usually a VerifyError) and the expected exitcode
+            expectedErr,expectedExitcode = self.loadExpectedErr(root+'.err')
+            # check the expectedErr - error is always the last (non-empty) line of output
+            actualErr = ''
+            for line in reversed(f):
+                # When running in --verifyonly mode, output will be VERIFY FAILED instead of VerifyError
+                line = line.replace('VERIFY FAILED', 'VerifyError')
+                # make sure we have an error
+                if re.search('.*Error:.*', line):
+                    actualErr = self.getError(line.strip())
+                    break
+            if actualErr != expectedErr:
+                outputCalls.append((self.fail,(testName, 'unexpected error message. expected: %s actual: %s'
+                                               % (expectedErr, actualErr), self.failmsgs)))
+                lfail += 1
+        elif isfile(root+".exitcode"):
+            try:
+                expectedExitcode=int(open(root+".exitcode").read())
+            except:
+                print("ERROR: reading exit code file '%s' should contain an integer")
+        res=dict_match(settings,'exitcode','expectedfail')
+        
+        if exitcode!=expectedExitcode:
+            res2=dict_match(settings,'exitcode','skip')
+            if res2==None and res:
+                outputCalls.append((self.js_print,(testName, 'expected failure: exitcode reason: %s'
+                                                   % res,self.expfailmsgs)))
+                lexpfail += 1
+            elif res2==None:
+                outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d Signal Name: %s FAILED!'
+                                               % (expectedExitcode,exitcode,getSignalName(abs(exitcode))),
+                                               self.failmsgs)))
+                outputCalls.append((self.fail,(testName, 'captured output: %s'
+                                               % string.join([l.strip() for l in f+err], ' | '),
+                                               self.failmsgs)))
+                lfail+= 1
+        return lfail, lexpfail, expectedExitcode
 
     def loadExpectedErr(self, file):
         try:

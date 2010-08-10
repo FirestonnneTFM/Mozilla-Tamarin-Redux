@@ -326,6 +326,17 @@ ecma3/Unicode/uAC00_HangulSyllables, .*, ats_skip, bug 499685 skip slow tests
 abcasm/.*, .*, verify_skip, abcasm tests not compatible with --verify
 
 ####################
+#  --verifyonly skips : tests that intentionally fail will "pass" in -Dverifyonly runs
+####################
+abcasm/bug_554915a, .*-Dverifyonly.*, skip, -Dtimeout test will not timeout when only being verified
+ecma3/Exceptions/exception_011_rt, .*-Dverifyonly.*, skip, Test expects exitcode=1: exits with uncaught exception
+regress/bug_515935, .*-Dverifyonly.*, skip, out of memory test
+regress/bug_555542, .*-Dverifyonly.*, skip, uncaught ReferenceError test
+regress/bug_555705, .*-Dverifyonly.*, skip, test intentionally throws a verifyerror
+regress/bug_498979, .*-Dverifyonly.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=585128
+abcasm/nullCheck/CallStatic, .*-Dverifyonly.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=585128
+
+####################
 # AOT specific
 ####################
 as3/sampling/FunctionEntry,		.*AOT.*	, skip, AOT does not yet support profiling
