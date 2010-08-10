@@ -436,7 +436,7 @@ namespace avmplus
         m->setFile(file);
 
         AvmCore::skipU32(pos, 4); // max_stack; local_count; init_stack_depth; max_stack_depth;
-        int code_len = AvmCore::readU32(pos);
+		uint32 code_len = AvmCore::readU32(pos); // checked earlier by AbcParser::parseMethodInfos()
 
         const uint8_t *start = pos;
         const uint8_t *end = pos + code_len;
@@ -479,9 +479,11 @@ namespace avmplus
                             // in this case last word contains
                             // register and line number
                             const uint8_t* pc2 = pc+2;
-                            int index = readU32(pc2);
+                            uint32 index = AvmCore::readU32(pc2);
                             int slot = (uint8_t)*(pc2);
                             //int line = readS24(pc+5);
+                            if (index >= pool->constantStringCount)
+                                break; // let the verifier handle this
 
 
                             //Atom str = pool->cpool[index];
@@ -508,7 +510,10 @@ namespace avmplus
                 {
                     // new or existing source file
                     const uint8_t* pc2 = pc+1;
-                    Stringp name = pool->getString(readU32(pc2));
+                    uint32 index = AvmCore::readU32(pc2);
+                    if (index >= pool->constantStringCount)
+                        break; // let the verifier handle this
+ 					Stringp name = pool->getString(index);
                     active = file->sourceNamed(name);
                     if (active == NULL)
                     {
