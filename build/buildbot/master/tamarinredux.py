@@ -1796,6 +1796,7 @@ class tamarinredux:
     windows_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air", vmargs="", config="", scriptargs=""))
     windows_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    windows_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     windows_deep_factory.addStep(util_process_clean)
     windows_deep_factory.addStep(util_clean_buildsdir)
 
@@ -1829,8 +1830,10 @@ class tamarinredux:
     mac_deep_factory.addStep(test_generic(name="ReleaseDebugger64-air", shellname="avmshell_air_64", vmargs="", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    mac_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     mac_deep_factory.addStep(test_generic(name="Release64-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger64_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    mac_deep_factory.addStep(test_generic(name="DebugDebugger64_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     mac_deep_factory.addStep(TestSuiteShellCommand(
                      command=['./run-brightspot.sh', WithProperties('%s','revision')],
                      env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
@@ -1940,6 +1943,7 @@ class tamarinredux:
     mac_ppc_deep_factory.addStep(test_generic(name="ReleasDebugger-air", shellname="avmshell_air_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_ppc", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     mac_ppc_deep_factory.addStep(util_process_clean)
     mac_ppc_deep_factory.addStep(util_clean_buildsdir)
 
@@ -1968,6 +1972,7 @@ class tamarinredux:
     solaris_sparc_deep_factory.addStep(test_misc)
     solaris_sparc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     solaris_sparc_deep_factory.addStep(util_process_clean)
     solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
 
@@ -2009,6 +2014,7 @@ class tamarinredux:
     windows_64_deep_factory.addStep(test_misc)
     windows_64_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     windows_64_deep_factory.addStep(util_process_clean)
     windows_64_deep_factory.addStep(util_clean_buildsdir)
 
@@ -2067,6 +2073,7 @@ class tamarinredux:
     linux_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air", vmargs="", config="", scriptargs=""))
     linux_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     linux_deep_factory.addStep(util_process_clean)
     linux_deep_factory.addStep(util_clean_buildsdir)
 
