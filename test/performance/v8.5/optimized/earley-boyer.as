@@ -2,8 +2,8 @@
 // benchmark harness code at the beginning and end of the file.
 
 var EarleyBoyer = new BenchmarkSuite('EarleyBoyer', 765819, [
-  new Benchmark("Earley", function () { BgL_earleyzd2benchmarkzd2(); }),
-  new Benchmark("Boyer", function () { BgL_nboyerzd2benchmarkzd2(); })
+ new Benchmark("Earley", function () { BgL_earleyzd2benchmarkzd2(); }, null, null),
+ new Benchmark("Boyer", function () { BgL_nboyerzd2benchmarkzd2(); }, null, null)
 ]);
 
 
@@ -4673,12 +4673,23 @@ SC_DEFAULT_OUT = new sc_GenericOutputPort(function(s) {});
 SC_ERROR_OUT = SC_DEFAULT_OUT;
 
 function RunBenchmark(name, count, run, warn) {
-  for (var n = 0; n < count; ++n) {
-    result = run();
-    if (!warn(result)) {
-      throw new Error("Earley or Boyer did incorrect number of rewrites");
+    try {
+	for (var n = 0; n < count; ++n) {
+	    result = run();
+	    if (!warn(result)) {
+		throw new Error("Earley or Boyer did incorrect number of rewrites");
+	    }
+	}
     }
-  }
+    catch (e) {
+	print("UNEXPECTED EXCEPTION: " + e);
+    }
 }
 
+Number.prototype.sc_toWriteString = function () { return String(this); }
+Number.prototype.sc_toDisplayString = function () { return String(this); }
+
 var BgL_runzd2benchmarkzd2 = RunBenchmark;
+
+      BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+                               NotifyScore: PrintScore });
