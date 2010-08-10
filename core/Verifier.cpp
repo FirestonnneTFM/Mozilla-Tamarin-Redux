@@ -272,7 +272,7 @@ namespace avmplus
         pool = _info->pool();
         frameSize = _frameSize;
 
-        if (_info->needRest() && !_info->needActivation())
+        if (_info->needRest() || (_info->needArguments() && _info->onlyUntypedParameters()))
             restVar = _info->getMethodSignature()->param_count() + 1;
         else
             optimize = false;
@@ -897,7 +897,7 @@ namespace avmplus
             state->setType(i, ms->paramTraits(i), i == 0);
 
         int first_local = param_count+1;
-        if (info->needRest() || info->needArguments()) {
+        if (info->needRestOrArguments()) {
             // NEED_REST overrides NEED_ARGUMENTS when both are set
             checkLocal(first_local);  // ensure param_count+1 <= max_reg
             state->setType(first_local, ARRAY_TYPE, true);

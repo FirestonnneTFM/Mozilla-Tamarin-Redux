@@ -564,6 +564,8 @@ namespace avmplus
             AvmCore::skipU32(pos); // name_index;
             pos++; // abcFlags;
 // begin AVMPLUS_UNCHECKED_HACK
+            if (untyped_args == param_count)
+                _flags |= ONLY_UNTYPED_PARAMETERS;
             // toplevel!=NULL check is so we only check when resolveSignature calls us (not subsequently)
             if (toplevel != NULL && (_flags & PROTOFUNC))
             {

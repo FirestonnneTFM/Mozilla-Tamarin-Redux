@@ -1639,7 +1639,7 @@ namespace avmplus
         this->try_to = driver->getTryTo();
         framesize = ms->frame_size();
 
-        if (info->needRest() && info->lazyRest())
+        if (info->needRestOrArguments() && info->lazyRest())
             restLocal = ms->param_count()+1;
 
         frag = new (*lir_alloc) Fragment(pc verbose_only(, 0));
@@ -1860,39 +1860,53 @@ namespace avmplus
 
         int firstLocal = 1+param_count;
 
-        // capture remaining args
+        // Capture remaining args.
+        //
+        // Optimized ...rest and 'arguments':
+        //
+        // We avoid constructing the rest array if possible.  An analysis in the
+        // verifier sets the LAZY_REST bit if access patterns to the rest argument
+        // or the arguments array are only OBJ.length or OBJ[prop] for arbitrary
+        // propery; see comments in Verifier::verify.  The former pattern
+        // results in an OP_restargc instruction, while the latter results in an
+        // OP_restarg instruction.  Those instructions will access an unconsed
+        // rest array or arguments array when possible, and otherwise access a
+        // constructed rest array.  (For example, if prop turns out to be "slice"
+        // we must construct the array.  This will almost never happen.) They're
+        // implemented via helper functions restargcHelper and restargHelper.
+        //
+        // The unconsed rest or arguments array, the argument count, the consed array,
+        // and the flag that determines whether to use the unconsed or the consed array,
+        // are represented as follows:
+        //
+        //  - The unconsed array restArg is represented indirectly via ap_param and 
+        //    rest_offset.
+        //  - The argument count restArgc is a LIR expression of type uint32 computed from
+        //    argc_param and param_count.
+        //  - The rest parameter local is an array, it is either null (no rest array
+        //    consed yet) or a raw array pointer, so it doubles as the flag.  The offset
+        //    of this variable is 1+param_count.
+        //
+        // The rest parameter local is passed by reference to restargHelper, which
+        // may update it.
+        //
+        // The difference between a ...rest argument and an arguments array are that in
+        // the former case, 
+        //
+        //    restArgc = MAX(argc_param - param_count, 0)
+        //    restArg = is ap_param + rest_offset
+        //
+        // while in the latter case
+        //
+        //    restArgc = argc_param
+        //    restArg = ap_param + 1
+        //
+        // restArg is computed in the code generation case for OP_restarg.
+        
         if (info->needRest())
         {
             if (info->lazyRest())
             {
-                // Optimized rest arguments.
-                //
-                // We aim to avoid constructing the rest array if at all possible.
-                // An analysis in the verifier sets the LAZY_REST bit if access patterns
-                // to the rest argument are only OBJ.length or OBJ[prop] for arbitrary
-                // propery; see comments in Verifier::verify.  The former pattern
-                // results in an OP_restargc instruction, while the latter results in an
-                // OP_restarg instruction.  Those instructions will access an unconsed
-                // rest array when possible, and otherwise access a constructed rest array.
-                // (For example, if prop turns out to be "slice" we must construct the
-                // array.  This will almost never happen.) They're implemented via
-                // helper functions restargcHelper and restargHelper.
-                //
-                // The unconsed rest array, the argument count, the consed array, and the
-                // flag that determines whether to use the unconsed or the consed array,
-                // are represented as follows:
-                //
-                //  - The unconsed rest array is represented indirectly via ap_param
-                //    and argc_param.
-                //  - The rest parameter local is an array, it is either null (no
-                //    rest array consed) or a raw array pointer, so it doubles as the
-                //    flag.  The offset of this variable is 1+param_count.
-                //  - The argument count is a stack-allocated (LIR_allocp) native uint32.
-                //
-                // The rest parameter local is passed by reference to restargHelper, which
-                // may update it.
-
-                // Compute and store the argument count
                 LIns* x0 = binaryIns(LIR_subi, argc_param, InsConst(param_count));
                 LIns* x1 = binaryIns(LIR_lti, x0, InsConst(0));
                 restArgc = lirout->insChoose(x1, InsConst(0), x0, true);
@@ -1912,11 +1926,20 @@ namespace avmplus
         }
         else if (info->needArguments())
         {
-            //framep[info->param_count+1] = createArguments(env, argv, argc);
-            // use csop so if arguments never used, we don't create it
-            LIns* arguments = callIns(FUNCTIONID(createArgumentsHelper), 3,
-                env_param, argc_param, apArg);
-            localSet(firstLocal, arguments, ARRAY_TYPE);
+            if (info->lazyRest())
+            {
+                restArgc = argc_param;
+                
+                // Store a NULL array pointer
+                localSet(firstLocal, InsConstPtr(0), ARRAY_TYPE);
+            }
+            else {
+                //framep[info->param_count+1] = createArguments(env, argv, argc);
+                // use csop so if arguments never used, we don't create it
+                LIns* arguments = callIns(FUNCTIONID(createArgumentsHelper), 3,
+                    env_param, argc_param, apArg);
+                localSet(firstLocal, arguments, ARRAY_TYPE);
+            }
             firstLocal++;
         }
 
@@ -2542,7 +2565,7 @@ namespace avmplus
         case OP_restargc:
         {
             // See documentation in writePrologue regarding rest arguments
-            AvmAssert(info->needRest() && info->lazyRest());
+            AvmAssert(info->needRestOrArguments() && info->lazyRest());
             LIns* out = callIns(FUNCTIONID(restargcHelper),
                                 2,
                                 localGetp(restLocal),
@@ -2740,7 +2763,7 @@ namespace avmplus
         case OP_restarg:
         {
             // See documentation in writePrologue regarding rest arguments
-            AvmAssert(info->needRest() && info->lazyRest());
+            AvmAssert(info->needRestOrArguments() && info->lazyRest());
             const Multiname *multiname = pool->precomputedMultiname(opd1);
             // The by-reference parameter &restLocal is handled specially for this
             // helper function in VarTracker::insCall and in CodegenLIR::analyze_call.
@@ -2751,7 +2774,9 @@ namespace avmplus
                                 loadAtomRep(state->sp()),
                                 leaIns(restLocal*8, vars),
                                 restArgc,
-                                binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))));
+                                (info->needRest() ? 
+                                    binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))) :
+                                    binaryIns(LIR_addp, ap_param, InsConstPtr((void*)sizeof(Atom)))));
             localSet(state->sp()-1, out, type);
             break;
         }

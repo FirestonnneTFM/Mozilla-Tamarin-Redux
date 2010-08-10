@@ -148,8 +148,13 @@ REALLY_INLINE int32_t MethodInfo::needRest() const
 
 REALLY_INLINE int32_t MethodInfo::lazyRest() const
 {
-    AvmAssert(needRest());
+    AvmAssert(needRestOrArguments());
     return _flags & LAZY_REST;
+}
+
+REALLY_INLINE int32_t MethodInfo::onlyUntypedParameters() const
+{
+    return _flags & ONLY_UNTYPED_PARAMETERS;
 }
 
 REALLY_INLINE int32_t MethodInfo::needRestOrArguments() const

@@ -199,11 +199,14 @@ namespace avmplus
         static const int32_t INTERP_IMPL            = 0x20000000;
 
         // Set by setLazyRest when the verifier discovers that the method's rest array
-        // can be allocated lazily (usually not at all).  Only makes sense in
-        // combination with NEED_REST.
+        // or arguments array can be allocated lazily (usually not at all).  Only makes
+        // sense in combination with NEED_REST or NEED_ARGUMENTS.
         static const int32_t LAZY_REST              = 0x40000000;
 
-        // unused:                              = 0x80000000;
+        // Set by _buildMethodSignature if all fixed or optional parameters
+        // to the function are untyped.  (We use this to optimize the 'arguments' 
+        // array, see RestArgAnalyzer.)
+        static const int32_t ONLY_UNTYPED_PARAMETERS      = 0x80000000;
 
         /*@}*/
 
@@ -282,6 +285,7 @@ namespace avmplus
         int32_t isStaticInit() const;
         int32_t isInterpreted() const;
         int32_t unboxThis() const;
+        int32_t onlyUntypedParameters() const;
 
         void setUnboxThis();
         void setStaticInit();
