@@ -1526,7 +1526,12 @@ namespace avmplus
                 index = readU30(pos);
                 if(index != 1)
                     toplevel->throwVerifyError(kCorruptABCError);
-                readU30(pos);
+
+                index = readU30(pos);
+                // validate that parameterized type is valid. (note that index == 0 is
+                // legal here, and is used for Vector<*>)
+                if (index >= mn_count)
+                    toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(mn_count));
                 break;
             }
             default:
@@ -1543,6 +1548,56 @@ namespace avmplus
             }
             #endif
         }
+
+        {
+            BitSet seen(mn_count);
+            
+            // verify that parameterized types have no cycles. 
+            // we have to do this in a second pass since forward-references are legal
+            for (uint32_t i = 1; i < mn_count; ++i )
+            {
+                const uint8_t* p = pool->_abcStart + cpool_mn_offsets[i];
+                if (*p++ != CONSTANT_TypeName)
+                    continue;
+
+                uint32 basetype_index = readU30(p); // type being parameterized (currently, always Vector)
+
+                // the type being parameterized can't itself be a parameterized type.
+                // (note that this check also means cycles for this value are impossible
+                // and need not be checked)
+                const uint8_t* p_basetype = pool->_abcStart + cpool_mn_offsets[basetype_index];
+                if (*p_basetype == CONSTANT_TypeName)
+                    goto corrupted; // don't throw: that would leak the BitSet
+
+                readU30(p); // param count (currently always 1)
+                
+                uint32_t pt_index = readU30(p); // param type(s) (currently exactly one)
+                // now check for cycles. we can nest arbitrarily deep (eg Vector<Vector<Vector<uint>>>)
+                // but we can't have a cycle.
+                seen.reset();
+                for (;;)
+                {
+                    if (pt_index == 0) // Vector<*> is a special case
+                        break;
+                    seen.set(pt_index);
+                    const uint8_t* p_paramtype = pool->_abcStart + cpool_mn_offsets[pt_index];
+                    if (*p_paramtype++ != CONSTANT_TypeName)
+                        break;
+                    readU30(p_paramtype); // skip type being parameterized (currently, always Vector)
+                    readU30(p_paramtype); // skip param count (currently always 1)
+                    pt_index = readU30(p_paramtype); // param type(s) (currently exactly one)
+                    if (seen.get(pt_index))
+                        goto corrupted; // don't throw: that would leak the BitSet
+                }
+                
+            }
+        }
+        
+        return;
+        
+    corrupted:
+        toplevel->throwVerifyError(kCorruptABCError);
+
     }
 
     void AbcParser::addNamedTraits(NamespaceSetp nss, Stringp name, Traits* itraits)

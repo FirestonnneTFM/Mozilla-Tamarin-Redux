@@ -573,6 +573,9 @@ range_error:
         case CONSTANT_TypeName:
         {
             index = AvmCore::readU32(pos);
+            // Note that AbcParser ensures that the Multiname we're parsing can't
+            // be a CONSTANT_TypeName, thus the recursion here can't be more
+            // than a single level deep.
             parseMultiname(_abcStart + cpool_mn_offsets[index], m);
             index = AvmCore::readU32(pos);
             AvmAssert(index==1);
