@@ -305,11 +305,12 @@ namespace avmplus
         config.interrupts = interrupts_default;
 
         gcInterface.SetCore(this);
-        xmlEntities        = NULL;
-        exceptionFrame     = NULL;
-        exceptionAddr      = NULL;
-        builtinPool        = NULL;
-        builtinDomain      = NULL;
+        xmlEntities                 = NULL;
+        exceptionFrame              = NULL;
+        exceptionAddr               = NULL;
+        builtinPool                 = NULL;
+        builtinDomain               = NULL;
+        builtinBugCompatibility     = NULL;
 
         GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
 
@@ -461,6 +462,8 @@ namespace avmplus
         #endif
 
         builtinDomain = new (GetGC()) Domain(this, NULL);
+        // builtins always use BugCompatibility::kLatest
+        builtinBugCompatibility = createBugCompatibility(BugCompatibility::kLatest);
 
 #ifdef VMCFG_AOT
         NativeInitializer ninit(this,
@@ -649,14 +652,11 @@ namespace avmplus
     {
         DomainEnv* builtinDomainEnv = new (GetGC()) DomainEnv(this, builtinDomain, NULL);
         
-        // builtins always use BugCompatibility::kLatest
-        const BugCompatibility* bugCompatibility = createBugCompatibility(BugCompatibility::kLatest);
-
         // note that this is the one-and-only place that a naked CodeContext
         // should ever be constructed (ie, when initializing the VM's own builtins);
         // this is because it is also the one-and-only place where we can be certain
         // that no native code will be expecting a subclass of CodeContext.
-        CodeContext* builtinCodeContext = new (GetGC()) CodeContext(builtinDomainEnv, bugCompatibility);
+        CodeContext* builtinCodeContext = new (GetGC()) CodeContext(builtinDomainEnv, builtinBugCompatibility);
 
         AvmAssert(builtinPool != NULL);
         AvmAssert(builtinPool->scriptCount() != 0);
@@ -4473,6 +4473,18 @@ return the result of the comparison ToPrimitive(x) == y.
         }
 
         return NULL;
+    }
+
+    const BugCompatibility* AvmCore::currentBugCompatibility() const
+    {
+        CodeContext* cc = this->codeContext();
+        if (cc != NULL)
+            return cc->bugCompatibility();
+        
+        // If CodeContext is NULL, then we're not executing any user code,
+        // so just use the BugCompatibility of the builtin pool...
+        // which should always be builtinBugCompatibility.
+        return builtinBugCompatibility;
     }
 
     void AvmCore::setStackLimit(uintptr_t p)

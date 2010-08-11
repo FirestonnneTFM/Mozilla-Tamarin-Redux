@@ -1548,7 +1548,7 @@ namespace avmplus
 
     bool XMLObject::escapeAppendedEntities() const
     {
-        const BugCompatibility* bugCompatibility = toplevel()->currentBugCompatibility();
+        const BugCompatibility* bugCompatibility = core()->currentBugCompatibility();
 
         // fix is in effect: don't do anything
         return (bugCompatibility->bugzilla444630) ? 
