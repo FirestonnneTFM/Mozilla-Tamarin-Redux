@@ -242,10 +242,6 @@ namespace avmplus
         Compare this string with a UTF-16 string.
         */
                 bool    FASTCALL    equalsUTF16(const wchar* p, int32_t len) const;
-        /**
-        Localized compare - maps to compare().
-        */
-                int32_t FASTCALL    localeCompare(Stringp other, const Atom* argv, int32_t argc);
 
         /*@{*/
         /**
@@ -428,7 +424,7 @@ namespace avmplus
                 double              _charCodeAt(int i); // returns NaN for out-of-bounds
                 double              AS3_charCodeAt(double i); // returns NaN for out-of-bounds
 
-                int                 AS3_localeCompare(Stringp other);
+                int32_t             AS3_localeCompare(Atom other);
 
                 Stringp             _substring(int i_start, int i_count);
                 Stringp             AS3_substring(double d_start, double d_count);

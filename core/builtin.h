@@ -70,7 +70,7 @@ namespace avmplus {
     class NumberClass; //Number$
     class ObjectClass; //Object$
     class ObjectVectorClass; //__AS3__.vec::Vector$object$
-    class ObjectVectorObject; //__AS3__.vec::Vector
+    class ObjectVectorObject; //__AS3__.vec::Vector$object
     class QNameClass; //QName$
     class QNameObject; //QName
     class RangeErrorClass; //RangeError$
@@ -786,9 +786,6 @@ extern AvmBox builtin_b2a_oa_optakAvmThunkUndefined_u_thunk(AvmMethodEnv env, ui
 #define XML_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
 #define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
 
-extern AvmBox builtin_i2a_ss_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_localeCompare_thunk  builtin_i2a_ss_optakAvmThunkUndefined_thunk
-
 extern AvmBox builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__match_thunk  builtin_a2a_osa_thunk
 
@@ -890,6 +887,9 @@ extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk(
 
 extern AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_length_get_thunk  builtin_i2a_s_thunk
+
+extern AvmBox builtin_i2a_sa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_AS3_localeCompare_thunk  builtin_i2a_sa_optakAvmThunkUndefined_thunk
 
 extern double builtin_func_d2d_os_optsAvmThunkConstant_AvmString_60_____NaN_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_parseFloat_thunk  builtin_func_d2d_os_optsAvmThunkConstant_AvmString_60_____NaN_____thunk
