@@ -125,8 +125,8 @@ package
             return s
         }
 
-        AS3 native function localeCompare(other:String=void 0):int
-        prototype.localeCompare = function(other:String=void 0):int
+        AS3 native function localeCompare(other:*=void 0):int
+        prototype.localeCompare = function(other:*=void 0):int
         {
             return String(this).AS3::localeCompare(other)
         }

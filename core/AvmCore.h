@@ -317,6 +317,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla444630:1;      
         
         unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
+        unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
         
     protected:
         friend class AvmCore;
@@ -392,6 +393,12 @@ const int kBufferPadding = 16;
     
         // Please see BugCompatibility for an explanation of this field.
         bool bugzilla444630;
+
+        // return the BugCompatibility that is associated with the current
+        // CodeContext. If there is no current CodeContext, return the
+        // BugCompatibility associated with the VM's builtins. 
+        // This call will never return NULL.
+        const BugCompatibility* currentBugCompatibility() const;
 
     private:
 
@@ -597,8 +604,11 @@ const int kBufferPadding = 16;
 
         /** Domain for built-in classes */
         Domain* builtinDomain;
-    
+
     private:
+        /** BugCompatibility used to initialize the built-in classes */
+        const BugCompatibility* builtinBugCompatibility;
+    
         /**
          * The default namespace, "public"
          */

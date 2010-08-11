@@ -325,6 +325,17 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
         return getprop_miss(c, env, obj);
     }
 
+    SSE2_ONLY(
+    // getting a double slot on an object
+    Atom getprop_obj_slot_double_sse2(GetCache& c, MethodEnv* env, Atom obj)
+    {
+        PROF_IF ("getprop_obj_slot hit", OBJ_HIT(obj, c)) {
+            return atomObj(obj)->core()->doubleToAtom_sse2(load_cached_slot<double>(c, obj));
+        }
+        return getprop_miss(c, env, obj);
+    }
+    )
+
     // calling a getter method on an object
     Atom getprop_obj_get(GetCache& c, MethodEnv* env, Atom obj)
     {
@@ -418,7 +429,15 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
                 void *slot_ptr, *obj_ptr = atomObj(obj);
                 const SlotStorageType sst = actual_type->getTraitsBindings()->
                     calcSlotAddrAndSST(AvmCore::bindingToSlotId(b), (void*)obj_ptr, slot_ptr);
-                c.get_handler = getprop_slot_handlers[sst];
+                SSE2_ONLY(if(toplevel->core()->config.njconfig.i386_sse2 && sst == SST_double) 
+                {
+                    c.get_handler = &getprop_obj_slot_double_sse2;
+                }
+                else 
+                )
+                {
+                    c.get_handler = getprop_slot_handlers[sst];
+                }
                 c.slot_offset = uintptr_t(slot_ptr) - uintptr_t(obj_ptr);
             }
             else {
