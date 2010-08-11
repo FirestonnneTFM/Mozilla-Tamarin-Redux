@@ -393,6 +393,12 @@ const int kBufferPadding = 16;
         // Please see BugCompatibility for an explanation of this field.
         bool bugzilla444630;
 
+        // return the BugCompatibility that is associated with the current
+        // CodeContext. If there is no current CodeContext, return the
+        // BugCompatibility associated with the VM's builtins. 
+        // This call will never return NULL.
+        const BugCompatibility* currentBugCompatibility() const;
+
     private:
 
         #ifdef DEBUGGER
@@ -597,8 +603,11 @@ const int kBufferPadding = 16;
 
         /** Domain for built-in classes */
         Domain* builtinDomain;
-    
+
     private:
+        /** BugCompatibility used to initialize the built-in classes */
+        const BugCompatibility* builtinBugCompatibility;
+    
         /**
          * The default namespace, "public"
          */

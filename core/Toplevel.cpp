@@ -1354,21 +1354,10 @@ namespace avmplus
         return true;
     }
 
-    const BugCompatibility* Toplevel::currentBugCompatibility() const
-    {
-        CodeContext* cc = core()->codeContext();
-        if (cc != NULL)
-            return cc->bugCompatibility();
-        
-        // If CodeContext is NULL, then we're not executing any user code,
-        // so just use the BugCompatibility of the builtin pool
-        return _abcEnv->codeContext()->bugCompatibility();
-    }
-
     // Toplevel::bugzilla implements a Script, not a Method, so "self" is a plain ScriptObject, not a Toplevel
     /*static*/ bool Toplevel::bugzilla(ScriptObject* self, int32_t bug)
     {
-        const BugCompatibility* bugCompatibility = self->toplevel()->currentBugCompatibility();
+        const BugCompatibility* bugCompatibility = self->core()->currentBugCompatibility();
         
         // This is ad-hoc, we only need to introduce cases here for
         // bugs that are actually worked around in AS3 code.

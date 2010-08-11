@@ -316,8 +316,6 @@ namespace avmplus
 
         ScopeChain* toplevel_scope();
 
-        const BugCompatibility* currentBugCompatibility() const;
-
     protected:
         ClassClosure* findClassInPool(int class_id, PoolObject* pool);
 
