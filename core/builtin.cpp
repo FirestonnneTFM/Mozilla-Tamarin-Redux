@@ -2521,7 +2521,7 @@ AvmBox String_AS3_localeCompare_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* a
     (void)env;
     String* const obj = (String*)AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0]);
     int32_t const ret = obj->AS3_localeCompare(
-        (argc < 1 ? AvmThunkCoerce_AvmBox_AvmString(kAvmThunkUndefined) : AvmThunkUnbox_AvmString(argv[argoff1]))
+        (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
     );
     return (AvmBox) ret;
 }
@@ -4208,21 +4208,6 @@ AvmBox builtin_b2a_oa_optakAvmThunkUndefined_u_thunk(AvmMethodEnv env, uint32_t 
     );
 }
 
-// String_AS3_localeCompare
-AvmBox builtin_i2a_ss_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
-{
-    enum {
-        argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_AvmString
-    };
-    (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0]);
-    int32_t const ret = obj->AS3_localeCompare(
-        (argc < 1 ? AvmThunkCoerce_AvmBox_AvmString(kAvmThunkUndefined) : AvmThunkUnbox_AvmString(argv[argoff1]))
-    );
-    return (AvmBox) ret;
-}
-
 // String_private__match
 AvmBox builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
@@ -4565,6 +4550,21 @@ AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)env;
     String* const obj = (String*)AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0]);
     int32_t const ret = obj->get_length();
+    return (AvmBox) ret;
+}
+
+// String_AS3_localeCompare
+AvmBox builtin_i2a_sa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmString
+    };
+    (void)env;
+    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0]);
+    int32_t const ret = obj->AS3_localeCompare(
+        (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
+    );
     return (AvmBox) ret;
 }
 
@@ -7203,7 +7203,7 @@ const uint8_t builtin_abc_data[45544] = {
    1,   8,   1,   1,   3,   0,   0,   1,   0,   0,   0,   1,   4,   2,  68,   1,
   67,   1,   8,   2,  58,   1,   1,   3,   2,  68,   1,  67,   1,   8,   2,  58,
    1,   7,   3,   1,   1,  67,   1,   8,   1,   1,   3,   1,  67,  67,   1,   8,
-   1,   1,   3,   0,   1,   1,   4,   1,  68,   1,   1,   8,   1,   0,   0,   1,
+   1,   1,   3,   0,   1,   1,   4,   1,  68,   0,   1,   8,   1,   0,   0,   1,
   61,   0,   1,   8,   1,   0,   0,   2,   1,   0,   0,   1,   8,   2,   0,   0,
    0,   0,   1,  68,   0,   1,   8,   1,   0,   0,   2,   1,  67,  67,   1,   8,
    2,   1,   3,   7,   3,   2,  61,   0,   0,   1,   8,   2,   0,   0,   5,   6,
@@ -7216,7 +7216,7 @@ const uint8_t builtin_abc_data[45544] = {
    1,  40,   1,   7,   3,   2,  68,   1,  67,   1,  40,   2,  58,   1,   7,   3,
    1,   1,  68,   1,  40,   1,   1,   3,   1,   1,  67,   1,  40,   1,   1,   3,
    1,  67,  68,   1,  40,   1,   1,   3,   1,  67,  67,   1,  40,   1,   1,   3,
-   0,   1,   1,   4,   1,  68,   1,   1,  40,   1,   0,   0,   1,  61,   0,   1,
+   0,   1,   1,   4,   1,  68,   0,   1,  40,   1,   0,   0,   1,  61,   0,   1,
    8,   1,   0,   0,   2,   1,   0,   0,   1,   8,   2,   0,   0,   0,   0,   1,
   68,   0,   1,   8,   1,   0,   0,   2,   1,  68,  68,   1,  40,   2,   1,   3,
    7,   3,   2,   1,  67,  67,   1,  40,   2,   1,   3,   7,   3,   2,  61,   0,

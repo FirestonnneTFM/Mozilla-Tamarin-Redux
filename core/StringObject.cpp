@@ -770,16 +770,6 @@ namespace avmplus
         return true;
     }
 
-    int32_t String::localeCompare(Stringp other, const Atom* /*argv*/, int32_t /*argc*/)
-    {
-        if (other == NULL)
-        {
-            return (m_length == 0) ? 1 : 0;
-        }
-
-        return other->Compare(*this);
-    }
-
 /////////////////////////////// Hash Codes /////////////////////////////////
 
     // The hashing algorithm uses the full character width
@@ -2223,9 +2213,33 @@ namespace avmplus
         return _charCodeAt(MathUtils::toIntClamp(dPos, this->length()));
     }
 
-    int32_t String::AS3_localeCompare(Stringp other)
+    int32_t String::AS3_localeCompare(Atom other)
     {
-        return localeCompare(other, NULL, 0);
+        Stringp otherStr;
+
+        if (AvmCore::isString(other))
+        {
+            otherStr = AvmCore::atomToString(other);
+        }
+        else
+        {
+            AvmCore* core = _core(this);
+
+            // legacy behavior special-cases NULL (including undefined).
+            if (AvmCore::isNullOrUndefined(other))
+            {
+                if (!core->currentBugCompatibility()->bugzilla585791)
+                    return (m_length == 0) ? 1 : 0;
+            }
+            
+            // Proper ECMAScript behavior:
+            // The 'this' object is converted to string, call it a.
+            // The argument is converted to string, call it b.
+            // Those strings are compared and a string comparison value is returned.
+            otherStr = core->string(other);
+        }
+
+        return otherStr->Compare(*this);
     }
 
 #ifdef DEBUGGER
