@@ -363,8 +363,8 @@ namespace avmplus
         // iterIndices[1] == the real internal index that corresponds to it,
         //  with bit 31 set if the entry was an intptr.
         // 
-        int publicIndex = iterIndices[0];
-        int realIndex = iterIndices[1];
+        int publicIndex = int(iterIndices[0]);
+        int realIndex = int(iterIndices[1]);
         if (!index)
         {
             // if index == 0, we're starting the iteration; prime the pump by finding
