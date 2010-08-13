@@ -212,12 +212,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="4"
-				InlineFunctionExpansion="0"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="true"
-				WholeProgramOptimization="false"
+				Optimization="2"
+				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\VMPI;..\..\MMgc;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -379,7 +375,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				FavorSizeOrSpeed="2"
+				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\VMPI;..\..\MMgc;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				ExceptionHandling="0"
@@ -1078,7 +1074,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				FavorSizeOrSpeed="2"
+				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\VMPI;..\..\MMgc;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -1154,7 +1150,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				FavorSizeOrSpeed="2"
+				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\VMPI;..\..\MMgc;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				ExceptionHandling="0"
