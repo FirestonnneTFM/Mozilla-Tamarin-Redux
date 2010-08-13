@@ -317,6 +317,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla444630:1;      
         
         unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
+        unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
         unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
         
     protected:

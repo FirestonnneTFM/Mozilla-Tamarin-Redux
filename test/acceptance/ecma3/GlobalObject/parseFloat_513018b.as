@@ -1,5 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,45 +35,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_AvmPlusScriptableObject__
-#define __avmplus_AvmPlusScriptableObject__
+package {
+    import avmplus.System
 
+    var SECTION = "GlobalObject";
+    var VERSION = "as3";
+    startTest();
+    var TITLE   = "bug 513018";
 
-namespace avmplus
-{
+    writeHeaderToLog( SECTION + " "+ TITLE );
 
-#ifdef DEBUGGER
-    // This really ought to be defined in Sampler.h, but is here to simplify header-file inclusion
-    // order issues.
-    typedef struct SamplerObjectType_* SamplerObjectType;
-#endif
+    AddTestCase("Verify bugCompatibility flag",
+      "SWF11",
+      System.bugCompatibility);
 
-    class AvmPlusScriptableObject : public MMgc::RCObject
-    {
-    public:
-        // used by WeakValueHashtable to correctly atom'ize a pointer to one of these
-        virtual Atom toAtom() const = 0;
+    AddTestCase('SWF11: 12..34..56',
+		parseFloat("12..34..56"),
+		12);
 
-#ifdef DEBUGGER
-        AvmPlusScriptableObject(SamplerObjectType sot);
-
-        /**
-         * Returns the number of bytes of memory taken by this object, that are not
-         * also shared by any other objects.  For example, a dependent String would
-         * include sizeof(String) but not the size of the buffer of the master string;
-         * but a dynamic String would include both sizeof(String) and the size of
-         * the buffer.
-         *
-         * Used by the profiler to tell the user the shallow size of the object.
-         */
-        virtual uint64_t bytesUsed() const = 0;
-#endif
-
-        inline AvmCore* core() const
-        {
-            return (AvmCore*)MMgc::GC::GetGC(this)->core();
-        }
-    };
+    test();
 }
-
-#endif //__avmplus_AvmPlusScriptableObject__

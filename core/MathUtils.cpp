@@ -1325,13 +1325,14 @@ namespace avmplus
             s++;
         }
         */
+        const int32_t limit = inStr->core()->currentBugCompatibility()->bugzilla513018 ? index : slength;
         index = start;
         if (numDigits > 15) // after 15 digits, we can run into roundoff error
         {
             BigInteger exactInt;
             exactInt.setFromInteger(0);
             int32_t decimalDigits= -1;
-            while (index < slength) {
+            while (index < limit) {
                 ch = s[index];
                 if ((ch >= '0' && ch <= '9') || ch == '.') {
                     if (decimalDigits != -1) {
@@ -1369,7 +1370,7 @@ namespace avmplus
         else // we can use double
         {
             int32_t decimalDigits= -1;
-            while (index < slength)
+            while (index < limit)
             {
                 ch = s[index];
                 if ((ch >= '0' && ch <= '9') || ch == '.') {
