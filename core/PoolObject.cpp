@@ -772,7 +772,8 @@ range_error:
             const int32_t index = this->_method_name_indices[i];
             if (index >= 0)
             {
-                name = this->getString(index);
+                if ((uint32_t)index < constantStringCount)
+                    name = this->getString(index);
             }
             else
             {
