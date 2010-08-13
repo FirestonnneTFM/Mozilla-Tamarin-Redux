@@ -40,6 +40,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+import avmplus.System
+
 START("13.4.4.32 - XML replace()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("replace"));
@@ -113,9 +115,15 @@ AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('firstname','Johnny')",
 	"<employee id=\"1\">Johnny<lastname>Walton</lastname><age>25</age></employee>", 
              (MYXML = new XML(xmlDoc), MYXML.replace('firstname','Johnny').toString()));
 
+var expectedResult;
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<employee id="1"><phone>1234567</phone></employee>';
+else
+    expectedResult = '<phone>1234567</phone>';
+
 // This should replace all the children
 AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('*','<phone>1234567</phone>')", 
-	"<employee id=\"1\"><phone>1234567</phone></employee>", 
+	expectedResult, 
              (MYXML = new XML(xmlDoc), MYXML.replace('*',"<phone>1234567</phone>").toString()));
 
 // What about using an attribute name as a input parameter
