@@ -4857,6 +4857,7 @@ return the result of the comparison ToPrimitive(x) == y.
         {
             bugzilla444630 = 1;     // Entities are not escaped when appending String content to XML
             bugzilla504525 = 1;     // Vector.concat processes arguments in reverse order
+            bugzilla513018 = 1;     // parseFloat accepts illegal number syntax
             bugzilla585791 = 1;     // String.localeCompare with a null String object returns 0
         }
     }
