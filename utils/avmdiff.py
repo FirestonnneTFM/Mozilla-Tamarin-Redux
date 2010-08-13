@@ -140,8 +140,8 @@ def signame(sig):
 def abcdump(filename):
 	os.system('~/hg/tamarin-redux/objdir-release/shell/avmshell ~/hg/tamarin-redux/utils/abcdump.abc -- ' + filename)
 
-def avm(vm, args):
-    cmd = vm + ' ' + args + ' 2>&1'
+def avm(vm, args, avmshell_args):
+    cmd = '%s %s %s 2>&1' % (vm, avmshell_args, args)
     p = Popen(cmd, shell=True, stdout=PIPE)
     output = ()
     try:
@@ -204,14 +204,14 @@ def verbose_print(s):
     if verbose:
         print(s)
 
-def compare(vmlist, args):
+def compare(vmlist, args, avmshell_args):
     results = {}
     if len(vmlist) < 2:
         print >> stderr, "too few vms were given"
         exit(1)
     for vm in vmlist:
         verbose_print('%s %s' % (vm,args))
-        e = avm(vm, args)
+        e = avm(vm, args, avmshell_args)
         verbose_print(e)
         if e in results:
             results[e] += [vm]
@@ -246,8 +246,8 @@ def pick_majoirty(results):
     # just pick the first one
     return l[0]
 
-def test(vmlist, args):
-    results = compare(vmlist, args)
+def test(vmlist, args, avmshell_args):
+    results = compare(vmlist, args, avmshell_args)
     e0 = pick_majoirty(results)
     stat0, out0 = e0
     if len(results) != 1:
@@ -281,8 +281,35 @@ def usage(stat):
 if __name__ == '__main__':
     cwd = os.path.dirname(sys.argv[0])
     buildfile = cwd+'/avmdiff.cfg'
+    
+    # pull out any extra options passed in.  Those go to the avmshell.
+    sys_args = argv[1:]
+    avmshell_args = []
+    avmdiff_args = []
+    
+    short = 'hf:qv'
+    long = ['help', 'buildfile=', 'quiet', 'verbose']
+    
+    if len(sys_args) > 1:
+        for arg in sys_args[:-1]:
+            if arg.startswith('--'):
+                if arg[2:] in [a.strip('=') for a in long]:
+                    avmdiff_args.append(arg)
+                else:
+                    avmshell_args.append(arg)
+            elif arg.startswith('-'):
+                if arg[1] in short:
+                    avmdiff_args.append(arg)
+                else:
+                    avmshell_args.append(arg)
+            else:
+                avmshell_args.append(arg)
+    
+    avmdiff_args.append(sys_args[-1])
+    avmshell_args = ' '.join(avmshell_args)
+        
     try:
-        opts, vmargs = getopt(argv[1:], 'hf:qv', ['help', 'buildfile=', 'quiet', 'verbose'])
+        opts, vmargs = getopt(avmdiff_args, short, long)
     except:
         usage(2)
 
@@ -320,7 +347,7 @@ if __name__ == '__main__':
         avmdd=os.environ['shell_debug_debugger']
 
     vmlist = make_vmlist(buildfile)
-    stat = test(vmlist, arglist)
+    stat = test(vmlist, arglist, avmshell_args)
     if stat == 0:
         print 'PASSED! all configs match'
     exit(stat)
