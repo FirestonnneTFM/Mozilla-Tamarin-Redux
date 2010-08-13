@@ -40,6 +40,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+import avmplus.System
+
 START("13.4.4.3 - XML appendChild()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("appendChild"));
@@ -82,12 +84,22 @@ TEST(3, correct, emps);
 XML.prettyPrinting = false;
 var xmlDoc = "<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM></XML>";
 
+var expectedResult;
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM><TEAM>Red Sox</TEAM></XML>';
+else
+    expectedResult = '<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM><TEAM>&lt;TEAM&gt;Red Sox&lt;/TEAM&gt;</TEAM></XML>';
+
 AddTestCase( "MYXML = new XML(xmlDoc), MYXML.appendChild('<TEAM>Red Sox</TEAM>'), MYXML.toXMLString()", 
-             "<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM><TEAM>Red Sox</TEAM></XML>",
+             expectedResult,
              (MYXML = new XML(xmlDoc), MYXML.appendChild('<TEAM>Red Sox</TEAM>'), MYXML.toXMLString()) );
 
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<XML><TEAM>Giants<City>San Francisco</City></TEAM><TEAM>Padres</TEAM></XML>';
+else
+    expectedResult = '<XML><TEAM>Giants&lt;City&gt;San Francisco&lt;/City&gt;</TEAM><TEAM>Padres</TEAM></XML>';
 AddTestCase( "MYXML = new XML(xmlDoc), MYXML.TEAM[0].appendChild ('<City>San Francisco</City>')), MYXML.toXMLString()", 
-             "<XML><TEAM>Giants<City>San Francisco</City></TEAM><TEAM>Padres</TEAM></XML>",
+             expectedResult,
              (MYXML = new XML(xmlDoc), MYXML.TEAM[0].appendChild ('<City>San Francisco</City>'), MYXML.toXMLString()) );
 
 
@@ -130,9 +142,14 @@ AddTestCase( "true duplicate child node - MYXML.appendChild(MYXML.child(0)[0]), 
 			"<LEAGUE><TEAM>Giants</TEAM><TEAM>Giants</TEAM></LEAGUE>",
 			(MYXML.appendChild(MYXML.child(0)[0]), MYXML.toString()) );
 			
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<root><b>a</b></root>';
+else
+    expectedResult = '<b>a</b>';
+
 MYXML = new XML('<?xml version="1.0"?><root></root>');
 AddTestCase( "MYXML = new XML('<?xml version=\"1.0\"?><root></root>'); MYXML.appendChild(\"<b>a</b>\"), MYXML.toString()",
-			"<root><b>a</b></root>",
+			expectedResult,
 			(MYXML.appendChild("<b>a</b>"), MYXML.toString()));
 			
 MYXML = new XML('<LEAGUE></LEAGUE>');
@@ -156,8 +173,13 @@ MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = "poltergeist";
 MYXML.appendChild(x1);
 			
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<SCARY><MOVIE/>poltergeist</SCARY>';
+else
+    expectedResult = '<SCARY><MOVIE/><MOVIE>poltergeist</MOVIE></SCARY>';
+
 AddTestCase( "Append a string to top node",
-			'<SCARY><MOVIE/>poltergeist</SCARY>',
+			expectedResult,
 			(MYXML.toString()) );
 			
 MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
