@@ -42,9 +42,6 @@
     <ClCompile Include="..\..\core\AbcEnv.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\core\AbcGen.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\core\AbcParser.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -648,15 +645,18 @@
     <ClCompile Include="..\..\core\exec-verifyall.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\extensions\ST_mmgc_weakref.cpp">
+      <Filter>extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extensions\ST_mmgc_finalize_uninit.cpp">
+      <Filter>extensions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\core\AbcEnv.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\AbcEnv-inlines.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\AbcGen.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\AbcParser.h">
