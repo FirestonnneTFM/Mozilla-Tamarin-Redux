@@ -2620,6 +2620,7 @@ uschar classbits[32];
 BOOL class_utf8;
 BOOL utf8 = (options & PCRE_UTF8) != 0;
 uschar *class_utf8data;
+uschar *class_utf8data_base;
 uschar utf8_char[6];
 #else
 BOOL utf8 = FALSE;
@@ -2933,6 +2934,7 @@ for (;; ptr++)
 #ifdef SUPPORT_UTF8
     class_utf8 = FALSE;                       /* No chars >= 256 */
     class_utf8data = code + LINK_SIZE + 2;    /* For UTF-8 items */
+    class_utf8data_base = class_utf8data;     /* For resetting in pass 1 */
 #endif
 
     /* Process characters until ] is reached. By writing this as a "do" it
@@ -2957,6 +2959,17 @@ for (;; ptr++)
         {                           /* Braces are required because the */
         GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
         }
+
+      /* In the pre-compile phase, accumulate the length of any UTF-8 extra
+      data and reset the pointer, to ensure that large classes that cannot 
+      overwrite the work space. */
+
+      if (lengthptr != NULL)
+        {
+        *lengthptr += class_utf8data - class_utf8data_base;
+        class_utf8data = class_utf8data_base;
+        }
+
 #endif
 
       /* Inside \Q...\E everything is literal except \E */
@@ -5032,10 +5045,8 @@ for (;; ptr++)
         both phases.
 
         If we are not at the pattern start, compile code to change the ims
-        options if this setting actually changes any of them. We also pass the
-        new setting back so that it can be put at the start of any following
-        branches, and when this group ends (if we are in a group), a resetting
-        item can be compiled. */
+        options if this setting actually changes any of them, and reset the
+        greedy defaults and the case value for firstbyte and reqbyte. */
 
         if (*ptr == ')')
           {
@@ -5043,7 +5054,6 @@ for (;; ptr++)
                (lengthptr == NULL || *lengthptr == 2 + 2*LINK_SIZE))
             {
             cd->external_options = newoptions;
-            options = newoptions;
             }
          else
             {
@@ -5052,17 +5062,17 @@ for (;; ptr++)
               *code++ = OP_OPT;
               *code++ = newoptions & PCRE_IMS;
               }
-
-            /* Change options at this level, and pass them back for use
-            in subsequent branches. Reset the greedy defaults and the case
-            value for firstbyte and reqbyte. */
-
-            *optionsptr = options = newoptions;
             greedy_default = ((newoptions & PCRE_UNGREEDY) != 0);
             greedy_non_default = greedy_default ^ 1;
-            req_caseopt = ((options & PCRE_CASELESS) != 0)? REQ_CASELESS : 0;
+            req_caseopt = ((newoptions & PCRE_CASELESS) != 0)? REQ_CASELESS : 0;
             }
 
+          /* Change options at this level, and pass them back for use
+          in subsequent branches. When not at the start of the pattern, this
+          information is also necessary so that a resetting item can be
+          compiled at the end of a group (if we are in a group). */
+
+          *optionsptr = options = newoptions;
           previous = NULL;       /* This item can't be repeated */
           continue;              /* It is complete */
           }

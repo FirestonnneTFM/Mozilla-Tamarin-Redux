@@ -130,7 +130,7 @@ ABC_OP(         2,       1,     0,     0,        callstatic)            // 0x44
 ABC_OP(         2,       1,     0,     0,        callsuper)             // 0x45  
 ABC_OP(         2,       1,     0,     0,        callproperty)          // 0x46  
 ABC_OP(         0,       0,     0,     0,        returnvoid)            // 0x47  
-ABC_OP(         0,       0,     -1,    0,        returnvalue)           // 0x48  
+ABC_OP(         0,       1,     -1,    0,        returnvalue)           // 0x48  
 ABC_OP(         1,       1,     -1,    0,        constructsuper)        // 0x49  
 ABC_OP(         2,       1,     0,     0,        constructprop)         // 0x4A  
 ABC_OP(         -1,      1,     0,     1,        callsuperid)           // 0x4B  
