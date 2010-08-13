@@ -367,6 +367,7 @@ namespace avmshell
         this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
         
         this->defaultBugCompatibilityVersion = settings.bugCompatibilityVersion;
+        this->bugzilla444630 = (this->defaultBugCompatibilityVersion >= BugCompatibility::kSWF10);
 
         // This is obscure but well-defined: the clearing of this flag is allowed
         // at any time, see comment for checkFixedMemory in GCHeap.h.
