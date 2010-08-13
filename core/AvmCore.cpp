@@ -1679,7 +1679,7 @@ return the result of the comparison ToPrimitive(x) == y.
     /* static */
     void AvmCore::formatMultiname(PrintWriter& out, uint32_t index, PoolObject* pool)
     {
-        if (index > 0 && index <= pool->cpool_mn_offsets.size())
+        if (index > 0 && index < pool->cpool_mn_offsets.size())
         {
             Multiname name;
             pool->parseMultiname(name, index);
@@ -1701,7 +1701,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index < pool->constantStringCount)
+                if (index > 0 && index < pool->constantStringCount)
                 {
                     buffer << " \"" << pool->getString(index) << "\"";
                 }
@@ -1718,7 +1718,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index < pool->cpool_int.size()) 
+                if (index > 0 && index < pool->cpool_int.size()) 
                 {
                     buffer << " " << pool->cpool_int[index];
                 }
@@ -1732,7 +1732,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index < pool->cpool_uint.size())
+                if (index > 0 && index < pool->cpool_uint.size())
                 {
                     buffer << " " << (double)pool->cpool_uint[index];
                 } 
@@ -1760,7 +1760,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index < pool->cpool_ns.size())
+                if (index > 0 && index < pool->cpool_ns.size())
                 {
                     buffer << " " << pool->cpool_ns[index]->getURI();
                 }
@@ -1813,15 +1813,23 @@ return the result of the comparison ToPrimitive(x) == y.
                     buffer << " argc=" << (int)readU32(pc); // argc
                 }
                 if (method_id < pool->methodCount()) 
-                    buffer << " " << pool->getMethodInfo(method_id)->getMethodName();
+                {
+                    Stringp fname = pool->getMethodInfo(method_id)->getMethodName();
+                    if (fname)
+                        buffer << " " << fname;
+                    else
+                        buffer << " null";
+                }
                 break;
             }
 
             case OP_newclass:
             {
                 uint32_t id = readU32(pc);
-                Traits* c = pool->getClassTraits(id);
-                buffer << opcodeInfo[opcode].name << " " << c;
+                if (id < pool->classCount()) {
+                    Traits* c = pool->getClassTraits(id);
+                    buffer << opcodeInfo[opcode].name << " " << c;
+                }
                 break;
             }
             case OP_lookupswitch:
@@ -1915,7 +1923,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_pushstring: {
                 buffer << wopAttrs[opcode].name;
                 uint32_t index = (uint32_t)*pc++;
-                if (index < pool->constantStringCount)
+                if (index > 0 && index < pool->constantStringCount)
                     buffer << " \"" << pool->getString(index) << "\"";
                 else
                     buffer << " OUT OF RANGE: " << index;
@@ -1950,7 +1958,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_pushnamespace: {
                 buffer << wopAttrs[opcode].name;
                 uint32_t index = (uint32_t)*pc++;
-                if (index < pool->cpool_ns.size())
+                if (index > 0 && index < pool->cpool_ns.size())
                     buffer << " " << pool->cpool_ns[index]->getURI();
                 else
                     buffer << " OUT OF RANGE: " << index;
