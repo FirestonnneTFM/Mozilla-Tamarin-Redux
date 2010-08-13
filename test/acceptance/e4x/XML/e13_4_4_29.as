@@ -40,6 +40,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+import avmplus.System
+
 START("13.4.4.29 - XML prependChild()");
 
 //TEST(1, true, XML.prototype.hasOwnProperty("prependChild"));
@@ -127,8 +129,14 @@ MYXML.prependChild(child3);
 MYXML.prependChild(child2);
 MYXML.prependChild(child1);
 
+var expectedResult;
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<company><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+else
+    expectedResult = '<company>&lt;!-- comment --&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+
 AddTestCase( "MYXML.prependChild('<!-- comment -->'), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>", 
+	expectedResult,
 	(MYXML.prependChild("<!-- comment -->"), MYXML.toString()));
 
 XML.ignoreComments = false;
@@ -137,8 +145,13 @@ MYXML.prependChild(child3);
 MYXML.prependChild(child2);
 MYXML.prependChild(child1);
 
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<company><!-- comment --><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+else
+    expectedResult = '<company>&lt;!-- comment --&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+
 AddTestCase( "MYXML.prependChild('<!-- comment -->'), MYXML.toString()", 
-	"<company><!-- comment --><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>", 
+	expectedResult, 
 	(MYXML.prependChild("<!-- comment -->"), MYXML.toString()));
 
 MYXML = new XML(xmlDoc);
@@ -146,8 +159,13 @@ MYXML.prependChild(child3);
 MYXML.prependChild(child2);
 MYXML.prependChild(child1);
 
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<company><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+else
+    expectedResult = '<company>&lt;?xml-stylesheet href="classic.xsl" type="text/xml"?&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+
 AddTestCase( "MYXML.prependChild('<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>'), MYXML.toString()", 
-	"<company><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>", 
+	expectedResult, 
 	(MYXML.prependChild("<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>"), MYXML.toString()));
 
 XML.ignoreProcessingInstructions = false;
@@ -159,8 +177,13 @@ MYXML.prependChild(child1);
 var expected = "TypeError: error: XML declaration may only begin entities.";
 var result = "error, exception not thrown";
 
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<company><?xml-stylesheet href="classic.xsl" type="text/xml"?><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+else
+    expectedResult = '<company>&lt;?xml-stylesheet href="classic.xsl" type="text/xml"?&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+
 AddTestCase( "MYXML.prependChild('<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>'), MYXML.toString()", 
-	"<company><?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>", 
+	expectedResult,
 	(MYXML.prependChild("<?xml-stylesheet href=\"classic.xsl\" type=\"text/xml\"?>"), MYXML.toString()));
 
 try{
@@ -182,8 +205,14 @@ MYXML = new XML(xmlDoc);
 MYXML.prependChild(child3);
 MYXML.prependChild(child2);
 MYXML.prependChild(child1);
+
+if (System.bugCompatibility == "SWF9")
+    expectedResult = '<company><@notanattribute>hi</@notanattribute><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+else
+    expectedResult = '<company>&lt;@notanattribute&gt;hi&lt;/@notanattribute&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
+
 AddTestCase( "MYXML.prependChild(\"<@notanattribute>hi</@notanattribute>\"), MYXML.toString()", 
-	"<company><@notanattribute>hi</@notanattribute><employee id=\"1\"><name>John</name></employee><employee id=\"2\"><name>Sue</name></employee><employee id=\"3\"><name>Bob</name></employee></company>", 
+	expectedResult,
 	(MYXML.prependChild("<@notanattribute>hi</@notanattribute>"), MYXML.toString()));
 
 MYXML = new XML('<LEAGUE></LEAGUE>');

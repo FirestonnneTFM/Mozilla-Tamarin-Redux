@@ -1546,20 +1546,19 @@ namespace avmplus
         return this;
     }
 
-    bool XMLObject::escapeAppendedEntities() const
+    /*static*/ bool XMLObject::fixBugzilla444630(AvmCore* core)
     {
-        const BugCompatibility* bugCompatibility = core()->currentBugCompatibility();
-
-        // fix is in effect: don't do anything
-        return (bugCompatibility->bugzilla444630) ? 
-                false :
-                core()->bugzilla444630;
+        const BugCompatibility* bugCompatibility = core->currentBugCompatibility();
+        // if the current BugCompatibility has this flag set, fix the bug (no escaping).
+        // otherwise, legacy behavior dictates that the root SWF/ABC dictates the bug;
+        // this is encapsulate in core->bugzilla444630.
+        return bugCompatibility->bugzilla444630 || core->bugzilla444630;
     }
     
     Atom XMLObject::maybeEscapeChild(Atom child)
     {
         // fix is in effect: don't do anything
-        if (!escapeAppendedEntities())
+        if (!fixBugzilla444630(core()))
         {
             if (AvmCore::isXML(child))
             {
@@ -2211,7 +2210,7 @@ namespace avmplus
         else
         {
             c = core->string(value)->atom();
-            if (!escapeAppendedEntities())
+            if (!fixBugzilla444630(core))
                 c = xmlClass()->ToXML(c);
         }
 

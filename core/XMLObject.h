@@ -289,6 +289,10 @@ namespace avmplus
         XMLObject(XMLClass *type, Stringp s=NULL, Namespace *defaultNamespace=NULL);
         XMLObject(XMLClass *type, E4XNode *node);
 
+        // public/static so that Flash/AIR can test for this special-case
+        // without replicating the logic and possibly getting it different.
+        static bool fixBugzilla444630(AvmCore* core);
+
 #ifdef AVMPLUS_VERBOSE
     public:
         Stringp format(AvmCore* core) const;
@@ -302,7 +306,6 @@ namespace avmplus
         void CoerceE4XMultiname(const Multiname *m, Multiname &out) const;
         bool NodeNameEquals(Stringp nodeName, int32_t nodeNameStart, Stringp parentName, Namespace *ns);
 
-        bool escapeAppendedEntities() const;
         Atom maybeEscapeChild(Atom child);
 
         Namespacep publicNS;
