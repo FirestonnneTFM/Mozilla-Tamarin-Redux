@@ -2008,6 +2008,10 @@ namespace avmplus
                 int captured_depth = scope->size;
                 if (captured_depth > 0)
                 {
+					// imm30 is unsigned, so can't be < 0
+					if (index >= uint32_t(scope->size))
+						toplevel->throwVerifyError(kGetScopeObjectBoundsError);
+
                     // enclosing scope
                     Traits* t = scope->getScopeTraitsAt(index);
                     coder->writeOp1(state, pc, opcode, index, t);
