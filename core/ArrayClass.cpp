@@ -1321,7 +1321,11 @@ namespace avmplus
         uint32_t shiftAmount;
 
         ArrayObject *a = isArray(toplevel, thisAtom);
-        if (a && a->isSimpleDense() && args->isSimpleDense())
+        // note the "len == a->m_length" clause... this is because "len" was gotten by calling
+        // the length getter; if 'a' is a subclass of Array with an override of length, it
+        // could be lying. (we don't need a similar check for args because it is the VM-created
+        // argument array, thus known to be a true Array rather than a subclass.)
+        if (a && a->isSimpleDense() && len == a->m_length && args->isSimpleDense())
         {
             a->m_denseArr.splice (start, insertCount, deleteCount, &args->m_denseArr, 2);
             a->m_length += l_shiftAmount;
