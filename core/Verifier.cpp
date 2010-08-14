@@ -1039,7 +1039,11 @@ namespace avmplus
                 state->pop();
                 checkTarget(pc, pc+imm24);
                 uint32_t case_count = 1 + imm30b;
-                if (nextpc + 3*case_count > code_end)
+                // case_count*3 can't overflow a U32...
+                uint32_t const case_skip = case_count * 3;
+                // ...but adding it to nextpc could wrap around, so check.
+                if (uintptr_t(nextpc) > uintptr_t(-1) - case_skip ||
+                        nextpc + case_skip > code_end)
                     verifyFailed(kLastInstExceedsCodeSizeError);
                 for (uint32_t i=0; i < case_count; i++)
                 {
