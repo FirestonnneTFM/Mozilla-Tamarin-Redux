@@ -115,7 +115,7 @@ regress/bug_558442.*, .*diff, skip, stack trace not handled by avmdiff https://b
 misc/invalid_opcodes, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 regress/bug_555542, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 regress/bug_555568, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
-regress/security/bug_555059*, .*diff, https://bugzilla.mozilla.org/show_bug.cgi?id=559227
+regress/security/bug_555059*, .*diff, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 
 # specific skips when running differential testing between 32bit and 64bit shells
 as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
