@@ -182,6 +182,7 @@ namespace avmshell
 
         void ThrowEOFError();
         void ThrowMemoryError();
+        void ThrowRangeError();
         void CheckEOF(uint32_t count);
     };
 
