@@ -144,6 +144,11 @@ namespace avmshell
             ThrowEOFError();
         }
 
+        // check for 32 bit overflow
+        uint64_t total = (uint64_t)offset + (uint64_t)count;
+        if (total != (uint64_t)(offset + count))
+            ThrowRangeError();
+
         // Grow the buffer if necessary
         if (offset + count >= buffer.GetLength()) {
             buffer.SetLength(offset + count);
@@ -167,6 +172,11 @@ namespace avmshell
     void DataInput::ThrowMemoryError()
     {
         m_toplevel->throwError(kOutOfMemoryError);
+    }
+
+    void DataInput::ThrowRangeError()
+    {
+        m_toplevel->throwRangeError(kInvalidRangeError);
     }
 
     //
