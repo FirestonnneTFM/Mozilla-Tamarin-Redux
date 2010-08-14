@@ -358,17 +358,14 @@ namespace avmplus
                 switch (*++format)
                 {
                     case '1':
-                        AvmAssertMsg(arg1!=0, "Expected argument got null");
                         if (arg1) *this << arg1;
                         break;
 
                     case '2':
-                        AvmAssertMsg(arg2!=0, "Expected argument got null");
                         if (arg2) *this << arg2;
                         break;
 
                     case '3':
-                        AvmAssertMsg(arg3!=0, "Expected argument got null");
                         if (arg3) *this << arg3;
                         break;
 

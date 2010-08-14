@@ -441,7 +441,7 @@ namespace avmplus
         const uint8_t *start = pos;
         const uint8_t *end = pos + code_len;
 
-        int size = 0;
+		uintptr_t size = 0;
         int op_count;
         SourceFile* active = NULL; // current source file
         for (const uint8_t* pc=start; pc < end; pc += size)
@@ -452,6 +452,10 @@ namespace avmplus
 
             size = AvmCore::calculateInstructionWidth(pc);
 
+            // if pc+size overflows, we're definitely hosed
+            if (uintptr_t(pc) > uintptr_t(-1) - size)
+                return false;
+
             if (pc+size > end)
                 return false; // also bad, let the verifier will handle it
 
@@ -461,8 +465,17 @@ namespace avmplus
                 {
                     // variable length instruction
                     const uint8_t *pc2 = pc+4;
-                    int case_count = 1 + readU32(pc2);
-                    size += case_count*3;
+                    // case_count is a U30, so if the high bits are set, 
+                    // bail and let Verifier throw the error
+                    uint32_t const case_count = readU32(pc2);
+                    if (case_count & 0xc0000000)
+                        return false;
+                    // case_count*3 can't overflow a U32...
+                    uint32_t const case_skip = (case_count + 1) * 3;
+                    // ...but size could, so check to see if it will.
+                    if (size > uintptr_t(-1) - case_skip)
+                        return false;
+                    size += case_skip;
                     break;
                 }
 
