@@ -202,6 +202,7 @@ namespace avmplus
         inline uint32_t sampleCount() const { return numSamples; }
         inline bool activelySampling() { return samplingNow; }
         inline bool sampling() const { return _sampling; }
+        inline uint64_t getSampleBufferId() const { return sampleBufferId; }
 
     private:
 
@@ -230,6 +231,7 @@ namespace avmplus
     private:
         List<Stringp>       fakeMethodNames;
         uint64_t            allocId;
+        uint64_t            sampleBufferId;
         uint8_t*            samples;
         uint8_t*            currentSample;
         uint8_t*            lastAllocSample;

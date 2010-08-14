@@ -136,11 +136,12 @@ namespace avmplus
     class SampleIterator : public ScriptObject
     {
     public:
-        SampleIterator(Sampler *sampler, ScriptObject* script, VTable *vt) :
+        SampleIterator(ScriptObject* script, VTable *vt) : 
             ScriptObject(vt, NULL),
-            sampler(sampler),
             script(script)
         {
+            Sampler* const sampler = script->core()->get_sampler();
+            sampleBufferId = sampler->getSampleBufferId();
             cursor = sampler->getSamples(count);
         }
 
@@ -150,11 +151,36 @@ namespace avmplus
             {
                 return 0;
             }
+
+            Sampler* const sampler = script->core()->get_sampler();
+            if (sampler == NULL || sampleBufferId != sampler->getSampleBufferId())
+            {
+                // If the sampler is stopped 
+                // while we are iterating on items 
+                // the iterator should be invalidated
+                // because the Sampler::sampleBufferId is incremented
+                // each time the sample buffer is cleared.
+                count = 0;
+                return 0;
+            }
+
             return index+1;
         }
 
         Atom nextValue(int i)
         {
+            if (count == 0)
+            {
+                return undefinedAtom;
+            }
+
+            Sampler * const sampler = script->core()->get_sampler();
+            if (sampler == NULL || sampleBufferId != sampler->getSampleBufferId()) 
+            {
+                count = 0;
+                return undefinedAtom;
+            }
+
             (void) i;
             Sample s;
             sampler->readSample(cursor, s);
@@ -176,9 +202,9 @@ namespace avmplus
         }
 
     private:
+        uint64_t sampleBufferId;
         uint32_t count;
         uint8_t *cursor;
-        Sampler *sampler;
         DRCWB(ScriptObject*) script;
     };
 
@@ -248,7 +274,7 @@ namespace avmplus
 
         if (s->sampleIteratorVTable == NULL)
             s->sampleIteratorVTable = _newVT(self->toplevel(), self->traits()->pool, sizeof(SampleIterator));
-        ScriptObject *iter = new (self->gc()) SampleIterator(s, self, s->sampleIteratorVTable);
+		ScriptObject *iter = new (self->gc()) SampleIterator(self, s->sampleIteratorVTable);
         return iter->atom();
 #else
         (void)self;
