@@ -348,6 +348,8 @@ namespace avmplus
     class MopsRangeCheckFilter;
     class PrologWriter;
 
+    typedef HashMap<LIns*, nanojit::BitSet*> LabelBitSet;
+
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
      * of the JIT.  It is intended to be instantiated on the stack once for each
@@ -390,6 +392,7 @@ namespace avmplus
         LIns *restArgc; // NULL or the expression that computes the number of rest arguments
         int restLocal;  // -1 or the local var that holds the rest array
         bool interruptable;
+        bool hasBackedges; // True if LIR has at least one backedge.
         CodegenLabel npe_label;
         CodegenLabel upe_label;
         CodegenLabel interrupt_label;
@@ -468,11 +471,11 @@ namespace avmplus
         void emitLabel(CodegenLabel &l);
         void deadvars();
         void deadvars_analyze(Allocator& alloc,
-                nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
-                nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels);
-        void deadvars_kill(
-                nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
-                nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels);
+                nanojit::BitSet& varlivein, LabelBitSet& varlabels,
+                nanojit::BitSet& taglivein, LabelBitSet& taglabels);
+        void deadvars_kill(Allocator& alloc,
+                nanojit::BitSet& varlivein, LabelBitSet& varlabels,
+                nanojit::BitSet& taglivein, LabelBitSet& taglabels);
         void copyParam(int i, int &offset);
 
         // on successful jit, allocate memory for BindingCache instances, if necessary

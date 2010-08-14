@@ -745,6 +745,7 @@ namespace avmplus
         restArgc(NULL),
         restLocal(-1),
         interruptable(true),
+        hasBackedges(false),
         npe_label("npe"),
         upe_label("upe"),
         interrupt_label("interrupt"),
@@ -5327,6 +5328,7 @@ namespace avmplus
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[j];
                 const uint8_t* handler_pc = code_pos + h->target;
                 if (driver->hasFrameState(handler_pc)) {
+                    hasBackedges = true;
                     CodegenLabel& label = getCodegenLabel(handler_pc);
                     AvmAssert(label.labelIns != NULL);
                     if (j == last_ordinal) {
@@ -5675,6 +5677,7 @@ namespace avmplus
         LIns* br = lirout->insBranch(op, cond, labelIns);
         if (br != NULL) {
             if (labelIns != NULL) {
+                hasBackedges = true;
                 varTracker->checkBackEdge(label, state);
             } else {
                 label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), label.unpatchedEdges);
@@ -5804,8 +5807,7 @@ namespace avmplus
     };
 
     void analyze_edge(LIns* label, nanojit::BitSet &livein,
-                      HashMap<LIns*, nanojit::BitSet*> &labels,
-                      InsList* looplabels)
+                      LabelBitSet& labels, InsList* looplabels)
     {
         nanojit::BitSet *lset = labels.get(label);
         if (lset) {
@@ -5841,8 +5843,8 @@ namespace avmplus
     }
 
     void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,)
-            nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
-            nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
+            nanojit::BitSet& varlivein, LabelBitSet& varlabels,
+            nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
         if (ins->callInfo() == FUNCTIONID(beginCatch)) {
             // beginCatch(core, ef, info, pc, &vars[i], &tags[i]) => store to &vars[i] and &tag[i]
@@ -5898,9 +5900,45 @@ namespace avmplus
         }
     }
 
+    // Analyze a LIR_label.  We're at the top of a block, save livein for
+    // this block so it can be propagated to predecessors.
+    bool analyze_label(LIns* i, Allocator& alloc, bool again,
+            int framesize, InsList* looplabels,
+            nanojit::BitSet& varlivein, LabelBitSet& varlabels,
+            nanojit::BitSet& taglivein, LabelBitSet& taglabels)
+    {
+        nanojit::BitSet *var_lset = varlabels.get(i);
+        if (!var_lset) {
+            var_lset = new (alloc) nanojit::BitSet(alloc, framesize);
+            varlabels.put(i, var_lset);
+        }
+        if (var_lset->setFrom(varlivein) && !again) {
+            for (Seq<LIns*>* p = looplabels->get(); p != NULL; p = p->tail) {
+                if (p->head == i) {
+                    again = true;
+                    break;
+                }
+            }
+        }
+        nanojit::BitSet *tag_lset = taglabels.get(i);
+        if (!tag_lset) {
+            tag_lset = new (alloc) nanojit::BitSet(alloc, framesize);
+            taglabels.put(i, tag_lset);
+        }
+        if (tag_lset->setFrom(taglivein) && !again) {
+            for (Seq<LIns*>* p = looplabels->get(); p != NULL; p = p->tail) {
+                if (p->head == i) {
+                    again = true;
+                    break;
+                }
+            }
+        }
+        return again;
+    }
+
     void CodegenLIR::deadvars_analyze(Allocator& alloc,
-            nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
-            nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
+            nanojit::BitSet& varlivein, LabelBitSet& varlabels,
+            nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
         LIns *catcher = this->catch_label.labelIns;
         InsList looplabels(alloc);
@@ -5955,37 +5993,10 @@ namespace avmplus
                         taglivein.set(d);
                     }
                     break;
-                case LIR_label: {
-                    // we're at the top of a block, save livein for this block
-                    // so it can be propagated to predecessors
-                    nanojit::BitSet *var_lset = varlabels.get(i);
-                    if (!var_lset) {
-                        var_lset = new (alloc) nanojit::BitSet(alloc, framesize);
-                        varlabels.put(i, var_lset);
-                    }
-                    if (var_lset->setFrom(varlivein) && !again) {
-                        for (Seq<LIns*>* p = looplabels.get(); p != NULL; p = p->tail) {
-                            if (p->head == i) {
-                                again = true;
-                                break;
-                            }
-                        }
-                    }
-                    nanojit::BitSet *tag_lset = taglabels.get(i);
-                    if (!tag_lset) {
-                        tag_lset = new (alloc) nanojit::BitSet(alloc, framesize);
-                        taglabels.put(i, tag_lset);
-                    }
-                    if (tag_lset->setFrom(taglivein) && !again) {
-                        for (Seq<LIns*>* p = looplabels.get(); p != NULL; p = p->tail) {
-                            if (p->head == i) {
-                                again = true;
-                                break;
-                            }
-                        }
-                    }
+                case LIR_label:
+                    again |= analyze_label(i, alloc, again, framesize, &looplabels,
+                            varlivein, varlabels, taglivein, taglabels);
                     break;
-                }
                 case LIR_j:
                     // the fallthrough path is unreachable, clear it.
                     varlivein.reset();
@@ -6045,8 +6056,9 @@ namespace avmplus
         return prev;
     }
 
-    void CodegenLIR::deadvars_kill(nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
-            nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
+    void CodegenLIR::deadvars_kill(Allocator& alloc,
+            nanojit::BitSet& varlivein, LabelBitSet& varlabels,
+            nanojit::BitSet& taglivein, LabelBitSet& taglabels)
     {
 #ifdef NJ_VERBOSE
         LInsPrinter *printer = frag->lirbuf->printer;
@@ -6123,17 +6135,10 @@ namespace avmplus
                         taglivein.set(d);
                     }
                     break;
-                case LIR_label: {
-                    // we're at the top of a block, save livein for this block
-                    // so it can be propagated to predecessors
-                    nanojit::BitSet *var_lset = varlabels.get(i);
-                    AvmAssert(var_lset != 0); // all labels have been seen by deadvars_analyze()
-                    var_lset->setFrom(varlivein);
-                    nanojit::BitSet *tag_lset = taglabels.get(i);
-                    AvmAssert(tag_lset != 0); // all labels have been seen by deadvars_analyze()
-                    tag_lset->setFrom(taglivein);
+                case LIR_label:
+                    analyze_label(i, alloc, true, framesize, 0,
+                            varlivein, varlabels, taglivein, taglabels);
                     break;
-                }
                 case LIR_j:
                     // the fallthrough path is unreachable, clear it.
                     varlivein.reset();
@@ -6203,16 +6208,17 @@ namespace avmplus
         // which is slightly below the actual # of labels in LIR.  Being slightly low
         // is okay for a bucket hashtable.  note: labelCount is 0 for simple 1-block
         // methods, so use labelCount+1 as the estimate to ensure we have >0 buckets.
-        HashMap<LIns*, nanojit::BitSet*> varlabels(dv_alloc, labelCount + 1);
-        HashMap<LIns*, nanojit::BitSet*> taglabels(dv_alloc, labelCount + 1);
+        LabelBitSet varlabels(dv_alloc, labelCount + 1);
+        LabelBitSet taglabels(dv_alloc, labelCount + 1);
 
         // scratch bitset used by both dv_analyze and dv_kill.  Each resets
         // the bitset before using it.  creating it here saves one allocation.
         nanojit::BitSet varlivein(dv_alloc, framesize);
         nanojit::BitSet taglivein(dv_alloc, framesize);
 
-        deadvars_analyze(dv_alloc, varlivein, varlabels, taglivein, taglabels);
-        deadvars_kill(varlivein, varlabels, taglivein, taglabels);
+        if (hasBackedges)
+            deadvars_analyze(dv_alloc, varlivein, varlabels, taglivein, taglabels);
+        deadvars_kill(dv_alloc, varlivein, varlabels, taglivein, taglabels);
     }
 
 #ifdef AVMPLUS_JITMAX
