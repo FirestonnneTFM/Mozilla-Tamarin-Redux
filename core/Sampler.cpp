@@ -157,6 +157,7 @@ namespace avmplus
         core(_core),
         fakeMethodNames(_core->GetGC()),
         allocId(1),
+        sampleBufferId(0),
         samples(NULL),
         currentSample(NULL),
         lastAllocSample(NULL),
@@ -520,6 +521,15 @@ namespace avmplus
         ptrSamples.clear();
         numSamples = 0;
         lastSampleCheckMicros = 0;
+
+        // Increment the sample buffer id, so that next time 
+        // a sample iterator tries to get the next sample
+        // it will automatically get invalidated.
+        // This is needed here even though the actual buffer
+        // is not disposed, but the contents of the buffer
+        // is garbaged and the sample iterator might create invalid
+        // ScriptObject pointers.
+        ++sampleBufferId;
     }
 
     void Sampler::startSampling()
@@ -585,6 +595,11 @@ namespace avmplus
         numSamples = 0;
         lastSampleCheckMicros = 0;
         currentSample = NULL;
+
+        // Increment the sample buffer id, so that next time 
+        // a sample iterator tries to get the next sample
+        // it will automatically get invalidated.
+        ++sampleBufferId;
     }
 
     void Sampler::initSampling()
