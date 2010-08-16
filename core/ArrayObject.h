@@ -61,6 +61,11 @@ namespace avmplus
         uint32_t m_lowHTentry; // lowest numeric entry in our hash table
         uint32_t m_length;
 
+    private:
+        // forcibly-inlined version used by various hot methods to ensure inlining;
+        // see definition for more info.
+        Atom getUintPropertyImpl(uint32_t index) const;
+
     public:
 
         ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity);
@@ -90,16 +95,17 @@ namespace avmplus
         virtual bool delUintProperty(uint32_t index);
         virtual bool hasUintProperty(uint32_t i) const;
 
-        Atom getIntProperty(int index) const;
-        void setIntProperty(int index, Atom value);
-
         virtual bool getAtomPropertyIsEnumerable(Atom name) const;
 
+        // NB: These are only for use by CodegenLIR, and by ArrayObject itself.
+        // They aren't declared private-with-friend-access because of the way
+        // they are initialized, but in an ideal world, they would be.
+        // Most code should call get/setUintProperty() instead.
         Atom _getUintProperty(uint32_t index) const;
         void _setUintProperty(uint32_t index, Atom value);
-        Atom _getIntProperty(int index) const;
-        void _setIntProperty(int index, Atom value);
-
+        Atom _getIntProperty(int32_t index) const;
+        void _setIntProperty(int32_t index, Atom value);
+        
         // Iterator support - for in, for each
         virtual Atom nextName(int index);
         virtual Atom nextValue(int index);

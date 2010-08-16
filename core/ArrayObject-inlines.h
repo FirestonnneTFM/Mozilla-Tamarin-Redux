@@ -57,16 +57,6 @@ namespace avmplus
         return m_denseArr.getLength();
     }
 
-    REALLY_INLINE Atom ArrayObject::getIntProperty(int index) const
-    {
-        return _getIntProperty(index);
-    }
-
-    REALLY_INLINE void ArrayObject::setIntProperty(int index, Atom value)
-    {
-        _setIntProperty(index, value);
-    }
-
     REALLY_INLINE Atom ArrayObject::pop()
     {
         return AS3_pop();
@@ -82,6 +72,24 @@ namespace avmplus
         return AS3_unshift(args, argc);
     }
 
+    // Performance on some benchmarks (eg Euler.as) is highly sensitive to
+    // ArrayObject::getUintProperty being fast; this exists in order to ensure
+    // that the implementations of getUintProperty and _getUintProperty/_getIntPropert 
+    // (used by the JIT) contain inlined code rather than a tail-call.
+    REALLY_INLINE Atom ArrayObject::getUintPropertyImpl(uint32_t index) const
+    {
+        if (traits()->needsHashtable())
+        {
+            if (hasDense())
+            {
+                if ((index < getDenseLength()))
+                    return m_denseArr.getAtFast(index);
+            }
+        }
+
+        return ScriptObject::getUintProperty (index);
+    }
+
     /*virtual*/
     REALLY_INLINE void ArrayObject::setUintProperty(uint32_t index, Atom value)
     {
@@ -91,7 +99,7 @@ namespace avmplus
     /*virtual*/
     REALLY_INLINE Atom ArrayObject::getUintProperty(uint32_t index) const
     {
-        return _getUintProperty(index);
+        return getUintPropertyImpl(index);
     }
 
     // Non-virtual members for ActionScript method implementation.

@@ -895,6 +895,9 @@
 		D9A4F1C710B3362F00D0408C /* Multiname-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Multiname-inlines.h"; path = "../../../core/Multiname-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9A4F1E810B3382300D0408C /* NamespaceSet-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NamespaceSet-inlines.h"; path = "../../../core/NamespaceSet-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
+		D9B242EC12135FE700C60D44 /* ArrayObject-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ArrayObject-inlines.h"; path = "../../../core/ArrayObject-inlines.h"; sourceTree = SOURCE_ROOT; };
+		D9B242ED12135FE700C60D44 /* AtomArray-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AtomArray-inlines.h"; path = "../../../core/AtomArray-inlines.h"; sourceTree = SOURCE_ROOT; };
+		D9B242EE12135FE700C60D44 /* MultinameHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MultinameHashtable-inlines.h"; path = "../../../core/MultinameHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_threads.cpp; path = ../../../extensions/ST_mmgc_threads.cpp; sourceTree = SOURCE_ROOT; };
 		D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_threads.st; path = ../../../extensions/ST_mmgc_threads.st; sourceTree = SOURCE_ROOT; };
 		E8B532031069A1DE00ED299A /* instr-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "instr-inlines.h"; path = "../../../core/instr-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1037,6 +1040,7 @@
 				079DF7BF0F3A882D0031D1B4 /* ActionBlockConstants.h */,
 				079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */,
 				079DF7C10F3A882D0031D1B4 /* AtomArray.h */,
+				D9B242ED12135FE700C60D44 /* AtomArray-inlines.h */,
 				079DF7C20F3A882D0031D1B4 /* atom.cpp */,
 				19382D9F106CFC64004612EA /* atom-inlines.h */,
 				079DF7C30F3A882D0031D1B4 /* atom.h */,
@@ -1121,6 +1125,7 @@
 				D9A4F1C710B3362F00D0408C /* Multiname-inlines.h */,
 				079DF7FF0F3A882D0031D1B4 /* MultinameHashtable.cpp */,
 				079DF8000F3A882D0031D1B4 /* MultinameHashtable.h */,
+				D9B242EE12135FE700C60D44 /* MultinameHashtable-inlines.h */,
 				079DF8010F3A882D0031D1B4 /* Namespace.cpp */,
 				079DF8020F3A882D0031D1B4 /* Namespace.h */,
 				079DF8030F3A882D0031D1B4 /* NamespaceSet.cpp */,
@@ -1192,6 +1197,7 @@
 				079DF8A50F3A88950031D1B4 /* ArrayClass.cpp */,
 				079DF8A60F3A88950031D1B4 /* ArrayClass.h */,
 				079DF8A70F3A88950031D1B4 /* ArrayObject.cpp */,
+				D9B242EC12135FE700C60D44 /* ArrayObject-inlines.h */,
 				079DF8A80F3A88950031D1B4 /* ArrayObject.h */,
 				079DF8A90F3A88950031D1B4 /* BooleanClass.cpp */,
 				079DF8AA0F3A88950031D1B4 /* BooleanClass.h */,

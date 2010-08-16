@@ -252,27 +252,20 @@ namespace avmplus
 
     Atom ArrayObject::_getUintProperty(uint32_t index) const
     {
-        if (traits()->needsHashtable())
-        {
-            if (hasDense())
-            {
-                if ((index < getDenseLength()))
-                    return m_denseArr.getAtFast(index);
-            }
-        }
-
-        return ScriptObject::getUintProperty (index);
+        return getUintPropertyImpl(index);
     }
 
-    Atom ArrayObject::_getIntProperty(int index) const
+    Atom ArrayObject::_getIntProperty(int32_t index) const
     {
         if (index >= 0)
-            return _getUintProperty(index);
+            // this is a hot function; explicitly call the force-inlined
+            // implementation to ensure we don't tail-call to _getUintProperty
+            return getUintPropertyImpl(index);
         else // integer is negative - we must intern it
             return getStringProperty(core()->internInt(index));
     }
 
-    void ArrayObject::_setIntProperty(int index, Atom value)
+    void ArrayObject::_setIntProperty(int32_t index, Atom value)
     {
         if (index >= 0)
             _setUintProperty(index, value);
