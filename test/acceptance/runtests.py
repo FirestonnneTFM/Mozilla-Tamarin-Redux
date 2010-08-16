@@ -69,6 +69,7 @@ class AcceptanceRuntest(RuntestBase):
     androidthreads = False
     androiddevices = []
     verifyonly = False
+    bugcompat_versions = ['SWF9','SWF10','SWF11']
 
     def __init__(self):
         # Set threads to # of available cpus/cores
@@ -303,21 +304,39 @@ class AcceptanceRuntest(RuntestBase):
         if isfile('%s.avm_args' % ast):
             avm_args_file = open('%s.avm_args' % ast,'r')
             index = 0
+            uses_bugcompat = re.compile('uses_bugcompat', re.IGNORECASE)
             for line in avm_args_file:
                 line = line.strip()
                 if line.startswith('#'):
                     continue
                 index += 1
-                line = string.replace(line, "$DIR", dir)
-                if line.find('--') != -1:
-                    (extraVmArgs, abcargs) = line.split('--')
-                else:
-                    extraVmArgs = line
+                # uses_bugcompat 
+                if uses_bugcompat.search(line):
+                    # run avm with all bugcompat versions
+                    for bcv in self.bugcompat_versions:
+                        line = uses_bugcompat.sub('', line)
+                        line, extraVmArgs, abcargs = self.process_avm_args_line(line, dir)
+                        extraVmArgs += ' -bugcompat %s ' % bcv
+                        outputCalls.extend(self.runTest(
+                            ast, root, testName, '%s.%s' % (testnum, index),
+                            settings, extraVmArgs, abcargs))
+                        index += 1
+                    continue
+                line, extraVmArgs, abcargs = self.process_avm_args_line(line, dir)
                 outputCalls.extend(self.runTest(ast, root, testName, '%s.%s' % (testnum, index), settings, extraVmArgs, abcargs))
         else:
             outputCalls.extend(self.runTest(ast, root, testName, testnum, settings))
 
         return outputCalls
+
+    def process_avm_args_line(self, line, dir):
+        abcargs = ''
+        line = string.replace(line, "$DIR", dir)
+        if line.find('--') != -1:
+            (extraVmArgs, abcargs) = line.split('--')
+        else:
+            extraVmArgs = line
+        return line, extraVmArgs, abcargs
 
     def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
         if self.androidthreads:

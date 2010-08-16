@@ -1248,11 +1248,11 @@ namespace MMgc
             return;
 
         if (incremental) {
-            if (!collecting) {
+            // If we're reaping don't do any work, this simplifies policy event timing and improves
+            // incrementality.
+            if (!collecting && !Reaping()) {
                 if (!marking) {
-                    if (!Reaping()) {
-                        StartIncrementalMark();
-                    }
+                    StartIncrementalMark();
                 }
                 else if (policy.queryEndOfCollectionCycle()) {
                     FinishIncrementalMark(true);
@@ -3541,9 +3541,9 @@ namespace MMgc
                *(((int32_t*)(val&~7))+1) != int32_t(GCHeap::GCFreedPoison) &&
                *(((int32_t*)(val&~7))+1) != int32_t(GCHeap::GCSweptPoison))
             {
-                GCDebugMsg(false, "Object 0x%x allocated here:\n", mem);
+                GCDebugMsg(false, "Object %p allocated here:\n", mem);
                 PrintAllocStackTrace(mem);
-                GCDebugMsg(false, "Didn't mark pointer at 0x%x, object 0x%x allocated here:\n", p, val);
+                GCDebugMsg(false, "Didn't mark pointer at %p, object %p allocated here:\n", p, (void*)val);
                 PrintAllocStackTrace((const void*)(val&~7));
                 GCAssert(false);
             }
@@ -3581,12 +3581,14 @@ namespace MMgc
                     // go through all marked objects in this page
                     GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
                     GCAlloc* alloc = (GCAlloc*)b->alloc;
-                    for (int i=0; i< alloc->m_itemsPerBlock; i++) {
-                        // find all marked objects and search them
-                        if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
-                            continue;
+                    if(alloc->ContainsPointers()) {
+                        for (int i=0; i< alloc->m_itemsPerBlock; i++) {
 
-                        if(alloc->ContainsPointers()) {
+                            // find all marked (but not kFreelist) objects and search them
+                            if(!GCAlloc::GetBit(b, i, GCAlloc::kMark) ||
+                               GCAlloc::GetBit(b, i, GCAlloc::kQueued))
+                                continue;
+
                             void* item = (char*)b->items + alloc->m_itemSize*i;
                             WhitePointerScan(GetUserPointer(item), alloc->m_itemSize - DebugSize());
                         }
