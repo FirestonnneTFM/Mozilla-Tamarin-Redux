@@ -1797,6 +1797,14 @@ class tamarinredux:
     windows_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     windows_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['./build-vtune.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting VTune build...',
+                descriptionDone='finished VTune build.',
+                name="VTune",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
     windows_deep_factory.addStep(util_process_clean)
     windows_deep_factory.addStep(util_clean_buildsdir)
 

@@ -59,7 +59,8 @@ def run():
     r.run_test('cache_bindings no value','%s -cache_bindings' %r.avm,expectedout=['Unrecognized option -cache_bindings'],expectedcode=1)
     r.run_test('cache_metadata no value','%s -cache_metadata' %r.avm,expectedout=['Unrecognized option -cache_metadata'],expectedcode=1)
     r.run_test('cache_methods no value','%s -cache_methods' %r.avm,expectedout=['Unrecognized option -cache_methods'],expectedcode=1)
-    r.run_test('Dastrace no value','%s -Dastrace' %r.avmrd,expectedout=['Unrecognized option -Dastrace'],expectedcode=1)
+    if r.avmrd!=None:
+        r.run_test('Dastrace no value','%s -Dastrace' %r.avmrd,expectedout=['Unrecognized option -Dastrace'],expectedcode=1)
     
 
 if __name__ == '__main__':
