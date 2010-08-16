@@ -1248,11 +1248,11 @@ namespace MMgc
             return;
 
         if (incremental) {
-            if (!collecting) {
+            // If we're reaping don't do any work, this simplifies policy event timing and improves
+            // incrementality.
+            if (!collecting && !Reaping()) {
                 if (!marking) {
-                    if (!Reaping()) {
-                        StartIncrementalMark();
-                    }
+                    StartIncrementalMark();
                 }
                 else if (policy.queryEndOfCollectionCycle()) {
                     FinishIncrementalMark(true);
