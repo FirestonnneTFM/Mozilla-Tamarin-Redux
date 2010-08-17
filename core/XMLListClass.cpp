@@ -72,7 +72,10 @@ namespace avmplus
             XMLObject *x = AvmCore::atomToXMLObject(arg);
             Multiname m;
             bool bFound = x->getQName (&m);
-            XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), x->parent(), bFound ? &m : 0);
+            Atom parent = x->parent();
+            if (parent == undefinedAtom)
+                parent = nullObjectAtom;
+            XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), parent, bFound ? &m : 0);
             xl->_append (arg);
             return xl->atom();
         }
