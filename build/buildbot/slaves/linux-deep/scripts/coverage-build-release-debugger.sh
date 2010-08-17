@@ -64,7 +64,8 @@ export COVFILE=$buildsdir/${change}-${changeid}/$platform/release_debugger.cov
 # Seems like cpp files are relative and header files are absolute, this was
 # causing some problems with viewing coverage based on directory, since there
 # would be 2 directories, one relative and one absolute
-export COVSRCDIR=/
+# Actually need to have it relative so that we can merge from multiple machines
+#export COVSRCDIR=
 
 # Make sure that the directory structure is created, bullseye will fail otherwise
 mkdir -p $buildsdir/${change}-${changeid}/$platform
