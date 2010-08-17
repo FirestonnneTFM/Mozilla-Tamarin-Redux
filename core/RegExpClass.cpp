@@ -59,6 +59,12 @@ namespace avmplus
         kinput = core->internConstantStringLatin1("input");
     }
 
+	ScriptObject* RegExpClass::createInstance(VTable *ivtable, ScriptObject* prototype)
+	{
+		AvmCore* core = this->core();
+		return new (core->GetGC(), ivtable->getExtraSize()) RegExpObject(this, core->kEmptyString, core->kEmptyString);
+	}
+
     // this = argv[0] (ignored)
     // arg1 = argv[1]
     // argN = argv[argc]
