@@ -2825,7 +2825,7 @@ namespace avmplus
 
     void Verifier::checkEarlySlotBinding(Traits* t)
     {
-        if (!t->allowEarlyBinding())
+        if (!t || !t->allowEarlyBinding())
             verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
     }
 
