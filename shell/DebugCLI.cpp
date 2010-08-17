@@ -233,7 +233,6 @@ namespace avmshell
         for (int i=0; i<count; i++)
         {
             // write out the name
-            Stringp nm;
             if (info)
             {
                 Stringp nm = info->getArgName(i);
