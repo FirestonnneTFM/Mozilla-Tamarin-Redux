@@ -2005,13 +2005,13 @@ return the result of the comparison ToPrimitive(x) == y.
 
             case WOP_callstatic:
             case WOP_newfunction: {
-                int method_id = (int)*pc++;
+                uint32_t method_id = (uint32_t)*pc++;
                 buffer << wopAttrs[opcode].name;
                 if (method_id < pool->methodCount()) 
                     buffer << " invalid";
                 buffer << " method_id=" << method_id;
                 if (opcode == WOP_callstatic)
-                    buffer << " argc=" << (int)*pc++; // argc
+                    buffer << " argc=" << (uint32_t)*pc++; // argc
                 if (method_id < pool->methodCount())  
                     buffer << " " << pool->getMethodInfo(method_id)->getMethodName();
                 break;

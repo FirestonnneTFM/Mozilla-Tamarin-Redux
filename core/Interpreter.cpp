@@ -296,7 +296,7 @@ namespace avmplus
 #  endif
              XXX(0x00)
              XXX(0x01) /* OP_bkpt */
-             XXX(0x02) /* OP_nop */
+             III(0x02, L_nop)
              III(0x03, L_throw)
              III(0x04, L_getsuper)
              III(0x05, L_setsuper)
@@ -896,7 +896,7 @@ namespace avmplus
      // Adjusted on demand in the CATCH clause.  Reduces size of interpreter function
      // by 2.5KB of object code (x86 / gcc4.0 / -O3).
 #    define SAVE_EXPC              expc = (intptr_t)pc
-#    define SAVE_EXPC_TARGET(off)  expc = (intptr_t)(pc + (off))
+#    define SAVE_EXPC_TARGET(off)  expc = (intptr_t)(pc + (off) + 1)
 #  endif
 
 #else // !VMCFG_WORDCODE
@@ -997,11 +997,9 @@ namespace avmplus
                 return a1;
             }
 
-#ifndef VMCFG_WORDCODE
             INSTR(nop) {
                 NEXT;
             }
-#endif
 
 #ifndef VMCFG_WORDCODE
             INSTR(label) {

@@ -233,21 +233,9 @@ namespace avmplus
             p[2]->pc = code_start + old_table->exceptions[i].target;
             p[2]->fixup_loc = &(new_table->exceptions[i].target);
 
-            if (p[0]->pc > p[1]->pc) {
-                catch_info* tmp = p[0];
-                p[0] = p[1];
-                p[1] = tmp;
-            }
-            if (p[1]->pc > p[2]->pc) {
-                catch_info* tmp = p[1];
-                p[1] = p[2];
-                p[2] = tmp;
-            }
-            if (p[0]->pc > p[1]->pc) {
-                catch_info* tmp = p[0];
-                p[0] = p[1];
-                p[1] = tmp;
-            }
+            // Verifier guarantees from <= to <= target.
+            AvmAssert(p[0]->pc <= p[1]->pc);
+            AvmAssert(p[1]->pc <= p[2]->pc);
 
             int j=0;
             catch_info* e = exception_fixes;
@@ -351,14 +339,26 @@ namespace avmplus
         computeExceptionFixups();
     }
 
-    void WordcodeEmitter::writeEpilogue(const FrameState*)
+    void WordcodeEmitter::writeEpilogue(const FrameState* state)
     {
+        // Process any labels patches for unreachable catch blocks.
+        fixExceptionsAndLabels(state->abc_pc);
         epilogue();
     }
 
     void WordcodeEmitter::writeBlockStart(const FrameState* state)
     {
         emitLabel(state->abc_pc);
+        if (state->targetOfBackwardsBranch && info->hasExceptions()) {
+            // If this label is the target of a back edge, and if this
+            // function has exception handlers, then emit a NOP to ensure
+            // we have a unique position in the code from which interrupt
+            // exceptions will appear to be thrown from.  The interrupt
+            // check is in the branch, but the interrupt *position* is at
+            // the label.
+            // also see bug 554915 and test/acceptance/abcasm/bug_554915a.abs.
+            emitOp0(state->abc_pc, WOP_nop);
+        }
     }
 
     void WordcodeEmitter::writeOpcodeVerified(const FrameState*, const uint8_t*, AbcOpcode)

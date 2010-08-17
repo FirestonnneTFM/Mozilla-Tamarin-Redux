@@ -844,6 +844,7 @@ namespace avmplus
                 verifyFailed(kInvalidBranchTargetError);
             end_pos = verifyBlock(start_pos);
         }
+        state->abc_pc = code_pos + code_length;
         coder->writeEpilogue(state);
     }
 
