@@ -234,12 +234,16 @@ namespace avmshell
         {
             // write out the name
             Stringp nm;
-                if (info && frame->argumentName(i, nm))
+            if (info)
+            {
+                Stringp nm = info->getArgName(i);
+                if (nm != core->kundefined)
                     core->console << nm << "=";
+            }
 
-                core->console << asAtom(*ptr++);
-                if (i<count-1)
-                    core->console << ",";
+            core->console << asAtom(*ptr++);
+            if (i<count-1)
+                core->console << ",";
         }
         core->console << ") at ";
         if (src)
