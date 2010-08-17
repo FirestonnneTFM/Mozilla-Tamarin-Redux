@@ -108,6 +108,7 @@ abcasm/.*, .*diff, skip, trim down tests
 # avmdiff does not handle .exitcode
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue: avmdiff does not handle .exitcode
 regress/bug_515935, .*diff, skip, known issue: avmdiff does not handle .exitcode
+regress/bug_555097.*, .*diff, skip, known issue: avmdiff does not handle .exitcode
 regress/bug_520888, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 regress/bug_555102, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 regress/bug_555705, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
