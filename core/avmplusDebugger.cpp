@@ -167,7 +167,7 @@ namespace avmplus
         {
             MethodInfo* f = core->callStack->info();
 #ifdef VMCFG_AOT
-            if (f && (f->hasMethodBody() || f->isAotCompiled()))
+            if (f && (f->hasMethodBody() || f->isCompiledMethod()))
 #else
             if (f && f->hasMethodBody())
 #endif
@@ -241,7 +241,7 @@ namespace avmplus
         // can't debug native methods
         if (!env->method->isNative()
 #ifdef VMCFG_AOT
-            || env->method->isAotCompiled()
+            || env->method->isCompiledMethod()
 #endif
             )
             debugMethod(env);
@@ -1019,7 +1019,7 @@ namespace avmplus
                 MethodInfo* info = trace->info();
                 info->boxLocals(trace->framep(), firstLocal, trace->types(), ar, 0, count);
 
-                // If abcMethod_NEED_REST or abcMethod_NEED_ARGUMENTS is set, and the jit is being used, then the first
+                // If NEED_REST or NEED_ARGUMENTS is set, and the jit is being used, then the first
                 // local is actually not an atom at all -- it is an ArrayObject*.  So, we need to
                 // convert it to an atom.  (If the interpreter is being used instead of the jit, then
                 // it is stored as an atom.)
