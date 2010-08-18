@@ -430,8 +430,8 @@ namespace avmshell
             Domain* shell_domain = shell_domainEnv->domain();
 
             // Create a new Domain/DomainEnv for the user code
-            Domain* user_domain = new (GetGC()) Domain(this, shell_domain);
-            DomainEnv* user_domainEnv = new (GetGC()) DomainEnv(this, user_domain, shell_domainEnv);
+            Domain* user_domain = Domain::newDomain(this, shell_domain);
+            DomainEnv* user_domainEnv = DomainEnv::newDomainEnv(this, user_domain, shell_domainEnv);
             const BugCompatibility* user_bugCompatibility = createBugCompatibility(defaultBugCompatibilityVersion);
             this->user_codeContext = new (GetGC()) ShellCodeContext(user_domainEnv, user_bugCompatibility);
 

@@ -729,7 +729,7 @@ namespace avmshell
                     core->getAnyPublicNamespace(),
                     core->internStringLatin1(name)
             );
-            ScriptEnv* script = env->getScriptEnv(mn);
+            ScriptEnv* script = core->domainMgr()->findScriptEnvInDomainEnvByMultiname(env->domainEnv(), *mn);
             if (script != (ScriptEnv*)BIND_NONE && script != (ScriptEnv*)BIND_AMBIGUOUS)
             {
                 ScriptObject* global = script->global;

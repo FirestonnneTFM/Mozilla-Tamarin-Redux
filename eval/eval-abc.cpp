@@ -526,9 +526,9 @@ namespace avmplus
             DEBUG_ONLY( uint8_t* b0 = b; )
             AvmAssert(flags != ~0U);
             if (option_count > 0)
-                flags |= MethodInfo::HAS_OPTIONAL;
+                flags |= abcMethod_HAS_OPTIONAL;
             else
-                flags &= ~MethodInfo::HAS_OPTIONAL;
+                flags &= ~abcMethod_HAS_OPTIONAL;
             b = emitU30(b, param_count);
             b = emitU30(b, return_type);
             for ( Seq<uint32_t>* param_types = this->param_types ; param_types != NULL ; param_types = param_types->tl )

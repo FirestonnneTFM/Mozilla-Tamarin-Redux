@@ -258,6 +258,7 @@ namespace avmplus
         , m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
         , m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
         , m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))
+        , m_domainMgr(NULL)
         , exec(NULL)
         , currentMethodFrame(NULL)
 #ifdef VMCFG_LOOKUP_CACHE
@@ -311,6 +312,8 @@ namespace avmplus
         builtinPool                 = NULL;
         builtinDomain               = NULL;
         builtinBugCompatibility     = NULL;
+
+        m_domainMgr = new(gc) DomainMgrFP10(this);
 
         GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
 
@@ -420,6 +423,7 @@ namespace avmplus
         m_msCache = NULL;
 
         delete exec;
+        delete m_domainMgr;
 
         // Free the numbers and strings tables
         mmfx_delete_array(strings);
@@ -461,7 +465,8 @@ namespace avmplus
         _profiler = createProfiler();
         #endif
 
-        builtinDomain = new (GetGC()) Domain(this, NULL);
+        builtinDomain = Domain::newDomain(this, NULL);
+
         // builtins always use BugCompatibility::kLatest
         builtinBugCompatibility = createBugCompatibility(BugCompatibility::kLatest);
 
@@ -598,7 +603,7 @@ namespace avmplus
         ScopeChain* scriptScope = ScriptEnv::createScriptScope(scriptSTC, scriptVTable, abcEnv);
         ScriptEnv* scriptEnv = new (this->GetGC()) ScriptEnv(scriptTraits->init, scriptScope);
         scriptVTable->init = scriptEnv;
-        this->exportDefs(scriptTraits, scriptEnv);
+
         initScriptActivationTraits(this, toplevel, scriptTraits->init);
         return scriptEnv;
     }
@@ -607,16 +612,26 @@ namespace avmplus
     {
         PoolObject* pool = abcEnv->pool();
 
+        // The list of ScriptEnvs that correspond to the MethodInfos the DomainMgr
+        // already knows about for the Pool/Domain that correspond to the AbcEnv/DomainEnv.
+        // Note that the order of the list doesn't matter (DomainMgr will use a hashtable
+        // to do the relevant association).
+        List<ScriptEnv*> envs(GetGC());
+
         // some code relies on the final script being initialized first, so we
         // must continue that behavior
         uint32_t const last = pool->scriptCount()-1;
         ScriptEnv* main = initOneScript(toplevel, abcEnv, pool->getScriptTraits(last));
+        envs.add(main);
 
         // skip the final one, it's already been done
         for (uint32_t i=0; i < last; i++)
         {
-            initOneScript(toplevel, abcEnv, pool->getScriptTraits(i));
+            ScriptEnv* scriptEnv = initOneScript(toplevel, abcEnv, pool->getScriptTraits(i));
+            envs.add(scriptEnv);
         }
+
+        this->domainMgr()->addNamedScriptEnvs(abcEnv, envs);
 
         exec->notifyAbcPrepared(toplevel, abcEnv);
 
@@ -650,7 +665,7 @@ namespace avmplus
 
     Toplevel* AvmCore::initToplevel()
     {
-        DomainEnv* builtinDomainEnv = new (GetGC()) DomainEnv(this, builtinDomain, NULL);
+        DomainEnv* builtinDomainEnv = DomainEnv::newDomainEnv(this, builtinDomain, NULL);
         
         // note that this is the one-and-only place that a naked CodeContext
         // should ever be constructed (ie, when initializing the VM's own builtins);
@@ -712,49 +727,6 @@ namespace avmplus
         AvmAssert(toplevel->objectClass != NULL);
 #endif
         return callScriptEnvEntryPoint(main);
-    }
-
-    void AvmCore::exportDefs(Traits* scriptTraits, ScriptEnv* scriptEnv)
-    {
-        AbcEnv* abcEnv = scriptEnv->abcEnv();
-        DomainEnv* domainEnv = abcEnv->domainEnv();
-
-        // iterate thru each of the definitions exported by this script
-        StTraitsBindingsIterator iter(scriptTraits->getTraitsBindings());
-        while (iter.next())
-        {
-            // don't need to check for DELETED because we never remove trait bindings
-            Stringp name = iter.key();
-            if (!name) continue;
-            Namespacep ns = iter.ns();
-
-            // not already in the table then export it
-            // otherwise we keep the first one that was encountered.
-            if (!ns->isPrivate())
-            {
-                if (!domainEnv->getNamedScript(name, ns))
-                {
-                    // add ns/name to global table
-                    // ISSUE should we filter out Object traits and/or private members?
-                    #ifdef AVMPLUS_VERBOSE
-                    if (scriptTraits->pool->isVerbose(VB_parse))
-                        console << "exporting " << ns << "::" << name << "\n";
-                    #endif
-                    domainEnv->addNamedScript(name, ns, scriptEnv);
-                }
-            }
-            else
-            {
-                if (!abcEnv->getPrivateScriptEnv(name, ns))
-                {
-                    abcEnv->addPrivateScriptEnv(name, ns, scriptEnv);
-                }
-            }
-        }
-#ifdef VMCFG_LOOKUP_CACHE
-        // Adding scripts to a domain always invalidates the lookup cache.
-        invalidateLookupCache();
-#endif
     }
 
     PoolObject* AvmCore::parseActionBlock(ScriptBuffer code,
@@ -1165,7 +1137,7 @@ return the result of the comparison ToPrimitive(x) == y.
                         // or the pointer of the exception handler. exceptfilt is being passed to abcOP_debugEnter as the 5th parameter
                         // and ends up in callStackNode.m_eip. In other words kCatchAction_SearchForActionScriptExceptionHandler in
                         // AvmCore::willExceptionBeCaught() can return true if callStackNode->eip() != 0.
-                        if (info && info->isCompiledMethod() && callStackNode->eip() != 0)
+                        if (info && info->isAotCompiled() && callStackNode->eip() != 0)
                             return true;
 #endif
                         // native methods don't have exception handlers

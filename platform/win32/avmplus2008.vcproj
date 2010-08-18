@@ -1884,6 +1884,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\DomainMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\DomainMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\E4XNode.cpp"
 				>
 			</File>

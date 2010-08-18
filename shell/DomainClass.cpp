@@ -66,8 +66,8 @@ namespace avmshell
                             (Toplevel*)parentDomain->domainToplevel :
                             core->createShellToplevel();
 
-        Domain* domain = new (core->GetGC()) Domain(core, baseDomain);
-        domainEnv = new (core->GetGC()) DomainEnv(core, domain, baseDomainEnv);
+		Domain* domain = Domain::newDomain(core, baseDomain);
+		domainEnv = DomainEnv::newDomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
     }
 
     Atom DomainObject::loadBytes(ByteArrayObject* b, String* bugCompatibilityStr)
@@ -120,7 +120,7 @@ done:
     {
         Toplevel* toplevel = this->toplevel();
 
-        ScriptEnv* script = (ScriptEnv*) domainEnv->getScriptInit(multiname);
+		ScriptEnv* script = core()->domainMgr()->findScriptEnvInDomainEnvByMultiname(domainEnv, multiname);
         if (script == (ScriptEnv*)BIND_AMBIGUOUS)
             toplevel->throwReferenceError(kAmbiguousBindingError, multiname);
 

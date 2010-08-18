@@ -70,7 +70,7 @@ namespace avmplus
     //
     // We recognize benign uses of the rest array and rewrite generic code
     // sequences to instead use new instructions RESTARGC and RESTARG, and set
-    // the LAZY_REST attribute.  The optimization kicks in if the rest array
+    // the _lazyRest attribute.  The optimization kicks in if the rest array
     // is not closed over and all uses of the rest array are to extract its
     // length or extract a property from it.  Even then the RESTARGC/RESTARG
     // instructions may fall back to the full array, if the extracted property
@@ -152,7 +152,7 @@ namespace avmplus
         void init(AvmCore* core, MethodInfo* info, uint32_t frameSize);
 
         // Insert this CodeWriter into the pipeline before next, or not.  On pass2,
-        // set the LAZY_REST flag on the MethodInfo if appropriate.
+        // set the _lazyRest flag on the MethodInfo if appropriate.
         CodeWriter* hookup(CodeWriter* next, bool pass2=false);
 
         void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);

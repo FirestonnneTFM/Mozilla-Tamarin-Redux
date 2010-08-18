@@ -67,8 +67,6 @@ namespace avmplus
         Stringp traitsName() const;
         Namespacep traitsNs() const;
 
-        ScriptEnv* getScriptEnv(const Multiname *m) const;
-
         /**
          * Coerces an array of actual parameters to the types
          * required by a function's formal parameters, then invokes

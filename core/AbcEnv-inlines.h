@@ -40,6 +40,11 @@
 namespace avmplus
 {
 
+REALLY_INLINE AvmCore* AbcEnv::core() const
+{
+    return m_core;
+}
+
 REALLY_INLINE PoolObject* AbcEnv::pool() const
 {
     return m_pool;
@@ -78,27 +83,6 @@ REALLY_INLINE size_t AbcEnv::calcExtra(PoolObject* pool)
 {
     const uint32_t c = pool->methodCount();
     return (c <= 1) ? 0 : (sizeof(MethodEnv*)*(c-1));
-}
-
-REALLY_INLINE ScriptEnv* AbcEnv::getPrivateScriptEnv(Stringp name) const
-{
-    return (ScriptEnv*)m_privateScriptEnvs->getName(name);
-}
-
-REALLY_INLINE ScriptEnv* AbcEnv::getPrivateScriptEnv(Stringp name, Namespacep ns) const
-{
-    return (ScriptEnv*)m_privateScriptEnvs->get(name, ns);
-}
-
-REALLY_INLINE ScriptEnv* AbcEnv::getPrivateScriptEnv(const Multiname& m) const
-{
-    return (ScriptEnv*)m_privateScriptEnvs->getMulti(m);
-}
-
-REALLY_INLINE void AbcEnv::addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv)
-{
-    AvmAssert(!getPrivateScriptEnv(name, ns));
-    m_privateScriptEnvs->add(name, ns, (Binding) scriptEnv);
 }
 
 } // namespace avmplus
