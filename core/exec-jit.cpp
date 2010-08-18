@@ -61,8 +61,8 @@ bool BaseExecMgr::shouldJit(const MethodInfo* m) const
 void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
 {
     // Mark method as been JIT compiled.
-    int flags = m->_flags & ~MethodInfo::INTERP_IMPL;
-    m->_flags = flags | MethodInfo::JIT_IMPL;
+    m->_isInterpImpl = 0;
+    m->_isJitImpl = 1;
     m->_implGPR = p;
     m->_invoker = InvokerCompiler::canCompileInvoker(m)
         ? jitInvokerNext
