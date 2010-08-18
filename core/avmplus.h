@@ -133,6 +133,7 @@ namespace avmplus
     class DescribeTypeClass;
     class Domain;
     class DomainEnv;
+	class DomainMgr;
     class E4XNode;
     class ErrorClass;
     class ErrorObject;
@@ -311,6 +312,7 @@ namespace avmplus
 #include "DescribeTypeClass.h"
 #include "Domain.h"
 #include "DomainEnv.h"
+#include "DomainMgr.h"
 #include "ObjectClass.h"
 #include "ErrorClass.h"
 #include "MathClass.h"

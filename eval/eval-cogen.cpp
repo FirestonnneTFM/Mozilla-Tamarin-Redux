@@ -377,11 +377,11 @@ namespace avmplus
             uint32_t flags = 0;
             AvmAssert( !(uses_arguments && (rest_param != NULL)) );
             if (uses_arguments)
-                flags |= MethodInfo::NEED_ARGUMENTS;
+                flags |= abcMethod_NEED_ARGUMENTS;
             if (rest_param != NULL)
-                flags |= MethodInfo::NEED_REST;
+                flags |= abcMethod_NEED_REST;
             if (uses_dxns)
-                flags |= MethodInfo::SETS_DXNS;
+                flags |= abcMethod_SETS_DXNS;
             (*info)->setFlags((uint8_t)((*body)->getFlags() | flags));
         }
 

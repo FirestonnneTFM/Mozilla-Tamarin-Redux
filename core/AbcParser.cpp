@@ -615,7 +615,7 @@ namespace avmplus
                 if (!f->makeMethodOf(traits))
                     toplevel->throwVerifyError(kCorruptABCError);
 
-                f->setKind(kind); // sets the IS_GETTER/IS_SETTER flags
+                f->setKind(kind); // sets the _isGetter/_isSetter flags
                 if ((tag & ATTR_final) || makeFinal)
                      f->setFinal();
                 if (tag & ATTR_override)
@@ -624,6 +624,8 @@ namespace avmplus
                     f->setNeedsDxns();
 
                 // only export one name for an accessor
+                // (note that addNamedScript checks for redundancy internally,
+                // no need to do so here)
                 if (script)
                     addNamedScript(nss, name, script);
 
@@ -750,7 +752,7 @@ namespace avmplus
             #endif
 
             const NativeMethodInfo* ni = NULL;
-            if (abcFlags & MethodInfo::NATIVE)
+            if (abcFlags & abcMethod_NATIVE)
             {
                 ni = natives ? natives->getNativeInfo(i) : NULL;
 #ifdef VMCFG_VERIFYALL
@@ -782,19 +784,18 @@ namespace avmplus
                 if (!ni && natives->getCompiledInfo(&compiledMethodInfo, returnTypeName, i))
                 {
                     ni = &compiledMethodInfo;
-                    abcFlags |= MethodInfo::compiledMethodFlags();
                     isCompiled = true;
                 }
             }
 #endif
 
-            const int optional_count = (abcFlags & MethodInfo::HAS_OPTIONAL) ? readU30(pos) : 0;
+            const int optional_count = (abcFlags & abcMethod_HAS_OPTIONAL) ? readU30(pos) : 0;
 
             MethodInfo* info = new (core->GetGC()) MethodInfo(i, pool, info_pos, abcFlags, ni);
 
 #ifdef VMCFG_AOT
-            if(isCompiled)
-                info->setCompiledMethod();
+            if (isCompiled)
+                info->setAotCompiled();
 #endif
 
             #if VMCFG_METHOD_NAMES
@@ -804,7 +805,7 @@ namespace avmplus
             }
             #endif
 
-            if (abcFlags & MethodInfo::HAS_OPTIONAL)
+            if (abcFlags & abcMethod_HAS_OPTIONAL)
             {
                 for( int j = 0; j < optional_count; ++j)
                 {
@@ -819,7 +820,7 @@ namespace avmplus
                 }
             }
 
-            if (abcFlags & MethodInfo::HAS_PARAM_NAMES)
+            if (abcFlags & abcMethod_HAS_PARAM_NAMES)
             {
                 // AVMPlus doesn't care about the param names, just skip past them
                 for( int j = 0; j < param_count; ++j )
@@ -1073,7 +1074,7 @@ namespace avmplus
                 AvmAssert(!info->isResolved());
                 info->set_abc_body_pos(body_pos);
 
-                // there will be a traits_count here, even if NEED_ACTIVATION is not
+                // there will be a traits_count here, even if abcMethod_NEED_ACTIVATION is not
                 // set.  So we parse the same way all the time.  We could reduce file size and
                 // memory by omitting the count + traits completely.
 
@@ -1617,50 +1618,34 @@ namespace avmplus
                 apis |= ApiUtils::getCompatibleAPIs(core, nsi->getAPI());
             }
             ns = ApiUtils::getVersionedNamespace(core, ns, apis);
-            domain->addUniqueTrait(name, ns, itraits);
-        }
-        else {
-            // duplicate class
-            //Multiname qname(ns,name);
-            //toplevel->definitionErrorClass()->throwError(kRedefinedError, core->toErrorString(&qname));
+            core->domainMgr()->addNamedTraits(pool, name, ns, itraits);
         }
     }
 
     void AbcParser::addNamedTraits(Namespacep ns, Stringp name, Traits* itraits)
     {
-        addNamedTraits(NamespaceSet::create(core->GetGC(), ns), name, itraits);
+        if (!ns->isPrivate()) {
+            API apis = ApiUtils::getCompatibleAPIs(core, ns->getAPI());
+            ns = ApiUtils::getVersionedNamespace(core, ns, apis);
+            core->domainMgr()->addNamedTraits(pool, name, ns, itraits);
+        }
     }
 
     void AbcParser::addNamedScript(NamespaceSetp nss, Stringp name, MethodInfo* script)
     {
         Namespacep ns = nss->nsAt(0); // just need one
-        if (ns->isPrivate())
+        if (!ns->isPrivate())
         {
-            pool->addPrivateNamedScript(name, ns, script);
-        }
-        else
-        {
-            // use the first namespace to see if its been added
-            MethodInfo* s = domain->getNamedScript(name, ns);
-            if (!s)
+            API apis = 0;
+            for (NamespaceSetIterator iter(nss); iter.hasNext();)
             {
-                API apis = 0;
-                for (NamespaceSetIterator iter(nss); iter.hasNext();)
-                {
-                    Namespacep nsi = iter.next();
-                    AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nsi->getType(), nsi->getURI()) ? nsi->getAPI() != 0 : true);
-                    apis |= ApiUtils::getCompatibleAPIs(core, nsi->getAPI());
-                }
-                ns = ApiUtils::getVersionedNamespace(core, ns, apis);
-                domain->addUniqueScript(name, ns, script);
+                Namespacep nsi = iter.next();
+                AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nsi->getType(), nsi->getURI()) ? nsi->getAPI() != 0 : true);
+                apis |= ApiUtils::getCompatibleAPIs(core, nsi->getAPI());
             }
-            else
-            {
-                // duplicate definition
-                //Multiname qname(ns, name);
-                //toplevel->definitionErrorClass()->throwError(kRedefinedError, core->toErrorString(&qname));
-            }
+            ns = ApiUtils::getVersionedNamespace(core, ns, apis);
         }
+        core->domainMgr()->addNamedScript(pool, name, ns, script);
     }
 
     bool AbcParser::parseScriptInfos()
@@ -1942,8 +1927,7 @@ namespace avmplus
 
             instances.set(i, itraits);
 
-            // add the trait if we've not seen it before
-            pool->addUniqueTraits(name, ns, itraits);
+            core->domainMgr()->addNamedInstanceTraits(pool, name, ns, itraits);
         }
 
         return true;

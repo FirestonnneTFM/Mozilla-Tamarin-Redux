@@ -59,8 +59,9 @@ namespace avmplus
 #endif
         cpool_mn_offsets(0),
         metadata_infos(0),
-        _namedTraits(new(core->GetGC()) MultinameHashtable()),
-        _privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
+        m_namedTraits(new(core->GetGC()) MultinameHashtable()),
+        m_namedScriptsMap(new(core->GetGC()) MultinameHashtable()),
+        m_namedScriptsList(core->GetGC(), 0),
         _code(sb.getImpl()),
         _abcStart(startPos),
         _abcStringStart(NULL),
@@ -126,90 +127,6 @@ namespace avmplus
                 s->makeDynamic(_abcStringStart, uint32_t(_abcStringEnd - _abcStringStart));
             }
         }
-    }
-
-    Traits* PoolObject::getBuiltinTraits(Stringp name) const
-    {
-        AvmAssert(BIND_NONE == 0);
-        AvmAssert(!domain->base()); // _namedTraits contains builtins iff base is null, see addUniqueTraits()
-        return (Traits*) _namedTraits->getName(name);
-    }
-
-    Traits* PoolObject::getTraits(Stringp name, Namespace* ns) const
-    {
-        // look for class locally
-        Traits* t = (Traits*) _namedTraits->get(name, ns);
-
-        // then in vm-wide table
-        if (t == NULL)
-            t = domain->getNamedTraits(name, ns);
-        return t;
-    }
-
-    Traits* PoolObject::getTraits(Stringp name) const
-    {
-        return getTraits(name, core->getPublicNamespace((PoolObject*) this));
-    }
-
-    Traits* PoolObject::getTraits(const Multiname& mname, const Toplevel* toplevel) const
-    {
-        // do full lookup of multiname, error if more than 1 match
-        // return Traits if 1 match, NULL if 0 match, throw ambiguity error if >1 match
-        Traits* match = NULL;
-        if (mname.isBinding())
-        {
-            // multiname must not be an attr name, have wildcards, or have runtime parts.
-            for (int32_t i=0, n=mname.namespaceCount(); i < n; i++)
-            {
-                Traits* t = getTraits(mname.getName(), mname.getNamespace(i));
-                if (t != NULL)
-                {
-                    if (match == NULL)
-                    {
-                        match = t;
-                    }
-                    else if (match != t)
-                    {
-                        // ambiguity
-                        if (toplevel)
-                            toplevel->throwReferenceError(kAmbiguousBindingError, mname);
-                        AvmAssert(!"unhandled ambiguous binding");
-                    }
-                }
-            }
-        }
-        return match;
-    }
-
-    Traits* PoolObject::addUniqueTraits(Stringp name, Namespace* ns, Traits* traits)
-    {
-        // don't add if we already have a traits with this name
-        Traits* t = getTraits(name, ns);
-        if (t != NULL)
-            return t;
-
-        _namedTraits->add(name, ns, (Binding)traits);
-        return traits;
-    }
-
-    Traits* PoolObject::addUniqueParameterizedITraits(AvmCore* core, const Toplevel* toplevel, Traits* base, Traits* param_traits)
-    {
-        // this - is the pool where our param_traits reside
-        AvmAssert(param_traits->pool == this);
-        Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
-        Traits* r = getTraits(Multiname(base->ns(), fullname), toplevel); // careful, toplevel can be null!
-        if (!r)
-        {
-            // below we are exposing this trait domain-wide, and this can occur
-            // during interp, abc parsing, method resolution, etc. That is, under many
-            // conditions.  This seems ripe for potential issues as it throws a lot
-            // of non-determinism into these searches.  Not to mention that it appears
-            // this code by-passes versioning altogether.
-            r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
-            r->verifyBindings(toplevel);
-            r = domain->addUniqueTrait(fullname, base->ns(), r);  // getTraits() above also checks the domain.
-        }
-        return r;
     }
 
     Namespace* PoolObject::getNamespace(int32_t index) const
@@ -611,7 +528,7 @@ range_error:
         }
     }
 
-    Traits* PoolObject::resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid/*=false*/) const
+    Traits* PoolObject::resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid/*=false*/)
     {
         // only save the type name for now.  verifier will resolve to traits
         if (index == 0)
@@ -630,7 +547,13 @@ range_error:
         Multiname m;
         parseMultiname(m, index);
 
-        Traits* t = getTraits(m, toplevel);
+		Traits* t = core->domainMgr()->findTraitsInPoolByMultiname(this, m);
+        if (t == (Traits*)BIND_AMBIGUOUS)
+        {
+            if (toplevel)
+                toplevel->throwReferenceError(kAmbiguousBindingError, m);
+            AvmAssert(!"unhandled verify error");
+        }
         if(m.isParameterizedType())
         {
             core->stackCheck(const_cast<Toplevel*>(toplevel));
@@ -679,28 +602,20 @@ range_error:
                     break;
                 default:
                 {
-                    r = param_traits->pool->addUniqueParameterizedITraits(core, toplevel, base, param_traits);
+                    PoolObject* pool = param_traits->pool;
+                    Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
+                    r = core->domainMgr()->findTraitsInPoolByNameAndNS(pool, fullname, base->ns());
+                    if (!r)
+                    {
+                        r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
+			            r->verifyBindings(toplevel);
+                        core->domainMgr()->addNamedTraits(pool, fullname, base->ns(), r);
+                    }
                     break;
                 }
             }
         }
         return r;
-    }
-
-    void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, MethodInfo *script)
-    {
-        // only add it if subsequent lookup wouldn't find it
-        Multiname mn(ns, name);
-        if (!getNamedScript(&mn))
-            _privateNamedScripts->add(name, ns, (Binding)script);
-    }
-
-    MethodInfo* PoolObject::getNamedScript(const Multiname* multiname) const
-    {
-        MethodInfo* f = (MethodInfo*)_privateNamedScripts->getMulti(multiname);
-        if (!f)
-            f = domain->getNamedScript(multiname);
-        return f;
     }
 
     // search metadata record at meta_pos for name, return true if present
@@ -772,7 +687,7 @@ range_error:
             const int32_t index = this->_method_name_indices[i];
             if (index >= 0)
             {
-                if ((uint32_t)index < constantStringCount)
+                if (hasString(index))
                     name = this->getString(index);
             }
             else

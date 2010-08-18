@@ -488,6 +488,12 @@ const int kBufferPadding = 16;
 
         Config config;
 
+    private:
+        DomainMgr* m_domainMgr;
+
+    public:
+        DomainMgr* domainMgr() const;
+
         // execution manager, responsible for all invocation
         ExecMgr* exec;
 
@@ -649,8 +655,6 @@ const int kBufferPadding = 16;
         ScriptEnv* prepareActionPool(PoolObject* pool,
                                      Toplevel* toplevel,
                                      CodeContext *codeContext);
-
-        void exportDefs(Traits* traits, ScriptEnv* scriptEnv);
 
         /**
          * Parse the ABC block starting at offset start in code.

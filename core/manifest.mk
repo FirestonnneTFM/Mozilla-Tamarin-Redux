@@ -63,6 +63,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/DescribeTypeClass.cpp \
   $(curdir)/Domain.cpp \
   $(curdir)/DomainEnv.cpp \
+  $(curdir)/DomainMgr.cpp \
   $(curdir)/E4XNode.cpp \
   $(curdir)/ErrorClass.cpp \
   $(curdir)/ErrorConstants.cpp \
