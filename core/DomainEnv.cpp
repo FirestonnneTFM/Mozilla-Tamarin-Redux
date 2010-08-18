@@ -42,14 +42,49 @@
 
 namespace avmplus
 {
-    DomainEnv::DomainEnv(AvmCore *core, Domain* domain, DomainEnv* base)
-        : m_domain(domain),
-          m_base(base),
-          m_namedScripts(new (core->GetGC()) MultinameHashtable()),
-          m_globalMemoryScratch(mmfx_new0(Scratch)),
-          m_globalMemoryBase(m_globalMemoryScratch->scratch),
-          m_globalMemorySize(GLOBAL_MEMORY_MIN_SIZE)
+    DomainEnv::DomainEnv(AvmCore* core, Domain* domain, DomainEnv* base, uint32_t baseCount)
+        : m_namedScriptEnvsList(core->GetGC(), 0)
+        , m_domain(domain)
+        , m_globalMemoryScratch(mmfx_new0(Scratch))
+        , m_globalMemoryBase(m_globalMemoryScratch->scratch)
+        , m_globalMemorySize(GLOBAL_MEMORY_MIN_SIZE)
+        , m_baseCount(baseCount)
     {
+        WB(core->GetGC(), this, &this->m_bases[0], this);
+        for (uint32_t i = 1; i < baseCount; ++i)
+        {
+            WB(core->GetGC(), this, &this->m_bases[i], base->m_bases[i-1]);
+        }
+
+    #ifdef _DEBUG
+        List<Domain*> dl(core->GetGC());
+        for (Domain* di = m_domain; di != NULL; di = di->base())
+            dl.add(di);
+        
+        List<DomainEnv*> el(core->GetGC());
+        for (DomainEnv* di = this; di != NULL; di = di->base())
+            el.add(di);
+        
+        AvmAssert(dl.size() == el.size());
+        for (uint32_t i = 0, n = el.size(); i < n; ++i)
+        {
+            Domain* d = dl[i];
+            DomainEnv* e = el[i];
+            AvmAssert(e->domain() == d);
+        }
+    #endif
+    }
+
+    DomainEnv* DomainEnv::newDomainEnv(AvmCore* core, Domain* domain, DomainEnv* base)
+    {
+        uint32_t baseCount = (base ? base->m_baseCount : 0) + 1;
+        // Note that we deliberately overallocate by one here (the proper
+        // amount is baseCount-1) so that we always have one, zeroed-out
+        // entry at the end. This allows us to always use "m_bases[1]"
+        // to get our immediate base, even if our base is NULL, thus
+        // avoiding a check in the implementation of base().
+        uint32_t extra = baseCount * sizeof(DomainEnv*);
+        return new (core->GetGC(), extra) DomainEnv(core, domain, base, baseCount);
     }
 
     DomainEnv::~DomainEnv()
@@ -57,53 +92,10 @@ namespace avmplus
         mmfx_delete(m_globalMemoryScratch);
     }
 
-
-    MethodEnv* DomainEnv::getScriptInit(Namespacep ns, Stringp name) const
-    {
-        MethodEnv *env = NULL;
-        if (m_base) {
-            env = m_base->getScriptInit(ns, name);
-        }
-        if (!env) {
-            env = (MethodEnv*) m_namedScripts->get(name, ns);
-        }
-        return env;
-    }
-
-    MethodEnv* DomainEnv::getScriptInit(const Multiname& multiname) const
-    {
-        MethodEnv *env = NULL;
-        if (m_base) {
-            env = m_base->getScriptInit(multiname);
-        }
-        if (!env) {
-            env = (MethodEnv*) m_namedScripts->getMulti(multiname);
-        }
-        return env;
-    }
-
-    int DomainEnv::scriptNext(int index) const
-    {
-        int v = m_namedScripts->next(index);
-        return v;
-    }
-
-    Stringp DomainEnv::scriptNameAt(int index) const
-    {
-        Stringp s = m_namedScripts->keyAt(index);
-        return s;
-    }
-
-    Namespacep DomainEnv::scriptNsAt(int index) const
-    {
-        Namespacep ns = m_namedScripts->nsAt(index);
-        return ns;
-    }
-
     Toplevel* DomainEnv::toplevel() const
     {
         if(m_toplevel) return m_toplevel;
-        if(m_base) return m_base->toplevel();
+        if(base()) return base()->toplevel();
         AvmAssert(0);
         return NULL;
     }
@@ -148,12 +140,12 @@ namespace avmplus
         m_globalMemorySize = newSize;
     }
 
-    bool DomainEnv::globalMemorySubscribe(ScriptObject* providerObject)
+    bool DomainEnv::globalMemorySubscribe(ScriptObject* providerObject) 
     {
         GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();
         return provider ? provider->addSubscriber(this) : false;
     }
-
+ 
     bool DomainEnv::globalMemoryUnsubscribe(ScriptObject* providerObject)
     {
         GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();

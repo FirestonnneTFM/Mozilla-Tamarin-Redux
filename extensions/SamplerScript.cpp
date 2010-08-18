@@ -636,7 +636,7 @@ namespace avmplus
             // not sure if this will be true for standalone avmplus
             AvmAssert(core->codeContext() != NULL);
             DomainEnv *domainEnv = core->codeContext()->domainEnv();
-            ScriptEnv* script = (ScriptEnv*) domainEnv->getScriptInit(multiname);
+            ScriptEnv* script = (ScriptEnv*) core->domainMgr()->findScriptEnvInDomainEnvByMultiname(domainEnv, multiname);
             if (script != (ScriptEnv*)BIND_NONE)
             {
                 if (script == (ScriptEnv*)BIND_AMBIGUOUS)

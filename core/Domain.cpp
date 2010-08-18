@@ -42,70 +42,34 @@
 
 namespace avmplus
 {
-    Domain::Domain(AvmCore* core, Domain* base) :
-        m_base(base),
-        m_core(core),
-        m_namedTraits(new (core->GetGC()) MultinameHashtable()),
-        m_namedScripts(new (core->GetGC()) MultinameHashtable()),
-        m_parameterizedTypes(new (core->GetGC(), 0) HeapHashtable(core->GetGC()))
+    Domain::Domain(AvmCore* core, Domain* base, uint32_t baseCount)
+        : m_namedTraits(new (core->GetGC()) MultinameHashtable())
+        , m_namedScriptsMap(new (core->GetGC()) MultinameHashtable())
+        , m_namedScriptsList(core->GetGC(), 0)
+        , m_parameterizedTypes(new (core->GetGC()) HeapHashtable(core->GetGC()))
+        , m_baseCount(baseCount)
     {
-    }
-
-    Traits* Domain::getNamedTraits(Stringp name, Namespacep ns)
-    {
-        Traits* f = NULL;
-        Domain* dom = this;
-        do {
-            f = (Traits*) dom->m_namedTraits->get(name, ns);
-            dom = dom->m_base;
-        } while (!f && dom);
-        return f;
-    }
-
-    Traits* Domain::addUniqueTrait(Stringp name, Namespace* ns, Traits* v)
-    {
-        Traits* t = getNamedTraits(name, ns);
-        if (t == NULL) {
-            m_namedTraits->add(name, ns, (Binding)v);
-            t = v; // return trait that we'd get from a getNamedTrait() call.
+        WB(core->GetGC(), this, &m_bases[0], this);
+        for (uint32_t i = 1; i < baseCount; ++i)
+        {
+            WB(core->GetGC(), this, &this->m_bases[i], base->m_bases[i-1]);
         }
-        return t;
     }
 
-    MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns) const
+    Domain* Domain::newDomain(AvmCore* core, Domain* base)
     {
-        MethodInfo* f = NULL;
-        const Domain* dom = this;
-        do {
-            f = (MethodInfo*) dom->m_namedScripts->get(name, ns);
-            dom = dom->m_base;
-        } while (!f && dom);
-        return f;
+        uint32_t baseCount = (base ? base->m_baseCount : 0) + 1;
+        // Note that we deliberately overallocate by one here (the proper
+        // amount is baseCount-1) so that we always have one, zeroed-out
+        // entry at the end. This allows us to always use "m_bases[1]"
+        // to get our immediate base, even if our base is NULL, thus
+        // avoiding a check in the implementation of base().
+        uint32_t extra = baseCount * sizeof(Domain*);
+        return new (core->GetGC(), extra) Domain(core, base, baseCount);
     }
 
-    MethodInfo* Domain::getNamedScript(const Multiname* mn) const
-    {
-        MethodInfo* f = NULL;
-        const Domain* dom = this;
-        do {
-            f = (MethodInfo*) dom->m_namedScripts->getMulti(mn);
-            dom = dom->m_base;
-        } while (!f && dom);
-        return f;
-    }
-
-    MethodInfo* Domain::addUniqueScript(Stringp name, Namespace* ns, MethodInfo* v)
-    {
-        MethodInfo* t = getNamedScript(name, ns);
-        if (t == NULL) {
-            m_namedScripts->add(name, ns, (Binding)v);
-            t = v; // return script that we'd get from a getNamedScript() call.
-        }
-        return t;
-    }
-
-    ClassClosure* Domain::getParameterizedType(ClassClosure* type)
-    {
+    ClassClosure* Domain::getParameterizedType(ClassClosure* type) 
+    { 
         AvmAssert(type != NULL);
         Atom a = type ? m_parameterizedTypes->get(type->atom()) : nullObjectAtom;
         return AvmCore::isObject(a) ? (ClassClosure*)AvmCore::atomToScriptObject(a) : NULL;

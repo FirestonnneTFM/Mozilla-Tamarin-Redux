@@ -55,6 +55,7 @@ namespace avmplus
         AbcEnv(PoolObject* _pool, CodeContext * _codeContext);
         ~AbcEnv();
 
+        AvmCore* core() const;
         PoolObject* pool() const;
         DomainEnv* domainEnv() const;
         CodeContext* codeContext() const;
@@ -68,29 +69,18 @@ namespace avmplus
 
         static size_t calcExtra(PoolObject* pool);
 
-        // these peek into the DomainEnv as appropriate
-        ScriptEnv* getScriptEnv(Stringp name, Namespacep ns);
-        ScriptEnv* getScriptEnv(const Multiname& m);
-
-        // these peek only into m_privateScriptEnvs
-        ScriptEnv* getPrivateScriptEnv(Stringp name) const;
-        ScriptEnv* getPrivateScriptEnv(Stringp name, Namespacep ns) const;
-        ScriptEnv* getPrivateScriptEnv(const Multiname& m) const;
-
-        void addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv);
-
     // ------------------------ DATA SECTION BEGIN
+    private:
+        friend class DomainMgrFP10;
+        List<ScriptEnv*, LIST_GCObjects>    m_namedScriptEnvsList;    // list of ScriptEnvs, corresponds to pool->m_namedScriptsList
     private:
         PoolObject* const           m_pool;
         DomainEnv* const            m_domainEnv;    // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code
         CodeContext* const          m_codeContext;
-        DWB(MultinameHashtable*)    m_privateScriptEnvs;
 #ifdef DEBUGGER
         DWB(uint64_t*)              m_invocationCounts; // actual size will hold pool->methodCount methods, only allocated if debugger exists
 #endif
-#ifdef VMCFG_NANOJIT
         AvmCore* const              m_core;
-#endif
         MethodEnv*                  m_methods[1];       // actual size will hold pool->methodCount methods
     // ------------------------ DATA SECTION END
     };

@@ -63,31 +63,19 @@ namespace avmplus
     class DomainEnv : public GlobalMemorySubscriber
     {
         friend class MopsRangeCheckFilter;
+    private:
+        DomainEnv(AvmCore* core, Domain* domain, DomainEnv* base, uint32_t baseCount);
     public:
-        DomainEnv(AvmCore *core, Domain *domain, DomainEnv* base);
+        static DomainEnv* newDomainEnv(AvmCore* core, Domain* domain, DomainEnv* base);
         virtual ~DomainEnv();
-
-        // these peek into base DomainEnv as appropriate
-        MethodEnv* getScriptInit(Namespacep ns, Stringp name) const;
-        MethodEnv* getScriptInit(const Multiname& multiname) const;
-
-        inline ScriptEnv* getNamedScript(Stringp name) const { return (ScriptEnv*)m_namedScripts->getName(name); }
-        inline ScriptEnv* getNamedScript(Stringp name, Namespacep ns) const { return (ScriptEnv*)m_namedScripts->get(name, ns); }
-        inline void addNamedScript(Stringp name, Namespacep ns, ScriptEnv* scriptEnv) { m_namedScripts->add(name, ns, Binding(scriptEnv)); }
-
+        
         inline Domain* domain() const { return m_domain; }
-        inline DomainEnv* base() const { return m_base; }
-
-        /**
-         * Allow caller to enumerate the named entries in the table.
-         */
-        int scriptNext(int index) const;
-        Stringp scriptNameAt(int index) const;
-        Namespace* scriptNsAt(int index) const;
+        // see note in newDomainEnv about why this is always valid, even if m_baseCount == 1
+        inline DomainEnv* base() const { return m_bases[1]; }
 
         Toplevel* toplevel() const;
         void setToplevel(Toplevel *t) { m_toplevel = t; }
-
+        
         /**
          * global memory access glue
          */
@@ -126,9 +114,9 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
-        Domain* const                   m_domain;       // Domain associated with this DomainEnv
-        DomainEnv* const                m_base;         // Parent DomainEnv
-        DWB(MultinameHashtable*)        m_namedScripts; // table of named program init functions. (ns,name => MethodEnv)
+        friend class DomainMgrFP10;
+        List<ScriptEnv*>                m_namedScriptEnvsList; // list of ScriptEnv, corresponds to domain->m_namedScriptsList
+        DWB(Domain*)                    m_domain;       // Domain associated with this DomainEnv 
         DWB(Toplevel*)                  m_toplevel;
         // scratch memory to use if the memory object is NULL...
         // allocated via mmfx_new, which is required by nanojit
@@ -138,6 +126,11 @@ namespace avmplus
         uint32_t                        m_globalMemorySize;
         // the actual memory object (can be NULL)
         DRCWB(ScriptObject*)            m_globalMemoryProviderObject;
+        // note that m_baseCount is actually the number of bases, plus one: 
+        // we always add ourself (!) to the front of the list, to simplify 
+        // processing in DomainMgr.
+        uint32_t const                  m_baseCount; // number of entries in m_bases
+        DomainEnv*                      m_bases[1];  // lying: really [m_baseCount]
     // ------------------------ DATA SECTION END
     };
 }
