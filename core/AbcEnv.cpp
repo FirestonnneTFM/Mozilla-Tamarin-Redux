@@ -50,9 +50,7 @@ namespace avmplus
 #ifdef DEBUGGER
         , m_invocationCounts(NULL)
 #endif
-#ifdef VMCFG_NANOJIT
         , m_core(_pool->core)
-#endif
     {
 #ifdef DEBUGGER
         if (_pool->core->debugger())
