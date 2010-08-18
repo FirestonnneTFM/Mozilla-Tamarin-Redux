@@ -125,7 +125,7 @@ private:
     static BaseExecMgr* exec(VTable*);
     static BaseExecMgr* exec(MethodEnv*);
 
-    // True if method's INTERP_IMPL flag is set.
+    // True if method's _isInterpImpl flag is set.
     static bool isInterpreted(MethodEnv*);
 
     // Trampolines that verify on first call:
@@ -228,8 +228,8 @@ private:
     // we encounter OP_newfunction, or when the declaring traits reaches the head
     // of the queue.
     //
-    // Methods have their VERIFY_PENDING flag set when queued, then changed
-    // to VERIFIED once verified.
+    // Methods have their _isVerifyPending flag set when queued, then changed
+    // to _isVerified once verified.
     //
     // In verifyall mode we never install the verify-on-first-call trampolines.
     // In verifyonly mode, all execution is stubbed out by a single stub that
@@ -258,7 +258,7 @@ private:
     // Run the verifier with the JIT attached.
     void verifyJit(MethodInfo*, MethodSignaturep, Toplevel*, AbcEnv*);
 
-    // Install JIT code pointers and set JIT_IMPL.
+    // Install JIT code pointers and set _isJitImpl.
     void setJit(MethodInfo*, GprMethodProc p);
 
     // Invoker called on the first invocation then calls invoke_generic,
