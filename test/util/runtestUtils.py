@@ -244,6 +244,7 @@ def walk(top, topdown=True, onerror=None, followlinks=False):
     '''Updated version of os.path.walk that will follow symbolic links'''
     try:
         names = os.listdir(top)
+        names.sort()
     except os.error, err:
         if onerror is not None:
             onerror(err)
