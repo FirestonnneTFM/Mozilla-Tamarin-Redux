@@ -43,6 +43,11 @@
 namespace avmplus
 {
 
+REALLY_INLINE DomainMgr* AvmCore::domainMgr() const
+{
+    return m_domainMgr;
+}
+
 #ifdef DEBUGGER
 REALLY_INLINE Debugger* AvmCore::debugger() const
 {

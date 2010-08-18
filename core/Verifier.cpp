@@ -1311,7 +1311,7 @@ namespace avmplus
                     // error, def name must be CT constant, regular name
                     verifyFailed(kIllegalOpMultinameError, core->toErrorString(opcode), core->toErrorString(&multiname));
                 }
-                MethodInfo* script = pool->getNamedScript(&multiname);
+                MethodInfo* script = core->domainMgr()->findScriptInPoolByMultiname(pool, multiname);
                 Traits* resultType;
                 if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS) {
                     // found a single matching traits
@@ -2624,7 +2624,7 @@ namespace avmplus
                 if (index <= 0)
                 {
                     // look at import table for a suitable script
-                    MethodInfo* script = pool->getNamedScript(&multiname);
+                    MethodInfo* script = core->domainMgr()->findScriptInPoolByMultiname(pool, multiname);
                     if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
                     {
                         if (script == info)
@@ -2930,16 +2930,17 @@ namespace avmplus
     {
         Multiname name;
         checkConstantMultiname(index, name); // CONSTANT_Multiname
-        Traits *t = pool->getTraits(name, toplevel);
+        Traits* t = core->domainMgr()->findTraitsInPoolByMultiname(pool, name);
         if (t == NULL)
             verifyFailed(kClassNotFoundError, core->toErrorString(&name));
-        else
-            if( name.isParameterizedType() )
-            {
-                core->stackCheck(toplevel);
-                Traits* param_traits = name.getTypeParameter() ? checkTypeName(name.getTypeParameter()) : NULL ;
-                t = pool->resolveParameterizedType(toplevel, t, param_traits);
-            }
+        if (t == (Traits*)BIND_AMBIGUOUS)
+            toplevel->throwReferenceError(kAmbiguousBindingError, name);
+        if (name.isParameterizedType())
+        {
+            core->stackCheck(toplevel);
+            Traits* param_traits = name.getTypeParameter() ? checkTypeName(name.getTypeParameter()) : NULL ;
+            t = pool->resolveParameterizedType(toplevel, t, param_traits);
+        }
         return t;
     }
 
