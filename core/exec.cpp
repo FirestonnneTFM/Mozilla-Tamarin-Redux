@@ -88,7 +88,7 @@ void BaseExecMgr::init(MethodInfo* m, const NativeMethodInfo* native_info)
     } else {
         #ifdef VMCFG_VERIFYALL
         if (config.verifyonly && m->isNative())
-            m->_hasMethodBody = 0;
+            m->_flags |= MethodInfo::ABSTRACT_METHOD;
         #endif
     }
     m->_implGPR = NULL;
@@ -200,7 +200,7 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
             m->_implFPR = init_interpFPR;
         else
             m->_implGPR = init_interpGPR;
-        m->_isInterpImpl = 1;
+        m->_flags |= MethodInfo::INTERP_IMPL;
         m->_invoker = hasTypedArgs(ms)
             ? init_invoke_interp
             : init_invoke_interp_nocoerce;
@@ -215,7 +215,7 @@ void BaseExecMgr::setInterpDirectly(MethodInfo* m, MethodSignaturep ms)
         m->_implFPR = interpFPR;
     else
         m->_implGPR = interpGPR;
-    m->_isInterpImpl = 1;
+    m->_flags |= MethodInfo::INTERP_IMPL;
     m->_invoker = hasTypedArgs(ms)
         ? invoke_interp
         : invoke_interp_nocoerce;

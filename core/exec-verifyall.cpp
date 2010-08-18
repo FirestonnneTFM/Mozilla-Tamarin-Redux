@@ -89,24 +89,23 @@ void VerifyallWriter::writeOp1(const FrameState* state, const uint8_t *pc, AbcOp
 // True after a method is verified.
 REALLY_INLINE bool BaseExecMgr::isVerified(const MethodInfo* m) const
 {
-    return m->_isVerified != 0;
+    return (m->_flags & MethodInfo::VERIFIED) != 0;
 }
 
 // True when a method is in verifyFunctionQueue, reset to false once verified.
 REALLY_INLINE bool BaseExecMgr::isVerifyPending(const MethodInfo* m) const
 {
-    return m->_isVerifyPending != 0;
+    return (m->_flags & MethodInfo::VERIFY_PENDING) != 0;
 }
 
 REALLY_INLINE void BaseExecMgr::setVerified(MethodInfo* m) const
 {
-    m->_isVerified = 1;
-    m->_isVerifyPending = 0;
+    m->_flags = (m->_flags | MethodInfo::VERIFIED) & ~MethodInfo::VERIFY_PENDING;
 }
 
 REALLY_INLINE void BaseExecMgr::setVerifyPending(MethodInfo* m) const
 {
-    m->_isVerifyPending = 1;
+    m->_flags |= MethodInfo::VERIFY_PENDING;
 }
 
 // Add a function to the verify queue if not already queued or verified.

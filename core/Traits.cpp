@@ -269,7 +269,7 @@ namespace avmplus
 
         if (virt->unboxThis())
         {
-            // the _unboxThis flag is sticky, all the way down the inheritance tree
+            // the UNBOX_THIS flag is sticky, all the way down the inheritance tree
             over->setUnboxThis();
         }
 
@@ -1727,7 +1727,7 @@ namespace avmplus
     void Traits::genInitBody(const Toplevel* toplevel, TraitsBindings* tb)
     {
 #if defined(VMCFG_AOT)
-        if (this->init && this->init->isAotCompiled())
+        if (this->init && this->init->isCompiledMethod())
             return;
 #endif
 

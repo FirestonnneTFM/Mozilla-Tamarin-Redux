@@ -70,7 +70,6 @@ AVMPLUS_SRCS := \
 	DescribeTypeClass.cpp \
 	Domain.cpp \
 	DomainEnv.cpp \
-	DomainMgr.cpp \
 	E4XNode.cpp \
 	ErrorClass.cpp \
 	ErrorConstants.cpp \

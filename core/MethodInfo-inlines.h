@@ -88,159 +88,167 @@ REALLY_INLINE DebuggerMethodInfo::DebuggerMethodInfo(int32_t _local_count, uint3
 {}
 #endif
 
-REALLY_INLINE uint32_t MethodInfo::hasExceptions() const
+REALLY_INLINE int32_t MethodInfo::allowExtraArgs() const
 {
-    return _hasExceptions;
+    return _flags & (NEED_REST|NEED_ARGUMENTS|IGNORE_REST);
 }
 
-REALLY_INLINE uint32_t MethodInfo::hasMethodBody() const
+REALLY_INLINE int32_t MethodInfo::hasExceptions() const
 {
-    return _hasMethodBody;
+    return _flags & HAS_EXCEPTIONS;
 }
 
-REALLY_INLINE uint32_t MethodInfo::hasOptional() const
+REALLY_INLINE int32_t MethodInfo::hasMethodBody() const
 {
-    return _hasOptional;
+    return !(_flags & ABSTRACT_METHOD);
 }
 
-REALLY_INLINE uint32_t MethodInfo::isNative() const
+REALLY_INLINE int32_t MethodInfo::hasOptional() const
 {
-    return _isNative;
+    return _flags & HAS_OPTIONAL;
 }
 
-REALLY_INLINE uint32_t MethodInfo::isNonInterruptible()
+REALLY_INLINE int32_t MethodInfo::isNative() const
 {
-    return _isNonInterruptible;
+    return _flags & NATIVE;
 }
 
-REALLY_INLINE uint32_t MethodInfo::isResolved() const
+REALLY_INLINE int32_t MethodInfo::isNonInterruptible()
 {
-    return _isResolved;
+    return _flags & NON_INTERRUPTIBLE;
 }
 
-REALLY_INLINE uint32_t MethodInfo::needActivation() const
+REALLY_INLINE int32_t MethodInfo::isResolved() const
 {
-    return _needActivation;
+    return _flags & RESOLVED;
 }
 
-REALLY_INLINE uint32_t MethodInfo::needArguments() const
+REALLY_INLINE int32_t MethodInfo::needActivation() const
 {
-    return _needArguments;
+    return _flags & NEED_ACTIVATION;
 }
 
-REALLY_INLINE uint32_t MethodInfo::needClosure() const
+REALLY_INLINE int32_t MethodInfo::needArguments() const
 {
-    return _needClosure;
+    return _flags & NEED_ARGUMENTS;
 }
 
-REALLY_INLINE uint32_t MethodInfo::needRest() const
+REALLY_INLINE int32_t MethodInfo::needClosure() const
 {
-    return _needRest;
+    return _flags & NEED_CLOSURE;
+}
+
+REALLY_INLINE int32_t MethodInfo::needRest() const
+{
+    return _flags & NEED_REST;
 }
 
 // This can be called only during pass2 of verification or later, as the attribute
 // is computed during pass1 of verification.
 
-REALLY_INLINE uint32_t MethodInfo::lazyRest() const
+REALLY_INLINE int32_t MethodInfo::lazyRest() const
 {
     AvmAssert(needRestOrArguments());
-    return _lazyRest;
+    return _flags & LAZY_REST;
 }
 
-REALLY_INLINE uint32_t MethodInfo::onlyUntypedParameters() const
+REALLY_INLINE int32_t MethodInfo::onlyUntypedParameters() const
 {
-    return _onlyUntypedParameters;
+    return _flags & ONLY_UNTYPED_PARAMETERS;
 }
 
-REALLY_INLINE uint32_t MethodInfo::needRestOrArguments() const
+REALLY_INLINE int32_t MethodInfo::needRestOrArguments() const
 {
-    return _needRest || _needArguments;
+    return _flags & (NEED_REST|NEED_ARGUMENTS);
 }
 
-REALLY_INLINE uint32_t MethodInfo::isFinal() const
+REALLY_INLINE int32_t MethodInfo::isFinal() const
 {
-    return _isFinal;
+    return _flags & FINAL;
 }
 
-REALLY_INLINE uint32_t MethodInfo::setsDxns() const
+REALLY_INLINE int32_t MethodInfo::setsDxns() const
 {
-    return _setsDxns;
+    return _flags & SETS_DXNS;
 }
 
-REALLY_INLINE uint32_t MethodInfo::isStaticInit() const
+REALLY_INLINE int32_t MethodInfo::isStaticInit() const
 {
-    return _isStaticInit;
+    return _flags & STATIC_INIT;
 }
 
-REALLY_INLINE uint32_t MethodInfo::unboxThis() const
+REALLY_INLINE int32_t MethodInfo::unboxThis() const
 {
-    return _unboxThis;
+    return _flags & UNBOX_THIS;
 }
 
 REALLY_INLINE void MethodInfo::setUnboxThis()
 {
-    _unboxThis = 1;
+    _flags |= UNBOX_THIS;
 }
 
 REALLY_INLINE void MethodInfo::setStaticInit()
 {
-    _isStaticInit = 1;
+    _flags |= STATIC_INIT;
 }
 
 REALLY_INLINE void MethodInfo::setHasExceptions()
 {
-    _hasExceptions = 1;
+    _flags |= HAS_EXCEPTIONS;
 }
 
 REALLY_INLINE void MethodInfo::setLazyRest()
 {
-    _lazyRest = 1;
+    _flags |= LAZY_REST;
 }
 
 REALLY_INLINE void MethodInfo::setNeedsDxns()
 {
-    _needsDxns = 1;
+    _flags |= NEEDS_DXNS;
 }
 
 REALLY_INLINE void MethodInfo::setFinal()
 {
-    _isFinal = 1;
+    _flags |= FINAL;
 }
 
 REALLY_INLINE void MethodInfo::setOverride()
 {
-    _isOverride = 1;
+    _flags |= OVERRIDE;
 }
 
 REALLY_INLINE void MethodInfo::makeNonInterruptible()
 {
-    _isNonInterruptible = 1;
+    _flags |= NON_INTERRUPTIBLE;
 }
 
 REALLY_INLINE void MethodInfo::setKind(TraitKind kind)
 {
     if (kind == TRAIT_Getter)
-        _isGetter = 1;
+        _flags |= MethodInfo::IS_GETTER;
     else if (kind == TRAIT_Setter)
-        _isSetter = 1;
+        _flags |= MethodInfo::IS_SETTER;
 }
 
-REALLY_INLINE uint32_t MethodInfo::isInterpreted() const
+REALLY_INLINE int32_t MethodInfo::isInterpreted() const
 {
-    return _isInterpImpl;
+    return _flags & INTERP_IMPL;
 }
 
 #ifdef VMCFG_AOT
-REALLY_INLINE uint32_t MethodInfo::isAotCompiled() const
+REALLY_INLINE int32_t MethodInfo::compiledMethodFlags()
 {
-    return _isAotCompiled;
+    return NATIVE | ABSTRACT_METHOD;
 }
 
-REALLY_INLINE void MethodInfo::setAotCompiled()
+REALLY_INLINE int32_t MethodInfo::isCompiledMethod() const
 {
-    _isAotCompiled = 1;
-    _isNative = 1;
-    _hasMethodBody = 0;
+    return _flags & AOT_COMPILED;
+}
+
+REALLY_INLINE void MethodInfo::setCompiledMethod()
+{
+    _flags |= AOT_COMPILED;
 }
 #endif
 
@@ -278,7 +286,7 @@ REALLY_INLINE void MethodInfo::set_abc_body_pos(const uint8_t* p)
 REALLY_INLINE ExceptionHandlerTable* MethodInfo::abc_exceptions() const
 {
 #ifdef VMCFG_AOT
-    AvmAssert(!isNative()||isAotCompiled());
+    AvmAssert(!isNative()||isCompiledMethod());
 #else
     AvmAssert(!isNative());
 #endif
@@ -395,37 +403,37 @@ REALLY_INLINE int32_t MethodSignature::rest_offset() const
 
 REALLY_INLINE int32_t MethodSignature::max_stack() const
 {
-    AvmAssert(!_isNative);
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
     return _max_stack;
 }
 
 REALLY_INLINE int32_t MethodSignature::local_count() const
 {
-    AvmAssert(!_isNative);
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
     return _local_count;
 }
 
 REALLY_INLINE int32_t MethodSignature::max_scope() const
 {
-    AvmAssert(!_isNative);
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
     return _max_scope;
 }
 
 REALLY_INLINE int32_t MethodSignature::frame_size() const
 {
-    AvmAssert(!_isNative);
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
     return _frame_size;
 }
 
 REALLY_INLINE int32_t MethodSignature::stack_base() const
 {
-    AvmAssert(!_isNative);
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
     return _local_count + _max_scope;
 }
 
 REALLY_INLINE int32_t MethodSignature::scope_base() const
 {
-    AvmAssert(!_isNative);
+    AvmAssert(!(_flags & MethodInfo::NATIVE));
     return _local_count;
 }
 
@@ -462,8 +470,9 @@ REALLY_INLINE Atom MethodSignature::getDefaultValue(int32_t i) const
 
 REALLY_INLINE bool MethodSignature::argcOk(int32_t argc) const
 {
+    const int32_t ALLOW_EXTRA_ARGS = MethodInfo::NEED_REST | MethodInfo::NEED_ARGUMENTS | MethodInfo::IGNORE_REST;
     return argc >= (_param_count - _optional_count) &&
-            (argc <= _param_count || _allowExtraArgs);
+            (argc <= _param_count || (_flags & ALLOW_EXTRA_ARGS));
 }
 
 } // namespace avmplus

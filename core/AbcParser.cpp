@@ -615,7 +615,7 @@ namespace avmplus
                 if (!f->makeMethodOf(traits))
                     toplevel->throwVerifyError(kCorruptABCError);
 
-                f->setKind(kind); // sets the _isGetter/_isSetter flags
+                f->setKind(kind); // sets the IS_GETTER/IS_SETTER flags
                 if ((tag & ATTR_final) || makeFinal)
                      f->setFinal();
                 if (tag & ATTR_override)
@@ -752,7 +752,7 @@ namespace avmplus
             #endif
 
             const NativeMethodInfo* ni = NULL;
-            if (abcFlags & abcMethod_NATIVE)
+            if (abcFlags & MethodInfo::NATIVE)
             {
                 ni = natives ? natives->getNativeInfo(i) : NULL;
 #ifdef VMCFG_VERIFYALL
@@ -784,18 +784,19 @@ namespace avmplus
                 if (!ni && natives->getCompiledInfo(&compiledMethodInfo, returnTypeName, i))
                 {
                     ni = &compiledMethodInfo;
+                    abcFlags |= MethodInfo::compiledMethodFlags();
                     isCompiled = true;
                 }
             }
 #endif
 
-            const int optional_count = (abcFlags & abcMethod_HAS_OPTIONAL) ? readU30(pos) : 0;
+            const int optional_count = (abcFlags & MethodInfo::HAS_OPTIONAL) ? readU30(pos) : 0;
 
             MethodInfo* info = new (core->GetGC()) MethodInfo(i, pool, info_pos, abcFlags, ni);
 
 #ifdef VMCFG_AOT
-            if (isCompiled)
-                info->setAotCompiled();
+            if(isCompiled)
+                info->setCompiledMethod();
 #endif
 
             #if VMCFG_METHOD_NAMES
@@ -805,7 +806,7 @@ namespace avmplus
             }
             #endif
 
-            if (abcFlags & abcMethod_HAS_OPTIONAL)
+            if (abcFlags & MethodInfo::HAS_OPTIONAL)
             {
                 for( int j = 0; j < optional_count; ++j)
                 {
@@ -820,7 +821,7 @@ namespace avmplus
                 }
             }
 
-            if (abcFlags & abcMethod_HAS_PARAM_NAMES)
+            if (abcFlags & MethodInfo::HAS_PARAM_NAMES)
             {
                 // AVMPlus doesn't care about the param names, just skip past them
                 for( int j = 0; j < param_count; ++j )
@@ -1074,7 +1075,7 @@ namespace avmplus
                 AvmAssert(!info->isResolved());
                 info->set_abc_body_pos(body_pos);
 
-                // there will be a traits_count here, even if abcMethod_NEED_ACTIVATION is not
+                // there will be a traits_count here, even if NEED_ACTIVATION is not
                 // set.  So we parse the same way all the time.  We could reduce file size and
                 // memory by omitting the count + traits completely.
 
