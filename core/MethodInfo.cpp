@@ -679,7 +679,7 @@ namespace avmplus
         ms->_param_count = param_count;
         ms->_optional_count = optional_count;
         ms->_rest_offset = rest_offset;
-        ms->_isNative = this->isNative();
+        ms->_isNative = this->_isNative;
         ms->_allowExtraArgs = this->_needRest || this->_needArguments || this->_ignoreRest;
         WB(gc, ms, &ms->_returnTraits, returnType);
         WB(gc, ms, &ms->_args[0].paramType, receiverType);
