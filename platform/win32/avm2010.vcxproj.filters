@@ -651,6 +651,9 @@
     <ClCompile Include="..\..\extensions\ST_mmgc_finalize_uninit.cpp">
       <Filter>extensions</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\DomainMgr.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\core\AbcEnv.h">
@@ -1347,6 +1350,9 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\exec-inlines.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\DomainMgr.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

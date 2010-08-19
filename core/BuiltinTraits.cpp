@@ -69,7 +69,12 @@ namespace avmplus
         void_itraits->verifyBindings(NULL);
         void_itraits->resolveSignatures(NULL);
 
-#define DO_BUILTIN(nm, clsnm)   do { nm##_itraits = pool->getBuiltinTraits(core->internConstantStringLatin1(clsnm)); nm##_itraits->builtinType = BUILTIN_##nm; } while (0)
+#define DO_BUILTIN(nm, clsnm) \
+    do { \
+        nm##_itraits = core->domainMgr()->findBuiltinTraitsByName(pool, core->internConstantStringLatin1(clsnm)); \
+        nm##_itraits->builtinType = BUILTIN_##nm; \
+    } while (0)
+    
         DO_BUILTIN(array, "Array");
         DO_BUILTIN(boolean, "Boolean");
         DO_BUILTIN(class, "Class");

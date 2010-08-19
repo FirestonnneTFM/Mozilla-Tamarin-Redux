@@ -382,6 +382,8 @@
 		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
 		D95B635611FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */; };
 		D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */; };
+		D987E32211C19E5700474022 /* DomainMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D987E32011C19E5700474022 /* DomainMgr.cpp */; };
+		D987E32311C19E5700474022 /* DomainMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D987E32011C19E5700474022 /* DomainMgr.cpp */; };
 		D9AA8809103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
@@ -892,6 +894,8 @@
 		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
 		D9854B961090D05700F30404 /* AvmCore-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AvmCore-inlines.h"; path = "../../../core/AvmCore-inlines.h"; sourceTree = SOURCE_ROOT; };
+		D987E32011C19E5700474022 /* DomainMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DomainMgr.cpp; path = ../../../core/DomainMgr.cpp; sourceTree = SOURCE_ROOT; };
+		D987E32111C19E5700474022 /* DomainMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DomainMgr.h; path = ../../../core/DomainMgr.h; sourceTree = SOURCE_ROOT; };
 		D9A4F1C710B3362F00D0408C /* Multiname-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Multiname-inlines.h"; path = "../../../core/Multiname-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9A4F1E810B3382300D0408C /* NamespaceSet-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NamespaceSet-inlines.h"; path = "../../../core/NamespaceSet-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
@@ -1029,6 +1033,8 @@
 		079DF7B00F3A86D50031D1B4 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				D987E32011C19E5700474022 /* DomainMgr.cpp */,
+				D987E32111C19E5700474022 /* DomainMgr.h */,
 				079DF7B50F3A882D0031D1B4 /* AbcData.cpp */,
 				079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */,
 				07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */,
@@ -1871,6 +1877,7 @@
 				198CF92111B973BD00A939C7 /* exec.cpp in Sources */,
 				07246FE511CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
 				D95B635611FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
+				D987E32211C19E5700474022 /* DomainMgr.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2053,6 +2060,7 @@
 				D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */,
 				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
+				D987E32311C19E5700474022 /* DomainMgr.cpp in Sources */,
 				0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
 				198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */,
 				198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */,

@@ -43,16 +43,14 @@ namespace avmplus
 {
     AbcEnv::AbcEnv(PoolObject* _pool,
            CodeContext * _codeContext)
-        : m_pool(_pool),
-          m_domainEnv(_codeContext->domainEnv()),
-          m_codeContext(_codeContext),
-          m_privateScriptEnvs(new(_pool->core->GetGC()) MultinameHashtable())
+		: m_namedScriptEnvsList(_pool->core->GetGC(), 0)
+        , m_pool(_pool)
+        , m_domainEnv(_codeContext->domainEnv())
+        , m_codeContext(_codeContext)
 #ifdef DEBUGGER
-          , m_invocationCounts(NULL)
+        , m_invocationCounts(NULL)
 #endif
-#ifdef VMCFG_NANOJIT
-          , m_core(_pool->core)
-#endif
+        , m_core(_pool->core)
     {
 #ifdef DEBUGGER
         if (_pool->core->debugger())
@@ -76,26 +74,4 @@ namespace avmplus
         #endif
     }
 
-    ScriptEnv* AbcEnv::getScriptEnv(Stringp name, Namespacep ns)
-    {
-        if (ns->isPrivate())
-        {
-            return (ScriptEnv*)m_privateScriptEnvs->get(name, ns);
-        }
-        else
-        {
-            return (ScriptEnv*)m_domainEnv->getScriptInit(ns, name);
-        }
-    }
-
-    ScriptEnv* AbcEnv::getScriptEnv(const Multiname& multiname)
-    {
-        ScriptEnv *se = (ScriptEnv*)m_domainEnv->getScriptInit(multiname);
-        if(!se)
-        {
-            // check privates
-            se = (ScriptEnv*)m_privateScriptEnvs->getMulti(multiname);
-        }
-        return se;
-    }
 }
