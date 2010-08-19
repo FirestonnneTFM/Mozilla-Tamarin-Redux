@@ -324,85 +324,78 @@ namespace MMgc
     }
 
     /*static*/
-    REALLY_INLINE int GC::GetMark(const void *item)
+    REALLY_INLINE gcbits_t& GC::GetGCBits(const void *realptr)
     {
-        item = GetRealPointer(item);
-        if (GCLargeAlloc::IsLargeBlock(item)) {
-            return GCLargeAlloc::GetMark(item);
-        } else {
-            return GCAlloc::GetMark(item);
-        }
+        if (GCLargeAlloc::IsLargeBlock(realptr))
+            return GCLargeAlloc::GetGCBits(realptr);
+        else
+            return GCAlloc::GetGCBits(realptr);
     }
 
     /*static*/
-    REALLY_INLINE int GC::SetMark(const void *item)
+    REALLY_INLINE int GC::GetMark(const void *userptr)
     {
-        item = GetRealPointer(item);
-        GCAssert(GetGC(item)->IsPointerToGCObject(item));
-        if (GCLargeAlloc::IsLargeBlock(item)) {
-            return GCLargeAlloc::SetMark(item);
-        } else {
-            return GCAlloc::SetMark(item);
-        }
-    }
-
-    REALLY_INLINE void GC::ClearQueued(const void *item)
-    {
-        item = GetRealPointer(item);
-        GCAssert(IsPointerToGCObject(item));
-        if (GCLargeAlloc::IsLargeBlock(item)) {
-            GCLargeAlloc::ClearQueued(item);
-        } else {
-            GCAlloc::ClearQueued(item);
-        }
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        return GetGCBits(realptr) & kMark;
     }
 
     /*static*/
-    REALLY_INLINE void GC::ClearFinalized(const void *item)
+    REALLY_INLINE int GC::SetMark(const void *userptr)
     {
-        item = GetRealPointer(item);
-        GCAssert(GetGC(item)->IsPointerToGCObject(item));
-        if (GCLargeAlloc::IsLargeBlock(item)) {
-            GCLargeAlloc::ClearFinalized(item);
-        } else {
-            GCAlloc::ClearFinalized(item);
-        }
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        gcbits_t& bits = GetGCBits(realptr);
+        int set = bits & kMark;
+        bits |= kMark;
+        bits &= ~kQueued;
+        return set;
+    }
+
+    REALLY_INLINE int GC::GetQueued(const void *userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        return GetGCBits(realptr) & kMark;
+    }
+
+    REALLY_INLINE void GC::ClearQueued(const void *userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(IsPointerToGCObject(realptr));
+        GetGCBits(realptr) &= ~kQueued;
     }
 
     /*static*/
-    REALLY_INLINE void GC::SetFinalize(const void *item)
+    REALLY_INLINE void GC::ClearFinalized(const void *userptr)
     {
-        item = GetRealPointer(item);
-        GCAssert(GetGC(item)->IsPointerToGCObject(item));
-        if (GCLargeAlloc::IsLargeBlock(item)) {
-            GCLargeAlloc::SetFinalize(item);
-        } else {
-            GCAlloc::SetFinalize(item);
-        }
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        GetGCBits(realptr) &= ~kFinalizable;
     }
 
     /*static*/
-    REALLY_INLINE int GC::IsFinalized(const void *item)
+    REALLY_INLINE void GC::SetFinalize(const void *userptr)
     {
-        item = GetRealPointer(item);
-        GCAssert(GetGC(item)->IsPointerToGCObject(item));
-        if (GCLargeAlloc::IsLargeBlock(item)) {
-            return GCLargeAlloc::IsFinalized(item);
-        } else {
-            return GCAlloc::IsFinalized(item);
-        }
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        GetGCBits(realptr) |= kFinalizable;
     }
 
     /*static*/
-    REALLY_INLINE int GC::HasWeakRef(const void *item)
+    REALLY_INLINE int GC::IsFinalized(const void *userptr)
     {
-        item = GetRealPointer(item);
-        GCAssert(GetGC(item)->IsPointerToGCObject(item));
-        if (GCLargeAlloc::IsLargeBlock(item)) {
-            return GCLargeAlloc::HasWeakRef(item);
-        } else {
-            return GCAlloc::HasWeakRef(item);
-        }
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        return GetGCBits(realptr) & kFinalizable;
+    }
+
+    /*static*/
+    REALLY_INLINE int GC::HasWeakRef(const void *userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        return GetGCBits(realptr) & kHasWeakRef;
     }
 
     REALLY_INLINE GCHeap *GC::GetGCHeap() const
@@ -538,19 +531,18 @@ namespace MMgc
     REALLY_INLINE bool GC::IsMarkedThenMakeQueued(const void* userptr)
     {
         const void* realptr = GetRealPointer(userptr);
-        if (GCLargeAlloc::IsLargeBlock(realptr))
-            return GCLargeAlloc::IsMarkedThenMakeQueued(realptr);
-        else
-            return GCAlloc::IsMarkedThenMakeQueued(realptr);
+        gcbits_t& bits = GetGCBits(realptr);
+        if (bits & kMark) {
+            bits ^= (kMark|kQueued);
+            return true;
+        }
+        return false;
     }
 
     REALLY_INLINE bool GC::IsQueued(const void* userptr)
     {
         const void* realptr = GetRealPointer(userptr);
-        if (GCLargeAlloc::IsLargeBlock(realptr))
-            return GCLargeAlloc::IsQueued(realptr);
-        else
-            return GCAlloc::IsQueued(realptr);
+        return (GetGCBits(realptr) & kQueued) != 0;
     }
 
     REALLY_INLINE int GC::GetPageMapValue(uintptr_t addr) const

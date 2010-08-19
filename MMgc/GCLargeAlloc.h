@@ -50,14 +50,15 @@ namespace MMgc
         friend class GC;
         friend class GCLargeAllocIterator;
     private:
+
+        // Additional per-object flags for large objects.  These are stored in flags[1].
+        // Note that GC::MarkItem knows about flags[1], but otherwise the knowledge is
+        // confined to GCLargeAlloc code.
+
         enum {
-            kMarkFlag         = 0x1,
-            kQueuedFlag       = 0x2,
-            kFinalizeFlag     = 0x4,
-            kHasWeakRef       = 0x8,
-            kContainsPointers = 0x10,
-            kRCObject         = 0x20,
-            kProtectedFlag    = 0x40    // protected from Free, see comments around GC::MarkItem
+            kContainsPointers = 0x01,   // Object contains pointers that must be marked
+            kRCObject         = 0x02,   // Object is an RCObject
+            kProtected        = 0x04    // Object is protected from Free, see comments around GC::MarkItem
         };
 
     public:
@@ -74,29 +75,11 @@ namespace MMgc
         void Finalize();
         void ClearMarks();
 
-        // not a hot method
-        static void SetHasWeakRef(const void *item, bool to);
-
-        // not a hot method
-        static bool HasWeakRef(const void *item);
-
         static bool IsLargeBlock(const void *item);
-
-        static bool SetMark(const void *item);
-
-        // Not a hot method but always inlining probably shrinks the code
-        static void SetFinalize(const void *item);
-
-        static bool GetMark(const void *item);
 
 #ifdef _DEBUG
         static bool IsWhite(const void *item);
 #endif
-
-        static bool IsMarkedThenMakeQueued(const void *item);
-
-        static bool IsQueued(const void *item);
-
         static void ProtectAgainstFree(const void *item);
 
         static void UnprotectAgainstFree(const void *item);
@@ -105,14 +88,8 @@ namespace MMgc
 
         static void* FindBeginning(const void *item);
 
-        // not a hot method
-        static void ClearFinalized(const void *item);
-
         // Not hot, because GC::MarkItem open-codes it
         static bool ContainsPointers(const void *item);
-
-        // not a hot method
-        static bool IsFinalized(const void *item);
 
         // Can be hot - used by PinStackObjects
         static bool IsRCObject(const void *item);
@@ -127,22 +104,27 @@ namespace MMgc
         void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 
     private:
-        struct LargeBlock : GCBlockHeader
+        // This can subclass GCBlockHeader because the byte map is not variable length:
+        // LargeBlock contains exactly the space we need for the mark bits for
+        // the large object.
+
+        struct LargeBlock : public GCBlockHeader
         {
-            uint32_t flags;
-#ifndef MMGC_64BIT
-            uint32_t padding;
-#endif
+            // We use flags[0] for the standard GC bits and flags[1] for additional
+            // large object bits.
+            //
+            // Static checks in GC.cpp test that sizeof(gcbits_t) == 1 and that LargeBlock
+            // alignment is 8 bytes.
+            gcbits_t flags[4];
             int GetNumBlocks() const;
         };
 
         static LargeBlock* GetLargeBlock(const void *addr);
 
         // not a hot method
-        static bool NeedsFinalize(LargeBlock *block);
+        static void ClearQueued(const void *userptr);
 
-        // not a hot method
-        static void ClearQueued(const void *item);
+        static gcbits_t& GetGCBits(const void* realptr);
 
         // The list of chunk blocks
         LargeBlock* m_blocks;

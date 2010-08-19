@@ -957,6 +957,8 @@ namespace MMgc
         MMGC_STATIC_ASSERT(sizeof(intptr_t) == 4);
         MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);
         #endif
+        MMGC_STATIC_ASSERT(sizeof(GCLargeAlloc::LargeBlock) % 8 == 0);
+        MMGC_STATIC_ASSERT(sizeof(gcbits_t) == 1);
 
         // The size tables above are derived based on a block size of 4096; this
         // assert keeps us honest.  Talk to Lars if you get into trouble here.
@@ -1596,6 +1598,23 @@ namespace MMgc
         m_incrementalWork.Clear();
     }
 
+    /*static*/
+    void GC::SetHasWeakRef(const void *userptr, bool flag)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        if (flag) {
+            GetGCBits(realptr) |= kHasWeakRef;
+            // Small-object allocators maintain an extra flag
+            // about weak objects in a block, need to set that
+            // flag here.
+            if (!GCLargeAlloc::IsLargeBlock(realptr))
+                GCAlloc::SetBlockHasWeakRef(userptr);
+        }
+        else
+            GetGCBits(realptr) &= ~kHasWeakRef;
+    }
+    
     void GC::ClearUnmarkedWeakRefs()
     {
         GCHashtable::Iterator it(&weakRefs);
@@ -2389,7 +2408,7 @@ namespace MMgc
                 } else if(bits == kGCLargeAllocPageFirst) {
                     GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
                     const void *item = GetUserPointer((const void*)(lb+1));
-                    if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(GetRealPointer(item))) {
+                    if(GetMark(item) && GCLargeAlloc::ContainsPointers(GetRealPointer(item))) {
                         UnmarkedScan(item, Size(item));
                     }
                     m += lb->GetNumBlocks() * GCHeap::kBlockSize;
@@ -2399,12 +2418,9 @@ namespace MMgc
                     GCAlloc* alloc = (GCAlloc*)b->alloc;
                     for (int i=0; i < alloc->m_itemsPerBlock; i++) {
                         // If the mark is 0, delete it.
-                        int marked = GCAlloc::GetBit(b, i, GCAlloc::kMark);
-                        if (!marked) {
-                            void* item = (char*)b->items + alloc->m_itemSize*i;
-                            if(GCAlloc::ContainsPointers(item)) {
-                                UnmarkedScan(GetUserPointer(item), alloc->m_itemSize - DebugSize());
-                            }
+                        void* item = (char*)b->items + alloc->m_itemSize*i;
+                        if (!GetMark(item) && GCAlloc::ContainsPointers(item)) {
+                            UnmarkedScan(GetUserPointer(item), alloc->m_itemSize - DebugSize());
                         }
                     }
 
@@ -2520,13 +2536,9 @@ namespace MMgc
             {
                 GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
                 const void *item = GetUserPointer((const void*)(lb+1));
-                bool marked = GCLargeAlloc::GetMark(item);
-                if (marked)
+                if (GetMark(item) && GCLargeAlloc::ContainsPointers(GetRealPointer(item)))
                 {
-                    if(GCLargeAlloc::ContainsPointers(GetRealPointer(item)))
-                    {
-                        ProbeForMatch(item, Size(item), val, recurseDepth, currentDepth);
-                    }
+                    ProbeForMatch(item, Size(item), val, recurseDepth, currentDepth);
                 }
                 m += lb->GetNumBlocks() * GCHeap::kBlockSize;
             }
@@ -2537,14 +2549,10 @@ namespace MMgc
                 GCAlloc* alloc = (GCAlloc*)b->alloc;
                 for (int i=0; i < alloc->m_itemsPerBlock; i++)
                 {
-                    int marked = GCAlloc::GetBit(b, i, GCAlloc::kMark);
-                    if (marked)
+                    void *item = (char*)b->items + alloc->m_itemSize*i;
+                    if (GetMark(item) && GCAlloc::ContainsPointers(item))
                     {
-                        void* item = (char*)b->items + alloc->m_itemSize*i;
-                        if(GCAlloc::ContainsPointers(item))
-                        {
-                            ProbeForMatch(GetUserPointer(item), alloc->m_itemSize - DebugSize(), val, recurseDepth, currentDepth);
-                        }
+                        ProbeForMatch(GetUserPointer(item), alloc->m_itemSize - DebugSize(), val, recurseDepth, currentDepth);
                     }
                 }
                 m += GCHeap::kBlockSize;
@@ -2903,7 +2911,7 @@ namespace MMgc
                     if(item < block->items)
                         continue;
 
-                    itemNum = GCAlloc::GetIndex(block, item);
+                    itemNum = GCAlloc::GetObjectIndex(block, item);
 
                     // adjust |item| to the beginning of the allocation
                     item = block->items + itemNum * block->size;
@@ -2917,7 +2925,7 @@ namespace MMgc
                     if(item < block->items)
                         continue;
 
-                    itemNum = GCAlloc::GetIndex(block, item);
+                    itemNum = GCAlloc::GetObjectIndex(block, item);
 
                     // if |item| doesn't point to the beginning of an allocation,
                     // it's not considered a pointer.
@@ -2937,14 +2945,8 @@ namespace MMgc
 #ifdef MMGC_POINTINESS_PROFILING
                 actually_is_pointer++;
 #endif
-
-                // inline IsWhite/SetBit
-                // FIXME: see if using 32 bit values is faster
-                uint32_t *pbits = &block->GetBits()[itemNum>>3];
-                int shift = (itemNum&0x7)<<2;
-                int bits2 = *pbits;
-                //if(GCAlloc::IsWhite(block, itemNum))
-                if((bits2 & ((GCAlloc::kMark|GCAlloc::kQueued)<<shift)) == 0)
+                gcbits_t& bits2 = block->bits[GCAlloc::GetBitsIndex(block, item)];
+                if ((bits2 & (kMark|kQueued)) == 0)
                 {
                     uint32_t itemSize = block->size - (uint32_t)DebugSize();
                     if(((GCAlloc*)block->alloc)->ContainsPointers())
@@ -2953,7 +2955,7 @@ namespace MMgc
                         GCWorkItem newItem(realItem, itemSize, GCWorkItem::kGCObject);
                         if(((uintptr_t)realItem & GCHeap::kBlockMask) != thisPage || mark_item_recursion_control == 0)
                         {
-                            *pbits = bits2 | (GCAlloc::kQueued << shift);
+                            bits2 |= kQueued;
                             PushWorkItem(newItem);
                         }
                         else
@@ -2965,8 +2967,7 @@ namespace MMgc
                     }
                     else
                     {
-                        //GCAlloc::SetBit(block, itemNum, GCAlloc::kMark);
-                        *pbits = bits2 | (GCAlloc::kMark << shift);
+                        bits2 |= kMark;
                         policy.signalMarkWork(itemSize);
                     }
 #ifdef MMGC_HEAP_GRAPH
@@ -3009,18 +3010,18 @@ namespace MMgc
 #endif
 
                 GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetLargeBlock(item);
-                if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0)
+                if((b->flags[0] & (kQueued|kMark)) == 0)
                 {
                     uint32_t itemSize = b->size - (uint32_t)DebugSize();
-                    if((b->flags & GCLargeAlloc::kContainsPointers) != 0)
+                    if((b->flags[1] & GCLargeAlloc::kContainsPointers) != 0)
                     {
-                        b->flags |= GCLargeAlloc::kQueuedFlag;
+                        b->flags[0] |= kQueued;
                         PushWorkItem(GCWorkItem(GetUserPointer(item), itemSize, GCWorkItem::kGCObject));
                     }
                     else
                     {
                         // doesn't need marking go right to black
-                        b->flags |= GCLargeAlloc::kMarkFlag;
+                        b->flags[0] |= kMark;
                         policy.signalMarkWork(itemSize);
                     }
 #ifdef MMGC_HEAP_GRAPH
@@ -3496,12 +3497,7 @@ namespace MMgc
         if(ref == NULL) {
             ref = new (gc) GCWeakRef(item);
             gc->weakRefs.put(item, ref);
-            item = GetRealPointer(item);
-            if (GCLargeAlloc::IsLargeBlock(item)) {
-                GCLargeAlloc::SetHasWeakRef(item, true);
-            } else {
-                GCAlloc::SetHasWeakRef(item, true);
-            }
+            SetHasWeakRef(item, true);
         } else {
             GCAssert(ref->get() == item);
         }
@@ -3516,12 +3512,7 @@ namespace MMgc
         if(ref) {
             GCAssert(ref->isNull() || ref->peek() == item);
             ref->m_obj = NULL;
-            item = GetRealPointer(item);
-            if (GCLargeAlloc::IsLargeBlock(item)) {
-                GCLargeAlloc::SetHasWeakRef(item, false);
-            } else {
-                GCAlloc::SetHasWeakRef(item, false);
-            }
+            SetHasWeakRef(item, false);
         }
     }
 
@@ -3570,7 +3561,7 @@ namespace MMgc
                 {
                     GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
                     const void *item = GetUserPointer((const void*)(lb+1));
-                    if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
+                    if(GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
                         WhitePointerScan(item, lb->size - DebugSize());
                     }
                     m += lb->GetNumBlocks() * GCHeap::kBlockSize;
@@ -3585,11 +3576,10 @@ namespace MMgc
                         for (int i=0; i< alloc->m_itemsPerBlock; i++) {
 
                             // find all marked (but not kFreelist) objects and search them
-                            if(!GCAlloc::GetBit(b, i, GCAlloc::kMark) ||
-                               GCAlloc::GetBit(b, i, GCAlloc::kQueued))
+                            void *item = (char*)b->items + alloc->m_itemSize*i;
+                            if(!GetMark(item) || GetQueued(item))
                                 continue;
 
-                            void* item = (char*)b->items + alloc->m_itemSize*i;
                             WhitePointerScan(GetUserPointer(item), alloc->m_itemSize - DebugSize());
                         }
                     }

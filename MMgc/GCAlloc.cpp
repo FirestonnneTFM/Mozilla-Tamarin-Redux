@@ -181,11 +181,10 @@ namespace MMgc
         m_gc->ObtainQuickListBudget(m_itemSize*m_itemsPerBlock);
         m_qBudget = m_qBudgetObtained = m_itemsPerBlock;
 
-        m_numBitmapBytes = (m_itemsPerBlock>>1) + (m_itemsPerBlock & 1);
-        // round up to 4 bytes so we can go through the bits 8 items at a time
-        m_numBitmapBytes = (m_numBitmapBytes+3)&~3;
+        m_numBitmapBytes = m_itemsPerBlock * sizeof(gcbits_t);
 
-        GCAssert(m_numBitmapBytes<<1 >= m_itemsPerBlock);
+        // round up to 4 bytes so we can go through the bits several items at a time
+        m_numBitmapBytes = (m_numBitmapBytes+3)&~3;
 
         int usedSpace = m_itemsPerBlock * m_itemSize + sizeof(GCBlock);
         GCAssert(usedSpace <= kBlockSize);
@@ -230,7 +229,7 @@ namespace MMgc
 
         // Get bitmap space; this may trigger OOM handling.
 
-        uint32_t* bits = m_bitsInPage ? NULL : m_gc->AllocBits(m_numBitmapBytes, m_sizeClassIndex);
+        gcbits_t* bits = m_bitsInPage ? NULL : (gcbits_t*)m_gc->AllocBits(m_numBitmapBytes, m_sizeClassIndex);
 
         // Allocate a new block; this may trigger OOM handling (though that
         // won't affect the bitmap space, which is not GC'd individually).
@@ -251,12 +250,10 @@ namespace MMgc
             else
                 b->finalizeState = !m_gc->finalizedValue;
 
-            union {
-                char* b_8;
-                uint32_t* b_32;
-            };
-            b_8 = (char*)b + sizeof(GCBlock);
-            b->bits = m_bitsInPage ? b_32 : bits;
+            if (m_bitsInPage)
+                b->bits = (gcbits_t*)b + sizeof(GCBlock);
+            else
+                b->bits = bits;
 
             // Link the block at the end of the list
             b->prev = m_lastBlock;
@@ -313,13 +310,14 @@ namespace MMgc
             p[0] = NULL;
 
             // Set all the mark bits to 'free'
-            uint32_t *pbits = b->GetBits();
-            const static uint32_t mq32 = 0x33333333;
-            GCAssert(kFreelist == 0x3);
-            // TODO: MMX version for IA32
-            for(int i=0, n=m_numBitmapBytes>>2; i < n; i++) {
-                pbits[i] = mq32;
-            }
+            
+            GCAssert(sizeof(gcbits_t) == 1);
+            GCAssert(kFreelist == 3);
+            GCAssert(m_numBitmapBytes % 4 == 0);
+            
+            uint32_t *pbits = (uint32_t*)b->bits;
+            for(int i=0, n=m_numBitmapBytes>>2; i < n; i++)
+                pbits[i] = 0x03030303;
 
 #ifdef MMGC_MEMORY_INFO
             VerifyFreeBlockIntegrity(b->firstFree, m_itemSize);
@@ -327,7 +325,7 @@ namespace MMgc
         }
         else {
             if (bits)
-                m_gc->FreeBits(bits, m_sizeClassIndex);
+                m_gc->FreeBits((uint32_t*)bits, m_sizeClassIndex);
         }
 
         return b;
@@ -365,8 +363,8 @@ namespace MMgc
     {
         GCAssert(b->numFree == m_itemsPerBlock);
         if(!m_bitsInPage) {
-            VMPI_memset(b->GetBits(), 0, m_numBitmapBytes);
-            m_gc->FreeBits(b->GetBits(), m_sizeClassIndex);
+            VMPI_memset(b->bits, 0, m_numBitmapBytes);
+            m_gc->FreeBits((uint32_t*)b->bits, m_sizeClassIndex);
             b->bits = NULL;
         }
 
@@ -434,21 +432,16 @@ namespace MMgc
         void**p = (void**)item;
         m_qList = (void**)p[0];
         GCBlock* b = GetBlock(item);
-        int index = GetIndex(b, item);
 
-        GCAssert(index >= 0 && index < m_itemsPerBlock);
         GCAssert(!b->needsSweeping());
+
+        // Code below uses this optimization
+        GCAssert((unsigned long)GC::kFinalize == (unsigned long)kFinalizable);
 
         // Clear free header, the rest was cleared in Free()
         p[0] = 0;
 
-        // It is likely that Clear4BitsAndSet can be optimized to do away with
-        // variable-width shifts, which seem to be expensive on some platforms,
-        // but it would cost a compare and branch or a couple of table lookups.
-        // Initial experiments have not been encouraging.  Defer until later, the
-        // problem may go away with a different bits representation.
-
-        Clear4BitsAndSet(b, index, flags & kFinalize);
+        b->bits[GetBitsIndex(b, item)] = (flags & GC::kFinalize);
 
 #ifdef MMGC_MEMORY_INFO
         m_numAlloc++;
@@ -530,8 +523,7 @@ namespace MMgc
             void *item = AllocFromQuickList(flags);
 #endif
             if(m_gc->collecting && b->finalizeState != m_gc->finalizedValue) {
-                int index = GetIndex(b, item);
-                SetBit(b, index, kMark);
+                b->bits[GetBitsIndex(b, item)] |= kMark;
             }
             CoalesceQuickList();
             GCAssert(m_qList == NULL);
@@ -564,13 +556,13 @@ namespace MMgc
     void GCAlloc::Free(const void *item)    // item is realPtr
     {
         GCBlock *b = GetBlock(item);
-        int index = GetIndex(b, item);
+        int bitsindex = GetBitsIndex(b, item);
 
         // We can't allow free'ing something during sweeping - it messes up
         // the per-block statistics - or anything that's on a mark queue.
 
         GCAssert(m_gc->collecting == false || m_gc->marking == true);
-        if (m_gc->marking && (m_gc->collecting || IsQueued(b,index))) {
+        if (m_gc->marking && (m_gc->collecting || b->bits[bitsindex] & kQueued)) {
             m_gc->AbortFree(GetUserPointer(item));
             return;
         }
@@ -621,16 +613,16 @@ namespace MMgc
         // that would be bad; it could also mean that objects reachable from the
         // dead object would be marked in turn and would be retained for a GC cycle.
 
-        SetBit(b, index, kFreelist);
+        b->bits[bitsindex] |= kFreelist;    // Don't clear the weak ref bit, FreeSlow may inspect it
 
         if (b->slowFlags)   // needs sweeping, or may have weak refs
         {
-            FreeSlow(b, index, item);
+            FreeSlow(b, bitsindex, item);
             return;
         }
 
         GCAssert(!b->needsSweeping());
-        GCAssert(!GetBit(b, index, kHasWeakRef));
+        GCAssert(!(b->bits[bitsindex] & kHasWeakRef));
 
 #ifndef _DEBUG
         ClearNonRCObject((void*)item, b->size);
@@ -644,9 +636,9 @@ namespace MMgc
             QuickListBudgetExhausted();
     }
 
-    void GCAlloc::FreeSlow(GCBlock* b, int index, const void* item)
+    void GCAlloc::FreeSlow(GCBlock* b, int bitsindex, const void* item)
     {
-        if(GetBit(b, index, kHasWeakRef))
+        if(b->bits[bitsindex] & kHasWeakRef)
             b->gc->ClearWeakRef(GetUserPointer(item));
 
 #ifndef _DEBUG
@@ -655,7 +647,7 @@ namespace MMgc
 
         if (b->needsSweeping()) {
             // See comment in GCAlloc::Free
-            //SetBit(b, index, kFreelist);
+            //b->bits[bitsindex] = kFreelist;
 
             // We know that the quick list does not have any items from the block b,
             // so we can push the object onto the block's free list and sweep the block.
@@ -709,8 +701,7 @@ namespace MMgc
     //    on the quick list
     //  - They never belong to a block that must be swept - Free() checks whether
     //    a page needs sweeping
-    //  - They may or may not have their bits set to kFreelist - the fast path
-    //    in Free() does not set them, instead it's done by CoalesceQuickList
+    //  - They all have kFreelist set
 
     void GCAlloc::CoalesceQuickList()
     {
@@ -728,8 +719,8 @@ namespace MMgc
 
             b->numFree++;
             // See comment in GCAlloc::Free
-            //int index = GetIndex(b, item);
-            //SetBit(b, index, kFreelist);
+            //int bitsindex = GetBitsIndex(b, item);
+            //b->bits[bitsindex] = kFreelist;
 
             // The object was cleared in Free() or will be cleared in Alloc(), but
             // we need to link it onto the block's free list.
@@ -804,23 +795,14 @@ namespace MMgc
                 RemoveFromFreeList(b);
             }
 
-            GCAssert(kMark == 0x1 && kFinalize == 0x4 && kHasWeakRef == 0x8);
+            GCAssert(kMark == 0x1 && kFinalizable == 0x4 && kHasWeakRef == 0x8);
 
             int numMarkedItems = 0;
 
-            // TODO: MMX version for IA32
-            uint32_t *bits = (uint32_t*) b->GetBits();
-            uint32_t count = m_itemsPerBlock;
-            // round up to eight
-            uint32_t numInts = ((count+7)&~7) >> 3;
-            for(uint32_t i=0; i < numInts; i++)
-            {
-                uint32_t marks = bits[i];
-                // hmm, is it better to screw around with exact counts or just examine
-                // 8 items on each pass, with the later we open the door to unrolling
-                uint32_t subCount = i==(numInts-1) ? ((count-1)&7)+1 : 8;
-                for(uint32_t j=0; j<subCount;j++,marks>>=4)
+            gcbits_t* blockbits = b->bits;
+            for ( char *item = b->items, *limit = b->items + m_itemSize * b->GetCount() ; item < limit ; item += m_itemSize )
                 {
+                    gcbits_t& marks = blockbits[GetBitsIndex(b,item)];
                     int mq = marks & kFreelist;
                     if(mq == kFreelist)
                         continue;
@@ -831,8 +813,6 @@ namespace MMgc
                     }
 
                     GCAssertMsg(mq != kQueued, "No queued objects should exist when finalizing");
-
-                    void* item = (char*)b->items + m_itemSize*((i*8)+j);
 
 #ifdef MMGC_HOOKS
                     if(m_gc->heap->HooksEnabled())
@@ -846,13 +826,13 @@ namespace MMgc
                     }
 #endif
 
-                    if(!(marks & (kFinalize|kHasWeakRef)))
+                    if(!(marks & (kFinalizable|kHasWeakRef)))
                         continue;
 
-                    if (marks & kFinalize)
+                    if (marks & kFinalizable)
                     {
                         GCFinalizedObject *obj = (GCFinalizedObject*)GetUserPointer(item);
-                        bits[i] &= ~(kFinalize<<(j*4));     // Clear bits first so we won't get second finalization if finalizer longjmps out
+                        marks &= ~kFinalizable;     // Clear bits first so we won't get second finalization if finalizer longjmps out
 
                         /* See https://bugzilla.mozilla.org/show_bug.cgi?id=573737 for the case where the object might remain in
                          * uninitialized state and thus crash occurs while calling the dtor below. 
@@ -870,7 +850,6 @@ namespace MMgc
                     if (marks & kHasWeakRef) {
                         b->gc->ClearWeakRef(GetUserPointer(item));
                     }
-                }
             }
 
             // 3 outcomes:
@@ -906,24 +885,17 @@ namespace MMgc
 
     void GCAlloc::SweepGuts(GCBlock *b)
     {
-        // TODO: MMX version for IA32
-        uint32_t *bits = (uint32_t*) b->GetBits();
-        uint32_t count = m_itemsPerBlock;
-        // round up to eight
-        uint32_t numInts = ((count+7)&~7) >> 3;
-        for(uint32_t i=0; i < numInts; i++)
-        {
-            uint32_t marks = bits[i];
-            // hmm, is it better to screw around with exact counts or just examine
-            // 8 items on each pass, with the later we open the door to unrolling
-            uint32_t subCount = i==(numInts-1) ? ((count-1)&7)+1 : 8;
-            for(uint32_t j=0; j<subCount;j++,marks>>=4)
+        gcbits_t* blockbits = b->bits;
+        for ( char *item = b->items, *limit = b->items + m_itemSize * b->GetCount() ; item < limit ; item += m_itemSize )
             {
+                uint32_t bitsindex = GetBitsIndex(b, item);
+                gcbits_t& marks = blockbits[bitsindex];
+
                 int mq = marks & kFreelist;
                 if(mq == kMark || mq == kQueued)    // Sweeping is lazy; don't sweep objects on the mark stack
                 {
                     // live item, clear bits
-                    bits[i] &= ~(kFreelist<<(j*4));
+                    marks &= ~kFreelist;
                     continue;
                 }
 
@@ -931,13 +903,11 @@ namespace MMgc
                      continue; // freelist item, ignore
 
                 // garbage, freelist it
-                void *item = (char*)b->items + m_itemSize*(i*8+j);
 #ifdef MMGC_HOOKS
                 if(m_gc->heap->HooksEnabled())
                     m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
 #endif
-                b->FreeSweptItem(item, (i*8+j));
-            }
+                b->FreeSweptItem(item, bitsindex);
         }
     }
 
@@ -971,23 +941,28 @@ namespace MMgc
         }
         GCAssert(m_needsSweeping == NULL);
     }
-
+    
     void GCAlloc::ClearMarks(GCAlloc::GCBlock* block)
     {
         GCAssert(m_qList == NULL);
         // Clear all the mark bits
-        uint32_t *pbits = block->GetBits();
-        const static uint32_t mq32 = 0x33333333;
-        GCAssert((kMark|kQueued) == 0x3);
+        GCAssert(sizeof(gcbits_t) == 1);
+        GCAssert(kFreelist == 3);
+        GCAssert(m_numBitmapBytes % 4 == 0);
+        uint32_t *pbits = (uint32_t*)block->bits;
+        uint32_t mq32 = ~uint32_t(0x03030303U);
+
+        // Clear the marked and queued bits
         // TODO: MMX version for IA32
         for(int i=0, n=m_numBitmapBytes>>2; i < n; i++) {
-            pbits[i] &= ~mq32;
+            pbits[i] &= mq32;
         }
 
         const void *item = block->firstFree;
         while(item != NULL) {
-            // set freelist bit pattern
-            SetBit(block, GetIndex(block, item), kFreelist);
+            // Set freelist bit pattern.  If it's free it's free so clear all
+            // the other bits.
+            block->bits[GetBitsIndex(block, item)] = kFreelist;
             item = *(const void**)item;
         }
     }
@@ -1013,23 +988,9 @@ namespace MMgc
             GCBlock *next = Next(b);
             GCAssertMsg(!b->needsSweeping(), "All needsSweeping should have been swept at this point.");
 
-            // TODO: MMX version for IA32
-            uint32_t *bits = b->GetBits();
-            uint32_t count = m_itemsPerBlock;
-
-            // round up to eight
-            uint32_t numInts = ((count+7)&~7) >> 3;
-            for(uint32_t i=0; i < numInts; i++)
-            {
-                uint32_t marks = bits[i];
-                // hmm, is it better to screw around with exact counts or just examine
-                // 8 items on each pass, with the later we open the door to unrolling
-                uint32_t subCount = i==(numInts-1) ? ((count-1)&7)+1 : 8;
-                for(uint32_t j=0; j<subCount;j++,marks>>=4)
-                {
-                    uint32_t m = marks&kFreelist;
-                    GCAssertMsg(m == 0 || m == kFreelist, "All items should be free or clear, nothing should be marked or queued.");
-                }
+            for ( char *item = b->items, *limit = b->items + m_itemSize * b->GetCount() ; item < limit ; item += m_itemSize ) {
+                gcbits_t m = GC::GetGCBits(item) & kFreelist;
+                GCAssertMsg(m == 0 || m == kFreelist, "All items should be free or clear, nothing should be marked or queued.");
             }
 
             // Advance to next block
@@ -1051,9 +1012,10 @@ namespace MMgc
             return bogusPointerReturnValue;
 
         // floor value to start of item
-        int itemNum = GetIndex(block, item);
+        int itemNum = GetObjectIndex(block, item);
 
         // skip pointers into dead space at end of block
+        // FIXME: not clear there is any dead space with current design
         if (itemNum > ((GCAlloc*)block->alloc)->m_itemsPerBlock - 1)
             return bogusPointerReturnValue;
 
@@ -1061,7 +1023,7 @@ namespace MMgc
         if(block->items + itemNum * block->size != item)
             return bogusPointerReturnValue;
 
-        return GetMark(item);
+        return GC::GetMark(item);
     }
 
     void GCAlloc::CheckFreelist()
@@ -1097,12 +1059,12 @@ namespace MMgc
         muli = (uint16_t) m;
     }
 
-    REALLY_INLINE void GCAlloc::GCBlock::FreeSweptItem(const void *item, int index)
+    REALLY_INLINE void GCAlloc::GCBlock::FreeSweptItem(const void *item, int bitsindex)
     {
         GCAlloc* alloc = (GCAlloc*)this->alloc;
 #ifdef _DEBUG
         // Check that we're not freeing something on the mark stack
-        GCAssert(!GetBit(this, index, kQueued));
+        GCAssert((bits[bitsindex] & kQueued) == 0);
         alloc->VerifyNotFree(this, item);
 #endif
 #ifdef MMGC_MEMORY_INFO
@@ -1114,7 +1076,7 @@ namespace MMgc
         firstFree = (void*)item;
         numFree++;
 
-        SetBit(this, index, kFreelist);
+        bits[bitsindex] = kFreelist;
 
 #ifndef _DEBUG
         alloc->ClearNonRCObject((void*)item, size);
@@ -1174,4 +1136,36 @@ namespace MMgc
     }
 
 #endif //MMGC_MEMORY_INFO
+
+#ifdef _DEBUG
+    bool GCAlloc::IsOnEitherList(GCBlock *b)
+    {
+        return b->nextFree != NULL || b->prevFree != NULL || b == m_firstFree || b == m_needsSweeping;
+    }
+    
+    /*static*/
+    bool GCAlloc::IsPointerIntoGCObject(const void *item)
+    {
+        // Contorted code allows for debugging, don't "optimize" this
+        GCBlock *block = GetBlock(item);
+        bool retval = false;
+        if(item >= block->items)
+            retval = (GC::GetGCBits(block->items + GetObjectIndex(block, item) * ((GCAlloc*)block->alloc)->m_itemSize) & kFreelist) != kFreelist;
+        return retval;
+    }
+    
+    /*static*/
+    bool GCAlloc::IsWhite(const void *item)
+    {
+        GCBlock *block = GetBlock(item);
+        // not a real item
+        if(item < block->items)
+            return false;
+        
+        if(FindBeginning(item) != item)
+            return false;
+        
+        return (GC::GetGCBits(item) & (kMark|kQueued)) != 0;
+    }
+#endif // _DEBUG
 }

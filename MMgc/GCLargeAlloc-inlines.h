@@ -54,20 +54,9 @@ namespace MMgc
         return (LargeBlock*)b->next;
     }
 
-    /*static*/
-    REALLY_INLINE void GCLargeAlloc::SetHasWeakRef(const void *item, bool to)
+    REALLY_INLINE gcbits_t& GCLargeAlloc::GetGCBits(const void *realptr)
     {
-        if(to) {
-            GetLargeBlock(item)->flags |= kHasWeakRef;
-        } else {
-            GetLargeBlock(item)->flags &= ~kHasWeakRef;
-        }
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::HasWeakRef(const void *item)
-    {
-        return (GetLargeBlock(item)->flags & kHasWeakRef) != 0;
+        return GetLargeBlock(realptr)->flags[0];
     }
 
     /*static*/
@@ -79,77 +68,24 @@ namespace MMgc
     }
 
     /*static*/
-    REALLY_INLINE bool GCLargeAlloc::SetMark(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        bool oldMark = (block->flags & kMarkFlag) != 0;
-        block->flags |= kMarkFlag;
-        block->flags &= ~kQueuedFlag;
-        return oldMark;
-    }
-
-    /*static*/
-    REALLY_INLINE void GCLargeAlloc::SetFinalize(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        block->flags |= kFinalizeFlag;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::GetMark(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        return (block->flags & kMarkFlag) != 0;
-    }
-
-#ifdef _DEBUG
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::IsWhite(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        if(!IsLargeBlock(item))
-            return false;
-        return (block->flags & (kMarkFlag|kQueuedFlag)) == 0;
-    }
-#endif
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::IsMarkedThenMakeQueued(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        if ((block->flags & kMarkFlag) != 0) {
-            block->flags ^= kMarkFlag|kQueuedFlag;
-            return true;
-        }
-        return false;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::IsQueued(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        return (block->flags & kQueuedFlag) != 0;
-    }
-
-    /*static*/
     REALLY_INLINE bool GCLargeAlloc::IsProtectedAgainstFree(const void *item)
     {
         LargeBlock *block = GetLargeBlock(item);
-        return (block->flags & (kQueuedFlag|kProtectedFlag)) != 0;
+        return (block->flags[0] & kQueued) != 0 || (block->flags[1] & kProtected) != 0;
     }
 
     /*static*/
     REALLY_INLINE void GCLargeAlloc::ProtectAgainstFree(const void *item)
     {
         LargeBlock *block = GetLargeBlock(item);
-        block->flags |= kProtectedFlag;
+        block->flags[1] |= kProtected;
     }
 
     /*static*/
     REALLY_INLINE void GCLargeAlloc::UnprotectAgainstFree(const void *item)
     {
         LargeBlock *block = GetLargeBlock(item);
-        block->flags &= ~kProtectedFlag;
+        block->flags[1] &= ~kProtected;
     }
 
     /*static*/
@@ -160,44 +96,17 @@ namespace MMgc
     }
 
     /*static*/
-    REALLY_INLINE void GCLargeAlloc::ClearFinalized(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        block->flags &= ~kFinalizeFlag;
-    }
-
-    /*static*/
     REALLY_INLINE bool GCLargeAlloc::ContainsPointers(const void *item)
     {
         LargeBlock *block = GetLargeBlock(item);
-        return (block->flags & kContainsPointers) != 0;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::IsFinalized(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        return (block->flags & kFinalizeFlag) != 0;
+        return (block->flags[1] & kContainsPointers) != 0;
     }
 
     /*static*/
     REALLY_INLINE bool GCLargeAlloc::IsRCObject(const void *item)
     {
         LargeBlock *block = GetLargeBlock(item);
-        return (block->flags & kRCObject) != 0;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::NeedsFinalize(LargeBlock *block)
-    {
-        return (block->flags & kFinalizeFlag) != 0;
-    }
-
-    /*static*/
-    REALLY_INLINE void GCLargeAlloc::ClearQueued(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        block->flags &= ~kQueuedFlag;
+        return (block->flags[1] & kRCObject) != 0;
     }
 
     REALLY_INLINE int GCLargeAlloc::LargeBlock::GetNumBlocks() const
@@ -216,7 +125,7 @@ namespace MMgc
         while (block != NULL) {
             GCLargeAlloc::LargeBlock* b = block;
             block = GCLargeAlloc::Next(block);
-            if ((b->flags & (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) == (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) {
+            if ((b->flags[0] & kMark) != 0 && (b->flags[1] & GCLargeAlloc::kContainsPointers) != 0) {
                 out_ptr = GetUserPointer(b+1);
                 out_size = b->size - (uint32_t)DebugSize();
                 return true;

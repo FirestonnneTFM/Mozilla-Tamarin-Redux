@@ -52,6 +52,9 @@ namespace MMgc
     // Some common functionality for GCAlloc and GCLargeAlloc follows.  (Could be
     // in a separate header file.)
 
+    // Mark bit item.
+    typedef uint8_t gcbits_t;
+
     /**
      * Common block header for GCAlloc and GCLargeAlloc.
      */
@@ -60,10 +63,25 @@ namespace MMgc
         GC*             gc;     // The GC that owns this block
         GCAllocBase*    alloc;  // the allocator that owns this block
         GCBlockHeader*  next;   // The next block in the list of blocks for the allocator
+        gcbits_t*       bits;   // Variable length table of mark bit entries
         uint32_t        size;   // Size of objects stored in this block
     };
 
     GCBlockHeader* GetBlockHeader(const void* item);
+
+    // These are common to small and large objects.  Large objects have additional bits,
+    // but those bits are stored elsewhere.
+
+    enum {
+        kMark=1,
+        kQueued=2,
+        kFinalizable=4,
+        kHasWeakRef=8
+        // free: 16
+        // free: 32
+        // free: 64
+        // free: 128
+    };
 
     /**
      *
@@ -100,13 +118,19 @@ namespace MMgc
     {
         friend class GC;
         friend class GCAllocIterator;
+        friend class ZCT;
 
-        struct GCBlock;
     public:
-        enum ItemBit { kMark=1, kQueued=2, kFinalize=4, kHasWeakRef=8, kFreelist=kMark|kQueued };
+        // The destructor needs to be public because it is called explicitly by
+        // the implementation of one of the mmfx_delete macros.
+        ~GCAlloc();
+
+    private:
+        struct GCBlock;
+
+        enum { kFreelist=kMark|kQueued };
 
         GCAlloc(GC* gc, int itemSize, bool containsPointers, bool isRC, int sizeClassIndex);
-        ~GCAlloc();
 
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
         void* Alloc(size_t size, int flags);
@@ -120,43 +144,14 @@ namespace MMgc
 #ifdef _DEBUG
         void CheckMarks();
         void CheckFreelist();
-#endif
-
-        static int SetMark(const void *item);
-
-        // Not a hot method
-        static int SetFinalize(const void *item);
-
-#ifdef _DEBUG
         static bool IsWhite(const void *item);
 #endif // _DEBUG
 
-        static int GetMark(const void *item);
-
         static void *FindBeginning(const void *item);
-
-        static bool IsMarkedThenMakeQueued(const void *item);
-
-        static bool IsQueued(const void *item);
-
-        static bool IsQueued(GCBlock *block, int index);
-
-        // not a hot method
-        static void ClearFinalized(const void *item);
-
-        // not a hot method
-        static int IsFinalized(const void *item);
-
-        // not a hot method
-        static int HasWeakRef(const void *item);
-
-        // Very hot: called in the inner loop of GC::MarkItem
         static bool ContainsPointers(const void *item);
-
-        // Can be hot - used by PinStackObjects
         static bool IsRCObject(const void *item);
-
         static bool IsUnmarkedPointer(const void *val);
+        static void SetBlockHasWeakRef(const void *userptr);
 
         REALLY_INLINE uint32_t GetItemSize() { return m_itemSize; }
         REALLY_INLINE int GetNumAlloc() const { return m_numAlloc; }
@@ -167,9 +162,6 @@ namespace MMgc
         REALLY_INLINE bool ContainsRCObjects() const { return containsRCObjects; }
 
         void GetBitsPages(void **pages);
-
-        // not a hot method
-        static void SetHasWeakRef(const void *item, bool to);
 
         //This method returns the number bytes allocated for GC objects
         size_t GetBytesInUse();
@@ -196,20 +188,18 @@ namespace MMgc
         // with the high 16 bits during pinning; it may pin dead objects.  Those that
         // use the index must be careful to mask off the high bits.
 
-        struct GCBlock : GCBlockHeader
+        struct GCBlock : public GCBlockHeader
         {
             GCBlock* prev;          // the previous block on the list of all blocks ('next' is in the block header)
             void*  firstFree;       // first item on free list
             GCBlock *prevFree;      // the previous block on the lists of blocks with free or sweepable objects
             GCBlock *nextFree;      // the next block on the lists of blocks with free or sweepable objects
-            uint32_t* bits;         // the header bits for this block
             short numFree;          // the number of free objects in this block
             uint8_t slowFlags;      // flags for special circumstances: kFlagNeedsSweeping, etc
             bool finalizeState:1;   // whether we've been visited during the Finalize stage
             char   *items;          // pointer to the array of objects in the block
 
             int GetCount() const;
-            uint32_t *GetBits() const;
             void FreeSweptItem(const void *item, int index);
             int needsSweeping();
             void setNeedsSweeping(int v);
@@ -252,7 +242,7 @@ namespace MMgc
         int    m_numAlloc;
         int    m_numBlocks;
 
-        // fast divide numbers
+        // fast divide numbers for GetObjectIndex
         uint16_t multiple;
         uint16_t shift;
 
@@ -301,28 +291,25 @@ namespace MMgc
         void SweepNeedsSweeping();
 
 #ifdef _DEBUG
+        static bool IsPointerIntoGCObject(const void *item);
         static int ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
 #endif
 
-        // very hot
-        static int GetIndex(const GCBlock *block, const void *item);
+        // NOTE that GetObjectIndex and GetBitsIndex are not necessarily the same
+        // (anticipating a future fix).
 
-        static int SetBit(GCBlock *block, int index, int bit);
+        // Compute the offset within the block of the given object.
+        static uint32_t GetObjectIndex(const GCBlock *block, const void *item);
 
-        static int GetBit(GCBlock *block, int index, int bit);
+        // Compute the offset within the bits table of the given object.
+        static uint32_t GetBitsIndex(const GCBlock *block, const void *item);
+        
+        static gcbits_t& GetGCBits(const void* realptr);
 
         static void ClearBits(GCBlock *block, int index, int bits);
 
-        static void Clear4BitsAndSet(GCBlock *block, int index, int bit);
-
         // not a hot method
-        static void ClearQueued(const void *item);
-
-#ifdef _DEBUG
-        static bool IsPointerIntoGCObject(const void *item);
-
-        static bool IsWhite(GCBlock *block, int index);
-#endif
+        static void ClearQueued(const void *userptr);
 
         void ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft);
 
