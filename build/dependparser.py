@@ -38,7 +38,7 @@
 
 
 """Pipes stdin | stdout and extracts a list of all header dependencies to
-a file.  It requires exactly three arguments.
+a file.  It requires exactly two arguments.
 
 The input is expected to take form of C preprocessor output, where
 paths to originating input source files are indicated via the form
@@ -47,12 +47,7 @@ paths to originating input source files are indicated via the form
 The first argument to the script is the target file to be overwritten.
 It will contain the extracted dependencies (unquoted paths).
 
-The second argument is the preprocessor otuput file, this file will
-be rewritten to have uniform path separators.
-(Mixing of separators has caused issues with code coverage on windows
-under cygwin, see bug 587151)
-
-The third argument to the script is the path of an originating source
+The second argument to the script is the path of an originating source
 file.  It is used to resolve relative paths within the input.
 (Relative paths are unusual, but can arise via manual #line directives
 in the source code; e.g. see bug 477230.)"""
@@ -61,36 +56,28 @@ import re
 import sys
 import os
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 3:
     raise Exception("Unexpected command line argument.")
 
 outfile          = sys.argv[1]
-ii_outfile       = sys.argv[2]
-originating_file = sys.argv[3]
+originating_file = sys.argv[2]
 
 relative_to_dir  = os.path.dirname(originating_file)
 
-# Need to also find dependencies that do not start at the begining of the line
-_lineExp = re.compile("[ \t]*#(?:line)? ?\d+ \"([^\"<>]+[^/])\"");
+_lineExp = re.compile("#(?:line)? ?\d+ \"([^\"<>]+[^/])\"");
 
 deps = set()
-_file=""
 
 for line in sys.stdin:
+    sys.stdout.write(line)
     m = _lineExp.match(line)
     if m:
         path = m.group(1)
         if not os.path.isabs(path):
             path = os.path.abspath(os.path.join(relative_to_dir, path))
         deps.add(path)
-        _file+=re.sub(r"\\\\", r"/", line)
-    else:
-        _file+=line
-        
+
+
 ostream = open(outfile, "w")
 ostream.write("\n".join(deps))
-ostream.close()
-
-ostream = open(ii_outfile, "w")
-ostream.write(_file)
 ostream.close()
