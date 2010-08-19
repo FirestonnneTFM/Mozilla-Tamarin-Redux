@@ -899,7 +899,7 @@ namespace avmplus
 
         int first_local = param_count+1;
         if (info->needRestOrArguments()) {
-            // NEED_REST overrides NEED_ARGUMENTS when both are set
+            // abcMethod_NEED_REST overrides abcMethod_NEED_ARGUMENTS when both are set
             checkLocal(first_local);  // ensure param_count+1 <= max_reg
             state->setType(first_local, ARRAY_TYPE, true);
             first_local++;

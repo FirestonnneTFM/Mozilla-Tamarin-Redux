@@ -96,6 +96,36 @@ namespace avmplus
         };
         /*@}*/
 
+        /** @name flags from .abc - limited to a BYTE */
+        /*@{*/
+        enum AbcMethodFlags 
+        {
+            /** need arguments[0..argc] */
+            abcMethod_NEED_ARGUMENTS         = 0x01,
+
+            /** need activation object */
+            abcMethod_NEED_ACTIVATION        = 0x02,
+
+            /** need arguments[param_count+1..argc] */
+            abcMethod_NEED_REST              = 0x04,
+
+            /** has optional parameters */
+            abcMethod_HAS_OPTIONAL           = 0x08,
+
+            /** allow extra args, but dont capture them */
+            abcMethod_IGNORE_REST            = 0x10,
+
+            /** method is native */
+            abcMethod_NATIVE                 = 0x20,
+
+            /** method sets default namespace */
+            abcMethod_SETS_DXNS              = 0x40,
+
+            /** method has table for parameter names */
+            abcMethod_HAS_PARAM_NAMES        = 0x80
+        };
+        /*@}*/
+
         /** @name attributes */
         /*@{*/
         const int ATTR_final            = 0x10; // 1=final, 0=virtual

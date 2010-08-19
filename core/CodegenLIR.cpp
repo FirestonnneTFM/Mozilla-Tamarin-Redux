@@ -1844,7 +1844,7 @@ namespace avmplus
         }
         else
         {
-            // !HAS_OPTIONAL
+            // !info->hasOptional()
             AvmAssert(optional_count == 0);
         }
 
@@ -1867,7 +1867,7 @@ namespace avmplus
         // Optimized ...rest and 'arguments':
         //
         // We avoid constructing the rest array if possible.  An analysis in the
-        // verifier sets the LAZY_REST bit if access patterns to the rest argument
+        // verifier sets the _lazyRest bit if access patterns to the rest argument
         // or the arguments array are only OBJ.length or OBJ[prop] for arbitrary
         // propery; see comments in Verifier::verify.  The former pattern
         // results in an OP_restargc instruction, while the latter results in an
