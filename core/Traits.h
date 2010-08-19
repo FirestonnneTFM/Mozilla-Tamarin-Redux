@@ -56,16 +56,12 @@ namespace avmplus
         TRAITSTYPE_INTERFACE                = 7     // instance info in abc (interface)
     };
 
-    const uint32_t NOT_DERIVED_OR_XML_MASK =
-// commented out, why?
-//      (1<<BUILTIN_array) |
-//      (1<<BUILTIN_date) |
-//      (1<<BUILTIN_regexp) |
+    // The follow types need more than simple pointer equality when performing == and ===.
+    // BUILTIN_object is required because sometimes the verifier will treat other classes
+    // as generic object types such as "new Number" or "new Boolean".
+    const uint32_t HAS_COMPLEX_EQUALITY_RULES =
         (1<<BUILTIN_boolean) |
-        (1<<BUILTIN_class) |
-        (1<<BUILTIN_function) |
         (1<<BUILTIN_int) |
-        (1<<BUILTIN_methodClosure) |
         (1<<BUILTIN_namespace) |
         (1<<BUILTIN_null) |
         (1<<BUILTIN_number) |
@@ -391,7 +387,7 @@ namespace avmplus
         // convenient wrapper to check for null (returns "BUILTIN_any")
         static BuiltinType getBuiltinType(const Traitsp t);
 
-        bool notDerivedObjectOrXML() const;
+        bool hasComplexEqualityRules() const;
         bool isMachineType() const;
         bool isNumeric() const;
         bool isXMLType() const;

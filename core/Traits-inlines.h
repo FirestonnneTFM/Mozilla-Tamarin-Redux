@@ -291,9 +291,9 @@ REALLY_INLINE BuiltinType Traits::getBuiltinType(const Traitsp t)
     return t ? BuiltinType(t->builtinType) : BUILTIN_any;
 }
 
-REALLY_INLINE bool Traits::notDerivedObjectOrXML() const
+REALLY_INLINE bool Traits::hasComplexEqualityRules() const
 {
-    return ((1<<builtinType) & NOT_DERIVED_OR_XML_MASK) != 0;
+    return ((1<<builtinType) & HAS_COMPLEX_EQUALITY_RULES) != 0;
 }
 
 REALLY_INLINE bool Traits::isMachineType() const

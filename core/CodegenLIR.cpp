@@ -3221,7 +3221,7 @@ namespace avmplus
                 // int to bool: b = (i==0) == 0
                 expr = eqi0(eqi0(localGet(loc)));
             }
-            else if (in && !in->notDerivedObjectOrXML())
+            else if (in && !in->hasComplexEqualityRules())
             {
                 // ptr to bool: b = (p==0) == 0
                 expr = eqi0(eqp0(localGetp(loc)));
@@ -5246,12 +5246,13 @@ namespace avmplus
         Traits* lht = state->value(lhsi).traits;
         Traits* rht = state->value(rhsi).traits;
 
-        // If we have null and a type that is derived from an Object (but not Object or XML)
+        // If we have null and a type that does not require complex equality checks,
         // we can optimize our equal comparison down to a simple ptr comparison. This also
-        // works when both types are derived Object types.
-        if (((lht == NULL_TYPE) && (rht && !rht->notDerivedObjectOrXML())) ||
-            ((rht == NULL_TYPE) && (lht && !lht->notDerivedObjectOrXML())) ||
-            ((rht && !rht->notDerivedObjectOrXML()) && (lht && !lht->notDerivedObjectOrXML())))
+        // works when both types are simple.  This does not work with values like string that
+        // require string comparisions or numeric types.
+        if (((lht == NULL_TYPE) && (rht && !rht->hasComplexEqualityRules())) ||
+            ((rht == NULL_TYPE) && (lht && !lht->hasComplexEqualityRules())) ||
+            ((rht && !rht->hasComplexEqualityRules()) && (lht && !lht->hasComplexEqualityRules())))
         {
             LIns* lhs = localGetp(lhsi);
             LIns* rhs = localGetp(rhsi);
