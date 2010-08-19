@@ -79,20 +79,25 @@ namespace MMgc
 
         if (block)
         {
-            block->flags = ((flags&GC::kFinalize) != 0) ? kFinalizeFlag : 0;
-            block->flags |= ((flags&GC::kContainsPointers) != 0) ? kContainsPointers : 0;
-            block->flags |= ((flags&GC::kRCObject) != 0) ? kRCObject : 0;
+            gcbits_t flagbits0 = 0;
+            gcbits_t flagbits1 = 0;
+            flagbits0 |= ((flags&GC::kFinalize) != 0) ? kFinalizable : 0;
+            flagbits1 |= ((flags&GC::kContainsPointers) != 0) ? kContainsPointers : 0;
+            flagbits1 |= ((flags&GC::kRCObject) != 0) ? kRCObject : 0;
             block->gc = this->m_gc;
             block->alloc= this;
             block->next = m_blocks;
             block->size = computedSize;
+            block->bits = block->flags;
             m_blocks = block;
 
             item = (void*)(block+1);
 
             if(m_gc->collecting && !m_startedFinalize)
-                block->flags |= kMarkFlag;
+                flagbits0 |= kMark;
 
+            block->flags[0] = flagbits0;
+            block->flags[1] = flagbits1;
 #ifdef _DEBUG
             (void)originalSize;
             if (flags & GC::kZero)
@@ -159,7 +164,7 @@ namespace MMgc
         }
 #endif
 
-        if(b->flags & kHasWeakRef)
+        if(b->flags[0] & kHasWeakRef)
             m_gc->ClearWeakRef(GetUserPointer(item));
 
         LargeBlock **prev = &m_blocks;
@@ -180,7 +185,7 @@ namespace MMgc
     {
         LargeBlock *block = m_blocks;
         while (block) {
-            block->flags &= ~(kMarkFlag|kQueuedFlag);
+            block->flags[0] &= ~(kMark|kQueued);
             block = Next(block);
         }
     }
@@ -191,8 +196,8 @@ namespace MMgc
         LargeBlock **prev = &m_blocks;
         while (*prev) {
             LargeBlock *b = *prev;
-            if ((b->flags & kMarkFlag) == 0) {
-                GCAssert((b->flags & kQueuedFlag) == 0);
+            if ((b->flags[0] & kMark) == 0) {
+                GCAssert((b->flags[0] & kQueued) == 0);
                 GC* gc = b->gc;
 
                 // Large blocks may be allocated by finalizers for large blocks, creating contention
@@ -205,17 +210,17 @@ namespace MMgc
                 b->next = NULL;
 
                 void *item = b+1;
-                if (NeedsFinalize(b)) {
+                if (b->flags[0] & kFinalizable) {
                     GCFinalizedObject *obj = (GCFinalizedObject *) item;
                     obj = (GCFinalizedObject *) GetUserPointer(obj);
                     obj->~GCFinalizedObject();
 #if defined(_DEBUG)
-                    if((b->flags & kRCObject) != 0) {
+                    if(b->flags[1] & kRCObject) {
                         gc->RCObjectZeroCheck((RCObject*)obj);
                     }
 #endif
                 }
-                if(b->flags & kHasWeakRef) {
+                if(b->flags[0] & kHasWeakRef) {
                     gc->ClearWeakRef(GetUserPointer(item));
                 }
 
@@ -236,7 +241,7 @@ namespace MMgc
                 continue;
             }
             // clear marks
-            b->flags &= ~(kMarkFlag|kQueuedFlag);
+            b->flags[0] &= ~(kMark|kQueued);
             prev = (LargeBlock**)(&b->next);
         }
         m_startedFinalize = false;
@@ -251,9 +256,17 @@ namespace MMgc
     /* static */
     bool GCLargeAlloc::ConservativeGetMark(const void *item, bool bogusPointerReturnValue)
     {
-        if(IsLargeBlock(item))
-            return GetMark(item);
-        return bogusPointerReturnValue;
+        if(!IsLargeBlock(item))
+            return bogusPointerReturnValue;
+        return (GetLargeBlock(item)->flags[0] & kMark) != 0;
+    }
+
+    /*static*/
+    bool GCLargeAlloc::IsWhite(const void *item)
+    {
+        if(!IsLargeBlock(item))
+            return false;
+        return (GetLargeBlock(item)->flags[0] & (kMark|kQueued)) == 0;
     }
 #endif
 

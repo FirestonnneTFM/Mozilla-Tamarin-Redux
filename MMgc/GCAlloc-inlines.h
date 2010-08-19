@@ -61,87 +61,18 @@ namespace MMgc
         return (GCBlock*)b->next;
     }
 
-    REALLY_INLINE int GCAlloc::SetMark(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        int index = GetIndex(block, item);
-        int mask = kMark << ((index&7)<<2);
-        uint32_t *bits = &block->GetBits()[index>>3];
-        int set = *bits & mask;
-        *bits |= mask;
-        *bits &= ~(kQueued << ((index&7)<<2));
-        return set;
-    }
-
     /*static*/
-    REALLY_INLINE int GCAlloc::SetFinalize(const void *item)
+    REALLY_INLINE gcbits_t& GCAlloc::GetGCBits(const void* realptr)
     {
-        GCBlock *block = GetBlock(item);
-        return SetBit(block, GetIndex(block, item), kFinalize);
-    }
-
-    /*static*/
-    REALLY_INLINE int GCAlloc::GetMark(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        return GetBit(block, GetIndex(block, item), kMark);
+        GCBlock *block = GetBlock(realptr);
+        return block->bits[GetBitsIndex(block, realptr)];
     }
 
     /*static*/
     REALLY_INLINE void *GCAlloc::FindBeginning(const void *item)
     {
         GCBlock *block = GetBlock(item);
-        return block->items + block->size * GetIndex(block, item);
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCAlloc::IsMarkedThenMakeQueued(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        int index = GetIndex(block, item);
-        uint32_t* bits = block->GetBits() + (index >> 3);
-        if (*bits & (kMark << ((index&7)<<2))) {
-            *bits ^= (kMark|kQueued) << ((index&7)<<2);
-            return true;
-        }
-        return false;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCAlloc::IsQueued(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        int index = GetIndex(block, item);
-        uint32_t* bits = block->GetBits() + (index >> 3);
-        return (*bits & (kQueued << ((index&7)<<2))) != 0;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCAlloc::IsQueued(GCAlloc::GCBlock *block, int index)
-    {
-        uint32_t* bits = block->GetBits() + (index >> 3);
-        return (*bits & (kQueued << ((index&7)<<2))) != 0;
-    }
-
-    /*static*/
-    REALLY_INLINE void GCAlloc::ClearFinalized(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        ClearBits(block, GetIndex(block, item), kFinalize);
-    }
-
-    /*static*/
-    REALLY_INLINE int GCAlloc::IsFinalized(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        return GetBit(block, GetIndex(block, item), kFinalize);
-    }
-
-    /*static*/
-    REALLY_INLINE int GCAlloc::HasWeakRef(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        return GetBit(block, GetIndex(block, item), kHasWeakRef);
+        return block->items + block->size * GetObjectIndex(block, item);
     }
 
     /*static*/
@@ -158,16 +89,9 @@ namespace MMgc
         return item >= block->items && ((GCAlloc*)block->alloc)->ContainsRCObjects();
     }
 
-    /*static*/
-    REALLY_INLINE void GCAlloc::SetHasWeakRef(const void *item, bool to)
+    REALLY_INLINE void GCAlloc::SetBlockHasWeakRef(const void *userptr)
     {
-        GCBlock *block = GetBlock(item);
-        if(to) {
-            SetBit(block, GetIndex(block, item), kHasWeakRef);
-            block->slowFlags |= kFlagWeakRefs;
-        } else {
-            ClearBits(block, GetIndex(block, item), kHasWeakRef);
-        }
+        GetBlock(userptr)->slowFlags |= kFlagWeakRefs;
     }
 
     REALLY_INLINE void GCAlloc::AddToFreeList(GCBlock *b)
@@ -222,98 +146,25 @@ namespace MMgc
         b->nextFree = b->prevFree = NULL;
     }
 
-    /*static*/
-    REALLY_INLINE int GCAlloc::GetIndex(const GCBlock *block, const void *item)
+    REALLY_INLINE uint32_t GCAlloc::GetObjectIndex(const GCBlock *block, const void *item)
     {
-        int index = (int)((((char*) item - block->items) * ((GCAlloc*)block->alloc)->multiple) >> ((GCAlloc*)block->alloc)->shift);
-#ifdef _DEBUG
-        GCAssert(((char*) item - block->items) / block->size == (uint32_t) index);
-#endif
+        GCAlloc* alloc = (GCAlloc*)block->alloc;
+        uint32_t index = (uint32_t)((((char*) item - block->items) * alloc->multiple) >> alloc->shift);
+ #ifdef _DEBUG
+        GCAssert(((char*) item - block->items) / block->size == index);
+ #endif
         return index;
-    }
+    }           
 
     /*static*/
-    REALLY_INLINE int GCAlloc::SetBit(GCBlock *block, int index, int bit)
+    REALLY_INLINE uint32_t GCAlloc::GetBitsIndex(const GCBlock *block, const void *item)
     {
-        int mask = bit << ((index&7)<<2);
-        int set = (block->GetBits()[index>>3] & mask);
-        block->GetBits()[index>>3] |= mask;
-        return set;
+        return GetObjectIndex(block, item);
     }
-
-    /*static*/
-    REALLY_INLINE int GCAlloc::GetBit(GCBlock *block, int index, int bit)
-    {
-        int mask = bit << ((index&7)<<2);
-        return block->GetBits()[index>>3] & mask;
-    }
-
-    /*static*/
-    REALLY_INLINE void GCAlloc::ClearBits(GCBlock *block, int index, int bits)
-    {
-        int mask = bits << ((index&7)<<2);
-        block->GetBits()[index>>3] &= ~mask;
-    }
-
-    /*static*/
-    REALLY_INLINE void GCAlloc::Clear4BitsAndSet(GCBlock *block, int index, int bit)
-    {
-        uint32_t *bitp = &(block->GetBits()[index>>3]);
-        *bitp = (*bitp & ~(15 << ((index & 7) << 2))) | (bit << ((index & 7) << 2));
-    }
-
-    /*static*/
-    REALLY_INLINE void GCAlloc::ClearQueued(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        ClearBits(block, GetIndex(block, item), kQueued);
-    }
-
-#ifdef _DEBUG
-    /*static*/
-    REALLY_INLINE bool GCAlloc::IsPointerIntoGCObject(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        if(item < block->items)
-            return false;
-        return GetBit(block, GetIndex(block, item), kFreelist) != kFreelist;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCAlloc::IsWhite(GCBlock *block, int index)
-    {
-        return (block->GetBits()[index>>3] & ((kMark|kQueued)<<((index&7)<<2))) == 0;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCAlloc::IsWhite(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        // not a real item
-        if(item < block->items)
-            return false;
-
-        if(FindBeginning(item) != item)
-            return false;
-
-        return IsWhite(block, GetIndex(block, item));
-    }
-
-    REALLY_INLINE bool GCAlloc::IsOnEitherList(GCBlock *b)
-    {
-        return b->nextFree != NULL || b->prevFree != NULL || b == m_firstFree || b == m_needsSweeping;
-    }
-#endif // _DEBUG
-
 
     REALLY_INLINE int GCAlloc::GCBlock::GetCount() const
     {
         return ((GCAlloc*)alloc)->m_itemsPerBlock;
-    }
-
-    REALLY_INLINE uint32_t *GCAlloc::GCBlock::GetBits() const
-    {
-        return bits;
     }
 
     REALLY_INLINE int GCAlloc::GCBlock::needsSweeping()
@@ -346,7 +197,7 @@ namespace MMgc
             if (block == NULL)
                 return false;
             uint32_t i = idx++;
-            if (GCAlloc::GetBit(block, i, MMgc::GCAlloc::kMark) && !GCAlloc::GetBit(block, i, MMgc::GCAlloc::kQueued)) {
+            if ((GC::GetGCBits(block->items + i*size) & (kMark|kQueued)) == kMark) {
                 out_ptr = GetUserPointer(block->items + i*size);
                 out_size = size - (uint32_t)DebugSize();
                 return true;

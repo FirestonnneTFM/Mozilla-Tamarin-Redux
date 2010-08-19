@@ -1068,27 +1068,41 @@ namespace MMgc
         static GC* GetGC(const void *item);
 
         /**
-         * Tracers should employ GetMark and SetMark to
-         * set the mark bits during the mark pass.
+         * @return the mark (live) bit for the given object: zero if not set,
+         * nonzero if set.
          */
-        static int GetMark(const void *item);
+        static int GetMark(const void *userptr);
 
-        static int SetMark(const void *item);
+        /**
+         * Mark the given object as live.
+         */
+        static int SetMark(const void *userptr);
 
+        /**
+         * @return the queued bit for the given object: zero if not set, nonzero if set.
+         */
+        static int GetQueued(const void *userptr);
+        
         // Not a hot method
-        void ClearQueued(const void *item);
+        void ClearQueued(const void *userptr);
 
         // not a hot method
-        static void ClearFinalized(const void *item);
+        static void ClearFinalized(const void *userptr);
 
         // not a hot method
-        static void SetFinalize(const void *item);
+        static void SetFinalize(const void *userptr);
 
         // not a hot method
-        static int IsFinalized(const void *item);
+        static int IsFinalized(const void *userptr);
 
         // not a hot method
-        static int HasWeakRef(const void *item);
+        static int HasWeakRef(const void *userptr);
+
+        /**
+         * Mark the given object as having (flag==true) or not having (flag==false)
+         * a weak reference.
+         */
+        static void SetHasWeakRef(const void *userptr, bool flag);
 
         /**
          * Used by sub-allocators to obtain memory.
@@ -1377,6 +1391,13 @@ namespace MMgc
 
         bool Destroying();
 
+        /**
+         * @return a reference to the mark bits for the given realptr.
+         * The realptr must point to the beginning of an object owned 
+         * by this GC.
+         */
+        static gcbits_t& GetGCBits(const void* realptr);
+
         static GCWeakRef *GetWeakRef(const void *obj);
 
         // a WeakRef that always refers to null. useful if you need one.
@@ -1532,6 +1553,7 @@ namespace MMgc
         uint32_t mark_item_recursion_control;
 
 #ifdef _DEBUG
+        // Works on any address
         bool IsWhite(const void *item);
 #endif
 
