@@ -58,8 +58,9 @@ namespace avmplus
         _activation(NULL),
         _pool(declTraits->pool),
         _abc_info_pos(NULL),
-        _flags(RESOLVED),
-        _method_id(-1)
+        _method_id(-1),
+        _hasMethodBody(1),
+        _isResolved(1)
     {
         declTraits->core->exec->init(this, NULL);
     }
@@ -72,13 +73,14 @@ namespace avmplus
         _activation(NULL),
         _pool(declTraits->pool),
         _abc_info_pos(NULL),
-        _flags(RESOLVED),
-        _method_id(-1)
+        _method_id(-1),
+        _hasMethodBody(1),
+        _isResolved(1)
     {
         AvmAssert(native_info != NULL);
         this->_native.thunker = native_info->thunker;
         this->_native.handler = native_info->handler;
-        this->_flags |= compiledMethodFlags() | AOT_COMPILED;
+        this->setAotCompiled();
     }
 #endif
 
@@ -95,13 +97,25 @@ namespace avmplus
         _activation(NULL),
         _pool(pool),
         _abc_info_pos(abc_info_pos),
-        _flags(abcFlags),
-        _method_id(method_id)
+        _method_id(method_id),
+        _needArguments((abcFlags & abcMethod_NEED_ARGUMENTS) != 0),
+        _needActivation((abcFlags & abcMethod_NEED_ACTIVATION) != 0),
+        _needRest((abcFlags & abcMethod_NEED_REST) != 0),
+        _hasOptional((abcFlags & abcMethod_HAS_OPTIONAL) != 0),
+        _ignoreRest((abcFlags & abcMethod_IGNORE_REST) != 0),
+        _isNative((abcFlags & abcMethod_NATIVE) != 0),
+        _setsDxns((abcFlags & abcMethod_SETS_DXNS) != 0),
+        _hasParamNames((abcFlags & abcMethod_HAS_PARAM_NAMES) != 0),
+        _hasMethodBody(1) // assume we have bytecode body until set otherwise
     {
         AvmAssert(method_id >= 0);
 
         if (native_info)
-            this->_flags |= NEEDS_CODECONTEXT | NEEDS_DXNS | ABSTRACT_METHOD;
+        {
+            _needsCodeContext = 1;
+            _needsDxns = 1;
+            _hasMethodBody = 0;
+        }
         pool->core->exec->init(this, native_info);
     }
 
@@ -342,7 +356,7 @@ namespace avmplus
     Atom MethodInfo::boxOneLocal(FramePtr src, int32_t srcPos, const uint8_t* sstArr)
     {
         // if we are running jit then the types are native and we need to box them.
-        if (_flags & JIT_IMPL)
+        if (_isJitImpl)
         {
             src = FramePtr(uintptr_t(src) + srcPos*8);
             AvmAssert(sstArr != NULL);
@@ -384,7 +398,7 @@ namespace avmplus
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
     void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int32_t dstPos, const uint8_t* sstArr)
     {
-        if (_flags & JIT_IMPL)
+        if (_isJitImpl)
         {
             AvmAssert(sstArr != NULL);
             dst = FramePtr(uintptr_t(dst) + dstPos*8);
@@ -468,13 +482,13 @@ namespace avmplus
     {
         AvmAssert(!isResolved());
 // begin AVMPLUS_UNCHECKED_HACK
-        AvmAssert(!(_flags & PROTOFUNC));
+        AvmAssert(!_isProtoFunc);
 // end AVMPLUS_UNCHECKED_HACK
 
         if (_declarer.getTraits() == NULL)
         {
             _declarer.setTraits(pool()->core->GetGC(), this, traits);
-            _flags |= NEED_CLOSURE;
+            _needClosure = 1;
             return true;
         }
         else
@@ -495,7 +509,7 @@ namespace avmplus
         _declarer.setScope(toplevel->core()->GetGC(), this, fscope);
 
 // begin AVMPLUS_UNCHECKED_HACK
-        this->_flags |= PROTOFUNC;
+        this->_isProtoFunc = 1;
 // end AVMPLUS_UNCHECKED_HACK
 
         // make sure param & return types are fully resolved.
@@ -547,7 +561,7 @@ namespace avmplus
         if (pos)
         {
             returnType = pool->resolveTypeName(pos, toplevel, /*allowVoid=*/true);
-            receiverType = (_flags & NEED_CLOSURE) ? declaringTraits() : core->traits.object_itraits;
+            receiverType = _needClosure ? declaringTraits() : core->traits.object_itraits;
             rest_offset = argSize(receiverType);
 // begin AVMPLUS_UNCHECKED_HACK
             uint32_t untyped_args = 0;
@@ -565,9 +579,9 @@ namespace avmplus
             pos++; // abcFlags;
 // begin AVMPLUS_UNCHECKED_HACK
             if (untyped_args == param_count)
-                _flags |= ONLY_UNTYPED_PARAMETERS;
+                _onlyUntypedParameters = 1;
             // toplevel!=NULL check is so we only check when resolveSignature calls us (not subsequently)
-            if (toplevel != NULL && (_flags & PROTOFUNC))
+            if (toplevel != NULL && _isProtoFunc)
             {
                 // HACK - compiler should do this, and only to toplevel functions
                 // that meet the E4 criteria for being an "unchecked function"
@@ -575,10 +589,12 @@ namespace avmplus
 
                 // if all params and return types are Object then make all params optional=undefined
                 if (param_count == 0)
-                    _flags |= IGNORE_REST;
+                    _ignoreRest = 1;
                 if (!hasOptional() && returnType == NULL && param_count > 0 && untyped_args == param_count)
                 {
-                    _flags |= HAS_OPTIONAL | IGNORE_REST | UNCHECKED;
+                    _hasOptional = 1;
+                    _ignoreRest = 1;
+                    _isUnchecked = 1;
                     // oops -- the ms we allocated is too small, has no space for optional values
                     // but it's easy to re-create, especially since we know the types are all null
                     const uint32_t extra = sizeof(MethodSignature::AtomOrType) * (param_count + param_count);
@@ -586,7 +602,7 @@ namespace avmplus
                     // don't need to re-set paramTypes: they are inited to NULL which is the right value
                 }
             }
-            if (_flags & UNCHECKED)
+            if (_isUnchecked)
             {
                 optional_count = param_count;
                 for (uint32_t j=0; j < optional_count; j++)
@@ -663,7 +679,8 @@ namespace avmplus
         ms->_param_count = param_count;
         ms->_optional_count = optional_count;
         ms->_rest_offset = rest_offset;
-        ms->_flags = this->_flags;
+        ms->_isNative = this->isNative();
+        ms->_allowExtraArgs = this->_needRest || this->_needArguments || this->_ignoreRest;
         WB(gc, ms, &ms->_returnTraits, returnType);
         WB(gc, ms, &ms->_args[0].paramType, receiverType);
 
@@ -714,9 +731,9 @@ namespace avmplus
             }
 
             if (ms->paramTraits(0) != NULL && ms->paramTraits(0)->isInterface())
-                _flags |= ABSTRACT_METHOD;
+                _hasMethodBody = 0;
 
-            _flags |= RESOLVED;
+            _isResolved = 1;
             pool()->core->exec->notifyMethodResolved(this, ms);
         }
     }
@@ -733,27 +750,27 @@ namespace avmplus
 
     bool MethodInfo::usesCallerContext() const
     {
-        return pool()->isBuiltin && (!isNative() || (_flags & NEEDS_CODECONTEXT));
+        return pool()->isBuiltin && (!_isNative || _needsCodeContext);
     }
 
     // Builtin + non-native functions always need the dxns code emitted
     // Builtin + native functions have flags to specify if they need the dxns code
     bool MethodInfo::usesDefaultXmlNamespace() const
     {
-        return pool()->isBuiltin && (!isNative() || (_flags & NEEDS_DXNS));
+        return pool()->isBuiltin && (!_isNative || _needsDxns);
     }
 
     bool MethodInfo::isTrivial()
     {
-        if (_flags & TRIVIAL)
+        if (_isTrivial)
             return true;
-        if (_flags & NONTRIVIAL)
+        if (_isNonTrivial)
             return false;
         bool trivial = computeIsTrivial();
         if (trivial)
-            _flags |= TRIVIAL;
+            _isTrivial = 1;
         else
-            _flags |= NONTRIVIAL;
+            _isNonTrivial = 1;
         return trivial;
     }
 
@@ -771,21 +788,25 @@ namespace avmplus
 #else
         // Initial attribute guard:
         //
-        // NEED_REST and NEED_ARGUMENTS are here because they invoke
+        // _needRest and _needArguments are here because they invoke
         // the Array constructor, ie, they may update system state.
         //
-        // NATIVE and ABSTRACT_METHOD are here because those methods have
+        // _isNative and _hasMethodBody are here because those methods have
         // no bytecode, and this computation is bytecode-based.
         //
-        // SETS_DXNS is here because the "default xml namespace" semantics
+        // _setsDxns is here because the "default xml namespace" semantics
         // are wild & crazy and some testing suggests that all bets are
         // off when using it.  (Belt and suspenders, belt and suspenders...)
         //
-        // NEED_ACTIVATION is here mostly as a shortcut; it will usually pair
+        // _needActivation is here mostly as a shortcut; it will usually pair
         // with NEWACTIVATION and GETPROPERTY and so on, and so the method will
         // be tossed out anyway.
-
-        if ((_flags & (NEED_ACTIVATION|NEED_REST|NEED_ARGUMENTS|NATIVE|SETS_DXNS|ABSTRACT_METHOD)) != 0)
+        if (_needActivation ||
+            _needRest ||
+            _needArguments ||
+            _isNative ||
+            _setsDxns ||
+            !_hasMethodBody)
             return false;
 
         const uint8_t* pc = _abc.body_pos;
@@ -962,9 +983,9 @@ namespace avmplus
                 else if (name)
                 {
                     const char* sep;
-                    if (_flags & IS_GETTER)
+                    if (_isGetter)
                         sep = "/get ";
-                    else if (_flags & IS_SETTER)
+                    else if (_isSetter)
                         sep = "/set ";
                     else
                         sep = "/";
