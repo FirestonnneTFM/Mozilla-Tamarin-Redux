@@ -70,7 +70,7 @@ namespace avmplus {
     class NumberClass; //Number$
     class ObjectClass; //Object$
     class ObjectVectorClass; //__AS3__.vec::Vector$object$
-    class ObjectVectorObject; //__AS3__.vec::Vector$object
+    class ObjectVectorObject; //__AS3__.vec::Vector
     class QNameClass; //QName$
     class QNameObject; //QName
     class RangeErrorClass; //RangeError$

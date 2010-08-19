@@ -276,6 +276,8 @@ class RuntestBase:
             elif o in ('--testtimeout',):
                 self.testTimeOut=int(v)
             elif o in ('-d',):
+                # Note that this is not documented in the usage text.  This
+                # should only be used for debugging the runtests scripts
                 self.debug = True
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
@@ -1113,7 +1115,7 @@ class RuntestBase:
     def run_pipe(self, cmd, outputCalls=None):
         # run a command and return a tuple of (output, stdErr, exitCode)
         if outputCalls != None:
-            outputCalls.append((self.debug_print,(cmd,)))
+            outputCalls.append((self.verbose_print,(cmd,)))
         try:
             self.lock.acquire()
             try:

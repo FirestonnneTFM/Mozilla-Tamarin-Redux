@@ -121,7 +121,7 @@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_D
 	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
 	@echo "Compiling $$*"
 	@$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
-	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps $$< < $$@ > /dev/null
+	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps $$@ $$< < $$@ > /dev/null
 
 $$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.$(II_SUFFIX) $$(GLOBAL_DEPS)
 	@$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
@@ -130,7 +130,7 @@ $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)): %.$(I_SUFFIX): %.c $$(GLOBAL_DEPS)
 	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
 	@echo "Compiling $$*"
 	@$(CC) -E $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
-	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps $$< < $$@ > /dev/null
+	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps $$@ $$< < $$@ > /dev/null
 
 $$($(1)_COBJS): %.$(OBJ_SUFFIX): %.$(I_SUFFIX) $$(GLOBAL_DEPS)
 	@$(CC) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<

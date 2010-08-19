@@ -57,12 +57,12 @@ REALLY_INLINE const uint8_t* PoolObject::getMetadataInfoPos(uint32_t index)
     return metadata_infos[index];
 }
 
-REALLY_INLINE Traits* PoolObject::resolveTypeName(const uint8_t*& pc, const Toplevel* toplevel, bool allowVoid) const
+REALLY_INLINE Traits* PoolObject::resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid)
 {
     return resolveTypeName(AvmCore::readU32(pc), toplevel, allowVoid);
 }
 
-REALLY_INLINE void PoolObject::resolveBindingNameNoCheck(const uint8_t* &p, Multiname &m, const Toplevel* toplevel) const
+REALLY_INLINE void PoolObject::resolveBindingNameNoCheck(const byte* &p, Multiname &m, const Toplevel* toplevel) const
 {
     resolveBindingNameNoCheck(AvmCore::readU32(p), m, toplevel);
 }

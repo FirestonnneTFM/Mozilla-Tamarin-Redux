@@ -154,6 +154,7 @@ function endSilent () {
         exec 1>&6 6>&-      # Restore stdout and close file descriptor #6.
         # ${logfile##*/} == filename from end of path
         echo "Build log can be found here: http://asteam.macromedia.com/builds/$branch/${change}-${changeid}/$platform/${logfile##*/}"
+	echo "url: http://asteam.macromedia.com/builds/$branch/${change}-${changeid}/$platform/${logfile##*/} build log"
     }
 }
 

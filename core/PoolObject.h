@@ -129,27 +129,15 @@ namespace avmplus
         PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api);
         ~PoolObject();
 
-        MethodInfo* getNamedScript(const Multiname* multiname) const;
-
         // search metadata record at meta_pos for name, return true if present
         bool hasMetadataName(const uint8_t* meta_pos, const String* name);
         const uint8_t* getMetadataInfoPos(uint32_t index);
 
-        Traits* getTraits(Stringp name, Namespacep ns) const;
-        Traits* getTraits(const Multiname& n, const Toplevel* toplevel) const;
-        Traits* getTraits(Stringp name) const;
-
-        Traits* getBuiltinTraits(Stringp name) const;
-
-        void addPrivateNamedScript(Stringp name, Namespacep ns, MethodInfo *a);
-        Traits* addUniqueTraits(Stringp name, Namespacep ns, Traits* traits);
-        Traits* addUniqueParameterizedITraits(AvmCore* core, const Toplevel* toplevel, Traits* base, Traits* param_traits);
-
         /** deferred parsing */
         void parseMultiname(const uint8_t *pos, Multiname& m) const;
 
-        Traits* resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid=false) const;
-        Traits* resolveTypeName(const uint8_t*& pc, const Toplevel* toplevel, bool allowVoid=false) const;
+        Traits* resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid=false);
+        Traits* resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid=false);
 
         void resolveBindingNameNoCheck(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
         void resolveBindingNameNoCheck(const uint8_t* &p, Multiname &m, const Toplevel* toplevel) const;
@@ -190,6 +178,12 @@ namespace avmplus
         void dynamicizeStrings();
 
     private:
+        friend class DomainMgrFP10;
+        DWB(MultinameHashtable*)                    m_namedTraits;
+        DWB(MultinameHashtable*)                    m_namedScriptsMap;
+        List<MethodInfo*>                           m_namedScriptsList;           // list of MethodInfo* for the scripts
+
+    private:
         union ConstantStringData
         {
             Stringp     str;
@@ -203,8 +197,6 @@ namespace avmplus
             void setup(uint32_t size);
             ConstantStringData* data;
         };
-        DWB(MultinameHashtable*)                    _namedTraits;
-        DWB(MultinameHashtable*)                    _privateNamedScripts;
         DWB(ScriptBufferImpl*)                      _code;
         const uint8_t * const                       _abcStart;
         // start of static ABC string data
