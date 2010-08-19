@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\core\DescribeTypeClass.cpp" />
     <ClCompile Include="..\..\core\Domain.cpp" />
     <ClCompile Include="..\..\core\DomainEnv.cpp" />
+    <ClCompile Include="..\..\core\DomainMgr.cpp" />
     <ClCompile Include="..\..\core\E4XNode.cpp" />
     <ClCompile Include="..\..\core\ErrorClass.cpp" />
     <ClCompile Include="..\..\core\ErrorConstants.cpp" />
@@ -423,6 +424,7 @@
     <ClInclude Include="..\..\core\DescribeTypeClass.h" />
     <ClInclude Include="..\..\core\Domain.h" />
     <ClInclude Include="..\..\core\DomainEnv.h" />
+    <ClInclude Include="..\..\core\DomainMgr.h" />
     <ClInclude Include="..\..\core\E4XNode.h" />
     <ClInclude Include="..\..\core\ErrorClass.h" />
     <ClInclude Include="..\..\core\ErrorConstants.h" />
