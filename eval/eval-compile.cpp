@@ -179,7 +179,7 @@ namespace avmplus
             , SYM_to(intern("to"))
             , SYM_use(intern("use"))
             , SYM_xml(intern("xml"))
-            , str_filename(intern(this->filename, NULL))
+            , str_filename(intern(this->filename, 0))
             , NS_public(abc.addNamespace(CONSTANT_Namespace, abc.addString(SYM_)))
             , ID_Array(abc.addQName(NS_public, abc.addString(SYM_Array)))
             , ID_Namespace(abc.addQName(NS_public, abc.addString(SYM_Namespace)))

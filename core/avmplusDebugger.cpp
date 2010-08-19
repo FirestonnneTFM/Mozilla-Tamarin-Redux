@@ -684,14 +684,14 @@ namespace avmplus
     }
 
     int Debugger::autoVarCount(DebugStackFrame* frame, AutoVarKind kind) {
-        if (frame == NULL) return NULL;
+        if (frame == NULL) return 0;
         int line, count;
         Atom* ptr;
         SourceInfo* src = NULL;
         // source information
         frame->sourceLocation(src, line);
         MethodInfo* info = functionFor(src, line, frame);
-        if (!info) return NULL;
+        if (!info) return 0;
         switch (kind) {
         case AUTO_LOCAL:
             return frame->locals(ptr, count) ? count : -1;
