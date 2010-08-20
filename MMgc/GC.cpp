@@ -1448,8 +1448,14 @@ namespace MMgc
 
     void GC::AbortFree(const void* item)
     {
-        // this presumes we got here via delete, maybe we should have
-        // delete call something other than the public Free to distinguish
+        // FIXME - https://bugzilla.mozilla.org/show_bug.cgi?id=589102.
+        // (a) This code presumes we got here via delete, but that may not always 
+        //     be true, and if we didn't then it isn't right to clear the finalized
+        //     bit nor the weak ref bit.
+        // (b) If we can't free an object it may be that we should clear it, to
+        //     avoid hanging onto pointers to other objects.  AtomArray::checkCapacity
+        //     clears an object explicitly before freeing it always but should not have
+        //     to do that.
         if(IsFinalized(item))
             ClearFinalized(item);
         if(HasWeakRef(item))
