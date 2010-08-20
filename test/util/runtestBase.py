@@ -214,6 +214,10 @@ class RuntestBase:
         print '    --javaargs      arguments to pass to java'
         print '    --random        run tests in random order'
         print '    --seed          explicitly specify random seed for --random'
+        print '    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.'
+        print '    --aotout        where the resulting binaries should be put (defaults to the location of the as file).'
+        print '    --aotargs       any extra arguments to pass to compile.py.'
+        
 
 
 
@@ -307,6 +311,12 @@ class RuntestBase:
                 self.random = True
             elif o in ('--seed',):
                 self.randomSeed = int(v)
+            elif o in ('--aotsdk',):
+                self.aotsdk = v
+            elif o in ('--aotout',):
+                self.aotout = v
+            elif o in ('--aotargs',):
+                self.aotextraargs = v
 
         return opts
 
@@ -784,8 +794,8 @@ class RuntestBase:
                 self.js_print('AOT compilation of %s' % (outabc))
 
                 t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
-                (f,err,exitcode) = self.run_pipe('python2.5 %s %s --output %s --name %s %s %s %s' % (
-                    os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
+                (f,err,exitcode) = self.run_pipe('%s %s %s --output %s --name %s %s %s %s' % (
+                    sys.executable, os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
 
                 for line in f:
                     self.js_print(("file '%s'>>> " % abcfile) + line.strip())
