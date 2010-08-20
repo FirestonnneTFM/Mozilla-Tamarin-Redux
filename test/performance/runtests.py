@@ -198,9 +198,6 @@ class PerformanceRuntest(RuntestBase):
         print " -k --socketlog     logs results to a socket server"
         print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
         print " -m --memory        logs the high water memory mark"
-        print "    --aotsdk        location of the AOT sdk used to compile tests to standalone executables."
-        print "    --aotout        where the resulting binaries should be put (defaults to the location of the as file)."
-        print "    --aotargs       any extra arguments to pass to compile.py."
         print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
         print "    --vm2version    specify version of avm2"
         print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
@@ -241,12 +238,6 @@ class PerformanceRuntest(RuntestBase):
                 self.vmname = v
             elif o in ('-m', '--memory'):
                 self.memory = True
-            elif o in ('--aotsdk'):
-                self.aotsdk = v
-            elif o in ('--aotout'):
-                self.aotout = v
-            elif o in ('--aotargs'):
-                self.aotextraargs = v
             elif o in ('--vmversion',):
                 self.avmversion = v
             elif o in ('--vm2version',):

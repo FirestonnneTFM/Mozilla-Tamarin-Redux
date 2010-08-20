@@ -93,9 +93,6 @@ class AcceptanceRuntest(RuntestBase):
         print '    --androidthreads    assign a thread for each android device connected.'
         print '    --verify        run a verify pass instead of running abcs'
         print '    --verifyonly    run a -Dverifyonly pass: only checks test exitcode'
-        print '    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.'
-        print '    --aotout        where the resulting binaries should be put (defaults to the location of the as file).'
-        print '    --aotargs       any extra arguments to pass to compile.py.'
         print '    --remoteip      IP/DNS address of the machine to run the tests on.'
         print '    --remoteuser    user name to use to connect to the remote machine.'
         exit(c)
@@ -133,12 +130,6 @@ class AcceptanceRuntest(RuntestBase):
                 self.verifyonly = True
                 if '-Dverifyonly' not in self.vmargs:
                     self.vmargs += ' -Dverifyonly'
-            elif o in ('--aotsdk',):
-                self.aotsdk = v
-            elif o in ('--aotout',):
-                self.aotout = v
-            elif o in ('--aotargs',):
-                self.aotextraargs = v
             elif o in ('--remoteip',):
                 self.remoteip = v
             elif o in ('--remoteuser',):
