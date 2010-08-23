@@ -97,7 +97,6 @@ namespace avmplus
         BuiltinTraits();
 
         void initInstanceTypes(PoolObject* pool);
-        void initFunctionTypes();
         void initClassTypes(PoolObject* pool);
 
         // Main built-in class traits
