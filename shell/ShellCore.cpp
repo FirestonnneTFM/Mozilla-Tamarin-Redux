@@ -161,6 +161,7 @@ namespace avmshell
 
     void ShellCore::initShellPool()
     {
+        shell_domain = Domain::newDomain(this, builtinDomain);
 #ifdef VMCFG_AOT
         NativeInitializer shellNInit(this,
             &shell_toplevel_aotInfo,
@@ -168,9 +169,9 @@ namespace avmshell
             avmplus::NativeID::shell_toplevel_abc_class_count);
         shellNInit.fillInClasses(avmplus::NativeID::shell_toplevel_classEntries);
         shellNInit.fillInMethods(avmplus::NativeID::shell_toplevel_methodEntries);
-        shellPool = shellNInit.parseBuiltinABC(builtinDomain);
+        shellPool = shellNInit.parseBuiltinABC(shell_domain);
 #else
-        shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this);
+        shellPool = AVM_INIT_BUILTIN_ABC_IN_DOMAIN(shell_toplevel, this, shell_domain);
 #endif
     }
 
@@ -179,13 +180,20 @@ namespace avmshell
         // Initialize a new Toplevel.  This will also create a new
         // DomainEnv based on the builtinDomain.
         ShellToplevel* shell_toplevel = (ShellToplevel*)initToplevel();
+        
+        DomainEnv* builtinDomainEnv = shell_toplevel->domainEnv();
+        AvmAssert(builtinDomainEnv->domain() == builtinDomain);
+        AvmAssert(builtinDomainEnv->base() == NULL);
+        
+        shell_domainEnv = DomainEnv::newDomainEnv(this, shell_domain, builtinDomainEnv);
 
         // Initialize the shell builtins in the new Toplevel
         // use the same bugCompatibility that the base builtins use
         const BugCompatibility* shell_bugCompatibility = shell_toplevel->abcEnv()->codeContext()->bugCompatibility();
-        ShellCodeContext* shell_codeContext = new(GetGC()) ShellCodeContext(shell_toplevel->domainEnv(), shell_bugCompatibility);
+        ShellCodeContext* shell_codeContext = new(GetGC()) ShellCodeContext(shell_domainEnv, shell_bugCompatibility);
 
-		handleActionPool(shellPool, shell_toplevel, shell_codeContext);
+		//handleActionPool(shellPool, shell_toplevel, shell_codeContext);
+        shell_toplevel->shellEntryPoint = prepareActionPool(shellPool, shell_toplevel, shell_codeContext);
 
         return shell_toplevel;
     }
@@ -426,9 +434,6 @@ namespace avmshell
             // init toplevel internally
             shell_toplevel = createShellToplevel();
 
-            DomainEnv* shell_domainEnv = shell_toplevel->domainEnv();
-            Domain* shell_domain = shell_domainEnv->domain();
-
             // Create a new Domain/DomainEnv for the user code
             Domain* user_domain = Domain::newDomain(this, shell_domain);
             DomainEnv* user_domainEnv = DomainEnv::newDomainEnv(this, user_domain, shell_domainEnv);
@@ -461,7 +466,7 @@ namespace avmshell
 
 #ifdef AVMPLUS_VERBOSE
     const char* ShellCore::identifyDomain(Domain* domain) {
-        return domain == builtinDomain ? "builtin" : (domain == shell_toplevel->domainEnv()->domain() ? "shell" : NULL);
+        return domain == builtinDomain ? "builtin" : (domain == shell_domain ? "shell" : NULL);
     }
 #endif
 

@@ -257,7 +257,8 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
     // since a DomainEnv can be shared among several AbcEnv's, 
     // its list might not be empty.
     Domain* domain = pool->domain;
-    abcEnv->domainEnv()->m_namedScriptEnvsList.ensureCapacity(domain->m_namedScriptsList.size());
+    DomainEnv* domainEnv = abcEnv->domainEnv();
+    domainEnv->m_namedScriptEnvsList.ensureCapacity(domainEnv->m_namedScriptEnvsList.size() + domain->m_namedScriptsList.size());
     for (uint32_t i = 0, n = domain->m_namedScriptsList.size(); i < n; ++i)
     {
         MethodInfo* mi = domain->m_namedScriptsList[i];
@@ -265,8 +266,21 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
             continue; 
         ScriptEnv* se = (ScriptEnv*)ht->get((Atom)mi);
         AvmAssert(se != (ScriptEnv*)undefinedAtom);
-        abcEnv->domainEnv()->m_namedScriptEnvsList.set(i, se);
+        AvmAssert(i >= domainEnv->m_namedScriptEnvsList.size() || domainEnv->m_namedScriptEnvsList.get(i) == 0);
+        domainEnv->m_namedScriptEnvsList.set(i, se);
     }
+
+    #ifdef _DEBUG
+    // final reality check.
+    AvmAssert(domainEnv->m_namedScriptEnvsList.size() == domainEnv->m_namedScriptEnvsList.size());
+    for (uint32_t i = 0, n = domain->m_namedScriptsList.size(); i < n; ++i)
+    {
+        MethodInfo* mi = domain->m_namedScriptsList[i];
+        ScriptEnv* se = domainEnv->m_namedScriptEnvsList[i];
+        AvmAssert(mi != NULL && se != NULL);
+        AvmAssert(se->method == mi);
+    }
+    #endif
     
     delete ht;
 

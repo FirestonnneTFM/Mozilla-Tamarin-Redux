@@ -211,6 +211,8 @@ namespace avmshell
         bool inStackOverflow;
         int allowDebugger;
         ShellToplevel* shell_toplevel;
+        DomainEnv* shell_domainEnv;
+        Domain* shell_domain;
         // Note that this has been renamed to emphasize the fact that it is
         // the CodeContext/DomainEnv that user code will run in (as opposed
         // to the Shell's builtin classes, eg System, File, Domain).
@@ -221,6 +223,8 @@ namespace avmshell
 
     class ShellToplevel : public Toplevel
     {
+        friend class ShellCore;
+        
     public:
         ShellToplevel(AbcEnv* abcEnv);
 
@@ -236,11 +240,12 @@ namespace avmshell
     private:
         ClassClosure* resolveShellClass(int class_id)
         {
-            ClassClosure* cc = findClassInPool(class_id, core()->getShellPool());
+            ClassClosure* cc = findClassInScriptEnv(class_id, shellEntryPoint);
             WBRC(core()->GetGC(), shellClasses, &shellClasses[class_id], cc);
             return cc;
         }
 
+        DWB(ScriptEnv*) shellEntryPoint;
         DWB(ClassClosure**) shellClasses;
     };
 }
