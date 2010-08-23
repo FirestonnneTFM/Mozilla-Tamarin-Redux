@@ -317,7 +317,7 @@ namespace avmplus
         ScopeChain* toplevel_scope();
 
     protected:
-        ClassClosure* findClassInPool(int class_id, PoolObject* pool);
+        ClassClosure* findClassInScriptEnv(int class_id, ScriptEnv* env);
 
     private:
 

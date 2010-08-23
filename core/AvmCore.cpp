@@ -617,6 +617,7 @@ namespace avmplus
         // Note that the order of the list doesn't matter (DomainMgr will use a hashtable
         // to do the relevant association).
         List<ScriptEnv*> envs(GetGC());
+        envs.ensureCapacity(pool->scriptCount());
 
         // some code relies on the final script being initialized first, so we
         // must continue that behavior

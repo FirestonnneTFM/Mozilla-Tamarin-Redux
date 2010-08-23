@@ -66,12 +66,12 @@ namespace avmplus
         class_ivtable->resolveSignatures(class_iscope);
     }
 
-    ClassClosure* Toplevel::findClassInPool(int class_id, PoolObject* pool)
+    ClassClosure* Toplevel::findClassInScriptEnv(int class_id, ScriptEnv* env)
     {
+        PoolObject* pool = env->abcEnv()->pool();
         Traits* traits = pool->getClassTraits(class_id)->itraits;
         Multiname qname(traits->ns(), traits->name());
-        AvmAssert(_mainEntryPoint == global()->vtable->init);
-        ScriptObject* container = _mainEntryPoint->finddef(&qname);
+        ScriptObject* container = env->finddef(&qname);
 
         Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
         ClassClosure* cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
@@ -84,7 +84,8 @@ namespace avmplus
         if (core()->config.verifyonly)
             return NULL;
 #endif
-        ClassClosure* cc = findClassInPool(class_id, core()->builtinPool);
+        AvmAssert(_mainEntryPoint == global()->vtable->init);
+        ClassClosure* cc = findClassInScriptEnv(class_id, _mainEntryPoint);
         //builtinClasses[class_id] = cc;
         WBRC(core()->GetGC(), _builtinClasses, &_builtinClasses[class_id], cc);
         return cc;
