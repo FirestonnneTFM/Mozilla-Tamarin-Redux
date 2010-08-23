@@ -219,8 +219,9 @@ regress/bug_558442a, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.o
 # Performance-acceptance testing: tests that must run on a performance machine 
 ####################
 #as3/Definitions/Function/RestOptimization, (debugger(?!.*-Dnodebugger))|interp, skip, Optimization not enabled unless running JIT with -Dnodebugger
-# Note the enabler below is not quite right, it needs to incorporate the regex above somehow too.
+# Note the enablers below are not quite right, they need to incorporate the regex above somehow too.
 as3/Definitions/Function/RestOptimization,  .*(?<!-performance) , skip, Optimization not enabled unless running JIT with -Dnodebugger
+as3/Definitions/Function/ArgumentsOptimization,  .*(?<!-performance) , skip, Optimization not enabled unless running JIT with -Dnodebugger
 
 ####################
 # skip slow tests in test phase, -Dgreedy passes
