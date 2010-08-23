@@ -485,6 +485,8 @@ namespace avmplus
         AvmAssert(!_isProtoFunc);
 // end AVMPLUS_UNCHECKED_HACK
 
+        _hasMakeMethodOfBeenCalled = 1;
+
         if (_declarer.getTraits() == NULL)
         {
             _declarer.setTraits(pool()->core->GetGC(), this, traits);
@@ -504,6 +506,14 @@ namespace avmplus
 
     void MethodInfo::makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope)
     {
+        // Once a MethodInfo has been made a method of a particular class,
+        // it is an error to attempt to use it for OP_newfunction; we may have
+        // jitted code with the method and made early-binding assumptions about the 
+        // receiver type that this would invalidate (by allowing us to call the method
+        // with a different type of object).
+        if (_hasMakeMethodOfBeenCalled)
+			toplevel->throwVerifyError(kCorruptABCError);
+
         AvmAssert(_declarer.getScope() == NULL);
 
         _declarer.setScope(toplevel->core()->GetGC(), this, fscope);

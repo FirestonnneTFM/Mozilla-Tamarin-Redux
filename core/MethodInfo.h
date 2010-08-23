@@ -403,6 +403,9 @@ namespace avmplus
         uint32_t                _isUnchecked:1;
 // end AVMPLUS_UNCHECKED_HACK
 
+        // Set if makeMethodOf() has ever been called for this MethodInfo.
+        uint32_t                _hasMakeMethodOfBeenCalled:1;
+
 #ifdef VMCFG_AOT
         uint32_t                _isAotCompiled:1;
 #endif
