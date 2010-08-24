@@ -72,3 +72,46 @@ echo "message: total condition/decision coverage: $cdpct"
 
 echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/avm.cov code coverage data file avm.cov"
 
+
+# Current known platforms generating coverage data:
+platforms="windows mac linux"
+covfiles="" # this will get built up by looping over the platforms
+
+# Get the coverage files for all platforms. If all files are not avaible, stop.
+# Only continue processing if ALL platforms are complete.
+for platform in ${platforms}
+do
+    covfiles+="$platform/avm.cov "
+    if [ ! -e "$buildsdir/${change}-${changeid}/$platform/avm.cov" ]; then
+	echo "Downloading $platform/avm.cov"
+	${basedir}/build/buildbot/slaves/all/util-download.sh $vmbuilds$branch/${change}-${changeid}/$platform/avm.cov $buildsdir/${change}-${changeid}/$platform/avm.cov
+	ret=$?
+	test "$ret" = "0" || {
+            echo "Downloading of $platform/avm.cov failed"
+            rm -f $buildsdir/${change}-${changeid}/$platform/avm.cov
+	    echo "Not all coverage files are available so stop processing"
+            exit 0
+	}
+    fi
+done
+
+# Merge all coverage files into a single file and upload
+export COVFILE=$buildsdir/${change}-${changeid}/avm.cov
+test -f $COVFILE && rm -f $COVFILE
+
+echo $covfiles
+cd $buildsdir/${change}-${changeid}
+$bullseyedir/covmerge -c $covfiles
+
+
+$bullseyedir/covdir -q
+fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
+cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
+
+
+
+echo "message: combined total function coverage:           $fnpct"
+echo "message: combined total condition/decision coverage: $cdpct"
+
+. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/avm.cov
+echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/avm.cov combined code coverage data file avm.cov"
