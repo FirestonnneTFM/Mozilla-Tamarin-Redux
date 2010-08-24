@@ -57,6 +57,7 @@ namespace avmplus
         OutputStream() {}
         virtual ~OutputStream() {}
         virtual void write(const char* utf8) = 0;  // null terminated-utf8 data
+        virtual void writeN(const char* utf8, size_t charCount) = 0;  // fixed amount of utf8 data
     };
 }
 
