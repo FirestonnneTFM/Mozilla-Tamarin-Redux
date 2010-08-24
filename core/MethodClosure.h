@@ -52,16 +52,10 @@ namespace avmplus
         // this = argv[0] (ignored)
         // arg1 = argv[1]
         // argN = argv[argc]
-        Atom construct(int /*argc*/, Atom* /*argv*/)
-        {
-            AvmAssert(false);
-            return nullObjectAtom;
-        }
+        Atom construct(int argc, Atom* argv);
 
-        Atom call(int argc, Atom* argv)
-        {
-            return construct(argc,argv);
-        }
+        // overrides ClassClosure::call
+        Atom call(int argc, Atom* argv);
 
         MethodClosure* create(MethodEnv* env, Atom savedThis);
         DECLARE_SLOTS_MethodClosureClass;
