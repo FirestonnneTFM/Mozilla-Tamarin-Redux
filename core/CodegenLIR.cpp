@@ -6466,8 +6466,11 @@ namespace nanojit
         LIns* vars = checkAccSetExtras ? (LIns*)checkAccSetExtras[0] : 0;
         LIns* tags = checkAccSetExtras ? (LIns*)checkAccSetExtras[1] : 0;
 
-        bool isTags = base == tags;
-        bool isVars = base == vars;
+        // not enough to check base == xxx , since cse or lirbuffer may split (ld/st,b,d) into (ld/st,(addp,b,d),0)
+        bool isTags = (base == tags) ||
+                      ( (base->opcode() == LIR_addp) && (base->oprnd1() == tags) );
+        bool isVars = (base == vars) ||
+                      ( (base->opcode() == LIR_addp) && (base->oprnd1() == vars) );
         bool isUnknown = !isTags && !isVars;
 
         bool ok;
