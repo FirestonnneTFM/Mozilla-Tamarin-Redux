@@ -42,34 +42,26 @@
 
 namespace avmplus
 {
+    // The 2 base methods below (write/writeN) forward the request to the underlying
+    // m_stream.  For optimal performance you should check the m_stream methods and
+    // ensure that you're not performing unnecessary copies.  For example, if you have
+    // a null terminated string and are using a ConsoleOutputStream its best to call
+    // write() as opposed to writeN().  The latter copies to a intermediate buffer,
+    // while the former does not.
+
+    // ------------------------------------------------------------
+
     void PrintWriter::write(const char* utf8)
     {
         m_stream->write(utf8);
     }
 
-    // this is an expensive call , use with caution !!!
     void PrintWriter::writeN(const char* utf8, size_t count)
     {
-        //Currently this method is called from avmplus::PrintWriter class
-        //which can pass 1-4 bytes of data at at time.
-        //To do a new/delete for small bursts of data could be inefficient.
-        //So for data < 256 bytes we use a stack buffer to copy and log the message
-        if(count < 256)
-        {
-            char message[256];
-            VMPI_strncpy(message, (const char*) utf8, count);
-            message[count] = '\0';
-            write(message);
-        }
-        else
-        {
-            char* message = new char[count+1];
-            VMPI_strncpy(message, (const char*)utf8, count);
-            message[count] = '\0';
-            write(message);
-            delete [] message;
-        }
+        m_stream->writeN(utf8, count);
     }
+
+    // ------------------------------------------------------------
 
     // only called from Date.print()
     void PrintWriter::writeUTF16(const void* buffer, size_t count)

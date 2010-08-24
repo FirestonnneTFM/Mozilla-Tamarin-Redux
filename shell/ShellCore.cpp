@@ -92,7 +92,7 @@ namespace avmshell
 
         allowDebugger = -1; // aka "not yet set"
 
-        consoleOutputStream = new (gc) ConsoleOutputStream();
+        consoleOutputStream = new (gc) ConsoleOutputStream(gc);
 
         setConsoleStream(consoleOutputStream);
 
