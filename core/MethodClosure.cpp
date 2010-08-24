@@ -45,6 +45,22 @@ using namespace MMgc;
 
 namespace avmplus
 {
+    
+    // overrides ClassClosure::construct()
+    Atom MethodClosureClass::construct(int /*argc*/, Atom* /*argv*/)
+    {
+        // It's illegal to call "new MethodClosure", and only possible from
+        // builtin code, so nobody should do it.
+        AvmAssert(false);
+        return nullObjectAtom;
+    }
+
+    // overrides ClassClosure::call()
+    Atom MethodClosureClass::call(int argc, Atom* argv)
+    {
+        return construct(argc,argv);
+    }
+
     // [ed] why does the E4 semantics MethodClosure have a slot table?
     // [jd] The slot table of a method closure is used to hold the value of the length
     // property for the method. Dont know how important this is, but there you go.
