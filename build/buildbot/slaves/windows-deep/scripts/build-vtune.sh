@@ -80,8 +80,8 @@ rm build.out
 test "$res" = "0" || {
     echo "build failed return value $res"
 }
-test -f obj_9/shell/VTune/avmplus.exe || {
-    echo "avmshell is missing, build failed"
+test -f obj_9/shell/VTune/avm.exe || {
+    echo "avm is missing, build failed"
     cd $basedir/core
     hg revert avmplusVersion.h
     exit 1
@@ -90,7 +90,7 @@ test -f obj_9/shell/VTune/avmplus.exe || {
 
 mkdir -p $buildsdir/${change}-${changeid}/$platform
 chmod 777 $buildsdir/${change}-${changeid}/$platform
-cp obj_9/shell/VTune/avmplus.exe $buildsdir/${change}-${changeid}/$platform/$shell_release_vtune
+cp obj_9/shell/VTune/avm.exe $buildsdir/${change}-${changeid}/$platform/$shell_release_vtune
 chmod 777 $buildsdir/${change}-${changeid}/$platform/$shell_release_vtune
 
 echo ""
