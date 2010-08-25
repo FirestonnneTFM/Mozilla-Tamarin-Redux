@@ -110,6 +110,9 @@ private:
 #ifdef DEBUGGER
     ScriptEnv* findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* domainEnv, Stringp name);
 #endif
+#ifdef _DEBUG
+    static void verifyMatchingLookup(Binding b, const List<MethodInfo*>& listMI, const List<ScriptEnv*>& listSE);
+#endif
 private:
     AvmCore* const core;
 };
