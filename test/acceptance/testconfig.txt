@@ -272,11 +272,7 @@ spidermonkey/js1_6/extensions/regress-456826, .*deep, include, include slow test
 # is fixed will also need to find a way to not run on testcase with
 # wordcode shell, which currently only runs on winmo in the deep
 # phase, all other platforms run it in the first phase
-
-# Bug https://bugzilla.mozilla.org/show_bug.cgi?id=583731
-# Unable to mark as expectedfail so need to NOT 'include' it in the
-# deep phase testing until this is resolved 
-#misc/testJitordieSwitch, ^((?!arm-winmobile-).).*deep, include, include slow tests in deep phase
+misc/testJitordieSwitch, ^((?!arm-winmobile-).).*deep, include, include slow tests in deep phase
 
 
 ####################
