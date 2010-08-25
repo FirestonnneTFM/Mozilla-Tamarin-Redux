@@ -272,7 +272,7 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
 
     #ifdef _DEBUG
     // final reality check.
-    AvmAssert(domainEnv->m_namedScriptEnvsList.size() == domainEnv->m_namedScriptEnvsList.size());
+    AvmAssert(domain->m_namedScriptsList.size() == domainEnv->m_namedScriptEnvsList.size());
     for (uint32_t i = 0, n = domain->m_namedScriptsList.size(); i < n; ++i)
     {
         MethodInfo* mi = domain->m_namedScriptsList[i];
