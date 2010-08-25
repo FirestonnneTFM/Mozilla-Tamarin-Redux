@@ -253,7 +253,7 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
         AvmAssert(se != (ScriptEnv*)undefinedAtom);
         abcEnv->m_namedScriptEnvsList.set(i, se);
     }
-    
+
     // since a DomainEnv can be shared among several AbcEnv's, 
     // its list might not be empty.
     Domain* domain = pool->domain;
@@ -270,17 +270,11 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
         domainEnv->m_namedScriptEnvsList.set(i, se);
     }
 
-    #ifdef _DEBUG
-    // final reality check.
-    AvmAssert(domain->m_namedScriptsList.size() == domainEnv->m_namedScriptEnvsList.size());
-    for (uint32_t i = 0, n = domain->m_namedScriptsList.size(); i < n; ++i)
-    {
-        MethodInfo* mi = domain->m_namedScriptsList[i];
-        ScriptEnv* se = domainEnv->m_namedScriptEnvsList[i];
-        AvmAssert(mi != NULL && se != NULL);
-        AvmAssert(se->method == mi);
-    }
-    #endif
+    // It may be tempting to check that domainEnv->m_namedScriptEnvsList matches domain->m_namedScriptsList here; 
+    // do not do this, for if we are lazily initializing pools, the Domain/DomainEnv lists
+    // can be temporarily out of sync. Instead, defer the check until the first time we
+    // actually do a DomainEnv-based lookup, which is the first time they really do need to
+    // be in sync.
     
     delete ht;
 
@@ -290,6 +284,24 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
 #endif
 }
 
+#ifdef _DEBUG
+/*static*/ void DomainMgrFP10::verifyMatchingLookup(Binding b, const List<MethodInfo*>& listMI, const List<ScriptEnv*>& listSE)
+{
+    // Note that when code is lazily inited, these lists might not be identical.
+    // So we only verify that the part we need to look up matches properly.
+    uint32_t const i = uint32_t(uintptr_t(b))-1;
+    AvmAssert(i < listMI.size());
+    AvmAssert(i < listSE.size());
+    MethodInfo* mi = listMI[i];
+    ScriptEnv* se = listSE[i];
+    AvmAssert((mi != NULL) == (se != NULL));
+    if (se != NULL)
+    {
+        AvmAssert(se->method == mi);
+    }
+}
+#endif
+
 ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* domainEnv, const Multiname& multiname)
 {
     for (uint32_t i = domainEnv->m_baseCount; i > 0; --i)
@@ -298,6 +310,9 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* dom
 		Binding b = d->domain()->m_namedScriptsMap->getMulti(multiname);
         if (b != BIND_NONE)
         {
+            #ifdef _DEBUG
+            verifyMatchingLookup(b, d->domain()->m_namedScriptsList, d->m_namedScriptEnvsList);
+            #endif
             return (b == BIND_AMBIGUOUS) ? 
                     (ScriptEnv*)BIND_AMBIGUOUS : 
                     d->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
@@ -320,6 +335,9 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const
 		Binding b = abcEnv->pool()->m_namedScriptsMap->getMulti(multiname);
         if (b != BIND_NONE)
         {
+            #ifdef _DEBUG
+            verifyMatchingLookup(b, abcEnv->pool()->m_namedScriptsList, abcEnv->m_namedScriptEnvsList);
+            #endif
             se = (b == BIND_AMBIGUOUS) ? 
                     (ScriptEnv*)BIND_AMBIGUOUS : 
                     abcEnv->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
@@ -338,6 +356,9 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* doma
 		Binding b = d->domain()->m_namedScriptsMap->getName(name);
         if (b != BIND_NONE)
         {
+            #ifdef _DEBUG
+            verifyMatchingLookup(b, d->domain()->m_namedScriptsList, d->m_namedScriptEnvsList);
+            #endif
             ScriptEnv* f = (ScriptEnv*)d->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
             return f;
         }
@@ -353,6 +374,9 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, String
 		Binding b = abcEnv->pool()->m_namedScriptsMap->getName(name);
         if (b != BIND_NONE)
         {
+            #ifdef _DEBUG
+            verifyMatchingLookup(b, abcEnv->pool()->m_namedScriptsList, abcEnv->m_namedScriptEnvsList);
+            #endif
             se = abcEnv->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
         }
     }
