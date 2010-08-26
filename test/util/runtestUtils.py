@@ -44,6 +44,7 @@ from os.path import join, isdir, islink, splitext, exists
 from math import sqrt
 import subprocess
 import shutil
+import sys
 
 class TimeOutException(Exception):
     def __init__(self):
@@ -130,6 +131,11 @@ def parseArgStringToList(argStr):
 
 def pPrint(obj):
     pprint.pprint(obj)
+ 
+def pythonVersion26():
+    '''Return boolean indicating if python version >= 2.6'''
+    return sys.version_info[0] == 2 and sys.version_info[1] >= 6
+                    
     
 
 def splitList(_list, _groups):
