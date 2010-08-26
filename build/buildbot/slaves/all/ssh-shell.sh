@@ -39,7 +39,6 @@
 # usage: ./ssh_shell.sh <vmargs> file.abc
 # assumes the shell is deployed to $SSH_SHELL_REMOTE_DIR/avmshell
 #
-set -x
 
 if [ "$SSH_SHELL_REMOTE_USER" = "" ] ||
    [ "$SSH_SHELL_REMOTE_HOST" = "" ] ||
