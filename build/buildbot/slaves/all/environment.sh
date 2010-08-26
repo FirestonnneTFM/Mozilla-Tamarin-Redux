@@ -107,6 +107,8 @@ export scp_mozilla="stage.mozilla.org:/home/ftp/pub/js/tamarin/builds"
 export coverage_host=10.171.22.12
 export coverage_dir="/cygdrive/e/AVMTeam/wwwroot/analytics/codecoverage"
 export scp_coverage="${coverage_host}:${coverage_dir}"
+export http_coverage=http://tamarin-builds.mozilla.org/analytics/codecoverage
+export coverage_skips=eval,other-licenses,pcre,Total
 
 baselineBranchTime=tamarin-flash
 baselineConfigTime=
