@@ -79,7 +79,7 @@ namespace MMgc
         }
     };
 
-    typedef GCHashtableBase<GCStackTraceHashtableKeyHandler,GCHashtableAllocHandler_VMPI> GCStackTraceHashtable_VMPI;
+    typedef GCHashtableBase<const void*, GCStackTraceHashtableKeyHandler,GCHashtableAllocHandler_VMPI> GCStackTraceHashtable_VMPI;
 
     class MemoryProfiler : public GCAllocObject
     {

@@ -42,10 +42,25 @@
 
 namespace MMgc
 {
+    /* Currently only simple types are supported as value in the hashtable.
+     * 0 assigment needs to be valid for the value type (e.g. struct type are
+     * not supported as 0 assigment will throw warnings for all the members of 
+     * the struct not getting zero initialized)
+     * 
+     * See https://bugzilla.mozilla.org/show_bug.cgi?id=585694 for more info.
+     */
+    template <typename V>
+    struct HashTableEntry {
+        V value;
+        const void * key;
+    };
+    
+    class GCHashtableKeyHandler;
+    class GCHashtableAllocHandler_new;
     /**
     * simplified version of avmplus hashtable
     */
-    template <class KEYHANDLER, class ALLOCHANDLER>
+    template <typename VAL = const void*, class KEYHANDLER = GCHashtableKeyHandler, class ALLOCHANDLER=GCHashtableAllocHandler_new>
     class GCHashtableBase
     {
     public:
@@ -56,18 +71,18 @@ namespace MMgc
 
         void clear();
 
-        REALLY_INLINE const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
+        REALLY_INLINE VAL get(const void* key) { return table[find(key, table, tableSize)].value; }
         REALLY_INLINE const void* get(intptr_t key) { return get((const void*)key); }
-        const void* remove(const void* key, bool allowRehash=true);
+        VAL remove(const void* key, bool allowRehash=true);
         // updates value if present, adds and grows if necessary if not
-        void put(const void* key, const void* value);
-        REALLY_INLINE void add(const void* key, const void* value) { put(key, value); }
-        REALLY_INLINE void add(intptr_t key, const void* value) { put((const void*)key, value); }
+        void put(const void* key, VAL value);
+        REALLY_INLINE void add(const void* key, VAL value) { put(key, value); }
+        REALLY_INLINE void add(intptr_t key, VAL value) { put((const void*)key, value); }
         REALLY_INLINE uint32_t count() const { return numValues - numDeleted; }
 
         int32_t nextIndex(int32_t index);
-        const void* keyAt(int32_t index) const { return table[index<<1]; }
-        const void* valueAt(int32_t index) const { return table[((index)<<1)+1]; }
+        const void* keyAt(int32_t index) const { return table[index].key; }
+        VAL valueAt(int32_t index) const { return table[index].value; }
 
         // Useful to call this after a lot of removals with allowRehash==false
         void prune();
@@ -75,21 +90,21 @@ namespace MMgc
         class Iterator
         {
         public:
-            Iterator(GCHashtableBase* _ht) : ht(_ht), index(-2) {}
+            Iterator(GCHashtableBase* _ht) : ht(_ht), index(-1) {}
 
             const void* nextKey()
             {
                 do {
-                    index += 2;
-                } while(index < (int32_t)ht->tableSize && ht->table[index] <= GCHashtableBase::DELETED);
+                    index += 1;
+                } while(index < (int32_t)ht->tableSize && ht->table[index].key <= GCHashtableBase::DELETED);
 
-                return (index < (int32_t)ht->tableSize) ? ht->table[index] : NULL;
+                return (index < (int32_t)ht->tableSize) ? ht->table[index].key : NULL;
             }
 
-            const void* value()
+            VAL value()
             {
-                GCAssert(ht->table[index] != NULL);
-                return ht->table[index+1];
+                GCAssert(ht->table[index].key != NULL);
+                return ht->table[index].value;
             }
 
         private:
@@ -98,15 +113,15 @@ namespace MMgc
         };
 
     private:
-        uint32_t find(const void* key, const void** table, uint32_t tableSize);
+        typedef struct HashTableEntry<VAL> Entry;
+        uint32_t find(const void* key, Entry * table, uint32_t tableSize);
 
         void grow(bool isRemoval);
 
-        static const void* const DELETED;// = (const void*)1;
-        static const void* EMPTY[4];// = { NULL, NULL, NULL, NULL };
-
-    protected:
-        const void** table;     // table elements
+        static const void* const DELETED;
+        static Entry EMPTY[4];
+     protected:
+        Entry* table;
         uint32_t tableSize;     // capacity
         uint32_t numValues;     // size of table array
         uint32_t numDeleted;    // number of delete items
@@ -114,12 +129,12 @@ namespace MMgc
 
     // --------------------------------
 
-    template <class KEYHANDLER, class ALLOCHANDLER>
-    /*static*/ const void* const GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::DELETED = (const void*)1;
+    template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
+    /*static*/ const void* const GCHashtableBase<VAL,KEYHANDLER,ALLOCHANDLER>::DELETED = (const void*)1;
 
-    template <class KEYHANDLER, class ALLOCHANDLER>
-    /*static*/ const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::EMPTY[4] = { NULL, NULL, NULL, NULL };
-
+    template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
+    /*static*/ typename GCHashtableBase<VAL,KEYHANDLER,ALLOCHANDLER>::Entry GCHashtableBase<VAL,KEYHANDLER,ALLOCHANDLER>::EMPTY[4] = { {0,0}, {0,0}, {0,0}, {0,0} };
+    
     // --------------------------------
 
     /*
@@ -162,8 +177,8 @@ namespace MMgc
         }
     };
 
-    typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_new> GCHashtable;
-    typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCHashtable_VMPI;
+    typedef GCHashtableBase<const void*, GCHashtableKeyHandler, GCHashtableAllocHandler_new> GCHashtable;
+    typedef GCHashtableBase<const void*, GCHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCHashtable_VMPI;
 
     // --------------------------------
 
@@ -191,8 +206,8 @@ namespace MMgc
         }
     };
 
-    typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_new> GCStringHashtable;
-    typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCStringHashtable_VMPI;
+    typedef GCHashtableBase<const void*, GCStringHashtableKeyHandler, GCHashtableAllocHandler_new> GCStringHashtable;
+    typedef GCHashtableBase<const void*, GCStringHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCStringHashtable_VMPI;
 }
 
 #endif
