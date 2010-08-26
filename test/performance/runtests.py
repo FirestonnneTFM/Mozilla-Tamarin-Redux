@@ -74,6 +74,7 @@ class PerformanceRuntest(RuntestBase):
     avmDefaultName = 'avm'
     avm2DefaultName = 'avm2'
     avm2name = ''
+    currentDir = ''
     iterations = 1
     vmname = 'unknown'  # name sent to socketserver
     memory = False
@@ -81,6 +82,7 @@ class PerformanceRuntest(RuntestBase):
     avm2version = ''
     avm2revision = ''
     detail = False
+    fullpath = False
     raw = False
     vmargs2 = ''
     optimize = True
@@ -113,7 +115,7 @@ class PerformanceRuntest(RuntestBase):
     score2 = {}
 
     # formatting vars
-    testFieldLen = 30   # field length for test name and path
+    testFieldLen = 27   # field length for test name and path
     resultWidth = 7     # width of result columns
 
     # Index file header
@@ -208,6 +210,7 @@ class PerformanceRuntest(RuntestBase):
         print "    --score         compute and print geometric mean of scores"
         print "    --index=        index file to use (must end with .py)"
         print "    --saveindex=    save results to given index file name"
+        print "    --fullpath      print out full path for each test"
         exit(c)
 
     def setOptions(self):
@@ -216,7 +219,8 @@ class PerformanceRuntest(RuntestBase):
         self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log','socketlog',
                                  'runtime=','memory','larger','vmversion=', 'vm2version=',
                                  'vmargs2=','nooptimize', 'score', 'saveindex=', 'index=',
-                                 'perfm','csv=', 'csvappend','prettyprint', 'detail', 'raw'])
+                                 'perfm','csv=', 'csvappend','prettyprint', 'detail', 'raw',
+                                 'fullpath'])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -265,6 +269,11 @@ class PerformanceRuntest(RuntestBase):
             elif o in ('--saveindex',):
                 self.saveIndex = True
                 self.saveIndexFile = v
+            elif o in ('--fullpath',):
+                self.fullpath = True
+        
+        self.avmname = self.avmname or self.avmDefaultName
+        self.avm2name = self.avm2name or self.avm2DefaultName
 
     def loadIndexFile(self, indexFile):
         # The indexFile contains values used to normalize
@@ -366,9 +375,9 @@ class PerformanceRuntest(RuntestBase):
     def printHeader(self):
         'Print run info and headers'
         self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True)
-        self.js_print("%s: %s %s version: %s" % (self.avmname or self.avmDefaultName, self.avm, self.vmargs, self.avmversion))
+        self.js_print("%s: %s %s version: %s" % (self.avmname, self.avm, self.vmargs, self.avmversion))
         if self.avm2:
-            self.js_print("%s: %s %s version: %s" % (self.avm2name or self.avm2DefaultName, self.avm2, self.vmargs2, self.avm2version))
+            self.js_print("%s: %s %s version: %s" % (self.avm2name, self.avm2, self.vmargs2, self.avm2version))
         self.avmDefaultName += ':'+self.avmrevision
         self.js_print('iterations: %s' % self.iterations)
         if self.indexFile:
@@ -376,17 +385,27 @@ class PerformanceRuntest(RuntestBase):
         if self.avm2:
             self.avm2DefaultName += ':'+self.avm2revision
             if self.iterations == 1:
-                self.js_print('\n%-*s %5s %7s %7s\n' % (self.testFieldLen, 'test', self.avmname or self.avmDefaultName,
-                                                        self.avm2name or self.avm2DefaultName, '%diff'))
+                self.js_print('\n%-*s %5s %7s %7s\n' % (self.testFieldLen, 'test', self.avmname,
+                                                        self.avm2name, '%diff'))
             else:   # multiple iterations
                 if self.detail:
-                    self.js_print('\n%-*s %-33s %-33s' % (self.testFieldLen, '', self.avmname or self.avmDefaultName, self.avm2name or self.avm2DefaultName))
+                    # Original old-school header - deprecated
+                    self.js_print('\n%-*s %-33s %-33s' % (self.testFieldLen, '', self.avmname, self.avm2name))
                     self.js_print('%-*s  %7s :%7s  %7s %6s    %7s :%7s  %7s %6s %7s %8s' % (self.testFieldLen, 'test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  '))
                     self.js_print('%*s ---------------------------------   ---------------------------------   -----  --------' % (self.testFieldLen, '') )
+                elif pythonVersion26():
+                    # python >= 2.6
+                    self.js_print('')
+                    self.js_print('{0:>{1}}{2:>{3}}'.format(self.avmname,self.testFieldLen+self.resultWidth*2,
+                                                             self.avm2name, self.resultWidth*2))
+                    self.js_print('{0:<{testwidth}}{1:>{rw}}{2:>{rw}}{3:>{rw}}{4:>{rw}}{5:>{rw}}{6:>{rw}}'.
+                                  format('test', 'best', 'avg', 'best', 'avg', '%dBst', '%dAvg',
+                                         testwidth=self.testFieldLen, rw=self.resultWidth))
                 else:
+                    # python <= 2.5
                     self.js_print('\n%-*s %-*s  %-*s' % (self.testFieldLen+self.resultWidth-4, '',
-                                                         self.resultWidth*2, self.avmname or self.avmDefaultName,
-                                                         self.resultWidth*2, self.avm2name or self.avm2DefaultName))
+                                                         self.resultWidth*2, self.avmname,
+                                                         self.resultWidth*2, self.avm2name))
                     self.js_print('%-*s %*s %*s %*s %*s %*s %*s' % (self.testFieldLen, 'test',
                                                                     self.resultWidth, 'best',
                                                                     self.resultWidth, 'avg',
@@ -397,10 +416,10 @@ class PerformanceRuntest(RuntestBase):
         else:   # only one avm
             if (self.iterations>1):
                 self.js_print(('\n\n%-*s %5s %6s %6s\n') % (self.testFieldLen, 'test',
-                                                        self.avmname or self.avmDefaultName,
+                                                        self.avmname,
                                                         'avg','95%_conf'))
             else:
-                self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", self.avmname or self.avmDefaultName))
+                self.js_print("\n\n%-*s %7s \n" % (self.testFieldLen, "test", self.avmname))
 
 
     def runTests(self, testList):
@@ -584,6 +603,8 @@ class PerformanceRuntest(RuntestBase):
 
     def truncateDescField(self, desc):
         'Return desc truncated to self.testFieldLen'
+        if desc.endswith('.as'):
+            desc = desc[:-3]
         return desc if len(desc) <= self.testFieldLen else desc[(len(desc) - self.testFieldLen):]
 
     def updateScore(self, scoreDict, metric, result):
@@ -595,11 +616,11 @@ class PerformanceRuntest(RuntestBase):
                                        'count':scoreDict[metric]['count']+1}
 
     def printScoreSummary(self):
-        print 'Score for %s:' % (self.avmname or self.avmDefaultName,)
+        print 'Score for %s:' % (self.avmname,)
         for k,v in self.score1.iteritems():
             print '  %s = %s' % (k, str(pow(v['score'],1.0/v['count'])))
         if self.score2:
-            print 'Score for %s' % (self.avm2name or self.avm2DefaultName,)
+            print 'Score for %s' % (self.avm2name,)
             for k,v in self.score2.iteritems():
                 print '  %s = %s' % (k, str(pow(v['score'],1.0/v['count'])))
 
@@ -739,6 +760,25 @@ class PerformanceRuntest(RuntestBase):
                 return False
         return True
 
+    def checkForDirChange(self, name):
+        # extract dir
+        try:
+            last_slash = name.rindex('/')+1
+        except ValueError:
+            last_slash = None
+        
+        if last_slash:
+            dir = name[:last_slash]
+            if not self.fullpath:
+                name = '  '+name[last_slash:]
+        
+            if dir and dir != self.currentDir:
+                self.js_print('Dir: %s' % dir)
+                self.currentDir = dir
+        
+        return name
+        
+    
     def printTestResults(self, testName):
         '''Print the results for a single test'''
         # Support two output modes:
@@ -756,45 +796,48 @@ class PerformanceRuntest(RuntestBase):
             # print out metric info if needed
             self.checkForMetricChange(metric)
 
+        # Print out dir names and indent tests below
+        desc = self.checkForDirChange(testName)
+
         if self.avm2:
             if self.iterations == 1:
                 if numMetrics == 1:
-                    self.printSingleIterationComparison(testName, testName, metric)
+                    self.printSingleIterationComparison(desc, testName, metric)
                 else:   # numMetrics > 1
-                    self.js_print(testName)
+                    self.js_print(desc)
                     for metric in testData[testName].keys():
-                        self.printSingleIterationComparison('  %s' % self.metricInfo[metric].get('name',metric), testName, metric)
+                        self.printSingleIterationComparison('    %s' % self.metricInfo[metric].get('name',metric), testName, metric)
             else:   # multiple iterations
                 if numMetrics == 1:
-                    self.printMultiIterationComparison(testName, testName, metric)
+                    self.printMultiIterationComparison(desc, testName, metric)
                 else: # numMetrics > 1
-                    self.js_print(testName)
+                    self.js_print(desc)
                     for metric in testData[testName].keys():
-                        self.printMultiIterationComparison('  %s' % self.metricInfo[metric].get('name',metric), testName, metric)
+                        self.printMultiIterationComparison('    %s' % self.metricInfo[metric].get('name',metric), testName, metric)
         else: # only one avm tested
             if self.iterations == 1:
                 if numMetrics == 1:
-                    self.js_print('%-*s %*s' % (self.testFieldLen, self.truncateDescField(testName),
+                    self.js_print('%-*s %*s' % (self.testFieldLen, self.truncateDescField(desc),
                                             self.resultWidth, self.formatResult(testData[testName][metric]['best1'], metric=metric)))
                 else:   # numMetrics > 1
-                    self.js_print(testName)
+                    self.js_print(desc)
                     for metric in testData[testName].keys():
-                        self.js_print('  %-*s %*s' % (self.testFieldLen-2, self.metricInfo[metric].get('name',metric),
+                        self.js_print('    %-*s %*s' % (self.testFieldLen-2, self.metricInfo[metric].get('name',metric),
                                             self.resultWidth, self.formatResult(testData[testName][metric]['best1'], metric=metric)))
 
             else:   # multiple iterations
                 if numMetrics == 1:
                     self.js_print(('%-*s %*s %6s %4.1f%% %s') %
-                        (self.testFieldLen, self.truncateDescField(testName), self.resultWidth,
+                        (self.testFieldLen, self.truncateDescField(desc), self.resultWidth,
                           self.formatResult(testData[testName][metric]['best1'], metric=metric),
                           self.formatResult(testData[testName][metric]['avg1'], metric=metric),
                           conf95(self.testData[testName][metric]['results1']),
                          [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else ''
                          ))
                 else:   # numMetrics > 1
-                    self.js_print(testName)
+                    self.js_print(desc)
                     for metric in testData[testName].keys():
-                        self.js_print(('  %-*s %*s %6s %4.1f%% %s') %
+                        self.js_print(('    %-*s %*s %6s %4.1f%% %s') %
                         (self.testFieldLen-2, self.metricInfo[metric].get('name',metric),
                          self.resultWidth,
                          self.formatResult(testData[testName][metric]['best1'], metric=metric),
@@ -844,7 +887,22 @@ class PerformanceRuntest(RuntestBase):
                            [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else '',
                            [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results2']] if self.raw else ''
                            ))
+        elif pythonVersion26():
+            self.js_print('{0:<{testwidth}}{1:>{rw}}{2:>{rw}}{3:>{rw}}{4:>{rw}}{5:>{rw}}{6:>{rw}}{7:>3}{8}{9}'.
+                            format(self.truncateDescField(descStr),
+                                   self.formatResult(self.testData[testName][metric]['best1'], metric=metric),
+                                   self.formatResult(self.testData[testName][metric]['avg1'], metric=metric),
+                                   self.formatResult(self.testData[testName][metric]['best2'], metric=metric),
+                                   self.formatResult(self.testData[testName][metric]['avg2'], metric=metric),
+                                   self.formatResult(spdup, 4, 1, 'percent'),
+                                   self.formatResult(avg_spdup, 4, 1, 'percent'),
+                                   sig_str,
+                                   [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results1']] if self.raw else '',
+                                   [self.formatResult(x, metric=metric) for x in self.testData[testName][metric]['results2']] if self.raw else '',
+                                   testwidth=self.testFieldLen, rw=self.resultWidth))
+        
         else:
+            # python <= 2.5
             self.js_print('%-*s %*s %*s %*s %*s %*s %*s %2s %s %s' %
                           (self.testFieldLen, self.truncateDescField(descStr),
                            self.resultWidth, self.formatResult(self.testData[testName][metric]['best1'], metric=metric),
@@ -897,11 +955,11 @@ class PerformanceRuntest(RuntestBase):
         # more work is needed to get that working there
         # This here is proof of concept that needs to be fleshed out
         self.avmOptionsDict = {
-            'avm' : self.avmname or self.avmDefaultName,
+            'avm' : self.avmname,
         }
         
         self.avm2OptionsDict = {
-            'avm' : self.avm2name or self.avm2DefaultName,
+            'avm' : self.avm2name,
         }
         
         avmOptionsHeader, avmOptions, avm2Options = self.convertAvmOptionsDictToList()
@@ -960,7 +1018,7 @@ except SystemExit:
     raise
 except TypeError:
     # This is the error thrown when ctrl-c'ing out of a testrun
-    print '\nKeyboard Interupt'
+    print '\nKeyboard Interrupt'
 except:
     print 'Runtest Abnormal Exit'
     raise
