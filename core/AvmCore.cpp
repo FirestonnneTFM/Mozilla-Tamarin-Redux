@@ -483,7 +483,7 @@ namespace avmplus
 #endif
         AvmAssert(builtinPool->isBuiltin);
 
-        // whack the the non-interruptable bit on all builtin functions
+        // Set the the non-interruptable bit on all builtin functions.
         for(int i=0, size=builtinPool->methodCount(); i<size; i++)
             builtinPool->getMethodInfo(i)->makeNonInterruptible();
 
