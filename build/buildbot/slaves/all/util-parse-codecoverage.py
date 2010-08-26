@@ -107,6 +107,7 @@ class ParseCodeCoverage:
 
     skips='other-licenses,pcre,Total,eval'
     build='unknown'
+    maxBuilds=20
 
     options=''
     longOptions=['covfile=','build=','skips=','incsvfile=','datadir=']
@@ -143,7 +144,6 @@ class ParseCodeCoverage:
         # write the csv table for current build and csv table with build number and timestamp
         if self.summary!=None:
             self.generateSummaryTable(fnucovered,fntotal,bcucovered,bctotal)
-            self.generateTime()
    
         # append csv for missing function chart
         if self.fnsummary!=None:
@@ -291,10 +291,12 @@ class ParseCodeCoverage:
             contents+='%s,%s,%s,%s%s,%s,%s,%s%s\n' % (module,fnuncovered[module],fntotal[module],self.calcpercent(fnuncovered[module],fntotal[module]),'%',bcuncovered[module],bctotal[module],self.calcpercent(bcuncovered[module],bctotal[module]),'%')
         contents+='total,%s,%s,%s%s,%s,%s,%s%s\n' % (fnuncoveredsum,fntotalsum,self.calcpercent(fnuncoveredsum,fntotalsum),'%',bcuncoveredsum,bctotalsum,self.calcpercent(bcuncoveredsum,bctotalsum),'%')
         open(self.summary,'w').write(contents)
-
-    def generateTime(self):
-        print('generating time file...')
-        open(self.info,'w').write('current build: %s,updated: %s' % (self.build,datetime.datetime.today().strftime('%Y-%m-%d %H:%M')))
+        open(self.info,'w').write('current build: %s,function coverage: %s%s,branch coverage: %s%s,updated: %s' % 
+                                 (self.build,
+                                  self.calcpercent(fnuncoveredsum,fntotalsum),'%',
+                                  self.calcpercent(bcuncoveredsum,bctotalsum),'%',
+                                  datetime.datetime.today().strftime('%Y-%m-%d %H:%M'))
+                                 )
 
     def generateSummary(self, file, modulescount):
         print('generating summary %s...' % file)
@@ -313,6 +315,13 @@ class ParseCodeCoverage:
         for line in modulefile.split('\n'):
             if line=='':
                 continue
+            # check if historical builds exceed max
+            tokens=line.split(',')
+            if len(tokens)>self.maxBuilds:
+                first=tokens[0]
+                tokens=tokens[(len(tokens)-self.maxBuilds+1):]
+                tokens.insert(0,first)
+                line=",".join(tokens)
             if line.startswith('build'):
                 modulefileupdated=line+','+self.build+'\n'
             else:
@@ -346,6 +355,13 @@ class ParseCodeCoverage:
         for line in modulefile.split('\n'):
             if line=='':
                 continue
+            # check if historical builds exceed max
+            tokens=line.split(',')
+            if len(tokens)>self.maxBuilds:
+                first=tokens[0]
+                tokens=tokens[(len(tokens)-self.maxBuilds+1):]
+                tokens.insert(0,first)
+                line=",".join(tokens)
             if line.startswith('build'):
                 modulefileupdated=line+','+self.build+'\n'
             else:
