@@ -39,7 +39,7 @@
 # usage: ./ssh_shell.sh <vmargs> file.abc
 # assumes the shell is deployed to $SSH_SHELL_REMOTE_DIR/avmshell
 #
-
+set -x
 
 if [ "$SSH_SHELL_REMOTE_USER" = "" ] ||
    [ "$SSH_SHELL_REMOTE_HOST" = "" ] ||
@@ -58,25 +58,37 @@ if [ "$1" = "" ]
 then
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./avmshell"
 else
+    # Note that testfiles are copied to the SSH_SHELL_REMOTE_DIR directly and
+    # run one at a time.  No dir structure is preserved when copying the files.
     args=""
     for a in $*
     do
-       echo "$a" | grep ".*\.abc" > /dev/null
-       res=$?
-       if [ "$res" = "0" ]
-       then
-           file=$a
-           flatfile=`basename $a`
-           filelist="$filelist $flatfile"
-           scp $file $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/$flatfile > /dev/null
-           args="$args $flatfile"       
-       else
-           args="$args $a"
-       fi
+        # look for an .abc file
+        echo "$a" | grep ".*\.abc" > /dev/null
+        res=$?
+        if [ "$res" = "0" ]
+        then
+            file=$a
+            flatfile=`basename $a`
+            # check to see if flatfile is already in filelist
+            echo "$filelist" | grep "$flatfile" > /dev/null
+            res=$?
+            if [ "$res" = "1" ]; then
+                # flatfile is not in filelist; add it
+                filelist="$filelist $flatfile"
+                # copy file to device
+                scp $file $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/$flatfile > /dev/null
+            fi
+            # even if flatfile is already in filelist, add to args
+            args="$args $flatfile"      
+        else
+            args="$args $a"
+        fi
     done
     # workaround for not returning exit code, run a shell script and print exit code to stdout
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./ssh-shell-runner.sh $args" > ./stdout
     ret=`cat ./stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
+    # clean up copied over files
     for a in $filelist
     do
         ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm $a"
