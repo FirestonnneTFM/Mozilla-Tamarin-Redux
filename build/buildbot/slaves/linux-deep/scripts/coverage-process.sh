@@ -130,3 +130,32 @@ echo; echo "Uploading avm-${change}.cov ..."
 . ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $buildsdir/${change}-${changeid}/coverage/avm.cov ${scp_coverage}/latest/avm-${change}.cov
 
 
+echo; echo "Updating code coverage reports..."
+covdatadir=$buildsdir/${change}-${changeid}/coverage
+# set pwd to code root for covfn to produce correct relative path
+cd $basedir
+
+# download current historical files
+${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-fn-summary.csv $covdatadir/codecoverage-fn-summary.csv
+${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-fnpercent-summary.csv $covdatadir/codecoverage-fnpercent-summary.csv
+${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-bc-summary.csv $covdatadir/codecoverage-bc-summary.csv
+${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-bcpercent-summary.csv $covdatadir/codecoverage-bcpercent-summary.csv
+
+# parse code coverage data and generate csv reports
+${basedir}/build/buildbot/slaves/all/util-parse-codecoverage.py --covfile=$covdatadir/avm.cov --build=$change --skips=$coverage_skips --datadir=$covdatadir
+result=$?
+test "$result" = "0" || {
+    echo "message: error ${basedir}/build/buildbot/slaves/all/util-parse-codecoverage.py failed"
+    exit 1
+}
+
+# upload csv reports
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-fn-summary.csv ${scp_coverage}/codecoverage-fn-summary.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-fnpercent-summary.csv ${scp_coverage}/codecoverage-fnpercent-summary.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-bc-summary.csv ${scp_coverage}/codecoverage-bc-summary.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-bcpercent-summary.csv ${scp_coverage}/codecoverage-bcpercent-summary.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-fn-summary.csv ${scp_coverage}/codecoverage-fn-summary.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-info.csv ${scp_coverage}/codecoverage-info.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-summary.csv ${scp_coverage}/codecoverage-summary.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-missingfn.csv ${scp_coverage}/latest/codecoverage-missingfn.csv
+${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage.csv ${scp_coverage}/latest/codecoverage.csv
