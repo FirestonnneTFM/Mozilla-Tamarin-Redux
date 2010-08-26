@@ -58,10 +58,10 @@ files=`ls *.cov`
 
 $bullseyedir/covmerge -c $files
 
-
-$bullseyedir/covdir -q
-fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
-cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
+cd ${basedir}
+$bullseyedir/covdir -q -m
+fnpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $6}'`
+cdpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $11}'`
 
 
 
@@ -96,22 +96,37 @@ do
 done
 
 # Merge all coverage files into a single file and upload
-export COVFILE=$buildsdir/${change}-${changeid}/avm.cov
+mkdir $buildsdir/${change}-${changeid}/coverage
+export COVFILE=$buildsdir/${change}-${changeid}/coverage/avm.cov
 test -f $COVFILE && rm -f $COVFILE
 
 echo $covfiles
 cd $buildsdir/${change}-${changeid}
 $bullseyedir/covmerge -c $covfiles
 
-
-$bullseyedir/covdir -q
-fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
-cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
+cd ${basedir}
+$bullseyedir/covdir -q -m
+fnpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $6}'`
+cdpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $11}'`
 
 
 
 echo "message: combined total function coverage:           $fnpct"
 echo "message: combined total condition/decision coverage: $cdpct"
 
-. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/avm.cov
-echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/avm.cov combined code coverage data file avm.cov"
+. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/coverage/avm.cov
+echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/coverage/avm.cov combined code coverage data file avm.cov"
+
+# Remove current coverage files
+ssh ${coverage_host} "cd ${coverage_dir}/latest; rm *.cov"
+
+# Post all of the coverage files to the 'latest' directory
+for platform in ${platforms}
+do
+    echo; echo "Uploading avm-${platform}-${change}.cov ..."
+    . ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $buildsdir/${change}-${changeid}/$platform/avm.cov ${scp_coverage}/latest/avm-${platform}-${change}.cov
+done
+echo; echo "Uploading avm-${change}.cov ..."
+. ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $buildsdir/${change}-${changeid}/coverage/avm.cov ${scp_coverage}/latest/avm-${change}.cov
+
+
