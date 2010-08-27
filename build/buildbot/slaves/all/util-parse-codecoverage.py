@@ -61,6 +61,7 @@ usage:
      codecoverage-bc-summary.csv        # historical uncovered branches
      codecoverage-bcpercent-summary.csv # historical coverage % branches 
 
+     ** when using --covfile $bullseyedir must be set to the bin directory of the bullseye tools
      ** can pass in --incsvfile=file.csv instead of avm.cov
 
   output:
@@ -105,6 +106,7 @@ class ParseCodeCoverage:
     defaultcovcsv=None
     modulelist=None
 
+    bullseyedir=None
     skips='other-licenses,pcre,Total,eval'
     build='unknown'
     maxBuilds=20
@@ -124,6 +126,11 @@ class ParseCodeCoverage:
         self.bcsummary=self.datadir+'/codecoverage-bc-summary.csv'
         self.bcpercentsummary=self.datadir+'/codecoverage-bcpercent-summary.csv'
         self.defaultcovcsv=self.datadir+'/codecoverage.csv'
+
+        self.bullseyedir=os.environ['bullseyedir']
+        if self.bullseyedir==None:
+            print("error: must set bullseyedir environment variable to the bullseye/bin directory")
+            sys.exit(1)
 
         # if incsvfile not set run covfn to generate the csv file
         if self.incsvfile==None:
@@ -208,7 +215,7 @@ class ParseCodeCoverage:
         if self.covfile!=None:
             covarg='--file %s' % self.covfile
 
-        cmd='covfn %s --no-banner --csv' % covarg
+        cmd='%s/covfn %s --no-banner --csv' % (self.bullseyedir,covarg)
         if os.path.exists(self.outcsvfile):
             os.unlink(self.outcsvfile)
 
