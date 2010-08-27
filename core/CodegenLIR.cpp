@@ -5653,26 +5653,11 @@ namespace avmplus
     // record to the label, which will patch the branch when the label position
     // is reached.  cond == NULL for unconditional branches (LIR_j).
     void CodegenLIR::branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label) {
-        if (cond) {
-            if (!cond->isCmp()) {
-                // branching on a non-condition expression, so test (v==0)
-                // and invert the sense of the branch.
-                cond = eqi0(cond);
-                op = LOpcode(op ^ 1);
-            }
-            if (cond->isImmI()) {
-                // the branch condition is constant so we're either always branching
-                // or never branching.  handle each case.
-                if ((op == LIR_jt && cond->immI()) || (op == LIR_jf && !cond->immI())) {
-                    // taken
-                    op = LIR_j;
-                    cond = 0;
-                }
-                else {
-                    // not taken - no code to emit.
-                    return;
-                }
-            }
+        if (cond && !cond->isCmp()) {
+            // branching on a non-condition expression, so test (v==0)
+            // and invert the sense of the branch.
+            cond = eqi0(cond);
+            op = invertCondJmpOpcode(op);
         }
         LIns* labelIns = label.labelIns;
         LIns* br = lirout->insBranch(op, cond, labelIns);
