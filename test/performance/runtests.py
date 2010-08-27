@@ -143,9 +143,9 @@ class PerformanceRuntest(RuntestBase):
         self.setTimestamp()
         self.checkPath(['avm2'])
         self.determineOS()
-        self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
+        self.tests = self.getTestsList(self.args)
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
         self.loadMetricInfo()

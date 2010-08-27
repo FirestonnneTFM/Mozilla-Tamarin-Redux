@@ -617,6 +617,17 @@ class RuntestBase:
                          ]
                 for x in [x for x in self.exclude+utilDirs if x in dirs]:
                     dirs.remove(x)
+        
+        # modify testlist based on testconfig settings
+        if self.includes:
+            # only run the tests in the include list
+            include_test_list = []
+            for test in tests:
+                for include in self.includes:
+                    if re.search(include, test):
+                        include_test_list.append(test)
+            return include_test_list
+        
         return tests
 
     def getLocalSettings(self, root):
@@ -687,15 +698,14 @@ class RuntestBase:
                 # TODO: add abs to here
                 if names[0][-3:] == self.sourceExt:
                     names[0]=names[0][:-3]
-                rs='^%s$' % names[0]
+                # fields[1] = config
+                # fields[2] = command
+                # fields[3] = description
                 # only add settings for current config
                 if re.search('^%s$' % fields[1],self.config):
-                    if re.search(fields[1],self.config) and fields[2]=='include':
+                    if fields[2]=='include':
                         includes.append(fields[0])
-                    if not settings.has_key(names[0]):
-                        settings[names[0]] = {}
-                    if not settings[names[0]].has_key(names[1]):
-                        settings[names[0]][names[1]] = {}
+                    settings.setdefault(names[0], {}).setdefault(names[1],{})
                     settings[names[0]][names[1]][fields[2]]=fields[3]
         return settings, includes
 
