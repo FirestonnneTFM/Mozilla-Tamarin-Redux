@@ -36,8 +36,13 @@
 #
 # commands are currently one of : asc.args, expectedfailure, skip, include
 #    expectedfailure - expects the test to fail, comments should provide bug number and a comment
-#    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
-#    include - includes a specific testcase even if the parent has been skipped - overrides any skip command defined for the same configuration
+#
+#    The following commands only operate at a testfile level and not individual tests:
+#
+#    skip - the test is not run, for example the configuration does not support
+#           a feature or the file is not a test and is a helper file to another test
+#    include - includes a specific testcase even if the parent has been skipped
+#              overrides any skip command defined for the same configuration
 #    ats_skip - don't generate an ATS swf as these files are not ATS compatible
 #    verify_skip - skip test when doing a verify run
 #
@@ -274,6 +279,8 @@ spidermonkey/js1_6/extensions/regress-456826, .*deep, include, include slow test
 # phase, all other platforms run it in the first phase
 misc/testJitordieSwitch, ^((?!arm-winmobile-).).*deep, include, include slow tests in deep phase
 
+# Bug 586397
+spidermonkey/js1_5/Array/regress-157652, arm-lnx.*deep, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=586397
 
 ####################
 # verifier

@@ -156,9 +156,9 @@ class AcceptanceRuntest(RuntestBase):
         # extension lists must be tuples
         self.otherTestExtensions = (self.abcasmExt,)
         self.executableExtensions = (self.abcOnlyExt,)
-        self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
+        self.tests = self.getTestsList(self.args)
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
         self.preProcessTests()
@@ -222,10 +222,6 @@ class AcceptanceRuntest(RuntestBase):
         includes = self.includes #list
 
         settings = self.getLocalSettings(root)
-
-        #TODO: possibly handle includes by building test list?  This works for now...
-        if includes and not list_match(includes,root):
-            return
 
         # skip tests that can't be verified
         if self.verify and settings.has_key('.*') and settings['.*'].has_key('verify_skip'):
