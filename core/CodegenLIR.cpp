@@ -1911,7 +1911,7 @@ namespace avmplus
             {
                 LIns* x0 = binaryIns(LIR_subi, argc_param, InsConst(param_count));
                 LIns* x1 = binaryIns(LIR_lti, x0, InsConst(0));
-                restArgc = lirout->insChoose(x1, InsConst(0), x0, true);
+                restArgc = lirout->insChoose(x1, InsConst(0), x0, use_cmov);
 
                 // Store a NULL array pointer
                 localSet(firstLocal, InsConstPtr(0), ARRAY_TYPE);
@@ -6379,7 +6379,12 @@ namespace avmplus
         pool(pool),
         core(pool->core),
         alloc1(mmfx_new(Allocator())),
-        lir_alloc(mmfx_new(Allocator()))
+        lir_alloc(mmfx_new(Allocator())),
+#ifdef NANOJIT_IA32
+        use_cmov(pool->core->config.njconfig.i386_use_cmov)
+#else
+        use_cmov(true)
+#endif
     { }
 
     LirHelper::~LirHelper()

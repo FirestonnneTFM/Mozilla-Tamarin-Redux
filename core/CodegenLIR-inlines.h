@@ -146,7 +146,7 @@ REALLY_INLINE LIns* LirHelper::ltup(LIns* a, LIns* b)
 
 REALLY_INLINE LIns* LirHelper::choose(LIns* cond, Atom t, LIns* f)
 {
-    return lirout->insChoose(cond, InsConstAtom(t), f, true/*use_cmov*/);
+    return lirout->insChoose(cond, InsConstAtom(t), f, use_cmov);
 }
 
 REALLY_INLINE LIns* LirHelper::addp(LIns* a, Atom mask)
