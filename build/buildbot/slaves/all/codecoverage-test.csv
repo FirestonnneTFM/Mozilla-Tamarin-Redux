@@ -1,0 +1,8 @@
+shell_name, suite, vm_args, config_string, script_args
+avmshell_cov, acceptance, , , 
+avmshell_cov, acceptance, -Dinterp, , 
+avmshell_cov, acceptance, -Ojit, , 
+avmshell_s_cov, acceptance, , , 
+avmshell_d_cov, acceptance, , , 
+avmshell_sd_cov, acceptance, , , 
+avmshell_cov, selftest, , , 
