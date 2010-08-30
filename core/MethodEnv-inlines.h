@@ -138,13 +138,18 @@ REALLY_INLINE MethodSignaturep MethodEnv::get_ms()
 // specialized for calling init/get functions with no parameters
 REALLY_INLINE Atom MethodEnv::coerceEnter(Atom thisArg)
 {
-    return (*method->_invoker)(this, 0, &thisArg);
+    STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
+    Atom ret = (*method->_invoker)(this, 0, &thisArg);
+    STACKRESTORE();
+    return ret;
 }
 
 // general case for method calls
 REALLY_INLINE Atom MethodEnv::coerceEnter(int32_t argc, Atom* args)
 {
+    STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
     Atom result = (*method->_invoker)(this, argc, args);
+    STACKRESTORE();
     AvmAssert(VMPI_memset(args, 0, (argc+1)*sizeof(Atom)) == args); // clobber incoming args in DEBUG
     return result;
 }

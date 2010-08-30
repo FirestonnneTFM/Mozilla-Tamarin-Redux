@@ -404,5 +404,32 @@ class ImtHolder
     class ImtThunkEnv* entries[IMT_SIZE];
 };
 
+#if defined(_MSC_VER) && defined(AVMPLUS_IA32)
+// These macros are used for dynamically aligning our
+// stack before calling into our JITed code.  By aligning our
+// stack to an 8 byte boundary before calling into our JITed
+// code, we will keep all double access aligned and improve performance.
+#define STACKADJUST() \
+    __asm \
+    { \
+        __asm push ecx \
+        __asm mov ecx, esp \
+        __asm and ecx, 0x4 \
+        __asm sub esp, ecx \
+        __asm push ecx \
+    }
+
+#define STACKRESTORE() \
+    __asm \
+    { \
+        __asm pop ecx \
+        __asm add esp, ecx \
+        __asm pop ecx \
+    }
+#else
+#define STACKADJUST()
+#define STACKRESTORE()
+#endif
+
 }
 #endif // __avmplus_exec__
