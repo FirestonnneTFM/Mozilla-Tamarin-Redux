@@ -124,6 +124,8 @@ bool SetupSpyServer()
     pthread_mutex_init(&spy_mutex, NULL);
     pthread_cond_init(&spy_cond, NULL);
 
+    spy_running = true;
+
     //wait for spy connections on a separate thread
     if(pthread_create(&spy_thread, NULL, SpyConnectionLoop, NULL))
     {
