@@ -98,7 +98,10 @@ Atom BaseExecMgr::jitInvokerNow(MethodEnv* env, int argc, Atom* args)
 #endif
     }
     env->method->_invoker = invoker;
-    return invoker(env, argc, args);
+    STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
+    Atom ret = invoker(env, argc, args);
+    STACKRESTORE();
+    return ret;
 }
 
 void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplevel, AbcEnv* abc_env)
@@ -382,7 +385,10 @@ REALLY_INLINE MethodEnv* findMethod(ImtThunkEnv* ite, uintptr_t iid, ScriptObjec
 /*static*/ GprImtThunkProcRetType BaseExecMgr::dispatchImt(ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid)
 {
     MethodEnv* const env = findMethod(ite, iid, *(ScriptObject**)ap);
-    return (*env->_implGPR)(env, argc, ap);
+    STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
+    GprImtThunkProcRetType r = (*env->_implGPR)(env, argc, ap);
+    STACKRESTORE();
+    return r;
 }
 
 ImtThunkEnv* BaseExecMgr::resolveImtSlot(ImtThunkEnv* ite, uintptr_t iid)

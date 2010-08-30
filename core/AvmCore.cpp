@@ -961,6 +961,10 @@ return the result of the comparison ToPrimitive(x) == y.
      * @param rhs
      * @return trueAtom, falseAtom, or undefinedAtom
      */
+#if defined(_MSC_VER) && defined(AVMPLUS_IA32)
+    // Force this function to have a frame pointer so the doubles used are 8-byte aligned
+    #pragma optimize("y", off)
+#endif
     Atom AvmCore::compare(Atom lhs, Atom rhs)
     {
         // fixme - toprimitive must take number hint, so "7" becomes 7
@@ -987,6 +991,9 @@ return the result of the comparison ToPrimitive(x) == y.
         if (MathUtils::isNaN(dy)) return undefinedAtom;
         return dx < dy ? trueAtom : falseAtom;
     }
+#if defined(_MSC_VER) && defined(AVMPLUS_IA32)
+    #pragma optimize("", on)
+#endif
 
     Atom AvmCore::stricteq(Atom lhs, Atom rhs)
     {

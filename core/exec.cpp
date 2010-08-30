@@ -224,13 +224,19 @@ void BaseExecMgr::setInterpDirectly(MethodInfo* m, MethodSignaturep ms)
 uintptr_t BaseExecMgr::verifyEnterGPR(MethodEnv* env, int32_t argc, uint32_t* ap)
 {
     verifyOnCall(env);
-    return (*env->method->_implGPR)(env, argc, ap);
+    STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
+    uintptr_t ret = (*env->method->_implGPR)(env, argc, ap);
+    STACKRESTORE();
+    return ret;
 }
 
 double BaseExecMgr::verifyEnterFPR(MethodEnv* env, int32_t argc, uint32_t* ap)
 {
     verifyOnCall(env);
-    return (*env->method->_implFPR)(env, argc, ap);
+    STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
+    double d = (*env->method->_implFPR)(env, argc, ap);
+    STACKRESTORE();
+    return d;
 }
 
 // Entry point when the first call to the method is late bound.
@@ -616,9 +622,17 @@ inline Atom BaseExecMgr::endCoerce(MethodEnv* env, int32_t argc, uint32_t *ap, M
     AvmCore* core = env->core();
     const int32_t bt = ms->returnTraitsBT();
     if (bt == BUILTIN_number)
-        return core->doubleToAtom((*env->method->_implFPR)(env, argc, ap));
+    {
+        STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
+        double d = (*env->method->_implFPR)(env, argc, ap);
+        STACKRESTORE();
+        return core->doubleToAtom(d);
+    }
 
+    STACKADJUST(); // align stack for 32-bit Windows and MSVC compiler
     const Atom i = (*env->method->_implGPR)(env, argc, ap);
+    STACKRESTORE();
+
     switch (bt)
     {
     case BUILTIN_int:

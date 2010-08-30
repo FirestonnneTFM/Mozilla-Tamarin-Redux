@@ -325,6 +325,10 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
         return getprop_miss(c, env, obj);
     }
 
+#if defined(_MSC_VER) && defined(AVMPLUS_IA32)
+    // Force this function to have a frame pointer so the double used is 8-byte aligned
+    #pragma optimize("y", off)
+#endif
     SSE2_ONLY(
     // getting a double slot on an object
     Atom getprop_obj_slot_double_sse2(GetCache& c, MethodEnv* env, Atom obj)
@@ -335,6 +339,9 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
         return getprop_miss(c, env, obj);
     }
     )
+#if defined(_MSC_VER) && defined(AVMPLUS_IA32)
+    #pragma optimize("y", on)
+#endif
 
     // calling a getter method on an object
     Atom getprop_obj_get(GetCache& c, MethodEnv* env, Atom obj)
