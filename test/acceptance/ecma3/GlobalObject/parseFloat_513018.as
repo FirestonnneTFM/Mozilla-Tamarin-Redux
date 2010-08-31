@@ -38,32 +38,22 @@
 package {
     import avmplus.System
 
-    var SECTION = "Vector";
+    var SECTION = "GlobalObject";
     var VERSION = "as3";
     startTest();
-    var TITLE   = "bug 504525";
+    var TITLE   = "bug 513018";
 
     writeHeaderToLog( SECTION + " "+ TITLE );
 
-    public function vtest()
-    {
-        var v1 = new Vector.<int>(); v1.push( 1 );
-        var v2 = new Vector.<int>(); v2.push( 2 );
-        var v3 = new Vector.<int>(); v3.push( 3 );
-        var v4 = new Vector.<int>(); v4.push( 4 );
-
-        return v1.concat( v2, v3, v4 );
+    if (System.swfVersion < 11) {
+        AddTestCase('SWF9: 12..34..56',
+            parseFloat("12..34..56"),
+            1234.56);
+    } else {
+        AddTestCase('SWF11+: 12..34..56',
+            parseFloat("12..34..56"),
+            12);
     }
-
-    AddTestCase("Verify swfVersion flag",
-      11,
-      System.swfVersion);
-
-    var result = vtest();
-    AddTestCase("Test Vector.concat with Latest behavior",
-      "1,2,3,4",
-      result.toString());
-
+    
     test();
-
 }
