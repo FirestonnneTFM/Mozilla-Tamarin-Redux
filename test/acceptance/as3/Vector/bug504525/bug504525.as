@@ -55,14 +55,17 @@ package {
         return v1.concat( v2, v3, v4 );
     }
 
-    AddTestCase("Verify swfVersion flag",
-      10,
-      System.swfVersion);
-
     var result = vtest();
-    AddTestCase("Test Vector.concat with FP_10_0 behavior",
-      "1,4,3,2",
-      result.toString());
+    
+    if (System.swfVersion < 11) {
+        AddTestCase("Test Vector.concat with SWF 9 or 10 behavior",
+          "1,4,3,2",
+          result.toString());
+    } else { // swf 11+
+        AddTestCase("Test Vector.concat with Latest behavior",
+          "1,2,3,4",
+          result.toString());
+    }
 
     test();
 
