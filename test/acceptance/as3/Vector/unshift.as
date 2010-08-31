@@ -53,31 +53,44 @@ writeHeaderToLog( " Vector.unshift()");
 var v1=new Vector.<int>();
 v1.unshift();
 AddTestCase(
-		"unshift empty vector with no items still empty",
-		"",
-		v1.toString());
+        "unshift empty vector with no items still empty",
+        "",
+        v1.toString());
+
+var v1= new Vector.<*>(5, true);
+var errormsg="";
+try {
+  v1.unshift({});
+} catch (e) {
+  errormsg=e.toString();
+}
+AddTestCase(
+        "unshift object vector with fixed length",
+        "RangeError: Error #1126",
+        parseError(errormsg,"RangeError: Error #1126".length));
+
 var v1=new Vector.<int>();
 v1.unshift(10);
 AddTestCase(
-		"unshift empty vector with single item",
-		"10",
-		v1.toString());
+        "unshift empty vector with single item",
+        "10",
+        v1.toString());
 
 var v1=new Vector.<int>();
 v1[0]=10;
 v1.unshift(11);
 AddTestCase(
-		"unshift single element vector with single item",
-		"11,10",
-		v1.toString());
+        "unshift single element vector with single item",
+        "11,10",
+        v1.toString());
 
 var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 v1.unshift(11);
 AddTestCase(
-		"unshift small vector with single item",
-		"11,0,1,2,3,4,5,6,7,8,9",
-		v1.toString());
+        "unshift small vector with single item",
+        "11,0,1,2,3,4,5,6,7,8,9",
+        v1.toString());
 
 var v1=new Vector.<int>(3,true);
 v1[0]=10; v1[1]=11; v1[2]=12;
@@ -88,9 +101,9 @@ try {
   errormsg=e.toString();
 }
 AddTestCase(
-		"unshift single element vector with single item",
-		"RangeError: Error #1126",
-		parseError(errormsg,"RangeError: Error #1126".length));
+        "unshift single element vector with single item",
+        "RangeError: Error #1126",
+        parseError(errormsg,"RangeError: Error #1126".length));
 
 // bug: https://bugzilla.mozilla.org/show_bug.cgi?id=469377
 var strVector = new Vector.<String>;

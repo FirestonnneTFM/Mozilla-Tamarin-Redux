@@ -100,4 +100,10 @@ AddTestCase(
 		"one,two,three,delete1,delete2,four,five,six",
 		v1.toString());
 */
+
+var v1= Vector.<int>([0,1,2,3,4,5,6,7,8,9]);
+v1.splice(12, 0, 33);
+AddTestCase("startIndex greater than vector length",
+            "0,1,2,3,4,5,6,7,8,9,33",
+            v1.toString())
 test();

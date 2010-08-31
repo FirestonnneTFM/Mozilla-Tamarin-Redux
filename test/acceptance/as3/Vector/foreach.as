@@ -63,8 +63,8 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase( 	"forEach eacher is undefined",
-		"ArgumentError: Error #1063",
+AddTestCase(    "forEach eacher is undefined",
+        "ArgumentError: Error #1063",
     parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var v1=new Vector.<int>();
@@ -76,14 +76,40 @@ try {
   errormsg=e.toString();
 }
 AddTestCase("forEach eacher is not a function",
-         		"TypeError: Error #1034",
+                "TypeError: Error #1034",
             parseError(errormsg,"TypeError: Error #1034".length));
 
 var v1=new Vector.<String>();
 for (var i=0;i<3;i++) v1[i]="s"+i;
 var result="";
 v1.forEach(eacher);
-AddTestCase(	"forEach simple vector",
-		"(s0:0)(s1:1)(s2:2)",
-		result);
+AddTestCase(    "forEach simple vector",
+        "(s0:0)(s1:1)(s2:2)",
+        result);
+
+function double(value,index,obj) {
+    
+}
+
+var v1=Vector.<uint>([4560,9120,13680]);
+var result="";
+v1.forEach(eacher);
+AddTestCase(    "forEach simple uint vector",
+        "(4560:0)(9120:1)(13680:2)",
+        result);
+
+var v1=Vector.<Number>([4560,9120,13680]);
+var result="";
+v1.forEach(eacher);
+AddTestCase(    "forEach simple Number vector",
+        "(4560:0)(9120:1)(13680:2)",
+        result);
+
+var v1=Vector.<int>([4560,9120,13680]);
+var result="";
+v1.forEach(eacher);
+AddTestCase(    "forEach simple uint vector",
+        "(4560:0)(9120:1)(13680:2)",
+        result);
+
 test();

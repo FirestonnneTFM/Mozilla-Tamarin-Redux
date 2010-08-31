@@ -54,11 +54,19 @@ var TITLE   = "Vector.sort(comparefn)";
 
 writeHeaderToLog( SECTION + " "+ TITLE);
 
+// sort int vector
 var v1=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=9-i;
 var v2=v1.sort(Compare);
 CheckItems(v1,v2,"sort()");
 
+// sort uint vector
+var v1=new Vector.<uint>();
+for (var i=0;i<10;i++) v1[i]=9-i;
+var v2=v1.sort(Compare);
+CheckItems(v1,v2,"sort()");
+
+// sort string vector
 var vs1=new Vector.<String>();
 for (var i=0;i<10;i++) vs1[i]="string"+(9-i);
 var vs2=vs1.sort(Compare);
