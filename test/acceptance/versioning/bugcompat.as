@@ -50,33 +50,33 @@ package {
     var test_path:String = System.argv[1];
 
     var SWF10_domain = new Domain(Domain.currentDomain);
-    SWF10_domain.load(test_path, "SWF10");
+    SWF10_domain.load(test_path, 10);
     var SWF10_cl = SWF10_domain.getClass("testclass");
     var SWF10_helper = new SWF10_cl;
 
     var SWF11_domain = new Domain(Domain.currentDomain);
-    SWF11_domain.load(test_path, "SWF11");
+    SWF11_domain.load(test_path, 11);
     var SWF11_cl = SWF11_domain.getClass("testclass");
     var SWF11_helper = new SWF11_cl;
 
     var result;
 
-    result = SWF10_helper.vtest(leaf_path, SWF10_domain, "SWF10");
+    result = SWF10_helper.vtest(leaf_path, SWF10_domain, 10);
     AddTestCase("Test Vector.concat with SWF10 loading SWF10 behavior",
       "1,4,3,2",
       result.toString());
 
-    result = SWF11_helper.vtest(leaf_path, SWF11_domain, "SWF11");
+    result = SWF11_helper.vtest(leaf_path, SWF11_domain, 11);
     AddTestCase("Test Vector.concat with SWF11 loading SWF11 behavior",
       "1,2,3,4",
       result.toString());
 
-    result = SWF10_helper.vtest(leaf_path, SWF10_domain, "SWF11");
+    result = SWF10_helper.vtest(leaf_path, SWF10_domain, 11);
     AddTestCase("Test Vector.concat with SWF10 loading SWF11 behavior",
       "1,2,3,4",
       result.toString());
 
-    result = SWF11_helper.vtest(leaf_path, SWF11_domain, "SWF10");
+    result = SWF11_helper.vtest(leaf_path, SWF11_domain, 10);
     AddTestCase("Test Vector.concat with SWF11 loading SWF10 behavior",
       "1,4,3,2",
       result.toString());

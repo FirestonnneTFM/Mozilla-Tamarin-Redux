@@ -69,7 +69,7 @@ class AcceptanceRuntest(RuntestBase):
     androidthreads = False
     androiddevices = []
     verifyonly = False
-    bugcompat_versions = ['SWF9','SWF10','SWF11']
+    bugcompat_versions = ['9','10','11']
 
     def __init__(self):
         # Set threads to # of available cpus/cores
@@ -303,7 +303,7 @@ class AcceptanceRuntest(RuntestBase):
                     for bcv in self.bugcompat_versions:
                         line = uses_bugcompat.sub('', line)
                         line, extraVmArgs, abcargs = self.process_avm_args_line(line, dir)
-                        extraVmArgs += ' -bugcompat %s ' % bcv
+                        extraVmArgs += ' -swfversion %s ' % bcv
                         outputCalls.extend(self.runTest(
                             ast, root, testName, '%s.%s' % (testnum, index),
                             settings, extraVmArgs, abcargs))

@@ -4850,10 +4850,10 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    /*static*/ const char* const BugCompatibility::kNames[BugCompatibility::VersionCount] = 
+    /*static*/ uint32_t const BugCompatibility::kNames[BugCompatibility::VersionCount] = 
     {
-        "SWF9",
-        "SWF10",
-        "SWF11"
+        9,
+        10,
+        11
     };
 }

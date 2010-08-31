@@ -55,9 +55,9 @@ package {
         return v1.concat( v2, v3, v4 );
     }
 
-    AddTestCase("Verify bugCompatibility flag",
-      "SWF9",
-      System.bugCompatibility);
+    AddTestCase("Verify swfVersion flag",
+      9,
+      System.swfVersion);
 
     var result = vtest();
     AddTestCase("Test Vector.concat with FP_9_0 behavior",

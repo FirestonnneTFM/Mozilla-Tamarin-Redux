@@ -45,9 +45,9 @@ package {
 
     writeHeaderToLog( SECTION + " "+ TITLE );
 
-    AddTestCase("Verify bugCompatibility flag",
-      "SWF11",
-      System.bugCompatibility);
+    AddTestCase("Verify swfVersion flag",
+				11,
+				System.swfVersion);
 
     AddTestCase('SWF11: 12..34..56',
 		parseFloat("12..34..56"),

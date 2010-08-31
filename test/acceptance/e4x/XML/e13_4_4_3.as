@@ -85,7 +85,7 @@ XML.prettyPrinting = false;
 var xmlDoc = "<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM></XML>";
 
 var expectedResult;
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM><TEAM>Red Sox</TEAM></XML>';
 else
     expectedResult = '<XML><TEAM>Giants</TEAM><TEAM>Padres</TEAM><TEAM>&lt;TEAM&gt;Red Sox&lt;/TEAM&gt;</TEAM></XML>';
@@ -94,7 +94,7 @@ AddTestCase( "MYXML = new XML(xmlDoc), MYXML.appendChild('<TEAM>Red Sox</TEAM>')
              expectedResult,
              (MYXML = new XML(xmlDoc), MYXML.appendChild('<TEAM>Red Sox</TEAM>'), MYXML.toXMLString()) );
 
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<XML><TEAM>Giants<City>San Francisco</City></TEAM><TEAM>Padres</TEAM></XML>';
 else
     expectedResult = '<XML><TEAM>Giants&lt;City&gt;San Francisco&lt;/City&gt;</TEAM><TEAM>Padres</TEAM></XML>';
@@ -142,7 +142,7 @@ AddTestCase( "true duplicate child node - MYXML.appendChild(MYXML.child(0)[0]), 
 			"<LEAGUE><TEAM>Giants</TEAM><TEAM>Giants</TEAM></LEAGUE>",
 			(MYXML.appendChild(MYXML.child(0)[0]), MYXML.toString()) );
 			
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<root><b>a</b></root>';
 else
     expectedResult = '<b>a</b>';
@@ -173,7 +173,7 @@ MYXML = new XML('<SCARY><MOVIE></MOVIE></SCARY>');
 x1 = "poltergeist";
 MYXML.appendChild(x1);
 			
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<SCARY><MOVIE/>poltergeist</SCARY>';
 else
     expectedResult = '<SCARY><MOVIE/><MOVIE>poltergeist</MOVIE></SCARY>';

@@ -130,7 +130,7 @@ MYXML.prependChild(child2);
 MYXML.prependChild(child1);
 
 var expectedResult;
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<company><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 else
     expectedResult = '<company>&lt;!-- comment --&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
@@ -145,7 +145,7 @@ MYXML.prependChild(child3);
 MYXML.prependChild(child2);
 MYXML.prependChild(child1);
 
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<company><!-- comment --><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 else
     expectedResult = '<company>&lt;!-- comment --&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
@@ -159,7 +159,7 @@ MYXML.prependChild(child3);
 MYXML.prependChild(child2);
 MYXML.prependChild(child1);
 
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<company><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 else
     expectedResult = '<company>&lt;?xml-stylesheet href="classic.xsl" type="text/xml"?&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
@@ -177,7 +177,7 @@ MYXML.prependChild(child1);
 var expected = "TypeError: error: XML declaration may only begin entities.";
 var result = "error, exception not thrown";
 
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<company><?xml-stylesheet href="classic.xsl" type="text/xml"?><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 else
     expectedResult = '<company>&lt;?xml-stylesheet href="classic.xsl" type="text/xml"?&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
@@ -206,7 +206,7 @@ MYXML.prependChild(child3);
 MYXML.prependChild(child2);
 MYXML.prependChild(child1);
 
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<company><@notanattribute>hi</@notanattribute><employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';
 else
     expectedResult = '<company>&lt;@notanattribute&gt;hi&lt;/@notanattribute&gt;<employee id="1"><name>John</name></employee><employee id="2"><name>Sue</name></employee><employee id="3"><name>Bob</name></employee></company>';

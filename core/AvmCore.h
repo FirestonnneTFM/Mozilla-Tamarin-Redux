@@ -263,7 +263,12 @@ const int kBufferPadding = 16;
                                 // note that this comes *after* VersionCount.
         };
         
-        static const char* const kNames[BugCompatibility::VersionCount];
+        /** These are the external names for swf versions - all integers.
+         *
+         * The names must correspond to the Version enum above.  The value will
+         * be '9' for kSWF9, and so on.
+         */
+        static uint32_t const kNames[BugCompatibility::VersionCount];
 
         /** Compatibility bug fixes in the AVM - an overview.
          *

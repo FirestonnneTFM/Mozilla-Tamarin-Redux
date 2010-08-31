@@ -986,19 +986,24 @@ namespace avmshell
                     settings.api = VMPI_atoi(argv[i+1]);
                     i++;
                 }
-                else if (VMPI_strcmp(arg, "-bugcompat") == 0 && i+1 < argc) {
-                    int j;
-                    for (j = 0; j < BugCompatibility::VersionCount; ++j)
+                else if (VMPI_strcmp(arg, "-swfversion") == 0 && i+1 < argc) {
+                    int j = BugCompatibility::VersionCount;
+                    unsigned swfVersion;
+                    int nchar;
+                    const char* val = argv[++i];
+                    if (VMPI_sscanf(val, "%u%n", &swfVersion, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val))
                     {
-                        if (VMPI_strcmp(argv[i+1], BugCompatibility::kNames[j]) == 0)
+                        for (j = 0; j < BugCompatibility::VersionCount; ++j)
                         {
-                            settings.bugCompatibilityVersion = (BugCompatibility::Version)j;
-                            i++;
-                            break;
+                            if (BugCompatibility::kNames[j] == swfVersion)
+                            {
+                                settings.swfVersion = (BugCompatibility::Version)j;
+                                break;
+                            }
                         }
                     }
                     if (j == BugCompatibility::VersionCount) {
-                        AvmLog("Unrecognized -bugcompat version %s\n", argv[i+1]);
+                        AvmLog("Unrecognized -swfversion version %s\n", val);
                         usage();
                     }
                 }
@@ -1179,13 +1184,13 @@ namespace avmshell
         AvmLog("                        workers than threads, and at least two threads.\n");
         AvmLog("                        If R > 0 is provided then it is the number of times the list of files is repeated.\n");
 #endif
-        AvmLog("          [-bugcompat version]\n");
+        AvmLog("          [-swfversion version]\n");
         AvmLog("                        Run with a given bug-compatibility version in use by default.\n");
         AvmLog("                        (This can be overridden on a per-ABC basis by embedded metadata.)\n");
-        AvmLog("                        Legal versions include:\n");
+        AvmLog("                        Legal versions are:\n");
         for (int j = 0; j < BugCompatibility::VersionCount; ++j)
         {
-        AvmLog("                            %s\n",BugCompatibility::kNames[j]);
+        AvmLog("                            %d\n",BugCompatibility::kNames[j]);
         }
         AvmLog("          [-log]\n");
         AvmLog("          [-api N] execute ABCs as version N (see api-versions.h)\n");

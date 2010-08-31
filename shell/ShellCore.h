@@ -84,7 +84,7 @@ namespace avmshell
         const char* st_category;
         const char* st_name;
         uint32_t api;
-        BugCompatibility::Version bugCompatibilityVersion;
+        BugCompatibility::Version swfVersion;
 
         MMgc::GC::GCMode gcMode()
         {
