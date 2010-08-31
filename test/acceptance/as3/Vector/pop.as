@@ -105,4 +105,22 @@ AddTestCase(
                 "0,0,0,0,0,0,0,0,0,0",
                 v1.toString());
 
+var v2 = new Vector.<Object>(10,true);
+var errormsg="";
+try {
+  p = v2.pop();
+} catch (e) {
+  errormsg=e.toString();
+}
+AddTestCase(
+                "pop fixed object vector should throw exception",
+                "RangeError: Error #1126",
+                parseError(errormsg,"RangeError: Error #1126".length));
+
+var v2 = new Vector.<Object>();
+var popped = v2.pop();
+AddTestCase('pop empty object vector',
+            undefined,
+            popped);
+
 test();

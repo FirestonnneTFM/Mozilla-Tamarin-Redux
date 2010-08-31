@@ -86,6 +86,25 @@ AddTestCase(    "every small array returns false on 0",
                 false,
                 v1.every(checker1));
 
+var v1 = Vector.<Number>([3.1415, Number.MAX_VALUE, -0.00032]);
+AddTestCase("every: Number vector does not contain a zero",
+            true,
+            v1.every(checker1));
+
+var v1 = Vector.<Number>([3.1415, Number.MAX_VALUE, 0.00, -0.00032]);
+AddTestCase("every: Number vector does contain a zero",
+            false,
+            v1.every(checker1));
+
+var v1 = Vector.<uint>([31415, uint.MAX_VALUE, 999999]);
+AddTestCase("every: uint vector does not contain a zero",
+            true,
+            v1.every(checker1));
+
+var v1 = Vector.<uint>([31415, uint.MAX_VALUE,0, 999999]);
+AddTestCase("every: uint vector does not contain a zero",
+            false,
+            v1.every(checker1));
 
 var msg="";
 var thisobj=new Object();

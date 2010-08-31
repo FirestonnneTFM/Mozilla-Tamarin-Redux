@@ -122,4 +122,53 @@ AddTestCase(
                 "some small vector message with a true",
                 "(value=a,index=0,object=[a,b,t,c,d])(value=b,index=1,object=[a,b,t,c,d])(value=t,index=2,object=[a,b,t,c,d])",
                 msg);
+
+
+function ninetyNinePointNineNine(value,index,obj) {
+    if (value == 99.99) {
+        return true;
+    }
+    return false;
+}
+
+var v2 = Vector.<Number>([1.1, 3.1415, 33.33333, 99.99, 100.0000001]);
+var v3 = Vector.<Number>([1.1, 3.1415, 33.33333, 99.9901, 100.0000001]);
+
+AddTestCase("Verify a value is in a Number vector",
+            true,
+            v2.some(ninetyNinePointNineNine));
+
+AddTestCase("Verify a value is not in a Number vector",
+            false,
+            v3.some(ninetyNinePointNineNine));
+
+function uint_maxvalue(value,index,obj) {
+    if (value == uint.MAX_VALUE) {
+        return true;
+    }
+    return false;
+}
+
+var v2 = Vector.<uint>([1, 3, uint.MAX_VALUE, 99, 100]);
+var v3 = Vector.<uint>([1, 3, uint.MIN_VALUE, 99, 100]);
+
+AddTestCase("Verify a value is in a uint vector",
+            true,
+            v2.some(uint_maxvalue));
+
+AddTestCase("Verify a value is not in a uint vector",
+            false,
+            v3.some(uint_maxvalue));
+
+var myObj = {x:33};
+var someFunc = function (value,index,obj) {
+    if (this.x == 33) {
+        return true;
+    }
+    return false;
+}
+AddTestCase("Test thisObject param",
+            true,
+            v3.some(someFunc, myObj));
+
 test();

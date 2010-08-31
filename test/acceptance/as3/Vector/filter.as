@@ -69,8 +69,8 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(	"filter checker is undefined",
-		"ArgumentError: Error #1063",
+AddTestCase(    "filter checker is undefined",
+        "ArgumentError: Error #1063",
     parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var v1:Vector.<int>=new Vector.<int>(10);
@@ -81,22 +81,36 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(	"filter checker is not a function",
-		"TypeError: Error #1034",
+AddTestCase(    "filter checker is not a function",
+        "TypeError: Error #1034",
               parseError(errormsg,"TypeError: Error #1034".length));
 
 var v1:Vector.<int>=new Vector.<int>();
 var result=v1.filter(EvenChecker);
-AddTestCase(	"filter empty vector",
-		"",
-		result.toString());
+AddTestCase(    "filter empty vector",
+        "",
+        result.toString());
 
 var v1:Vector.<int>=new Vector.<int>();
 for (var i=0;i<10;i++) v1[i]=i;
 var result=v1.filter(EvenChecker);
-AddTestCase(	"filter small vector",
-		"0,2,4,6,8",
-		result.toString());
+AddTestCase(    "filter small vector",
+        "0,2,4,6,8",
+        result.toString());
+
+var vn:Vector.<Number>=new Vector.<Number>();
+for (var i=0;i<10;i++) vn[i]=i;
+var result=vn.filter(EvenChecker);
+AddTestCase("filter small Number vector",
+        "0,2,4,6,8",
+        result.toString());
+
+var vu:Vector.<uint>=new Vector.<uint>();
+for (var i=0;i<10;i++) vu[i]=i;
+var result=vu.filter(EvenChecker);
+AddTestCase(    "filter small vector",
+        "0,2,4,6,8",
+        result.toString());
 
 var v1:Vector.<int>=new Vector.<int>();
 for (var i=0;i<3;i++) v1[i]=i;
@@ -104,9 +118,9 @@ var myobject=new Object();
 myobject.message="message";
 var msg="";
 var result=v1.filter(ThisChecker,myobject);
-AddTestCase(	"filter use thisobj",
-		"messagemessagemessage",
-		msg);
+AddTestCase(    "filter use thisobj",
+        "messagemessagemessage",
+        msg);
 
 // Bugzilla https://bugzilla.mozilla.org/show_bug.cgi?id=513095
 var items:Vector.<String> = new Vector.<String>;
