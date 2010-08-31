@@ -408,7 +408,7 @@ namespace avmshell
             else if ((c[0] == 0xff) && (c[1] == 0xfe))
             {
                 //UTF-16 little endian
-                return core()->newStringEndianUTF16(/*littleEndian*/true, (wchar*)c, len);
+                return core()->newStringEndianUTF16(/*littleEndian*/true, (wchar*)(void*)c, len);
             }
         }
 

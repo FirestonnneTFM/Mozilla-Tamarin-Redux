@@ -76,6 +76,9 @@ endif
 ifeq (mips,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
+ifeq (sh4,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
 ifeq (darwin,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/mac)
 endif
