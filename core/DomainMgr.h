@@ -40,7 +40,7 @@
 #ifndef __avmplus_DomainMgr__
 #define __avmplus_DomainMgr__
 
-namespace avmplus 
+namespace avmplus
 {
 
 /**

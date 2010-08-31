@@ -1553,8 +1553,8 @@ namespace avmplus
 
         {
             BitSet seen(mn_count);
-            
-            // verify that parameterized types have no cycles. 
+
+            // verify that parameterized types have no cycles.
             // we have to do this in a second pass since forward-references are legal
             for (uint32_t i = 1; i < mn_count; ++i )
             {
@@ -1572,7 +1572,7 @@ namespace avmplus
                     goto corrupted; // don't throw: that would leak the BitSet
 
                 readU30(p); // param count (currently always 1)
-                
+
                 uint32_t pt_index = readU30(p); // param type(s) (currently exactly one)
                 // now check for cycles. we can nest arbitrarily deep (eg Vector<Vector<Vector<uint>>>)
                 // but we can't have a cycle.
@@ -1591,12 +1591,12 @@ namespace avmplus
                     if (seen.get(pt_index))
                         goto corrupted; // don't throw: that would leak the BitSet
                 }
-                
+
             }
         }
-        
+
         return;
-        
+
     corrupted:
         toplevel->throwVerifyError(kCorruptABCError);
 

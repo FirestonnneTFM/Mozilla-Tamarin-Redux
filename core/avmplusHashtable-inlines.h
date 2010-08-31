@@ -76,9 +76,9 @@ namespace avmplus
         return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0;
     }
 
-    REALLY_INLINE bool InlineHashtable::hasDontEnumSupport() const 
+    REALLY_INLINE bool InlineHashtable::hasDontEnumSupport() const
     {
-        return (m_atomsAndFlags & kDontEnumBit) != 0; 
+        return (m_atomsAndFlags & kDontEnumBit) != 0;
     }
 
     REALLY_INLINE Atom InlineHashtable::removeDontEnumMask(Atom a) const
@@ -91,10 +91,10 @@ namespace avmplus
         return a != EMPTY && a != DELETED && !(uintptr_t(a) & (m_atomsAndFlags & kDontEnumBit));
     }
 
-	REALLY_INLINE bool InlineHashtable::hasIterIndex() const
-	{
-		return (m_atomsAndFlags & kHasIterIndex) != 0;
-	}
+    REALLY_INLINE bool InlineHashtable::hasIterIndex() const
+    {
+        return (m_atomsAndFlags & kHasIterIndex) != 0;
+    }
 
 #ifdef DEBUGGER
     REALLY_INLINE uint64_t InlineHashtable::bytesUsed() const
@@ -103,9 +103,9 @@ namespace avmplus
     }
 #endif
 
-    REALLY_INLINE bool InlineHashtable::hasDeletedItems() const 
+    REALLY_INLINE bool InlineHashtable::hasDeletedItems() const
     {
-        return (m_atomsAndFlags & kHasDeletedItems) != 0; 
+        return (m_atomsAndFlags & kHasDeletedItems) != 0;
     }
 
     REALLY_INLINE void InlineHashtable::reset()

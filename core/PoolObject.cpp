@@ -547,7 +547,7 @@ range_error:
         Multiname m;
         parseMultiname(m, index);
 
-		Traits* t = core->domainMgr()->findTraitsInPoolByMultiname(this, m);
+        Traits* t = core->domainMgr()->findTraitsInPoolByMultiname(this, m);
         if (t == (Traits*)BIND_AMBIGUOUS)
         {
             if (toplevel)
@@ -608,7 +608,7 @@ range_error:
                     if (!r)
                     {
                         r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
-			            r->verifyBindings(toplevel);
+                        r->verifyBindings(toplevel);
                         core->domainMgr()->addNamedTraits(pool, fullname, base->ns(), r);
                     }
                     break;

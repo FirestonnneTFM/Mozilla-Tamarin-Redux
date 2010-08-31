@@ -1881,7 +1881,7 @@ namespace avmplus
         // and the flag that determines whether to use the unconsed or the consed array,
         // are represented as follows:
         //
-        //  - The unconsed array restArg is represented indirectly via ap_param and 
+        //  - The unconsed array restArg is represented indirectly via ap_param and
         //    rest_offset.
         //  - The argument count restArgc is a LIR expression of type uint32 computed from
         //    argc_param and param_count.
@@ -1893,7 +1893,7 @@ namespace avmplus
         // may update it.
         //
         // The difference between a ...rest argument and an arguments array are that in
-        // the former case, 
+        // the former case,
         //
         //    restArgc = MAX(argc_param - param_count, 0)
         //    restArg = is ap_param + rest_offset
@@ -1904,7 +1904,7 @@ namespace avmplus
         //    restArg = ap_param + 1
         //
         // restArg is computed in the code generation case for OP_restarg.
-        
+
         if (info->needRest())
         {
             if (info->lazyRest())
@@ -1931,7 +1931,7 @@ namespace avmplus
             if (info->lazyRest())
             {
                 restArgc = argc_param;
-                
+
                 // Store a NULL array pointer
                 localSet(firstLocal, InsConstPtr(0), ARRAY_TYPE);
             }
@@ -2775,7 +2775,7 @@ namespace avmplus
                                 loadAtomRep(state->sp()),
                                 leaIns(restLocal*8, vars),
                                 restArgc,
-                                (info->needRest() ? 
+                                (info->needRest() ?
                                     binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))) :
                                     binaryIns(LIR_addp, ap_param, InsConstPtr((void*)sizeof(Atom)))));
             localSet(state->sp()-1, out, type);

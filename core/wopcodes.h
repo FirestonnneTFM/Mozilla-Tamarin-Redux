@@ -63,7 +63,7 @@ namespace avmplus
         WOP_timestamp = 0,
         WOP_restargc = 0,
         WOP_restarg = 0,
-        
+
         // Normal operations
         WOP_nop = 0x02,
         WOP_throw = 0x03,

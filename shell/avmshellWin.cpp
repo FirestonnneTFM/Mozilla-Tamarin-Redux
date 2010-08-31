@@ -188,12 +188,12 @@ namespace avmshell
                 );
 
             HMODULE hDbgHelp = LoadLibraryW(L"dbghelp.dll");
- 			MINIDUMP_WRITE_DUMP MiniDumpWriteDump_ = NULL;
- 			if (hDbgHelp)
- 			{
- 				MiniDumpWriteDump_ = 
- 					(MINIDUMP_WRITE_DUMP)GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
- 			}
+            MINIDUMP_WRITE_DUMP MiniDumpWriteDump_ = NULL;
+            if (hDbgHelp)
+            {
+                MiniDumpWriteDump_ =
+                    (MINIDUMP_WRITE_DUMP)GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
+            }
 
             if (MiniDumpWriteDump_)
             {

@@ -45,7 +45,7 @@ using namespace MMgc;
 
 namespace avmplus
 {
-    
+
     // overrides ClassClosure::construct()
     Atom MethodClosureClass::construct(int /*argc*/, Atom* /*argv*/)
     {

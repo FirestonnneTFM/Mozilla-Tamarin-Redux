@@ -74,7 +74,7 @@ namespace avmplus
         nm##_itraits = core->domainMgr()->findBuiltinTraitsByName(pool, core->internConstantStringLatin1(clsnm)); \
         nm##_itraits->builtinType = BUILTIN_##nm; \
     } while (0)
-    
+
         DO_BUILTIN(array, "Array");
         DO_BUILTIN(boolean, "Boolean");
         DO_BUILTIN(class, "Class");

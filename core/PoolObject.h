@@ -113,7 +113,7 @@ namespace avmplus
         uint32_t constantStringCount;
         uint32_t constantNsCount;
         uint32_t constantNsSetCount;
-    
+
 #ifdef VMCFG_PRECOMP_NAMES
     private:
         DWB(PrecomputedMultinames*) precompNames;   // a GCFinalizedObject

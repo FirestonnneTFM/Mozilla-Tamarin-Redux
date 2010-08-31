@@ -98,7 +98,7 @@ namespace avmshell
     class ShellCodeContext : public CodeContext
     {
     public:
-        inline ShellCodeContext(DomainEnv* env, const BugCompatibility* bugCompatibility) 
+        inline ShellCodeContext(DomainEnv* env, const BugCompatibility* bugCompatibility)
             : CodeContext(env, bugCompatibility) { }
     };
 
@@ -188,7 +188,7 @@ namespace avmshell
         static void interruptTimerCallback(void* data);
 
         ShellToplevel* createShellToplevel();
-        
+
         void interrupt(Toplevel*, InterruptReason);
         void stackOverflow(Toplevel *toplevel);
         void setEnv(Toplevel *toplevel, int argc, char *argv[]);
@@ -224,7 +224,7 @@ namespace avmshell
     class ShellToplevel : public Toplevel
     {
         friend class ShellCore;
-        
+
     public:
         ShellToplevel(AbcEnv* abcEnv);
 

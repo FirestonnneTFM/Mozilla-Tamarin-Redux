@@ -66,7 +66,7 @@ namespace avmplus
         AvmAssert(getCapacity());
         MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
         uint32_t const cap = getCapacity() + (hasIterIndex() ? 2 : 0);
-		setAtoms((Atom *)gc->Calloc(cap, sizeof(Atom), GC::kContainsPointers|GC::kZero));
+        setAtoms((Atom *)gc->Calloc(cap, sizeof(Atom), GC::kContainsPointers|GC::kZero));
     }
 
     void InlineHashtable::destroy()
@@ -263,7 +263,7 @@ namespace avmplus
         GC* gc = GC::GetGC(atoms);
         MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
         const uint32_t newCapacityAlloc = newCapacity + (hasIterIndex() ? 2 : 0);
-		Atom* newAtoms = (Atom*)gc->Calloc(newCapacityAlloc, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+        Atom* newAtoms = (Atom*)gc->Calloc(newCapacityAlloc, sizeof(Atom), GC::kContainsPointers|GC::kZero);
         // WE#2621977 -- the behavior of growing-during-enumeration has always been ill-defined,
         // but this change caused that to (effectively) terminate the enumeration. This is a hack:
         // if we have an iter index, copy it over to preserve the previous oddball behavior. (srj)
@@ -282,21 +282,21 @@ namespace avmplus
     }
 
     // this function is slow -- however, for "normal", well-mannered ABC code, it should
-    // be called only once per iteration, at the start. (For handcrafted ABC it could be 
+    // be called only once per iteration, at the start. (For handcrafted ABC it could be
     // called repeatedly, which would dramatically slow such cases, but that's acceptable.)
     int InlineHashtable::publicIterIndexToRealIndex(int publicIndex)
     {
         // keep in mind that a "public" index goes from 1...N (0 is the start-and-finish value)
         AvmAssert(publicIndex > 0);
-        
-        // for "well-formed" (ie, generated with ASC or other reasonable compiler), 
+
+        // for "well-formed" (ie, generated with ASC or other reasonable compiler),
         // we should only end up calling this function once per iteration, with publicIndex == 1 ....
         // however, we don't assert here because it *is* legal to call it with other values
         // (in fact, our abcasm tests do so), but such usage is now dramatically slower than
         // it used to be.
         // AvmAssert(publicIndex == 1);
 
-		const Atom* const atoms = getAtoms();
+        const Atom* const atoms = getAtoms();
         int const cap = getCapacity();
         uintptr_t const dontEnumMask = (m_atomsAndFlags & kDontEnumBit);
         for (int i = 0; i < cap; i += 2)
@@ -324,7 +324,7 @@ namespace avmplus
                     return i;
             }
         }
-        
+
         // well-formed code can get here if there are no enumerable keys in the table.
         // return a value that is always > getCapacity;
         // since all callers check vs. cap this neuters the result
@@ -335,10 +335,10 @@ namespace avmplus
     // by this method starting with 0, until 0 is returned.
     int InlineHashtable::next(int index)
     {
-		Atom* atoms = getAtoms();
-		int const cap = getCapacity();
+        Atom* atoms = getAtoms();
+        int const cap = getCapacity();
 
-        // we need our iter-index fields to iterate. 
+        // we need our iter-index fields to iterate.
         // since most objects don't ever iterate this way,
         // they aren't always preallocated... if we get here and
         // they aren't, reallocate first.
@@ -358,11 +358,11 @@ namespace avmplus
         AvmAssert(hasIterIndex()); // @todo
 
         intptr_t* iterIndices = (intptr_t*)(atoms + cap);
-        // 
+        //
         // iterIndices[0] == the expected public index we receive as arg
         // iterIndices[1] == the real internal index that corresponds to it,
         //  with bit 31 set if the entry was an intptr.
-        // 
+        //
         int publicIndex = int(iterIndices[0]);
         int realIndex = int(iterIndices[1]);
         if (!index)
@@ -378,7 +378,7 @@ namespace avmplus
                 goto done;
             }
         }
-        else 
+        else
         {
             // we'll never return an index larger than cap, but malicious ABC could try to feed us one
             if (index > cap)
@@ -392,10 +392,10 @@ namespace avmplus
             {
                 // if publicIndex == 0, it's an uninitialized value (eg post-grow()),and realIndex is garbage.
                 //
-                // if publicIndex is nonzero but doesn't match index, someone is passing 
+                // if publicIndex is nonzero but doesn't match index, someone is passing
                 // us an arbitrary value, rather than the value we
-                // last returned; this won't happen with "normal" ABC but hand-assembled 
-                // ABC could do so, so be prepared to do something reasonable. 
+                // last returned; this won't happen with "normal" ABC but hand-assembled
+                // ABC could do so, so be prepared to do something reasonable.
                 publicIndex = index;
                 realIndex = publicIterIndexToRealIndex(index);
                 if ((realIndex & ~kIterIndexIsIntptr) >= cap)
@@ -411,7 +411,7 @@ namespace avmplus
                 // this will not hold true
                 // AvmAssert(realIndex == publicIterIndexToRealIndex(publicIndex));
             }
-            
+
             // realIndex should now always point to a valid key
             AvmAssert((realIndex & ~kIterIndexIsIntptr) < cap);
             AvmAssert(!(realIndex & 1));
@@ -441,7 +441,7 @@ namespace avmplus
                 // reset for search thru object list (-2 so we start at zero)
                 realIndex = -2;
             }
-            
+
             // No enumerable kIntptrType entries left, try the non-kIntptrType
 
             for (realIndex += 2; realIndex < cap; realIndex += 2)
@@ -452,7 +452,7 @@ namespace avmplus
                     goto done;
                 }
             }
-            
+
             // oh well, nothing left
             publicIndex = realIndex = 0;
         }
@@ -463,16 +463,16 @@ namespace avmplus
         return publicIndex;
     }
 
-    Atom InlineHashtable::keyAt(int i) 
+    Atom InlineHashtable::keyAt(int i)
     {
         // if we get here without this bit being set, someone called us without
         // calling next() first -- a no-no. We'll still work, but we will have
         // to search for the right index, which is slower.
-        AvmAssert(hasIterIndex()); 
+        AvmAssert(hasIterIndex());
         AvmAssert(i > 0);
 
-		Atom* const atoms = getAtoms();
-		int const cap = getCapacity();
+        Atom* const atoms = getAtoms();
+        int const cap = getCapacity();
         intptr_t* const iterIndices = (intptr_t*)(atoms + cap);
         int realIndex = (hasIterIndex() && iterIndices[0] == i) ?
                             (int)iterIndices[1] :
@@ -481,16 +481,16 @@ namespace avmplus
         return realIndex < cap ? removeDontEnumMask(atoms[realIndex]) : nullStringAtom;
     }
 
-    Atom InlineHashtable::valueAt(int i) 
+    Atom InlineHashtable::valueAt(int i)
     {
         // if we get here without this bit being set, someone called us without
         // calling next() first -- a no-no. We'll still work, but we will have
         // to search for the right index, which is slower.
-        AvmAssert(hasIterIndex()); 
+        AvmAssert(hasIterIndex());
         AvmAssert(i > 0);
 
-		Atom* const atoms = getAtoms();
-		int const cap = getCapacity();
+        Atom* const atoms = getAtoms();
+        int const cap = getCapacity();
         intptr_t* const iterIndices = (intptr_t*)(atoms + cap);
         int realIndex = (hasIterIndex() && iterIndices[0] == i) ?
                             (int)iterIndices[1] :
@@ -502,11 +502,11 @@ namespace avmplus
 
     void InlineHashtable::removeKeyValuePairAtPublicIndex(int i)
     {
-        AvmAssert(hasIterIndex()); 
+        AvmAssert(hasIterIndex());
         AvmAssert(i > 0);
 
-		Atom* const atoms = getAtoms();
-		int const cap = getCapacity();
+        Atom* const atoms = getAtoms();
+        int const cap = getCapacity();
         intptr_t* const iterIndices = (intptr_t*)(atoms + cap);
         int realIndex = (hasIterIndex() && iterIndices[0] == i) ?
                             (int)iterIndices[1] :
@@ -519,8 +519,8 @@ namespace avmplus
             AvmCore::atomWriteBarrier_dtor(&atoms[realIndex+1]);
             // calls above set the slot to 0, we want DELETED
             atoms[realIndex] = DELETED;
-			atoms[realIndex+1] = DELETED;
-			setHasDeletedItems();
+            atoms[realIndex+1] = DELETED;
+            setHasDeletedItems();
         }
     }
 
@@ -672,7 +672,7 @@ namespace avmplus
             if (index != 0)
             {
                 Atom const a = ht.keyAt(index);
-                if (AvmCore::isGenericObject(a)) 
+                if (AvmCore::isGenericObject(a))
                 {
                     GCWeakRef* weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
                     if (!weakRef->get())

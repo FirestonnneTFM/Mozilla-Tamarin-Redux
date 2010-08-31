@@ -1554,7 +1554,7 @@ namespace avmplus
         // this is encapsulate in core->bugzilla444630.
         return bugCompatibility->bugzilla444630 || core->bugzilla444630;
     }
-    
+
     Atom XMLObject::maybeEscapeChild(Atom child)
     {
         // fix is in effect: don't do anything

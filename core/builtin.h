@@ -771,11 +771,11 @@ extern double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define Date_AS3_getMilliseconds_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getUTCDay_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getUTCHours_thunk  builtin_d2d_o_thunk
-#define Number_private__minValue_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCMilliseconds_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getTime_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getDay_thunk  builtin_d2d_o_thunk
 #define __AS3___vec_Vector_double_AS3_pop_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCMilliseconds_thunk  builtin_d2d_o_thunk
+#define Number_private__minValue_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getMonth_thunk  builtin_d2d_o_thunk
 #define Math_random_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getDate_thunk  builtin_d2d_o_thunk

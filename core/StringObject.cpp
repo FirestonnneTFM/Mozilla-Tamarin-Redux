@@ -2231,7 +2231,7 @@ namespace avmplus
                 if (!core->currentBugCompatibility()->bugzilla585791)
                     return (m_length == 0) ? 1 : 0;
             }
-            
+
             // Proper ECMAScript behavior:
             // The 'this' object is converted to string, call it a.
             // The argument is converted to string, call it b.

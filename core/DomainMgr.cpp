@@ -39,7 +39,7 @@
 
 #include "avmplus.h"
 
-namespace avmplus 
+namespace avmplus
 {
 
 DomainMgrFP10::DomainMgrFP10(AvmCore* _core) : core(_core)
@@ -107,7 +107,7 @@ Traits* DomainMgrFP10::findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp
     {
         t = (Traits*)pool->m_namedTraits->get(name, ns);
     }
-    
+
     return t;
 }
 
@@ -174,7 +174,7 @@ MethodInfo* DomainMgrFP10::findScriptInDomainByNameAndNSImpl(Domain* domain, Str
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
     {
         Domain* d = domain->m_bases[i-1];
-		Binding b = d->m_namedScriptsMap->get(name, ns);
+        Binding b = d->m_namedScriptsMap->get(name, ns);
         if (b != BIND_NONE)
         {
             // BIND_AMBIGUOUS not possible here
@@ -189,11 +189,11 @@ MethodInfo* DomainMgrFP10::findScriptInDomainByMultinameImpl(Domain* domain, con
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
     {
         Domain* d = domain->m_bases[i-1];
-		Binding b = d->m_namedScriptsMap->getMulti(multiname);
+        Binding b = d->m_namedScriptsMap->getMulti(multiname);
         if (b != BIND_NONE)
         {
-            return (b == BIND_AMBIGUOUS) ? 
-                    (MethodInfo*)BIND_AMBIGUOUS : 
+            return (b == BIND_AMBIGUOUS) ?
+                    (MethodInfo*)BIND_AMBIGUOUS :
                     d->m_namedScriptsList.get(uint32_t(uintptr_t(b))-1);
         }
     }
@@ -205,7 +205,7 @@ MethodInfo* DomainMgrFP10::findScriptInPoolByNameAndNSImpl(PoolObject* pool, Str
     MethodInfo* f = findScriptInDomainByNameAndNSImpl(pool->domain, name, ns);
     if (f == NULL)
     {
-		Binding b = pool->m_namedScriptsMap->get(name, ns);
+        Binding b = pool->m_namedScriptsMap->get(name, ns);
         if (b != BIND_NONE)
         {
             // BIND_AMBIGUOUS not possible here
@@ -220,11 +220,11 @@ MethodInfo* DomainMgrFP10::findScriptInPoolByMultiname(PoolObject* pool, const M
     MethodInfo* f = findScriptInDomainByMultinameImpl(pool->domain, multiname);
     if (f == NULL)
     {
-		Binding b = pool->m_namedScriptsMap->getMulti(multiname);
+        Binding b = pool->m_namedScriptsMap->getMulti(multiname);
         if (b != BIND_NONE)
         {
-            f = (b == BIND_AMBIGUOUS) ? 
-                    (MethodInfo*)BIND_AMBIGUOUS : 
+            f = (b == BIND_AMBIGUOUS) ?
+                    (MethodInfo*)BIND_AMBIGUOUS :
                     pool->m_namedScriptsList.get(uint32_t(uintptr_t(b))-1);
         }
     }
@@ -241,7 +241,7 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
         MethodInfo* mi = se->method;
         ht->add((Atom)mi, (Atom)se);
     }
-    
+
     AvmAssert(abcEnv->m_namedScriptEnvsList.size() == 0);
     PoolObject* pool = abcEnv->pool();
     abcEnv->m_namedScriptEnvsList.ensureCapacity(pool->m_namedScriptsList.size());
@@ -254,7 +254,7 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
         abcEnv->m_namedScriptEnvsList.set(i, se);
     }
 
-    // since a DomainEnv can be shared among several AbcEnv's, 
+    // since a DomainEnv can be shared among several AbcEnv's,
     // its list might not be empty.
     Domain* domain = pool->domain;
     DomainEnv* domainEnv = abcEnv->domainEnv();
@@ -263,19 +263,19 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
     {
         MethodInfo* mi = domain->m_namedScriptsList[i];
         if (mi->pool() != abcEnv->pool())
-            continue; 
+            continue;
         ScriptEnv* se = (ScriptEnv*)ht->get((Atom)mi);
         AvmAssert(se != (ScriptEnv*)undefinedAtom);
         AvmAssert(i >= domainEnv->m_namedScriptEnvsList.size() || domainEnv->m_namedScriptEnvsList.get(i) == 0);
         domainEnv->m_namedScriptEnvsList.set(i, se);
     }
 
-    // It may be tempting to check that domainEnv->m_namedScriptEnvsList matches domain->m_namedScriptsList here; 
+    // It may be tempting to check that domainEnv->m_namedScriptEnvsList matches domain->m_namedScriptsList here;
     // do not do this, for if we are lazily initializing pools, the Domain/DomainEnv lists
     // can be temporarily out of sync. Instead, defer the check until the first time we
     // actually do a DomainEnv-based lookup, which is the first time they really do need to
     // be in sync.
-    
+
     delete ht;
 
 #ifdef VMCFG_LOOKUP_CACHE
@@ -307,14 +307,14 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* dom
     for (uint32_t i = domainEnv->m_baseCount; i > 0; --i)
     {
         DomainEnv* d = domainEnv->m_bases[i-1];
-		Binding b = d->domain()->m_namedScriptsMap->getMulti(multiname);
+        Binding b = d->domain()->m_namedScriptsMap->getMulti(multiname);
         if (b != BIND_NONE)
         {
             #ifdef _DEBUG
             verifyMatchingLookup(b, d->domain()->m_namedScriptsList, d->m_namedScriptEnvsList);
             #endif
-            return (b == BIND_AMBIGUOUS) ? 
-                    (ScriptEnv*)BIND_AMBIGUOUS : 
+            return (b == BIND_AMBIGUOUS) ?
+                    (ScriptEnv*)BIND_AMBIGUOUS :
                     d->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
         }
     }
@@ -332,14 +332,14 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const
     ScriptEnv* se = findScriptEnvInDomainEnvByMultinameImpl(abcEnv->domainEnv(), multiname);
     if (se == NULL)
     {
-		Binding b = abcEnv->pool()->m_namedScriptsMap->getMulti(multiname);
+        Binding b = abcEnv->pool()->m_namedScriptsMap->getMulti(multiname);
         if (b != BIND_NONE)
         {
             #ifdef _DEBUG
             verifyMatchingLookup(b, abcEnv->pool()->m_namedScriptsList, abcEnv->m_namedScriptEnvsList);
             #endif
-            se = (b == BIND_AMBIGUOUS) ? 
-                    (ScriptEnv*)BIND_AMBIGUOUS : 
+            se = (b == BIND_AMBIGUOUS) ?
+                    (ScriptEnv*)BIND_AMBIGUOUS :
                     abcEnv->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
         }
     }
@@ -353,7 +353,7 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* doma
     for (uint32_t i = domainEnv->m_baseCount; i > 0; --i)
     {
         DomainEnv* d = domainEnv->m_bases[i-1];
-		Binding b = d->domain()->m_namedScriptsMap->getName(name);
+        Binding b = d->domain()->m_namedScriptsMap->getName(name);
         if (b != BIND_NONE)
         {
             #ifdef _DEBUG
@@ -371,7 +371,7 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, String
     ScriptEnv* se = findScriptEnvInDomainEnvByNameOnlyImpl(abcEnv->domainEnv(), name);
     if (se == NULL)
     {
-		Binding b = abcEnv->pool()->m_namedScriptsMap->getName(name);
+        Binding b = abcEnv->pool()->m_namedScriptsMap->getName(name);
         if (b != BIND_NONE)
         {
             #ifdef _DEBUG

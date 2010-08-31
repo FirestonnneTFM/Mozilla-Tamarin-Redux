@@ -522,7 +522,7 @@ namespace avmplus
         numSamples = 0;
         lastSampleCheckMicros = 0;
 
-        // Increment the sample buffer id, so that next time 
+        // Increment the sample buffer id, so that next time
         // a sample iterator tries to get the next sample
         // it will automatically get invalidated.
         // This is needed here even though the actual buffer
@@ -596,7 +596,7 @@ namespace avmplus
         lastSampleCheckMicros = 0;
         currentSample = NULL;
 
-        // Increment the sample buffer id, so that next time 
+        // Increment the sample buffer id, so that next time
         // a sample iterator tries to get the next sample
         // it will automatically get invalidated.
         ++sampleBufferId;

@@ -182,7 +182,7 @@ namespace avmshell
      * else
      *   run it via handleActionBlock() just as if it were on the commandline
      */
-    void handleSwf(const char *filename, ScriptBuffer swf, 
+    void handleSwf(const char *filename, ScriptBuffer swf,
               Toplevel* toplevel, CodeContext* codeContext)
     {
         SwfParser parser(swf);
@@ -218,12 +218,12 @@ namespace avmshell
             if (taglen == 63)
                 taglen = parser.readU32();
             if (type == stagDoABC || type == stagDoABC2)
-				handleDoABC(type, parser, taglen, toplevel, codeContext, deferred);		
+                handleDoABC(type, parser, taglen, toplevel, codeContext, deferred);
             else
                 parser.pos += taglen;
         }
         for (int i = 0, n = deferred.size(); i < n; i++) {
-			core->handleActionPool(deferred[i], toplevel, codeContext);
+            core->handleActionPool(deferred[i], toplevel, codeContext);
         }
     }
 }

@@ -436,11 +436,11 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
                 void *slot_ptr, *obj_ptr = atomObj(obj);
                 const SlotStorageType sst = actual_type->getTraitsBindings()->
                     calcSlotAddrAndSST(AvmCore::bindingToSlotId(b), (void*)obj_ptr, slot_ptr);
-                SSE2_ONLY(if(toplevel->core()->config.njconfig.i386_sse2 && sst == SST_double) 
+                SSE2_ONLY(if(toplevel->core()->config.njconfig.i386_sse2 && sst == SST_double)
                 {
                     c.get_handler = &getprop_obj_slot_double_sse2;
                 }
-                else 
+                else
                 )
                 {
                     c.get_handler = getprop_slot_handlers[sst];

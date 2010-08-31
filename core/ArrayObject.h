@@ -105,7 +105,7 @@ namespace avmplus
         void _setUintProperty(uint32_t index, Atom value);
         Atom _getIntProperty(int32_t index) const;
         void _setIntProperty(int32_t index, Atom value);
-        
+
         // Iterator support - for in, for each
         virtual Atom nextName(int index);
         virtual Atom nextValue(int index);

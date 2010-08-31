@@ -667,7 +667,7 @@ namespace avmplus
     Toplevel* AvmCore::initToplevel()
     {
         DomainEnv* builtinDomainEnv = DomainEnv::newDomainEnv(this, builtinDomain, NULL);
-        
+
         // note that this is the one-and-only place that a naked CodeContext
         // should ever be constructed (ie, when initializing the VM's own builtins);
         // this is because it is also the one-and-only place where we can be certain
@@ -1685,7 +1685,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 {
                     buffer << " \"" << pool->getString(index) << "\"";
                 }
-                else 
+                else
                 {
                     buffer << " invalid string index=" << index;
                 }
@@ -1698,11 +1698,11 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index > 0 && index < pool->cpool_int.size()) 
+                if (index > 0 && index < pool->cpool_int.size())
                 {
                     buffer << " " << pool->cpool_int[index];
                 }
-                else 
+                else
                 {
                     buffer << " invalid index=" << index;
                 }
@@ -1715,8 +1715,8 @@ return the result of the comparison ToPrimitive(x) == y.
                 if (index > 0 && index < pool->cpool_uint.size())
                 {
                     buffer << " " << (double)pool->cpool_uint[index];
-                } 
-                else 
+                }
+                else
                 {
                     buffer  << " invalid index=" << index;
                 }
@@ -1744,7 +1744,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 {
                     buffer << " " << pool->cpool_ns[index]->getURI();
                 }
-                else 
+                else
                 {
                     buffer << " invalid index=" << index;
                 }
@@ -1785,14 +1785,14 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 uint32 method_id = readU32(pc);
                 buffer << opcodeInfo[opcode].name;
-                if (method_id < pool->methodCount()) 
+                if (method_id < pool->methodCount())
                     buffer << " invalid";
                 buffer << " method_id=" << method_id;
                 if (opcode == OP_callstatic)
                 {
                     buffer << " argc=" << (int)readU32(pc); // argc
                 }
-                if (method_id < pool->methodCount()) 
+                if (method_id < pool->methodCount())
                 {
                     Stringp fname = pool->getMethodInfo(method_id)->getMethodName();
                     if (fname)
@@ -1987,24 +1987,24 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_newfunction: {
                 uint32_t method_id = (uint32_t)*pc++;
                 buffer << wopAttrs[opcode].name;
-                if (method_id < pool->methodCount()) 
+                if (method_id < pool->methodCount())
                     buffer << " invalid";
                 buffer << " method_id=" << method_id;
                 if (opcode == WOP_callstatic)
                     buffer << " argc=" << (uint32_t)*pc++; // argc
-                if (method_id < pool->methodCount())  
+                if (method_id < pool->methodCount())
                     buffer << " " << pool->getMethodInfo(method_id)->getMethodName();
                 break;
             }
 
             case WOP_newclass: {
                 uint32_t id = (uint32_t)*pc++;
-                if (id < pool->classCount()) 
+                if (id < pool->classCount())
                 {
                     Traits* c = pool->getClassTraits(id);
                     buffer << wopAttrs[opcode].name << " " << c;
-                } 
-                else 
+                }
+                else
                 {
                     buffer << wopAttrs[opcode].name << " invalid class index " << id;
                 }
@@ -4493,7 +4493,7 @@ return the result of the comparison ToPrimitive(x) == y.
         CodeContext* cc = this->codeContext();
         if (cc != NULL)
             return cc->bugCompatibility();
-        
+
         // If CodeContext is NULL, then we're not executing any user code,
         // so just use the BugCompatibility of the builtin pool...
         // which should always be builtinBugCompatibility.
@@ -4832,15 +4832,15 @@ return the result of the comparison ToPrimitive(x) == y.
         // We rely on the fact that we are allocated pre-zeroed by MMgc,
         // thus ensuring that the default state of all compatibility bits is zero.
         // Thus we only need to set bits based on versions, we don't have to clear anything.
-  
+
         // Primordial version did not fix any bugs (it only introduced them)
         // if (v >= kSWF9) { nothing to do }
-        
+
         // kSWF10 is also a no-op, since the one bug that used to live here actually needs
         // to be controlled by a global (!) flag for backwards compatibility in this case.
         // see class BugCompatibility for more information.
         // if (v >= kSWF10) { nothing to do here, either }
-        
+
         if (v >= kSWF11)
         {
             bugzilla444630 = 1;     // Entities are not escaped when appending String content to XML
@@ -4850,7 +4850,7 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    /*static*/ uint32_t const BugCompatibility::kNames[BugCompatibility::VersionCount] = 
+    /*static*/ uint32_t const BugCompatibility::kNames[BugCompatibility::VersionCount] =
     {
         9,
         10,

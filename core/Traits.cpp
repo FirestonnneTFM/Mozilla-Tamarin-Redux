@@ -903,7 +903,7 @@ namespace avmplus
             if (c > slotCount)
             {
                 // This can happen for fuzzed files that duplicate slots in certain orders; we'd detect these later
-                // on, in finishSlotsAndMethods, but not before we fired an assert. This just detects the obvious naughtiness 
+                // on, in finishSlotsAndMethods, but not before we fired an assert. This just detects the obvious naughtiness
                 // earlier.
                 if (toplevel)
                     toplevel->throwVerifyError(kCorruptABCError);
@@ -2003,7 +2003,7 @@ failure:
         return BIND_NONE;
     }
 
-    void Traits::ensureNonFinal(MethodInfo* minfo, const Toplevel* toplevel) const 
+    void Traits::ensureNonFinal(MethodInfo* minfo, const Toplevel* toplevel) const
     {
         if (!minfo->isFinal())
             return;
@@ -2014,7 +2014,7 @@ failure:
         toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(minfo), toplevel->core()->toErrorString(this));
         AvmAssert(!"unhandled verify error");
     }
-    
+
     TraitsBindings* FASTCALL Traits::_getTraitsBindings()
     {
         AvmAssert(m_bindingsVerified);
@@ -2198,8 +2198,8 @@ failure:
     // Return the slot type (if slot), return type (if getter), or NULL.
     Traits* Traits::readBinding(Traits* traits, Binding b)
     {
-    	AvmAssert((!traits && AvmCore::bindingKind(b) == BKIND_NONE) ||
-    			  (traits && traits->isResolved()));
+        AvmAssert((!traits && AvmCore::bindingKind(b) == BKIND_NONE) ||
+                  (traits && traits->isResolved()));
         switch (AvmCore::bindingKind(b))
         {
         default:

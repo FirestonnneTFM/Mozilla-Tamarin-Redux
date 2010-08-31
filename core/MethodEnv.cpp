@@ -514,8 +514,8 @@ namespace avmplus
 
         AbcEnv* abcEnv = this->abcEnv();
         AvmCore* core = abcEnv->core();
-		ScriptEnv* script = core->domainMgr()->findScriptEnvInAbcEnvByMultiname(abcEnv, *multiname);
-		if (script == (ScriptEnv*)BIND_AMBIGUOUS)
+        ScriptEnv* script = core->domainMgr()->findScriptEnvInAbcEnvByMultiname(abcEnv, *multiname);
+        if (script == (ScriptEnv*)BIND_AMBIGUOUS)
             this->toplevel()->throwReferenceError(kAmbiguousBindingError, multiname);
 
         if (script == (ScriptEnv*)BIND_NONE)
@@ -547,7 +547,7 @@ namespace avmplus
         ScriptObject* const delegate = objectClass ? objectClass->prototypePtr() : NULL;
         global = this->core()->newObject(this->vtable(), delegate);
         return global;
-	}
+    }
 
     ScriptObject* MethodEnv::op_newobject(Atom* sp, int argc) const
     {
@@ -1292,15 +1292,15 @@ namespace avmplus
 
         Toplevel* toplevel = this->toplevel();
 
-		// look for imported definition (similar logic to OP_finddef).  This will
-		// find definitions in this script and in other scripts.
+        // look for imported definition (similar logic to OP_finddef).  This will
+        // find definitions in this script and in other scripts.
         AbcEnv* abcEnv = this->abcEnv();
         AvmCore* core = abcEnv->core();
-		ScriptEnv* script = core->domainMgr()->findScriptEnvInAbcEnvByMultiname(abcEnv, *multiname);
-		if (script != (ScriptEnv*)BIND_NONE)
-		{
-			if (script == (ScriptEnv*)BIND_AMBIGUOUS)
-				toplevel->throwReferenceError(kAmbiguousBindingError, multiname);
+        ScriptEnv* script = core->domainMgr()->findScriptEnvInAbcEnvByMultiname(abcEnv, *multiname);
+        if (script != (ScriptEnv*)BIND_NONE)
+        {
+            if (script == (ScriptEnv*)BIND_AMBIGUOUS)
+                toplevel->throwReferenceError(kAmbiguousBindingError, multiname);
 
             ScriptObject* global = script->global;
             if (global == NULL)

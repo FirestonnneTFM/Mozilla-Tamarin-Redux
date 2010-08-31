@@ -62,7 +62,7 @@ namespace avmplus
         Atom construct(int argc, Atom* argv);
 
         virtual ScriptObject* createInstance(VTable *ivtable, ScriptObject* prototype);
- 
+
         DRCWB(String*) kindex;
         DRCWB(String*) kinput;
 

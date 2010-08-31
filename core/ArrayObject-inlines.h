@@ -74,7 +74,7 @@ namespace avmplus
 
     // Performance on some benchmarks (eg Euler.as) is highly sensitive to
     // ArrayObject::getUintProperty being fast; this exists in order to ensure
-    // that the implementations of getUintProperty and _getUintProperty/_getIntPropert 
+    // that the implementations of getUintProperty and _getUintProperty/_getIntPropert
     // (used by the JIT) contain inlined code rather than a tail-call.
     REALLY_INLINE Atom ArrayObject::getUintPropertyImpl(uint32_t index) const
     {

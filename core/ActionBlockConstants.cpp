@@ -142,13 +142,13 @@ namespace avmplus
 
         #define ABC_OP(operandCount, canThrow, stack, internalOnly, nameToken)        { operandCount, canThrow, stack W(WOP_##nameToken) N(#nameToken) },
         #define ABC_UNUSED_OP(operandCount, canThrow, stack, internalOnly, nameToken) { operandCount, canThrow, stack W(0)               N(#nameToken) },
-        
+
         #include "opcodes.tbl"
-        
+
         #undef ABC_OP
         #undef ABC_UNUSED_OP
         };
-        
+
         // Some static asserts to make sure the opcode enum in ActionBlockConstants.h is in good order.
         MMGC_STATIC_ASSERT(OP_0x00 == 0x00);
         MMGC_STATIC_ASSERT(OP_0xFF == 0xFF);

@@ -148,12 +148,12 @@ namespace avmplus
     void AtomArray::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, AtomArray *args, int offset)
     {
         // guard against people calling us with bogus values
-        if (insertPoint > m_length) 
+        if (insertPoint > m_length)
             insertPoint = m_length;
-            
-        if (deleteCount > m_length) 
+
+        if (deleteCount > m_length)
             deleteCount = m_length;
-        
+
         long l_shiftAmount = (long)insertCount - (long) deleteCount; // long because result could be negative
 
         // Must be BEFORE arr = m_atoms since m_atoms might change
