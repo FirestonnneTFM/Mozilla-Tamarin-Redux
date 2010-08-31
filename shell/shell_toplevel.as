@@ -107,8 +107,8 @@ package avmplus
         // function exists solely to test ScriptObject::isGlobalObject
         public native static function isGlobal(o:Object):Boolean;
         
-        // return the value passed to -bugcompat at launch (or the default value, if -bugcompat was not specified)
-        public native static function get bugCompatibility():String;
+        // return the value passed to -swfversion at launch (or the default value, if -swfversion was not specified)
+        public native static function get swfVersion():int;
     }
 
     [native(cls="::avmshell::FileClass", methods="auto")]

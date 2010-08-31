@@ -71,7 +71,7 @@ namespace avmshell
         , st_category(NULL)
         , st_name(NULL)
         , api(0xffffffff)
-        , bugCompatibilityVersion(BugCompatibility::kLatest)
+        , swfVersion(BugCompatibility::kLatest)
     {
     }
 
@@ -374,7 +374,7 @@ namespace avmshell
         //console << "defaultAPIVersion=" << defaultAPIVersion;
         this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
         
-        this->defaultBugCompatibilityVersion = settings.bugCompatibilityVersion;
+        this->defaultBugCompatibilityVersion = settings.swfVersion;
         this->bugzilla444630 = (this->defaultBugCompatibilityVersion >= BugCompatibility::kSWF10);
 
         // This is obscure but well-defined: the clearing of this flag is allowed

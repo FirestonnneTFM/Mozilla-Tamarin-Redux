@@ -50,7 +50,7 @@ namespace avmshell
         ~DomainObject();
 
         void init(DomainObject *base);
-        Atom loadBytes(ByteArrayObject* bytes, String* bugCompatibilityStr);
+        Atom loadBytes(ByteArrayObject* bytes, uint32_t swfVersion);
         ClassClosure* getClass(Stringp name);
         // AS3 declaration requires these are ByteArrayObject
         ByteArrayObject* get_domainMemory() const;

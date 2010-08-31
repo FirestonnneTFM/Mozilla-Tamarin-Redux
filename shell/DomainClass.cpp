@@ -70,7 +70,7 @@ namespace avmshell
 		domainEnv = DomainEnv::newDomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
     }
 
-    Atom DomainObject::loadBytes(ByteArrayObject* b, String* bugCompatibilityStr)
+    Atom DomainObject::loadBytes(ByteArrayObject* b, uint32_t swfVersion)
     {
         AvmCore* core = this->core();
         if (!b)
@@ -95,19 +95,19 @@ namespace avmshell
 
         // by default, use the same bugCompatibility as the builtins use
         const BugCompatibility* bugCompatibility = toplevel->abcEnv()->codeContext()->bugCompatibility();
-        if (bugCompatibilityStr != NULL)
+        if (swfVersion != 0)
         {
             // ...unless specified otherwise.
             for (int j = 0; j < BugCompatibility::VersionCount; ++j)
             {
-                if (bugCompatibilityStr->equalsLatin1(BugCompatibility::kNames[j]))
+                if (BugCompatibility::kNames[j] == swfVersion)
                 {
                     bugCompatibility = core->createBugCompatibility((BugCompatibility::Version)j);
                     goto done;
                 }
             }
             // if we get here, didn't find a valid name
-            toplevel->throwTypeError(kInvalidArgumentError, core->toErrorString("bugCompatibility"));
+            toplevel->throwTypeError(kInvalidArgumentError, core->toErrorString("swfVersion"));
         }
 done:
 

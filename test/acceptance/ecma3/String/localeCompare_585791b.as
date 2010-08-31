@@ -45,9 +45,9 @@ package {
 
     writeHeaderToLog( SECTION + " "+ TITLE );
 
-    AddTestCase("Verify bugCompatibility flag",
-      "SWF11",
-      System.bugCompatibility);
+    AddTestCase("Verify swfVersion flag",
+				11,
+				System.swfVersion);
 
     function sign(n:int):int
     {

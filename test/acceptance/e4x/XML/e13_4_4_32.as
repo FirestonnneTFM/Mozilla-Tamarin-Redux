@@ -116,7 +116,7 @@ AddTestCase( "MYXML = new XML(xmlDoc), MYXML.replace('firstname','Johnny')",
              (MYXML = new XML(xmlDoc), MYXML.replace('firstname','Johnny').toString()));
 
 var expectedResult;
-if (System.bugCompatibility == "SWF9")
+if (System.swfVersion < 10)
     expectedResult = '<employee id="1"><phone>1234567</phone></employee>';
 else
     expectedResult = '<phone>1234567</phone>';

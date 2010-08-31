@@ -219,12 +219,12 @@ namespace avmshell
         return double(VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize());
     }
 
-    String* SystemClass::get_bugCompatibility()
+    int32_t SystemClass::get_swfVersion()
     {
         ShellCore* core = (ShellCore*)this->core();
         BugCompatibility::Version v = core->getDefaultBugCompatibilityVersion();
         AvmAssert(v >= 0 && v < BugCompatibility::VersionCount);
-        return core->internConstantStringLatin1(BugCompatibility::kNames[v]);
+        return BugCompatibility::kNames[v];
     }
 
     void SystemClass::forceFullCollection()
