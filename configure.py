@@ -66,8 +66,12 @@ def _setSDKParams(sdk_version,os_ver):
         config._acvars['CC']  = 'gcc-4.0'
     elif sdk_version == '105':
         os_ver,sdk_number = '10.5','10.5'
+        config._acvars['CXX'] = 'g++-4.2'
+        config._acvars['CC']  = 'gcc-4.2'
     elif sdk_version == '106':
         os_ver,sdk_number = '10.6','10.6'
+        config._acvars['CXX'] = 'g++-4.2'
+        config._acvars['CC']  = 'gcc-4.2'
     # For future expansion
     #elif sdk_version == '107':
         #os_ver,sdk_number = '10.7','10.7'
