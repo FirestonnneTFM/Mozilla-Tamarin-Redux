@@ -436,12 +436,12 @@ namespace avmplus
         m->setFile(file);
 
         AvmCore::skipU32(pos, 4); // max_stack; local_count; init_stack_depth; max_stack_depth;
-		uint32 code_len = AvmCore::readU32(pos); // checked earlier by AbcParser::parseMethodInfos()
+        uint32 code_len = AvmCore::readU32(pos); // checked earlier by AbcParser::parseMethodInfos()
 
         const uint8_t *start = pos;
         const uint8_t *end = pos + code_len;
 
-		uintptr_t size = 0;
+        uintptr_t size = 0;
         int op_count;
         SourceFile* active = NULL; // current source file
         for (const uint8_t* pc=start; pc < end; pc += size)
@@ -465,7 +465,7 @@ namespace avmplus
                 {
                     // variable length instruction
                     const uint8_t *pc2 = pc+4;
-                    // case_count is a U30, so if the high bits are set, 
+                    // case_count is a U30, so if the high bits are set,
                     // bail and let Verifier throw the error
                     uint32_t const case_count = readU32(pc2);
                     if (case_count & 0xc0000000)
@@ -526,7 +526,7 @@ namespace avmplus
                     uint32 index = AvmCore::readU32(pc2);
                     if (index >= pool->constantStringCount)
                         break; // let the verifier handle this
- 					Stringp name = pool->getString(index);
+                    Stringp name = pool->getString(index);
                     active = file->sourceNamed(name);
                     if (active == NULL)
                     {

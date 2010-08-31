@@ -312,18 +312,18 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES && defined(AVMPLUS_SAMPLER)
         mutable DRCWB(Stringp)  _methodName;
 #endif
-        
+
         // -------- FLAGS SECTION
-        // (Set in ABC) need arguments[0..argc]. 
-        uint32_t                _needArguments:1;            
+        // (Set in ABC) need arguments[0..argc].
+        uint32_t                _needArguments:1;
 
         // (Set in ABC) need activation object
-        uint32_t                _needActivation:1;            
+        uint32_t                _needActivation:1;
 
         // (Set in ABC) need arguments[param_count+1..argc]
         uint32_t                _needRest:1;
 
-        // (Set in ABC) has optional parameters 
+        // (Set in ABC) has optional parameters
         uint32_t                _hasOptional:1;
 
         // (Set in ABC) allow extra args, but dont capture them
@@ -339,10 +339,10 @@ namespace avmplus
         uint32_t                _hasParamNames:1;
 
         // Set iff this is a getter.
-        uint32_t                _isGetter:1;            
+        uint32_t                _isGetter:1;
 
         // Set iff this is a setter.
-        uint32_t                _isSetter:1;            
+        uint32_t                _isSetter:1;
 
         // Set iff this is an override of an inherited method.
         uint32_t                _isOverride:1;
@@ -359,31 +359,31 @@ namespace avmplus
 #endif
 
         // indicates method is final, no overrides allowed
-        uint32_t                _isFinal:1;             
+        uint32_t                _isFinal:1;
 
         // indicates the function is a method, that pushes the
         // receiver object onto the scope chain at method entry
-        uint32_t                _needClosure:1;        
+        uint32_t                _needClosure:1;
 
         // cleared to indicate that a function has no bytecode body
-        uint32_t                _hasMethodBody:1;    
+        uint32_t                _hasMethodBody:1;
 
         // set once the signature types have been resolved and
         // override signatures have been checked
-        uint32_t                _isResolved:1;                  
-        
+        uint32_t                _isResolved:1;
+
         // set to indictate that a function is a static initializer
-        uint32_t                _isStaticInit:1;        
+        uint32_t                _isStaticInit:1;
 
         // set to indicate that a function has been compiled
         // to native code by the jit compiler
-        uint32_t                _isJitImpl:1;           
-        
+        uint32_t                _isJitImpl:1;
+
         // true if execution mechanism is the interpreter
-        uint32_t                _isInterpImpl:1;        
+        uint32_t                _isInterpImpl:1;
 
         // see isTrivial() for definition of these two flags
-        uint32_t                _isTrivial:1;           
+        uint32_t                _isTrivial:1;
         uint32_t                _isNonTrivial:1;
 
         // Set by setLazyRest when the verifier discovers that the method's rest array
@@ -392,14 +392,14 @@ namespace avmplus
         uint32_t                _lazyRest:1;
 
         // Set by _buildMethodSignature if all fixed or optional parameters
-        // to the function are untyped.  (We use this to optimize the 'arguments' 
+        // to the function are untyped.  (We use this to optimize the 'arguments'
         // array, see RestArgAnalyzer.)
         uint32_t                _onlyUntypedParameters:1;
 
 // begin AVMPLUS_UNCHECKED_HACK
         // Note, this means "makeIntoPrototypeFunction has been called on me",
         // *not* "I am a function on a prototype object".
-        uint32_t                _isProtoFunc:1;         
+        uint32_t                _isProtoFunc:1;
         uint32_t                _isUnchecked:1;
 // end AVMPLUS_UNCHECKED_HACK
 
@@ -466,9 +466,9 @@ namespace avmplus
         int         _local_count;       // abc-only: maximum number of local registers
         int         _max_scope;         // abc-only: maximum depth of local scope stack
         int         _frame_size;        // abc-only: total size of frame in number of Atoms, derived from other values above
-        // Note that these two flags are "bool" because we will have to pad the struct anyway; 
+        // Note that these two flags are "bool" because we will have to pad the struct anyway;
         // might as well avoid per-bit access as long as we have the space.
-        bool        _isNative;          // dupe of owner's flag of same name. 
+        bool        _isNative;          // dupe of owner's flag of same name.
         bool        _allowExtraArgs;    // == _needRest | _needArguments | _ignoreRest
         AtomOrType  _args[1];           // lying, actually 1+param_count+optional_count
     // ------------------------ DATA SECTION END

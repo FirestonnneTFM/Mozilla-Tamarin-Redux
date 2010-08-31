@@ -98,7 +98,7 @@ namespace avmplus
 
         /** @name flags from .abc - limited to a BYTE */
         /*@{*/
-        enum AbcMethodFlags 
+        enum AbcMethodFlags
         {
             /** need arguments[0..argc] */
             abcMethod_NEED_ARGUMENTS         = 0x01,
@@ -141,7 +141,7 @@ namespace avmplus
             #include "opcodes.tbl"
             #undef ABC_OP
             #undef ABC_UNUSED_OP
-            
+
             //-----
             OP_end_of_op_codes
         };

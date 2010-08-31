@@ -1359,13 +1359,13 @@ namespace avmplus
     /*static*/ bool Toplevel::bugzilla(ScriptObject* self, int32_t bug)
     {
         const BugCompatibility* bugCompatibility = self->core()->currentBugCompatibility();
-        
+
         // This is ad-hoc, we only need to introduce cases here for
         // bugs that are actually worked around in AS3 code.
 #define HANDLE_BUG(n) \
             case n: return bugCompatibility->bugzilla##n;
-            
-        switch (bug) 
+
+        switch (bug)
         {
             HANDLE_BUG(504525)
             default:        AvmAssert(0); return false;

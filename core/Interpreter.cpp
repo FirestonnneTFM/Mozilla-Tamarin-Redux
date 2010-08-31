@@ -3324,16 +3324,16 @@ namespace avmplus
         }
         return initMultiname(env, name, sp);
     }
-	
+
     Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
     {
         // See Verifier::checkTypeName for the canonical code
 
-		Traits* t = core->domainMgr()->findTraitsInPoolByMultiname(pool, *name);
+        Traits* t = core->domainMgr()->findTraitsInPoolByMultiname(pool, *name);
         // Verifier::checkTypeName has ensured this is a valid, non-ambiguous binding
         AvmAssert(t != NULL && t != (Traits*)BIND_AMBIGUOUS);
-		if (name->isParameterizedType())
-		{
+        if (name->isParameterizedType())
+        {
             const Multiname* param_name;
             GET_MULTINAME_PTR(param_name, name->getTypeParameter());
             core->stackCheck(toplevel);

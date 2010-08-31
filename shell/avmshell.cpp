@@ -247,7 +247,7 @@ namespace avmshell
                 MMGC_GCENTER(gc);
 #ifdef _DEBUG
                 core->codeContextThread = VMPI_currentThread();
-#endif 
+#endif
                 delete core;
             }
 
@@ -510,7 +510,7 @@ namespace avmshell
             pthread_mutex_lock(&self->m);
             // Don't wait when pendingWork == true,
             // slave might have been already signalled but it didn't notice because it wasn't waiting yet.
-            while (self->pendingWork == false) 
+            while (self->pendingWork == false)
                 pthread_cond_wait(&self->c, &self->m);
             pthread_mutex_unlock(&self->m);
 
@@ -525,7 +525,7 @@ namespace avmshell
                 MMGC_GCENTER(self->corenode->core->GetGC());
 #ifdef _DEBUG
                 self->corenode->core->codeContextThread = VMPI_currentThread();
-#endif 
+#endif
                 self->corenode->core->evaluateFile(state.settings, self->filename); // Ignore the exit code for now
             }
             LOGGING( AvmLog("T%d: Work completed\n", self->id); )

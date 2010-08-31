@@ -2013,9 +2013,9 @@ namespace avmplus
                 int captured_depth = scope->size;
                 if (captured_depth > 0)
                 {
-					// imm30 is unsigned, so can't be < 0
-					if (index >= uint32_t(scope->size))
-						toplevel->throwVerifyError(kGetScopeObjectBoundsError);
+                    // imm30 is unsigned, so can't be < 0
+                    if (index >= uint32_t(scope->size))
+                        toplevel->throwVerifyError(kGetScopeObjectBoundsError);
 
                     // enclosing scope
                     Traits* t = scope->getScopeTraitsAt(index);
@@ -2766,12 +2766,12 @@ namespace avmplus
 
     const uint8_t* Verifier::getTryFrom() const
     {
-    	return tryFrom;
+        return tryFrom;
     }
 
     const uint8_t* Verifier::getTryTo() const
     {
-    	return tryTo;
+        return tryTo;
     }
 
     void Verifier::emitCheckNull(int i)

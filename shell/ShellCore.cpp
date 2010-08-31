@@ -180,11 +180,11 @@ namespace avmshell
         // Initialize a new Toplevel.  This will also create a new
         // DomainEnv based on the builtinDomain.
         ShellToplevel* shell_toplevel = (ShellToplevel*)initToplevel();
-        
+
         DomainEnv* builtinDomainEnv = shell_toplevel->domainEnv();
         AvmAssert(builtinDomainEnv->domain() == builtinDomain);
         AvmAssert(builtinDomainEnv->base() == NULL);
-        
+
         shell_domainEnv = DomainEnv::newDomainEnv(this, shell_domain, builtinDomainEnv);
 
         // Initialize the shell builtins in the new Toplevel
@@ -192,7 +192,7 @@ namespace avmshell
         const BugCompatibility* shell_bugCompatibility = shell_toplevel->abcEnv()->codeContext()->bugCompatibility();
         ShellCodeContext* shell_codeContext = new(GetGC()) ShellCodeContext(shell_domainEnv, shell_bugCompatibility);
 
-		//handleActionPool(shellPool, shell_toplevel, shell_codeContext);
+        //handleActionPool(shellPool, shell_toplevel, shell_codeContext);
         shell_toplevel->shellEntryPoint = prepareActionPool(shellPool, shell_toplevel, shell_codeContext);
 
         return shell_toplevel;
@@ -268,7 +268,7 @@ namespace avmshell
             if (record_time)
                 then = VMPI_getDate();
             uint32_t api = this->getAPI(NULL);
-			Atom result = handleActionSource(input, /*filename*/NULL, shell_toplevel, /*ninit*/NULL, user_codeContext, api);
+            Atom result = handleActionSource(input, /*filename*/NULL, shell_toplevel, /*ninit*/NULL, user_codeContext, api);
             if (record_time)
                 now = VMPI_getDate();
             if (result != undefinedAtom)
@@ -373,7 +373,7 @@ namespace avmshell
         }
         //console << "defaultAPIVersion=" << defaultAPIVersion;
         this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
-        
+
         this->defaultBugCompatibilityVersion = settings.swfVersion;
         this->bugzilla444630 = (this->defaultBugCompatibilityVersion >= BugCompatibility::kSWF10);
 
@@ -381,7 +381,7 @@ namespace avmshell
         // at any time, see comment for checkFixedMemory in GCHeap.h.
         if (!settings.fixedcheck)
             GCHeap::GetGCHeap()->Config().clearCheckFixedMemory();
-        
+
         config.interrupts = settings.interrupts;
 #ifdef VMCFG_VERIFYALL
         config.verifyall = settings.verifyall;
@@ -520,7 +520,7 @@ namespace avmshell
         {
 #ifdef VMCFG_AOT
             if (filename == NULL) {
-				handleAOT(this, user_codeContext->domainEnv()->domain(), user_codeContext->domainEnv(), shell_toplevel, user_codeContext);
+                handleAOT(this, user_codeContext->domainEnv()->domain(), user_codeContext->domainEnv(), shell_toplevel, user_codeContext);
             } else
 #endif
             if (AbcParser::canParse(code) == 0) {
@@ -530,14 +530,14 @@ namespace avmshell
                 #endif
 
                 uint32_t api = this->getAPI(NULL);
-				handleActionBlock(code, 0, shell_toplevel, NULL, user_codeContext, api);
+                handleActionBlock(code, 0, shell_toplevel, NULL, user_codeContext, api);
             }
             else if (isSwf(code)) {
                 #ifdef VMCFG_VERIFYALL
                 if (config.verbose_vb & VB_verify)
                     console << "SWF " << filename << "\n";
                 #endif
-				handleSwf(filename, code, shell_toplevel, user_codeContext);
+                handleSwf(filename, code, shell_toplevel, user_codeContext);
             }
             else {
 #ifdef VMCFG_EVAL

@@ -50,14 +50,14 @@ namespace avmplus
     {
         friend class AvmCore;
 
-    protected:   
-        explicit CodeContext(DomainEnv* env, const BugCompatibility* bugCompatibility) 
-            : m_domainEnv(env) 
+    protected:
+        explicit CodeContext(DomainEnv* env, const BugCompatibility* bugCompatibility)
+            : m_domainEnv(env)
             , m_bugCompatibility(bugCompatibility)
-        { 
-            AvmAssert(env != NULL); 
+        {
+            AvmAssert(env != NULL);
         }
-    
+
     public:
         REALLY_INLINE DomainEnv* domainEnv() const { return m_domainEnv; }
         REALLY_INLINE const BugCompatibility* bugCompatibility() const { return m_bugCompatibility; }

@@ -200,7 +200,7 @@ namespace avmplus
         PoolObject* traitsPool = this->traits->pool;
 
         Stringp classname = core->internString(fullname->appendLatin1("$"));
-		Traits* ctraits = core->domainMgr()->findTraitsInPoolByNameAndNS(traitsPool, classname, traitsNs);
+        Traits* ctraits = core->domainMgr()->findTraitsInPoolByNameAndNS(traitsPool, classname, traitsNs);
         Traits* itraits;
         if (!ctraits)
         {

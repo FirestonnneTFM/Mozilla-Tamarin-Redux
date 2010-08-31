@@ -54,7 +54,7 @@ namespace avmshell
     void DomainObject::init(DomainObject* parentDomain)
     {
         ShellCore* core = (ShellCore*) this->core();
- 
+
         DomainEnv* baseDomainEnv = parentDomain ?
                                 parentDomain->domainEnv :
                                 (DomainEnv*)NULL;
@@ -62,12 +62,12 @@ namespace avmshell
                                 baseDomainEnv->domain() :
                                 NULL;
 
-        domainToplevel = parentDomain ? 
+        domainToplevel = parentDomain ?
                             (Toplevel*)parentDomain->domainToplevel :
                             core->createShellToplevel();
 
-		Domain* domain = Domain::newDomain(core, baseDomain);
-		domainEnv = DomainEnv::newDomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
+        Domain* domain = Domain::newDomain(core, baseDomain);
+        domainEnv = DomainEnv::newDomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
     }
 
     Atom DomainObject::loadBytes(ByteArrayObject* b, uint32_t swfVersion)
@@ -111,7 +111,7 @@ namespace avmshell
         }
 done:
 
-		ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext(domainEnv, bugCompatibility);
+        ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext(domainEnv, bugCompatibility);
         return core->handleActionPool(pool, toplevel, codeContext);
     }
 
@@ -120,7 +120,7 @@ done:
     {
         Toplevel* toplevel = this->toplevel();
 
-		ScriptEnv* script = core()->domainMgr()->findScriptEnvInDomainEnvByMultiname(domainEnv, multiname);
+        ScriptEnv* script = core()->domainMgr()->findScriptEnvInDomainEnvByMultiname(domainEnv, multiname);
         if (script == (ScriptEnv*)BIND_AMBIGUOUS)
             toplevel->throwReferenceError(kAmbiguousBindingError, multiname);
 

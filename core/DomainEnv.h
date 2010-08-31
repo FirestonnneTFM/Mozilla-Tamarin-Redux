@@ -68,14 +68,14 @@ namespace avmplus
     public:
         static DomainEnv* newDomainEnv(AvmCore* core, Domain* domain, DomainEnv* base);
         virtual ~DomainEnv();
-        
+
         inline Domain* domain() const { return m_domain; }
         // see note in newDomainEnv about why this is always valid, even if m_baseCount == 1
         inline DomainEnv* base() const { return m_bases[1]; }
 
         Toplevel* toplevel() const;
         void setToplevel(Toplevel *t) { m_toplevel = t; }
-        
+
         /**
          * global memory access glue
          */
@@ -116,7 +116,7 @@ namespace avmplus
     private:
         friend class DomainMgrFP10;
         List<ScriptEnv*>                m_namedScriptEnvsList; // list of ScriptEnv, corresponds to domain->m_namedScriptsList
-        DWB(Domain*)                    m_domain;       // Domain associated with this DomainEnv 
+        DWB(Domain*)                    m_domain;       // Domain associated with this DomainEnv
         DWB(Toplevel*)                  m_toplevel;
         // scratch memory to use if the memory object is NULL...
         // allocated via mmfx_new, which is required by nanojit
@@ -126,8 +126,8 @@ namespace avmplus
         uint32_t                        m_globalMemorySize;
         // the actual memory object (can be NULL)
         DRCWB(ScriptObject*)            m_globalMemoryProviderObject;
-        // note that m_baseCount is actually the number of bases, plus one: 
-        // we always add ourself (!) to the front of the list, to simplify 
+        // note that m_baseCount is actually the number of bases, plus one:
+        // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.
         uint32_t const                  m_baseCount; // number of entries in m_bases
         DomainEnv*                      m_bases[1];  // lying: really [m_baseCount]

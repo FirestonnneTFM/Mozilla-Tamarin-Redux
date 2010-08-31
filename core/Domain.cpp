@@ -68,8 +68,8 @@ namespace avmplus
         return new (core->GetGC(), extra) Domain(core, base, baseCount);
     }
 
-    ClassClosure* Domain::getParameterizedType(ClassClosure* type) 
-    { 
+    ClassClosure* Domain::getParameterizedType(ClassClosure* type)
+    {
         AvmAssert(type != NULL);
         Atom a = type ? m_parameterizedTypes->get(type->atom()) : nullObjectAtom;
         return AvmCore::isObject(a) ? (ClassClosure*)AvmCore::atomToScriptObject(a) : NULL;

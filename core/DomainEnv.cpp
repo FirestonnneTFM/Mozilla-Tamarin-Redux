@@ -60,11 +60,11 @@ namespace avmplus
         List<Domain*> dl(core->GetGC());
         for (Domain* di = m_domain; di != NULL; di = di->base())
             dl.add(di);
-        
+
         List<DomainEnv*> el(core->GetGC());
         for (DomainEnv* di = this; di != NULL; di = di->base())
             el.add(di);
-        
+
         AvmAssert(dl.size() == el.size());
         for (uint32_t i = 0, n = el.size(); i < n; ++i)
         {
@@ -140,12 +140,12 @@ namespace avmplus
         m_globalMemorySize = newSize;
     }
 
-    bool DomainEnv::globalMemorySubscribe(ScriptObject* providerObject) 
+    bool DomainEnv::globalMemorySubscribe(ScriptObject* providerObject)
     {
         GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();
         return provider ? provider->addSubscriber(this) : false;
     }
- 
+
     bool DomainEnv::globalMemoryUnsubscribe(ScriptObject* providerObject)
     {
         GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();

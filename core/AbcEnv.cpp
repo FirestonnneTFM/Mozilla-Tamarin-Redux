@@ -43,7 +43,7 @@ namespace avmplus
 {
     AbcEnv::AbcEnv(PoolObject* _pool,
            CodeContext * _codeContext)
-		: m_namedScriptEnvsList(_pool->core->GetGC(), 0)
+        : m_namedScriptEnvsList(_pool->core->GetGC(), 0)
         , m_pool(_pool)
         , m_domainEnv(_codeContext->domainEnv())
         , m_codeContext(_codeContext)

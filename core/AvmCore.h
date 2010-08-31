@@ -251,18 +251,18 @@ const int kBufferPadding = 16;
     class BugCompatibility : public MMgc::GCObject
     {
     public:
-        enum Version 
-        {   
+        enum Version
+        {
             kSWF9,              // SWF9  (Flash Player 9.x)
             kSWF10,             // SWF10 (Flash Player 10.0 & 10.1)
             kSWF11,             // SWF11 (Flash Player TBD)
 
             VersionCount,
-            
+
             kLatest = kSWF11    // alias for "most recent"; will be changed as new versions are added.
                                 // note that this comes *after* VersionCount.
         };
-        
+
         /** These are the external names for swf versions - all integers.
          *
          * The names must correspond to the Version enum above.  The value will
@@ -291,7 +291,7 @@ const int kBufferPadding = 16;
          * 'bugzilla(n:int)', which is in an internal namespace (part of the
          * 'AIR_SYS' API).  It returns true if the flag for the numbered bug is
          * set, otherwise false.
-         * 
+         *
          * The flags always name a bug in Bugzilla, which means that bugs named here
          * can /only/ be about the one thing that is fixed.
          *
@@ -315,20 +315,20 @@ const int kBufferPadding = 16;
         //
         // The reason for this hackery is that existing Flash9/10 content assumes that
         // the root SWF defines the behavior, and all subordinate SWFs will follow it,
-        // regardless of their version. 
-        // 
+        // regardless of their version.
+        //
         // This is some ugly hackery, but a necessary evil for legacy content. Please don't
         // ever use this antipattern for new bugs.
-        unsigned bugzilla444630:1;      
-        
+        unsigned bugzilla444630:1;
+
         unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
         unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
         unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
-        
+
     protected:
         friend class AvmCore;
 
-        // You should never construct a BugCompatibility directly; 
+        // You should never construct a BugCompatibility directly;
         // instead, call AvmCore::createBugCompatibility, so that embedders
         // can create concrete subclasses if they so desire.
         explicit BugCompatibility(Version v);
@@ -396,13 +396,13 @@ const int kBufferPadding = 16;
     #endif
 
     public:
-    
+
         // Please see BugCompatibility for an explanation of this field.
         bool bugzilla444630;
 
         // return the BugCompatibility that is associated with the current
         // CodeContext. If there is no current CodeContext, return the
-        // BugCompatibility associated with the VM's builtins. 
+        // BugCompatibility associated with the VM's builtins.
         // This call will never return NULL.
         const BugCompatibility* currentBugCompatibility() const;
 
@@ -620,7 +620,7 @@ const int kBufferPadding = 16;
     private:
         /** BugCompatibility used to initialize the built-in classes */
         const BugCompatibility* builtinBugCompatibility;
-    
+
         /**
          * The default namespace, "public"
          */

@@ -133,7 +133,7 @@ namespace avmplus
     class DescribeTypeClass;
     class Domain;
     class DomainEnv;
-	class DomainMgr;
+    class DomainMgr;
     class E4XNode;
     class ErrorClass;
     class ErrorObject;

@@ -508,11 +508,11 @@ namespace avmplus
     {
         // Once a MethodInfo has been made a method of a particular class,
         // it is an error to attempt to use it for OP_newfunction; we may have
-        // jitted code with the method and made early-binding assumptions about the 
+        // jitted code with the method and made early-binding assumptions about the
         // receiver type that this would invalidate (by allowing us to call the method
         // with a different type of object).
         if (_hasMakeMethodOfBeenCalled)
-			toplevel->throwVerifyError(kCorruptABCError);
+            toplevel->throwVerifyError(kCorruptABCError);
 
         AvmAssert(_declarer.getScope() == NULL);
 

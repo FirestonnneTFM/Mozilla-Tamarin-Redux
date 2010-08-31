@@ -51,12 +51,12 @@ public class Domain
     {
         init(base);
     }
-    
+
     // If swfVersion is not zero, then load the given ABC with the specific BugCompatibility
     // (overriding the default passed to -swfversion). Note that swfVersion must be a known
     // value, or an exception will be thrown.
     public native function loadBytes(byteArray:ByteArray, swfVersion:uint = 0);
-    
+
     public native function getClass(className:String):Class;
     public native static function get currentDomain():Domain;
 

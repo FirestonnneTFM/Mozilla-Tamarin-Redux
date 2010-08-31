@@ -63,8 +63,8 @@ namespace avmplus
         DWB(MultinameHashtable*)        m_namedScriptsMap;
         List<MethodInfo*>               m_namedScriptsList;        // list of MethodInfo* for the scripts
         DWB(HeapHashtable*)             m_parameterizedTypes;
-        // note that m_baseCount is actually the number of bases, plus one: 
-        // we always add ourself (!) to the front of the list, to simplify 
+        // note that m_baseCount is actually the number of bases, plus one:
+        // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.
         uint32_t const                  m_baseCount; // number of entries in m_bases
         Domain*                         m_bases[1];  // lying: really [m_baseCount]
