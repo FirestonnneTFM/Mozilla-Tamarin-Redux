@@ -94,6 +94,8 @@ def _configSub(ostest, cputest):
         cpu = 'arm'
     elif re.search('mips', cputest):
         cpu = 'mips'
+    elif re.search('sh4', cputest):
+        cpu = 'sh4'
     else:
         raise Exception('Unrecognized CPU: ' + cputest)
 

@@ -274,6 +274,14 @@ var FEATURES =
     <defines>   AVMPLUS_MIPS </defines>  <!-- FIXME: legacy name -->
   </feature>
 
+  <feature>
+    <desc> Selects the 32-bit SH4 architecture. </desc>
+
+    <name>      AVMSYSTEM_SH4 </name>
+    <precludes> AVMSYSTEM_64BIT </precludes>
+    <defines>   VMCFG_SH4 </defines>
+  </feature>
+
   <at-most-one>
     <!-- architectures are all mutually exclusive, but there can be "none", I believe (need to verify) -->
     <name> AVMSYSTEM_IA32 </name>
@@ -282,6 +290,7 @@ var FEATURES =
     <name> AVMSYSTEM_PPC </name>
     <name> AVMSYSTEM_SPARC </name>
     <name> AVMSYSTEM_MIPS </name>
+    <name> AVMSYSTEM_SH4 </name>
   </at-most-one>
 
 
@@ -398,6 +407,7 @@ var FEATURES =
       <name> AVMSYSTEM_PPC </name>
       <name> AVMSYSTEM_SPARC </name>
       <name> AVMSYSTEM_MIPS </name>
+      <name> AVMSYSTEM_SH4 </name>
      </exactly-one>
     </requires>
     <defines> VMCFG_NANOJIT  </defines>

@@ -89,6 +89,9 @@ const char * const avmfeatures = ""
   #if AVMSYSTEM_MIPS
     "AVMSYSTEM_MIPS;"
   #endif
+  #if AVMSYSTEM_SH4
+    "AVMSYSTEM_SH4;"
+  #endif
   #if AVMSYSTEM_UNIX
     "AVMSYSTEM_UNIX;"
   #endif

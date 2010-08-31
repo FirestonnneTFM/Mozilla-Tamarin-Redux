@@ -315,7 +315,7 @@ namespace MMgc
             GCAssert(kFreelist == 3);
             GCAssert(m_numBitmapBytes % 4 == 0);
             
-            uint32_t *pbits = (uint32_t*)b->bits;
+            uint32_t *pbits = (uint32_t*)(void *)b->bits;
             for(int i=0, n=m_numBitmapBytes>>2; i < n; i++)
                 pbits[i] = 0x03030303;
 
@@ -325,7 +325,7 @@ namespace MMgc
         }
         else {
             if (bits)
-                m_gc->FreeBits((uint32_t*)bits, m_sizeClassIndex);
+                m_gc->FreeBits((uint32_t*)(void *)bits, m_sizeClassIndex);
         }
 
         return b;
@@ -364,7 +364,7 @@ namespace MMgc
         GCAssert(b->numFree == m_itemsPerBlock);
         if(!m_bitsInPage) {
             VMPI_memset(b->bits, 0, m_numBitmapBytes);
-            m_gc->FreeBits((uint32_t*)b->bits, m_sizeClassIndex);
+            m_gc->FreeBits((uint32_t*)(void *)b->bits, m_sizeClassIndex);
             b->bits = NULL;
         }
 
@@ -831,7 +831,7 @@ namespace MMgc
 
                     if (marks & kFinalizable)
                     {
-                        GCFinalizedObject *obj = (GCFinalizedObject*)GetUserPointer(item);
+                        GCFinalizedObject *obj = (GCFinalizedObject*)(void *)GetUserPointer(item);
                         marks &= ~kFinalizable;     // Clear bits first so we won't get second finalization if finalizer longjmps out
 
                         /* See https://bugzilla.mozilla.org/show_bug.cgi?id=573737 for the case where the object might remain in
@@ -949,7 +949,7 @@ namespace MMgc
         GCAssert(sizeof(gcbits_t) == 1);
         GCAssert(kFreelist == 3);
         GCAssert(m_numBitmapBytes % 4 == 0);
-        uint32_t *pbits = (uint32_t*)block->bits;
+        uint32_t *pbits = (uint32_t*)(void *)block->bits;
         uint32_t mq32 = ~uint32_t(0x03030303U);
 
         // Clear the marked and queued bits

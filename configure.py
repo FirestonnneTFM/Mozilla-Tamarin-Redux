@@ -159,6 +159,8 @@ if config.getCompiler() == 'GCC':
             APP_CXXFLAGS += "-Wstrict-aliasing=0 "
         else: # gcc 4.3 or later
             APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
+    if cpu == 'sh4':
+        APP_CXXFLAGS += "-mieee "
 
     if arm_fpu:
         ARM_FPU_FLAGS = "-mfloat-abi=softfp -mfpu=vfp -march=%s -Wno-cast-align " % arm_arch # compile to use hardware fpu
@@ -327,6 +329,9 @@ elif cpu == "arm":
 elif cpu == "mips":
     # we detect this in core/avmbuild.h and MMgc/*build.h
     None
+elif cpu == "sh4":
+    # work around for a problem with tas.b instruction on some sh4 boards
+    APP_CPPFLAGS += "-DUSE_PTHREAD_MUTEX "
 else:
     raise Exception("Unsupported CPU")
 
