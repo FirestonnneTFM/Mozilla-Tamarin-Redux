@@ -75,6 +75,7 @@ class PerformanceRuntest(RuntestBase):
     avm2DefaultName = 'avm2'
     avm2name = ''
     currentDir = ''
+    displayMetrics = []
     iterations = 1
     vmname = 'unknown'  # name sent to socketserver
     memory = False
@@ -200,6 +201,8 @@ class PerformanceRuntest(RuntestBase):
         print " -k --socketlog     logs results to a socket server"
         print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
         print " -m --memory        logs the high water memory mark"
+        print "    --metrics=      display specified metrics: either a comma-separated list of"
+        print "                    metrics names (e.g. v8), or the keyword all."
         print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
         print "    --vm2version    specify version of avm2"
         print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
@@ -217,7 +220,7 @@ class PerformanceRuntest(RuntestBase):
         RuntestBase.setOptions(self)
         self.options += 'S:i:lkr:mp'
         self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log','socketlog',
-                                 'runtime=','memory','larger','vmversion=', 'vm2version=',
+                                 'runtime=','memory','metrics=','larger','vmversion=', 'vm2version=',
                                  'vmargs2=','nooptimize', 'score', 'saveindex=', 'index=',
                                  'perfm','csv=', 'csvappend','prettyprint', 'detail', 'raw',
                                  'fullpath'])
@@ -242,6 +245,11 @@ class PerformanceRuntest(RuntestBase):
                 self.vmname = v
             elif o in ('-m', '--memory'):
                 self.memory = True
+            elif o in ('--metrics'):
+                self.displayMetrics = v.strip().lower().split(',')
+                if 'memory' in self.displayMetrics:
+                    self.memory = True
+                    del self.displayMetrics[self.displayMetrics.index('memory')]
             elif o in ('--vmversion',):
                 self.avmversion = v
             elif o in ('--vm2version',):
@@ -481,9 +489,9 @@ class PerformanceRuntest(RuntestBase):
                     memoryhigh = self.parseMemHigh(line)
                     break
             resultDict.setdefault('memory', []).append(memoryhigh)
-            # When running in memory mode, we only want the memory metric and
-            # ignore all others
-            return
+            # only display memory unless user is asking for other metrics
+            if not self.displayMetrics:
+                return
             
 
         if self.perfm:
@@ -507,6 +515,10 @@ class PerformanceRuntest(RuntestBase):
             # results must have the form of 'metric metric_name value'
             if 'metric' in line:
                 rl=line.rsplit()
+                if self.displayMetrics and 'all' not in self.displayMetrics:
+                    # need to check which metrics to display
+                    if rl[1].strip() not in self.displayMetrics:
+                        continue
                 if len(rl)>2:
                     if '.' in rl[2]:
                         resultDict.setdefault(rl[1], []).append(float(rl[2]))
