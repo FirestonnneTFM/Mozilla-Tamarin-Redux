@@ -45,6 +45,7 @@ MMGC_DIR := $(AVMPLUS_DIR)/MMgc
 MMGC_SRCS := \
 	GCGlobalNew.cpp \
 	GCObject.cpp \
+	GCPolicyManager.cpp \
 	GCMemoryProfiler.cpp \
 	GCLargeAlloc.cpp \
 	GCHeap.cpp \
