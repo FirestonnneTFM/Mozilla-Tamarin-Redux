@@ -140,6 +140,18 @@
 
 namespace MMgc
 {
+#ifdef MMGC_FASTBITS
+    static uint32_t log2(uint32_t n)
+    {
+        uint32_t result = 0;
+        while (n > 1) {
+            result += 1;
+            n >>= 1;
+        }
+        return result;
+    }
+#endif
+
     /*virtual*/
     GCAllocBase::~GCAllocBase()
     {
@@ -181,8 +193,34 @@ namespace MMgc
         m_gc->ObtainQuickListBudget(m_itemSize*m_itemsPerBlock);
         m_qBudget = m_qBudgetObtained = m_itemsPerBlock;
 
+#ifdef MMGC_FASTBITS
+        // The idea here is that the byte table may have some unused entries and that
+        // that allows a unique byte index for an object to be computed with a simple
+        // mask and shift off the object pointer (the mask is constant, the shift is
+        // variable).  That benefits the write barrier, the marker (especially precise
+        // marking), and other hot code.  Code that walks the byte map (eg the sweeper)
+        // should do so by stepping through objects one by one and computing the byte
+        // index for each (this is cheap) rather than examining bytes in the byte map
+        // in sequence.
+        //
+        // The number of bytes required for objects of size n is the same as for
+        // objects of size m where m is the next lower power-of-two object size
+        // below n.  The shift for n is then the same as the shift for m: log2(m).
+        //
+        // The key is that a unique byte index will be assigned to each object position
+        // in the block even for non-power-of-two object sizes.  I don't have a mathematical
+        // proof for this, but it's easy to test it exhaustively (and I've done so).
+        //
+        // The amount of waste in the byte map is at most 50%, but average waste for
+        // object sizes up to 256 is 26%.  Waste is a little higher than that, because
+        // the bitmap is sized to cover the block, including the block header - that
+        // too removes instructions from the hot path later.
+        
+        m_bitsShift = log2(m_itemSize);
+        m_numBitmapBytes = kBlockSize / (1 << m_bitsShift);
+#else
         m_numBitmapBytes = m_itemsPerBlock * sizeof(gcbits_t);
-
+#endif
         // round up to 4 bytes so we can go through the bits several items at a time
         m_numBitmapBytes = (m_numBitmapBytes+3)&~3;
 
@@ -250,6 +288,9 @@ namespace MMgc
             else
                 b->finalizeState = !m_gc->finalizedValue;
 
+#ifdef MMGC_FASTBITS
+            b->bitsShift = m_bitsShift;
+#endif
             if (m_bitsInPage)
                 b->bits = (gcbits_t*)b + sizeof(GCBlock);
             else

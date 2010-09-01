@@ -54,10 +54,12 @@ namespace MMgc
         return (LargeBlock*)b->next;
     }
 
+#ifndef MMGC_FASTBITS
     REALLY_INLINE gcbits_t& GCLargeAlloc::GetGCBits(const void *realptr)
     {
         return GetLargeBlock(realptr)->flags[0];
     }
+#endif
 
     /*static*/
     REALLY_INLINE bool GCLargeAlloc::IsLargeBlock(const void *item)

@@ -116,6 +116,9 @@ namespace MMgc
             // Static checks in GC.cpp test that sizeof(gcbits_t) == 1 and that LargeBlock
             // alignment is 8 bytes.
             gcbits_t flags[4];
+#if defined MMGC_FASTBITS && !defined MMGC_64BIT
+            uint32_t padding;    // Pad to 8-byte aligned.
+#endif
             int GetNumBlocks() const;
         };
 
@@ -124,7 +127,9 @@ namespace MMgc
         // not a hot method
         static void ClearQueued(const void *userptr);
 
+#ifndef MMGC_FASTBITS
         static gcbits_t& GetGCBits(const void* realptr);
+#endif
 
         // The list of chunk blocks
         LargeBlock* m_blocks;

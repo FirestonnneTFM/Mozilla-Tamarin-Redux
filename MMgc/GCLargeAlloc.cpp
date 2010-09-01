@@ -88,6 +88,9 @@ namespace MMgc
             block->alloc= this;
             block->next = m_blocks;
             block->size = computedSize;
+#ifdef MMGC_FASTBITS
+            block->bitsShift = 12;     // Always use bits[0]
+#endif
             block->bits = block->flags;
             m_blocks = block;
 
