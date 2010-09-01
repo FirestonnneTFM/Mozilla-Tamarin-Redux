@@ -264,6 +264,14 @@ namespace MMgc
         return gc;
     }
 
+#ifdef MMGC_FASTBITS
+    /*static*/
+    REALLY_INLINE gcbits_t& GC::GetGCBits(const void *realptr)
+    {
+        GCBlockHeader* block = GetBlockHeader(realptr);
+        return block->bits[(uintptr_t(realptr)& 0xFFF) >> block->bitsShift];
+    }
+#else
     /*static*/
     REALLY_INLINE gcbits_t& GC::GetGCBits(const void *realptr)
     {
@@ -272,6 +280,7 @@ namespace MMgc
         else
             return GCAlloc::GetGCBits(realptr);
     }
+#endif
 
     /*static*/
     REALLY_INLINE int GC::GetMark(const void *userptr)

@@ -112,6 +112,18 @@
     #define MMGC_MEMORY_PROFILER_ARG(x)
 #endif
 
+// MMGC_FASTBITS enables a potentially faster representation of the per-block bit table. 
+// The representation is fairly well hidden from most of the GC code; only GC::GetGCBits
+// and GCAlloc / GCLargeAlloc take it into account.
+//
+// The new representation uses more space than the old because there are gaps in the
+// bit table.
+//
+// Do not disable this.  The #define will be removed and the feature will always be
+// enabled when we're certain that the effects of the feature are positive.
+
+#define MMGC_FASTBITS
+
 #include "AvmAssert.h"
 #include "GCDebug.h"
 #include "GCLog.h"
@@ -187,7 +199,7 @@ namespace MMgc
 #include "GCPolicyManager-inlines.h"
 #include "GC-inlines.h"
 
-// remove these when the player stops using it
+// remove these when the player stops using them
 #define MMGC_DRC
 #define WRITE_BARRIERS
 

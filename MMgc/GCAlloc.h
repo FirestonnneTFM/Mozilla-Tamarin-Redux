@@ -65,6 +65,9 @@ namespace MMgc
         GCBlockHeader*  next;   // The next block in the list of blocks for the allocator
         gcbits_t*       bits;   // Variable length table of mark bit entries
         uint32_t        size;   // Size of objects stored in this block
+#ifdef MMGC_FASTBITS
+        uint32_t        bitsShift;  // Right shift for lower 12 bits of a pointer into the block to obtain the mark bit item for that pointer
+#endif
     };
 
     GCBlockHeader* GetBlockHeader(const void* item);
@@ -242,6 +245,12 @@ namespace MMgc
         int    m_numAlloc;
         int    m_numBlocks;
 
+#ifdef MMGC_FASTBITS
+        // Right shift for lower 12 bits of a pointer into the block to obtain
+        // the gcbits_t item for that pointer.  Is copied into the block header.
+        uint32_t m_bitsShift;
+#endif
+
         // fast divide numbers for GetObjectIndex
         uint16_t multiple;
         uint16_t shift;
@@ -295,8 +304,10 @@ namespace MMgc
         static int ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
 #endif
 
-        // NOTE that GetObjectIndex and GetBitsIndex are not necessarily the same
-        // (anticipating a future fix).
+        // NOTE that GetObjectIndex and GetBitsIndex are not the same if MMGC_FASTBITS
+        // is defined.  That is an efficiency concern; the representation of the bits 
+        // table allows the bits index to be computed more quickly, and that shortens 
+        // the hot control paths.  Both functions are very hot.
 
         // Compute the offset within the block of the given object.
         static uint32_t GetObjectIndex(const GCBlock *block, const void *item);
@@ -304,7 +315,9 @@ namespace MMgc
         // Compute the offset within the bits table of the given object.
         static uint32_t GetBitsIndex(const GCBlock *block, const void *item);
         
+#ifndef MMGC_FASTBITS
         static gcbits_t& GetGCBits(const void* realptr);
+#endif
 
         static void ClearBits(GCBlock *block, int index, int bits);
 

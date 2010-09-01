@@ -61,12 +61,14 @@ namespace MMgc
         return (GCBlock*)b->next;
     }
 
+#ifndef MMGC_FASTBITS
     /*static*/
     REALLY_INLINE gcbits_t& GCAlloc::GetGCBits(const void* realptr)
     {
         GCBlock *block = GetBlock(realptr);
         return block->bits[GetBitsIndex(block, realptr)];
     }
+#endif
 
     /*static*/
     REALLY_INLINE void *GCAlloc::FindBeginning(const void *item)
@@ -156,11 +158,27 @@ namespace MMgc
         return index;
     }           
 
+#ifdef MMGC_FASTBITS
+
+    /*static*/
+    REALLY_INLINE uint32_t GCAlloc::GetBitsIndex(const GCBlock *block, const void *item)
+    {
+        uint32_t index = (uintptr_t(item) & 0xFFF) >> block->bitsShift;
+#ifdef _DEBUG
+        GCAssert(index < uint32_t(((GCAlloc*)block->alloc)->m_numBitmapBytes));
+#endif
+        return index;
+    }
+    
+#else // MMGC_FASTBITS
+    
     /*static*/
     REALLY_INLINE uint32_t GCAlloc::GetBitsIndex(const GCBlock *block, const void *item)
     {
         return GetObjectIndex(block, item);
     }
+
+#endif // MMGC_FASTBITS
 
     REALLY_INLINE int GCAlloc::GCBlock::GetCount() const
     {
