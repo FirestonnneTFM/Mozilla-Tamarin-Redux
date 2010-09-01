@@ -319,6 +319,9 @@ extern void* VMPI_allocateCodeMemory(size_t size);
  * operating system unmap the memory so that executable writable memory is not
  * sitting around unused.
  *
+ * If VMPI_makeCodeMemoryExecutable is called on this memory it must be
+ * called again with makeItSo false before calling VMPI_freeCodeMemory.
+ *
  * @exceptions  May abort the process if address was not returned by
  * VMPI_allocateCodeMemory or size was not the size value passed to
  * VMPI_allocateCodeMemory.
@@ -331,6 +334,9 @@ extern void VMPI_freeCodeMemory(void* address, size_t size);
  *
  * This operation may be a no-op on some platforms, see comments to
  * VMPI_allocateCodeMemory and VMPI_freeCodeMemory.
+ *
+ * Memory allocated with VMPI_allocateCodeMemory must be returned to the
+ * non-executable state before calling VMP_freeCodeMemory.
  *
  * @param address  Pointer to start of an acceptable protection boundary (typically
  * a VM page) within the block.
