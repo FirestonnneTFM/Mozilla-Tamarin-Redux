@@ -358,7 +358,7 @@ static FILE* atos_file = NULL;
 bool startATOSProcess()
 {
     char cmd[PATH_MAX];
-    VMPI_snprintf(cmd, sizeof(cmd), "atos -p %d", getpid());
+    VMPI_snprintf(cmd, sizeof(cmd), "atos -p %d 2> /dev/null", getpid());
     // thank you very much http://boinc.berkeley.edu/svn/trunk/boinc/lib/mac/mac_backtrace.cpp
     // thank you very little Apple!
     // this is required for bi-directional I/O to work
