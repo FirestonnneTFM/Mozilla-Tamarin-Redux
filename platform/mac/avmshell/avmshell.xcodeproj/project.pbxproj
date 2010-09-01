@@ -40,6 +40,8 @@
 		072EA0F60F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
 		073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
 		0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0749E7721173EDC9002F7F64 /* AvmAssert.cpp */; };
+		07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
+		075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		078F536B0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
 		079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
@@ -397,14 +399,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DD76F620486A84900D96B5E /* avm */;
+			remoteGlobalIDString = 8DD76F620486A84900D96B5E;
 			remoteInfo = avm;
 		};
 		7E87D15D122C617A0005FEAF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 7E87D055122C5B980005FEAF /* avm64 */;
+			remoteGlobalIDString = 7E87D055122C5B980005FEAF;
 			remoteInfo = avm64;
 		};
 /* End PBXContainerItemProxy section */
@@ -486,6 +488,9 @@
 		0749E7731173EDC9002F7F64 /* AvmAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmAssert.h; path = ../../../VMPI/AvmAssert.h; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
 		07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcEnv-inlines.h"; path = "../../../core/AbcEnv-inlines.h"; sourceTree = SOURCE_ROOT; };
+		07591FB0122BE8EC00D60F63 /* GCPolicyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCPolicyManager.h; path = ../../../MMgc/GCPolicyManager.h; sourceTree = SOURCE_ROOT; };
+		07591FB8122BEA0E00D60F63 /* GCPolicyManager-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCPolicyManager-inlines.h"; path = "../../../MMgc/GCPolicyManager-inlines.h"; sourceTree = SOURCE_ROOT; };
+		07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCPolicyManager.cpp; path = ../../../MMgc/GCPolicyManager.cpp; sourceTree = SOURCE_ROOT; };
 		075BA6EE1157D806000BDF13 /* GCHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHashtable-inlines.h"; path = "../../../MMgc/GCHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBD4B107326E4009E599C /* FixedAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FixedAlloc-inlines.h"; path = "../../../MMgc/FixedAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBD5710732FD9009E599C /* FixedMalloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FixedMalloc-inlines.h"; path = "../../../MMgc/FixedMalloc-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1489,6 +1494,9 @@
 				079DFA9E0F3A96BE0031D1B4 /* GCMemoryProfiler.h */,
 				079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */,
 				079DFAA00F3A96BE0031D1B4 /* GCObject.h */,
+				07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */,
+				07591FB0122BE8EC00D60F63 /* GCPolicyManager.h */,
+				07591FB8122BEA0E00D60F63 /* GCPolicyManager-inlines.h */,
 				3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */,
 				07ED27EF0FBD78C4007E3950 /* GCStack.cpp */,
 				079DFAA20F3A96BE0031D1B4 /* GCStack.h */,
@@ -1889,6 +1897,7 @@
 				7E87D10A122C5B980005FEAF /* exec.cpp in Sources */,
 				7E87D10B122C5B980005FEAF /* ST_mmgc_weakref.cpp in Sources */,
 				7E87D10C122C5B980005FEAF /* ST_mmgc_finalize_uninit.cpp in Sources */,
+				075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2078,6 +2087,7 @@
 				198CF91E11B973BD00A939C7 /* exec.cpp in Sources */,
 				07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
 				D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
+				07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
