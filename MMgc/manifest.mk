@@ -57,6 +57,7 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/GCLog.cpp \
   $(curdir)/GCMemoryProfiler.cpp \
   $(curdir)/GCObject.cpp \
+  $(curdir)/GCPolicyManager.cpp \
   $(curdir)/GCStack.cpp \
   $(curdir)/GCTests.cpp \
   $(curdir)/GCThreads.cpp \

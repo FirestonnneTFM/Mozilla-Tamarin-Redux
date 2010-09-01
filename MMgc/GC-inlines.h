@@ -41,8 +41,7 @@
 #ifndef __GC_inlines__
 #define __GC_inlines__
 
-// Inline functions for GCRoot, GCPolicyManager, GC, GC::AllocaAutoPtr, GCWorkItem, Cleaner
-// Policy manager should probably move to its own file.
+// Inline functions for GCRoot, GC, GC::AllocaAutoPtr, GCWorkItem, Cleaner
 // Inline functions for the write barrier are in WriteBarrier.h for now.
 
 namespace MMgc
@@ -72,64 +71,6 @@ namespace MMgc
     REALLY_INLINE GCWorkItem GCRoot::GetWorkItem() const
     {
         return GCWorkItem(object, (uint32_t)size, GCWorkItem::kNonGCObject);
-    }
-
-    // GCPolicyManager
-    // A number of the inline functions for this class are currently in GC.cpp
-
-#ifdef MMGC_POLICY_PROFILING
-    REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
-    {
-        GCAssert(ARRAY_SIZE(barrierStageLastCollection) > size_t(stage));
-        barrierStageLastCollection[stage]++;
-    }
-#endif
-
-#ifdef MMGC_REFCOUNT_PROFILING
-    REALLY_INLINE void GCPolicyManager::signalIncrementRef()
-    {
-        incrementRefLastCollection++;
-    }
-
-    REALLY_INLINE void GCPolicyManager::signalDecrementRef()
-    {
-        decrementRefLastCollection++;
-    }
-
-    REALLY_INLINE void GCPolicyManager::signalZCTAdd(bool initial, uint32_t population)
-    {
-        addZCTLastCollection++;
-        if (initial)
-            addZCTInitialTotal++;
-        if (population > zctPeakSize)
-            zctPeakSize = population;
-    }
-
-    REALLY_INLINE void GCPolicyManager::signalZCTRemove(bool final)
-    {
-        removeZCTLastCollection++;
-        if (final)
-            removeZCTFinalTotal++;
-    }
-#endif
-
-    REALLY_INLINE bool GCPolicyManager::signalAllocWork(size_t nbytes)
-    {
-#ifdef MMGC_POLICY_PROFILING
-        objectsAllocated++;
-        bytesAllocated += nbytes;
-#endif
-        remainingMinorAllocationBudget -= int32_t(nbytes);
-
-        // Important to use < 0 not <= 0: in greedy mode we set the budget to
-        // exactly the object size we're about to allocate.  Using <= 0 would
-        // cause the allocation never to succeed.
-        return remainingMinorAllocationBudget < 0;
-    }
-
-    REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
-    {
-        remainingMinorAllocationBudget += int32_t(nbytes);
     }
 
     // GC

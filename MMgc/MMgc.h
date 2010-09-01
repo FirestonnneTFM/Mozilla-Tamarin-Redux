@@ -171,6 +171,7 @@ namespace MMgc
 #include "GCLargeAlloc.h"
 #include "ZCT.h"
 #include "HeapGraph.h"
+#include "GCPolicyManager.h"
 #include "GC.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"
@@ -183,6 +184,7 @@ namespace MMgc
 #include "GCAlloc-inlines.h"
 #include "GCLargeAlloc-inlines.h"
 #include "ZCT-inlines.h"
+#include "GCPolicyManager-inlines.h"
 #include "GC-inlines.h"
 
 // remove these when the player stops using it
