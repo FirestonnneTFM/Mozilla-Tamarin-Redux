@@ -1009,7 +1009,16 @@ namespace avmplus
             // Must convert to native values.  Just subtracting the atoms may lead to
             // overflows which result in the incorrect sign being returned.  See
             // NumericCompareCompatible, above.
-            return int(atomGetIntptr(atmj)) - int(atomGetIntptr(atmk));
+            intptr_t tmp = atomGetIntptr(atmj) - atomGetIntptr(atmk);
+#ifdef AVMPLUS_64BIT
+            // On 64-bit systems atoms carry more than 32 significant bits of integer
+            // data, so we need to be careful.
+            if (tmp < 0) return -1;
+            if (tmp == 0) return 0;
+            return 1;
+#else
+            return int(tmp);
+#endif
         }
         
         double x = AvmCore::number(atmj);

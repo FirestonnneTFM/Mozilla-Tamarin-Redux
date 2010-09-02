@@ -56,10 +56,21 @@ function getTestCases()
     // Note, the Array.NUMERIC argument is an ActionScript-ism.
     var actual = input.sort(Array.NUMERIC);
 
-    var expected_old = [-273000000,-270000000,87000000,-245000000,287000000];
+    var expected_old32 = [-273000000,-270000000,87000000,-245000000,287000000];
+    var expected_old64 = [87000000,-273000000,-270000000,287000000,-245000000];
     var expected_new = [-273000000,-270000000,-245000000,87000000,287000000];
 
-    array[item++] = new TestCase(SECTION, "numeric sort", (System.swfVersion < 11 ? expected_old : expected_new).join(), actual.join() );
+    var expected;
+    if (System.swfVersion < 11) {
+        if (actual[0] == expected_old32[0])
+            expected = expected_old32;
+        else
+            expected = expected_old64;
+    }
+    else
+        expected = expected_new;
+
+    array[item++] = new TestCase(SECTION, "numeric sort", expected.join(), actual.join() );
 
     return ( array );
 }
