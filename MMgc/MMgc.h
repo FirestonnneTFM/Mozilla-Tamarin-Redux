@@ -98,6 +98,9 @@
     //#define MMGC_MARKSTACK_DEPTH
 #endif
 
+// this might be good to enable in a heightened DEBUG build, it triggers bug 561402
+//#define MMGC_POISON_MEMORY_FROM_OS
+
 #ifdef MMGC_REFCOUNT_PROFILING
     #define REFCOUNT_PROFILING_ONLY(x) x
     #define REFCOUNT_PROFILING_ARG(x) , x
