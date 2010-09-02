@@ -94,7 +94,11 @@ bool VMPI_canCommitAlreadyCommittedMemory()
 
 bool VMPI_areNewPagesDirty()
 {
+#ifdef MMGC_POISON_MEMORY_FROM_OS
+    return true;
+#else
     return false;
+#endif
 }
 
 static int get_major_version()
@@ -158,6 +162,10 @@ bool VMPI_commitMemory(void* address, size_t size)
                             PROT_READ | PROT_WRITE,
                             MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
                             get_mmap_fdes(0), 0);
+#ifdef MMGC_POISON_MEMORY_FROM_OS
+    if(got == address)
+        memset(got, MMgc::GCHeap::FXFreshPoison, size);
+#endif
     return (got == address);
 }
 
@@ -174,7 +182,12 @@ bool VMPI_decommitMemory(char *address, size_t size)
 
 void* VMPI_allocateAlignedMemory(size_t size)
 {
-    return valloc(size);
+    void *addr = valloc(size);
+#ifdef MMGC_POISON_MEMORY_FROM_OS
+    GCAssert(size % VMPI_getVMPageSize() == 0);
+    memset(addr, MMgc::GCHeap::FXFreshPoison, size);
+#endif
+    return addr;
 }
 
 void VMPI_releaseAlignedMemory(void* address)
