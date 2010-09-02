@@ -37,6 +37,10 @@ metric_info = {
             'desc': 'custom v8 normalized metric (hardcoded in the test)',
             'largerIsFaster':True
         },
+        'iterations/second':{
+            'best':max,
+            'largerIsFaster':True,
+        },
         
         # steps is a metric output by the avm when compiled with --enable-count-steps
         'steps':{
