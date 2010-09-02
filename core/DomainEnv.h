@@ -114,7 +114,7 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
-        friend class DomainMgrFP10;
+        friend class DomainMgr;
         List<ScriptEnv*>                m_namedScriptEnvsList; // list of ScriptEnv, corresponds to domain->m_namedScriptsList
         DWB(Domain*)                    m_domain;       // Domain associated with this DomainEnv
         DWB(Toplevel*)                  m_toplevel;

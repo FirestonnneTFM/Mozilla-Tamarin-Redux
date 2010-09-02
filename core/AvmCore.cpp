@@ -313,7 +313,7 @@ namespace avmplus
         builtinDomain               = NULL;
         builtinBugCompatibility     = NULL;
 
-        m_domainMgr = new(gc) DomainMgrFP10(this);
+        m_domainMgr = new(gc) DomainMgr(this);
 
         GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
 

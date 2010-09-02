@@ -42,15 +42,11 @@
 namespace avmplus
 {
 
-DomainMgrFP10::DomainMgrFP10(AvmCore* _core) : core(_core)
+DomainMgr::DomainMgr(AvmCore* _core) : core(_core)
 {
 }
 
-DomainMgrFP10::~DomainMgrFP10()
-{
-}
-
-void DomainMgrFP10::addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* traits)
+void DomainMgr::addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* traits)
 {
     // look for class in VM-wide type table, *without* recursion
     // (don't look for traits in pool, ever.)
@@ -62,7 +58,7 @@ void DomainMgrFP10::addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns
     }
 }
 
-void DomainMgrFP10::addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* itraits)
+void DomainMgr::addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* itraits)
 {
     // look for class in VM-wide type table, *without* recursion
     Traits* t = (Traits*)pool->domain->m_namedTraits->get(name, ns);
@@ -79,12 +75,12 @@ void DomainMgrFP10::addNamedInstanceTraits(PoolObject* pool, Stringp name, Names
     }
 }
 
-Traits* DomainMgrFP10::findBuiltinTraitsByName(PoolObject* pool, Stringp name)
+Traits* DomainMgr::findBuiltinTraitsByName(PoolObject* pool, Stringp name)
 {
     return (Traits*)pool->m_namedTraits->getName(name);
 }
 
-Traits* DomainMgrFP10::findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns)
+Traits* DomainMgr::findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns)
 {
     Traits* traits = NULL;
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
@@ -97,7 +93,7 @@ Traits* DomainMgrFP10::findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp
     return traits;
 }
 
-Traits* DomainMgrFP10::findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns)
+Traits* DomainMgr::findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns)
 {
     // look for class in VM-wide type table
     Traits* t = findTraitsInDomainByNameAndNSImpl(pool->domain, name, ns);
@@ -111,12 +107,12 @@ Traits* DomainMgrFP10::findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp
     return t;
 }
 
-Traits* DomainMgrFP10::findTraitsInPoolByNameAndNS(PoolObject* pool, Stringp name, Namespacep ns)
+Traits* DomainMgr::findTraitsInPoolByNameAndNS(PoolObject* pool, Stringp name, Namespacep ns)
 {
     return findTraitsInPoolByNameAndNSImpl(pool, name, ns);
 }
 
-Traits* DomainMgrFP10::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname& multiname)
+Traits* DomainMgr::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname& multiname)
 {
     // do full lookup of multiname, error if more than 1 match
     // return Traits if 1 match, NULL if 0 match, BIND_AMBIGUOUS >1 match
@@ -152,7 +148,7 @@ static void addScript(Stringp name, Namespacep ns, MethodInfo* script, List<Meth
     scriptMap->add(name, ns, Binding(idx));
 }
 
-void DomainMgrFP10::addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, MethodInfo* script)
+void DomainMgr::addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, MethodInfo* script)
 {
     if (ns->isPrivate())
     {
@@ -169,7 +165,7 @@ void DomainMgrFP10::addNamedScript(PoolObject* pool, Stringp name, Namespacep ns
     }
 }
 
-MethodInfo* DomainMgrFP10::findScriptInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns)
+MethodInfo* DomainMgr::findScriptInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns)
 {
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
     {
@@ -184,7 +180,7 @@ MethodInfo* DomainMgrFP10::findScriptInDomainByNameAndNSImpl(Domain* domain, Str
     return NULL;
 }
 
-MethodInfo* DomainMgrFP10::findScriptInDomainByMultinameImpl(Domain* domain, const Multiname& multiname)
+MethodInfo* DomainMgr::findScriptInDomainByMultinameImpl(Domain* domain, const Multiname& multiname)
 {
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
     {
@@ -200,7 +196,7 @@ MethodInfo* DomainMgrFP10::findScriptInDomainByMultinameImpl(Domain* domain, con
     return NULL;
 }
 
-MethodInfo* DomainMgrFP10::findScriptInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns)
+MethodInfo* DomainMgr::findScriptInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns)
 {
     MethodInfo* f = findScriptInDomainByNameAndNSImpl(pool->domain, name, ns);
     if (f == NULL)
@@ -215,7 +211,7 @@ MethodInfo* DomainMgrFP10::findScriptInPoolByNameAndNSImpl(PoolObject* pool, Str
     return f;
 }
 
-MethodInfo* DomainMgrFP10::findScriptInPoolByMultiname(PoolObject* pool, const Multiname& multiname)
+MethodInfo* DomainMgr::findScriptInPoolByMultiname(PoolObject* pool, const Multiname& multiname)
 {
     MethodInfo* f = findScriptInDomainByMultinameImpl(pool->domain, multiname);
     if (f == NULL)
@@ -231,7 +227,7 @@ MethodInfo* DomainMgrFP10::findScriptInPoolByMultiname(PoolObject* pool, const M
     return f;
 }
 
-void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs)
+void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs)
 {
     HeapHashtable* ht = new(core->GetGC()) HeapHashtable(core->GetGC());
     for (uint32_t i = 0, n = envs.size(); i < n; ++i)
@@ -285,7 +281,7 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
 }
 
 #ifdef _DEBUG
-/*static*/ void DomainMgrFP10::verifyMatchingLookup(Binding b, const List<MethodInfo*>& listMI, const List<ScriptEnv*>& listSE)
+/*static*/ void DomainMgr::verifyMatchingLookup(Binding b, const List<MethodInfo*>& listMI, const List<ScriptEnv*>& listSE)
 {
     // Note that when code is lazily inited, these lists might not be identical.
     // So we only verify that the part we need to look up matches properly.
@@ -302,7 +298,7 @@ void DomainMgrFP10::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& e
 }
 #endif
 
-ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* domainEnv, const Multiname& multiname)
+ScriptEnv* DomainMgr::findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* domainEnv, const Multiname& multiname)
 {
     for (uint32_t i = domainEnv->m_baseCount; i > 0; --i)
     {
@@ -321,12 +317,12 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* dom
     return NULL;
 }
 
-ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, const Multiname& multiname)
+ScriptEnv* DomainMgr::findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, const Multiname& multiname)
 {
     return findScriptEnvInDomainEnvByMultinameImpl(domainEnv, multiname);
 }
 
-ScriptEnv* DomainMgrFP10::findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Multiname& multiname)
+ScriptEnv* DomainMgr::findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Multiname& multiname)
 {
     // note, lookup order must match findNamedScript!
     ScriptEnv* se = findScriptEnvInDomainEnvByMultinameImpl(abcEnv->domainEnv(), multiname);
@@ -348,7 +344,7 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const
 
 #ifdef DEBUGGER
 
-ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* domainEnv, Stringp name)
+ScriptEnv* DomainMgr::findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* domainEnv, Stringp name)
 {
     for (uint32_t i = domainEnv->m_baseCount; i > 0; --i)
     {
@@ -366,7 +362,7 @@ ScriptEnv* DomainMgrFP10::findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* doma
     return NULL;
 }
 
-ScriptEnv* DomainMgrFP10::findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, Stringp name)
+ScriptEnv* DomainMgr::findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, Stringp name)
 {
     ScriptEnv* se = findScriptEnvInDomainEnvByNameOnlyImpl(abcEnv->domainEnv(), name);
     if (se == NULL)
