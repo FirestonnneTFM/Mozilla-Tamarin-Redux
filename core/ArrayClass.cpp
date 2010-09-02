@@ -431,7 +431,8 @@ namespace avmplus
         static int StringCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->StringCompare(j, k); }
         static int CaseInsensitiveStringCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->CaseInsensitiveStringCompare(j, k); }
         static int ScriptCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->ScriptCompare(j, k); }
-        static int NumericCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->NumericCompare(j, k); }
+        static int NumericCompareFuncCompatible(const ArraySort *s, uint32_t j, uint32_t k) { return s->NumericCompareCompatible(j, k); }
+        static int NumericCompareFuncCorrect(const ArraySort *s, uint32_t j, uint32_t k) { return s->NumericCompareCorrect(j, k); }
         static int DescendingCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->altCmpFunc(s, k, j); }
         static int FieldCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->FieldCompare(j, k); }
 
@@ -474,7 +475,8 @@ namespace avmplus
         inline int StringCompare(uint32_t j, uint32_t k) const;
         inline int CaseInsensitiveStringCompare(uint32_t j, uint32_t k) const;
         inline int ScriptCompare(uint32_t j, uint32_t k) const;
-        inline int NumericCompare(uint32_t j, uint32_t k) const;
+        inline int NumericCompareCompatible(uint32_t j, uint32_t k) const;
+        inline int NumericCompareCorrect(uint32_t j, uint32_t k) const;
         inline int FieldCompare(uint32_t j, uint32_t k) const;
 
         /**
@@ -603,7 +605,9 @@ namespace avmplus
             int opt = fields[0].options;
 
             if (opt & ArraySort::kNumeric) {
-                this->cmpFunc = ArraySort::NumericCompareFunc;
+                this->cmpFunc = core->currentBugCompatibility()->bugzilla524122 ? 
+                                    ArraySort::NumericCompareFuncCorrect :
+                                    ArraySort::NumericCompareFuncCompatible;
             } else if (opt & ArraySort::kCaseInsensitive) {
                 this->cmpFunc = ArraySort::CaseInsensitiveStringCompareFunc;
             } else {
@@ -617,7 +621,10 @@ namespace avmplus
         }
         else
         {
-            bool isNumericCompare = (cmpFunc == ArraySort::NumericCompareFunc) || (altCmpFunc == ArraySort::NumericCompareFunc);
+            bool isNumericCompare = (cmpFunc == ArraySort::NumericCompareFuncCompatible) || 
+                                    (altCmpFunc == ArraySort::NumericCompareFuncCompatible) ||
+                                    (cmpFunc == ArraySort::NumericCompareFuncCorrect) ||
+                                    (altCmpFunc == ArraySort::NumericCompareFuncCorrect);
             // note, loop needs to go until i = -1, but i is unsigned. 0xffffffff is a valid index, so check (i+1) != 0.
             for (i = (len - 1), j = len; (i+1) != 0; i--)
             {
@@ -961,7 +968,7 @@ namespace avmplus
     /*
      * compare(j, k) as numbers
      */
-    int ArraySort::NumericCompare(uint32_t j, uint32_t k) const
+    int ArraySort::NumericCompareCompatible(uint32_t j, uint32_t k) const
     {
         Atom atmj = get(j);
         Atom atmk = get(k);
@@ -969,7 +976,7 @@ namespace avmplus
         // A double array sort is 5% slower because of this overhead
         if (atomIsBothIntptr(atmj, atmk))
         {
-            // yes, this code is wrong, but fixing requires a version-check to preserve buggy behavior
+            // This is incorrect, see bugzilla 524122.  NumericCompareCorrect, below, fixes the bug.
             return ((int)atmj - (int)atmk);
         }
 
@@ -988,6 +995,38 @@ namespace avmplus
         }
     }
 
+    /*
+     * compare(j, k) as numbers
+     */
+    int ArraySort::NumericCompareCorrect(uint32_t j, uint32_t k) const
+    {
+        Atom atmj = get(j);
+        Atom atmk = get(k);
+        // Integer checks makes an int array sort about 3x faster.
+        // A double array sort is 5% slower because of this overhead
+        if (atomIsBothIntptr(atmj, atmk))
+        {
+            // Must convert to native values.  Just subtracting the atoms may lead to
+            // overflows which result in the incorrect sign being returned.  See
+            // NumericCompareCompatible, above.
+            return atomGetIntptr(atmj) - atomGetIntptr(atmk);
+        }
+        
+        double x = AvmCore::number(atmj);
+        double y = AvmCore::number(atmk);
+        double diff = x - y;
+        
+        if (diff == diff) { // same as !isNaN
+            return (diff < 0) ? -1 : ((diff > 0) ? 1 : 0);
+        } else if (!MathUtils::isNaN(y)) {
+            return 1;
+        } else if (!MathUtils::isNaN(x)) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+    
     ScriptObject* ArraySort::toFieldObject(Atom atom) const
     {
         if (atomKind(atom) != kObjectType)
@@ -1179,7 +1218,9 @@ namespace avmplus
         if (cmp == undefinedAtom)
         {
             if (opt & ArraySort::kNumeric) {
-                compare = ArraySort::NumericCompareFunc;
+                compare = core->currentBugCompatibility()->bugzilla524122 ? 
+                                ArraySort::NumericCompareFuncCorrect : 
+                                ArraySort::NumericCompareFuncCompatible;
             } else if (opt & ArraySort::kCaseInsensitive) {
                 compare = ArraySort::CaseInsensitiveStringCompareFunc;
             } else {
