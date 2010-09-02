@@ -44,62 +44,33 @@ namespace avmplus
 {
 
 /**
- *  Domain manager pure virtual interface.  An Domain manager implementation
- *  is responsible for all aspects of finding names in a given Domain stack.
- *
- *  Although some configurations may only have one concrete implementation,
- *  we use ordinary polymorphism instead of build-time polymorphism, to keep
- *  things simple.
+ *  The Domain manager implementation
+ *  is responsible for all aspects of 
+ *  finding names in a given Domain stack.
  */
-class DomainMgr
+class DomainMgr : public MMgc::GCObject
 {
 public:
-    virtual ~DomainMgr() {}
-
-    virtual void addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* traits) = 0;
-    virtual void addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* itraits) = 0;
-    virtual Traits* findBuiltinTraitsByName(PoolObject* pool, Stringp name) = 0;
-    virtual Traits* findTraitsInPoolByNameAndNS(PoolObject* pool, Stringp name, Namespacep ns) = 0;
-    virtual Traits* findTraitsInPoolByMultiname(PoolObject* pool, const Multiname& multiname) = 0;
-
-    virtual void addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, MethodInfo* script) = 0;
-    virtual MethodInfo* findScriptInPoolByMultiname(PoolObject* pool, const Multiname& multiname) = 0;
-
-    virtual void addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs) = 0;
-    virtual ScriptEnv* findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, const Multiname& multiname) = 0;
-    virtual ScriptEnv* findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Multiname& multiname) = 0;
-
-#ifdef DEBUGGER
-    // look up a ScriptEnv by name only, ignoring namespace. This should be used only by the debugger,
-    // when trying to match a user-specified name.
-    virtual ScriptEnv* findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, Stringp name) = 0;
-#endif
-};
-
-class DomainMgrFP10 : public MMgc::GCFinalizedObject
-    , /* implements */ public DomainMgr
-{
-public:
-    DomainMgrFP10(AvmCore* core);
-    virtual ~DomainMgrFP10();
+    DomainMgr(AvmCore* core);
 
     // DomainMgr methods:
-    virtual void addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* traits);
-    virtual void addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* itraits);
-    virtual Traits* findBuiltinTraitsByName(PoolObject* pool, Stringp name);
-    virtual Traits* findTraitsInPoolByNameAndNS(PoolObject* pool, Stringp name, Namespacep ns);
-    virtual Traits* findTraitsInPoolByMultiname(PoolObject* pool, const Multiname& multiname);
+    void addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* traits);
+    void addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* itraits);
+    Traits* findBuiltinTraitsByName(PoolObject* pool, Stringp name);
+    Traits* findTraitsInPoolByNameAndNS(PoolObject* pool, Stringp name, Namespacep ns);
+    Traits* findTraitsInPoolByMultiname(PoolObject* pool, const Multiname& multiname);
 
-    virtual void addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, MethodInfo* script);
-    virtual MethodInfo* findScriptInPoolByMultiname(PoolObject* pool, const Multiname& multiname);
+    void addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, MethodInfo* script);
+    MethodInfo* findScriptInPoolByMultiname(PoolObject* pool, const Multiname& multiname);
 
-    virtual void addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs);
-    virtual ScriptEnv* findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, const Multiname& multiname);
-    virtual ScriptEnv* findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Multiname& multiname);
+    void addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs);
+    ScriptEnv* findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, const Multiname& multiname);
+    ScriptEnv* findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Multiname& multiname);
 
 #ifdef DEBUGGER
-    virtual ScriptEnv* findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, Stringp name);
+    ScriptEnv* findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, Stringp name);
 #endif
+
 private:
     Traits* findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns);
     Traits* findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns);
@@ -113,6 +84,7 @@ private:
 #ifdef _DEBUG
     static void verifyMatchingLookup(Binding b, const List<MethodInfo*>& listMI, const List<ScriptEnv*>& listSE);
 #endif
+
 private:
     AvmCore* const core;
 };

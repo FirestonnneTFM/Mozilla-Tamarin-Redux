@@ -58,7 +58,7 @@ namespace avmplus
         void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
 
     private:
-        friend class DomainMgrFP10;
+        friend class DomainMgr;
         DWB(MultinameHashtable*)        m_namedTraits;
         DWB(MultinameHashtable*)        m_namedScriptsMap;
         List<MethodInfo*>               m_namedScriptsList;        // list of MethodInfo* for the scripts
