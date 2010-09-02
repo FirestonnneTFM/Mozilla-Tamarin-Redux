@@ -2741,17 +2741,22 @@ namespace MMgc
         return (GCObject*)m_obj;
     }
 
-    GCWeakRef* GC::GetWeakRef(const void *item)
+    /*static*/
+    GCWeakRef* GC::GetWeakRef(const void *userptr)
     {
-        GC *gc = GetGC(item);
-        GCWeakRef *ref = (GCWeakRef*) gc->weakRefs.get(item);
+        GC *gc = GetGC(userptr);
+        GCWeakRef *ref = (GCWeakRef*) gc->weakRefs.get(userptr);
+
+        GCAssert(gc->IsPointerToGCPage(userptr));
+        GCAssert(gc->IsPointerToGCObject(GetRealPointer(userptr)));
+        GCAssert((gc->GetGCBits(GetRealPointer(userptr)) & GCAlloc::kFreelist) != GCAlloc::kFreelist);
 
         if(ref == NULL) {
-            ref = new (gc) GCWeakRef(item);
-            gc->weakRefs.put(item, ref);
-            SetHasWeakRef(item, true);
+            ref = new (gc) GCWeakRef(userptr);
+            gc->weakRefs.put(userptr, ref);
+            SetHasWeakRef(userptr, true);
         } else {
-            GCAssert(ref->get() == item);
+            GCAssert(ref->get() == userptr);
         }
         return ref;
     }

@@ -915,7 +915,12 @@ namespace MMgc
          */
         static gcbits_t& GetGCBits(const void* realptr);
 
-        static GCWeakRef *GetWeakRef(const void *obj);
+        /**
+         * @return a GCWeakRef object whose get method will return userptr
+         * until its collected at which point NULL will be returned.
+         * userptr must be a valid live GC object.
+         */
+        static GCWeakRef *GetWeakRef(const void *userptr);
 
         // a WeakRef that always refers to null. useful if you need one.
         GCWeakRef* emptyWeakRef;
