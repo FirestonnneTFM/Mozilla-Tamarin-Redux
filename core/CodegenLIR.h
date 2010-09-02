@@ -317,6 +317,8 @@ namespace avmplus
         LIns* andp(LIns* a, Atom mask);
         LIns* orp(LIns* a, Atom mask);
         LIns* ori(LIns* a, int32_t mask);
+        LIns* xorp(LIns* a, Atom mask);
+        LIns* subp(LIns* a, int32_t offset);
         LIns* retp(LIns* a);
         LIns* label();
         LIns* jlti(LIns* a, int32_t b);
@@ -325,10 +327,15 @@ namespace avmplus
         LIns* sti(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* stp(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* std(LIns* val, LIns* p, int32_t d, AccSet);
+        LIns* ldi(LIns* p, int32_t d, AccSet);
+        LIns* ldd(LIns* p, int32_t d, AccSet);
         LIns* ldp(LIns* p, int32_t d, AccSet);
         LIns* livep(LIns*);
         LIns* param(int n, const char *name);
         LIns* lshi(LIns* a, int32_t b);
+        LIns* rshi(LIns* a, int32_t b);
+        LIns* lshp(LIns* a, int32_t b);
+        LIns* rshp(LIns* a, int32_t b);
         LIns* rshup(LIns* a, int32_t b);
         void  liveAlloc(LIns* expr);        // extend lifetime of LIR_allocp, otherwise no-op
         void  emitStart(Allocator&, LirBuffer*, LirWriter*&);
@@ -444,7 +451,7 @@ namespace avmplus
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
         void branchToAbcPos(LOpcode op, LIns *cond, const uint8_t* target);
         LIns *retIns(LIns *val);
-        LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
+        LIns *mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
         LIns *loadEnvScope();
         LIns *loadEnvVTable();
         LIns *loadEnvAbcEnv();
@@ -483,6 +490,7 @@ namespace avmplus
         void initBindingCache();
 
         LIns *loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet, LoadQual loadQual=LOAD_NORMAL);
+        LIns *storeIns(LOpcode op, LIns* val, int32_t disp, LIns *base, AccSet accSet);
         LIns *Ins(LOpcode op);
         LIns *Ins(LOpcode op, LIns *a);
         LIns *i2dIns(LIns* v);

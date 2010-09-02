@@ -49,8 +49,12 @@ REALLY_INLINE BuiltinType LirHelper::bt(Traits *t)
 
 REALLY_INLINE LIns* CodegenLIR::loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet, LoadQual loadQual)
 {
-    AvmAssert(isS32(disp));
-    return lirout->insLoad(op, base, (int32_t)disp, accSet, loadQual);
+    return lirout->insLoad(op, base, disp, accSet, loadQual);
+}
+
+REALLY_INLINE LIns* CodegenLIR::storeIns(LOpcode op, LIns* val, int32_t disp, LIns *base, AccSet accSet)
+{
+    return lirout->insStore(op, val, base, disp, accSet);
 }
 
 REALLY_INLINE LIns* CodegenLIR::Ins(LOpcode op)
@@ -174,6 +178,16 @@ REALLY_INLINE LIns* LirHelper::ori(LIns* a, int32_t mask)
     return lirout->ins2(LIR_ori, a, InsConst(mask));
 }
 
+REALLY_INLINE LIns* LirHelper::xorp(LIns* a, Atom mask)
+{
+    return lirout->ins2(LIR_xorp, a, InsConstAtom(mask));
+}
+
+REALLY_INLINE LIns* LirHelper::subp(LIns* a, int32_t offset)
+{
+    return lirout->ins2(LIR_subp, a, InsConstAtom(offset));
+}
+
 REALLY_INLINE LIns* LirHelper::retp(LIns* a)
 {
     return lirout->ins1(LIR_retp, a);
@@ -217,6 +231,16 @@ REALLY_INLINE LIns* LirHelper::std(LIns* val, LIns* p, int32_t d, AccSet accSet)
     return lirout->insStore(LIR_std, val, p, d, accSet);
 }
 
+REALLY_INLINE LIns* LirHelper::ldi(LIns* p, int32_t d, AccSet accSet)
+{
+    return lirout->insLoad(LIR_ldi, p, d, accSet);
+}
+
+REALLY_INLINE LIns* LirHelper::ldd(LIns* p, int32_t d, AccSet accSet)
+{
+    return lirout->insLoad(LIR_ldd, p, d, accSet);
+}
+
 REALLY_INLINE LIns* LirHelper::ldp(LIns* p, int32_t d, AccSet accSet)
 {
     return lirout->insLoad(LIR_ldp, p, d, accSet);
@@ -242,6 +266,21 @@ REALLY_INLINE LIns* LirHelper::param(int id, const char *name)
 REALLY_INLINE LIns* LirHelper::lshi(LIns* a, int32_t b)
 {
     return lirout->ins2(LIR_lshi, a, InsConst(b));
+}
+
+REALLY_INLINE LIns* LirHelper::rshi(LIns* a, int32_t b)
+{
+    return lirout->ins2(LIR_rshi, a, InsConst(b));
+}
+
+REALLY_INLINE LIns* LirHelper::lshp(LIns* a, int32_t b)
+{
+    return lirout->ins2(LIR_lshp, a, InsConst(b));
+}
+
+REALLY_INLINE LIns* LirHelper::rshp(LIns* a, int32_t b)
+{
+    return lirout->ins2(LIR_rshp, a, InsConst(b));
 }
 
 REALLY_INLINE LIns* LirHelper::rshup(LIns* a, int32_t b)

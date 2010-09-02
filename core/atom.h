@@ -150,6 +150,16 @@ namespace avmplus
         const Atom unreachableAtom = kUnusedAtomTag;
         /*@}*/
 
+        /**
+         * @name Useful constants for manipulating atoms
+         * These are particularly useful when generating code in the JIT.
+         */
+        /*@{*/
+        const Atom kAtomTypeMask = 7;       // mask for type tag
+        const Atom kAtomPtrMask = ~7;       // mask for atom pointer, or shifted Intptr value
+        const unsigned kAtomTypeSize = 3;   // width of type tag
+        /*@}*/
+
     }
 
     // atomMinIntValue is the smallest negative (most negative) integer value representable
