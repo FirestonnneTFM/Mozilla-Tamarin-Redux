@@ -3318,6 +3318,39 @@ namespace avmplus
     // This is for VTable->createInstance which is called by OP_construct
     FUNCTION(CALL_INDIRECT, SIG3(V,P,P,P), createInstance)
 
+    bool CodegenLIR::inlineBuiltinFunction(AbcOpcode, intptr_t, int argc, Traits* result, MethodInfo* mi)
+    {
+        if (haveDebugger)
+            return false;
+
+        if (mi->pool() == core->builtinPool && mi->isFinal()) {
+            switch (mi->method_id()) {
+                case avmplus::NativeID::native_script_function_isNaN: {
+                    if (argc == 1) {
+#ifndef AVMPLUS_SSE2_ALWAYS
+                        // On x86, inline NaN compares are slower with non-SSE instructions
+                        SSE2_ONLY(if(core->config.njconfig.i386_sse2))
+#endif // AVMPLUS_SSE2_ALWAYS
+                        {
+                            int op1 = state->sp();
+                            LIns *f = localGetf(op1);
+                            if (f->opcode() == LIR_ui2d || f->opcode() == LIR_i2d) {
+                                localSet(op1-1, InsConst(0), result);
+                            }
+                            else {
+                                localSet(op1-1, binaryIns(LIR_eqi, binaryIns(LIR_eqd, f, f), InsConst(0)), result);
+                            }
+                            return true;
+                        }
+                    }
+                    break;
+                }  
+            }
+        }
+
+        return false;
+    }
+
 #ifdef DEBUG
     /**
      * emitTypedCall is used when the Verifier has found an opportunity to early bind,
@@ -3339,11 +3372,18 @@ namespace avmplus
             BuiltinType t = bt(state->value(objDisp+arg).traits);
             AvmAssert(valueStorageType(t) == SST_atom);
         }
+
+        if (inlineBuiltinFunction(opcode, method_id, argc, result, mi))
+            return;
+
         emitCall(opcode, method_id, argc, result, ms);
     }
 #else
     REALLY_INLINE void CodegenLIR::emitTypedCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi)
     {
+        if (inlineBuiltinFunction(opcode, method_id, argc, result, mi))
+            return;
+
         emitCall(opcode, method_id, argc, result, mi->getMethodSignature());
     }
 #endif

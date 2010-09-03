@@ -539,6 +539,8 @@ namespace avmplus
         LIns* coerceToType(int i, Traits*);
         void emitInitializers();
 
+        bool inlineBuiltinFunction(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi);
+
     public:
         CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel);
         ~CodegenLIR();
