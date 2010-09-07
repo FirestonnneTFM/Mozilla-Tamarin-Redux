@@ -400,7 +400,6 @@ namespace avmplus
         LIns *restArgc; // NULL or the expression that computes the number of rest arguments
         int restLocal;  // -1 or the local var that holds the rest array
         bool interruptable;
-        bool hasBackedges; // True if LIR has at least one backedge.
         CodegenLabel npe_label;
         CodegenLabel upe_label;
         CodegenLabel interrupt_label;
