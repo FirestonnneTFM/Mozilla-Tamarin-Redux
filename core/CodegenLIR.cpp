@@ -745,7 +745,6 @@ namespace avmplus
         restArgc(NULL),
         restLocal(-1),
         interruptable(true),
-        hasBackedges(false),
         npe_label("npe"),
         upe_label("upe"),
         interrupt_label("interrupt"),
@@ -890,6 +889,9 @@ namespace avmplus
         // true from the start and after we start a block via trackLabel()
         bool reachable;
 
+        // true if any backedges exist in LIR, false otherwise.
+        bool has_backedges;
+
 #ifdef DEBUGGER
         bool haveDebugger;              // true if debugger is currently enabled
 #else
@@ -908,7 +910,8 @@ namespace avmplus
             : LirWriter(out), alloc(alloc),
               vars(NULL), tags(NULL),
               nvar(nvar), scopeBase(scopeBase), stackBase(stackBase),
-              restLocal(restLocal), reachable(true)
+              restLocal(restLocal), reachable(true),
+              has_backedges(false)
 #ifdef DEBUGGER
             , haveDebugger(info->pool()->core->debugger() != NULL)
 #endif
@@ -928,6 +931,10 @@ namespace avmplus
         void init(LIns *vars, LIns* tags) {
             this->vars = vars;
             this->tags = tags;
+        }
+
+        bool hasBackedges() const {
+            return has_backedges;
         }
 
         void setNotNull(LIns* ins, Traits* t) {
@@ -1020,8 +1027,9 @@ namespace avmplus
         {}
 #endif
 
-#ifdef DEBUG
         void checkBackEdge(CodegenLabel& target, const FrameState* state) {
+            has_backedges = true;
+#ifdef DEBUG
             AvmAssert(target.labelIns != NULL);
             if (target.notnull) {
                 printNotNull(notnull, "current");
@@ -1044,11 +1052,11 @@ namespace avmplus
                     AvmAssert(!target.notnull->get(i) || currentNotNull);
                 }
             }
-        }
 #else
-        void checkBackEdge(CodegenLabel&, const FrameState*)
-        {}
-#endif
+            (void) target;
+            (void) state;
+#endif // DEBUG
+        }
 
         // starts a new block.  if the new label is reachable from here,
         // merge our state with it.  then initialize from the new merged state.
@@ -5369,7 +5377,6 @@ namespace avmplus
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[j];
                 const uint8_t* handler_pc = code_pos + h->target;
                 if (driver->hasFrameState(handler_pc)) {
-                    hasBackedges = true;
                     CodegenLabel& label = getCodegenLabel(handler_pc);
                     AvmAssert(label.labelIns != NULL);
                     if (j == last_ordinal) {
@@ -5703,7 +5710,6 @@ namespace avmplus
         LIns* br = lirout->insBranch(op, cond, labelIns);
         if (br != NULL) {
             if (labelIns != NULL) {
-                hasBackedges = true;
                 varTracker->checkBackEdge(label, state);
             } else {
                 label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), label.unpatchedEdges);
@@ -5839,6 +5845,7 @@ namespace avmplus
         if (lset) {
             livein.setFrom(*lset);
         } else {
+            AvmAssertMsg(looplabels != NULL, "Unexpected back-edge");
             looplabels->add(label);
         }
     }
@@ -6242,7 +6249,7 @@ namespace avmplus
         nanojit::BitSet varlivein(dv_alloc, framesize);
         nanojit::BitSet taglivein(dv_alloc, framesize);
 
-        if (hasBackedges)
+        if (varTracker->hasBackedges() || driver->hasReachableExceptions())
             deadvars_analyze(dv_alloc, varlivein, varlabels, taglivein, taglabels);
         deadvars_kill(dv_alloc, varlivein, varlabels, taglivein, taglabels);
     }
