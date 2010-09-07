@@ -124,6 +124,7 @@ regress/bug_555568, .*diff, skip, stack trace not handled by avmdiff https://bug
 regress/security/bug_555059.*, .*diff, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 
 # specific skips when running differential testing between 32bit and 64bit shells
+as3/Array/regress/regress_524122 , .*3264-diff , skip , swf 9/10 32bit and 64bit shells return different results, so can not run diff  
 as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 ecma3/Math/e15_8_2_16 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
