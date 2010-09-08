@@ -306,7 +306,7 @@ namespace MMgc
     {
         const void *realptr = GetRealPointer(userptr);
         GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
-        return GetGCBits(realptr) & kMark;
+        return GetGCBits(realptr) & kQueued;
     }
 
     REALLY_INLINE void GC::ClearQueued(const void *userptr)
