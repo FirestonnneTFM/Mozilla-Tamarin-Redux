@@ -5417,6 +5417,10 @@ namespace avmplus
         prologLastIns = prolog->lastIns;
 
         info->set_lookup_cache_size(finddef_cache_builder.next_cache);
+
+        // After CodeWriter::writeEpilogue() is called, driver is invalid
+        // and could be destructed.  Null out our pointer as a precaution.
+        this->driver = NULL;
     }
 
     // emit code to create a stack-allocated copy of the given multiname.
@@ -6249,7 +6253,9 @@ namespace avmplus
         nanojit::BitSet varlivein(dv_alloc, framesize);
         nanojit::BitSet taglivein(dv_alloc, framesize);
 
-        if (varTracker->hasBackedges() || driver->hasReachableExceptions())
+        // If catch_label.labelIns is non-null, we emitted an exception
+        // handler dispatcher, which generates back-edges into the method.
+        if (varTracker->hasBackedges() || catch_label.labelIns)
             deadvars_analyze(dv_alloc, varlivein, varlabels, taglivein, taglabels);
         deadvars_kill(dv_alloc, varlivein, varlabels, taglivein, taglabels);
     }
