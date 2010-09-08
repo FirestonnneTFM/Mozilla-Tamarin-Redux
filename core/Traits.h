@@ -176,7 +176,6 @@ namespace avmplus
         public:     const Traitsp                   owner;
         public:     const TraitsBindingsp           base;
         private:    MultinameHashtable* const       m_bindings;
-        private:    Traits**                        m_interfaces;
         public:     const uint32_t                  slotCount;          // including slots in our base classes
         public:     const uint32_t                  methodCount;        // including methods in our base classes
         private:    uint32_t                        m_slotSize;         // size of slot area in bytes, including base classes (only valid after resolveSignatures)
