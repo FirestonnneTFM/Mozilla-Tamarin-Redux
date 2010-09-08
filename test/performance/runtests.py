@@ -483,11 +483,12 @@ class PerformanceRuntest(RuntestBase):
             print output
 
         if self.memory:
-            # we only want the LAST [mem] private reading
-            for line in reversed(output):
-                if '[mem]' in line and 'private' in line:
-                    memoryhigh = self.parseMemHigh(line)
-                    break
+            memoryhigh = 0
+            for line in output:
+                if '[mem]' in line and 'mmgc' in line:
+                    tempmem = self.parseMemHigh(line)
+                    if tempmem > memoryhigh:
+                        memoryhigh = tempmem
             resultDict.setdefault('memory', []).append(memoryhigh)
             # only display memory unless user is asking for other metrics
             if not self.displayMetrics:

@@ -903,6 +903,12 @@ namespace MMgc
 
     void GC::Sweep()
     {
+        // Applications using -memstats for peak heap measurements need info printed before the sweep
+
+        if(heap->Config().gcstats) {
+            gclog("[mem] sweep-start\n");
+        }
+        
         // 'collecting' must be true because it indicates allocations should
         // start out marked and the write barrier should short-circuit (not
         // record any hits).  We can't rely on write barriers to mark objects
