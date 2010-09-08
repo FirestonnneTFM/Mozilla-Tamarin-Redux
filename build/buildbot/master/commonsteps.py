@@ -424,14 +424,25 @@ perf_release_arm_jit = PerfShellCommand(
             timeout=3600,
             workdir="../repo/build/buildbot/slaves/scripts")
 
-deep_codecoverage = BuildShellCommand(
-            command=['./run-code-coverage.sh', WithProperties('%s','revision')],
+def deep_codecoverage(compilecsv, testcsv):
+    return BuildShellCommand(
+            command=['../all/codecoverage-runner.py', '--buildnum=%s' % WithProperties('%s','revision'), '--compilecsv=%s' % compilecsv, '--testcsv=%s' % testcsv],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting code coverage...',
             descriptionDone='finished code coverage',
             name='CodeCoverage',
             timeout=3600,
-            workdir="../repo/build/buildbot/slaves/scripts")
+            workdir="../repo/build/buildbot/slaves/scripts"
+            )
+
+deep_codecoverage_process = BuildShellCommand(
+            command=['../all/codecoverage-process.sh', WithProperties('%s','revision')],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='starting to process coverage data...',
+            descriptionDone='finished processing coverage data',
+            name='CodeCoverageProcess',
+            workdir="../repo/build/buildbot/slaves/scripts"
+            )
 
 deep_release_esc = BuildShellCommand(
             command=['../all/run-release-esc.sh', WithProperties('%s','revision')],

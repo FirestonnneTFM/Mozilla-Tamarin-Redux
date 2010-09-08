@@ -59,7 +59,7 @@ export build_shell_release_debugger_cov=avmshell_s_cov
 export build_shell_debug_cov=avmshell_d_cov
 export build_shell_debug_debugger_cov=avmshell_sd_cov
 
-bullseyedir=/home/build/tools/bullseye/bin
+export bullseyedir=/home/build/tools/bullseye/bin
 
 ## Used by make in the build scripts
 export make_opt="-j2"

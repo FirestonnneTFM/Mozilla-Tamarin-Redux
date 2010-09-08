@@ -61,7 +61,7 @@ export build_shell_release_debugger_cov=avmshell_s_cov
 export build_shell_debug_cov=avmshell_d_cov
 export build_shell_debug_debugger_cov=avmshell_sd_cov
 
-bullseyedir="/c/Progra~1/BullseyeCoverage/bin"
+export bullseyedir="/c/Progra~1/BullseyeCoverage/bin"
 
 
 VS_HOME_PATH="/c/Program Files/Microsoft Visual Studio 9.0"

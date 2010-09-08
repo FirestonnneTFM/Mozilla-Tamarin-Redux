@@ -1787,7 +1787,6 @@ class tamarinredux:
     windows_deep_factory.addStep(bb_slaveupdate(slave="windows-deep"))
     windows_deep_factory.addStep(download_testmedia)
     windows_deep_factory.addStep(deep_release_esc)
-    windows_deep_factory.addStep(deep_codecoverage)
     windows_deep_factory.addStep(test_misc)
     windows_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
     windows_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
@@ -1851,7 +1850,8 @@ class tamarinredux:
                      workdir="../repo/build/buildbot/slaves/scripts",
                      timeout=3600)
     )
-    mac_deep_factory.addStep(deep_codecoverage)
+    mac_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
+    mac_deep_factory.addStep(deep_codecoverage_process)
     mac_deep_factory.addStep(util_process_clean)
     mac_deep_factory.addStep(util_clean_buildsdir)
 
@@ -2023,6 +2023,8 @@ class tamarinredux:
     windows_64_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    windows_64_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
+    windows_64_deep_factory.addStep(deep_codecoverage_process)
     windows_64_deep_factory.addStep(util_process_clean)
     windows_64_deep_factory.addStep(util_clean_buildsdir)
 
@@ -2076,12 +2078,13 @@ class tamarinredux:
     linux_deep_factory.addStep(compile_generic(name="Release-system-malloc", shellname="avmshell_sysmalloc", args="--enable-shell --enable-use-system-malloc", upload="true"))
     linux_deep_factory.addStep(test_generic(name="Release-system-malloc", shellname="avmshell_sysmalloc", vmargs="", config="x86-lnx-tvm-release-use-system-malloc", scriptargs=""))
     linux_deep_factory.addStep(test_misc)
-    linux_deep_factory.addStep(deep_codecoverage)
     linux_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true"))
     linux_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air", vmargs="", config="", scriptargs=""))
     linux_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    linux_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
+    linux_deep_factory.addStep(deep_codecoverage_process)
     linux_deep_factory.addStep(util_process_clean)
     linux_deep_factory.addStep(util_clean_buildsdir)
 
