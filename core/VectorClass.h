@@ -108,7 +108,7 @@ namespace avmplus
 
         ~TypedVectorObject()
         {
-            mmfx_delete_array((T*)m_array);
+            MMgc::GC::GetGC(this)->Free(m_array);
             m_array = NULL;
         }
 
@@ -405,7 +405,11 @@ namespace avmplus
                 if( !exact )
                     newCapacity = newCapacity + (newCapacity >>2);
                 //newCapacity = ((newCapacity+kGrowthIncr)/kGrowthIncr)*kGrowthIncr;
-                T *newArray = mmfx_new_array(T, newCapacity);
+                MMgc::GC* gc = MMgc::GC::GetGC(this);
+                // Allocate pointerfree object without zeroing, as we zero what we need below.
+                // Must use kCanFail with a following throw for backward compatibility, though
+                // this is bogus - kOutOfMemoryError is a crock.
+                T *newArray = (T*)gc->Calloc(newCapacity, sizeof(T), MMgc::GC::kCanFail);
                 if (!newArray)
                 {
                     toplevel()->throwError(kOutOfMemoryError);
@@ -413,7 +417,7 @@ namespace avmplus
                 if (m_array)
                 {
                     VMPI_memcpy(newArray, m_array, m_length * sizeof(T));
-                    mmfx_delete_array((T*)m_array);
+                    gc->Free(m_array);
                 }
                 VMPI_memset(newArray+m_length, 0, (newCapacity-m_capacity) * sizeof(T));
                 m_array = newArray;
