@@ -109,6 +109,8 @@ package avmplus
 
         // return the value passed to -swfversion at launch (or the default value, if -swfversion was not specified)
         public native static function get swfVersion():int;
+
+        public native static function disposeXML(xml:XML):void;
     }
 
     [native(cls="::avmshell::FileClass", methods="auto")]

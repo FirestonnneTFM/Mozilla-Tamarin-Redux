@@ -241,4 +241,10 @@ namespace avmshell
     {
         return AvmCore::isObject(o) ? AvmCore::atomToScriptObject(o)->isGlobalObject() : false;
     }
+
+    void SystemClass::disposeXML(XMLObject *xmlObject)
+    {
+        if(xmlObject)
+            xmlObject->dispose();
+    }
 }
