@@ -164,6 +164,8 @@ namespace avmshell
         // function exists solely to test ScriptObject::isGlobalObject
         bool isGlobal(Atom o);
 
+        void disposeXML(XMLObject *xmlObject);
+
         DECLARE_SLOTS_SystemClass;
     };
 }
