@@ -64,6 +64,11 @@ config=$2
 test "$config" = "" && {
     showhelp
 }
+test "$CONFIGURE_ARGS" != "" && {
+    echo "CONFIGURE_ARGS=$CONFIGURE_ARGS, appending to config"
+    config="$config $CONFIGURE_ARGS"
+}
+
 filename=$3
 test "$filename" = "" && {
     showhelp
