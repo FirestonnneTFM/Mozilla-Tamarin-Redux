@@ -272,7 +272,7 @@ namespace MMgc
         // Allocate a new block; this may trigger OOM handling (though that
         // won't affect the bitmap space, which is not GC'd individually).
 
-        GCBlock* b = (GCBlock*) m_gc->AllocBlock(1, GC::kGCAllocPage, /*zero*/true,  (flags&GC::kCanFail) != 0);
+        GCBlock* b = (GCBlock*) m_gc->AllocBlock(1, PageMap::kGCAllocPage, /*zero*/true,  (flags&GC::kCanFail) != 0);
 
         if (b)
         {

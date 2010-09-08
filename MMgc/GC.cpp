@@ -51,12 +51,6 @@
 
 namespace MMgc
 {
-#ifdef MMGC_64BIT
-    const uintptr_t MAX_UINTPTR = 0xFFFFFFFFFFFFFFFF;
-#else
-    const uintptr_t MAX_UINTPTR = 0xFFFFFFFF;
-#endif
-
 #ifdef MMGC_MEMORY_PROFILER
     // get detailed info on each size class allocators
     const bool dumpSizeClassState = false;
@@ -170,8 +164,7 @@ namespace MMgc
         m_markStackOverflow(false),
         mark_item_recursion_control(20),    // About 3KB as measured with GCC 4.1 on MacOS X (144 bytes / frame), May 2009
         sizeClassIndex(kSizeClassIndex),    // see comment in GC.h
-        memStart(MAX_UINTPTR),
-        memEnd(0),
+        pageMap(),
         heap(gcheap),
         finalizedValue(true),
         smallEmptyPageList(NULL),
@@ -252,8 +245,6 @@ namespace MMgc
         allocsTable[kContainsPointers] = containsPointersAllocs;
         allocsTable[kRCObject|kContainsPointers] = containsPointersRCAllocs;
         allocsTable[0] = noPointersAllocs;
-
-        pageMap = (unsigned char*) heap->Alloc(1);  // Expansions use heap->AllocNoOOM, can't use heapAlloc here
 
         VMPI_memset(m_bitsFreelists, 0, sizeof(uint32_t*) * kNumSizeClasses);
         m_bitsNext = (uint32_t*)heapAlloc(1);
@@ -337,7 +328,7 @@ namespace MMgc
             pageList = next;
         }
 
-        heap->Free(pageMap);    // Was allocated with heap->Alloc and heap->AllocNoOOM, can't use heapFree here
+        pageMap.DestroyPageMapVia(heap);
 
         delete emptyWeakRefRoot;
         GCAssert(!m_roots);
@@ -1055,7 +1046,7 @@ namespace MMgc
 
     }
 
-    void* GC::AllocBlock(int size, int pageType, bool zero, bool canFail)
+    void* GC::AllocBlock(int size, PageMap::PageType pageType, bool zero, bool canFail)
     {
         GCAssert(size > 0);
 
@@ -1065,8 +1056,8 @@ namespace MMgc
         // the first page of large pages is 3 and the rest are 2
         if(item) {
             MarkGCPages(item, 1, pageType);
-            if(pageType == kGCLargeAllocPageFirst) {
-                MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
+            if(pageType == PageMap::kGCLargeAllocPageFirst) {
+                MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, PageMap::kGCLargeAllocPageRest);
             }
         }
 
@@ -1081,28 +1072,6 @@ namespace MMgc
         heapFree(ptr, size, false);
     }
 
-    REALLY_INLINE void GC::SetPageMapValue(uintptr_t addr, int val)
-    {
-        uintptr_t index = (addr-memStart) >> 12;
-#ifdef MMGC_64BIT
-        GCAssert((index >> 2) < uintptr_t(64*65536) * uintptr_t(GCHeap::kBlockSize));
-#else
-        GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
-#endif
-        pageMap[index >> 2] |= (val<<((index&0x3)*2));
-    }
-
-    REALLY_INLINE void GC::ClearPageMapValue(uintptr_t addr)
-    {
-        uintptr_t index = (addr-memStart) >> 12;
-#ifdef MMGC_64BIT
-        GCAssert((index >> 2) < uintptr_t(64*65536) * uintptr_t(GCHeap::kBlockSize));
-#else
-        GCAssert((index >> 2) < 64 * GCHeap::kBlockSize);
-#endif
-        pageMap[index >> 2] &= ~(3<<((index&0x3)*2));
-    }
-
     void *GC::FindBeginningGuarded(const void *gcItem, bool allowGarbage)
     {
         (void)allowGarbage;
@@ -1110,14 +1079,14 @@ namespace MMgc
         int bits = GetPageMapValueGuarded((uintptr_t)gcItem);
         switch(bits)
         {
-            case kGCAllocPage:
+            case PageMap::kGCAllocPage:
                 realItem = GCAlloc::FindBeginning(gcItem);
                 break;
-            case kGCLargeAllocPageFirst:
+            case PageMap::kGCLargeAllocPageFirst:
                 realItem = GCLargeAlloc::FindBeginning(gcItem);
                 break;
-            case kGCLargeAllocPageRest:
-                while(bits == kGCLargeAllocPageRest)
+            case PageMap::kGCLargeAllocPageRest:
+                while(bits == PageMap::kGCLargeAllocPageRest)
                 {
                     gcItem = (void*) ((uintptr_t)gcItem - GCHeap::kBlockSize);
                     bits = GetPageMapValue((uintptr_t)gcItem);
@@ -1156,70 +1125,14 @@ namespace MMgc
     //
     // (See Bugzilla 551833.)
 
-    void GC::MarkGCPages(void *item, uint32_t numPages, int to)
+    void GC::MarkGCPages(void *item, uint32_t numPages, PageMap::PageType to)
     {
-        // Constants used in this method depend on the block size being 4K.
-        GCAssert(GCHeap::kBlockSize == 4096);
-        
-        uintptr_t addr = (uintptr_t)item;
-        size_t shiftAmount=0;
-        unsigned char *dst = pageMap;
-
-        // save the current live range in case we need to move/copy
-        size_t numBytesToCopy = (memEnd-memStart)>>14;
-
-        if(addr < memStart) {
-            // round down to nearest 16k boundary, makes shift logic work cause it works
-            // in bytes, ie 16k chunks
-            addr &= ~0x3fff;
-            // marking earlier pages
-            if(memStart != MAX_UINTPTR) {
-                shiftAmount = (memStart - addr) >> 14;
-            }
-            memStart = addr;
-        }
-
-        if(addr + (numPages+1)*GCHeap::kBlockSize > memEnd) {
-            // marking later pages
-            memEnd = addr + (numPages+1)*GCHeap::kBlockSize;
-            // round up to 16k
-            memEnd = (memEnd+0x3fff)&~0x3fff;
-        }
-
-        uint32_t numPagesNeeded = (uint32_t)(((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1);
-        if(numPagesNeeded > heap->Size(pageMap)) {
-            dst = (unsigned char*)heap->AllocNoOOM(numPagesNeeded);
-        }
-
-        if(shiftAmount || dst != pageMap) {
-            VMPI_memmove(dst + shiftAmount, pageMap, numBytesToCopy);
-            if ( shiftAmount ) {
-                VMPI_memset(dst, 0, shiftAmount);
-            }
-            if(dst != pageMap) {
-                heap->FreeNoOOM(pageMap);
-                pageMap = dst;
-            }
-        }
-
-        addr = (uintptr_t)item;
-        while(numPages--)
-        {
-            GCAssert(GetPageMapValue(addr) == 0);
-            SetPageMapValue(addr, to);
-            addr += GCHeap::kBlockSize;
-        }
+        pageMap.ExpandSetAll(heap, item, numPages, to);
     }
 
     void GC::UnmarkGCPages(void *item, uint32_t numpages)
     {
-        uintptr_t addr = (uintptr_t) item;
-
-        while(numpages--)
-        {
-            ClearPageMapValue(addr);
-            addr += GCHeap::kBlockSize;
-        }
+        pageMap.ClearAddrs(item, numpages);
     }
 
     void GC::CleanStack(bool force)
@@ -1376,11 +1289,11 @@ namespace MMgc
     {
         int bits = GetPageMapValueGuarded((uintptr_t)item);
         switch(bits) {
-            case kGCAllocPage:
+            case PageMap::kGCAllocPage:
                 return GCAlloc::IsPointerIntoGCObject(item);
-            case kGCLargeAllocPageFirst:
+            case PageMap::kGCLargeAllocPageFirst:
                 return item >= GCLargeAlloc::FindBeginning(item);
-            case kGCLargeAllocPageRest:
+            case PageMap::kGCLargeAllocPageRest:
                 return true;
             default:
                 return false;
@@ -1482,16 +1395,17 @@ namespace MMgc
 
     bool GC::IsRCObject(const void *item)
     {
-        if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item & GCHeap::kOffsetMask) == 0)
+        if ( ! pageMap.AddrIsMappable(uintptr_t(item))
+             || ((uintptr_t)item & GCHeap::kOffsetMask) == 0)
             return false;
 
         int bits = GetPageMapValue((uintptr_t)item);
         item = GetRealPointer(item);
         switch(bits)
         {
-        case kGCAllocPage:
+        case PageMap::kGCAllocPage:
             return GCAlloc::IsRCObject(item);
-        case kGCLargeAllocPageFirst:
+        case PageMap::kGCLargeAllocPageFirst:
             return GCLargeAlloc::IsRCObject(item);
         default:
             return false;
@@ -1610,8 +1524,8 @@ namespace MMgc
 
     void GC::UnmarkedScan(const void *mem, size_t size)
     {
-        uintptr_t lowerBound = memStart;
-        uintptr_t upperBound = memEnd;
+        uintptr_t lowerBound = pageMap.MemStart();
+        uintptr_t upperBound = pageMap.MemEnd();
 
         uintptr_t *p = (uintptr_t *) mem;
         uintptr_t *end = p + (size / sizeof(void*));
@@ -1627,12 +1541,12 @@ namespace MMgc
             int bits = GetPageMapValue(val);
             switch(bits)
             {
-            case kNonGC:
+            case PageMap::kNonGC:
                 continue;
-            case kGCAllocPage:
+            case PageMap::kGCAllocPage:
                 GCAssert(GCAlloc::ConservativeGetMark((const void*) (val&~7), true));
                 break;
-            case kGCLargeAllocPageFirst:
+            case PageMap::kGCLargeAllocPageFirst:
                 GCAssert(GCLargeAlloc::ConservativeGetMark((const void*) (val&~7), true));
                 break;
             default:
@@ -1654,23 +1568,23 @@ namespace MMgc
     {
         if(findUnmarkedPointers)
         {
-            uintptr_t m = memStart;
+            uintptr_t m = pageMap.MemStart();
 
-            while(m < memEnd)
+            while(m < pageMap.MemEnd())
             {
                 // divide by 4K to get index
                 int bits = GetPageMapValue(m);
-                if(bits == kNonGC) {
+                if(bits == PageMap::kNonGC) {
                     UnmarkedScan((const void*)m, GCHeap::kBlockSize);
                     m += GCHeap::kBlockSize;
-                } else if(bits == kGCLargeAllocPageFirst) {
+                } else if(bits == PageMap::kGCLargeAllocPageFirst) {
                     GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
                     const void *item = GetUserPointer((const void*)(lb+1));
                     if(GetMark(item) && GCLargeAlloc::ContainsPointers(GetRealPointer(item))) {
                         UnmarkedScan(item, Size(item));
                     }
                     m += lb->GetNumBlocks() * GCHeap::kBlockSize;
-                } else if(bits == kGCAllocPage) {
+                } else if(bits == PageMap::kGCAllocPage) {
                     // go through all marked objects
                     GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
                     GCAlloc* alloc = (GCAlloc*)b->alloc;
@@ -1690,8 +1604,8 @@ namespace MMgc
 
     void GC::ProbeForMatch(const void *mem, size_t size, uintptr_t value, int recurseDepth, int currentDepth)
     {
-        uintptr_t lowerBound = memStart;
-        uintptr_t upperBound = memEnd;
+        uintptr_t lowerBound = pageMap.MemStart();
+        uintptr_t upperBound = pageMap.MemEnd();
 
         uintptr_t *p = (uintptr_t *) mem;
         uintptr_t *end = p + (size / sizeof(void*));
@@ -1717,7 +1631,7 @@ namespace MMgc
 
                 switch(bits)
                 {
-                case kNonGC:
+                case PageMap::kNonGC:
                     {
                         if (block->size == 1)
                         {
@@ -1778,19 +1692,19 @@ namespace MMgc
     void GC::WhosPointingAtMe(void* me, int recurseDepth, int currentDepth)
     {
         uintptr_t val = (uintptr_t)me;
-        uintptr_t m = memStart;
+        uintptr_t m = pageMap.MemStart();
 
         GCDebugIndent(currentDepth*3);
         GCDebugMsg(false, "[%d] Probing for pointers to : 0x%08x\n", currentDepth, me);
-        while(m < memEnd)
+        while(m < pageMap.MemEnd())
         {
             int bits = GetPageMapValue(m);
-            if(bits == kNonGC)
+            if(bits == PageMap::kNonGC)
             {
                 ProbeForMatch((const void*)m, GCHeap::kBlockSize, val, recurseDepth, currentDepth);
                 m += GCHeap::kBlockSize;
             }
-            else if(bits == kGCLargeAllocPageFirst)
+            else if(bits == PageMap::kGCLargeAllocPageFirst)
             {
                 GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
                 const void *item = GetUserPointer((const void*)(lb+1));
@@ -1800,7 +1714,7 @@ namespace MMgc
                 }
                 m += lb->GetNumBlocks() * GCHeap::kBlockSize;
             }
-            else if(bits == kGCAllocPage)
+            else if(bits == PageMap::kGCAllocPage)
             {
                 // go through all marked objects
                 GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
@@ -2138,8 +2052,8 @@ namespace MMgc
 #endif
         }
 
-        uintptr_t _memStart = memStart;
-        uintptr_t _memEnd = memEnd;
+        uintptr_t _memStart = pageMap.MemStart();
+        uintptr_t _memEnd = pageMap.MemEnd();
 
         while(p < end)
         {
@@ -2155,7 +2069,7 @@ namespace MMgc
             // normalize and divide by 4K to get index
             int bits = GetPageMapValue(val);
 
-            if (bits == kGCAllocPage)
+            if (bits == PageMap::kGCAllocPage)
             {
                 const void *item;
                 int itemNum;
@@ -2233,13 +2147,13 @@ namespace MMgc
 #endif
                 }
             }
-            else if (bits == GC::kGCLargeAllocPageFirst || (wi.HasInteriorPtrs() && bits == GC::kGCLargeAllocPageRest))
+            else if (bits == PageMap::kGCLargeAllocPageFirst || (wi.HasInteriorPtrs() && bits == PageMap::kGCLargeAllocPageRest))
             {
                 const void* item;
 
                 if (wi.HasInteriorPtrs())
                 {
-                    if (bits == kGCLargeAllocPageFirst)
+                    if (bits == PageMap::kGCLargeAllocPageFirst)
                     {
                         // guard against bogus pointers to the block header
                         if ((val & GCHeap::kOffsetMask) < sizeof(GCLargeAlloc::LargeBlock))
@@ -2456,9 +2370,9 @@ namespace MMgc
 
         int bits = GetPageMapValueGuarded((uintptr_t)item);
         switch(bits) {
-        case kGCAllocPage:
+        case PageMap::kGCAllocPage:
             return GCAlloc::IsWhite(item);
-        case kGCLargeAllocPageFirst:
+        case PageMap::kGCLargeAllocPageFirst:
             return GCLargeAlloc::IsWhite(item);
         }
         return false;
@@ -2810,17 +2724,17 @@ namespace MMgc
         if(!incrementalValidation)
             return;
 
-        uintptr_t m = memStart;
-        while(m < memEnd)
+        uintptr_t m = pageMap.MemStart();
+        while(m < pageMap.MemEnd())
         {
             // divide by 4K to get index
             int bits = GetPageMapValue(m);
             switch(bits)
             {
-            case kNonGC:
+            case PageMap::kNonGC:
                 m += GCHeap::kBlockSize;
                 break;
-            case kGCLargeAllocPageFirst:
+            case PageMap::kGCLargeAllocPageFirst:
                 {
                     GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
                     const void *item = GetUserPointer((const void*)(lb+1));
@@ -2830,7 +2744,7 @@ namespace MMgc
                     m += lb->GetNumBlocks() * GCHeap::kBlockSize;
                 }
                 break;
-            case kGCAllocPage:
+            case PageMap::kGCAllocPage:
                 {
                     // go through all marked objects in this page
                     GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;

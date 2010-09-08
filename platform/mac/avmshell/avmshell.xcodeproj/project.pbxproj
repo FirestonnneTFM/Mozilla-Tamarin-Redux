@@ -181,6 +181,8 @@
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
+		07EA9EA51237F37B00236B2F /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
+		07EA9EA61237F38000236B2F /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
 		198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91811B973BD00A939C7 /* exec-jit.cpp */; };
@@ -867,6 +869,9 @@
 		1992FDA2102869D10032FBBF /* Containers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Containers.h; path = ../../../nanojit/Containers.h; sourceTree = SOURCE_ROOT; };
 		1998F9E81072A6ED00780913 /* CodegenLIR-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "CodegenLIR-inlines.h"; path = "../../../core/CodegenLIR-inlines.h"; sourceTree = SOURCE_ROOT; };
 		1998F9E91072A6ED00780913 /* Toplevel-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Toplevel-inlines.h"; path = "../../../core/Toplevel-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19A21B371213443300CB55E0 /* PageMap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PageMap-inlines.h"; path = "../../../MMgc/PageMap-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19A21B381213443300CB55E0 /* PageMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PageMap.cpp; path = ../../../MMgc/PageMap.cpp; sourceTree = SOURCE_ROOT; };
+		19A21B391213443300CB55E0 /* PageMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PageMap.h; path = ../../../MMgc/PageMap.h; sourceTree = SOURCE_ROOT; };
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA441100CC20200172A70 /* Allocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Allocator.cpp; path = ../../../nanojit/Allocator.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA442100CC20200172A70 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = ../../../nanojit/Allocator.h; sourceTree = SOURCE_ROOT; };
@@ -1509,6 +1514,9 @@
 				079DFAA90F3A96BE0031D1B4 /* GCWeakRef.h */,
 				079DFAAC0F3A96BE0031D1B4 /* MMgc.h */,
 				07A8D2DD0F5EEA2B0005E66C /* OOM.h */,
+				19A21B371213443300CB55E0 /* PageMap-inlines.h */,
+				19A21B381213443300CB55E0 /* PageMap.cpp */,
+				19A21B391213443300CB55E0 /* PageMap.h */,
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
@@ -1898,6 +1906,7 @@
 				7E87D10B122C5B980005FEAF /* ST_mmgc_weakref.cpp in Sources */,
 				7E87D10C122C5B980005FEAF /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */,
+				07EA9EA61237F38000236B2F /* PageMap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2088,6 +2097,7 @@
 				07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
 				D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */,
+				07EA9EA51237F37B00236B2F /* PageMap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
