@@ -48,7 +48,7 @@ def run():
     r=RunTestLib()
     if r.avmrd==None:
         print "environment variable 'AVMRD' is not set"
-        print "debugger FAILED"
+        print "SKIPPED all tests"
         return
 
     r.run_test(
