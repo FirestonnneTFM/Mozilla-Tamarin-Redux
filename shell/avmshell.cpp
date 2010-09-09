@@ -845,7 +845,10 @@ namespace avmshell
                 }
 #ifdef MMGC_POLICY_PROFILING
                 else if (!VMPI_strcmp(arg, "-gcbehavior")) {
-                    MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = true;
+                    MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = 2;
+                }
+                else if (!VMPI_strcmp(arg, "-gcsummary")) {
+                    MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = 1;
                 }
 #endif
                 else if (!VMPI_strcmp(arg, "-eagersweep")) {
@@ -1106,7 +1109,8 @@ namespace avmshell
         AvmLog("          [-eagersweep] sweep the heap synchronously at the end of GC;\n"
                "                        improves usage statistics.\n");
 #ifdef MMGC_POLICY_PROFILING
-        AvmLog("          [-gcbehavior] summarize GC behavior and policy computation\n");
+        AvmLog("          [-gcbehavior] summarize GC behavior and policy, after every gc\n");
+        AvmLog("          [-gcsummary]  summarize GC behavior and policy, at end only\n");
 #endif
         AvmLog("          [-load L,B, ...\n"
                "                        GC load factor L up to a post-GC heap size of B megabytes.\n"

@@ -115,7 +115,7 @@ namespace MMgc
         bool returnMemory;
         bool gcstats;
         bool autoGCStats;
-        bool gcbehavior;        // Print gross history and policy decisions (MMGC_POLICY_PROFILING)
+        int32_t gcbehavior;     // Print gross history and policy decisions (MMGC_POLICY_PROFILING): 0=off, 1=at end, 2=after every gc and at end
         bool eagerSweeping;     // Enable full-heap sweeping at the end of Sweep()
 #ifdef MMGC_HEAP_GRAPH
         bool dumpFalsePositives;

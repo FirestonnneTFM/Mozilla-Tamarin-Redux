@@ -106,9 +106,9 @@ namespace MMgc
         gcstats(false), // tracking
         autoGCStats(false), // auto printing
 #ifdef AVMSHELL_BUILD
-        gcbehavior(false),  // controlled by command line switch
+        gcbehavior(0),  // controlled by command line switch
 #else
-        gcbehavior(true),   // unconditional, if MMGC_POLICY_PROFILING is on
+        gcbehavior(2),   // unconditional, if MMGC_POLICY_PROFILING is on
 #endif
         eagerSweeping(false),
 #ifdef MMGC_HEAP_GRAPH

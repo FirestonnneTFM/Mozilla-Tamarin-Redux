@@ -157,7 +157,7 @@ namespace MMgc
     void GCPolicyManager::shutdown()
     {
 #ifdef MMGC_POLICY_PROFILING
-        if (summarizeGCBehavior())
+        if (summarizeGCBehaviorAtEnd())
             PrintGCBehaviorStats(false);
 #endif
     }
@@ -585,7 +585,11 @@ namespace MMgc
 
 #ifdef MMGC_POLICY_PROFILING
     bool GCPolicyManager::summarizeGCBehavior() {
-        return GCHeap::GetGCHeap()->Config().gcbehavior;
+        return GCHeap::GetGCHeap()->Config().gcbehavior >= 2;
+    }
+    
+    bool GCPolicyManager::summarizeGCBehaviorAtEnd() {
+        return GCHeap::GetGCHeap()->Config().gcbehavior >= 1;
     }
     
     double GCPolicyManager::ticksToMillis(uint64_t ticks) {
@@ -593,7 +597,7 @@ namespace MMgc
     }
 
     /**
-     * Note, gcno=0 is special and means statistics dumped at the end of the run,
+     * Note, final=1 is special and means statistics dumped at the end of the run,
      * just as the GC is about to shut down.
      *
      * Note that a lot of the stats for the last GC cycle do make sense even if
@@ -612,7 +616,12 @@ namespace MMgc
         double dtotal;
 
         GCLog("--------------------\n");
-        GCLog("[gcbehavior] tag: gc=%p gcno=%u incremental-marks=%u\n", (void*)gc, afterCollection ? (unsigned)countFinalizeAndSweep : 0, (unsigned)countIncrementalMark);
+        GCLog("[gcbehavior] tag: gc=%p final=%d gccount=%u incremental-marks=%u\n",
+              (void*)gc,
+              (int)!afterCollection,
+              (unsigned)countFinalizeAndSweep, 
+              (unsigned)countIncrementalMark);
+
         GCLog("[gcbehavior] allocation-work: objects=%.0f bytes=%.0f\n",
               double(objectsAllocated),
               double(bytesAllocated));
