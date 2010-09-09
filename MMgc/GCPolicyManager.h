@@ -344,9 +344,12 @@ namespace MMgc
         // Convert ticks to milliseconds, as a double (used for printing)
         double ticksToMillis(uint64_t ticks);
 
-        // @return true if we should print policy data
+        // @return true if we should print policy data after every GC and at the end of the run
         bool summarizeGCBehavior();
 
+        // @return true if we should print policy data at the end of the run
+        bool summarizeGCBehaviorAtEnd();
+        
         // Print policy data.  At shutdown, afterCollection will be passed as false.
         void PrintGCBehaviorStats(bool afterCollection=true);
 #endif
