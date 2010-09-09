@@ -61,7 +61,6 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/GCStack.cpp \
   $(curdir)/GCTests.cpp \
   $(curdir)/GCThreads.cpp \
-  $(curdir)/PageMap.cpp \
   $(curdir)/ZCT.cpp \
   $(curdir)/GCGlobalNew.cpp \
   $(NULL)

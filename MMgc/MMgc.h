@@ -154,10 +154,6 @@
 // for all objects added with GC::AddToBlacklist
 //#define MMGC_HEAP_GRAPH
 
-// This reverts back to the original pagemap representation.
-// https://bugzilla.mozilla.org/show_bug.cgi?id=581070
-//#define MMGC_USE_UNIFORM_PAGEMAP
-
 namespace MMgc
 {
     class GC;
@@ -172,7 +168,6 @@ namespace MMgc
 
 #define CAPACITY(T)  (uint32_t(GCHeap::kBlockSize) / uint32_t(sizeof(T)))
 
-#include "StaticAssert.h"
 #include "GCTypes.h"
 #include "AllocationMacros.h"
 #include "OOM.h"
@@ -187,7 +182,6 @@ namespace MMgc
 #include "GCGlobalNew.h"
 #include "BasicList.h"
 #include "GCHeap.h"
-#include "PageMap.h"
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
 #include "ZCT.h"
@@ -201,7 +195,6 @@ namespace MMgc
 #include "GCHashtable-inlines.h"
 #include "FixedAlloc-inlines.h"
 #include "FixedMalloc-inlines.h"
-#include "PageMap-inlines.h"
 #include "GCHeap-inlines.h"
 #include "GCAlloc-inlines.h"
 #include "GCLargeAlloc-inlines.h"

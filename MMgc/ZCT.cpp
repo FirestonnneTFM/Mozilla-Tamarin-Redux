@@ -603,8 +603,8 @@ namespace MMgc
         RCObject **p = (RCObject**)start;
         RCObject **end = p + len/sizeof(RCObject*);
 
-        const void *_memStart = (const void*)gc->pageMap.MemStart();
-        const void *_memEnd = (const void*)gc->pageMap.MemEnd();
+        const void *_memStart = (const void*)gc->memStart;
+        const void *_memEnd = (const void*)gc->memEnd;
 
         while(p < end) {
             const void *val = GC::Pointer(*p++);
@@ -615,15 +615,15 @@ namespace MMgc
             // Any pointer into the object pins the object.
 
             switch (gc->GetPageMapValue((uintptr_t)val)) {
-                case PageMap::kGCAllocPage:
+                case GC::kGCAllocPage:
                     val = GCAlloc::IsRCObject(val) ? GetUserPointer(GCAlloc::FindBeginning(val)) : NULL;
                     break;
-                case PageMap::kGCLargeAllocPageRest:
+                case GC::kGCLargeAllocPageRest:
                     do {
                         val = (const void*) ((uintptr_t)val - GCHeap::kBlockSize);
-                    } while (gc->GetPageMapValue((uintptr_t)val) == PageMap::kGCLargeAllocPageRest);
+                    } while (gc->GetPageMapValue((uintptr_t)val) == GC::kGCLargeAllocPageRest);
                     /*FALLTHROUGH*/
-                case PageMap::kGCLargeAllocPageFirst:
+                case GC::kGCLargeAllocPageFirst:
                     val = GCLargeAlloc::IsRCObject(val) ? GetUserPointer(GCLargeAlloc::FindBeginning(val)) : NULL;
                     break;
                 default:
