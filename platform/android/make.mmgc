@@ -55,7 +55,6 @@ MMGC_SRCS := \
 	GC.cpp \
 	GCTests.cpp \
 	GCStack.cpp \
-	PageMap.cpp \
 	ZCT.cpp \
 	FixedMalloc.cpp \
 	FixedAlloc.cpp \

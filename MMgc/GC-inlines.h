@@ -385,10 +385,10 @@ namespace MMgc
 
     REALLY_INLINE void *GC::FindBeginningFast(const void *gcItem)
     {
-        PageMap::PageType bits = GetPageMapValue((uintptr_t)gcItem);
-        if (bits == PageMap::kGCAllocPage)
+        int bits = GetPageMapValue((uintptr_t)gcItem);
+        if (bits == kGCAllocPage)
             return GetUserPointer(GCAlloc::FindBeginning(gcItem));
-        while (bits == PageMap::kGCLargeAllocPageRest)
+        while (bits == kGCLargeAllocPageRest)
         {
             gcItem = (void*) ((uintptr_t)gcItem - GCHeap::kBlockSize);
             bits = GetPageMapValue((uintptr_t)gcItem);
@@ -495,18 +495,28 @@ namespace MMgc
         return (GetGCBits(realptr) & kQueued) != 0;
     }
 
-    REALLY_INLINE PageMap::PageType GC::GetPageMapValue(uintptr_t addr) const
+    REALLY_INLINE int GC::GetPageMapValue(uintptr_t addr) const
     {
-        GCAssert(pageMap.AddrIsMappable(addr));
-        return pageMap.AddrToVal(addr);
+        GCAssert(addr >= memStart && addr < memEnd);
+        uintptr_t index = (addr-memStart) >> 12;
+#ifdef MMGC_64BIT
+        GCAssert((index >> 2) < uintptr_t(64*65536) * uintptr_t(GCHeap::kBlockSize));
+#else
+        GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
+#endif
+        // shift amount to determine position in the byte (times 2 b/c 2 bits per page)
+        uint32_t shiftAmount = (index&0x3) * 2;
+        // 3 ... is mask for 2 bits, shifted to the left by shiftAmount
+        // finally shift back by shift amount to get the value 0, 1 or 3
+        //return (pageMap[addr >> 2] & (3<<shiftAmount)) >> shiftAmount;
+        return (pageMap[index >> 2] >> shiftAmount) & 3;
     }
 
-    REALLY_INLINE PageMap::PageType GC::GetPageMapValueGuarded(uintptr_t addr)
+    REALLY_INLINE int GC::GetPageMapValueGuarded(uintptr_t addr)
     {
-        if (pageMap.AddrIsMappable(addr))
+        if(addr >= memStart && addr < memEnd)
             return GetPageMapValue(addr);
-        MMGC_STATIC_ASSERT(PageMap::kNonGC == 0);
-        return PageMap::kNonGC;
+        return 0;
     }
 
     REALLY_INLINE void GC::AddToSmallEmptyBlockList(GCAlloc::GCBlock *b)

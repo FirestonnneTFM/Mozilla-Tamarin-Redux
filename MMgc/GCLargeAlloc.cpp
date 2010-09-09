@@ -73,7 +73,7 @@ namespace MMgc
 
         m_gc->SignalAllocWork(computedSize);
 
-        LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, PageMap::kGCLargeAllocPageFirst,
+        LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, GC::kGCLargeAllocPageFirst,
                                                            (flags&GC::kZero) != 0, (flags&GC::kCanFail) != 0);
         void *item = NULL;
 

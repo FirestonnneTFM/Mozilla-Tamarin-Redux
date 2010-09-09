@@ -1614,18 +1614,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\MMgc\PageMap-inlines.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\MMgc\PageMap.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\MMgc\PageMap.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\MMgc\TypeTraits.h"
 				>
 			</File>

@@ -388,6 +388,19 @@ namespace MMgc
             kCanFail=16
         };
 
+        // Note that 'two bits per page' is ingrained deeply in the GC at this point, see
+        // eg GetPageMapValue, SetPageMapValue, ClearPageMapValue, MarkGCPages, and search
+        // for occurrences of 33333333 in the code.
+        //
+        // API cleanup: why is this public?
+        enum PageType
+        {
+            kNonGC = 0,
+            kGCAllocPage = 1,
+            kGCLargeAllocPageRest = 2,
+            kGCLargeAllocPageFirst = 3
+        };
+
         /**
          * Main interface for allocating memory.  Default flags are
          * no finalization, not containing pointers, not zero'd, and not ref-counted.
@@ -611,7 +624,7 @@ namespace MMgc
         /**
          * Used by sub-allocators to obtain memory.
          */
-        void* AllocBlock(int size, PageMap::PageType pageType, bool zero=true, bool canFail=false);
+        void* AllocBlock(int size, int pageType, bool zero=true, bool canFail=false);
 
         void FreeBlock(void *ptr, uint32_t size);
 
@@ -1088,34 +1101,46 @@ namespace MMgc
 
         void *m_contextVars[GCV_COUNT];
 
+        // bitmap for what pages are in use, 2 bits for every page
+        // 0 - not in use
+        // 1 - used by GCAlloc
+        // 3 - used by GCLargeAlloc
+
+        uintptr_t memStart;
+        uintptr_t memEnd;
+
         /**
-         * Tracks pages in use; 2 bits per page (see PageType enum).
+         * The bitmap for what pages are in use.  Any access to either the
+         * pageMap pointer or the bitmap requires pageMapLock.
+         *
+         * (Note: A better synchronization scheme might be to use atomic
+         * operations to read and write the pageMap pointer, writing it only
+         * from within m_lock; and then using atomic read and write
+         * operations--on Intel x86, these are just ordinary reads and
+         * writes--to access the bitmap, with writes again only from within
+         * m_lock.  This would require reallocating the pageMap more often,
+         * but at least write barriers wouldn't have to acquire the spinlock.)
          */
-#ifdef MMGC_USE_UNIFORM_PAGEMAP
-        PageMap::Uniform pageMap;
-#else
-#ifdef MMGC_64BIT
-        PageMap::DelayT4 pageMap;
-#else
-        PageMap::Tiered2 pageMap;
-#endif // MMGC_64BIT
-#endif // MMGC_USE_UNIFORM_PAGEMAP
+        unsigned char *pageMap;
 
         // This is very hot
-        PageMap::PageType GetPageMapValue(uintptr_t addr) const;
+        int GetPageMapValue(uintptr_t addr) const;
 
         // This is warm - used in IsPointerToGCPage and in FindBeginningGuarded
-        PageMap::PageType GetPageMapValueGuarded(uintptr_t addr);
+        int GetPageMapValueGuarded(uintptr_t addr);
 
         /**
-         * Set the pageMap bits for numpages starting from given address.
-         * Those bits must be zero beforehand.
+         * Set the pageMap bits for the given address.  Those bits must be
+         * zero beforehand.
          */
-        void MarkGCPages(void *item, uint32_t numpages, PageMap::PageType val);
+        void SetPageMapValue(uintptr_t addr, int val);
 
         /**
-         * Zero out the pageMap bits for numpages starting from given address.
+         * Zero out the pageMap bits for the given address.
          */
+        void ClearPageMapValue(uintptr_t addr);
+
+        void MarkGCPages(void *item, uint32_t numpages, int val);
         void UnmarkGCPages(void *item, uint32_t numpages);
 
         /**
