@@ -53,7 +53,7 @@ class CodeCoverageRunner:
     builds_dir=None
     platform=None
     
-    options=''
+    options='b:'
     longOptions=['buildnum=','compilecsv=','testcsv=']
     
     def __init__(self):
@@ -138,7 +138,7 @@ class CodeCoverageRunner:
         
     def usage(self,c):
         print('usage: %s [options]' % sys.argv[0])
-        print('    --buildnum    build number that is being built')
+        print('    -b --buildnum build number that is being built')
         print('    --compilecsv  csv file defining what to compile,')
         print('                  defaults to %s' % self.compile_csvfile)
         print('    --testcsv     csv file defining what test to run,')
@@ -153,11 +153,11 @@ class CodeCoverageRunner:
             self.usage(2)
 
         for o,v in opts:
-            if o in ('--buildnum'):
+            if o in ('-b', '--buildnum'):
                 self.buildnum=v
-            if o in ('--compilecsv'):
+            if o in ('--compilecsv',):
                 self.compile_csvfile=v
-            if o in ('--testcsv'):
+            if o in ('--testcsv',):
                 self.test_csvfile=v
             
         if self.buildnum==None:
