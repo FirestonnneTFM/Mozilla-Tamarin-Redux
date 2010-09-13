@@ -43,6 +43,7 @@
 #    include - includes a specific testcase/dir even if the parent has been skipped
 
 sunspider/.*          , sunspider , include , sunspider testsuite
+sunspider-0.9.1/.*, sunspider , include , sunspider testsuite
 jsbench/.*            , jsbench   , include , jsbench testsuite
 v8/.*                 , v8        , include , v8 testsuite 
 v8.5/.*               , v8        , include , v8 testsuite 
@@ -90,6 +91,11 @@ sunspider/(as3/|)date-format-xparb.as ,.*       ,skip, contains eval
 #sunspider/(as3/|)string-unpack-code.as,.*       ,skip, too slow: javascript compressor code runs slowly https://bugzilla.mozilla.org/show_bug.cgi?id=409225
 sunspider/(as3/|)string-base64.as ,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
 sunspider/(as3/|)string-tagcloud.as ,.*       ,skip, contains eval
+
+sunspider-0.9.1/.*/date-format-tofte.as  ,.*       ,skip, contains eval
+sunspider-0.9.1/.*/date-format-xparb.as ,.*       ,skip, contains eval
+sunspider-0.9.1/.*/string-base64.as ,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
+sunspider-0.9.1/.*/string-tagcloud.as ,.*       ,skip, contains eval
 
 # util file for language tests
 language/string/timetest.as, .*, skip, included in test files
