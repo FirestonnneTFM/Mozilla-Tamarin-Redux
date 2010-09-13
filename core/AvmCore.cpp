@@ -1671,7 +1671,7 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    void AvmCore::formatOpcode(PrintWriter& buffer, const uint8_t *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool)
+    void AvmCore::formatOpcode(PrintWriter& buffer, const uint8_t *pc, const uint8_t *code_end, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool)
     {
         pc++;
         switch (opcode)
@@ -1816,10 +1816,17 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 ptrdiff_t target = off + readS24(pc);
                 pc += 3;
-                int maxindex = readU32(pc);
+                // maxindex is really a U30, so strip off the two hi bits
+                // (don't bother trying to throw an error, Verifier will handle that)
+                uint32_t maxindex = readU32(pc) & 0x3FFFFFF;
                 buffer << opcodeInfo[opcode].name << " default:" << (int)target << " maxcase:"<<maxindex;
-                for (int i=0; i <= maxindex; i++)
+                for (uint32_t i=0; i <= maxindex; i++)
                 {
+                    if (pc > code_end)
+                    {
+                        buffer << " invalid";
+                        break;
+                    }
                     target = off + readS24(pc);
                     pc += 3;
                     buffer << " " << (int)target;
@@ -1894,7 +1901,7 @@ return the result of the comparison ToPrimitive(x) == y.
             buffer << "[unknown: " << bits << "]";
     }
 
-    void AvmCore::formatOpcode(PrintWriter& buffer, const uintptr_t *pc, WordOpcode opcode, ptrdiff_t off, PoolObject* pool)
+    void AvmCore::formatOpcode(PrintWriter& buffer, const uintptr_t *pc, const uintptr_t *code_end, WordOpcode opcode, ptrdiff_t off, PoolObject* pool)
     {
         pc++;
         switch (opcode)
@@ -2013,10 +2020,15 @@ return the result of the comparison ToPrimitive(x) == y.
 
             case WOP_lookupswitch: {
                 ptrdiff_t target = off + *pc++;
-                int maxindex = (int)*pc++;
+                uint32_t maxindex = (uint32_t)*pc++;
                 buffer << wopAttrs[opcode].name << " default:" << (int)target << " maxcase:"<<maxindex;
-                for (int i=0; i <= maxindex; i++)
+                for (uint32_t i=0; i <= maxindex; i++)
                 {
+                    if (pc > code_end)
+                    {
+                        buffer << " invalid";
+                        break;
+                    }
                     target = off + *pc++;
                     buffer << " " << (int)target;
                 }
