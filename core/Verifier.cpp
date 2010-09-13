@@ -992,7 +992,7 @@ namespace avmplus
 
             #ifdef AVMPLUS_VERBOSE
             if (verbose)
-                printOpcode(pc);
+                printOpcode(pc, code_end);
             #endif
 
             _nvprof("verify-instr", 1);
@@ -3338,11 +3338,11 @@ namespace avmplus
     }
 
     #ifdef AVMPLUS_VERBOSE
-    void Verifier::printOpcode(const uint8_t* pc)
+    void Verifier::printOpcode(const byte* pc, const byte* code_end)
     {
         int offset = int(pc - code_pos);
         core->console << "  " << offset << ':';
-        core->formatOpcode(core->console, pc, (AbcOpcode)*pc, offset, pool);
+        core->formatOpcode(core->console, pc, code_end, (AbcOpcode)*pc, offset, pool);
         core->console << '\n';
     }
 

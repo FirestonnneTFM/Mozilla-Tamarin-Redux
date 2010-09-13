@@ -849,9 +849,9 @@ const int kBufferPadding = 16;
 
 #ifdef AVMPLUS_VERBOSE
         /** Disassembles an opcode and places the text in str. */
-        void formatOpcode(PrintWriter& out, const uint8_t *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
+        void formatOpcode(PrintWriter& out, const uint8_t *pc, const uint8_t *code_end, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
 # ifdef VMCFG_WORDCODE
-        void formatOpcode(PrintWriter& out, const uintptr_t *pc, WordOpcode opcode, ptrdiff_t off, PoolObject* pool);
+        void formatOpcode(PrintWriter& out, const uintptr_t *pc, const uintptr_t *code_end, WordOpcode opcode, ptrdiff_t off, PoolObject* pool);
         void formatBits(PrintWriter& buffer, uint32_t bits);
 # endif
         static void formatMultiname(PrintWriter& out, uint32_t index, PoolObject* pool);

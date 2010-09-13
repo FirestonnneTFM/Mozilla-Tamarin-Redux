@@ -276,7 +276,7 @@ namespace avmplus
         bool secondTry;
         void printScope(const char* title, const ScopeTypeChain*);
         void printState(StringBuffer& prefix, FrameState* state);
-        void printOpcode(const uint8_t* pc);
+        void printOpcode(const uint8_t* pc, const byte* code_end);
     private:
         void printValue(Value& v);
 #endif

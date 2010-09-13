@@ -3419,10 +3419,16 @@ namespace avmplus
         }
 #endif
         core->console << (int)off << ':';
+        // Using largest-possible-pointer here for code_end; this is obviously not correct,
+        // but extracting the proper code_end requires diving into the method's ABC bytecode
+        // (and may not be easily accessible at all for wordcode), and more importantly,
+        // is only used for range-checking of fuzzed opcodes... all of which should have been caught
+        // by Verifier, thus checking should be unnecessary here.
+        const bytecode_t* const code_end = (const bytecode_t*)uintptr_t(-1);
 #ifdef VMCFG_WORDCODE
-        core->formatOpcode(core->console, pc, (WordOpcode)((int32_t)opcode&0xffff), off, pool);
+		core->formatOpcode(core->console, pc, code_end, (WordOpcode)((int32_t)opcode&0xffff), off, pool);
 #else
-        core->formatOpcode(core->console, pc, opcode, off, pool);
+		core->formatOpcode(core->console, pc, code_end, opcode, off, pool);
 #endif
         core->console << '\n';
     }
