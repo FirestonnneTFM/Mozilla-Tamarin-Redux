@@ -42,8 +42,7 @@
 #    skip - the test/dir is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase/dir even if the parent has been skipped
 
-sunspider/.*          , sunspider , include , sunspider testsuite
-sunspider-0.9.1/.*, sunspider , include , sunspider testsuite
+sunspider.*/.*        , sunspider , include , sunspider testsuite
 jsbench/.*            , jsbench   , include , jsbench testsuite
 v8/.*                 , v8        , include , v8 testsuite 
 v8.5/.*               , v8        , include , v8 testsuite 
@@ -54,7 +53,7 @@ mmgc/.*               , mmgc      , include  , mmgc testsuite
 canaries/.*           , canaries  , include , canaries testsuite
 .*/canaries/.*        , canaries  , include , canaries testsuite
 
-sunspider/.*          , misc    , skip  , skip sunspider
+sunspider.*/.*        , misc    , skip  , skip sunspider
 jsbench/.*            , misc    , skip  , skip jsbench
 v8.*/.*               , misc    , skip  , skip v8
 jsmicro/.*            , misc    , skip  , skip jsmicro
@@ -68,8 +67,7 @@ mmgc/.*               , misc      , skip , mmgc diagnostic tests
 .*fc64.*              , .*      , skip  , skip fc64 bug 488114
 
 ## misc-mobile : required since the canaries tests require access to additional abc files which will not be on the device
-sunspider/.*          , misc-mobile.*  , skip  , skip sunspider
-sunspider/.*          , misc-mobile.*  , skip  , skip sunspider
+sunspider.*/.*        , misc-mobile.*  , skip  , skip sunspider
 jsbench/.*            , misc-mobile.*  , skip  , skip jsbench
 v8.*/.*               , misc-mobile.*  , skip  , skip v8
 jsmicro/.*            , misc-mobile    , skip  , skip jsmicro
@@ -77,7 +75,7 @@ canaries/.*           , misc-mobile.*  , skip  , skip canaries as they require a
 .*/canaries/.*        , misc-mobile.*  , skip  , skip canaries as they require additional files to run which will not be on the device
 
 ## sunspider-mobile : required because controlflow-recursive overflows the stack https://bugzilla.mozilla.org/show_bug.cgi?id=458055
-sunspider/.*                , sunspider-mobile.* , include , sunspider testsuite
+sunspider.*/.*              , sunspider-mobile.* , include , sunspider testsuite
 .*/controlflow-recursive.*  , sunspider-mobile.* , skip , sunspider testsuite
 ## WONTFIX: Stack-overflow on winmo when running sunspider/s3d-cude.as with the interpreter
 .*/s3d-cube.as  , sunspider-mobile-Dinterp , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=496942
