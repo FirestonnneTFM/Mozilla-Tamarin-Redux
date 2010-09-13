@@ -828,6 +828,10 @@ namespace avmplus
                             else
                                 slotSizeInfo->nonPointer32BitSlotCount += 1;
                         }
+                        else
+                        {
+                            slotSizeInfo->pointerSlotCount += 1;
+                        }
                     }
                     break;
                 }
@@ -900,7 +904,10 @@ namespace avmplus
         if (slotSizeInfo)
         {
             uint32_t const c = slotSizeInfo->nonPointer32BitSlotCount + slotSizeInfo->nonPointer64BitSlotCount + baseSlotCount;
-            if (c > slotCount)
+            // if pointerSlotCount doesn't match slotCount-c, we probably have a fuzzed file that 
+            // re-uses the same slot-id. this will be caught later on, but detecting it here
+            // avoids assertions in finishSlotsAndMethods.
+            if (c > slotCount || slotSizeInfo->pointerSlotCount != (slotCount - c))
             {
                 // This can happen for fuzzed files that duplicate slots in certain orders; we'd detect these later
                 // on, in finishSlotsAndMethods, but not before we fired an assert. This just detects the obvious naughtiness
@@ -909,7 +916,6 @@ namespace avmplus
                     toplevel->throwVerifyError(kCorruptABCError);
                 AvmAssert(!"unhandled verify error");
             }
-            slotSizeInfo->pointerSlotCount = slotCount - c;
         }
     }
 
