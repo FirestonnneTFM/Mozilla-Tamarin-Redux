@@ -962,7 +962,7 @@ class sandbox:
     ######################################################
     sb_winmobile_emulator_smoke_factory = factory.BuildFactory()
     sb_winmobile_emulator_smoke_factory.addStep(download_testmedia)
-    sb_winmobile_emulator_smoke_factory.addStep(test_emulator_smoke_mobile)
+    #sb_winmobile_emulator_smoke_factory.addStep(test_emulator_smoke_mobile)
     sb_winmobile_emulator_smoke_factory.addStep(util_process_clean)
 
     sb_winmobile_emulator_smoke_builder = {
@@ -1379,10 +1379,10 @@ class sandbox:
     #### builder for winmobile-emulator-test-sandbox ####
     #####################################################
     sb_winmobile_emulator_test_factory = factory.BuildFactory()
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
+    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
+    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
     sb_winmobile_emulator_test_factory.addStep(util_process_clean)
     sb_winmobile_emulator_test_factory.addStep(util_clean_buildsdir)
 
