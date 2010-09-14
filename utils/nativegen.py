@@ -1932,15 +1932,15 @@ class AbcThunkGen:
             for a in self.abcs:
                 for t in a.scripts:
                     if self.lookup_traits.has_key(str(t)):
-						raise Error("duplicate name found: " + str(t))
+                        raise Error("duplicate name found: " + str(t))
                     self.lookup_traits[str(t)] = t
                 for t in a.classes:
                     if self.lookup_traits.has_key(str(t)):
-						raise Error("duplicate name found: " + str(t))
+                        raise Error("duplicate name found: " + str(t))
                     self.lookup_traits[str(t)] = t
                 for t in a.instances:
                     if self.lookup_traits.has_key(str(t)):
-						raise Error("duplicate name found: " + str(t))
+                        raise Error("duplicate name found: " + str(t))
                     self.lookup_traits[str(t)] = t
         if not self.lookup_traits.has_key(name):
             raise Error("name not found: " + name)
