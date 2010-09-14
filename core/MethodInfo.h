@@ -409,6 +409,11 @@ namespace avmplus
 #ifdef VMCFG_AOT
         uint32_t                _isAotCompiled:1;
 #endif
+
+        // If true, Function.apply & call() use a fast path that only works
+        // for JIT and Native code, not interpreted code.
+        uint32_t                _apply_fastpath:1;
+
     // ------------------------ DATA SECTION END
     };
 
