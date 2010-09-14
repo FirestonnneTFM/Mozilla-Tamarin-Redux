@@ -63,6 +63,7 @@ void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
     // Mark method as been JIT compiled.
     m->_isInterpImpl = 0;
     m->_isJitImpl = 1;
+    m->_apply_fastpath = 1;
     m->_implGPR = p;
     m->_invoker = InvokerCompiler::canCompileInvoker(m)
         ? jitInvokerNext
@@ -131,6 +132,50 @@ void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplev
 #endif
         setInterp(m, ms);
     }
+}
+
+uintptr_t BaseExecMgr::init_interpGPR(MethodEnv* env, int argc, uint32_t* ap)
+{
+    initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
+    return interpGPR(env, argc, ap);
+}
+
+double BaseExecMgr::init_interpFPR(MethodEnv* env, int argc, uint32_t* ap)
+{
+    initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
+    return interpFPR(env, argc, ap);
+}
+
+// Transition from JIT code to the interpreter.
+uintptr_t BaseExecMgr::interpGPR(MethodEnv* env, int argc, uint32_t *ap)
+{
+    AvmAssert(exec(env)->isJitEnabled());
+    Atom* const atomv = (Atom*)ap;
+    MethodSignaturep ms = env->method->getMethodSignature();
+    ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
+    Atom a = interpBoxed(env, argc, atomv);
+    const BuiltinType bt = ms->returnTraitsBT();
+    const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
+    if ((1U<<bt) & ATOM_MASK)
+        return a;
+    if (bt == BUILTIN_int)
+        return AvmCore::integer_i(a);
+    if (bt == BUILTIN_uint)
+        return AvmCore::integer_u(a);
+    if (bt == BUILTIN_boolean)
+        return a>>3;
+    return a & ~7; // Possibly null pointer.
+}
+
+// Transition from JIT code to the interpreter, for a function returning double.
+double BaseExecMgr::interpFPR(MethodEnv* env, int argc, uint32_t * ap)
+{
+    AvmAssert(exec(env)->isJitEnabled());
+    Atom* const atomv = (Atom*)ap;
+    MethodSignaturep ms = env->method->getMethodSignature();
+    ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
+    Atom a = interpBoxed(env, argc, atomv);
+    return AvmCore::number_d(a);
 }
 
 void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)

@@ -81,6 +81,7 @@ void BaseExecMgr::init(MethodInfo* m, const NativeMethodInfo* native_info)
 #endif
 
     if (native_info) {
+        m->_apply_fastpath = 1;
         m->_native.thunker = native_info->thunker;
         #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
         m->_native.handler = native_info->handler;
@@ -151,7 +152,7 @@ static bool hasTypedArgs(MethodSignaturep ms)
 
 // Initialize the declared slots of the given object by iterating
 // through the ABC traits record and assigning to nonzero slots.
-void initObj(MethodEnv* env, ScriptObject* obj)
+void BaseExecMgr::initObj(MethodEnv* env, ScriptObject* obj)
 {
     struct InterpInitVisitor: public InitVisitor {
         ScriptObject* obj;
@@ -169,18 +170,6 @@ void initObj(MethodEnv* env, ScriptObject* obj)
     t->visitInitBody(&visitor, env->toplevel(), tb);
 }
 
-uintptr_t BaseExecMgr::init_interpGPR(MethodEnv* env, int argc, uint32_t* ap)
-{
-    initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
-    return interpGPR(env, argc, ap);
-}
-
-double BaseExecMgr::init_interpFPR(MethodEnv* env, int argc, uint32_t* ap)
-{
-    initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
-    return interpFPR(env, argc, ap);
-}
-
 Atom BaseExecMgr::init_invoke_interp(MethodEnv* env, int argc, Atom* args)
 {
     initObj(env, (ScriptObject*) atomPtr(args[0]));
@@ -195,30 +184,43 @@ Atom BaseExecMgr::init_invoke_interp_nocoerce(MethodEnv* env, int argc, Atom* ar
 
 void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
 {
-    if (m->isConstructor()) {
-        if (ms->returnTraitsBT() == BUILTIN_number)
-            m->_implFPR = init_interpFPR;
-        else
-            m->_implGPR = init_interpGPR;
-        m->_isInterpImpl = 1;
-        m->_invoker = hasTypedArgs(ms)
-            ? init_invoke_interp
-            : init_invoke_interp_nocoerce;
-    } else {
-        setInterpDirectly(m, ms);
-    }
-}
-
-void BaseExecMgr::setInterpDirectly(MethodInfo* m, MethodSignaturep ms)
-{
-    if (ms->returnTraitsBT() == BUILTIN_number)
-        m->_implFPR = interpFPR;
-    else
-        m->_implGPR = interpGPR;
+    // Choose an appropriate set of interpreter invocation stubs.
+    // * if the method is a constructor, choose a stub that initializes
+    //   the object's fields before executing (init_).
+    // * if the method has no typed args, choose an invoker stub that skips
+    //   arg type checking entirely (_nocoerce).
+    static const AtomMethodProc invoke_stubs[2][2] = {{
+        BaseExecMgr::invoke_interp_nocoerce,        // ctor=0, typedargs=0
+        BaseExecMgr::invoke_interp                  // ctor=0, typedargs=1
+    }, {
+        BaseExecMgr::init_invoke_interp_nocoerce,   // ctor=1, typedargs=0
+        BaseExecMgr::init_invoke_interp             // ctor=1, typedargs=1
+    }};
+    int ctor = m->isConstructor() ? 1 : 0;
+    int typedargs = hasTypedArgs(ms) ? 1 : 0;
+    m->_implGPR = NULL;
+    m->_invoker = invoke_stubs[ctor][typedargs];
     m->_isInterpImpl = 1;
-    m->_invoker = hasTypedArgs(ms)
-        ? invoke_interp
-        : invoke_interp_nocoerce;
+
+#ifdef FEATURE_NANOJIT
+    if (isJitEnabled()) {
+        // Choose an appropriate set of jit->interp stubs.
+        // * if the method is a constructor, choose a stub that initializes
+        //   the object's fields before executing (init_).
+        // * if the return type is double, the stub must have a signature that
+        //   returns double. (FPR)
+        static const GprMethodProc impl_stubs[2][2] = {{
+            BaseExecMgr::interpGPR,                     // ctor=0, fpr=0
+            (GprMethodProc)BaseExecMgr::interpFPR       // ctor=0, fpr=1
+        }, {
+            BaseExecMgr::init_interpGPR,                // ctor=1, fpr=0
+            (GprMethodProc)BaseExecMgr::init_interpFPR  // ctor=1, fpr=1
+        }};
+        int ctor = m->isConstructor() ? 1 : 0;
+        int fpr = ms->returnTraitsBT() == BUILTIN_number ? 1 : 0;
+        m->_implGPR = impl_stubs[ctor][fpr];
+    }
+#endif
 }
 
 uintptr_t BaseExecMgr::verifyEnterGPR(MethodEnv* env, int32_t argc, uint32_t* ap)
@@ -687,26 +689,28 @@ Atom BaseExecMgr::apply(MethodEnv* env, Atom thisArg, ArrayObject *a)
     if (argc == 0)
         return env->coerceEnter(thisArg);
 
-    if (isInterpreted(env)) {
-        // Caller will coerce instance if necessary, so make sure it was done.
-        AvmAssert(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)));
-
-        // Tail call inhibited by local allocation/deallocation.
-        MMgc::GC::AllocaAutoPtr _atomv;
-        Atom* atomv = (Atom*)VMPI_alloca(core, _atomv, sizeof(Atom)*(argc+1));
-        atomv[0] = thisArg;
-        for (int32_t i=0 ; i < argc ; i++ )
-            atomv[i+1] = a->getUintProperty(i);
-        return env->coerceEnter(argc, atomv);
+    if (env->method->_apply_fastpath) {
+        // JIT or native method.  We specialize this path to avoid
+        // calling alloca twice; once to unpack atoms from a[], then
+        // again to unpack from Atom[] to native values.
+        MethodSignaturep ms = env->get_ms();
+        const size_t extra_sz = startCoerce(env, argc, ms);
+        MMgc::GC::AllocaAutoPtr _ap;
+        uint32_t *ap = (uint32_t *)VMPI_alloca(core, _ap, extra_sz);
+        unboxCoerceArgs(env, thisArg, a, ap, ms);
+        return endCoerce(env, argc, ap, ms);
     }
 
-    // Unverified, JIT, or native method.
-    MethodSignaturep ms = env->get_ms();
-    const size_t extra_sz = startCoerce(env, argc, ms);
-    MMgc::GC::AllocaAutoPtr _ap;
-    uint32_t *ap = (uint32_t *)VMPI_alloca(core, _ap, extra_sz);
-    unboxCoerceArgs(env, thisArg, a, ap, ms);
-    return endCoerce(env, argc, ap, ms);
+    // Caller will coerce instance if necessary, so make sure it was done.
+    AvmAssert(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)));
+
+    // Tail call inhibited by local allocation/deallocation.
+    MMgc::GC::AllocaAutoPtr _atomv;
+    Atom* atomv = (Atom*)VMPI_alloca(core, _atomv, sizeof(Atom)*(argc+1));
+    atomv[0] = thisArg;
+    for (int32_t i=0 ; i < argc ; i++ )
+        atomv[i+1] = a->getUintProperty(i);
+    return env->coerceEnter(argc, atomv);
 }
 
 // Specialized to be called from Function.call().
@@ -715,25 +719,27 @@ Atom BaseExecMgr::call(MethodEnv* env, Atom thisArg, int argc, Atom *argv)
     if (argc == 0)
         return env->coerceEnter(thisArg);
 
-    if (isInterpreted(env)) {
-        // Caller will coerce instance if necessary, so make sure it was done.
-        AvmAssert(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)));
-
-        // Tail call inhibited by local allocation/deallocation.
-        MMgc::GC::AllocaAutoPtr _atomv;
-        Atom* atomv = (Atom*)VMPI_alloca(core, _atomv, sizeof(Atom)*(argc+1));
-        atomv[0] = thisArg;
-        VMPI_memcpy(atomv+1, argv, sizeof(Atom)*argc);
-        return env->coerceEnter(argc, atomv);
+    if (env->method->_apply_fastpath) {
+        // JIT or native method.  We specialize this path to avoid
+        // calling alloca twice; once to unpack atoms from a[], then
+        // again to unpack from Atom[] to native values.
+        MethodSignaturep ms = env->get_ms();
+        const size_t extra_sz = startCoerce(env, argc, ms);
+        MMgc::GC::AllocaAutoPtr _ap;
+        uint32_t *ap = (uint32_t *)VMPI_alloca(core, _ap, extra_sz);
+        unboxCoerceArgs(env, thisArg, argc, argv, ap, ms);
+        return endCoerce(env, argc, ap, ms);
     }
 
-    // Unverified, JIT, or native method.
-    MethodSignaturep ms = env->get_ms();
-    const size_t extra_sz = startCoerce(env, argc, ms);
-    MMgc::GC::AllocaAutoPtr _ap;
-    uint32_t *ap = (uint32_t *)VMPI_alloca(core, _ap, extra_sz);
-    unboxCoerceArgs(env, thisArg, argc, argv, ap, ms);
-    return endCoerce(env, argc, ap, ms);
+    // Caller will coerce instance if necessary, so make sure it was done.
+    AvmAssert(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)));
+
+    // Tail call inhibited by local allocation/deallocation.
+    MMgc::GC::AllocaAutoPtr _atomv;
+    Atom* atomv = (Atom*)VMPI_alloca(core, _atomv, sizeof(Atom)*(argc+1));
+    atomv[0] = thisArg;
+    VMPI_memcpy(atomv+1, argv, sizeof(Atom)*argc);
+    return env->coerceEnter(argc, atomv);
 }
 
 // Optimization opportunities: since we call interpBoxed() directly, it is
@@ -850,36 +856,6 @@ void BaseExecMgr::unboxCoerceArgs(MethodEnv* env, Atom thisArg, int32_t argc, At
         args = coerceUnbox1(env, in[i], ms->paramTraits(i+1), args);
     while (end < argc)
         *args++ = in[end++];
-}
-
-// Transition from JIT code to the interpreter.
-uintptr_t BaseExecMgr::interpGPR(MethodEnv* env, int argc, uint32_t *ap)
-{
-    Atom* const atomv = (Atom*)ap;
-    MethodSignaturep ms = env->method->getMethodSignature();
-    ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
-    Atom a = interpBoxed(env, argc, atomv);
-    const BuiltinType bt = ms->returnTraitsBT();
-    const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
-    if ((1U<<bt) & ATOM_MASK)
-        return a;
-    if (bt == BUILTIN_int)
-        return AvmCore::integer_i(a);
-    if (bt == BUILTIN_uint)
-        return AvmCore::integer_u(a);
-    if (bt == BUILTIN_boolean)
-        return a>>3;
-    return a & ~7; // Possibly null pointer.
-}
-
-// Transition from JIT code to the interpreter, for a function returning double.
-double BaseExecMgr::interpFPR(MethodEnv* env, int argc, uint32_t * ap)
-{
-    Atom* const atomv = (Atom*)ap;
-    MethodSignaturep ms = env->method->getMethodSignature();
-    ms->boxArgs(env->core(), argc, (uint32_t *)ap, atomv);
-    Atom a = interpBoxed(env, argc, atomv);
-    return AvmCore::number_d(a);
 }
 
 } // namespace avmplus
