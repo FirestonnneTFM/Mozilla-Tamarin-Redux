@@ -1022,7 +1022,7 @@ class tamarinredux:
     ##############################################
     winmobile_emulator_smoke_factory = factory.BuildFactory()
     winmobile_emulator_smoke_factory.addStep(download_testmedia)
-    winmobile_emulator_smoke_factory.addStep(test_emulator_smoke_mobile)
+    #winmobile_emulator_smoke_factory.addStep(test_emulator_smoke_mobile)
     winmobile_emulator_smoke_factory.addStep(util_process_clean)
 
     winmobile_emulator_smoke_builder = {
@@ -1444,10 +1444,10 @@ class tamarinredux:
     #### builder for winmobile-emulator-test ####
     #############################################
     winmobile_emulator_test_factory = factory.BuildFactory()
-    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
-    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
+    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
+    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
     winmobile_emulator_test_factory.addStep(util_process_clean)
     winmobile_emulator_test_factory.addStep(util_clean_buildsdir)
 
@@ -1755,9 +1755,9 @@ class tamarinredux:
     winmobile_performance_factory.addStep(bb_slaveupdate(slave="winmobile-performance"))
     winmobile_performance_factory.addStep(bb_lockacquire)
     winmobile_performance_factory.addStep(perf_prepare)
-    winmobile_performance_factory.addStep(perf_release_arm)
-    winmobile_performance_factory.addStep(perf_release_arm_interp)
-    winmobile_performance_factory.addStep(perf_release_arm_jit)
+    #winmobile_performance_factory.addStep(perf_release_arm)
+    #winmobile_performance_factory.addStep(perf_release_arm_interp)
+    #winmobile_performance_factory.addStep(perf_release_arm_jit)
     winmobile_performance_factory.addStep(util_clean_buildsdir)
     winmobile_performance_factory.addStep(bb_lockrelease)
 
