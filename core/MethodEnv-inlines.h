@@ -110,17 +110,7 @@ REALLY_INLINE int32_t MethodEnv::getType() const
 REALLY_INLINE void MethodEnv::setActivationOrMCTable(void *ptr, int32_t type)
 {
     AvmAssert((uintptr_t(ptr) & 7) == 0);
-    WB(core()->GetGC(), this, &activationOrMCTable, (uintptr_t)ptr | type | (activationOrMCTable & kIsScriptEnv));
-}
-
-REALLY_INLINE void MethodEnv::setIsScriptEnv()
-{
-    activationOrMCTable |= kIsScriptEnv;
-}
-
-REALLY_INLINE bool MethodEnv::isScriptEnv() const
-{
-    return (activationOrMCTable & kIsScriptEnv) != 0;
+    WB(core()->GetGC(), this, &activationOrMCTable, (uintptr_t)ptr | type);
 }
 
 REALLY_INLINE VTable* MethodEnv::vtable() const
@@ -157,7 +147,6 @@ REALLY_INLINE Atom MethodEnv::coerceEnter(int32_t argc, Atom* args)
 REALLY_INLINE ScriptEnv::ScriptEnv(MethodInfo* _method, ScopeChain* _scope)
     : MethodEnv(_method, _scope)
 {
-    setIsScriptEnv();
 }
 
 REALLY_INLINE FunctionEnv::FunctionEnv(MethodInfo* _method, ScopeChain* _scope)
