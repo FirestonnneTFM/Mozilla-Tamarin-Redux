@@ -247,18 +247,12 @@ namespace avmplus
 
         // low 2 bits of activationOrMCTable
         enum { kActivation=0, kMethodTable, kActivationMethodTablePair };
-        // and the 3rd bit is a flag for "am I a ScriptEnv"
-        enum { kIsScriptEnv = 4 };
 
         ActivationMethodTablePair* getPair() const;
         int32_t getType() const;
         void setActivationOrMCTable(void *ptr, int32_t type);
 
-    protected:
-        void setIsScriptEnv();
-
     public:
-        bool isScriptEnv() const;
 
 #ifdef DEBUGGER
         uint64_t invocationCount() const;
