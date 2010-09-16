@@ -88,7 +88,7 @@ namespace MMgc
         while(fl) {
             if(item == fl)
                 return true;
-            fl = *(void**)fl;
+            fl = FLNext(fl);
         }
         return false;
     }
@@ -286,7 +286,7 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_INFO
     /* static */
-    void FixedAlloc::VerifyFreeBlockIntegrity(const void* item, uint32_t size)
+    void FixedAlloc::VerifyFreeBlockIntegrity(void* item, uint32_t size)
     {
         while(item)
         {
@@ -307,7 +307,7 @@ namespace MMgc
                 }
             }
             // next free item
-            item = *((const void**)item);
+            item = FLNext(item);
         }
     }
 #endif //MMGC_MEMORY_INFO
