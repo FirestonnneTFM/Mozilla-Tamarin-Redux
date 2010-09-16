@@ -408,9 +408,7 @@ namespace avmplus
         {
             if(cap > max) {
                 int gcflags = 0;
-                if(kElementType == LIST_GCObjects)
-                    gcflags |= MMgc::GC::kContainsPointers;
-                if(kElementType == LIST_RCObjects)
+                if(kElementType == LIST_GCObjects || kElementType == LIST_RCObjects)
                     gcflags |= (MMgc::GC::kContainsPointers|MMgc::GC::kZero);
 
                 T* newData = (gc) ? (T*) gc->Calloc(cap, sizeof(T), gcflags) : mmfx_new_array(T, cap);
