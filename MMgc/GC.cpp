@@ -273,6 +273,8 @@ namespace MMgc
         MMGC_GCENTER(this);
         emptyWeakRef = new (this) GCWeakRef(NULL);
 
+        Alloc(2048);
+
         gcheap->AddGC(this);
         gcheap->AddOOMCallback(this);
 

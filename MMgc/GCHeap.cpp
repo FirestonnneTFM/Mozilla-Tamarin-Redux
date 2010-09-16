@@ -1254,6 +1254,10 @@ namespace MMgc
             size_t amountRecommitted = block->committed ? 0 : block->size;
             bool dirty = block->dirty;
 
+            // The first block needs to be committed when sloppyCommit is disabled.
+            if(!config.sloppyCommit && !block->committed)
+                Commit(block);
+
             while(block->size < size)
             {
                 // Coalesce the next block into this one.
@@ -1295,7 +1299,7 @@ namespace MMgc
             Commit(block);
         }
 
-        GCAssert(block->size >= size);
+        GCAssert(block->size >= size && block->committed);
 
         CheckFreelist();
 
