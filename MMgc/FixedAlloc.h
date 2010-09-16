@@ -190,7 +190,7 @@ namespace MMgc
 #ifdef MMGC_MEMORY_INFO
         // Go through every item on the free list and make sure it wasn't written to
         // after it was poisoned as it was being freed.
-        static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
+        static void VerifyFreeBlockIntegrity(void* item, uint32_t size);
 #endif
 
         // Implement the 'Free' operation on 'item', excluding the calling of hooks

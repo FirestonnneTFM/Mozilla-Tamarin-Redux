@@ -173,8 +173,7 @@ namespace MMgc
         // Take the object from the free list if it is not empty
         void *item = NULL;
         if (b->firstFree) {
-            item = b->firstFree;
-            b->firstFree = *((void**)item);
+            item = FLPop(b->firstFree);
             // Assert that the freelist hasn't been tampered with (by writing to the first 4 bytes).
             GCAssert(b->firstFree == NULL ||
                     (b->firstFree >= b->items &&
@@ -240,9 +239,7 @@ namespace MMgc
 
         item = GetRealPointer(item);
 
-        // Add the item to b's free list.
-        *((void**)item) = b->firstFree;
-        b->firstFree = item;
+        FLPush(b->firstFree, item);
 
         // 'b' was full but now it has a free spot, add it to the free block list.
         if (b->numAlloc == b->alloc->m_itemsPerBlock)

@@ -341,8 +341,7 @@ namespace MMgc
                 if(heap->HooksEnabled())
                     heap->PseudoFreeHook(GetUserPointer(p), m_itemSize - DebugSize(), uint8_t(GCHeap::GCSweptPoison));
 #endif
-                p[0] = (char*)p + m_itemSize;
-                p = (void**)(void*)((char*)p + m_itemSize);
+                p = FLSeed(p, (char*)p + m_itemSize);
             }
 #ifdef MMGC_HOOKS
             if(heap->HooksEnabled())
@@ -469,18 +468,13 @@ namespace MMgc
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
         (void)askSize;
 #endif
-        void* item = m_qList;
-        void**p = (void**)item;
-        m_qList = (void**)p[0];
+        void *item = FLPopAndZero(m_qList);
         GCBlock* b = GetBlock(item);
 
         GCAssert(!b->needsSweeping());
 
         // Code below uses this optimization
         GCAssert((unsigned long)GC::kFinalize == (unsigned long)kFinalizable);
-
-        // Clear free header, the rest was cleared in Free()
-        p[0] = 0;
 
         b->bits[GetBitsIndex(b, item)] = (flags & GC::kFinalize);
 
@@ -669,8 +663,7 @@ namespace MMgc
         ClearNonRCObject((void*)item, b->size);
 #endif
 
-        *(void**)item = m_qList;
-        m_qList = (void**)item;
+        FLPush(m_qList, item);
 
         m_gc->SignalFreeWork(m_itemSize);
         if (--m_qBudget <= 0)
@@ -696,8 +689,7 @@ namespace MMgc
             void* qList = m_qList;
             m_qList = NULL;
 
-            *(void**)item = b->firstFree;
-            b->firstFree = (void*)item;
+            FLPush(b->firstFree, item);
             b->numFree++;
             Sweep(b);
 
@@ -751,7 +743,7 @@ namespace MMgc
         m_qList = NULL;
 
         while (item != NULL) {
-            void *next = ((void**)item)[0];
+            void *next = FLNext(item);
             GCBlock *b = GetBlock(item);
 
             GCAssert(!b->needsSweeping());
@@ -770,9 +762,7 @@ namespace MMgc
             VerifyNotFree(b, item);
 #endif
 
-            ((void**)item)[0] = b->firstFree;
-            b->firstFree = item;
-
+            FLPush(b->firstFree, item);
             item = next;
         }
 
@@ -805,10 +795,10 @@ namespace MMgc
 #ifdef _DEBUG
     void GCAlloc::VerifyNotFree(GCBlock* b, const void* item)
     {
-        for ( void *free = m_qList ; free != NULL ; free = ((void**)free)[0] )
+        for ( void *free = m_qList ; free != NULL ; free = FLNext(free) )
             GCAssert(free != item);
 
-        for ( void *free = b->firstFree ; free != NULL ; free = ((void**)free)[0] )
+        for ( void *free = b->firstFree ; free != NULL ; free = FLNext(free) )
             GCAssert(free != item);
     }
 #endif
@@ -999,12 +989,12 @@ namespace MMgc
             pbits[i] &= mq32;
         }
 
-        const void *item = block->firstFree;
+        void *item = block->firstFree;
         while(item != NULL) {
             // Set freelist bit pattern.  If it's free it's free so clear all
             // the other bits.
             block->bits[GetBitsIndex(block, item)] = kFreelist;
-            item = *(const void**)item;
+            item = FLNext(item);
         }
     }
 
@@ -1078,7 +1068,7 @@ namespace MMgc
                 // b->firstFree should be either 0 end of free list or a pointer into b, otherwise, someone
                 // wrote to freed memory and hosed our freelist
                 GCAssert(freelist == 0 || ((uintptr_t) freelist >= (uintptr_t) b->items && (uintptr_t) freelist < (uintptr_t) b + GCHeap::kBlockSize));
-                freelist = *((void**)freelist);
+                freelist = FLNext(freelist);
             }
             b = b->nextFree;
         }
@@ -1113,8 +1103,6 @@ namespace MMgc
         alloc->m_numAlloc--;
 #endif
 
-        void *oldFree = firstFree;
-        firstFree = (void*)item;
         numFree++;
 
         bits[bitsindex] = kFreelist;
@@ -1122,8 +1110,7 @@ namespace MMgc
 #ifndef _DEBUG
         alloc->ClearNonRCObject((void*)item, size);
 #endif
-        // Add this item to the free list
-        *((void**)item) = oldFree;
+        FLPush(firstFree, item);
     }
 
     void GCAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
@@ -1146,7 +1133,7 @@ namespace MMgc
 #ifdef MMGC_MEMORY_INFO
 
     /* static */
-    void GCAlloc::VerifyFreeBlockIntegrity(const void* item, uint32_t size, uint32_t limit)
+    void GCAlloc::VerifyFreeBlockIntegrity(void* item, uint32_t size, uint32_t limit)
     {
         // go through every item on the free list and make sure it wasn't written to
         // after being poisoned.
@@ -1172,7 +1159,7 @@ namespace MMgc
                 }
             }
             // next free item
-            item = *((const void**)item);
+            item = FLNext(item);
         }
     }
 
