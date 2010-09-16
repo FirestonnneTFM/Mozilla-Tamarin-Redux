@@ -70,8 +70,8 @@
 #undef MMGC_SPARC
 #undef AVMPLUS_SPARC
 #undef VMCFG_MIPS
-#undef VMCFG_SH4
 #undef AVMPLUS_MIPS
+#undef VMCFG_SH4
 #undef AVMPLUS_UNIX
 #undef AVMPLUS_MAC
 #undef MMGC_MAC
@@ -253,7 +253,7 @@
 
 /* AVMSYSTEM_SH4
  *
- * Selects the SH4 architecture.
+ * Selects the 32-bit SH4 architecture.
  */
 #if !defined AVMSYSTEM_SH4 || AVMSYSTEM_SH4 != 0 && AVMSYSTEM_SH4 != 1
 #  error "AVMSYSTEM_SH4 must be defined and 0 or 1 (only)."
@@ -344,20 +344,13 @@
 
 
 /* AVMFEATURE_VTUNE
+ *
  * Selects vtune profiling of jit'd code.  Requires Windows x86,
  * and could support windows x64 after more testing.
  * turns on AVMPLUS_VERBOSE solely to get method/class names for profiling
  */
 #if !defined AVMFEATURE_VTUNE || AVMFEATURE_VTUNE != 0 && AVMFEATURE_VTUNE != 1
 #  error "AVMFEATURE_VTUNE must be defined and 0 or 1 (only)."
-#endif
-#if AVMFEATURE_VTUNE
-#  if !AVMSYSTEM_WIN32
-#    error "AVMSYSTEM_WIN32 is required for AVMFEATURE_VTUNE"
-#  endif
-#  if !AVMSYSTEM_IA32
-#    error "AVMSYSTEM_IA32 is required for AVMFEATURE_VTUNE"
-#  endif
 #endif
 
 
@@ -677,7 +670,14 @@
 #  endif
 #endif
 
-
+#if AVMFEATURE_VTUNE
+#  if !AVMSYSTEM_WIN32
+#    error "AVMSYSTEM_WIN32 is required for AVMFEATURE_VTUNE"
+#  endif
+#  if !AVMSYSTEM_IA32
+#    error "AVMSYSTEM_IA32 is required for AVMFEATURE_VTUNE"
+#  endif
+#endif
 #if AVMFEATURE_JIT
 #if AVMSYSTEM_IA32+AVMSYSTEM_AMD64+AVMSYSTEM_ARM+AVMSYSTEM_PPC+AVMSYSTEM_SPARC+AVMSYSTEM_MIPS+AVMSYSTEM_SH4 != 1
 #  error "Exactly one of AVMSYSTEM_IA32,AVMSYSTEM_AMD64,AVMSYSTEM_ARM,AVMSYSTEM_PPC,AVMSYSTEM_SPARC,AVMSYSTEM_MIPS,AVMSYSTEM_SH4 must be defined."
@@ -697,6 +697,8 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
+
 
 
 
@@ -812,11 +814,11 @@
 #if AVMSYSTEM_MIPS
 #  define VMCFG_MIPS
 #endif
-#if AVMSYSTEM_SH4
-#  define VMCFG_SH4
-#endif
 #if AVMSYSTEM_MIPS
 #  define AVMPLUS_MIPS
+#endif
+#if AVMSYSTEM_SH4
+#  define VMCFG_SH4
 #endif
 #if AVMSYSTEM_UNIX
 #  define AVMPLUS_UNIX
