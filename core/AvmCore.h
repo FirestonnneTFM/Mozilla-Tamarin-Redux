@@ -248,6 +248,13 @@ const int kBufferPadding = 16;
         bool            m_disabled;             // true iff the cache has been (temporarily) disabled
     };
 
+    /**
+     * Container for bug compatibility flags.
+     *
+     * NOTE the allocation code in AvmCore::createBugCompatibility assumes this structure
+     * is pointer-free and allocates it as pointer-free memory (bugzilla 596529).
+     * Subclassers should consider doing the same.
+     */
     class BugCompatibility : public MMgc::GCObject
     {
     public:
