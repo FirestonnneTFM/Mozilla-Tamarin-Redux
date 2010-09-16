@@ -141,7 +141,6 @@ $$($(1)_ASMOBJS): %.$(OBJ_SUFFIX): %.armasm $$(GLOBAL_DEPS)
 $$($(1)_MASMOBJS): %.$(OBJ_SUFFIX): %.asm $$(GLOBAL_DEPS)
 	$(MASM) -Fo $$@ $$($(1)_MASMFLAGS) $$<
 
-	
 $(1).thing.pp: FORCE
 	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX))
 
@@ -219,6 +218,8 @@ $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
 	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
 	  $$($(1)_LDFLAGS)
+	$(ifneq ($POSTMKPROGRAM,''))
+		$(call POSTMKPROGRAM,$$@)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)
 
