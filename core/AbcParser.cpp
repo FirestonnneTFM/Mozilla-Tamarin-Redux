@@ -1266,7 +1266,7 @@ namespace avmplus
 
         pool->_abcStringStart = pos;
 
-        PoolObject::ConstantStringData* dataP = pool->_abcStrings.data;
+        PoolObject::ConstantStringData* dataP = pool->_abcStrings;
         AvmAssert(core->kEmptyString != NULL);
         dataP->str = core->kEmptyString;
         for(uint32_t i = 1; i < string_count; ++i)
@@ -1289,7 +1289,7 @@ namespace avmplus
                 // can cause dynamicizeStrings to make poor decisions. So clean up before throwing.
                 pool->_abcStringStart = NULL;
                 pool->_abcStringEnd = NULL;
-                VMPI_memset(pool->_abcStrings.data, 0, string_count*sizeof(PoolObject::ConstantStringData*));
+                VMPI_memset(pool->_abcStrings, 0, string_count*sizeof(PoolObject::ConstantStringData*));
                 toplevel->throwVerifyError(kCorruptABCError);
             }
 
