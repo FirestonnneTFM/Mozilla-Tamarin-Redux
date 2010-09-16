@@ -66,7 +66,7 @@ namespace avmplus
         _abcStart(startPos),
         _abcStringStart(NULL),
         _abcStringEnd(NULL),
-        _abcStrings(core->GetGC()),
+        _abcStrings(NULL),
         _classes(core->GetGC(), 0),
         _scripts(core->GetGC(), 0),
         _methods(core->GetGC(), 0)
@@ -100,7 +100,7 @@ namespace avmplus
             // make all strings created so far dynamic,
             // making sure that no pointers into ABC data persist
             // (string 0 is always core->kEmptyString: skip it)
-            ConstantStringData* dataP = _abcStrings.data;
+            ConstantStringData* dataP = _abcStrings;
             for (uint32_t i = 1; i < constantStringCount; i++)
             {
                 ++dataP;
@@ -143,22 +143,39 @@ namespace avmplus
 
     void PoolObject::setupConstantStrings(uint32_t count)
     {
-        _abcStrings.setup(count);
+        // Always allocate slot 0 in the data array, which will be
+        // initialized to an empty String* in AbcParser::parseCpool().
+        // We also avoid invoking Calloc() with a size of zero,
+        // which will cause an assertion to fail.
+        // TODO: If there are no strings, we should be able to set
+        // data = NULL, size = 0, and avoid calling the allocator.
+        // Slot 0 should never be accessed, and the code guards against
+        // such accesses generally, but there are presently exceptions.
+        // With the guards spread over much code, it is safer to do
+        // as we do here.  This problem extends to other constant pool
+        // entry types, and should be cleaned up.  See bug 557684.
+        //
+        // Be sure to zero the memory or garbage will be touched by
+        // the presweep handler that cleans up the string pool, see
+        // Bugzilla 574427.
+        if (count == 0)
+            count = 1;
+        _abcStrings = (ConstantStringData*)core->gc->Calloc(count, sizeof(ConstantStringData), MMgc::GC::kZero|MMgc::GC::kContainsPointers);
         constantStringCount = count;
     }
 
     Stringp PoolObject::getString(int32_t index) const
     {
-        ConstantStringData* dataP = _abcStrings.data + index;
+        ConstantStringData* dataP = _abcStrings + index;
         if (dataP->abcPtr >= _abcStringStart && dataP->abcPtr < _abcStringEnd)
         {
             // String not created yet; grab the pointer to the (verified) ABC data
             uint32_t len = AvmCore::readU32(dataP->abcPtr);
             // strict=false for bug-compatibility with swfs with incorrect utf8 encoding of strings
             Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, true, false);
-            // must be made sticky for now...
-            s->Stick();
-            dataP->str = s;
+            s->Stick();             // FIXME - Bugzilla 596918:  The Stick() call is dodgy.
+            dataP->abcPtr = NULL;   // Important to clear it - what's there is not an RCObject*, don't let WBRC see it
+            WBRC(core->gc, _abcStrings, &dataP->str, s);
         }
         return dataP->str;
     }

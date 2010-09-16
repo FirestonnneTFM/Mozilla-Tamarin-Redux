@@ -189,21 +189,13 @@ namespace avmplus
             Stringp     str;
             const uint8_t* abcPtr;
         };
-        class ConstantStrings : public MMgc::GCRoot
-        {
-        public:
-            ConstantStrings(MMgc::GC* gc);
-            ~ConstantStrings();
-            void setup(uint32_t size);
-            ConstantStringData* data;
-        };
         DWB(ScriptBufferImpl*)                      _code;
         const uint8_t * const                       _abcStart;
         // start of static ABC string data
         const uint8_t *                             _abcStringStart;
         // points behind end of ABC string data - see AbcParser.cpp
         const uint8_t *                             _abcStringEnd;
-        ConstantStrings                             _abcStrings;
+        DWB(ConstantStringData*)                    _abcStrings;                // The length is constantStringCount
         List<Traits*, LIST_GCObjects>               _classes;
         List<Traits*, LIST_GCObjects>               _scripts;
         List<MethodInfo*, LIST_GCObjects>           _methods;
