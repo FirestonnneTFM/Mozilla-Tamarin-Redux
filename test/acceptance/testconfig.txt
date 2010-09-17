@@ -100,22 +100,20 @@ abcasm/nullCheck/CallStatic , .*verifyall.* , expectedfail, Expected failure in 
 # arm-linux
 ####################
 # bug https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_2_1:parseInt. '0x', arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_2_1:parseInt. '0X', arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_2_1:parseInt. '01234567890'. (-1 |0 |1 ), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(''\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(' '\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\('string'\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(true\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(false\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(Infinity\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/GlobalObject/e15_1_2_3_1:parseFloat\('[\s+]*Infinity[\s]*'\), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-as3/Expressions/asOperator/asOper:.NaN as (Number|Object), arm-lnx.*Ojit, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-as3/Expressions/asOperator/asOper:.Infinity as (Number|Object|int|uint), arm-lnx.*Ojit, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-as3/Expressions/asOperator/asOper:.Number.* as (Number|Object), arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/Math/e15_8_2_1:Math.abs.( void 0| string primitive| string object| Number.NaN| -Infinity| Infinity|-0| - MAX_VALUE| - MIN_VALUE| MAX_VALUE| MIN_VALUE| Math.PI| -Math.PI| 'Infinity'| '-Infinity') , arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
-ecma3/ObjectObjects/e15_2_1_1_rt:Object.Number.(POSITIVE_INFINITY|NEGATIVE_INFINITY|NaN)..valueOf, arm-lnx.*(Ojit|release), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_2_1:parseInt. '0x', arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_2_1:parseInt. '0X', arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_2_1:parseInt. '01234567890'. (-1 |0 |1 ), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(''\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(' '\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\('string'\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(true\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(false\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\(Infinity\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/GlobalObject/e15_1_2_3_1:parseFloat\('[\s+]*Infinity[\s]*'\), arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+as3/Expressions/asOperator/asOper, arm-lnx.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/Math/e15_8_2_1:Math.abs.( void 0| string primitive| string object| Number.NaN| -Infinity| Infinity|-0| - MAX_VALUE| - MIN_VALUE| MAX_VALUE| MIN_VALUE| Math.PI| -Math.PI| 'Infinity'| '-Infinity') , arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
+ecma3/ObjectObjects/e15_2_1_1_rt:Object.Number.(POSITIVE_INFINITY|NEGATIVE_INFINITY|NaN)..valueOf, arm-lnx.*(Ojit|release|vfp), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=596923
 
 ####################
 # Differential testing (avmdiff.py)
