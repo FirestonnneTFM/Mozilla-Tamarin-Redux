@@ -3324,7 +3324,7 @@ namespace avmplus
     }
 
     // This is for VTable->createInstance which is called by OP_construct
-    FUNCTION(CALL_INDIRECT, SIG3(V,P,P,P), createInstance)
+    FUNCTION(CALL_INDIRECT, SIG3(P,P,P,P), createInstance)
 
     bool CodegenLIR::inlineBuiltinFunction(AbcOpcode, intptr_t, int argc, Traits* result, MethodInfo* mi)
     {
