@@ -385,7 +385,8 @@ void VMPI_setupPCResolution()
 {
     //attempt launch of atos for the first time
     //if it fails for some reason we never reattempt it
-    startATOSProcess();
+    // silence occasional errors from atos
+    //    startATOSProcess();
 }
 
 void VMPI_desetupPCResolution()
