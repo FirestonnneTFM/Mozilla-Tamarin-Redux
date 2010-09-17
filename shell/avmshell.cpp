@@ -1133,7 +1133,11 @@ namespace avmshell
         AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 #endif
 #ifdef AVMPLUS_VERBOSE
-        AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,jit,minaddr,memstats,sweep,occupancy,execpolicy]] \n");
+        AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,minaddr,memstats,sweep,occupancy,execpolicy"
+#  ifdef FEATURE_NANOJIT
+               ",jit,opt,regs"
+#  endif
+               "]]\n");
         AvmLog("                        With no options, enables extreme! output mode.  Otherwise the\n");
         AvmLog("                        options are mostly self-descriptive except for the following: \n");
         AvmLog("                           builtins - includes output from builtin methods\n");
@@ -1142,6 +1146,12 @@ namespace avmshell
         AvmLog("                           sweep - [memstats] include detailed sweep information \n");
         AvmLog("                           occupancy - [memstats] include occupancy bit graph \n");
         AvmLog("                           execpolicy - shows which execution method (interpretation, compilation) was chosen and why \n");
+#  ifdef FEATURE_NANOJIT
+        AvmLog("                           jit - output LIR as it is generated, and final assembly code\n");
+        AvmLog("                           opt - show details about each optimization pass\n");
+        AvmLog("                           regs - show register allocation state after each assembly instruction\n");
+#  endif
+
         AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
         AvmLog("                        are contained in [ ] For example, 'minaddr' requires 'jit' \n");
 #endif
