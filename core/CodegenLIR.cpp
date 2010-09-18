@@ -968,8 +968,6 @@ namespace avmplus
                 printNotNull(bits, "loop label");
             } else {
                 // Set any notNull bits that are set in FrameState.
-                // If we are tracking an expression for a non-null variable,
-                // add it to the set of checked expressions.
                 for (int i=0, n=nvar; i < n; i++) {
                     const Value& v = state->value(i);
                     bool stateNotNull = v.notNull && isNullable(v.traits);
@@ -979,46 +977,17 @@ namespace avmplus
                         bits->set(i);
                         if (varTracker[i])
                             checked->put(varTracker[i], true);
-                    } else if (bits->get(i) && varTracker[i])
-                        checked->put(varTracker[i], true);
+                    }
                 }
                 printNotNull(bits, "forward label");
             }
         }
 
-        // Model a control flow edge by merging our current state with the state
-        // saved at the target.  Used for forward branches and exception edges.
-        void trackForwardEdge(CodegenLabel& target, bool isExceptionEdge) {
+        // model a control flow edge by merging our current state with the
+        // state saved at the target.  Used for forward branches and exception
+        // edges.
+        void trackForwardEdge(CodegenLabel& target) {
             AvmAssert(target.labelIns == NULL);  // illegal to call trackEdge on backedge
-
-            // Merge varTracker/tagTracker state with state at target label.
-            // Due to hidden internal control flow in exception dispatch, state may not be
-            // propagated across exception edges.  Thus, if a label may be reached from such
-            // an edge, we cannot determine accurate state at the label, and must clear it.
-            // The state will remain cleared due to the monotonicity of the merge.
-            if (!target.varTracker) {
-                // Allocate state vectors for target label upon first encounter.
-                target.varTracker = new (alloc) LIns*[nvar];
-                target.tagTracker = new (alloc) LIns*[nvar];
-                if (isExceptionEdge) {
-                    VMPI_memset(target.varTracker, 0, nvar*sizeof(LIns*));
-                    VMPI_memset(target.tagTracker, 0, nvar*sizeof(LIns*));
-                } else {
-                    VMPI_memcpy(target.varTracker, varTracker, nvar*sizeof(LIns*));
-                    VMPI_memcpy(target.tagTracker, tagTracker, nvar*sizeof(LIns*));
-                }
-            } else if (isExceptionEdge) {
-                VMPI_memset(target.varTracker, 0, nvar*sizeof(LIns*));
-                VMPI_memset(target.tagTracker, 0, nvar*sizeof(LIns*));
-            } else {
-                for (int i=0, n=nvar; i < n; i++) {
-                    if (varTracker[i] != target.varTracker[i])
-                        target.varTracker[i] = NULL;
-                    if (tagTracker[i] != target.tagTracker[i])
-                        target.tagTracker[i] = NULL;
-                }
-            }
-
             for (int i=0, n=nvar; i < n; i++) {
                 if (varTracker[i]) {
                     if (checked->containsKey(varTracker[i]))
@@ -1093,18 +1062,9 @@ namespace avmplus
         // merge our state with it.  then initialize from the new merged state.
         void trackLabel(CodegenLabel& label, const FrameState* state) {
             if (reachable)
-                trackForwardEdge(label, false); // model the fall-through path as an edge
+                trackForwardEdge(label); // model the fall-through path as an edge
             clearState();
             label.labelIns = out->ins0(LIR_label);
-
-            // Load varTracker/tagTracker state accumulated from forward branches.
-            // Do not load if there are any backward branches, as the tracker state may
-            // not be accurate.  Just switch the pointers -- no need to copy the arrays.
-            if (!state->targetOfBackwardsBranch && label.varTracker) {
-                varTracker = label.varTracker;
-                tagTracker = label.tagTracker;
-            }
-
             // load state saved at label
             if (label.notnull) {
                 syncNotNull(label.notnull, state);
@@ -1323,7 +1283,7 @@ namespace avmplus
                 const uint8_t* to     = code_pos + handler->to;
                 const uint8_t* target = code_pos + handler->target;
                 if (pc >= from && pc < to && driver->hasFrameState(target))
-                    varTracker->trackForwardEdge(getCodegenLabel(target), true);
+                    varTracker->trackForwardEdge(getCodegenLabel(target));
             }
         }
 
@@ -5757,7 +5717,7 @@ namespace avmplus
                 varTracker->checkBackEdge(label, state);
             } else {
                 label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), label.unpatchedEdges);
-                varTracker->trackForwardEdge(label, false);
+                varTracker->trackForwardEdge(label);
             }
         } else {
             // branch was optimized away.  do nothing.
@@ -5817,7 +5777,7 @@ namespace avmplus
             varTracker->checkBackEdge(target, state);
         } else {
             target.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(jtbl, index), target.unpatchedEdges);
-            varTracker->trackForwardEdge(target, false);
+            varTracker->trackForwardEdge(target);
         }
     }
 
@@ -5828,7 +5788,7 @@ namespace avmplus
             varTracker->checkBackEdge(target, state);
         } else {
             target.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), target.unpatchedEdges);
-            varTracker->trackForwardEdge(target, false);
+            varTracker->trackForwardEdge(target);
         }
     }
 

@@ -77,18 +77,16 @@ namespace avmplus
         LIns *labelIns;                 // the LIR_label instruction for this code position
         nanojit::BitSet *notnull;       // merged nullability information for vars at this label
         Seq<InEdge> *unpatchedEdges;    // branches to this label that need patching
-        LIns** varTracker;              // merged var tracker state at this label
-        LIns** tagTracker;              // merged tag tracker state at this label
 #ifdef NJ_VERBOSE
         const char* name;
-        CodegenLabel() : labelIns(0), notnull(0), unpatchedEdges(0), varTracker(0), tagTracker(0), name(0)
+        CodegenLabel() : labelIns(0), notnull(0), unpatchedEdges(0), name(0)
         {}
-        CodegenLabel(const char* name) : labelIns(0), notnull(0), unpatchedEdges(0), varTracker(0), tagTracker(0), name(name)
+        CodegenLabel(const char* name) : labelIns(0), notnull(0), unpatchedEdges(0), name(name)
         {}
 #else
-        CodegenLabel() : labelIns(0), notnull(0), unpatchedEdges(0), varTracker(0), tagTracker(0)
+        CodegenLabel() : labelIns(0), notnull(0), unpatchedEdges(0)
         {}
-        CodegenLabel(const char*) : labelIns(0), notnull(0), unpatchedEdges(0), varTracker(0), tagTracker(0)
+        CodegenLabel(const char*) : labelIns(0), notnull(0), unpatchedEdges(0)
         {}
 #endif
 
