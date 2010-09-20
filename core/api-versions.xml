@@ -110,16 +110,25 @@ ASC and AVM to control the visibility of names in the API.
       <profile id="full">
 	<version id="667" alias="FP_10_1"/>
       </profile>
-      <profile id="system">
-	<version id="669" alias="FP_SYS"/>
-      </profile>
     </product>
     <product id="air">
       <profile id="full">
 	<version id="668" alias="AIR_2_0"/>
       </profile>
+    </product>
+  </release>
+  <release id="5">
+    <product id="player">
       <profile id="system">
-	<version id="670" alias="AIR_SYS"/>
+	<version id="670" alias="FP_SYS"/>
+      </profile>
+    </product>
+    <product id="air">
+      <profile id="full">
+	<version id="669" alias="AIR_2_5"/>
+      </profile>
+      <profile id="system">
+	<version id="671" alias="AIR_SYS"/>
       </profile>
     </product>
   </release>
@@ -152,6 +161,7 @@ ASC and AVM to control the visibility of names in the API.
   <uri id="flash.profiler"/>
   <uri id="flash.sampler"/>
   <uri id="flash.security"/>
+  <uri id="flash.sensors"/>
   <uri id="flash.system"/>
   <uri id="flash.text"/>
   <uri id="flash.text.engine"/>

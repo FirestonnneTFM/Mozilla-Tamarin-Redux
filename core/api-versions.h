@@ -46,29 +46,31 @@
 [3,player,full]=665:FP_10_0_32
 [3,air,full]=666:AIR_1_5_2
 [4,player,full]=667:FP_10_1
-[4,player,system]=669:FP_SYS
 [4,air,full]=668:AIR_2_0
-[4,air,system]=670:AIR_SYS
+[5,player,system]=670:FP_SYS
+[5,air,full]=669:AIR_2_5
+[5,air,system]=671:AIR_SYS
 */
 
 static const uint32_t _min_version_num = 660;
-static const uint32_t _max_version_num = 670;
-static const uint32_t _versions_count[] = {11, 6, 9, 5, 4, 6, 3, 4, 2, 2, 1, };
+static const uint32_t _max_version_num = 671;
+static const uint32_t _versions_count[] = {12, 7, 10, 6, 5, 7, 4, 5, 3, 2, 2, 1, };
 
-static const uint32_t _versions [][11] = {
-  {660, 661, 662, 663, 664, 665, 666, 667, 669, 668, 670, },
-  {661, 663, 664, 666, 668, 670, },
-  {662, 663, 664, 665, 666, 667, 669, 668, 670, },
-  {663, 664, 666, 668, 670, },
-  {664, 666, 668, 670, },
-  {665, 666, 667, 669, 668, 670, },
-  {666, 668, 670, },
-  {667, 669, 668, 670, },
-  {668, 670, },
-  {669, 670, },
-  {670, },
+static const uint32_t _versions [][12] = {
+  {660, 661, 662, 663, 664, 665, 666, 667, 668, 670, 669, 671, },
+  {661, 663, 664, 666, 668, 669, 671, },
+  {662, 663, 664, 665, 666, 667, 668, 670, 669, 671, },
+  {663, 664, 666, 668, 669, 671, },
+  {664, 666, 668, 669, 671, },
+  {665, 666, 667, 668, 670, 669, 671, },
+  {666, 668, 669, 671, },
+  {667, 668, 670, 669, 671, },
+  {668, 669, 671, },
+  {669, 671, },
+  {670, 671, },
+  {671, },
 };
-static const uint32_t _uris_count = 34;
+static const uint32_t _uris_count = 35;
 static const char* _uris [] = {
   "",
   "__AS3__.vec",
@@ -97,6 +99,7 @@ static const char* _uris [] = {
   "flash.profiler",
   "flash.sampler",
   "flash.security",
+  "flash.sensors",
   "flash.system",
   "flash.text",
   "flash.text.engine",
@@ -105,5 +108,5 @@ static const char* _uris [] = {
   "flash.utils",
   "flash.xml",
 };
-static const int32_t _api_compat [] = {0x7ff, 0x55a, 0x7fc, 0x558, 0x550, 0x7e0, 0x540, 0x780, 0x500, 0x600, 0x400, };
-static const uint32_t _max_nonsys_version_num = 668;
+static const int32_t _api_compat [] = {0xfff, 0xb5a, 0xffc, 0xb58, 0xb50, 0xfe0, 0xb40, 0xf80, 0xb00, 0xa00, 0xc00, 0x800, };
+static const uint32_t _max_nonsys_version_num = 669;
