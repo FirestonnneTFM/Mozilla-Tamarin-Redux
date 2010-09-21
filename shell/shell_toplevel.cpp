@@ -1966,6 +1966,9 @@ class SlotOffsetsAndAsserts
 private:
     static uint32_t getSlotOffset(Traits* t, int nameId);
 public:
+    // This exists solely to silence a warning (generally GCC 4.4+):
+    // "all member functions in class SlotOffsetsAndAsserts are private"
+    static inline void do_nothing();
     static const uint16_t s_slotsOffsetMIClass = 0;
     static const uint16_t s_slotsOffsetMIObject = 0;
     #ifdef DEBUG
