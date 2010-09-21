@@ -90,6 +90,7 @@ MMGC_SRCS := ${MMGC_ROOT}/GCObject.cpp \
 			${MMGC_ROOT}/GCAllocObjectUnix.cpp \
 			${MMGC_ROOT}/GCAlloc.cpp \
 			${MMGC_ROOT}/GC.cpp \
+			${MMGC_ROOT}/GCPolicyManager.cpp \
 			${MMGC_ROOT}/GCTests.cpp \
 			${MMGC_ROOT}/FixedMalloc.cpp \
 			${MMGC_ROOT}/FixedAlloc.cpp
