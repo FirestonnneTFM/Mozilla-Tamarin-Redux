@@ -1641,6 +1641,9 @@ class AbcThunkGen:
         out_c.indent -= 1
         out_c.println(u'public:')
         out_c.indent += 1
+        out_c.println(u'// This exists solely to silence a warning (generally GCC 4.4+):')
+        out_c.println(u'// "all member functions in class SlotOffsetsAndAsserts are private"')
+        out_c.println(u'static inline void do_nothing();')
         visitedNativeClasses = set()
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]

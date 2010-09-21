@@ -4171,11 +4171,11 @@ double builtin_d2d_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 // Date_AS3_getMilliseconds
 // Date_AS3_getUTCDay
 // Date_AS3_getUTCHours
-// Date_AS3_getUTCMilliseconds
+// Number_private__minValue
 // Date_AS3_getTime
 // Date_AS3_getDay
 // __AS3___vec_Vector_double_AS3_pop
-// Number_private__minValue
+// Date_AS3_getUTCMilliseconds
 // Date_AS3_getMonth
 // Math_random
 // Date_AS3_getDate
@@ -5579,6 +5579,9 @@ class SlotOffsetsAndAsserts
 private:
     static uint32_t getSlotOffset(Traits* t, int nameId);
 public:
+    // This exists solely to silence a warning (generally GCC 4.4+):
+    // "all member functions in class SlotOffsetsAndAsserts are private"
+    static inline void do_nothing();
     static const uint16_t s_slotsOffsetObjectClass = offsetof(ObjectClass, m_slots_ObjectClass);
     static const uint16_t s_slotsOffsetScriptObject = 0;
     #ifdef DEBUG
@@ -6498,8 +6501,8 @@ const uint8_t builtin_abc_data[45544] = {
  101,  14,  95, 105, 115,  80, 114, 111, 116, 111, 116, 121, 112, 101,  79, 102,
   15,  95, 104,  97, 115,  79, 119, 110,  80, 114, 111, 112, 101, 114, 116, 121,
   21,  95, 112, 114, 111, 112, 101, 114, 116, 121,  73, 115,  69, 110, 117, 109,
- 101, 114,  97,  98, 108, 101,   3, 238, 138, 148,   3, 238, 138, 158,   4, 105,
- 110, 105, 116,   3,  65,  80,  73,   3,  54,  55,  48,   5,  67, 108,  97, 115,
+ 101, 114,  97,  98, 108, 101,   3, 238, 138, 148,   3, 238, 138, 159,   4, 105,
+ 110, 105, 116,   3,  65,  80,  73,   3,  54,  55,  49,   5,  67, 108,  97, 115,
  115,   8,  70, 117, 110,  99, 116, 105, 111, 110,   4,  99,  97, 108, 108,   5,
   97, 112, 112, 108, 121,  22, 102, 117, 110,  99, 116, 105, 111, 110,  32,  70,
  117, 110,  99, 116, 105, 111, 110,  40,  41,  32, 123, 125,   9, 101, 109, 112,
