@@ -444,6 +444,10 @@ namespace avmplus
     */
     static Stringp truncateAtFirstNullChar(AvmCore* core, Stringp in)
     {
+        const BugCompatibility* bugCompatibility = core->currentBugCompatibility();
+        if (bugCompatibility->bugzilla526662)
+            return in;
+            
         int32_t const pos = in->indexOfCharCode(0);
         if (pos > 0)
         {
