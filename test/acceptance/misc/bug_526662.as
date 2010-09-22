@@ -35,6 +35,8 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
+import avmplus.System
+
 function parse(s:String):String
 {
     try
@@ -65,27 +67,31 @@ function parse(s:String):String
 
     var s:String = "foo" + String.fromCharCode(0) + "<one>1</one>"
     var r:String = parse(s);
-	//results.push({expected: "Error #1088", actual: r});
-    // the XML parser stops at the first zero char, regardless of length
-	results.push({expected: "foo", actual: r});
+    if (System.swfVersion >= 11)
+        results.push({expected: "Error #1088", actual: r});
+    else
+        results.push({expected: "foo", actual: r});
 
     var s:String = "foo" + String.fromCharCode(0) + "??garbled randomness that is not legal XML!"
     var r:String = parse(s);
-	//results.push({expected: "foo&#x0;??garbled randomness that is not legal XML!", actual: r});
-    // the XML parser stops at the first zero char, regardless of length
-	results.push({expected: "foo", actual: r});
+    if (System.swfVersion >= 11)
+        results.push({expected: "foo&#x0;??garbled randomness that is not legal XML!", actual: r});
+    else
+        results.push({expected: "foo", actual: r});
     
     var s:String = String.fromCharCode(0) + "<one>1</one>"
     var r:String = parse(s);
-	//results.push({expected: "Error #1088", actual: r});
-    // the XML parser stops at the first zero char, regardless of length
-	results.push({expected: "", actual: r});
+    if (System.swfVersion >= 11)
+        results.push({expected: "Error #1088", actual: r});
+    else
+        results.push({expected: "", actual: r});
 
     var s:String = "<head><one>1</one>" + String.fromCharCode(0) + "<two>2</two></head>"
     var r:String = parse(s);
-	//results.push({expected: "<head><one>1</one>&#x0;<two>2</two></head>", actual: r});
-    // the XML parser stops at the first zero char, regardless of length
-	results.push({expected: "Error #1085", actual: r});
+    if (System.swfVersion >= 11)
+        results.push({expected: "<head><one>1</one>&#x0;<two>2</two></head>", actual: r});
+    else
+        results.push({expected: "Error #1085", actual: r});
 
 
 startTest();
