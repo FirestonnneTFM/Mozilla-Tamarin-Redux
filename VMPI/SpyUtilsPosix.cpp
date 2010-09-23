@@ -65,7 +65,7 @@ void* SpyConnectionLoop(void*)
 {
     struct sockaddr_un sockAddr;
 
-    socklen_t len = sizeof(sockAddr.sun_family) + strlen(sockAddr.sun_path)+1;
+    socklen_t len = sizeof(sockAddr);
     while(spy_running)
     {
         //wait for spy socket connection
