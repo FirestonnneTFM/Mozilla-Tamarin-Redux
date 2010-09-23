@@ -573,7 +573,7 @@ namespace avmplus
     {
         // TypeError in ECMA to execute a non-function
         // NOTE use default public since name is not used
-        Multiname name(core()->getAnyPublicNamespace(), core()->internConstantStringLatin1("value"));
+        Multiname name(core()->getAnyPublicNamespace(), core()->kvalue);
         toplevel()->throwTypeError(kCallOfNonFunctionError, core()->toErrorString(&name));
         return undefinedAtom;
     }

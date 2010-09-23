@@ -56,14 +56,14 @@ namespace avmplus
         Namespacep publicNS = core->getPublicNamespace(ApiUtils::getSmallestAPI());
 
         null_itraits = Traits::newTraits(pool, NULL, 0, 0, 0, TRAITSTYPE_NVA);
-        null_itraits->set_names(publicNS, core->internConstantStringLatin1("null"));
+        null_itraits->set_names(publicNS, core->knull);
         null_itraits->final = true;
         null_itraits->builtinType = BUILTIN_null;
         null_itraits->verifyBindings(NULL);
         null_itraits->resolveSignatures(NULL);
 
         void_itraits = Traits::newTraits(pool, NULL, 0, 0, 0, TRAITSTYPE_NVA);
-        void_itraits->set_names(publicNS, core->internConstantStringLatin1("void"));
+        void_itraits->set_names(publicNS, core->kvoid);
         void_itraits->final = true;
         void_itraits->builtinType = BUILTIN_void;
         void_itraits->verifyBindings(NULL);
@@ -141,10 +141,10 @@ namespace avmplus
 //      xmlList_itraits->hasCustomConstruct         = true;
 //      xml_itraits->hasCustomConstruct             = true;
 
-        vectordouble_itraits->set_names(vectordouble_itraits->ns(), core->internConstantStringLatin1("Vector.<Number>"));
-        vectorint_itraits->set_names(vectorint_itraits->ns(), core->internConstantStringLatin1("Vector.<int>"));
-        vectoruint_itraits->set_names(vectoruint_itraits->ns(), core->internConstantStringLatin1("Vector.<uint>"));
-        vectorobj_itraits->set_names(vectorobj_itraits->ns(), core->internConstantStringLatin1("Vector.<*>"));
+        vectordouble_itraits->set_names(vectordouble_itraits->ns(), core->kVectorNumber);
+        vectorint_itraits->set_names(vectorint_itraits->ns(), core->kVectorint);
+        vectoruint_itraits->set_names(vectoruint_itraits->ns(), core->kVectoruint);
+        vectorobj_itraits->set_names(vectorobj_itraits->ns(), core->kVectorAny);
 
         object_istc = ScopeTypeChain::createEmpty(core->GetGC(), object_itraits);
         class_istc = ScopeTypeChain::createEmpty(core->GetGC(), class_itraits);

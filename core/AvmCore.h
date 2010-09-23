@@ -883,11 +883,13 @@ const int kBufferPadding = 16;
         DRC(Stringp) ktoString;
         DRC(Stringp) ktoLocaleString;
         DRC(Stringp) kvalueOf;
+        DRC(Stringp) kvalue;
         DRC(Stringp) klength;
         DRC(Stringp) kobject;
-        DRC(Stringp) kfunction;
         DRC(Stringp) kxml;
+        DRC(Stringp) kfunction;
         DRC(Stringp) kboolean;
+        DRC(Stringp) kvoid;
         DRC(Stringp) knumber;
         DRC(Stringp) kstring;
         DRC(Stringp) kuri;
@@ -895,11 +897,45 @@ const int kBufferPadding = 16;
         DRC(Stringp) kglobal;
         DRC(Stringp) kcallee;
         DRC(Stringp) kNeedsDxns;
-        DRC(Stringp) kAsterisk;
         DRC(Stringp) kVersion;
 #if VMCFG_METHOD_NAMES
         DRC(Stringp) kanonymousFunc;
 #endif
+        // From here at least the spelling mirrors exactly the spelling in the string constant
+        DRC(Stringp) klittleEndian;
+        DRC(Stringp) kbigEndian;
+        DRC(Stringp) kparent;
+        DRC(Stringp) kattribute;
+        DRC(Stringp) kcomment;
+        DRC(Stringp) kprocessing_instruction;
+        DRC(Stringp) kelement;
+        DRC(Stringp) ktext;
+        DRC(Stringp) kattributeAdded;
+        DRC(Stringp) kattributeRemoved;
+        DRC(Stringp) kattributeChanged;
+        DRC(Stringp) knodeAdded;
+        DRC(Stringp) knodeRemoved;
+        DRC(Stringp) knodeChanged;
+        DRC(Stringp) knamespaceAdded;
+        DRC(Stringp) knamespaceRemoved;
+        DRC(Stringp) knamespaceSet;
+        DRC(Stringp) knameSet;
+        DRC(Stringp) ktextSet;
+        DRC(Stringp) klocalName;
+        DRC(Stringp) kindex;
+        DRC(Stringp) kinput;
+        DRC(Stringp) kemptyCtor;
+        
+        DRC(Stringp) kAsterisk;     // '*'
+        DRC(Stringp) kColon;        // ':'
+        DRC(Stringp) kUnderscore;   // '_'
+        DRC(Stringp) kXML1998NS;    // http://www.w3.org/XML/1998/namespace
+        DRC(Stringp) kzero;         // '0'  - 'kZero' conflicts with MMgc
+        DRC(Stringp) kClassS;       // 'Class$'
+        DRC(Stringp) kVectorNumber; // 'Vector.<Number>'
+        DRC(Stringp) kVectorint;    // 'Vector.<int>'
+        DRC(Stringp) kVectoruint;   // 'Vector.<uint>'
+        DRC(Stringp) kVectorAny;    // 'Vector.<*>'
 
         Atom kNaN;
 

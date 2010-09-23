@@ -75,30 +75,6 @@ namespace avmplus
             kFlagPrettyPrinting = 0x08
         };
 
-        DRCWB(Stringp) kAttribute;
-        DRCWB(Stringp) kComment;
-        DRCWB(Stringp) kProcessingInstruction;
-        DRCWB(Stringp) kElement;
-        DRCWB(Stringp) kText;
-
-        DRCWB(Stringp) kColon;
-
-        // Support for built-in "xml" namespace
-        DRCWB(Stringp) kXml;
-
-        // notification types
-        DRCWB(Stringp) kAttrAdded;
-        DRCWB(Stringp) kAttrRemoved;
-        DRCWB(Stringp) kAttrChanged;
-        DRCWB(Stringp) kNodeAdded;
-        DRCWB(Stringp) kNodeRemoved;
-        DRCWB(Stringp) kNodeChanged;
-        DRCWB(Stringp) kNamespaceAdded;
-        DRCWB(Stringp) kNamespaceRemoved;
-        DRCWB(Stringp) kNamespaceSet;
-        DRCWB(Stringp) kNameSet;
-        DRCWB(Stringp) kTextSet;
-
         // static props/funcs off the XML object
         // XML.ignoreComments
         // XML.ignoreProcessingInstructions
@@ -146,9 +122,6 @@ namespace avmplus
         // arg1 = argv[1]
         // argN = argv[argc]
         Atom construct(int argc, Atom* argv);
-
-        ATOM_WB kUri;
-        ATOM_WB kLocalName;
 
         DECLARE_SLOTS_QNameClass;
     };

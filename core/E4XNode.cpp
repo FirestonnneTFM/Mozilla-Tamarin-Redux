@@ -411,9 +411,9 @@ namespace avmplus
             y = y->m_parent;
         }
 
-        if (prefix == toplevel->xmlClass()->kXml)
+        if (prefix == core->kxml)
         {
-            Namespacep nsXML = core->newNamespace(core->kEmptyString->atom(), core->internConstantStringLatin1("http://www.w3.org/XML/1998/namespace")->atom());
+            Namespacep nsXML = core->newNamespace(core->kEmptyString->atom(), core->kXML1998NS->atom());
             return nsXML;
         }
 
@@ -941,7 +941,7 @@ namespace avmplus
                 if (!detail)
                     detail = pastValue;
                 XMLObject* target = new (core->GetGC()) XMLObject(toplevel->xmlClass(), newXML);
-                target->nonChildChanges(toplevel->xmlClass()->kTextSet, newXML->getValue()->atom(), detail);
+                target->nonChildChanges(core->ktextSet, newXML->getValue()->atom(), detail);
             }
         }
 
@@ -1041,19 +1041,20 @@ namespace avmplus
 
     String *E4XNode::nodeKind(Toplevel* toplevel) const
     {
+        AvmCore* core = toplevel->core();
         switch (getClass())
         {
             case E4XNode::kAttribute:
-                return toplevel->xmlClass()->kAttribute;
+                return core->kattribute;
             case E4XNode::kText:
             case E4XNode::kCDATA:
-                return toplevel->xmlClass()->kText;
+                return core->ktext;
             case E4XNode::kComment:
-                return toplevel->xmlClass()->kComment;
+                return core->kcomment;
             case E4XNode::kProcessingInstruction:
-                return toplevel->xmlClass()->kProcessingInstruction;
+                return core->kprocessing_instruction;
             case E4XNode::kElement:
-                return toplevel->xmlClass()->kElement;
+                return core->kelement;
             case E4XNode::kUnknown:
             default:
                 AvmAssert(0);

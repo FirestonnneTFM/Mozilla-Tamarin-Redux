@@ -54,9 +54,6 @@ namespace avmplus
 
         ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
         setPrototypePtr(new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype));
-
-        kindex = core->internConstantStringLatin1("index");
-        kinput = core->internConstantStringLatin1("input");
     }
 
     ScriptObject* RegExpClass::createInstance(VTable *ivtable, ScriptObject* /*prototype*/)

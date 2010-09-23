@@ -708,18 +708,18 @@ namespace avmshell
 
     Stringp ByteArrayObject::get_endian()
     {
-        return (m_byteArray.GetEndian() == kBigEndian) ? core()->internConstantStringLatin1("bigEndian") : core()->internConstantStringLatin1("littleEndian");
+        return (m_byteArray.GetEndian() == kBigEndian) ? core()->kbigEndian : core()->klittleEndian;
     }
 
     void ByteArrayObject::set_endian(Stringp type)
     {
         AvmCore* core = this->core();
         type = core->internString(type);
-        if (type == core->internConstantStringLatin1("bigEndian"))
+        if (type == core->kbigEndian)
         {
             m_byteArray.SetEndian(kBigEndian);
         }
-        else if (type == core->internConstantStringLatin1("littleEndian"))
+        else if (type == core->klittleEndian)
         {
             m_byteArray.SetEndian(kLittleEndian);
         }
