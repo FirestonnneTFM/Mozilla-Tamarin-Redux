@@ -858,10 +858,6 @@ namespace avmplus
         {
             metaNames = (Stringp*) core->GetGC()->Calloc(metadataCount, sizeof(Stringp), MMgc::GC::kContainsPointers);
 
-#ifdef AVMPLUS_VERBOSE
-            kVerboseVerify = core->internConstantStringLatin1("VerboseVerify");
-#endif
-
             for (uint32_t i=0; i < metadataCount; i++)
             {
                 pool->metadata_infos.set(i, pos);
