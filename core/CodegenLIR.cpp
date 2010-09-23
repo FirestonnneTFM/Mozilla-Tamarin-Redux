@@ -3902,7 +3902,8 @@ namespace avmplus
                     LIns* cmp = binaryIns(LIR_ltui, index, InsConst(count));
                     branchToAbcPos(LIR_jf, cmp, targetpc);
 
-                    if (NJ_JTBL_SUPPORTED) {
+                    // count == 1 is equivalent to if (case) else (default), so don't bother with jtbl
+                    if (NJ_JTBL_SUPPORTED && count > 1) {
                         // Backend supports LIR_jtbl for jump tables
                         LIns* jtbl = lirout->insJtbl(index, count);
                         for (int i=0; i < count; i++) {
