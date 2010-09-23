@@ -6098,6 +6098,7 @@ namespace avmplus
                 CASE64(LIR_callq:)
                 case LIR_calli:
                 case LIR_calld:
+                case LIR_callv:
                     analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
                             varlivein, varlabels, taglivein, taglabels);
                     break;
@@ -6240,6 +6241,7 @@ namespace avmplus
                 CASE64(LIR_callq:)
                 case LIR_calli:
                 case LIR_calld:
+                case LIR_callv:
                     analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
                             varlivein, varlabels, taglivein, taglabels);
                     break;
