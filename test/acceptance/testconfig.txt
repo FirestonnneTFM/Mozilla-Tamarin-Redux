@@ -432,6 +432,8 @@ spidermonkey/js1_5/Function/regress-338121-.*, (arm|mips).*, skip, test runs out
 spidermonkey/js1_5/Function/regress-338001, (arm|mips).*, skip, test runs out of memory on devices
 
 spidermonkey/js1_5/Regress/regress-98901, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
+spidermonkey/js1_5/Regress/regress-89443, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
+spidermonkey/js1_5/Regress/regress-96526-003, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
 
 ### Spidermonkey JS1_6 ###
 spidermonkey/js1_6/Array/regress-290592:.*length, ^((?!diff).)*$, expectedfail, related to https://bugzilla.mozilla.org/show_bug.cgi?id=551032
