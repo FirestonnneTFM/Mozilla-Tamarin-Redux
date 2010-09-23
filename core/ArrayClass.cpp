@@ -64,8 +64,7 @@ namespace avmplus
     // negative numbers too.
 
     ArrayClass::ArrayClass(VTable* cvtable)
-    : ClassClosure(cvtable),
-      kComma(core()->internConstantStringLatin1(","))
+    : ClassClosure(cvtable)
     {
         AvmCore* core = this->core();
         Toplevel* toplevel = this->toplevel();
