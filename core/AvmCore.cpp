@@ -351,10 +351,12 @@ namespace avmplus
         ktoString = internConstantStringLatin1("toString");
         ktoLocaleString = internConstantStringLatin1("toLocaleString");
         kvalueOf = internConstantStringLatin1("valueOf");
+        kvalue = internConstantStringLatin1("value");
         klength = internConstantStringLatin1("length");
 
         kobject = internConstantStringLatin1("object");
         kboolean = internConstantStringLatin1("boolean");
+        kvoid = internConstantStringLatin1("void");
         knumber = internConstantStringLatin1("number");
         kstring = internConstantStringLatin1("string");
         kxml = internConstantStringLatin1("xml");
@@ -366,13 +368,47 @@ namespace avmplus
         kprefix = internConstantStringLatin1("prefix");
         kNaN = doubleToAtom(MathUtils::kNaN);
         kNeedsDxns = internConstantStringLatin1("NeedsDxns");
-        kAsterisk = internConstantStringLatin1("*");
         kVersion = internConstantStringLatin1("Version");
 
 #if VMCFG_METHOD_NAMES
         kanonymousFunc = newConstantStringLatin1("<anonymous>");
 #endif
-
+        
+        klittleEndian = internConstantStringLatin1("littleEndian");
+        kbigEndian = internConstantStringLatin1("bigEndian");
+        kparent = internConstantStringLatin1("parent");
+        kattribute = internConstantStringLatin1("attribute");
+        kcomment = internConstantStringLatin1("comment");
+        kprocessing_instruction = internConstantStringLatin1("processing-instruction");
+        kelement = internConstantStringLatin1("element");
+        ktext = internConstantStringLatin1("text");
+        kattributeAdded = internConstantStringLatin1("attributeAdded");
+        kattributeRemoved = internConstantStringLatin1("attributeRemoved");
+        kattributeChanged = internConstantStringLatin1("attributeChanged");
+        knodeAdded = internConstantStringLatin1("nodeAdded");
+        knodeRemoved = internConstantStringLatin1("nodeRemoved");
+        knodeChanged = internConstantStringLatin1("nodeChanged");
+        knamespaceAdded = internConstantStringLatin1("namespaceAdded");
+        knamespaceRemoved = internConstantStringLatin1("namespaceRemoved");
+        knamespaceSet = internConstantStringLatin1("namespaceSet");
+        knameSet = internConstantStringLatin1("nameSet");
+        ktextSet = internConstantStringLatin1("textSet");
+        klocalName = internConstantStringLatin1("localName");
+        kindex = internConstantStringLatin1("index");
+        kinput = internConstantStringLatin1("input");
+        kemptyCtor = internConstantStringLatin1("emptyCtor");
+        
+        kAsterisk = internConstantStringLatin1("*");
+        kColon = internConstantStringLatin1(":");
+        kUnderscore = internConstantStringLatin1("_");
+        kXML1998NS = internConstantStringLatin1("http://www.w3.org/XML/1998/namespace");
+        kzero = internConstantStringLatin1("0");
+        kClassS = internConstantStringLatin1("Class$");
+        kVectorNumber = internConstantStringLatin1("Vector.<Number>");
+        kVectorint = internConstantStringLatin1("Vector.<int>");
+        kVectoruint = internConstantStringLatin1("Vector.<uint>");
+        kVectorAny = internConstantStringLatin1("Vector.<*>");
+        
         for (int i = 0; i < 128; i++)
         {
             AvmAssert(k_cachedChars[i] == i);

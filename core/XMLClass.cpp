@@ -48,8 +48,6 @@ namespace avmplus
     {
         AvmAssert(traits()->getSizeOfInstance() == sizeof(XMLClass));
 
-        AvmCore* core = this->core();
-
         createVanillaPrototype();
 
         // These are static objects on the XML type
@@ -61,28 +59,6 @@ namespace avmplus
         // XML.prettyIndent
         m_flags = kFlagIgnoreComments | kFlagIgnoreProcessingInstructions | kFlagIgnoreWhitespace | kFlagPrettyPrinting;
         m_prettyIndent = 2;
-
-        kAttribute = core->internConstantStringLatin1("attribute");
-        kComment = core->internConstantStringLatin1("comment");
-        kProcessingInstruction = core->internConstantStringLatin1("processing-instruction");
-        kElement = core->internConstantStringLatin1("element");
-        kText = core->internConstantStringLatin1("text");
-
-        kColon = core->internConstantStringLatin1(":");
-        kXml = core->internConstantStringLatin1("xml");
-
-        // for notifications
-        kAttrAdded = core->internConstantStringLatin1("attributeAdded");
-        kAttrRemoved = core->internConstantStringLatin1("attributeRemoved");
-        kAttrChanged = core->internConstantStringLatin1("attributeChanged");
-        kNodeAdded = core->internConstantStringLatin1("nodeAdded");
-        kNodeRemoved = core->internConstantStringLatin1("nodeRemoved");
-        kNodeChanged = core->internConstantStringLatin1("nodeChanged");
-        kNamespaceAdded = core->internConstantStringLatin1("namespaceAdded");
-        kNamespaceRemoved = core->internConstantStringLatin1("namespaceRemoved");
-        kNamespaceSet = core->internConstantStringLatin1("namespaceSet");
-        kNameSet = core->internConstantStringLatin1("nameSet");
-        kTextSet = core->internConstantStringLatin1("textSet");
 
         // XML.settings
         // XML.setSettings ([settings])
@@ -317,10 +293,6 @@ namespace avmplus
         AvmAssert(traits()->getSizeOfInstance() == sizeof(QNameClass));
 
         createVanillaPrototype();
-
-        AvmCore* core = this->core();
-        kUri = core->internConstantStringLatin1("uri")->atom();
-        kLocalName = core->internConstantStringLatin1("localName")->atom();
     }
 
     // E4X 13.3.1, page 66

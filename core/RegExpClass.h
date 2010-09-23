@@ -63,9 +63,6 @@ namespace avmplus
 
         virtual ScriptObject* createInstance(VTable *ivtable, ScriptObject* prototype);
 
-        DRCWB(String*) kindex;
-        DRCWB(String*) kinput;
-
         DECLARE_SLOTS_RegExpClass;
     };
 }

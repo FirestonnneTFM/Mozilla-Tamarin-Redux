@@ -55,7 +55,7 @@ namespace avmplus
 
     Atom ClassClass::construct(int /*argc*/, Atom* /*argv*/)
     {
-        Multiname multiname(core()->getAnyPublicNamespace(), core()->internConstantStringLatin1("Class$"));
+        Multiname multiname(core()->getAnyPublicNamespace(), core()->kClassS);
         toplevel()->throwTypeError(kNotConstructorError, core()->toErrorString(&multiname));
         return nullObjectAtom;
     }

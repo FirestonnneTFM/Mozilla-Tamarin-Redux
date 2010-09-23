@@ -310,7 +310,7 @@ namespace avmplus
                 y->setQName (core, m_targetProperty);
 
                 // warning: it looks like this is sent prior to the attribute being added.
-                rx->nonChildChanges(xmlClass()->kAttrAdded, this->m_targetProperty.getName()->atom());
+                rx->nonChildChanges(core->kattributeAdded, this->m_targetProperty.getName()->atom());
             }
             // if targetProperty is null or targetProperty.localName = "*"
             else if (m_targetProperty.isAnyName() ||
@@ -468,11 +468,11 @@ namespace avmplus
                     {
                         // @todo; is this condition ever true?
                         if (node != prior->getNode())
-                            target->childChanges( xmlClass()->kNodeChanged, obj->atom(), prior->getNode());
+                            target->childChanges(core->knodeChanged, obj->atom(), prior->getNode());
                     }
                     else
                     {
-                        target->childChanges( xmlClass()->kNodeAdded, obj->atom());
+                        target->childChanges(core->knodeAdded, obj->atom());
                     }
                 }
             }
@@ -505,7 +505,7 @@ namespace avmplus
                         if (XMLObject::notifyNeeded(parent))
                         {
                             XMLObject *po = new (core->GetGC()) XMLObject (toplevel->xmlClass(), parent);
-                            po->childChanges(xmlClass()->kNodeAdded, xo->atom());
+                            po->childChanges(core->knodeAdded, xo->atom());
                         }
                         break;
                     }
@@ -565,7 +565,7 @@ namespace avmplus
                     {
                         AvmCore *core = this->core();
                         XMLObject *r = new (core->GetGC())  XMLObject (xmlClass(), x);
-                        px->childChanges(xmlClass()->kNodeRemoved, r->atom());
+                        px->childChanges(core->knodeRemoved, r->atom());
                     }
                 }
             }

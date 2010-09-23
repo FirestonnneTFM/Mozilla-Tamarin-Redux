@@ -141,9 +141,7 @@ namespace avmplus
 
             m_node->_addInScopeNamespace (core, ns, publicNS);
 
-            Stringp name = core->internConstantStringLatin1("parent");
-
-            m_node->setQName (core, name, ns);
+            m_node->setQName (core, core->kparent, ns);
 
             p = m_node;
         }
@@ -672,7 +670,7 @@ namespace avmplus
 
                 e->_addInScopeNamespace(core, ns, publicNS);
 
-                nonChildChanges(xmlClass()->kAttrAdded, nameAtom, sc->atom());
+                nonChildChanges(core->kattributeAdded, nameAtom, sc->atom());
             }
             else // step 7g
             {
@@ -680,7 +678,7 @@ namespace avmplus
                 Stringp prior = x->getValue();
                 x->setValue (sc);
 
-                nonChildChanges(xmlClass()->kAttrChanged, nameAtom, (prior) ? prior->atom() : undefinedAtom);
+                nonChildChanges(core->kattributeChanged, nameAtom, (prior) ? prior->atom() : undefinedAtom);
             }
 
             // step 7h
@@ -728,7 +726,7 @@ namespace avmplus
                     if (notify && (was->getClass() == E4XNode::kElement))
                     {
                         XMLObject* nd = new (core->GetGC())  XMLObject (toplevel->xmlClass(), was);
-                        childChanges(xmlClass()->kNodeRemoved, nd->atom());
+                        childChanges(core->knodeRemoved, nd->atom());
                     }
                 }
 
@@ -777,7 +775,7 @@ namespace avmplus
                 if (ild->getClass() == E4XNode::kElement)
                 {
                     XMLObject* nd = new (core->GetGC())  XMLObject (toplevel->xmlClass(), ild);
-                    target->childChanges(xmlClass()->kNodeRemoved, nd->atom());
+                    target->childChanges(core->knodeRemoved, nd->atom());
                 }
             }
 
@@ -809,7 +807,7 @@ namespace avmplus
                 if (m_node->_length() > (uint32_t)i)
                 {
                     XMLObject* xml = new (core->GetGC()) XMLObject(xmlClass(), m_node->_getAt(i));
-                    childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, xml->atom(), prior);
+                    childChanges( (prior) ? core->knodeChanged : core->knodeAdded, xml->atom(), prior);
                 }
             }
         }
@@ -855,7 +853,7 @@ namespace avmplus
                     x->getQName(&previous, publicNS);
                     Stringp name = previous.getName();
                     Stringp val = x->getValue();
-                    nonChildChanges(xmlClass()->kAttrRemoved, (name) ? name->atom() : undefinedAtom, (val) ? val->atom() : undefinedAtom);
+                    nonChildChanges(core->kattributeRemoved, (name) ? name->atom() : undefinedAtom, (val) ? val->atom() : undefinedAtom);
                 }
                 else
                 {
@@ -888,7 +886,7 @@ namespace avmplus
                 if (notify && isElem)
                 {
                     XMLObject *r = new (core->GetGC())  XMLObject (xmlClass(), x);
-                    childChanges(xmlClass()->kNodeRemoved, r->atom());
+                    childChanges(core->knodeRemoved, r->atom());
                 }
             }
             else
@@ -1542,7 +1540,7 @@ namespace avmplus
             _namespace = ns->atom();
         }
 
-        nonChildChanges(xmlClass()->kNamespaceAdded, _namespace);
+        nonChildChanges(core->knamespaceAdded, _namespace);
         return this;
     }
 
@@ -1784,7 +1782,7 @@ namespace avmplus
         if (AvmCore::isNull(child1))
         {
             m_node->_insert (core, toplevel, 0, child2);
-            childChanges(xmlClass()->kNodeAdded, child2);
+            childChanges(core->knodeAdded, child2);
             return this->atom();
         }
         else
@@ -1806,7 +1804,7 @@ namespace avmplus
                     if (child == c1)
                     {
                         m_node->_insert (core, toplevel, i + 1, child2);
-                        childChanges(xmlClass()->kNodeAdded, child2);
+                        childChanges(core->knodeAdded, child2);
                         return this->atom();
                     }
                 }
@@ -1830,7 +1828,7 @@ namespace avmplus
         if (AvmCore::isNull(child1))
         {
             m_node->_insert (core, toplevel, _length(), child2);
-            childChanges(xmlClass()->kNodeAdded, child2);
+            childChanges(core->knodeAdded, child2);
             return this->atom();
         }
         else
@@ -1852,7 +1850,7 @@ namespace avmplus
                     if (child == c1)
                     {
                         m_node->_insert (core, toplevel, i, child2);
-                        childChanges(xmlClass()->kNodeAdded, child2);
+                        childChanges(core->knodeAdded, child2);
                         return this->atom();
                     }
                 }
@@ -2032,7 +2030,7 @@ namespace avmplus
                     if (notify)
                     {
                         XMLObject *nd = new (core->GetGC())  XMLObject (xmlClass(), x2);
-                        childChanges(xmlClass()->kNodeRemoved, nd->atom());
+                        childChanges(core->knodeRemoved, nd->atom());
                     }
                 }
                 /// Need to check if string is "empty" - 0 length or filled with whitespace
@@ -2045,7 +2043,7 @@ namespace avmplus
                     if (notify)
                     {
                         XMLObject *nd = new (core->GetGC())  XMLObject (xmlClass(), prior);
-                        childChanges(xmlClass()->kNodeRemoved, nd->atom());
+                        childChanges(core->knodeRemoved, nd->atom());
                     }
                 }
                 else
@@ -2058,7 +2056,7 @@ namespace avmplus
                 if ((current != prior) && notify)
                 {
                     XMLObject *xo = new (core->GetGC())  XMLObject (xmlClass(), x);
-                    xo->nonChildChanges(xmlClass()->kTextSet, current->atom(), (prior) ? prior->atom() : undefinedAtom);
+                    xo->nonChildChanges(core->ktextSet, current->atom(), (prior) ? prior->atom() : undefinedAtom);
                 }
             }
             else
@@ -2120,14 +2118,14 @@ namespace avmplus
 
         m_node->_insert (core, toplevel, 0, value);
 
-        childChanges(xmlClass()->kNodeAdded, value);
+        childChanges(core->knodeAdded, value);
         return this;
     }
 
     bool XMLObject::XML_AS3_propertyIsEnumerable(Atom P)    // NOT virtual, not an override
     {
         AvmCore *core = this->core();
-        if (core->intern(P) == core->internConstantStringLatin1("0"))
+        if (core->intern(P) == core->kzero)
             return true;
 
         return false;
@@ -2184,7 +2182,7 @@ namespace avmplus
 
         // step 9
         // Note about namespaces in ancestors and parents, etc.
-        nonChildChanges(xmlClass()->kNamespaceRemoved, ns->atom());
+        nonChildChanges(core->knamespaceRemoved, ns->atom());
         return this;
     }
 
@@ -2218,7 +2216,7 @@ namespace avmplus
         if (AvmCore::getIndexFromString (core->string(P), &index))
         {
             E4XNode* prior = m_node->_replace (core, toplevel, index, c);
-            childChanges(xmlClass()->kNodeChanged, c, prior);
+            childChanges(core->knodeChanged, c, prior);
             return this;
         }
 
@@ -2252,7 +2250,7 @@ namespace avmplus
                     if (notify && was->getClass() == E4XNode::kElement)
                     {
                         XMLObject* nd = new (core->GetGC())  XMLObject (xmlClass(), was);
-                        childChanges(xmlClass()->kNodeRemoved, nd->atom());
+                        childChanges(core->knodeRemoved, nd->atom());
                     }
                 }
 
@@ -2265,7 +2263,7 @@ namespace avmplus
             return this;
 
         E4XNode* prior = m_node->_replace (core, toplevel, i, c);
-        childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, c, prior);
+        childChanges( (prior) ? core->knodeChanged : core->knodeAdded, c, prior);
         return this;
     }
 
@@ -2306,7 +2304,7 @@ namespace avmplus
             m.setName (newname);
             getNode()->setQName (core, &m);
 
-            nonChildChanges(xmlClass()->kNameSet, m.getName()->atom(), (prior) ? prior->atom() : undefinedAtom );
+            nonChildChanges(core->knameSet, m.getName()->atom(), (prior) ? prior->atom() : undefinedAtom );
         }
         return;
     }
@@ -2362,7 +2360,7 @@ namespace avmplus
                 }
             }
 
-            nonChildChanges(xmlClass()->kNameSet, name, m.getName()->atom());
+            nonChildChanges(core->knameSet, name, m.getName()->atom());
         }
         return;
     }
@@ -2392,7 +2390,7 @@ namespace avmplus
             getNode()->_addInScopeNamespace (core, newns, publicNS);
         }
 
-        nonChildChanges(xmlClass()->kNamespaceSet, newns->atom());
+        nonChildChanges(core->knamespaceSet, newns->atom());
         return;
     }
 
@@ -2945,9 +2943,9 @@ namespace avmplus
         AvmAssert(index > 0);
         // first return "uri" then "localName"
         if (index == 1)
-            return toplevel()->qnameClass()->kUri;
+            return toplevel()->core()->kuri->atom();
         else if (index == 2)
-            return toplevel()->qnameClass()->kLocalName;
+            return toplevel()->core()->klocalName->atom();
         else
             return nullObjectAtom;
     }
