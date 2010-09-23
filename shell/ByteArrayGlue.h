@@ -85,11 +85,11 @@ namespace avmshell
             // ByteArray don't result in a DomainEnv not being
             // collectable because a ByteArray refers to it and
             // is referenced by another live DomainEnv
-            MMgc::GCWeakRef* weakSubscriber;
+            DWB(MMgc::GCWeakRef*) weakSubscriber;
             // next link
-            SubscriberLink* next;
+            DWB(SubscriberLink*) next;
         };
-        SubscriberLink* m_subscriberRoot;
+        DWB(SubscriberLink*) m_subscriberRoot;
 
         void NotifySubscribers();
         void ThrowMemoryError();

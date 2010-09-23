@@ -181,7 +181,7 @@ namespace avmshell
     void ByteArray::NotifySubscribers()
     {
         SubscriberLink *curLink = m_subscriberRoot;
-        SubscriberLink **prevNext = &m_subscriberRoot;
+        DWB(SubscriberLink*) *prevNext = &m_subscriberRoot;
 
         while(curLink != NULL) // notify subscribers
         {
@@ -197,7 +197,7 @@ namespace avmshell
             else
             {
                 // Domain went away? remove link
-                MMgc::GC::WriteBarrier(prevNext, curLink->next);
+                *prevNext = curLink->next;
             }
             curLink = curLink->next;
         }
@@ -210,8 +210,8 @@ namespace avmshell
             removeSubscriber(subscriber);
             SubscriberLink *newLink = new (MMgc::GC::GetGC(subscriber)) SubscriberLink;
             newLink->weakSubscriber = subscriber->GetWeakRef();
-            MMgc::GC::WriteBarrier(&newLink->next, m_subscriberRoot);
-            MMgc::GC::WriteBarrier(&m_subscriberRoot, newLink);
+            newLink->next =  m_subscriberRoot;
+            m_subscriberRoot = newLink;
             // notify the new "subscriber" of the current state of the world
             subscriber->notifyGlobalMemoryChanged(m_array, m_length);
             return true;
@@ -221,14 +221,14 @@ namespace avmshell
 
     bool ByteArray::removeSubscriber(GlobalMemorySubscriber* subscriber)
     {
-        SubscriberLink **prevNext = &m_subscriberRoot;
+        DWB(SubscriberLink*)*prevNext = &m_subscriberRoot;
         SubscriberLink *curLink = m_subscriberRoot;
 
         while(curLink)
         {
             if ((GlobalMemorySubscriber*)(void*)curLink->weakSubscriber->get() == subscriber)
             {
-                MMgc::GC::WriteBarrier(prevNext, curLink->next);
+                *prevNext = curLink->next;
                 return true;
             }
             prevNext = &curLink->next;
