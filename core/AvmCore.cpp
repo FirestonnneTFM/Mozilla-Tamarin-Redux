@@ -335,11 +335,9 @@ namespace avmplus
 
         numStrings = 1024; // power of 2
         strings = mmfx_new_array(DRC(Stringp), numStrings);
-        VMPI_memset(strings, 0, numStrings*sizeof(DRC(Stringp)));
 
         numNamespaces = 1024;  // power of 2
         namespaces = mmfx_new_array(DRC(Namespacep), numNamespaces);
-        VMPI_memset(namespaces, 0, numNamespaces*sizeof(DRC(Namespacep)));
 
         console.setCore(this);
 
@@ -3616,7 +3614,6 @@ return the result of the comparison ToPrimitive(x) == y.
         int oldStringCount = numStrings;
 
         strings = mmfx_new_array(DRC(Stringp), newlen);
-        VMPI_memset(strings, 0, newlen*sizeof(DRC(Stringp)));
         numStrings = newlen;
 
 #ifdef _DEBUG // debug sanity checks
@@ -3679,7 +3676,6 @@ return the result of the comparison ToPrimitive(x) == y.
         int oldCount = numNamespaces;
 
         namespaces = mmfx_new_array(DRC(Namespacep), newlen);
-        VMPI_memset(namespaces, 0, newlen*sizeof(DRC(Namespacep)));
         numNamespaces = newlen;
 
         for (int i=0; i < oldCount; i++)
