@@ -559,8 +559,7 @@ class PerformanceRuntest(RuntestBase):
                 self.metricInfo[metric] = {'best':min, 'largerIsFaster':False}
             a1 = self.testData[testName][metric]['avg1'] = mean(resultDict[metric])
 
-            if self.logresults and len(resultDict[metric]) > 1:
-                # only send results if there are multiple iterations (TODO: why only multi iteration?)
+            if self.logresults:
                 self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" %
                                    (testName, metric, r1, conf95(resultDict[metric]),
                                     self.testData[testName][metric]['avg1'],
