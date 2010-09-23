@@ -126,8 +126,6 @@ namespace avmplus
 
         static ArrayObject* isArray(Toplevel* toplevel, Atom instance);
 
-        const DRCWB(Stringp) kComma;
-
         DECLARE_SLOTS_ArrayClass;
     };
 }
