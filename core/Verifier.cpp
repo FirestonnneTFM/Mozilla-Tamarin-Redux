@@ -2290,11 +2290,11 @@ namespace avmplus
             case OP_debug:
             {
 #ifdef DEBUGGER
-                uint8 type = (uint8)*(pc + 1);
+                uint8_t type = (uint8_t)*(pc + 1);
                 if (type == DI_LOCAL) {
                     // see Debugger::scanCode
-                    const byte* pc2 = pc + 2;
-                    uint32 index = AvmCore::readU32(pc2);
+                    const uint8_t* pc2 = pc + 2;
+                    uint32_t index = AvmCore::readU32(pc2);
                     checkCpoolOperand(index, kStringType);
                 }
 #endif
@@ -3338,7 +3338,7 @@ namespace avmplus
     }
 
     #ifdef AVMPLUS_VERBOSE
-    void Verifier::printOpcode(const byte* pc, const byte* code_end)
+    void Verifier::printOpcode(const uint8_t* pc, const uint8_t* code_end)
     {
         int offset = int(pc - code_pos);
         core->console << "  " << offset << ':';

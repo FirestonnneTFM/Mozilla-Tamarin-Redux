@@ -137,7 +137,7 @@ namespace avmplus
         void parseMultiname(const uint8_t *pos, Multiname& m) const;
 
         Traits* resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid=false);
-        Traits* resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid=false);
+        Traits* resolveTypeName(const uint8_t*& pc, const Toplevel* toplevel, bool allowVoid=false);
 
         void resolveBindingNameNoCheck(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
         void resolveBindingNameNoCheck(const uint8_t* &p, Multiname &m, const Toplevel* toplevel) const;
