@@ -163,9 +163,6 @@ namespace avmplus
         uint8_t*                    abcEnd; // one past the end, actually
         Stringp*                    metaNames;
         Stringp                     kNeedsDxns;
-#ifdef AVMPLUS_VERBOSE
-        Stringp                     kVerboseVerify;
-#endif
         int32_t                     version;
         uint32_t                    classCount;
     // ------------------------ DATA SECTION END
