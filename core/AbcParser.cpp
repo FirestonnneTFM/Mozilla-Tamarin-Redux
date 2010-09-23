@@ -1558,7 +1558,7 @@ namespace avmplus
                 if (*p++ != CONSTANT_TypeName)
                     continue;
 
-                uint32 basetype_index = readU30(p); // type being parameterized (currently, always Vector)
+                uint32_t basetype_index = readU30(p); // type being parameterized (currently, always Vector)
 
                 // the type being parameterized can't itself be a parameterized type.
                 // (note that this check also means cycles for this value are impossible

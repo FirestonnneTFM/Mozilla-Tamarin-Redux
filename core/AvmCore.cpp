@@ -1817,7 +1817,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case OP_callstatic:
             case OP_newfunction:
             {
-                uint32 method_id = readU32(pc);
+                uint32_t method_id = readU32(pc);
                 buffer << opcodeInfo[opcode].name;
                 if (method_id < pool->methodCount())
                     buffer << " invalid";
