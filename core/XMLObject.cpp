@@ -183,8 +183,8 @@ namespace avmplus
                         if (!NodeNameEquals(tag.text, nodeNameStart, parentName, ns) &&
                             // We're trying to support paired nodes where the first node gets a namespace
                             // from the default namespace.
-                            parentName->Compare(*tag.text, nodeNameStart, tag.text->length()-nodeNameStart) != 0 &&
-                            ns->getURI() == toplevel->getDefaultNamespace()->getURI())
+                            !(parentName->Compare(*tag.text, nodeNameStart, tag.text->length()-nodeNameStart) == 0 &&
+                            ns->getURI() == toplevel->getDefaultNamespace()->getURI()))
                         {
                             // If p == m_node, we are at the top of our tree and we're parsing the fake "parent"
                             // wrapper tags around our actual XML text.  Instead of warning about a missing "</parent>"
