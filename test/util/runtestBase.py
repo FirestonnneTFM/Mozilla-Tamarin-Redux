@@ -368,17 +368,22 @@ class RuntestBase:
                 cputype='mips'
             elif re.search('(arm)', f.lower()):
                 cputype='arm'
+            # Keep this before x86 since `file $AVM` contains 'ELF 32-bit' on our SH4 hardware:
+            #   ELF 32-bit LSB executable, Hitachi SH, version 1 (SYSV),
+            #   for GNU/Linux 2.6.30, dynamically linked (uses shared libs),
+            #   for GNU/Linux 2.6.30, not stripped
+            elif re.search('( SH,)', f):
+                cputype='sh4'
             elif re.search('(32-bit|80386|i386)', f):
                 cputype='x86'
             elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f):
                 cputype='x64'
-
             if cputype == '':
                 raise Exception()
 
         except:
             try:
-                cputype={'AMD64':'x86','x86':'x86','i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','mips':'mips','armv7l':'arm','':'x86'}[platform.machine()]
+                cputype={'AMD64':'x86','x86':'x86','i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','mips':'mips','armv7l':'arm','sh4':'sh4','':'x86'}[platform.machine()]
                 if cputype == 'x86' and splitext(self.avm)[0][-2:] == '64':
                     cputype == 'x64'
             except:
