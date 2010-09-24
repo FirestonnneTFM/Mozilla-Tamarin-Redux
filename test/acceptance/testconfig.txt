@@ -187,19 +187,19 @@ regress/bug_515935 , arm-android.*, skip, https://bugzilla.mozilla.org/show_bug.
 # ARM
 ####################
 # do not use wildcard match (.*) at end, use (?<!-deep) so -deep ending will not match, want it to run in -deep phase
-ecma3/Unicode/u5000_CJKUnifiedIdeographs , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/u6000_CJKUnifiedIdeographs , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/u7000_CJKUnifiedIdeographs , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/u8000_CJKUnifiedIdeographs , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/u9000_CJKUnifiedIdeographs , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/uE000_PrivateUseArea , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/uAC00_HangulSyllables , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
-ecma3/Unicode/uA000_YiSyllables, (arm|mips)-.*(?<!-deep)$ , skip, tests run too slowly on winmo
+ecma3/Unicode/u5000_CJKUnifiedIdeographs , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/u6000_CJKUnifiedIdeographs , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/u7000_CJKUnifiedIdeographs , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/u8000_CJKUnifiedIdeographs , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/u9000_CJKUnifiedIdeographs , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/uE000_PrivateUseArea , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/uAC00_HangulSyllables , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
+ecma3/Unicode/uA000_YiSyllables, (arm|mips|sh4)-.*(?<!-deep)$ , skip, tests run too slowly on winmo
 
-mops/mops , (arm|mips)-.*(?<!-deep)$ , skip , test runs too slowly
+mops/mops , (arm|mips|sh4)-.*(?<!-deep)$ , skip , test runs too slowly
 
-regress/bug_515935 , (arm|mips)-lnx.* , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
+regress/bug_515935 , (arm|mips|sh4)-lnx.* , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
 
 
 
@@ -219,6 +219,12 @@ as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip
 regress/bug_555568, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335
 regress/bug_558442a, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335
 
+
+####################
+# SH4
+####################
+abcasm/syntaxErrors , sh4.*, skip, sh4 box lacks java
+versioning/bugcompat , sh4.*, skip, sh4 box lacks java
 
 ####################
 # Performance-acceptance testing: tests that must run on a performance machine 
@@ -415,7 +421,7 @@ spidermonkey/js1_5/Regress/regress-280769-(4|5), ^((?!diff).)*$, expectedfail, N
 
 spidermonkey/js1_5/Regress/regress-438415-02, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551202
 spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4).*, x64-lnx.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
-spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4|6).*, .*(mac|x86-lnx|arm-lnx|mips-lnx|sparc-sol).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
+spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4|6).*, .*(mac|x86-lnx|arm-lnx|mips-lnx|sh4-lnx|sparc-sol).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
 spidermonkey/js1_5/Regress/regress-58116, .*-diff, skip, skip in diff testing
 spidermonkey/js1_5/Regress/regress-261887, .*-diff, skip, skip in diff testing as output can vary somewhat
 
@@ -427,9 +433,9 @@ spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|Ojit|jitord
 spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|Ojit|jitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 #spidermonkey/js1_5/Regress/regress-146596, .*wordcode.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
 
-spidermonkey/js1_5/Array/regress-157652, (arm|mips).*, skip, test runs out of memory on devices
-spidermonkey/js1_5/Function/regress-338121-.*, (arm|mips).*, skip, test runs out of memory on devices
-spidermonkey/js1_5/Function/regress-338001, (arm|mips).*, skip, test runs out of memory on devices
+spidermonkey/js1_5/Array/regress-157652, (arm|mips|sh4).*, skip, test runs out of memory on devices
+spidermonkey/js1_5/Function/regress-338121-.*, (arm|mips|sh4).*, skip, test runs out of memory on devices
+spidermonkey/js1_5/Function/regress-338001, (arm|mips|sh4).*, skip, test runs out of memory on devices
 
 spidermonkey/js1_5/Regress/regress-98901, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
 spidermonkey/js1_5/Regress/regress-89443, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
