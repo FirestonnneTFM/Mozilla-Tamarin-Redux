@@ -351,7 +351,22 @@ namespace avmshell
 
     bool ByteArrayObject::hasAtomProperty(Atom name) const
     {
-        return ScriptObject::hasAtomProperty(name) || getAtomProperty(name) != undefinedAtom;
+        if (core()->currentBugCompatibility()->bugzilla558863) {
+            uint32_t index;
+            if (ScriptObject::hasAtomProperty(name)) {
+                return true;
+            } else if (AvmCore::getIndexFromAtom(name, &index)) {
+                // return (getAtomProperty(name) != undefinedAtom);
+                // is same as:
+                return (index < (uint32_t) m_byteArray.GetLength());
+            } else {
+                return false;
+            }
+        } else {
+            // old logic from before fix to bug 558863.
+            return ScriptObject::hasAtomProperty(name)
+                || getAtomProperty(name) != undefinedAtom;
+        }
     }
 
     void ByteArrayObject::setLength(uint32_t newLength)
