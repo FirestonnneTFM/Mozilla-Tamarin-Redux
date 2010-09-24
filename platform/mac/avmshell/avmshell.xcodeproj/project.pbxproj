@@ -867,6 +867,9 @@
 		1992FDA2102869D10032FBBF /* Containers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Containers.h; path = ../../../nanojit/Containers.h; sourceTree = SOURCE_ROOT; };
 		1998F9E81072A6ED00780913 /* CodegenLIR-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "CodegenLIR-inlines.h"; path = "../../../core/CodegenLIR-inlines.h"; sourceTree = SOURCE_ROOT; };
 		1998F9E91072A6ED00780913 /* Toplevel-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Toplevel-inlines.h"; path = "../../../core/Toplevel-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19A21B371213443300CB55E0 /* PageMap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PageMap-inlines.h"; path = "../../../MMgc/PageMap-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19A21B381213443300CB55E0 /* PageMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PageMap.cpp; path = ../../../MMgc/PageMap.cpp; sourceTree = SOURCE_ROOT; };
+		19A21B391213443300CB55E0 /* PageMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PageMap.h; path = ../../../MMgc/PageMap.h; sourceTree = SOURCE_ROOT; };
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA441100CC20200172A70 /* Allocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Allocator.cpp; path = ../../../nanojit/Allocator.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA442100CC20200172A70 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = ../../../nanojit/Allocator.h; sourceTree = SOURCE_ROOT; };
@@ -1459,6 +1462,9 @@
 		079DFA860F3A965C0031D1B4 /* mmgc */ = {
 			isa = PBXGroup;
 			children = (
+				19A21B371213443300CB55E0 /* PageMap-inlines.h */,
+				19A21B381213443300CB55E0 /* PageMap.cpp */,
+				19A21B391213443300CB55E0 /* PageMap.h */,
 				07D28FEA106CF00D0050C864 /* AllocationMacros.h */,
 				07C0F7BE0FDE897100B0E09A /* BasicList.h */,
 				079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */,
