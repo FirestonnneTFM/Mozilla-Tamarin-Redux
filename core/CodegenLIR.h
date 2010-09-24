@@ -423,6 +423,7 @@ namespace avmplus
         LIns* prologLastIns;
         HashMap<const uint8_t*, CodegenLabel*> *blockLabels;
         LirWriter* redirectWriter;
+        CseFilter* cseFilter; // The CseFilter instance for this method, or NULL if none.
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LInsPrinter* vbNames;)
 #ifdef DEBUGGER
@@ -541,6 +542,8 @@ namespace avmplus
         void emitInitializers();
 
         bool inlineBuiltinFunction(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi);
+        void suspendCSE();
+        void resumeCSE();
 
     public:
         CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel);

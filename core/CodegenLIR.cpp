@@ -754,7 +754,8 @@ namespace avmplus
         get_cache_builder(*alloc1, *pool->codeMgr),
         set_cache_builder(*alloc1, *pool->codeMgr),
         prolog(NULL),
-        blockLabels(NULL)
+        blockLabels(NULL),
+        cseFilter(NULL)
         DEBUGGER_ONLY(, haveDebugger(core->debugger() != NULL) )
     {
         #ifdef AVMPLUS_MAC_CARBON
@@ -802,6 +803,16 @@ namespace avmplus
         }
     }
     #endif
+
+    void CodegenLIR::suspendCSE()
+    {
+        if (cseFilter) cseFilter->suspend();
+    }
+
+    void CodegenLIR::resumeCSE()
+    {
+        if (cseFilter) cseFilter->resume();
+    }
 
     LIns* CodegenLIR::atomToNativeRep(Traits* t, LIns* atom)
     {
@@ -1716,9 +1727,8 @@ namespace avmplus
         )
         prolog = new (*alloc1) PrologWriter(lirout);
         redirectWriter = lirout = new (*lir_alloc) LirWriter(prolog);
-        CseFilter *csefilter = NULL;
         if (core->config.njconfig.cseopt)
-            lirout = csefilter = new (*alloc1) CseFilter(lirout, TR_NUM_USED_ACCS, *alloc1);
+            lirout = cseFilter = new (*alloc1) CseFilter(lirout, TR_NUM_USED_ACCS, *alloc1);
 #if defined(NANOJIT_ARM)
         if (core->config.njconfig.soft_float)
             lirout = new (*alloc1) SoftFloatFilter(lirout);
