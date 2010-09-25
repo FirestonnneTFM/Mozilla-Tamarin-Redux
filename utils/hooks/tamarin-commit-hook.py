@@ -101,6 +101,13 @@ def diff_check(ui, repo, **kwargs):
             if m:
                 return True, m.start(1)
         return False, 0
+    
+    def securityCheck(line):
+        loc = line.find('MARK_SECURITY_CHANGE')
+        if loc != -1:
+            # found security change ifdef
+            return True, loc
+        return False, 0
 
     # check for tabs - exit if user chooses to abort
     if checkChangeCtxDiff(ui, repo, changecontexts, tabCheck,
@@ -113,6 +120,10 @@ def diff_check(ui, repo, **kwargs):
 
     if checkChangeCtxDiff(ui, repo, changecontexts, trailingWhitespaceCheck,
                           'Trailing Whitespace', ('.cpp', '.c', '.h', '.as', '.abs', '.py')):
+        return True
+
+    if checkChangeCtxDiff(ui, repo, changecontexts, securityCheck,
+                          'Security Check', ('.cpp', '.c', '.h', '.as', '.abs', '.py')):
         return True
 
     return False
