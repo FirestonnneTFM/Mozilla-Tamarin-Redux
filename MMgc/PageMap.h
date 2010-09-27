@@ -41,8 +41,6 @@
 #ifndef __MMgc__PageMap__
 #define __MMgc__PageMap__
 
-#include "StaticAssert.h"
-
 namespace MMgc
 {
     namespace PageMap
@@ -79,17 +77,47 @@ namespace MMgc
         const static uint32_t kPageShift = 12;
         MMGC_STATIC_ASSERT( (1 << kPageShift) == kPageSize );
 
+        // PageMapBase collects a few members shared amongst all page maps
+        class PageMapBase
+         {
+         public:
+             /** @return lower bound (inclusive) of page map address range. */
+             uintptr_t MemStart() const;
+
+             /** @return upper bound (exclusive) in page map address range. */
+             uintptr_t MemEnd() const;
+
+             /** @return true iff addr is in domain of page map. */
+             bool AddrIsMappable(uintptr_t addr) const;
+        protected:
+            uintptr_t memStart;
+            uintptr_t memEnd;
+            PageMapBase();
+        private:
+            // (prevent introduction of default copiers)
+            PageMapBase(PageMapBase&);
+            PageMapBase& operator=(PageMapBase&);
+        };
+
         // NOTE: the public methods of the Uniform pagemap class are
         // the interface that client code should be coded against;
         // every pagemap implementation must support the public
         // methods provided by the Uniform implementation (and should
         // eschew adding new public methods in release code).
 
+        // FIXME: remove Uniform (but 1st copy its specs to other PageMap impl)
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=588878
+#ifdef MMGC_USE_UNIFORM_PAGEMAP
         // Uniform is the original simple (but poorly scaling) implementation
-        class Uniform
+        class Uniform : private PageMapBase
         {
         public:
             Uniform();
+
+            // adjust access (aka "re-export") utilty methods.
+            using PageMapBase::MemStart;
+            using PageMapBase::MemEnd;
+            using PageMapBase::AddrIsMappable;
 
             /** @return lower bound (inclusive) of page map address range. */
             uintptr_t MemStart() const;
@@ -123,9 +151,6 @@ namespace MMgc
             void ClearAddrs(void *item, uint32_t numpages);
 
         private:
-            uintptr_t memStart;
-            uintptr_t memEnd;
-
             // Need to extract the byte (via indexing into byte map),
             // shift it so payload is in low bits, and mask out the
             // payload.
@@ -152,6 +177,17 @@ namespace MMgc
             // 2      2         (idx & 0x3)*2   0x3  (relevant case for now)
             // 4      1         (idx & 0x1)*4   0xf
             // 8      0         0               0xff (trivial case)
+
+            // (helper implements ExpandSetAll via EnsureCapacity and AddrSet
+            //  methods of PM)
+            template<typename PM>
+            friend void SimpleExpandSetAll(PM *pagemap, GCHeap *heap,
+                                           void *item, uint32_t numpages,
+                                           PageType val);
+
+            // (helper implements ClearAddrs via AddrClear method of PM)
+            template<typename PM>
+            friend void SimpleClearAddrs(PM *pm,void *item, uint32_t numpages);
 
             /** Ensures AddrIsMappable for all addrs in [item,item+numpages).*/
             void EnsureCapacity(GCHeap *heap, void *item, uint32_t numpages);
@@ -194,8 +230,259 @@ namespace MMgc
 
             uint8_t *pageMap;
         };
+#endif // MMGC_USE_UNIFORM_PAGEMAP
 
+#if ! defined(MMGC_USE_UNIFORM_PAGEMAP) && ! defined(MMGC_64BIT)
+        // Tiered2 is two level tree; leaves are bitmaps w/ payload.
+        // Scalable on 32-bit systems but not 64-bit ones.
+        // Fairly simplistic; assumes EnsureCapacity calls imply high
+        // chance of assigning non-zero payloads to addrs in range.
+        class Tiered2 : protected PageMapBase
+        {
+            // Goal: interchangable interface with Uniform, but more
+            // sparsely structured, to cover 32-bit address range.
+        protected:
+            static const uint32_t tier1_nbits = 6;
+            static const uint32_t tier2_nbits = 12;
+
+            // 12 : kPageShift, covers 4096 byte page
+            //  2 : index a bit-pair in a byte
+            //
+            // sum of two tiers + 2 + 12 should be exactly 32, the
+            // upper-bound on address width for 32-bit systems:
+
+            // values of below constants derive from above bit-widths.
+            // tier 2 must yield page-sized units (static-asserted below).
+            static const uint32_t tier1_entries = 1 << tier1_nbits;
+            static const uint32_t tier2_entries = 1 << tier2_nbits;
+
+            static const uint32_t tier2_pages = tier2_entries*sizeof(uint8_t) / GCHeap::kBlockSize;
+            MMGC_STATIC_ASSERT(tier2_pages * GCHeap::kBlockSize == tier2_entries*sizeof(uint8_t));
+
+            static const uintptr_t tier2_shift = kPageShift+2;
+            static const uint32_t tier2_postshift_mask = (1 << tier2_nbits)-1;
+            static const uintptr_t tier1_shift = tier2_shift + tier2_nbits;
+            // Doc for public methods: see above.
+        public:
+            Tiered2();
+
+            // adjust access (aka "re-export") utilty methods.
+            using PageMapBase::MemStart;
+            using PageMapBase::MemEnd;
+            using PageMapBase::AddrIsMappable;
+
+            void DestroyPageMapVia(GCHeap *heap);
+            PageType AddrToVal(uintptr_t addr) const;
+            void ExpandSetAll(GCHeap *h, void *item, uint32_t np, PageType val);
+            void ClearAddrs(void *item, uint32_t numpages);
+        protected:
+            // (helper implements ExpandSetAll via EnsureCapacity and AddrSet)
+            template<typename PM>
+            friend void SimpleExpandSetAll(PM*,GCHeap*,void*,uint32_t,PageType);
+            // (helper implements ClearAddrs via AddrClear)
+            template<typename PM>
+            friend void SimpleClearAddrs(PM*,void*,uint32_t);
+
+            void AddrSet(uintptr_t addr, PageType val);
+            void AddrClear(uintptr_t addr);
+            void EnsureCapacity(GCHeap *heap, void *item, uint32_t numpages);
+            uint8_t* AddrToLeafBytes(uintptr_t addr) const;
+            PageType LeafAddrToVal(uint8_t* bytes, uintptr_t addr) const;
+            void LeafAddrSet(uint8_t* bytes, uintptr_t addr, PageType val);
+            void LeafAddrClear(uint8_t* bytes, uintptr_t addr);
+
+            uint32_t AddrToIndex1(uintptr_t addr) const;
+            uint32_t AddrToIndex2(uintptr_t addr) const;
+            uint32_t AddrToByteShiftAmt(uintptr_t addr) const;
+        protected:
+
+            // since tier1_entries is small, it seems reasonable
+            // to allocate its array inline as a member of this class.
+            uint8_t *pageMap[tier1_entries];
+        };
+#endif // ! defined(MMGC_USE_UNIFORM_PAGEMAP) && ! defined(MMGC_64BIT)
+
+#if ! defined(MMGC_USE_UNIFORM_PAGEMAP) && defined(MMGC_64BIT)
+        // Tiered4 is four level tree; leaves are bitmaps w/ payload.
+        // Fairly simplistic; assumes EnsureCapacity calls imply high
+        // chance of assigning non-zero payloads to addrs in range.
+        class Tiered4 : protected PageMapBase
+        {
+            // Goal: interchangable interface with Uniform, but more
+            // sparse than Tiered2, to cover 64-bit address range.
+        protected:
+            // tier0 inlined into member itself (0 is sound here;
+            // however code not optimized for tier0_nbits = 0 case)
+            static const uint32_t tier0_nbits =  3;
+            // remaining tiers are allocated in page-sized units.
+            static const uint32_t tier1_nbits =  9;
+            static const uint32_t tier2_nbits =  9;
+            static const uint32_t tier3_nbits = 13;
+
+            // 12 : covers 4096 byte page
+            //  2 : index a bit-pair in a byte
+            //
+            // sum of all three + 2 + 12 should be at least 48, the
+            // initial (but not for-all-time) upper-bound on address width:
+            //
+            //   AMD64 Volume 2, page 118: "Currently, the AMD64
+            //   architecture defines a mechanism for translating
+            //   48-bit virtual addresses to 52-bit physical
+            //   addresses. The mechanism used to translate a full
+            //   64-bit virtual address is reserved and will be
+            //   described in a future AMD64 architectural
+            //   specification."
+
+            // values of below constants derive from above bit-widths.
+            // tiers >= 1 must yield page-sized units (static-asserted below).
+            static const uint32_t tier0_entries = 1 << tier0_nbits;
+            static const uint32_t tier1_entries = 1 << tier1_nbits;
+            static const uint32_t tier2_entries = 1 << tier2_nbits;
+            static const uint32_t tier3_entries = 1 << tier3_nbits;
+
+            static const uint32_t tier1_pages = tier1_entries*sizeof(uint8_t**) / GCHeap::kBlockSize;
+            static const uint32_t tier2_pages = tier2_entries*sizeof(uint8_t*) / GCHeap::kBlockSize;
+            static const uint32_t tier3_pages = tier3_entries*sizeof(uint8_t) / GCHeap::kBlockSize;
+
+            MMGC_STATIC_ASSERT(tier1_pages * GCHeap::kBlockSize == tier1_entries*sizeof(uint8_t**));
+            MMGC_STATIC_ASSERT(tier2_pages * GCHeap::kBlockSize == tier2_entries*sizeof(uint8_t*));
+            MMGC_STATIC_ASSERT(tier3_pages * GCHeap::kBlockSize == tier3_entries*sizeof(uint8_t));
+
+            static const uintptr_t tier3_shift = kPageShift+2;
+            static const uint32_t tier3_postshift_mask = (1 << tier3_nbits)-1;
+            static const uintptr_t tier2_shift = tier3_shift + tier3_nbits;
+            static const uint32_t tier2_postshift_mask = (1 << tier2_nbits)-1;
+            static const uintptr_t tier1_shift = tier2_shift + tier2_nbits;
+            static const uint32_t tier1_postshift_mask = (1 << tier1_nbits)-1;
+            static const uintptr_t tier0_shift = tier1_shift + tier1_nbits;
+            // Doc for public methods: see above.
+        public:
+            Tiered4();
+
+            // adjust access (aka "re-export") utilty methods.
+            using PageMapBase::MemStart;
+            using PageMapBase::MemEnd;
+            using PageMapBase::AddrIsMappable;
+
+            void DestroyPageMapVia(GCHeap *heap);
+            PageType AddrToVal(uintptr_t addr) const;
+            void ExpandSetAll(GCHeap *h, void *item, uint32_t np, PageType val);
+            void ClearAddrs(void *item, uint32_t numpages);
+        protected:
+            // (helper implements ExpandSetAll via EnsureCapacity and AddrSet)
+            template<typename PM>
+            friend void SimpleExpandSetAll(PM*,GCHeap*,void*,uint32_t,PageType);
+            // (helper implements ClearAddrs via AddrClear)
+            template<typename PM>
+            friend void SimpleClearAddrs(PM*,void*,uint32_t);
+
+            void AddrSet(uintptr_t addr, PageType val);
+            void AddrClear(uintptr_t addr);
+            void EnsureCapacity(GCHeap *heap, void *item, uint32_t numpages);
+            uint8_t* AddrToLeafBytes(uintptr_t addr) const;
+            PageType LeafAddrToVal(uint8_t* bytes, uintptr_t addr) const;
+            void LeafAddrSet(uint8_t* bytes, uintptr_t addr, PageType val);
+            void LeafAddrClear(uint8_t* bytes, uintptr_t addr);
+
+            static uint32_t AddrToIndex0(uintptr_t addr);
+            static uint32_t AddrToIndex1(uintptr_t addr);
+            static uint32_t AddrToIndex2(uintptr_t addr);
+            static uint32_t AddrToIndex3(uintptr_t addr);
+            static uint32_t AddrToByteShiftAmt(uintptr_t addr);
+
+            /** initalizes pageMap for half-open range [start,limit). */
+            void InitPageMap(GCHeap *heap, uintptr_t start, uintptr_t limit);
+        protected:
+            uint8_t ***pageMap[tier0_entries];
+        };
+
+        // CacheT4 is like Tiered4 but caches most-recently used leaf.
+        class CacheT4 : protected Tiered4
+        {
+        public:
+            CacheT4();
+
+            // adjust access (aka "re-export") cache-ignorant methods.
+            using Tiered4::MemStart;
+            using Tiered4::MemEnd;
+            using Tiered4::AddrIsMappable;
+            using Tiered4::DestroyPageMapVia;
+
+            PageType AddrToVal(uintptr_t addr) const;
+            void ExpandSetAll(GCHeap *h, void *item, uint32_t np, PageType val);
+            void ClearAddrs(void *item, uint32_t numpages);
+        protected:
+            // (helper implements ExpandSetAll via EnsureCapacity and AddrSet)
+            template<typename PM>
+            friend void SimpleExpandSetAll(PM*,GCHeap*,void*,uint32_t,PageType);
+            // (helper implements ClearAddrs via AddrClear)
+            template<typename PM>
+            friend void SimpleClearAddrs(PM*,void*,uint32_t);
+            void AddrSet(uintptr_t addr, PageType val);
+            void AddrClear(uintptr_t addr);
+            using Tiered4::EnsureCapacity;
+
+            /**
+             * Extracts prefix for (tiers 1+2) of addr.  Used for
+             * comparsion with (and assignment to) cached_addr_prefix.
+             */
+            static uintptr_t AddrPrefix(uintptr_t addr);
+
+            /**
+             * @return true only if cache matches addr; false otherwise.
+             */
+            bool CacheHit(uintptr_t addr) const;
+
+            /**
+             * Attempts lookup of addr in pagemap.
+             * @return status flag where true implies cache now
+             *  matches addr and false implies pagemap[addr]==0
+             * (Note that status of cache itself is unspecified with
+             * false return.)
+             */
+            bool UpdateCache(uintptr_t addr) const;
+
+            // uncached sentinel value; see below
+            // (valid prefixes have lower tier3_nbits + 14 bits = 0).
+            static const uintptr_t uncached = uintptr_t(-1);
+            // If not uncached, then is first tier1_nbits and tier2_nbits ...
+            mutable uintptr_t cached_addr_prefix;
+            // ... of addresses of this bitmap.
+            mutable uint8_t * cached_leaf_bytes;
+        };
+
+        // DelayT4 is like CacheT4 but uses cache as main store until
+        // allocating rest of tree is unavoidable.
+        class DelayT4 : protected CacheT4
+        {
+        public:
+            DelayT4();
+
+            // adjust access (aka "re-export") non-caching/delaying methods
+            using CacheT4::MemStart;
+            using CacheT4::MemEnd;
+            using CacheT4::AddrIsMappable;
+            using CacheT4::AddrToVal;
+            using CacheT4::ClearAddrs;
+
+            void DestroyPageMapVia(GCHeap *heap);
+            void ExpandSetAll(GCHeap *h, void *item, uint32_t np, PageType val);
+
+        protected:
+            // (helper implements ExpandSetAll via EnsureCapacity and AddrSet)
+            template<typename PM>
+            friend void SimpleExpandSetAll(PM*,GCHeap*,void*,uint32_t,PageType);
+
+            void EnsureCapacity(GCHeap *heap, void *item, uint32_t numpages);
+            using CacheT4::AddrSet;
+            using CacheT4::AddrClear;
+        private:
+            void SetupDelayedPagemap(GCHeap *heap,
+                                     uintptr_t addr, uintptr_t addr_lim);
+            bool stillInitialDelay; // true iff only cache exists.
+        };
+#endif // ! defined(MMGC_USE_UNIFORM_PAGEMAP) && defined(MMGC_64BIT)
     }
 }
 
-#endif
+#endif /* __MMgc__PageMap__ */
