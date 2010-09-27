@@ -79,3 +79,4 @@ utils/wmremote/wmrunner/Release/**
 *.sdf
 *.opensdf
 *.ipch
+.settings/**
