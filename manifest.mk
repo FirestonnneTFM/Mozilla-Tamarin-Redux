@@ -47,10 +47,12 @@ INCLUDES += \
   -I$(topsrcdir)/other-licenses/zlib \
   -I$(topsrcdir)/shell \
   -I$(topsrcdir)/VMPI \
+  -I$(topsrcdir)/vmbase \
   $(NULL)
 
 $(call RECURSE_DIRS,other-licenses/zlib)
 $(call RECURSE_DIRS,VMPI)
+$(call RECURSE_DIRS,vmbase)
 $(call RECURSE_DIRS,MMgc)
 
 ifdef ENABLE_TAMARIN

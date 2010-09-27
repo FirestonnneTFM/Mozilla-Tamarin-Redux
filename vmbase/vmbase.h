@@ -17,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,20 +37,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#ifndef __vmbase__
+#define __vmbase__
 
-#ifndef __GCDebug__
-#define __GCDebug__
+#include "VMPI.h"
 
-#include "GCTypes.h"
+// vmbase.h is included by both avmplus.h and MMgc.h
+// It serves as the main header for the vmbase module, which contains platform
+// independent code used by both avmcore and MMgc, e.g. AvmAssert.
 
-namespace MMgc
-{
-    void GCDebugIndent(size_t count);
+#include "AvmAssert.h"
 
-    #define GCAssert         AvmAssert
-    #define GCAssertMsg      AvmAssertMsg
-    #define GCDebugMsg       vmbase::AvmDebugMsg
 
-}
 
-#endif /* __GCDebug__ */
+#endif /* __vmbase__ */
