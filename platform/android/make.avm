@@ -184,6 +184,7 @@ vpath %.cpp ${AVMPLUS_DIR}/core	\
 	${AVMPLUS_DIR}/pcre	\
 	${AVMPLUS_DIR}/platform/unix \
  	${AVMPLUS_DIR}/VMPI \
+ 	${AVMPLUS_DIR}/vmbase \
  	${AVMPLUS_DIR}/eval
 
 AVMPLUS_LIB := ${LIBDIR}/libavmplus.a
