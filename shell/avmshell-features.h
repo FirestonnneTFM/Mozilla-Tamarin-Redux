@@ -221,8 +221,4 @@
 	#endif // AVMSYSTEM_SYMBIAN && AVMSYSTEM_IA32
 #endif // AVMSYSTEM_SYMBIAN
 
-#ifndef AVMFEATURE_VALGRIND
-  #define AVMFEATURE_VALGRIND 0
-#endif
-
 #endif // __avmshell_features__

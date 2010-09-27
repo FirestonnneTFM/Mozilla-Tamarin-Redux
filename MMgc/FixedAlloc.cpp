@@ -190,10 +190,6 @@ namespace MMgc
         }
 
         FixedBlock* b = (FixedBlock*) m_heap->Alloc(1, GCHeap::kExpand | (canFail ? GCHeap::kCanFail : 0));
-        VALGRIND_CREATE_MEMPOOL(b,  0/*redZoneSize*/, 0/*zeroed*/);
-
-        // treat block header as allocation so reads write are okay
-        VALGRIND_MEMPOOL_ALLOC(b, b, (char*)b->items - (char*)b);
 
         if(lock != NULL)
             VMPI_lockAcquire(lock);
@@ -209,8 +205,7 @@ namespace MMgc
 
 #ifdef DEBUG
         // Deleted and unused memory is poisoned, this is important for leak diagnostics.
-        if (!RUNNING_ON_VALGRIND)
-            VMPI_memset(b->items, uint8_t(GCHeap::FXFreedPoison), m_itemSize * m_itemsPerBlock);
+        VMPI_memset(b->items, uint8_t(GCHeap::FXFreedPoison), m_itemSize * m_itemsPerBlock);
 #endif
 
         // Link the block at the end of the list.
@@ -276,9 +271,6 @@ namespace MMgc
 
         if(lock != NULL)
             VMPI_lockAcquire(lock);
-
-        VALGRIND_MEMPOOL_FREE(b, b);
-        VALGRIND_DESTROY_MEMPOOL(b);
     }
 
 #ifdef DEBUG

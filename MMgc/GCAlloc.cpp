@@ -279,12 +279,6 @@ namespace MMgc
             m_maxAlloc += m_itemsPerBlock;
             m_numBlocks++;
 
-            VALGRIND_CREATE_MEMPOOL(b, 0/*redZoneSize*/, 1/*zeroed*/);
-
-            // treat block header as a separate allocation
-            VALGRIND_MEMPOOL_ALLOC(b, b, sizeof(GCBlock));
-
-
             b->gc = m_gc;
             b->alloc = this;
             b->size = m_itemSize;
@@ -301,11 +295,6 @@ namespace MMgc
                 b->bits = (gcbits_t*)b + sizeof(GCBlock);
             else
                 b->bits = bits;
-
-            // ditto for in page bits
-            if (m_bitsInPage) {
-                VALGRIND_MEMPOOL_ALLOC(b, b->bits, m_numBitmapBytes);
-            }
 
             // Link the block at the end of the list
             b->prev = m_lastBlock;
@@ -417,17 +406,10 @@ namespace MMgc
             VMPI_memset(b->bits, 0, m_numBitmapBytes);
             m_gc->FreeBits((uint32_t*)(void *)b->bits, m_sizeClassIndex);
             b->bits = NULL;
-        } else {
-            // Only free bits if they were in page, see CreateChunk.
-            VALGRIND_MEMPOOL_FREE(b, b->bits);
         }
-        
-        VALGRIND_MEMPOOL_FREE(b, b);
 
         // Free the memory
         m_gc->FreeBlock(b, 1);
-
-        VALGRIND_DESTROY_MEMPOOL(b);
     }
 
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
@@ -516,8 +498,6 @@ namespace MMgc
 #endif // MMGC_HOOKS
 
         m_qBudget++;
-
-        VALGRIND_MEMPOOL_ALLOC(b, item, m_itemSize);
 
         return item;
     }
@@ -685,8 +665,6 @@ namespace MMgc
 
         FLPush(m_qList, item);
 
-        VALGRIND_MEMPOOL_FREE(b, item);
-
         m_gc->SignalFreeWork(m_itemSize);
         if (--m_qBudget <= 0)
             QuickListBudgetExhausted();
@@ -700,7 +678,6 @@ namespace MMgc
 #ifndef _DEBUG
         ClearNonRCObject((void*)item, b->size);
 #endif
-        bool blockSwept = false;
 
         if (b->needsSweeping()) {
             // See comment in GCAlloc::Free
@@ -714,8 +691,7 @@ namespace MMgc
 
             FLPush(b->firstFree, item);
             b->numFree++;
-
-            blockSwept = Sweep(b);
+            Sweep(b);
 
             m_qList = qList;
         }
@@ -726,8 +702,6 @@ namespace MMgc
             if (--m_qBudget <= 0)
                 QuickListBudgetExhausted();
         }
-        if (!blockSwept)
-            VALGRIND_MEMPOOL_FREE(b, item);
     }
 
     REALLY_INLINE void GCAlloc::ClearNonRCObject(void* item, size_t size)
@@ -1137,7 +1111,6 @@ namespace MMgc
         alloc->ClearNonRCObject((void*)item, size);
 #endif
         FLPush(firstFree, item);
-        VALGRIND_MEMPOOL_FREE(this, item);
     }
 
     void GCAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)

@@ -209,17 +209,9 @@ namespace MMgc
 
 #ifdef DEBUG
         // Fresh memory poisoning.
-        if ((opts & kZero) == 0 && !RUNNING_ON_VALGRIND)
+        if((opts & kZero) == 0)
             memset(item, uint8_t(GCHeap::FXFreshPoison), b->size - DebugSize());
 #endif
-
-        // Note that we'd like to use the requested size and not
-        // b->size but clients will use the slop after calling Size().
-        // Using the requested size and expanding to b->size via
-        // VALGRIND_MEMPOOL_CHANGE in Size() doesn't work because the
-        // scanner scans the full size (see bug 594756).
-        VALGRIND_MEMPOOL_ALLOC(b, item, b->size);
-
         if((opts & kZero) != 0)
             memset(item, 0, b->size - DebugSize());
 
@@ -249,8 +241,6 @@ namespace MMgc
 
         FLPush(b->firstFree, item);
 
-        VALGRIND_MEMPOOL_FREE(b, GetUserPointer(item));
-        
         // 'b' was full but now it has a free spot, add it to the free block list.
         if (b->numAlloc == b->alloc->m_itemsPerBlock)
         {
