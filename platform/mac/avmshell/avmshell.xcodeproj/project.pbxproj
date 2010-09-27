@@ -183,6 +183,8 @@
 		07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
+		1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
+		1969AE2C1250E706002F7F01 /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
 		198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91811B973BD00A939C7 /* exec-jit.cpp */; };
 		198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91911B973BD00A939C7 /* exec-verifyall.cpp */; };
 		198CF91E11B973BD00A939C7 /* exec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91A11B973BD00A939C7 /* exec.cpp */; };
@@ -1904,6 +1906,7 @@
 				7E87D10B122C5B980005FEAF /* ST_mmgc_weakref.cpp in Sources */,
 				7E87D10C122C5B980005FEAF /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */,
+				1969AE2C1250E706002F7F01 /* PageMap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2094,6 +2097,7 @@
 				07246FE411CBBC2F005D3F1F /* ST_mmgc_weakref.cpp in Sources */,
 				D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */,
+				1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
