@@ -362,6 +362,8 @@ namespace avmplus
     inline AvmThunkNativeMethodHandler _to_method_handler(AvmThunkNativeFunctionHandler function)
     {
         AvmThunkNativeHandler handler;
+        // FIXME: this fixes bug 596608 (see also 599931)
+        handler.method = NULL;
         handler.function = function;
         return handler.method;
     }
