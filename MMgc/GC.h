@@ -1091,7 +1091,15 @@ namespace MMgc
         /**
          * Tracks pages in use; 2 bits per page (see PageType enum).
          */
+#ifdef MMGC_USE_UNIFORM_PAGEMAP
         PageMap::Uniform pageMap;
+#else
+#ifdef MMGC_64BIT
+        PageMap::DelayT4 pageMap;
+#else
+        PageMap::Tiered2 pageMap;
+#endif // MMGC_64BIT
+#endif // MMGC_USE_UNIFORM_PAGEMAP
 
         // This is very hot
         PageMap::PageType GetPageMapValue(uintptr_t addr) const;
