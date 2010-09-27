@@ -39,10 +39,11 @@
 		072EA0F50F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E50F4C1CE9009F11E6 /* eval-unicode.cpp */; };
 		072EA0F60F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
 		073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
-		0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0749E7721173EDC9002F7F64 /* AvmAssert.cpp */; };
 		07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */; };
 		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
+		078B1B271250F2710004F9F4 /* AvmAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */; };
+		078B1B281250F2770004F9F4 /* AvmAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */; };
 		078F536B0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
 		079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
 		079DF8350F3A882D0031D1B4 /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B50F3A882D0031D1B4 /* AbcData.cpp */; };
@@ -374,7 +375,6 @@
 		7E87D104122C5B980005FEAF /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
 		7E87D105122C5B980005FEAF /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
 		7E87D106122C5B980005FEAF /* DomainMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D987E32011C19E5700474022 /* DomainMgr.cpp */; };
-		7E87D107122C5B980005FEAF /* AvmAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0749E7721173EDC9002F7F64 /* AvmAssert.cpp */; };
 		7E87D108122C5B980005FEAF /* exec-jit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91811B973BD00A939C7 /* exec-jit.cpp */; };
 		7E87D109122C5B980005FEAF /* exec-verifyall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91911B973BD00A939C7 /* exec-verifyall.cpp */; };
 		7E87D10A122C5B980005FEAF /* exec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91A11B973BD00A939C7 /* exec.cpp */; };
@@ -486,8 +486,6 @@
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
 		073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_gcheap.cpp; path = ../../../extensions/ST_mmgc_gcheap.cpp; sourceTree = SOURCE_ROOT; };
 		073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_gcheap.st; path = ../../../extensions/ST_mmgc_gcheap.st; sourceTree = SOURCE_ROOT; };
-		0749E7721173EDC9002F7F64 /* AvmAssert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmAssert.cpp; path = ../../../VMPI/AvmAssert.cpp; sourceTree = SOURCE_ROOT; };
-		0749E7731173EDC9002F7F64 /* AvmAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmAssert.h; path = ../../../VMPI/AvmAssert.h; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
 		07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcEnv-inlines.h"; path = "../../../core/AbcEnv-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07591FB0122BE8EC00D60F63 /* GCPolicyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCPolicyManager.h; path = ../../../MMgc/GCPolicyManager.h; sourceTree = SOURCE_ROOT; };
@@ -892,6 +890,9 @@
 		3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObject.cpp; path = ../../../MMgc/GCAllocObject.cpp; sourceTree = SOURCE_ROOT; };
 		3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCSpinLock.h; path = ../../../MMgc/GCSpinLock.h; sourceTree = SOURCE_ROOT; };
 		7E87D11A122C5B980005FEAF /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
+		81B69B1E123848B200B9DF4F /* vmbase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vmbase.h; path = ../../../vmbase/vmbase.h; sourceTree = SOURCE_ROOT; };
+		81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmAssert.cpp; path = ../../../vmbase/AvmAssert.cpp; sourceTree = SOURCE_ROOT; };
+		81B69B2912384D1D00B9DF4F /* AvmAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmAssert.h; path = ../../../vmbase/AvmAssert.h; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsPosix.cpp; path = ../../../VMPI/SpyUtilsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
@@ -1464,9 +1465,6 @@
 		079DFA860F3A965C0031D1B4 /* mmgc */ = {
 			isa = PBXGroup;
 			children = (
-				19A21B371213443300CB55E0 /* PageMap-inlines.h */,
-				19A21B381213443300CB55E0 /* PageMap.cpp */,
-				19A21B391213443300CB55E0 /* PageMap.h */,
 				07D28FEA106CF00D0050C864 /* AllocationMacros.h */,
 				07C0F7BE0FDE897100B0E09A /* BasicList.h */,
 				079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */,
@@ -1517,6 +1515,9 @@
 				079DFAA90F3A96BE0031D1B4 /* GCWeakRef.h */,
 				079DFAAC0F3A96BE0031D1B4 /* MMgc.h */,
 				07A8D2DD0F5EEA2B0005E66C /* OOM.h */,
+				19A21B371213443300CB55E0 /* PageMap-inlines.h */,
+				19A21B381213443300CB55E0 /* PageMap.cpp */,
+				19A21B391213443300CB55E0 /* PageMap.h */,
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
@@ -1621,6 +1622,7 @@
 				079DF7B30F3A86F20031D1B4 /* nanojit */,
 				079DF9C20F3A8BC10031D1B4 /* platform */,
 				079DF99C0F3A8A830031D1B4 /* selftest */,
+				81B69B1D1238486D00B9DF4F /* vmbase */,
 				D94236920F8ACAAD00F97706 /* VMPI */,
 				079DF7B40F3A87020031D1B4 /* shell */,
 				079DF9710F3A89910031D1B4 /* shell_builtins */,
@@ -1637,6 +1639,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		81B69B1D1238486D00B9DF4F /* vmbase */ = {
+			isa = PBXGroup;
+			children = (
+				81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */,
+				81B69B2912384D1D00B9DF4F /* AvmAssert.h */,
+				81B69B1E123848B200B9DF4F /* vmbase.h */,
+			);
+			name = vmbase;
+			sourceTree = "<group>";
+		};
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
@@ -1649,8 +1661,6 @@
 			children = (
 				0709B6580F9734DF001A6E61 /* Non-Mac */,
 				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
-				0749E7721173EDC9002F7F64 /* AvmAssert.cpp */,
-				0749E7731173EDC9002F7F64 /* AvmAssert.h */,
 				D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */,
 				D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */,
 				D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */,
@@ -1899,7 +1909,6 @@
 				7E87D104122C5B980005FEAF /* ST_mmgc_dependent.cpp in Sources */,
 				7E87D105122C5B980005FEAF /* ST_mmgc_gcheap.cpp in Sources */,
 				7E87D106122C5B980005FEAF /* DomainMgr.cpp in Sources */,
-				7E87D107122C5B980005FEAF /* AvmAssert.cpp in Sources */,
 				7E87D108122C5B980005FEAF /* exec-jit.cpp in Sources */,
 				7E87D109122C5B980005FEAF /* exec-verifyall.cpp in Sources */,
 				7E87D10A122C5B980005FEAF /* exec.cpp in Sources */,
@@ -1907,6 +1916,7 @@
 				7E87D10C122C5B980005FEAF /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */,
 				1969AE2C1250E706002F7F01 /* PageMap.cpp in Sources */,
+				078B1B281250F2770004F9F4 /* AvmAssert.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2090,7 +2100,6 @@
 				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 				D987E32311C19E5700474022 /* DomainMgr.cpp in Sources */,
-				0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
 				198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */,
 				198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */,
 				198CF91E11B973BD00A939C7 /* exec.cpp in Sources */,
@@ -2098,6 +2107,7 @@
 				D95B635711FE4602004ED0D5 /* ST_mmgc_finalize_uninit.cpp in Sources */,
 				07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */,
 				1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */,
+				078B1B271250F2710004F9F4 /* AvmAssert.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

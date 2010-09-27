@@ -82,8 +82,11 @@
  */
 
 #include "VMPI.h"           // also includes avmfeatures.h
-#include "AvmAssert.h"      // in the platform layer
 #include "avmbuild.h"       // old-style configuration, may disappear, handles a few things not yet handled by the feature system
+
+#include "vmbase.h" 
+
+using namespace vmbase;
 
 #include "GCTypes.h"
 #include "avmplusVersion.h"

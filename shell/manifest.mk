@@ -40,7 +40,7 @@ PROGRAMS += shell
 shell_BASENAME = avmshell
 shell_INCLUDES = -I$(srcdir) -I$(topsrcdir)/extensions
 shell_DEFINES = -DAVMPLUS_SHELL
-shell_STATIC_LIBRARIES = zlib MMgc avmplus
+shell_STATIC_LIBRARIES = zlib vmbase MMgc avmplus
 shell_DIR := $(curdir)/
 shell_EXTRA_CPPFLAGS := $(AVMSHELL_CPPFLAGS)
 shell_EXTRA_LDFLAGS := $(AVMSHELL_LDFLAGS)
@@ -75,7 +75,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_mmgc_weakref.cpp \
   $(curdir)/../extensions/ST_mmgc_543560.cpp \
   $(curdir)/../extensions/ST_mmgc_gcheap.cpp \
-  $(curdir)/../VMPI/AvmAssert.cpp \
   $(NULL)
 
 ifeq (windows,$(TARGET_OS))

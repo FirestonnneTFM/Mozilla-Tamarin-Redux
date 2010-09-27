@@ -44,6 +44,8 @@
 // VMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
 #include "VMPI.h"
 
+#include "vmbase.h"
+
 #if defined MMGC_MEMORY_INFO && defined MMGC_64BIT
     #error "MMGC_MEMORY_INFO not supported on 64-bit (see bugzilla 468501)"
 #endif
@@ -127,7 +129,6 @@
 
 #define MMGC_FASTBITS
 
-#include "AvmAssert.h"
 #include "GCDebug.h"
 #include "GCLog.h"
 
