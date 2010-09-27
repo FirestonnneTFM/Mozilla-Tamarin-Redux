@@ -57,6 +57,8 @@ showhelp ()
     echo "       <config>       config options passed to configure.py"
     echo "       <filename>     name of the shell, do not include file extension"
     echo "       <upload>       (true|false) upload shell to server"
+    echo "       <features>     +<feature> -<feature>, will ensure specified"
+    echo "                      features are either enabled(+) or disabled(-)"
     exit 1
 }
 
@@ -78,6 +80,9 @@ upload=$4
 test "$upload" = "true" || {
     upload=false
 }
+
+# Features to confirm being enabled or disabled
+features=$5
 
 # silence output if silent=true (function defined in environment.sh)
 logfile=build-$platform-$filename.log
@@ -145,15 +150,65 @@ chmod 777 $buildsdir/${change}-${changeid}/$platform
 cp shell/$shell $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
 chmod 777 $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
 
-echo ""
-echo "*******************************************************************************"
-echo "shell compiled with these features:"
-features=`$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
-for i in ${features}; do
-    echo feature: $i
-done
-echo ""
-echo "*******************************************************************************"
+
+# Check to see if it is possible to run the generated shell, we could be cross compiling
+# Look for the version string since calling the shell without an ABC will have a non-zero exitcode
+$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension | grep ${change}:${changeid} &> /dev/null
+res=$?
+if [ "$res" == "0" ]; then
+    echo ""
+    echo "*******************************************************************************"
+    echo "shell compiled with these features:"
+    avmfeatures=`$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
+    for i in ${avmfeatures}; do
+	echo $i
+    done
+    echo ""
+    failbuild=0
+    for i in ${features}; do
+	feature_ok=0
+	if [[ $i == +* ]]; then
+	    echo "Make sure that ${i:1} is enabled"
+	    for feat in ${avmfeatures}; do
+		if [ "$feat" == "${i:1}" ]; then
+		    feature_ok=1
+		    break		
+		fi
+            done
+	    if [ $feature_ok != 1 ]; then
+		echo "---> FAIL"
+		failbuild=1
+	    else
+		echo "---> PASS"
+	    fi
+	fi
+	if [[ $i == -* ]]; then
+	    feature_ok=1
+	    echo "Make sure that ${i:1} is NOT enabled"
+	    for feat in ${avmfeatures}; do
+		if [ "$feat" == "${i:1}" ]; then
+		    feature_ok=0
+		    break		
+		fi
+            done
+	    if [ $feature_ok == 0 ]; then
+		echo "---> FAIL"
+		failbuild=1
+	    else
+		echo "---> PASS"
+	    fi
+	fi
+	echo ""
+    done
+    if [ $failbuild == 1 ]; then
+	echo "message: feature check FAILED"
+	cd $basedir/core
+	hg revert avmplusVersion.h
+	endSilent
+	exit 1
+    fi
+    echo "*******************************************************************************"
+fi # end feature check
 
 cd $basedir/core
 hg revert avmplusVersion.h
