@@ -620,14 +620,6 @@ var FEATURES =
     <defines> VMCFG_CACHE_GQCN </defines>
   </feature>
 
-  <feature>
-    <desc> Enabling this will compile in code to tell valgrind about how MMgc allocates memory.
-      </desc>
-    <name> AVMFEATURE_VALGRIND </name>
-    <defines> MMGC_VALGRIND </defines>
-    <default> false </defines>
-  </feature>
-
   <!-- VM adjustments for various oddities: AVMTWEAK_* -->
 
   <tweak>

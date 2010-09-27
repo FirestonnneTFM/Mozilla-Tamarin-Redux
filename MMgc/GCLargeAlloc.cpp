@@ -84,10 +84,6 @@ namespace MMgc
             flagbits0 |= ((flags&GC::kFinalize) != 0) ? kFinalizable : 0;
             flagbits1 |= ((flags&GC::kContainsPointers) != 0) ? kContainsPointers : 0;
             flagbits1 |= ((flags&GC::kRCObject) != 0) ? kRCObject : 0;
-
-            VALGRIND_CREATE_MEMPOOL(block, /*rdzone*/0, (flags&GC::kZero) != 0);
-            VALGRIND_MEMPOOL_ALLOC(block, block, sizeof(LargeBlock));
-
             block->gc = this->m_gc;
             block->alloc= this;
             block->next = m_blocks;
@@ -107,7 +103,7 @@ namespace MMgc
             block->flags[1] = flagbits1;
 #ifdef _DEBUG
             (void)originalSize;
-            if (flags & GC::kZero && !RUNNING_ON_VALGRIND)
+            if (flags & GC::kZero)
             {
                 // AllocBlock should take care of this
                 for(int i=0, n=(int)(requestSize/sizeof(int)); i<n; i++) {
@@ -116,9 +112,6 @@ namespace MMgc
                 }
             }
 #endif
-
-            // see comments in GCAlloc about using full size instead of ask size
-            VALGRIND_MEMPOOL_ALLOC(block, item, computedSize);
 
 #ifdef MMGC_HOOKS
             GCHeap* heap = GCHeap::GetGCHeap();
@@ -183,11 +176,7 @@ namespace MMgc
             if(b == *prev)
             {
                 *prev = Next(b);
-                size_t numBlocks = b->GetNumBlocks();
-                VALGRIND_MEMPOOL_FREE(b, b);
-                VALGRIND_MEMPOOL_FREE(b, item);
-                VALGRIND_DESTROY_MEMPOOL(b);
-                m_gc->FreeBlock(b, numBlocks);
+                m_gc->FreeBlock(b, b->GetNumBlocks());
                 return;
             }
             prev = (LargeBlock**)(&(*prev)->next);

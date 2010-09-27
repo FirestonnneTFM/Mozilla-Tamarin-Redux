@@ -250,7 +250,7 @@ namespace MMgc
                 return;
 #endif
             // This is a deleted/free object so ignore it.
-            if (getCompositeSafe() == 0)
+            if (composite == 0)
                 return;
 
             composite |= STACK_PIN;
@@ -465,18 +465,6 @@ namespace MMgc
             GCAssert(reaping == 0 || reaping == 1);
             GCAssert(index <= (ZCT_INDEX>>8));
             composite = (composite&~(ZCT_INDEX|((~reaping&1)<<STACK_PIN_SHIFT))) | ((index<<8)|ZCTFLAG);
-        }
-
-        // Before we read composite tell valgrind its okay if
-        // composite isn't defined.  Deleted RCObject pointers can
-        // live on the stack so this read is always okay since we
-        // check the page header and found this to be a committed
-        // RCObject page.
-        REALLY_INLINE uint32_t getCompositeSafe()
-        {
-            uint32_t *c = &composite;
-            VALGRIND_MAKE_MEM_DEFINED(c, sizeof(c));
-            return *c;
         }
 
         // Fields in 'composite'

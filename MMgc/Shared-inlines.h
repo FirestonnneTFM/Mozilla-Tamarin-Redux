@@ -48,9 +48,7 @@ namespace MMgc
     // FL* are freelist helpers, put in one place to ease Valgrind support
     REALLY_INLINE void **FLSeed(void **item, void *next)
     {
-        VALGRIND_MAKE_MEM_DEFINED(item, sizeof(void*));
         item[0] = next;
-        VALGRIND_MAKE_MEM_UNDEFINED(item, sizeof(void*));
         return (void**)next;
     }
 
@@ -63,27 +61,21 @@ namespace MMgc
     REALLY_INLINE void *FLPop(void* &head)
     {
         void *p = head;
-        VALGRIND_MAKE_MEM_DEFINED(p, sizeof(void*));
         head = *(void**)p;
-        VALGRIND_MAKE_MEM_UNDEFINED(p, sizeof(void*));
         return p;
     }
 
     REALLY_INLINE void *FLPopAndZero(void* &head)
     { 
         void *p = FLPop(head);
-        VALGRIND_MAKE_MEM_DEFINED(p, sizeof(void*));
         *(void**)p = NULL;
-        VALGRIND_MAKE_MEM_UNDEFINED(p, sizeof(void*));
         return p;
     }
 
     REALLY_INLINE void *FLNext(void *item)
     {
         void **p = (void**)item;
-        VALGRIND_MAKE_MEM_DEFINED(p, sizeof(void*));
         void *next = p[0];
-        VALGRIND_MAKE_MEM_UNDEFINED(p, sizeof(void*));
         return next;
     }
 }
