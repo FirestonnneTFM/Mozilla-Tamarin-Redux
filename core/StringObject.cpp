@@ -770,6 +770,45 @@ namespace avmplus
         return true;
     }
 
+#ifdef FEATURE_NANOJIT
+    /*static*/ int32_t String::equalsWithNullChecks(Stringp s1, Stringp s2)
+    {
+        if (s1 == s2)
+            return true;
+
+        if (!s1 || !s2)
+            return false;
+
+        int32_t const len1 = s1->length();
+        int32_t const len2 = s2->length();
+        if (len1 != len2)
+            return false;
+
+        Width const w1 = s1->getWidth();
+        Width const w2 = s2->getWidth();
+
+        Pointers thisbuf(s1);
+        Pointers thatbuf(s2);
+
+        switch ((w1 << 1) + w2)
+        {
+            case (k8 << 1) + k8:
+                return equalsImpl(thisbuf.p8, thatbuf.p8, len1);
+
+            case (k8 << 1) + k16:
+                return equalsImpl(thisbuf.p8, thatbuf.p16, len1);
+
+            case (k16 << 1) + k8:
+                return equalsImpl(thisbuf.p16, thatbuf.p8, len1);
+
+            case (k16 << 1) + k16:
+                return equalsImpl(thisbuf.p16, thatbuf.p16, len1);
+        }
+        AvmAssert(0);
+        return true;
+    }
+#endif // FEATURE_NANOJIT
+
 /////////////////////////////// Hash Codes /////////////////////////////////
 
     // The hashing algorithm uses the full character width
