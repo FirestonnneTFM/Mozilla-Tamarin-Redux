@@ -1038,7 +1038,10 @@ namespace avmshell
 
         if (print_version)
         {
-            AvmLog("shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE " build " AVMPLUS_BUILD_CODE "\n");
+            AvmLog("shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE );
+            if (RUNNING_ON_VALGRIND)
+                AvmLog("-valgrind");
+            AvmLog(" build " AVMPLUS_BUILD_CODE "\n");
             AvmLog("features %s\n", avmfeatures);
             Platform::GetInstance()->exit(1);
         }

@@ -457,3 +457,20 @@ as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/s
 #abcasm/bug_554915a, .*wordcode.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
 #abcasm/bug_554915b, .*wordcode.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=554915
 
+abcasm/bug_554915a, x86-mac.*valgrind.*, skip, valgrind hangs https://bugzilla.mozilla.org/show_bug.cgi?id=590503
+abcasm/bug_554915b, x86-mac.*valgrind.*, skip, valgrind hangs https://bugzilla.mozilla.org/show_bug.cgi?id=590503
+
+# SIGILL issues
+ecma3/Math/e15_8_2_1, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Number/e15_7_3_3_1, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Number/e15_7_3_3_2, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Number/e15_7_3_3_3, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Number/e15_7_4_7_1, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/ObjectObjects/e15_2_1_1_rt, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/TypeConversion/e9_3, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/TypeConversion/e9_9_1_rt, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Types/e8_5, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Expressions/e11_5_1, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Expressions/e11_5_2, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+ecma3/Expressions/e11_5_3, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
+as3/Definitions/Function/functionReturnTypes.*, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
