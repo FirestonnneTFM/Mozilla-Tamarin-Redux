@@ -234,6 +234,13 @@ namespace avmplus
         Compare this string with another string.
         */
                 bool FASTCALL       equals(Stringp that) const;
+
+        /**
+        Compare one string with another string where each one could be null.
+        This returns an int32_t to work directly with the JIT
+        */
+        static int32_t FASTCALL       equalsWithNullChecks(Stringp s1, Stringp s2);
+
         /**
         Compare this string with a Latin1 string.
         */

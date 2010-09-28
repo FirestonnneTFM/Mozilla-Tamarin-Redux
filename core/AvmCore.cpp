@@ -1044,7 +1044,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case kSpecialType:
                 return trueAtom; // undefined is the only kSpecialType atom
             case kStringType:
-                return (lhs==rhs || *string(lhs) == *string(rhs)) ? trueAtom : falseAtom;
+                return (lhs==rhs || *atomToString(lhs) == *atomToString(rhs)) ? trueAtom : falseAtom;
             case kBooleanType:
             case kIntptrType:
             case kNamespaceType:

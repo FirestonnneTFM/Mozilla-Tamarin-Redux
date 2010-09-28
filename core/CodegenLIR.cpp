@@ -5334,13 +5334,13 @@ namespace avmplus
         return NULL;
     }
         
-    // Faster compares for ints, uint, doubles
-    LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
-    {
-        Traits* lht = state->value(lhsi).traits;
-        Traits* rht = state->value(rhsi).traits;
-
-        if (lht == rht && lht == INT_TYPE)
+    // Faster compares for int, uint, double, boolean
+     LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
+     {
+         Traits* lht = state->value(lhsi).traits;
+         Traits* rht = state->value(rhsi).traits;
+ 
+        if (lht == rht && (lht == INT_TYPE || lht == BOOLEAN_TYPE))
         {
             LIns* lhs = localGet(lhsi);
             LIns* rhs = localGet(rhsi);
@@ -5468,25 +5468,34 @@ namespace avmplus
         Traits* lht = state->value(lhsi).traits;
         Traits* rht = state->value(rhsi).traits;
 
-        // If we have null and a type that does not require complex equality checks,
-        // we can optimize our equal comparison down to a simple ptr comparison. This also
-        // works when both types are simple.  This does not work with values like string that
-        // require string comparisions or numeric types.
-        if (((lht == NULL_TYPE) && (rht && !rht->hasComplexEqualityRules())) ||
-            ((rht == NULL_TYPE) && (lht && !lht->hasComplexEqualityRules())) ||
-            ((rht && !rht->hasComplexEqualityRules()) && (lht && !lht->hasComplexEqualityRules())))
-        {
+        // There are various conditions we can check for that simplify our equality check down
+        // to a ptr comparison:
+        //  - null and a type that does not require complex equality checks
+        //  - null and a string - no string comparison is performed, just ptrs
+        //  - both types do not have complex equality checks (non builtin derived Object types)
+        // This does not work for various other types (not a complete list) such as:
+        //    string vs string - performs string comparison
+        //    number vs string - type conversion is performed
+        //    XML types - complex equality checks
+        //    OBJECT_TYPE - this can mean even Number and String        
+        if (((lht == NULL_TYPE) && (rht && (!rht->hasComplexEqualityRules() || rht == STRING_TYPE))) ||
+            ((rht == NULL_TYPE) && (lht && (!lht->hasComplexEqualityRules() || lht == STRING_TYPE))) ||
+            ((rht && !rht->hasComplexEqualityRules()) && (lht && !lht->hasComplexEqualityRules()))) {
             LIns* lhs = localGetp(lhsi);
             LIns* rhs = localGetp(rhsi);
-            result = binaryIns(LIR_eqp, lhs, rhs);
+            return binaryIns(LIR_eqp, lhs, rhs);
         }
-        else
-        {
-            LIns* lhs = loadAtomRep(lhsi);
-            LIns* rhs = loadAtomRep(rhsi);
-            LIns* out = callIns(fid, 3, coreAddr, lhs, rhs);
-            result = binaryIns(LIR_eqp, out, InsConstAtom(trueAtom));
+    
+        if ((lht == rht) && (lht == STRING_TYPE)) {
+            LIns* lhs = localGetp(lhsi);
+            LIns* rhs = localGetp(rhsi);
+            return callIns(FUNCTIONID(String_equals), 2, lhs, rhs, result);
         }
+
+        LIns* lhs = loadAtomRep(lhsi);
+        LIns* rhs = loadAtomRep(rhsi);
+        LIns* out = callIns(fid, 3, coreAddr, lhs, rhs);
+        result = binaryIns(LIR_eqp, out, InsConstAtom(trueAtom));
         return result;
     }
 
