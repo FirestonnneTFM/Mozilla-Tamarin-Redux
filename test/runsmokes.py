@@ -133,14 +133,15 @@ class RunSmokes():
         envs=re.findall('\$\{[A-Za-z0-9_\-]+\}',line)    
         for env in envs:
             env=env[2:-1]
+            val = ''
             if os.environ.has_key(env)==False:
-                print "ERROR: environment variable '%s' is not defined, exiting" % env
-                sys.exit(1)
-            if (env in self.envsubs)==False:
-                self.envsubs.append(env)
-            val=os.environ[env]
-            if val==None:
-                continue
+                if env != 'RTARGS':
+                    print "ERROR: environment variable '%s' is not defined, exiting" % env
+                    sys.exit(1)
+            else:
+                val=os.environ[env]
+                if (env in self.envsubs)==False:
+                    self.envsubs.append(env)
             line=re.sub('\$\{%s\}' % env, val, line)
         return line
 

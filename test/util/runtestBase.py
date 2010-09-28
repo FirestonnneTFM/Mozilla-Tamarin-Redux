@@ -157,6 +157,7 @@ class RuntestBase:
     verbose = False
     verify = False
     writeResultProperties = False   # used by the asc runtests.py to write to a result.properties file used by the asc ant scripts
+    valgrind = False
 
     randomSeed = None # can be specified so that random run runs in same order
     start_time = None
@@ -201,6 +202,7 @@ class RuntestBase:
         print ' -c --config        sets the config string [default OS-tvm]'
         print ' -q --quiet         display minimum output during testrun'
         print ' -l --log           also log all output to given logfile'
+        print '    --valgrind      run tests under valgrind'
         print '    --summaryonly   only display final summary'
         print '    --rebuildtests  rebuild the tests only - do not run against VM'
         print '    --showtimes     shows the time for each test'
@@ -230,7 +232,7 @@ class RuntestBase:
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
-                   'javaargs=', 'summaryonly', 'log='
+                   'javaargs=', 'summaryonly', 'log=', 'valgrind'
                    ]
 
     def parseOptions(self):
@@ -297,6 +299,8 @@ class RuntestBase:
                 self.js_output = v
                 self.logFileType = 'txt'
                 self.createOutputFile()
+            elif o in ('--valgrind',):
+                self.valgrind = True
             elif o in ('--html',):
                 self.htmlOutput = True
             elif o in ('--notimecheck',):
@@ -390,6 +394,10 @@ class RuntestBase:
                 print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
                 exit(1)
 
+        # now that we've run file on the vm, prepend valgrind
+        if self.valgrind:
+            self.avm = 'valgrind --error-exitcode=1 --log-file=/tmp/valgrind-%p.txt ' + self.avm
+            
         self.vmtype = 'release'
         if self.osName=='winmobile-emulator':
             # try to determine vmtype by filename
@@ -424,6 +432,10 @@ class RuntestBase:
 
                 # get the build number and hash
                 self.avmversion = self.getAvmVersion(txt=f[0])
+
+                # need to check for whether valgrind is running
+                if re.search('valgrind',f[0]):
+                    self.vmtype += '-valgrind'
             except:
                 # Error getting shell info
                 self.vmtype = 'unknown'
