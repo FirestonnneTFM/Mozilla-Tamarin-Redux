@@ -495,6 +495,13 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     PUREFUNCTION(FUNCADDR(AvmCore::number), SIG1(F,A), number)
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
 
+    PUREMETHOD(STRINGADDR(String::_charCodeAtFI),  SIG2(F,P,I), String_charCodeAtFI)
+    PUREMETHOD(STRINGADDR(String::_charCodeAtII),  SIG2(I,P,I), String_charCodeAtII)
+    PUREMETHOD(STRINGADDR(String::AS3_charCodeAt), SIG2(F,P,F), String_charCodeAtFF)
+    PUREMETHOD(STRINGADDR(String::_charCodeAtIF),  SIG2(I,P,F), String_charCodeAtIF)
+    PUREMETHOD(STRINGADDR(String::_charCodeAtFU),  SIG2(F,P,U), String_charCodeAtFU)
+    PUREMETHOD(STRINGADDR(String::_charCodeAtIU),  SIG2(I,P,U), String_charCodeAtIU)
+
     // FIXME: Bug 570049
     // Note that Toplevel::throwTypeError() assumes that Toplevel::typeErrorClass()
     // returns non-null.  In contrast, the interpreter signals a nullcheck failure

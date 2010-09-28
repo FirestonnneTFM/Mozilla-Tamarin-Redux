@@ -100,17 +100,18 @@ namespace avmplus
         static double exp(double value);
         static double floor(double value);
         static uint64_t  frexp(double x, int32_t *eptr);
-        REALLY_INLINE static double infinity() { return kInfinity; }
-        REALLY_INLINE static double neg_infinity() { return kNegInfinity; }
+        REALLY_INLINE static double infinity();
+        REALLY_INLINE static double neg_infinity();
         /// Return 1 if value is +Infinity, -1 if -Infinity, 0 otherwise.
         static int32_t isInfinite(double value);
-        static bool isNaN(double value);
+        REALLY_INLINE static bool isNaNInline(double value); // only for time critical routines
+        static bool isNaN(double value); 
         static bool isNegZero(double x);
         static double log(double value);
-        REALLY_INLINE static double max(double x, double y) { return (x > y) ? x : y; }
-        REALLY_INLINE static double min(double x, double y) { return (x < y) ? x : y; }
+        REALLY_INLINE static double max(double x, double y);
+        REALLY_INLINE static double min(double x, double y);
         static double mod(double x, double y);
-        REALLY_INLINE static double nan() { return kNaN; }
+        REALLY_INLINE static double nan();
         static int32_t nextPowerOfTwo(int32_t n);
         static double parseInt(Stringp s, int32_t radix=10, bool strict=true);
         static double pow(double x, double y);
@@ -123,19 +124,12 @@ namespace avmplus
         static double tan(double value);
         static double toInt(double value);
 
-        // toIntClamp() is like toInt(), where the result is
-        // clamped such that -clampMagnitude <= result <= clampMagnitude. (This includes
-        // infinities.) useful for String functions where the result
-        // will be converted to integer (again) and subsequent clamping
-        // would be done.
-        static int32_t toIntClamp(double value, int32_t clampMagnitude);
-
         #if defined(WIN32) && defined(AVMPLUS_IA32)
         // This routine will return 0x80000000 if the double value overflows
         // and integer and is not between -2^31 and 2^31-1.
         static int32_t real2int(double value);
         #else
-        REALLY_INLINE static int32_t real2int(double val) { return (int32_t) val; }
+        REALLY_INLINE static int32_t real2int(double val);
         #endif
         /**
          * Enumeration values for the minimum buffer size required to convert
@@ -336,15 +330,4 @@ namespace avmplus
 #elif AVMSYSTEM_SYMBIAN
     // No inlines presently defined for the Symbian platform.
 #endif
-
-namespace avmplus
-{
-
-    REALLY_INLINE double MathUtils::round(double value)
-    {
-        return MathUtils::floor(value + 0.5);
-    }
-
-}
-
 #endif /* __avmplus__MathUtils__ */

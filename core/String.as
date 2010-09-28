@@ -100,7 +100,6 @@ package
         }
 
         // charCodeAt
-        private native function _charCodeAt(i:int=0):Number // special-cased in Verifier, don't remove
         AS3 native function charCodeAt(i:Number=0):Number
 
         prototype.charCodeAt = function(i:Number=0):Number

@@ -163,6 +163,7 @@ namespace avmplus
         #define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
         #define ENVADDR(f) envAddr((int (MethodEnv::*)())(&f))
         #define ARRAYADDR(f) arrayAddr((int (ArrayObject::*)())(&f))
+        #define STRINGADDR(f) stringAddr((int (String::*)())(&f))
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
@@ -196,6 +197,11 @@ namespace avmplus
         intptr_t  arrayAddr(int (ArrayObject::*f)())
         {
             RETURN_METHOD_PTR(ArrayObject, f);
+        }
+
+        intptr_t  stringAddr(int (String::*f)())
+        {
+            RETURN_METHOD_PTR(String, f);
         }
 
         intptr_t vectorIntAddr(int (IntVectorObject::*f)())
@@ -1410,6 +1416,32 @@ namespace avmplus
                     if (a && b)
                         return out->ins2(arithOpcodeD2I(op), a, b);
                 }
+
+                // Try to swap a builtin function returning a number to a builtin function returning
+                // an integer for better performance
+                if (op == LIR_calld)
+                {
+                    const CallInfo *ci = v->callInfo();
+                    if (ci == FUNCTIONID(String_charCodeAtFI)) {
+                        LIns *args[2];
+                        args[0] = v->arg(0);
+                        args[1] = v->arg(1);
+                        return out->insCall(FUNCTIONID(String_charCodeAtII), args);
+                    }
+                    else if (ci == FUNCTIONID(String_charCodeAtFU)) {
+                        LIns *args[2];
+                        args[0] = v->arg(0);
+                        args[1] = v->arg(1);
+                        return out->insCall(FUNCTIONID(String_charCodeAtIU), args);
+                    }
+                    else if (ci == FUNCTIONID(String_charCodeAtFF)) {
+                        LIns *args[2];
+                        args[0] = v->arg(0);
+                        args[1] = v->arg(1);
+                        return out->insCall(FUNCTIONID(String_charCodeAtIF), args);
+                    }
+                }
+
 #ifdef AVMPLUS_64BIT
                 else if (op == LIR_immq) {
                     // const fold
@@ -3402,7 +3434,28 @@ namespace avmplus
                         }
                     }
                     break;
-                }  
+                }
+                case avmplus::NativeID::String_AS3_charCodeAt: {
+                    if (argc == 1) {
+                        int op1 = state->sp();
+                        LIns *arg = localGetf(op1);
+                        // argument is a constant integer
+                        if (arg->isImmD() && ((double)(int32_t)arg->immD() == arg->immD())) {
+                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFI), 2, localGetp(op1-1), InsConst((int32_t)arg->immD())), result);
+                        }
+                        else if (arg->opcode() == LIR_i2d) {
+                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFI), 2, localGetp(op1-1), arg->oprnd1()), result);
+                        }
+                        else if (arg->opcode() == LIR_ui2d) {
+                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFU), 2, localGetp(op1-1), arg->oprnd1()), result);
+                        }
+                        else {
+                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFF), 2, localGetp(op1-1), arg), result);
+                        }
+                        return true;
+                    }
+                    break;
+                 }  
             }
         }
 
@@ -5223,6 +5276,64 @@ namespace avmplus
         branchToAbcPos(br, cond, target);
     } // emitIf()
 
+    // Try to optimize comparison of a function call yielding NUMBER_TYPE with another expression
+    // of INT_TYPE.  We may be able to simplify the function and/or the comparison based on the
+    // type or value, if constant, of the other argument.  The function call is normally presumed
+    // to be the left-hand argument.  The swap parameter, if true, reverses this convention.
+
+    LIns *CodegenLIR::optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap)
+    {
+        LIns* numSide = localGetf(callIndex);
+        const CallInfo *ci = numSide->callInfo();
+
+        // Try to optimize charCodeAt to return an integer if possible. Because it can return NaN for
+        // out of bounds access, we need to limit our support to constant integer values that generate 
+        // the same results for both NaN (floating point result) and zero (NaN cast to integer result).  
+        // These are the six possibilities:
+        // String.CharCodeAt == int - any constant integer but zero
+        // String.CharCodeAt < int  - zero or any negative integer constant
+        // String.CharCodeAt <= int - any negative integer constant
+        // int == String.CharCodeAt - any constant integer but zero
+        // int < String.CharCodeAt  - zero or any positive integer constant
+        // int <= String.CharCodeAt - any positive integer constant
+
+        if (ci == FUNCTIONID(String_charCodeAtFI) || ci == FUNCTIONID(String_charCodeAtFU) || ci == FUNCTIONID(String_charCodeAtFF)) {
+
+            AvmAssert(numSide->opcode() == LIR_calld);
+
+            LIns* intSide = localGet(otherIndex);
+            if (!intSide->isImmI())
+                return NULL;
+            int32_t intVal = intSide->immI();
+
+            if ((icmp == LIR_eqi && intVal != 0) ||
+                (icmp == LIR_lti && (swap ? intVal >= 0 : intVal <= 0)) ||
+                (icmp == LIR_lei && (swap ? intVal > 0 : intVal < 0))) {
+
+                if (ci == FUNCTIONID(String_charCodeAtFI)) {
+                    numSide = callIns(FUNCTIONID(String_charCodeAtII), 2, numSide->arg(1), numSide->arg(0), INT_TYPE);
+                }
+                else if (ci == FUNCTIONID(String_charCodeAtFU)) {
+                    numSide = callIns(FUNCTIONID(String_charCodeAtIU), 2, numSide->arg(1), numSide->arg(0), INT_TYPE);
+                }
+                else if (ci == FUNCTIONID(String_charCodeAtFF)) {
+                    numSide = callIns(FUNCTIONID(String_charCodeAtIF), 2, numSide->arg(1), numSide->arg(0), INT_TYPE);
+                }
+                else {
+                    AvmAssert(false);
+                }
+
+                if (swap) {
+                    return binaryIns(icmp, intSide, numSide);
+                } else {
+                    return binaryIns(icmp, numSide, intSide);
+                }
+            }
+        }
+
+        return NULL;
+    }
+        
     // Faster compares for ints, uint, doubles
     LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
     {
@@ -5243,6 +5354,18 @@ namespace avmplus
         }
         else if (lht && lht->isNumeric() && rht && rht->isNumeric())
         {
+            // Comparing the result of a call returning a Number to another int value.
+            if (lht == NUMBER_TYPE && rht == INT_TYPE && localGetf(lhsi)->opcode() == LIR_calld) {
+                LIns* result = optimizeIntCmpWithNumberCall(lhsi, rhsi, icmp, false);
+                if (result)
+                    return result;
+            }
+            if (rht == NUMBER_TYPE && lht == INT_TYPE && localGetf(rhsi)->opcode() == LIR_calld) {
+                LIns* result = optimizeIntCmpWithNumberCall(rhsi, lhsi, icmp, true);
+                if (result)
+                    return result;
+            }
+
             // If we're comparing a uint to an int and the int is a non-negative
             // integer constant, don't promote to doubles for the compare
             if ((lht == UINT_TYPE) && (rht == INT_TYPE))

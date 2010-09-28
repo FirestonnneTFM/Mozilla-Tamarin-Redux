@@ -421,8 +421,12 @@ namespace avmplus
                 Stringp             _charAt(int i=0);
                 Stringp             AS3_charAt(double i=0);
 
-                double              _charCodeAt(int i); // returns NaN for out-of-bounds
+                double              _charCodeAtFI(int32_t i); // returns NaN for out-of-bounds
+                int32_t             _charCodeAtII(int32_t i); // returns 0 for out-of-bounds
                 double              AS3_charCodeAt(double i); // returns NaN for out-of-bounds
+                int32_t             _charCodeAtIF(double i); // returns 0 for out-of-bounds
+                double              _charCodeAtFU(uint32_t i); // returns NaN for out-of-bounds
+                int32_t             _charCodeAtIU(uint32_t i); // returns 0 for out-of-bounds
 
                 int32_t             AS3_localeCompare(Atom other);
 
@@ -454,6 +458,7 @@ namespace avmplus
         friend class StringIndexer;
         friend class StUTF8String;
         friend class StUTF16String;
+        friend class CodegenLIR;
 
     private:
         /**
