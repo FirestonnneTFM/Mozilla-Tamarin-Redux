@@ -46,6 +46,25 @@
 
 #include "vmbase.h"
 
+#ifdef MMGC_VALGRIND
+    // Valgrind information:
+    // The GCHeap, GC and FixedMalloc allocators are instrumented for valgrind's purposes.
+    // All memory from the virtual memory API's is unknown to valgrind.   Only when we tell
+    // valgrind about the memory using client requests does valgrind track it.
+    // See valgrind headers and online manual for client request details.
+    #include <valgrind/memcheck.h>
+#else
+    #define RUNNING_ON_VALGRIND false
+    #define VALGRIND_MAKE_MEM_DEFINED
+    #define VALGRIND_MAKE_MEM_UNDEFINED
+    #define VALGRIND_MEMPOOL_ALLOC
+    #define VALGRIND_MEMPOOL_FREE
+    #define VALGRIND_CREATE_MEMPOOL
+    #define VALGRIND_DESTROY_MEMPOOL
+    #define VALGRIND_MALLOCLIKE_BLOCK
+    #define VALGRIND_FREELIKE_BLOCK
+#endif
+
 #if defined MMGC_MEMORY_INFO && defined MMGC_64BIT
     #error "MMGC_MEMORY_INFO not supported on 64-bit (see bugzilla 468501)"
 #endif
@@ -53,7 +72,11 @@
 #ifdef DEBUG
     #define MMGC_DELETE_DEBUGGING
     #ifndef MMGC_64BIT              // see bugzilla 468501
+    // Valgrind integration is trickier with fresh memory scribbling and free memory
+    // poisoning and its pointless since valgrind will uncover the same problems.
+    #ifndef MMGC_VALGRIND
         #define MMGC_MEMORY_INFO
+    #endif
     #endif
 #endif
 

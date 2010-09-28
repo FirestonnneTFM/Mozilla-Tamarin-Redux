@@ -114,6 +114,14 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 
+if o.getBoolArg('valgrind', False, False):
+    OPT_CXXFLAGS = "-O1 -g "
+
+valinc = '$(topsrcdir)/other-licenses'
+if 'VALGRIND_HOME' in os.environ:
+    valinc = os.environ['VALGRIND_HOME'] + '/include'
+APP_CPPFLAGS += '-I' + valinc + ' '
+
 # See build/avmfeatures.py for the code that processes switches for
 # standard feature names.
 APP_CPPFLAGS += build.avmfeatures.featureSettings(o)

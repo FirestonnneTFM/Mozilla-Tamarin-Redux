@@ -230,6 +230,7 @@ namespace MMgc
         void *item = m_heap->Alloc(blocksNeeded, gcheap_flags);
         if(item)
         {
+            VALGRIND_CREATE_MEMPOOL(item, 0,  (flags & kZero) != 0);
 
             item = GetUserPointer(item);
 #ifdef MMGC_HOOKS
@@ -241,7 +242,7 @@ namespace MMgc
 
 #ifdef DEBUG
             // Fresh memory poisoning
-            if((flags & kZero) == 0)
+            if ((flags & kZero) == 0 && !RUNNING_ON_VALGRIND)
                 memset(item, uint8_t(GCHeap::FXFreshPoison), size - DebugSize());
 
 #ifndef AVMPLUS_SAMPLER
@@ -249,6 +250,8 @@ namespace MMgc
             AddToLargeObjectTracker(item);
 #endif
 #endif // DEBUG
+
+            VALGRIND_MEMPOOL_ALLOC(GetRealPointer(item), item, Size(item));
         }
         return item;
     }
@@ -268,6 +271,8 @@ namespace MMgc
         }
 #endif
         m_heap->FreeNoProfile(GetRealPointer(item));
+        VALGRIND_MEMPOOL_FREE(GetRealPointer(item), item);
+        VALGRIND_DESTROY_MEMPOOL(GetRealPointer(item));
     }
 
     size_t FixedMalloc::LargeSize(const void *item)

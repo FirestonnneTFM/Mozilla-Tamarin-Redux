@@ -1002,6 +1002,9 @@ namespace MMgc
 #endif
             int numBlocks = lb->GetNumBlocks();
             sweepResults += numBlocks;
+            VALGRIND_MEMPOOL_FREE(lb, lb);
+            VALGRIND_MEMPOOL_FREE(lb, lb + 1);
+            VALGRIND_DESTROY_MEMPOOL(lb);
             FreeBlock(lb, numBlocks);
             lb = next;
         }
@@ -2060,6 +2063,11 @@ namespace MMgc
         while(p < end)
         {
             uintptr_t val = *p++;
+#ifdef MMGC_VALGRIND
+            if (wi.HasInteriorPtrs()) {
+                VALGRIND_MAKE_MEM_DEFINED(&val, sizeof(val));
+            }
+#endif // MMGC_VALGRIND
 
             if(val < _memStart || val >= _memEnd)
                 continue;

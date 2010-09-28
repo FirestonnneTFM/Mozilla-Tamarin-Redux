@@ -393,7 +393,17 @@ namespace MMgc
 
         // Zero out the memory, if requested to do so
         if (zero) {
+            // These pages may have been seen by valgrind before and
+            // they become unaddressable when we last called
+            // FREELIKE_BLOCK or MEMPOOL_DESTROY, use MAKE_MEM_DEFINED
+            // to silence write to freed memory errors.
+            VALGRIND_MAKE_MEM_DEFINED(baseAddr, size * kBlockSize);
             VMPI_memset(baseAddr, 0, size * kBlockSize);
+            // and then make the memory undefined again, we do this because
+            // we do this because either the VALGRIND_MALLOCLIKE_BLOCK call
+            // below will define it, or the suballocator will, ie this is
+            // here to keep the sub allocators honest.
+            VALGRIND_MAKE_MEM_UNDEFINED(baseAddr, size * kBlockSize);
         }
 
         // Fail the allocation if we're a "canFail" allocation that has pushed beyond one of our limits.
@@ -401,6 +411,14 @@ namespace MMgc
         {
             FreeInternal(baseAddr, (flags & kProfile) != 0, m_oomHandling);
             return NULL;
+        }
+
+        // We utilize the "profile" flag to tell the difference
+        // between client requests and sub-allocator requests.  Direct
+        // client requests are reported to valgrind here, sub
+        // allocators need to tell valgrind about memory themselves.
+        if ((flags & kProfile) != 0) {
+            VALGRIND_MALLOCLIKE_BLOCK(baseAddr, size * kBlockSize, 0, (flags&kZero) != 0);
         }
 
         GCAssert(((uintptr_t)baseAddr >> kBlockShift) % alignment == 0);
@@ -515,6 +533,9 @@ namespace MMgc
             FreeBlock(block);
         else
             LargeFree(item);
+
+        if (profile)
+            VALGRIND_FREELIKE_BLOCK(item, 0);
 
         m_oomHandling = saved_oomHandling;
     }
@@ -1565,7 +1586,8 @@ namespace MMgc
 
 #ifdef _DEBUG
         // trash it. fb == free block
-        VMPI_memset(block->baseAddr, uint8_t(MMFreedPoison), block->size * kBlockSize);
+        if (!RUNNING_ON_VALGRIND)
+            VMPI_memset(block->baseAddr, uint8_t(MMFreedPoison), block->size * kBlockSize);
 #endif
 
         AddToFreeList(block, true);
