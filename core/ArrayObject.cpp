@@ -208,7 +208,7 @@ namespace avmplus
                 return;
             }
 
-            if (m_length <= index) {
+            if (index >= m_length) {
                 m_length = index+1;
             }
 
@@ -253,6 +253,28 @@ namespace avmplus
     Atom ArrayObject::_getUintProperty(uint32_t index) const
     {
         return getUintPropertyImpl(index);
+    }
+
+    Atom ArrayObject::_getDoubleProperty(double d) const
+    {
+        uint32_t index = (uint32_t) d;
+        if (double(index) == d)
+            // this is a hot function; explicitly call the force-inlined
+            // implementation to ensure we don't tail-call to _getUintProperty
+            return getUintPropertyImpl(index);
+        else // integer is negative - we must intern it
+            return getStringProperty(core()->internDouble(d));
+    }
+
+    void ArrayObject::_setDoubleProperty(double d, Atom value)
+    {
+        uint32_t index = (uint32_t) d;
+        if (double(index) == d)
+            // this is a hot function; explicitly call the force-inlined
+            // implementation to ensure we don't tail-call to _getUintProperty
+            _setUintProperty(index, value);
+        else // integer is negative - we must intern it
+            setStringProperty(core()->internDouble(d), value);
     }
 
     Atom ArrayObject::_getIntProperty(int32_t index) const

@@ -1384,7 +1384,7 @@ namespace avmplus
 
                     // NOTE a dynamic name should have the same version as the current pool
                     bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
-                    if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
+                    if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE) )
                     {
                         if(obj.traits == VECTORINT_TYPE)
                             emitCoerce(INT_TYPE, state->sp());
@@ -2711,7 +2711,7 @@ namespace avmplus
                 Traits* indexType = state->value(state->sp()).traits;
                 // NOTE a dynamic name should have the same version as the current pool
                 bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
-                if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
+                if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE || indexType == NUMBER_TYPE) )
                 {
                     if(obj.traits == VECTORINT_TYPE)
                         propType = INT_TYPE;

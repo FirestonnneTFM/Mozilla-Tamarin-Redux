@@ -992,6 +992,27 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getUintProperty), SIG2(A,P,U), DoubleVectorObject_getUintProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getNativeUintProperty), SIG2(F,P,U), DoubleVectorObject_getNativeUintProperty)
+
+    METHOD(VECTORDOUBLEADDRF(DoubleVectorObject::_getNativeDoubleProperty), SIG2(F,P,F), DoubleVectorObject_getNativeDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getNativeDoubleProperty), SIG2(I,P,F), IntVectorObject_getNativeDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeDoubleProperty), SIG2(U,P,F), UIntVectorObject_getNativeDoubleProperty)
+
+    METHOD(ARRAYADDR(ArrayObject::_getDoubleProperty), SIG2(A,P,F), ArrayObject_getDoubleProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getDoubleProperty), SIG2(F,P,F), DoubleVectorObject_getDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getDoubleProperty), SIG2(I,P,F), IntVectorObject_getDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getDoubleProperty), SIG2(U,P,F), UIntVectorObject_getDoubleProperty)
+    METHOD(VECTOROBJADDR(ObjectVectorObject::_getDoubleProperty), SIG2(A,P,F), ObjectVectorObject_getDoubleProperty)
+
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,F), DoubleVectorObject_setNativeDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,I), IntVectorObject_setNativeDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,U), UIntVectorObject_setNativeDoubleProperty)
+
+    METHOD(ARRAYADDR(ArrayObject::_setDoubleProperty), SIG3(V,P,F,A), ArrayObject_setDoubleProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setDoubleProperty), SIG3(V,P,F,A), DoubleVectorObject_setDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setDoubleProperty), SIG3(V,P,F,A), IntVectorObject_setDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setDoubleProperty), SIG3(V,P,F,A), UIntVectorObject_setDoubleProperty)
+    METHOD(VECTOROBJADDR(ObjectVectorObject::_setDoubleProperty), SIG3(V,P,F,A), ObjectVectorObject_setDoubleProperty)
+
     METHOD(VECTORINTADDR(IntVectorObject::_getUintProperty), SIG2(A,P,U), IntVectorObject_getUintProperty)
     METHOD(VECTORUINTADDR(UIntVectorObject::_getUintProperty), SIG2(A,P,U), UIntVectorObject_getUintProperty)
     METHOD(VECTORINTADDR(IntVectorObject::_getNativeUintProperty), SIG2(I,P,U), IntVectorObject_getNativeUintProperty)

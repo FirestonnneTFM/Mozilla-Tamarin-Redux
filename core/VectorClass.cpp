@@ -580,9 +580,48 @@ namespace avmplus
     {
         return _getUintProperty(index);
     }
+
+    Atom ObjectVectorObject::_getDoubleProperty(double d) const
+    {
+        uint32_t index = (uint32_t) d;
+        if (double(index) == d)
+        {
+            if (index >= m_length)
+            {
+                toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
+            }
+            else
+            {
+                return m_array[index];
+            }
+        }
+
+        // Not a valid indexed name - has a decimal part
+        // NOTE use default public for message gen
+        Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+        toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
+        return 0; // unreachable
+    }
+
+    void ObjectVectorObject::_setDoubleProperty(double d, Atom value)
+    {
+        uint32_t index = (uint32_t) d;
+        if (double(index) == d)
+        {
+            _setUintProperty(index, value);
+        }
+        else
+        {
+            // Not a valid indexed name - has a decimal part
+            // NOTE use default public for message gen
+            Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+            toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
+        }
+    }
+
     Atom ObjectVectorObject::_getUintProperty(uint32_t index) const
     {
-        if (m_length <= index)
+        if (index >= m_length)
         {
             toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
         }
@@ -599,7 +638,7 @@ namespace avmplus
     }
     void ObjectVectorObject::_setUintProperty(uint32_t index, Atom value)
     {
-        if (m_length <= index)
+        if (index >= m_length)
         {
             if( index > m_length || m_fixed )
                 toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
