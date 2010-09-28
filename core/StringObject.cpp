@@ -2074,9 +2074,30 @@ namespace avmplus
         return (int) indexOf(substr, (int32_t) startPos);
     }
 
+    // Coded as a macro for best performance with MSVC 2008 32-bit
+    // -1 (or negative infinity) - position equals -1 (out of bounds)
+    // >length (or positive infinity) - position equals length
+    // non-NaN - integer cast to determine position
+    // NaN - use NaNValue (usually zero but length for lastIndexOf)
+    #define INTCLAMP(iPos, dPos, length, NaNValue) \
+    { \
+        if (dPos <= -1)  \
+            iPos = -1; \
+        else if (dPos >= length) \
+            iPos = length; \
+        else if (!MathUtils::isNaNInline(dPos)) { \
+            iPos = (int32_t) dPos; \
+        } \
+        else { \
+            iPos = NaNValue; \
+        } \
+    }
+
     int32_t String::AS3_indexOf(Stringp substr, double dStartPos)
     {
-        return indexOf(substr, MathUtils::toIntClamp(dStartPos, this->length()));
+        int32_t iPos;
+        INTCLAMP(iPos, dStartPos, this->length(), 0);
+        return indexOf(substr, iPos);
     }
 
     int String::_lastIndexOf(Stringp substr, int iStartPos)
@@ -2087,9 +2108,8 @@ namespace avmplus
     int32_t String::AS3_lastIndexOf(Stringp substr, double dStartPos)
     {
         // unlike most other calls, this one has nan->length rather than nan->0
-        int32_t iStartPos = !MathUtils::isNaN(dStartPos) ?
-                            MathUtils::toIntClamp(dStartPos, this->length()) :
-                            this->length();
+        int32_t iStartPos;
+        INTCLAMP(iStartPos, dStartPos, this->length(), this->length());
         return lastIndexOf(substr, iStartPos);
     }
 
@@ -2185,7 +2205,10 @@ namespace avmplus
 
     Stringp String::AS3_charAt(double dPos)
     {
-        return _charAt(MathUtils::toIntClamp(dPos, this->length()));
+        int32_t iPos;
+        INTCLAMP(iPos, dPos, this->length(), 0);
+
+        return _charAt(iPos);
     }
 
     Stringp String::AS3_toUpperCase()
@@ -2198,19 +2221,76 @@ namespace avmplus
         return toLowerCase();
     }
 
-    double String::_charCodeAt(int32_t iPos)
+    double String::_charCodeAtFI(int32_t iPos)
     {
         double d;
-        if (iPos >= 0 && iPos < m_length)
-            d = (double) charAt(iPos);
+        // use unsigned compare as faster equivalent to >= 0 && < m_length
+        if (uint32_t(iPos) < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            d = (double) ((getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos]);
+        }
         else
             d = MathUtils::kNaN;
         return d;
     }
 
+    int32_t String::_charCodeAtII(int32_t iPos)
+    {
+        // use unsigned compare as faster equivalent to >= 0 && < m_length
+        if (uint32_t(iPos) < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            return (getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos];
+        }
+        else
+            return 0;
+    }
+
+    double String::_charCodeAtFU(uint32_t iPos)
+    {
+        double d;
+        if (iPos < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            d = (double) ((getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos]);
+        }
+        else
+            d = MathUtils::kNaN;
+        return d;
+    }
+
+    int32_t String::_charCodeAtIU(uint32_t iPos)
+    {
+        if (iPos < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            return (getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos];
+        }
+        else
+            return 0;
+    }
+
     double String::AS3_charCodeAt(double dPos)
     {
-        return _charCodeAt(MathUtils::toIntClamp(dPos, this->length()));
+        int32_t iPos;
+        INTCLAMP(iPos, dPos, m_length, 0);
+        // use unsigned compare as faster equivalent to >= 0 && < m_length
+        if (uint32_t(iPos) < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            return (double) ((getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos]);
+        }
+        else
+            return MathUtils::kNaN;
+    }
+
+    int32_t String::_charCodeAtIF(double dPos)
+    {
+        int32_t iPos;
+        INTCLAMP(iPos, dPos, m_length, 0);
+        // use unsigned compare as faster equivalent to >= 0 && < m_length
+        if (uint32_t(iPos) < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            return (getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos];
+        }
+        else
+            return 0;
     }
 
     int32_t String::AS3_localeCompare(Atom other)

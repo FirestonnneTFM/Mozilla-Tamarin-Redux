@@ -476,44 +476,6 @@ namespace avmplus
         }
     }
 
-    int32_t MathUtils::toIntClamp(double value, int32_t clampMagnitude)
-    {
-        AvmAssert(clampMagnitude >= 0);
-
-        if (MathUtils::isNaN(value))
-            return 0;
-
-        int32_t const inf = MathUtils::isInfinite(value);
-        if (inf > 0)
-            return clampMagnitude;
-        else if (inf < 0)
-            return -clampMagnitude;
-
-        //
-        // clamp first, so we know the double is in an integer range.
-        //
-        double const clampMag = (double)clampMagnitude;
-        if (value > clampMag)
-            value = clampMag;
-        else if (value < -clampMag)
-            value = -clampMag;
-
-        int32_t intValue = real_to_int(value);
-
-        if (value != (double)(intValue))
-        {
-            // alas, have to round, then reconvert.
-            if (value < 0)
-                value = -MathUtils::floor(-value);
-            else
-                value = MathUtils::floor(value);
-
-            intValue = real_to_int(value);
-        }
-
-        return intValue;
-    }
-
     //
     // powerOfTen(exponent, value) returns the value
     //    value * 10 ^ exponent

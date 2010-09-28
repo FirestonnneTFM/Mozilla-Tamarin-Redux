@@ -351,6 +351,7 @@ namespace avmplus
 #include "exec-inlines.h"
 #include "FrameState-inlines.h"
 #include "instr-inlines.h"
+#include "MathUtils-inlines.h"
 #include "MethodEnv-inlines.h"
 #include "MethodInfo-inlines.h"
 #include "Multiname-inlines.h"
