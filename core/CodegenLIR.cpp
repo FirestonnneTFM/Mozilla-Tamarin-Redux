@@ -108,6 +108,33 @@ return foo;
 return *((intptr_t*)&_method);
 #endif
 
+#ifdef AVMPLUS_ARM
+#ifdef _MSC_VER
+#define RETURN_METHOD_PTR_F(_class, _method) \
+return *((int*)&_method);
+#else
+#define RETURN_METHOD_PTR_F(_class, _method) \
+union { \
+    double (_class::*bar)(); \
+    int foo[2]; \
+}; \
+bar = _method; \
+return foo[0];
+#endif
+
+#elif defined __GNUC__
+#define RETURN_METHOD_PTR_F(_class, _method) \
+union { \
+    double (_class::*bar)(); \
+    intptr_t foo; \
+}; \
+bar = _method; \
+return foo;
+#else
+#define RETURN_METHOD_PTR_F(_class, _method) \
+return *((intptr_t*)&_method);
+#endif
+
 #ifdef PERFM
 #define DOPROF
 #endif /* PERFM */
@@ -167,6 +194,7 @@ namespace avmplus
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
+        #define VECTORDOUBLEADDRF(f) vectorDoubleAddrF((double (DoubleVectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -217,6 +245,11 @@ namespace avmplus
         intptr_t vectorDoubleAddr(int (DoubleVectorObject::*f)())
         {
             RETURN_METHOD_PTR(DoubleVectorObject, f);
+        }
+
+        intptr_t vectorDoubleAddrF(double (DoubleVectorObject::*f)())
+        {
+            RETURN_METHOD_PTR_F(DoubleVectorObject, f);
         }
 
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
@@ -4704,6 +4737,75 @@ namespace avmplus
 
                     localSet(sp-1, valIsAtom?atomToNativeRep(result, value):value, result);
                 }
+                else if (maybeIntegerIndex && indexType == NUMBER_TYPE)
+                {
+                    bool valIsAtom = true;
+
+                    LIns* index = localGetf(objDisp--);
+
+                    LIns *value;
+                    if (multiname->isRtns())
+                    {
+                        // Discard runtime namespace
+                        objDisp--;
+                    }
+                    Traits* objType = state->value(objDisp).traits;
+
+                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)) )
+                    {
+                        value = callIns((objType==ARRAY_TYPE ?
+                            FUNCTIONID(ArrayObject_getDoubleProperty) :
+                            FUNCTIONID(ObjectVectorObject_getDoubleProperty)), 2,
+                            localGetp(sp-1), index);
+                    }
+                    else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
+                    {
+                        if( result == INT_TYPE || result == UINT_TYPE )
+                        {
+                            value = callIns((objType==VECTORINT_TYPE ?
+                                                    FUNCTIONID(IntVectorObject_getNativeDoubleProperty) :
+                                                    FUNCTIONID(UIntVectorObject_getNativeDoubleProperty)), 2,
+                            localGetp(sp-1), index);
+                            valIsAtom = false;
+                        }
+                        else
+                        {
+                            value = callIns((objType==VECTORINT_TYPE ?
+                                                    FUNCTIONID(IntVectorObject_getDoubleProperty) :
+                                                    FUNCTIONID(UIntVectorObject_getDoubleProperty)), 2,
+                            localGetp(sp-1), index);
+                        }
+                    }
+                    else if (objType == VECTORDOUBLE_TYPE)
+                    {
+                        if (result == NUMBER_TYPE) {
+                            value = callIns(FUNCTIONID(DoubleVectorObject_getNativeDoubleProperty), 2,
+                                localGetp(sp-1), index);
+                            valIsAtom = false;
+                        }
+                        else
+                        {
+                            value = callIns(FUNCTIONID(DoubleVectorObject_getDoubleProperty), 2,
+                                localGetp(sp-1), index);
+                        }
+                    }
+                    else
+                    {
+                        LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
+
+                        index = nativeToAtom(index, NUMBER_TYPE);
+                        // back out from above subtraction
+                        if (multiname->isRtns())
+                            objDisp++;
+                        AvmAssert(state->value(objDisp).notNull);
+                        LIns* obj = loadAtomRep(objDisp);
+                        value = callIns(FUNCTIONID(getprop_index), 4,
+                                            env_param, obj, multi, index);
+
+                    }
+                    localSet(sp-1, valIsAtom?atomToNativeRep(result, value):value, result);
+
+                }
                 else if (maybeIntegerIndex && indexType != STRING_TYPE)
                 {
                     LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
@@ -4897,6 +4999,85 @@ namespace avmplus
                         LIns* value = loadAtomRep(sp);
                         callIns(FUNCTIONID(setpropertylate_u), 4,
                             env_param, loadAtomRep(objDisp), index, value);
+                    }
+                }
+                else if (maybeIntegerIndex && indexType == NUMBER_TYPE)
+                {
+                    LIns* index = localGetf(objDisp--);
+                    if (multiname->isRtns())
+                    {
+                        // Discard runtime namespace
+                        objDisp--;
+                    }
+
+                    Traits* objType = state->value(objDisp).traits;
+
+                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
+                    {
+                        LIns* value = loadAtomRep(sp);
+                        callIns((objType==ARRAY_TYPE ?
+                                        FUNCTIONID(ArrayObject_setDoubleProperty) :
+                                        FUNCTIONID(ObjectVectorObject_setDoubleProperty)), 3,
+                            localGetp(objDisp), index, value);
+                    }
+                    else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
+                    {
+                        if( valueType == INT_TYPE )
+                        {
+                            LIns* value = localGet(sp);
+                            callIns((objType==VECTORINT_TYPE ?
+                                            FUNCTIONID(IntVectorObject_setNativeDoubleProperty) :
+                                            FUNCTIONID(UIntVectorObject_setNativeDoubleProperty)),
+                                            3,
+                                            localGetp(objDisp), index, value);
+                        }
+                        else if( valueType == UINT_TYPE )
+                        {
+                            LIns* value = localGet(sp);
+                            callIns((objType==VECTORINT_TYPE ?
+                                            FUNCTIONID(IntVectorObject_setNativeDoubleProperty) :
+                                            FUNCTIONID(UIntVectorObject_setNativeDoubleProperty)),
+                                            3,
+                                            localGetp(objDisp), index, value);
+                        }
+                        else
+                        {
+                            LIns* value = loadAtomRep(sp);
+                            value = callIns((objType==VECTORINT_TYPE ?
+                                                    FUNCTIONID(IntVectorObject_setDoubleProperty) :
+                                                    FUNCTIONID(UIntVectorObject_setDoubleProperty)),
+                                                    3,
+                                                    localGetp(objDisp), index, value);
+                        }
+                    }
+                    else if(objType == VECTORDOUBLE_TYPE)
+                    {
+                        if( valueType == NUMBER_TYPE )
+                        {
+                            LIns* value = localGetf(sp);
+                            callIns(FUNCTIONID(DoubleVectorObject_setNativeDoubleProperty), 3,
+                                localGetp(objDisp), index, value);
+                        }
+                        else
+                        {
+                            LIns* value = loadAtomRep(sp);
+                            value = callIns(FUNCTIONID(DoubleVectorObject_setDoubleProperty), 3,
+                                localGetp(objDisp), index, value);
+                        }
+                    }
+                    else
+                    {
+                        LIns* name = InsConstPtr(multiname); // precomputed multiname
+                        LIns* value = loadAtomRep(sp);
+                        index = nativeToAtom(index, indexType);
+                        // back out the above subtraction to match code below.  
+                        if (multiname->isRtns())
+                            objDisp++;
+                        AvmAssert(state->value(objDisp).notNull);
+                        LIns* obj = loadAtomRep(objDisp);
+                        const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setprop_index) :
+                                                            FUNCTIONID(initprop_index);
+                        callIns(func, 5, env_param, obj, name, value, index);
                     }
                 }
                 else if (maybeIntegerIndex)

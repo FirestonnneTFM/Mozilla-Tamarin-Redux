@@ -132,9 +132,93 @@ namespace avmplus
 
         T _getNativeUintProperty(uint32_t index) const
         {
-            if( m_length <= index )
+            if( index >= m_length )
                 toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
             return m_array[index];
+        }
+
+        T _getNativeDoubleProperty(double d) const
+        {
+            uint32_t index = (uint32_t) d;
+            if (double(index) == d)
+            {
+                if ( m_length > index )
+                    return m_array[index];
+                toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
+            }
+            else
+            {
+                // Not a valid indexed name - has a decimal part
+                // NOTE use default public for message gen
+                Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+                toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
+            }
+            return T(0); // unreachable
+        }
+
+        Atom _getDoubleProperty(double d) const
+        {
+            uint32_t index = (uint32_t) d;
+            if (double(index) == d)
+            {
+                if ( m_length > index )
+                    return valueToAtom(m_array[index]);
+                toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
+            }
+            else
+            {
+                // Not a valid indexed name - has a decimal part
+                // NOTE use default public for message gen
+                Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+                toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
+            }
+            return 0; // unreachable
+        }
+
+        void _setNativeDoubleProperty(double d, T value)
+        {
+            int index = (int) d;
+            if (double(index) != d)
+            {
+                // Not a valid indexed name - has a decimal part
+                // NOTE use default public for message gen
+                Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+                toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
+            }
+
+            if (m_length <= uint32_t(index))
+            {
+                if( index < 0 )
+                    toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+                else if(uint32_t(index) > m_length || m_fixed)
+                    toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+                grow(index+1);
+                m_length = index+1;
+            }
+            m_array[index] = value;
+        }
+
+        void _setDoubleProperty(double d, Atom value)
+        {
+            int index = (int) d;
+            if (double(index) != d)
+            {
+                // Not a valid indexed name - has a decimal part
+                // NOTE use default public for message gen
+                Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+                toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
+            }
+
+            if (m_length <= uint32_t(index))
+            {
+                if( index < 0 )
+                    toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+                else if(uint32_t(index) > m_length || m_fixed)
+                    toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+                grow(index+1);
+                m_length = index+1;
+            }
+            atomToValue(value, m_array[index]);;
         }
 
         T _getNativeIntProperty(int index) const
@@ -146,7 +230,7 @@ namespace avmplus
 
         void _setNativeUintProperty(uint32_t index, T value)
         {
-            if (m_length <= index)
+            if (index >= m_length)
             {
                 if(index > m_length || m_fixed)
                     toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
@@ -177,7 +261,7 @@ namespace avmplus
 
         Atom _getUintProperty(uint32_t index) const
         {
-            if (m_length <= index)
+            if (index >= m_length)
             {
                 toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
             }
@@ -195,7 +279,7 @@ namespace avmplus
 
         void _setUintProperty(uint32_t index, Atom value)
         {
-            if (m_length <= index)
+            if (index >= m_length)
             {
                 if(index > m_length || m_fixed)
                     toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
@@ -499,6 +583,9 @@ namespace avmplus
 
         Atom _getIntProperty(int index) const;
         void _setIntProperty(int index, Atom value);
+
+        void _setDoubleProperty(double d, Atom value);
+        Atom _getDoubleProperty(double d) const;
 
         void set_length(uint32_t newLength);
 
