@@ -839,7 +839,8 @@ function testDefined(feature) {
 }
 
 function formatFeature(feature) {
-    return feature.desc.toString().replace(/^[ \t]*/gm, " * ");
+    // make the beginning of the line be " * " and then trim the extra space for empty lines
+    return feature.desc.toString().replace(/^[ \t]*/gm, " * ").replace(/[ ]+\n/g, "\n")
 }
 
 function checkRequirements(feature) {

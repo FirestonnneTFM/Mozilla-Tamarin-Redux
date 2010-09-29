@@ -301,11 +301,11 @@
  *
  * Selects the AVM debugger API, including retaining debug information at
  * run-time and human-readable error messages for run-time errors.
- * 
+ *
  * There is a performance penalty to enabling this; clients that want
  * maximal execution performance and don't care about debugging should
  * disable it.
- * 
+ *
  * If you enable the debugger you may want to consider enabling support for
  * specific language strings for error messages in order to avoid getting
  * them all.  See the AVMPLUS_ERROR_LANG_ macros in core/ErrorConstants.h.
@@ -331,11 +331,11 @@
  * Enable the sample-based memory profiler.  This makes allocation a
  * little more expensive if a sampler callback is not installed, and
  * more expensive still if it is installed.
- * 
+ *
  * FIXME: more information needed.
- * 
+ *
  * Note that this is enabled always by AVMFEATURE_DEBUGGER.
- * 
+ *
  * It is known that the Flash Player wants to enable this if SCRIPT_DEBUGGER
  * is enabled in the Player code.
  */
@@ -412,7 +412,7 @@
  * AVMFEATURE_SELFTEST enables the built-in selftests.  These can be run by -Dselftest
  * at the shell or by calling the global function avmplus::selftests(), see extensions/Selftest.h.
  * Mostly they are useful for AVM development, not for embedders.
- * 
+ *
  * Apart from code size considerations this can be enabled for release builds.
  */
 #if !defined AVMFEATURE_SELFTEST || AVMFEATURE_SELFTEST != 0 && AVMFEATURE_SELFTEST != 1
@@ -456,7 +456,7 @@
  *
  * Make MMgc's overridden global new and delete operators delegate allocation and
  * deallocation to VMPI_alloc and VMPI_free instead of going to FixedMalloc.
- * 
+ *
  * Whether you want this or not probably depends on the performance of the
  * underlying malloc and might depend on memory consumption patterns.  On desktop
  * systems you probably want this to be disabled.
@@ -472,11 +472,11 @@
  * this means decorating the global new and delete operator with appropriate 'throw'
  * clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
  * do not generally support C++ exceptions.
- * 
+ *
  * Note that even if this is enabled, the global new and delete operators may
  * not throw exceptions when memory can't be allocated, because the out-of-memory
  * handling in MMgc may take precedence.
- * 
+ *
  * FixedMalloc never throws an exception for a failed allocation.
  */
 #if !defined AVMFEATURE_CPP_EXCEPTIONS || AVMFEATURE_CPP_EXCEPTIONS != 0 && AVMFEATURE_CPP_EXCEPTIONS != 1
@@ -488,7 +488,7 @@
  *
  * Recognize a pointer or pointer-like value into anywhere in an object as referencing
  * that object during marking in the garbage collector.
- * 
+ *
  * Enabling this tends to be increase GC cost but it can be a useful debugging aid.
  */
 #if !defined AVMFEATURE_INTERIOR_POINTERS || AVMFEATURE_INTERIOR_POINTERS != 0 && AVMFEATURE_INTERIOR_POINTERS != 1
@@ -528,7 +528,7 @@
  * Enable this if you are building on a system that allows static
  * initialization of global constant function pointers (almost all systems
  * except some mobile-phone and other embedded operating systems).
- * 
+ *
  * Disabling this will increase code size slightly.
  */
 #if !defined AVMFEATURE_STATIC_FUNCTION_PTRS || AVMFEATURE_STATIC_FUNCTION_PTRS != 0 && AVMFEATURE_STATIC_FUNCTION_PTRS != 1
