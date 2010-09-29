@@ -114,6 +114,36 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 
+if 'APP_CPPFLAGS' in os.environ:
+    APP_CPPFLAGS += os.environ['APP_CPPFLAGS'] + " "
+if 'APP_CXXFLAGS' in os.environ:
+    APP_CXXFLAGS += os.environ['APP_CXXFLAGS'] + " "
+if 'APP_CFLAGS' in os.environ:
+    APP_CFLAGS += os.environ['APP_CFLAGS'] + " "
+if 'OPT_CXXFLAGS' in os.environ:
+    OPT_CXXFLAGS += os.environ['OPT_CXXFLAGS'] + " "
+if 'OPT_CPPFLAGS' in os.environ:
+    OPT_CPPFLAGS += os.environ['OPT_CPPFLAGS'] + " "
+if 'DEBUG_CPPFLAGS' in os.environ:
+    DEBUG_CPPFLAGS += os.environ['DEBUG_CPPFLAGS'] + " "
+if 'DEBUG_CXXFLAGS' in os.environ:
+    DEBUG_CXXFLAGS += os.environ['DEBUG_CXXFLAGS'] + " "
+if 'DEBUG_CFLAGS' in os.environ:
+    DEBUG_CFLAGS += os.environ['DEBUG_CFLAGS'] + " "
+if 'DEBUG_LDFLAGS' in os.environ:
+    DEBUG_LDFLAGS += os.environ['DEBUG_LDFLAGS'] + " "
+if 'OS_LDFLAGS' in os.environ:
+    OS_LDFLAGS += os.environ['OS_LDFLAGS'] + " "
+if 'MMGC_CPPFLAGS' in os.environ:
+    MMGC_CPPFLAGS += os.environ['MMGC_CPPFLAGS'] + " "
+if 'AVMSHELL_CPPFLAGS' in os.environ:
+    AVMSHELL_CPPFLAGS += os.environ['AVMSHELL_CPPFLAGS'] + " "
+if 'AVMSHELL_LDFLAGS' in os.environ:
+    AVMSHELL_LDFLAGS += os.environ['AVMSHELL_LDFLAGS'] + " "
+if 'NSPR_INCLUDES' in os.environ:
+    NSPR_INCLUDES += os.environ['NSPR_INCLUDES'] + " "
+if 'NSPR_LDOPTS' in os.environ:
+    NSPR_LDOPTS += os.environ['NSPR_LDOPTS'] + " "
 if o.getBoolArg('valgrind', False, False):
     OPT_CXXFLAGS = "-O1 -g "
 
