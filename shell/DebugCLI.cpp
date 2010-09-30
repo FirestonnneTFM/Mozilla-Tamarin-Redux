@@ -725,17 +725,15 @@ namespace avmshell
         MethodEnv* env = frame->trace->env();
         if (env)
         {
-            Multiname* mn = new (core->gc) Multiname(
-                    core->getAnyPublicNamespace(),
-                    core->internStringLatin1(name)
-            );
-            ScriptEnv* script = core->domainMgr()->findScriptEnvInDomainEnvByMultiname(env->domainEnv(), *mn);
+            Multiname mn(core->getAnyPublicNamespace(),
+                         core->internStringLatin1(name));
+            ScriptEnv* script = core->domainMgr()->findScriptEnvInDomainEnvByMultiname(env->domainEnv(), mn);
             if (script != (ScriptEnv*)BIND_NONE && script != (ScriptEnv*)BIND_AMBIGUOUS)
             {
                 ScriptObject* global = script->global;
                 if (global)
                 {
-                    return new PropertyValue(global, mn);
+                    return new (core->gc) PropertyValue(global, mn);
                 }
         }
     }
@@ -806,10 +804,8 @@ namespace avmshell
                             // on it will define a new property.  If the parent object is not
                             // dynamic, then get() and set() will throw exceptions.  Either way,
                             // that's the correct behavior.
-                            Multiname* mn = new (core->gc) Multiname(
-            core->getAnyPublicNamespace(),
-            core->internStringLatin1(name)
-        );
+                            Multiname mn(core->getAnyPublicNamespace(),
+                                         core->internStringLatin1(name));
                             value = new (core->gc) PropertyValue(AvmCore::atomToScriptObject(parent), mn);
                         }
                         else
@@ -1105,7 +1101,7 @@ namespace avmshell
     {
         if (key->getName()->equalsLatin1(propertyname))
         {
-            value = new (core->gc) PropertyValue(object, key);
+            value = new (core->gc) PropertyValue(object, *key);
             return false; // stop iterating
         }
 
