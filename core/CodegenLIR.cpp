@@ -261,6 +261,7 @@ namespace avmplus
             RETURN_METHOD_PTR(ExceptionFrame, f);
         }
 
+    using namespace vmbase;
     using namespace MMgc;
     using namespace nanojit;
 
@@ -3488,7 +3489,7 @@ namespace avmplus
                         return true;
                     }
                     break;
-                 }  
+                 }
             }
         }
 
@@ -5070,7 +5071,7 @@ namespace avmplus
                         LIns* name = InsConstPtr(multiname); // precomputed multiname
                         LIns* value = loadAtomRep(sp);
                         index = nativeToAtom(index, indexType);
-                        // back out the above subtraction to match code below.  
+                        // back out the above subtraction to match code below.
                         if (multiname->isRtns())
                             objDisp++;
                         AvmAssert(state->value(objDisp).notNull);
@@ -5468,8 +5469,8 @@ namespace avmplus
         const CallInfo *ci = numSide->callInfo();
 
         // Try to optimize charCodeAt to return an integer if possible. Because it can return NaN for
-        // out of bounds access, we need to limit our support to constant integer values that generate 
-        // the same results for both NaN (floating point result) and zero (NaN cast to integer result).  
+        // out of bounds access, we need to limit our support to constant integer values that generate
+        // the same results for both NaN (floating point result) and zero (NaN cast to integer result).
         // These are the six possibilities:
         // String.CharCodeAt == int - any constant integer but zero
         // String.CharCodeAt < int  - zero or any negative integer constant
@@ -5514,13 +5515,13 @@ namespace avmplus
 
         return NULL;
     }
-        
+
     // Faster compares for int, uint, double, boolean
      LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
      {
          Traits* lht = state->value(lhsi).traits;
          Traits* rht = state->value(rhsi).traits;
- 
+
         if (lht == rht && (lht == INT_TYPE || lht == BOOLEAN_TYPE))
         {
             LIns* lhs = localGet(lhsi);
@@ -5658,7 +5659,7 @@ namespace avmplus
         //    string vs string - performs string comparison
         //    number vs string - type conversion is performed
         //    XML types - complex equality checks
-        //    OBJECT_TYPE - this can mean even Number and String        
+        //    OBJECT_TYPE - this can mean even Number and String
         if (((lht == NULL_TYPE) && (rht && (!rht->hasComplexEqualityRules() || rht == STRING_TYPE))) ||
             ((rht == NULL_TYPE) && (lht && (!lht->hasComplexEqualityRules() || lht == STRING_TYPE))) ||
             ((rht && !rht->hasComplexEqualityRules()) && (lht && !lht->hasComplexEqualityRules()))) {
@@ -5666,7 +5667,7 @@ namespace avmplus
             LIns* rhs = localGetp(rhsi);
             return binaryIns(LIR_eqp, lhs, rhs);
         }
-    
+
         if ((lht == rht) && (lht == STRING_TYPE)) {
             LIns* lhs = localGetp(lhsi);
             LIns* rhs = localGetp(rhsi);
