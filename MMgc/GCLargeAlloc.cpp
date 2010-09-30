@@ -73,6 +73,10 @@ namespace MMgc
 
         m_gc->SignalAllocWork(computedSize);
 
+        // Pointer containing memory is always zeroed (see bug 594533).
+        if((flags&GC::kContainsPointers) != 0)
+            flags |= GC::kZero
+
         LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, PageMap::kGCLargeAllocPageFirst,
                                                            (flags&GC::kZero) != 0, (flags&GC::kCanFail) != 0);
         void *item = NULL;
