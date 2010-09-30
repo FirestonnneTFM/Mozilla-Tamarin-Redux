@@ -393,6 +393,8 @@ namespace MMgc
          * no finalization, not containing pointers, not zero'd, and not ref-counted.
          *
          * This function returns NULL only if kCanFail is passed in 'flags'.
+         * Note that kContainsPointers implies kZero, pointer containing memory is
+         * always zeroed (see bug 594533).
          */
         void *Alloc(size_t size, int flags=0);
 
