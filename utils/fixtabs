@@ -10,6 +10,6 @@
 
 for file in $*; do
 	cp $file $file.tmp
-	expand -4 <$file.tmp | perl -p -e 's/\s+\n$/\n/go;' >$file
+	expand -4 <$file.tmp >$file
 	rm $file.tmp
 done
