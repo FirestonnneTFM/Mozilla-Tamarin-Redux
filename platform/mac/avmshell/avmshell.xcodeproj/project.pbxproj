@@ -841,6 +841,7 @@
 		07C2E88010A197DE00C773C6 /* SpyUtilsWinMo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsWinMo.cpp; path = ../../../VMPI/SpyUtilsWinMo.cpp; sourceTree = SOURCE_ROOT; };
 		07C2E88110A197DE00C773C6 /* ThreadsWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsWin.cpp; path = ../../../VMPI/ThreadsWin.cpp; sourceTree = SOURCE_ROOT; };
 		07D28FEA106CF00D0050C864 /* AllocationMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AllocationMacros.h; path = ../../../MMgc/AllocationMacros.h; sourceTree = SOURCE_ROOT; };
+		07D95ABB1254C05500DD872D /* vmbase-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "vmbase-inlines.h"; path = "../../../vmbase/vmbase-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
@@ -1644,6 +1645,7 @@
 			children = (
 				81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */,
 				81B69B2912384D1D00B9DF4F /* AvmAssert.h */,
+				07D95ABB1254C05500DD872D /* vmbase-inlines.h */,
 				81B69B1E123848B200B9DF4F /* vmbase.h */,
 			);
 			name = vmbase;
