@@ -96,7 +96,7 @@ def diff_check(ui, repo, **kwargs):
         return False, 0
 
     def trailingWhitespaceCheck(line):
-        if len(line.strip()) > 1:   # skip empty lines (will have a +)
+        if len(line.strip()) > 1:   # skip empty lines (will have a +) see bug 600536
             m = re.match(r'\+.*?(\s+$)', line)
             if m:
                 return True, m.start(1)
