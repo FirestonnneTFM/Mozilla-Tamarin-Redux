@@ -1091,8 +1091,13 @@ namespace avmplus
                 case TRAIT_Const:
                 case TRAIT_Class:
                 {
-                    AvmAssert(endOf64BitSlots > slotAreaStart);
                     uint32_t slotid = sic.calc_id(ne.id);
+                    if (slotid >= tb->slotCount || tb->getSlotOffset(slotid) > 0)
+                    {
+                        if (toplevel)
+                            toplevel->throwVerifyError(kCorruptABCError);
+                        AvmAssert(!"unhandled verify error");
+                    }
                     // note, for TRAIT_Class, AbcParser::parseTraits has already verified that pool->cinits[ne.info] is not null
                     Traitsp slotType = (ne.kind == TRAIT_Class) ?
                                         pool->getClassTraits(ne.info) :
