@@ -455,7 +455,7 @@ namespace avmplus
         // The following are meant to be called interactively from a debugger.
         /**
          * Query the kind of the automatic variable.
-         * @see avmplus::AtomConstants
+         * @see vmbase::AtomConstants
          */
         static Atom autoAtomKindAt(DebugFrame* frame, int autoIndex, AutoVarKind kind);
 
