@@ -541,6 +541,10 @@ namespace avmplus
         LIns* coerceToType(int i, Traits*);
         void emitInitializers();
 
+        bool isPromote(LOpcode op);
+        LIns* imm2Int(LIns* imm);
+        LIns* coerceNumberToInt(int i);
+
         bool inlineBuiltinFunction(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi);
         LIns *optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
         void suspendCSE();

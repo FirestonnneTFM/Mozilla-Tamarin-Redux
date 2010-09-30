@@ -683,6 +683,10 @@ namespace avmplus
     {
         switch (bt(t)) {
         case BUILTIN_number:
+            SSE2_ONLY(if(core->config.njconfig.i386_sse2) {
+                return callIns(FUNCTIONID(doubleToAtom_sse2), 2, coreAddr, native);
+            })
+
             return callIns(FUNCTIONID(doubleToAtom), 2, coreAddr, native);
 
         case BUILTIN_any:
@@ -1401,100 +1405,6 @@ namespace avmplus
         }
     }
 
-    /**
-     * Specializer holds specializations of certian calls into inline code sequences.
-     * this could just as easily be a standalone filter instead of subclassing
-     * ExprFilter, however having one less pipeline stage saves 5% of verify
-     * time for esc (2000 methods).  when/if this subclassing becomes painful
-     * then a separate stage is waranted.
-     */
-    class Specializer: public ExprFilter
-    {
-        const nanojit::Config& config;
-    public:
-        Specializer(LirWriter *out, const nanojit::Config& config) : ExprFilter(out), config(config)
-        {}
-
-        bool isPromote(LOpcode op) {
-            return op == LIR_ui2d || op == LIR_i2d;
-        }
-
-        LIns *imm2Int(LIns* imm) {
-            // return LIns* if we can fit the constant into a i32
-            if (imm->isImmI())
-                ; // just use imm
-            else if (imm->isImmD()) {
-                double val = imm->immD();
-                double cvt = (int)val;
-                if (val == 0 || val == cvt)
-                    imm = out->insImmI((int32_t)cvt);
-                else
-                    imm = 0; // can't convert
-            } else {
-                imm = 0; // non-imm
-            }
-            return imm;
-        }
-
-        LIns *insCall(const CallInfo *call, LIns* args[]) {
-            if (call == FUNCTIONID(integer_d)) {
-                LIns *v = args[0];
-                LOpcode op = v->opcode();
-                if (isPromote(op))
-                    return v->oprnd1();
-                if (op == LIR_addd || op == LIR_subd || op == LIR_muld) {
-                    LIns *a = v->oprnd1();
-                    LIns *b = v->oprnd2();
-                    a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
-                    b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
-                    if (a && b)
-                        return out->ins2(arithOpcodeD2I(op), a, b);
-                }
-
-                // Try to swap a builtin function returning a number to a builtin function returning
-                // an integer for better performance
-                if (op == LIR_calld)
-                {
-                    const CallInfo *ci = v->callInfo();
-                    if (ci == FUNCTIONID(String_charCodeAtFI)) {
-                        LIns *args[2];
-                        args[0] = v->arg(0);
-                        args[1] = v->arg(1);
-                        return out->insCall(FUNCTIONID(String_charCodeAtII), args);
-                    }
-                    else if (ci == FUNCTIONID(String_charCodeAtFU)) {
-                        LIns *args[2];
-                        args[0] = v->arg(0);
-                        args[1] = v->arg(1);
-                        return out->insCall(FUNCTIONID(String_charCodeAtIU), args);
-                    }
-                    else if (ci == FUNCTIONID(String_charCodeAtFF)) {
-                        LIns *args[2];
-                        args[0] = v->arg(0);
-                        args[1] = v->arg(1);
-                        return out->insCall(FUNCTIONID(String_charCodeAtIF), args);
-                    }
-                }
-
-#ifdef AVMPLUS_64BIT
-                else if (op == LIR_immq) {
-                    // const fold
-                    return insImmI(AvmCore::integer_d(v->immD()));
-                }
-#endif
-            }
-
-            SSE2_ONLY(if(config.i386_sse2) {
-                if (call == FUNCTIONID(integer_d))
-                    call = FUNCTIONID(integer_d_sse2);
-                else if (call == FUNCTIONID(doubleToAtom))
-                    call = FUNCTIONID(doubleToAtom_sse2);
-            })
-
-            return out->insCall(call, args);
-        }
-    };
-
 #if defined(DEBUGGER) && defined(_DEBUG)
     // The AS debugger requires type information for variables contained
     // in the AS frame regions (i.e. 'vars').  In the interpreter this
@@ -1799,7 +1709,7 @@ namespace avmplus
         if (core->config.njconfig.soft_float)
             lirout = new (*alloc1) SoftFloatFilter(lirout);
 #endif
-        lirout = new (*alloc1) Specializer(lirout, core->config.njconfig);
+        lirout = new (*alloc1) ExprFilter(lirout);
 
         #ifdef DEBUGGER
         dbg_framesize = ms->local_count() + ms->max_scope();
@@ -3254,6 +3164,86 @@ namespace avmplus
         localSet(loc, coerceToType(loc, result), result);
     }
 
+    // Return true if we are promoting an int or uint to a double
+    bool CodegenLIR::isPromote(LOpcode op) {
+        return op == LIR_ui2d || op == LIR_i2d;
+    }
+
+    // Return non-null LIns* if input is a constant that fits into a int32_t
+    LIns* CodegenLIR::imm2Int(LIns* imm) {
+        if (imm->isImmI())
+            ; // just use imm
+        else if (imm->isImmD()) {
+            double val = imm->immD();
+            double cvt = (int32_t)val;
+            if (val == 0 || val == cvt)
+                imm = InsConst((int32_t)cvt);
+            else
+                imm = 0; // can't convert
+        } else {
+            imm = 0; // non-imm
+        }
+        return imm;
+    }
+
+    // Perform coercion from a double to integer.
+    // Try various optimization to avoid double math if possible
+    // and specialize charCodeAt to an faster integer version.
+    LIns* CodegenLIR::coerceNumberToInt(int loc)
+    {
+        LIns *arg = localGetf(loc);
+        LOpcode op = arg->opcode();
+        if (isPromote(op))
+            return arg->oprnd1();
+        if (op == LIR_addd || op == LIR_subd || op == LIR_muld) {
+            LIns *a = arg->oprnd1();
+            LIns *b = arg->oprnd2();
+            a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
+            b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
+            if (a && b)
+                return lirout->ins2(arithOpcodeD2I(op), a, b);
+        }
+
+        // Try to swap a builtin function returning a number to a builtin function returning
+        // an integer for better performance
+        if (op == LIR_calld)
+        {
+            const CallInfo *ci = arg->callInfo();
+            if (ci == FUNCTIONID(String_charCodeAtFI)) {
+                LIns *args[2];
+                args[0] = arg->arg(0);
+                args[1] = arg->arg(1);
+                return lirout->insCall(FUNCTIONID(String_charCodeAtII), args);
+            }
+            else if (ci == FUNCTIONID(String_charCodeAtFU)) {
+                LIns *args[2];
+                args[0] = arg->arg(0);
+                args[1] = arg->arg(1);
+                return lirout->insCall(FUNCTIONID(String_charCodeAtIU), args);
+            }
+            else if (ci == FUNCTIONID(String_charCodeAtFF)) {
+                LIns *args[2];
+                args[0] = arg->arg(0);
+                args[1] = arg->arg(1);
+                return lirout->insCall(FUNCTIONID(String_charCodeAtIF), args);
+            }
+        }
+
+#ifdef AVMPLUS_64BIT
+        else if (op == LIR_immq) {
+            // const fold
+            return InsConst(AvmCore::integer_d(arg->immD()));
+        }
+#endif
+
+        SSE2_ONLY(if(core->config.njconfig.i386_sse2) {
+            return callIns(FUNCTIONID(integer_d_sse2), 1, arg);
+        })
+
+        return callIns(FUNCTIONID(integer_d), 1, arg);
+    }
+
+
     LIns* CodegenLIR::coerceToType(int loc, Traits* result)
     {
         const Value& value = state->value(loc);
@@ -3303,8 +3293,7 @@ namespace avmplus
             else if (in == NUMBER_TYPE)
             {
                 // narrowing conversion number->int
-                LIns* ins = localGetf(loc);
-                expr = callIns(FUNCTIONID(integer_d), 1, ins);
+                expr = coerceNumberToInt(loc);
             }
             else
             {
@@ -3321,8 +3310,7 @@ namespace avmplus
             }
             else if (in == NUMBER_TYPE)
             {
-                LIns* ins = localGetf(loc);
-                expr = callIns(FUNCTIONID(integer_d), 1, ins);
+                expr = coerceNumberToInt(loc);
             }
             else
             {
@@ -3458,7 +3446,7 @@ namespace avmplus
                         {
                             int op1 = state->sp();
                             LIns *f = localGetf(op1);
-                            if (f->opcode() == LIR_ui2d || f->opcode() == LIR_i2d) {
+                            if (isPromote(f->opcode())) {
                                 localSet(op1-1, InsConst(0), result);
                             }
                             else {
