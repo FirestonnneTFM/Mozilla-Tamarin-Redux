@@ -128,7 +128,7 @@ namespace avmplus
         virtual int size() const = 0;
     };
 
-    class DebugFrame
+    class DebugFrame : public MMgc::GCObject
     {
     public:
         // since we have virtual functions, we probably need a virtual dtor
@@ -601,7 +601,7 @@ namespace avmplus
         int                 byteCount;  // # bytes of bytecode
     };
 
-    class DebugStackFrame : public MMgc::GCObject, public DebugFrame
+    class DebugStackFrame : public DebugFrame
     {
     public:
         /**
@@ -652,7 +652,7 @@ namespace avmplus
         void localBounds(int* firstLocal, int* pastLastLocal);
         int indexOfFirstLocal();
 
-        Debugger* debugger;
+        DWB(Debugger*) debugger;
         int       frameNbr;  // top of call stack == 0
     };
 
