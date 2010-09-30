@@ -10,6 +10,9 @@
 
 for file in $*; do
 	cp $file $file.tmp
+# this used to be:
+# expand -4 <$file.tmp | perl -p -e 's/\s+\n$/\n/go;' >$file
+# see bug 600536
 	expand -4 <$file.tmp >$file
 	rm $file.tmp
 done
