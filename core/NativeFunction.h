@@ -52,7 +52,7 @@ namespace avmplus
     typedef avmplus::ScriptObject* AvmObject;
     typedef avmplus::String* AvmString;
     typedef avmplus::Namespace* AvmNamespace;
-    typedef avmplus::Atom AvmBox;
+    typedef vmbase::Atom AvmBox;
     typedef avmplus::MethodEnv* AvmMethodEnv;
     typedef int32_t AvmBool32;
 

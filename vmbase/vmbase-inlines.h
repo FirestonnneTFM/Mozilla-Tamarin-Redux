@@ -40,6 +40,6 @@
 #ifndef __vmbase_inlines__
 #define __vmbase_inlines__
 
-// Nothing yet
+#include "atom-inlines.h"
 
 #endif // __vmbase_atom__
