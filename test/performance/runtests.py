@@ -235,7 +235,11 @@ class PerformanceRuntest(RuntestBase):
             elif o in ('--avm2name',):
                 self.avm2name = v
             elif o in ('-i', '--iterations'):
-                self.iterations = int(v)
+                try:
+                    self.iterations = int(v)
+                except ValueError:
+                    print 'Incorrect iterations value: %s\n' % v
+                    self.usage(2)
             elif o in ('-l','--log'):
                 self.logFileType='log'
                 self.createOutputFile()

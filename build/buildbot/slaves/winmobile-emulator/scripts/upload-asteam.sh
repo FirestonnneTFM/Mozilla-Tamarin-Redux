@@ -52,33 +52,82 @@
 
 # Release_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_arm
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_release_arm failed"
+    exit 1
+fi
 
 # Release-wordcode_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode_arm
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_release_wordcode_arm failed"
+    exit 1
+fi
 
 # Release-FPU_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_fpu_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_fpu_arm
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_release_fpu_arm failed"
+    exit 1
+fi
 
 # Debug_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_arm
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_debug_arm failed"
+    exit 1
+fi
 
 # Debug-FPU_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_fpu_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_fpu_arm
-
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_debug_fpu_arm failed"
+    exit 1
+fi
 
 # bring in the win64 environment this will reset the shell names so that the x64 shells are uploaded
 . ../windows64/scripts/environment.sh
 # Release
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_release failed"
+    exit 1
+fi
 
 # Release-wordcode
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_release_wordcode failed"
+    exit 1
+fi
 
 # Release_Debugger
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_release_debugger failed"
+    exit 1
+fi
 
 # Debug
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_debug failed"
+    exit 1
+fi
 
 #Debug_Debugger
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_debugger
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $platform/$shell_debug_debugger failed"
+    exit 1
+fi

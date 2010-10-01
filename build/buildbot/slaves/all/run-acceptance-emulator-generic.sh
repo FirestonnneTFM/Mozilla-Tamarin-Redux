@@ -169,6 +169,11 @@ fi
 test "$silent" = "true" && {
     # upload log to asteam
     . $basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
+    ret=$?
+    if [ "$ret" != "0" ]; then
+	echo "Uploading of $logfile failed"
+	exit 1
+    fi
     echo "Acceptance logfile can be found here: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile"
     echo "url: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile logfile"
 }

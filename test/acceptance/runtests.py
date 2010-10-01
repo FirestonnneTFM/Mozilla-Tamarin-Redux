@@ -117,7 +117,11 @@ class AcceptanceRuntest(RuntestBase):
                 self.androidthreads=True
                 self.threads=1
             elif o in ('--threads',):
-                self.threads=int(v)
+                try:
+                    self.threads=int(v)
+                except ValueError:
+                    print 'Incorrect threads value: %s\n' % v
+                    self.usage(2)
             elif o in ('--ats',):
                 self.genAtsSwfs = True
                 self.rebuildtests = True

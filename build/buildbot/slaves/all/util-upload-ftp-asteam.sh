@@ -59,7 +59,25 @@ echo "Uploading $source to $dest"
 
 ## Just quickly make sure that the permisions are fully open on the file
 chmod 777 $source
-curl --ftp-create-dirs -T $source ftp://${dest}
-echo ""
-echo ""
 
+maxtries=5
+x=1
+
+while [ $x -le $maxtries ]
+do
+    curl --fail --ftp-create-dirs -T $source ftp://${dest}
+    res=$?
+    if [ "$res" != "0" ]; then
+	echo "Upload appears to have failed, exitcode: $res"
+        if [ $x -lt $maxtries ]; then
+            x=$(( $x + 1 ))
+            echo "Attempting upload again.  Attempt $x of $maxtries."
+            sleep 5
+        else 
+            echo "Upload failed after $maxtries tries.  Aborting Download."
+            exit 1
+        fi
+    fi
+done
+
+exit 0
