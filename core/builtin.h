@@ -70,7 +70,7 @@ namespace avmplus {
     class NumberClass; //Number$
     class ObjectClass; //Object$
     class ObjectVectorClass; //__AS3__.vec::Vector$object$
-    class ObjectVectorObject; //__AS3__.vec::Vector$object
+    class ObjectVectorObject; //__AS3__.vec::Vector
     class QNameClass; //QName$
     class QNameObject; //QName
     class RangeErrorClass; //RangeError$
@@ -794,9 +794,6 @@ extern AvmBox builtin_func_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env,
 extern AvmBox builtin_u2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__unshift_thunk  builtin_u2a_oao_thunk
 
-extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_indexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk
-
 extern AvmBox builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define XML_AS3_setNotification_thunk  builtin_a2a_oo_thunk
 
@@ -846,13 +843,8 @@ extern AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define XMLList_AS3_setChildren_thunk  builtin_a2a_oa_thunk
 #define XML_AS3_setChildren_thunk  builtin_a2a_oa_thunk
 
-extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_504___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_504___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_504___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_504___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_504___________thunk
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_504___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_504___________thunk
+extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_AS3_indexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk
 
 extern double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__setUTCDate_thunk  builtin_d2d_o_rest_thunk
@@ -879,6 +871,14 @@ extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined___
 
 extern double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_UTC_thunk  builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk
+
+extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
 
 extern AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_length_get_thunk  builtin_i2a_s_thunk

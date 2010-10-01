@@ -40,7 +40,7 @@
 package
 {
 
-[native(cls="MathClass", instance="double", methods="auto")]
+[native(cls="MathClass", instance="double", methods="auto", customconstruct=true)]
 public final class Math
 {
     // the value properties of math are {DontEnum,DontDelete,ReadOnly}

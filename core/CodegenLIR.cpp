@@ -3811,19 +3811,17 @@ namespace avmplus
     {
         // Attempt to early bind to constructor method.
         Traits* itraits = NULL;
-        if (ctraits) {
-            itraits = ctraits->itraits;
-            if (itraits && !itraits->hasCustomConstruct) {
-                // Inline the body of ClassClosure::construct() and early bind the call
-                // to the constructor method, if it's resolved and argc is legal.
-                // Cannot resolve signatures now because that could cause a premature verification failure,
-                // one that should occur in the class's script-init.
-                // If it's already resolved then we're good to go.
-                if (itraits->init && itraits->init->isResolved() && itraits->init->getMethodSignature()->argcOk(argc)) {
-                    emitCheckNull(ctor, ctraits);
-                    emitConstructCall(0, argc, ctor, ctraits);
-                    return;
-                }
+        if (ctraits && (itraits = ctraits->itraits) != NULL &&
+                !ctraits->hasCustomConstruct) {
+            // Inline the body of ClassClosure::construct() and early bind the call
+            // to the constructor method, if it's resolved and argc is legal.
+            // Cannot resolve signatures now because that could cause a premature verification failure,
+            // one that should occur in the class's script-init.
+            // If it's already resolved then we're good to go.
+            if (itraits->init && itraits->init->isResolved() && itraits->init->getMethodSignature()->argcOk(argc)) {
+                emitCheckNull(ctor, ctraits);
+                emitConstructCall(0, argc, ctor, ctraits);
+                return;
             }
         }
 

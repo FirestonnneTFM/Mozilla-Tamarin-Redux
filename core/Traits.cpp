@@ -472,8 +472,9 @@ namespace avmplus
         m_offsetofSlots(_offsetofSlots),
         builtinType(BUILTIN_none),
         m_posType(uint8_t(posType)),
-        // assume everything in builtin pools have custom construct unless stated otherwise
-        hasCustomConstruct(_pool->isBuiltin)
+        // Assume builtins initialize this correctly.  This is verified
+        // by checkCustomConstruct() in MethodEnv.cpp.
+        hasCustomConstruct(0)
     {
         AvmAssert(m_tbref->isNull());
         AvmAssert(m_tmref->isNull());

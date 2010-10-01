@@ -214,6 +214,7 @@ namespace avmplus
         uint16_t offsetofSlotsClass;
         uint16_t sizeofInstance;
         uint16_t offsetofSlotsInstance;
+        bool hasCustomConstruct;
     };
 
 
@@ -389,11 +390,18 @@ namespace avmplus
     #define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
         const NativeClassInfo NAME##_classEntries[] = {
 
-    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST) \
-        { (CreateClassClosureProc)CLS##_createClassClosure, avmplus::NativeID::CLSID, sizeof(FQCLS), OFFSETOFSLOTSCLS, sizeof(INST), OFFSETOFSLOTSINST },
+    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT) \
+        { (CreateClassClosureProc)CLS##_createClassClosure,\
+          avmplus::NativeID::CLSID,\
+          sizeof(FQCLS),\
+          OFFSETOFSLOTSCLS,\
+          sizeof(INST),\
+          OFFSETOFSLOTSINST,\
+          CUSTOMCONSTRUCT\
+        },
 
     #define AVMTHUNK_END_NATIVE_CLASSES() \
-        { NULL, -1, 0, 0, 0, 0 } };
+        { NULL, -1, 0, 0, 0, 0, false } };
 
 #ifdef VMCFG_AOT
     #define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME)

@@ -40,7 +40,7 @@
 
 package
 {
-    [native(cls="NamespaceClass", instance="Namespace", methods="auto")]
+    [native(cls="NamespaceClass", instance="Namespace", methods="auto", customconstruct=true)]
     public final class Namespace
     {
         // E262 {ReadOnly,DontDelete,DontEnum}
