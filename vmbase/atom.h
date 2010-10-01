@@ -190,7 +190,7 @@ namespace vmbase
 #endif
 
     // sadly, these generate better code than the inlines in atom-inlines.h
-    #define atomKind(a)     ((Atom)((uintptr_t(a) & 7)))
+    #define atomKind(a)     ((vmbase::Atom)((uintptr_t(a) & 7)))
     #define atomPtr(a)      ((void*)(uintptr_t(a) & ~7))
 
     #define ISNULL(a) (((uintptr_t)a) < (uintptr_t)kSpecialType)
