@@ -84,20 +84,19 @@
 #include "VMPI.h"           // also includes avmfeatures.h
 #include "avmbuild.h"       // old-style configuration, may disappear, handles a few things not yet handled by the feature system
 
-#include "vmbase.h" 
+#include "vmbase.h"
 
 using namespace vmbase;
 
 #include "GCTypes.h"
 #include "avmplusVersion.h"
 #include "AvmLog.h"
-#include "atom.h"
 #include "ActionBlockConstants.h"
 #include "wopcodes.h"
 #include "ErrorConstants.h"
 #include "NativeObjectHelpers.h"
 
-using namespace avmplus::AtomConstants;
+using namespace vmbase::AtomConstants;
 using namespace avmplus::ActionBlockConstants;
 using namespace avmplus::ErrorConstants;
 
@@ -344,7 +343,6 @@ namespace avmplus
 #include "AbcEnv-inlines.h"
 #include "AbcParser-inlines.h"
 #include "ArrayObject-inlines.h"
-#include "atom-inlines.h"
 #include "AtomArray-inlines.h"
 #include "AvmCore-inlines.h"
 #include "avmplusHashtable-inlines.h"
