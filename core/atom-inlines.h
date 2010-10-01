@@ -44,19 +44,8 @@
 
 namespace avmplus
 {
-    class ScriptObject;
-#ifdef DEBUG
-    bool testIsObject(vmbase::Atom atom);
-#endif
-}
+    // macros for these are defined in atom.h
 
-namespace vmbase
-{
-    using namespace AtomConstants;
-
-    // Macros for these are defined in atom.h.  Measurements show that macros have an edge
-    // over inline functions with Visual C++ 2008, at least.
-    //
     //inline AtomConstants::AtomKind atomKind(Atom a) { return AtomConstants::AtomKind(uintptr_t(a) & 7); }
     //inline void* atomPtr(Atom a) { return (void*)(uintptr_t(a) & ~7); }
 
@@ -69,6 +58,7 @@ namespace vmbase
     {
         return ((((uintptr_t(a) ^ kIntptrType) | (uintptr_t(b) ^ kIntptrType)) & 7) == 0);
     }
+
 
     REALLY_INLINE bool atomCanBeInt32(Atom atom)
     {
@@ -130,10 +120,10 @@ namespace vmbase
     // unwrap an atom and return a ScriptObject*.  Doesn't use atomPtr(), because
     // using subtract allows the expression to be folded with other pointer math,
     // unlike the & ~7 in atomPtr().
-    REALLY_INLINE avmplus::ScriptObject* atomObj(Atom a)
+    REALLY_INLINE ScriptObject* atomObj(Atom a)
     {
-        AvmAssert(avmplus::testIsObject(a)); // proper type and not null or undefined
-        return (avmplus::ScriptObject*) (uintptr_t(a) - kObjectType);
+        AvmAssert(AvmCore::isObject(a)); // proper type and not null or undefined
+        return (ScriptObject*) (uintptr_t(a) - kObjectType);
     }
 
     REALLY_INLINE bool atomGetBoolean(Atom a)

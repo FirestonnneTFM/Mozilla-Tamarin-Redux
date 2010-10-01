@@ -124,6 +124,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(NULL)
 
 #  $(curdir)/avmplus.cpp \
+#  $(curdir)/AtomConstants.cpp \
 
 $(avmplus_CXXSRCS): $(curdir)/builtin.h
 

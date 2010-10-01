@@ -47,6 +47,7 @@
 // independent code used by both avmcore and MMgc, e.g. AvmAssert.
 
 #include "AvmAssert.h"
-#include "atom.h"
+
+
 
 #endif /* __vmbase__ */

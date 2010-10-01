@@ -41,7 +41,7 @@
 #define __avmplus_atom__
 
 
-namespace vmbase
+namespace avmplus
 {
     // Atom should really be an intptr_t, but doing so can cause problematic compiles
     // because some platforms define intptr_t as an int64_t, and some as a long, which

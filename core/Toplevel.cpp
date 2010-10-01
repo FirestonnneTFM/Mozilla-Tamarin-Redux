@@ -478,8 +478,8 @@ namespace avmplus
         {
             Stringp name;
 
-            if (vmbase::atomIsIntptr(nameatom) &&
-                vmbase::atomCanBeUint32(nameatom))
+            if (avmplus::atomIsIntptr(nameatom) &&
+                avmplus::atomCanBeUint32(nameatom))
             {
                 ScriptObject* o = (atomKind(obj) == kObjectType) ?
                     AvmCore::atomToScriptObject(obj) :

@@ -50,6 +50,7 @@ AVMPLUS_SRCS := \
 	ArrayClass.cpp \
 	ArrayObject.cpp \
 	AtomArray.cpp \
+	atom.cpp \
 	AvmCore.cpp \
 	avm.cpp \
     avmfeatures.cpp \
@@ -173,8 +174,6 @@ AVMPLUS_SRCS := \
     eval-parse-xml.cpp \
     eval-unicode.cpp \
     eval-util.cpp \
-	atom.cpp \
-	AvmAssert.cpp \
 
 ifeq ($(ENABLE_NANOJIT),true)
 	AVMPLUS_SRCS := ${AVMPLUS_SRCS} NativeARM.cpp

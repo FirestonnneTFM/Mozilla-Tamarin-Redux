@@ -51,6 +51,7 @@
 		079DF8380F3A882D0031D1B4 /* AbcParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */; };
 		079DF83A0F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */; };
 		079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
+		079DF83C0F3A882D0031D1B4 /* atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C20F3A882D0031D1B4 /* atom.cpp */; };
 		079DF83D0F3A882D0031D1B4 /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */; };
 		079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
@@ -179,8 +180,6 @@
 		079DFB2E0F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */; };
 		079DFB680F3A9C350031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
-		07D95AE51254C39000DD872D /* atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07D95AE31254C39000DD872D /* atom.cpp */; };
-		07D95AE61254C39000DD872D /* atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07D95AE31254C39000DD872D /* atom.cpp */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
@@ -205,6 +204,7 @@
 		7E87D059122C5B980005FEAF /* AbcParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */; };
 		7E87D05A122C5B980005FEAF /* ActionBlockConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */; };
 		7E87D05B122C5B980005FEAF /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
+		7E87D05C122C5B980005FEAF /* atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C20F3A882D0031D1B4 /* atom.cpp */; };
 		7E87D05D122C5B980005FEAF /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */; };
 		7E87D05E122C5B980005FEAF /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		7E87D05F122C5B980005FEAF /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
@@ -534,6 +534,8 @@
 		079DF7BF0F3A882D0031D1B4 /* ActionBlockConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ActionBlockConstants.h; path = ../../../core/ActionBlockConstants.h; sourceTree = SOURCE_ROOT; };
 		079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AtomArray.cpp; path = ../../../core/AtomArray.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7C10F3A882D0031D1B4 /* AtomArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AtomArray.h; path = ../../../core/AtomArray.h; sourceTree = SOURCE_ROOT; };
+		079DF7C20F3A882D0031D1B4 /* atom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = atom.cpp; path = ../../../core/atom.cpp; sourceTree = SOURCE_ROOT; };
+		079DF7C30F3A882D0031D1B4 /* atom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = atom.h; path = ../../../core/atom.h; sourceTree = SOURCE_ROOT; };
 		079DF7C40F3A882D0031D1B4 /* AtomWriteBarrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AtomWriteBarrier.h; path = ../../../core/AtomWriteBarrier.h; sourceTree = SOURCE_ROOT; };
 		079DF7C50F3A882D0031D1B4 /* avmbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmbuild.h; path = ../../../core/avmbuild.h; sourceTree = SOURCE_ROOT; };
 		079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmCore.cpp; path = ../../../core/AvmCore.cpp; sourceTree = SOURCE_ROOT; };
@@ -840,9 +842,6 @@
 		07C2E88110A197DE00C773C6 /* ThreadsWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsWin.cpp; path = ../../../VMPI/ThreadsWin.cpp; sourceTree = SOURCE_ROOT; };
 		07D28FEA106CF00D0050C864 /* AllocationMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AllocationMacros.h; path = ../../../MMgc/AllocationMacros.h; sourceTree = SOURCE_ROOT; };
 		07D95ABB1254C05500DD872D /* vmbase-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "vmbase-inlines.h"; path = "../../../vmbase/vmbase-inlines.h"; sourceTree = SOURCE_ROOT; };
-		07D95AE21254C39000DD872D /* atom-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "atom-inlines.h"; path = "../../../vmbase/atom-inlines.h"; sourceTree = SOURCE_ROOT; };
-		07D95AE31254C39000DD872D /* atom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = atom.cpp; path = ../../../vmbase/atom.cpp; sourceTree = SOURCE_ROOT; };
-		07D95AE41254C39000DD872D /* atom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = atom.h; path = ../../../vmbase/atom.h; sourceTree = SOURCE_ROOT; };
 		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
@@ -859,6 +858,7 @@
 		07ED27EF0FBD78C4007E3950 /* GCStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCStack.cpp; path = ../../../MMgc/GCStack.cpp; sourceTree = SOURCE_ROOT; };
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
+		19382D9F106CFC64004612EA /* atom-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "atom-inlines.h"; path = "../../../core/atom-inlines.h"; sourceTree = SOURCE_ROOT; };
 		198CF91711B973BD00A939C7 /* exec-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "exec-inlines.h"; path = "../../../core/exec-inlines.h"; sourceTree = SOURCE_ROOT; };
 		198CF91811B973BD00A939C7 /* exec-jit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "exec-jit.cpp"; path = "../../../core/exec-jit.cpp"; sourceTree = SOURCE_ROOT; };
 		198CF91911B973BD00A939C7 /* exec-verifyall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "exec-verifyall.cpp"; path = "../../../core/exec-verifyall.cpp"; sourceTree = SOURCE_ROOT; };
@@ -1068,6 +1068,9 @@
 				079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */,
 				079DF7C10F3A882D0031D1B4 /* AtomArray.h */,
 				D9B242ED12135FE700C60D44 /* AtomArray-inlines.h */,
+				079DF7C20F3A882D0031D1B4 /* atom.cpp */,
+				19382D9F106CFC64004612EA /* atom-inlines.h */,
+				079DF7C30F3A882D0031D1B4 /* atom.h */,
 				079DF7C40F3A882D0031D1B4 /* AtomWriteBarrier.h */,
 				079DF7C50F3A882D0031D1B4 /* avmbuild.h */,
 				D935BDEB0FA0EBA7001E3E70 /* avm.cpp */,
@@ -1640,9 +1643,6 @@
 		81B69B1D1238486D00B9DF4F /* vmbase */ = {
 			isa = PBXGroup;
 			children = (
-				07D95AE21254C39000DD872D /* atom-inlines.h */,
-				07D95AE31254C39000DD872D /* atom.cpp */,
-				07D95AE41254C39000DD872D /* atom.h */,
 				81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */,
 				81B69B2912384D1D00B9DF4F /* AvmAssert.h */,
 				07D95ABB1254C05500DD872D /* vmbase-inlines.h */,
@@ -1740,6 +1740,7 @@
 				7E87D059122C5B980005FEAF /* AbcParser.cpp in Sources */,
 				7E87D05A122C5B980005FEAF /* ActionBlockConstants.cpp in Sources */,
 				7E87D05B122C5B980005FEAF /* AtomArray.cpp in Sources */,
+				7E87D05C122C5B980005FEAF /* atom.cpp in Sources */,
 				7E87D05D122C5B980005FEAF /* AvmCore.cpp in Sources */,
 				7E87D05E122C5B980005FEAF /* avmplus.cpp in Sources */,
 				7E87D05F122C5B980005FEAF /* avmplusDebugger.cpp in Sources */,
@@ -1918,7 +1919,6 @@
 				075920A7122E51EF00D60F63 /* GCPolicyManager.cpp in Sources */,
 				1969AE2C1250E706002F7F01 /* PageMap.cpp in Sources */,
 				078B1B281250F2770004F9F4 /* AvmAssert.cpp in Sources */,
-				07D95AE61254C39000DD872D /* atom.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1931,6 +1931,7 @@
 				079DF8380F3A882D0031D1B4 /* AbcParser.cpp in Sources */,
 				079DF83A0F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */,
 				079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */,
+				079DF83C0F3A882D0031D1B4 /* atom.cpp in Sources */,
 				079DF83D0F3A882D0031D1B4 /* AvmCore.cpp in Sources */,
 				079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */,
 				079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */,
@@ -2109,7 +2110,6 @@
 				07591FBE122BEA8F00D60F63 /* GCPolicyManager.cpp in Sources */,
 				1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */,
 				078B1B271250F2710004F9F4 /* AvmAssert.cpp in Sources */,
-				07D95AE51254C39000DD872D /* atom.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
