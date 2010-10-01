@@ -433,6 +433,7 @@ class NativeInfo:
     gen_method_map = False
     method_map_name = None
     constSetters = False
+    customConstruct = False
 
     def set_class(self, name):
         if self.class_name != None:
@@ -443,6 +444,11 @@ class NativeInfo:
         if self.instance_name != None:
             raise Error("native(instance) may not be specified multiple times for the same class: %s %s" % (self.instance_name, name))
         self.instance_name = name
+
+    def set_customConstruct(self):
+        if self.customConstruct:
+            raise Error("native(customConstruct) may not be specified multiple times for the same class")
+        self.customConstruct = True
 
     def validate(self):
         if self.gen_method_map and self.class_name == None and self.instance_name == None:
@@ -937,6 +943,12 @@ class Abc:
                             ni.constSetters = True
                         elif (v != "false"):
                             raise Error(u'native metadata specified illegal value, "%s" for constsetters field.  Value must be "true" or "false".' % unicode(v))
+                    if md.attrs.has_key("customconstruct"):
+                        v = md.attrs.get("customconstruct")
+                        if (v == "true"):
+                            ni.set_customConstruct()
+                        elif (v != "false"):
+                            raise Error(u'native metadata specified illegal value, "%s" for customconstruct field.  Value must be "true" or "false".' % unicode(v))
                     if (ni.class_name == None) and (ni.instance_name == None):
                         raise Error("native metadata must specify (cls,instance)")
 
@@ -1384,7 +1396,14 @@ class AbcThunkGen:
                 if c.ni.gen_method_map:
                     offsetOfSlotsClass = "SlotOffsetsAndAsserts::s_slotsOffset%s" % self.__baseNINameForNIName(c.ni.class_name)
                     offsetOfSlotsInstance = "SlotOffsetsAndAsserts::s_slotsOffset%s" % self.__baseNINameForNIName(c.ni.instance_name)
-                    out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s)" % (self.class_id_name(c), self.__baseNINameForNIName(c.ni.class_name), c.ni.class_name, offsetOfSlotsClass, c.ni.instance_name, offsetOfSlotsInstance))
+                    out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s)" %\
+                        (self.class_id_name(c),\
+                        self.__baseNINameForNIName(c.ni.class_name),\
+                        c.ni.class_name,\
+                        offsetOfSlotsClass,\
+                        c.ni.instance_name,\
+                        offsetOfSlotsInstance,\
+                        str(c.ni.customConstruct).lower()))
                 else:
                     out_c.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), c.ni.class_name, c.ni.instance_name))
         out_c.indent -= 1

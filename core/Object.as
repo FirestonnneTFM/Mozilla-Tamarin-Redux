@@ -48,7 +48,7 @@ package
     Number, Namespace, int, and uint, which cannot hold inherited state from Object because
     we represent these types more compactly than with ScriptObject.
     */
-    [native(cls="ObjectClass", methods="auto")]
+    [native(cls="ObjectClass", methods="auto", customconstruct=true)]
     public dynamic class Object
     {
         // Object.length = 1 per ES3

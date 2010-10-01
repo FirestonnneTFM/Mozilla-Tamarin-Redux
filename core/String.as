@@ -40,7 +40,7 @@
 
 package
 {
-    [native(cls="StringClass", instance="String", methods="auto")]
+    [native(cls="StringClass", instance="String", methods="auto", customconstruct=true)]
     public final class String extends Object
     {
         // String.length = 1 per ES3

@@ -40,7 +40,7 @@
 
 package
 {
-    [native(cls="BooleanClass", instance="bool", methods="auto")]
+    [native(cls="BooleanClass", instance="bool", methods="auto", customconstruct=true)]
     public final class Boolean extends Object
     {
         // Boolean.length = 1 per ES3

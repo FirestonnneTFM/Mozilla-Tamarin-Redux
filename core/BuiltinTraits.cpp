@@ -114,33 +114,6 @@ namespace avmplus
         xml_itraits->set_needsHashtable(false);
         xmlList_itraits->set_needsHashtable(false);
 
-        // set the types that don't have custom construct (default is true)
-        array_itraits->hasCustomConstruct           = false;
-//      boolean_itraits->hasCustomConstruct         = true;
-//      class_itraits->hasCustomConstruct           = true;
-//      date_itraits->hasCustomConstruct            = true;
-        error_itraits->hasCustomConstruct           = false;
-//      function_itraits->hasCustomConstruct        = true;
-//      int_itraits->hasCustomConstruct             = true;
-//      math_itraits->hasCustomConstruct            = true;
-        methodClosure_itraits->hasCustomConstruct   = false;
-//      namespace_itraits->hasCustomConstruct       = true;
-//      null_itraits->hasCustomConstruct            = true;
-//      number_itraits->hasCustomConstruct          = true;
-//      object_itraits->hasCustomConstruct          = true;
-//      qName_itraits->hasCustomConstruct           = true;
-//      regexp_itraits->hasCustomConstruct          = true;
-//      string_itraits->hasCustomConstruct          = true;
-//      uint_itraits->hasCustomConstruct            = true;
-        vector_itraits->hasCustomConstruct          = false;
-        vectordouble_itraits->hasCustomConstruct    = false;
-        vectorint_itraits->hasCustomConstruct       = false;
-        vectorobj_itraits->hasCustomConstruct       = false;
-        vectoruint_itraits->hasCustomConstruct      = false;
-//      void_itraits->hasCustomConstruct            = true;
-//      xmlList_itraits->hasCustomConstruct         = true;
-//      xml_itraits->hasCustomConstruct             = true;
-
         vectordouble_itraits->set_names(vectordouble_itraits->ns(), core->kVectorNumber);
         vectorint_itraits->set_names(vectorint_itraits->ns(), core->kVectorint);
         vectoruint_itraits->set_names(vectoruint_itraits->ns(), core->kVectoruint);

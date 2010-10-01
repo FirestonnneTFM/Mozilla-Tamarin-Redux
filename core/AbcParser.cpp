@@ -1975,7 +1975,8 @@ namespace avmplus
                                             class_pos,
                                             TRAITSTYPE_CLASS,
                                             itraits->protectedNamespace);
-
+            if (haveClassNativeInfo)
+                ctraits->hasCustomConstruct = nativeEntry->hasCustomConstruct;
             ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
 
             Traits* declaringTraits = cinit->declaringTraits();
