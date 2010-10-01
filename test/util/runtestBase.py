@@ -277,10 +277,18 @@ class RuntestBase:
             elif o in ('--ext',):
                 self.sourceExt = v
             elif o in ('--timeout',):
-                self.timeout = int(v)
-                self.testTimeOut=int(v)
+                try:
+                    self.timeout = int(v)
+                    self.testTimeOut=int(v)
+                except ValueError:
+                    print 'Incorrect timeout value: %s\n' % v
+                    self.usage(2)
             elif o in ('--testtimeout',):
-                self.testTimeOut=int(v)
+                try:
+                    self.testTimeOut=int(v)
+                except ValueError:
+                    print 'Incorrect testtimeout value: %s\n' % v
+                    self.usage(2)
             elif o in ('-d',):
                 # Note that this is not documented in the usage text.  This
                 # should only be used for debugging the runtests scripts
@@ -314,7 +322,11 @@ class RuntestBase:
             elif o in ('--random',):
                 self.random = True
             elif o in ('--seed',):
-                self.randomSeed = int(v)
+                try:
+                    self.randomSeed = int(v)
+                except ValueError:
+                    print 'Incorrect seed value: %s\n' % v
+                    self.usage(2)
             elif o in ('--aotsdk',):
                 self.aotsdk = v
             elif o in ('--aotout',):

@@ -69,6 +69,11 @@ echo "message: total function coverage:           $fnpct"
 echo "message: total condition/decision coverage: $cdpct"
 
 . ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $COVFILE failed"
+    exit 1
+fi
 
 echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/avm.cov code coverage data file avm.cov"
 
@@ -115,6 +120,11 @@ echo "message: combined total function coverage:           $fnpct"
 echo "message: combined total condition/decision coverage: $cdpct"
 
 . ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/coverage/avm.cov
+ret=$?
+if [ "$ret" != "0" ]; then
+    echo "Uploading of $COVFILE failed"
+    exit 1
+fi
 echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/coverage/avm.cov combined code coverage data file avm.cov"
 
 # Remove current coverage files
