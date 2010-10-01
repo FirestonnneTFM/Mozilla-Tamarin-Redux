@@ -52,11 +52,11 @@
 ##
 # Upload the common builds
 ##
-. ../all/upload-asteam.sh
+../all/upload-asteam.sh $change
 
 
 # Release_arm-linux
-. ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/avmshell_neon_arm $ftp_asteam/$branch/$change-${changeid}/$platform/avmshell_neon_arm
+../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/avmshell_neon_arm $ftp_asteam/$branch/$change-${changeid}/$platform/avmshell_neon_arm
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/avmshell_neon_arm failed"
@@ -64,7 +64,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Debug_arm-linux
-. ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/avmshell_neon_arm_d $ftp_asteam/$branch/$change-${changeid}/$platform/avmshell_neon_arm_d
+../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/avmshell_neon_arm_d $ftp_asteam/$branch/$change-${changeid}/$platform/avmshell_neon_arm_d
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/avmshell_neon_arm_d failed"

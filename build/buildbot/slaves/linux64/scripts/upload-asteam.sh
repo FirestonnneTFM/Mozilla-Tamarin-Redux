@@ -54,7 +54,7 @@
 ../all/upload-asteam.sh $change
 
 # Test media
-. ../all/util-upload-ftp-asteam.sh $basedir/test/acceptance/acceptance-tests-abcs.zip $ftp_asteam/$branch/$change-${changeid}/acceptance-tests-abcs.zip
+../all/util-upload-ftp-asteam.sh $basedir/test/acceptance/acceptance-tests-abcs.zip $ftp_asteam/$branch/$change-${changeid}/acceptance-tests-abcs.zip
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of acceptance-tests-abcs.zip failed"

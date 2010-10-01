@@ -167,7 +167,7 @@ fi
 
 test "$silent" = "true" && {
     # upload log to asteam
-    . $basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
+    $basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
     ret=$?
     if [ "$ret" != "0" ]; then
 	echo "Uploading of $logfile failed"

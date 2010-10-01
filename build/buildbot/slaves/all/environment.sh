@@ -154,7 +154,7 @@ function beginSilent () {
 
 function endSilent () {
     test "$silent" = "true" && {
-        . $workdir/../all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
+        $workdir/../all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
 	ret=$?
 	if [ "$ret" != "0" ]; then
 	    exec 1>&6 6>&-      # Restore stdout and close file descriptor #6.

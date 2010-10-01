@@ -53,7 +53,7 @@
 
 # Upload the PPC compiled binaries
 # Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_ppc
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_ppc
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/${shell_release}_ppc failed"
@@ -61,7 +61,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Release-wordcode
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release_wordcode}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_wordcode}_ppc
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release_wordcode}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_wordcode}_ppc
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/${shell_release_wordcode}_ppc failed"
@@ -69,7 +69,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Release_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/${shell_release_debugger}_ppc failed"
@@ -77,7 +77,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/${shell_debug}_ppc failed"
@@ -85,7 +85,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 #Debug_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/${shell_debug_debugger}_ppc failed"

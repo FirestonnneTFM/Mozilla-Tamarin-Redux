@@ -51,7 +51,7 @@
 
 
 # Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/$shell_release failed"
@@ -59,7 +59,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/$shell_debug failed"
