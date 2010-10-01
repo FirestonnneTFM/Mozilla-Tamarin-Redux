@@ -51,7 +51,7 @@
 
 
 # Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/$shell_release failed"
@@ -59,7 +59,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Release-wordcode
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/$shell_release_wordcode failed"
@@ -67,7 +67,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Release_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/$shell_release_debugger failed"
@@ -75,7 +75,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 # Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/$shell_debug failed"
@@ -83,7 +83,7 @@ if [ "$ret" != "0" ]; then
 fi
 
 #Debug_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_debugger
+../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_debugger
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $platform/$shell_debug_debugger failed"

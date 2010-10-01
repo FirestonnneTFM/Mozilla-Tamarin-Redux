@@ -68,7 +68,7 @@ cdpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $11}'`
 echo "message: total function coverage:           $fnpct"
 echo "message: total condition/decision coverage: $cdpct"
 
-. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
+${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $COVFILE failed"
@@ -119,7 +119,7 @@ cdpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $11}'`
 echo "message: combined total function coverage:           $fnpct"
 echo "message: combined total condition/decision coverage: $cdpct"
 
-. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/coverage/avm.cov
+${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/coverage/avm.cov
 ret=$?
 if [ "$ret" != "0" ]; then
     echo "Uploading of $COVFILE failed"

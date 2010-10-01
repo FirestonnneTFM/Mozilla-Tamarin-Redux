@@ -218,7 +218,7 @@ hg revert avmplusVersion.h
 # Post the build shell to ASTEAM
 if ${upload}; then
     cd $basedir/build/buildbot/slaves/scripts/
-    . ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension $ftp_asteam/$branch/${change}-${changeid}/$platform/$filename$shell_extension
+    ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension $ftp_asteam/$branch/${change}-${changeid}/$platform/$filename$shell_extension
     ret=$?
     if [ "$ret" != "0" ]; then
 	echo "Uploading of $platform/$filename$shell_extension failed"
