@@ -41,6 +41,6 @@
 
 // non-inline Atom implementation code goes here.
 
-namespace vmbase
+namespace avmplus
 {
 }

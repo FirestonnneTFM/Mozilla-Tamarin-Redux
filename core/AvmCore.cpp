@@ -136,14 +136,6 @@ namespace avmplus
         m_disabled = false;
     }
 
-#ifdef DEBUG
-    // This is called from the Atom code in vmbase
-    bool testIsObject(vmbase::Atom atom)
-    {
-        return AvmCore::isObject(atom);
-    }
-#endif
-
     void AvmCore::setCacheSizes(const CacheSizes& cs)
     {
         #ifdef AVMPLUS_VERBOSE
@@ -379,7 +371,7 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES
         kanonymousFunc = newConstantStringLatin1("<anonymous>");
 #endif
-
+        
         klittleEndian = internConstantStringLatin1("littleEndian");
         kbigEndian = internConstantStringLatin1("bigEndian");
         kparent = internConstantStringLatin1("parent");
@@ -403,7 +395,7 @@ namespace avmplus
         kindex = internConstantStringLatin1("index");
         kinput = internConstantStringLatin1("input");
         kemptyCtor = internConstantStringLatin1("emptyCtor");
-
+        
         kAsterisk = internConstantStringLatin1("*");
         kColon = internConstantStringLatin1(":");
         kUnderscore = internConstantStringLatin1("_");
@@ -414,7 +406,7 @@ namespace avmplus
         kVectorint = internConstantStringLatin1("Vector.<int>");
         kVectoruint = internConstantStringLatin1("Vector.<uint>");
         kVectorAny = internConstantStringLatin1("Vector.<*>");
-
+        
         for (int i = 0; i < 128; i++)
         {
             AvmAssert(k_cachedChars[i] == i);

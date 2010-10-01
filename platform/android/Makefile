@@ -344,6 +344,7 @@ SHELL_SRCS :=  ../../shell/ByteArrayGlue.cpp \
   ../../shell/avmshell.cpp \
   ../../shell/avmshellUnix.cpp \
   ../../shell/swf.cpp \
+  ../../shell/../vmbase/AvmAssert.cpp \
   ../../shell/../extensions/DictionaryGlue.cpp \
   ../../shell/../extensions/JavaGlue.cpp \
   ../../shell/../extensions/SamplerScript.cpp \

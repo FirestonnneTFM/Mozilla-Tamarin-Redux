@@ -39,7 +39,8 @@ STATIC_LIBRARIES += vmbase
 vmbase_BUILD_ALL = 1
 
 vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
-  $(curdir)/atom.cpp \
   $(curdir)/AvmAssert.cpp \
   $(NULL)
+
+
 
