@@ -77,6 +77,9 @@ do
             echo "Upload failed after $maxtries tries.  Aborting Download."
             exit 1
         fi
+    else
+	echo "Upload successful"
+	exit 0
     fi
 done
 
