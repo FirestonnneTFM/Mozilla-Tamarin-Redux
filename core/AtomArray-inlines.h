@@ -42,8 +42,6 @@
 
 namespace avmplus
 {
-    using namespace MMgc;
-
     REALLY_INLINE void AtomArray::setAtInternal(uint32_t index, Atom a)
     {
         // m_arr[index] = a;
