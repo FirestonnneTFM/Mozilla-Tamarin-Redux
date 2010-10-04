@@ -1401,7 +1401,8 @@ namespace avmplus
         for (int i=0; i < NumSavedRegs; i++) {
             LIns *p = lirout->insParam(i, 1); (void) p;
             verbose_only(if (lirbuf->printer)
-                lirbuf->printer->lirNameMap->addName(p, regNames[Assembler::savedRegs[i]]);)
+                lirbuf->printer->lirNameMap->addName(p,
+                    regNames[REGNUM(Assembler::savedRegs[i])]);)
         }
     }
 
