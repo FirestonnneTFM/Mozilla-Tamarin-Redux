@@ -380,7 +380,7 @@ namespace avmshell
         // This is obscure but well-defined: the clearing of this flag is allowed
         // at any time, see comment for checkFixedMemory in GCHeap.h.
         if (!settings.fixedcheck)
-            GCHeap::GetGCHeap()->Config().clearCheckFixedMemory();
+            MMgc::GCHeap::GetGCHeap()->Config().clearCheckFixedMemory();
 
         config.interrupts = settings.interrupts;
 #ifdef VMCFG_VERIFYALL

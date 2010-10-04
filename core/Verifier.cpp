@@ -135,7 +135,7 @@ namespace avmplus
                 const ScopeTypeChain *scope = info->activationScope();
                 if (scope == NULL) {
                     AvmAssert(type == info->activationTraits());
-                    GC* gc = info->pool()->core->GetGC();
+                    MMgc::GC* gc = info->pool()->core->GetGC();
                     scope = info->declaringScope()->cloneWithNewTraits(gc, type);
                     type->setDeclaringScopes(scope);
                     info->init_activationScope(scope);
