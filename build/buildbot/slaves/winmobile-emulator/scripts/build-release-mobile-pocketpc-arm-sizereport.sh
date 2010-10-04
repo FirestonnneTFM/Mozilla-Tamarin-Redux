@@ -104,7 +104,7 @@ endSilent
 cd $basedir/utils
 python ./sizereport.py --vmversion=$change --config=-arm --product=${branch} --socketlog --prefix=message: --map=../objdir/shell/avmshell.map
 
-echo url: "http://tamarin-builds.mozilla.org/report/index.cfm?mode=size&rollupname=sizereport&hostip=10.60.147.246&configbaseline=tamarin-redux-arm&config1=tamarin-redux-arm&config2=tamarin-redux-arm&baselineBuild=1119&topBuild=${change}" size report
+echo url: "http://tamarin-builds.mozilla.org/report/index.cfm?mode=size&rollupname=sizereport&hostip=10.60.147.240&product1=tamarin-redux&product2=tamarin-redux&productBaseline=tamarin-redux&configbaseline=-arm&config1=-arm&config2=-arm&baselineBuild=1119&topBuild=${change}" size report
 
 cd $basedir
 test -d objdir && {
