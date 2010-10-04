@@ -751,7 +751,7 @@ namespace avmplus
 
 #ifdef DEBUG
 
-#if defined(__GNUC__) && !defined(VMCFG_ARM)
+#if defined(__GNUC__) && !defined(VMCFG_ARM) && !defined(VMCFG_MIPS)
     // Ensure that if a native class object overrides ClassClosure::construct(),
     // then itraits->hasCustomConstruct must be true.  Conversely if it does not
     // override construct(), hasCustomConstruct must be false (lest we lose out
