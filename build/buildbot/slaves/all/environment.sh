@@ -142,7 +142,7 @@ function beginSilent () {
     test "$silent" = "true" && {
         if [ ! -z internal_repo ]; then
             repo_url=`hg showconfig | grep paths.default | awk -F"=" '{print $2}'`
-            if [ "$repo_url" == http://hg.mozilla.org* ]; then
+            if [[ "$repo_url" == http://hg.mozilla.org* ]]; then
                 internal_repo=false
             else
                 internal_repo=true
