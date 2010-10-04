@@ -74,7 +74,7 @@ do
             echo "Attempting upload again.  Attempt $x of $maxtries."
             sleep 5
         else 
-            echo "Upload failed after $maxtries tries.  Aborting Download."
+            echo "Upload failed after $maxtries tries.  Aborting upload."
             exit 1
         fi
     else
