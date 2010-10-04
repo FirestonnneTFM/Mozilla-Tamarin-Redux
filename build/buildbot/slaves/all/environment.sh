@@ -165,14 +165,14 @@ function beginSilent () {
 
 function endSilent () {
     if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
+        exec 1>&6 2>&1 6>&-      # Restore stdout, stderr and close file descriptor #6.
         $workdir/../all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
         ret=$?
         if [ "$ret" != "0" ]; then
-            exec 1>&6 6>&-      # Restore stdout and close file descriptor #6.
             echo "Uploading of $logfile failed"
             exit 1
         fi
-        exec 1>&6 6>&-      # Restore stdout and close file descriptor #6.
+
         # ${logfile##*/} == filename from end of path
         echo "Build log can be found here: http://asteam.macromedia.com/builds/$branch/${change}-${changeid}/$platform/${logfile##*/}"
         echo "url: http://asteam.macromedia.com/builds/$branch/${change}-${changeid}/$platform/${logfile##*/} build log"
