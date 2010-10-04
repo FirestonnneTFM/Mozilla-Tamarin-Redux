@@ -103,7 +103,7 @@ endSilent
 cd $basedir/utils
 python ./sizereport.py --vmversion=$change --product=${branch} --socketlog --prefix=message: --map=../objdir/shell/avmshell.map
 
-echo url: "http://tamarin-builds.mozilla.org/report/index.cfm?mode=size&rollupname=sizereport&hostip=10.60.147.246&configbaseline=tamarin-redux&config1=tamarin-redux&config2=tamarin-redux&baselineBuild=1094&topBuild=${change}" size report
+echo url: "http://tamarin-builds.mozilla.org/report/index.cfm?mode=size&rollupname=sizereport&hostip=10.60.147.240&product1=tamarin-redux&product2=tamarin-redux&productBaseline=tamarin-redux&baselineBuild=1094&topBuild=${change}" size report
 
 # We have had some problems in the past with deleting the objdir directory after running the 
 # sizereport, give the script a couple of seconds to make sure that the python process completely

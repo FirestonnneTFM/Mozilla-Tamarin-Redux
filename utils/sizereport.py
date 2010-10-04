@@ -146,7 +146,7 @@ def logResult(out):
     msg=''
     date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # for consistency in the performance report, pretend result came from windows performance host
-    ip='10.60.147.246';
+    ip='10.60.147.240';
     for line in out.split('\n'):
         fields=line.split()
         if len(fields)>1:
