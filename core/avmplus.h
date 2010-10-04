@@ -247,6 +247,16 @@ namespace avmplus
     #undef AVM_MAP
 }
 
+#ifdef DEBUG
+// Fixme: bug 559132.  export avmplus::AvmAssertFail() to support
+// explicitly the qualified reference in nanojit/nanojit.h.
+namespace avmplus {
+    inline void AvmAssertFail(const char *msg) {
+        vmbase::AvmAssertFail(msg);
+    }
+}
+#endif
+
 #include "MMgc.h"
 #include "QCache.h"
 #include "MathUtils.h"
