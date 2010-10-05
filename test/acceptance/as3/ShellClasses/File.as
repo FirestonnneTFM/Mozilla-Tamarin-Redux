@@ -70,8 +70,8 @@
       err.substring(0,18));
 
     File.write("test2.ba","sample test data");
-    var ba:ByteArray=File.fileToByteArray("test2.ba",false);
-    AddTestCase("File.fileToByteArray length",true,ba.length=="sample test data".length);
+    var ba:ByteArray=File.readByteArray("test2.ba");
+    AddTestCase("File.readByteArray length",true,ba.length=="sample test data".length);
 
     // Regression for https://bugzilla.mozilla.org/show_bug.cgi?id=473863
     //      File.read fail for binary files

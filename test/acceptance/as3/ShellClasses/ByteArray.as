@@ -326,8 +326,8 @@
       5 in bytearray_atom);
     
 // read/write file
-    bytearray_atom.writeFile('test.ba');
-    var bytearray_read=ByteArray.readFile('test.ba');
+    File.writeByteArray('test.ba', bytearray_atom);
+    var bytearray_read=File.readByteArray('test.ba');
     AddTestCase(
       "ByteArray read/writeFile",
       3,
@@ -335,7 +335,7 @@
 
     var err2="";
     try {
-        var bytearray_badread=ByteArray.readFile('foo.ba');
+        var bytearray_badread=File.readByteArray('foo.ba');
     } catch (e) {
         err2=e.toString();
     }

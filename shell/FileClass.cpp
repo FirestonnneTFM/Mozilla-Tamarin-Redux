@@ -171,4 +171,93 @@ namespace avmshell
         fp->close();
         Platform::GetInstance()->destroyFile(fp);
     }
+
+    ByteArrayObject* FileClass::readByteArray(Stringp filename)
+    {
+        Toplevel* toplevel = this->toplevel();
+        if (!filename) {
+            toplevel->throwArgumentError(kNullArgumentError, "filename");
+        }
+        StUTF8String filenameUTF8(filename);
+
+        File* fp = Platform::GetInstance()->createFile();
+        if (fp == NULL || !fp->open(filenameUTF8.c_str(), File::OPEN_READ_BINARY))
+        {
+            if(fp)
+            {
+                Platform::GetInstance()->destroyFile(fp);
+            }
+            toplevel->throwError(kFileOpenError, filename);
+        }
+
+        int64_t len = fp->size();
+        if((uint64_t)len >= UINT32_T_MAX) //ByteArray APIs cannot handle files > 4GB
+        {
+            toplevel->throwRangeError(kOutOfRangeError, filename);
+        }
+
+        uint32_t readCount = (uint32_t)len;
+
+        unsigned char *c = mmfx_new_array( unsigned char, readCount+1);
+
+        ByteArrayClass* bac = (ByteArrayClass*)toplevel->getBuiltinExtensionClass(NativeID::abcclass_flash_utils_ByteArray);
+        Atom args[1] = {nullObjectAtom};
+        ByteArrayObject *b = (ByteArrayObject*)AvmCore::atomToScriptObject(bac->construct(0,args));
+        b->setLength(0);
+
+        while (readCount > 0)
+        {
+            uint32_t actual = (uint32_t) fp->read(c, readCount);
+            if (actual > 0)
+            {
+                b->fill(c, actual);
+                readCount -= readCount;
+            }
+            else
+            {
+                break;
+            }
+        }
+        b->seek(0);
+
+        mmfx_delete_array( c );
+
+        fp->close();
+        Platform::GetInstance()->destroyFile(fp);
+
+        return b;
+    }
+
+    bool FileClass::writeByteArray(Stringp filename, ByteArrayObject* bytes)
+    {
+        Toplevel* toplevel = this->toplevel();
+        if (!filename) {
+            toplevel->throwArgumentError(kNullArgumentError, "filename");
+        }
+
+        StUTF8String filenameUTF8(filename);
+
+        File* fp = Platform::GetInstance()->createFile();
+        if (fp == NULL || !fp->open(filenameUTF8.c_str(), File::OPEN_WRITE_BINARY))
+        {
+            if(fp)
+            {
+                Platform::GetInstance()->destroyFile(fp);
+            }
+            toplevel->throwError(kFileWriteError, filename);
+        }
+
+        int32_t len = bytes->get_length();
+        bool success = (int32_t)fp->write(&(bytes->GetByteArray())[0], len) == len;
+
+        fp->close();
+        Platform::GetInstance()->destroyFile(fp);
+
+        if (!success) {
+            toplevel->throwError(kFileWriteError, filename);
+        }
+        
+        return true;
+    }
+
 }

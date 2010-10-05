@@ -133,7 +133,7 @@ package swfmake
     result.writeByte(9);
     result.writeUnsignedInt(numbytes);
     result.writeBytes(body);
-    result.writeFile(output_name);
+    File.writeByteArray(output_name, result);
     System.exit(0);
 
     function usage() {

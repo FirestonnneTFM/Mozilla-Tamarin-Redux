@@ -75,6 +75,10 @@ namespace avmshell
          */
         void write(Stringp filename, Stringp data);
 
+        ByteArrayObject* readByteArray(Stringp filename);
+        bool writeByteArray(Stringp filename, ByteArrayObject* bytes);
+
+
         DECLARE_SLOTS_FileClass;
     };
 }

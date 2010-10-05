@@ -120,16 +120,8 @@ package avmplus
         public native static function read(filename:String):String;
         public native static function write(filename:String, data:String):void;
 
-        public static function fileToByteArray(filename:String, readOnly:Boolean):ByteArray
-        {
-            return ByteArray.readFile(filename)
-        }
-
-        public static function writeByteArray(filename:String, bytes:ByteArray):Boolean
-        {
-            bytes.writeFile(filename)
-            return true
-        }
+        public native static function readByteArray(filename:String):ByteArray;
+        public native static function writeByteArray(filename:String, bytes:ByteArray):Boolean;
     }
 
     public function debugger()

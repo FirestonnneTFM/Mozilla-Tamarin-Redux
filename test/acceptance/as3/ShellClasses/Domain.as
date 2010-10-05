@@ -37,6 +37,7 @@
 
 package {
     import avmplus.Domain
+    import avmplus.File
     import flash.utils.ByteArray
 
     public class testclass1 {
@@ -56,7 +57,7 @@ package {
         for (n in data) {
             ba.writeByte(data[n]);
 	}
-        ba.writeFile("testclass.abc");
+        File.writeByteArray("testclass.abc", ba);
     }
 
 

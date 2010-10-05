@@ -41,6 +41,7 @@
 package avmplus {
 
 import flash.utils.ByteArray
+import avmplus.File
 
 [native(cls="::avmshell::DomainClass", instance="::avmshell::DomainObject", methods="auto")]
 public class Domain
@@ -62,7 +63,7 @@ public class Domain
 
     public function load(filename:String, swfVersion:uint = 0)
     {
-        return loadBytes(ByteArray.readFile(filename), swfVersion)
+        return loadBytes(File.readByteArray(filename), swfVersion)
     }
 
     /**

@@ -41,6 +41,7 @@ package abcdump
 {
     import flash.utils.ByteArray
     import avmplus.System
+    import avmplus.File
 
     include "abc-constants.as"
     
@@ -741,7 +742,7 @@ package abcdump
             parseMethodBodies()
 
             if (doExtractAbc==true)
-                data.writeFile(nextAbcFname());
+                File.writeByteArray(nextAbcFname(), data);
         }
     
         function readU32():int
@@ -1548,7 +1549,7 @@ package abcdump
             currentFname = file.substring(0,x);
         else
             currentFname = file;
-        var data:ByteArray = ByteArray.readFile(file)
+        var data:ByteArray = File.readByteArray(file)
         data.endian = "littleEndian"
         var version:uint = data.readUnsignedInt()
         switch (version) {
