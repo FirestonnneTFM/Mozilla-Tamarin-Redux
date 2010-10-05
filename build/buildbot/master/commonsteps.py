@@ -80,12 +80,12 @@ def startCompile(change):
 # For an explanation of the WithProperties('(%(silent:-)s') syntax see
 # http://djmitche.github.com/buildbot/docs/current/#Using-Build-Properties
 
-def compile_generic(name, shellname, args, upload):
-    # factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--enable-shell", upload="false"))
+def compile_generic(name, shellname, args, upload, features=""):
+    # factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--enable-shell", upload="false", features="+AVMSYSTEM_32BIT"))
     # upload: if true build will be uploaded to asteam, this is normaly done in the upload buildstep
     #         but is here for shells that are compiled in deep-testing
     return BuildShellCommand(
-            command=['../all/compile-generic.sh', WithProperties('%s','revision'), '%s' % args, '%s' % shellname, '%s' % upload],
+            command=['../all/compile-generic.sh', WithProperties('%s','revision'), '%s' % args, '%s' % shellname, '%s' % upload, '%s' % features],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting %s build...' % name,
             descriptionDone='finished %s build' % name,

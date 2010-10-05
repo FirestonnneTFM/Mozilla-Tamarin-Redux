@@ -471,6 +471,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=sh4-linux', 'avmshell_sh4', 'true'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'CXX': 'sh4-linux-g++',
                     'CC' : 'sh4-linux-gcc',
                     'LD' : 'sh4-linux-ld',
@@ -485,6 +486,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=sh4-linux', 'avmshell_sh4_d', 'true'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'CXX': 'sh4-linux-g++',
                     'CC' : 'sh4-linux-gcc',
                     'LD' : 'sh4-linux-ld',
