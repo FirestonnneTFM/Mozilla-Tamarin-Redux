@@ -111,6 +111,10 @@ export scp_coverage="${coverage_host}:${coverage_dir}"
 export http_coverage=http://tamarin-builds.mozilla.org/analytics/codecoverage
 export coverage_skips=eval,other-licenses,pcre,Total
 
+export doxygen_host=10.171.22.12
+export doxygen_dir="/cygdrive/e/AVMTeam/wwwroot/doxygen"
+export scp_doxygen="${doxygen_host}:${doxygen_dir}"
+
 baselineBranchTime=tamarin-flash
 baselineConfigTime=
 baselineBuildTime=458340
