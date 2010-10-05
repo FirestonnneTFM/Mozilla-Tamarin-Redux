@@ -401,7 +401,7 @@ package {
         public var dataFormat;
         public function load(request:URLRequest) {
 //            print("loading "+request.url);
-            var ba:ByteArray=File.fileToByteArray(request.url,false);
+            var ba:ByteArray=File.readByteArray(request.url);
             var evt=new Event("complete");
             evt.target=new Object();
             evt.target.data=ba;

@@ -4143,11 +4143,11 @@ AvmBox builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 // Date_AS3_getMilliseconds
 // Date_AS3_getUTCDay
 // Date_AS3_getUTCHours
-// Date_AS3_getUTCMilliseconds
+// Number_private__minValue
 // Date_AS3_getTime
 // Date_AS3_getDay
 // __AS3___vec_Vector_double_AS3_pop
-// Number_private__minValue
+// Date_AS3_getUTCMilliseconds
 // Date_AS3_getMonth
 // Math_random
 // Date_AS3_getDate

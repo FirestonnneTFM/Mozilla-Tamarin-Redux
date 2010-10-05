@@ -186,8 +186,6 @@ namespace avmshell
 
         ByteArray& GetByteArray() { return m_byteArray; }
 
-        void writeFile(Stringp filename);
-
         /*virtual*/ GlobalMemoryProvider* getGlobalMemoryProvider() { return &m_byteArray; }
 
 #ifdef DEBUGGER
@@ -212,8 +210,6 @@ namespace avmshell
         ByteArrayClass(VTable *vtable);
 
         ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-
-        ByteArrayObject *readFile(Stringp filename);
 
         DECLARE_SLOTS_ByteArrayClass;
     };
