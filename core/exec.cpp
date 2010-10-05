@@ -170,16 +170,16 @@ void BaseExecMgr::initObj(MethodEnv* env, ScriptObject* obj)
     t->visitInitBody(&visitor, env->toplevel(), tb);
 }
 
-Atom BaseExecMgr::init_invoke_interp(MethodEnv* env, int argc, Atom* args)
+Atom BaseExecMgr::initInvokeInterp(MethodEnv* env, int argc, Atom* args)
 {
     initObj(env, (ScriptObject*) atomPtr(args[0]));
-    return invoke_interp(env, argc, args);
+    return invokeInterp(env, argc, args);
 }
 
-Atom BaseExecMgr::init_invoke_interp_nocoerce(MethodEnv* env, int argc, Atom* args)
+Atom BaseExecMgr::initInvokeInterpNoCoerce(MethodEnv* env, int argc, Atom* args)
 {
     initObj(env, (ScriptObject*) atomPtr(args[0]));
-    return invoke_interp_nocoerce(env, argc, args);
+    return invokeInterpNoCoerce(env, argc, args);
 }
 
 void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
@@ -190,11 +190,11 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
     // * if the method has no typed args, choose an invoker stub that skips
     //   arg type checking entirely (_nocoerce).
     static const AtomMethodProc invoke_stubs[2][2] = {{
-        BaseExecMgr::invoke_interp_nocoerce,        // ctor=0, typedargs=0
-        BaseExecMgr::invoke_interp                  // ctor=0, typedargs=1
+        BaseExecMgr::invokeInterpNoCoerce,        // ctor=0, typedargs=0
+        BaseExecMgr::invokeInterp                  // ctor=0, typedargs=1
     }, {
-        BaseExecMgr::init_invoke_interp_nocoerce,   // ctor=1, typedargs=0
-        BaseExecMgr::init_invoke_interp             // ctor=1, typedargs=1
+        BaseExecMgr::initInvokeInterpNoCoerce,   // ctor=1, typedargs=0
+        BaseExecMgr::initInvokeInterp             // ctor=1, typedargs=1
     }};
     int ctor = m->isConstructor() ? 1 : 0;
     int typedargs = hasTypedArgs(ms) ? 1 : 0;
@@ -213,8 +213,8 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
             BaseExecMgr::interpGPR,                     // ctor=0, fpr=0
             (GprMethodProc)BaseExecMgr::interpFPR       // ctor=0, fpr=1
         }, {
-            BaseExecMgr::init_interpGPR,                // ctor=1, fpr=0
-            (GprMethodProc)BaseExecMgr::init_interpFPR  // ctor=1, fpr=1
+            BaseExecMgr::initInterpGPR,                // ctor=1, fpr=0
+            (GprMethodProc)BaseExecMgr::initInterpFPR  // ctor=1, fpr=1
         }};
         int ctor = m->isConstructor() ? 1 : 0;
         int fpr = ms->returnTraitsBT() == BUILTIN_number ? 1 : 0;
@@ -385,7 +385,7 @@ void BaseExecMgr::verifyNative(MethodInfo* m, MethodSignaturep ms)
 void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
 {
     m->_implGPR = p;
-    m->_invoker = invoke_generic;
+    m->_invoker = invokeGeneric;
 }
 
 // Without a JIT, we don't need to build any IMTs.
@@ -758,7 +758,7 @@ Atom BaseExecMgr::call(MethodEnv* env, Atom thisArg, int argc, Atom *argv)
 // ("sibcalls") -- see http://www.ddj.com/architect/184401756 for a useful explanation.
 // anyway, since we really want interpBoxed to be a tailcall from
 // here, be sure to keep it using a compatible signature...
-Atom BaseExecMgr::invoke_interp(MethodEnv* env, int32_t argc, Atom* atomv)
+Atom BaseExecMgr::invokeInterp(MethodEnv* env, int32_t argc, Atom* atomv)
 {
     // The tail call to interpBoxed is important in order to keep stack consumption down in an
     // interpreter-only configuration, but it's good always.
@@ -781,7 +781,7 @@ Atom BaseExecMgr::invoke_interp(MethodEnv* env, int32_t argc, Atom* atomv)
 }
 
 // Specialized copy of invoke_interp() when there are no typed args.
-Atom BaseExecMgr::invoke_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* atomv)
+Atom BaseExecMgr::invokeInterpNoCoerce(MethodEnv* env, int32_t argc, Atom* atomv)
 {
     // The tail call to interpBoxed is important in order to keep stack consumption down in an
     // interpreter-only configuration, but it's good always.
@@ -804,7 +804,7 @@ Atom BaseExecMgr::invoke_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* ato
 
 // Invoker for native or jit code used before we have jit-compiled,
 // or after JIT compilation of the invoker has failed.
-Atom BaseExecMgr::invoke_generic(MethodEnv *env, int32_t argc, Atom* atomv)
+Atom BaseExecMgr::invokeGeneric(MethodEnv *env, int32_t argc, Atom* atomv)
 {
     MethodSignaturep ms = env->get_ms();
     const size_t extra_sz = startCoerce(env, argc, ms);
