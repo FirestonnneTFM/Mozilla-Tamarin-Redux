@@ -67,7 +67,7 @@ void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
     m->_implGPR = p;
     m->_invoker = InvokerCompiler::canCompileInvoker(m)
         ? jitInvokerNext
-        : invoke_generic;
+        : invokeGeneric;
 #ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy))
         core->console << "execpolicy jit " << m << "\n";
@@ -78,7 +78,7 @@ Atom BaseExecMgr::jitInvokerNext(MethodEnv* env, int argc, Atom* args)
 {
     // Install stub to compile on next call.
     env->method->_invoker = jitInvokerNow;
-    return invoke_generic(env, argc, args);
+    return invokeGeneric(env, argc, args);
 }
 
 // First call after compiling method; compile a custom invoker and run it.
@@ -91,7 +91,7 @@ Atom BaseExecMgr::jitInvokerNow(MethodEnv* env, int argc, Atom* args)
             env->core()->console << "execpolicy generic-invoker " << env->method
                                  << " invoker-jit-failed\n";
 #endif
-        invoker = invoke_generic; // Fail: install generic invoker.
+        invoker = invokeGeneric; // Fail: install generic invoker.
     } else {
 #ifdef AVMPLUS_VERBOSE
         if (env->method->pool()->isVerbose(VB_execpolicy))
@@ -134,13 +134,13 @@ void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplev
     }
 }
 
-uintptr_t BaseExecMgr::init_interpGPR(MethodEnv* env, int argc, uint32_t* ap)
+uintptr_t BaseExecMgr::initInterpGPR(MethodEnv* env, int argc, uint32_t* ap)
 {
     initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
     return interpGPR(env, argc, ap);
 }
 
-double BaseExecMgr::init_interpFPR(MethodEnv* env, int argc, uint32_t* ap)
+double BaseExecMgr::initInterpFPR(MethodEnv* env, int argc, uint32_t* ap)
 {
     initObj(env, (ScriptObject*) atomPtr(((uintptr_t*)ap)[0]));
     return interpFPR(env, argc, ap);
@@ -181,7 +181,7 @@ double BaseExecMgr::interpFPR(MethodEnv* env, int argc, uint32_t * ap)
 void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
 {
     m->_implGPR = p;
-    m->_invoker = invoke_generic;
+    m->_invoker = invokeGeneric;
     if (InvokerCompiler::canCompileInvoker(m))
         m->_invoker = jitInvokerNext;
 #ifdef AVMPLUS_VERBOSE

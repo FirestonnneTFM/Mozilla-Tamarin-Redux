@@ -57,25 +57,25 @@ class ExecMgr
 public:
     virtual ~ExecMgr() {}
 
-    // Called when a MethodInfo is allocated.
+    /** Called when a MethodInfo is allocated. */
     virtual void init(MethodInfo*, const NativeMethodInfo*) = 0;
 
-    // Called when a MethodEnv is allocated.
+    /** Called when a MethodEnv is allocated. */
     virtual void init(MethodEnv*) = 0;
 
-    // Called after MethodInfo::resolveSignatures() completes
+    /** Called after MethodInfo::resolveSignatures() completes */
     virtual void notifyMethodResolved(MethodInfo*, MethodSignaturep) = 0;
 
-    // Called after VTable::resolveSignatures() completes.
+    /** Called after VTable::resolveSignatures() completes. */
     virtual void notifyVTableResolved(VTable*) = 0;
 
-    // Called after prepareActionPool completes.
+    /** Called after prepareActionPool completes. */
     virtual void notifyAbcPrepared(Toplevel*, AbcEnv*) = 0;
 
-    // Invoke a function apply-style, by unpacking arguments from an array
+    /** Invoke a function apply-style, by unpacking arguments from an array */
     virtual Atom apply(MethodEnv*, Atom thisArg, ArrayObject* a) = 0;
 
-    // Invoke a function call-style, with thisArg passed explicitly
+    /** Invoke a function call-style, with thisArg passed explicitly */
     virtual Atom call(MethodEnv*, Atom thisArg, int32_t argc, Atom* argv) = 0;
 };
 
@@ -94,7 +94,8 @@ typedef Atom (*AtomMethodProc)(MethodEnv*, int, Atom*);
 // type reference.  JIT code passes in the IID of the interface method
 // to enable searching for the correct concrete method.
 typedef uintptr_t GprImtThunkProcRetType;
-typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*, int argc, uint32_t* args, uintptr_t idd);
+typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*,
+        int argc, uint32_t* args, uintptr_t idd);
 
 /**
  * BaseExecMgr implements for all policies, and encapsulates
@@ -125,7 +126,7 @@ private:
     static BaseExecMgr* exec(VTable*);
     static BaseExecMgr* exec(MethodEnv*);
 
-    // True if method's _isInterpImpl flag is set.
+    /** True if method's _isInterpImpl flag is set. */
     static bool isInterpreted(MethodEnv*);
 
     // Trampolines that verify on first call:
@@ -143,72 +144,87 @@ private:
 
     // Interpreter invocation when called by JIT code.  C++ and Interpreter
     // calls to the interpreter go through one of the invoke_interp variants.
-    static uintptr_t interpGPR(MethodEnv* method, int argc, uint32_t *ap); // returns Atom, int/uint, or a pointer
-    static double interpFPR(MethodEnv* method, int argc, uint32_t *ap); // really returns double
+    static uintptr_t interpGPR(MethodEnv* method, int argc, uint32_t *ap);
+    static double interpFPR(MethodEnv* method, int argc, uint32_t *ap);
 
-    // General purpose interpreter invocation.
-    static Atom invoke_interp(MethodEnv* env, int32_t argc, Atom* argv);
+    /** General purpose interpreter invocation. */
+    static Atom invokeInterp(MethodEnv* env, int32_t argc, Atom* argv);
 
-    // Invoke the interpreter for a method that does not need to coerce
-    // any arguments, either because there are none, or they're all type *.
-    static Atom invoke_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* argv);
+    /**
+     * Invoke the interpreter for a method that does not need to coerce
+     * any arguments, either because there are none, or they're all type *.
+     **/
+    static Atom invokeInterpNoCoerce(MethodEnv* env, int32_t argc, Atom* argv);
 
     // Stubs used for invoking interpreted constructor methods; these
     // initialize default values of the new object before invoking the
     // interpreter.  See initObj() in exec.cpp.
-    static uintptr_t init_interpGPR(MethodEnv*, int, uint32_t*);
-    static double init_interpFPR(MethodEnv*, int, uint32_t*);
-    static Atom init_invoke_interp(MethodEnv*, int, Atom*);
-    static Atom init_invoke_interp_nocoerce(MethodEnv*, int, Atom*);
+    static uintptr_t initInterpGPR(MethodEnv*, int, uint32_t*);
+    static double initInterpFPR(MethodEnv*, int, uint32_t*);
+    static Atom initInvokeInterp(MethodEnv*, int, Atom*);
+    static Atom initInvokeInterpNoCoerce(MethodEnv*, int, Atom*);
 
-    // Initialize an object's fields to default values. Called by init stubs.
+    /** Set an object's fields to default values. Called by init stubs. */
     static void initObj(MethodEnv* env, ScriptObject* obj);
 
-    // Generic interpretive invoker for JIT and native methods that
-    // iterates over argument types and coerces each one.
-    static Atom invoke_generic(MethodEnv* env, int32_t argc, Atom* argv);
+    /**
+     * Generic interpretive invoker for JIT and native methods that
+     * iterates over argument types and coerces each one.
+     */
+    static Atom invokeGeneric(MethodEnv* env, int32_t argc, Atom* argv);
 
-    // Invoke a native or jit-compiled method and then box the return value.
-    static Atom endCoerce(MethodEnv*, int32_t argc, uint32_t *ap, MethodSignaturep ms);
+    /** Invoke a native or jit-compiled method and then box the return value. */
+    static Atom endCoerce(MethodEnv*, int32_t argc, uint32_t *ap,
+                          MethodSignaturep ms);
 
-    // Check argc and compute the space required for rest args
+    /** Check argc and compute the space required for rest args. */
     static size_t startCoerce(MethodEnv*, int32_t argc, MethodSignaturep ms);
 
-    // Unbox and coerce arguments for ordinary invocation.
-    static void unboxCoerceArgs(MethodEnv*, int32_t argc, Atom* in, uint32_t *ap, MethodSignaturep ms);
+    /** Unbox and coerce arguments for ordinary invocation. */
+    static void unboxCoerceArgs(MethodEnv*, int32_t argc, Atom* in,
+                                uint32_t *ap, MethodSignaturep ms);
 
-    // Unbox and coerce arguments for invocation via Function.apply().
-    static void unboxCoerceArgs(MethodEnv*, Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms);
+    /** Unbox and coerce arguments for invocation via Function.apply(). */
+    static void unboxCoerceArgs(MethodEnv*, Atom thisArg, ArrayObject *a,
+                                uint32_t *argv, MethodSignaturep ms);
 
-    // Unbox and coerce arguments for invocation via Function.call().
-    static void unboxCoerceArgs(MethodEnv*, Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms);
+    /** Unbox and coerce arguments for invocation via Function.call(). */
+    static void unboxCoerceArgs(MethodEnv*, Atom thisArg, int32_t argc,
+                                Atom* in, uint32_t *argv, MethodSignaturep ms);
 
-    // Coerce and unbox a single argument.
+    /** Coerce and unbox a single argument. */
     static Atom* FASTCALL coerceUnbox1(MethodEnv*, Atom atom, Traits* t, Atom* args);
 
-    // Just unbox a single argument that is known to be the correct type already.
+    /** Just unbox a single argument that is known to be the correct type already. */
     static Atom* FASTCALL unbox1(MethodEnv*, Atom atom, Traits* t, Atom* args);
 
-    // Set trampolines and flags for the interpreter, possibly including an initObj trampoline.
+    /**
+     * Set trampolines and flags for the interpreter, possibly including an
+     * initializer trampoline.
+     */
     void setInterp(MethodInfo*, MethodSignaturep);
 
-    // Set trampolines and flags for a native method.
+    /** Set trampolines and flags for a native method. */
     void setNative(MethodInfo*, GprMethodProc p);
 
-    // Verify any kind of method, by sniffing what kind it is and dispatching
-    // to the appropriate case.  Called on or before the first invocation of the
-    // target method.  Each subcase is responsible for setting up CodeWriters and
-    // then ultimately running the verifier by calling verifyCommon().
+    /**
+     * Verify any kind of method, by sniffing what kind it is and dispatching
+     * to the appropriate case.  Called on or before the first invocation of the
+     * target method.  Each subcase is responsible for setting up CodeWriters and
+     * then ultimately running the verifier by calling verifyCommon().
+     */
     void verifyMethod(MethodInfo*, Toplevel*, AbcEnv*);
 
-    // "Verify" a native method by installing trampolines and flags.
+    /** "Verify" a native method by installing trampolines and flags. */
     void verifyNative(MethodInfo*, MethodSignaturep);
 
-    // Verify a method and install interpreter trampolines.
+    /** Verify a method and install interpreter trampolines. */
     void verifyInterp(MethodInfo*, MethodSignaturep, Toplevel*, AbcEnv*);
 
-    // Actually run the verifier with the given CodeWriter chain, and
-    // clean up if it throws a VerifyError.
+    /**
+     * Actually run the verifier with the given CodeWriter chain, and
+     * clean up if it throws a VerifyError.
+     */
     void verifyCommon(MethodInfo*, MethodSignaturep, Toplevel*, AbcEnv*, CodeWriter*);
 
     //
@@ -249,24 +265,26 @@ private:
     // Support for JIT Compilation:
     //
 
-    // Should we eagerly JIT or always interpret?
+    /** Return true if we should eagerly JIT.  False means use interpreter. */
     bool shouldJit(const MethodInfo*) const;
 
-    // True if the JIT is enabled.
+    /** True if the JIT is enabled */
     bool isJitEnabled() const;
 
-    // Run the verifier with the JIT attached.
+    /** Run the verifier with the JIT attached. */
     void verifyJit(MethodInfo*, MethodSignaturep, Toplevel*, AbcEnv*);
 
-    // Install JIT code pointers and set _isJitImpl.
+    /** Install JIT code pointers and set MethodInfo::_isJitImpl. */
     void setJit(MethodInfo*, GprMethodProc p);
 
-    // Invoker called on the first invocation then calls invoke_generic,
-    // installs jitInvokerNow yielding a 1-call delay before we try to
-    // compile the invoker itself.
+    /**
+     * Invoker called on the first invocation then calls invoke_generic,
+     * installs jitInvokerNow yielding a 1-call delay before we try to
+     * compile the invoker itself.
+     */
     static Atom jitInvokerNext(MethodEnv*, int argc, Atom* args);
 
-    // Compile now then invoke the compiled invoker.
+    /* Compile now then invoke the compiled invoker. */
     static Atom jitInvokerNow(MethodEnv*, int argc, Atom* args);
 
     // Support for interface method tables (IMTs).  These enable fast
@@ -293,8 +311,10 @@ private:
     // to the execution mechanism but must be allocated in each VTable instance.
     //
 
-    // Analyze the implemented types then build the ImtEntry table and
-    // install dispatchImt() or a concrete MethodEnv*.
+    /**
+     * Analyze the implemented types then build the ImtEntry table and
+     * install dispatchImt() or a concrete MethodEnv*.
+     */
     static class ImtThunkEnv* resolveImtSlot(class ImtThunkEnv*, uintptr_t iid);
 
     // Helpers for resolveImtSlot():
@@ -303,11 +323,13 @@ private:
     void resolveImtSlotFull(VTable*, uint32_t slot);
     static class ImtEntry* buildImtEntries(VTable* vtable, uint32_t slot, uint32_t& count);
 
-    // Trampoline to resolve this IMT slot then invoke the proper handler.
-    static GprImtThunkProcRetType resolveImt(class ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
+    /** Trampoline to resolve this IMT slot then invoke the proper handler. */
+    static GprImtThunkProcRetType resolveImt(class ImtThunkEnv* ite,
+                                  int argc, uint32_t* ap, uintptr_t iid);
 
-    // Trampoline which searches for the method with a matching IID.
-    static GprImtThunkProcRetType dispatchImt(class ImtThunkEnv* ite, int argc, uint32_t* ap, uintptr_t iid);
+    /** Trampoline which searches for the method with a matching IID. */
+    static GprImtThunkProcRetType dispatchImt(class ImtThunkEnv* ite,
+                                  int argc, uint32_t* ap, uintptr_t iid);
 
 private:
     AvmCore* core;
@@ -319,8 +341,9 @@ private:
 };
 
 /**
- * CodeWriter instance to hook OP_newfunction, OP_newclass, and OP_newactivation
- * so that we can populate verifyFunctionQueue and verifyTraitsQueue in verifyall mode.
+ * CodeWriter instance to hook into opcodes OP_newfunction, OP_newclass, and
+ * OP_newactivation so we can populate verifyFunctionQueue and
+ * verifyTraitsQueue in verifyall mode.
  */
 class VerifyallWriter : public NullWriter
 {
@@ -351,7 +374,7 @@ private:
         GprMethodProc _implGPR;
         FprMethodProc _implFPR;
     };
-    // pointer to invoker used when callee must coerce args.
+    /** pointer to invoker used when callee must coerce args. */
     AtomMethodProc _invoker;
 };
 
