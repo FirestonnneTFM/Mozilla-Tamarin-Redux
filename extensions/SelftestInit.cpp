@@ -47,6 +47,7 @@ extern void create_avmplus_peephole(AvmCore* core);
 extern void create_mmgc_bugzilla_543560(AvmCore* core);
 #endif
 #endif
+extern void create_mmgc_bugzilla_575631(AvmCore* core);
 extern void create_mmgc_basics(AvmCore* core);
 extern void create_mmgc_dependent(AvmCore* core);
 extern void create_mmgc_finalize_uninit(AvmCore* core);
@@ -65,6 +66,7 @@ create_avmplus_peephole(core);
 create_mmgc_bugzilla_543560(core);
 #endif
 #endif
+create_mmgc_bugzilla_575631(core);
 create_mmgc_basics(core);
 create_mmgc_dependent(core);
 create_mmgc_finalize_uninit(core);
