@@ -182,6 +182,17 @@ sync_update = ShellCommand(
             workdir="../repo",
             haltOnFailure="True")
 
+# pull new changes into an existing repository.  Used on promote-build slave to
+# save time instead of deleting / recloning entire repo.
+sync_pull = ShellCommand(
+            command=["hg", "pull"],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='Pulling new changes to source repository...',
+            descriptionDone='Finished pulling new changes to source repository',
+            name='Source_Pull',
+            workdir="../repo",
+            haltOnFailure="True")
+
 def bb_slaveupdate(slave):
     return ShellCommand(
             command=['cp','-R','repo/build/buildbot/slaves/%s/scripts' % slave, 'repo/build/buildbot/slaves/scripts'],

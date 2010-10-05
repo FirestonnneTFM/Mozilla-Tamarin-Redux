@@ -194,10 +194,15 @@ class tamarinredux:
                                   ["winmobile-emulator-deep", "winmobile-emulator-test"],
                                   ["linux-mips-deep", "linux-mips-test"],
                                  ])
-
+    
+    # The promote_build phase only runs when deep passes all tests.
+    promote_build = Dependent(name="promote_build", upstream=deep, properties={'silent':'false'},
+                        builderNames=["promote-build"],
+                    )
+    
 
     
-    schedulers = [compile, smoke, test, performance, deep]
+    schedulers = [compile, smoke, test, performance, deep, promote_build]
     
     
 
@@ -2292,6 +2297,42 @@ class tamarinredux:
                 'builddir': './linux-mips-deep',
     }
     
+    ##########################################
+    #### builder for promote-build ####
+    ##########################################
+    
+    promote_build_factory = factory.BuildFactory()
+    promote_build_factory.addStep(sync_pull)
+    promote_build_factory.addStep(sync_update)
+    # since we do not wipe the repo every time, delete the scripts dir before
+    # running bb_slaveupdate
+    promote_build_factory.addStep(ShellCommand(
+            command=['if [[ -d "scripts" ]]; then rm -r scripts; fi'],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='Delete scripts dir' ,
+            descriptionDone='Deleted scripts dir',
+            name='Delete_Scripts_Dir',
+            workdir='../repo/build/buildbot/slaves/',
+            haltOnFailure='False')
+        )
+    promote_build_factory.addStep(bb_slaveupdate(slave='promote-build'))
+    promote_build_factory.addStep(ShellCommand(
+            command=['../all/promote-build.sh', WithProperties('%s','revision')],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='Promote revision to latest' ,
+            descriptionDone='Promoted revision to latest after deep phase pass',
+            name='Promote_Build',
+            workdir='../repo/build/buildbot/slaves/scripts',
+            haltOnFailure='True')
+        )
+    
+    promote_build_builder = {
+                'name': 'promote-build',
+                'slavename': 'promote-build',
+                'factory': promote_build_factory,
+                'builddir': './promote-build', 
+    }
+    
     builders = [
                 windows_compile_builder,
                 windows_64_compile_builder,
@@ -2380,7 +2421,9 @@ class tamarinredux:
                 linux_deep_builder,
                 linux_arm_deep_builder,
                 linux_mips_deep_builder,
-                windows_frr_builder
+                windows_frr_builder,
+                
+                promote_build_builder,
                 ]
 
 
