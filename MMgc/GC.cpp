@@ -2550,7 +2550,8 @@ namespace MMgc
         
         if (zeroEmptied)
         {
-            uint32_t zeroOffsetInBytes, bytesToZero;
+            uint32_t zeroOffsetInBytes;
+            size_t bytesToZero;
             if (srcOffsetInBytes > dstOffsetInBytes)
             {
                 // moving down, zero the end
