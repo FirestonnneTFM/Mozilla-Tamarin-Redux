@@ -114,8 +114,8 @@
 #undef VMCFG_INDIRECT_NATIVE_THUNKS
 #undef MMGC_OVERRIDE_GLOBAL_NEW
 #undef MMGC_MEMORY_PROFILER
-#undef MMGC_VALGRIND
 #undef VMCFG_CACHE_GQCN
+#undef MMGC_VALGRIND
 
 #undef VMCFG_TWEAK_SIN_COS_NONFINITE
 #undef VMCFG_EPOC_EMULATOR
@@ -570,15 +570,6 @@
 #endif
 
 
-/* AVMFEATURE_VALGRIND
- *
- * Enabling this will compile in code to tell valgrind about how MMgc allocates memory.
- */
-#if !defined AVMFEATURE_VALGRIND || AVMFEATURE_VALGRIND != 0 && AVMFEATURE_VALGRIND != 1
-#  error "AVMFEATURE_VALGRIND must be defined and 0 or 1 (only)."
-#endif
-
-
 /* AVMFEATURE_CACHE_GQCN
  *
  * Enabling this will cache the result of getQualifiedClassName, making it run
@@ -586,6 +577,15 @@
  */
 #if !defined AVMFEATURE_CACHE_GQCN || AVMFEATURE_CACHE_GQCN != 0 && AVMFEATURE_CACHE_GQCN != 1
 #  error "AVMFEATURE_CACHE_GQCN must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_VALGRIND
+ *
+ * Enabling this will compile in code to tell valgrind about how MMgc allocates memory.
+ */
+#if !defined AVMFEATURE_VALGRIND || AVMFEATURE_VALGRIND != 0 && AVMFEATURE_VALGRIND != 1
+#  error "AVMFEATURE_VALGRIND must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -957,11 +957,11 @@
 #if AVMFEATURE_MEMORY_PROFILER
 #  define MMGC_MEMORY_PROFILER
 #endif
-#if AVMFEATURE_VALGRIND
-#  define MMGC_VALGRIND
-#endif
 #if AVMFEATURE_CACHE_GQCN
 #  define VMCFG_CACHE_GQCN
+#endif
+#if AVMFEATURE_VALGRIND
+#  define MMGC_VALGRIND
 #endif
 
 #if AVMTWEAK_SIN_COS_NONFINITE
