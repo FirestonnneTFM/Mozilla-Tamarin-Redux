@@ -146,16 +146,16 @@ def featureSettings(o):
         args += "-DAVMFEATURE_MEMORY_PROFILER=1 "
     if (arg == False):
         args += "-DAVMFEATURE_MEMORY_PROFILER=0 "
-    arg = o.getBoolArg("valgrind")
-    if (arg == True):
-        args += "-DAVMFEATURE_VALGRIND=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_VALGRIND=0 "
     arg = o.getBoolArg("cache-gqcn")
     if (arg == True):
         args += "-DAVMFEATURE_CACHE_GQCN=1 "
     if (arg == False):
         args += "-DAVMFEATURE_CACHE_GQCN=0 "
+    arg = o.getBoolArg("valgrind")
+    if (arg == True):
+        args += "-DAVMFEATURE_VALGRIND=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_VALGRIND=0 "
     arg = o.getBoolArg("sin-cos-nonfinite")
     if (arg == True):
         args += "-DAVMTWEAK_SIN_COS_NONFINITE=1 "

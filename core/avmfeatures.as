@@ -625,7 +625,6 @@ var FEATURES =
       </desc>
     <name> AVMFEATURE_VALGRIND </name>
     <defines> MMGC_VALGRIND </defines>
-    <default> false </defines>
   </feature>
 
   <!-- VM adjustments for various oddities: AVMTWEAK_* -->
