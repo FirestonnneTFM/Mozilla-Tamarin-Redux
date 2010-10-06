@@ -56,6 +56,7 @@
 %%category bugzilla_575631
 
 %%prefix
+using namespace MMgc;
 
 // Upon destruction, start reading weak refs of "friends" near and far
 class Snoopy : public GCFinalizedObject
@@ -87,7 +88,6 @@ int compute_stride(int numerator, int denominator)
 void collect2() { core->gc->Collect(); core->gc->Collect(); }
 
 %%methods
-using namespace MMgc;
 
 /*static*/ int Snoopy::alive_count = 0;
 
