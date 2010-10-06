@@ -2545,7 +2545,7 @@ namespace MMgc
             InlineWriteBarrierTrap(array);
         }
         
-        uint32_t const bytesToMove = numPointers * sizeof(void*);
+        size_t const bytesToMove = numPointers * sizeof(void*);
         VMPI_memmove((char*)array + dstOffsetInBytes, (char*)array + srcOffsetInBytes, bytesToMove);
         
         if (zeroEmptied)
