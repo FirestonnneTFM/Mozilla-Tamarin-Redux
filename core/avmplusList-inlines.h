@@ -455,8 +455,7 @@ namespace avmplus
     REALLY_INLINE uint64_t ListImpl<T,ListHelper>::bytesUsed() const
     {
         AvmAssert(m_data != NULL);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        return allocator->Size(m_data);
+        return ListHelper::getAllocator(m_data)->Size(m_data);
     }
 
     template<class T, class ListHelper>
