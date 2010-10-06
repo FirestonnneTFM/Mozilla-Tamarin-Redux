@@ -56,6 +56,7 @@
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
 namespace avmplus {
+using namespace MMgc;
 
 // Upon destruction, start reading weak refs of "friends" near and far
 class Snoopy : public GCFinalizedObject
@@ -104,7 +105,6 @@ switch(n) {
 case 0: test0(); return;
 }
 }
-using namespace MMgc;
 
 /*static*/ int Snoopy::alive_count = 0;
 
