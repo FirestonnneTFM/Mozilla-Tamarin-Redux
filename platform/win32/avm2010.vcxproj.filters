@@ -60,6 +60,9 @@
     <ClCompile Include="..\..\core\AtomArray.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\avmplusList.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\core\avm.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -729,6 +732,12 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\avmplusList.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\avmplusList-impl.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\avmplusList-inlines.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\avmplusProfiler.h">

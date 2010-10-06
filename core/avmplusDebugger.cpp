@@ -52,7 +52,7 @@ namespace avmplus
         , in_trace(false)
         , astraceStartTime(VMPI_getTime())
         , core(core)
-        , abcList(core->GetGC())
+        , abcList(core->GetGC(), kListInitialCapacity)
         , pool2abcIndex()
     {
     }
@@ -391,7 +391,7 @@ namespace avmplus
         scanResources(abc, pool);
 
         // build a bridging table from pools to abcs
-        uintptr_t index = abcList.size();
+        uintptr_t index = abcList.length();
         pool2abcIndex.add(pool, (const void*)index);
 
         // at this point our abc object has been populated with
@@ -591,7 +591,7 @@ namespace avmplus
      */
     int Debugger::abcCount() const
     {
-        return abcList.size();
+        return abcList.length();
     }
 
 
@@ -770,7 +770,7 @@ namespace avmplus
      */
     AbcFile::AbcFile(AvmCore* core, int size)
         : core(core),
-          source(core->GetGC()),
+          source(core->GetGC(), kListInitialCapacity),
           byteCount(size)
     {
         sourcemap = new (core->GetGC()) HeapHashtable(core->GetGC());
@@ -778,7 +778,7 @@ namespace avmplus
 
     int AbcFile::sourceCount() const
     {
-        return source.size();
+        return source.length();
     }
 
     SourceInfo* AbcFile::sourceAt(int index) const
@@ -809,8 +809,8 @@ namespace avmplus
      */
     void AbcFile::sourceAdd(SourceFile* s)
     {
-        uint32_t index = source.add(s);
-        sourcemap->add(s->name()->atom(), core->uintToAtom(index));
+        source.add(s);
+        sourcemap->add(s->name()->atom(), core->uintToAtom(source.length()-1));
     }
 
     /**
@@ -818,7 +818,7 @@ namespace avmplus
      */
     SourceFile::SourceFile(MMgc::GC* gc, Stringp name)
         : named(name)
-        , functions(gc)
+        , functions(gc, kListInitialCapacity)
     {
     }
 
@@ -837,7 +837,10 @@ namespace avmplus
         // already exists at the end of the list.
         int index = functions.lastIndexOf(func);
         if (index < 0)
-            index = functions.add(func);
+        {
+            functions.add(func);
+            index = functions.length() - 1;
+        }
 
         // line numbers for a given function don't always come in sequential
         // order -- for example, I've seen them come out of order if a function
@@ -848,7 +851,7 @@ namespace avmplus
 
     int SourceFile::functionCount() const
     {
-        return functions.size();
+        return functions.length();
     }
 
     MethodInfo* SourceFile::functionAt(int index) const

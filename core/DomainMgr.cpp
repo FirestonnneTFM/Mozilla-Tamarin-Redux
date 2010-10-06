@@ -140,11 +140,11 @@ Traits* DomainMgr::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname
     return found;
 }
 
-static void addScript(Stringp name, Namespacep ns, MethodInfo* script, List<MethodInfo*>& scriptList, MultinameHashtable* scriptMap)
+static void addScript(Stringp name, Namespacep ns, MethodInfo* script, GCList<MethodInfo*>& scriptList, MultinameHashtable* scriptMap)
 {
     scriptList.add(script);
     // note that this is idx+1 -- can't use idx=0 since that's BIND_NONE
-    uint32_t idx = scriptList.size();
+    uint32_t idx = scriptList.length();
     scriptMap->add(name, ns, Binding(idx));
 }
 
@@ -227,10 +227,10 @@ MethodInfo* DomainMgr::findScriptInPoolByMultiname(PoolObject* pool, const Multi
     return f;
 }
 
-void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs)
+void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv*>& envs)
 {
     HeapHashtable* ht = new(core->GetGC()) HeapHashtable(core->GetGC());
-    for (uint32_t i = 0, n = envs.size(); i < n; ++i)
+    for (uint32_t i = 0, n = envs.length(); i < n; ++i)
     {
         ScriptEnv* se = envs[i];
         AvmAssert(se->abcEnv() == abcEnv);
@@ -238,10 +238,10 @@ void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs)
         ht->add((Atom)mi, (Atom)se);
     }
 
-    AvmAssert(abcEnv->m_namedScriptEnvsList.size() == 0);
+    AvmAssert(abcEnv->m_namedScriptEnvsList.length() == 0);
     PoolObject* pool = abcEnv->pool();
-    abcEnv->m_namedScriptEnvsList.ensureCapacity(pool->m_namedScriptsList.size());
-    for (uint32_t i = 0, n = pool->m_namedScriptsList.size(); i < n; ++i)
+    abcEnv->m_namedScriptEnvsList.ensureCapacity(pool->m_namedScriptsList.length());
+    for (uint32_t i = 0, n = pool->m_namedScriptsList.length(); i < n; ++i)
     {
         MethodInfo* mi = pool->m_namedScriptsList[i];
         AvmAssert(mi->pool() == abcEnv->pool());
@@ -254,15 +254,15 @@ void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs)
     // its list might not be empty.
     Domain* domain = pool->domain;
     DomainEnv* domainEnv = abcEnv->domainEnv();
-    domainEnv->m_namedScriptEnvsList.ensureCapacity(domainEnv->m_namedScriptEnvsList.size() + domain->m_namedScriptsList.size());
-    for (uint32_t i = 0, n = domain->m_namedScriptsList.size(); i < n; ++i)
+    domainEnv->m_namedScriptEnvsList.ensureCapacity(domainEnv->m_namedScriptEnvsList.length() + domain->m_namedScriptsList.length());
+    for (uint32_t i = 0, n = domain->m_namedScriptsList.length(); i < n; ++i)
     {
         MethodInfo* mi = domain->m_namedScriptsList[i];
         if (mi->pool() != abcEnv->pool())
             continue;
         ScriptEnv* se = (ScriptEnv*)ht->get((Atom)mi);
         AvmAssert(se != (ScriptEnv*)undefinedAtom);
-        AvmAssert(i >= domainEnv->m_namedScriptEnvsList.size() || domainEnv->m_namedScriptEnvsList.get(i) == 0);
+        AvmAssert(i >= domainEnv->m_namedScriptEnvsList.length() || domainEnv->m_namedScriptEnvsList.get(i) == 0);
         domainEnv->m_namedScriptEnvsList.set(i, se);
     }
 
@@ -281,13 +281,13 @@ void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const List<ScriptEnv*>& envs)
 }
 
 #ifdef _DEBUG
-/*static*/ void DomainMgr::verifyMatchingLookup(Binding b, const List<MethodInfo*>& listMI, const List<ScriptEnv*>& listSE)
+/*static*/ void DomainMgr::verifyMatchingLookup(Binding b, const GCList<MethodInfo*>& listMI, const GCList<ScriptEnv*>& listSE)
 {
     // Note that when code is lazily inited, these lists might not be identical.
     // So we only verify that the part we need to look up matches properly.
     uint32_t const i = uint32_t(uintptr_t(b))-1;
-    AvmAssert(i < listMI.size());
-    AvmAssert(i < listSE.size());
+    AvmAssert(i < listMI.length());
+    AvmAssert(i < listSE.length());
     MethodInfo* mi = listMI[i];
     ScriptEnv* se = listSE[i];
     AvmAssert((mi != NULL) == (se != NULL));

@@ -56,11 +56,13 @@ namespace avmplus
      * no duplicates are allowed.
      *
      * MEMORY MANAGEMENT:
-     * this class can be instantiated on the stack or embedded as a field in another class.
-     * (it *cannot* be allocated dynamically; use GCSortedMap for that.)
-     * it allocates memory with global new/delete if gc == NULL.
      *
-     * therefore, when gc == NULL, to avoid memory leaks, one MUST
+     * SortedMap can be instantiated on the stack or embedded as a field in another class.
+     * However, it cannot be allocated dynamically (operator new is private/unimplemented):
+     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject. 
+     * If you need to dynamically allocate one, use HeapSortedMap to wrap an instance.
+     *
+     * Also, keep in mind that since some variants allocate using nonGC memory, one MUST
      * ensure the destructor runs, one way or another:
      *
      *   with stack allocation, as long as nobody longjmp's over
@@ -71,24 +73,28 @@ namespace avmplus
      *   if embedding in a GC-allocated object, the embedder
      *   must be a GCFinalizedObject or RCObject, *not* a plain GCObject)
      */
-  template <class K, class T, ListElementType valType>
+    template<class KLIST, class TLIST>
     class SortedMap
     {
+    private:
+        typedef typename KLIST::TYPE K;
+        typedef typename TLIST::TYPE T;
     public:
         enum { kInitialCapacity= 64 };
 
-        SortedMap(int cap = kInitialCapacity)
-            : keys(NULL, cap), values(NULL, cap) { }
-        SortedMap(MMgc::GC* gc, int cap = kInitialCapacity)
-            : keys(gc, cap), values(gc, cap) { }
+        typedef typename KLIST::ALLOCATOR KALLOCATOR;
+        typedef typename TLIST::ALLOCATOR TALLOCATOR;
+
+        SortedMap(KALLOCATOR* kallocator, TALLOCATOR* tallocator, int cap = kInitialCapacity)
+            : keys(kallocator, cap), values(tallocator, cap) { }
 
         bool isEmpty() const
         {
-            return keys.size() == 0;
+            return keys.length() == 0;
         }
-        int size() const
+        int length() const
         {
-            return keys.size();
+            return keys.length();
         }
         void clear()
         {
@@ -102,7 +108,7 @@ namespace avmplus
         }
         T put(K k, T v)
         {
-            if (keys.size() == 0 || k > keys.last())
+            if (keys.length() == 0 || k > keys.last())
             {
                 keys.add(k);
                 values.add(v);
@@ -121,7 +127,7 @@ namespace avmplus
                 else
                 {
                     i = -i - 1; // recover the insertion point
-                    AvmAssert(keys.size() != (uint32_t)i);
+                    AvmAssert(keys.length() != (uint32_t)i);
                     keys.insert(i, k);
                     values.insert(i, v);
                     return v;
@@ -161,12 +167,12 @@ namespace avmplus
         }
 
         T removeFirst() { return isEmpty() ? (T)0 : removeAt(0); }
-        T removeLast()  { return isEmpty() ? (T)0 : removeAt(keys.size()-1); }
+        T removeLast()  { return isEmpty() ? (T)0 : removeAt(keys.length()-1); }
         T first() const { return isEmpty() ? (T)0 : values[0]; }
-        T last()  const { return isEmpty() ? (T)0 : values[keys.size()-1]; }
+        T last()  const { return isEmpty() ? (T)0 : values[keys.length()-1]; }
 
         K firstKey() const  { return isEmpty() ? 0 : keys[0]; }
-        K lastKey() const   { return isEmpty() ? 0 : keys[keys.size()-1]; }
+        K lastKey() const   { return isEmpty() ? 0 : keys[keys.length()-1]; }
 
         // iterator
         T   at(int i) const { return values[i]; }
@@ -177,13 +183,13 @@ namespace avmplus
             return i >= 0 ? i : -i-2;
         }
     protected:
-        List<K, LIST_NonGCObjects> keys;
-        List<T, valType> values;
+        KLIST keys;
+        TLIST values;
 
         int find(K k) const
         {
             int lo = 0;
-            int hi = keys.size()-1;
+            int hi = keys.length()-1;
 
             while (lo <= hi)
             {
@@ -199,40 +205,36 @@ namespace avmplus
             return -(lo + 1);  // key not found, low is the insertion point
         }
     private:
-        // private and unimplemented, use GCSortedMap instead
+        SortedMap<KLIST,TLIST>& operator=(const SortedMap<KLIST,TLIST>& other);       // unimplemented
+        explicit SortedMap(const SortedMap<KLIST,TLIST>& other);            // unimplemented
+        // private and unimplemented, use HeapSortedMap instead
         void* operator new(size_t size);
     };
 
-    template <class K, class T, ListElementType valType>
-    class GCSortedMap : public MMgc::GCFinalizedObject
+    // ----------------------------
+
+    // Don't be confused: this class reads as
+    //
+    //      "Heap-allocated SortedMap"
+    //
+    // NOT
+    //
+    //      "Map sorted using HeapSort"
+    //
+    template <class KLIST, class TLIST>
+    class HeapSortedMap : public MMgc::GCFinalizedObject
     {
     private:
-        typedef SortedMap<K, T, valType> MapType;
+        typedef SortedMap<KLIST, TLIST> MapType;
+    public:
         MapType map;
     public:
-        GCSortedMap(MMgc::GC* gc, int _capacity=MapType::kInitialCapacity)
-          : map(gc, _capacity)
+        explicit HeapSortedMap(typename KLIST::ALLOCATOR* kallocator, 
+                                typename TLIST::ALLOCATOR* tallocator, 
+                                int _capacity = MapType::kInitialCapacity)
+          : map(kallocator, tallocator, _capacity)
         {
         }
-
-        inline bool isEmpty() const { return map.isEmpty(); }
-        inline int size() const { return map.size(); }
-        inline void clear() { map.clear(); }
-        inline T put(K k, T v) { return map.put(k, v); }
-        inline T get(K k) const { return map.get(k); }
-        inline bool get(K k, T& v) const { return map.get(k, v); }
-        inline bool containsKey(K k) const { return map.containsKey(k); }
-        inline T remove(K k) { return map.remove(k); }
-        inline T removeAt(int i) { return map.removeAt(i); }
-        inline T removeFirst() { return map.removeFirst(); }
-        inline T removeLast()  { return map.removeLast(); }
-        inline T first() const { return map.first(); }
-        inline T last()  const { return map.last(); }
-        inline K firstKey() const   { return map.firstKey(); }
-        inline K lastKey() const    { return map.lastKey(); }
-        inline T    at(int i) const { return map.at(i); }
-        inline K   keyAt(int i) const { return map.keyAt(i); }
-        inline int findNear(K k) const { return map.findNear(k); }
     };
 }
 

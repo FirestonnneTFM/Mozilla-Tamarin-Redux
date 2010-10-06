@@ -177,7 +177,7 @@ namespace avmplus
                             src->addLine(info.lines[i], f, 0);
                 }
                 // hook the ABC in
-                debugger->pool2abcIndex.add(pool, (const void *)debugger->abcList.size());
+                debugger->pool2abcIndex.add(pool, (const void *)debugger->abcList.length());
                 debugger->abcList.add(abc);
             }
         }
@@ -294,8 +294,8 @@ namespace avmplus
             return;
         }
 
-        if (index >= pool->cpool_mn_offsets.size())
-            toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->cpool_mn_offsets.size()));
+        if (index >= pool->cpool_mn_offsets.length())
+            toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->cpool_mn_offsets.length()));
 
         pool->parseMultiname(m, index);
     }
@@ -304,9 +304,9 @@ namespace avmplus
     uint32_t AbcParser::resolveBindingName(const uint8_t* &p, Multiname &m) const
     {
         uint32_t index = readU30(p);
-        if (index == 0 || index >= pool->cpool_mn_offsets.size())
+        if (index == 0 || index >= pool->cpool_mn_offsets.length())
             toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index),
-                                       core->toErrorString(pool->cpool_mn_offsets.size()));
+                                       core->toErrorString(pool->cpool_mn_offsets.length()));
         pool->resolveBindingNameNoCheck(index, m, toplevel);
 
         // Only builtin traits names can have multiple namespaces, which are used as an implementation
@@ -1007,7 +1007,7 @@ namespace avmplus
                     uint32_t name_index = (version != (46<<16|15)) ? readU30(pos) : 0;
                     if (name_index != 0)
                     {
-                        if (name_index >= pool->cpool_mn_offsets.size())
+                        if (name_index >= pool->cpool_mn_offsets.length())
                             toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(name_index), core->toErrorString(pool->constantCount));
                         pool->parseMultiname(qn, name_index);
                     }
@@ -1037,7 +1037,7 @@ namespace avmplus
                     if (version != (46<<16|15))
                     {
                         const uint32_t name_index = readU30(pos); // variable name
-                        if (name_index >= pool->cpool_mn_offsets.size())
+                        if (name_index >= pool->cpool_mn_offsets.length())
                             toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(name_index), core->toErrorString(pool->constantCount));
                     }
                     #endif
@@ -1162,7 +1162,7 @@ namespace avmplus
         if (int_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        List<int>& cpool_int = pool->cpool_int;
+        DataList<int32_t>& cpool_int = pool->cpool_int;
         cpool_int.ensureCapacity(int_count);
         pool->constantIntCount = int_count;
 
@@ -1194,7 +1194,7 @@ namespace avmplus
         if (uint_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        List<uint32_t>& cpool_uint = pool->cpool_uint;
+        DataList<uint32_t>& cpool_uint = pool->cpool_uint;
         cpool_uint.ensureCapacity(uint_count);
         pool->constantUIntCount = uint_count;
 
@@ -1224,7 +1224,7 @@ namespace avmplus
         if (double_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        List<double*, LIST_GCObjects>& cpool_double = pool->cpool_double;
+        GCList<const GCDouble*>& cpool_double = pool->cpool_double;
         cpool_double.ensureCapacity(double_count);
         pool->constantDoubleCount = double_count;
 
@@ -1238,12 +1238,12 @@ namespace avmplus
             int offset = (int)(pos-startpos);
 #endif
             double value = readDouble(pos);
-            cpool_double.set(i, (double*)(core->allocDouble(value)&~7));
+            cpool_double.set(i, (const GCDouble*)(core->allocDouble(value)&~7));
             #ifdef AVMPLUS_VERBOSE
             if(pool->isVerbose(VB_parse)) {
                 core->console << "    " << offset << ":" << "cpool_double["<<i<<"]="
                     <<constantNames[CONSTANT_Double] << " ";
-                core->console << *cpool_double[i];
+                core->console << value;
                 core->console << "\n";
             }
             #endif
@@ -1306,7 +1306,7 @@ namespace avmplus
         if (ns_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        List<Namespacep> &cpool_ns = pool->cpool_ns;
+        RCList<Namespacep> &cpool_ns = pool->cpool_ns;
 
         MMGC_MEM_TYPE(pool);
         cpool_ns.ensureCapacity(ns_count);
@@ -1407,7 +1407,7 @@ namespace avmplus
         if (ns_set_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        List<NamespaceSetp>& cpool_ns_set = pool->cpool_ns_set;
+        GCList<NamespaceSetp>& cpool_ns_set = pool->cpool_ns_set;
         cpool_ns_set.ensureCapacity(ns_set_count);
         pool->constantNsSetCount = ns_set_count;
 
@@ -1447,7 +1447,7 @@ namespace avmplus
         if (mn_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        List<uint32_t>& cpool_mn_offsets = pool->cpool_mn_offsets;
+        DataList<uint32_t>& cpool_mn_offsets = pool->cpool_mn_offsets;
 
         MMGC_MEM_TYPE(pool);
         cpool_mn_offsets.ensureCapacity(mn_count);
@@ -1516,7 +1516,7 @@ namespace avmplus
             {
                 uint32_t index = readU30(pos);
 
-                // compare index against mn_count, *not* cpool_mn_offsets.size(), as the latter is still being built...
+                // compare index against mn_count, *not* cpool_mn_offsets.length(), as the latter is still being built...
                 // it's ok to forward-reference here.
                 if(!index || index >= mn_count)
                     toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(mn_count));

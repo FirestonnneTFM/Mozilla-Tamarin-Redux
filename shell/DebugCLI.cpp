@@ -599,6 +599,7 @@ namespace avmshell
     class ScopeBuilder : public CallStackNode::IScopeChainEnumerator
     {
     public:
+        ScopeBuilder(MMgc::GC* gc) : scopeChain(gc, kListInitialCapacity) { }
         /*virtual*/ void addScope(Atom scope)
         {
             // null/undefined are not legal entries for scope, but
@@ -611,7 +612,7 @@ namespace avmshell
             scopeChain.add(scope);
         }
 
-        List<Atom> scopeChain;
+        AtomList scopeChain;
     };
 
     void DebugCLI::throwUndefinedVarError(const char* name)
@@ -708,10 +709,10 @@ namespace avmshell
             MethodEnv* env = frame->trace->env();
             if (env)
             {
-                ScopeBuilder scopeBuilder;
+                ScopeBuilder scopeBuilder(core->GetGC());
                 frame->trace->enumerateScopeChainAtoms(scopeBuilder);
 
-                for (uint32_t i=0, n=scopeBuilder.scopeChain.size(); i<n; ++i)
+                for (uint32_t i=0, n=scopeBuilder.scopeChain.length(); i<n; ++i)
                 {
                     StPropertyFinder finder(core, scopeBuilder.scopeChain.get(i), name);
                     finder.iterate();

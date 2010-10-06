@@ -703,7 +703,7 @@ namespace avmplus
         // see also: AvmCore::handleStackOverflow().
         core->stackCheck(env);
 
-        register List<double*, LIST_GCObjects> const & cpool_double = pool->cpool_double;
+        register GCList<const GCDouble*> const & cpool_double = pool->cpool_double;
         register const bool interruptable = !info->isNonInterruptible();
         register const DomainEnv* envDomain = env->domainEnv();
         // I do *not* like making pc 'volatile'; a smart compiler may handle it well

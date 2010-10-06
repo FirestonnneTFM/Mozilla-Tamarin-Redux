@@ -658,8 +658,7 @@ namespace avmplus
         // already knows about for the Pool/Domain that correspond to the AbcEnv/DomainEnv.
         // Note that the order of the list doesn't matter (DomainMgr will use a hashtable
         // to do the relevant association).
-        List<ScriptEnv*> envs(GetGC());
-        envs.ensureCapacity(pool->scriptCount());
+        GCList<ScriptEnv*> envs(GetGC(), pool->scriptCount());
 
         // some code relies on the final script being initialized first, so we
         // must continue that behavior
@@ -1701,7 +1700,7 @@ return the result of the comparison ToPrimitive(x) == y.
     /* static */
     void AvmCore::formatMultiname(PrintWriter& out, uint32_t index, PoolObject* pool)
     {
-        if (index > 0 && index < pool->cpool_mn_offsets.size())
+        if (index > 0 && index < pool->cpool_mn_offsets.length())
         {
             Multiname name;
             pool->parseMultiname(name, index);
@@ -1740,7 +1739,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index > 0 && index < pool->cpool_int.size())
+                if (index > 0 && index < pool->cpool_int.length())
                 {
                     buffer << " " << pool->cpool_int[index];
                 }
@@ -1754,7 +1753,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index > 0 && index < pool->cpool_uint.size())
+                if (index > 0 && index < pool->cpool_uint.length())
                 {
                     buffer << " " << (double)pool->cpool_uint[index];
                 }
@@ -1768,9 +1767,9 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index > 0 && index < pool->cpool_double.size())
+                if (index > 0 && index < pool->cpool_double.length())
                 {
-                    buffer << " " << *pool->cpool_double[index];
+                    buffer << " " << pool->cpool_double[index]->value;
                 }
                 else
                 {
@@ -1782,7 +1781,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 buffer << opcodeInfo[opcode].name;
                 uint32_t index = readU32(pc);
-                if (index > 0 && index < pool->cpool_ns.size())
+                if (index > 0 && index < pool->cpool_ns.length())
                 {
                     buffer << " " << pool->cpool_ns[index]->getURI();
                 }
@@ -1977,7 +1976,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_pushdouble: {
                 buffer << wopAttrs[opcode].name;
                 uint32_t index = (uint32_t)*pc++;
-                if (index < pool->cpool_double.size())
+                if (index < pool->cpool_double.length())
                     buffer << " " << *pool->cpool_double[index];
                 else
                     buffer << " OUT OF RANGE: " << index;
@@ -1987,7 +1986,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case WOP_pushnamespace: {
                 buffer << wopAttrs[opcode].name;
                 uint32_t index = (uint32_t)*pc++;
-                if (index > 0 && index < pool->cpool_ns.size())
+                if (index > 0 && index < pool->cpool_ns.length())
                     buffer << " " << pool->cpool_ns[index]->getURI();
                 else
                     buffer << " OUT OF RANGE: " << index;

@@ -219,7 +219,8 @@ namespace avmplus
         FrameState *worklist;
         Toplevel* toplevel;
         AbcEnv*   abc_env;
-        GCSortedMap<const uint8_t*, FrameState*, LIST_NonGCObjects> *blockStates;
+        typedef HeapSortedMap< UnmanagedPointerList<const uint8_t*>, UnmanagedPointerList<FrameState*> > BlockStatesType;
+        BlockStatesType *blockStates;
         FrameState *state;
         bool emitPass;
         bool handlerIsReachable;

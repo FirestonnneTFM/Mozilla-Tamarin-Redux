@@ -521,7 +521,7 @@ bool BaseExecMgr::resolveImtSlotSelf(VTable* vtable, uint32_t slot)
 void BaseExecMgr::resolveImtSlotFull(VTable* vtable, uint32_t slot)
 {
     MMgc::GC* gc = core->GetGC();
-    List<VTable*> work_stack(gc);
+    GCList<VTable*> work_stack(gc, kListInitialCapacity);
 
     work_stack.add(vtable);
 
@@ -536,7 +536,7 @@ void BaseExecMgr::resolveImtSlotFull(VTable* vtable, uint32_t slot)
 
     // Work backwards through the base types, copying
     // the imt stub down as we go.
-    uint32_t size = work_stack.size();
+    uint32_t size = work_stack.length();
     for (uint32_t i = 0; i < size; ++i) {
         cur = work_stack[size-i-1];
         resolveImtSlotFromBase(cur, slot);

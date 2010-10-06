@@ -2235,7 +2235,7 @@ namespace avmplus
             break;
         case OP_pushdouble:
             AvmAssert(type == NUMBER_TYPE);
-            emitDoubleConst(sp+1, pool->cpool_double[imm30]);
+            emitDoubleConst(sp+1, &pool->cpool_double[imm30]->value);
             break;
         case OP_pushnan:
             AvmAssert(type == NUMBER_TYPE);
@@ -3147,7 +3147,7 @@ namespace avmplus
         localSet(index, lirout->insImmP(c), type);
     }
 
-    void CodegenLIR::emitDoubleConst(int index, double* pd)
+    void CodegenLIR::emitDoubleConst(int index, const double* pd)
     {
         localSet(index, lirout->insImmD(*pd), NUMBER_TYPE);
     }

@@ -1175,7 +1175,7 @@ namespace avmplus
     // eliminate redundant ones.  We do this by only adding new interfaces to
     // the "seen" list and only traversing new super-interfaces.  An interface
     // is NEW if our base class does not implement it.
-    uint32_t Traits::countNewInterfaces(List<Traitsp, LIST_GCObjects>& seen)
+    uint32_t Traits::countNewInterfaces(GCList<Traitsp>& seen)
     {
         // each Traits* added to this list is rooted via Domain and PoolObject,
         // so it is okay for this Stack to be opaque to the GC.
@@ -1197,7 +1197,7 @@ namespace avmplus
                 }
             }
         }
-        return seen.size();
+        return seen.length();
     }
 
     static uint8_t calcLog2(uint32_t cap)
@@ -1399,10 +1399,10 @@ namespace avmplus
      * subtypes or implementers of t, so that when we iterate through
      * pending[] we will traverse the inheritance DAG top-down.
      */
-    void insertSupertype(Traits* t, List<Traits*> &pending)
+    void insertSupertype(Traits* t, GCList<Traits*> &pending)
     {
         uint32_t i = 0;
-        for (uint32_t n = pending.size(); i < n; i++) {
+        for (uint32_t n = pending.length(); i < n; i++) {
             if (pending[i]->subtypeof(t)) {
                 pending.insert(i, t);
                 return;
@@ -1424,7 +1424,7 @@ namespace avmplus
         if (m_resolved)
             return;
 
-        List<Traits*> pending(core->gc);
+        GCList<Traits*> pending(core->gc, kListInitialCapacity);
         // copy primary supertypes into pending.
         // primary_supertypes[] is already in top-down order.
         for (int32_t i = 0; i < MAX_PRIMARY_SUPERTYPE; i++) {
@@ -1444,7 +1444,7 @@ namespace avmplus
                 insertSupertype(t, pending);
         }
 
-        for (uint32_t i = 0, n = pending.size(); i < n; i++) {
+        for (uint32_t i = 0, n = pending.length(); i < n; i++) {
             AvmAssert(!pending[i]->m_resolved);
             pending[i]->resolveSignaturesSelf(toplevel);
         }
@@ -2094,7 +2094,7 @@ failure:
     void Traits::build_secondary_supertypes()
     {
         MMgc::GC* gc = core->GetGC();
-        List<Traitsp, LIST_GCObjects> seen(gc);
+        GCList<Traitsp> seen(gc, kListInitialCapacity);
         uint32_t count;
         if (!isInstanceType() || (count = countNewInterfaces(seen)) == 0) {
             // no new interfaces, attempt to share the base type's secondary list
@@ -2144,7 +2144,7 @@ failure:
 
 #ifdef DEBUG
         // sanity check to make sure we don't have any duplicate supertypes.
-        List<Traitsp, LIST_GCObjects> supertypes(gc);
+        GCList<Traitsp> supertypes(gc, kListInitialCapacity);
         for (int i = 0; i < MAX_PRIMARY_SUPERTYPE; i++) {
             Traits* t = m_primary_supertypes[i];
             if (t != NULL) {

@@ -384,6 +384,8 @@
 		7E87D10F122C5B980005FEAF /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
 		D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
+		D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D944CADA123EF76600EA0342 /* avmplusList.cpp */; };
+		D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D944CADA123EF76600EA0342 /* avmplusList.cpp */; };
 		D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D92373DC11222458006D8AA3 /* njconfig.cpp */; };
 		D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D935BDEB0FA0EBA7001E3E70 /* avm.cpp */; };
 		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
@@ -902,6 +904,8 @@
 		D92373DC11222458006D8AA3 /* njconfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = njconfig.cpp; path = ../../../nanojit/njconfig.cpp; sourceTree = SOURCE_ROOT; };
 		D92373DD11222458006D8AA3 /* njconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = njconfig.h; path = ../../../nanojit/njconfig.h; sourceTree = SOURCE_ROOT; };
 		D927090C112B5FD700A13EAA /* avmplusHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusHashtable-inlines.h"; path = "../../../core/avmplusHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
+		D92B139711EB96B7008170E3 /* avmplusList-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusList-impl.h"; path = "../../../core/avmplusList-impl.h"; sourceTree = SOURCE_ROOT; };
+		D92B139811EB96B7008170E3 /* avmplusList-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusList-inlines.h"; path = "../../../core/avmplusList-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D935BDEB0FA0EBA7001E3E70 /* avm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avm.cpp; path = ../../../core/avm.cpp; sourceTree = SOURCE_ROOT; };
 		D935BDEE0FA0EC17001E3E70 /* avm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avm.h; path = ../../../core/avm.h; sourceTree = SOURCE_ROOT; };
 		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -913,6 +917,7 @@
 		D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UnixDebugUtils.cpp; path = ../../../VMPI/UnixDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinDebugUtils.cpp; path = ../../../VMPI/WinDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinPortUtils.cpp; path = ../../../VMPI/WinPortUtils.cpp; sourceTree = SOURCE_ROOT; };
+		D944CADA123EF76600EA0342 /* avmplusList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmplusList.cpp; path = ../../../core/avmplusList.cpp; sourceTree = SOURCE_ROOT; };
 		D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_finalize_uninit.cpp; path = ../../../extensions/ST_mmgc_finalize_uninit.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
@@ -1094,7 +1099,10 @@
 				079DF7CF0F3A882D0031D1B4 /* avmplusHashtable.cpp */,
 				079DF7D00F3A882D0031D1B4 /* avmplusHashtable.h */,
 				D927090C112B5FD700A13EAA /* avmplusHashtable-inlines.h */,
+				D944CADA123EF76600EA0342 /* avmplusList.cpp */,
 				079DF7D10F3A882D0031D1B4 /* avmplusList.h */,
+				D92B139711EB96B7008170E3 /* avmplusList-impl.h */,
+				D92B139811EB96B7008170E3 /* avmplusList-inlines.h */,
 				079DF7D20F3A882D0031D1B4 /* avmplusProfiler.cpp */,
 				079DF7D30F3A882D0031D1B4 /* avmplusProfiler.h */,
 				079DF7D40F3A882D0031D1B4 /* AvmPlusScriptableObject.cpp */,
@@ -1928,6 +1936,7 @@
 				078B1B281250F2770004F9F4 /* AvmAssert.cpp in Sources */,
 				07D95AE61254C39000DD872D /* atom.cpp in Sources */,
 				D9909EB5125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */,
+				D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2120,6 +2129,7 @@
 				078B1B271250F2710004F9F4 /* AvmAssert.cpp in Sources */,
 				07D95AE51254C39000DD872D /* atom.cpp in Sources */,
 				D9909EB6125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */,
+				D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

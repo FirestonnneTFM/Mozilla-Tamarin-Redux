@@ -370,8 +370,8 @@ namespace avmplus
 
        #ifdef VTUNE
        bool hasDebugInfo;
-       List<JITCodeInfo*,LIST_GCObjects> jitInfoList;
-       List<LineNumberRecord*,LIST_GCObjects> jitPendingRecords;
+       GCList<JITCodeInfo*> jitInfoList;
+       GCList<LineNumberRecord*> jitPendingRecords;
        void jitPushInfo();
        JITCodeInfo* jitCurrentInfo();
 
@@ -526,7 +526,7 @@ namespace avmplus
         void emitKill(int i);
         void emitIntConst(int index, int32_t c, Traits* type);
         void emitPtrConst(int index, void* c, Traits* type);
-        void emitDoubleConst(int index, double* pd);
+        void emitDoubleConst(int index, const double* pd);
         void emitGetslot(int slot, int ptr_index, Traits *slotType);
         void emitSetslot(AbcOpcode opcode, int slot, int ptr_index);
         void emitSetslot(AbcOpcode opcode, int slot, int ptr_index, LIns* value);

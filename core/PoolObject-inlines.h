@@ -90,7 +90,7 @@ REALLY_INLINE bool PoolObject::isCodePointer(const uint8_t* pos)
 
 REALLY_INLINE uint32_t PoolObject::classCount() const
 {
-    return _classes.size();
+    return _classes.length();
 }
 
 REALLY_INLINE Traits* PoolObject::getClassTraits(uint32_t i) const
@@ -100,7 +100,7 @@ REALLY_INLINE Traits* PoolObject::getClassTraits(uint32_t i) const
 
 REALLY_INLINE uint32_t PoolObject::scriptCount() const
 {
-    return _scripts.size();
+    return _scripts.length();
 }
 
 REALLY_INLINE Traits* PoolObject::getScriptTraits(uint32_t i) const
@@ -110,7 +110,7 @@ REALLY_INLINE Traits* PoolObject::getScriptTraits(uint32_t i) const
 
 REALLY_INLINE uint32_t PoolObject::methodCount() const
 {
-    return _methods.size();
+    return _methods.length();
 }
 
 REALLY_INLINE MethodInfo* PoolObject::getMethodInfo(uint32_t i) const
@@ -121,7 +121,7 @@ REALLY_INLINE MethodInfo* PoolObject::getMethodInfo(uint32_t i) const
 #ifdef DEBUGGER
 REALLY_INLINE DebuggerMethodInfo* PoolObject::getDebuggerMethodInfo(uint32_t i) const
 {
-    return (i < _method_dmi.size()) ? _method_dmi[i] : NULL;
+    return (i < _method_dmi.length()) ? _method_dmi[i] : NULL;
 }
 #endif
 
