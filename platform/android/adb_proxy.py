@@ -73,7 +73,17 @@ def main(argv=None):
         # causing the process to become blocked.
         f = tempfile.NamedTemporaryFile(delete=False)
         p=killableprocess.Popen(cmd, shell=True, stdout=f ,stderr=subprocess.PIPE)
-        p.wait(ADB_TIMEOUT)
+        try:
+            p.wait(ADB_TIMEOUT)
+        except OSError:
+            '''
+            We have seen the following error happen in the build system, so guard against
+            this error and just treat like a timeout and retry the call
+                "killableprocess.py", line 177, in kill
+                    os.killpg(self.pid, signal.SIGKILL)
+                    OSError: [Errno 3] No such process
+            '''
+            p.returncode = 127
         f.flush()
         f.close()
 

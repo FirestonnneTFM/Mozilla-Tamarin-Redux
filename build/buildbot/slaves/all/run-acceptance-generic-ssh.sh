@@ -162,10 +162,10 @@ cd $basedir/build/buildbot/slaves/scripts
 cd $basedir/test/acceptance
 
 
-test "$silent" = "true" && {
+if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
     logfile=`echo acceptance-$shell$vmargs.log | sed 's/ //g' | sed 's/\.exe//g'`
     silentoptions="-l $logfile --summaryonly"
-}
+fi
 
 if [ "$config" != "" ]
 then
@@ -176,7 +176,7 @@ else
     $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs} ${silentoptions}
 fi
 
-test "$silent" = "true" && {
+if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
     # upload log to asteam
     $basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
     ret=$?
@@ -186,7 +186,7 @@ test "$silent" = "true" && {
     fi
     echo "Acceptance logfile can be found here: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile"
     echo "url: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile logfile"
-}
+fi
 
 ##
 # Ensure that the system is torn down and clean
