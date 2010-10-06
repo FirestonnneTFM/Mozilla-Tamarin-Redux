@@ -37,54 +37,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_AbcEnv__
-#define __avmplus_AbcEnv__
+#include "avmplus.h"
 
+#include "avmplusList-impl.h"
 
 namespace avmplus
 {
-    // runtime info associated with a pool
-    class AbcEnv : public MMgc::GCFinalizedObject
-    {
-        #if defined FEATURE_NANOJIT
-        friend class CodegenLIR;
-        friend class MopsRangeCheckFilter;
-        #endif
+    // Force explicit instantiations for various non-inlined ListImpl methods;
+    // some compilers don't need this, but some do. (I'm looking at you, XCode.)
 
-    public:
-        AbcEnv(PoolObject* _pool, CodeContext * _codeContext);
-        ~AbcEnv();
-
-        AvmCore* core() const;
-        PoolObject* pool() const;
-        DomainEnv* domainEnv() const;
-        CodeContext* codeContext() const;
-
-        MethodEnv* getMethod(uint32_t i) const;
-        void setMethod(uint32_t i, MethodEnv* env);
-
-#ifdef DEBUGGER
-        uint64_t& invocationCount(uint32_t i);
-#endif
-
-        static size_t calcExtra(PoolObject* pool);
-
-    // ------------------------ DATA SECTION BEGIN
-    private:
-        friend class DomainMgr;
-        GCList<ScriptEnv*>          m_namedScriptEnvsList;    // list of ScriptEnvs, corresponds to pool->m_namedScriptsList
-    private:
-        PoolObject* const           m_pool;
-        DomainEnv* const            m_domainEnv;    // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code
-        CodeContext* const          m_codeContext;
-#ifdef DEBUGGER
-        DWB(uint64_t*)              m_invocationCounts; // actual size will hold pool->methodCount methods, only allocated if debugger exists
-#endif
-        AvmCore* const              m_core;
-        MethodEnv*                  m_methods[1];       // actual size will hold pool->methodCount methods
-    // ------------------------ DATA SECTION END
-    };
-
+    template class ListImpl<MMgc::GCObject*, GCListHelper>;
+    template class ListImpl<MMgc::RCObject*, RCListHelper>;
+    template class ListImpl<MMgc::GCObject*, WeakRefListHelper>;
+    template class ListImpl<Atom, AtomListHelper>;
+    template class ListImpl< UnmanagedPointer, DataListHelper<UnmanagedPointer> >;
+    template class ListImpl< uint8_t, DataListHelper<uint8_t> >;
+    template class ListImpl< int32_t, DataListHelper<int32_t> >;
+    template class ListImpl< uint32_t, DataListHelper<uint32_t> >;
+    template class ListImpl< float, DataListHelper<float> >;
+    template class ListImpl< double, DataListHelper<double> >;
 }
-
-#endif // __avmplus_AbcEnv__

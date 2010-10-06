@@ -50,6 +50,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/AvmLog.cpp \
   $(curdir)/avmplusDebugger.cpp \
   $(curdir)/avmplusHashtable.cpp \
+  $(curdir)/avmplusList.cpp \
   $(curdir)/avmplusProfiler.cpp \
   $(curdir)/BigInteger.cpp \
   $(curdir)/BooleanClass.cpp \

@@ -2530,6 +2530,43 @@ namespace MMgc
         VMPI_memmove(dstArray + dstOffset, srcArray + srcOffset, numPointers * sizeof(void*));
     }
 
+    void GC::movePointersWithinBlock(void** array, uint32_t dstOffsetInBytes, uint32_t srcOffsetInBytes, size_t numPointers, bool zeroEmptied)
+    {
+        if (srcOffsetInBytes == dstOffsetInBytes || numPointers == 0)
+            return;
+       
+        if (marking && 
+            GetMark(array) && 
+            ContainsPointers(array) &&
+            // don't push small items that are moving pointers inside the same array
+            Size(array) > kMarkItemSplitThreshold) 
+        {
+            // this could be optimized to just re-scan the dirty region
+            InlineWriteBarrierTrap(array);
+        }
+        
+        uint32_t const bytesToMove = numPointers * sizeof(void*);
+        VMPI_memmove((char*)array + dstOffsetInBytes, (char*)array + srcOffsetInBytes, bytesToMove);
+        
+        if (zeroEmptied)
+        {
+            uint32_t zeroOffsetInBytes, bytesToZero;
+            if (srcOffsetInBytes > dstOffsetInBytes)
+            {
+                // moving down, zero the end
+                bytesToZero = srcOffsetInBytes - dstOffsetInBytes;
+                zeroOffsetInBytes = dstOffsetInBytes + bytesToMove;
+            }
+            else
+            {
+                // moving up, zero the start
+                bytesToZero = dstOffsetInBytes - srcOffsetInBytes;
+                zeroOffsetInBytes = srcOffsetInBytes;
+            }
+            VMPI_memset((char*)array + zeroOffsetInBytes, 0, bytesToZero);
+        }
+    }
+
     bool GC::ContainsPointers(const void *item)
     {
         item = GetRealPointer(item);

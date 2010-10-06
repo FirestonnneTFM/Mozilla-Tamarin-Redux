@@ -46,10 +46,15 @@
 
 namespace avmplus
 {
+    // This assert is here to ensure that "GCDouble" is the same
+    // bit value as "double"; GCDouble exists solely to provide
+    // a GCObject-descended type to satisfy new constraints on List.
+    MMGC_STATIC_ASSERT(sizeof(GCDouble) == sizeof(double));
+
     PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startPos, uint32_t api) :
         core(core),
-        cpool_int(0),
-        cpool_uint(0),
+        cpool_int(FixedMalloc::GetFixedMalloc(), 0),
+        cpool_uint(FixedMalloc::GetFixedMalloc(), 0),
         cpool_double(core->GetGC(), 0),
         cpool_ns(core->GetGC(), 0),
         cpool_ns_set(core->GetGC(), 0),
@@ -57,8 +62,8 @@ namespace avmplus
         cpool_int_atoms(core->GetGC(), 0),
         cpool_uint_atoms(core->GetGC(), 0),
 #endif
-        cpool_mn_offsets(0),
-        metadata_infos(0),
+        cpool_mn_offsets(FixedMalloc::GetFixedMalloc(), 0),
+        metadata_infos(FixedMalloc::GetFixedMalloc(), 0),
         m_namedTraits(new(core->GetGC()) MultinameHashtable()),
         m_namedScriptsMap(new(core->GetGC()) MultinameHashtable()),
         m_namedScriptsList(core->GetGC(), 0),
@@ -74,7 +79,7 @@ namespace avmplus
         , _method_dmi(core->GetGC(), 0)
 #endif
 #if VMCFG_METHOD_NAMES
-        , _method_name_indices(0)
+        , _method_name_indices(FixedMalloc::GetFixedMalloc(), 0)
 #endif
         , api(api)
 #ifdef VMCFG_AOT
@@ -255,12 +260,12 @@ namespace avmplus
                 // LIR relies on the return values from this being "sticky" so it can insert them inline.
                 // that's true for everything but int/uints that overflow, so special-case them.
                 // @todo this can/should go away when we convert to 64-bit Box atoms.
-                if (!cpool_int_atoms.size())
+                if (!cpool_int_atoms.length())
                 {
                     cpool_int_atoms.ensureCapacity(constantIntCount);
                     for (uint32_t j = 0; j < constantIntCount; ++j)
                         cpool_int_atoms.set(j, 0);
-                    AvmAssert(cpool_int_atoms.size() == constantIntCount);
+                    AvmAssert(cpool_int_atoms.length() == constantIntCount);
                 }
                 value = (Atom)cpool_int_atoms[index];
                 if (value == 0)
@@ -291,12 +296,12 @@ namespace avmplus
                 // LIR relies on the return values from this being "sticky" so it can insert them inline.
                 // that's true for everything but int/uints that overflow, so special-case them.
                 // @todo this can/should go away when we convert to 64-bit Box atoms.
-                if (!cpool_uint_atoms.size())
+                if (!cpool_uint_atoms.length())
                 {
                     cpool_uint_atoms.ensureCapacity(constantUIntCount);
                     for (uint32_t j = 0; j < constantUIntCount; ++j)
                         cpool_uint_atoms.set(j, 0);
-                    AvmAssert(cpool_uint_atoms.size() == constantUIntCount);
+                    AvmAssert(cpool_uint_atoms.length() == constantUIntCount);
                 }
                 value = (Atom)cpool_uint_atoms[index];
                 if (value == 0)
@@ -528,10 +533,10 @@ range_error:
     {
         // FIXME: should only assert and not throw, pending correctness verification, see bug https://bugzilla.mozilla.org/show_bug.cgi?id=557541
 
-        if (index == 0 || index >= cpool_mn_offsets.size())
+        if (index == 0 || index >= cpool_mn_offsets.length())
         {
             if (toplevel)
-                toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.size()));
+                toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.length()));
             AvmAssert(!"unhandled verify error");
         }
 
@@ -554,10 +559,10 @@ range_error:
         }
 
         // check contents is a multiname.  in the cpool, and type system, kObjectType means multiname.
-        if (index >= cpool_mn_offsets.size())
+        if (index >= cpool_mn_offsets.length())
         {
             if (toplevel)
-                toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.size()));
+                toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.length()));
             AvmAssert(!"unhandled verify error");
         }
 
@@ -659,7 +664,7 @@ range_error:
     {
         if (this->precompNames == NULL)
         {
-            size_t nNames = this->cpool_mn_offsets.size();
+            size_t nNames = this->cpool_mn_offsets.length();
             if (nNames == 0)
                 nNames = 1;
             this->precompNames = new (core->GetGC(), (nNames-1)*sizeof(HeapMultiname)) PrecomputedMultinames(this);
@@ -674,7 +679,7 @@ range_error:
         // it hasn't).  So below it is correct to assign the Multiname mn to the HeapMultiname
         // multinames[i], the assignment operator will operate on sane values and will handle
         // write barriers correctly.
-        nNames = pool->cpool_mn_offsets.size();
+        nNames = pool->cpool_mn_offsets.length();
         MMgc::GC* gc = MMgc::GC::GetGC(this);
         const void* container = gc->FindBeginningFast(this);
         for (uint32_t i=1; i < nNames; i++) {
@@ -699,7 +704,7 @@ range_error:
     Stringp PoolObject::getMethodInfoName(uint32_t i)
     {
         Stringp name = NULL;
-        if (core->config.methodNames && (uint32_t(i) < uint32_t(this->_method_name_indices.size())))
+        if (core->config.methodNames && (uint32_t(i) < uint32_t(this->_method_name_indices.length())))
         {
             const int32_t index = this->_method_name_indices[i];
             if (index >= 0)

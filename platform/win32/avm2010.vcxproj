@@ -43,6 +43,7 @@
     <ClCompile Include="..\..\core\ArrayObject.cpp" />
     <ClCompile Include="..\..\core\atom.cpp" />
     <ClCompile Include="..\..\core\AtomArray.cpp" />
+    <ClCompile Include="..\..\core\avmplusList.cpp" />
     <ClCompile Include="..\..\core\avm.cpp" />
     <ClCompile Include="..\..\core\AvmCore.cpp" />
     <ClCompile Include="..\..\core\avmfeatures.cpp" />
@@ -391,6 +392,8 @@
     <ClInclude Include="..\..\core\avmplusHashtable-inlines.h" />
     <ClInclude Include="..\..\core\avmplusHashtable.h" />
     <ClInclude Include="..\..\core\avmplusList.h" />
+    <ClInclude Include="..\..\core\avmplusList-inlines.h" />
+    <ClInclude Include="..\..\core\avmplusList-impl.h" />
     <ClInclude Include="..\..\core\avmplusProfiler.h" />
     <ClInclude Include="..\..\core\AvmPlusScriptableObject.h" />
     <ClInclude Include="..\..\core\avmplusStack.h" />

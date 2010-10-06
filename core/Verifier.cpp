@@ -87,8 +87,8 @@ namespace avmplus
     {
         mmfx_delete( this->state );
         if (blockStates) {
-            for(int i = 0, n=blockStates->size(); i < n; i++)
-                mmfx_delete( blockStates->at(i) );
+            for(int i = 0, n=blockStates->map.length(); i < n; i++)
+                mmfx_delete( blockStates->map.at(i) );
             delete blockStates;
         }
     }
@@ -838,7 +838,7 @@ namespace avmplus
             end_pos = verifyBlock(code_pos);
         // visit blocks in linear order (blockStates is sorted by abc address)
         for (int i=0, n=getBlockCount(); i < n; i++) {
-            const uint8_t* start_pos = loadBlockState(blockStates->at(i));
+            const uint8_t* start_pos = loadBlockState(blockStates->map.at(i));
             // overlapping blocks indicates a branch to the middle of an instruction
             if (start_pos < end_pos)
                 verifyFailed(kInvalidBranchTargetError);
@@ -2751,17 +2751,17 @@ namespace avmplus
 
     FrameState *Verifier::getFrameState(const uint8_t* pc)
     {
-        return blockStates ? blockStates->get(pc) : NULL;
+        return blockStates ? blockStates->map.get(pc) : NULL;
     }
 
     bool Verifier::hasFrameState(const uint8_t* pc) const
     {
-        return blockStates && blockStates->containsKey(pc);
+        return blockStates && blockStates->map.containsKey(pc);
     }
 
     int Verifier::getBlockCount() const
     {
-        return blockStates ? blockStates->size() : 0;
+        return blockStates ? blockStates->map.length() : 0;
     }
 
     const uint8_t* Verifier::getTryFrom() const
@@ -2998,10 +2998,10 @@ namespace avmplus
         bool targetChanged;
         if (!targetState) {
             if (!blockStates)
-                blockStates = new (core->GetGC()) GCSortedMap<const uint8_t*, FrameState*, LIST_NonGCObjects>(core->GetGC());
+                blockStates = new (core->GetGC()) BlockStatesType(MMgc::FixedMalloc::GetFixedMalloc(), MMgc::FixedMalloc::GetFixedMalloc());
             targetState = mmfx_new( FrameState(ms) );
             targetState->abc_pc = target;
-            blockStates->put(target, targetState);
+            blockStates->map.put(target, targetState);
 
             // first time visiting target block
             targetChanged = true;
@@ -3167,9 +3167,9 @@ namespace avmplus
             break;
 
         case kObjectType:
-            if( !index || index >= pool->cpool_mn_offsets.size() )
+            if( !index || index >= pool->cpool_mn_offsets.length() )
             {
-                verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->cpool_mn_offsets.size()));
+                verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->cpool_mn_offsets.length()));
             }
             break;
 

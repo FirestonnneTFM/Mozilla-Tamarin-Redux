@@ -57,16 +57,16 @@ namespace avmplus
         }
 
     #ifdef _DEBUG
-        List<Domain*> dl(core->GetGC());
+        GCList<Domain*> dl(core->GetGC(), 0);
         for (Domain* di = m_domain; di != NULL; di = di->base())
             dl.add(di);
 
-        List<DomainEnv*> el(core->GetGC());
+        GCList<DomainEnv*> el(core->GetGC(), 0);
         for (DomainEnv* di = this; di != NULL; di = di->base())
             el.add(di);
 
-        AvmAssert(dl.size() == el.size());
-        for (uint32_t i = 0, n = el.size(); i < n; ++i)
+        AvmAssert(dl.length() == el.length());
+        for (uint32_t i = 0, n = el.length(); i < n; ++i)
         {
             Domain* d = dl[i];
             DomainEnv* e = el[i];

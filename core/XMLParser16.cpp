@@ -492,7 +492,7 @@ namespace avmplus
                                Stringp& name,
                                Stringp& value)
     {
-        if (index >= attributes.size()) {
+        if (index >= attributes.length()) {
             return false;
         }
         name  = attributes.get(index++);

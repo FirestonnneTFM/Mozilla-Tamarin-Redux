@@ -229,7 +229,7 @@ namespace avmplus
     protected:
         AvmCore*            core;
     private:
-        List<Stringp>       fakeMethodNames;
+        RCList<Stringp>     fakeMethodNames;
         uint64_t            allocId;
         uint64_t            sampleBufferId;
         uint8_t*            samples;

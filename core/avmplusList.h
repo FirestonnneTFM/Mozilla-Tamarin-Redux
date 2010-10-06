@@ -44,418 +44,592 @@
 
 namespace avmplus
 {
-    /**
-     * The List<T> template implements a simple List, which can
-     * be templated to support different types.
+    /*
+     * MEMORY MANAGEMENT:
      *
-     * Elements can be added to the end, modified in the middle,
-     * but no holes are allowed.  That is for set(n, v) to work
-     * size() > n
+     * The List variants can be instantiated on the stack or embedded as a field in another class.
+     * However, they cannot be allocated dynamically (operator new is private/unimplemented):
+     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject. 
+     * If you need to dynamically allocate a list, use HeapList to wrap an instance.
      *
-     * Note that [] operators are provided and you can violate the
-     * set properties using these operators, if you want a real
-     * list dont use the [] operators, if you want a general purpose
-     * array use the [] operators.
+     * Also, keep in mind that since some variants allocate using nonGC memory, one MUST
+     * ensure the destructor runs, one way or another:
      *
-     * Note that calls to arraycopy() may have to be prefixed
-     * by "this->" to pass muster with RVCT 3.1, see
-     * https://bugzilla.mozilla.org/show_bug.cgi?id=551826.
+     *   with stack allocation, as long as nobody longjmp's over
+     *   the destructor, C++ compiler ensures the destructor is called.
+     *
+     *   when embedded as a field in another class, normal C++
+     *   dtor handling should take care of this (but be wary:
+     *   if embedding in a GC-allocated object, the embedder
+     *   must be a GCFinalizedObject or RCObject, *not* a plain GCObject)
+     *
+     * Most variants require you to use an MMgc::GC* as the allocator; 
+     * the ones that cannot contain GC-allocated data (DataList and UnmanagedPointerList)
+     * use FixedMalloc instead.
+     *
      */
 
-    enum ListElementType {
-        LIST_NonGCObjects = 0,
-        LIST_GCObjects = 1,
-        LIST_RCObjects = 2
-    };
-
-    template <bool isGCObject, bool isGCFinalizedObject, bool isRCObject>
-    struct _ListElementType
-    {
-    };
-
-    /*
-        Only valid combinations of the above variables are listed below.
-    */
-    template <>
-    struct _ListElementType<true, false, false>
-    {
-        static const ListElementType kElementType = LIST_GCObjects;
-    };
-
-    template <>
-    struct _ListElementType<false, true, false>
-    {
-        static const ListElementType kElementType = LIST_GCObjects;
-    };
-
-    template <>
-    struct _ListElementType<false, true, true>
-    {
-        static const ListElementType kElementType = LIST_RCObjects;
-    };
-
-    template <>
-    struct _ListElementType<false, false, false>
-    {
-        static const ListElementType kElementType = LIST_NonGCObjects;
-    };
-
     template <class T>
-    struct _ListElementTypeHelper
+    struct TypeSniffer
     {
-        typedef typename MMgc::remove_pointer<T>::type base_type;
+        typedef typename MMgc::remove_pointer<T>::type                  baseType;
 
-        typedef MMgc::is_base_of<MMgc::GCObject, base_type> _isGCObject;
-        typedef MMgc::is_base_of<MMgc::GCFinalizedObject, base_type> _isGCFinalizedObject;
-        typedef MMgc::is_base_of<MMgc::RCObject, base_type> _isRCObject;
-
-        static const ListElementType kElementType = _ListElementType<_isGCObject::value, _isGCFinalizedObject::value, _isRCObject::value>::kElementType;
+        typedef MMgc::is_same<T, baseType>                              isNonPointer;
+        typedef MMgc::is_base_of<MMgc::GCObject, baseType>              isGCObject;
+        typedef MMgc::is_base_of<MMgc::GCFinalizedObject, baseType>     isGCFinalizedObject;
+        typedef MMgc::is_base_of<MMgc::RCObject, baseType>              isRCObject;
     };
+    
+    // ----------------------------
 
-    class ListAllocPolicy_GC
+    // All Lists will be created with this as a minimum capacity, even if empty.
+    // The current value (4) is based on the value from AtomArray, which used it as a minimum.
+    const uint32_t kListMinCapacity = 4;
+
+    // Old versions of List<> provided a default initial capacity (of 128) if you did not specify one.
+    // This is dubiously large for many cases, so the new ListImpl<> variants don't provide a default
+    // and require explicit sizing on creation. For minimal impact on existing code, this constant is provided
+    // so that existing usage will have identical behavior until/unless it can be shown that a smaller value
+    // is appropriate.
+    const uint32_t kListInitialCapacity = 128;
+
+    // The maximum length for a List is the maximum positive int32 value (thus the max index value
+    // is one less than that). This may seem odd, as List indices are unsigned ints, but is done
+    // mainly to preserve the semantics of indexOf() and lastIndexOf(), which return -1 for "not found".
+    // This effectively rules out any indices > 0x7FFFFFFF. To minimize possibilities of off-by-one
+    // errors, we also make the maximum *length* positive.
+    const uint32_t kListMaxLength = 0x7FFFFFF;
+    const uint32_t kListMaxIndexValue = kListMaxLength - 1;
+
+    // ----------------------------
+    // Conceptually, ListData<> is private to ListImpl<>, but we make it toplevel and public to avoid
+    // friend template class declaration cruft. Since there's no way to extract a ListData from a ListImpl,
+    // this is probably safe enough.
+    template<class STORAGE>
+    struct ListData 
+    {
+        uint32_t    len;
+        uint32_t    cap;
+        STORAGE     entries[1];   // lying, really [cap]
+    };
+        
+    // ----------------------------
+    // ----------------------------
+    template<class T>
+    class DataListHelper
     {
     public:
-        typedef MMgc::GCObject Base;
+    
+        // The allocator to use -- typically either GC or a wrapper around FixedMalloc.
+        typedef MMgc::FixedMalloc ALLOCATOR;
+        typedef MMgc::FixedMallocOpts ALLOCATORFLAGS;
+    
+        // TYPE which is the public-facing type seen by users of the ListImpl
+        typedef T TYPE;
+
+        // STORAGE is an internal-only type used to store the value.
+        typedef T STORAGE;
+        
+        // (syntactic sugar)
+        typedef ListData<STORAGE> LISTDATA;
+
+        // When calling allocator->Alloc(), these are the flags we should use (kZero, etc).
+        static ALLOCATORFLAGS allocFlags();
+
+        // Given a pointer to data, return the allocator used to allocate it.
+        // data must not be null.
+        static ALLOCATOR* getAllocator(LISTDATA* data);
+
+        // Store the data at the address, using WB if necessary.
+        // Any pointer already stored there will be overwritten (but not freed); the caller
+        // must ensure that old pointers are freed.
+        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        
+        // Load the item and do any conversion necessary from STORAGE to TYPE.
+        static TYPE load(LISTDATA* data, uint32_t index);
+
+        // Store a value at the given index, using WB as necessary and doing any conversion necessary from TYPE to STORAGE.
+        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+
+        // Like store(), but the value at the given index is known to be empty (zeroed),
+        // which may allow more efficiency.
+        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        
+        // Clear a range starting at index and going for count. Count must be > 0.
+        // All entries in the range will be zeroed by this call.
+        static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
+        
+        // Move a range within the given data. It is expected that the caller has
+        // already done range checking to ensure that src+count and dst+count constitute
+        // valid ranges within data.
+        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
 
-    class ListAllocPolicy_InsideRCObject
+    // ----------------------------
+
+    class GCListHelper
     {
     public:
-        class Base {};
+        typedef MMgc::GC ALLOCATOR;
+        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
+        typedef MMgc::GCObject* TYPE;
+        typedef MMgc::GCObject* STORAGE;
+        typedef ListData<STORAGE> LISTDATA;
+        
+        static ALLOCATORFLAGS allocFlags();
+        static ALLOCATOR* getAllocator(LISTDATA* data);
+        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static TYPE load(LISTDATA* data, uint32_t index);
+        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
+        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
 
-    template<class T, ListElementType kElementType, class ListAllocPolicy>
-    class ListBase;
+    // ----------------------------
 
-    template<class T, class ListAllocPolicy>
-    class ListBase<T, LIST_NonGCObjects, ListAllocPolicy> : public ListAllocPolicy::Base
+    class RCListHelper
     {
-    protected:
-        T *data;
-        uint32_t len;
-        uint32_t max;
-        MMgc::GC* gc;
-
-        void wb(uint32_t index, T value)
-        {
-            AvmAssert(index < max);
-            AvmAssert(data != NULL);
-            data[index] = value;
-        }
-
-        void arraycopy(const T* src, uint32_t srcStart, T* dst, uint32_t dstStart, size_t nbr)
-        {
-            // we have 2 cases, either closing a gap or opening it.
-            if ((src == dst) && (srcStart > dstStart) )
-            {
-                for(size_t i=0; i<nbr; i++)
-                    dst[i+dstStart] = src[i+srcStart];
-            }
-            else
-            {
-                for(intptr_t i=nbr-1; i>=0; i--)
-                    dst[i+dstStart] = src[i+srcStart];
-            }
-        }
-    };
-
-    template<class T, class ListAllocPolicy>
-    class ListBase<T, LIST_GCObjects, ListAllocPolicy> : public ListAllocPolicy::Base
-    {
-    protected:
-        T *data;
-        uint32_t len;
-        uint32_t max;
-        MMgc::GC* gc;
-
-        void wb(uint32_t index, T value)
-        {
-            AvmAssert(index < max);
-            AvmAssert(data != NULL);
-            WB(gc, data, &data[index], value);
-        }
-
-        void arraycopy(const T* src, uint32_t srcStart, T* dst, uint32_t dstStart, size_t nbr)
-        {
-            if(gc) {
-                gc->movePointers((void**)dst, dstStart, (const void**)src, srcStart, nbr);
-            } else {
-                // we have 2 cases, either closing a gap or opening it.
-                if ((src == dst) && (srcStart > dstStart) )
-                {
-                    for(size_t i=0; i<nbr; i++)
-                        dst[i+dstStart] = src[i+srcStart];
-                }
-                else
-                {
-                    for(intptr_t i=nbr-1; i>=0; i--)
-                        dst[i+dstStart] = src[i+srcStart];
-                }
-            }
-        }
-    };
-
-    template<class T, class ListAllocPolicy>
-    class ListBase<T, LIST_RCObjects, ListAllocPolicy> : public ListAllocPolicy::Base
-    {
-    protected:
-        T *data;
-        uint32_t len;
-        uint32_t max;
-        MMgc::GC* gc;
-
-        void wb(uint32_t index, T value)
-        {
-            AvmAssert(index < max);
-            AvmAssert(data != NULL);
-            WBRC(gc, data, &data[index], value);
-        }
-
-        void arraycopy(const T* src, uint32_t srcStart, T* dst, uint32_t dstStart, size_t nbr)
-        {
-            if(gc) {
-                gc->movePointers((void**)dst, dstStart, (const void**)src, srcStart, nbr);
-            } else {
-                // we have 2 cases, either closing a gap or opening it.
-                if ((src == dst) && (srcStart > dstStart) )
-                {
-                    for(size_t i=0; i<nbr; i++)
-                        dst[i+dstStart] = src[i+srcStart];
-                }
-                else
-                {
-                    for(intptr_t i=nbr-1; i>=0; i--)
-                        dst[i+dstStart] = src[i+srcStart];
-                }
-            }
-        }
-    };
-
-    template <class T, ListElementType kElementType = _ListElementTypeHelper<T>::kElementType, class ListAllocPolicy = ListAllocPolicy_GC>
-    class List : public ListBase<T, kElementType, ListAllocPolicy>
-    {
-        using ListBase<T, kElementType, ListAllocPolicy>::data;
-        using ListBase<T, kElementType, ListAllocPolicy>::len;
-        using ListBase<T, kElementType, ListAllocPolicy>::max;
-        using ListBase<T, kElementType, ListAllocPolicy>::gc;
-        using ListBase<T, kElementType, ListAllocPolicy>::wb;
-
     public:
-        enum { kInitialCapacity = 128 };
+        typedef MMgc::GC ALLOCATOR;
+        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
+        typedef MMgc::RCObject* TYPE;
+        typedef MMgc::RCObject* STORAGE;
+        typedef ListData<STORAGE> LISTDATA;
+        
+        static ALLOCATORFLAGS allocFlags();
+        static ALLOCATOR* getAllocator(LISTDATA* data);
+        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static TYPE load(LISTDATA* data, uint32_t index);
+        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
+        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+    };
 
-        List(int _capacity = kInitialCapacity)
-        {
-            init(0, _capacity);
-        }
-        List(MMgc::GC* _gc, uint32_t _capacity = kInitialCapacity)
-        {
-            init(_gc, _capacity);
-        }
-        void init(MMgc::GC* _gc, uint32_t _capacity)
-        {
-            len = 0;
-            max = 0;
-            data = NULL;
-            this->gc = _gc;
-            AvmAssert (_gc || kElementType == LIST_NonGCObjects);
-            ensureCapacity(_capacity);
-        }
-        ~List()
-        {
-            if(gc) {
-                if(kElementType == LIST_RCObjects) {
-                    for (unsigned int i=0; i<len; i++) {
-                        set(i, 0);
-                    }
-                }
-                gc->Free(data);
-            } else
-                mmfx_delete_array(data);
-            // List can be a stack object, or it can be inside an RCObject, so clearing it
-            // can help the gc or indeed be required.
-            data = NULL;
-            len = 0;
-            max = 0;
-            gc = 0;
-        }
-        uint32_t add(T value)
-        {
-            if (len >= max) {
-                grow();
-            }
-            // messy WB, need to ignore write in cases where data isn't gc memory
-            wb(len++, value);
-            return len-1;
-        }
-        bool isEmpty() const
-        {
-            return len == 0;
-        }
-        uint32_t size() const
-        {
-            return len;
-        }
-        uint32_t capacity() const
-        {
-            return max;
-        }
-        T get(uint32_t index) const
-        {
-            AvmAssert(index < len);
-            return data[index];
-        }
-        T last() const
-        {
-            AvmAssert(len > 0);
-            return data[len-1];
-        }
-        void set(uint32_t index, T value)
-        {
-            wb(index, value);
-            len = (index+1 > len) ? index+1 : len;
-            AvmAssert(index < max);
-        }
-        void insert(int index, T value)
-        {
-            if ((uint32_t)index >= len)
-            {
-                // Someone is trying to insert at the end
-                add(value);
-                return;
-            }
+    // ----------------------------
 
-            if (len >= max) {
-                grow();
-            }
+    class AtomListHelper
+    {
+    public:
+        typedef MMgc::GC ALLOCATOR;
+        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
+        typedef Atom TYPE;
+        typedef Atom STORAGE;
+        typedef ListData<STORAGE> LISTDATA;
 
-            //move items up
-            this->arraycopy(data, index, data, index + 1, len - index);
+        static ALLOCATORFLAGS allocFlags();
+        static ALLOCATOR* getAllocator(LISTDATA* data);
+        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static TYPE load(LISTDATA* data, uint32_t index);
+        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
+        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+    };
 
-            // The item formerly at "index" is still in the array (at index+1),
-            //   but arraycopy didn't increment its refcount.
-            // Null out its former slot, so that set() doesn't decrement its refcount.
-            if(kElementType == LIST_RCObjects)
-                data[ index ] = 0;
+    // ----------------------------
 
-            set(index, value);
-            len++;
-        }
+    class WeakRefListHelper
+    {
+    public:
+        typedef MMgc::GC ALLOCATOR;
+        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
+        typedef MMgc::GCObject* TYPE;
+        typedef MMgc::GCWeakRef* STORAGE;
+        typedef ListData<STORAGE> LISTDATA;
 
-        void add(const List<T, kElementType>& l)
-        {
-            ensureCapacity(len+l.size());
-            // FIXME: make RCObject version
-            AvmAssert(kElementType != LIST_RCObjects);
-            this->arraycopy(l.getData(), 0, data, (uint32_t)len, (size_t) l.size());
-            len += l.size();
-        }
+        static ALLOCATORFLAGS allocFlags();
+        static ALLOCATOR* getAllocator(LISTDATA* data);
+        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static TYPE load(LISTDATA* data, uint32_t index);
+        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
+        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+    };
 
-        void clear()
-        {
-            if(kElementType == LIST_RCObjects) {
-                for (unsigned int i=0; i<len; i++) {
-                    set(i, 0);
-                }
-            } else {
-                if ( len ) {
-                    VMPI_memset(data, 0, len*sizeof(T));
-                }
-            }
-            len = 0;
-        }
+    // ----------------------------
 
-        int indexOf(T value) const
-        {
-            for(uint32_t i=0; i<len; i++)
-                if (data[i] == value)
-                    return i;
-            return -1;
-        }
-        int lastIndexOf(T value) const
-        {
-            for(int32_t i=len-1; i>=0; i--)
-                if (data[i] == value)
-                    return i;
-            return -1;
-        }
+    template<class T, class ListHelper>
+    class ListImpl
+    {
+    public:
+        typedef T TYPE;
+        typedef typename ListHelper::ALLOCATOR ALLOCATOR;
+        
+    public:
+        // capacity is the initial capacity to preallocate for the List.
+        // 
+        // If args is NULL, the new list will have the given capacity, and a length of zero.
+        //
+        // If args is non-NULL, it is expected to point to an arrray of 'capacity'
+        // entries, which will be used to initialize the list. The new list will
+        // have length equal to capacity.
+        //
+        explicit ListImpl(typename ListHelper::ALLOCATOR* allocator, 
+                          uint32_t capacity,
+                          const T* args = NULL);
 
-        T removeAt(uint32_t i)
-        {
-            T old = (T)0;
-            old = data[i];
-            if(kElementType == LIST_RCObjects)
-                set(i, NULL);
-            this->arraycopy(data, i+1, data, i, len-i-1);
-            len--;
-            // clear copy at the end so it can be collected if removed
-            // and isn't decremented on next add
-            if(kElementType != LIST_NonGCObjects)
-                data[len] = NULL;
-            AvmAssert((int32_t)len >= 0);
-            return old;
-        }
+        ~ListImpl();
 
-        T removeFirst() { return isEmpty() ? (T)0 : removeAt(0); }
-        T removeLast()  { return isEmpty() ? (T)0 : removeAt(len-1); }
+        // Return true if list has no elements. equivalent to length()==0.
+        bool isEmpty() const;
 
-        T operator[](uint32_t index) const
-        {
-            AvmAssert(index < len);
-            return data[index];
-        }
+        // Return the index+1 for highest-numbered entry that has an item stored. (This can differ
+        // from "number of items contained" if set() is called in a nonlinear fashion.)
+        uint32_t length() const;
+        
+        // Return the maximum number of items the ListImpl can contain without needing to allocate
+        // more memory.
+        uint32_t capacity() const;
+        
+        // Return the item at the given index. If the index is >= length(), assert. If the index
+        // is < length() but has never had an item stored into it, return 0.
+        T get(uint32_t index) const;
+        
+        // Equivalent to get(0).
+        T first() const;
 
-        void ensureCapacity(uint32_t cap)
-        {
-            if(cap > max) {
-                int gcflags = 0;
-                if(kElementType == LIST_GCObjects || kElementType == LIST_RCObjects)
-                    gcflags |= (MMgc::GC::kContainsPointers|MMgc::GC::kZero);
+        // Equivalent to get(length()-1).
+        T last() const;
 
-                T* newData = (gc) ? (T*) gc->Calloc(cap, sizeof(T), gcflags) : mmfx_new_array(T, cap);
-                for (unsigned int i=0; i<len; i++) {
-                    newData[i] = data[i];
-                }
-                if (!gc) {
-                    mmfx_delete_array(data);
-                }
-                if(gc && gc->IsPointerToGCPage(this)) {
-                    // data = newData;
-                    WB(gc, gc->FindBeginningFast(this), &data, newData);
-                } else {
-                    data = newData;
-                }
-                max = cap;
-            }
-        }
+        // Replace the item at the given index with the new value. This call will not expand
+        // the ListImpl, and will assert if index >= capacity(). After this call, length() >= index.
+        void set(uint32_t index, T value);
+        
+        // Append the value to the end of the ListImpl, growing the ListImpl if necessary.
+        void add(T value);
+        
+        // Append the given ListImpl to the end of this ListImpl, growing if necessary.
+        void add(const ListImpl<T,ListHelper>& that);
 
-        const T *getData() const { return data; }
+        // Insert the given item at index. The item previously at index will then be at index+1.
+        void insert(uint32_t index, T value);
 
-        void become(List<T, kElementType> &list) {
-            clear();
-            for (int i=0, n=list.size(); i < n; i++)
-                add(list[i]);
-            list.clear();
-        }
+        // Insert the given items at index, shifting entries up.
+        // (aka "Array.unshift()" if index == 0, "Array.push()" if index >= len)
+        void insert(uint32_t index, const T* args, uint32_t argc);
+
+        // Delete deleteCount entries, starting at insertPoint, then insert insertCount entries from args,
+        // starting at insertPoint.
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ListImpl<T,ListHelper>& args, uint32_t argsOffset);
+        
+        // Reverse the ListImpl in place.
+        void reverse();
+
+        // Remove all items from the ListImpl and minimize capacity; 
+        // after this call, isEmpty() == true, length() == 0, capacity() == kListMinCapacity.
+        void clear();
+
+        // If the given value is in the ListImpl, return the lowest-numbered index it can be found at. If not, return -1.
+        // operator== is used to compare values (overloaded versions will be used, though this isn't currently tested).
+        int32_t indexOf(T value) const;
+
+        // If the given value is in the ListImpl, return the highest-numbered index it can be found at. If not, return -1.
+        // operator== is used to compare values (overloaded versions will be used, though this isn't currently tested).
+        int32_t lastIndexOf(T value) const;
+
+        // Remove the item at index i, shifting all higher-indexed values down 1. Return the value that was at that
+        // index. If index >= length(), assert.
+        T removeAt(uint32_t index);
+        
+        // Equivalent to removeAt(0). (aka "Array.shift()")
+        T removeFirst();
+
+        // Equivalent to removeAt(length()-1). (aka "Array.pop()")
+        T removeLast();
+
+        // Equivalent to get(index).
+        T operator[](uint32_t index) const;
+        
+        // Ensure that the ListImpl can hold at least cap elements. This does not affect length(); 
+        // it's primarily useful to reduce redundant allocations when filling in a list.
+        void ensureCapacity(uint32_t cap);
+
+        // Return the number of bytes used for the ListImpl's dynamically-allocated storage.
+        uint64_t bytesUsed() const; 
 
     private:
+        ListImpl<T,ListHelper>& operator=(const ListImpl<T,ListHelper>& other); // unimplemented
+        explicit ListImpl(const ListImpl<T,ListHelper>& other);                 // unimplemented
+        void* operator new(size_t size);                                        // unimplemented, use HeapList instead
 
-        List<T,kElementType>& operator=(const List<T,kElementType>& other); // unimplemented
-        List(const List<T,kElementType>& other);                            // unimplemented
+        void ensureCapacity(typename ListHelper::ALLOCATOR* allocator, uint32_t cap, uint32_t extra);
+        
+        // This function shouldn't be called directly; it's intended to be called
+        // only by ensureCapacity(), which does an inline capacity check
+        // before calling (which is a clear performance win).
+        void ensureCapacityImpl(typename ListHelper::ALLOCATOR* allocator, uint32_t cap);
 
-        void grow()
-        {
-            // growth is fast at first, then slows at larger list sizes.
-            int newMax = 0;
-            if (max == 0)
-                newMax = kInitialCapacity;
-            else if(max > 15)
-                newMax = max * 3/2;
-            else
-                newMax = max * 2;
+        static typename ListHelper::LISTDATA* allocData(typename ListHelper::ALLOCATOR* allocator, uint32_t cap);
 
-            ensureCapacity(newMax);
-        }
+    private:
+        typename ListHelper::LISTDATA* m_data; // If GC-allocated, this is written with explicit WB
     };
+
+    // ----------------------------
+
+    template<class T>
+    class GCList
+    {
+    private:
+        typedef ListImpl<MMgc::GCObject*, GCListHelper> LIST;
+        
+    public:
+        typedef T TYPE;
+        typedef typename LIST::ALLOCATOR ALLOCATOR;
+        
+    public:
+        explicit GCList(ALLOCATOR* allocator, 
+                        uint32_t capacity,
+                        const T* args = NULL);
+
+        bool isEmpty() const;
+        uint32_t length() const;
+        uint32_t capacity() const;
+        T get(uint32_t index) const;
+        T first() const;
+        T last() const;
+        void set(uint32_t index, T value);
+        void add(T value);
+        void add(const GCList<T>& that);
+        void insert(uint32_t index, T value);
+        void insert(uint32_t index, const T* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const GCList<T>& args, uint32_t argsOffset);
+        void reverse();
+        void clear();
+        int32_t indexOf(T value) const;
+        int32_t lastIndexOf(T value) const;
+        T removeAt(uint32_t index);
+        T removeFirst();
+        T removeLast();
+        T operator[](uint32_t index) const;
+        void ensureCapacity(uint32_t cap);
+        uint64_t bytesUsed() const; 
+
+    private:
+        GCList<T>& operator=(const GCList<T>& other);     // unimplemented
+        explicit GCList(const GCList<T>& other);          // unimplemented
+        void* operator new(size_t size);                  // unimplemented, use HeapList instead
+
+        // This is a little hackery that is necessary due to the fact that GCFinalizedObject
+        // doesn't extend GCObject, but can be treated equivalently in this context.
+        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCObject* o) { return o; }
+        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
+        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCObject* o) { return (MMgc::GCObject*)o; }
+        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
+
+    private:
+        LIST m_list;
+    };
+
+    // ----------------------------
+
+    template<class T>
+    class RCList
+    {
+    private:
+        typedef ListImpl<MMgc::RCObject*, RCListHelper> LIST;
+        
+    public:
+        typedef T TYPE;
+        typedef typename LIST::ALLOCATOR ALLOCATOR;
+        
+    public:
+        explicit RCList(ALLOCATOR* allocator, 
+                        uint32_t capacity,
+                        const T* args = NULL);
+
+        bool isEmpty() const;
+        uint32_t length() const;
+        uint32_t capacity() const;
+        T get(uint32_t index) const;
+        T first() const;
+        T last() const;
+        void set(uint32_t index, T value);
+        void add(T value);
+        void add(const RCList<T>& that);
+        void insert(uint32_t index, T value);
+        void insert(uint32_t index, const T* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const RCList<T>& args, uint32_t argsOffset);
+        void reverse();
+        void clear();
+        int32_t indexOf(T value) const;
+        int32_t lastIndexOf(T value) const;
+        T removeAt(uint32_t index);
+        T removeFirst();
+        T removeLast();
+        T operator[](uint32_t index) const;
+        void ensureCapacity(uint32_t cap);
+        uint64_t bytesUsed() const; 
+
+    private:
+        RCList<T>& operator=(const RCList<T>& other);     // unimplemented
+        explicit RCList(const RCList<T>& other);          // unimplemented
+        void* operator new(size_t size);                  // unimplemented, use HeapList instead
+
+    private:
+        LIST m_list;
+    };
+
+    // ----------------------------
+    
+    // We can't use "void*" for UnmanagedPointer, as the type-sniffing
+    // code will complain that sizeof(void) is illegal (which it is)...
+    // so we'll make a synthetic type to use here. We declare it publicly
+    // to simplify explicit instantiation of the relevant ListImpl<> type.
+    struct Unmanaged { int foo; };
+    typedef Unmanaged* UnmanagedPointer;
+    
+    template<class T>
+    class UnmanagedPointerList
+    {
+    private:
+        typedef ListImpl< UnmanagedPointer, DataListHelper<UnmanagedPointer> > LIST;
+        
+    public:
+        typedef T TYPE;
+        typedef typename LIST::ALLOCATOR ALLOCATOR;
+        
+    public:
+        explicit UnmanagedPointerList(ALLOCATOR* allocator, 
+                                      uint32_t capacity,
+                                      const T* args = NULL);
+
+        bool isEmpty() const;
+        uint32_t length() const;
+        uint32_t capacity() const;
+        T get(uint32_t index) const;
+        T first() const;
+        T last() const;
+        void set(uint32_t index, T value);
+        void add(T value);
+        void add(const UnmanagedPointerList<T>& that);
+        void insert(uint32_t index, T value);
+        void insert(uint32_t index, const T* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const UnmanagedPointerList<T>& args, uint32_t argsOffset);
+        void reverse();
+        void clear();
+        int32_t indexOf(T value) const;
+        int32_t lastIndexOf(T value) const;
+        T removeAt(uint32_t index);
+        T removeFirst();
+        T removeLast();
+        T operator[](uint32_t index) const;
+        void ensureCapacity(uint32_t cap);
+        uint64_t bytesUsed() const; 
+
+    private:
+        UnmanagedPointerList<T>& operator=(const UnmanagedPointerList<T>& other);       // unimplemented
+        explicit UnmanagedPointerList(const UnmanagedPointerList<T>& other);            // unimplemented
+        void* operator new(size_t size);                                                // unimplemented, use HeapList instead
+
+    private:
+        LIST m_list;
+    };
+
+    // ----------------------------
+    template<class T>
+    class WeakRefList
+    {
+    private:
+        typedef ListImpl<MMgc::GCObject*, WeakRefListHelper> LIST;
+        
+    public:
+        typedef T TYPE;
+        typedef typename LIST::ALLOCATOR ALLOCATOR;
+        
+    public:
+        explicit WeakRefList(ALLOCATOR* allocator, 
+                             uint32_t capacity,
+                             const T* args = NULL);
+
+        bool isEmpty() const;
+        uint32_t length() const;
+        uint32_t capacity() const;
+        T get(uint32_t index) const;
+        T first() const;
+        T last() const;
+        void set(uint32_t index, T value);
+        void add(T value);
+        void add(const WeakRefList<T>& that);
+        void insert(uint32_t index, T value);
+        void insert(uint32_t index, const T* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const WeakRefList<T>& args, uint32_t argsOffset);
+        void reverse();
+        void clear();
+        int32_t indexOf(T value) const;
+        int32_t lastIndexOf(T value) const;
+        T removeAt(uint32_t index);
+        T removeFirst();
+        T removeLast();
+        T operator[](uint32_t index) const;
+        void ensureCapacity(uint32_t cap);
+        uint64_t bytesUsed() const; 
+
+    private:
+        WeakRefList<T>& operator=(const WeakRefList<T>& other);     // unimplemented
+        explicit WeakRefList(const WeakRefList<T>& other);          // unimplemented
+        void* operator new(size_t size);                            // unimplemented, use HeapList instead
+
+        // This is a little hackery that is necessary due to the fact that GCFinalizedObject
+        // doesn't extend GCObject, but can be treated equivalently in this context.
+        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCObject* o) { return o; }
+        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
+        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCObject* o) { return (MMgc::GCObject*)o; }
+        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
+
+    private:
+        LIST m_list;
+    };
+
+    // ----------------------------
+
+    typedef ListImpl<Atom, AtomListHelper> AtomList;
+
+    // ----------------------------
+    template<class T>
+    class DataList : public ListImpl< T, DataListHelper<T> >
+    {
+    private:
+        typedef ListImpl< T, DataListHelper<T> > BASE;
+
+    public:
+        typedef T TYPE;
+        typedef typename BASE::ALLOCATOR ALLOCATOR;
+        
+    public:
+        explicit DataList(ALLOCATOR* allocator, 
+                          uint32_t capacity,
+                          const T* args = NULL);
+
+    private:
+        DataList<T>& operator=(const DataList<T>& other);       // unimplemented
+        explicit DataList(const DataList<T>& other);            // unimplemented
+        void* operator new(size_t size);                        // unimplemented, use HeapList instead
+    };
+
+    // ----------------------------
+
+    template<class T>
+    class HeapList : public MMgc::GCFinalizedObject
+    {
+    public:
+        T list;
+    public:
+        explicit HeapList(typename T::ALLOCATOR* allocator, 
+                          uint32_t capacity,
+                          const typename T::TYPE* args = NULL);
+    };
+
+    // ----------------------------
+
 }
 
 #endif /* __avmplus_List__ */

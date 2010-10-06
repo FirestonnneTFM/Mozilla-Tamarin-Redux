@@ -66,6 +66,14 @@ namespace avmplus
 
 #endif  // VMCFG_PRECOMP_NAMES
 
+    // This is intended to be exactly the size of a double in memory.
+    // (We use compile-time assertions to verify this.)
+    class GCDouble : public MMgc::GCObject
+    {
+    public:
+        double value;
+    };
+
     /**
      * The PoolObject class is a container for the pool of resources
      * decoded from an ABC file: the constant pool, the methods
@@ -81,23 +89,23 @@ namespace avmplus
         int32_t getAPI();
 
         /** constants */
-        List<int32_t> cpool_int;
-        List<uint32_t> cpool_uint;
-        List<double*, LIST_GCObjects> cpool_double; // explicitly specify LIST_GCObject b/c these are GC-allocated ptrs
-        List<Namespacep> cpool_ns;
-        List<NamespaceSetp> cpool_ns_set;
+        DataList<int32_t> cpool_int;
+        DataList<uint32_t> cpool_uint;
+        GCList<const GCDouble*> cpool_double;
+        RCList<Namespacep> cpool_ns;
+        GCList<NamespaceSetp> cpool_ns_set;
 
 #ifndef AVMPLUS_64BIT
         // lists to keep int/uint atoms "sticky".
         // @todo this can/should go away when we convert to 64-bit Box atoms.
-        List<Atom, LIST_GCObjects> cpool_int_atoms;
-        List<Atom, LIST_GCObjects> cpool_uint_atoms;
+        AtomList cpool_int_atoms;
+        AtomList cpool_uint_atoms;
 #endif
 
-        List<uint32_t> cpool_mn_offsets;
+        DataList<uint32_t> cpool_mn_offsets;
 
         /** metadata -- ptrs into ABC, not gc-allocated */
-        List<const uint8_t*> metadata_infos;
+        UnmanagedPointerList<const uint8_t*> metadata_infos;
 
         /** domain */
         DWB(Domain*) domain;
@@ -181,7 +189,7 @@ namespace avmplus
         friend class DomainMgr;
         DWB(MultinameHashtable*)                    m_namedTraits;
         DWB(MultinameHashtable*)                    m_namedScriptsMap;
-        List<MethodInfo*>                           m_namedScriptsList;           // list of MethodInfo* for the scripts
+        GCList<MethodInfo*>                         m_namedScriptsList;           // list of MethodInfo* for the scripts
 
     private:
         union ConstantStringData
@@ -196,17 +204,17 @@ namespace avmplus
         // points behind end of ABC string data - see AbcParser.cpp
         const uint8_t *                             _abcStringEnd;
         DWB(ConstantStringData*)                    _abcStrings;                // The length is constantStringCount
-        List<Traits*, LIST_GCObjects>               _classes;
-        List<Traits*, LIST_GCObjects>               _scripts;
-        List<MethodInfo*, LIST_GCObjects>           _methods;
+        GCList<Traits*>                             _classes;
+        GCList<Traits*>                             _scripts;
+        GCList<MethodInfo*>                         _methods;
 #ifdef DEBUGGER
-        List<DebuggerMethodInfo*, LIST_GCObjects>   _method_dmi;
+        GCList<DebuggerMethodInfo*>                 _method_dmi;
 #endif
 #if VMCFG_METHOD_NAMES
         // only allocated & populated if core->config.methodName is true...
         // if positive, an index into cpool_string; if negative, an index into cpool_mn
         // (always safe because those indices are limited to 30 bits)
-        List<int32_t, LIST_NonGCObjects>            _method_name_indices;
+        DataList<int32_t>                           _method_name_indices;
 #endif
                 void                                setupConstantStrings(uint32_t count);
         uint32_t api;

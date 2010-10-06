@@ -155,7 +155,7 @@ namespace avmplus
         sampleIteratorVTable(NULL),
         slotIteratorVTable(NULL),
         core(_core),
-        fakeMethodNames(_core->GetGC()),
+        fakeMethodNames(_core->GetGC(), kListInitialCapacity),
         allocId(1),
         sampleBufferId(0),
         samples(NULL),

@@ -474,6 +474,14 @@ namespace MMgc
          */
         void movePointers(void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers);
 
+        /**
+         * Optimized version for moving within a single block of memory. Note that the 
+         * offsets are in bytes, not in void* indices, to allow for an array that is
+         * offset from the start of a block. If zeroEmptied is true, then the area "moved out of"
+         * will be zeroed (generally a good idea, to avoid phantom GC references or possible RC naughtiness)
+         */
+        void movePointersWithinBlock(void** array, uint32_t dstOffsetInBytes, uint32_t srcOffsetInBytes, size_t numPointers, bool zeroEmptied = true);
+
     private:
         /**
          * Signal that we've allocated some memory and that collection can be triggered

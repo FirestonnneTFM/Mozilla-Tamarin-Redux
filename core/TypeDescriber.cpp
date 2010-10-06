@@ -273,7 +273,7 @@ namespace avmplus
             }
 
             // yuck, replicate buggy behavior in FP9/10
-            List<Namespacep> nsremoval(gc);
+            RCList<Namespacep> nsremoval(gc, kListInitialCapacity);
             if (flags & HIDE_NSURI_METHODS)
             {
                 for (TraitsBindingsp tbi = tb->base; tbi; tbi = tbi->base)
@@ -454,7 +454,7 @@ namespace avmplus
         }
     }
 
-    static void read_u30_list(List<uint32_t>& list, uint32_t val_count, const uint8_t*& pos)
+    static void read_u30_list(DataList<uint32_t>& list, uint32_t val_count, const uint8_t*& pos)
     {
         list.ensureCapacity(val_count);
         while (val_count--)
@@ -483,9 +483,8 @@ namespace avmplus
 
         if (val_count > 0)
         {
-            GC* gc = core->GetGC();
-            List<uint32_t> key_indexes(gc);
-            List<uint32_t> val_indexes(gc);
+            DataList<uint32_t> key_indexes(FixedMalloc::GetFixedMalloc(), kListInitialCapacity);
+            DataList<uint32_t> val_indexes(FixedMalloc::GetFixedMalloc(), kListInitialCapacity);
 
             read_u30_list(key_indexes, val_count, metadata_pos);
             read_u30_list(val_indexes, val_count, metadata_pos);

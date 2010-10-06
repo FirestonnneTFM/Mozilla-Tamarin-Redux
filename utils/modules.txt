@@ -275,9 +275,11 @@ builtin avmplus::WeakKeyHashtable
 builtin avmplus:ArrayClass.obj
 builtin avmplus:ArrayObject.obj
 builtin avmplus:AtomArray.obj
+builtin avmplus:avmplusList.obj
 builtin avmplus::ArrayObject
 builtin avmplus::ArrayClass
 builtin avmplus::AtomArray
+builtin avmplus::avmplusList
 builtin avmplus::ArraySort
 
 builtin avmplus:StringClass.obj

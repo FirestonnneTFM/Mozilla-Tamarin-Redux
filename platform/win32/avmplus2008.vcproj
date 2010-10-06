@@ -1504,6 +1504,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\avmplusList.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\AtomArray.cpp"
 				>
 			</File>
@@ -1729,6 +1733,14 @@
 			</File>
 			<File
 				RelativePath="..\..\core\avmplusList.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\avmplusList-impl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\avmplusList-inlines.h"
 				>
 			</File>
 			<File
