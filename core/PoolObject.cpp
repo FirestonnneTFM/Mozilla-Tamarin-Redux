@@ -53,8 +53,8 @@ namespace avmplus
 
     PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startPos, uint32_t api) :
         core(core),
-        cpool_int(FixedMalloc::GetFixedMalloc(), 0),
-        cpool_uint(FixedMalloc::GetFixedMalloc(), 0),
+        cpool_int(MMgc::FixedMalloc::GetFixedMalloc(), 0),
+        cpool_uint(MMgc::FixedMalloc::GetFixedMalloc(), 0),
         cpool_double(core->GetGC(), 0),
         cpool_ns(core->GetGC(), 0),
         cpool_ns_set(core->GetGC(), 0),
@@ -62,8 +62,8 @@ namespace avmplus
         cpool_int_atoms(core->GetGC(), 0),
         cpool_uint_atoms(core->GetGC(), 0),
 #endif
-        cpool_mn_offsets(FixedMalloc::GetFixedMalloc(), 0),
-        metadata_infos(FixedMalloc::GetFixedMalloc(), 0),
+        cpool_mn_offsets(MMgc::FixedMalloc::GetFixedMalloc(), 0),
+        metadata_infos(MMgc::FixedMalloc::GetFixedMalloc(), 0),
         m_namedTraits(new(core->GetGC()) MultinameHashtable()),
         m_namedScriptsMap(new(core->GetGC()) MultinameHashtable()),
         m_namedScriptsList(core->GetGC(), 0),
@@ -79,7 +79,7 @@ namespace avmplus
         , _method_dmi(core->GetGC(), 0)
 #endif
 #if VMCFG_METHOD_NAMES
-        , _method_name_indices(FixedMalloc::GetFixedMalloc(), 0)
+        , _method_name_indices(MMgc::FixedMalloc::GetFixedMalloc(), 0)
 #endif
         , api(api)
 #ifdef VMCFG_AOT
