@@ -480,9 +480,10 @@ namespace avmplus
     
     // We can't use "void*" for UnmanagedPointer, as the type-sniffing
     // code will complain that sizeof(void) is illegal (which it is)...
-    // so we'll alias it to char*, so that we can avoid 
-    // "increases required alignment of target type" warnings.
-    typedef char* UnmanagedPointer;
+    // so we'll make a synthetic type to use here. We declare it publicly
+    // to simplify explicit instantiation of the relevant ListImpl<> type.
+    struct Unmanaged { int foo; };
+    typedef Unmanaged* UnmanagedPointer;
     
     template<class T>
     class UnmanagedPointerList

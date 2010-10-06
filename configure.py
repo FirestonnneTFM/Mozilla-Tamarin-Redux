@@ -199,7 +199,7 @@ if config.getCompiler() == 'GCC':
         else: # gcc 4.3 or later
             APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
     if cpu == 'sh4':
-        APP_CXXFLAGS += "-mieee "
+        APP_CXXFLAGS += "-mieee -Wno-cast-align "
 
     if arm_fpu:
         ARM_FPU_FLAGS = "-mfloat-abi=softfp -mfpu=vfp -march=%s -Wno-cast-align " % arm_arch # compile to use hardware fpu
