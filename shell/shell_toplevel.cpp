@@ -1296,12 +1296,12 @@ AvmBox shell_toplevel_func_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox*
     return kAvmThunkUndefined;
 }
 
-// flash_sampler_NewObjectSample_size_get
 // avmplus_System_freeMemory_get
 // avmplus_System_privateMemory_get
-// flash_utils_ByteArray_readFloat
 // avmplus_System_totalMemory_get
+// flash_sampler_NewObjectSample_size_get
 // flash_utils_ByteArray_readDouble
+// flash_utils_ByteArray_readFloat
 double shell_toplevel_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1314,8 +1314,8 @@ double shell_toplevel_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-// flash_utils_ByteArray_writeBytes
 // flash_utils_ByteArray_readBytes
+// flash_utils_ByteArray_writeBytes
 AvmBox shell_toplevel_v2a_oouu_opti0_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1334,8 +1334,8 @@ AvmBox shell_toplevel_v2a_oouu_opti0_opti0_thunk(AvmMethodEnv env, uint32_t argc
     return kAvmThunkUndefined;
 }
 
-// avmplus_File_readByteArray
 // avmplus_Domain_getClass
+// avmplus_File_readByteArray
 AvmBox shell_toplevel_a2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1368,8 +1368,8 @@ AvmBox shell_toplevel_func_b2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox
     return (AvmBox) ret;
 }
 
-// flash_utils_ByteArray_writeByte
 // avmplus_System_exit
+// flash_utils_ByteArray_writeByte
 // flash_utils_ByteArray_writeInt
 // flash_utils_ByteArray_writeShort
 AvmBox shell_toplevel_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
@@ -1387,11 +1387,11 @@ AvmBox shell_toplevel_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
     return kAvmThunkUndefined;
 }
 
-// avmplus_System_readLine
 // avmplus_System_getAvmplusVersion
-// flash_utils_ByteArray_readUTF
-// flash_utils_ByteArray_private__toString
+// avmplus_System_readLine
 // flash_utils_ByteArray_endian_get
+// flash_utils_ByteArray_private__toString
+// flash_utils_ByteArray_readUTF
 AvmBox shell_toplevel_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1468,8 +1468,8 @@ AvmBox shell_toplevel_a2a_oii_opti2_thunk(AvmMethodEnv env, uint32_t argc, AvmBo
     return (AvmBox) ret;
 }
 
-// native_script_function_flash_sampler_pauseSampling
 // native_script_function_flash_sampler_clearSamples
+// native_script_function_flash_sampler_pauseSampling
 // native_script_function_flash_sampler_startSampling
 // native_script_function_flash_sampler_stopSampling
 AvmBox shell_toplevel_func_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
@@ -1485,14 +1485,14 @@ AvmBox shell_toplevel_func_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* 
     return kAvmThunkUndefined;
 }
 
-// flash_utils_ByteArray_readUnsignedShort
-// flash_utils_ByteArray_bytesAvailable_get
-// flash_utils_ByteArray_length_get
-// flash_utils_ByteArray_readUnsignedInt
-// flash_utils_ByteArray_readUnsignedByte
 // avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get
 // avmplus_System_getTimer
+// flash_utils_ByteArray_bytesAvailable_get
+// flash_utils_ByteArray_length_get
 // flash_utils_ByteArray_position_get
+// flash_utils_ByteArray_readUnsignedByte
+// flash_utils_ByteArray_readUnsignedInt
+// flash_utils_ByteArray_readUnsignedShort
 AvmBox shell_toplevel_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1558,10 +1558,10 @@ AvmBox shell_toplevel_func_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox*
     return kAvmThunkUndefined;
 }
 
-// flash_utils_ByteArray_readInt
-// flash_utils_ByteArray_readShort
 // avmplus_System_swfVersion_get
 // flash_utils_ByteArray_readByte
+// flash_utils_ByteArray_readInt
+// flash_utils_ByteArray_readShort
 AvmBox shell_toplevel_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1690,8 +1690,8 @@ AvmBox shell_toplevel_a2a_os_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox*
     return (AvmBox) ret;
 }
 
-// native_script_function_flash_sampler_getSavedThis
 // native_script_function_flash_sampler_getLexicalScopes
+// native_script_function_flash_sampler_getSavedThis
 AvmBox shell_toplevel_func_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1735,11 +1735,11 @@ AvmBox shell_toplevel_b2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
     return (AvmBox) ret;
 }
 
-// flash_trace_Trace_getListener
-// avmplus_System_private_getArgv
-// flash_sampler_NewObjectSample_object_get
 // avmplus_Domain_currentDomain_get
 // avmplus_Domain_domainMemory_get
+// avmplus_System_private_getArgv
+// flash_sampler_NewObjectSample_object_get
+// flash_trace_Trace_getListener
 AvmBox shell_toplevel_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1835,9 +1835,9 @@ AvmBox shell_toplevel_i2a_oi_opti2_thunk(AvmMethodEnv env, uint32_t argc, AvmBox
 }
 
 // avmplus_Domain_domainMemory_set
-// avmplus_System_trace
 // avmplus_Domain_private_init
 // avmplus_System_disposeXML
+// avmplus_System_trace
 AvmBox shell_toplevel_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1871,11 +1871,11 @@ AvmBox shell_toplevel_b2a_oso_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* arg
     return (AvmBox) ret;
 }
 
-// flash_utils_ByteArray_private_zlib_compress
+// avmplus_System_debugger
 // avmplus_System_forceFullCollection
 // avmplus_System_ns_example_nstest
-// avmplus_System_debugger
 // avmplus_System_queueCollection
+// flash_utils_ByteArray_private_zlib_compress
 // flash_utils_ByteArray_private_zlib_uncompress
 AvmBox shell_toplevel_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
@@ -1890,8 +1890,8 @@ AvmBox shell_toplevel_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return kAvmThunkUndefined;
 }
 
-// flash_utils_ByteArray_position_set
 // flash_utils_ByteArray_length_set
+// flash_utils_ByteArray_position_set
 // flash_utils_ByteArray_writeUnsignedInt
 AvmBox shell_toplevel_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
@@ -1908,8 +1908,8 @@ AvmBox shell_toplevel_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
     return kAvmThunkUndefined;
 }
 
-// flash_utils_ByteArray_readBoolean
 // avmplus_System_isDebugger
+// flash_utils_ByteArray_readBoolean
 AvmBox shell_toplevel_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -1922,9 +1922,9 @@ AvmBox shell_toplevel_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-// flash_utils_ByteArray_writeUTF
-// flash_utils_ByteArray_endian_set
 // avmplus_System_write
+// flash_utils_ByteArray_endian_set
+// flash_utils_ByteArray_writeUTF
 // flash_utils_ByteArray_writeUTFBytes
 AvmBox shell_toplevel_v2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {

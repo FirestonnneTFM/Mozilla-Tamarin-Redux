@@ -40,67 +40,68 @@
 #define AVMTHUNK_VERSION 5
 
 namespace avmplus {
-    class ArgumentErrorClass; //ArgumentError$
-    class ArgumentErrorObject; //ArgumentError
-    class ArrayClass; //Array$
-    class ArrayObject; //Array
-    class BooleanClass; //Boolean$
-    class ClassClass; //Class$
-    class ClassClosure; //Class
-    class DateClass; //Date$
-    class DateObject; //Date
-    class DefinitionErrorClass; //DefinitionError$
-    class DefinitionErrorObject; //DefinitionError
-    class DoubleVectorClass; //__AS3__.vec::Vector$double$
-    class DoubleVectorObject; //__AS3__.vec::Vector$double
-    class ErrorClass; //Error$
-    class ErrorObject; //Error
-    class EvalErrorClass; //EvalError$
-    class EvalErrorObject; //EvalError
-    class FunctionClass; //Function$
-    class FunctionObject; //Function
-    class IntClass; //int$
-    class IntVectorClass; //__AS3__.vec::Vector$int$
-    class IntVectorObject; //__AS3__.vec::Vector$int
-    class MathClass; //Math$
-    class MethodClosure; //private::MethodClosure
-    class MethodClosureClass; //private::MethodClosure$
-    class Namespace; //Namespace
-    class NamespaceClass; //Namespace$
-    class NumberClass; //Number$
-    class ObjectClass; //Object$
-    class ObjectVectorClass; //__AS3__.vec::Vector$object$
-    class ObjectVectorObject; //__AS3__.vec::Vector$object
-    class QNameClass; //QName$
-    class QNameObject; //QName
-    class RangeErrorClass; //RangeError$
-    class RangeErrorObject; //RangeError
-    class ReferenceErrorClass; //ReferenceError$
-    class ReferenceErrorObject; //ReferenceError
-    class RegExpClass; //RegExp$
-    class RegExpObject; //RegExp
-    class SecurityErrorClass; //SecurityError$
-    class SecurityErrorObject; //SecurityError
-    class String; //String
-    class StringClass; //String$
-    class SyntaxErrorClass; //SyntaxError$
-    class SyntaxErrorObject; //SyntaxError
-    class TypeErrorClass; //TypeError$
-    class TypeErrorObject; //TypeError
-    class UIntClass; //uint$
-    class UIntVectorClass; //__AS3__.vec::Vector$uint$
-    class UIntVectorObject; //__AS3__.vec::Vector$uint
-    class URIErrorClass; //URIError$
-    class URIErrorObject; //URIError
-    class UninitializedErrorClass; //UninitializedError$
-    class UninitializedErrorObject; //UninitializedError
-    class VectorClass; //__AS3__.vec::Vector$
-    class VerifyErrorClass; //VerifyError$
-    class VerifyErrorObject; //VerifyError
-    class XMLClass; //XML$
-    class XMLListClass; //XMLList$
-    class XMLListObject; //XMLList
-    class XMLObject; //XML
+    class ArgumentErrorClass; // ArgumentError$
+    class ArgumentErrorObject; // ArgumentError
+    class ArrayClass; // Array$
+    class ArrayObject; // Array
+    class BooleanClass; // Boolean$
+    class ClassClass; // Class$
+    class ClassClosure; // Class
+    class DateClass; // Date$
+    class DateObject; // Date
+    class DefinitionErrorClass; // DefinitionError$
+    class DefinitionErrorObject; // DefinitionError
+    class DoubleVectorClass; // __AS3__.vec::Vector$double$
+    class DoubleVectorObject; // __AS3__.vec::Vector$double
+    class ErrorClass; // Error$
+    class ErrorObject; // Error
+    class EvalErrorClass; // EvalError$
+    class EvalErrorObject; // EvalError
+    class FunctionClass; // Function$
+    class FunctionObject; // Function
+    class IntClass; // int$
+    class IntVectorClass; // __AS3__.vec::Vector$int$
+    class IntVectorObject; // __AS3__.vec::Vector$int
+    class MathClass; // Math$
+    class MethodClosure; // private::MethodClosure
+    class MethodClosureClass; // private::MethodClosure$
+    class Namespace; // Namespace
+    class NamespaceClass; // Namespace$
+    class NumberClass; // Number$
+    class ObjectClass; // Object$
+    class ObjectVectorClass; // __AS3__.vec::Vector$object$
+    class ObjectVectorObject; // __AS3__.vec::Vector
+    class ObjectVectorObject; // __AS3__.vec::Vector$object
+    class QNameClass; // QName$
+    class QNameObject; // QName
+    class RangeErrorClass; // RangeError$
+    class RangeErrorObject; // RangeError
+    class ReferenceErrorClass; // ReferenceError$
+    class ReferenceErrorObject; // ReferenceError
+    class RegExpClass; // RegExp$
+    class RegExpObject; // RegExp
+    class SecurityErrorClass; // SecurityError$
+    class SecurityErrorObject; // SecurityError
+    class String; // String
+    class StringClass; // String$
+    class SyntaxErrorClass; // SyntaxError$
+    class SyntaxErrorObject; // SyntaxError
+    class TypeErrorClass; // TypeError$
+    class TypeErrorObject; // TypeError
+    class UIntClass; // uint$
+    class UIntVectorClass; // __AS3__.vec::Vector$uint$
+    class UIntVectorObject; // __AS3__.vec::Vector$uint
+    class URIErrorClass; // URIError$
+    class URIErrorObject; // URIError
+    class UninitializedErrorClass; // UninitializedError$
+    class UninitializedErrorObject; // UninitializedError
+    class VectorClass; // __AS3__.vec::Vector$
+    class VerifyErrorClass; // VerifyError$
+    class VerifyErrorObject; // VerifyError
+    class XMLClass; // XML$
+    class XMLListClass; // XMLList$
+    class XMLListObject; // XMLList
+    class XMLObject; // XML
 }
 
 namespace avmplus { namespace NativeID {
@@ -746,40 +747,40 @@ extern AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 #define Array_private__map_thunk  builtin_a2a_oaoa_thunk
 
 extern AvmBox builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define __AS3___vec_Vector_double_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
+#define __AS3___vec_Vector_int_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
 #define __AS3___vec_Vector_object_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
 #define __AS3___vec_Vector_uint_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
-#define __AS3___vec_Vector_int_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
-#define __AS3___vec_Vector_double_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
 
 extern double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Date_AS3_getUTCDate_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCMonth_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getHours_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getFullYear_thunk  builtin_d2d_o_thunk
-#define Date_AS3_valueOf_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getSeconds_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getTimezoneOffset_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getMinutes_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCSeconds_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCMinutes_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCFullYear_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getMilliseconds_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCDay_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCHours_thunk  builtin_d2d_o_thunk
-#define Number_private__minValue_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getTime_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getDay_thunk  builtin_d2d_o_thunk
-#define __AS3___vec_Vector_double_AS3_pop_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getUTCMilliseconds_thunk  builtin_d2d_o_thunk
-#define Date_AS3_getMonth_thunk  builtin_d2d_o_thunk
-#define Math_random_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getDate_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getDay_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getFullYear_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getHours_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getMilliseconds_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getMinutes_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getMonth_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getSeconds_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getTime_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getTimezoneOffset_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCDate_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCDay_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCFullYear_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCHours_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCMilliseconds_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCMinutes_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCMonth_thunk  builtin_d2d_o_thunk
+#define Date_AS3_getUTCSeconds_thunk  builtin_d2d_o_thunk
+#define Date_AS3_valueOf_thunk  builtin_d2d_o_thunk
+#define Math_random_thunk  builtin_d2d_o_thunk
+#define Number_private__minValue_thunk  builtin_d2d_o_thunk
+#define __AS3___vec_Vector_double_AS3_pop_thunk  builtin_d2d_o_thunk
 
 extern AvmBox builtin_b2a_oa_optakAvmThunkUndefined_u_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XML_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
+#define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
 #define XMLList_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
 #define XML_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
-#define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
+#define XML_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
 
 extern AvmBox builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__match_thunk  builtin_a2a_osa_thunk
@@ -801,15 +802,15 @@ extern AvmBox builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define Namespace_uri_get_thunk  builtin_s2a_n_thunk
 
 extern AvmBox builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XML_AS3_toXMLString_thunk  builtin_s2a_o_thunk
-#define XML_AS3_toString_thunk  builtin_s2a_o_thunk
 #define Error_getStackTrace_thunk  builtin_s2a_o_thunk
 #define QName_localName_get_thunk  builtin_s2a_o_thunk
-#define XMLList_AS3_toString_thunk  builtin_s2a_o_thunk
-#define XML_AS3_nodeKind_thunk  builtin_s2a_o_thunk
 #define RegExp_source_get_thunk  builtin_s2a_o_thunk
-#define XMLList_AS3_toXMLString_thunk  builtin_s2a_o_thunk
 #define XMLList_AS3_nodeKind_thunk  builtin_s2a_o_thunk
+#define XMLList_AS3_toString_thunk  builtin_s2a_o_thunk
+#define XMLList_AS3_toXMLString_thunk  builtin_s2a_o_thunk
+#define XML_AS3_nodeKind_thunk  builtin_s2a_o_thunk
+#define XML_AS3_toString_thunk  builtin_s2a_o_thunk
+#define XML_AS3_toXMLString_thunk  builtin_s2a_o_thunk
 
 extern AvmBox builtin_s2a_odi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Number_private__numberToString_thunk  builtin_s2a_odi_thunk
@@ -818,53 +819,53 @@ extern double builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_
 #define Math_max_thunk  builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk
 
 extern AvmBox builtin_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_uint_length_set_thunk  builtin_v2a_ou_thunk
-#define __AS3___vec_Vector_object_length_set_thunk  builtin_v2a_ou_thunk
-#define __AS3___vec_Vector_int_length_set_thunk  builtin_v2a_ou_thunk
-#define __AS3___vec_Vector_double_length_set_thunk  builtin_v2a_ou_thunk
 #define Array_length_set_thunk  builtin_v2a_ou_thunk
+#define __AS3___vec_Vector_double_length_set_thunk  builtin_v2a_ou_thunk
+#define __AS3___vec_Vector_int_length_set_thunk  builtin_v2a_ou_thunk
+#define __AS3___vec_Vector_object_length_set_thunk  builtin_v2a_ou_thunk
+#define __AS3___vec_Vector_uint_length_set_thunk  builtin_v2a_ou_thunk
 
 extern AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__pop_thunk  builtin_a2a_oa_thunk
-#define XML_AS3_removeNamespace_thunk  builtin_a2a_oa_thunk
-#define XMLList_AS3_appendChild_thunk  builtin_a2a_oa_thunk
-#define XML_AS3_addNamespace_thunk  builtin_a2a_oa_thunk
-#define XMLList_AS3_prependChild_thunk  builtin_a2a_oa_thunk
-#define XMLList_AS3_attribute_thunk  builtin_a2a_oa_thunk
-#define XMLList_AS3_addNamespace_thunk  builtin_a2a_oa_thunk
-#define XMLList_AS3_child_thunk  builtin_a2a_oa_thunk
-#define XML_AS3_appendChild_thunk  builtin_a2a_oa_thunk
-#define Array_private__shift_thunk  builtin_a2a_oa_thunk
-#define XML_AS3_prependChild_thunk  builtin_a2a_oa_thunk
-#define XML_AS3_child_thunk  builtin_a2a_oa_thunk
-#define XML_AS3_attribute_thunk  builtin_a2a_oa_thunk
-#define XMLList_AS3_removeNamespace_thunk  builtin_a2a_oa_thunk
 #define Array_private__reverse_thunk  builtin_a2a_oa_thunk
+#define Array_private__shift_thunk  builtin_a2a_oa_thunk
+#define XMLList_AS3_addNamespace_thunk  builtin_a2a_oa_thunk
+#define XMLList_AS3_appendChild_thunk  builtin_a2a_oa_thunk
+#define XMLList_AS3_attribute_thunk  builtin_a2a_oa_thunk
+#define XMLList_AS3_child_thunk  builtin_a2a_oa_thunk
+#define XMLList_AS3_prependChild_thunk  builtin_a2a_oa_thunk
+#define XMLList_AS3_removeNamespace_thunk  builtin_a2a_oa_thunk
 #define XMLList_AS3_setChildren_thunk  builtin_a2a_oa_thunk
+#define XML_AS3_addNamespace_thunk  builtin_a2a_oa_thunk
+#define XML_AS3_appendChild_thunk  builtin_a2a_oa_thunk
+#define XML_AS3_attribute_thunk  builtin_a2a_oa_thunk
+#define XML_AS3_child_thunk  builtin_a2a_oa_thunk
+#define XML_AS3_prependChild_thunk  builtin_a2a_oa_thunk
+#define XML_AS3_removeNamespace_thunk  builtin_a2a_oa_thunk
 #define XML_AS3_setChildren_thunk  builtin_a2a_oa_thunk
 
 extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_indexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk
 
 extern double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Date_private__setUTCDate_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setDate_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setFullYear_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setHours_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setMilliseconds_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setMinutes_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setMonth_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setSeconds_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setUTCDate_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setUTCFullYear_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setUTCHours_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setUTCMilliseconds_thunk  builtin_d2d_o_rest_thunk
+#define Date_private__setUTCMinutes_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setUTCMonth_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setUTCSeconds_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setHours_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setDate_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setUTCMinutes_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setMonth_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setUTCHours_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setSeconds_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setUTCFullYear_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setMilliseconds_thunk  builtin_d2d_o_rest_thunk
-#define Date_private__setUTCMilliseconds_thunk  builtin_d2d_o_rest_thunk
 
 extern AvmBox builtin_func_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_isNaN_thunk  builtin_func_b2a_od_optakAvmThunkUndefined_thunk
 #define native_script_function_isFinite_thunk  builtin_func_b2a_od_optakAvmThunkUndefined_thunk
+#define native_script_function_isNaN_thunk  builtin_func_b2a_od_optakAvmThunkUndefined_thunk
 
 extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_lastIndexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk
@@ -873,12 +874,12 @@ extern double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmM
 #define Date_UTC_thunk  builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk
 
 extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
 #define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
 #define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
 
 extern AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_length_get_thunk  builtin_i2a_s_thunk
@@ -896,21 +897,21 @@ extern AvmBox builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 #define Array_private__sortOn_thunk  builtin_a2a_oaaa_thunk
 
 extern AvmBox builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_uint_length_get_thunk  builtin_u2a_o_thunk
-#define __AS3___vec_Vector_int_length_get_thunk  builtin_u2a_o_thunk
 #define Array_length_get_thunk  builtin_u2a_o_thunk
-#define __AS3___vec_Vector_uint_AS3_pop_thunk  builtin_u2a_o_thunk
-#define __AS3___vec_Vector_object_length_get_thunk  builtin_u2a_o_thunk
 #define __AS3___vec_Vector_double_length_get_thunk  builtin_u2a_o_thunk
+#define __AS3___vec_Vector_int_length_get_thunk  builtin_u2a_o_thunk
+#define __AS3___vec_Vector_object_length_get_thunk  builtin_u2a_o_thunk
+#define __AS3___vec_Vector_uint_AS3_pop_thunk  builtin_u2a_o_thunk
+#define __AS3___vec_Vector_uint_length_get_thunk  builtin_u2a_o_thunk
 
 extern AvmBox builtin_func_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_avmplus_describeTypeJSON_thunk  builtin_func_a2a_oau_thunk
 
 extern AvmBox builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define __AS3___vec_Vector_double_private__reverse_thunk  builtin_v2a_o_thunk
-#define __AS3___vec_Vector_uint_private__reverse_thunk  builtin_v2a_o_thunk
-#define __AS3___vec_Vector_object_private__reverse_thunk  builtin_v2a_o_thunk
 #define __AS3___vec_Vector_int_private__reverse_thunk  builtin_v2a_o_thunk
+#define __AS3___vec_Vector_object_private__reverse_thunk  builtin_v2a_o_thunk
+#define __AS3___vec_Vector_uint_private__reverse_thunk  builtin_v2a_o_thunk
 
 extern AvmBox builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Function_AS3_call_thunk  builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk
@@ -926,23 +927,23 @@ extern AvmBox builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* arg
 #define Object_private__propertyIsEnumerable_thunk  builtin_b2a_oas_thunk
 
 extern AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Function_length_get_thunk  builtin_i2a_o_thunk
+#define RegExp_lastIndex_get_thunk  builtin_i2a_o_thunk
+#define XMLList_AS3_childIndex_thunk  builtin_i2a_o_thunk
+#define XMLList_AS3_length_thunk  builtin_i2a_o_thunk
 #define XML_AS3_childIndex_thunk  builtin_i2a_o_thunk
 #define XML_prettyIndent_get_thunk  builtin_i2a_o_thunk
 #define __AS3___vec_Vector_int_AS3_pop_thunk  builtin_i2a_o_thunk
-#define XMLList_AS3_length_thunk  builtin_i2a_o_thunk
-#define RegExp_lastIndex_get_thunk  builtin_i2a_o_thunk
-#define XMLList_AS3_childIndex_thunk  builtin_i2a_o_thunk
-#define Function_length_get_thunk  builtin_i2a_o_thunk
 
 extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
 #define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
 #define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
 #define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
 
 extern double builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_charCodeAt_thunk  builtin_d2d_sd_opti0_thunk
@@ -951,16 +952,16 @@ extern AvmBox builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define Object_private__toString_thunk  builtin_s2a_oa_thunk
 
 extern AvmBox builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__every_thunk  builtin_b2a_oaoa_thunk
-#define __AS3___vec_Vector_int_private__some_thunk  builtin_b2a_oaoa_thunk
-#define __AS3___vec_Vector_object_private__some_thunk  builtin_b2a_oaoa_thunk
-#define Array_private__some_thunk  builtin_b2a_oaoa_thunk
-#define __AS3___vec_Vector_double_private__some_thunk  builtin_b2a_oaoa_thunk
-#define __AS3___vec_Vector_uint_private__some_thunk  builtin_b2a_oaoa_thunk
-#define __AS3___vec_Vector_object_private__every_thunk  builtin_b2a_oaoa_thunk
 #define Array_private__every_thunk  builtin_b2a_oaoa_thunk
+#define Array_private__some_thunk  builtin_b2a_oaoa_thunk
+#define __AS3___vec_Vector_double_private__every_thunk  builtin_b2a_oaoa_thunk
+#define __AS3___vec_Vector_double_private__some_thunk  builtin_b2a_oaoa_thunk
 #define __AS3___vec_Vector_int_private__every_thunk  builtin_b2a_oaoa_thunk
+#define __AS3___vec_Vector_int_private__some_thunk  builtin_b2a_oaoa_thunk
+#define __AS3___vec_Vector_object_private__every_thunk  builtin_b2a_oaoa_thunk
+#define __AS3___vec_Vector_object_private__some_thunk  builtin_b2a_oaoa_thunk
 #define __AS3___vec_Vector_uint_private__every_thunk  builtin_b2a_oaoa_thunk
+#define __AS3___vec_Vector_uint_private__some_thunk  builtin_b2a_oaoa_thunk
 
 extern AvmBox builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
@@ -973,71 +974,71 @@ extern AvmBox builtin_s2a_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox
 #define String_AS3_charAt_thunk  builtin_s2a_sd_opti0_thunk
 
 extern AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__forEach_thunk  builtin_v2a_oaoa_thunk
-#define __AS3___vec_Vector_object_private__forEach_thunk  builtin_v2a_oaoa_thunk
-#define __AS3___vec_Vector_int_private__forEach_thunk  builtin_v2a_oaoa_thunk
-#define __AS3___vec_Vector_uint_private__forEach_thunk  builtin_v2a_oaoa_thunk
 #define Array_private__forEach_thunk  builtin_v2a_oaoa_thunk
+#define __AS3___vec_Vector_double_private__forEach_thunk  builtin_v2a_oaoa_thunk
+#define __AS3___vec_Vector_int_private__forEach_thunk  builtin_v2a_oaoa_thunk
+#define __AS3___vec_Vector_object_private__forEach_thunk  builtin_v2a_oaoa_thunk
+#define __AS3___vec_Vector_uint_private__forEach_thunk  builtin_v2a_oaoa_thunk
 
 extern AvmBox builtin_func_b2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_bugzilla_thunk  builtin_func_b2a_oi_thunk
 
 extern AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_decodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_escape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_unescape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
+#define native_script_function_decodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
 #define native_script_function_encodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
 #define native_script_function_encodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_decodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
+#define native_script_function_escape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
+#define native_script_function_unescape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
 
 extern AvmBox builtin_s2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_toLowerCase_thunk  builtin_s2a_s_thunk
 #define String_AS3_toUpperCase_thunk  builtin_s2a_s_thunk
 
 extern AvmBox builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_AS3_slice_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
 #define String_AS3_substr_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
 #define String_AS3_substring_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
-#define String_AS3_slice_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
 
 extern double builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Math_private__min_thunk  builtin_d2d_odd_thunk
 #define Math_atan2_thunk  builtin_d2d_odd_thunk
 #define Math_pow_thunk  builtin_d2d_odd_thunk
 #define Math_private__max_thunk  builtin_d2d_odd_thunk
+#define Math_private__min_thunk  builtin_d2d_odd_thunk
 
 extern AvmBox builtin_a2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Namespace_prefix_get_thunk  builtin_a2a_n_thunk
 
 extern AvmBox builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_inScopeNamespaces_thunk  builtin_a2a_o_thunk
-#define XML_AS3_notification_thunk  builtin_a2a_o_thunk
-#define XML_AS3_inScopeNamespaces_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_copy_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_children_thunk  builtin_a2a_o_thunk
-#define XML_AS3_attributes_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_text_thunk  builtin_a2a_o_thunk
-#define __AS3___vec_Vector_object_AS3_pop_thunk  builtin_a2a_o_thunk
+#define Array_AS3_pop_thunk  builtin_a2a_o_thunk
 #define Class_prototype_get_thunk  builtin_a2a_o_thunk
+#define Function_prototype_get_thunk  builtin_a2a_o_thunk
+#define QName_uri_get_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_attributes_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_children_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_comments_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_copy_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_inScopeNamespaces_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_localName_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_name_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_namespaceDeclarations_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_normalize_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_parent_thunk  builtin_a2a_o_thunk
+#define XMLList_AS3_text_thunk  builtin_a2a_o_thunk
+#define XML_AS3_attributes_thunk  builtin_a2a_o_thunk
+#define XML_AS3_children_thunk  builtin_a2a_o_thunk
+#define XML_AS3_comments_thunk  builtin_a2a_o_thunk
+#define XML_AS3_copy_thunk  builtin_a2a_o_thunk
+#define XML_AS3_inScopeNamespaces_thunk  builtin_a2a_o_thunk
+#define XML_AS3_localName_thunk  builtin_a2a_o_thunk
 #define XML_AS3_name_thunk  builtin_a2a_o_thunk
 #define XML_AS3_namespaceDeclarations_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_name_thunk  builtin_a2a_o_thunk
-#define QName_uri_get_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_normalize_thunk  builtin_a2a_o_thunk
-#define XML_AS3_text_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_namespaceDeclarations_thunk  builtin_a2a_o_thunk
-#define Function_prototype_get_thunk  builtin_a2a_o_thunk
-#define XML_AS3_children_thunk  builtin_a2a_o_thunk
-#define XML_AS3_parent_thunk  builtin_a2a_o_thunk
-#define __AS3___vec_Vector_object_private_type_get_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_comments_thunk  builtin_a2a_o_thunk
-#define XML_AS3_localName_thunk  builtin_a2a_o_thunk
-#define XML_AS3_copy_thunk  builtin_a2a_o_thunk
 #define XML_AS3_normalize_thunk  builtin_a2a_o_thunk
-#define Array_AS3_pop_thunk  builtin_a2a_o_thunk
-#define XML_AS3_comments_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_attributes_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_localName_thunk  builtin_a2a_o_thunk
-#define XMLList_AS3_parent_thunk  builtin_a2a_o_thunk
+#define XML_AS3_notification_thunk  builtin_a2a_o_thunk
+#define XML_AS3_parent_thunk  builtin_a2a_o_thunk
+#define XML_AS3_text_thunk  builtin_a2a_o_thunk
+#define __AS3___vec_Vector_object_AS3_pop_thunk  builtin_a2a_o_thunk
+#define __AS3___vec_Vector_object_private_type_get_thunk  builtin_a2a_o_thunk
 
 extern AvmBox builtin_a2a_osau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__split_thunk  builtin_a2a_osau_thunk
@@ -1049,16 +1050,16 @@ extern AvmBox builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(Avm
 #define RegExp_AS3_exec_thunk  builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk
 
 extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
 #define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
 #define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
 
 extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__toString_thunk  builtin_s2a_oi_thunk
@@ -1075,19 +1076,19 @@ extern AvmBox builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmB
 
 extern double builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__setTime_thunk  builtin_d2d_od_thunk
-#define Math_cos_thunk  builtin_d2d_od_thunk
-#define Math_ceil_thunk  builtin_d2d_od_thunk
-#define Math_acos_thunk  builtin_d2d_od_thunk
 #define Math_abs_thunk  builtin_d2d_od_thunk
-#define Math_atan_thunk  builtin_d2d_od_thunk
+#define Math_acos_thunk  builtin_d2d_od_thunk
 #define Math_asin_thunk  builtin_d2d_od_thunk
+#define Math_atan_thunk  builtin_d2d_od_thunk
+#define Math_ceil_thunk  builtin_d2d_od_thunk
+#define Math_cos_thunk  builtin_d2d_od_thunk
 #define Math_exp_thunk  builtin_d2d_od_thunk
-#define Math_round_thunk  builtin_d2d_od_thunk
+#define Math_floor_thunk  builtin_d2d_od_thunk
 #define Math_log_thunk  builtin_d2d_od_thunk
-#define Math_tan_thunk  builtin_d2d_od_thunk
+#define Math_round_thunk  builtin_d2d_od_thunk
 #define Math_sin_thunk  builtin_d2d_od_thunk
 #define Math_sqrt_thunk  builtin_d2d_od_thunk
-#define Math_floor_thunk  builtin_d2d_od_thunk
+#define Math_tan_thunk  builtin_d2d_od_thunk
 
 extern AvmBox builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Function_AS3_apply_thunk  builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk
@@ -1098,31 +1099,31 @@ extern AvmBox builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint3
 #define String_private__substring_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
 
 extern AvmBox builtin_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_uint_fixed_set_thunk  builtin_v2a_ob_thunk
-#define XML_prettyPrinting_set_thunk  builtin_v2a_ob_thunk
-#define __AS3___vec_Vector_object_fixed_set_thunk  builtin_v2a_ob_thunk
 #define XML_ignoreComments_set_thunk  builtin_v2a_ob_thunk
-#define XML_ignoreWhitespace_set_thunk  builtin_v2a_ob_thunk
-#define __AS3___vec_Vector_double_fixed_set_thunk  builtin_v2a_ob_thunk
 #define XML_ignoreProcessingInstructions_set_thunk  builtin_v2a_ob_thunk
+#define XML_ignoreWhitespace_set_thunk  builtin_v2a_ob_thunk
+#define XML_prettyPrinting_set_thunk  builtin_v2a_ob_thunk
+#define __AS3___vec_Vector_double_fixed_set_thunk  builtin_v2a_ob_thunk
 #define __AS3___vec_Vector_int_fixed_set_thunk  builtin_v2a_ob_thunk
+#define __AS3___vec_Vector_object_fixed_set_thunk  builtin_v2a_ob_thunk
+#define __AS3___vec_Vector_uint_fixed_set_thunk  builtin_v2a_ob_thunk
 
 extern AvmBox builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_setName_thunk  builtin_v2a_oa_thunk
-#define __AS3___vec_Vector_object_private_type_set_thunk  builtin_v2a_oa_thunk
-#define XMLList_AS3_setLocalName_thunk  builtin_v2a_oa_thunk
 #define Function_prototype_set_thunk  builtin_v2a_oa_thunk
+#define XMLList_AS3_setLocalName_thunk  builtin_v2a_oa_thunk
+#define XMLList_AS3_setName_thunk  builtin_v2a_oa_thunk
 #define XMLList_AS3_setNamespace_thunk  builtin_v2a_oa_thunk
+#define XML_AS3_setLocalName_thunk  builtin_v2a_oa_thunk
 #define XML_AS3_setName_thunk  builtin_v2a_oa_thunk
 #define XML_AS3_setNamespace_thunk  builtin_v2a_oa_thunk
-#define XML_AS3_setLocalName_thunk  builtin_v2a_oa_thunk
+#define __AS3___vec_Vector_object_private_type_set_thunk  builtin_v2a_oa_thunk
 
 extern double builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_parse_thunk  builtin_d2d_oa_thunk
 
 extern AvmBox builtin_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XML_prettyIndent_set_thunk  builtin_v2a_oi_thunk
 #define RegExp_lastIndex_set_thunk  builtin_v2a_oi_thunk
+#define XML_prettyIndent_set_thunk  builtin_v2a_oi_thunk
 
 extern double builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__get_thunk  builtin_d2d_oi_thunk
@@ -1131,31 +1132,31 @@ extern double builtin_func_d2d_osi_optsAvmThunkConstant_AvmString_60_____NaN____
 #define native_script_function_parseInt_thunk  builtin_func_d2d_osi_optsAvmThunkConstant_AvmString_60_____NaN_____opti0_thunk
 
 extern AvmBox builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XML_AS3_insertChildAfter_thunk  builtin_a2a_oaa_thunk
-#define XMLList_AS3_insertChildBefore_thunk  builtin_a2a_oaa_thunk
 #define XMLList_AS3_insertChildAfter_thunk  builtin_a2a_oaa_thunk
+#define XMLList_AS3_insertChildBefore_thunk  builtin_a2a_oaa_thunk
+#define XMLList_AS3_replace_thunk  builtin_a2a_oaa_thunk
+#define XML_AS3_insertChildAfter_thunk  builtin_a2a_oaa_thunk
 #define XML_AS3_insertChildBefore_thunk  builtin_a2a_oaa_thunk
 #define XML_AS3_replace_thunk  builtin_a2a_oaa_thunk
-#define XMLList_AS3_replace_thunk  builtin_a2a_oaa_thunk
 
 extern AvmBox builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define RegExp_multiline_get_thunk  builtin_b2a_o_thunk
-#define __AS3___vec_Vector_double_fixed_get_thunk  builtin_b2a_o_thunk
 #define RegExp_dotall_get_thunk  builtin_b2a_o_thunk
-#define XMLList_AS3_hasComplexContent_thunk  builtin_b2a_o_thunk
-#define XML_prettyPrinting_get_thunk  builtin_b2a_o_thunk
-#define __AS3___vec_Vector_uint_fixed_get_thunk  builtin_b2a_o_thunk
-#define XML_ignoreComments_get_thunk  builtin_b2a_o_thunk
-#define __AS3___vec_Vector_int_fixed_get_thunk  builtin_b2a_o_thunk
+#define RegExp_extended_get_thunk  builtin_b2a_o_thunk
 #define RegExp_global_get_thunk  builtin_b2a_o_thunk
 #define RegExp_ignoreCase_get_thunk  builtin_b2a_o_thunk
-#define __AS3___vec_Vector_object_fixed_get_thunk  builtin_b2a_o_thunk
+#define RegExp_multiline_get_thunk  builtin_b2a_o_thunk
+#define XMLList_AS3_hasComplexContent_thunk  builtin_b2a_o_thunk
 #define XMLList_AS3_hasSimpleContent_thunk  builtin_b2a_o_thunk
-#define XML_AS3_hasSimpleContent_thunk  builtin_b2a_o_thunk
-#define XML_ignoreWhitespace_get_thunk  builtin_b2a_o_thunk
-#define RegExp_extended_get_thunk  builtin_b2a_o_thunk
 #define XML_AS3_hasComplexContent_thunk  builtin_b2a_o_thunk
+#define XML_AS3_hasSimpleContent_thunk  builtin_b2a_o_thunk
+#define XML_ignoreComments_get_thunk  builtin_b2a_o_thunk
 #define XML_ignoreProcessingInstructions_get_thunk  builtin_b2a_o_thunk
+#define XML_ignoreWhitespace_get_thunk  builtin_b2a_o_thunk
+#define XML_prettyPrinting_get_thunk  builtin_b2a_o_thunk
+#define __AS3___vec_Vector_double_fixed_get_thunk  builtin_b2a_o_thunk
+#define __AS3___vec_Vector_int_fixed_get_thunk  builtin_b2a_o_thunk
+#define __AS3___vec_Vector_object_fixed_get_thunk  builtin_b2a_o_thunk
+#define __AS3___vec_Vector_uint_fixed_get_thunk  builtin_b2a_o_thunk
 
 extern AvmBox builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__search_thunk  builtin_i2a_osa_thunk
@@ -1164,8 +1165,8 @@ extern AvmBox builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 #define Array_private__slice_thunk  builtin_a2a_oadd_thunk
 
 extern AvmBox builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XML_private__namespace_thunk  builtin_a2a_oai_thunk
 #define XMLList_private__namespace_thunk  builtin_a2a_oai_thunk
+#define XML_private__namespace_thunk  builtin_a2a_oai_thunk
 
 extern AvmBox builtin_i2a_oaai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__indexOf_thunk  builtin_i2a_oaai_thunk
@@ -1177,13 +1178,13 @@ extern double builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_t
 #define Math_min_thunk  builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk
 
 extern AvmBox builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_uint_private__sort_thunk  builtin_a2a_oao_thunk
-#define __AS3___vec_Vector_object_private__sort_thunk  builtin_a2a_oao_thunk
 #define Array_private__concat_thunk  builtin_a2a_oao_thunk
-#define __AS3___vec_Vector_int_private__sort_thunk  builtin_a2a_oao_thunk
-#define __AS3___vec_Vector_double_private__sort_thunk  builtin_a2a_oao_thunk
-#define Array_private__splice_thunk  builtin_a2a_oao_thunk
 #define Array_private__sort_thunk  builtin_a2a_oao_thunk
+#define Array_private__splice_thunk  builtin_a2a_oao_thunk
+#define __AS3___vec_Vector_double_private__sort_thunk  builtin_a2a_oao_thunk
+#define __AS3___vec_Vector_int_private__sort_thunk  builtin_a2a_oao_thunk
+#define __AS3___vec_Vector_object_private__sort_thunk  builtin_a2a_oao_thunk
+#define __AS3___vec_Vector_uint_private__sort_thunk  builtin_a2a_oao_thunk
 
 #endif // VMCFG_INDIRECT_NATIVE_THUNKS
 

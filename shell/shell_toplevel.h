@@ -39,35 +39,37 @@
 
 #define AVMTHUNK_VERSION 5
 
-namespace avmshell {
-    class ByteArrayClass; //flash.utils::ByteArray$
-    class ByteArrayObject; //flash.utils::ByteArray
-    class DomainClass; //avmplus::Domain$
-    class DomainObject; //avmplus::Domain
-    class FileClass; //avmplus::File$
-    class MIClass; //avmplus::MI$
-    class MIObject; //avmplus::MI
-    class SystemClass; //avmplus::System$
+namespace avmplus {
+    class ArrayObject; // Array
+    class ClassClosure; // Class
+    class DeleteObjectSampleClass; // flash.sampler::DeleteObjectSample$
+    class DeleteObjectSampleObject; // flash.sampler::DeleteObjectSample
+    class DictionaryClass; // flash.utils::Dictionary$
+    class DictionaryObject; // flash.utils::Dictionary
+    class JObject; // avmplus::JObject
+    class JObjectClass; // avmplus::JObject$
+    class NewObjectSampleClass; // flash.sampler::NewObjectSample$
+    class NewObjectSampleObject; // flash.sampler::NewObjectSample
+    class SampleClass; // flash.sampler::Sample$
+    class SampleObject; // flash.sampler::Sample
+    class ScriptObject; // avmplus::System
+    class ScriptObject; // avmplus::File
+    class ScriptObject; // flash.trace::Trace
+    class StackFrameClass; // flash.sampler::StackFrame$
+    class StackFrameObject; // flash.sampler::StackFrame
+    class String; // String
+    class TraceClass; // flash.trace::Trace$
 }
 
-namespace avmplus {
-    class ArrayObject; //Array
-    class ClassClosure; //Class
-    class DeleteObjectSampleClass; //flash.sampler::DeleteObjectSample$
-    class DeleteObjectSampleObject; //flash.sampler::DeleteObjectSample
-    class DictionaryClass; //flash.utils::Dictionary$
-    class DictionaryObject; //flash.utils::Dictionary
-    class JObject; //avmplus::JObject
-    class JObjectClass; //avmplus::JObject$
-    class NewObjectSampleClass; //flash.sampler::NewObjectSample$
-    class NewObjectSampleObject; //flash.sampler::NewObjectSample
-    class SampleClass; //flash.sampler::Sample$
-    class SampleObject; //flash.sampler::Sample
-    class ScriptObject; //avmplus::System
-    class StackFrameClass; //flash.sampler::StackFrame$
-    class StackFrameObject; //flash.sampler::StackFrame
-    class String; //String
-    class TraceClass; //flash.trace::Trace$
+namespace avmshell {
+    class ByteArrayClass; // flash.utils::ByteArray$
+    class ByteArrayObject; // flash.utils::ByteArray
+    class DomainClass; // avmplus::Domain$
+    class DomainObject; // avmplus::Domain
+    class FileClass; // avmplus::File$
+    class MIClass; // avmplus::MI$
+    class MIObject; // avmplus::MI
+    class SystemClass; // avmplus::System$
 }
 
 namespace avmplus { namespace NativeID {
@@ -318,36 +320,36 @@ extern AvmBox shell_toplevel_func_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, 
 #define native_script_function_flash_sampler__setSamplerCallback_thunk  shell_toplevel_func_v2a_oo_thunk
 
 extern double shell_toplevel_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_sampler_NewObjectSample_size_get_thunk  shell_toplevel_d2d_o_thunk
 #define avmplus_System_freeMemory_get_thunk  shell_toplevel_d2d_o_thunk
 #define avmplus_System_privateMemory_get_thunk  shell_toplevel_d2d_o_thunk
-#define flash_utils_ByteArray_readFloat_thunk  shell_toplevel_d2d_o_thunk
 #define avmplus_System_totalMemory_get_thunk  shell_toplevel_d2d_o_thunk
+#define flash_sampler_NewObjectSample_size_get_thunk  shell_toplevel_d2d_o_thunk
 #define flash_utils_ByteArray_readDouble_thunk  shell_toplevel_d2d_o_thunk
+#define flash_utils_ByteArray_readFloat_thunk  shell_toplevel_d2d_o_thunk
 
 extern AvmBox shell_toplevel_v2a_oouu_opti0_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_writeBytes_thunk  shell_toplevel_v2a_oouu_opti0_opti0_thunk
 #define flash_utils_ByteArray_readBytes_thunk  shell_toplevel_v2a_oouu_opti0_opti0_thunk
+#define flash_utils_ByteArray_writeBytes_thunk  shell_toplevel_v2a_oouu_opti0_opti0_thunk
 
 extern AvmBox shell_toplevel_a2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define avmplus_File_readByteArray_thunk  shell_toplevel_a2a_os_thunk
 #define avmplus_Domain_getClass_thunk  shell_toplevel_a2a_os_thunk
+#define avmplus_File_readByteArray_thunk  shell_toplevel_a2a_os_thunk
 
 extern AvmBox shell_toplevel_func_b2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_flash_sampler_isGetterSetter_thunk  shell_toplevel_func_b2a_oao_thunk
 
 extern AvmBox shell_toplevel_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_writeByte_thunk  shell_toplevel_v2a_oi_thunk
 #define avmplus_System_exit_thunk  shell_toplevel_v2a_oi_thunk
+#define flash_utils_ByteArray_writeByte_thunk  shell_toplevel_v2a_oi_thunk
 #define flash_utils_ByteArray_writeInt_thunk  shell_toplevel_v2a_oi_thunk
 #define flash_utils_ByteArray_writeShort_thunk  shell_toplevel_v2a_oi_thunk
 
 extern AvmBox shell_toplevel_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define avmplus_System_readLine_thunk  shell_toplevel_s2a_o_thunk
 #define avmplus_System_getAvmplusVersion_thunk  shell_toplevel_s2a_o_thunk
-#define flash_utils_ByteArray_readUTF_thunk  shell_toplevel_s2a_o_thunk
-#define flash_utils_ByteArray_private__toString_thunk  shell_toplevel_s2a_o_thunk
+#define avmplus_System_readLine_thunk  shell_toplevel_s2a_o_thunk
 #define flash_utils_ByteArray_endian_get_thunk  shell_toplevel_s2a_o_thunk
+#define flash_utils_ByteArray_private__toString_thunk  shell_toplevel_s2a_o_thunk
+#define flash_utils_ByteArray_readUTF_thunk  shell_toplevel_s2a_o_thunk
 
 extern AvmBox shell_toplevel_func_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_flash_sampler_getSamples_thunk  shell_toplevel_func_a2a_o_thunk
@@ -362,20 +364,20 @@ extern AvmBox shell_toplevel_a2a_oii_opti2_thunk(AvmMethodEnv env, uint32_t argc
 #define flash_trace_Trace_setLevel_thunk  shell_toplevel_a2a_oii_opti2_thunk
 
 extern AvmBox shell_toplevel_func_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_flash_sampler_pauseSampling_thunk  shell_toplevel_func_v2a_o_thunk
 #define native_script_function_flash_sampler_clearSamples_thunk  shell_toplevel_func_v2a_o_thunk
+#define native_script_function_flash_sampler_pauseSampling_thunk  shell_toplevel_func_v2a_o_thunk
 #define native_script_function_flash_sampler_startSampling_thunk  shell_toplevel_func_v2a_o_thunk
 #define native_script_function_flash_sampler_stopSampling_thunk  shell_toplevel_func_v2a_o_thunk
 
 extern AvmBox shell_toplevel_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_readUnsignedShort_thunk  shell_toplevel_u2a_o_thunk
-#define flash_utils_ByteArray_bytesAvailable_get_thunk  shell_toplevel_u2a_o_thunk
-#define flash_utils_ByteArray_length_get_thunk  shell_toplevel_u2a_o_thunk
-#define flash_utils_ByteArray_readUnsignedInt_thunk  shell_toplevel_u2a_o_thunk
-#define flash_utils_ByteArray_readUnsignedByte_thunk  shell_toplevel_u2a_o_thunk
 #define avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk  shell_toplevel_u2a_o_thunk
 #define avmplus_System_getTimer_thunk  shell_toplevel_u2a_o_thunk
+#define flash_utils_ByteArray_bytesAvailable_get_thunk  shell_toplevel_u2a_o_thunk
+#define flash_utils_ByteArray_length_get_thunk  shell_toplevel_u2a_o_thunk
 #define flash_utils_ByteArray_position_get_thunk  shell_toplevel_u2a_o_thunk
+#define flash_utils_ByteArray_readUnsignedByte_thunk  shell_toplevel_u2a_o_thunk
+#define flash_utils_ByteArray_readUnsignedInt_thunk  shell_toplevel_u2a_o_thunk
+#define flash_utils_ByteArray_readUnsignedShort_thunk  shell_toplevel_u2a_o_thunk
 
 extern AvmBox shell_toplevel_a2a_ooio_optakAvmThunkNull_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_JObject_createArray_thunk  shell_toplevel_a2a_ooio_optakAvmThunkNull_thunk
@@ -387,10 +389,10 @@ extern AvmBox shell_toplevel_func_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, 
 #define native_script_function_flash_sampler_sampleInternalAllocs_thunk  shell_toplevel_func_v2a_ob_thunk
 
 extern AvmBox shell_toplevel_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_readInt_thunk  shell_toplevel_i2a_o_thunk
-#define flash_utils_ByteArray_readShort_thunk  shell_toplevel_i2a_o_thunk
 #define avmplus_System_swfVersion_get_thunk  shell_toplevel_i2a_o_thunk
 #define flash_utils_ByteArray_readByte_thunk  shell_toplevel_i2a_o_thunk
+#define flash_utils_ByteArray_readInt_thunk  shell_toplevel_i2a_o_thunk
+#define flash_utils_ByteArray_readShort_thunk  shell_toplevel_i2a_o_thunk
 
 extern AvmBox shell_toplevel_s2a_oos_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_JObject_fieldSignature_thunk  shell_toplevel_s2a_oos_thunk
@@ -415,8 +417,8 @@ extern AvmBox shell_toplevel_a2a_os_rest_thunk(AvmMethodEnv env, uint32_t argc, 
 #define avmplus_JObject_create_thunk  shell_toplevel_a2a_os_rest_thunk
 
 extern AvmBox shell_toplevel_func_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_flash_sampler_getSavedThis_thunk  shell_toplevel_func_a2a_oo_thunk
 #define native_script_function_flash_sampler_getLexicalScopes_thunk  shell_toplevel_func_a2a_oo_thunk
+#define native_script_function_flash_sampler_getSavedThis_thunk  shell_toplevel_func_a2a_oo_thunk
 
 extern double shell_toplevel_func_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_flash_sampler_getSampleCount_thunk  shell_toplevel_func_d2d_o_thunk
@@ -425,11 +427,11 @@ extern AvmBox shell_toplevel_b2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBo
 #define avmplus_File_exists_thunk  shell_toplevel_b2a_os_thunk
 
 extern AvmBox shell_toplevel_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_trace_Trace_getListener_thunk  shell_toplevel_a2a_o_thunk
-#define avmplus_System_private_getArgv_thunk  shell_toplevel_a2a_o_thunk
-#define flash_sampler_NewObjectSample_object_get_thunk  shell_toplevel_a2a_o_thunk
 #define avmplus_Domain_currentDomain_get_thunk  shell_toplevel_a2a_o_thunk
 #define avmplus_Domain_domainMemory_get_thunk  shell_toplevel_a2a_o_thunk
+#define avmplus_System_private_getArgv_thunk  shell_toplevel_a2a_o_thunk
+#define flash_sampler_NewObjectSample_object_get_thunk  shell_toplevel_a2a_o_thunk
+#define flash_trace_Trace_getListener_thunk  shell_toplevel_a2a_o_thunk
 
 extern AvmBox shell_toplevel_a2a_oou_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_Domain_loadBytes_thunk  shell_toplevel_a2a_oou_opti0_thunk
@@ -450,34 +452,34 @@ extern AvmBox shell_toplevel_i2a_oi_opti2_thunk(AvmMethodEnv env, uint32_t argc,
 
 extern AvmBox shell_toplevel_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_Domain_domainMemory_set_thunk  shell_toplevel_v2a_oo_thunk
-#define avmplus_System_trace_thunk  shell_toplevel_v2a_oo_thunk
 #define avmplus_Domain_private_init_thunk  shell_toplevel_v2a_oo_thunk
 #define avmplus_System_disposeXML_thunk  shell_toplevel_v2a_oo_thunk
+#define avmplus_System_trace_thunk  shell_toplevel_v2a_oo_thunk
 
 extern AvmBox shell_toplevel_b2a_oso_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_File_writeByteArray_thunk  shell_toplevel_b2a_oso_thunk
 
 extern AvmBox shell_toplevel_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_private_zlib_compress_thunk  shell_toplevel_v2a_o_thunk
+#define avmplus_System_debugger_thunk  shell_toplevel_v2a_o_thunk
 #define avmplus_System_forceFullCollection_thunk  shell_toplevel_v2a_o_thunk
 #define avmplus_System_ns_example_nstest_thunk  shell_toplevel_v2a_o_thunk
-#define avmplus_System_debugger_thunk  shell_toplevel_v2a_o_thunk
 #define avmplus_System_queueCollection_thunk  shell_toplevel_v2a_o_thunk
+#define flash_utils_ByteArray_private_zlib_compress_thunk  shell_toplevel_v2a_o_thunk
 #define flash_utils_ByteArray_private_zlib_uncompress_thunk  shell_toplevel_v2a_o_thunk
 
 extern AvmBox shell_toplevel_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_position_set_thunk  shell_toplevel_v2a_ou_thunk
 #define flash_utils_ByteArray_length_set_thunk  shell_toplevel_v2a_ou_thunk
+#define flash_utils_ByteArray_position_set_thunk  shell_toplevel_v2a_ou_thunk
 #define flash_utils_ByteArray_writeUnsignedInt_thunk  shell_toplevel_v2a_ou_thunk
 
 extern AvmBox shell_toplevel_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_readBoolean_thunk  shell_toplevel_b2a_o_thunk
 #define avmplus_System_isDebugger_thunk  shell_toplevel_b2a_o_thunk
+#define flash_utils_ByteArray_readBoolean_thunk  shell_toplevel_b2a_o_thunk
 
 extern AvmBox shell_toplevel_v2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_writeUTF_thunk  shell_toplevel_v2a_os_thunk
-#define flash_utils_ByteArray_endian_set_thunk  shell_toplevel_v2a_os_thunk
 #define avmplus_System_write_thunk  shell_toplevel_v2a_os_thunk
+#define flash_utils_ByteArray_endian_set_thunk  shell_toplevel_v2a_os_thunk
+#define flash_utils_ByteArray_writeUTF_thunk  shell_toplevel_v2a_os_thunk
 #define flash_utils_ByteArray_writeUTFBytes_thunk  shell_toplevel_v2a_os_thunk
 
 extern double shell_toplevel_func_d2d_oaou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
