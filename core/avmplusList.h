@@ -294,8 +294,9 @@ namespace avmplus
         // Equivalent to get(length()-1).
         T last() const;
 
-        // Replace the item at the given index with the new value. This call will not expand
-        // the ListImpl, and will assert if index >= capacity(). After this call, length() >= index.
+        // Replace the item at the given index with the new value. 
+        // This call will expand the List if necessary, and adjust length() if the new index
+        // is >= the old length()
         void set(uint32_t index, T value);
         
         // Append the value to the end of the ListImpl, growing the ListImpl if necessary.
@@ -356,12 +357,12 @@ namespace avmplus
         explicit ListImpl(const ListImpl<T,ListHelper>& other);                 // unimplemented
         void* operator new(size_t size);                                        // unimplemented, use HeapList instead
 
-        void ensureCapacity(typename ListHelper::ALLOCATOR* allocator, uint32_t cap, uint32_t extra);
+        void ensureCapacityExtra(uint32_t cap, uint32_t extra);
         
         // This function shouldn't be called directly; it's intended to be called
         // only by ensureCapacity(), which does an inline capacity check
         // before calling (which is a clear performance win).
-        void ensureCapacityImpl(typename ListHelper::ALLOCATOR* allocator, uint32_t cap);
+        void FASTCALL ensureCapacityImpl(uint32_t cap);
 
         static typename ListHelper::LISTDATA* allocData(typename ListHelper::ALLOCATOR* allocator, uint32_t cap);
 

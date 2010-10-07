@@ -77,17 +77,16 @@ namespace avmplus
     {
         // OPTIMIZEME, this method may be worth inlining
         AvmAssert(m_data->len <= m_data->cap);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        ensureCapacity(allocator, m_data->len, 1);
-        ListHelper::store(allocator, m_data, m_data->len++, value);
+        ensureCapacityExtra(m_data->len, 1);
+        ListHelper::store(ListHelper::getAllocator(m_data), m_data, m_data->len++, value);
     }
 
     template<class T, class ListHelper>
     void ListImpl<T,ListHelper>::add(const ListImpl<T,ListHelper>& that)
     {
         uint32_t const n = that.length();
+        ensureCapacityExtra(m_data->len, n);
         typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        ensureCapacity(allocator, m_data->len, n);
         for (uint32_t i = 0; i < n; ++i)
             ListHelper::store(allocator, m_data, m_data->len + i, that.get(i));
         m_data->len += n;
@@ -97,8 +96,8 @@ namespace avmplus
     void ListImpl<T,ListHelper>::insert(uint32_t index, T value)
     {
         AvmAssert(m_data->len <= m_data->cap);
+        ensureCapacityExtra(m_data->len, 1);
         typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        ensureCapacity(allocator, m_data->len, 1);
         if (index < m_data->len)
             ListHelper::moveRange(allocator, m_data, index, index + 1, m_data->len - index);
         else
@@ -165,8 +164,11 @@ namespace avmplus
     }
 
     template<class T, class ListHelper>
-    void ListImpl<T,ListHelper>::ensureCapacityImpl(ALLOCATOR* allocator, uint32_t cap)
+    void FASTCALL ListImpl<T,ListHelper>::ensureCapacityImpl(uint32_t cap)
     {
+        if (cap > kListMaxLength)
+            MMgc::GCHeap::SignalObjectTooLarge();
+        
         AvmAssert(m_data != NULL);
         AvmAssert(m_data->cap >= kListMinCapacity);
         AvmAssert(cap > m_data->cap);
@@ -180,6 +182,7 @@ namespace avmplus
         MMGC_STATIC_ASSERT(uint64_t(kListMaxLength) + uint64_t(kListMaxLength/4) <= uint64_t(0xFFFFFFFF));
         cap += (cap/4);
         AvmAssert(cap > kListMinCapacity);
+        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         typename ListHelper::LISTDATA* newData = allocData(allocator, cap);
 
         VMPI_memcpy(newData->entries, m_data->entries, m_data->len * sizeof(typename ListHelper::STORAGE));
@@ -192,9 +195,9 @@ namespace avmplus
     template<class T, class ListHelper>
     void ListImpl<T,ListHelper>::insert(uint32_t index, const T* args, uint32_t argc)
     {
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         uint32_t const len = m_data->len;
-        ensureCapacity(allocator, len, argc);
+        ensureCapacityExtra(len, argc);
+        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         if (index < len)
             ListHelper::moveRange(allocator, m_data, index, index + argc, len - index);
         else
@@ -210,12 +213,12 @@ namespace avmplus
     void ListImpl<T,ListHelper>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args)
     {
         uint32_t const len = m_data->len;
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         // We only need to expand if we are inserting more than we are deleting,
         // so don't bother calling it unless that's the case, as it means we don't
         // have to worry about overflow-checking "insertCount - deleteCount"
         if (insertCount > deleteCount)
-            ensureCapacity(allocator, len, insertCount - deleteCount);
+            ensureCapacityExtra(len, insertCount - deleteCount);
+        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         if (insertCount < deleteCount)
         {
             ListHelper::clearRange(m_data, insertPoint + insertCount, deleteCount - insertCount);
@@ -238,12 +241,12 @@ namespace avmplus
     void ListImpl<T,ListHelper>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ListImpl<T,ListHelper>& that, uint32_t thatOffset)
     {
         uint32_t const len = m_data->len;
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         // We only need to expand if we are inserting more than we are deleting,
         // so don't bother calling it unless that's the case, as it means we don't
         // have to worry about overflow-checking "insertCount - deleteCount"
         if (insertCount > deleteCount)
-            ensureCapacity(allocator, len, insertCount - deleteCount);
+            ensureCapacityExtra(len, insertCount - deleteCount);
+        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         if (insertCount < deleteCount)
         {
             ListHelper::clearRange(m_data, insertPoint + insertCount, deleteCount - insertCount);
