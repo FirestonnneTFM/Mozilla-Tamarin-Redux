@@ -38,31 +38,51 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-
+// FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248
+// this should be "avmplus.h" once this file is moved into core
 #include "avmshell.h"
 #include "genericzlib.h"
 
-namespace avmshell
+namespace avmplus
 {
     //
     // ByteArray
     //
-
-    ByteArray::ByteArray()
+    
+    ByteArray::ByteArray(Toplevel* toplevel)
+        : DataIOBase()
+        , GlobalMemoryProvider()
+        , DataInput()
+        , DataOutput()
+        , m_toplevel(toplevel)
+        , m_gc(toplevel->core()->GetGC())
+        , m_subscribers(m_gc, 0)
+        , m_array(NULL)
+        , m_capacity(0)
+        , m_length(0)
+        , m_position(0)
+        , m_copyOnWrite(false)
     {
-        m_subscriberRoot = NULL;
-        m_capacity = 0;
-        m_length   = 0;
-        m_array    = NULL;
+        AvmAssert(m_gc != NULL);
     }
 
-    ByteArray::ByteArray(const ByteArray &lhs)
-        // GCC will warn if we don't explicitly init GlobalMemoryProvider,
-        // even though it has no fields or ctor... sigh
-        : GlobalMemoryProvider()
+    ByteArray::ByteArray(const ByteArray& lhs)
+        : DataIOBase()
+        , GlobalMemoryProvider()
+        , DataInput()
+        , DataOutput()
+        , m_toplevel(lhs.m_toplevel)
+        , m_gc(lhs.m_gc)
+        , m_subscribers(m_gc, 0)
+        , m_array(NULL)
+        , m_capacity(0)
+        , m_length(0)
+        , m_position(0)
+        , m_copyOnWrite(false)
     {
-        m_subscriberRoot = NULL;
-        m_array    = mmfx_new_array(uint8_t, lhs.m_length);
+        AvmAssert(m_gc != NULL);
+        m_array = mmfx_new_array_opt(uint8_t, lhs.m_length, MMgc::kCanFailAndZero);
+        TellGcNewBufferMemory(m_array, lhs.m_length);
         if (!m_array)
         {
             ThrowMemoryError();
@@ -77,334 +97,362 @@ namespace avmshell
 
     ByteArray::~ByteArray()
     {
-        m_subscriberRoot = NULL;
-        if (m_array)
-        {
-            mmfx_delete_array(m_array);
-            m_array = NULL;
-        }
-        m_capacity = 0;
-        m_length = 0;
+        m_subscribers.clear();
+        Clear();
     }
 
+    void ByteArray::Clear()
+    {
+        if (m_subscribers.length() > 0)
+        {
+            AvmAssert(false); // shouldn't get here?
+            m_toplevel->throwRangeError(kInvalidRangeError);
+        }
+        if (m_array && !m_copyOnWrite)
+        {
+            TellGcDeleteBufferMemory(m_array, m_length);
+            mmfx_delete_array(m_array);
+        }
+        m_array        = NULL;
+        m_length       = 0;
+        m_capacity     = 0;
+        m_copyOnWrite     = false;
+    }
+
+    void ByteArray::SetCopyOnWriteData(uint8_t* data, uint32_t length)
+    {
+        Clear();
+        m_array        = data;
+        m_length       = length;
+        m_capacity     = length;
+        m_copyOnWrite     = true;
+    }
+        
     void ByteArray::ThrowMemoryError()
     {
-        // todo throw out of memory exception
-        // m_toplevel->memoryError->throwError(kOutOfMemoryError);
+        m_toplevel->throwError(kOutOfMemoryError);
     }
 
-    bool ByteArray::Grow(uint32_t minimumCapacity)
+    void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint64_t minimumCapacity)
     {
-        if (minimumCapacity > m_capacity)
+        if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
+            m_owner->ThrowMemoryError();
+
+        if (minimumCapacity > m_owner->m_capacity || m_owner->m_copyOnWrite)
         {
-            uint32_t newCapacity = m_capacity << 1;
+            uint32_t newCapacity = m_owner->m_capacity << 1;          
             if (newCapacity < minimumCapacity)
-            {
-                newCapacity = minimumCapacity;
-            }
-            if (newCapacity < kGrowthIncr)
-            {
+                newCapacity = uint32_t(minimumCapacity);
+            if (newCapacity < kGrowthIncr) 
                 newCapacity = kGrowthIncr;
-            }
-            U8 *newArray = mmfx_new_array(uint8_t, newCapacity);
+
+            m_oldArray = m_owner->m_array;
+            m_oldLength = m_owner->m_length;
+
+            uint8_t* newArray = mmfx_new_array_opt(uint8_t, newCapacity, MMgc::kCanFailAndZero);
             if (!newArray)
-            {
-                return false;
-            }
-            if (m_array)
-            {
-                VMPI_memcpy(newArray, m_array, m_length);
-                mmfx_delete_array(m_array);
-            }
-            VMPI_memset(newArray+m_length, 0, newCapacity-m_capacity);
-            m_array = newArray;
-            m_capacity = newCapacity;
-            NotifySubscribers();
+                m_owner->ThrowMemoryError();
+
+            m_owner->TellGcNewBufferMemory(newArray, newCapacity);
+            if (m_oldArray)
+                VMPI_memcpy(newArray, m_oldArray, m_oldLength);
+
+            m_owner->m_array = newArray;
+            m_owner->m_capacity = newCapacity;
+            m_owner->m_copyOnWrite = false;
         }
-        return true;
     }
 
-    U8 ByteArray::operator[] (uint32_t index) const
+    /*
+        Why the "Grower" class?
+        
+        (1) It provides a clean way to defer discarding the old buffer until the
+            end of the calling function; this matters in the case of Write(),
+            as it's legal to call Write() on your own buffer, and so if growth
+            occurs, you must not discard the old buffer until copying takes place.
+        (2) It avoid redundant calls to NotifySubscribers(); previously we'd call
+            once when a reallocation occurred, then again when the length field
+            changed. 
+        (3) It streamlines copy-on-write handling; formerly we either did
+            redundant CopyOnWrite alloc-and-copy followed by a Grow alloc-and-copy,
+            or an if-else clause with redundant alloc-and-copy.
+            
+        Of course, the dtor will be skipped (and thus notify and deletes skipped)
+        if a longjmp over it, but the old code was subject to the same defects,
+        so this is not a new liability.
+    */
+    ByteArray::Grower::~Grower()
     {
-        if (m_length <= index)
+        if (m_oldArray != m_owner->m_array || m_oldLength != m_owner->m_length) 
         {
-            return 0;
+            m_owner->NotifySubscribers();
         }
+        if (m_oldArray != m_owner->m_array) 
+        {
+            m_owner->TellGcDeleteBufferMemory(m_oldArray, m_oldLength);
+            mmfx_delete_array(m_oldArray);
+        }
+    }
+
+    uint8_t* FASTCALL ByteArray::GetWritableBuffer() 
+    { 
+        Grower grower(this);
+        grower.EnsureWritableCapacity(m_capacity);
+        return m_array; 
+    }
+
+    uint8_t& ByteArray::operator[](uint32_t index)
+    {
+        if (index >= m_length)
+            SetLength(index + 1);
         return m_array[index];
     }
 
-    U8& ByteArray::operator[] (uint32_t index)
+    void FASTCALL ByteArray::SetLength(uint32_t newLength)
     {
-        if (m_length <= index)
-        {
-            Grow(index+1);
-            m_length = index+1;
-            NotifySubscribers();
-        }
-        return m_array[index];
-    }
+        if (m_subscribers.length() > 0 && m_length < DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
+            m_toplevel->throwRangeError(kInvalidRangeError);
 
-    void ByteArray::Push(U8 value)
-    {
-        if (m_length >= m_capacity)
-        {
-            Grow(m_length + 1);
-        }
-        m_array[m_length++] = value;
-        NotifySubscribers();
-    }
-
-    void ByteArray::Push(const U8 *data, uint32_t count)
-    {
-        Grow(m_length + count);
-        VMPI_memcpy(m_array + m_length, data, count);
-        m_length += count;
-        NotifySubscribers();
-    }
-
-    void ByteArray::SetLength(uint32_t newLength)
-    {
-        if(m_subscriberRoot && m_length < DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
-            ThrowMemoryError();
+        Grower grower(this);
         if (newLength > m_capacity)
         {
-            if (!Grow(newLength))
-            {
-                ThrowMemoryError();
-                return;
-            }
+            grower.EnsureWritableCapacity(newLength);
         }
         m_length = newLength;
-        NotifySubscribers();
+        if (m_position > newLength) 
+            m_position = newLength;
     }
 
+    // When we might be reading or writing to ourself, use this function
+    REALLY_INLINE static void move_or_copy(void* dst, const void* src, uint32_t count)
+    {
+        if ((uintptr_t(dst) - uintptr_t(src)) >= uintptr_t(count)) 
+        {
+            VMPI_memcpy(dst, src, count);
+        } 
+        else 
+        {
+            VMPI_memmove(dst, src, count);
+        }
+    }
+
+    void ByteArray::Read(void* buffer, uint32_t count)
+    {
+        CheckEOF(count);
+        move_or_copy(buffer, m_array + m_position, count);
+        m_position += count;
+    }
+
+    void ByteArray::Write(const void* buffer, uint32_t count)
+    {
+        uint32_t writeEnd = m_position + count;
+        
+        Grower grower(this);
+        grower.EnsureWritableCapacity(writeEnd);
+        
+        move_or_copy(m_array + m_position, buffer, count);
+        m_position += count;
+        if (m_length < m_position) 
+            m_length = m_position;
+    }
+
+    void ByteArray::EnsureCapacity(uint32_t capacity)
+    {
+        Grower grower(this);
+        grower.EnsureWritableCapacity(capacity);
+    }
+    
     void ByteArray::NotifySubscribers()
     {
-        SubscriberLink *curLink = m_subscriberRoot;
-        DWB(SubscriberLink*) *prevNext = &m_subscriberRoot;
-
-        while(curLink != NULL) // notify subscribers
+        for (uint32_t i = 0, n = m_subscribers.length(); i < n; ++i)
         {
             AvmAssert(m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE);
-
-            GlobalMemorySubscriber* subscriber = (GlobalMemorySubscriber*)(void*)curLink->weakSubscriber->get();
-
+ 
+            GlobalMemorySubscriber* subscriber = m_subscribers.get(i);
             if (subscriber)
             {
                 subscriber->notifyGlobalMemoryChanged(m_array, m_length);
-                prevNext = &curLink->next;
             }
             else
             {
                 // Domain went away? remove link
-                *prevNext = curLink->next;
+                m_subscribers.removeAt(i);
+                --i;
             }
-            curLink = curLink->next;
         }
     }
-
+ 
     bool ByteArray::addSubscriber(GlobalMemorySubscriber* subscriber)
     {
-        if(m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
+        if (m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
         {
             removeSubscriber(subscriber);
-            SubscriberLink *newLink = new (MMgc::GC::GetGC(subscriber)) SubscriberLink;
-            newLink->weakSubscriber = subscriber->GetWeakRef();
-            newLink->next =  m_subscriberRoot;
-            m_subscriberRoot = newLink;
+            m_subscribers.add(subscriber);
             // notify the new "subscriber" of the current state of the world
             subscriber->notifyGlobalMemoryChanged(m_array, m_length);
             return true;
         }
         return false;
     }
-
+ 
     bool ByteArray::removeSubscriber(GlobalMemorySubscriber* subscriber)
     {
-        DWB(SubscriberLink*)*prevNext = &m_subscriberRoot;
-        SubscriberLink *curLink = m_subscriberRoot;
-
-        while(curLink)
+        for (uint32_t i = 0, n = m_subscribers.length(); i < n; ++i)
         {
-            if ((GlobalMemorySubscriber*)(void*)curLink->weakSubscriber->get() == subscriber)
+            if (m_subscribers.get(i) == subscriber)
             {
-                *prevNext = curLink->next;
+                m_subscribers.removeAt(i);
                 return true;
             }
-            prevNext = &curLink->next;
-            curLink = curLink->next;
         }
         return false;
     }
-
+ 
 #ifdef DEBUGGER
     uint64_t ByteArray::bytesUsed() const
     {
-        return m_capacity * sizeof(U8);
+        // If m_copyOnWrite is set, then we don't own the buffer, so the profiler
+        // should not attribute it to us.
+        return m_copyOnWrite ? 0 : m_capacity;
     }
 #endif
 
-    //
-    // ByteArrayFile
-    //
-
-    ByteArrayFile::ByteArrayFile(Toplevel *toplevel)
-        : DataInput(toplevel),
-          DataOutput(toplevel)
+    void ByteArray::TellGcNewBufferMemory(const uint8_t* buf, uint32_t numberOfBytes)
     {
-        m_filePointer = 0;
-    }
-
-    uint32_t ByteArrayFile::Available()
-    {
-        if (m_filePointer <= m_length) {
-            return m_length - m_filePointer;
-        } else {
-            return 0;
-        }
-    }
-
-    void ByteArrayFile::SetLength(uint32_t newLength)
-    {
-        ByteArray::SetLength(newLength);
-        if (m_filePointer > newLength) {
-            m_filePointer = newLength;
-        }
-    }
-
-    void ByteArrayFile::Read(void *buffer, uint32_t count)
-    {
-        CheckEOF(count);
-
-        if (count > 0)
+        if (buf && numberOfBytes > 0)
         {
-            VMPI_memcpy(buffer, m_array+m_filePointer, count);
-            m_filePointer += count;
+            m_gc->SignalDependentAllocation(numberOfBytes);
         }
     }
 
-    void ByteArrayFile::Write(const void *buffer, uint32_t count)
+    void ByteArray::TellGcDeleteBufferMemory(const uint8_t* buf, uint32_t numberOfBytes)
     {
-        if (m_filePointer+count >= m_length) {
-            Grow(m_filePointer+count);
-            m_length = m_filePointer+count;
+        // Note that we can't rely on using m_toplevel->core()->GetGC();
+        // order of destruction is unspecified, and if this is called at destruction
+        // time, Toplevel might have been destroyed before us. So keep a separate GC*.
+        if (buf && numberOfBytes > 0)
+        {
+            m_gc->SignalDependentDeallocation(numberOfBytes);
         }
-        VMPI_memcpy(m_array+m_filePointer, buffer, count);
-        m_filePointer += count;
     }
-
+    
     //
     // ByteArrayObject
     //
-
-    ByteArrayObject::ByteArrayObject(VTable *ivtable,
-                                     ScriptObject *delegate)
-        : ScriptObject(ivtable, delegate),
-          m_byteArray(toplevel())
+    
+    ByteArrayObject::ByteArrayObject(VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding)
+        : ScriptObject(ivtable, delegate)
+        , m_byteArray(toplevel())
     {
-        c.set(&m_byteArray, sizeof(ByteArrayFile));
-    }
-
-    bool ByteArrayObject::hasUintProperty(uint32_t i) const
-    {
-        return (i < (uint32_t)m_byteArray.GetLength());
+        c.set(&m_byteArray, sizeof(ByteArray));
+        m_byteArray.SetObjectEncoding(defaultEncoding);
     }
 
     Atom ByteArrayObject::getUintProperty(uint32_t i) const
     {
-        if (i < (uint32_t)m_byteArray.GetLength()) {
-            return core()->intToAtom(m_byteArray[i]);
-        } else {
+        if (i < m_byteArray.GetLength()) 
+        {
+            intptr_t const b = m_byteArray[i];
+            return atomFromIntptrValue(b);
+        } 
+        else 
+        {
             return undefinedAtom;
         }
     }
-
+    
+    bool ByteArrayObject::hasUintProperty(uint32_t i) const
+    {
+        return i < m_byteArray.GetLength();
+    }
+    
     void ByteArrayObject::setUintProperty(uint32_t i, Atom value)
     {
-        m_byteArray[i] = (U8)(AvmCore::integer(value));
+        m_byteArray[i] = uint8_t(AvmCore::integer(value));
     }
-
+    
     Atom ByteArrayObject::getAtomProperty(Atom name) const
     {
         uint32_t index;
-        if (AvmCore::getIndexFromAtom(name, &index)) {
-            if (index < (uint32_t) m_byteArray.GetLength()) {
-                return core()->intToAtom(m_byteArray[index]);
-            } else {
-                return undefinedAtom;
-            }
+        if (AvmCore::getIndexFromAtom(name, &index)) 
+        {
+            return getUintProperty(index);
         }
 
         return ScriptObject::getAtomProperty(name);
     }
-
+    
     void ByteArrayObject::setAtomProperty(Atom name, Atom value)
     {
         uint32_t index;
-        if (AvmCore::getIndexFromAtom(name, &index)) {
-            int intValue = AvmCore::integer(value);
-            m_byteArray[index] = (U8)(intValue);
-        } else {
+        if (AvmCore::getIndexFromAtom(name, &index)) 
+        {
+            setUintProperty(index, value);
+        } 
+        else 
+        {
             ScriptObject::setAtomProperty(name, value);
         }
     }
-
+    
     bool ByteArrayObject::hasAtomProperty(Atom name) const
     {
-        if (core()->currentBugCompatibility()->bugzilla558863) {
+        if (core()->currentBugCompatibility()->bugzilla558863) 
+        {
             uint32_t index;
-            if (ScriptObject::hasAtomProperty(name)) {
-                return true;
-            } else if (AvmCore::getIndexFromAtom(name, &index)) {
-                // return (getAtomProperty(name) != undefinedAtom);
-                // is same as:
-                return (index < (uint32_t) m_byteArray.GetLength());
-            } else {
-                return false;
+            if (AvmCore::getIndexFromAtom(name, &index)) 
+            {
+                return index < m_byteArray.GetLength();
             }
-        } else {
-            // old logic from before fix to bug 558863.
+
+            return ScriptObject::hasAtomProperty(name);
+        }
+        else
+        {
             return ScriptObject::hasAtomProperty(name)
                 || getAtomProperty(name) != undefinedAtom;
         }
     }
 
-    void ByteArrayObject::setLength(uint32_t newLength)
+    Atom ByteArrayObject::getMultinameProperty(const Multiname* name) const
     {
-        m_byteArray.SetLength(newLength);
-    }
-
-    uint32_t ByteArrayObject::get_length()
-    {
-        return m_byteArray.GetLength();
-    }
-
-    void ByteArrayObject::set_length(uint32_t value)
-    {
-        setLength(value);
-    }
-
-    int ByteArrayObject::get_position()
-    {
-        return m_byteArray.GetFilePointer();
-    }
-
-    int ByteArrayObject::get_bytesAvailable()
-    {
-        return m_byteArray.Available();
-    }
-
-    void ByteArrayObject::set_position(int offset)
-    {
-        if (offset >= 0) {
-            m_byteArray.Seek(offset);
+        uint32_t index;
+        if (AvmCore::getIndexFromString(name->getName(), &index)) 
+        {
+            return getUintProperty(index);
         }
+
+        return ScriptObject::getMultinameProperty (name);
+    }
+
+    void ByteArrayObject::setMultinameProperty(const Multiname* name, Atom value)
+    {
+        uint32_t index;
+        if (AvmCore::getIndexFromString(name->getName(), &index)) 
+        {
+            setUintProperty(index, value);
+        }
+        else
+        {
+            ScriptObject::setMultinameProperty (name, value);
+        }
+    }
+
+    bool ByteArrayObject::hasMultinameProperty(const Multiname* name) const
+    {
+        uint32_t index;
+        if (this->core()->getIndexFromString(name->getName(), &index)) 
+        {
+            return index < m_byteArray.GetLength();
+        }
+
+        return ScriptObject::hasMultinameProperty(name);
     }
 
     String* ByteArrayObject::_toString()
     {
-        uint8_t* c = (uint8_t*)m_byteArray.GetBuffer();
         uint32_t len = m_byteArray.GetLength();
+        const uint8_t* c = m_byteArray.GetReadableBuffer();
 
         if (len >= 3)
         {
@@ -418,12 +466,14 @@ namespace avmshell
                 //UTF-16 big endian
                 c += 2;
                 len = (len - 2) >> 1;
-                return core()->newStringEndianUTF16(/*littleEndian*/false, (wchar*)(void*)c, len);
+                return core()->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
             }
             else if ((c[0] == 0xff) && (c[1] == 0xfe))
             {
                 //UTF-16 little endian
-                return core()->newStringEndianUTF16(/*littleEndian*/true, (wchar*)(void*)c, len);
+                c += 2;
+                len = (len - 2) >> 1;
+                return core()->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
             }
         }
 
@@ -431,10 +481,20 @@ namespace avmshell
         // buggy behavior, where malformed UTF-8 sequences are stored as single characters.
         return core()->newStringUTF8((const char*)c, len, false);
     }
+    
+    Atom ByteArrayObject::readObject()
+    {
+        return m_byteArray.ReadObject();
+    }
 
+    void ByteArrayObject::writeObject(Atom value)
+    {
+        m_byteArray.WriteObject(value);
+    }
+    
     int ByteArrayObject::readByte()
     {
-        return (signed char)m_byteArray.ReadU8();
+        return (int8_t)m_byteArray.ReadU8();
     }
 
     int ByteArrayObject::readUnsignedByte()
@@ -444,7 +504,7 @@ namespace avmshell
 
     int ByteArrayObject::readShort()
     {
-        return (short)m_byteArray.ReadU16();
+        return (int16_t)m_byteArray.ReadU16();
     }
 
     int ByteArrayObject::readUnsignedShort()
@@ -454,14 +514,14 @@ namespace avmshell
 
     int ByteArrayObject::readInt()
     {
-        return (int)m_byteArray.ReadU32();
+        return (int32_t)m_byteArray.ReadU32();      
     }
 
     uint32_t ByteArrayObject::readUnsignedInt()
     {
-        return m_byteArray.ReadU32();
+        return m_byteArray.ReadU32();       
     }
-
+    
     double ByteArrayObject::readFloat()
     {
         return m_byteArray.ReadFloat();
@@ -484,12 +544,12 @@ namespace avmshell
 
     void ByteArrayObject::writeByte(int value)
     {
-        m_byteArray.WriteU8((U8)value);
+        m_byteArray.WriteU8((uint8_t)value);
     }
 
     void ByteArrayObject::writeShort(int value)
     {
-        m_byteArray.WriteU16((unsigned short)value);
+        m_byteArray.WriteU16((uint16_t)value);
     }
 
     void ByteArrayObject::writeInt(int value)
@@ -501,7 +561,7 @@ namespace avmshell
     {
         m_byteArray.WriteU32(value);
     }
-
+    
     void ByteArrayObject::writeFloat(double value)
     {
         m_byteArray.WriteFloat((float)value);
@@ -518,11 +578,11 @@ namespace avmshell
         if (!len) // empty buffer should give us a empty result
             return;
         unsigned long gzlen = len * 3/2 + 32; // enough for growth plus zlib headers
-        U8 *gzdata = mmfx_new_array( uint8_t, gzlen );
+        uint8_t *gzdata = mmfx_new_array( uint8_t, gzlen );
 
         // Use zlib to compress the data
         compress2((uint8_t*)gzdata, (unsigned long*)&gzlen,
-                m_byteArray.GetBuffer(), len, 9);
+                m_byteArray.GetWritableBuffer(), len, 9);
 
         // Replace the byte array with the compressed data
         m_byteArray.SetLength(0);
@@ -540,10 +600,10 @@ namespace avmshell
             return;
 
         uint8_t *gzdata = mmfx_new_array( uint8_t, gzlen );
-        VMPI_memcpy(gzdata, m_byteArray.GetBuffer(), gzlen);
+        VMPI_memcpy(gzdata, m_byteArray.GetReadableBuffer(), gzlen);
 
         // Clear the buffer
-        m_byteArray.Seek(0);
+        m_byteArray.SetPosition(0);
         m_byteArray.SetLength(0);
 
         // The following block is to force destruction
@@ -566,11 +626,11 @@ namespace avmshell
             } while (error == Z_OK);
 
             mmfx_delete_array( buffer );
-        mmfx_delete_array( gzdata );
+            mmfx_delete_array( gzdata );
         }
 
         // position byte array at the beginning
-        m_byteArray.Seek(0);
+        m_byteArray.SetPosition(0);
 
         if (error != Z_OK && error != Z_STREAM_END) {
             toplevel()->throwError(kShellCompressedDataError);
@@ -590,7 +650,7 @@ namespace avmshell
         checkNull(bytes, "bytes");
 
         if (length == 0) {
-            length = bytes->getLength() - offset;
+            length = bytes->get_length() - offset;
         }
 
         m_byteArray.WriteByteArray(bytes->GetByteArray(),
@@ -613,6 +673,12 @@ namespace avmshell
                                   length);
     }
 
+    String* ByteArrayObject::readMultiByte(uint32_t length, String* charSet)
+    {
+        checkNull(charSet, "charSet");
+        return m_byteArray.ReadMultiByte(length, charSet);
+    }
+    
     String* ByteArrayObject::readUTF()
     {
         return m_byteArray.ReadUTF();
@@ -623,21 +689,46 @@ namespace avmshell
         return m_byteArray.ReadUTFBytes(length);
     }
 
-    void ByteArrayObject::writeUTF(String *value)
+    void ByteArrayObject::writeMultiByte(String* value, String* charSet)
+    {
+        checkNull(value, "value");
+        checkNull(charSet, "charSet");
+        m_byteArray.WriteMultiByte(value, charSet);
+    }
+    
+    void ByteArrayObject::writeUTF(String* value)
     {
         checkNull(value, "value");
         m_byteArray.WriteUTF(value);
     }
 
-    void ByteArrayObject::writeUTFBytes(String *value)
+    void ByteArrayObject::writeUTFBytes(String* value)
     {
         checkNull(value, "value");
         m_byteArray.WriteUTFBytes(value);
     }
 
-    void ByteArrayObject::fill(const void *b, uint32_t len)
+    uint32_t ByteArrayObject::get_objectEncoding()
     {
-        m_byteArray.Write(b, len);
+        return m_byteArray.GetObjectEncoding();
+    }
+
+    void ByteArrayObject::set_objectEncoding(uint32_t objectEncoding)
+    {
+        if ((objectEncoding == kAMF3)||(objectEncoding == kAMF0))
+        {
+            m_byteArray.SetObjectEncoding(ObjectEncoding(objectEncoding));
+        }
+        else
+        {
+            toplevel()->throwArgumentError(kInvalidArgumentError, "objectEncoding");
+        }
+    }
+
+    void ByteArrayObject::clear()
+    {
+        m_byteArray.Clear();
+        m_byteArray.SetPosition(0);
     }
 
 #ifdef DEBUGGER
@@ -657,14 +748,13 @@ namespace avmshell
         : ClassClosure(vtable)
     {
         setPrototypePtr(toplevel()->objectClass->construct());
+        set_defaultObjectEncoding(kEncodeDefault);
     }
 
-    ScriptObject* ByteArrayClass::createInstance(VTable *ivtable,
-                                                 ScriptObject *prototype)
+    ScriptObject* ByteArrayClass::createInstance(VTable* ivtable, ScriptObject* prototype)
     {
-        return new (core()->GetGC(), ivtable->getExtraSize()) ByteArrayObject(ivtable, prototype);
+        return new (ivtable->gc(), ivtable->getExtraSize()) ByteArrayObject(ivtable, prototype, (ObjectEncoding)get_defaultObjectEncoding());
     }
-
 
     Stringp ByteArrayObject::get_endian()
     {
@@ -673,6 +763,8 @@ namespace avmshell
 
     void ByteArrayObject::set_endian(Stringp type)
     {
+        checkNull(type, "endian");
+
         AvmCore* core = this->core();
         type = core->internString(type);
         if (type == core->kbigEndian)
@@ -688,6 +780,7 @@ namespace avmshell
             toplevel()->throwArgumentError(kInvalidArgumentError, "type");
         }
     }
+    
 
 
 }

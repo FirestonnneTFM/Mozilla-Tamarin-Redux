@@ -46,23 +46,22 @@ package flash.utils
 
 
 /**
- * The ByteArray class makes it possible to work with
- * binary data in ActionScript in an efficient manner.
+ * The ByteArray class provides methods and properties to optimize reading, writing,
+ * and working with binary data.
  *
- * <p><b><i>Note:</i></b> The ByteArray class are for advanced ActionScript developers who need to access
+ * <p><em>Note:</em> The ByteArray class is for advanced developers who need to access 
  * data on the byte level.</p>
  *
- * <p>Its in-memory representation is a packed array of bytes, but an instance of the ByteArray
- * class can be manipulated with the standard the ActionScript array access operators:
- * <code>[</code> and <code>]</code>.</p>
+ * <p>In-memory data is a packed array (the most compact representation for the data type)
+ * of bytes, but an instance of the ByteArray
+ * class can be manipulated with the standard <code>[]</code> (array access) operators.
+ * It also can be read and written to as an in-memory file, using
+ * methods similar to those in the URLStream and Socket classes.</p>
  *
- * <p>It also can be read/written to as an in-memory file, using
- * methods similar to <code>URLStream</code> and <code>Socket</code>.</p>
+ * <p>In addition, zlib compression and decompression are supported, as
+ * well as Action Message Format (AMF) object serialization.</p>
  *
- * <p>In addition, zlib compression/decompression is supported, as
- * well as AMF object serialization.</p>
- *
- * <p>Possible uses of the <code>ByteArray</code> class include the following:
+ * <p>Possible uses of the ByteArray class include the following:
  *
  * <ul>
  *
@@ -70,44 +69,64 @@ package flash.utils
  *
  *   <li>Writing your own URLEncoder/URLDecoder.</li>
  *
- *   <li>Writing your own AMF/Remoting packet.</li>
+ *   <li platform="actionscript">Writing your own AMF/Remoting packet.</li>
  *
  *   <li>Optimizing the size of your data by using data types.</li>
+ *
+ *   <li>Working with binary data loaded from a file in 
+ *      Adobe<sup>&#xAE;</sup> AIR<sup>&#xAE;</sup>.</li>
  *
  * </ul>
  * </p>
  *
- * @playerversion Flash 8.0
+ * @includeExample examples\ByteArrayExample.as -noswf
+ * @see ../../operators.html#array_access [] (array access)
+ * @see flash.net.Socket Socket class
+ * @see flash.net.URLStream URLStream class
+ * @playerversion Flash 9
  * @langversion 3.0
  * @helpid
  * @refpath
  * @keyword ByteArray
+ *  
+ *  @playerversion Lite 4
  */
-[native(cls="::avmshell::ByteArrayClass", instance="::avmshell::ByteArrayObject", methods="auto")]
-public class ByteArray
+
+[native(cls="ByteArrayClass", instance="ByteArrayObject", methods="auto")]
+public class ByteArray implements IDataInput, IDataOutput
 {
+
     /**
-     * Reads <code>length</code> bytes of data from the byte stream.
-     * The bytes are read into the <code>ByteArray</code> object specified
-     * by <code>bytes</code>, starting <code>offset</code> bytes into
-     * the <code>ByteAray</code>.
+     * Creates a ByteArray instance representing a packed array of bytes, so that you can use the methods and properties in this class to optimize your data storage and stream.
+     * @playerversion Flash 9
+     * @langversion 3.0
+     *  
+     *  @playerversion Lite 4
+     */
+    public function ByteArray(){}
+
+    /**
+     * Reads the number of data bytes, specified by the <code>length</code> parameter, from the byte stream.
+     * The bytes are read into the ByteArray object specified by the <code>bytes</code> parameter, 
+     * and the bytes are written into the destination ByteArray starting at the position specified by <code>offset</code>.
      *
-     * @param bytes The <code>ByteArray</code> object to read
-     *              data into.
-     * @param offset The offset into <code>bytes</code> at which data
-     *               read should begin.  Defaults to 0.
-     * @param length The number of bytes to read.  The default value
-     *               of 0 will cause all available data to be read.
+     * @param bytes The ByteArray object to read data into.
+     * @param offset The offset (position) in <code>bytes</code> at which the read data should be written.
+     * @param length The number of bytes to read.  The default value of 0 causes all available data to be read.
+     *
      * @throws EOFError There is not sufficient data available
      * to read.
-     * @throws IOError An I/O error occurred on the byte stream,
-     * or the byte stream is not open.
+     * @throws RangeError The value of the supplied offset and length, combined, is greater than the maximum for a uint.
+     * @internal does this throw IOError An I/O error occurred on the byte stream,
+     * or the byte stream is not open?
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readBytes, readBytes
+     *  
+     *  @playerversion Lite 4
      */
     public native function readBytes(bytes:ByteArray,
                                      offset:uint=0,
@@ -118,37 +137,45 @@ public class ByteArray
      * Writes a sequence of <code>length</code> bytes from the
      * specified byte array, <code>bytes</code>,
      * starting <code>offset</code>(zero-based index) bytes
-     * into the array.
+     * into the byte stream.
      *
-     * <p><code>offset</code> and <code>length</code> are optional
-     * parameters. If <code>length</code> is omitted, the default
-     * length of 0 means to write the entire buffer starting at
+     * <p>If the <code>length</code> parameter is omitted, the default
+     * length of 0 is used; the method writes the entire buffer starting at
      * <code>offset</code>.
-     *
-     * If <code>offset</code> is also omitted, the entire buffer is
+     * If the <code>offset</code> parameter is also omitted, the entire buffer is
      * written. </p> <p>If <code>offset</code> or <code>length</code>
-     * is out of range, they will be clamped to the beginning and end
+     * is out of range, they are clamped to the beginning and end
      * of the <code>bytes</code> array.</p>
      *
-     * @playerversion Flash 8.0
+     * @param ByteArray The ByteArray object.
+     * @param offset A zero-based index indicating the position into the array to begin writing.
+     * @param length An unsigned integer indicating how far into the buffer to write.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeBytes, writeBytes
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeBytes(bytes:ByteArray,
                                       offset:uint=0,
                                       length:uint=0):void;
 
     /**
-     * Writes a boolean to the byte stream. A single byte is written,
-     * either 1 for <code>true</code> or 0 for <code>false</code>.
+     * Writes a Boolean value. A single byte is written according to the <code>value</code> parameter,
+     * either 1 if <code>true</code> or 0 if <code>false</code>.
      *
-     * @playerversion Flash 8.0
+     * @param value A Boolean value determining which byte is written. If the parameter is <code>true</code>,
+     * the method writes a 1; if <code>false</code>, the method writes a 0.
+     *
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeBoolean, writeBoolean
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeBoolean(value:Boolean):void;
 
@@ -157,165 +184,207 @@ public class ByteArray
      * <p>The low 8 bits of the
      * parameter are used. The high 24 bits are ignored. </p>
      *
-     * @playerversion Flash 8.0
+     * @param value A 32-bit integer. The low 8 bits are written to the byte stream.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeByte, writeByte
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeByte(value:int):void;
 
     /**
-     * Writes a 16-bit integer to the byte stream. The bytes written
-     * are:
+     * Writes a 16-bit integer to the byte stream. The low 16 bits of the parameter are used. 
+     * The high 16 bits are ignored.
      *
-     * <pre><code>(v &gt;&gt; 8) &amp; 0xff v &amp; 0xff</code></pre>
-     *
-     * <p>The low 16 bits of the parameter are used. The high 16 bits
-     * are ignored.</p>
-     *
-     * @playerversion Flash 8.0
+     * @param A 32-bit integer, whose low 16 bits are written to the byte stream.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeShort, writeShort
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeShort(value:int):void;
 
     /**
      * Writes a 32-bit signed integer to the byte stream.
      *
-     * @playerversion Flash 8.0
+     * @param value An integer to write to the byte stream.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeInt, writeInt
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeInt(value:int):void;
 
     /**
      * Writes a 32-bit unsigned integer to the byte stream.
      *
-     * @playerversion Flash 8.0
+     * @param value An unsigned integer to write to the byte stream.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeUnsignedInt, writeUnsignedInt
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeUnsignedInt(value:uint):void;
 
     /**
-     * Writes an IEEE 754 single-precision floating point number to the byte stream.
+     * Writes an IEEE 754 single-precision (32-bit) floating-point number to the byte stream. 
      *
-     * @playerversion Flash 8.0
+     * @param Number A single-precision (32-bit) floating-point number.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeFloat, writeFloat
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeFloat(value:Number):void;
 
     /**
-     * Writes an IEEE 754 double-precision floating point number to the byte stream.
+     * Writes an IEEE 754 double-precision (64-bit) floating-point number to the byte stream. 
      *
-     * @playerversion Flash 8.0
+     * @param Number A double-precision (64-bit) floating-point number.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeDouble, writeDouble
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeDouble(value:Number):void;
 
     /**
-     * Writes a 16-bit unsigned integer to the byte stream, specifying
-     * the length of the UTF-8 string that follows in bytes. Then,
-     * writes the UTF-8 string to the byte stream.
+     * Writes a multibyte string to the byte stream using the specified character set. 
      *
-     * <p>First, the total number of bytes needed to represent all the
-     * characters of <code>s</code> is calculated.</p>
+     * @param value The string value to be written.
+     * @param charSet The string denoting the character set to use. Possible character set strings
+     * include <code>"shift-jis"</code>, <code>"cn-gb"</code>, <code>"iso-8859-1"</code>, and others.
+     * For a complete list, see <a href="../../charset-codes.html">Supported Character Sets</a>. 
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath 
+     * @keyword ByteArray, ByteArray.writeMultiByte, writeMultiByte
+     *  
+     *  @playerversion Lite 4
+     */ 
+    public native function writeMultiByte(value:String, charSet:String):void;
+
+    /**
+     * Writes a UTF-8 string to the byte stream. The length of the UTF-8 string in bytes 
+     * is written first, as a 16-bit integer, followed by the bytes representing the 
+     * characters of the string.
      *
+     * @param value The string value to be written.
      * @throws RangeError If the length is larger than
-     * <code>65535</code>.
+     * 65535.
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeUTF, writeUTF
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeUTF(value:String):void;
 
     /**
-     * Writes a UTF-8 string to the byte stream. Similar to writeUTF,
-     * but does not prefix the string with a 16-bit length word.
+     * Writes a UTF-8 string to the byte stream. Similar to the <code>writeUTF()</code> method,
+     * but <code>writeUTFBytes()</code> does not prefix the string with a 16-bit length word.
      *
-     * @playerversion Flash 8.0
+     * @param value The string value to be written.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.writeUTFBytes, writeUTFBytes
+     *  
+     *  @playerversion Lite 4
      */
     public native function writeUTFBytes(value:String):void;
 
     /**
-     * Reads a boolean from the byte stream. A single byte is read,
-     * and <code>true</code> is returned if the byte is non-zero,
+     * Reads a Boolean value from the byte stream. A single byte is read,
+     * and <code>true</code> is returned if the byte is nonzero,
      * <code>false</code> otherwise.
      *
      * @throws EOFError There is not sufficient data available
      * to read.
+     * @return Returns <code>true</code> if the byte is nonzero, <code>false</code> otherwise.
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readBoolean, readBoolean
+     *  
+     *  @playerversion Lite 4
      */
     public native function readBoolean():Boolean;
 
     /**
      * Reads a signed byte from the byte stream.
-     * <p>The returned value is in the range -128...127.</p>
+     * <p>The returned value is in the range -128 to 127.</p>
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return An integer between -128 and 127.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readByte, readByte
+     *  
+     *  @playerversion Lite 4
      */
     public native function readByte():int;
 
     /**
      * Reads an unsigned byte from the byte stream.
      *
-     * <p>The returned value is in the range 0...255. </p>
+     * <p>The returned value is in the range 0 to 255. </p> 
      *
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return A 32-bit unsigned integer between 0 and 255.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readUnsignedByte, readUnsignedByte
+     *  
+     *  @playerversion Lite 4
      */
     public native function readUnsignedByte():uint;
 
     /**
      * Reads a signed 16-bit integer from the byte stream.
      *
-     * <p>The returned value is in the range -32768...32767.</p>
+     * <p>The returned value is in the range -32768 to 32767.</p>
      *
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return A 16-bit signed integer between -32768 and 32767.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readShort, readShort
+     *  
+     *  @playerversion Lite 4
      */
     public native function readShort():int;
 
@@ -323,129 +392,215 @@ public class ByteArray
     /**
      * Reads an unsigned 16-bit integer from the byte stream.
      *
-     * <p>The returned value is in the range 0...65535. </p>
+     * <p>The returned value is in the range 0 to 65535. </p>
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return A 16-bit unsigned integer between 0 and 65535.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readUnsignedShort, readUnsignedShort
+     *  
+     *  @playerversion Lite 4
      */
     public native function readUnsignedShort():uint;
 
     /**
      * Reads a signed 32-bit integer from the byte stream.
      *
-     * <p>The returned value is in the range -2147483648...2147483647.</p>
+         * <p>The returned value is in the range -2147483648 to 2147483647.</p>
      *
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return A 32-bit signed integer between -2147483648 and 2147483647.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readInt, readInt
+     *  
+     *  @playerversion Lite 4
      */
     public native function readInt():int;
 
     /**
      * Reads an unsigned 32-bit integer from the byte stream.
      *
-     * <p>The returned value is in the range 0...4294967295. </p>
+     * <p>The returned value is in the range 0 to 4294967295. </p>
      *
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return A 32-bit unsigned integer between 0 and 4294967295.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readUnsignedInt, readUnsignedInt
+     *  
+     *  @playerversion Lite 4
      */
     public native function readUnsignedInt():uint;
 
     /**
-     * Reads an IEEE 754 single-precision floating point number from the byte stream.
+     * Reads an IEEE 754 single-precision (32-bit) floating-point number from the byte stream.
      *
      * @throws EOFError There is not sufficient data available
      * to read.
+     * @return  A single-precision (32-bit) floating-point number.
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readFloat, readFloat
+     *  
+     *  @playerversion Lite 4
      */
     public native function readFloat():Number;
 
     /**
-     * Reads an IEEE 754 double-precision floating point number from the byte stream.
+     * Reads an IEEE 754 double-precision (64-bit) floating-point number from the byte stream.
      *
      * @throws EOFError There is not sufficient data available
      * to read.
+     * @return A double-precision (64-bit) floating-point number.
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readDouble, readDouble
+     *  
+     *  @playerversion Lite 4
      */
     public native function readDouble():Number;
+
+    /**
+     * Reads a multibyte string of specified length from the byte stream using the
+     * specified character set.
+     *
+     *
+     * @param length The number of bytes from the byte stream to read.
+     * @param charSet The string denoting the character set to use to interpret the bytes. 
+     * Possible character set strings include <code>"shift-jis"</code>, <code>"cn-gb"</code>,
+     * <code>"iso-8859-1"</code>, and others.
+     * For a complete list, see <a href="../../charset-codes.html">Supported Character Sets</a>. 
+     * <p><strong>Note:</strong> If the value for the <code>charSet</code> parameter 
+     * is not recognized by the current system, the application uses the system's default 
+     * code page as the character set. For example, a value for the <code>charSet</code> parameter, 
+     * as in <code>myTest.readMultiByte(22, "iso-8859-01")</code> that uses <code>01</code> instead of 
+     * <code>1</code> might work on your development system, but not on another system. 
+     * On the other system, the application will use the system's default code page.</p>
+     * 
+     * @throws EOFError There is not sufficient data available
+     * to read.
+     * @return UTF-8 encoded string.
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath 
+     * @keyword ByteArray, ByteArray.readMultiByte, readMultiByte
+     *  
+     *  @playerversion Lite 4
+     */ 
+    public native function readMultiByte(length:uint, charSet:String):String;
 
     /**
      * Reads a UTF-8 string from the byte stream.  The string
      * is assumed to be prefixed with an unsigned short indicating
      * the length in bytes.
      *
-     * <p>This method is similar to the <code>readUTF</code>
-     * method in the Java <code>DataInput</code> interface.</p>
      *
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return UTF-8 encoded  string.
+     * @playerversion Flash 9
      * @langversion 3.0
+     * @see flash.utils.IDataInput#readUTF()
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readUTF, readUTF
+     *  
+     *  @playerversion Lite 4
      */
     public native function readUTF():String;
 
     /**
-     * Reads a sequence of <code>length</code> UTF-8
-     * bytes from the byte stream, and returns a string.
+     * Reads a sequence of UTF-8 bytes specified by the <code>length</code>
+     * parameter from the byte stream and returns a string.
      *
+     * @param length An unsigned short indicating the length of the UTF-8 bytes.
      * @throws EOFError There is not sufficient data available
      * to read.
-     *
-     * @playerversion Flash 8.0
+     * @return A string composed of the UTF-8 bytes of the specified length.
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.readUTFBytes, readUTFBytes
+     *  
+     *  @playerversion Lite 4
      */
     public native function readUTFBytes(length:uint):String;
 
     /**
-     * The length of the <code>ByteArray</code>, in bytes.
+     * The length of the ByteArray object, in bytes.
      *
-     * <p>If the length is set to a larger value than the
-     * current length, the empty space is filled with zeros.</p>
+     * <p>If the length is set to a value that is larger than the current length, 
+     * the right side  of the byte array is filled with zeros.</p>
      *
-     * <p>If the length is set to a smaller value than the
-     * current length, the array is truncated.</p>
+     * <p>If the length is set to a value that is smaller than the
+     * current length, the byte array is truncated.</p>
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.length, length
+     *  
+     *  @playerversion Lite 4
      */
     public native function get length():uint;
     public native function set length(value:uint):void;
+
+    /**
+     * Writes an object into the byte array in AMF
+     * serialized format.
+     *
+     * @param object The object to serialize.
+     *
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath 
+     * @keyword ByteArray, ByteArray.writeObject, writeObject
+     * @see ../../flash/net/package.html#registerClassAlias() flash.net.registerClassAlias()
+     *
+     *  
+     *  @playerversion Lite 4
+     */ 
+    public native function writeObject(object:*):void;
+
+    /**
+     * Reads an object from the byte array, encoded in AMF
+     * serialized format.
+     *
+     * @return The deserialized object.
+     * @throws EOFError There is not sufficient data available
+     * to read.  
+     *
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath 
+     * @keyword ByteArray, ByteArray.readObject, readObject
+     * @see ../../flash/net/package.html#registerClassAlias() flash.net.registerClassAlias()
+     *
+     *  
+     *  @playerversion Lite 4
+     */ 
+    public native function readObject():*;
 
     /**
     * Compresses the byte array using zlib compression.
@@ -480,67 +635,122 @@ public class ByteArray
 
 
     /**
-     * Converts the ByteArray to a String.
+     * Converts the byte array to a string.
+     * If the data in the array begins with a Unicode byte order mark, the application will honor that mark
+     * when converting to a string. If <code>System.useCodePage</code> is set to <code>true</code>, the
+     * application will treat the data in the array as being in the current system code page when converting.
      *
-     * @return The String representation of the ByteArray.
+     * @return The string representation of the byte array.
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.toString, toString
+     *  
+     *  @playerversion Lite 4
      */
-    private native function _toString():String;
     public function toString():String { return _toString(); }
+    private native function _toString():String;
 
     /**
      * The number of bytes of data available for reading
      * from the current position in the byte array to the
      * end of the array.
      *
-     * <p>User code must access the <code>bytesAvailable</code> property to ensure
-     * that sufficient data is available before trying to read
-     * it with one of the <code>read</code> methods.</p>
+     * <p>Use the <code>bytesAvailable</code> property in conjunction 
+     * with the read methods each time you access a ByteArray object 
+     * to ensure that you are reading valid data.</p>
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword available, bytes, position
+     *  
+     *  @playerversion Lite 4
      */
     public native function get bytesAvailable():uint;
 
     /**
-     * Returns the current position, in bytes, of the file
-     * pointer into the <code>ByteArray</code>.  This is the
-     * point at which the next call to a <code>read</code>
-     * method will start reading, or a <code>write</code>
-     * method will start writing.
+     * Moves, or returns the current position, in bytes, of the file
+     * pointer into the ByteArray object. This is the
+     * point at which the next call to a read
+     * method starts reading or a write
+     * method starts writing.
      *
-     * @playerversion Flash 8.0
+     * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
      * @refpath
      * @keyword ByteArray, ByteArray.getFilePointer,
+     *
+     *  @playerversion Lite 4
      */
     public native function get position():uint;
-
-    /**
-     * Moves the file pointer to <code>offset</code> bytes
-     * into the byte array.  The next call to a <code>read</code>
-     * or <code>write</code> method will start operating
-     * at this point.
-     *
-     * @playerversion Flash 8.0
-     * @langversion 3.0
-     * @helpid
-     * @refpath
-     * @keyword ByteArray, ByteArray.seek,
-     */
     public native function set position(offset:uint):void;
 
+    /**
+     * Denotes the default object encoding for the ByteArray class to use for a new ByteArray instance.
+     * When you create a new ByteArray instance, the encoding on that instance starts
+     * with the value of <code>defaultObjectEncoding</code>.
+     * The <code>defaultObjectEncoding</code> property is initialized to <code>ObjectEncoding.AMF3</code>.
+     * 
+     *
+     * <p>When an object is written to or read from binary data, the <code>objectEncoding</code> value
+     * is used to determine whether the ActionScript 3.0, ActionScript2.0, or ActionScript 1.0 format should be used. The value is a
+     * constant from the ObjectEncoding class.</p>
+     *
+     * @see flash.net.ObjectEncoding ObjectEncoding class
+     * @see flash.utils.ByteArray#objectEncoding
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath 
+     * @keyword ByteArray, ByteArray.defaultObjectEncoding, defaultObjectEncoding
+     *  
+     *  @playerversion Lite 4
+     */ 
+    static public native function get defaultObjectEncoding():uint;
+    static public native function set defaultObjectEncoding(version:uint):void;
+    static private var _defaultObjectEncoding:uint;
+
+    /**
+     * Used to determine whether the ActionScript 3.0, ActionScript 2.0, or ActionScript 1.0 format should be 
+     * used when writing to, or reading from, a ByteArray instance. The value is a
+     * constant from the ObjectEncoding class.
+     *
+     * @see flash.net.ObjectEncoding ObjectEncoding class
+     * @see flash.utils.ByteArray#defaultObjectEncoding  
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath 
+     * @keyword ByteArray, ByteArray.objectEncoding, objectEncoding
+     *  
+     *  @playerversion Lite 4
+     */ 
+    public native function get objectEncoding():uint;
+    public native function set objectEncoding(version:uint):void;
+
+    /**
+     * Changes or reads the byte order for the data; either <code>Endian.BIG_ENDIAN</code> or 
+     * <code>Endian.LITTLE_ENDIAN</code>.
+     *
+     * @see flash.utils.Endian Endian class
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath 
+     * @keyword 
+     *  
+     *  @playerversion Lite 4
+     */ 
     public native function get endian():String;
     public native function set endian(type:String):void;
+    
+    static private const _zlib:String = "zlib";
+    static private const _deflate:String = "deflate";
 };
 
 
@@ -548,7 +758,7 @@ public class ByteArray
 /*
  * [ggrossman 04/07/05] API SCRUB
  *
- * - _ByteArray_ now implements the _DataInput_ and _DataOutput_
+ * - _ByteArray_ now implements the _IDataInput_ and _IDataOutput_
  *   interfaces, as described in the Low Level Data specification.
  *
  * - Method _available()_ changed to accessor _bytesAvailable_
@@ -562,7 +772,7 @@ public class ByteArray
  *
  * - Moved _registerClass_ to the _flash.net_ package.
  *
- * - Moved the _ObjectEncoding_ class from _flash.util_ to the
+ * - Moved the _ObjectEncoding_ class from _flash.utils_ to the
  *   _flash.net_ package.
  *
  * - [srahim 04/05/05] Doc scrub

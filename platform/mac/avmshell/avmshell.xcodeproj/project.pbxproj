@@ -906,6 +906,8 @@
 		D927090C112B5FD700A13EAA /* avmplusHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusHashtable-inlines.h"; path = "../../../core/avmplusHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D92B139711EB96B7008170E3 /* avmplusList-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusList-impl.h"; path = "../../../core/avmplusList-impl.h"; sourceTree = SOURCE_ROOT; };
 		D92B139811EB96B7008170E3 /* avmplusList-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusList-inlines.h"; path = "../../../core/avmplusList-inlines.h"; sourceTree = SOURCE_ROOT; };
+		D92C589C125E61A500912085 /* IDataInput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = IDataInput.as; path = ../../../shell/IDataInput.as; sourceTree = SOURCE_ROOT; };
+		D92C589D125E61A500912085 /* IDataOutput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = IDataOutput.as; path = ../../../shell/IDataOutput.as; sourceTree = SOURCE_ROOT; };
 		D935BDEB0FA0EBA7001E3E70 /* avm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avm.cpp; path = ../../../core/avm.cpp; sourceTree = SOURCE_ROOT; };
 		D935BDEE0FA0EC17001E3E70 /* avm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avm.h; path = ../../../core/avm.h; sourceTree = SOURCE_ROOT; };
 		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -1409,6 +1411,8 @@
 		079DF9860F3A89CA0031D1B4 /* AS */ = {
 			isa = PBXGroup;
 			children = (
+				D92C589C125E61A500912085 /* IDataInput.as */,
+				D92C589D125E61A500912085 /* IDataOutput.as */,
 				079DF9990F3A8A7C0031D1B4 /* Dictionary.as */,
 				079DF99A0F3A8A7D0031D1B4 /* Sampler.as */,
 				079DF99B0F3A8A7D0031D1B4 /* Trace.as */,

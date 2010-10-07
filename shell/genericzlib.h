@@ -44,7 +44,7 @@
 
 #include "zlib.h"
 
-namespace avmshell
+namespace avmplus
 {
 
 //#include "platformutils.h"
@@ -55,9 +55,9 @@ namespace avmshell
 
 
 inline bool PlatformZlibInflate(
-                            const U8* pbCompressed,
+                            const uint8_t* pbCompressed,
                             int nbCompressed,
-                            U8* pbDecompressedOut,
+                            uint8_t* pbDecompressedOut,
                             int* pnbDecompressedOut
                             )
 {
@@ -89,7 +89,7 @@ public:
     //
     // Set compressed input stream
     //
-    inline void SetNextIn(const U8* pbCompressed);  // set next input byte
+    inline void SetNextIn(const uint8_t* pbCompressed);  // set next input byte
     inline void SetAvailIn(int nb);                     // set number of bytes available at next_in
     inline int AvailIn();                               // get number of bytes available at next_in
 
@@ -102,8 +102,8 @@ public:
     //
     // Get decompressed output stream
     //
-    inline void SetNextOut(U8* pbDecompressed); // set next output byte should be put there
-    inline U8* NextOut();                           // get next output byte should be put there
+    inline void SetNextOut(uint8_t* pbDecompressed); // set next output byte should be put there
+    inline uint8_t* NextOut();                           // get next output byte should be put there
 
     inline void SetAvailOut(int nb);                // set remaining free space at next_out
     inline int AvailOut();                          // get remaining free space at next_out
@@ -135,7 +135,7 @@ PlatformZlibStream::~PlatformZlibStream()
 }
 
 
-void PlatformZlibStream::SetNextIn(const U8* pbCompressed)
+void PlatformZlibStream::SetNextIn(const uint8_t* pbCompressed)
 {
     m_zstream.next_in = (Bytef*) pbCompressed;
 }
@@ -168,13 +168,13 @@ int PlatformZlibStream::InflateWithStatus()
 }
 
 
-void PlatformZlibStream::SetNextOut(U8* pbDecompressed)
+void PlatformZlibStream::SetNextOut(uint8_t* pbDecompressed)
 {
     m_zstream.next_out = (Bytef*) pbDecompressed;
 }
 
 
-U8* PlatformZlibStream::NextOut()
+uint8_t* PlatformZlibStream::NextOut()
 {
     return m_zstream.next_out;
 }

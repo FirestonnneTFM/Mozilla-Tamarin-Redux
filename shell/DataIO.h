@@ -41,23 +41,23 @@
 #ifndef DATAIO_INCLUDED
 #define DATAIO_INCLUDED
 
-namespace avmshell
+namespace avmplus
 {
     template <class T>
-    inline void CoreSwap(T& a, T& b)
+    REALLY_INLINE void CoreSwap(T& a, T& b)
     {
         T t = a;
         a = b;
         b = t;
     }
 
-    inline void FlipU16(uint16_t& value)
+    REALLY_INLINE void FlipU16(uint16_t& value)
     {
         uint8_t *pa = (uint8_t*)&(value);
         CoreSwap(pa[0], pa[1]);
     }
 
-    inline void FlipU64(uint64_t& value)
+    REALLY_INLINE void FlipU64(uint64_t& value)
     {
         uint8_t *pa = (uint8_t*)&(value);
         CoreSwap(pa[0], pa[7]);
@@ -66,40 +66,33 @@ namespace avmshell
         CoreSwap(pa[3], pa[4]);
     }
 
-    inline void FlipU32(uint32_t& value)
+    REALLY_INLINE void FlipU32(uint32_t& value)
     {
         uint8_t *pa = (uint8_t *)&(value);
         CoreSwap(pa[0], pa[3]);
         CoreSwap(pa[1], pa[2]);
     }
 
-    enum ObjectEncoding {
-        kAMF0 = 0,
-        kAMF3 = 3,
-        kEncodeDefault = kAMF3
-    };
-
-    enum Endian
-    {
-        kBigEndian    = 0,
-        kLittleEndian = 1
-    };
-
     class DataIOBase
     {
     public:
-        DataIOBase() { m_endian = kBigEndian; }
+        MMGC_DECLARE_OPERATOR_DELETES_FOR_CLASS
 
-        virtual ~DataIOBase()
+        REALLY_INLINE DataIOBase()
+            : m_objectEncoding(kEncodeDefault)
+            , m_endian(kBigEndian)
         {
-            m_endian = kBigEndian;
         }
 
+        virtual ~DataIOBase() {}
 
-        Endian GetEndian() const { return m_endian; }
-        void SetEndian(Endian endian) { m_endian = endian; }
+        REALLY_INLINE Endian GetEndian() const { return m_endian; }
+        REALLY_INLINE void SetEndian(Endian endian) { m_endian = endian; }
 
-        void ConvertU16(uint16_t& value)
+        REALLY_INLINE ObjectEncoding GetObjectEncoding() const { return m_objectEncoding; }
+        REALLY_INLINE void SetObjectEncoding(ObjectEncoding objectEncoding) { m_objectEncoding = objectEncoding; }
+
+        REALLY_INLINE void ConvertU16(uint16_t& value)
         {
             if (GetEndian() != GetNativeEndian())
             {
@@ -107,7 +100,7 @@ namespace avmshell
             }
         }
 
-        void ConvertU32(uint32_t& value)
+        REALLY_INLINE void ConvertU32(uint32_t& value)
         {
             if (GetEndian() != GetNativeEndian())
             {
@@ -115,7 +108,7 @@ namespace avmshell
             }
         }
 
-        void ConvertU64(uint64_t& value)
+        REALLY_INLINE void ConvertU64(uint64_t& value)
         {
             if (GetEndian() != GetNativeEndian())
             {
@@ -123,7 +116,7 @@ namespace avmshell
             }
         }
 
-        void ConvertD64(uint64_t& value)
+        REALLY_INLINE void ConvertD64(uint64_t& value)
         {
 #if defined(VMCFG_DOUBLE_MSW_FIRST)
             // Swap the high and low words so that the datum is in "natural" endianness,
@@ -142,7 +135,7 @@ namespace avmshell
             return ConvertU64(value);
         }
 
-        Endian GetNativeEndian() const
+        REALLY_INLINE Endian GetNativeEndian() const
         {
             #if defined(AVMPLUS_LITTLE_ENDIAN)
             return kLittleEndian;
@@ -153,62 +146,64 @@ namespace avmshell
             #endif
         }
 
+    protected:
+        virtual Toplevel* toplevel() const = 0;
+
+        void ThrowEOFError();
+        void ThrowMemoryError();
+        void ThrowRangeError();
+        
     private:
+        // OPTIMIZEME these will fit into bytes, might be a tiny worthwhile savings
+        ObjectEncoding  m_objectEncoding;
         Endian m_endian;
     };
-
-    typedef unsigned char U8;
 
     class DataInput : virtual public DataIOBase
     {
     public:
-        DataInput(Toplevel *toplevel) : m_toplevel(toplevel) {}
+        REALLY_INLINE DataInput() : DataIOBase() {}
 
         virtual uint32_t Available() = 0;
         virtual void Read(void *buffer, uint32_t count) = 0;
 
         bool ReadBoolean();
-        U8 ReadU8();
-        unsigned short ReadU16();
+        uint8_t ReadU8();
+        uint16_t ReadU16();
         uint32_t ReadU32();
         float ReadFloat();
         double ReadDouble();
+        String* ReadMultiByte(uint32_t length, String *charSet);
         String* ReadUTF();
         String* ReadUTFBytes(uint32_t length);
         void ReadByteArray(ByteArray& buffer, uint32_t offset, uint32_t count);
+        Atom ReadObject();
 
     protected:
-        Toplevel* const m_toplevel;
-
-        void ThrowEOFError();
-        void ThrowMemoryError();
-        void ThrowRangeError();
         void CheckEOF(uint32_t count);
     };
 
     class DataOutput : virtual public DataIOBase
     {
     public:
-        DataOutput(Toplevel *toplevel) : m_toplevel(toplevel) { }
+        REALLY_INLINE DataOutput() : DataIOBase() { }
 
         virtual void Write(const void *buffer, uint32_t count) = 0;
 
         void WriteBoolean(bool value);
-        void WriteU8(U8 value);
-        void WriteU16(unsigned short value);
+        void WriteU8(uint8_t value);
+        void WriteU16(uint16_t value);
         void WriteU32(uint32_t value);
         void WriteFloat(float value);
         void WriteDouble(double value);
+        void WriteMultiByte(String *str, String *charSet);
         void WriteUTF(String *str);
         void WriteUTFBytes(String *str);
         void WriteByteArray(ByteArray& buffer, uint32_t offset, uint32_t count);
-
-    protected:
-        Toplevel* const m_toplevel;
-
-        void ThrowRangeError();
-
+        void WriteObject(Atom atom);
     };
 }
+
+MMGC_DECLARE_SPECIALIZED_DESTRUCTORCALL_TEMPLATES(avmplus::DataIOBase)
 
 #endif /* DATAIO_INCLUDED */

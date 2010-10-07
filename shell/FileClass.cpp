@@ -203,14 +203,14 @@ namespace avmshell
         ByteArrayClass* bac = (ByteArrayClass*)toplevel->getBuiltinExtensionClass(NativeID::abcclass_flash_utils_ByteArray);
         Atom args[1] = {nullObjectAtom};
         ByteArrayObject *b = (ByteArrayObject*)AvmCore::atomToScriptObject(bac->construct(0,args));
-        b->setLength(0);
+        b->set_length(0);
 
         while (readCount > 0)
         {
             uint32_t actual = (uint32_t) fp->read(c, readCount);
             if (actual > 0)
             {
-                b->fill(c, actual);
+                b->GetByteArray().Write(c, actual);
                 readCount -= readCount;
             }
             else
@@ -218,7 +218,7 @@ namespace avmshell
                 break;
             }
         }
-        b->seek(0);
+        b->set_position(0);
 
         mmfx_delete_array( c );
 

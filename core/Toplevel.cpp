@@ -1373,4 +1373,35 @@ namespace avmplus
 #undef HANDLE_BUG
 
     }
+
+    //  -------------------------------------------------------
+    uint32_t Toplevel::charsetToCodepage(String* /*charset*/)
+    {
+        return 0;
+    }
+
+    String* Toplevel::readMultiByte(uint32_t /*codepage*/, uint32_t /*length*/, DataInput* /*input*/)
+    {
+        AvmAssert(0);
+        return core()->kEmptyString;
+    }
+
+    void Toplevel::writeMultiByte(uint32_t /*codepage*/, String* /*str*/, DataOutput* /*output*/)
+    {
+        AvmAssert(0);
+    }
+
+    //  -------------------------------------------------------
+    Atom Toplevel::readObject(ObjectEncoding /*encoding*/, DataInput* /*input*/)
+    {
+        throwArgumentError(kInvalidArgumentError, core()->toErrorString("objectEncoding"));
+        return undefinedAtom;
+    }
+
+    void Toplevel::writeObject(ObjectEncoding /*encoding*/, DataOutput* /*output*/, Atom /*a*/)
+    {
+        throwArgumentError(kInvalidArgumentError, core()->toErrorString("objectEncoding"));
+    }
+
+    //  -------------------------------------------------------
 }
