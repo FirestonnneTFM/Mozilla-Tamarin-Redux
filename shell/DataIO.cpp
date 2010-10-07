@@ -38,65 +38,103 @@
  * ***** END LICENSE BLOCK ***** */
 
 
+// FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248
+// this should be "avmplus.h" once this file is moved into core
 #include "avmshell.h"
 
-namespace avmshell
+namespace avmplus
 {
-    #define M_ERROR_CLASS(class_id) ((ErrorClass*)m_toplevel->getPlayerClass(avmplus::NativeID::abcclass_##class_id))
+    //
+    // DataIOBase
+    //
+
+    void DataIOBase::ThrowEOFError()
+    {
+        toplevel()->throwError(kEndOfFileError);
+    }
+
+    void DataIOBase::ThrowMemoryError()
+    {
+        toplevel()->throwError(kOutOfMemoryError);
+    }
+
+    void DataIOBase::ThrowRangeError()
+    {
+        toplevel()->throwRangeError(kInvalidRangeError);
+    }
+
+    //
+    // DataInput
+    //
 
     bool DataInput::ReadBoolean()
     {
-        U8 value;
-
+        uint8_t value;
         Read(&value, 1);
         return value != 0;
     }
 
-    U8 DataInput::ReadU8()
+    uint8_t DataInput::ReadU8()
     {
-        U8 value;
-
+        uint8_t value;
         Read(&value, 1);
         return value;
     }
 
-    unsigned short DataInput::ReadU16()
+    uint16_t DataInput::ReadU16()
     {
-        unsigned short value;
-
-        Read(&value, 2);
-        ConvertU16(value);
-        return value;
+        union {
+            uint8_t b[2];
+            uint16_t u;
+        };
+        Read(b, 2);
+        ConvertU16(u);
+        return u;
     }
 
     uint32_t DataInput::ReadU32()
     {
-        uint32_t value;
-        Read(&value, 4);
-        ConvertU32(value);
-        return value;
+        union {
+            uint8_t b[4];
+            uint32_t u;
+        };
+        Read(b, 4);
+        ConvertU32(u);
+        return u;
     }
 
     float DataInput::ReadFloat()
     {
         union {
+            uint8_t b[4];
             uint32_t u;
             float f;
-        } ptr;
-        ptr.u = ReadU32();
-        return ptr.f;
+        };
+        Read(b, 4);
+        ConvertU32(u);
+        return f;
     }
 
     double DataInput::ReadDouble()
     {
         union {
+            uint8_t b[8];
             uint64_t u;
             double d;
-        } ptr;
+        };
+        Read(b, 8);
+        ConvertD64(u);
+        return d;
+    }
 
-        Read(&ptr.d, 8);
-        ConvertD64(ptr.u);
-        return ptr.d;
+    String* DataInput::ReadMultiByte(uint32_t length, String* charset)
+    {
+        CheckEOF(length);
+
+        Toplevel* toplevel = this->toplevel();
+        uint32_t codepage = toplevel->charsetToCodepage(charset);
+        String* result = toplevel->readMultiByte(codepage, length, this);
+        return result;
     }
 
     String* DataInput::ReadUTFBytes(uint32_t length)
@@ -119,7 +157,7 @@ namespace avmshell
             utf8chars += 3;
         }
 
-        String *out = m_toplevel->core()->newStringUTF8(utf8chars);
+        String* out = toplevel()->core()->newStringUTF8(utf8chars);
         mmfx_delete_array( buffer );
 
         return out;
@@ -154,7 +192,7 @@ namespace avmshell
             buffer.SetLength(offset + count);
         }
 
-        Read(buffer.GetBuffer() + offset, count);
+        Read(buffer.GetWritableBuffer() + offset, count);
     }
 
     void DataInput::CheckEOF(uint32_t count)
@@ -164,71 +202,77 @@ namespace avmshell
         }
     }
 
-    void DataInput::ThrowEOFError()
+    Atom DataInput::ReadObject()
     {
-        m_toplevel->throwError(kEndOfFileError);
-    }
-
-    void DataInput::ThrowMemoryError()
-    {
-        m_toplevel->throwError(kOutOfMemoryError);
-    }
-
-    void DataInput::ThrowRangeError()
-    {
-        m_toplevel->throwRangeError(kInvalidRangeError);
+        Toplevel* toplevel = this->toplevel();
+        return toplevel->readObject(GetObjectEncoding(), this);
     }
 
     //
     // DataOutput
     //
 
-    void DataOutput::ThrowRangeError()
-    {
-        m_toplevel->throwRangeError(kInvalidRangeError);
-    }
-
     void DataOutput::WriteBoolean(bool value)
     {
         WriteU8(value ? 1 : 0);
     }
 
-    void DataOutput::WriteU8(U8 value)
+    void DataOutput::WriteU8(uint8_t value)
     {
         Write(&value, 1);
     }
 
-    void DataOutput::WriteU16(unsigned short value)
+    void DataOutput::WriteU16(uint16_t value)
     {
-        ConvertU16(value);
-        Write(&value, 2);
+        union {
+            uint8_t b[2];
+            uint16_t u;
+        };
+        u = value;
+        ConvertU16(u);
+        Write(b, 2);
     }
 
     void DataOutput::WriteU32(uint32_t value)
     {
-        ConvertU32(value);
-        Write(&value, 4);
+        union {
+            uint8_t b[4];
+            uint32_t u;
+        };
+        u = value;
+        ConvertU32(u);
+        Write(b, 4);
     }
 
     void DataOutput::WriteFloat(float value)
     {
         union {
+            uint8_t b[4];
             uint32_t u;
-            float v;
-        } ptr;
-        ptr.v = value;
-        WriteU32(ptr.u);
+            float f;
+        };
+        f = value;
+        ConvertU32(u);
+        Write(b, 4);
     }
 
     void DataOutput::WriteDouble(double value)
     {
         union {
+            uint8_t b[8];
             uint64_t u;
-            double v;
-        } ptr;
-        ptr.v = value;
-        ConvertD64(ptr.u);
-        Write(&ptr.u, 8);
+            double d;
+        };
+        d = value;
+        ConvertD64(u);
+        Write(b, 8);
+    }
+
+    void DataOutput::WriteMultiByte(String* str, String* charset)
+    {
+        Toplevel* toplevel = this->toplevel();
+        uint32_t codepage = toplevel->charsetToCodepage(charset);
+        toplevel->writeMultiByte(codepage, str, this);
     }
 
     void DataOutput::WriteUTF(String *str)
@@ -238,7 +282,7 @@ namespace avmshell
         if (length > 65535) {
             ThrowRangeError();
         }
-        WriteU16((unsigned short)length);
+        WriteU16((uint16_t)length);
         Write(utf8.c_str(), length*sizeof(char));
     }
 
@@ -253,7 +297,7 @@ namespace avmshell
                                     uint32_t offset,
                                     uint32_t count)
     {
-        if (buffer.GetLength() < offset)
+        if (offset >= buffer.GetLength())
             offset = buffer.GetLength();
 
         if (count == 0) {
@@ -265,8 +309,14 @@ namespace avmshell
         }
 
         if (count > 0) {
-            Write(buffer.GetBuffer()+offset, count);
+            Write(buffer.GetReadableBuffer()+offset, count);
         }
+    }
+
+    void DataOutput::WriteObject(Atom atom)
+    {
+        Toplevel* toplevel = this->toplevel();
+        toplevel->writeObject(GetObjectEncoding(), this, atom);
     }
 }
 

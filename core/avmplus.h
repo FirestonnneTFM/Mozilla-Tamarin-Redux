@@ -126,6 +126,8 @@ namespace avmplus
     class CompiledRegExp;
     class Console;
     class Date;
+    class DataInput;
+    class DataOutput;
     class DateClass;
     class DateObject;
     class Debugger;

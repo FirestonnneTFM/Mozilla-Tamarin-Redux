@@ -43,6 +43,22 @@
 
 namespace avmplus
 {
+    // FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248 
+    // Moved here (from DataIO.h) temporarily; when that file is moved into core, move this back
+    enum ObjectEncoding {
+        kAMF0 = 0,
+        kAMF3 = 3,
+        kEncodeDefault = kAMF3
+    };
+
+    // FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248 
+    // Moved here (from DataIO.h) temporarily; when that file is moved into core, move this back
+    enum Endian
+    {
+        kBigEndian    = 0,
+        kLittleEndian = 1
+    };
+
     class IntVectorClass;
     class UIntVectorClass;
     class DoubleVectorClass;
@@ -315,6 +331,84 @@ namespace avmplus
         virtual bool sampler_trusted(ScriptObject* /*sampler*/);
 
         ScopeChain* toplevel_scope();
+
+        //  -------------------------------------------------------
+        
+        //
+        // These methods are used by DataIO to handle conversion to/from specific
+        // non-Unicode text encodings. The default implementation understands nothing, and
+        // always returns 0.
+        //
+        // Subclasses may implement a larger set of codepages (see http://en.wikipedia.org/wiki/Code_page)
+        // but should ensure that any recognized by charsetToCodepage()
+        // are also handled by the conversion routines. They should also
+        // ensure to return zero for illegal input.
+        //
+        // Note that there may be multiple charset strings that map to
+        // the same codepage; this is fine (although the defaults
+        // above don't express all known acceptable charset equivalents)
+        //
+        virtual uint32_t charsetToCodepage(String* charset);
+
+        // 
+        // Read length bytes from the DataInput and convert it to a String
+        // under the assumption it is formatted in the given codepage.
+        // and return it as a String. 
+        //
+        // codepage can be assumed to be a value returned by the charsetToCodepage() method.
+        //
+        // Note that the implementation is not allowed to call DataInput::ReadMultiByte.
+        //
+        // If the data is malformed (e.g., is not valid for the
+        // given codepage), this method may return an arbitrary
+        // string or throw an error, but it must never return null.
+        // (Returning an arbitrary string seems odd, but is the behavior
+        // in certain existing versions of Flash, so must be kept legal.)
+        //
+        virtual String* readMultiByte(uint32_t codepage, uint32_t length, DataInput* input);
+
+        // 
+        // Convert the given (Unicode) String into the given codepage and write it to the given DataOutput.
+        //
+        // codepage can be assumed to be a value returned by the charsetToCodepage() method.
+        //
+        // Note that the implementation is not allowed to call DataOutut::WriteMultiByte.
+        //
+        // If the data is malformed (e.g., is not valid for the
+        // given codepage), this method may write an arbitrary
+        // string to the DataOutput.
+        // (Returning an arbitrary string seems odd, but is the behavior
+        // in certain existing versions of Flash, so must be kept legal.)
+        //
+        virtual void writeMultiByte(uint32_t codepage, String* str, DataOutput* output);
+
+        //  -------------------------------------------------------
+        
+        //
+        // Deserialize an Atom value from the input using the specified encoding.
+        // If the encoding is not valid, or the input stream is malformed, throw an error.
+        //
+        // Note that the implementation is not allowed to call DataInput::ReadObject.
+        //
+        // Note that the default implementation always throws an error; this is
+        // simply a hook for embedders to use for custom implementations.
+        //
+        virtual Atom readObject(ObjectEncoding encoding, DataInput* input);
+
+        //
+        // Serialize the given Atom value into the output using the specified encoding.
+        // If the encoding is not valid, throw an error. 
+        //
+        // Note that the implementation is not allowed to call DataOutput::WriteObject.
+        //
+        // Note that the default implementation always throws an error; this is
+        // simply a hook for embedders to use for custom implementations.
+        //
+        virtual void writeObject(ObjectEncoding encoding, DataOutput* output, Atom a);
+
+        //  -------------------------------------------------------
+
+
 
     protected:
         ClassClosure* findClassInScriptEnv(int class_id, ScriptEnv* env);
