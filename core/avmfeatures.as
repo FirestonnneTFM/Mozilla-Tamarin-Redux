@@ -320,7 +320,6 @@ var FEATURES =
   <feature>
     <desc> Selects Symbian </desc>
     <name> AVMSYSTEM_SYMBIAN </name>
-    <defines> AVMPLUS_SYMBIAN </defines>    <!-- FIXME: legacy name -->
     <defines> VMCFG_SYMBIAN </defines>
   </feature>
 
