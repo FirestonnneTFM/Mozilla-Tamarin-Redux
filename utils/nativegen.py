@@ -1326,13 +1326,13 @@ class AbcThunkGen:
             receiver = None;
             m = None;
             out_c.println('')
-            for native_name in users:
+            for native_name in sorted(users):
                 out_c.println("// "+native_name);
                 receiver = users[native_name][0];
                 m = users[native_name][1];
             thunkname = name+"_"+sig;
             self.emitThunkProto(thunkname, receiver, m);
-            for native_name in users:
+            for native_name in sorted(users):
                 # use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
                 # (sad but true, happens in some environments)
                 out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
@@ -1461,22 +1461,28 @@ class AbcThunkGen:
                 traitsSet.add(slotTraits)
 
         glueClassToTraits = {}
-        for t in traitsSet:
+        for t in sorted(traitsSet):
             if ((t.niname is not None) and (CTYPE_TO_NEED_FORWARD_DECL[ctype_from_traits(t, True)])):
                 (classNS, glueClassName) = self.__parseCPPClassName(t.niname)
                 # special hack because the meta data for the class Math says its instance data is of type double
                 if (CTYPE_TO_NEED_FORWARD_DECL.get(glueClassName, True)):
                     cppNamespaceToGlueClasses.setdefault(classNS, set()).add(glueClassName)
-                    glueClassToTraits[classNS + u'::' + glueClassName] = t
-        for (nsStr, glueClasses) in cppNamespaceToGlueClasses.iteritems():
+                    key = classNS + u'::' + glueClassName
+                    if not key in glueClassToTraits:
+                        glueClassToTraits[key] = []
+                    glueClassToTraits[key].append(t)
+        for (nsStr, glueClasses) in sorted(cppNamespaceToGlueClasses.iteritems()):
             #turn list of namespaces [foo, bar, baz] into "namespace foo { namespace bar { namespace baz{"
             nsList = self.__parseCPPNamespaceStr(nsStr)
             out_h.println(' '.join(map(lambda ns: u'namespace %s {' % ns, nsList)))
             out_h.indent += 1
-
+            
+            # this can emit the same class multiple times; that's by design,
+            # for clarity & stability of output
             for glueClass in sorted(glueClasses):
-                traits = glueClassToTraits[nsStr + u'::' + glueClass]
-                out_h.println('class %s; //%s' % (glueClass, str(traits.name)))
+                traitsList = glueClassToTraits[nsStr + u'::' + glueClass]
+                for traits in sorted(traitsList):
+                    out_h.println('class %s; // %s' % (glueClass, traits))
             out_h.indent -= 1
             out_h.println(' '.join(('}',) * len(nsList)))
             out_h.println('')

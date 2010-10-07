@@ -4102,10 +4102,10 @@ AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
+// __AS3___vec_Vector_double_private__spliceHelper
+// __AS3___vec_Vector_int_private__spliceHelper
 // __AS3___vec_Vector_object_private__spliceHelper
 // __AS3___vec_Vector_uint_private__spliceHelper
-// __AS3___vec_Vector_int_private__spliceHelper
-// __AS3___vec_Vector_double_private__spliceHelper
 AvmBox builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4129,28 +4129,28 @@ AvmBox builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return kAvmThunkUndefined;
 }
 
-// Date_AS3_getUTCDate
-// Date_AS3_getUTCMonth
-// Date_AS3_getHours
-// Date_AS3_getFullYear
-// Date_AS3_valueOf
-// Date_AS3_getSeconds
-// Date_AS3_getTimezoneOffset
-// Date_AS3_getMinutes
-// Date_AS3_getUTCSeconds
-// Date_AS3_getUTCMinutes
-// Date_AS3_getUTCFullYear
-// Date_AS3_getMilliseconds
-// Date_AS3_getUTCDay
-// Date_AS3_getUTCHours
-// Number_private__minValue
-// Date_AS3_getTime
-// Date_AS3_getDay
-// __AS3___vec_Vector_double_AS3_pop
-// Date_AS3_getUTCMilliseconds
-// Date_AS3_getMonth
-// Math_random
 // Date_AS3_getDate
+// Date_AS3_getDay
+// Date_AS3_getFullYear
+// Date_AS3_getHours
+// Date_AS3_getMilliseconds
+// Date_AS3_getMinutes
+// Date_AS3_getMonth
+// Date_AS3_getSeconds
+// Date_AS3_getTime
+// Date_AS3_getTimezoneOffset
+// Date_AS3_getUTCDate
+// Date_AS3_getUTCDay
+// Date_AS3_getUTCFullYear
+// Date_AS3_getUTCHours
+// Date_AS3_getUTCMilliseconds
+// Date_AS3_getUTCMinutes
+// Date_AS3_getUTCMonth
+// Date_AS3_getUTCSeconds
+// Date_AS3_valueOf
+// Math_random
+// Number_private__minValue
+// __AS3___vec_Vector_double_AS3_pop
 double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4163,10 +4163,10 @@ double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-// XML_AS3_propertyIsEnumerable
+// XMLList_AS3_hasOwnProperty
 // XMLList_AS3_propertyIsEnumerable
 // XML_AS3_hasOwnProperty
-// XMLList_AS3_hasOwnProperty
+// XML_AS3_propertyIsEnumerable
 AvmBox builtin_b2a_oa_optakAvmThunkUndefined_u_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4276,15 +4276,15 @@ AvmBox builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return (AvmBox) ret;
 }
 
-// XML_AS3_toXMLString
-// XML_AS3_toString
 // Error_getStackTrace
 // QName_localName_get
-// XMLList_AS3_toString
-// XML_AS3_nodeKind
 // RegExp_source_get
-// XMLList_AS3_toXMLString
 // XMLList_AS3_nodeKind
+// XMLList_AS3_toString
+// XMLList_AS3_toXMLString
+// XML_AS3_nodeKind
+// XML_AS3_toString
+// XML_AS3_toXMLString
 AvmBox builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4335,11 +4335,11 @@ double builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_th
     return ret;
 }
 
-// __AS3___vec_Vector_uint_length_set
-// __AS3___vec_Vector_object_length_set
-// __AS3___vec_Vector_int_length_set
-// __AS3___vec_Vector_double_length_set
 // Array_length_set
+// __AS3___vec_Vector_double_length_set
+// __AS3___vec_Vector_int_length_set
+// __AS3___vec_Vector_object_length_set
+// __AS3___vec_Vector_uint_length_set
 AvmBox builtin_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4356,21 +4356,21 @@ AvmBox builtin_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 }
 
 // Array_private__pop
-// XML_AS3_removeNamespace
-// XMLList_AS3_appendChild
-// XML_AS3_addNamespace
-// XMLList_AS3_prependChild
-// XMLList_AS3_attribute
-// XMLList_AS3_addNamespace
-// XMLList_AS3_child
-// XML_AS3_appendChild
-// Array_private__shift
-// XML_AS3_prependChild
-// XML_AS3_child
-// XML_AS3_attribute
-// XMLList_AS3_removeNamespace
 // Array_private__reverse
+// Array_private__shift
+// XMLList_AS3_addNamespace
+// XMLList_AS3_appendChild
+// XMLList_AS3_attribute
+// XMLList_AS3_child
+// XMLList_AS3_prependChild
+// XMLList_AS3_removeNamespace
 // XMLList_AS3_setChildren
+// XML_AS3_addNamespace
+// XML_AS3_appendChild
+// XML_AS3_attribute
+// XML_AS3_child
+// XML_AS3_prependChild
+// XML_AS3_removeNamespace
 // XML_AS3_setChildren
 AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
@@ -4403,20 +4403,20 @@ AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0
     return (AvmBox) ret;
 }
 
-// Date_private__setUTCDate
+// Date_private__setDate
 // Date_private__setFullYear
+// Date_private__setHours
+// Date_private__setMilliseconds
 // Date_private__setMinutes
+// Date_private__setMonth
+// Date_private__setSeconds
+// Date_private__setUTCDate
+// Date_private__setUTCFullYear
+// Date_private__setUTCHours
+// Date_private__setUTCMilliseconds
+// Date_private__setUTCMinutes
 // Date_private__setUTCMonth
 // Date_private__setUTCSeconds
-// Date_private__setHours
-// Date_private__setDate
-// Date_private__setUTCMinutes
-// Date_private__setMonth
-// Date_private__setUTCHours
-// Date_private__setSeconds
-// Date_private__setUTCFullYear
-// Date_private__setMilliseconds
-// Date_private__setUTCMilliseconds
 double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4431,8 +4431,8 @@ double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-// native_script_function_isNaN
 // native_script_function_isFinite
+// native_script_function_isNaN
 AvmBox builtin_func_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4493,12 +4493,12 @@ double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEn
     return ret;
 }
 
-// XMLList_AS3_elements
-// XML_AS3_descendants
-// XML_AS3_processingInstructions
-// XML_AS3_elements
 // XMLList_AS3_descendants
+// XMLList_AS3_elements
 // XMLList_AS3_processingInstructions
+// XML_AS3_descendants
+// XML_AS3_elements
+// XML_AS3_processingInstructions
 AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4593,12 +4593,12 @@ AvmBox builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return (AvmBox) ret;
 }
 
-// __AS3___vec_Vector_uint_length_get
-// __AS3___vec_Vector_int_length_get
 // Array_length_get
-// __AS3___vec_Vector_uint_AS3_pop
-// __AS3___vec_Vector_object_length_get
 // __AS3___vec_Vector_double_length_get
+// __AS3___vec_Vector_int_length_get
+// __AS3___vec_Vector_object_length_get
+// __AS3___vec_Vector_uint_AS3_pop
+// __AS3___vec_Vector_uint_length_get
 AvmBox builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4630,9 +4630,9 @@ AvmBox builtin_func_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 }
 
 // __AS3___vec_Vector_double_private__reverse
-// __AS3___vec_Vector_uint_private__reverse
-// __AS3___vec_Vector_object_private__reverse
 // __AS3___vec_Vector_int_private__reverse
+// __AS3___vec_Vector_object_private__reverse
+// __AS3___vec_Vector_uint_private__reverse
 AvmBox builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4717,13 +4717,13 @@ AvmBox builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
+// Function_length_get
+// RegExp_lastIndex_get
+// XMLList_AS3_childIndex
+// XMLList_AS3_length
 // XML_AS3_childIndex
 // XML_prettyIndent_get
 // __AS3___vec_Vector_int_AS3_pop
-// XMLList_AS3_length
-// RegExp_lastIndex_get
-// XMLList_AS3_childIndex
-// Function_length_get
 AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4736,14 +4736,14 @@ AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-// __AS3___vec_Vector_object_private__map
 // __AS3___vec_Vector_double_private__filter
-// __AS3___vec_Vector_object_private__filter
-// __AS3___vec_Vector_int_private__map
-// __AS3___vec_Vector_uint_private__map
-// __AS3___vec_Vector_int_private__filter
 // __AS3___vec_Vector_double_private__map
+// __AS3___vec_Vector_int_private__filter
+// __AS3___vec_Vector_int_private__map
+// __AS3___vec_Vector_object_private__filter
+// __AS3___vec_Vector_object_private__map
 // __AS3___vec_Vector_uint_private__filter
+// __AS3___vec_Vector_uint_private__map
 AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4791,16 +4791,16 @@ AvmBox builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return (AvmBox) ret;
 }
 
-// __AS3___vec_Vector_double_private__every
-// __AS3___vec_Vector_int_private__some
-// __AS3___vec_Vector_object_private__some
-// Array_private__some
-// __AS3___vec_Vector_double_private__some
-// __AS3___vec_Vector_uint_private__some
-// __AS3___vec_Vector_object_private__every
 // Array_private__every
+// Array_private__some
+// __AS3___vec_Vector_double_private__every
+// __AS3___vec_Vector_double_private__some
 // __AS3___vec_Vector_int_private__every
+// __AS3___vec_Vector_int_private__some
+// __AS3___vec_Vector_object_private__every
+// __AS3___vec_Vector_object_private__some
 // __AS3___vec_Vector_uint_private__every
+// __AS3___vec_Vector_uint_private__some
 AvmBox builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4867,11 +4867,11 @@ AvmBox builtin_s2a_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return (AvmBox) ret;
 }
 
-// __AS3___vec_Vector_double_private__forEach
-// __AS3___vec_Vector_object_private__forEach
-// __AS3___vec_Vector_int_private__forEach
-// __AS3___vec_Vector_uint_private__forEach
 // Array_private__forEach
+// __AS3___vec_Vector_double_private__forEach
+// __AS3___vec_Vector_int_private__forEach
+// __AS3___vec_Vector_object_private__forEach
+// __AS3___vec_Vector_uint_private__forEach
 AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4908,11 +4908,11 @@ AvmBox builtin_func_b2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 }
 
 // native_script_function_decodeURI
-// native_script_function_escape
-// native_script_function_unescape
+// native_script_function_decodeURIComponent
 // native_script_function_encodeURI
 // native_script_function_encodeURIComponent
-// native_script_function_decodeURIComponent
+// native_script_function_escape
+// native_script_function_unescape
 AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4940,9 +4940,9 @@ AvmBox builtin_s2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
+// String_AS3_slice
 // String_AS3_substr
 // String_AS3_substring
-// String_AS3_slice
 AvmBox builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4958,10 +4958,10 @@ AvmBox builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t arg
     );
 }
 
-// Math_private__min
 // Math_atan2
 // Math_pow
 // Math_private__max
+// Math_private__min
 double builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -4991,35 +4991,35 @@ AvmBox builtin_a2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return (AvmBox) ret;
 }
 
-// XMLList_AS3_inScopeNamespaces
-// XML_AS3_notification
-// XML_AS3_inScopeNamespaces
-// XMLList_AS3_copy
-// XMLList_AS3_children
-// XML_AS3_attributes
-// XMLList_AS3_text
-// __AS3___vec_Vector_object_AS3_pop
+// Array_AS3_pop
 // Class_prototype_get
+// Function_prototype_get
+// QName_uri_get
+// XMLList_AS3_attributes
+// XMLList_AS3_children
+// XMLList_AS3_comments
+// XMLList_AS3_copy
+// XMLList_AS3_inScopeNamespaces
+// XMLList_AS3_localName
+// XMLList_AS3_name
+// XMLList_AS3_namespaceDeclarations
+// XMLList_AS3_normalize
+// XMLList_AS3_parent
+// XMLList_AS3_text
+// XML_AS3_attributes
+// XML_AS3_children
+// XML_AS3_comments
+// XML_AS3_copy
+// XML_AS3_inScopeNamespaces
+// XML_AS3_localName
 // XML_AS3_name
 // XML_AS3_namespaceDeclarations
-// XMLList_AS3_name
-// QName_uri_get
-// XMLList_AS3_normalize
-// XML_AS3_text
-// XMLList_AS3_namespaceDeclarations
-// Function_prototype_get
-// XML_AS3_children
-// XML_AS3_parent
-// __AS3___vec_Vector_object_private_type_get
-// XMLList_AS3_comments
-// XML_AS3_localName
-// XML_AS3_copy
 // XML_AS3_normalize
-// Array_AS3_pop
-// XML_AS3_comments
-// XMLList_AS3_attributes
-// XMLList_AS3_localName
-// XMLList_AS3_parent
+// XML_AS3_notification
+// XML_AS3_parent
+// XML_AS3_text
+// __AS3___vec_Vector_object_AS3_pop
+// __AS3___vec_Vector_object_private_type_get
 AvmBox builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5087,16 +5087,16 @@ AvmBox builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodE
     return (AvmBox) ret;
 }
 
-// __AS3___vec_Vector_uint_AS3_push
-// __AS3___vec_Vector_object_AS3_push
-// Array_AS3_unshift
 // Array_AS3_push
-// __AS3___vec_Vector_int_AS3_unshift
-// __AS3___vec_Vector_uint_AS3_unshift
-// __AS3___vec_Vector_double_AS3_unshift
-// __AS3___vec_Vector_object_AS3_unshift
-// __AS3___vec_Vector_int_AS3_push
+// Array_AS3_unshift
 // __AS3___vec_Vector_double_AS3_push
+// __AS3___vec_Vector_double_AS3_unshift
+// __AS3___vec_Vector_int_AS3_push
+// __AS3___vec_Vector_int_AS3_unshift
+// __AS3___vec_Vector_object_AS3_push
+// __AS3___vec_Vector_object_AS3_unshift
+// __AS3___vec_Vector_uint_AS3_push
+// __AS3___vec_Vector_uint_AS3_unshift
 AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5180,19 +5180,19 @@ AvmBox builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* arg
 }
 
 // Date_private__setTime
-// Math_cos
-// Math_ceil
-// Math_acos
 // Math_abs
-// Math_atan
+// Math_acos
 // Math_asin
+// Math_atan
+// Math_ceil
+// Math_cos
 // Math_exp
-// Math_round
+// Math_floor
 // Math_log
-// Math_tan
+// Math_round
 // Math_sin
 // Math_sqrt
-// Math_floor
+// Math_tan
 double builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5242,14 +5242,14 @@ AvmBox builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t arg
     );
 }
 
-// __AS3___vec_Vector_uint_fixed_set
-// XML_prettyPrinting_set
-// __AS3___vec_Vector_object_fixed_set
 // XML_ignoreComments_set
-// XML_ignoreWhitespace_set
-// __AS3___vec_Vector_double_fixed_set
 // XML_ignoreProcessingInstructions_set
+// XML_ignoreWhitespace_set
+// XML_prettyPrinting_set
+// __AS3___vec_Vector_double_fixed_set
 // __AS3___vec_Vector_int_fixed_set
+// __AS3___vec_Vector_object_fixed_set
+// __AS3___vec_Vector_uint_fixed_set
 AvmBox builtin_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5265,14 +5265,14 @@ AvmBox builtin_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return kAvmThunkUndefined;
 }
 
-// XMLList_AS3_setName
-// __AS3___vec_Vector_object_private_type_set
-// XMLList_AS3_setLocalName
 // Function_prototype_set
+// XMLList_AS3_setLocalName
+// XMLList_AS3_setName
 // XMLList_AS3_setNamespace
+// XML_AS3_setLocalName
 // XML_AS3_setName
 // XML_AS3_setNamespace
-// XML_AS3_setLocalName
+// __AS3___vec_Vector_object_private_type_set
 AvmBox builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5304,8 +5304,8 @@ double builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return ret;
 }
 
-// XML_prettyIndent_set
 // RegExp_lastIndex_set
+// XML_prettyIndent_set
 AvmBox builtin_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5354,12 +5354,12 @@ double builtin_func_d2d_osi_optsAvmThunkConstant_AvmString_60_____NaN_____opti0_
     return ret;
 }
 
-// XML_AS3_insertChildAfter
-// XMLList_AS3_insertChildBefore
 // XMLList_AS3_insertChildAfter
+// XMLList_AS3_insertChildBefore
+// XMLList_AS3_replace
+// XML_AS3_insertChildAfter
 // XML_AS3_insertChildBefore
 // XML_AS3_replace
-// XMLList_AS3_replace
 AvmBox builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5376,23 +5376,23 @@ AvmBox builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-// RegExp_multiline_get
-// __AS3___vec_Vector_double_fixed_get
 // RegExp_dotall_get
-// XMLList_AS3_hasComplexContent
-// XML_prettyPrinting_get
-// __AS3___vec_Vector_uint_fixed_get
-// XML_ignoreComments_get
-// __AS3___vec_Vector_int_fixed_get
+// RegExp_extended_get
 // RegExp_global_get
 // RegExp_ignoreCase_get
-// __AS3___vec_Vector_object_fixed_get
+// RegExp_multiline_get
+// XMLList_AS3_hasComplexContent
 // XMLList_AS3_hasSimpleContent
-// XML_AS3_hasSimpleContent
-// XML_ignoreWhitespace_get
-// RegExp_extended_get
 // XML_AS3_hasComplexContent
+// XML_AS3_hasSimpleContent
+// XML_ignoreComments_get
 // XML_ignoreProcessingInstructions_get
+// XML_ignoreWhitespace_get
+// XML_prettyPrinting_get
+// __AS3___vec_Vector_double_fixed_get
+// __AS3___vec_Vector_int_fixed_get
+// __AS3___vec_Vector_object_fixed_get
+// __AS3___vec_Vector_uint_fixed_get
 AvmBox builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5443,8 +5443,8 @@ AvmBox builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     return (AvmBox) ret;
 }
 
-// XML_private__namespace
 // XMLList_private__namespace
+// XML_private__namespace
 AvmBox builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
@@ -5521,13 +5521,13 @@ double builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(Av
     return ret;
 }
 
-// __AS3___vec_Vector_uint_private__sort
-// __AS3___vec_Vector_object_private__sort
 // Array_private__concat
-// __AS3___vec_Vector_int_private__sort
-// __AS3___vec_Vector_double_private__sort
-// Array_private__splice
 // Array_private__sort
+// Array_private__splice
+// __AS3___vec_Vector_double_private__sort
+// __AS3___vec_Vector_int_private__sort
+// __AS3___vec_Vector_object_private__sort
+// __AS3___vec_Vector_uint_private__sort
 AvmBox builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
     enum {
