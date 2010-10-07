@@ -131,7 +131,7 @@ namespace avmshell
 
 #ifdef AVMPLUS_64BIT
     const size_t kStackMargin = 262144;
-#elif (defined AVMPLUS_WIN32 && defined UNDER_CE) || defined AVMPLUS_SYMBIAN
+#elif (defined AVMPLUS_WIN32 && defined UNDER_CE) || defined VMCFG_SYMBIAN
     // FIXME: all embedded platforms, but we have no way of expressing that now
     const size_t kStackMargin = 32768;
 #else
