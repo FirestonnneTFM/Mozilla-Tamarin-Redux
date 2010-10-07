@@ -387,11 +387,12 @@ namespace avmplus
     REALLY_INLINE void ListImpl<T,ListHelper>::set(uint32_t index, T value)
     {
         // Yes, this is worth inlining, according to performance testing.
-        AvmAssert(index < m_data->cap);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        ListHelper::store(allocator, m_data, index, value);
         if (index >= m_data->len)
+        {
+            ensureCapacityExtra(index, 1);
             m_data->len = index+1;
+        }
+        ListHelper::store(ListHelper::getAllocator(m_data), m_data, index, value);
     }
 
     template<class T, class ListHelper>
@@ -430,16 +431,16 @@ namespace avmplus
     }
 
     template<class T, class ListHelper>
-    REALLY_INLINE void ListImpl<T,ListHelper>::ensureCapacity(ALLOCATOR* allocator, uint32_t cap, uint32_t extra)
+    REALLY_INLINE void ListImpl<T,ListHelper>::ensureCapacityExtra(uint32_t cap, uint32_t extra)
     {
-        uint64_t const ncap = uint64_t(cap) + uint64_t(extra);
-        if (ncap > kListMaxLength)
-            MMgc::GCHeap::SignalObjectTooLarge();
-
-        uint32_t const ncap32 = uint32_t(ncap);
-        if (ncap32 > m_data->cap)
+        MMGC_STATIC_ASSERT(0xFFFFFFFF > kListMaxLength);
+        uint32_t const ncap = (cap > 0xFFFFFFFF - extra) ?  // if true, cap + extra will overflow a uint32_t...
+                              0xFFFFFFFF :                  // ...in that case, choose a size that will definitely fail in ensureCapacityImpl.
+                              (cap + extra);                
+        
+        if (ncap > m_data->cap)
         {
-            ensureCapacityImpl(allocator, ncap32);
+            ensureCapacityImpl(ncap);
         }
     }
 
@@ -447,8 +448,10 @@ namespace avmplus
     REALLY_INLINE void ListImpl<T,ListHelper>::ensureCapacity(uint32_t cap)
     {
         AvmAssert(m_data != NULL);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        ensureCapacity(allocator, cap, 0);
+        if (cap > m_data->cap)
+        {
+            ensureCapacityImpl(cap);
+        }
     }
 
     template<class T, class ListHelper>
