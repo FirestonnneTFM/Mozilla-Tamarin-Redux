@@ -1977,7 +1977,7 @@ return the result of the comparison ToPrimitive(x) == y.
                 buffer << wopAttrs[opcode].name;
                 uint32_t index = (uint32_t)*pc++;
                 if (index < pool->cpool_double.length())
-                    buffer << " " << *pool->cpool_double[index];
+                    buffer << " " << pool->cpool_double[index]->value;
                 else
                     buffer << " OUT OF RANGE: " << index;
                 break;
