@@ -117,9 +117,8 @@ namespace avmplus
         }
         if (m_data->cap > kListMinCapacity)
         {
-            size_t const sizeInBytes = sizeof(typename ListHelper::LISTDATA) + (kListMinCapacity-1)*sizeof(T);
             typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-            typename ListHelper::LISTDATA* newData = (typename ListHelper::LISTDATA*) allocator->Alloc(sizeInBytes, ListHelper::allocFlags());
+            typename ListHelper::LISTDATA* newData = allocData(allocator, kListMinCapacity);
             newData->len = 0;
             newData->cap = kListMinCapacity;
             allocator->Free(m_data);
