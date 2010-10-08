@@ -133,7 +133,7 @@ namespace avmplus
         // (syntactic sugar)
         typedef ListData<STORAGE> LISTDATA;
 
-        // When calling allocator->Alloc(), these are the flags we should use (kZero, etc).
+        // When calling allocator->Calloc(), these are the flags we should use (kZero, etc).
         static ALLOCATORFLAGS allocFlags();
 
         // Given a pointer to data, return the allocator used to allocate it.
