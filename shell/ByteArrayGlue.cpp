@@ -224,7 +224,9 @@ namespace avmplus
     }
 
     // When we might be reading or writing to ourself, use this function
-    REALLY_INLINE static void move_or_copy(void* dst, const void* src, uint32_t count)
+    // apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions in CPP files
+    /*static*/
+    REALLY_INLINE void move_or_copy(void* dst, const void* src, uint32_t count)
     {
         if ((uintptr_t(dst) - uintptr_t(src)) >= uintptr_t(count)) 
         {
