@@ -598,7 +598,7 @@ namespace avmplus
 
         // Not a valid indexed name - has a decimal part
         // NOTE use default public for message gen
-        Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+        Multiname mn(core()->findPublicNamespace(), core()->internDouble(d));
         toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
         return 0; // unreachable
     }
@@ -614,7 +614,7 @@ namespace avmplus
         {
             // Not a valid indexed name - has a decimal part
             // NOTE use default public for message gen
-            Multiname mn(core()->findPublicNamespace(), core()->doubleToString(d));
+            Multiname mn(core()->findPublicNamespace(), core()->internDouble(d));
             toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
         }
     }
