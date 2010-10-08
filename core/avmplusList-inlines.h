@@ -473,7 +473,7 @@ namespace avmplus
         size_t const extra = (ld_minus_t >= sizeof(T)) ?
                                 (ld_minus_t / sizeof(T)) :
                                 1;
-        typename ListHelper::LISTDATA* newData = ::new (allocator->Calloc(cap + extra, sizeof(T), ListHelper::allocFlags()))(typename ListHelper::LISTDATA)();
+        typename ListHelper::LISTDATA* newData = ::new (allocator->Calloc(cap + extra, sizeof(T), ListHelper::allocFlags()))(typename ListHelper::LISTDATA);
         newData->len = 0;
         newData->cap = cap;
         return newData;
