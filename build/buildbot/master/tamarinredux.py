@@ -2348,7 +2348,7 @@ class tamarinredux:
     # since we do not wipe the repo every time, delete the scripts dir before
     # running bb_slaveupdate
     promote_build_factory.addStep(ShellCommand(
-            command=['delete-bb-scripts-dir.sh'],
+            command=['./delete-bb-scripts-dir.sh'],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Delete scripts dir' ,
             descriptionDone='Deleted scripts dir',
