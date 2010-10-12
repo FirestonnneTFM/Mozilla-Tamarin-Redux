@@ -45,7 +45,7 @@ function loop():void {
 function loop2(s:String):int {
     var v:int;
     for ( var i:uint=0 ; i < 100000 ; i++ )
-        v = s.indexOf("abcde");
+        v = s.lastIndexOf("abcde");
     return v;
 }
 
