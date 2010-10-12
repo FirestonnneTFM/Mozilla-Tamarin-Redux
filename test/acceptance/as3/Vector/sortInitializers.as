@@ -60,10 +60,20 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase(
+
+if (as3Enabled()) {
+    AddTestCase(
+   "sort vector without setting compare function throws exception",
+   "ArgumentError: Error #1063",
+   parseError(errormsg,"ArgumentError: Error #1063".length));
+} else {
+    AddTestCase(
    "sort vector without setting compare function throws exception",
    "TypeError: Error #1034",
    parseError(errormsg,"TypeError: Error #1034".length));
+}
+
+
 
 AddTestCase(
     "sort vector",

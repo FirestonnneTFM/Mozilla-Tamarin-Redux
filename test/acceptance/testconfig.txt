@@ -151,6 +151,10 @@ ecma3/String/split_504567:'babab',   ^((?!diff).)*$   , expectedfail, bug https:
 ####################
 as3/Vector/concat:concat multiple int vectors, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=504525
 
+# vector/map passes w/ asc -ES but fails with -AS3 - skip due to differing behavior
+as3/Vector/map      , ^((?!-ES).)*$ , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=574600
+as3/Vector/mapInitializers, ^((?!-ES).)*$ , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=574600
+
 ####################
 # Array
 ####################
@@ -305,6 +309,7 @@ regress/bug_555705, .*-Dverifyall.*, skip, test throws an expected verifyerror t
 # as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
 # ProcessSampling:GetSizeSamples intermittently fails
 as3/sampling/ProcessSampling ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+as3/sampling/Callback:Callback: callback called.*, ^((?!-ES).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=603814
 
 ####################
 # ATS Skipped tests - These tests will not be exported when generating ATS swfs

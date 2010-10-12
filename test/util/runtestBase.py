@@ -86,8 +86,11 @@ class RuntestBase:
     abcasmRunner = 'bash ../../utils/abcasm/abcasm.sh'
     abcasmShell = 'abcasm/abs_helper'
     abcdump = '../../utils/abcdump'
+    addtoconfig = ''
     asc = ''
     ascargs = ''
+    # list of args to remove defined using -no-argname format in --ascargs
+    asc_negative_args = []
     atsDir = 'ATS_SWFS'
     ascversion = ''
     avm = ''
@@ -200,6 +203,7 @@ class RuntestBase:
         print ' -t --notime        do not generate timestamps (cleaner diffs)'
         print ' -f --forcerebuild  force rebuild all test files'
         print ' -c --config        sets the config string [default OS-tvm]'
+        print '    --addtoconfig   add string to default config'
         print ' -q --quiet         display minimum output during testrun'
         print ' -l --log           also log all output to given logfile'
         print '    --valgrind      run tests under valgrind'
@@ -207,6 +211,7 @@ class RuntestBase:
         print '    --rebuildtests  rebuild the tests only - do not run against VM'
         print '    --showtimes     shows the time for each test'
         print '    --ascargs       args to pass to asc on rebuild of test files'
+        print '                    can also pass in -no-Argname to remove arg'
         print '    --vmargs        args to pass to vm'
         print '    --timeout       max time to run all tests'
         print '    --testtimeout   max time to let a test run, in sec (default -1 = never timeout)'
@@ -232,7 +237,7 @@ class RuntestBase:
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
-                   'javaargs=', 'summaryonly', 'log=', 'valgrind'
+                   'javaargs=', 'summaryonly', 'log=', 'valgrind', 'addtoconfig='
                    ]
 
     def parseOptions(self):
@@ -269,6 +274,8 @@ class RuntestBase:
                 self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-c', '--config'):
                 self.config = v
+            elif o in ('--addtoconfig',):
+                self.addtoconfig = v
             elif o in ('--ascargs',):
                 self.ascargs = v
             elif o in ('--vmargs',):
@@ -459,7 +466,8 @@ class RuntestBase:
         else:
             wordcode = ''
             
-        self.config = cputype+'-'+self.osName+'-'+vm_str+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
+        self.config = cputype+'-'+self.osName+'-'+vm_str+'-'+self.vmtype+ \
+                      wordcode+self.addtoconfig+self.vmargs.replace(" ", "")
         
         
 
@@ -747,6 +755,12 @@ class RuntestBase:
 
         if isfile('./dir.asc_args'):  # load root dir.asc_args
             ascArgsList = parseArgStringToList(self.ascargs)
+            # seperate out the negative args
+            for arg in ascArgsList:
+                if arg[0:3].lower() == '-no':
+                    self.asc_negative_args.append(arg[3:])
+                # delete the -no arg from the list
+                ascArgsList.remove(arg)
             ascArgsList = self.parseAscArgs(ascArgsList, './dir.asc_args', './')
             self.ascargs = ' '.join(ascArgsList)
 
@@ -876,8 +890,6 @@ class RuntestBase:
         if as_file.endswith(self.sourceExt):
             if not isfile(builtinabc):
                 exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
-
-
 
             javaArgList = parseArgStringToList(self.javaargs)
             javaArgList = self.loadArgsFile(javaArgList, dir, as_file, 'java_args')
@@ -1082,10 +1094,10 @@ class RuntestBase:
                 exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % self.shellabc)
             ascargs[1] = string.replace(ascargs[1], '$SHELLABC', self.shellabc)
         ascargs[1] = parseArgStringToList(ascargs[1])
-        removeArgList = []
+        removeArgList = self.asc_negative_args[:]   # get a copy of the negative args list
         argList = []
         for a in ascargs[1]:
-            if a[0:3] == '-no':
+            if a[0:3].lower() == '-no':
                 removeArgList.append(a[3:])
             else:
                 argList.append(a)
