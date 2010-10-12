@@ -243,7 +243,6 @@ class RuntestBase:
 
         if not self.args:
             self.args = ['.']
-
         for o, v in opts:
             if o in ('-v', '--verbose'):
                 self.verbose = True
@@ -692,10 +691,12 @@ class RuntestBase:
                and not f.endswith('Util'+self.sourceExt)
 
     def parents(self, d):
+        '''return a generator of the current dir and all parent directories up
+            to the test dir root'''
         while d != abspath(self.args[0]) and d != '':
             yield d
             d = dirname(d)
-        yield d
+        yield '.'   # yield the test dir root
 
     def parseTestConfig(self, dir):
         settings={}
@@ -751,7 +752,7 @@ class RuntestBase:
 
 
         # Loads root asc_args file and modifies arglist accordingly
-        if isfile('./dir.java_args'):  # load root dir.asc_args
+        if isfile('./dir.java_args'):  # load root dir.java_args
             javaArgsList = parseArgStringToList(self.javaargs)
             javaArgsList = self.parseAscArgs(javaArgsList, './dir.java_args', './')
             self.javaargs = ' '.join(javaArgsList)
@@ -893,8 +894,6 @@ class RuntestBase:
             ascArgList = parseArgStringToList(ascargs)
         
             for p in self.parents(dir):
-                if p=='':
-                    p='.'
                 shell = join(p,'shell'+self.sourceExt)
                 if isfile(shell):
                     ascArgList.append(' -in ' + shell)
@@ -935,7 +934,6 @@ class RuntestBase:
             return
         
         try:
-            self.verbose_print('compiling: %s %s' % (cmd,as_file))
             (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file), outputCalls=outputCalls)
             if self.genAtsSwfs:
                 moveAtsSwf(dir,file, self.atsDir)
@@ -1003,8 +1001,6 @@ class RuntestBase:
                         self.compile_test(test)
                     else:
                         for p in self.parents(dir):
-                            if p=='':
-                                p='.'
                             shell = join(p,"shell.as")
                             if isfile(shell):
                                 arglist.append(' -in ' + shell)
@@ -1051,13 +1047,18 @@ class RuntestBase:
         # It is possible that file is actually a partial path rooted to acceptance,
         # so make sure that we are only dealing with the actual filename
         file = split(file)[1]
-
-        if isfile('%s/dir.%s' % (dir, filetype)):  # dir takes precedence over root
-            arglist = self.parseAscArgs(arglist, '%s/dir.%s' % (dir, filetype), dir)
-
-        if file and isfile('%s/%s.%s' % (dir, file, filetype)):  # file takes precendence over directory
+        
+        # file takes precendence over directory
+        if file and isfile('%s/%s.%s' % (dir, file, filetype)):
             arglist = self.parseAscArgs(arglist, '%s/%s.%s' % (dir, file, filetype), dir)
-
+        else:   # dir takes precedence over root
+            # look for arg file in this or any parent dir (excluding root)
+            for d in self.parents(dir):
+                if d == '.':
+                    break   # don't parse the root args file
+                if isfile('%s/dir.%s' % (d, filetype)):
+                    arglist = self.parseAscArgs(arglist, '%s/dir.%s' % (d, filetype), d)
+                    break
         return arglist
 
 
