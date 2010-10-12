@@ -672,4 +672,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">När ett callback-argument är en metod i en klass måste det valfria this-argumentet vara null.</error>
+  <error id="2007" label="kNullPointerError">Parametern %1 får inte vara null.</error>
+  <error id="2008" label="kInvalidEnumError">Parametern %1 måste ha ett av de godkända värdena.</error>
 </errors>

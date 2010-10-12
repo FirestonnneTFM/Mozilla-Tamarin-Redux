@@ -762,4 +762,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">コールバック引数がクラスのメソッドのとき、任意指定の引数 'this' は null でなければなりません。</error>
+  <error id="2007" label="kNullPointerError">パラメーター %1 は null 以外でなければなりません。</error>
+  <error id="2008" label="kInvalidEnumError">パラメーター %1 は承認された値の 1 つでなければなりません。</error>
 </errors>

@@ -136,7 +136,6 @@ namespace avmplus
                 , m_oldLength(owner->m_length)
             {
             }
-            
             void FASTCALL EnsureWritableCapacity(uint64_t minimumCapacity);
             ~Grower();
         

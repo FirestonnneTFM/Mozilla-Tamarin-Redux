@@ -672,4 +672,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır.</error>
+  <error id="2007" label="kNullPointerError">%1 parametresi boş olmamalıdır.</error>
+  <error id="2008" label="kInvalidEnumError">%1 parametresi kabul edilen değerlerden biridir.</error>
 </errors>

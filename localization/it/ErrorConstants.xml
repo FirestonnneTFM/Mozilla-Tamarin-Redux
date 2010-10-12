@@ -762,4 +762,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null.</error>
+  <error id="2007" label="kNullPointerError">Il valore del parametro %1 deve essere diverso da null.</error>
+  <error id="2008" label="kInvalidEnumError">Il valore del parametro %1 deve essere uno dei valori accettati.</error>
 </errors>

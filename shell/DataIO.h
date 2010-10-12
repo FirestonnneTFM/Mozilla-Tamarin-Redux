@@ -43,34 +43,45 @@
 
 namespace avmplus
 {
-    template <class T>
-    REALLY_INLINE void CoreSwap(T& a, T& b)
-    {
-        T t = a;
-        a = b;
-        b = t;
+    REALLY_INLINE void byteSwapU16(uint16_t& a) 
+    { 
+#if defined(_MSC_VER)
+        a = _byteswap_ushort(a); 
+#else
+        // OPTIMIZEME: GCC 4.3+ have intrinsics we should use
+        a = ((a & 0x00ffU)<<8)|
+            ((a & 0xff00U)>>8);
+#endif
     }
 
-    REALLY_INLINE void FlipU16(uint16_t& value)
-    {
-        uint8_t *pa = (uint8_t*)&(value);
-        CoreSwap(pa[0], pa[1]);
+    REALLY_INLINE void byteSwapU32(uint32_t& a) 
+    { 
+#if defined(_MSC_VER)
+        a = _byteswap_ulong(a); 
+#else
+        // OPTIMIZEME: GCC 4.3+ have intrinsics we should use
+        a = ((a & 0x000000ffUL)<<24)|
+            ((a & 0x0000ff00UL)<< 8)|
+            ((a & 0x00ff0000UL)>> 8)|
+            ((a & 0xff000000UL)>>24);
+#endif
     }
 
-    REALLY_INLINE void FlipU64(uint64_t& value)
-    {
-        uint8_t *pa = (uint8_t*)&(value);
-        CoreSwap(pa[0], pa[7]);
-        CoreSwap(pa[1], pa[6]);
-        CoreSwap(pa[2], pa[5]);
-        CoreSwap(pa[3], pa[4]);
-    }
-
-    REALLY_INLINE void FlipU32(uint32_t& value)
-    {
-        uint8_t *pa = (uint8_t *)&(value);
-        CoreSwap(pa[0], pa[3]);
-        CoreSwap(pa[1], pa[2]);
+    REALLY_INLINE void byteSwapU64(uint64_t& a) 
+    { 
+#if defined(_MSC_VER)
+        a = _byteswap_uint64(a); 
+#else
+        // OPTIMIZEME: GCC 4.3+ have intrinsics we should use
+        a = ((a & 0x00000000000000ffULL)<<56)|
+            ((a & 0x000000000000ff00ULL)<<40)|
+            ((a & 0x0000000000ff0000ULL)<<24)|
+            ((a & 0x00000000ff000000ULL)<< 8)|
+            ((a & 0x000000ff00000000ULL)>> 8)|
+            ((a & 0x0000ff0000000000ULL)>>24)|
+            ((a & 0x00ff000000000000ULL)>>40)|
+            ((a & 0xff00000000000000ULL)>>56);
+#endif
     }
 
     class DataIOBase
@@ -96,7 +107,7 @@ namespace avmplus
         {
             if (GetEndian() != GetNativeEndian())
             {
-                FlipU16(value);
+                byteSwapU16(value);
             }
         }
 
@@ -104,7 +115,7 @@ namespace avmplus
         {
             if (GetEndian() != GetNativeEndian())
             {
-                FlipU32(value);
+                byteSwapU32(value);
             }
         }
 
@@ -112,7 +123,7 @@ namespace avmplus
         {
             if (GetEndian() != GetNativeEndian())
             {
-                FlipU64(value);
+                byteSwapU64(value);
             }
         }
 

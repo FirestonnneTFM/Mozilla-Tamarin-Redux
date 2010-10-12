@@ -240,7 +240,7 @@
     }
     AddTestCase(
      "exception thrown when endian is to littleEndian or bigEndian",
-     "ArgumentError: Error #1508",
+     "ArgumentError: Error #2008",
      err.substring(0,26));
     AddTestCase(
      "endian value is uchanged after invalid set",

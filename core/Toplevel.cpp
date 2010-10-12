@@ -1327,6 +1327,11 @@ namespace avmplus
         referenceErrorClass()->throwError(id, core()->toErrorString(multiname));
     }
 
+    void FASTCALL Toplevel::throwNullPointerError(const char* name)
+    {
+        throwTypeErrorWithName(kNullPointerError, name);
+    }
+
     DateClass* Toplevel::dateClass() { return (DateClass*)getBuiltinClass(avmplus::NativeID::abcclass_Date); }
     RegExpClass* Toplevel::regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
     XMLClass* Toplevel::xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }
@@ -1394,13 +1399,13 @@ namespace avmplus
     //  -------------------------------------------------------
     Atom Toplevel::readObject(ObjectEncoding /*encoding*/, DataInput* /*input*/)
     {
-        throwArgumentError(kInvalidArgumentError, core()->toErrorString("objectEncoding"));
+        throwArgumentError(kInvalidArgumentError, "objectEncoding");
         return undefinedAtom;
     }
 
     void Toplevel::writeObject(ObjectEncoding /*encoding*/, DataOutput* /*output*/, Atom /*a*/)
     {
-        throwArgumentError(kInvalidArgumentError, core()->toErrorString("objectEncoding"));
+        throwArgumentError(kInvalidArgumentError, "objectEncoding");
     }
 
     //  -------------------------------------------------------

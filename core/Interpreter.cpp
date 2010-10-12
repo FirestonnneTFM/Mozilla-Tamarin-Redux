@@ -3426,9 +3426,9 @@ namespace avmplus
         // by Verifier, thus checking should be unnecessary here.
         const bytecode_t* const code_end = (const bytecode_t*)uintptr_t(-1);
 #ifdef VMCFG_WORDCODE
-		core->formatOpcode(core->console, pc, code_end, (WordOpcode)((int32_t)opcode&0xffff), off, pool);
+        core->formatOpcode(core->console, pc, code_end, (WordOpcode)((int32_t)opcode&0xffff), off, pool);
 #else
-		core->formatOpcode(core->console, pc, code_end, opcode, off, pool);
+        core->formatOpcode(core->console, pc, code_end, opcode, off, pool);
 #endif
         core->console << '\n';
     }

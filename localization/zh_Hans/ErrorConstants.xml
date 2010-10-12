@@ -762,4 +762,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">如果回调参数是某个类的方法，则可选参数“this”必须为空。</error>
+  <error id="2007" label="kNullPointerError">参数 %1 不能为空。</error>
+  <error id="2008" label="kInvalidEnumError">参数 %1 必须是某个可接受的值。</error>
 </errors>

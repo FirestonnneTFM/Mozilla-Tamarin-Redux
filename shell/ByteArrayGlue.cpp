@@ -588,7 +588,6 @@ namespace avmplus
 
         // Replace the byte array with the compressed data
         m_byteArray.SetLength(0);
-        //m_byteArray.WriteU32((U32)len);
         m_byteArray.Write(gzdata, gzlen);
 
         mmfx_delete_array( gzdata );
@@ -639,17 +638,11 @@ namespace avmplus
         }
     }
 
-    void ByteArrayObject::checkNull(void *instance, const char *name)
-    {
-        if (instance == NULL) {
-            toplevel()->throwTypeError(kNullArgumentError, core()->toErrorString(name));
-        }
-    }
     void ByteArrayObject::writeBytes(ByteArrayObject *bytes,
                                      uint32_t offset,
                                      uint32_t length)
     {
-        checkNull(bytes, "bytes");
+        toplevel()->checkNull(bytes, "bytes");
 
         if (length == 0) {
             length = bytes->get_length() - offset;
@@ -664,7 +657,7 @@ namespace avmplus
                                     uint32_t offset,
                                     uint32_t length)
     {
-        checkNull(bytes, "bytes");
+        toplevel()->checkNull(bytes, "bytes");
 
         if (length == 0) {
             length = m_byteArray.Available();
@@ -677,7 +670,7 @@ namespace avmplus
 
     String* ByteArrayObject::readMultiByte(uint32_t length, String* charSet)
     {
-        checkNull(charSet, "charSet");
+        toplevel()->checkNull(charSet, "charSet");
         return m_byteArray.ReadMultiByte(length, charSet);
     }
     
@@ -693,20 +686,20 @@ namespace avmplus
 
     void ByteArrayObject::writeMultiByte(String* value, String* charSet)
     {
-        checkNull(value, "value");
-        checkNull(charSet, "charSet");
+        toplevel()->checkNull(value, "value");
+        toplevel()->checkNull(charSet, "charSet");
         m_byteArray.WriteMultiByte(value, charSet);
     }
     
     void ByteArrayObject::writeUTF(String* value)
     {
-        checkNull(value, "value");
+        toplevel()->checkNull(value, "value");
         m_byteArray.WriteUTF(value);
     }
 
     void ByteArrayObject::writeUTFBytes(String* value)
     {
-        checkNull(value, "value");
+        toplevel()->checkNull(value, "value");
         m_byteArray.WriteUTFBytes(value);
     }
 
@@ -723,10 +716,35 @@ namespace avmplus
         }
         else
         {
-            toplevel()->throwArgumentError(kInvalidArgumentError, "objectEncoding");
+            toplevel()->throwArgumentError(kInvalidEnumError, "objectEncoding");
         }
     }
 
+    Stringp ByteArrayObject::get_endian()
+    {
+        return (m_byteArray.GetEndian() == kBigEndian) ? core()->kbigEndian : core()->klittleEndian;
+    }
+
+    void ByteArrayObject::set_endian(Stringp type)
+    {
+        toplevel()->checkNull(type, "endian");
+
+        AvmCore* core = this->core();
+        type = core->internString(type);
+        if (type == core->kbigEndian)
+        {
+            m_byteArray.SetEndian(kBigEndian);
+        }
+        else if (type == core->klittleEndian)
+        {
+            m_byteArray.SetEndian(kLittleEndian);
+        }
+        else
+        {
+            toplevel()->throwArgumentError(kInvalidEnumError, "type");
+        }
+    }
+    
     void ByteArrayObject::clear()
     {
         m_byteArray.Clear();
@@ -757,33 +775,6 @@ namespace avmplus
     {
         return new (ivtable->gc(), ivtable->getExtraSize()) ByteArrayObject(ivtable, prototype, (ObjectEncoding)get_defaultObjectEncoding());
     }
-
-    Stringp ByteArrayObject::get_endian()
-    {
-        return (m_byteArray.GetEndian() == kBigEndian) ? core()->kbigEndian : core()->klittleEndian;
-    }
-
-    void ByteArrayObject::set_endian(Stringp type)
-    {
-        checkNull(type, "endian");
-
-        AvmCore* core = this->core();
-        type = core->internString(type);
-        if (type == core->kbigEndian)
-        {
-            m_byteArray.SetEndian(kBigEndian);
-        }
-        else if (type == core->klittleEndian)
-        {
-            m_byteArray.SetEndian(kLittleEndian);
-        }
-        else
-        {
-            toplevel()->throwArgumentError(kInvalidArgumentError, "type");
-        }
-    }
-    
-
 
 }
 

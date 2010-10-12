@@ -239,7 +239,9 @@ namespace avmplus
             1507, 129,
             1508, 130,
             1509, 131,
-            1510, 132
+            1510, 132,
+            2007, 133,
+            2008, 134
         };
 
         const char* errorConstants[][kNumErrorConstants] =
@@ -379,7 +381,9 @@ namespace avmplus
                 /*1507,129*/ "Argument %1 cannot be null.",
                 /*1508,130*/ "The value specified for argument %1 is invalid.",
                 /*1509,131*/ "There was an error decompressing the data.",
-                /*1510,132*/ "When the callback argument is a method of a class, the optional this argument must be null."
+                /*1510,132*/ "When the callback argument is a method of a class, the optional this argument must be null.",
+                /*2007,133*/ "Parameter %1 must be non-null.",
+                /*2008,134*/ "Parameter %1 must be one of the accepted values."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -517,7 +521,9 @@ namespace avmplus
                 /*1507,129*/ "Argument %1 nemůže být null.",
                 /*1508,130*/ "Hodnota zadaná pro argument %1 je neplatná.",
                 /*1509,131*/ "Při dekomprimování dat došlo k chybě.",
-                /*1510,132*/ "Pokud je argument zpětného volání metodou třídy, volitelný argument musí být null."
+                /*1510,132*/ "Pokud je argument zpětného volání metodou třídy, volitelný argument musí být null.",
+                /*2007,133*/ "Parametr %1 nesmí být null.",
+                /*2008,134*/ "Parametr %1 musí být jedna z akceptovaných hodnot."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_de
@@ -655,7 +661,9 @@ namespace avmplus
                 /*1507,129*/ "Argument %1 kann nicht null sein.",
                 /*1508,130*/ "Der angegebene Wert für Argument %1 ist ungültig.",
                 /*1509,131*/ "Fehler beim Dekomprimieren der Daten.",
-                /*1510,132*/ "Wenn das callback-Argument eine Methode einer Klasse ist, muss das optionale this-Argument null sein."
+                /*1510,132*/ "Wenn das callback-Argument eine Methode einer Klasse ist, muss das optionale this-Argument null sein.",
+                /*2007,133*/ "Parameter %1 darf nicht 'null' sein.",
+                /*2008,134*/ "Parameter %1 muss einen zulässigen Wert haben."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_es
@@ -793,7 +801,9 @@ namespace avmplus
                 /*1507,129*/ "El argumento %1 no puede ser null.",
                 /*1508,130*/ "El valor especificado para el argumento %1 no es válido.",
                 /*1509,131*/ "Se produjo un error al descomprimir los datos.",
-                /*1510,132*/ "Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null."
+                /*1510,132*/ "Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null.",
+                /*2007,133*/ "El valor del parámetro %1 debe ser distinto de null.",
+                /*2008,134*/ "El parámetro %1 debe tener uno de los valores aceptados."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_fr
@@ -931,7 +941,9 @@ namespace avmplus
                 /*1507,129*/ "L’argument %1 ne doit pas être null.",
                 /*1508,130*/ "La valeur indiquée pour l’argument %1 n’est pas valide.",
                 /*1509,131*/ "Une erreur s'est produite lors de la décompression des données.",
-                /*1510,132*/ "Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null."
+                /*1510,132*/ "Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null.",
+                /*2007,133*/ "Le paramètre %1 ne doit pas être nul.",
+                /*2008,134*/ "Le paramètre %1 doit être l'une des valeurs acceptées."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_it
@@ -1069,7 +1081,9 @@ namespace avmplus
                 /*1507,129*/ "L'argomento %1 non può essere null.",
                 /*1508,130*/ "Il valore specificato per l'argomento %1 non è valido.",
                 /*1509,131*/ "Si è verificato un errore durante la decompressione dei dati.",
-                /*1510,132*/ "Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null."
+                /*1510,132*/ "Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null.",
+                /*2007,133*/ "Il valore del parametro %1 deve essere diverso da null.",
+                /*2008,134*/ "Il valore del parametro %1 deve essere uno dei valori accettati."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ja
@@ -1207,7 +1221,9 @@ namespace avmplus
                 /*1507,129*/ "引数 %1 は null にすることができません。",
                 /*1508,130*/ "引数 %1 に指定した値は無効です。",
                 /*1509,131*/ "圧縮データの解凍時にエラーが発生しました。",
-                /*1510,132*/ "コールバック引数がクラスのメソッドのとき、任意指定の引数 'this' は null でなければなりません。"
+                /*1510,132*/ "コールバック引数がクラスのメソッドのとき、任意指定の引数 'this' は null でなければなりません。",
+                /*2007,133*/ "パラメーター %1 は null 以外でなければなりません。",
+                /*2008,134*/ "パラメーター %1 は承認された値の 1 つでなければなりません。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ko
@@ -1345,7 +1361,9 @@ namespace avmplus
                 /*1507,129*/ "인수 %1은(는) null일 수 없습니다.",
                 /*1508,130*/ "인수 %1에 지정된 값이 유효하지 않습니다.",
                 /*1509,131*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다.",
-                /*1510,132*/ "콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다."
+                /*1510,132*/ "콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다.",
+                /*2007,133*/ "매개 변수 %1은(는) null이 아니어야 합니다.",
+                /*2008,134*/ "매개 변수 %1은(는) 허용된 값 중 하나여야 합니다."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_nl
@@ -1483,7 +1501,9 @@ namespace avmplus
                 /*1507,129*/ "Argument %1 kan niet null zijn.",
                 /*1508,130*/ "De opgegeven waarde voor argument %1 is ongeldig.",
                 /*1509,131*/ "Er is een fout opgetreden bij het decomprimeren van gegevens.",
-                /*1510,132*/ "Wanneer het callback-argument een methode of een klasse is, moet het optionele argument this null zijn."
+                /*1510,132*/ "Wanneer het callback-argument een methode of een klasse is, moet het optionele argument this null zijn.",
+                /*2007,133*/ "Parameter %1 mag niet null zijn.",
+                /*2008,134*/ "Parameter %1 moet een van de toegestane waarden zijn."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_pl
@@ -1621,7 +1641,9 @@ namespace avmplus
                 /*1507,129*/ "Argument %1 nie może mieć wartości null.",
                 /*1508,130*/ "Wartość określona dla argumentu %1 jest nieprawidłowa.",
                 /*1509,131*/ "Podczas dekompresji danych wystąpił błąd.",
-                /*1510,132*/ "Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null."
+                /*1510,132*/ "Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null.",
+                /*2007,133*/ "Parametr %1 musi mieć wartość inną niż null.",
+                /*2008,134*/ "Parametr %1 musi być jedną z akceptowanych wartości."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -1759,7 +1781,9 @@ namespace avmplus
                 /*1507,129*/ "O argumento %1 não pode ser nulo.",
                 /*1508,130*/ "O valor especificado para o argumento %1 é inválido.",
                 /*1509,131*/ "Ocorreu um erro ao descompactar os dados.",
-                /*1510,132*/ "Quando o argumento de retorno de chamada for um método de uma classe, o opcional deste argumento deverá ser nulo."
+                /*1510,132*/ "Quando o argumento de retorno de chamada for um método de uma classe, o opcional deste argumento deverá ser nulo.",
+                /*2007,133*/ "O parâmetro %1 não deve ser nulo.",
+                /*2008,134*/ "O parâmetro %1 deve ser um dos valores aceitos."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ru
@@ -1897,7 +1921,9 @@ namespace avmplus
                 /*1507,129*/ "Аргумент %1 не может быть \"null\".",
                 /*1508,130*/ "Указано недопустимое значение для аргумента %1.",
                 /*1509,131*/ "При распаковке данных произошла ошибка.",
-                /*1510,132*/ "Если аргумент \"callback\" является методом класса, дополнительный аргумент \"this\" должен быть \"null\"."
+                /*1510,132*/ "Если аргумент \"callback\" является методом класса, дополнительный аргумент \"this\" должен быть \"null\".",
+                /*2007,133*/ "Параметр %1 не должен быть равен нулю.",
+                /*2008,134*/ "Параметр %1 должен быть одним из принятых значений."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_sv
@@ -2035,7 +2061,9 @@ namespace avmplus
                 /*1507,129*/ "Argumentet %1 får inte vara null.",
                 /*1508,130*/ "Det värde som specificerats för argumentet %1 är ogiltigt.",
                 /*1509,131*/ "Ett fel uppstod vid dekomprimering av data.",
-                /*1510,132*/ "När ett callback-argument är en metod i en klass måste det valfria this-argumentet vara null."
+                /*1510,132*/ "När ett callback-argument är en metod i en klass måste det valfria this-argumentet vara null.",
+                /*2007,133*/ "Parametern %1 får inte vara null.",
+                /*2008,134*/ "Parametern %1 måste ha ett av de godkända värdena."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_tr
@@ -2173,7 +2201,9 @@ namespace avmplus
                 /*1507,129*/ "%1 değişkeni boş olamaz.",
                 /*1508,130*/ "%1 değişkeni için belirlenen değer geçersiz.",
                 /*1509,131*/ "Veri açılırken hata oluştu.",
-                /*1510,132*/ "Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır."
+                /*1510,132*/ "Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır.",
+                /*2007,133*/ "%1 parametresi boş olmamalıdır.",
+                /*2008,134*/ "%1 parametresi kabul edilen değerlerden biridir."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_CN
@@ -2311,7 +2341,9 @@ namespace avmplus
                 /*1507,129*/ "参数 %1 不能为空。",
                 /*1508,130*/ "为参数 %1 指定的值无效。",
                 /*1509,131*/ "解压缩数据时出错。",
-                /*1510,132*/ "如果回调参数是某个类的方法，则可选参数“this”必须为空。"
+                /*1510,132*/ "如果回调参数是某个类的方法，则可选参数“this”必须为空。",
+                /*2007,133*/ "参数 %1 不能为空。",
+                /*2008,134*/ "参数 %1 必须是某个可接受的值。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_TW
@@ -2449,7 +2481,9 @@ namespace avmplus
                 /*1507,129*/ "引數 %1 不能是 null。",
                 /*1508,130*/ "指定給引數 %1 的值無效。",
                 /*1509,131*/ "解壓縮資料時發生錯誤。",
-                /*1510,132*/ "若回呼引數是 Class 的方法，選擇性的引數 'this' 必須是 null。"
+                /*1510,132*/ "若回呼引數是 Class 的方法，選擇性的引數 'this' 必須是 null。",
+                /*2007,133*/ "參數 %1 不能是 Null。",
+                /*2008,134*/ "參數 %1 必須是其中一個可接受值。"
             }
         #endif
         };
