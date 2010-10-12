@@ -207,12 +207,6 @@ class AcceptanceRuntest(RuntestBase):
         ast = testAndNum[0]
         testnum = testAndNum[1]
         outputCalls = [] #queue all output calls so that output is written in a block
-        lpass = 0
-        lfail = 0
-        lexpfail = 0
-        lunpass = 0
-        ltimeout = 0
-        lassert = 0
         extraVmArgs = ''
         abcargs = ''
 
@@ -247,20 +241,12 @@ class AcceptanceRuntest(RuntestBase):
         if isfile(testName) and getmtime(ast)>getmtime(testName) and self.timestampcheck:
             outputCalls.append((self.verbose_print, ("%s has been modified, recompiling" % ast,)))
             os.unlink(testName)
+        
         # process support dir
         if exists(root+self.supportFolderExt):
-            for p, dirs, files in walk(root+self.supportFolderExt):
-                for f in files:
-                    if f.endswith(self.sourceExt):
-                        f = p+'/'+f
-                        binFile = splitext(f)[0]+'.abc'
-                        if exists(binFile) and (self.forcerebuild or (self.timestampcheck and getmtime(f)>getmtime(binFile))):
-                            os.unlink(binFile)
-                        if not isfile(binFile):
-                            compileOutput = self.compile_test(f, outputCalls=outputCalls)
-                            if not isfile(binFile):
-                                outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
-                                outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
+            self.compile_support_files(root+self.supportFolderExt, outputCalls)
+        
+        # compile file if needed
         if not isfile(testName):
             compileOutput = self.compile_test(ast, outputCalls=outputCalls)
             if not isfile(testName):
@@ -268,22 +254,17 @@ class AcceptanceRuntest(RuntestBase):
                     # file didn't compile, compare compile output
                     flines = self.compareAbcAsmOutput(ast, compileOutput)
                     if flines:
-                        lfail += 1
+                        self.allfails += 1
                         outputCalls.append((self.fail,(testName, 'FAILED! :\nExpected:\n'+''.join(flines)+'\nGOT:\n'+''.join(compileOutput), self.failmsgs)))
-                        outputCalls.append((self.js_print, ('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+                        outputCalls.append((self.js_print, ('   FAILED passes: 0 fails: 1 unexpected passes: 0 expected failures: 0', '', '<br/>')))
                     else:
-                        lpass += 1
-                        outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+                        self.allpasses += 1
+                        outputCalls.append((self.verbose_print, ('   PASSED passes: 1 fails: 0 unexpected passes: 0 expected failures: 0', '', '<br/>')))
                     outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
-                    self.allfails += lfail
-                    self.allpasses += lpass
                     return outputCalls
                 else:
-                    lfail += 1
+                    self.allfails += 1
                     outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
-
-        self.allfails += lfail
-        self.allpasses += lpass
 
         if self.runSource or self.eval:
             incfiles=self.build_incfiles(testName)
@@ -319,6 +300,20 @@ class AcceptanceRuntest(RuntestBase):
             outputCalls.extend(self.runTest(ast, root, testName, testnum, settings))
 
         return outputCalls
+
+    def compile_support_files(self, support_dir, outputCalls):
+        for p, dirs, files in walk(support_dir):
+            for f in files:
+                if f.endswith(self.sourceExt):
+                    f = join(p,f)
+                    binFile = splitext(f)[0]+'.abc'
+                    if exists(binFile) and (self.forcerebuild or (self.timestampcheck and getmtime(f)>getmtime(binFile))):
+                        os.unlink(binFile)
+                    if not isfile(binFile):
+                        compileOutput = self.compile_test(f, outputCalls=outputCalls)
+                        if not isfile(binFile):
+                            outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
+                            outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
 
     def process_avm_args_line(self, line, dir):
         abcargs = ''

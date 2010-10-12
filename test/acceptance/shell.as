@@ -276,6 +276,10 @@ function writeHeaderToLog( string )	{
 }
 // end of print functions
 
+function as3Enabled():Boolean {
+    // return whether the test was compiled with -AS3
+    return ((new Boolean()).valueOf != Boolean.prototype.valueOf)
+}
 
 
 //  When running in the shell, run the garbage collector after the

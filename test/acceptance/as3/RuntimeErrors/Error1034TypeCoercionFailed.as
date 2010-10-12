@@ -42,8 +42,8 @@ startTest();
 
 try {
 	var result = "no error";
-	this.setTime = new Date().getDate;
-	this.setTime(-1);
+	f = function (arg):Function {return arg;};
+    f({});
 } catch (err) {
 	result = err.toString();
 	trace(err);

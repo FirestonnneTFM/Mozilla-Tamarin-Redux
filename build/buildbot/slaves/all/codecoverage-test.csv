@@ -6,3 +6,4 @@ avmshell_s_cov, acceptance, , ,
 avmshell_d_cov, acceptance, , , 
 avmshell_sd_cov, acceptance, , , 
 avmshell_cov, selftest, , , 
+avmshell_cov, acceptance, , ,"--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"
