@@ -672,4 +672,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Pokud je argument zpětného volání metodou třídy, volitelný argument musí být null.</error>
+  <error id="2007" label="kNullPointerError">Parametr %1 nesmí být null.</error>
+  <error id="2008" label="kInvalidEnumError">Parametr %1 musí být jedna z akceptovaných hodnot.</error>
 </errors>

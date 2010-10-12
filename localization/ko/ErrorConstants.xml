@@ -762,4 +762,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다.</error>
+  <error id="2007" label="kNullPointerError">매개 변수 %1은(는) null이 아니어야 합니다.</error>
+  <error id="2008" label="kInvalidEnumError">매개 변수 %1은(는) 허용된 값 중 하나여야 합니다.</error>
 </errors>

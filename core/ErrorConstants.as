@@ -181,4 +181,6 @@ class Errors
         public static const kInvalidArgumentError             = 1508;
         public static const kShellCompressedDataError         = 1509;
         public static const kArrayFilterNonNullObjectError    = 1510;
+        public static const kNullPointerError                 = 2007;
+        public static const kInvalidEnumError                 = 2008;
 };

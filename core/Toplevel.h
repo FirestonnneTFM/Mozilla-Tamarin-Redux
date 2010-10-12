@@ -137,6 +137,14 @@ namespace avmplus
         inline Toplevel* toplevel() { return this; }
         inline const Toplevel* toplevel() const { return this; }
 
+        REALLY_INLINE void checkNull(void* instance, const char* name)
+        {
+            if (instance == NULL)
+                throwNullPointerError(name);
+        }
+        
+        void FASTCALL throwNullPointerError(const char* name);
+
         //
         // methods that used to be on AvmCore but depend on the caller's environment
         //

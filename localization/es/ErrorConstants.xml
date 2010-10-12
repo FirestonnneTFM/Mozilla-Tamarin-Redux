@@ -762,4 +762,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null.</error>
+  <error id="2007" label="kNullPointerError">El valor del parámetro %1 debe ser distinto de null.</error>
+  <error id="2008" label="kInvalidEnumError">El parámetro %1 debe tener uno de los valores aceptados.</error>
 </errors>

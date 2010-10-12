@@ -672,4 +672,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null.</error>
+  <error id="2007" label="kNullPointerError">Parametr %1 musi mieć wartość inną niż null.</error>
+  <error id="2008" label="kInvalidEnumError">Parametr %1 musi być jedną z akceptowanych wartości.</error>
 </errors>

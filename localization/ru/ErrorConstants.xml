@@ -672,4 +672,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Если аргумент "callback" является методом класса, дополнительный аргумент "this" должен быть "null".</error>
+  <error id="2007" label="kNullPointerError">Параметр %1 не должен быть равен нулю.</error>
+  <error id="2008" label="kInvalidEnumError">Параметр %1 должен быть одним из принятых значений.</error>
 </errors>

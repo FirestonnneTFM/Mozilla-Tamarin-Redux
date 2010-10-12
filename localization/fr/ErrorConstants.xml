@@ -762,4 +762,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null.</error>
+  <error id="2007" label="kNullPointerError">Le paramètre %1 ne doit pas être nul.</error>
+  <error id="2008" label="kInvalidEnumError">Le paramètre %1 doit être l'une des valeurs acceptées.</error>
 </errors>

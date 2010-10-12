@@ -281,13 +281,15 @@ namespace avmplus
             kNullArgumentError                              = 1507,
             kInvalidArgumentError                           = 1508,
             kShellCompressedDataError                       = 1509,
-            kArrayFilterNonNullObjectError                  = 1510
+            kArrayFilterNonNullObjectError                  = 1510,
+            kNullPointerError                               = 2007,
+            kInvalidEnumError                               = 2008
         };
 
         // Error message strings only in non-stubbed DEBUGGER builds.
         #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
         const int kLanguages = LANG_count;
-        const int kNumErrorConstants = 133;
+        const int kNumErrorConstants = 135;
         extern const char* errorConstants[kLanguages][kNumErrorConstants];
         extern int errorMappingTable[2*kNumErrorConstants];
         extern LangName languageNames[kLanguages];

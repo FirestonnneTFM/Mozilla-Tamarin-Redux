@@ -672,4 +672,6 @@ class B extends A {
     stream is probably corrupted.
     ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Quando o argumento de retorno de chamada for um método de uma classe, o opcional deste argumento deverá ser nulo.</error>
+  <error id="2007" label="kNullPointerError">O parâmetro %1 não deve ser nulo.</error>
+  <error id="2008" label="kInvalidEnumError">O parâmetro %1 deve ser um dos valores aceitos.</error>
 </errors>
