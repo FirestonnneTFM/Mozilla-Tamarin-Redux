@@ -44,7 +44,7 @@ function loop() {
 function loop2(s) {
     var v;
     for ( var i=0 ; i < 100000 ; i++ )
-	v = s.indexOf("abcde");
+	v = s.lastIndexOf("abcde");
     return v;
 }
 
