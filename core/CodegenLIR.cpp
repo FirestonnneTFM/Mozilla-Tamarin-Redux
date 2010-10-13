@@ -3128,7 +3128,52 @@ namespace avmplus
             return promoteNumberIns(in, index);
         } else {
             // * -> Number
+#ifdef VMCFG_FASTPATH_FROMATOM
+            //     double rslt;
+            //     intptr_t val = CONVERT_TO_ATOM(arg);
+            //     if ((val & kAtomTypeMask) != kIntptrType) goto not_intptr;   # test for kIntptrType tag
+            //     # kIntptrType
+            //     rslt = val >> kAtomTypeSize;                                 # extract integer value
+            //     goto done;
+            // not_intptr:
+            //     if ((val & kAtomTypeMask) != kDoubleType) goto not_double;   # test for kDoubleType tag
+            //     # kDoubleType
+            //     rslt = *(val - kDoubleType);                                 # remove tag and dereference
+            //     goto done;
+            // not_double:
+            //     rslt = number(val);                                          # slow path -- call helper
+            // done:
+            //     result = rslt;
+            CodegenLabel not_intptr;
+            CodegenLabel not_double;
+            CodegenLabel done;
+            suspendCSE();
+            LIns* val = loadAtomRep(index);
+            LIns* rslt = insAlloc(sizeof(double));
+            LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
+            // kIntptrType
+            branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), not_intptr);
+            // Note that this works on 64bit platforms only if we are careful
+            // to restrict the range of intptr values to those that fit within
+            // the integer range of the double type.
+            std(p2dIns(rshp(val, AtomConstants::kAtomTypeSize)), rslt, 0, ACCSET_OTHER);
+            JIT_EVENT(jit_atom2double_fast_intptr);
+            branchToLabel(LIR_j, NULL, done);
+            emitLabel(not_intptr);
+            // kDoubleType
+            branchToLabel(LIR_jf, eqp(tag, AtomConstants::kDoubleType), not_double);
+            std(ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER), rslt, 0, ACCSET_OTHER);
+            JIT_EVENT(jit_atom2double_fast_double);
+            branchToLabel(LIR_j, NULL, done);
+            emitLabel(not_double);
+            std(callIns(FUNCTIONID(number), 1, val), rslt, 0, ACCSET_OTHER);
+            JIT_EVENT(jit_atom2double_slow);
+            emitLabel(done);
+            resumeCSE();
+            return ldd(rslt, 0, ACCSET_OTHER);
+#else
             return callIns(FUNCTIONID(number), 1, loadAtomRep(index));
+#endif
         }
     }
 

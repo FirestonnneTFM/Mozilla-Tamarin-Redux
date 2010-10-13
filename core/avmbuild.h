@@ -165,8 +165,16 @@
 
 #ifdef VMCFG_JIT_FASTPATH
 
+    // Generate inline fastpath for converting numeric atom to double.
+    // Required opcode LIR_q2d for 64-bit support is not implemented.
+    #ifndef AVMPLUS_64BIT
+        #define VMCFG_FASTPATH_FROMATOM
+    #endif
+
+    // Use type-specialized helper functions for addition.
     #define VMCFG_FASTPATH_ADD
 
+    // Inline fastpaths for additions involving kIntptrType atoms.
     // Inlining requires the addjovi instruction, which is not
     // implemented on PPC or Sparc.
     // PPC:   https://bugzilla.mozilla.org/show_bug.cgi?id=601266
