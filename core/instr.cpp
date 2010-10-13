@@ -374,7 +374,7 @@ void coerceobj_atom(MethodEnv *env, Atom atom, Traits* t)
             (atomKind(atom) != kObjectType || !atomObj(atom)->traits()->subtypeof(t)))
         throwCheckTypeError(env, atom, t);
 }
-
+    
 Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
 {
     tagprof("op_add val1", lhs);
@@ -391,12 +391,18 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
     // to reduce the # of alu instructions
     if (atomIsBothIntptr(lhs,rhs))
     {
+        // Subtract off one of the type tags so result will be properly tagged.
+        // Sign-extend 53-bit intptr value on 64-bit platforms.
         intptr_t const sum = SIGN_EXTEND(lhs + rhs - kIntptrType);
+        // No overflow occurs if the signs of the arguments are different,
+        // or if the sign of the result matches that of the arguments.
+        // Rather than isolating the sign bits by masking off the others, we exploit
+        // the fact that the comparisons with zero implicitly ignore the other bits.
         if ((lhs ^ rhs) < 0 || (lhs ^ sum) >= 0) {
-            // no overflow
+            // No overflow, sum is correctly tagged atom
             return sum;
         }
-        // both integers, but overflow happens.  Intentionally add these
+        // Both integers, but overflow happens.  Intentionally add these
         // without casting to int32_t.  If the sum of the shifted values overflow,
         // we know the unshifted values will not overflow with a word-sized add.
         return core->allocDouble(double(atomGetIntptr(lhs) + atomGetIntptr(rhs)));
@@ -458,8 +464,277 @@ concat_strings:
 
 add_numbers:
     return core->doubleToAtom(AvmCore::number(lhs) + AvmCore::number(rhs));
-#undef IS_BOTH_INTEGER
 }
+
+#ifdef VMCFG_FASTPATH_ADD
+
+// Auxilliary predicate for assertions.
+// Return true if result of adding lhs and rhs will require
+// a kDoubleType atom instead of a kIntptrType atom.
+#if defined(VMCFG_FASTPATH_ADD_INLINE) && defined(DEBUG)
+static bool addIntptrOverflow(intptr_t lhs, intptr_t rhs)
+{
+    intptr_t const sum = lhs + rhs;
+    if ((lhs ^ rhs) < 0 || (lhs ^ sum) >= 0) {
+        // add overflowed, numerical result will not fit in intptr_t
+        return true;
+    }
+    // verify that tagged result will not fit in kIntptrType
+    intptr_t const extended = SIGN_EXTEND(sum << kAtomTypeSize) >> kAtomTypeSize;
+    return (sum == extended);
+}
+#endif
+
+// Specialized helper functions called by code generated for the OP_add instruction.
+// These take into account operands with known specific types and invariants previously
+// established by inline code.
+
+// atom + atom => atom
+Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
+{
+#ifndef VMCFG_FASTPATH_ADD_INLINE
+    // Fastpath for intptr+intptr
+    if (atomIsBothIntptr(lhs, rhs))
+    {
+        intptr_t const sum = SIGN_EXTEND(lhs + rhs - kIntptrType);
+        if ((lhs ^ rhs) < 0 || (lhs ^ sum) >= 0) {
+            // No overflow, sum is correctly tagged atom
+            return sum;
+        }
+        // Overflow, allocate heap double
+        return core->allocDouble(double(atomGetIntptr(lhs) + atomGetIntptr(rhs)));
+    }
+#else
+    // Inline code should handle intptr+intptr case, except where result must be double.
+    AvmAssert(!atomIsBothIntptr(lhs, rhs) || addIntptrOverflow(atomGetIntptr(lhs), atomGetIntptr(rhs)));
+#endif
+
+    if (atomIsIntptr(lhs))
+    {
+        if (AvmCore::isDouble(rhs))
+        {
+            return core->doubleToAtom(double(atomGetIntptr(lhs)) + AvmCore::atomToDouble(rhs));
+        }
+        else if (atomIsIntptr(rhs))
+        {
+            // We should arrive here only on overflow in inline fastpath.
+            return core->doubleToAtom(double(atomGetIntptr(lhs) + double(atomGetIntptr(rhs))));
+        }
+    }
+    else if (AvmCore::isDouble(lhs))
+    {
+        if (atomIsIntptr(rhs))
+        {
+            return core->doubleToAtom(AvmCore::atomToDouble(lhs) + double(atomGetIntptr(rhs)));
+        }
+        else if (AvmCore::isDouble(rhs))
+        {
+            return core->doubleToAtom(AvmCore::atomToDouble(lhs) + AvmCore::atomToDouble(rhs));
+        }
+    }
+
+    if (atomIsString(lhs))
+    {
+        if (atomIsString(rhs))
+        {
+            return core->concatStrings(AvmCore::atomToString(lhs),
+                                       AvmCore::atomToString(rhs))->atom();
+        }
+        else
+        {
+            goto concat_strings;
+        }
+    }
+    else if (AvmCore::isDate(lhs) || AvmCore::isDate(rhs))
+    {
+        goto concat_strings;
+    }
+
+    if (AvmCore::isXMLorXMLList(lhs) && AvmCore::isXMLorXMLList(rhs))
+    {
+        XMLListObject *l = new (core->GetGC()) XMLListObject(atomObj(lhs)->toplevel()->xmlListClass());
+        l->_append(lhs);
+        l->_append(rhs);
+        return l->atom();
+    }
+
+    lhs = AvmCore::primitive(lhs);
+    rhs = AvmCore::primitive(rhs);
+
+    if (!(atomIsString(lhs) || atomIsString(rhs)))
+    {
+        return core->doubleToAtom(AvmCore::number(lhs) + AvmCore::number(rhs));
+    }
+
+concat_strings:
+    return core->concatStrings(core->string(lhs), core->string(rhs))->atom();
+}
+
+// atom + int => atom
+Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs)
+{
+    if (atomIsIntptr(lhs))
+    {
+#ifndef VMCFG_FASTPATH_ADD_INLINE
+    // Fastpath for intptr+int with no overflow
+    #ifdef AVMPLUS_64BIT
+        // A 32-bit integer is guaranteed convertible to an atom of type kIntptrType.
+        intptr_t lhsv = lhs;
+        intptr_t rhsv = intptr_t(rhs) << AtomConstants::kAtomTypeSize;
+        intptr_t const sum = SIGN_EXTEND(lhsv + rhsv);
+        if ((lhsv ^ rhsv) < 0 || (lhsv ^ sum) >= 0) {
+            // No overflow, sum is correctly tagged atom
+            return sum;
+        }
+    #else
+        intptr_t const lhsv = atomGetIntptr(lhs);
+        intptr_t const rhsv = rhs;
+        intptr_t const sum = lhsv + rhsv;
+        if ((lhsv ^ rhsv) < 0 || (lhsv ^ sum) >= 0) {
+            // No overflow
+            if (atomIsValidIntptrValue(sum))
+                return atomFromIntptrValue(sum);
+            else
+                return core->allocDouble(double(sum));
+        }
+    #endif
+#else
+        // Inline code should handle intptr+int case, except where result must be double.
+        // It is allowable for the inline code to punt if the 32-bit int argument is itself too large for an intptr.
+        AvmAssert(!atomIsValidIntptrValue(rhs) || addIntptrOverflow(atomGetIntptr(lhs), rhs));
+#endif
+        return core->doubleToAtom(double(atomGetIntptr(lhs)) + double(rhs));
+    }
+    else if (AvmCore::isDouble(lhs))
+    {
+        return core->doubleToAtom(AvmCore::atomToDouble(lhs) + double(rhs));
+    }
+
+    if (atomIsString(lhs) || AvmCore::isDate(lhs)) goto concat_strings;
+
+    lhs = AvmCore::primitive(lhs);
+
+    if (!atomIsString(lhs))
+    {
+        return core->doubleToAtom(AvmCore::number(lhs) + double(rhs));
+    }
+
+ concat_strings:
+    // See AvmCore::string()
+    Stringp s = MathUtils::convertIntegerToStringBase10(core, rhs, MathUtils::kTreatAsSigned);
+    return core->concatStrings(core->string(lhs), s)->atom();
+}
+
+// int + atom => atom
+Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs)
+{
+    if (atomIsIntptr(rhs))
+    {
+#ifndef VMCFG_FASTPATH_ADD_INLINE
+    // Fastpath for int+intptr with no overflow
+    #ifdef AVMPLUS_64BIT
+        // A 32-bit integer is guaranteed convertible to an atom of type kIntptrType.
+        intptr_t lhsv = intptr_t(lhs) << AtomConstants::kAtomTypeSize;
+        intptr_t rhsv = rhs;
+        intptr_t const sum = SIGN_EXTEND(lhsv + rhsv);
+        if ((lhsv ^ rhsv) < 0 || (lhsv ^ sum) >= 0) {
+            // No overflow, sum is correctly tagged atom
+            return sum;
+        }
+    #else
+        intptr_t const lhsv = lhs;
+        intptr_t const rhsv = atomGetIntptr(rhs);
+        intptr_t const sum = lhsv + rhsv;
+        if ((lhsv ^ rhsv) < 0 || (lhsv ^ sum) >= 0) {
+            // No overflow
+            if (atomIsValidIntptrValue(sum))
+                return atomFromIntptrValue(sum);
+            else
+                return core->allocDouble(double(sum));
+        }
+    #endif
+#else
+        // Inline code should handle int+intptr case, except where result must be double.
+        // It is allowable for the inline code to punt if the 32-bit int argument is itself too large for an intptr.
+        AvmAssert(!atomIsValidIntptrValue(lhs) || addIntptrOverflow(lhs, atomGetIntptr(rhs)));
+#endif
+        return core->doubleToAtom(double(lhs) + double(atomGetIntptr(rhs)));
+    }
+    else if (AvmCore::isDouble(rhs))
+    {
+        return core->doubleToAtom(double(lhs) + AvmCore::atomToDouble(rhs));
+    }
+
+    if (atomIsString(rhs) || AvmCore::isDate(rhs)) goto concat_strings;
+
+    rhs = AvmCore::primitive(rhs);
+
+    if (!atomIsString(rhs))
+    {
+        return core->doubleToAtom(double(lhs) + AvmCore::number(rhs));
+    }
+
+concat_strings:
+    // See AvmCore::string()
+    Stringp s = MathUtils::convertIntegerToStringBase10(core, lhs, MathUtils::kTreatAsSigned);
+    return core->concatStrings(s, core->string(rhs))->atom();
+}
+
+// atom + double => atom
+Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs)
+{
+    if (AvmCore::isDouble(lhs))
+    {
+        return core->doubleToAtom(AvmCore::atomToDouble(lhs) + rhs);
+    }
+    else if (atomIsIntptr(lhs))
+    {
+        return core->doubleToAtom(double(atomGetIntptr(lhs)) + rhs);
+    }
+
+    if (atomIsString(lhs) || AvmCore::isDate(lhs)) goto concat_strings;
+
+    lhs = AvmCore::primitive(lhs);
+
+    if (!atomIsString(lhs))
+    {
+        return core->doubleToAtom(AvmCore::number(lhs) + rhs);
+    }
+
+concat_strings:
+    // See AvmCore::string()
+    Stringp s = core->doubleToString(rhs);
+    return core->concatStrings(core->string(lhs), s)->atom();
+}
+
+// double + atom => atom
+Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs)
+{
+    if (AvmCore::isDouble(rhs))
+    {
+        return core->doubleToAtom(lhs + AvmCore::atomToDouble(rhs));
+    }
+    else if (atomIsIntptr(rhs))
+    {
+        return core->doubleToAtom(lhs + double(atomGetIntptr(rhs)));
+    }
+
+    if (atomIsString(rhs) || AvmCore::isDate(rhs)) goto concat_strings;
+
+    rhs = AvmCore::primitive(rhs);
+
+    if (!atomIsString(rhs))
+    {
+        return core->doubleToAtom(lhs + AvmCore::number(rhs));
+    }
+
+concat_strings:
+    // See AvmCore::string()
+    Stringp s = core->doubleToString(lhs);
+    return core->concatStrings(s, core->string(rhs))->atom();
+}
+
+#endif /* VMCFG_FASTPATH_ADD */
 
 void FASTCALL mop_rangeCheckFailed(MethodEnv* env)
 {

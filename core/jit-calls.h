@@ -964,7 +964,15 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     PUREMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
 
+#ifdef VMCFG_FASTPATH_ADD
+    FUNCTION(FUNCADDR(op_add_a_aa), SIG3(A,P,A,A), op_add_a_aa)
+    FUNCTION(FUNCADDR(op_add_a_ai), SIG3(A,P,A,I), op_add_a_ai)
+    FUNCTION(FUNCADDR(op_add_a_ia), SIG3(A,P,I,A), op_add_a_ia)
+    FUNCTION(FUNCADDR(op_add_a_ad), SIG3(A,P,A,F), op_add_a_ad)
+    FUNCTION(FUNCADDR(op_add_a_da), SIG3(A,P,F,A), op_add_a_da)
+#else
     FUNCTION(FUNCADDR(op_add), SIG3(A,P,A,A), op_add)
+#endif
 
     PUREMETHOD(COREADDR(AvmCore::EscapeAttributeValue), SIG2(P,P,A), EscapeAttributeValue)
     PUREMETHOD(COREADDR(AvmCore::ToXMLString), SIG2(P,P,A), ToXMLString)

@@ -451,6 +451,7 @@ namespace avmplus
         LIns *localGetf(int i);
         LIns *localCopy(int i); // sniff's type from FrameState
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
+        LIns *branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label);
         void branchToAbcPos(LOpcode op, LIns *cond, const uint8_t* target);
         LIns *retIns(LIns *val);
         LIns *mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
@@ -524,6 +525,17 @@ namespace avmplus
         void emitCopy(int src, int dest);
         void emitGetscope(int scope, int dest);
         void emitKill(int i);
+#ifdef VMCFG_FASTPATH_ADD
+#ifdef VMCFG_FASTPATH_ADD_INLINE
+        void emitIntPlusAtomFastpath(int i, Traits* type, LIns* lhs, LIns* rhs, CodegenLabel &fallback);
+#endif
+        void emitAddIntToAtom(int i, int j, Traits* type);
+        void emitAddDoubleToAtom(int i, int j, Traits* type);
+        void emitAddAtomToInt(int i, int j, Traits* type);
+        void emitAddAtomToDouble(int i, int j, Traits* type);
+#endif
+        void emitAddAtomToAtom(int i, int j, Traits* type);
+        void emitAdd(int i, int j, Traits* type);
         void emitIntConst(int index, int32_t c, Traits* type);
         void emitPtrConst(int index, void* c, Traits* type);
         void emitDoubleConst(int index, const double* pd);

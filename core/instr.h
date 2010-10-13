@@ -193,6 +193,17 @@ void coerceobj_atom(MethodEnv* env, Atom atom, Traits*);
  */
 Atom op_add(AvmCore*, Atom lhs, Atom rhs);
 
+/**
+ * Arithmetic fastpath helper functions
+ */
+#ifdef VMCFG_FASTPATH_ADD
+Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs);
+Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs);
+Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs);
+Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs);
+Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs);
+#endif
+
 void FASTCALL mop_rangeCheckFailed(MethodEnv* env);
 // load-and-sign-extend
 int32_t FASTCALL mop_lix8(const void* addr);

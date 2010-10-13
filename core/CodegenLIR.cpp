@@ -2116,6 +2116,295 @@ namespace avmplus
         localSet(i, undefConst, NULL);
     }
 
+#ifdef VMCFG_FASTPATH_ADD
+
+#ifdef VMCFG_FASTPATH_ADD_INLINE
+
+    // Emit code for the fastpath for int + intptr => intptr addition.
+    // Branch to fallback label if rhs is not intptr, or result cannot be so represented due to overflow.
+    //
+    // 64-bit:
+    //
+    // FAST_ADD_INT_TO_ATOM(lhs, rhs, result, fallback)
+    //    if ((rhs & kAtomTypeMask) != kIntptrType) goto fallback;   # punt if atom argument rhs is not intptr
+    //    intptr_t lhsExtended = i;                                  # extend int argument lhs to atom size
+    //    intptr_t lhsShifted = lhsExtended << (kAtomTypeSize+8);    # align lhs with 53-bit payload of rhs (see next step)
+    //    intptr_t rhsShifted = rhs << 8;                            # left-justify 53-bit payload of rhs (note rhs is tagged)
+    //    intptr_t sumShifted = lhsShifted + rhsShifted;             # add aligned values, producing 56-bit tagged sum, left-justified
+    //    if (OVERFLOW) goto fallback;                               # punt on overflow, as sum will not fit in 53-bit field allotted
+    //    intptr_t sum = sumShifted >> 8;                            # right-justify 56-bit tagged value (53 payload bits + 3 tag bits)
+    //    result = sum;                                              # result is intptr atom, properly tagged
+    //
+    // 32-bit:
+    //
+    // FAST_ADD_INT_TO_ATOM(lhs, rhs, result, fallback)
+    //    if ((rhs & kAtomTypeMask) != kIntptrType) goto fallback;   # punt if atom argument rhs is not intptr
+    //    intptr_t lhsExtended = i;                                  # extend int argument lhs to atom size (a nop on 32-bit platforms)
+    //    intptr_t lhsShifted = lhsExtended << kAtomTypeSize;        # left-justify 29-bit payload
+    //    intptr_t lhsRestored = lhsShifted >> kAtomTypeSize;        # restore
+    //    if (lhsRestored != lhsExtended) goto fallback;             # high-order bits were lost, value will not fit in 29-bit field allotted
+    //    intptr_t sum = lhsShifted + rhs;                           # add left-justified lhs to tagged rhs, resulting in tagged result
+    //    if (OVERFLOW) goto fallback;                               # punt on overflow, as sum will not fit in 29-bit field allotted
+    //    result = sum;                                              # result is intptr atom, properly tagged
+    //
+    // Note: If lhs will not fit in 29 bits, the fastpath will fail even if the result may fit.  We expect this to be an
+    // uncommon case.  Generating code as we do avoids extra tag manipulations that would be required if we did a full
+    // 32-bit addition followed by a range check.
+
+    void CodegenLIR::emitIntPlusAtomFastpath(int i, Traits* type, LIns* lhs, LIns* rhs, CodegenLabel &fallback)
+    {
+        LIns* tag = andp(rhs, AtomConstants::kAtomTypeMask);
+        branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), fallback);
+        LIns* lhsExtended = i2p(lhs);
+        #ifdef AVMPLUS_64BIT
+            // int argument is guaranteed to fit, but must restrict intptr result to 53 bit range
+            // TODO: Consider maintaining 53-bit intptrs in pre-shifted form.
+            LIns* lhsShifted = lshp(lhsExtended, AtomConstants::kAtomTypeSize + 8);
+            LIns* rhsShifted = lshp(rhs, 8);
+            LIns* sumShifted = branchJovToLabel(LIR_addjovp, lhsShifted, rhsShifted, fallback);
+            LIns* sum = rshp(sumShifted, 8);
+        #else
+            // verify that int value will fit in intptr
+            LIns* lhsShifted = lshp(lhsExtended, AtomConstants::kAtomTypeSize);
+            LIns* lhsRestored = rshp(lhsShifted, AtomConstants::kAtomTypeSize);
+            branchToLabel(LIR_jf, binaryIns(LIR_eqp, lhsRestored, lhsExtended), fallback);
+            LIns* sum = branchJovToLabel(LIR_addjovp, lhsShifted, rhs, fallback);
+        #endif
+        localSet(i, sum, type);
+    }
+#endif /* VMCFG_FASTPATH_ADD_INLINE */
+
+    // Emit code for int + atom => atom addition.
+    // The usual helper function call may be bypassed with a fastpath for the int + intptr => intptr case:
+    //
+    //     intptr_t rhsa = CONVERT_TO_ATOM(rhs);                    # box atom if needed
+    //     FAST_ADD_INT_TO_ATOM(lhs, rhsa, result, fallback);       # handle the fastpath, branching to fallback label on failure
+    //     goto done;                                               # fastpath succeeded
+    // fallback:
+    //     result = op_add_a_ia(coreAddr, lhs, rhsa);               # fastpath failed, fall back to helper function
+    // done:
+
+    void CodegenLIR::emitAddIntToAtom(int i, int j, Traits* type)
+    {
+        LIns* rhs = loadAtomRep(j);
+        LIns* lhs = localGet(i);
+        #ifdef VMCFG_FASTPATH_ADD_INLINE
+            CodegenLabel fallback("fallback");
+            CodegenLabel done("done");
+            suspendCSE();
+            emitIntPlusAtomFastpath(i, type, lhs, rhs, fallback);
+            JIT_EVENT(jit_add_a_ia_fast_intptr);
+            branchToLabel(LIR_j, NULL, done);
+            emitLabel(fallback);
+            LIns* out = callIns(FUNCTIONID(op_add_a_ia), 3, coreAddr, lhs, rhs);
+            localSet(i, out, type);
+            JIT_EVENT(jit_add_a_ia_slow);
+            emitLabel(done);
+            resumeCSE();
+        #else
+            LIns* out = callIns(FUNCTIONID(op_add_a_ia), 3, coreAddr, lhs, rhs);
+            localSet(i, out, type);
+            JIT_EVENT(jit_add_a_ia);
+        #endif
+    }
+
+    // Emit code for double + atom => atom addition.
+
+    void CodegenLIR::emitAddDoubleToAtom(int i, int j, Traits* type)
+    {
+        LIns* rhs = loadAtomRep(j);
+        LIns* lhs = localGetf(i);
+        LIns* out = callIns(FUNCTIONID(op_add_a_da), 3, coreAddr, lhs, rhs);
+        localSet(i, out, type);
+        JIT_EVENT(jit_add_a_da);
+    }
+
+    // Emit code for atom + int => atom addition.
+    // The usual helper function call may be bypassed with a fastpath for the intptr + int => intptr case:
+    //
+    //     intptr_t lhsa = CONVERT_TO_ATOM(lhs);                    # box atom if needed
+    //     FAST_ADD_INT_TO_ATOM(rhs, lhsa, result, fallback);       # handle the fastpath, note it is OK to commute arguments here
+    //     goto done;                                               # fastpath succeeded
+    // fallback:
+    //     result = op_add_a_ai(coreAddr, lhsa, rhs);               # fastpath failed, fall back to helper function
+    // done:
+
+    void CodegenLIR::emitAddAtomToInt(int i, int j, Traits* type)
+    {
+        LIns* lhs = loadAtomRep(i);
+        LIns* rhs = localGet(j);
+        #ifdef VMCFG_FASTPATH_ADD_INLINE
+            CodegenLabel fallback("fallback");
+            CodegenLabel done("done");
+            suspendCSE();
+            emitIntPlusAtomFastpath(i, type, rhs, lhs, fallback);
+            JIT_EVENT(jit_add_a_ai_fast_intptr);
+            branchToLabel(LIR_j, NULL, done);
+            emitLabel(fallback);
+            LIns* out = callIns(FUNCTIONID(op_add_a_ai), 3, coreAddr, lhs, rhs);
+            localSet(i, out, type);
+            JIT_EVENT(jit_add_a_ai_slow);
+            emitLabel(done);
+            resumeCSE();
+        #else
+            LIns* out = callIns(FUNCTIONID(op_add_a_ai), 3, coreAddr, lhs, rhs);
+            localSet(i, out, type);
+            JIT_EVENT(jit_add_a_ai);
+        #endif
+    }
+
+    // Emit code for atom + double => atom addition.
+
+    void CodegenLIR::emitAddAtomToDouble(int i, int j, Traits* type)
+    {
+        LIns* lhs = loadAtomRep(i);
+        LIns* rhs = localGetf(j);
+        LIns* out = callIns(FUNCTIONID(op_add_a_ad), 3, coreAddr, lhs, rhs);
+        localSet(i, out, type);
+        JIT_EVENT(jit_add_a_ad);
+    }
+
+    // Emit code for atom + atom => atom addition.
+    //
+    // We implement a fastpath for the intptr + intptr => intptr case:
+    //
+    // 64-bit:
+    //
+    //     intptr_t lhsa = CONVERT_TO_ATOM(lhs);                    # box atom if needed
+    //     intptr_t rhsa = CONVERT_TO_ATOM(rhs);                    # box atom if needed
+    //     if (((lhsa ^ kIntptrType) | (rhsa ^ kIntptrType)) & kAtomTypeMask) goto fallback;
+    //     # both arguments are intptr atoms
+    //     intptr_t lhsStripped = lhsa - kIntptrtype;               # zero out tag bits on lhs
+    //     intptr_t lhsShifted = lhsStripped << 8;                  # left-justify 53-bit payload (followed by 0s in tag position)
+    //     intptr_t rhsShifted = rhsa << 8;                         # align rhs payload and tag with left-justified lhs
+    //     intptr_t sumShifted = lhsShifted + rhsShifted;           # add aligned values, producing 53-bit left-justified sum followed by tag
+    //     if (OVERFLOW) goto fallback;
+    //     result = sumShifted >> 8;                                # right-justify tagged sum (53-bit payload + 3-bit tag)
+    //     goto done;
+    // fallback:
+    //     result = op_add_a_aa(coreAddr, lhsa, rhsa);              # handle the general case out-of-line
+    // done:
+    //
+    // 32-bit:
+    //
+    //     intptr_t lhsa = CONVERT_TO_ATOM(lhs);                    # box atom if needed
+    //     intptr_t rhsa = CONVERT_TO_ATOM(rhs);                    # box atom if needed
+    //     if (((lhsa ^ kIntptrType) | (rhsa ^ kIntptrType)) & kAtomTypeMask) goto fallback;
+    //     # both arguments are intptr atoms
+    //     intptr_t lhsStripped = lhsa - kIntptrtype;               # zero out tag bits on lhs (note rhs retains its tag)
+    //     intptr_t sum = lhsStripped + rhs;                        # add, producing 29-bit sum followed by 3-bit tag
+    //     if (OVERFLOW) goto fallback;
+    //     result = sum;
+    //     goto done;
+    // fallback:
+    //     result = op_add_a_aa(coreAddr, lhsa, rhsa);              # handle the general case out-of-line
+    // done:
+
+    void CodegenLIR::emitAddAtomToAtom(int i, int j, Traits* type)
+    {
+        LIns* lhs = loadAtomRep(i);
+        LIns* rhs = loadAtomRep(j);
+        #ifdef VMCFG_FASTPATH_ADD_INLINE
+            CodegenLabel fallback("fallback");
+            CodegenLabel done("done");
+            // intptr + intptr fastpath
+            suspendCSE();
+            LIns* t0 = xorp(lhs, AtomConstants::kIntptrType);
+            LIns* t1 = xorp(rhs, AtomConstants::kIntptrType);
+            LIns* t2 = binaryIns(LIR_orp, t0, t1);
+            LIns* t3 = andp(t2, AtomConstants::kAtomTypeMask);
+            branchToLabel(LIR_jf, eqp0(t3), fallback);
+            LIns* lhsStripped = subp(lhs, AtomConstants::kIntptrType);
+            #ifdef AVMPLUS_64BIT
+                // restrict range of intptr result to 53 bits
+                // since 64-bit int atoms expect exactly 53 bits of precision, shift bit 53+3 up into the sign bit
+                LIns* lhsShifted = lshp(lhsStripped, 8);
+                LIns* rhsShifted = lshp(rhs, 8);
+                LIns* sumShifted = branchJovToLabel(LIR_addjovp, lhsShifted, rhsShifted, fallback);
+                LIns* sum = rshp(sumShifted, 8);
+            #else
+                LIns* sum = branchJovToLabel(LIR_addjovp, lhsStripped, rhs, fallback);
+            #endif
+            localSet(i, sum, type);
+            JIT_EVENT(jit_add_a_aa_fast_intptr);
+            branchToLabel(LIR_j, NULL, done);
+            emitLabel(fallback);
+            LIns* out = callIns(FUNCTIONID(op_add_a_aa), 3, coreAddr, lhs, rhs);
+            localSet(i, out, type);
+            JIT_EVENT(jit_add_a_aa_slow);
+            emitLabel(done);
+            resumeCSE();
+        #else
+            LIns* out = callIns(FUNCTIONID(op_add_a_aa), 3, coreAddr, lhs, rhs);
+            localSet(i, atomToNativeRep(type, out), type);
+            JIT_EVENT(jit_add_a_aa);
+        #endif
+    }
+
+#else /* VMCFG_FASTPATH_ADD */
+
+    void CodegenLIR::emitAddAtomToAtom(int i, int j, Traits* type)
+    {
+        LIns* lhs = loadAtomRep(i);
+        LIns* rhs = loadAtomRep(j);
+        LIns* out = callIns(FUNCTIONID(op_add), 3, coreAddr, lhs, rhs);
+        localSet(i, atomToNativeRep(type, out), type);
+        JIT_EVENT(jit_add);
+    }
+
+#endif /* VMCFG_FASTPATH_ADD */
+
+    void CodegenLIR::emitAdd(int i, int j, Traits* type)
+    {
+        const Value& val1 = state->value(i);
+        const Value& val2 = state->value(j);
+        if ((val1.traits == STRING_TYPE && val1.notNull) || (val2.traits == STRING_TYPE && val2.notNull)) {
+            // string concatenation
+            AvmAssert(type == STRING_TYPE);
+            LIns* lhs = convertToString(i);
+            LIns* rhs = convertToString(j);
+            LIns* out = callIns(FUNCTIONID(concatStrings), 3, coreAddr, lhs, rhs);
+            localSet(i,  out, type);
+            JIT_EVENT(jit_add_a_ss);
+        } else if (val1.traits && val2.traits && val1.traits->isNumeric() && val2.traits->isNumeric()) {
+            // numeric + numeric
+            // TODO: The tests for isNumeric() above could be isNumericOrBool(),
+            // but a corresponding change would be needed in the verifier, resulting
+            // in a slight change to the verifier's type inference algorithm.
+            AvmAssert(type == NUMBER_TYPE);
+            LIns* lhs = coerceToNumber(i);
+            LIns* rhs = coerceToNumber(j);
+            localSet(i, binaryIns(LIR_addd, lhs, rhs), type);
+            JIT_EVENT(jit_add_a_nn);
+#ifdef VMCFG_FASTPATH_ADD
+        // If we arrive here, at least one argument is not known to be of a numeric type.
+        // Thus, having determined one argument to be of a known numeric type, we will coerce
+        // the other to an atom.  We speculate that the other argument will already be an atom
+        // of type kIntptrType or kDoubleType, checking for these cases first.
+        } else if (val1.traits == INT_TYPE) {
+            // integer + atom
+            AvmAssert(type == OBJECT_TYPE);
+            emitAddIntToAtom(i, j, type);
+        } else if (val1.traits == NUMBER_TYPE) {
+            // double + atom
+            AvmAssert(type == OBJECT_TYPE);
+            emitAddDoubleToAtom(i, j, type);
+        } else if (val2.traits == INT_TYPE) {
+            // atom + integer
+            AvmAssert(type == OBJECT_TYPE);
+            emitAddAtomToInt(i, j, type);
+        } else if (val2.traits == NUMBER_TYPE) {
+            // atom + double
+            AvmAssert(type == OBJECT_TYPE);
+            emitAddAtomToDouble(i, j, type);
+#endif
+        } else {
+            // Neither argument is known to be of a numeric type, so coerce both to atoms.
+            AvmAssert(type == OBJECT_TYPE);
+            emitAddAtomToAtom(i, j, type);
+        }
+    }
+
     void CodegenLIR::writeBlockStart(const FrameState* state)
     {
         this->state = state;
@@ -2428,6 +2717,10 @@ namespace avmplus
             emitSwap(sp, sp-1);
             break;
 
+        case OP_add:
+            emitAdd(sp-1, sp, type);
+            break;
+
         case OP_equals:
         case OP_strictequals:
         case OP_instanceof:
@@ -2554,35 +2847,6 @@ namespace avmplus
         case OP_getglobalscope:
             emitGetGlobalScope(sp+1);
             break;
-
-        case OP_add:
-        {
-            const Value& val1 = state->value(sp-1);
-            const Value& val2 = state->value(sp);
-            if ((val1.traits == STRING_TYPE && val1.notNull) || (val2.traits == STRING_TYPE && val2.notNull)) {
-                // string add
-                AvmAssert(type == STRING_TYPE);
-                LIns* lhs = convertToString(sp-1);
-                LIns* rhs = convertToString(sp);
-                LIns* out = callIns(FUNCTIONID(concatStrings), 3, coreAddr, lhs, rhs);
-                localSet(sp-1,  out, type);
-            } else if (val1.traits && val2.traits && val1.traits->isNumeric() && val2.traits->isNumeric()) {
-                // numeric add
-                AvmAssert(type == NUMBER_TYPE);
-                LIns* num1 = coerceToNumber(sp-1);
-                LIns* num2 = coerceToNumber(sp);
-                localSet(sp-1, binaryIns(LIR_addd, num1, num2), type);
-            } else {
-                // any other add
-                AvmAssert(type == OBJECT_TYPE);
-                LIns* lhs = loadAtomRep(sp-1);
-                LIns* rhs = loadAtomRep(sp);
-                LIns* out = callIns(FUNCTIONID(op_add), 3, coreAddr, lhs, rhs);
-                localSet(sp-1, atomToNativeRep(type, out), type);
-                break;
-            }
-            break;
-        }
 
         case OP_convert_s:
             localSet(sp, convertToString(sp), STRING_TYPE);
@@ -6073,6 +6337,26 @@ namespace avmplus
         } else {
             // branch was optimized away.  do nothing.
         }
+    }
+
+    LIns* CodegenLIR::branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label) {
+        LIns* labelIns = label.labelIns;
+        LIns* result = lirout->insBranchJov(op, a, b, labelIns);
+        NanoAssert(result);
+        if (result->isop(op)) {
+            if (labelIns != NULL) {
+                varTracker->checkBackEdge(label, state);
+            } else {
+                label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(result), label.unpatchedEdges);
+                varTracker->trackForwardEdge(label, false);
+            }
+        } else {
+            // The root operator of the expression has been eliminated via
+            // constant folding or other simplification.  This is only valid
+            // if no overflow is possible, in which case the branch is not needed.
+            // Do nothing.
+        }
+        return result;
     }
 
     // emit a relative branch to the given ABC pc-offset by mapping pc

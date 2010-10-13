@@ -202,10 +202,14 @@ namespace vmbase
     // an int32_t (or uint32_t) will hold on 64-bit architectures.
     bool            atomIsIntptr(Atom atom);
 
+    // returns true if atom type is String.
+    bool            atomIsString(Atom atom);
+
     // return true iff both atoms are of the given type. sometimes this is slightly
     // faster than calling atomIs(b1)&&atomIs(b2). (And yes, "atomIsBoth" is poor
     // grammar in English, but follows the "atomIsXXX -> bool" pattern)
     bool            atomIsBothIntptr(Atom atom1, Atom atom2);
+    bool            atomIsBothString(Atom atom1, Atom atom2);
 
     // if the atom is kIntptrType and will fit into an int32_t, return true
     // if the atom is kIntptrType and will NOT fit into an int32_t, return false
