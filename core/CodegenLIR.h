@@ -498,6 +498,7 @@ namespace avmplus
         LIns *Ins(LOpcode op, LIns *a);
         LIns *i2dIns(LIns* v);
         LIns *ui2dIns(LIns* v);
+        LIns *p2dIns(LIns* v);
         LIns *binaryIns(LOpcode op, LIns *a, LIns *b);
         LIns* callIns(const CallInfo *, uint32_t argc, ...);
 
