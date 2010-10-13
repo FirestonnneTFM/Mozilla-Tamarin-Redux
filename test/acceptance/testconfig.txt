@@ -229,6 +229,7 @@ regress/bug_558442a, arm-winmobile-emulator.*, skip , https://bugzilla.mozilla.o
 ####################
 abcasm/syntaxErrors , sh4.*, skip, sh4 box lacks java
 versioning/bugcompat , sh4.*, skip, sh4 box lacks java
+as3/Expressions/indexProperties , sh4.* , skip , This testcase causes the SH4 box to run out of memory when running inside buildbot  
 
 ####################
 # Performance-acceptance testing: tests that must run on a performance machine 
