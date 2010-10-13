@@ -153,4 +153,28 @@
     #define VMCFG_RESTARG_OPTIMIZATION
 #endif
 
+// Enable more agressive use of type-specialized helper functions and speculative
+// inlining in the JIT.
+// It is likely that this will want to become a feature, as the space-for-speed
+// tradeoff may not be appropriate for all target platforms and host embeddings.
+
+#define VMCFG_JIT_FASTPATH
+
+// Individual optimizations should be controlled by separate VMCFG variables
+// to facilitate performance analsyis experiments.
+
+#ifdef VMCFG_JIT_FASTPATH
+
+    #define VMCFG_FASTPATH_ADD
+
+    // Inlining requires the addjovi instruction, which is not
+    // implemented on PPC or Sparc.
+    // PPC:   https://bugzilla.mozilla.org/show_bug.cgi?id=601266
+    // Sparc: https://bugzilla.mozilla.org/show_bug.cgi?id=603876
+    #if defined(VMCFG_FASTPATH_ADD) && !(defined(AVMPLUS_PPC) || defined(AVMPLUS_SPARC))
+        #define VMCFG_FASTPATH_ADD_INLINE
+    #endif
+
+#endif
+
 #endif /* __avmbuild__ */
