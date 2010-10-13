@@ -54,7 +54,7 @@ lockfile=~/asteammac2.lck
 export slavename="$branch-$platform-performance"
 
 
-export hostip=10.60.147.221
+export hostip=10.60.144.181
 
 PATH=/usr/local/bin/:$PATH
 
