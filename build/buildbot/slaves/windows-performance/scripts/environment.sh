@@ -53,5 +53,5 @@ export lockfile=c:/asteamwin1.lck
 export slavename="$branch-$platform-performance"
 
 
-export hostip=10.60.147.246
+export hostip=10.60.147.240
 

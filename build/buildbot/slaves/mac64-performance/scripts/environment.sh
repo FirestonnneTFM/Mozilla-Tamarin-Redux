@@ -56,7 +56,7 @@ lockfile=~/buildbot.lck
 export slavename="$branch-$platform-performance"
 
 
-export hostip=10.60.147.196
+export hostip=10.60.144.182
 
 PATH=/usr/local/bin/:$PATH
 

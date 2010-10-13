@@ -54,7 +54,7 @@ export shell_release_arm=$shell_release
 
 export slavename="$branch-$platform-performance"
 
-export hostip=10.60.147.220
+export hostip=10.60.147.120
 
 baselineBranchTime=tamarin-argo
 baselineConfigTime=
