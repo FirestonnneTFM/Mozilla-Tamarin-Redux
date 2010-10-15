@@ -94,6 +94,11 @@ REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
         : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
 }
 
+REALLY_INLINE ErrorClass* Toplevel::getErrorClass(int class_id) const 
+{ 
+    return (ErrorClass*)getBuiltinClass(class_id); 
+}
+
 // static
 REALLY_INLINE bool Toplevel::contains(const uint32_t *uriSet, uint32_t ch)
 {

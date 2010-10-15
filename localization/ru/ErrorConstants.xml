@@ -666,12 +666,10 @@ class B extends A {
     this ["doSomething"] ("str")</code></pre>
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
-  <error id="1509" hidden="true" label="kShellCompressedDataError">При распаковке данных произошла ошибка.
- <description><![CDATA[
-    The de-compressor reached the end of the stream, but more data was expected. The compressed data
-    stream is probably corrupted.
-    ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Если аргумент "callback" является методом класса, дополнительный аргумент "this" должен быть "null".</error>
+  <error id="2006" label="kParamRangeError">Предоставленный индекс выходит за допустимые пределы.</error>
   <error id="2007" label="kNullPointerError">Параметр %1 не должен быть равен нулю.</error>
   <error id="2008" label="kInvalidEnumError">Параметр %1 должен быть одним из принятых значений.</error>
+  <error id="2030" label="kEOFError">Обнаружен конец файла.</error>
+  <error id="2058" label="kCompressedDataError">Ошибка при распаковке данных.</error>
 </errors>

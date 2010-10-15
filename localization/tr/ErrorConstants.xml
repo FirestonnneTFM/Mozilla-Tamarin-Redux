@@ -666,12 +666,10 @@ class B extends A {
     this ["doSomething"] ("str")</code></pre>
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
-  <error id="1509" hidden="true" label="kShellCompressedDataError">Veri açılırken hata oluştu.
-  <description><![CDATA[
-    The de-compressor reached the end of the stream, but more data was expected. The compressed data
-    stream is probably corrupted.
-    ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır.</error>
+  <error id="2006" label="kParamRangeError">Sağlanan dizin sınırların dışındadır.</error>
   <error id="2007" label="kNullPointerError">%1 parametresi boş olmamalıdır.</error>
   <error id="2008" label="kInvalidEnumError">%1 parametresi kabul edilen değerlerden biridir.</error>
+  <error id="2030" label="kEOFError">Dosya sonuyla karşılaşıldı.</error>
+  <error id="2058" label="kCompressedDataError">Veri açılırken hata oluştu.</error>
 </errors>

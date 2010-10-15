@@ -151,7 +151,6 @@ namespace avmplus
 
     private:
         void NotifySubscribers();
-        void ThrowMemoryError();
         
         void TellGcNewBufferMemory(const uint8_t* buf, uint32_t numberOfBytes);
         void TellGcDeleteBufferMemory(const uint8_t* buf, uint32_t numberOfBytes);
@@ -171,8 +170,6 @@ namespace avmplus
     {
     public:
         ByteArrayObject(VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding);
-
-        void checkNull(void *instance, const char *name);
 
         virtual bool hasAtomProperty(Atom name) const;
         virtual void setAtomProperty(Atom name, Atom value);
@@ -202,10 +199,10 @@ namespace avmplus
         void writeUnsignedInt(uint32_t value);
         void writeFloat(double value);
         void writeDouble(double value);
-        void writeMultiByte(String *value, String *charSet);
-        void writeUTF(String *value);
-        void writeUTFBytes(String *value);
-
+        void writeMultiByte(String* value, String* charSet);
+        void writeUTF(String* value);
+        void writeUTFBytes(String* value);
+    
         bool readBoolean();
         int readByte();
         int readUnsignedByte();
@@ -215,7 +212,7 @@ namespace avmplus
         uint32_t readUnsignedInt();
         double readFloat();
         double readDouble();
-        String* readMultiByte(uint32_t length, String *charSet);
+        String* readMultiByte(uint32_t length, String* charSet);
         String* readUTF();
         String* readUTFBytes(uint32_t length);
 
@@ -261,7 +258,7 @@ namespace avmplus
         ByteArrayClass(VTable *vtable);
         ~ByteArrayClass() { }
 
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+        ScriptObject* createInstance(VTable* ivtable, ScriptObject* delegate);
 
         uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }
         void set_defaultObjectEncoding(uint32_t version) { set_private__defaultObjectEncoding(version); }

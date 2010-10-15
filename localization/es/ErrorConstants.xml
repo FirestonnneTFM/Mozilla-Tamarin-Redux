@@ -755,13 +755,10 @@ class B extends A {
     this ["doSomething"] ("str")</code></pre>
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
-  <error id="1509" hidden="true" label="kShellCompressedDataError">
-    Se produjo un error al descomprimir los datos.
-    <description><![CDATA[
-    The de-compressor reached the end of the stream, but more data was expected. The compressed data
-    stream is probably corrupted.
-    ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null.</error>
+  <error id="2006" label="kParamRangeError">El índice proporcionado está fuera de los límites.</error>
   <error id="2007" label="kNullPointerError">El valor del parámetro %1 debe ser distinto de null.</error>
   <error id="2008" label="kInvalidEnumError">El parámetro %1 debe tener uno de los valores aceptados.</error>
+  <error id="2030" label="kEOFError">Se alcanzó el final del archivo.</error>
+  <error id="2058" label="kCompressedDataError">Se produjo un error al descomprimir los datos.</error>
 </errors>

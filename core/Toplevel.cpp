@@ -1332,6 +1332,21 @@ namespace avmplus
         throwTypeErrorWithName(kNullPointerError, name);
     }
 
+    void FASTCALL Toplevel::throwMemoryError(int id)
+    {
+        memoryErrorClass()->throwError(id);
+    }
+
+    void FASTCALL Toplevel::throwIOError(int id)
+    {
+        ioErrorClass()->throwError(id);
+    }
+
+    void FASTCALL Toplevel::throwEOFError(int id)
+    {
+        eofErrorClass()->throwError(id);
+    }
+
     DateClass* Toplevel::dateClass() { return (DateClass*)getBuiltinClass(avmplus::NativeID::abcclass_Date); }
     RegExpClass* Toplevel::regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
     XMLClass* Toplevel::xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }
@@ -1347,6 +1362,9 @@ namespace avmplus
     ErrorClass* Toplevel::securityErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SecurityError); }
     ErrorClass* Toplevel::syntaxErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SyntaxError); }
     ErrorClass* Toplevel::verifyErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_VerifyError); }
+    ErrorClass* Toplevel::ioErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_flash_errors_IOError); }
+    ErrorClass* Toplevel::eofErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_flash_errors_EOFError); }
+    ErrorClass* Toplevel::memoryErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_flash_errors_MemoryError); }
 
     // virtual
     ClassClosure *Toplevel::getBuiltinExtensionClass(int /*clsid*/)
@@ -1394,6 +1412,12 @@ namespace avmplus
     void Toplevel::writeMultiByte(uint32_t /*codepage*/, String* /*str*/, DataOutput* /*output*/)
     {
         AvmAssert(0);
+    }
+
+    //  -------------------------------------------------------
+    String* Toplevel::tryFromSystemCodepage(const uint8_t* /*data*/)
+    {
+        return NULL;
     }
 
     //  -------------------------------------------------------

@@ -143,11 +143,14 @@ const uint32_t abcclass_URIError = 25;
 const uint32_t abcclass_VerifyError = 26;
 const uint32_t abcclass_UninitializedError = 27;
 const uint32_t abcclass_ArgumentError = 28;
-const uint32_t abcclass_Date = 29;
-const uint32_t abcclass_RegExp = 30;
-const uint32_t abcclass_XML = 31;
-const uint32_t abcclass_XMLList = 32;
-const uint32_t abcclass_QName = 33;
+const uint32_t abcclass_flash_errors_IOError = 29;
+const uint32_t abcclass_flash_errors_MemoryError = 30;
+const uint32_t abcclass_flash_errors_EOFError = 31;
+const uint32_t abcclass_Date = 32;
+const uint32_t abcclass_RegExp = 33;
+const uint32_t abcclass_XML = 34;
+const uint32_t abcclass_XMLList = 35;
+const uint32_t abcclass_QName = 36;
 
 /* methods */
 const uint32_t native_script_function_avmplus_getQualifiedSuperclassName = 0;
@@ -308,142 +311,142 @@ const uint32_t Math_min = 480;
 const uint32_t Math_random = 481;
 const uint32_t Error_getErrorMessage = 486;
 const uint32_t Error_getStackTrace = 490;
-const uint32_t Date_parse = 557;
-const uint32_t Date_UTC = 558;
-const uint32_t Date_AS3_valueOf = 559;
-const uint32_t Date_private__toString = 560;
-const uint32_t Date_private__setTime = 561;
-const uint32_t Date_private__get = 562;
-const uint32_t Date_AS3_getUTCFullYear = 571;
-const uint32_t Date_AS3_getUTCMonth = 572;
-const uint32_t Date_AS3_getUTCDate = 573;
-const uint32_t Date_AS3_getUTCDay = 574;
-const uint32_t Date_AS3_getUTCHours = 575;
-const uint32_t Date_AS3_getUTCMinutes = 576;
-const uint32_t Date_AS3_getUTCSeconds = 577;
-const uint32_t Date_AS3_getUTCMilliseconds = 578;
-const uint32_t Date_AS3_getFullYear = 579;
-const uint32_t Date_AS3_getMonth = 580;
-const uint32_t Date_AS3_getDate = 581;
-const uint32_t Date_AS3_getDay = 582;
-const uint32_t Date_AS3_getHours = 583;
-const uint32_t Date_AS3_getMinutes = 584;
-const uint32_t Date_AS3_getSeconds = 585;
-const uint32_t Date_AS3_getMilliseconds = 586;
-const uint32_t Date_AS3_getTimezoneOffset = 587;
-const uint32_t Date_AS3_getTime = 588;
-const uint32_t Date_private__setFullYear = 589;
-const uint32_t Date_private__setMonth = 590;
-const uint32_t Date_private__setDate = 591;
-const uint32_t Date_private__setHours = 592;
-const uint32_t Date_private__setMinutes = 593;
-const uint32_t Date_private__setSeconds = 594;
-const uint32_t Date_private__setMilliseconds = 595;
-const uint32_t Date_private__setUTCFullYear = 596;
-const uint32_t Date_private__setUTCMonth = 597;
-const uint32_t Date_private__setUTCDate = 598;
-const uint32_t Date_private__setUTCHours = 599;
-const uint32_t Date_private__setUTCMinutes = 600;
-const uint32_t Date_private__setUTCSeconds = 601;
-const uint32_t Date_private__setUTCMilliseconds = 602;
-const uint32_t RegExp_source_get = 656;
-const uint32_t RegExp_global_get = 657;
-const uint32_t RegExp_ignoreCase_get = 658;
-const uint32_t RegExp_multiline_get = 659;
-const uint32_t RegExp_lastIndex_get = 660;
-const uint32_t RegExp_lastIndex_set = 661;
-const uint32_t RegExp_dotall_get = 662;
-const uint32_t RegExp_extended_get = 663;
-const uint32_t RegExp_AS3_exec = 664;
-const uint32_t XML_ignoreComments_get = 710;
-const uint32_t XML_ignoreComments_set = 711;
-const uint32_t XML_ignoreProcessingInstructions_get = 712;
-const uint32_t XML_ignoreProcessingInstructions_set = 713;
-const uint32_t XML_ignoreWhitespace_get = 714;
-const uint32_t XML_ignoreWhitespace_set = 715;
-const uint32_t XML_prettyPrinting_get = 716;
-const uint32_t XML_prettyPrinting_set = 717;
-const uint32_t XML_prettyIndent_get = 718;
-const uint32_t XML_prettyIndent_set = 719;
-const uint32_t XML_AS3_toString = 723;
-const uint32_t XML_AS3_hasOwnProperty = 724;
-const uint32_t XML_AS3_propertyIsEnumerable = 725;
-const uint32_t XML_AS3_addNamespace = 726;
-const uint32_t XML_AS3_appendChild = 727;
-const uint32_t XML_AS3_attribute = 728;
-const uint32_t XML_AS3_attributes = 729;
-const uint32_t XML_AS3_child = 730;
-const uint32_t XML_AS3_childIndex = 731;
-const uint32_t XML_AS3_children = 732;
-const uint32_t XML_AS3_comments = 733;
-const uint32_t XML_AS3_contains = 734;
-const uint32_t XML_AS3_copy = 735;
-const uint32_t XML_AS3_descendants = 736;
-const uint32_t XML_AS3_elements = 737;
-const uint32_t XML_AS3_hasComplexContent = 738;
-const uint32_t XML_AS3_hasSimpleContent = 739;
-const uint32_t XML_AS3_inScopeNamespaces = 740;
-const uint32_t XML_AS3_insertChildAfter = 741;
-const uint32_t XML_AS3_insertChildBefore = 742;
-const uint32_t XML_AS3_localName = 744;
-const uint32_t XML_AS3_name = 745;
-const uint32_t XML_private__namespace = 746;
-const uint32_t XML_AS3_namespaceDeclarations = 748;
-const uint32_t XML_AS3_nodeKind = 749;
-const uint32_t XML_AS3_normalize = 750;
-const uint32_t XML_AS3_parent = 751;
-const uint32_t XML_AS3_processingInstructions = 752;
-const uint32_t XML_AS3_prependChild = 753;
-const uint32_t XML_AS3_removeNamespace = 754;
-const uint32_t XML_AS3_replace = 755;
-const uint32_t XML_AS3_setChildren = 756;
-const uint32_t XML_AS3_setLocalName = 757;
-const uint32_t XML_AS3_setName = 758;
-const uint32_t XML_AS3_setNamespace = 759;
-const uint32_t XML_AS3_text = 760;
-const uint32_t XML_AS3_toXMLString = 761;
-const uint32_t XML_AS3_notification = 762;
-const uint32_t XML_AS3_setNotification = 763;
-const uint32_t XMLList_AS3_toString = 805;
-const uint32_t XMLList_AS3_hasOwnProperty = 807;
-const uint32_t XMLList_AS3_propertyIsEnumerable = 808;
-const uint32_t XMLList_AS3_attribute = 809;
-const uint32_t XMLList_AS3_attributes = 810;
-const uint32_t XMLList_AS3_child = 811;
-const uint32_t XMLList_AS3_children = 812;
-const uint32_t XMLList_AS3_comments = 813;
-const uint32_t XMLList_AS3_contains = 814;
-const uint32_t XMLList_AS3_copy = 815;
-const uint32_t XMLList_AS3_descendants = 816;
-const uint32_t XMLList_AS3_elements = 817;
-const uint32_t XMLList_AS3_hasComplexContent = 818;
-const uint32_t XMLList_AS3_hasSimpleContent = 819;
-const uint32_t XMLList_AS3_length = 820;
-const uint32_t XMLList_AS3_name = 821;
-const uint32_t XMLList_AS3_normalize = 822;
-const uint32_t XMLList_AS3_parent = 823;
-const uint32_t XMLList_AS3_processingInstructions = 824;
-const uint32_t XMLList_AS3_text = 825;
-const uint32_t XMLList_AS3_toXMLString = 826;
-const uint32_t XMLList_AS3_addNamespace = 827;
-const uint32_t XMLList_AS3_appendChild = 828;
-const uint32_t XMLList_AS3_childIndex = 829;
-const uint32_t XMLList_AS3_inScopeNamespaces = 830;
-const uint32_t XMLList_AS3_insertChildAfter = 831;
-const uint32_t XMLList_AS3_insertChildBefore = 832;
-const uint32_t XMLList_AS3_nodeKind = 833;
-const uint32_t XMLList_private__namespace = 834;
-const uint32_t XMLList_AS3_localName = 836;
-const uint32_t XMLList_AS3_namespaceDeclarations = 837;
-const uint32_t XMLList_AS3_prependChild = 838;
-const uint32_t XMLList_AS3_removeNamespace = 839;
-const uint32_t XMLList_AS3_replace = 840;
-const uint32_t XMLList_AS3_setChildren = 841;
-const uint32_t XMLList_AS3_setLocalName = 842;
-const uint32_t XMLList_AS3_setName = 843;
-const uint32_t XMLList_AS3_setNamespace = 844;
-const uint32_t QName_localName_get = 848;
-const uint32_t QName_uri_get = 849;
+const uint32_t Date_parse = 563;
+const uint32_t Date_UTC = 564;
+const uint32_t Date_AS3_valueOf = 565;
+const uint32_t Date_private__toString = 566;
+const uint32_t Date_private__setTime = 567;
+const uint32_t Date_private__get = 568;
+const uint32_t Date_AS3_getUTCFullYear = 577;
+const uint32_t Date_AS3_getUTCMonth = 578;
+const uint32_t Date_AS3_getUTCDate = 579;
+const uint32_t Date_AS3_getUTCDay = 580;
+const uint32_t Date_AS3_getUTCHours = 581;
+const uint32_t Date_AS3_getUTCMinutes = 582;
+const uint32_t Date_AS3_getUTCSeconds = 583;
+const uint32_t Date_AS3_getUTCMilliseconds = 584;
+const uint32_t Date_AS3_getFullYear = 585;
+const uint32_t Date_AS3_getMonth = 586;
+const uint32_t Date_AS3_getDate = 587;
+const uint32_t Date_AS3_getDay = 588;
+const uint32_t Date_AS3_getHours = 589;
+const uint32_t Date_AS3_getMinutes = 590;
+const uint32_t Date_AS3_getSeconds = 591;
+const uint32_t Date_AS3_getMilliseconds = 592;
+const uint32_t Date_AS3_getTimezoneOffset = 593;
+const uint32_t Date_AS3_getTime = 594;
+const uint32_t Date_private__setFullYear = 595;
+const uint32_t Date_private__setMonth = 596;
+const uint32_t Date_private__setDate = 597;
+const uint32_t Date_private__setHours = 598;
+const uint32_t Date_private__setMinutes = 599;
+const uint32_t Date_private__setSeconds = 600;
+const uint32_t Date_private__setMilliseconds = 601;
+const uint32_t Date_private__setUTCFullYear = 602;
+const uint32_t Date_private__setUTCMonth = 603;
+const uint32_t Date_private__setUTCDate = 604;
+const uint32_t Date_private__setUTCHours = 605;
+const uint32_t Date_private__setUTCMinutes = 606;
+const uint32_t Date_private__setUTCSeconds = 607;
+const uint32_t Date_private__setUTCMilliseconds = 608;
+const uint32_t RegExp_source_get = 662;
+const uint32_t RegExp_global_get = 663;
+const uint32_t RegExp_ignoreCase_get = 664;
+const uint32_t RegExp_multiline_get = 665;
+const uint32_t RegExp_lastIndex_get = 666;
+const uint32_t RegExp_lastIndex_set = 667;
+const uint32_t RegExp_dotall_get = 668;
+const uint32_t RegExp_extended_get = 669;
+const uint32_t RegExp_AS3_exec = 670;
+const uint32_t XML_ignoreComments_get = 716;
+const uint32_t XML_ignoreComments_set = 717;
+const uint32_t XML_ignoreProcessingInstructions_get = 718;
+const uint32_t XML_ignoreProcessingInstructions_set = 719;
+const uint32_t XML_ignoreWhitespace_get = 720;
+const uint32_t XML_ignoreWhitespace_set = 721;
+const uint32_t XML_prettyPrinting_get = 722;
+const uint32_t XML_prettyPrinting_set = 723;
+const uint32_t XML_prettyIndent_get = 724;
+const uint32_t XML_prettyIndent_set = 725;
+const uint32_t XML_AS3_toString = 729;
+const uint32_t XML_AS3_hasOwnProperty = 730;
+const uint32_t XML_AS3_propertyIsEnumerable = 731;
+const uint32_t XML_AS3_addNamespace = 732;
+const uint32_t XML_AS3_appendChild = 733;
+const uint32_t XML_AS3_attribute = 734;
+const uint32_t XML_AS3_attributes = 735;
+const uint32_t XML_AS3_child = 736;
+const uint32_t XML_AS3_childIndex = 737;
+const uint32_t XML_AS3_children = 738;
+const uint32_t XML_AS3_comments = 739;
+const uint32_t XML_AS3_contains = 740;
+const uint32_t XML_AS3_copy = 741;
+const uint32_t XML_AS3_descendants = 742;
+const uint32_t XML_AS3_elements = 743;
+const uint32_t XML_AS3_hasComplexContent = 744;
+const uint32_t XML_AS3_hasSimpleContent = 745;
+const uint32_t XML_AS3_inScopeNamespaces = 746;
+const uint32_t XML_AS3_insertChildAfter = 747;
+const uint32_t XML_AS3_insertChildBefore = 748;
+const uint32_t XML_AS3_localName = 750;
+const uint32_t XML_AS3_name = 751;
+const uint32_t XML_private__namespace = 752;
+const uint32_t XML_AS3_namespaceDeclarations = 754;
+const uint32_t XML_AS3_nodeKind = 755;
+const uint32_t XML_AS3_normalize = 756;
+const uint32_t XML_AS3_parent = 757;
+const uint32_t XML_AS3_processingInstructions = 758;
+const uint32_t XML_AS3_prependChild = 759;
+const uint32_t XML_AS3_removeNamespace = 760;
+const uint32_t XML_AS3_replace = 761;
+const uint32_t XML_AS3_setChildren = 762;
+const uint32_t XML_AS3_setLocalName = 763;
+const uint32_t XML_AS3_setName = 764;
+const uint32_t XML_AS3_setNamespace = 765;
+const uint32_t XML_AS3_text = 766;
+const uint32_t XML_AS3_toXMLString = 767;
+const uint32_t XML_AS3_notification = 768;
+const uint32_t XML_AS3_setNotification = 769;
+const uint32_t XMLList_AS3_toString = 811;
+const uint32_t XMLList_AS3_hasOwnProperty = 813;
+const uint32_t XMLList_AS3_propertyIsEnumerable = 814;
+const uint32_t XMLList_AS3_attribute = 815;
+const uint32_t XMLList_AS3_attributes = 816;
+const uint32_t XMLList_AS3_child = 817;
+const uint32_t XMLList_AS3_children = 818;
+const uint32_t XMLList_AS3_comments = 819;
+const uint32_t XMLList_AS3_contains = 820;
+const uint32_t XMLList_AS3_copy = 821;
+const uint32_t XMLList_AS3_descendants = 822;
+const uint32_t XMLList_AS3_elements = 823;
+const uint32_t XMLList_AS3_hasComplexContent = 824;
+const uint32_t XMLList_AS3_hasSimpleContent = 825;
+const uint32_t XMLList_AS3_length = 826;
+const uint32_t XMLList_AS3_name = 827;
+const uint32_t XMLList_AS3_normalize = 828;
+const uint32_t XMLList_AS3_parent = 829;
+const uint32_t XMLList_AS3_processingInstructions = 830;
+const uint32_t XMLList_AS3_text = 831;
+const uint32_t XMLList_AS3_toXMLString = 832;
+const uint32_t XMLList_AS3_addNamespace = 833;
+const uint32_t XMLList_AS3_appendChild = 834;
+const uint32_t XMLList_AS3_childIndex = 835;
+const uint32_t XMLList_AS3_inScopeNamespaces = 836;
+const uint32_t XMLList_AS3_insertChildAfter = 837;
+const uint32_t XMLList_AS3_insertChildBefore = 838;
+const uint32_t XMLList_AS3_nodeKind = 839;
+const uint32_t XMLList_private__namespace = 840;
+const uint32_t XMLList_AS3_localName = 842;
+const uint32_t XMLList_AS3_namespaceDeclarations = 843;
+const uint32_t XMLList_AS3_prependChild = 844;
+const uint32_t XMLList_AS3_removeNamespace = 845;
+const uint32_t XMLList_AS3_replace = 846;
+const uint32_t XMLList_AS3_setChildren = 847;
+const uint32_t XMLList_AS3_setLocalName = 848;
+const uint32_t XMLList_AS3_setName = 849;
+const uint32_t XMLList_AS3_setNamespace = 850;
+const uint32_t QName_localName_get = 854;
+const uint32_t QName_uri_get = 855;
 
 extern double Math_private__min_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern double Math_private__max_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -873,14 +876,6 @@ extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined___
 extern double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_UTC_thunk  builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk
 
-extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_505___________thunk
-
 extern AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_length_get_thunk  builtin_i2a_s_thunk
 
@@ -983,6 +978,18 @@ extern AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 extern AvmBox builtin_func_b2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_bugzilla_thunk  builtin_func_b2a_oi_thunk
 
+extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+
 extern AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_decodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
 #define native_script_function_decodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
@@ -1049,17 +1056,13 @@ extern AvmBox builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 extern AvmBox builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define RegExp_AS3_exec_thunk  builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk
 
-extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
 
 extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__toString_thunk  builtin_s2a_oi_thunk

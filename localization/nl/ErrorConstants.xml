@@ -666,12 +666,10 @@ class B extends A {
     this ["doSomething"] ("str")</code></pre>
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
-  <error id="1509" hidden="true" label="kShellCompressedDataError">Er is een fout opgetreden bij het decomprimeren van gegevens.
-  <description><![CDATA[
-    The de-compressor reached the end of the stream, but more data was expected. The compressed data
-    stream is probably corrupted.
-    ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Wanneer het callback-argument een methode of een klasse is, moet het optionele argument this null zijn.</error>
+  <error id="2006" label="kParamRangeError">De opgegeven index is buiten de grenzen.</error>
   <error id="2007" label="kNullPointerError">Parameter %1 mag niet null zijn.</error>
   <error id="2008" label="kInvalidEnumError">Parameter %1 moet een van de toegestane waarden zijn.</error>
+  <error id="2030" label="kEOFError">Einde van bestand is bereikt.</error>
+  <error id="2058" label="kCompressedDataError">Er is een fout opgetreden bij het decomprimeren van gegevens.</error>
 </errors>

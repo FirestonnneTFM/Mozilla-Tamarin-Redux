@@ -50,17 +50,17 @@ namespace avmplus
 
     void DataIOBase::ThrowEOFError()
     {
-        toplevel()->throwError(kEndOfFileError);
+        toplevel()->throwEOFError(kEOFError);
     }
 
     void DataIOBase::ThrowMemoryError()
     {
-        toplevel()->throwError(kOutOfMemoryError);
+        toplevel()->throwMemoryError(kOutOfMemoryError);
     }
 
     void DataIOBase::ThrowRangeError()
     {
-        toplevel()->throwRangeError(kInvalidRangeError);
+        toplevel()->throwRangeError(kParamRangeError);
     }
 
     //
@@ -297,7 +297,7 @@ namespace avmplus
                                     uint32_t offset,
                                     uint32_t count)
     {
-        if (offset >= buffer.GetLength())
+        if (offset > buffer.GetLength())
             offset = buffer.GetLength();
 
         if (count == 0) {
