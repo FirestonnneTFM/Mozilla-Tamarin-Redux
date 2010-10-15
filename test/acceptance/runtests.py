@@ -428,6 +428,8 @@ class AcceptanceRuntest(RuntestBase):
                         outputCalls.append((self.verbose_print,(expectedOut,)))
                         outputCalls.append((self.verbose_print,('\nactual output:',)))
                         outputCalls.append((self.verbose_print,(actual,)))
+                        # check settings if this should be an expected failure
+                        expectedfail = dict_match(settings,'','expectedfail')
                         # .out files can contain regex but must be prefaced with REGEXP as the first line in the file
                         try:
                             if expectedOut[0] == 'REGEXP':
@@ -442,12 +444,27 @@ class AcceptanceRuntest(RuntestBase):
                             else:
                                 if actual != expectedOut:
                                     raise IndexError
-                            lpass += 1
+                            # test passed - check to make sure its not an expected failure
+                            if expectedfail:
+                                outputCalls.append((self.fail,(
+                                    testName, 'unexpected .out file pass. ' +
+                                    ' reason: '+expectedfail, self.unpassmsgs)))
+                                lunpass += 1
+                            else:
+                                lpass += 1
                         except IndexError:
-                            outputCalls.append((self.fail,(testName,
-                                '.out file does not match output:\n%s.out file (expected):\n%s\nactual output:\n%s' % (root, expectedOut,actual),
-                                self.failmsgs)))
-                            lfail += 1
+                            # test failed
+                            if expectedfail:
+                                outputCalls.append((self.fail,(
+                                    testName,
+                                    'expected failure: .out file does not match stdout+stderr. ' +
+                                    ' reason: '+expectedfail, self.expfailmsgs)))
+                                lexpfail += 1
+                            else:
+                                outputCalls.append((self.fail,(testName,
+                                    '.out file does not match output:\n%s.out file (expected):\n%s\nactual output:\n%s' % (root, expectedOut,actual),
+                                    self.failmsgs)))
+                                lfail += 1
                     except IOError:
                         outputLines.append((self.js_print,('Error opening %s.out' % root,)))
                         lfail += 1
