@@ -72,7 +72,10 @@ namespace avmplus
 
         inline Stringp fromCharCode(Atom *argv, int argc) { return AS3_fromCharCode(argv, argc); }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_StringClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

@@ -126,7 +126,10 @@ namespace avmplus
 
         static ArrayObject* isArray(Toplevel* toplevel, Atom instance);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_ArrayClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

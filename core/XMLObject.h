@@ -122,13 +122,9 @@ namespace avmplus
             return toplevel()->xmlClass();
         }
 
-    protected:
-        DWB(E4XNode*) m_node;
-
         friend class XMLClass;
 
     public:
-
         E4XNode* getNode() const { return m_node; }
         void setNode(E4XNode* node) { m_node = node; }
 
@@ -308,8 +304,14 @@ namespace avmplus
 
         Atom maybeEscapeChild(Atom child);
 
+    // ------------------------ DATA SECTION BEGIN
+    protected:
+        DWB(E4XNode*) m_node;
+
+    private:
         Namespacep publicNS;
         DECLARE_SLOTS_XMLObject;
+    // ------------------------ DATA SECTION END
     };
 
     /**
@@ -328,7 +330,6 @@ namespace avmplus
             return toplevel()->xmlClass();
         }
 
-        HeapMultiname m_mn;
         friend class QNameClass;
 
     public:
@@ -352,7 +353,11 @@ namespace avmplus
             name = m_mn;
         }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        HeapMultiname m_mn;
         DECLARE_SLOTS_QNameObject;
+    // ------------------------ DATA SECTION END
     };
 }
 #endif /* __avmplus_XMLObject__ */

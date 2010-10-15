@@ -69,7 +69,10 @@ namespace avmplus
         Stringp _numberToString(double n, int radix);
         double _minValue();
 
+    // ------------------------ DATA SECTION BEGIN
+    private:    
         DECLARE_SLOTS_NumberClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

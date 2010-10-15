@@ -85,15 +85,20 @@ namespace avmplus
 
         uint32_t AS3_push(Atom *args, int argc);
 
-        uint32_t m_length;
     protected:
-        uint32_t m_capacity;
-        bool m_fixed;
-
         virtual void grow(uint32_t newCapacity, bool exact=false) = 0;
         virtual VectorBaseObject* newVector(uint32_t length = 0) = 0;
 
         bool getVectorIndex(Atom name, uint32_t& index, bool& isNumber) const;
+
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        uint32_t m_length;
+        
+    protected:
+        uint32_t m_capacity;
+        bool m_fixed;
+    // ------------------------ DATA SECTION END
     };
 
     template <class T>
@@ -403,8 +408,6 @@ namespace avmplus
             return 0;  // Undefined cast to number/int/uint
         }
 
-        DWB(T *) m_array;
-
         // Helper method to init the vector with another object
         void initWithObj(Atom obj)
         {
@@ -508,6 +511,11 @@ namespace avmplus
                 m_capacity = newCapacity;
             }
         }
+
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        DWB(T *) m_array;
+    // ------------------------ DATA SECTION END
     };
 
     class IntVectorObject : public TypedVectorObject<int32_t> {
@@ -616,8 +624,12 @@ namespace avmplus
             gc()->movePointers((void**)(void*)array, dstOffset, (const void**)(void*)array, srcOffset, num);
         }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:        
         DRCWB(ClassClosure*) t;
+
         DECLARE_SLOTS_ObjectVectorObject;
+    // ------------------------ DATA SECTION END
     };
 
     class IntVectorClass : public ClassClosure
@@ -636,7 +648,10 @@ namespace avmplus
         bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
         Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:        
         DECLARE_SLOTS_IntVectorClass;
+    // ------------------------ DATA SECTION END
     };
 
     class UIntVectorClass : public ClassClosure
@@ -655,7 +670,10 @@ namespace avmplus
         bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
         Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:        
         DECLARE_SLOTS_UIntVectorClass;
+    // ------------------------ DATA SECTION END
     };
 
     class DoubleVectorClass : public ClassClosure
@@ -674,7 +692,10 @@ namespace avmplus
         bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
         Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:        
         DECLARE_SLOTS_DoubleVectorClass;
+    // ------------------------ DATA SECTION END
     };
 
     class VectorClass : public ClassClosure
@@ -701,8 +722,10 @@ namespace avmplus
 
         static Stringp makeVectorClassName(AvmCore* core, Traits* t);
 
+    // ------------------------ DATA SECTION BEGIN
     private:
         DECLARE_SLOTS_VectorClass;
+    // ------------------------ DATA SECTION END
     };
 
     class ObjectVectorClass : public ClassClosure
@@ -722,11 +745,13 @@ namespace avmplus
         bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
         Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
 
+    // ------------------------ DATA SECTION BEGIN
     private:
         DRCWB(ClassClosure*) index_type;
+        
         DECLARE_SLOTS_ObjectVectorClass;
+    // ------------------------ DATA SECTION END
     };
-
 }
 
 #endif /* __avmplus_VectorClass__ */

@@ -64,7 +64,10 @@ namespace avmplus
             return construct(argc, argv);
         }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_IntClass;
+    // ------------------------ DATA SECTION END
     };
 
     /**
@@ -88,7 +91,10 @@ namespace avmplus
             return construct(argc,argv);
         }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_UIntClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

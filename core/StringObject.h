@@ -507,10 +507,13 @@ namespace avmplus
             REALLY_INLINE explicit Extra(Stringp _master) { master = _master; }
         };
 
+        // ------------------------ DATA SECTION BEGIN
                 Buffer          m_buffer;   // buffer pointer (dynamic, static, or offset into master)
                 Extra           m_extra;
                 int32_t         m_length;                   // length in characters
         mutable uint32_t        m_bitsAndFlags;             // various bits and flags, see below (must be unsigned)
+        // ------------------------ DATA SECTION END
+
                 enum {
                     TSTR_WIDTH_MASK         = 0x00000001,   // string width (right-aligned for fast access)
                     TSTR_TYPE_MASK          = 0x00000006,   // type index, 2 bits

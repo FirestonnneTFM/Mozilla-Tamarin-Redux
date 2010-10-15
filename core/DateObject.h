@@ -50,8 +50,6 @@ namespace avmplus
     class DateObject : public ScriptObject
     {
     public:
-        Date date;
-
         /**
          * This variant is only used for creating the prototype
          */
@@ -120,7 +118,14 @@ namespace avmplus
     public:
         PrintWriter& print(PrintWriter& prw) const;
 #endif
+        
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        Date date;
+        
+    private:
         DECLARE_SLOTS_DateObject;
+    // ------------------------ DATA SECTION END
     };
 }
 

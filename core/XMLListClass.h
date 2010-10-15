@@ -63,7 +63,10 @@ namespace avmplus
 
         Atom ToXMLList(Atom arg);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_XMLListClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

@@ -63,7 +63,10 @@ namespace avmplus
 
         virtual ScriptObject* createInstance(VTable *ivtable, ScriptObject* prototype);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_RegExpClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

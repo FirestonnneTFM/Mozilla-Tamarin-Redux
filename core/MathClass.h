@@ -94,10 +94,12 @@ namespace avmplus
         double max(double x, double y, const Atom* argv, uint32_t argc);
         double min(double x, double y, const Atom* argv, uint32_t argc);
 
+    // ------------------------ DATA SECTION BEGIN
     private:
         TRandomFast seed;
 
         DECLARE_SLOTS_MathClass;
+    // ------------------------ DATA SECTION END
     };
 }
 
