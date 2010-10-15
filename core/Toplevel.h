@@ -102,6 +102,9 @@ namespace avmplus
         ErrorClass* securityErrorClass() const;
         ErrorClass* syntaxErrorClass() const;
         ErrorClass* verifyErrorClass() const;
+        ErrorClass* eofErrorClass() const;
+        ErrorClass* ioErrorClass() const;
+        ErrorClass* memoryErrorClass() const;
         /*@}*/
 
         void throwVerifyError(int id) const;
@@ -144,6 +147,10 @@ namespace avmplus
         }
         
         void FASTCALL throwNullPointerError(const char* name);
+
+        void FASTCALL throwMemoryError(int id);
+        void FASTCALL throwIOError(int id);
+        void FASTCALL throwEOFError(int id);
 
         //
         // methods that used to be on AvmCore but depend on the caller's environment
@@ -326,7 +333,7 @@ namespace avmplus
         static bool isXMLName(ScriptObject*, Atom v);
 
         ClassClosure* getBuiltinClass(int class_id) const;
-        ErrorClass* getErrorClass(int class_id) const { return (ErrorClass*)getBuiltinClass(class_id); }
+        ErrorClass* getErrorClass(int class_id) const;
 
         unsigned int readU30(const uint8_t *&p) const;
 
@@ -389,6 +396,16 @@ namespace avmplus
         // in certain existing versions of Flash, so must be kept legal.)
         //
         virtual void writeMultiByte(uint32_t codepage, String* str, DataOutput* output);
+
+        //  -------------------------------------------------------
+
+        // 
+        // If a ByteArray doesn't begiun with a BOM, Flash may want ByteArray.toString()
+        // to attempt a conversion from the system's default codepage as though the data
+        // is MBCS. If such a conversion is desirable and possible, you should return the
+        // result as a String. If the conversion is either impossible or undesirable, return NULL.
+        //
+        virtual String* tryFromSystemCodepage(const uint8_t* data);
 
         //  -------------------------------------------------------
         

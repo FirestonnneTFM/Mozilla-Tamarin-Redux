@@ -755,13 +755,10 @@ class B extends A {
     this ["doSomething"] ("str")</code></pre>
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
-  <error id="1509" hidden="true" label="kShellCompressedDataError">
-    Si è verificato un errore durante la decompressione dei dati.
-    <description><![CDATA[
-    The de-compressor reached the end of the stream, but more data was expected. The compressed data
-    stream is probably corrupted.
-    ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null.</error>
+  <error id="2006" label="kParamRangeError">L'indice fornito è fuori intervallo.</error>
   <error id="2007" label="kNullPointerError">Il valore del parametro %1 deve essere diverso da null.</error>
   <error id="2008" label="kInvalidEnumError">Il valore del parametro %1 deve essere uno dei valori accettati.</error>
+  <error id="2030" label="kEOFError">È stata raggiunta la fine del file.</error>
+  <error id="2058" label="kCompressedDataError">Si è verificato un errore durante la decompressione dei dati.</error>
 </errors>

@@ -238,10 +238,12 @@ namespace avmplus
             1506, 128,
             1507, 129,
             1508, 130,
-            1509, 131,
-            1510, 132,
+            1510, 131,
+            2006, 132,
             2007, 133,
-            2008, 134
+            2008, 134,
+            2030, 135,
+            2058, 136
         };
 
         const char* errorConstants[][kNumErrorConstants] =
@@ -380,10 +382,12 @@ namespace avmplus
                 /*1506,128*/ "The specified range is invalid.",
                 /*1507,129*/ "Argument %1 cannot be null.",
                 /*1508,130*/ "The value specified for argument %1 is invalid.",
-                /*1509,131*/ "There was an error decompressing the data.",
-                /*1510,132*/ "When the callback argument is a method of a class, the optional this argument must be null.",
+                /*1510,131*/ "When the callback argument is a method of a class, the optional this argument must be null.",
+                /*2006,132*/ "The supplied index is out of bounds.",
                 /*2007,133*/ "Parameter %1 must be non-null.",
-                /*2008,134*/ "Parameter %1 must be one of the accepted values."
+                /*2008,134*/ "Parameter %1 must be one of the accepted values.",
+                /*2030,135*/ "End of file was encountered.",
+                /*2058,136*/ "There was an error decompressing the data."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -520,10 +524,12 @@ namespace avmplus
                 /*1506,128*/ "Zadaný rozsah je neplatný.",
                 /*1507,129*/ "Argument %1 nemůže být null.",
                 /*1508,130*/ "Hodnota zadaná pro argument %1 je neplatná.",
-                /*1509,131*/ "Při dekomprimování dat došlo k chybě.",
-                /*1510,132*/ "Pokud je argument zpětného volání metodou třídy, volitelný argument musí být null.",
+                /*1510,131*/ "Pokud je argument zpětného volání metodou třídy, volitelný argument musí být null.",
+                /*2006,132*/ "Poskytnutý index je mimo rozsah.",
                 /*2007,133*/ "Parametr %1 nesmí být null.",
-                /*2008,134*/ "Parametr %1 musí být jedna z akceptovaných hodnot."
+                /*2008,134*/ "Parametr %1 musí být jedna z akceptovaných hodnot.",
+                /*2030,135*/ "Bylo dosaženo konce souboru.",
+                /*2058,136*/ "Při dekomprimování dat došlo k chybě."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_de
@@ -660,10 +666,12 @@ namespace avmplus
                 /*1506,128*/ "Der angegebene Bereich ist ungültig.",
                 /*1507,129*/ "Argument %1 kann nicht null sein.",
                 /*1508,130*/ "Der angegebene Wert für Argument %1 ist ungültig.",
-                /*1509,131*/ "Fehler beim Dekomprimieren der Daten.",
-                /*1510,132*/ "Wenn das callback-Argument eine Methode einer Klasse ist, muss das optionale this-Argument null sein.",
+                /*1510,131*/ "Wenn das callback-Argument eine Methode einer Klasse ist, muss das optionale this-Argument null sein.",
+                /*2006,132*/ "Der angegebene Index liegt außerhalb des zulässigen Bereichs.",
                 /*2007,133*/ "Parameter %1 darf nicht 'null' sein.",
-                /*2008,134*/ "Parameter %1 muss einen zulässigen Wert haben."
+                /*2008,134*/ "Parameter %1 muss einen zulässigen Wert haben.",
+                /*2030,135*/ "Das Dateiende wurde erkannt.",
+                /*2058,136*/ "Fehler beim Dekomprimieren der Daten."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_es
@@ -800,10 +808,12 @@ namespace avmplus
                 /*1506,128*/ "El rango especificado no es válido.",
                 /*1507,129*/ "El argumento %1 no puede ser null.",
                 /*1508,130*/ "El valor especificado para el argumento %1 no es válido.",
-                /*1509,131*/ "Se produjo un error al descomprimir los datos.",
-                /*1510,132*/ "Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null.",
+                /*1510,131*/ "Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null.",
+                /*2006,132*/ "El índice proporcionado está fuera de los límites.",
                 /*2007,133*/ "El valor del parámetro %1 debe ser distinto de null.",
-                /*2008,134*/ "El parámetro %1 debe tener uno de los valores aceptados."
+                /*2008,134*/ "El parámetro %1 debe tener uno de los valores aceptados.",
+                /*2030,135*/ "Se alcanzó el final del archivo.",
+                /*2058,136*/ "Se produjo un error al descomprimir los datos."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_fr
@@ -940,10 +950,12 @@ namespace avmplus
                 /*1506,128*/ "La plage indiquée n'est pas valide.",
                 /*1507,129*/ "L’argument %1 ne doit pas être null.",
                 /*1508,130*/ "La valeur indiquée pour l’argument %1 n’est pas valide.",
-                /*1509,131*/ "Une erreur s'est produite lors de la décompression des données.",
-                /*1510,132*/ "Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null.",
+                /*1510,131*/ "Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null.",
+                /*2006,132*/ "L'index indiqué sort des limites.",
                 /*2007,133*/ "Le paramètre %1 ne doit pas être nul.",
-                /*2008,134*/ "Le paramètre %1 doit être l'une des valeurs acceptées."
+                /*2008,134*/ "Le paramètre %1 doit être l'une des valeurs acceptées.",
+                /*2030,135*/ "Fin de fichier détectée.",
+                /*2058,136*/ "Une erreur s'est produite lors de la décompression des données."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_it
@@ -1080,10 +1092,12 @@ namespace avmplus
                 /*1506,128*/ "L'intervallo specificato non è valido.",
                 /*1507,129*/ "L'argomento %1 non può essere null.",
                 /*1508,130*/ "Il valore specificato per l'argomento %1 non è valido.",
-                /*1509,131*/ "Si è verificato un errore durante la decompressione dei dati.",
-                /*1510,132*/ "Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null.",
+                /*1510,131*/ "Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null.",
+                /*2006,132*/ "L'indice fornito è fuori intervallo.",
                 /*2007,133*/ "Il valore del parametro %1 deve essere diverso da null.",
-                /*2008,134*/ "Il valore del parametro %1 deve essere uno dei valori accettati."
+                /*2008,134*/ "Il valore del parametro %1 deve essere uno dei valori accettati.",
+                /*2030,135*/ "È stata raggiunta la fine del file.",
+                /*2058,136*/ "Si è verificato un errore durante la decompressione dei dati."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ja
@@ -1220,10 +1234,12 @@ namespace avmplus
                 /*1506,128*/ "指定した範囲は無効です。",
                 /*1507,129*/ "引数 %1 は null にすることができません。",
                 /*1508,130*/ "引数 %1 に指定した値は無効です。",
-                /*1509,131*/ "圧縮データの解凍時にエラーが発生しました。",
-                /*1510,132*/ "コールバック引数がクラスのメソッドのとき、任意指定の引数 'this' は null でなければなりません。",
+                /*1510,131*/ "コールバック引数がクラスのメソッドのとき、任意指定の引数 'this' は null でなければなりません。",
+                /*2006,132*/ "指定したインデックスが境界外です。",
                 /*2007,133*/ "パラメーター %1 は null 以外でなければなりません。",
-                /*2008,134*/ "パラメーター %1 は承認された値の 1 つでなければなりません。"
+                /*2008,134*/ "パラメーター %1 は承認された値の 1 つでなければなりません。",
+                /*2030,135*/ "ファイルの終端 (EOF) が検出されました。",
+                /*2058,136*/ "圧縮データの解凍時にエラーが発生しました。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ko
@@ -1360,10 +1376,12 @@ namespace avmplus
                 /*1506,128*/ "유효하지 않은 범위가 지정되었습니다.",
                 /*1507,129*/ "인수 %1은(는) null일 수 없습니다.",
                 /*1508,130*/ "인수 %1에 지정된 값이 유효하지 않습니다.",
-                /*1509,131*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다.",
-                /*1510,132*/ "콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다.",
+                /*1510,131*/ "콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다.",
+                /*2006,132*/ "제공된 인덱스가 범위를 벗어났습니다.",
                 /*2007,133*/ "매개 변수 %1은(는) null이 아니어야 합니다.",
-                /*2008,134*/ "매개 변수 %1은(는) 허용된 값 중 하나여야 합니다."
+                /*2008,134*/ "매개 변수 %1은(는) 허용된 값 중 하나여야 합니다.",
+                /*2030,135*/ "파일의 끝입니다.",
+                /*2058,136*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_nl
@@ -1500,10 +1518,12 @@ namespace avmplus
                 /*1506,128*/ "Het opgegeven bereik is ongeldig.",
                 /*1507,129*/ "Argument %1 kan niet null zijn.",
                 /*1508,130*/ "De opgegeven waarde voor argument %1 is ongeldig.",
-                /*1509,131*/ "Er is een fout opgetreden bij het decomprimeren van gegevens.",
-                /*1510,132*/ "Wanneer het callback-argument een methode of een klasse is, moet het optionele argument this null zijn.",
+                /*1510,131*/ "Wanneer het callback-argument een methode of een klasse is, moet het optionele argument this null zijn.",
+                /*2006,132*/ "De opgegeven index is buiten de grenzen.",
                 /*2007,133*/ "Parameter %1 mag niet null zijn.",
-                /*2008,134*/ "Parameter %1 moet een van de toegestane waarden zijn."
+                /*2008,134*/ "Parameter %1 moet een van de toegestane waarden zijn.",
+                /*2030,135*/ "Einde van bestand is bereikt.",
+                /*2058,136*/ "Er is een fout opgetreden bij het decomprimeren van gegevens."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_pl
@@ -1640,10 +1660,12 @@ namespace avmplus
                 /*1506,128*/ "Określony zakres jest nieprawidłowy.",
                 /*1507,129*/ "Argument %1 nie może mieć wartości null.",
                 /*1508,130*/ "Wartość określona dla argumentu %1 jest nieprawidłowa.",
-                /*1509,131*/ "Podczas dekompresji danych wystąpił błąd.",
-                /*1510,132*/ "Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null.",
+                /*1510,131*/ "Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null.",
+                /*2006,132*/ "Określony indeks wychodzi poza zakres.",
                 /*2007,133*/ "Parametr %1 musi mieć wartość inną niż null.",
-                /*2008,134*/ "Parametr %1 musi być jedną z akceptowanych wartości."
+                /*2008,134*/ "Parametr %1 musi być jedną z akceptowanych wartości.",
+                /*2030,135*/ "Napotkano koniec pliku.",
+                /*2058,136*/ "Podczas dekompresji danych wystąpił błąd."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -1780,10 +1802,12 @@ namespace avmplus
                 /*1506,128*/ "O intervalo especificado é inválido.",
                 /*1507,129*/ "O argumento %1 não pode ser nulo.",
                 /*1508,130*/ "O valor especificado para o argumento %1 é inválido.",
-                /*1509,131*/ "Ocorreu um erro ao descompactar os dados.",
-                /*1510,132*/ "Quando o argumento de retorno de chamada for um método de uma classe, o opcional deste argumento deverá ser nulo.",
+                /*1510,131*/ "Quando o argumento de retorno de chamada for um método de uma classe, o opcional deste argumento deverá ser nulo.",
+                /*2006,132*/ "O índice fornecido está fora dos limites.",
                 /*2007,133*/ "O parâmetro %1 não deve ser nulo.",
-                /*2008,134*/ "O parâmetro %1 deve ser um dos valores aceitos."
+                /*2008,134*/ "O parâmetro %1 deve ser um dos valores aceitos.",
+                /*2030,135*/ "O fim do arquivo foi encontrado.",
+                /*2058,136*/ "Erro ao descompactar os dados."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ru
@@ -1920,10 +1944,12 @@ namespace avmplus
                 /*1506,128*/ "Указан недопустимый диапазон.",
                 /*1507,129*/ "Аргумент %1 не может быть \"null\".",
                 /*1508,130*/ "Указано недопустимое значение для аргумента %1.",
-                /*1509,131*/ "При распаковке данных произошла ошибка.",
-                /*1510,132*/ "Если аргумент \"callback\" является методом класса, дополнительный аргумент \"this\" должен быть \"null\".",
+                /*1510,131*/ "Если аргумент \"callback\" является методом класса, дополнительный аргумент \"this\" должен быть \"null\".",
+                /*2006,132*/ "Предоставленный индекс выходит за допустимые пределы.",
                 /*2007,133*/ "Параметр %1 не должен быть равен нулю.",
-                /*2008,134*/ "Параметр %1 должен быть одним из принятых значений."
+                /*2008,134*/ "Параметр %1 должен быть одним из принятых значений.",
+                /*2030,135*/ "Обнаружен конец файла.",
+                /*2058,136*/ "Ошибка при распаковке данных."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_sv
@@ -2060,10 +2086,12 @@ namespace avmplus
                 /*1506,128*/ "Det angivna intervallet är ogiltigt.",
                 /*1507,129*/ "Argumentet %1 får inte vara null.",
                 /*1508,130*/ "Det värde som specificerats för argumentet %1 är ogiltigt.",
-                /*1509,131*/ "Ett fel uppstod vid dekomprimering av data.",
-                /*1510,132*/ "När ett callback-argument är en metod i en klass måste det valfria this-argumentet vara null.",
+                /*1510,131*/ "När ett callback-argument är en metod i en klass måste det valfria this-argumentet vara null.",
+                /*2006,132*/ "Det angivna indexvärdet är utanför intervallet.",
                 /*2007,133*/ "Parametern %1 får inte vara null.",
-                /*2008,134*/ "Parametern %1 måste ha ett av de godkända värdena."
+                /*2008,134*/ "Parametern %1 måste ha ett av de godkända värdena.",
+                /*2030,135*/ "Filens slut påträffades.",
+                /*2058,136*/ "Ett fel uppstod vid dekomprimering av data."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_tr
@@ -2200,10 +2228,12 @@ namespace avmplus
                 /*1506,128*/ "Belirtilen aralık geçersiz.",
                 /*1507,129*/ "%1 değişkeni boş olamaz.",
                 /*1508,130*/ "%1 değişkeni için belirlenen değer geçersiz.",
-                /*1509,131*/ "Veri açılırken hata oluştu.",
-                /*1510,132*/ "Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır.",
+                /*1510,131*/ "Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır.",
+                /*2006,132*/ "Sağlanan dizin sınırların dışındadır.",
                 /*2007,133*/ "%1 parametresi boş olmamalıdır.",
-                /*2008,134*/ "%1 parametresi kabul edilen değerlerden biridir."
+                /*2008,134*/ "%1 parametresi kabul edilen değerlerden biridir.",
+                /*2030,135*/ "Dosya sonuyla karşılaşıldı.",
+                /*2058,136*/ "Veri açılırken hata oluştu."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_CN
@@ -2340,10 +2370,12 @@ namespace avmplus
                 /*1506,128*/ "指定的范围无效。",
                 /*1507,129*/ "参数 %1 不能为空。",
                 /*1508,130*/ "为参数 %1 指定的值无效。",
-                /*1509,131*/ "解压缩数据时出错。",
-                /*1510,132*/ "如果回调参数是某个类的方法，则可选参数“this”必须为空。",
+                /*1510,131*/ "如果回调参数是某个类的方法，则可选参数“this”必须为空。",
+                /*2006,132*/ "提供的索引超出范围。",
                 /*2007,133*/ "参数 %1 不能为空。",
-                /*2008,134*/ "参数 %1 必须是某个可接受的值。"
+                /*2008,134*/ "参数 %1 必须是某个可接受的值。",
+                /*2030,135*/ "遇到文件尾。",
+                /*2058,136*/ "解压缩数据时出错。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_TW
@@ -2480,10 +2512,12 @@ namespace avmplus
                 /*1506,128*/ "指定的範圍無效。",
                 /*1507,129*/ "引數 %1 不能是 null。",
                 /*1508,130*/ "指定給引數 %1 的值無效。",
-                /*1509,131*/ "解壓縮資料時發生錯誤。",
-                /*1510,132*/ "若回呼引數是 Class 的方法，選擇性的引數 'this' 必須是 null。",
+                /*1510,131*/ "若回呼引數是 Class 的方法，選擇性的引數 'this' 必須是 null。",
+                /*2006,132*/ "提供的索引超出范围。",
                 /*2007,133*/ "參數 %1 不能是 Null。",
-                /*2008,134*/ "參數 %1 必須是其中一個可接受值。"
+                /*2008,134*/ "參數 %1 必須是其中一個可接受值。",
+                /*2030,135*/ "到達檔案結尾。",
+                /*2058,136*/ "解壓縮資料時發生錯誤。"
             }
         #endif
         };

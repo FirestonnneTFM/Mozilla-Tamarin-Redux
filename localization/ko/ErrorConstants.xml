@@ -755,13 +755,10 @@ class B extends A {
     this ["doSomething"] ("str")</code></pre>
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
-  <error id="1509" hidden="true" label="kShellCompressedDataError">
-    데이터의 압축을 푸는 동안 오류가 발생했습니다.
-    <description><![CDATA[
-    The de-compressor reached the end of the stream, but more data was expected. The compressed data
-    stream is probably corrupted.
-    ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다.</error>
+  <error id="2006" label="kParamRangeError">제공된 인덱스가 범위를 벗어났습니다.</error>
   <error id="2007" label="kNullPointerError">매개 변수 %1은(는) null이 아니어야 합니다.</error>
   <error id="2008" label="kInvalidEnumError">매개 변수 %1은(는) 허용된 값 중 하나여야 합니다.</error>
+  <error id="2030" label="kEOFError">파일의 끝입니다.</error>
+  <error id="2058" label="kCompressedDataError">데이터의 압축을 푸는 동안 오류가 발생했습니다.</error>
 </errors>

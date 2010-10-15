@@ -128,11 +128,6 @@ namespace avmplus
         m_copyOnWrite     = true;
     }
         
-    void ByteArray::ThrowMemoryError()
-    {
-        m_toplevel->throwError(kOutOfMemoryError);
-    }
-
     void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint64_t minimumCapacity)
     {
         if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
@@ -456,32 +451,39 @@ namespace avmplus
         uint32_t len = m_byteArray.GetLength();
         const uint8_t* c = m_byteArray.GetReadableBuffer();
 
+        Toplevel* toplevel = this->toplevel();
+        AvmCore* core = toplevel->core();
+
         if (len >= 3)
         {
             // UTF8 BOM
             if ((c[0] == 0xef) && (c[1] == 0xbb) && (c[2] == 0xbf))
             {
-                return core()->newStringUTF8((const char*)c + 3, len - 3);
+                return core->newStringUTF8((const char*)c + 3, len - 3);
             }
             else if ((c[0] == 0xfe) && (c[1] == 0xff))
             {
                 //UTF-16 big endian
                 c += 2;
                 len = (len - 2) >> 1;
-                return core()->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
+                return core->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
             }
             else if ((c[0] == 0xff) && (c[1] == 0xfe))
             {
                 //UTF-16 little endian
                 c += 2;
                 len = (len - 2) >> 1;
-                return core()->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
+                return core->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
             }
         }
 
+        String* result = toplevel->tryFromSystemCodepage(c);
+        if (result != NULL)
+            return result;
+        
         // Use newStringUTF8() with "strict" explicitly set to false to mimick old,
         // buggy behavior, where malformed UTF-8 sequences are stored as single characters.
-        return core()->newStringUTF8((const char*)c, len, false);
+        return core->newStringUTF8((const char*)c, len, false);
     }
     
     Atom ByteArrayObject::readObject()
@@ -584,7 +586,7 @@ namespace avmplus
 
         // Use zlib to compress the data
         compress2((uint8_t*)gzdata, (unsigned long*)&gzlen,
-                m_byteArray.GetWritableBuffer(), len, 9);
+                  m_byteArray.GetReadableBuffer(), len, 9);
 
         // Replace the byte array with the compressed data
         m_byteArray.SetLength(0);
@@ -634,7 +636,7 @@ namespace avmplus
         m_byteArray.SetPosition(0);
 
         if (error != Z_OK && error != Z_STREAM_END) {
-            toplevel()->throwError(kShellCompressedDataError);
+            toplevel()->throwIOError(kCompressedDataError);
         }
     }
 
@@ -727,9 +729,11 @@ namespace avmplus
 
     void ByteArrayObject::set_endian(Stringp type)
     {
-        toplevel()->checkNull(type, "endian");
+        Toplevel* toplevel = this->toplevel();
+        AvmCore* core = toplevel->core();
 
-        AvmCore* core = this->core();
+        toplevel->checkNull(type, "endian");
+
         type = core->internString(type);
         if (type == core->kbigEndian)
         {
@@ -741,7 +745,7 @@ namespace avmplus
         }
         else
         {
-            toplevel()->throwArgumentError(kInvalidEnumError, "type");
+            toplevel->throwArgumentError(kInvalidEnumError, "type");
         }
     }
     

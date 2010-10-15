@@ -179,8 +179,10 @@ class Errors
         public static const kInvalidRangeError                = 1506;
         public static const kNullArgumentError                = 1507;
         public static const kInvalidArgumentError             = 1508;
-        public static const kShellCompressedDataError         = 1509;
         public static const kArrayFilterNonNullObjectError    = 1510;
+        public static const kParamRangeError                  = 2006;
         public static const kNullPointerError                 = 2007;
         public static const kInvalidEnumError                 = 2008;
+        public static const kEOFError                         = 2030;
+        public static const kCompressedDataError              = 2058;
 };

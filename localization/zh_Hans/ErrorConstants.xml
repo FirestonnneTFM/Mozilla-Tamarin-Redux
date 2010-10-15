@@ -755,13 +755,10 @@ class B extends A {
     this ["doSomething"] ("str")</code></pre>
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
-  <error id="1509" hidden="true" label="kShellCompressedDataError">
-    解压缩数据时出错。
-    <description><![CDATA[
-    The de-compressor reached the end of the stream, but more data was expected. The compressed data
-    stream is probably corrupted.
-    ]]></description></error>
   <error id="1510" label="kArrayFilterNonNullObjectError">如果回调参数是某个类的方法，则可选参数“this”必须为空。</error>
+  <error id="2006" label="kParamRangeError">提供的索引超出范围。</error>
   <error id="2007" label="kNullPointerError">参数 %1 不能为空。</error>
   <error id="2008" label="kInvalidEnumError">参数 %1 必须是某个可接受的值。</error>
+  <error id="2030" label="kEOFError">遇到文件尾。</error>
+  <error id="2058" label="kCompressedDataError">解压缩数据时出错。</error>
 </errors>
