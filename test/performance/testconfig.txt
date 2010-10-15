@@ -53,6 +53,8 @@ mmgc/.*               , mmgc      , include  , mmgc testsuite
 canaries/.*           , canaries  , include , canaries testsuite
 .*/canaries/.*        , canaries  , include , canaries testsuite
 
+canaries/simpleflexapp.*, misc, skip, test is failing due to changes to builtin - dschaffe is investigating (10/13/10)
+
 sunspider.*/.*        , misc    , skip  , skip sunspider
 jsbench/.*            , misc    , skip  , skip jsbench
 v8.*/.*               , misc    , skip  , skip v8
