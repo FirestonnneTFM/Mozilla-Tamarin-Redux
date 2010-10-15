@@ -654,6 +654,12 @@ class RuntestBase:
                 for x in [x for x in self.exclude+utilDirs if x in dirs]:
                     dirs.remove(x)
         
+        def checkTestList(testlist):
+            if len(testlist) == 0:
+                self.js_print('No tests found!')
+                self.js_print('Exiting ...')
+                sys.exit(1)
+        
         # modify testlist based on testconfig settings
         if self.includes:
             # only run the tests in the include list
@@ -662,8 +668,10 @@ class RuntestBase:
                 for include in self.includes:
                     if re.search(include, test):
                         include_test_list.append(test)
+            checkTestList(include_test_list)
             return include_test_list
         
+        checkTestList(tests)
         return tests
 
     def getLocalSettings(self, root):
