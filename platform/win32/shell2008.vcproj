@@ -1667,6 +1667,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\ST_mmgc_580603.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\ST_mmgc_basics.cpp"
 				>
 			</File>
