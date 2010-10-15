@@ -816,11 +816,19 @@ namespace MMgc
 
     public:
 
-        // not a hot method
+        /**
+         * @return true if the gc item contains pointers.  Item must be valid GC pointer.
+         */
         bool ContainsPointers(const void *item);
 
-        // not a hot method.  Will reliably return NULL if gcItem does not point into managed
-        // memory (and _DEBUG code will also assert if that happens - it should not).
+        /**
+         * Will reliably return NULL if gcItem does not point into
+         * managed memory (and _DEBUG code will also assert if that
+         * happens - it should not unless allowGarbage is true).  Note
+         * that this function is for pointers to bytes inside GC items,
+         * pointers to GC block headers (ie before the first object on
+         * the page) will return NULL.
+         */
         void *FindBeginningGuarded(const void *gcItem, bool allowGarbage=false);
 
         // Legacy public API.  DO NOT USE from within AVM code.
@@ -831,8 +839,10 @@ namespace MMgc
         // similar purposes, but use it when speed is key.
         void *FindBeginningFast(const void *gcItem);
 
-        // not a hot method; PinStackObjects goes directly to GCAlloc::IsRCObject/GCLargeAlloc::IsRCObject.
-        bool IsRCObject(const void *);
+        /**
+         * @return true if the useritem is an RCObject.  Item must be valid GC pointer.
+         */
+        static bool IsRCObject(const void *userptr);
 
         /**
          * True during Sweep phase.  Application code can use this to
@@ -852,7 +862,10 @@ namespace MMgc
          */
         bool IsPointerToGCPage(const void *item);
 
-        bool IsPointerToGCObject(const void *realPtr);
+        /**
+         * @return true is realptr points to the beginning of a GC object.
+         */
+        bool IsPointerToGCObject(const void *realptr);
 
         /**
          * GC initialization time, in ticks.  Used for logging.
@@ -946,6 +959,14 @@ namespace MMgc
         bool onThread();
 
     private:
+
+        // Take any pointer and determine if its an rc object,
+        // specifically that its on a GC page marked for RC objects
+        // and points to the beginning of that object.  Basically
+        // shorthand for IsPointerToGCObject && IsRCObject.  Any input
+        // is safe, this never crashes or asserts.
+        bool IsRCObjectSafe(const void *anyptr);
+
         // heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
         // if the allocation succeeded.
         void *heapAlloc(size_t size, int flags=GCHeap::flags_Alloc);

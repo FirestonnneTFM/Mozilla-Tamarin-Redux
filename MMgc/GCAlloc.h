@@ -65,9 +65,11 @@ namespace MMgc
         GCBlockHeader*  next;   // The next block in the list of blocks for the allocator
         gcbits_t*       bits;   // Variable length table of mark bit entries
         uint32_t        size;   // Size of objects stored in this block
-#ifdef MMGC_FASTBITS
-        uint32_t        bitsShift;  // Right shift for lower 12 bits of a pointer into the block to obtain the mark bit item for that pointer
-#endif
+        // bitsShift is only used if MMGC_FASTBITS is defined but its always present to simplify header layout.
+        uint8_t         bitsShift;  // Right shift for lower 12 bits of a pointer into the block to obtain the mark bit item for that pointer
+        uint8_t         containsPointers;
+        uint8_t         rcobject;
+        uint8_t         unused1;
     };
 
     GCBlockHeader* GetBlockHeader(const void* item);
@@ -151,8 +153,6 @@ namespace MMgc
 #endif // _DEBUG
 
         static void *FindBeginning(const void *item);
-        static bool ContainsPointers(const void *item);
-        static bool IsRCObject(const void *item);
         static bool IsUnmarkedPointer(const void *val);
         static void SetBlockHasWeakRef(const void *userptr);
 

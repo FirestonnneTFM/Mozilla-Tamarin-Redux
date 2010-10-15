@@ -283,6 +283,22 @@ namespace MMgc
 #endif
 
     /*static*/
+    REALLY_INLINE bool GC::ContainsPointers(const void *userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(userptr)->IsPointerToGCObject(realptr));
+        return GetBlockHeader(realptr)->containsPointers;
+    }
+    
+    /*static*/
+    REALLY_INLINE bool GC::IsRCObject(const void *userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(userptr)->IsPointerToGCObject(realptr));
+        return GetBlockHeader(realptr)->rcobject;
+    }
+    
+    /*static*/
     REALLY_INLINE int GC::GetMark(const void *userptr)
     {
         const void *realptr = GetRealPointer(userptr);
@@ -403,8 +419,7 @@ namespace MMgc
 
     REALLY_INLINE bool GC::IsPointerToGCObject(const void *realPtr)
     {
-        GCAssert(realPtr != NULL);
-        return GetRealPointer(FindBeginningGuarded(realPtr)) == realPtr;
+        return GetRealPointer(FindBeginningGuarded(realPtr, true)) == realPtr;
     }
 
     /*static*/

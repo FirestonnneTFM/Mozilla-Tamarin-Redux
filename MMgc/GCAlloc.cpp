@@ -297,6 +297,9 @@ namespace MMgc
 #ifdef MMGC_FASTBITS
             b->bitsShift = m_bitsShift;
 #endif
+            b->containsPointers = ContainsPointers();
+            b->rcobject = ContainsRCObjects();
+
             if (m_bitsInPage)
                 b->bits = (gcbits_t*)b + sizeof(GCBlock);
             else
@@ -628,7 +631,7 @@ namespace MMgc
         // RCObject have contract that they must clean themselves, since they
         // have to scan themselves to decrement other RCObjects they might as well
         // clean themselves too, better than suffering a memset later
-        if(IsRCObject(GetUserPointer(item)))
+        if(b->rcobject)
             m_gc->RCObjectZeroCheck((RCObject*)GetUserPointer(item));
 #endif
 

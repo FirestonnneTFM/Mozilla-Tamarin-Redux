@@ -74,21 +74,8 @@ namespace MMgc
     REALLY_INLINE void *GCAlloc::FindBeginning(const void *item)
     {
         GCBlock *block = GetBlock(item);
+        GCAssertMsg(item >= block->items, "Can't call FindBeginning on something pointing to GC header");
         return block->items + block->size * GetObjectIndex(block, item);
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCAlloc::ContainsPointers(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        return ((GCAlloc*)block->alloc)->ContainsPointers();
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCAlloc::IsRCObject(const void *item)
-    {
-        GCBlock *block = GetBlock(item);
-        return item >= block->items && ((GCAlloc*)block->alloc)->ContainsRCObjects();
     }
 
     REALLY_INLINE void GCAlloc::SetBlockHasWeakRef(const void *userptr)

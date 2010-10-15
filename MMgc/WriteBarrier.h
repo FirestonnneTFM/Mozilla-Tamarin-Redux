@@ -78,8 +78,7 @@ namespace MMgc
     {
         RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
         if(rc != NULL) {
-            GCAssert(IsRCObject(rc));
-            GCAssert(rc == FindBeginningGuarded(rc));
+            GCAssert(IsRCObjectSafe(rc));
             rc->DecrementRef();
         }
         GCAssert(IsPointerIntoGCObject(address));
@@ -87,8 +86,7 @@ namespace MMgc
         *(uintptr_t*)address = (uintptr_t) value;
         rc = (RCObject*)Pointer(value);
         if(rc != NULL) {
-            GCAssert(IsRCObject(rc));
-            GCAssert(rc == FindBeginningGuarded(value));
+            GCAssert(IsRCObjectSafe(rc));
             rc->IncrementRef();
         }
     }
@@ -103,8 +101,7 @@ namespace MMgc
         *(uintptr_t*)address = (uintptr_t) value;
         RCObject *rc = (RCObject*)Pointer(value);
         if(rc != NULL) {
-            GCAssert(IsRCObject(rc));
-            GCAssert(rc == FindBeginningGuarded(value));
+            GCAssert(IsRCObjectSafe(rc));
             rc->IncrementRef();
         }
     }
@@ -116,8 +113,7 @@ namespace MMgc
         RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
         MMGC_WB_EDGE(address, NULL);
         if(rc != NULL) {
-            GCAssert(IsRCObject(rc));
-            GCAssert(rc == FindBeginningGuarded(rc));
+            GCAssert(IsRCObjectSafe(rc));
             rc->DecrementRef();
             *(uintptr_t*)address = 0;
         }
@@ -126,7 +122,7 @@ namespace MMgc
     /*private*/
     REALLY_INLINE void GC::WriteBarrierWrite(const void *address, const void *value)
     {
-        GCAssert(!IsRCObject(value));
+        GCAssert(!IsRCObjectSafe(value));
         GCAssert(IsPointerIntoGCObject(address));
         MMGC_WB_EDGE(address, value);
         *(uintptr_t*)address = (uintptr_t) value;
