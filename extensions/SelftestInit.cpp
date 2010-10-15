@@ -48,6 +48,9 @@ extern void create_mmgc_bugzilla_543560(AvmCore* core);
 #endif
 #endif
 extern void create_mmgc_bugzilla_575631(AvmCore* core);
+#if defined AVMPLUS_64BIT && defined DEBUG
+extern void create_mmgc_bugzilla_580603(AvmCore* core);
+#endif
 extern void create_mmgc_basics(AvmCore* core);
 extern void create_mmgc_dependent(AvmCore* core);
 extern void create_mmgc_finalize_uninit(AvmCore* core);
@@ -67,6 +70,9 @@ create_mmgc_bugzilla_543560(core);
 #endif
 #endif
 create_mmgc_bugzilla_575631(core);
+#if defined AVMPLUS_64BIT && defined DEBUG
+create_mmgc_bugzilla_580603(core);
+#endif
 create_mmgc_basics(core);
 create_mmgc_dependent(core);
 create_mmgc_finalize_uninit(core);

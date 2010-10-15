@@ -73,6 +73,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_mmgc_weakref.cpp \
   $(curdir)/../extensions/ST_mmgc_543560.cpp \
   $(curdir)/../extensions/ST_mmgc_575631.cpp \
+  $(curdir)/../extensions/ST_mmgc_580603.cpp \
   $(curdir)/../extensions/ST_mmgc_gcheap.cpp \
   $(NULL)
 
