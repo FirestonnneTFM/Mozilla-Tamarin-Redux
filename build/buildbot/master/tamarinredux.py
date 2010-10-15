@@ -1758,6 +1758,7 @@ class tamarinredux:
     windows_performance_factory.addStep(perf_release)
     windows_performance_factory.addStep(perf_release_interp)
     windows_performance_factory.addStep(perf_release_jit)
+    windows_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell"))
     windows_performance_factory.addStep(util_process_clean)
     windows_performance_factory.addStep(util_clean_buildsdir)
     windows_performance_factory.addStep(bb_lockrelease)
@@ -1784,6 +1785,7 @@ class tamarinredux:
     mac_performance_factory.addStep(perf_release)
     mac_performance_factory.addStep(perf_release_interp)
     mac_performance_factory.addStep(perf_release_jit)
+    mac_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell"))
     mac_performance_factory.addStep(util_process_clean)
     mac_performance_factory.addStep(util_clean_buildsdir)    
     mac_performance_factory.addStep(bb_lockrelease)
@@ -1810,6 +1812,7 @@ class tamarinredux:
     mac_64_performance_factory.addStep(perf_release)
     mac_64_performance_factory.addStep(perf_release_interp)
     mac_64_performance_factory.addStep(perf_release_jit)
+    mac_64_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell_64"))
     mac_64_performance_factory.addStep(util_process_clean)
     mac_64_performance_factory.addStep(util_clean_buildsdir)
     mac_64_performance_factory.addStep(bb_lockrelease)
@@ -1836,6 +1839,7 @@ class tamarinredux:
     mac_ppc_performance_factory.addStep(perf_release)
     mac_ppc_performance_factory.addStep(perf_release_interp)
     mac_ppc_performance_factory.addStep(perf_release_jit)
+    mac_ppc_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell_ppc"))
     mac_ppc_performance_factory.addStep(util_process_clean)
     mac_ppc_performance_factory.addStep(util_clean_buildsdir)
     mac_ppc_performance_factory.addStep(bb_lockrelease)
@@ -1862,6 +1866,7 @@ class tamarinredux:
     linux_performance_factory.addStep(perf_release)
     linux_performance_factory.addStep(perf_release_interp)
     linux_performance_factory.addStep(perf_release_jit)
+    linux_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell"))
     linux_performance_factory.addStep(util_process_clean)
     linux_performance_factory.addStep(util_clean_buildsdir)
     linux_performance_factory.addStep(bb_lockrelease)
@@ -1911,6 +1916,9 @@ class tamarinredux:
                 workdir="../repo/build/buildbot/slaves/scripts",
                 timeout=3600)
     )
+    android_performance_factory.addStep(test_generic_adb(
+                name="Acceptance_Performance_Release", shellname="avmshell", vmargs="", config="",
+                scriptargs="--addtoconfig=-performance"))
     android_performance_factory.addStep(util_clean_buildsdir)
     android_performance_factory.addStep(sync_clean)
 

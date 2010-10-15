@@ -435,6 +435,11 @@ perf_release_arm_jit = PerfShellCommand(
             timeout=3600,
             workdir="../repo/build/buildbot/slaves/scripts")
 
+def acceptance_performance(name, shellname, vmargs="", config="", scriptargs=""):
+            return test_generic(
+                name="Acceptance_Performance_%s" % name, shellname=shellname, vmargs=vmargs, config=config,
+                scriptargs="--threads=1 --addtoconfig=-performance %s" % scriptargs)
+
 def deep_codecoverage(compilecsv, testcsv):
     return BuildShellCommand(
             command=['../all/codecoverage-runner.py', '-b', WithProperties('%s','revision'), '--compilecsv=%s' % compilecsv, '--testcsv=%s' % testcsv],
