@@ -341,8 +341,7 @@ namespace MMgc
                 return;
 #ifdef _DEBUG
             GC* gc = GC::GetGC(this);
-            GCAssert(gc->IsRCObject(this));
-            GCAssert(this == gc->FindBeginningGuarded(this));
+            GCAssert(gc->IsRCObjectSafe(this));
 #endif
 
             composite++;
@@ -387,8 +386,7 @@ namespace MMgc
 
 #ifdef _DEBUG
             GC* gc = GC::GetGC(this);
-            GCAssert(gc->IsRCObject(this));
-            GCAssert(this == gc->FindBeginningGuarded(this));
+            GCAssert(gc->IsRCObjectSafe(this));
 
             // ???
             if(gc->Destroying())

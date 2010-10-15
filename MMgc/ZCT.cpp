@@ -618,25 +618,9 @@ namespace MMgc
                 continue;
 
             // Any pointer into the object pins the object.
+            val = gc->FindBeginningGuarded(val,true);
 
-            switch (gc->GetPageMapValue((uintptr_t)val)) {
-                case PageMap::kGCAllocPage:
-                    val = GCAlloc::IsRCObject(val) ? GetUserPointer(GCAlloc::FindBeginning(val)) : NULL;
-                    break;
-                case PageMap::kGCLargeAllocPageRest:
-                    do {
-                        val = (const void*) ((uintptr_t)val - GCHeap::kBlockSize);
-                    } while (gc->GetPageMapValue((uintptr_t)val) == PageMap::kGCLargeAllocPageRest);
-                    /*FALLTHROUGH*/
-                case PageMap::kGCLargeAllocPageFirst:
-                    val = GCLargeAlloc::IsRCObject(val) ? GetUserPointer(GCLargeAlloc::FindBeginning(val)) : NULL;
-                    break;
-                default:
-                    val = NULL;
-                    break;
-            }
-
-            if(val) {
+            if(val && GC::IsRCObject(val)) {
                 // We must pin all objects that are reachable from the stack whether they're in
                 // the ZCT or not, because destroying an object not in the ZCT may push additional
                 // references onto the ZCT, and if those are reachable from the stack they must

@@ -94,26 +94,18 @@ namespace MMgc
     REALLY_INLINE void* GCLargeAlloc::FindBeginning(const void *item)
     {
         LargeBlock *block = GetLargeBlock(item);
-        return (void*) (block+1);
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::ContainsPointers(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        return (block->flags[1] & kContainsPointers) != 0;
-    }
-
-    /*static*/
-    REALLY_INLINE bool GCLargeAlloc::IsRCObject(const void *item)
-    {
-        LargeBlock *block = GetLargeBlock(item);
-        return (block->flags[1] & kRCObject) != 0;
+        GCAssertMsg(item >= block->GetObject(), "Can't call FindBeginning on something pointing to GC header");
+        return block->GetObject();
     }
 
     REALLY_INLINE int GCLargeAlloc::LargeBlock::GetNumBlocks() const
     {
         return (size + sizeof(LargeBlock)) / GCHeap::kBlockSize;
+    }
+
+    REALLY_INLINE void* GCLargeAlloc::LargeBlock::GetObject() const
+    {
+        return (void*) (this+1);
     }
 
     REALLY_INLINE GCLargeAllocIterator::GCLargeAllocIterator(MMgc::GCLargeAlloc* alloc)
@@ -127,8 +119,8 @@ namespace MMgc
         while (block != NULL) {
             GCLargeAlloc::LargeBlock* b = block;
             block = GCLargeAlloc::Next(block);
-            if ((b->flags[0] & kMark) != 0 && (b->flags[1] & GCLargeAlloc::kContainsPointers) != 0) {
-                out_ptr = GetUserPointer(b+1);
+            if ((b->flags[0] & kMark) != 0 && (b->containsPointers != 0)) {
+                out_ptr = GetUserPointer(b->GetObject());
                 out_size = b->size - (uint32_t)DebugSize();
                 return true;
             }

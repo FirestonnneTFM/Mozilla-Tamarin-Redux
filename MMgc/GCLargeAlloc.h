@@ -56,9 +56,7 @@ namespace MMgc
         // confined to GCLargeAlloc code.
 
         enum {
-            kContainsPointers = 0x01,   // Object contains pointers that must be marked
-            kRCObject         = 0x02,   // Object is an RCObject
-            kProtected        = 0x04    // Object is protected from Free, see comments around GC::MarkItem
+            kProtected        = 0x01    // Object is protected from Free, see comments around GC::MarkItem
         };
 
     public:
@@ -88,12 +86,6 @@ namespace MMgc
 
         static void* FindBeginning(const void *item);
 
-        // Not hot, because GC::MarkItem open-codes it
-        static bool ContainsPointers(const void *item);
-
-        // Can be hot - used by PinStackObjects
-        static bool IsRCObject(const void *item);
-
         //This method returns the number bytes allocated by FixedMalloc
         size_t GetBytesInUse();
 
@@ -116,10 +108,13 @@ namespace MMgc
             // Static checks in GC.cpp test that sizeof(gcbits_t) == 1 and that LargeBlock
             // alignment is 8 bytes.
             gcbits_t flags[4];
-#if defined MMGC_FASTBITS && !defined MMGC_64BIT
+#ifndef MMGC_64BIT
             uint32_t padding;    // Pad to 8-byte aligned.
 #endif
             int GetNumBlocks() const;
+
+            // returns a pointer to the object (realptr in GetUserPointer/GetRealPointer duality)
+            void* GetObject() const;
         };
 
         static LargeBlock* GetLargeBlock(const void *addr);

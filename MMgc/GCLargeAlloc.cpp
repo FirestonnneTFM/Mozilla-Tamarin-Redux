@@ -86,8 +86,6 @@ namespace MMgc
             gcbits_t flagbits0 = 0;
             gcbits_t flagbits1 = 0;
             flagbits0 |= ((flags&GC::kFinalize) != 0) ? kFinalizable : 0;
-            flagbits1 |= ((flags&GC::kContainsPointers) != 0) ? kContainsPointers : 0;
-            flagbits1 |= ((flags&GC::kRCObject) != 0) ? kRCObject : 0;
 
             VALGRIND_CREATE_MEMPOOL(block, /*rdzone*/0, (flags&GC::kZero) != 0);
             VALGRIND_MEMPOOL_ALLOC(block, block, sizeof(LargeBlock));
@@ -99,10 +97,12 @@ namespace MMgc
 #ifdef MMGC_FASTBITS
             block->bitsShift = 12;     // Always use bits[0]
 #endif
+            block->containsPointers = ((flags&GC::kContainsPointers) != 0) ? 1 : 0;
+            block->rcobject = ((flags&GC::kRCObject) != 0) ? 1 : 0;
             block->bits = block->flags;
             m_blocks = block;
 
-            item = (void*)(block+1);
+            item = block->GetObject();
 
             if(m_gc->collecting && !m_startedFinalize)
                 flagbits0 |= kMark;
@@ -143,15 +143,16 @@ namespace MMgc
 
     void GCLargeAlloc::Free(const void *item)
     {
+        LargeBlock *b = GetLargeBlock(item);
+
 #ifdef _DEBUG
         // RCObject have contract that they must clean themselves, since they
         // have to scan themselves to decrement other RCObjects they might as well
         // clean themselves too, better than suffering a memset later
-        if(IsRCObject(GetUserPointer(item)))
+        if(b->rcobject)
             m_gc->RCObjectZeroCheck((RCObject*)GetUserPointer(item));
 #endif
 
-        LargeBlock *b = GetLargeBlock(item);
 
         // We can't allow free'ing something during Sweeping, otherwise alloc counters
         // get decremented twice and destructors will be called twice.
@@ -233,7 +234,7 @@ namespace MMgc
                     obj = (GCFinalizedObject *) GetUserPointer(obj);
                     obj->~GCFinalizedObject();
 #if defined(_DEBUG)
-                    if(b->flags[1] & kRCObject) {
+                    if(b->rcobject) {
                         gc->RCObjectZeroCheck((RCObject*)obj);
                     }
 #endif
