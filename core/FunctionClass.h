@@ -64,7 +64,10 @@ namespace avmplus
             return construct(argc,argv);
         }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_FunctionClass;
+    // ------------------------ DATA SECTION END
     };
 
     class FunctionObject : public ClassClosure
@@ -83,10 +86,14 @@ namespace avmplus
         virtual Stringp implToString() const;
     protected:
         virtual Atom get_coerced_receiver(Atom a);
+
+    // ------------------------ DATA SECTION BEGIN
     protected:
         DWB(MethodEnv*) _call;
 
+    private:
         DECLARE_SLOTS_FunctionObject;
+    // ------------------------ DATA SECTION END
     };
 }
 

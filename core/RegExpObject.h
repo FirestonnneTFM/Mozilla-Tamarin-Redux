@@ -95,13 +95,6 @@ namespace avmplus
         bool get_extended();
 
     private:
-        DRCWB(Stringp)         m_source;
-        DRCWB(CompiledRegExp*) m_pcreInst;
-        int                    m_lastIndex;
-        int                    m_optionFlags;
-        bool                   m_global;
-        bool                   m_hasNamedGroups;
-
         void completeInitialization(String* options);
 
         Atom stringFromUTF8(const char *buffer, int len);
@@ -122,7 +115,17 @@ namespace avmplus
 
         int numBytesInUtf8Character(const uint8_t *in);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        DRCWB(Stringp)         m_source;
+        DRCWB(CompiledRegExp*) m_pcreInst;
+        int                    m_lastIndex;
+        int                    m_optionFlags;
+        bool                   m_global;
+        bool                   m_hasNamedGroups;
+        
         DECLARE_SLOTS_RegExpObject;
+    // ------------------------ DATA SECTION END
     };
 }
 

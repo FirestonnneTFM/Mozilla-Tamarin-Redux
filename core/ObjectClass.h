@@ -73,7 +73,10 @@ namespace avmplus
         void _setPropertyIsEnumerable(Atom thisAtom, Stringp name, bool enumerable);
         Stringp _toString(Atom thisAtom);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_ObjectClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

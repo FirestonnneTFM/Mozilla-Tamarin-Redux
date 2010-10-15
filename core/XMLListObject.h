@@ -93,21 +93,16 @@ namespace avmplus
      */
     class XMLListObject : public ScriptObject
     {
+        friend class XMLObject;
+        
         XMLClass* xmlClass() const
         {
             return toplevel()->xmlClass();
         }
 
     private:
-        mutable HeapMultiname m_targetProperty;
-        mutable ATOM_WB m_targetObject;
-        mutable bool m_appended;
-        // Above member are mutable because this const method may modify them
+        
         void fixTargetObject() const;
-
-        // An array of XMLObjects,or E4XNodes; mutable because E4XNodes may be converted to XMLObjects
-        mutable AtomArray m_children;
-        friend class XMLObject;
 
         void setTargetObject(Atom a) const { m_targetObject.set(MMgc::GC::GetGC(this), this, a); }
 
@@ -260,7 +255,18 @@ namespace avmplus
 
         XMLListObject(XMLListClass *type, Atom targetObject = nullObjectAtom, const Multiname* targetProperty = 0);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        // These three members are mutable because fixTargetObject may modify them
+        mutable HeapMultiname m_targetProperty;
+        mutable ATOM_WB m_targetObject;
+        mutable bool m_appended;
+
+        // An array of XMLObjects,or E4XNodes; mutable because E4XNodes may be converted to XMLObjects
+        mutable AtomArray m_children;
+
         DECLARE_SLOTS_XMLListObject;
+    // ------------------------ DATA SECTION END
     };
 }
 

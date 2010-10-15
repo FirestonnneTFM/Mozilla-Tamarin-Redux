@@ -64,7 +64,10 @@ namespace avmplus
             return construct(argc, argv);
         }
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_BooleanClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

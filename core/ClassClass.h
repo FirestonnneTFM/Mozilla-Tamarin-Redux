@@ -57,7 +57,10 @@ namespace avmplus
         // argN = argv[argc]
         Atom construct(int argc, Atom* argv);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_ClassClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

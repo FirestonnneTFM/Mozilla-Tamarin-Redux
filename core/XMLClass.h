@@ -64,9 +64,6 @@ namespace avmplus
 
         Atom ToXML(Atom arg);
 
-        int m_prettyIndent;
-        uint8_t m_flags;
-
         enum flags
         {
             kFlagIgnoreComments = 0x01,
@@ -102,7 +99,14 @@ namespace avmplus
 
         bool okToPrettyPrint() { return (get_prettyPrinting() && (m_prettyIndent >= 0)); }
 
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        int m_prettyIndent;
+        uint8_t m_flags;
+        
+    private:
         DECLARE_SLOTS_XMLClass;
+    // ------------------------ DATA SECTION END
     };
 
     /**
@@ -123,7 +127,10 @@ namespace avmplus
         // argN = argv[argc]
         Atom construct(int argc, Atom* argv);
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_QNameClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

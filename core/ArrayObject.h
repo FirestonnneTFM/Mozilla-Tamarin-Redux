@@ -51,15 +51,7 @@ namespace avmplus
      */
     class ArrayObject : public ScriptObject
     {
-    private:
         friend class ArrayClass;
-        AtomArray m_denseArr;
-
-        // We can NOT use 0xFFFFFFFF for this since x[0xFFFFFFFE] is a valid prop
-        // which would make our length 0xFFFFFFFF
-        static const uint32_t NO_LOW_HTENTRY  = 0;
-        uint32_t m_lowHTentry; // lowest numeric entry in our hash table
-        uint32_t m_length;
 
     private:
         // forcibly-inlined version used by various hot methods to ensure inlining;
@@ -135,7 +127,20 @@ namespace avmplus
         PrintWriter& print(PrintWriter& prw) const;
 #endif
 
+    private:
+        // We can NOT use 0xFFFFFFFF for this since x[0xFFFFFFFE] is a valid prop
+        // which would make our length 0xFFFFFFFF
+        static const uint32_t NO_LOW_HTENTRY  = 0;
+
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        AtomArray m_denseArr;
+        
+        uint32_t m_lowHTentry; // lowest numeric entry in our hash table
+        uint32_t m_length;
+        
         DECLARE_SLOTS_ArrayObject;
+    // ------------------------ DATA SECTION END
     };
 }
 

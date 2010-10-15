@@ -58,7 +58,6 @@ namespace avmplus
 
         ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
-
         /**
          * throwError is a convenience function for throwing
          * an exception with a formatted error message,
@@ -75,7 +74,10 @@ namespace avmplus
                            int argc);
 #endif /* DEBUGGER */
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
         DECLARE_SLOTS_ErrorClass;
+    // ------------------------ DATA SECTION END
     };
 
     /**
@@ -99,12 +101,16 @@ namespace avmplus
         Stringp getStackTrace() const;
 #ifdef DEBUGGER
         StackTrace* getStackTraceObject() const { return stackTrace; }
-
+#endif
+        
+    // ------------------------ DATA SECTION BEGIN
     private:
+#ifdef DEBUGGER
         StackTrace* stackTrace;
 #endif /* DEBUGGER */
 
         DECLARE_SLOTS_ErrorObject;
+    // ------------------------ DATA SECTION END
     };
 
     /**
