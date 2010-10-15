@@ -234,10 +234,13 @@ as3/Expressions/indexProperties , sh4.* , skip , This testcase causes the SH4 bo
 ####################
 # Performance-acceptance testing: tests that must run on a performance machine 
 ####################
-#as3/Definitions/Function/RestOptimization, (debugger(?!.*-Dnodebugger))|interp, skip, Optimization not enabled unless running JIT with -Dnodebugger
-# Note the enablers below are not quite right, they need to incorporate the regex above somehow too.
-as3/Definitions/Function/RestOptimization,  .*(?<!-performance) , skip, Optimization not enabled unless running JIT with -Dnodebugger
-as3/Definitions/Function/ArgumentsOptimization,  .*(?<!-performance) , skip, Optimization not enabled unless running JIT with -Dnodebugger
+misc/performance_placeholder, .*, skip, placeholder test used for acceptance-performance runs
+as3/Definitions/Function/RestOptimization, .*, skip , skip acceptance-perf tests in normal runs
+as3/Definitions/Function/ArgumentsOptimization, .*, skip , skip acceptance-perf tests in normal runs
+
+misc/performance_placeholder, .*performance.*, include, This test is used to make sure that only performance tests are run when -performance is set in the config.
+as3/Definitions/Function/RestOptimization,  ^((?!(interp|(debugger(?!.*Dnodebugger)))).)*performance.* , include, Optimization not enabled unless running JIT with -Dnodebugger
+as3/Definitions/Function/ArgumentsOptimization,  ^((?!(interp|(debugger(?!.*Dnodebugger)))).)*performance.* , include, Optimization not enabled unless running JIT with -Dnodebugger
 
 ####################
 # skip slow tests in test phase, -Dgreedy passes
