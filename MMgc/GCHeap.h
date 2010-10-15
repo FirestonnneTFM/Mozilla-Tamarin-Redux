@@ -63,6 +63,14 @@ namespace MMgc
         size_t heapSoftLimit;
 
         /**
+         * In DEBUG builds, if dispersiveAdversarial is non-zero then
+         * region reservation attempts to exercise low and high ends
+         * of address space. Its magnitude roughly corresponds to how
+         * much filler we attempt to insert between regions.
+         */
+        size_t dispersiveAdversarial;
+
+        /**
          * If the application wants the allocator to exit when memory
          * runs out and reclamation efforts fail set this to a
          * non-zero value.   Defaults to zero.
@@ -798,6 +806,17 @@ namespace MMgc
         void FreeInternal(const void *item, bool profile, bool oomHandling);
 
         HeapBlock *Split(HeapBlock *block, size_t size);
+
+        /**
+         * Reserves region(s) of memory in system's virtual address space.
+         *
+         * Treat as synonymous with VMPI_reserveMemoryRegion(NULL,---);
+         * when debugging, this exercises areas of specification that are
+         * hard to reach otherwise.
+         *
+         * @see VMPI_reserveMemoryRegion
+         */
+        char* ReserveSomeRegion(size_t sizeInBytes);
 
         // abandon a block of memory that may maps completely to the committed portion of region
         void RemoveBlock(HeapBlock *block, bool release=true);

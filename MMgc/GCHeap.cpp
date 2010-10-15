@@ -96,6 +96,7 @@ namespace MMgc
         initialSize(512),
         heapLimit(kDefaultHeapLimit),
         heapSoftLimit(0),
+        dispersiveAdversarial(0), // 0 means dispersive allocation is off.
         OOMExitCode(0),
         useVirtualMemory(VMPI_useVirtualMemory()),
         trimVirtualMemory(true),
@@ -1083,6 +1084,48 @@ namespace MMgc
         return (alignment - (size_t)(((uintptr_t)baseAddr >> GCHeap::kBlockShift) & (alignment - 1))) & (alignment - 1);
     }
 
+#ifdef DEBUG
+    // Reserves region of size == sizeInBytes, while attempting to
+    // insert filler >= fill_sz bytes between pairs of consecutively
+    // reserved regions.  (Goal: exercise address space extremities
+    // w/o actually committing memory within the filler area itself.)
+    static char* reserveSomeRegionDispersively(size_t fill_sz, size_t sizeInBytes) {
+        static bool retLowAddr = false; // each call toggles low/high.
+
+        void *mem0 = VMPI_reserveMemoryRegion(NULL, fill_sz);
+        void *mem1 = VMPI_reserveMemoryRegion(NULL, fill_sz);
+
+        if ((retLowAddr && mem0 > mem1) || ( !retLowAddr && mem0 < mem1)) {
+            void *swap_tmp = mem0;
+            mem0 = mem1;
+            mem1 = swap_tmp;
+        }
+
+        VMPI_releaseMemoryRegion(mem0, fill_sz);
+        char *addr = (char*)VMPI_reserveMemoryRegion(mem0, sizeInBytes);
+        VMPI_releaseMemoryRegion(mem1, fill_sz);
+        if (addr == NULL) {
+            addr = (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+        }
+        retLowAddr = ! retLowAddr;
+
+        return addr;
+    }
+#endif
+
+    REALLY_INLINE char *GCHeap::ReserveSomeRegion(size_t sizeInBytes)
+    {
+#ifdef DEBUG
+        if (!config.dispersiveAdversarial)
+            return (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+        else
+            return reserveSomeRegionDispersively(config.dispersiveAdversarial,
+                                                 sizeInBytes);
+#else
+        return (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+#endif
+    }
+
     void *GCHeap::LargeAlloc(size_t size, size_t alignment)
     {
         GCAssert(config.useVirtualMemory);
@@ -1092,7 +1135,7 @@ namespace MMgc
         if(!EnsureFreeRegion(true))
             return NULL;
 
-        char* addr = (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+        char* addr = ReserveSomeRegion(sizeInBytes);
 
         if(!addr)
             return NULL;
@@ -1102,7 +1145,7 @@ namespace MMgc
         if(alignmentSlop(addr, alignment) != 0) {
             VMPI_releaseMemoryRegion(addr, sizeInBytes);
             unalignedSize = sizeInBytes + (alignment-1) * kBlockSize;
-            addr = (char*)VMPI_reserveMemoryRegion(NULL, unalignedSize);
+            addr = ReserveSomeRegion(unalignedSize);
             if(!addr)
                 return NULL;
         }
@@ -1807,16 +1850,14 @@ namespace MMgc
             // - Go for the default reservation size unless the requested
             //   size is bigger.
             if (newRegionAddr == NULL && size < defaultReserve) {
-                newRegionAddr = (char*) VMPI_reserveMemoryRegion(NULL,
-                                                  defaultReserve*kBlockSize);
+                newRegionAddr = ReserveSomeRegion(defaultReserve*kBlockSize);
                 newRegionSize = defaultReserve;
             }
 
             // - If that failed or the requested size is bigger than default,
             //   go for the requested size exactly.
             if (newRegionAddr == NULL) {
-                newRegionAddr = (char*) VMPI_reserveMemoryRegion(NULL,
-                                              size*kBlockSize);
+                newRegionAddr = ReserveSomeRegion(size*kBlockSize);
                 newRegionSize = size;
             }
 
