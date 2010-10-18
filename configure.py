@@ -382,21 +382,10 @@ if o.help:
     sys.exit(1)
 
 
-# We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
+# Append MMGC_DEFINES to APP_CPPFLAGS
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
                         for (var, val) in MMGC_DEFINES.iteritems())
 
-definePattern = \
-"""#ifndef %(var)s
-#define %(var)s %(val)s
-#endif
-"""
-
-outpath = "%s/MMgc-config.h" % config.getObjDir()
-contents = ''.join(definePattern % {'var': var,
-                                    'val': val is not None and val or ''}
-                   for (var, val) in MMGC_DEFINES.iteritems())
-writeFileIfChanged(outpath, contents)
 
 config.subst("APP_CPPFLAGS", APP_CPPFLAGS)
 config.subst("APP_CXXFLAGS", APP_CXXFLAGS)
