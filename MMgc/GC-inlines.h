@@ -287,7 +287,7 @@ namespace MMgc
     {
         const void *realptr = GetRealPointer(userptr);
         GCAssert(GetGC(userptr)->IsPointerToGCObject(realptr));
-        return GetBlockHeader(realptr)->containsPointers;
+        return GetBlockHeader(realptr)->containsPointers != 0;
     }
     
     /*static*/
@@ -295,7 +295,7 @@ namespace MMgc
     {
         const void *realptr = GetRealPointer(userptr);
         GCAssert(GetGC(userptr)->IsPointerToGCObject(realptr));
-        return GetBlockHeader(realptr)->rcobject;
+        return GetBlockHeader(realptr)->rcobject != 0;
     }
     
     /*static*/
