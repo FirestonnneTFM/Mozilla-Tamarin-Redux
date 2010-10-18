@@ -4510,7 +4510,7 @@ return the result of the comparison ToPrimitive(x) == y.
         if (obj != NULL)
         {
             GC* gc = GC::GetGC(obj);
-            AvmAssert(!gc->IsRCObject(obj));
+            AvmAssert(!gc->IsRCObjectSafe(obj));
         }
         // return a non-RC atom, makes atomWriteBarrier do the right thing
         return (Atom)obj|kDoubleType;
