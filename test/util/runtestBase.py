@@ -767,8 +767,8 @@ class RuntestBase:
             for arg in ascArgsList:
                 if arg[0:3].lower() == '-no':
                     self.asc_negative_args.append(arg[3:])
-                # delete the -no arg from the list
-                ascArgsList.remove(arg)
+                    # delete the -no arg from the list
+                    ascArgsList.remove(arg)
             ascArgsList = self.parseAscArgs(ascArgsList, './dir.asc_args', './')
             self.ascargs = ' '.join(ascArgsList)
 
