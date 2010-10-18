@@ -958,14 +958,14 @@ namespace MMgc
 
         bool onThread();
 
-    private:
-
         // Take any pointer and determine if its an rc object,
         // specifically that its on a GC page marked for RC objects
         // and points to the beginning of that object.  Basically
         // shorthand for IsPointerToGCObject && IsRCObject.  Any input
         // is safe, this never crashes or asserts.
         bool IsRCObjectSafe(const void *anyptr);
+
+    private:
 
         // heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
         // if the allocation succeeded.
