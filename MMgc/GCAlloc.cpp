@@ -295,7 +295,7 @@ namespace MMgc
                 b->finalizeState = !m_gc->finalizedValue;
 
 #ifdef MMGC_FASTBITS
-            b->bitsShift = m_bitsShift;
+            b->bitsShift = (uint8_t) m_bitsShift;
 #endif
             b->containsPointers = ContainsPointers();
             b->rcobject = ContainsRCObjects();
