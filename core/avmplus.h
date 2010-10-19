@@ -118,6 +118,7 @@ namespace avmplus
     class BooleanClass;
     class BuiltinTraits;
     class BugCompatibility;
+    class ByteArrayObject;
     class CallStackNode;
     class ClassClass;
     class ClassClosure;

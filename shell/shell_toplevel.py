@@ -62,9 +62,12 @@ asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
 print("ASC="+classpath)
 print("Building shell_toplevel...")
 
+configs = ""
+configs += " -config CONFIG::BYTEARRAY_API_AIR=true "
+configs += " -config CONFIG::BYTEARRAY_API_FLASH=false "
+
 # compile builtins
-#os.system(asc+" -abcfuture -import ../core/builtin.abc -builtin -out shell_toplevel shell_toplevel.as Domain.as ByteArray.as ../extensions/Sampler.as ../extensions/Trace.as ../extensions/Dictionary.as Endian.as Java.as")
-os.system(asc+" -abcfuture -import ../core/builtin.abc -builtin -apiversioning -out shell_toplevel shell_toplevel.as Domain.as IDataInput.as IDataOutput.as ByteArray.as ../extensions/Sampler.as ../extensions/Trace.as ../extensions/Dictionary.as Endian.as Java.as")
+os.system(asc+" -abcfuture -import ../core/builtin.abc -builtin "+configs+"-apiversioning -out shell_toplevel shell_toplevel.as Domain.as IDataInput.as IDataOutput.as ByteArray.as ../extensions/Sampler.as ../extensions/Trace.as ../extensions/Dictionary.as Endian.as Java.as")
 
 print("Generating native thunks...")
 os.system("python ../utils/nativegen.py ../core/builtin.abc shell_toplevel.abc")

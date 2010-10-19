@@ -49,7 +49,6 @@ namespace avmplus
     {
     public:
         ByteArray(Toplevel* toplevel);
-        ByteArray(const ByteArray& lhs);
         ~ByteArray();
 
         void Clear();
@@ -95,8 +94,12 @@ namespace avmplus
         // it's highly recommend you not use this method for new code.
         //
         uint8_t* FASTCALL GetWritableBuffer();
-
-        void SetCopyOnWriteData(uint8_t* data, uint32_t length);
+        
+        // Make this ByteArray a copy-on-write ByteArray. All existing content will be discarded
+        // and the new data referenced instead. "owner", if non-null, is a GCObject that
+        // owns the data (a reference will be kept to it to ensure the data isn't collected);
+        // if owner is null, it's assumed that the data will never become invalid.
+        void SetCopyOnWriteData(MMgc::GCObject* owner, const uint8_t* data, uint32_t length);
 
         REALLY_INLINE uint32_t GetPosition() { return m_position; }
         REALLY_INLINE void SetPosition(uint32_t pos) { m_position = pos; }
@@ -115,6 +118,16 @@ namespace avmplus
         // overrides from GlobalMemoryProvider
         /*virtual*/ bool addSubscriber(GlobalMemorySubscriber* subscriber);
         /*virtual*/ bool removeSubscriber(GlobalMemorySubscriber* subscriber);
+
+        // compression / decompression
+        enum CompressionAlgorithm 
+        {
+            k_zlib,
+            k_deflate
+        };
+
+        void Compress(CompressionAlgorithm algorithm);
+        void Uncompress(CompressionAlgorithm algorithm);
 
 #ifdef DEBUGGER
     public:
@@ -143,7 +156,7 @@ namespace avmplus
             uint8_t*    m_oldArray;
             uint32_t    m_oldLength;
         };
-
+        
     private:
         enum { kGrowthIncr = 4096 };
 
@@ -154,16 +167,38 @@ namespace avmplus
         
         void TellGcNewBufferMemory(const uint8_t* buf, uint32_t numberOfBytes);
         void TellGcDeleteBufferMemory(const uint8_t* buf, uint32_t numberOfBytes);
+        
+        REALLY_INLINE bool IsCopyOnWrite() const { return m_copyOnWriteOwner != NULL; }
+        void SetCopyOnWriteOwner(MMgc::GCObject* owner);
+
+        ByteArray(const ByteArray& lhs);        // unimplemented
+        ByteArray& operator=(const ByteArray&); // unimplemented
 
     private:
         Toplevel* const         m_toplevel;
         MMgc::GC* const         m_gc;
         WeakSubscriberList      m_subscribers;
+        //
+        // If this is NULL, we are not a copy-on-write ByteArray.
+        //
+        // If this is non-NULL, we are copy-on-write, with this pointer being used
+        // to ensure that our data isn't collected out from under us. (Note that this
+        // currently requires the object to be GCObject or GCFinalizedObject, not RCObject;
+        // that's fine for all extant use cases.) (Note that the pointer is written with explicit WB calls.)
+        //
+        // Note that (under the covers) we use GC::emptyWeakRef as a sentinel to mean 
+        // "I am copy on write but there is no GCObject controlling my lifespan"; this
+        // can be the case if (e.g.) the data is compile-time-constant data we are just
+        // wrapping. Using GC::emptyWeakRef here is, admittedly, an ugly hack, but doing so
+        // avoids using the lower-three-bits-as-flags approach we're trying to eradicate elsewhere,
+        // and avoids adding a "bool" field which would expand this struct by an average of 7 bytes
+        // due to MMgc alignment rules.
+        //
+        MMgc::GCObject*         m_copyOnWriteOwner; 
         uint8_t*                m_array;
         uint32_t                m_capacity;
         uint32_t                m_length;
         uint32_t                m_position;
-        bool                    m_copyOnWrite;
     };
 
     class ByteArrayObject : public ScriptObject
@@ -187,10 +222,9 @@ namespace avmplus
         void writeBytes(ByteArrayObject *bytes, uint32_t offset, uint32_t length);
 
         String* _toString();
-
-        // renamed to avoid preprocessor conflict with mozilla's zlib, which #define's compress and uncompress
-        void zlib_compress();
-        void zlib_uncompress();
+        
+        void _compress(String* algorithm);
+        void _uncompress(String* algorithm);
 
         void writeBoolean(bool value);
         void writeByte(int value);
@@ -242,9 +276,12 @@ namespace avmplus
 #endif
 
     private:
+
+        ByteArray::CompressionAlgorithm algorithmToEnum(String* algorithm);
+
+    private:
         MMgc::Cleaner   c;
         ByteArray       m_byteArray;
-
         DECLARE_SLOTS_ByteArrayObject;
     };
 
@@ -263,10 +300,6 @@ namespace avmplus
         uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }
         void set_defaultObjectEncoding(uint32_t version) { set_private__defaultObjectEncoding(version); }
         
-        // Retrieve compression algorithm strings
-        String* getZlibCompressionString() { return get_private__zlib(); }
-        String* getDeflateCompressionString() { return get_private__deflate(); }
-
         DECLARE_SLOTS_ByteArrayClass;
     };
 }

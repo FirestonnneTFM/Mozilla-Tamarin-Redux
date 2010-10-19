@@ -283,35 +283,35 @@ package
 
 package flash.errors
 {
-	public dynamic class IOError extends Error {
-	   /** 
-		* @private
-		**/
-		public function IOError(message:String = "", id:int = 0) {
-			super(message, id);
-		}	
-	}
+    public dynamic class IOError extends Error {
+       /** 
+        * @private
+        **/
+        public function IOError(message:String = "", id:int = 0) {
+            super(message, id);
+        }   
+    }
 
-	public dynamic class EOFError extends IOError {
-		/**
-		* @private
-		**/
-		public function EOFError(message:String = "", id:int = 0) {
-			super(message, id);
-		}	
-	}
+    public dynamic class EOFError extends IOError {
+        /**
+        * @private
+        **/
+        public function EOFError(message:String = "", id:int = 0) {
+            super(message, id);
+        }   
+    }
 
-	public dynamic class MemoryError extends Error {
-		
-	   /** 
-		* @private
-		**/		
-		public function MemoryError(message:String = "", id:int = 0) {
-			super(message, id);
-		}	
-	}
+    public dynamic class MemoryError extends Error {
+        
+       /** 
+        * @private
+        **/     
+        public function MemoryError(message:String = "", id:int = 0) {
+            super(message, id);
+        }   
+    }
 
-	IOError.prototype.name                  = "IOError"
-	MemoryError.prototype.name              = "MemoryError"
-	EOFError.prototype.name                 = "EOFError"
+    IOError.prototype.name                  = "IOError"
+    MemoryError.prototype.name              = "MemoryError"
+    EOFError.prototype.name                 = "EOFError"
 }

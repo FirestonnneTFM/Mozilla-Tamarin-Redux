@@ -1433,4 +1433,8 @@ namespace avmplus
     }
 
     //  -------------------------------------------------------
+
+    void Toplevel::byteArrayCreated(ByteArrayObject* /*byteArrayObject*/)
+    {
+    }
 }

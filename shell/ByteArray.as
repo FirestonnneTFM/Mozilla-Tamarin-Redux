@@ -40,9 +40,58 @@
 package flash.utils
 {
 
+// FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248
+// this should be include "api-versions.as" once this file is moved into core
+include "../core/api-versions.as"
+
+/**
+ * The CompressionAlgorithm class defines string constants for the names of compress and uncompress options. These constants 
+ * are used as values of the <code>algorithm</code> parameter of the <code>ByteArray.compress()</code> 
+ * and <code>ByteArray.uncompress()</code> methods.
+ * 
+ * @see flash.utils.ByteArray#compress()
+ * @see flash.utils.ByteArray#uncompress()
+ * 
+ * @playerversion AIR 1.0
+ * @langversion 3.0
+ *  
+ */
+CONFIG::BYTEARRAY_API_AIR
+{
+    public final class CompressionAlgorithm
+    {
+        /**
+        * Defines the string to use for the zlib compression algorithm.
+        * 
+        * @playerversion AIR 1.0
+        * @langversion 3.0
+        *  
+        */
+        public static const ZLIB:String = "zlib";
+        /**
+         * Defines the string to use for the deflate compression algorithm.
+        *  
+        * @playerversion AIR 1.0
+        * @langversion 3.0  
+        *  
+        */
+        public static const DEFLATE:String = "deflate";
+    };
+} // CONFIG::BYTEARRAY_API_AIR
+
+
 //
 // ByteArray
 //
+
+// Note that this class exposes two different, incompatible signatures of ByteArray.compress
+// and ByteArray.uncompress, depending on the value of BYTEARRAY_API_AIR; API versioning
+// cannot (yet) handle the overloaded nature of this change, and for now we must maintain
+// existing behavior to avoid issues if subclasses override these methods. Thus, for now,
+// you must explicitly choose the API you want on the ASC command-line:
+//
+//  -config CONFIG::BYTEARRAY_API_AIR=true (compress/uncompress take an optional argument)
+//  -config CONFIG::BYTEARRAY_API_FLASH=true (compress/uncompress take no arguments)
 
 
 /**
@@ -89,7 +138,7 @@ package flash.utils
  * @refpath
  * @keyword ByteArray
  *  
- *  @playerversion Lite 4
+ * @playerversion Lite 4
  */
 
 [native(cls="ByteArrayClass", instance="ByteArrayObject", methods="auto")]
@@ -101,7 +150,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @playerversion Flash 9
      * @langversion 3.0
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public function ByteArray(){}
 
@@ -126,7 +175,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readBytes, readBytes
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readBytes(bytes:ByteArray,
                                      offset:uint=0,
@@ -156,7 +205,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeBytes, writeBytes
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeBytes(bytes:ByteArray,
                                       offset:uint=0,
@@ -175,7 +224,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeBoolean, writeBoolean
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeBoolean(value:Boolean):void;
 
@@ -191,7 +240,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeByte, writeByte
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeByte(value:int):void;
 
@@ -206,7 +255,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeShort, writeShort
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeShort(value:int):void;
 
@@ -220,7 +269,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeInt, writeInt
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeInt(value:int):void;
 
@@ -234,7 +283,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeUnsignedInt, writeUnsignedInt
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeUnsignedInt(value:uint):void;
 
@@ -248,7 +297,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeFloat, writeFloat
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeFloat(value:Number):void;
 
@@ -262,7 +311,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeDouble, writeDouble
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeDouble(value:Number):void;
 
@@ -279,7 +328,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath 
      * @keyword ByteArray, ByteArray.writeMultiByte, writeMultiByte
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */ 
     public native function writeMultiByte(value:String, charSet:String):void;
 
@@ -298,7 +347,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeUTF, writeUTF
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeUTF(value:String):void;
 
@@ -313,7 +362,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.writeUTFBytes, writeUTFBytes
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function writeUTFBytes(value:String):void;
 
@@ -332,7 +381,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readBoolean, readBoolean
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readBoolean():Boolean;
 
@@ -348,7 +397,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readByte, readByte
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readByte():int;
 
@@ -366,7 +415,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readUnsignedByte, readUnsignedByte
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readUnsignedByte():uint;
 
@@ -384,7 +433,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readShort, readShort
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readShort():int;
 
@@ -402,14 +451,14 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readUnsignedShort, readUnsignedShort
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readUnsignedShort():uint;
 
     /**
      * Reads a signed 32-bit integer from the byte stream.
      *
-         * <p>The returned value is in the range -2147483648 to 2147483647.</p>
+     * <p>The returned value is in the range -2147483648 to 2147483647.</p>
      *
      * @throws EOFError There is not sufficient data available
      * to read.
@@ -420,7 +469,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readInt, readInt
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readInt():int;
 
@@ -438,7 +487,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readUnsignedInt, readUnsignedInt
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readUnsignedInt():uint;
 
@@ -455,7 +504,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readFloat, readFloat
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readFloat():Number;
 
@@ -472,7 +521,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readDouble, readDouble
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readDouble():Number;
 
@@ -502,7 +551,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath 
      * @keyword ByteArray, ByteArray.readMultiByte, readMultiByte
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */ 
     public native function readMultiByte(length:uint, charSet:String):String;
 
@@ -522,7 +571,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readUTF, readUTF
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readUTF():String;
 
@@ -540,7 +589,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.readUTFBytes, readUTFBytes
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function readUTFBytes(length:uint):String;
 
@@ -559,7 +608,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.length, length
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function get length():uint;
     public native function set length(value:uint):void;
@@ -578,7 +627,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @see ../../flash/net/package.html#registerClassAlias() flash.net.registerClassAlias()
      *
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */ 
     public native function writeObject(object:*):void;
 
@@ -598,41 +647,219 @@ public class ByteArray implements IDataInput, IDataOutput
      * @see ../../flash/net/package.html#registerClassAlias() flash.net.registerClassAlias()
      *
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */ 
     public native function readObject():*;
 
+    [API(CONFIG::FP_10_0)]
     /**
-    * Compresses the byte array using zlib compression.
-    * The entire byte array is compressed.
-    *
-    * @see #uncompress
-    *
-    * @playerversion Flash 8.0
-    * @langversion 3.0
-    * @helpid
-    * @refpath
-    * @keyword ByteArray, ByteArray.compress, compress
-    */
-    private native function zlib_compress():void;
-    public function compress():void { zlib_compress(); }
+     * Compresses the byte array using the deflate compression algorithm.
+     * The entire byte array is compressed.
+     *
+     * <p>After the call, the <code>length</code> property of the ByteArray is set to the new length. 
+     * The <code>position</code> property is set to the end of the byte array.</p>
+     *
+     * <p>The deflate compression algorithm is described at
+     * <a target="mm_external" href="http://www.ietf.org/rfc/rfc1951.txt">http://www.ietf.org/rfc/rfc1951.txt</a>.</p>
+     *
+     * <p>In order to use the deflate format to compress a ByteArray instance's 
+     * data in a specific format such as gzip or zip, you cannot simply call 
+     * <code>deflate()</code>. You must create a ByteArray structured 
+     * according to the compression format's specification, including the appropriate 
+     * metadata as well as the compressed data obtained using the deflate format.
+     * Likewise, in order to decode data compressed in a format such 
+     * as gzip or zip, you can't simply call <code>inflate()</code>
+     * on that data. First, you must separate the metadata from the compressed data, and you can
+     * then use the deflate format to decompress the compressed data.</p>
+     * 
+     * @see #inflate()
+     * @playerversion Flash 10
+     * @playerversion AIR 1.5
+     * @langversion 3.0
+     *  
+     * @playerversion Lite 4
+     */
+    public function deflate():void
+    {
+        _compress("deflate");
+    }
+    
+    private native function _compress(algorithm:String):void;
 
     /**
-    * Uncompresses the byte array.  The byte array
-    * must have been previously compressed with the
-    * <code>compress</code> method.
-    *
-    * @see #compress
-    *
-    * @playerversion Flash 8.0
-    * @langversion 3.0
-    * @helpid
-    * @refpath
-    * @keyword ByteArray, ByteArray.uncompress, uncompress
-    */
-    private native function zlib_uncompress():void;
-    public function uncompress():void { zlib_uncompress(); }
+     * Compresses the byte array. The entire byte array is compressed. For content   
+     * running in Adobe AIR, you can specify a compression algorithm by passing a
+     * value (defined in the CompressionAlgorithm class) as the <code>algorithm</code>
+     * parameter. <span platform="actionscript">Flash Player supports only the default 
+     * algorithm, zlib.</span>
+     *
+     * <p>After the call, the <code>length</code> property of the ByteArray is set to the new length. 
+     * The <code>position</code> property is set to the end of the byte array.</p>
+     *
+     * <p>The zlib compressed data format is described at
+     * <a target="mm_external" href="http://www.ietf.org/rfc/rfc1950.txt">http://www.ietf.org/rfc/rfc1950.txt</a>.</p>
+     * 
+     * <p>The deflate compression algorithm is described at
+     * <a target="mm_external" href="http://www.ietf.org/rfc/rfc1951.txt">http://www.ietf.org/rfc/rfc1951.txt</a>.</p>
+     * 
+     * <p>The deflate compression algorithm is used in several compression
+     * formats, such as zlib, gzip, some zip implementations, and others. When data is
+     * compressed using one of those compression formats, in addition to storing 
+     * the compressed version of the original data, the compression format data 
+     * (for example, the .zip file) includes metadata information. Some examples of 
+     * the types of metadata included in various file formats are file name, 
+     * file modification date/time, original file size, optional comments, checksum 
+     * data, and more.</p>
+     * 
+     * <p>For example, when a ByteArray is compressed using the zlib algorithm,
+     * the resulting ByteArray is structured in a specific format. Certain bytes contain 
+     * metadata about the compressed data, while other bytes contain the actual compressed 
+     * version of the original ByteArray data. As defined by the zlib compressed data 
+     * format specification, those bytes (that is, the portion containing 
+     * the compressed version of the original data) are compressed using the deflate 
+     * algorithm. Consequently those bytes are identical to the result of calling 
+     * <code>compress(<span class="javascript">air.</span>CompressionAlgorithm.DEFLATE)</code> 
+     * on the original ByteArray. However, the result from 
+     * <code>compress(<span class="javascript">air.</span>CompressionAlgorithm.ZLIB)</code> includes 
+     * the extra metadata, while the <code>compress(<span platform="javascript">air.</span>CompressionAlgorithm.DEFLATE)</code> 
+     * result includes only the compressed version of the original ByteArray data and nothing else.</p>
+     * 
+     * <p>In order to use the deflate format to compress a ByteArray instance's 
+     * data in a specific format such as gzip or zip, you cannot simply call 
+     * <code>compress(<span platform="javascript">air.</span>CompressionAlgorithm.DEFLATE)</code>. 
+     * You must create a ByteArray structured 
+     * according to the compression format's specification, including the appropriate 
+     * metadata as well as the compressed data obtained using the deflate format.
+     * Likewise, in order to decode data compressed in a format such 
+     * as gzip or zip, you can't simply call <code>uncompress(<span platform="javascript">air.</span>CompressionAlgorithm.DEFLATE)</code>
+     * on that data. First, you must separate the metadata from the compressed data, and you can
+     * then use the deflate format to decompress the compressed data.</p>
+     * 
+     * @param algorithm The compression algorithm to use when compressing. Valid values are defined as
+     * constants in the CompressionAlgorithm class. The default is to use zlib format. 
+     * <span platform="actionscript">This parameter is only recognized for content running in Adobe AIR. 
+     * Flash Player supports only the default algorithm, zlib, and throws an exception if you attempt to pass
+     * a value for this parameter.</span> Calling <code>compress(<span platform="javascript">air.</span>CompressionAlgorithm.DEFLATE)</code> 
+     * has the same effect as calling the <code>deflate()</code> method. 
+     * 
+     * @playerversion Flash 9
+     * @langversion 3.0
+     *
+     * @see #uncompress()
+     * @see flash.utils.CompressionAlgorithm
+     * @keyword ByteArray, ByteArray.compress, compress
+     *  
+     */
+    CONFIG::BYTEARRAY_API_AIR
+    {
+        public function compress(algorithm:String = CompressionAlgorithm.ZLIB):void
+        {
+            _compress(algorithm);
+        }
+    }
+    CONFIG::BYTEARRAY_API_FLASH
+    {
+        public function compress():void
+        {
+            _compress("zlib");
+        }
+    }
+     
+    [API(CONFIG::FP_10_0)]
+    /**
+     * Decompresses the byte array using the deflate compression algorithm. 
+     * The byte array must have been compressed using the same algorithm. 
+     * 
+     * <p>After the call, the <code>length</code> property of the ByteArray is set to the new length. 
+     * The <code>position</code> property is set to 0.</p>
+     * 
+     * <p>The deflate compression algorithm is described at
+     * <a target="mm_external" href="http://www.ietf.org/rfc/rfc1951.txt">http://www.ietf.org/rfc/rfc1951.txt</a>.</p>
+     *
+     * <p>In order to decode data compressed in a format that uses the deflate compression algorithm, 
+     * such as data in gzip or zip format, it will not work to simply call <code>inflate()</code> on 
+     * a ByteArray containing the compression formation data. First, you must separate the metadata that is 
+     * included as part of the compressed data format from the actual compressed data. For more 
+     * information, see the <code>compress()</code> method description.</p>
+     * 
+     * @throws IOError The data is not valid compressed data; it was not compressed with the 
+     * same compression algorithm used to compress.
+     *
+     * @see #deflate()
+     *
+     * @playerversion Flash 10
+     * @langversion 3.0
+     * @helpid
+     * @refpath
+     * @keyword ByteArray, ByteArray.uncompress, uncompress
+     *  
+     */
+    public function inflate():void
+    {
+        _uncompress("deflate");
+    }
+    
+    private native function _uncompress(algorithm:String):void;
 
+
+    /**
+     * Decompresses the byte array. For content running in Adobe AIR, you can specify 
+     * a compression algorithm by passing a value (defined in the CompressionAlgorithm class) 
+     * as the <code>algorithm</code> parameter. The byte array must have been compressed 
+     * using the same algorithm. <span platform="actionscript">Flash Player supports only the 
+     * default algorithm, zlib.</span>
+     *
+     * <p>After the call, the <code>length</code> property of the ByteArray is set to the new length. 
+     * The <code>position</code> property is set to 0.</p>
+     *
+     * <p>The zlib compressed data format is described at
+     * <a target="mm_external" href="http://www.ietf.org/rfc/rfc1950.txt">http://www.ietf.org/rfc/rfc1950.txt</a>.</p>
+     * 
+     * <p>The deflate compression algorithm is described at
+     * <a target="mm_external" href="http://www.ietf.org/rfc/rfc1951.txt">http://www.ietf.org/rfc/rfc1951.txt</a>.</p>
+     *
+     * <p>In order to decode data compressed in a format that uses the deflate compression algorithm, 
+     * such as data in gzip or zip format, it will not work to call 
+     * <code>uncompress(CompressionAlgorithm.DEFLATE)</code> on 
+     * a ByteArray containing the compression formation data. First, you must separate the metadata that is 
+     * included as part of the compressed data format from the actual compressed data. For more 
+     * information, see the <code>compress()</code> method description.</p>
+     * 
+     * @param algorithm The compression algorithm to use when decompressing. This must be the 
+     * same compression algorithm used to compress the data. Valid values are defined as
+     * constants in the CompressionAlgorithm class. The default is to use zlib format. This parameter
+     * is only recognized for content running in Adobe AIR. <span platform="actionscript">Flash Player 
+     * supports only the default algorithm, zlib, and throws an exception if you attempt to pass
+     * a value for this parameter.</span>
+     *
+     * @throws IOError The data is not valid compressed data; it was not compressed with the 
+     * same compression algorithm used to compress.
+     *
+     * @see #compress()
+     * @see flash.utils.CompressionAlgorithm
+     *
+     * @playerversion Flash 9
+     * @langversion 3.0
+     * @helpid
+     * @refpath
+     * @keyword ByteArray, ByteArray.uncompress, uncompress
+     *  
+     * @playerversion Lite 4
+     */
+    CONFIG::BYTEARRAY_API_AIR
+    {
+        public function uncompress(algorithm:String = CompressionAlgorithm.ZLIB):void
+        {
+            _uncompress(algorithm);
+        }
+    }
+    CONFIG::BYTEARRAY_API_FLASH
+    {
+        public function uncompress():void
+        {
+            _uncompress("zlib");
+        }
+    }
 
     /**
      * Converts the byte array to a string.
@@ -648,7 +875,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.toString, toString
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public function toString():String { return _toString(); }
     private native function _toString():String;
@@ -668,7 +895,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword available, bytes, position
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function get bytesAvailable():uint;
 
@@ -685,7 +912,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath
      * @keyword ByteArray, ByteArray.getFilePointer,
      *
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */
     public native function get position():uint;
     public native function set position(offset:uint):void;
@@ -709,7 +936,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath 
      * @keyword ByteArray, ByteArray.defaultObjectEncoding, defaultObjectEncoding
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */ 
     static public native function get defaultObjectEncoding():uint;
     static public native function set defaultObjectEncoding(version:uint):void;
@@ -728,7 +955,7 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath 
      * @keyword ByteArray, ByteArray.objectEncoding, objectEncoding
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */ 
     public native function get objectEncoding():uint;
     public native function set objectEncoding(version:uint):void;
@@ -744,13 +971,24 @@ public class ByteArray implements IDataInput, IDataOutput
      * @refpath 
      * @keyword 
      *  
-     *  @playerversion Lite 4
+     * @playerversion Lite 4
      */ 
     public native function get endian():String;
     public native function set endian(type:String):void;
     
-    static private const _zlib:String = "zlib";
-    static private const _deflate:String = "deflate";
+    [API(CONFIG::FP_10_0)]
+    /** 
+     * Clears the contents of the byte array and resets the <code>length</code> 
+     * and <code>position</code> properties to 0. Calling this method explicitly 
+     * frees up the memory used by the ByteArray instance.
+     * 
+     * @playerversion Flash 10
+     * @playerversion AIR 1.5
+     * @langversion 3.0
+     *  
+     * @playerversion Lite 4
+     */
+    public native function clear():void;
 };
 
 
