@@ -433,6 +433,16 @@ namespace avmplus
 
         //  -------------------------------------------------------
 
+        // 
+        // This is called anytime a ByteArrayObject (or subclass thereof) is created;
+        // it allows the ByteArray to be pre-initialized (eg via SetCopyOnWriteData),
+        // most typically if it is a subclass that is bound to a particular data set.
+        // (Most typically this is done via ByteArrayAsset in Flex code.) The relevant
+        // mapping tables don't exist in the VM proper, so this is a no-op in current Tamarin.
+        //
+        virtual void byteArrayCreated(ByteArrayObject* byteArrayObject);
+
+        //  -------------------------------------------------------
 
 
     protected:

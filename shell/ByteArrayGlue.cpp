@@ -41,7 +41,7 @@
 // FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248
 // this should be "avmplus.h" once this file is moved into core
 #include "avmshell.h"
-#include "genericzlib.h"
+#include "zlib.h"
 
 namespace avmplus
 {
@@ -57,42 +57,13 @@ namespace avmplus
         , m_toplevel(toplevel)
         , m_gc(toplevel->core()->GetGC())
         , m_subscribers(m_gc, 0)
+        , m_copyOnWriteOwner(NULL)
         , m_array(NULL)
         , m_capacity(0)
         , m_length(0)
         , m_position(0)
-        , m_copyOnWrite(false)
     {
         AvmAssert(m_gc != NULL);
-    }
-
-    ByteArray::ByteArray(const ByteArray& lhs)
-        : DataIOBase()
-        , GlobalMemoryProvider()
-        , DataInput()
-        , DataOutput()
-        , m_toplevel(lhs.m_toplevel)
-        , m_gc(lhs.m_gc)
-        , m_subscribers(m_gc, 0)
-        , m_array(NULL)
-        , m_capacity(0)
-        , m_length(0)
-        , m_position(0)
-        , m_copyOnWrite(false)
-    {
-        AvmAssert(m_gc != NULL);
-        m_array = mmfx_new_array_opt(uint8_t, lhs.m_length, MMgc::kCanFailAndZero);
-        TellGcNewBufferMemory(m_array, lhs.m_length);
-        if (!m_array)
-        {
-            ThrowMemoryError();
-            return;
-        }
-
-        m_capacity = lhs.m_length;
-        m_length   = lhs.m_length;
-
-        VMPI_memcpy(m_array, lhs.m_array, m_length);
     }
 
     ByteArray::~ByteArray()
@@ -108,24 +79,41 @@ namespace avmplus
             AvmAssert(false); // shouldn't get here?
             m_toplevel->throwRangeError(kInvalidRangeError);
         }
-        if (m_array && !m_copyOnWrite)
+        if (m_array && !IsCopyOnWrite())
         {
             TellGcDeleteBufferMemory(m_array, m_length);
             mmfx_delete_array(m_array);
         }
-        m_array        = NULL;
-        m_length       = 0;
-        m_capacity     = 0;
-        m_copyOnWrite     = false;
+        m_array             = NULL;
+        m_capacity          = 0;
+        m_length            = 0;
+        m_copyOnWriteOwner  = NULL;
     }
 
-    void ByteArray::SetCopyOnWriteData(uint8_t* data, uint32_t length)
+    void ByteArray::SetCopyOnWriteOwner(MMgc::GCObject* owner)
+    {
+        if (owner != NULL && m_gc->IsPointerToGCPage(this))
+        {
+            WB(m_gc, m_gc->FindBeginningFast(this), &m_copyOnWriteOwner, owner);
+        }
+        else
+        {
+            m_copyOnWriteOwner = owner;
+        }
+    }
+
+    void ByteArray::SetCopyOnWriteData(MMgc::GCObject* owner, const uint8_t* data, uint32_t length)
     {
         Clear();
-        m_array        = data;
-        m_length       = length;
-        m_capacity     = length;
-        m_copyOnWrite     = true;
+        m_array             = const_cast<uint8_t*>(data);
+        m_capacity          = length;
+        m_length            = length;
+        // we must have a non-null value for m_copyOnWriteOwner, as we
+        // use it as an implicit boolean as well, so if none is provided,
+        // cheat and use m_gc->emptyWeakRef
+        if (owner == NULL)
+            owner = (MMgc::GCObject*)m_gc->emptyWeakRef;
+        SetCopyOnWriteOwner(owner);
     }
         
     void FASTCALL ByteArray::Grower::EnsureWritableCapacity(uint64_t minimumCapacity)
@@ -133,7 +121,7 @@ namespace avmplus
         if (minimumCapacity > (MMgc::GCHeap::kMaxObjectSize - MMgc::GCHeap::kBlockSize*2))
             m_owner->ThrowMemoryError();
 
-        if (minimumCapacity > m_owner->m_capacity || m_owner->m_copyOnWrite)
+        if (minimumCapacity > m_owner->m_capacity || m_owner->IsCopyOnWrite())
         {
             uint32_t newCapacity = m_owner->m_capacity << 1;          
             if (newCapacity < minimumCapacity)
@@ -154,7 +142,7 @@ namespace avmplus
 
             m_owner->m_array = newArray;
             m_owner->m_capacity = newCapacity;
-            m_owner->m_copyOnWrite = false;
+            m_owner->m_copyOnWriteOwner = NULL;
         }
     }
 
@@ -310,7 +298,7 @@ namespace avmplus
     {
         // If m_copyOnWrite is set, then we don't own the buffer, so the profiler
         // should not attribute it to us.
-        return m_copyOnWrite ? 0 : m_capacity;
+        return IsCopyOnWrite() ? 0 : m_capacity;
     }
 #endif
 
@@ -333,6 +321,145 @@ namespace avmplus
         }
     }
     
+    void ByteArray::Compress(CompressionAlgorithm algorithm)
+    {
+        // Snarf the data and give ourself some empty data
+        // (remember, existing data might be copy-on-write so don't dance on it)
+        uint8_t* origData                       = m_array;
+        uint32_t origLen                        = m_length;
+        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
+        if (!origLen) // empty buffer should give empty result
+            return; 
+
+        m_array             = NULL;
+        m_length            = 0;
+        m_capacity          = 0;
+        m_position          = 0;
+        m_copyOnWriteOwner  = NULL;
+
+        int error = Z_OK;
+        
+        // Use zlib to compress the data. This next block is essentially the
+        // implementation of the compress2() method, but modified to pass a
+        // negative window value (-15) to deflateInit2() for k_deflate mode
+        // in order to obtain deflate-only compression (no ZLib headers).
+
+        const int MAX_WINDOW_RAW_DEFLATE = -15;
+        const int DEFAULT_MEMORY_USE = 8;
+
+        z_stream stream;
+        VMPI_memset(&stream, 0, sizeof(stream));
+        error = deflateInit2(&stream, 
+                                Z_BEST_COMPRESSION,
+                                Z_DEFLATED, 
+                                algorithm == k_zlib ? MAX_WBITS : MAX_WINDOW_RAW_DEFLATE, 
+                                DEFAULT_MEMORY_USE, 
+                                Z_DEFAULT_STRATEGY);
+        AvmAssert(error == Z_OK);
+
+        uint32_t newCap = deflateBound(&stream, origLen);
+        EnsureCapacity(newCap);
+
+        stream.next_in = origData;
+        stream.avail_in = origLen;
+        stream.next_out = m_array;
+        stream.avail_out = m_capacity;
+
+        error = deflate(&stream, Z_FINISH);
+        AvmAssert(error == Z_STREAM_END);
+
+        m_length = stream.total_out;
+        AvmAssert(m_length <= m_capacity);
+
+        // Note that Compress() has always ended with position == length,
+        // but Uncompress() has always ended with position == 0.
+        // Weird, but we must maintain it.
+        m_position = m_length;
+
+        deflateEnd(&stream);
+
+        // Note: the Compress() method has never reported an error for corrupted data,
+        // so we won't start now. (Doing so would probably require a version check,
+        // to avoid breaking content that relies on misbehavior.)
+        if (origData && origData != m_array && origCopyOnWriteOwner == NULL)
+        {
+            TellGcDeleteBufferMemory(origData, origLen);
+            mmfx_delete_array(origData);
+        }
+    }
+
+    void ByteArray::Uncompress(CompressionAlgorithm algorithm)
+    {
+        // Snarf the data and give ourself some empty data
+        // (remember, existing data might be copy-on-write so don't dance on it)
+        uint8_t* origData                       = m_array;
+        uint32_t origCap                        = m_capacity;
+        uint32_t origLen                        = m_length;
+        uint32_t origPos                        = m_position;
+        MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
+        if (!origLen) // empty buffer should give empty result
+            return; 
+
+        m_array             = NULL;
+        m_length            = 0;
+        m_capacity          = 0;
+        m_position          = 0;
+        m_copyOnWriteOwner  = NULL;
+        // we know that the uncompressed data will be at least as
+        // large as the compressed data, so let's start there,
+        // rather than at zero.
+        EnsureCapacity(origCap);
+
+        const uint32_t kScratchSize = 8192;
+        uint8_t* scratch = mmfx_new_array(uint8_t, kScratchSize);
+
+        int error = Z_OK;
+        
+        z_stream stream;
+        VMPI_memset(&stream, 0, sizeof(stream));
+        error = inflateInit2(&stream, algorithm == k_zlib ? 15 : -15);
+        AvmAssert(error == Z_OK);
+
+        stream.next_in = origData;
+        stream.avail_in = origLen;
+        while (error == Z_OK)
+        {
+            stream.next_out = scratch;
+            stream.avail_out = kScratchSize;
+            error = inflate(&stream, Z_NO_FLUSH);
+            Write(scratch, kScratchSize - stream.avail_out);
+        }
+
+        inflateEnd(&stream);
+
+        mmfx_delete_array(scratch);
+
+        if (error == Z_STREAM_END)
+        {
+            // everything is cool
+            if (origData && origData != m_array && origCopyOnWriteOwner == NULL)
+            {
+                TellGcDeleteBufferMemory(origData, origLen);
+                mmfx_delete_array(origData);
+            }
+
+            // Note that Compress() has always ended with position == length,
+            // but Uncompress() has always ended with position == 0.
+            // Weird, but we must maintain it.
+            m_position = 0;
+        }
+        else
+        {
+            // When we error, put the original data back
+            m_array = origData;
+            m_length = origCap;
+            m_capacity = origLen;
+            m_position = origPos;
+            SetCopyOnWriteOwner(origCopyOnWriteOwner);
+            toplevel()->throwIOError(kCompressedDataError);
+        }
+    }
+
     //
     // ByteArrayObject
     //
@@ -343,6 +470,7 @@ namespace avmplus
     {
         c.set(&m_byteArray, sizeof(ByteArray));
         m_byteArray.SetObjectEncoding(defaultEncoding);
+        toplevel()->byteArrayCreated(this);
     }
 
     Atom ByteArrayObject::getUintProperty(uint32_t i) const
@@ -576,68 +704,34 @@ namespace avmplus
         m_byteArray.WriteDouble(value);
     }
 
-    void ByteArrayObject::zlib_compress()
+    ByteArray::CompressionAlgorithm ByteArrayObject::algorithmToEnum(String* algorithm)
     {
-        int len = m_byteArray.GetLength();
-        if (!len) // empty buffer should give us a empty result
-            return;
-        unsigned long gzlen = len * 3/2 + 32; // enough for growth plus zlib headers
-        uint8_t *gzdata = mmfx_new_array( uint8_t, gzlen );
-
-        // Use zlib to compress the data
-        compress2((uint8_t*)gzdata, (unsigned long*)&gzlen,
-                  m_byteArray.GetReadableBuffer(), len, 9);
-
-        // Replace the byte array with the compressed data
-        m_byteArray.SetLength(0);
-        m_byteArray.Write(gzdata, gzlen);
-
-        mmfx_delete_array( gzdata );
+        Toplevel* toplevel = this->toplevel();
+        toplevel->checkNull(algorithm, "algorithm");
+        if (algorithm->equalsLatin1("zlib"))
+        {
+            return ByteArray::k_zlib;
+        }
+        if (algorithm->equalsLatin1("deflate"))
+        {
+            return ByteArray::k_deflate;
+        }
+        else
+        {
+            // Unknown format
+            toplevel->throwIOError(kCompressedDataError);
+            return ByteArray::k_zlib; // not reached, pacify compiler
+        }
     }
 
-    void ByteArrayObject::zlib_uncompress()
+    void ByteArrayObject::_compress(String* algorithm)
     {
-        // Snapshot the compressed data.
-        unsigned long gzlen = m_byteArray.GetLength();
-        if (!gzlen) // empty buffer should give us a empty result
-            return;
+        m_byteArray.Compress(algorithmToEnum(algorithm));
+    }
 
-        uint8_t *gzdata = mmfx_new_array( uint8_t, gzlen );
-        VMPI_memcpy(gzdata, m_byteArray.GetReadableBuffer(), gzlen);
-
-        // Clear the buffer
-        m_byteArray.SetPosition(0);
-        m_byteArray.SetLength(0);
-
-        // The following block is to force destruction
-        // of zstream before potential exception throw.
-        int error = Z_OK;
-        {
-            // Decompress the data
-            PlatformZlibStream zstream;
-            zstream.SetNextIn(gzdata);
-            zstream.SetAvailIn(gzlen);
-
-            const int kBufferSize = 8192;
-            uint8_t *buffer = mmfx_new_array( uint8_t, kBufferSize );
-
-            do {
-                zstream.SetNextOut(buffer);
-                zstream.SetAvailOut(kBufferSize);
-                error = zstream.InflateWithStatus();
-                m_byteArray.Write(buffer, kBufferSize-zstream.AvailOut());
-            } while (error == Z_OK);
-
-            mmfx_delete_array( buffer );
-            mmfx_delete_array( gzdata );
-        }
-
-        // position byte array at the beginning
-        m_byteArray.SetPosition(0);
-
-        if (error != Z_OK && error != Z_STREAM_END) {
-            toplevel()->throwIOError(kCompressedDataError);
-        }
+    void ByteArrayObject::_uncompress(String* algorithm)
+    {
+        m_byteArray.Uncompress(algorithmToEnum(algorithm));
     }
 
     void ByteArrayObject::writeBytes(ByteArrayObject *bytes,

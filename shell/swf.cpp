@@ -38,7 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmshell.h"
-#include "genericzlib.h"
+#include "zlib.h"
 
 namespace avmshell
 {
