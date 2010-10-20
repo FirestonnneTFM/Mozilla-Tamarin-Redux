@@ -1784,6 +1784,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\ByteArrayGlue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\ByteArrayGlue.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\ClassClass.cpp"
 				>
 			</File>
@@ -1829,6 +1837,14 @@
 			</File>
 			<File
 				RelativePath=".\coff.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\DataIO.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\DataIO.h"
 				>
 			</File>
 			<File
@@ -2719,6 +2735,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\ByteArray.as"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Class.as"
 				>
 			</File>
@@ -2736,6 +2756,14 @@
 			</File>
 			<File
 				RelativePath="..\..\core\Function.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\IDataInput.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\IDataOutput.as"
 				>
 			</File>
 			<File

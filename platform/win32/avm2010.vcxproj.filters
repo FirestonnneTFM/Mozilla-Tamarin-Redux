@@ -579,13 +579,13 @@
     <ClCompile Include="..\..\shell\avmshellWin.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\shell\ByteArrayGlue.cpp">
+    <ClCompile Include="..\..\core\ByteArrayGlue.cpp">
       <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="..\..\shell\ConsoleOutputStream.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\shell\DataIO.cpp">
+    <ClCompile Include="..\..\core\DataIO.cpp">
       <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="..\..\shell\DebugCLI.cpp">
@@ -1301,13 +1301,13 @@
     <ClInclude Include="..\..\shell\avmshell-features.h">
       <Filter>shell</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\shell\ByteArrayGlue.h">
+    <ClInclude Include="..\..\core\ByteArrayGlue.h">
       <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="..\..\shell\ConsoleOutputStream.h">
       <Filter>shell</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\shell\DataIO.h">
+    <ClInclude Include="..\..\core\DataIO.h">
       <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="..\..\shell\DebugCLI.h">
@@ -1323,9 +1323,6 @@
       <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="..\..\shell\FileInputStream.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\shell\genericzlib.h">
       <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="..\..\shell\Platform.h">

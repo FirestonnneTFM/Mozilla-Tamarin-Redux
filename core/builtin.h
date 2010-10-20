@@ -45,6 +45,8 @@ namespace avmplus {
     class ArrayClass; // Array$
     class ArrayObject; // Array
     class BooleanClass; // Boolean$
+    class ByteArrayClass; // flash.utils::ByteArray$
+    class ByteArrayObject; // flash.utils::ByteArray
     class ClassClass; // Class$
     class ClassClosure; // Class
     class DateClass; // Date$
@@ -151,6 +153,10 @@ const uint32_t abcclass_RegExp = 33;
 const uint32_t abcclass_XML = 34;
 const uint32_t abcclass_XMLList = 35;
 const uint32_t abcclass_QName = 36;
+const uint32_t abcclass_flash_utils_IDataInput = 37;
+const uint32_t abcclass_flash_utils_IDataOutput = 38;
+const uint32_t abcclass_flash_utils_CompressionAlgorithm = 39;
+const uint32_t abcclass_flash_utils_ByteArray = 40;
 
 /* methods */
 const uint32_t native_script_function_avmplus_getQualifiedSuperclassName = 0;
@@ -447,6 +453,47 @@ const uint32_t XMLList_AS3_setName = 849;
 const uint32_t XMLList_AS3_setNamespace = 850;
 const uint32_t QName_localName_get = 854;
 const uint32_t QName_uri_get = 855;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 904;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 905;
+const uint32_t flash_utils_ByteArray_readBytes = 907;
+const uint32_t flash_utils_ByteArray_writeBytes = 908;
+const uint32_t flash_utils_ByteArray_writeBoolean = 909;
+const uint32_t flash_utils_ByteArray_writeByte = 910;
+const uint32_t flash_utils_ByteArray_writeShort = 911;
+const uint32_t flash_utils_ByteArray_writeInt = 912;
+const uint32_t flash_utils_ByteArray_writeUnsignedInt = 913;
+const uint32_t flash_utils_ByteArray_writeFloat = 914;
+const uint32_t flash_utils_ByteArray_writeDouble = 915;
+const uint32_t flash_utils_ByteArray_writeMultiByte = 916;
+const uint32_t flash_utils_ByteArray_writeUTF = 917;
+const uint32_t flash_utils_ByteArray_writeUTFBytes = 918;
+const uint32_t flash_utils_ByteArray_readBoolean = 919;
+const uint32_t flash_utils_ByteArray_readByte = 920;
+const uint32_t flash_utils_ByteArray_readUnsignedByte = 921;
+const uint32_t flash_utils_ByteArray_readShort = 922;
+const uint32_t flash_utils_ByteArray_readUnsignedShort = 923;
+const uint32_t flash_utils_ByteArray_readInt = 924;
+const uint32_t flash_utils_ByteArray_readUnsignedInt = 925;
+const uint32_t flash_utils_ByteArray_readFloat = 926;
+const uint32_t flash_utils_ByteArray_readDouble = 927;
+const uint32_t flash_utils_ByteArray_readMultiByte = 928;
+const uint32_t flash_utils_ByteArray_readUTF = 929;
+const uint32_t flash_utils_ByteArray_readUTFBytes = 930;
+const uint32_t flash_utils_ByteArray_length_get = 931;
+const uint32_t flash_utils_ByteArray_length_set = 932;
+const uint32_t flash_utils_ByteArray_writeObject = 933;
+const uint32_t flash_utils_ByteArray_readObject = 934;
+const uint32_t flash_utils_ByteArray_private__compress = 936;
+const uint32_t flash_utils_ByteArray_private__uncompress = 938;
+const uint32_t flash_utils_ByteArray_private__toString = 940;
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 941;
+const uint32_t flash_utils_ByteArray_position_get = 942;
+const uint32_t flash_utils_ByteArray_position_set = 943;
+const uint32_t flash_utils_ByteArray_objectEncoding_get = 944;
+const uint32_t flash_utils_ByteArray_objectEncoding_set = 945;
+const uint32_t flash_utils_ByteArray_endian_get = 946;
+const uint32_t flash_utils_ByteArray_endian_set = 947;
+const uint32_t flash_utils_ByteArray_clear = 948;
 
 extern double Math_private__min_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern double Math_private__max_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -606,6 +653,47 @@ extern AvmBox XMLList_AS3_setName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox*
 extern AvmBox XMLList_AS3_setNamespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox QName_localName_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox QName_uri_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_defaultObjectEncoding_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_defaultObjectEncoding_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeBoolean_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeUnsignedInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeFloat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeDouble_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeMultiByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeUTF_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeUTFBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readBoolean_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readUnsignedByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readUnsignedShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readUnsignedInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double flash_utils_ByteArray_readFloat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double flash_utils_ByteArray_readDouble_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readMultiByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readUTF_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readUTFBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_writeObject_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_readObject_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_private__compress_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_private__uncompress_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_private__toString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_bytesAvailable_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_position_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_position_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_objectEncoding_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_objectEncoding_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_endian_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_endian_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox flash_utils_ByteArray_clear_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox Object_private__hasOwnProperty_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox Object_private__propertyIsEnumerable_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox Object_protected__setPropertyIsEnumerable_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -749,11 +837,10 @@ extern AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 #define Array_private__filter_thunk  builtin_a2a_oaoa_thunk
 #define Array_private__map_thunk  builtin_a2a_oaoa_thunk
 
-extern AvmBox builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
-#define __AS3___vec_Vector_int_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
-#define __AS3___vec_Vector_object_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
-#define __AS3___vec_Vector_uint_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
+extern AvmBox builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_AS3_slice_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
+#define String_AS3_substr_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
+#define String_AS3_substring_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
 
 extern double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_AS3_getDate_thunk  builtin_d2d_o_thunk
@@ -778,6 +865,8 @@ extern double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define Math_random_thunk  builtin_d2d_o_thunk
 #define Number_private__minValue_thunk  builtin_d2d_o_thunk
 #define __AS3___vec_Vector_double_AS3_pop_thunk  builtin_d2d_o_thunk
+#define flash_utils_ByteArray_readDouble_thunk  builtin_d2d_o_thunk
+#define flash_utils_ByteArray_readFloat_thunk  builtin_d2d_o_thunk
 
 extern AvmBox builtin_b2a_oa_optakAvmThunkUndefined_u_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
@@ -785,8 +874,18 @@ extern AvmBox builtin_b2a_oa_optakAvmThunkUndefined_u_thunk(AvmMethodEnv env, ui
 #define XML_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
 #define XML_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
 
+extern AvmBox builtin_v2a_oouu_opti0_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define flash_utils_ByteArray_readBytes_thunk  builtin_v2a_oouu_opti0_opti0_thunk
+#define flash_utils_ByteArray_writeBytes_thunk  builtin_v2a_oouu_opti0_opti0_thunk
+
 extern AvmBox builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__match_thunk  builtin_a2a_osa_thunk
+
+extern AvmBox builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define __AS3___vec_Vector_double_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
+#define __AS3___vec_Vector_int_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
+#define __AS3___vec_Vector_object_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
+#define __AS3___vec_Vector_uint_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
 
 extern AvmBox builtin_func_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_avmplus_getQualifiedClassName_thunk  builtin_func_s2a_oa_thunk
@@ -795,8 +894,8 @@ extern AvmBox builtin_func_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox*
 extern AvmBox builtin_func_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_isXMLName_thunk  builtin_func_b2a_oa_optakAvmThunkUndefined_thunk
 
-extern AvmBox builtin_u2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_private__unshift_thunk  builtin_u2a_oao_thunk
+extern AvmBox builtin_s2a_ous_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define flash_utils_ByteArray_readMultiByte_thunk  builtin_s2a_ous_thunk
 
 extern AvmBox builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define XML_AS3_setNotification_thunk  builtin_a2a_oo_thunk
@@ -814,6 +913,9 @@ extern AvmBox builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define XML_AS3_nodeKind_thunk  builtin_s2a_o_thunk
 #define XML_AS3_toString_thunk  builtin_s2a_o_thunk
 #define XML_AS3_toXMLString_thunk  builtin_s2a_o_thunk
+#define flash_utils_ByteArray_endian_get_thunk  builtin_s2a_o_thunk
+#define flash_utils_ByteArray_private__toString_thunk  builtin_s2a_o_thunk
+#define flash_utils_ByteArray_readUTF_thunk  builtin_s2a_o_thunk
 
 extern AvmBox builtin_s2a_odi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Number_private__numberToString_thunk  builtin_s2a_odi_thunk
@@ -827,6 +929,11 @@ extern AvmBox builtin_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define __AS3___vec_Vector_int_length_set_thunk  builtin_v2a_ou_thunk
 #define __AS3___vec_Vector_object_length_set_thunk  builtin_v2a_ou_thunk
 #define __AS3___vec_Vector_uint_length_set_thunk  builtin_v2a_ou_thunk
+#define flash_utils_ByteArray_defaultObjectEncoding_set_thunk  builtin_v2a_ou_thunk
+#define flash_utils_ByteArray_length_set_thunk  builtin_v2a_ou_thunk
+#define flash_utils_ByteArray_objectEncoding_set_thunk  builtin_v2a_ou_thunk
+#define flash_utils_ByteArray_position_set_thunk  builtin_v2a_ou_thunk
+#define flash_utils_ByteArray_writeUnsignedInt_thunk  builtin_v2a_ou_thunk
 
 extern AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__pop_thunk  builtin_a2a_oa_thunk
@@ -850,6 +957,9 @@ extern AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_indexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk
 
+extern AvmBox builtin_u2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Array_private__unshift_thunk  builtin_u2a_oao_thunk
+
 extern double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__setDate_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setFullYear_thunk  builtin_d2d_o_rest_thunk
@@ -870,8 +980,8 @@ extern AvmBox builtin_func_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env,
 #define native_script_function_isFinite_thunk  builtin_func_b2a_od_optakAvmThunkUndefined_thunk
 #define native_script_function_isNaN_thunk  builtin_func_b2a_od_optakAvmThunkUndefined_thunk
 
-extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_lastIndexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk
+extern AvmBox builtin_v2a_oss_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define flash_utils_ByteArray_writeMultiByte_thunk  builtin_v2a_oss_thunk
 
 extern double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_UTC_thunk  builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk
@@ -898,15 +1008,17 @@ extern AvmBox builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define __AS3___vec_Vector_object_length_get_thunk  builtin_u2a_o_thunk
 #define __AS3___vec_Vector_uint_AS3_pop_thunk  builtin_u2a_o_thunk
 #define __AS3___vec_Vector_uint_length_get_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_bytesAvailable_get_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_defaultObjectEncoding_get_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_length_get_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_objectEncoding_get_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_position_get_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_readUnsignedByte_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_readUnsignedInt_thunk  builtin_u2a_o_thunk
+#define flash_utils_ByteArray_readUnsignedShort_thunk  builtin_u2a_o_thunk
 
 extern AvmBox builtin_func_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_avmplus_describeTypeJSON_thunk  builtin_func_a2a_oau_thunk
-
-extern AvmBox builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__reverse_thunk  builtin_v2a_o_thunk
-#define __AS3___vec_Vector_int_private__reverse_thunk  builtin_v2a_o_thunk
-#define __AS3___vec_Vector_object_private__reverse_thunk  builtin_v2a_o_thunk
-#define __AS3___vec_Vector_uint_private__reverse_thunk  builtin_v2a_o_thunk
 
 extern AvmBox builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Function_AS3_call_thunk  builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk
@@ -929,16 +1041,21 @@ extern AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define XML_AS3_childIndex_thunk  builtin_i2a_o_thunk
 #define XML_prettyIndent_get_thunk  builtin_i2a_o_thunk
 #define __AS3___vec_Vector_int_AS3_pop_thunk  builtin_i2a_o_thunk
+#define flash_utils_ByteArray_readByte_thunk  builtin_i2a_o_thunk
+#define flash_utils_ByteArray_readInt_thunk  builtin_i2a_o_thunk
+#define flash_utils_ByteArray_readShort_thunk  builtin_i2a_o_thunk
 
-extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
+extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
 
 extern double builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_charCodeAt_thunk  builtin_d2d_sd_opti0_thunk
@@ -958,8 +1075,12 @@ extern AvmBox builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 #define __AS3___vec_Vector_uint_private__every_thunk  builtin_b2a_oaoa_thunk
 #define __AS3___vec_Vector_uint_private__some_thunk  builtin_b2a_oaoa_thunk
 
-extern AvmBox builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
+extern AvmBox builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define __AS3___vec_Vector_double_private__reverse_thunk  builtin_v2a_o_thunk
+#define __AS3___vec_Vector_int_private__reverse_thunk  builtin_v2a_o_thunk
+#define __AS3___vec_Vector_object_private__reverse_thunk  builtin_v2a_o_thunk
+#define __AS3___vec_Vector_uint_private__reverse_thunk  builtin_v2a_o_thunk
+#define flash_utils_ByteArray_clear_thunk  builtin_v2a_o_thunk
 
 extern AvmBox builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define XMLList_AS3_contains_thunk  builtin_b2a_oa_thunk
@@ -975,20 +1096,21 @@ extern AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 #define __AS3___vec_Vector_object_private__forEach_thunk  builtin_v2a_oaoa_thunk
 #define __AS3___vec_Vector_uint_private__forEach_thunk  builtin_v2a_oaoa_thunk
 
-extern AvmBox builtin_func_b2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_bugzilla_thunk  builtin_func_b2a_oi_thunk
+extern AvmBox builtin_s2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define flash_utils_ByteArray_readUTFBytes_thunk  builtin_s2a_ou_thunk
 
-extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
+
+extern AvmBox builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
 
 extern AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_decodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
@@ -1002,10 +1124,8 @@ extern AvmBox builtin_s2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define String_AS3_toLowerCase_thunk  builtin_s2a_s_thunk
 #define String_AS3_toUpperCase_thunk  builtin_s2a_s_thunk
 
-extern AvmBox builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_slice_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
-#define String_AS3_substr_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
-#define String_AS3_substring_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
+extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_AS3_lastIndexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk
 
 extern double builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Math_atan2_thunk  builtin_d2d_odd_thunk
@@ -1046,6 +1166,7 @@ extern AvmBox builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define XML_AS3_text_thunk  builtin_a2a_o_thunk
 #define __AS3___vec_Vector_object_AS3_pop_thunk  builtin_a2a_o_thunk
 #define __AS3___vec_Vector_object_private_type_get_thunk  builtin_a2a_o_thunk
+#define flash_utils_ByteArray_readObject_thunk  builtin_a2a_o_thunk
 
 extern AvmBox builtin_a2a_osau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__split_thunk  builtin_a2a_osau_thunk
@@ -1071,8 +1192,8 @@ extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 extern AvmBox builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__indexOf_thunk  builtin_i2a_ssi_opti0_thunk
 
-extern AvmBox builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_fromCharCode_thunk  builtin_s2a_o_rest_thunk
+extern AvmBox builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Function_AS3_apply_thunk  builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk
 
 extern AvmBox builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__lastIndexOf_thunk  builtin_i2a_oaai_opti0_thunk
@@ -1093,8 +1214,9 @@ extern double builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define Math_sqrt_thunk  builtin_d2d_od_thunk
 #define Math_tan_thunk  builtin_d2d_od_thunk
 
-extern AvmBox builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Function_AS3_apply_thunk  builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk
+extern AvmBox builtin_v2a_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define flash_utils_ByteArray_writeDouble_thunk  builtin_v2a_od_thunk
+#define flash_utils_ByteArray_writeFloat_thunk  builtin_v2a_od_thunk
 
 extern AvmBox builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__slice_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
@@ -1110,6 +1232,7 @@ extern AvmBox builtin_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define __AS3___vec_Vector_int_fixed_set_thunk  builtin_v2a_ob_thunk
 #define __AS3___vec_Vector_object_fixed_set_thunk  builtin_v2a_ob_thunk
 #define __AS3___vec_Vector_uint_fixed_set_thunk  builtin_v2a_ob_thunk
+#define flash_utils_ByteArray_writeBoolean_thunk  builtin_v2a_ob_thunk
 
 extern AvmBox builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Function_prototype_set_thunk  builtin_v2a_oa_thunk
@@ -1120,13 +1243,20 @@ extern AvmBox builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define XML_AS3_setName_thunk  builtin_v2a_oa_thunk
 #define XML_AS3_setNamespace_thunk  builtin_v2a_oa_thunk
 #define __AS3___vec_Vector_object_private_type_set_thunk  builtin_v2a_oa_thunk
+#define flash_utils_ByteArray_writeObject_thunk  builtin_v2a_oa_thunk
 
 extern double builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_parse_thunk  builtin_d2d_oa_thunk
 
+extern AvmBox builtin_func_b2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define native_script_function_bugzilla_thunk  builtin_func_b2a_oi_thunk
+
 extern AvmBox builtin_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define RegExp_lastIndex_set_thunk  builtin_v2a_oi_thunk
 #define XML_prettyIndent_set_thunk  builtin_v2a_oi_thunk
+#define flash_utils_ByteArray_writeByte_thunk  builtin_v2a_oi_thunk
+#define flash_utils_ByteArray_writeInt_thunk  builtin_v2a_oi_thunk
+#define flash_utils_ByteArray_writeShort_thunk  builtin_v2a_oi_thunk
 
 extern double builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__get_thunk  builtin_d2d_oi_thunk
@@ -1160,12 +1290,23 @@ extern AvmBox builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define __AS3___vec_Vector_int_fixed_get_thunk  builtin_b2a_o_thunk
 #define __AS3___vec_Vector_object_fixed_get_thunk  builtin_b2a_o_thunk
 #define __AS3___vec_Vector_uint_fixed_get_thunk  builtin_b2a_o_thunk
+#define flash_utils_ByteArray_readBoolean_thunk  builtin_b2a_o_thunk
 
 extern AvmBox builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__search_thunk  builtin_i2a_osa_thunk
 
+extern AvmBox builtin_v2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define flash_utils_ByteArray_endian_set_thunk  builtin_v2a_os_thunk
+#define flash_utils_ByteArray_private__compress_thunk  builtin_v2a_os_thunk
+#define flash_utils_ByteArray_private__uncompress_thunk  builtin_v2a_os_thunk
+#define flash_utils_ByteArray_writeUTF_thunk  builtin_v2a_os_thunk
+#define flash_utils_ByteArray_writeUTFBytes_thunk  builtin_v2a_os_thunk
+
 extern AvmBox builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__slice_thunk  builtin_a2a_oadd_thunk
+
+extern AvmBox builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_AS3_fromCharCode_thunk  builtin_s2a_o_rest_thunk
 
 extern AvmBox builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define XMLList_private__namespace_thunk  builtin_a2a_oai_thunk
@@ -2257,6 +2398,42 @@ private:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::QNameObjectSlots EmptySlotsStruct_QNameObject
+//-----------------------------------------------------------
+
+// flash.utils::ByteArray$
+//-----------------------------------------------------------
+class ByteArrayClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE uint32_t get_private__defaultObjectEncoding() const { return m_private__defaultObjectEncoding; }
+    void set_private__defaultObjectEncoding(uint32_t newVal);
+private:
+    uint32_t m_private__defaultObjectEncoding;
+};
+REALLY_INLINE void ByteArrayClassSlots::set_private__defaultObjectEncoding(uint32_t newVal) { m_private__defaultObjectEncoding = newVal; }
+#define DECLARE_SLOTS_ByteArrayClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE uint32_t get_private__defaultObjectEncoding() const { return m_slots_ByteArrayClass.get_private__defaultObjectEncoding(); } \
+        REALLY_INLINE void set_private__defaultObjectEncoding(uint32_t newVal) { m_slots_ByteArrayClass.set_private__defaultObjectEncoding(newVal); } \
+    private: \
+        avmplus::NativeID::ByteArrayClassSlots m_slots_ByteArrayClass
+//-----------------------------------------------------------
+
+// flash.utils::ByteArray
+//-----------------------------------------------------------
+class ByteArrayObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ByteArrayObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::ByteArrayObjectSlots EmptySlotsStruct_ByteArrayObject
 //-----------------------------------------------------------
 
 } }

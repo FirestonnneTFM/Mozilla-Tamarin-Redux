@@ -1607,15 +1607,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\ByteArrayGlue.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\shell\ConsoleOutputStream.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\shell\DataIO.cpp"
 				>
 			</File>
 			<File
@@ -1769,15 +1761,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\ByteArrayGlue.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\shell\ConsoleOutputStream.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\shell\DataIO.h"
 				>
 			</File>
 			<File
@@ -1802,10 +1786,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\FileInputStream.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\shell\genericzlib.h"
 				>
 			</File>
 			<File
@@ -1848,10 +1828,6 @@
 		<Filter
 			Name="AS3 Files"
 			>
-			<File
-				RelativePath="..\..\shell\ByteArray.as"
-				>
-			</File>
 			<File
 				RelativePath="..\..\extensions\Dictionary.as"
 				>

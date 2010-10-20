@@ -96,7 +96,6 @@ namespace avmplus
 
 namespace avmshell
 {
-    class ByteArray;
     class Shell;
     class ShellCodeContext;
     class ShellCore;
@@ -117,7 +116,6 @@ namespace avmshell
 #include "DebugCLI.h"
 #include "Profiler.h"
 #include "DataIO.h"
-#include "ByteArrayGlue.h"
 #include "DictionaryGlue.h"
 #include "SamplerScript.h"
 #include "JavaGlue.h"
