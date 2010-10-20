@@ -3387,29 +3387,36 @@ namespace avmplus
 //      core->console << '\n';
 //#endif
 
-        // stack
-        core->console << "                        stack:";
-        for (ptrdiff_t i=stackBase; i <= sp; i++) {
-            core->console << " " << asAtom(framep[i]);
+        // locals
+        core->console << "                          [";
+        for (ptrdiff_t i=0, n=scopeBase; i<n; i++) {
+            core->console << asAtom(framep[i]);
+            if (i+1<n) core->console << ' ';
         }
-        core->console << '\n';
 
         // scope chain
-        core->console << "                        scope: ";
-        for (ptrdiff_t i=scopeBase; i <= scopep; i++) {
-            core->console << asAtom(framep[i]) << " ";
+        core->console << "] {";
+        for (ptrdiff_t i=scopeBase, n=scopep; i<=n; i++) {
+            core->console << asAtom(framep[i]);
+            if (i+1<=n) core->console << ' ';
         }
-        core->console << '\n';
 
-        // locals
-        core->console << "                         locals: ";
-        for (ptrdiff_t i=0; i < scopeBase; i++) {
-            core->console << asAtom(framep[i]) << " ";
+        // stack
+        core->console << "} (";
+        ptrdiff_t stackStart = stackBase;
+        const size_t stackLimit = 20; // don't display more than this, to reduce verbosity
+        size_t stackDepth = (stackBase <= sp) ? sp - stackBase : 0;
+        if (stackDepth > stackLimit) {
+            stackStart = sp - stackLimit;
+            core->console << "..." << (stackStart-stackBase) << ": ";
         }
-        core->console << '\n';
+        for (ptrdiff_t i=stackStart, n=sp; i<=n; i++) {
+            core->console << asAtom(framep[i]);
+            if (i+1<=n) core->console << ' ';
+        }
 
         // opcode
-        core->console << "  ";
+        core->console << ")\n  ";
 #ifdef DEBUGGER
         if (core->debugger() && core->callStack && core->callStack->filename())
         {
