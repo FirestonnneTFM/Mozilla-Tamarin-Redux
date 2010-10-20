@@ -386,7 +386,7 @@ namespace avmplus
         //  -------------------------------------------------------
 
         // 
-        // If a ByteArray doesn't begiun with a BOM, Flash may want ByteArray.toString()
+        // If a ByteArray doesn't begin with a BOM, Flash may want ByteArray.toString()
         // to attempt a conversion from the system's default codepage as though the data
         // is MBCS. If such a conversion is desirable and possible, you should return the
         // result as a String. If the conversion is either impossible or undesirable, return NULL.

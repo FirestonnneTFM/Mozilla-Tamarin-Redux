@@ -156,7 +156,7 @@ namespace avmplus
             uint8_t*    m_oldArray;
             uint32_t    m_oldLength;
         };
-        
+
     private:
         enum { kGrowthIncr = 4096 };
 

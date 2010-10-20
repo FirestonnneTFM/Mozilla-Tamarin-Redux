@@ -756,7 +756,7 @@ class B extends A {
     generates an error at runtime because <code>doSomething</code> is cast as an int data type. ]]></description></error>
 
   <error id="1510" label="kArrayFilterNonNullObjectError">若回呼引數是 Class 的方法，選擇性的引數 'this' 必須是 null。</error>
-  <error id="2006" label="kParamRangeError">提供的索引超出范围。</error>
+  <error id="2006" label="kParamRangeError">提供的索引超出範圍。</error>
   <error id="2007" label="kNullPointerError">參數 %1 不能是 Null。</error>
   <error id="2008" label="kInvalidEnumError">參數 %1 必須是其中一個可接受值。</error>
   <error id="2030" label="kEOFError">到達檔案結尾。</error>
