@@ -62,9 +62,11 @@ AVMPLUS_SRCS := \
 	BigInteger.cpp \
 	BooleanClass.cpp \
 	BuiltinTraits.cpp \
+	ByteArrayGlue.cpp \
 	ClassClass.cpp \
 	ClassClosure.cpp \
 	Date.cpp \
+	DataIO.cpp \
 	DateClass.cpp \
 	DateObject.cpp \
 	DescribeTypeClass.cpp \

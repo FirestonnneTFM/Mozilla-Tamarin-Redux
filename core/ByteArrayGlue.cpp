@@ -545,7 +545,7 @@ namespace avmplus
             return getUintProperty(index);
         }
 
-        return ScriptObject::getMultinameProperty (name);
+        return ScriptObject::getMultinameProperty(name);
     }
 
     void ByteArrayObject::setMultinameProperty(const Multiname* name, Atom value)
@@ -557,7 +557,7 @@ namespace avmplus
         }
         else
         {
-            ScriptObject::setMultinameProperty (name, value);
+            ScriptObject::setMultinameProperty(name, value);
         }
     }
 
