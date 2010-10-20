@@ -51,9 +51,7 @@ endif
 
 shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshell.cpp \
-  $(curdir)/ByteArrayGlue.cpp \
   $(curdir)/ConsoleOutputStream.cpp \
-  $(curdir)/DataIO.cpp \
   $(curdir)/DebugCLI.cpp \
   $(curdir)/DomainClass.cpp \
   $(curdir)/FileClass.cpp \

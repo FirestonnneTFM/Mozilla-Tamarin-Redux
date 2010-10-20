@@ -200,9 +200,7 @@ namespace avmshell
 
         unsigned char *c = mmfx_new_array( unsigned char, readCount+1);
 
-        ByteArrayClass* bac = (ByteArrayClass*)toplevel->getBuiltinExtensionClass(NativeID::abcclass_flash_utils_ByteArray);
-        Atom args[1] = {nullObjectAtom};
-        ByteArrayObject *b = (ByteArrayObject*)AvmCore::atomToScriptObject(bac->construct(0,args));
+        ByteArrayObject* b = toplevel->byteArrayClass()->constructByteArray();
         b->set_length(0);
 
         while (readCount > 0)

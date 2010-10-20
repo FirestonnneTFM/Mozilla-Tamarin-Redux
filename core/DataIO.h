@@ -43,6 +43,18 @@
 
 namespace avmplus
 {
+    enum ObjectEncoding {
+        kAMF0 = 0,
+        kAMF3 = 3,
+        kEncodeDefault = kAMF3
+    };
+
+    enum Endian
+    {
+        kBigEndian    = 0,
+        kLittleEndian = 1
+    };
+
     REALLY_INLINE void byteSwapU16(uint16_t& a) 
     { 
 #if defined(_MSC_VER)

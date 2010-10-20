@@ -38,9 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-// FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248
-// this should be "avmplus.h" once this file is moved into core
-#include "avmshell.h"
+#include "avmplus.h"
 
 namespace avmplus
 {

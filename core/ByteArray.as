@@ -40,9 +40,7 @@
 package flash.utils
 {
 
-// FIXME https://bugzilla.mozilla.org/show_bug.cgi?id=564248
-// this should be include "api-versions.as" once this file is moved into core
-include "../core/api-versions.as"
+include "api-versions.as"
 
 /**
  * The CompressionAlgorithm class defines string constants for the names of compress and uncompress options. These constants 

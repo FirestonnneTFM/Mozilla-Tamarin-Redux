@@ -295,6 +295,8 @@ namespace avmplus
         ByteArrayClass(VTable *vtable);
         ~ByteArrayClass() { }
 
+        ByteArrayObject* constructByteArray();
+
         ScriptObject* createInstance(VTable* ivtable, ScriptObject* delegate);
 
         uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }

@@ -41,9 +41,6 @@
 #ifndef __avmplus_VectorClass__
 #define __avmplus_VectorClass__
 
-#include "AvmCore.h"
-#include "Toplevel.h"
-
 namespace avmplus
 {
 

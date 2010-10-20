@@ -132,10 +132,8 @@
 		079DF9520F3A893C0031D1B4 /* RegAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9480F3A893C0031D1B4 /* RegAlloc.cpp */; };
 		079DF9670F3A898A0031D1B4 /* avmshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF95C0F3A898A0031D1B4 /* avmshell.cpp */; };
 		079DF9680F3A898A0031D1B4 /* ConsoleOutputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF95E0F3A898A0031D1B4 /* ConsoleOutputStream.cpp */; };
-		079DF9690F3A898A0031D1B4 /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9600F3A898A0031D1B4 /* DataIO.cpp */; };
 		079DF96A0F3A898A0031D1B4 /* DebugCLI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9620F3A898A0031D1B4 /* DebugCLI.cpp */; };
 		079DF96B0F3A898A0031D1B4 /* FileInputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9640F3A898A0031D1B4 /* FileInputStream.cpp */; };
-		079DF97C0F3A89C50031D1B4 /* ByteArrayGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9720F3A89C50031D1B4 /* ByteArrayGlue.cpp */; };
 		079DF97D0F3A89C50031D1B4 /* DomainClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9740F3A89C50031D1B4 /* DomainClass.cpp */; };
 		079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
@@ -286,10 +284,8 @@
 		7E87D0AB122C5B980005FEAF /* RegAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9480F3A893C0031D1B4 /* RegAlloc.cpp */; };
 		7E87D0AC122C5B980005FEAF /* avmshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF95C0F3A898A0031D1B4 /* avmshell.cpp */; };
 		7E87D0AD122C5B980005FEAF /* ConsoleOutputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF95E0F3A898A0031D1B4 /* ConsoleOutputStream.cpp */; };
-		7E87D0AE122C5B980005FEAF /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9600F3A898A0031D1B4 /* DataIO.cpp */; };
 		7E87D0AF122C5B980005FEAF /* DebugCLI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9620F3A898A0031D1B4 /* DebugCLI.cpp */; };
 		7E87D0B0122C5B980005FEAF /* FileInputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9640F3A898A0031D1B4 /* FileInputStream.cpp */; };
-		7E87D0B1122C5B980005FEAF /* ByteArrayGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9720F3A89C50031D1B4 /* ByteArrayGlue.cpp */; };
 		7E87D0B2122C5B980005FEAF /* DomainClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9740F3A89C50031D1B4 /* DomainClass.cpp */; };
 		7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9760F3A89C50031D1B4 /* FileClass.cpp */; };
 		7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */; };
@@ -388,6 +384,10 @@
 		D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D944CADA123EF76600EA0342 /* avmplusList.cpp */; };
 		D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D92373DC11222458006D8AA3 /* njconfig.cpp */; };
 		D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D935BDEB0FA0EBA7001E3E70 /* avm.cpp */; };
+		D939B111126E358400522895 /* ByteArrayGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10D126E358400522895 /* ByteArrayGlue.cpp */; };
+		D939B112126E358400522895 /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10F126E358400522895 /* DataIO.cpp */; };
+		D939B113126E358400522895 /* ByteArrayGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10D126E358400522895 /* ByteArrayGlue.cpp */; };
+		D939B114126E358400522895 /* DataIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10F126E358400522895 /* DataIO.cpp */; };
 		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
 		D942369A0F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */; };
 		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
@@ -736,15 +736,10 @@
 		079DF95D0F3A898A0031D1B4 /* avmshell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmshell.h; path = ../../../shell/avmshell.h; sourceTree = SOURCE_ROOT; };
 		079DF95E0F3A898A0031D1B4 /* ConsoleOutputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleOutputStream.cpp; path = ../../../shell/ConsoleOutputStream.cpp; sourceTree = SOURCE_ROOT; };
 		079DF95F0F3A898A0031D1B4 /* ConsoleOutputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConsoleOutputStream.h; path = ../../../shell/ConsoleOutputStream.h; sourceTree = SOURCE_ROOT; };
-		079DF9600F3A898A0031D1B4 /* DataIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataIO.cpp; path = ../../../shell/DataIO.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9610F3A898A0031D1B4 /* DataIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataIO.h; path = ../../../shell/DataIO.h; sourceTree = SOURCE_ROOT; };
 		079DF9620F3A898A0031D1B4 /* DebugCLI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugCLI.cpp; path = ../../../shell/DebugCLI.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9630F3A898A0031D1B4 /* DebugCLI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DebugCLI.h; path = ../../../shell/DebugCLI.h; sourceTree = SOURCE_ROOT; };
 		079DF9640F3A898A0031D1B4 /* FileInputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileInputStream.cpp; path = ../../../shell/FileInputStream.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9650F3A898A0031D1B4 /* FileInputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileInputStream.h; path = ../../../shell/FileInputStream.h; sourceTree = SOURCE_ROOT; };
-		079DF9660F3A898A0031D1B4 /* genericzlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = genericzlib.h; path = ../../../shell/genericzlib.h; sourceTree = SOURCE_ROOT; };
-		079DF9720F3A89C50031D1B4 /* ByteArrayGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ByteArrayGlue.cpp; path = ../../../shell/ByteArrayGlue.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9730F3A89C50031D1B4 /* ByteArrayGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ByteArrayGlue.h; path = ../../../shell/ByteArrayGlue.h; sourceTree = SOURCE_ROOT; };
 		079DF9740F3A89C50031D1B4 /* DomainClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DomainClass.cpp; path = ../../../shell/DomainClass.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9750F3A89C50031D1B4 /* DomainClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DomainClass.h; path = ../../../shell/DomainClass.h; sourceTree = SOURCE_ROOT; };
 		079DF9760F3A89C50031D1B4 /* FileClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileClass.cpp; path = ../../../shell/FileClass.cpp; sourceTree = SOURCE_ROOT; };
@@ -753,7 +748,6 @@
 		079DF9790F3A89C50031D1B4 /* shell_toplevel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shell_toplevel.h; path = ../../../shell/shell_toplevel.h; sourceTree = SOURCE_ROOT; };
 		079DF97A0F3A89C50031D1B4 /* SystemClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SystemClass.cpp; path = ../../../shell/SystemClass.cpp; sourceTree = SOURCE_ROOT; };
 		079DF97B0F3A89C50031D1B4 /* SystemClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SystemClass.h; path = ../../../shell/SystemClass.h; sourceTree = SOURCE_ROOT; };
-		079DF9870F3A89E60031D1B4 /* ByteArray.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ByteArray.as; path = ../../../shell/ByteArray.as; sourceTree = SOURCE_ROOT; };
 		079DF9880F3A89E60031D1B4 /* Domain.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Domain.as; path = ../../../shell/Domain.as; sourceTree = SOURCE_ROOT; };
 		079DF9890F3A89E60031D1B4 /* Endian.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Endian.as; path = ../../../shell/Endian.as; sourceTree = SOURCE_ROOT; };
 		079DF98A0F3A89E60031D1B4 /* Java.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
@@ -906,10 +900,15 @@
 		D927090C112B5FD700A13EAA /* avmplusHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusHashtable-inlines.h"; path = "../../../core/avmplusHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D92B139711EB96B7008170E3 /* avmplusList-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusList-impl.h"; path = "../../../core/avmplusList-impl.h"; sourceTree = SOURCE_ROOT; };
 		D92B139811EB96B7008170E3 /* avmplusList-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusList-inlines.h"; path = "../../../core/avmplusList-inlines.h"; sourceTree = SOURCE_ROOT; };
-		D92C589C125E61A500912085 /* IDataInput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = IDataInput.as; path = ../../../shell/IDataInput.as; sourceTree = SOURCE_ROOT; };
-		D92C589D125E61A500912085 /* IDataOutput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = IDataOutput.as; path = ../../../shell/IDataOutput.as; sourceTree = SOURCE_ROOT; };
 		D935BDEB0FA0EBA7001E3E70 /* avm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avm.cpp; path = ../../../core/avm.cpp; sourceTree = SOURCE_ROOT; };
 		D935BDEE0FA0EC17001E3E70 /* avm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avm.h; path = ../../../core/avm.h; sourceTree = SOURCE_ROOT; };
+		D939B10A126E356500522895 /* ByteArray.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = ByteArray.as; path = ../../../core/ByteArray.as; sourceTree = SOURCE_ROOT; };
+		D939B10B126E356500522895 /* IDataInput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = IDataInput.as; path = ../../../core/IDataInput.as; sourceTree = SOURCE_ROOT; };
+		D939B10C126E356500522895 /* IDataOutput.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = IDataOutput.as; path = ../../../core/IDataOutput.as; sourceTree = SOURCE_ROOT; };
+		D939B10D126E358400522895 /* ByteArrayGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ByteArrayGlue.cpp; path = ../../../core/ByteArrayGlue.cpp; sourceTree = SOURCE_ROOT; };
+		D939B10E126E358400522895 /* ByteArrayGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ByteArrayGlue.h; path = ../../../core/ByteArrayGlue.h; sourceTree = SOURCE_ROOT; };
+		D939B10F126E358400522895 /* DataIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataIO.cpp; path = ../../../core/DataIO.cpp; sourceTree = SOURCE_ROOT; };
+		D939B110126E358400522895 /* DataIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataIO.h; path = ../../../core/DataIO.h; sourceTree = SOURCE_ROOT; };
 		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortMac.cpp; path = ../../../VMPI/MMgcPortMac.cpp; sourceTree = SOURCE_ROOT; };
 		D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../VMPI/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -1244,8 +1243,12 @@
 				079DF8AA0F3A88950031D1B4 /* BooleanClass.h */,
 				079DF8AB0F3A88950031D1B4 /* builtin.cpp */,
 				079DF8AC0F3A88950031D1B4 /* builtin.h */,
+				D939B10D126E358400522895 /* ByteArrayGlue.cpp */,
+				D939B10E126E358400522895 /* ByteArrayGlue.h */,
 				079DF8AD0F3A88950031D1B4 /* ClassClass.cpp */,
 				079DF8AE0F3A88950031D1B4 /* ClassClass.h */,
+				D939B10F126E358400522895 /* DataIO.cpp */,
+				D939B110126E358400522895 /* DataIO.h */,
 				079DF8AF0F3A88950031D1B4 /* DateClass.cpp */,
 				079DF8B00F3A88950031D1B4 /* DateClass.h */,
 				079DF8B10F3A88950031D1B4 /* DateObject.cpp */,
@@ -1337,13 +1340,10 @@
 				079DF95D0F3A898A0031D1B4 /* avmshell.h */,
 				079DF95E0F3A898A0031D1B4 /* ConsoleOutputStream.cpp */,
 				079DF95F0F3A898A0031D1B4 /* ConsoleOutputStream.h */,
-				079DF9600F3A898A0031D1B4 /* DataIO.cpp */,
-				079DF9610F3A898A0031D1B4 /* DataIO.h */,
 				079DF9620F3A898A0031D1B4 /* DebugCLI.cpp */,
 				079DF9630F3A898A0031D1B4 /* DebugCLI.h */,
 				079DF9640F3A898A0031D1B4 /* FileInputStream.cpp */,
 				079DF9650F3A898A0031D1B4 /* FileInputStream.h */,
-				079DF9660F3A898A0031D1B4 /* genericzlib.h */,
 				3F5B2BC70F54B223009A93FE /* Platform.h */,
 				3F5B2BC80F54B223009A93FE /* PosixFile.cpp */,
 				3F5B2BC90F54B223009A93FE /* PosixFile.h */,
@@ -1363,6 +1363,9 @@
 		079DF9090F3A889D0031D1B4 /* AS */ = {
 			isa = PBXGroup;
 			children = (
+				D939B10A126E356500522895 /* ByteArray.as */,
+				D939B10B126E356500522895 /* IDataInput.as */,
+				D939B10C126E356500522895 /* IDataOutput.as */,
 				079DF90B0F3A88EA0031D1B4 /* Array.as */,
 				079DF90C0F3A88EA0031D1B4 /* Boolean.as */,
 				079DF90D0F3A88EA0031D1B4 /* builtin.as */,
@@ -1390,8 +1393,6 @@
 			isa = PBXGroup;
 			children = (
 				079DF9860F3A89CA0031D1B4 /* AS */,
-				079DF9720F3A89C50031D1B4 /* ByteArrayGlue.cpp */,
-				079DF9730F3A89C50031D1B4 /* ByteArrayGlue.h */,
 				079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */,
 				079DF98E0F3A8A320031D1B4 /* DictionaryGlue.h */,
 				079DF9740F3A89C50031D1B4 /* DomainClass.cpp */,
@@ -1411,12 +1412,9 @@
 		079DF9860F3A89CA0031D1B4 /* AS */ = {
 			isa = PBXGroup;
 			children = (
-				D92C589C125E61A500912085 /* IDataInput.as */,
-				D92C589D125E61A500912085 /* IDataOutput.as */,
 				079DF9990F3A8A7C0031D1B4 /* Dictionary.as */,
 				079DF99A0F3A8A7D0031D1B4 /* Sampler.as */,
 				079DF99B0F3A8A7D0031D1B4 /* Trace.as */,
-				079DF9870F3A89E60031D1B4 /* ByteArray.as */,
 				079DF9880F3A89E60031D1B4 /* Domain.as */,
 				079DF9890F3A89E60031D1B4 /* Endian.as */,
 				079DF98A0F3A89E60031D1B4 /* Java.as */,
@@ -1841,10 +1839,8 @@
 				7E87D0AB122C5B980005FEAF /* RegAlloc.cpp in Sources */,
 				7E87D0AC122C5B980005FEAF /* avmshell.cpp in Sources */,
 				7E87D0AD122C5B980005FEAF /* ConsoleOutputStream.cpp in Sources */,
-				7E87D0AE122C5B980005FEAF /* DataIO.cpp in Sources */,
 				7E87D0AF122C5B980005FEAF /* DebugCLI.cpp in Sources */,
 				7E87D0B0122C5B980005FEAF /* FileInputStream.cpp in Sources */,
-				7E87D0B1122C5B980005FEAF /* ByteArrayGlue.cpp in Sources */,
 				7E87D0B2122C5B980005FEAF /* DomainClass.cpp in Sources */,
 				7E87D0B3122C5B980005FEAF /* FileClass.cpp in Sources */,
 				7E87D0B4122C5B980005FEAF /* SystemClass.cpp in Sources */,
@@ -1941,6 +1937,8 @@
 				07D95AE61254C39000DD872D /* atom.cpp in Sources */,
 				D9909EB5125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */,
 				D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */,
+				D939B113126E358400522895 /* ByteArrayGlue.cpp in Sources */,
+				D939B114126E358400522895 /* DataIO.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2034,10 +2032,8 @@
 				079DF9520F3A893C0031D1B4 /* RegAlloc.cpp in Sources */,
 				079DF9670F3A898A0031D1B4 /* avmshell.cpp in Sources */,
 				079DF9680F3A898A0031D1B4 /* ConsoleOutputStream.cpp in Sources */,
-				079DF9690F3A898A0031D1B4 /* DataIO.cpp in Sources */,
 				079DF96A0F3A898A0031D1B4 /* DebugCLI.cpp in Sources */,
 				079DF96B0F3A898A0031D1B4 /* FileInputStream.cpp in Sources */,
-				079DF97C0F3A89C50031D1B4 /* ByteArrayGlue.cpp in Sources */,
 				079DF97D0F3A89C50031D1B4 /* DomainClass.cpp in Sources */,
 				079DF97E0F3A89C50031D1B4 /* FileClass.cpp in Sources */,
 				079DF9800F3A89C50031D1B4 /* SystemClass.cpp in Sources */,
@@ -2134,6 +2130,8 @@
 				07D95AE51254C39000DD872D /* atom.cpp in Sources */,
 				D9909EB6125BBC79007EBE1E /* ST_mmgc_575631.cpp in Sources */,
 				D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */,
+				D939B111126E358400522895 /* ByteArrayGlue.cpp in Sources */,
+				D939B112126E358400522895 /* DataIO.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

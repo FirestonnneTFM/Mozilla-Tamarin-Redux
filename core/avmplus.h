@@ -118,6 +118,7 @@ namespace avmplus
     class BooleanClass;
     class BuiltinTraits;
     class BugCompatibility;
+    class ByteArrayClass;
     class ByteArrayObject;
     class CallStackNode;
     class ClassClass;
@@ -334,6 +335,7 @@ namespace avmplus {
 #ifdef VMCFG_EVAL
 #include "eval-avmplus.h"
 #endif
+#include "DataIO.h"
 #include "Toplevel.h"
 #include "AbcParser.h"
 #include "RegExpObject.h"
@@ -349,6 +351,7 @@ namespace avmplus {
 #ifdef VMCFG_AOT
 #include "AOTCompiler.h"
 #endif
+#include "ByteArrayGlue.h"
 
 // inline implementations
 #include "vmbase-inlines.h"

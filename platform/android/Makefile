@@ -330,9 +330,7 @@ LDFLAGS := -lc -lm -lstdc++ -lssl -lgcc
 # Shell Source files
 #****************************************************************************
 
-SHELL_SRCS :=  ../../shell/ByteArrayGlue.cpp \
-  ../../shell/ConsoleOutputStream.cpp \
-  ../../shell/DataIO.cpp \
+SHELL_SRCS := ../../shell/ConsoleOutputStream.cpp \
   ../../shell/DebugCLI.cpp \
   ../../shell/DomainClass.cpp \
   ../../shell/FileClass.cpp \

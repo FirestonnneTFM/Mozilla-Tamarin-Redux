@@ -55,10 +55,12 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/BigInteger.cpp \
   $(curdir)/BooleanClass.cpp \
   $(curdir)/BuiltinTraits.cpp \
+  $(curdir)/ByteArrayGlue.cpp \
   $(curdir)/ClassClass.cpp \
   $(curdir)/ClassClosure.cpp \
   $(curdir)/CodegenLIR.cpp \
   $(curdir)/Coder.cpp \
+  $(curdir)/DataIO.cpp \
   $(curdir)/DateClass.cpp \
   $(curdir)/DateObject.cpp \
   $(curdir)/DescribeTypeClass.cpp \

@@ -62,7 +62,11 @@ asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
 print("ASC="+classpath)
 print("Building builtins...")
 
-os.system(asc+" -builtin -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as")
+configs = ""
+configs += " -config CONFIG::BYTEARRAY_API_AIR=true "
+configs += " -config CONFIG::BYTEARRAY_API_FLASH=false "
+
+os.system(asc+" -builtin "+configs+" -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as IDataInput.as IDataOutput.as ByteArray.as ")
 
 print("Generating native thunks...")
 os.system("python ../utils/nativegen.py builtin.abc")
