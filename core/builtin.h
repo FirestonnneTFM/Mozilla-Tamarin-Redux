@@ -1285,7 +1285,7 @@ class NamespaceClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    Atom m_length;
+    ATOM_WB m_length;
 };
 #define DECLARE_SLOTS_NamespaceClass \
     private: \
@@ -1698,25 +1698,16 @@ class ErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
     REALLY_INLINE int32_t get_private__errorID() const { return m_private__errorID; }
-    void set_private__errorID(int32_t newVal);
+    REALLY_INLINE void set_private__errorID(int32_t newVal) { m_private__errorID = newVal; }
     REALLY_INLINE AvmBox get_message() const { return m_message; }
-    void set_message(ErrorObject* obj, AvmBox newVal);
+    REALLY_INLINE void set_message(AvmBox newVal) { m_message = newVal; }
     REALLY_INLINE AvmBox get_name() const { return m_name; }
-    void set_name(ErrorObject* obj, AvmBox newVal);
+    REALLY_INLINE void set_name(AvmBox newVal) { m_name = newVal; }
 private:
     int32_t m_private__errorID;
-    Atom m_message;
-    Atom m_name;
+    ATOM_WB m_message;
+    ATOM_WB m_name;
 };
-REALLY_INLINE void ErrorObjectSlots::set_private__errorID(int32_t newVal) { m_private__errorID = newVal; }
-REALLY_INLINE void ErrorObjectSlots::set_message(ErrorObject* obj, AvmBox newVal)
-{
-    WBATOM(((ScriptObject*)obj)->gc(), obj, &m_message, newVal);
-}
-REALLY_INLINE void ErrorObjectSlots::set_name(ErrorObject* obj, AvmBox newVal)
-{
-    WBATOM(((ScriptObject*)obj)->gc(), obj, &m_name, newVal);
-}
 #define DECLARE_SLOTS_ErrorObject \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
@@ -1724,9 +1715,9 @@ REALLY_INLINE void ErrorObjectSlots::set_name(ErrorObject* obj, AvmBox newVal)
         REALLY_INLINE int32_t get_private__errorID() const { return m_slots_ErrorObject.get_private__errorID(); } \
         REALLY_INLINE void set_private__errorID(int32_t newVal) { m_slots_ErrorObject.set_private__errorID(newVal); } \
         REALLY_INLINE AvmBox get_message() const { return m_slots_ErrorObject.get_message(); } \
-        REALLY_INLINE void set_message(AvmBox newVal) { m_slots_ErrorObject.set_message(this, newVal); } \
+        REALLY_INLINE void set_message(AvmBox newVal) { m_slots_ErrorObject.set_message(newVal); } \
         REALLY_INLINE AvmBox get_name() const { return m_slots_ErrorObject.get_name(); } \
-        REALLY_INLINE void set_name(AvmBox newVal) { m_slots_ErrorObject.set_name(this, newVal); } \
+        REALLY_INLINE void set_name(AvmBox newVal) { m_slots_ErrorObject.set_name(newVal); } \
     private: \
         avmplus::NativeID::ErrorObjectSlots m_slots_ErrorObject
 //-----------------------------------------------------------
@@ -2168,7 +2159,7 @@ class XMLClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    Atom m_length;
+    ATOM_WB m_length;
 };
 #define DECLARE_SLOTS_XMLClass \
     private: \
@@ -2201,7 +2192,7 @@ class XMLListClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    Atom m_length;
+    ATOM_WB m_length;
 };
 #define DECLARE_SLOTS_XMLListClass \
     private: \
@@ -2234,7 +2225,7 @@ class QNameClassSlots
 public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
-    Atom m_length;
+    ATOM_WB m_length;
 };
 #define DECLARE_SLOTS_QNameClass \
     private: \
