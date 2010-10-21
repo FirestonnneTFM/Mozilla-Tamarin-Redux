@@ -1041,10 +1041,10 @@ def outputBasicSlotDecl(output, slotDict):
     output.println(u'%(type)s m_%(name)s;' % slotDict)
 
 def outputWBRCSlotDecl(output, slotDict):
-    output.println(u'%(type)s m_%(name)s;' % slotDict)
+    output.println(u'DRCWB(%(type)s) m_%(name)s;' % slotDict)
 
 def outputWBAtomSlotDecl(output, slotDict):
-    output.println(u'Atom m_%(name)s;' % slotDict)
+    output.println(u'ATOM_WB m_%(name)s;' % slotDict)
 
 CTYPE_TO_SLOT_DECL = {
     ctype_from_enum(CTYPE_OBJECT, True) : outputWBRCSlotDecl,
@@ -1061,95 +1061,46 @@ CTYPE_TO_SLOT_DECL = {
 def outputBasicGetMethodDecl(output, slotDict):
     output.println(u'REALLY_INLINE %(type)s get_%(name)s() const { return m_%(name)s; }' % slotDict)
 
-def outputWBRCGetMethodDecl(output, slotDict):
-    output.println(u'REALLY_INLINE %(type)s get_%(name)s() const { return m_%(name)s; }' % slotDict)
-
-def outputWBAtomGetMethodDecl(output, slotDict):
-    output.println(u'REALLY_INLINE %(type)s get_%(name)s() const { return m_%(name)s; }' % slotDict)
-
 CTYPE_TO_GET_METHOD_DECL = {
-    ctype_from_enum(CTYPE_OBJECT, True) : outputWBRCGetMethodDecl,
-    ctype_from_enum(CTYPE_ATOM, False) : outputWBAtomGetMethodDecl,
+    ctype_from_enum(CTYPE_OBJECT, True) : outputBasicGetMethodDecl,
+    ctype_from_enum(CTYPE_ATOM, False) : outputBasicGetMethodDecl,
     ctype_from_enum(CTYPE_VOID, True) : lambda output, slotDict: None,
     ctype_from_enum(CTYPE_BOOLEAN, True) : outputBasicGetMethodDecl,
     ctype_from_enum(CTYPE_INT, True) : outputBasicGetMethodDecl,
     ctype_from_enum(CTYPE_UINT, True) : outputBasicGetMethodDecl,
     ctype_from_enum(CTYPE_DOUBLE, True) : outputBasicGetMethodDecl,
-    ctype_from_enum(CTYPE_STRING, True) : outputWBRCGetMethodDecl,
-    ctype_from_enum(CTYPE_NAMESPACE, True) : outputWBRCGetMethodDecl
+    ctype_from_enum(CTYPE_STRING, True) : outputBasicGetMethodDecl,
+    ctype_from_enum(CTYPE_NAMESPACE, True) : outputBasicGetMethodDecl
 }
 
 def outputBasicSetMethodDecl(output, slotDict):
-    output.println(u'void set_%(name)s(%(type)s newVal);' % slotDict)
-
-def outputWBRCSetMethodDecl(output, slotDict):
-    output.println(u'void set_%(name)s(%(native)s* obj, %(type)s newVal);' % slotDict)
-
-def outputWBAtomSetMethodDecl(output, slotDict):
-    output.println(u'void set_%(name)s(%(native)s* obj, %(type)s newVal);' % slotDict)
+    output.println(u'REALLY_INLINE void set_%(name)s(%(type)s newVal) { m_%(name)s = newVal; }' % slotDict)
 
 CTYPE_TO_SET_METHOD_DECL = {
-    ctype_from_enum(CTYPE_OBJECT, True) : outputWBRCSetMethodDecl,
-    ctype_from_enum(CTYPE_ATOM, False) : outputWBAtomSetMethodDecl,
+    ctype_from_enum(CTYPE_OBJECT, True) : outputBasicSetMethodDecl,
+    ctype_from_enum(CTYPE_ATOM, False) : outputBasicSetMethodDecl,
     ctype_from_enum(CTYPE_VOID, True) : lambda output, slotDict: None,
     ctype_from_enum(CTYPE_BOOLEAN, True) : outputBasicSetMethodDecl,
     ctype_from_enum(CTYPE_INT, True) : outputBasicSetMethodDecl,
     ctype_from_enum(CTYPE_UINT, True) : outputBasicSetMethodDecl,
     ctype_from_enum(CTYPE_DOUBLE, True) : outputBasicSetMethodDecl,
-    ctype_from_enum(CTYPE_STRING, True) : outputWBRCSetMethodDecl,
-    ctype_from_enum(CTYPE_NAMESPACE, True) : outputWBRCSetMethodDecl
-}
-
-def outputBasicSetMethodBody(output, slotDict):
-    output.println(u'REALLY_INLINE void %(struct)s::set_%(name)s(%(type)s newVal) { m_%(name)s = newVal; }' % slotDict)
-
-def outputWBRCSetMethodBody(output, slotDict):
-    output.println(u'REALLY_INLINE void %(struct)s::set_%(name)s(%(native)s* obj, %(type)s newVal)' % slotDict)
-    output.println(u'{')
-    output.indent += 1
-    output.println(u'WBRC(((ScriptObject*)obj)->gc(), obj, &m_%(name)s, newVal);' % slotDict)
-    output.indent -= 1
-    output.println('}')
-
-def outputWBAtomSetMethodBody(output, slotDict):
-    output.println(u'REALLY_INLINE void %(struct)s::set_%(name)s(%(native)s* obj, %(type)s newVal)' % slotDict)
-    output.println(u'{')
-    output.indent += 1
-    output.println(u'WBATOM(((ScriptObject*)obj)->gc(), obj, &m_%(name)s, newVal);' % slotDict)
-    output.indent -= 1
-    output.println('}')
-
-CTYPE_TO_SET_METHOD_BODY = {
-    ctype_from_enum(CTYPE_OBJECT, True) : outputWBRCSetMethodBody,
-    ctype_from_enum(CTYPE_ATOM, False) : outputWBAtomSetMethodBody,
-    ctype_from_enum(CTYPE_VOID, True) : lambda output, slotDict: None,
-    ctype_from_enum(CTYPE_BOOLEAN, True) : outputBasicSetMethodBody,
-    ctype_from_enum(CTYPE_INT, True) : outputBasicSetMethodBody,
-    ctype_from_enum(CTYPE_UINT, True) : outputBasicSetMethodBody,
-    ctype_from_enum(CTYPE_DOUBLE, True) : outputBasicSetMethodBody,
-    ctype_from_enum(CTYPE_STRING, True) : outputWBRCSetMethodBody,
-    ctype_from_enum(CTYPE_NAMESPACE, True) : outputWBRCSetMethodBody
+    ctype_from_enum(CTYPE_STRING, True) : outputBasicSetMethodDecl,
+    ctype_from_enum(CTYPE_NAMESPACE, True) : outputBasicSetMethodDecl
 }
 
 def outputBasicSetMethodMacroThunk(output, slotDict):
     output.println(u'REALLY_INLINE void set_%(name)s(%(type)s newVal) { %(instance)s.set_%(name)s(newVal); } \\' % slotDict)
 
-def outputWBRCSetMethodMacroThunk(output, slotDict):
-    output.println(u'REALLY_INLINE void set_%(name)s(%(type)s newVal) { %(instance)s.set_%(name)s(this, newVal); } \\' % slotDict)
-
-def outputWBAtomSetMethodMacroThunk(output, slotDict):
-    output.println(u'REALLY_INLINE void set_%(name)s(%(type)s newVal) { %(instance)s.set_%(name)s(this, newVal); } \\' % slotDict)
-
 CTYPE_TO_SET_METHOD_MACRO_THUNK = {
-    ctype_from_enum(CTYPE_OBJECT, True) : outputWBRCSetMethodMacroThunk,
-    ctype_from_enum(CTYPE_ATOM, False) : outputWBAtomSetMethodMacroThunk,
+    ctype_from_enum(CTYPE_OBJECT, True) : outputBasicSetMethodMacroThunk,
+    ctype_from_enum(CTYPE_ATOM, False) : outputBasicSetMethodMacroThunk,
     ctype_from_enum(CTYPE_VOID, True) : lambda output, slotDict: None,
     ctype_from_enum(CTYPE_BOOLEAN, True) : outputBasicSetMethodMacroThunk,
     ctype_from_enum(CTYPE_INT, True) : outputBasicSetMethodMacroThunk,
     ctype_from_enum(CTYPE_UINT, True) : outputBasicSetMethodMacroThunk,
     ctype_from_enum(CTYPE_DOUBLE, True) : outputBasicSetMethodMacroThunk,
-    ctype_from_enum(CTYPE_STRING, True) : outputWBRCSetMethodMacroThunk,
-    ctype_from_enum(CTYPE_NAMESPACE, True) : outputWBRCSetMethodMacroThunk
+    ctype_from_enum(CTYPE_STRING, True) : outputBasicSetMethodMacroThunk,
+    ctype_from_enum(CTYPE_NAMESPACE, True) : outputBasicSetMethodMacroThunk
 }
 
 NON_POINTER_4_BYTE_SLOT_BUCKET = 0
@@ -1616,13 +1567,6 @@ class AbcThunkGen:
 
         out_h.indent -= 1
         out_h.println(u'};')
-
-        for slot in sortedSlots:
-            assert slot.kind in (TRAIT_Slot, TRAIT_Const)
-            (slotCType, slotNIType) = slotsTypeInfo[id(slot)]
-            slotDict = { u'struct' : structName, u'native' : t.niname, u'instance' : slotsInstanceName, u'type' : slotNIType, u'name' : to_cname(slot.name) }
-            if ((slot.kind == TRAIT_Slot) or (t.ni.constSetters)):
-                CTYPE_TO_SET_METHOD_BODY[slotCType](out_h, slotDict)
         out_h.println(u'#define DECLARE_SLOTS_' + self.__baseNINameForNIName(t.niname) + u' \\')
         out_h.indent += 1
         out_h.println(u'private: \\')

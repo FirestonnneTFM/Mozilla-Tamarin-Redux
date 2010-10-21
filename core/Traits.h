@@ -281,7 +281,9 @@ namespace avmplus
         // in bytes. size of the slots not included in the size of instance.  Includes size of slots for bases classes that are not native.
         uint32_t getSlotAreaSize() const;
 
-        void computeSlotAreaCountAndSize(TraitsBindings* tb, uint32_t& slotCount, uint32_t& size) const;
+        // Compute size and number of slots not including any slots in native backed classes, these are
+        // included in the instance size already.
+        void computeNonNativeSlotAreaCountAndSize(TraitsBindings* tb, uint32_t& slotCount, uint32_t& size) const;
 
         struct SlotSizeInfo
         {
@@ -543,7 +545,7 @@ namespace avmplus
     private:    CreateClassClosureProc  m_createClassClosure;
     private:    const TraitsPosPtr      m_traitsPos;        // ptr into our ABC definition, depending on m_posType
     private:    const uint8_t*          metadata_pos;
-    private:    FixedBitSet             m_slotDestroyInfo;
+    private:    FixedBitSet             m_slotDestroyInfo;      // bitset for non-native slots, destruction of native slots is left to C++ write barriers
     private:    DWB(MMgc::GCWeakRef*)   m_tbref;                // our TraitsBindings
     private:    DWB(MMgc::GCWeakRef*)   m_tmref;                // our TraitsMetadata
     private:    DWB(const ScopeTypeChain*)

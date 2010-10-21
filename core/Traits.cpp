@@ -964,7 +964,7 @@ namespace avmplus
         }
     }
 
-    void Traits::computeSlotAreaCountAndSize(TraitsBindings* tb, uint32_t& slotCount, uint32_t& size) const
+    void Traits::computeNonNativeSlotAreaCountAndSize(TraitsBindings* tb, uint32_t& slotCount, uint32_t& size) const
     {
         const TraitsBindings* prevBindings = tb;
         const TraitsBindings* currBindings = tb->base;
@@ -1520,7 +1520,7 @@ namespace avmplus
             case TRAITSTYPE_SCRIPT:
             case TRAITSTYPE_ACTIVATION:
             case TRAITSTYPE_CATCH:
-                computeSlotAreaCountAndSize(tb, slotAreaCount, slotAreaSize);
+                computeNonNativeSlotAreaCountAndSize(tb, slotAreaCount, slotAreaSize);
                 m_totalSize = getSizeOfInstance() + slotAreaSize;
                 break;
             case TRAITSTYPE_NVA:

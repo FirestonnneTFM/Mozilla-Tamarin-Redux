@@ -39,7 +39,7 @@ from twisted.application import service
 from buildbot.slave.bot import BuildSlave
 
 basedir = r'/Users/build/buildbot/tamarin-redux/mac64-performance'
-host = '10.171.22.12'
+host = '10.116.42.110'
 port = 9750
 slavename = 'mac64-performance'
 passwd = 'asteam'
