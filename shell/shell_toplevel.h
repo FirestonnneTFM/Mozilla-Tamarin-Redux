@@ -561,7 +561,7 @@ class _avmshell_SystemClassSlots
 public:
     REALLY_INLINE ArrayObject* get_argv() const { return m_argv; }
 private:
-    ArrayObject* m_argv;
+    DRCWB(ArrayObject*) m_argv;
 };
 #define DECLARE_SLOTS_SystemClass \
     private: \
@@ -635,29 +635,19 @@ class StackFrameObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
     REALLY_INLINE uint32_t get_line() const { return m_line; }
-    void set_line(uint32_t newVal);
+    REALLY_INLINE void set_line(uint32_t newVal) { m_line = newVal; }
     REALLY_INLINE AvmString get_name() const { return m_name; }
-    void set_name(StackFrameObject* obj, AvmString newVal);
+    REALLY_INLINE void set_name(AvmString newVal) { m_name = newVal; }
     REALLY_INLINE AvmString get_file() const { return m_file; }
-    void set_file(StackFrameObject* obj, AvmString newVal);
+    REALLY_INLINE void set_file(AvmString newVal) { m_file = newVal; }
     REALLY_INLINE double get_scriptID() const { return m_scriptID; }
-    void set_scriptID(double newVal);
+    REALLY_INLINE void set_scriptID(double newVal) { m_scriptID = newVal; }
 private:
     uint32_t m_line;
-    AvmString m_name;
-    AvmString m_file;
+    DRCWB(AvmString) m_name;
+    DRCWB(AvmString) m_file;
     double m_scriptID;
 };
-REALLY_INLINE void StackFrameObjectSlots::set_line(uint32_t newVal) { m_line = newVal; }
-REALLY_INLINE void StackFrameObjectSlots::set_name(StackFrameObject* obj, AvmString newVal)
-{
-    WBRC(((ScriptObject*)obj)->gc(), obj, &m_name, newVal);
-}
-REALLY_INLINE void StackFrameObjectSlots::set_file(StackFrameObject* obj, AvmString newVal)
-{
-    WBRC(((ScriptObject*)obj)->gc(), obj, &m_file, newVal);
-}
-REALLY_INLINE void StackFrameObjectSlots::set_scriptID(double newVal) { m_scriptID = newVal; }
 #define DECLARE_SLOTS_StackFrameObject \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
@@ -665,9 +655,9 @@ REALLY_INLINE void StackFrameObjectSlots::set_scriptID(double newVal) { m_script
         REALLY_INLINE uint32_t get_line() const { return m_slots_StackFrameObject.get_line(); } \
         REALLY_INLINE void set_line(uint32_t newVal) { m_slots_StackFrameObject.set_line(newVal); } \
         REALLY_INLINE AvmString get_name() const { return m_slots_StackFrameObject.get_name(); } \
-        REALLY_INLINE void set_name(AvmString newVal) { m_slots_StackFrameObject.set_name(this, newVal); } \
+        REALLY_INLINE void set_name(AvmString newVal) { m_slots_StackFrameObject.set_name(newVal); } \
         REALLY_INLINE AvmString get_file() const { return m_slots_StackFrameObject.get_file(); } \
-        REALLY_INLINE void set_file(AvmString newVal) { m_slots_StackFrameObject.set_file(this, newVal); } \
+        REALLY_INLINE void set_file(AvmString newVal) { m_slots_StackFrameObject.set_file(newVal); } \
         REALLY_INLINE double get_scriptID() const { return m_slots_StackFrameObject.get_scriptID(); } \
         REALLY_INLINE void set_scriptID(double newVal) { m_slots_StackFrameObject.set_scriptID(newVal); } \
     private: \
@@ -695,24 +685,19 @@ class SampleObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
     REALLY_INLINE ArrayObject* get_stack() const { return m_stack; }
-    void set_stack(SampleObject* obj, ArrayObject* newVal);
+    REALLY_INLINE void set_stack(ArrayObject* newVal) { m_stack = newVal; }
     REALLY_INLINE double get_time() const { return m_time; }
-    void set_time(double newVal);
+    REALLY_INLINE void set_time(double newVal) { m_time = newVal; }
 private:
-    ArrayObject* m_stack;
+    DRCWB(ArrayObject*) m_stack;
     double m_time;
 };
-REALLY_INLINE void SampleObjectSlots::set_stack(SampleObject* obj, ArrayObject* newVal)
-{
-    WBRC(((ScriptObject*)obj)->gc(), obj, &m_stack, newVal);
-}
-REALLY_INLINE void SampleObjectSlots::set_time(double newVal) { m_time = newVal; }
 #define DECLARE_SLOTS_SampleObject \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE ArrayObject* get_stack() const { return m_slots_SampleObject.get_stack(); } \
-        REALLY_INLINE void set_stack(ArrayObject* newVal) { m_slots_SampleObject.set_stack(this, newVal); } \
+        REALLY_INLINE void set_stack(ArrayObject* newVal) { m_slots_SampleObject.set_stack(newVal); } \
         REALLY_INLINE double get_time() const { return m_slots_SampleObject.get_time(); } \
         REALLY_INLINE void set_time(double newVal) { m_slots_SampleObject.set_time(newVal); } \
     private: \
@@ -740,24 +725,19 @@ class NewObjectSampleObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
     REALLY_INLINE ClassClosure* get_type() const { return m_type; }
-    void set_type(NewObjectSampleObject* obj, ClassClosure* newVal);
+    REALLY_INLINE void set_type(ClassClosure* newVal) { m_type = newVal; }
     REALLY_INLINE double get_id() const { return m_id; }
-    void set_id(double newVal);
+    REALLY_INLINE void set_id(double newVal) { m_id = newVal; }
 private:
-    ClassClosure* m_type;
+    DRCWB(ClassClosure*) m_type;
     double m_id;
 };
-REALLY_INLINE void NewObjectSampleObjectSlots::set_type(NewObjectSampleObject* obj, ClassClosure* newVal)
-{
-    WBRC(((ScriptObject*)obj)->gc(), obj, &m_type, newVal);
-}
-REALLY_INLINE void NewObjectSampleObjectSlots::set_id(double newVal) { m_id = newVal; }
 #define DECLARE_SLOTS_NewObjectSampleObject \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE ClassClosure* get_type() const { return m_slots_NewObjectSampleObject.get_type(); } \
-        REALLY_INLINE void set_type(ClassClosure* newVal) { m_slots_NewObjectSampleObject.set_type(this, newVal); } \
+        REALLY_INLINE void set_type(ClassClosure* newVal) { m_slots_NewObjectSampleObject.set_type(newVal); } \
         REALLY_INLINE double get_id() const { return m_slots_NewObjectSampleObject.get_id(); } \
         REALLY_INLINE void set_id(double newVal) { m_slots_NewObjectSampleObject.set_id(newVal); } \
     private: \
@@ -785,15 +765,13 @@ class DeleteObjectSampleObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
     REALLY_INLINE double get_id() const { return m_id; }
-    void set_id(double newVal);
+    REALLY_INLINE void set_id(double newVal) { m_id = newVal; }
     REALLY_INLINE double get_size() const { return m_size; }
-    void set_size(double newVal);
+    REALLY_INLINE void set_size(double newVal) { m_size = newVal; }
 private:
     double m_id;
     double m_size;
 };
-REALLY_INLINE void DeleteObjectSampleObjectSlots::set_id(double newVal) { m_id = newVal; }
-REALLY_INLINE void DeleteObjectSampleObjectSlots::set_size(double newVal) { m_size = newVal; }
 #define DECLARE_SLOTS_DeleteObjectSampleObject \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
@@ -825,8 +803,8 @@ private:
     int32_t m_METHODS_WITH_ARGS;
     int32_t m_METHODS_AND_LINES;
     int32_t m_METHODS_AND_LINES_WITH_ARGS;
-    Atom m_FILE;
-    Atom m_LISTENER;
+    ATOM_WB m_FILE;
+    ATOM_WB m_LISTENER;
 };
 #define DECLARE_SLOTS_TraceClass \
     private: \
@@ -906,11 +884,10 @@ class ByteArrayClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
     REALLY_INLINE uint32_t get_private__defaultObjectEncoding() const { return m_private__defaultObjectEncoding; }
-    void set_private__defaultObjectEncoding(uint32_t newVal);
+    REALLY_INLINE void set_private__defaultObjectEncoding(uint32_t newVal) { m_private__defaultObjectEncoding = newVal; }
 private:
     uint32_t m_private__defaultObjectEncoding;
 };
-REALLY_INLINE void ByteArrayClassSlots::set_private__defaultObjectEncoding(uint32_t newVal) { m_private__defaultObjectEncoding = newVal; }
 #define DECLARE_SLOTS_ByteArrayClass \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
