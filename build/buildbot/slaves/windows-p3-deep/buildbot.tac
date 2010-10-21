@@ -39,7 +39,7 @@ from twisted.application import service
 from buildbot.slave.bot import BuildSlave
 
 basedir = r'/c/buildbot/tamarin-redux/windows-p3-deep'
-host = '10.171.22.12'
+host = '10.116.42.110'
 port = 9750
 slavename = 'windows-p3-deep'
 passwd = 'asteam'

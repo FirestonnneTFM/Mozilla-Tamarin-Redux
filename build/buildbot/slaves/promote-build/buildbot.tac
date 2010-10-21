@@ -39,7 +39,7 @@ from twisted.application import service
 from buildbot.slave.bot import BuildSlave
 
 basedir = r'/e/buildbot/tamarin-redux/promote-build'
-host = '10.171.22.12'
+host = '10.116.42.110'
 port = 9750
 slavename = 'promote-build'
 passwd = 'asteam'
