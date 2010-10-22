@@ -819,7 +819,7 @@ namespace MMgc
         /**
          * @return true if the gc item contains pointers.  Item must be valid GC pointer.
          */
-        bool ContainsPointers(const void *item);
+        static bool ContainsPointers(const void *item);
 
         /**
          * Will reliably return NULL if gcItem does not point into
