@@ -54,9 +54,6 @@
     <ClCompile Include="..\..\core\ArrayObject.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\core\atom.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\core\AtomArray.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -615,9 +612,6 @@
     <ClCompile Include="..\..\shell\WinFile.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\VMPI\AvmAssert.cpp">
-      <Filter>VMPI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\VMPI\MMgcPortWin.cpp">
       <Filter>VMPI</Filter>
     </ClCompile>
@@ -657,6 +651,19 @@
     <ClCompile Include="..\..\core\DomainMgr.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\extensions\ST_mmgc_575631.cpp" />
+    <ClCompile Include="..\..\vmbase\atom.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vmbase\AvmAssert.cpp">
+      <Filter>VMPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MMgc\GCPolicyManager.cpp">
+      <Filter>MMgc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MMgc\PageMap.cpp">
+      <Filter>MMgc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\core\AbcEnv.h">
@@ -684,9 +691,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\ArrayObject-inlines.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\atom.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\AtomArray.h">
@@ -1343,9 +1347,6 @@
     <ClInclude Include="..\..\shell\WinFile.h">
       <Filter>shell</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\VMPI\AvmAssert.h">
-      <Filter>VMPI</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\VMPI\VMPI.h">
       <Filter>VMPI</Filter>
     </ClInclude>
@@ -1360,6 +1361,18 @@
     </ClInclude>
     <ClInclude Include="..\..\core\DomainMgr.h">
       <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmbase\atom.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmbase\AvmAssert.h">
+      <Filter>VMPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MMgc\GCPolicyManager.h">
+      <Filter>MMgc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MMgc\PageMap.h">
+      <Filter>MMgc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

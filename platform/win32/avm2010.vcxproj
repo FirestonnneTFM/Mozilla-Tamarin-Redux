@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_Debugger|Win32">
@@ -41,7 +41,9 @@
     <ClCompile Include="..\..\core\ActionBlockConstants.cpp" />
     <ClCompile Include="..\..\core\ArrayClass.cpp" />
     <ClCompile Include="..\..\core\ArrayObject.cpp" />
-    <ClCompile Include="..\..\core\atom.cpp" />
+    <ClCompile Include="..\..\MMgc\GCPolicyManager.cpp" />
+    <ClCompile Include="..\..\MMgc\PageMap.cpp" />
+    <ClCompile Include="..\..\vmbase\atom.cpp" />
     <ClCompile Include="..\..\core\AtomArray.cpp" />
     <ClCompile Include="..\..\core\avmplusList.cpp" />
     <ClCompile Include="..\..\core\avm.cpp" />
@@ -335,7 +337,7 @@
     <ClCompile Include="..\..\shell\swf.cpp" />
     <ClCompile Include="..\..\shell\SystemClass.cpp" />
     <ClCompile Include="..\..\shell\WinFile.cpp" />
-    <ClCompile Include="..\..\VMPI\AvmAssert.cpp" />
+    <ClCompile Include="..\..\vmbase\AvmAssert.cpp" />
     <ClCompile Include="..\..\VMPI\MMgcPortWin.cpp" />
     <ClCompile Include="..\..\VMPI\SpyUtilsWin.cpp" />
     <ClCompile Include="..\..\VMPI\ThreadsWin.cpp" />
@@ -377,7 +379,9 @@
     <ClInclude Include="..\..\core\ArrayObject-inlines.h" />
     <ClInclude Include="..\..\core\ArrayObject.h" />
     <ClInclude Include="..\..\core\atom-inlines.h" />
-    <ClInclude Include="..\..\core\atom.h" />
+    <ClInclude Include="..\..\MMgc\GCPolicyManager.h" />
+    <ClInclude Include="..\..\MMgc\PageMap.h" />
+    <ClInclude Include="..\..\vmbase\atom.h" />
     <ClInclude Include="..\..\core\AtomArray-inlines.h" />
     <ClInclude Include="..\..\core\AtomArray.h" />
     <ClInclude Include="..\..\core\AtomWriteBarrier.h" />
@@ -640,7 +644,7 @@
     <ClInclude Include="..\..\shell\shell_toplevel.h" />
     <ClInclude Include="..\..\shell\SystemClass.h" />
     <ClInclude Include="..\..\shell\WinFile.h" />
-    <ClInclude Include="..\..\VMPI\AvmAssert.h" />
+    <ClInclude Include="..\..\vmbase\AvmAssert.h" />
     <ClInclude Include="..\..\VMPI\VMPI.h" />
     <ClInclude Include="..\..\vprof\vprof.h" />
     <ClInclude Include="..\system-selection.h" />
@@ -813,7 +817,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -843,7 +847,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -873,7 +877,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -904,7 +908,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -936,7 +940,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -967,7 +971,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -998,7 +1002,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -1030,7 +1034,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <AdditionalIncludeDirectories>..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\VMPI;..\..\vmbase;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;..\..\pcre;..\..\nanojit;.;..</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
       <TreatWarningAsError>true</TreatWarningAsError>
