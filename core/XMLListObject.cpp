@@ -44,7 +44,7 @@ namespace avmplus
 {
     XMLListObject::XMLListObject(XMLListClass *type, Atom tObject, const Multiname* tProperty)
         : ScriptObject(type->ivtable(), type->prototypePtr()), m_targetObject(tObject),
-          m_appended(false), m_children(0)
+          m_appended(false), m_children(type->gc(), 0)
     {
         if (tProperty)
             m_targetProperty = *tProperty;
@@ -174,7 +174,7 @@ namespace avmplus
         // The only thing allowed in XMLLists is XML objects
         for (uint32_t z = 0; z < _length(); z++)
         {
-            AvmAssert(AvmCore::isXML(m_children.getAt(z)));
+            AvmAssert(AvmCore::isXML(m_children.get(z)));
         }
 #endif
 
@@ -413,7 +413,7 @@ namespace avmplus
             Atom attr = parent->getMultinameProperty(&mxi);
             XMLListObject *attrx = AvmCore::atomToXMLList(attr);
             // x[i] = attr[0];
-            m_children.setAt (i, attrx->m_children.getAt(0));
+            m_children.set(i, attrx->m_children.get(0));
         }
         // step 2f
         else if (AvmCore::isXMLList(V))
@@ -422,10 +422,9 @@ namespace avmplus
             XMLListObject *src = AvmCore::atomToXMLList(V);
             XMLListObject *c = new (core->GetGC()) XMLListObject(toplevel->xmlListClass());
 
-            //c->m_children = new (core->GetGC()) AtomArray (src->numChildren());
-            c->m_children.checkCapacity(src->numChildren());
+            c->m_children.ensureCapacity(src->numChildren());
             for (uint32_t i2 = 0; i2 < src->numChildren(); i2++)
-                c->m_children.push (src->m_children.getAt(i2));
+                c->m_children.add(src->m_children.get(i2));
 
             E4XNode *parent = _getNodeAt(i)->getParent();
             // step 2 f iii
@@ -439,7 +438,7 @@ namespace avmplus
                         parent->_replace (core, toplevel, q, c->atom());
                         for (uint32_t j = 0; j < c->_length(); j++)
                         {
-                            c->m_children.setAt (j, AvmCore::genericObjectToAtom(parent->_getAt(q + j)));
+                            c->m_children.set(j, AvmCore::genericObjectToAtom(parent->_getAt(q + j)));
                         }
 
                         break;
@@ -455,10 +454,10 @@ namespace avmplus
             XMLObject* prior =  (notify) ? _getAt(i) : 0;
             XMLObject* target = (notify) ? (new (core->GetGC())  XMLObject (toplevel->xmlClass(), parent)) : 0;
 
-            m_children.removeAt (i);
+            m_children.removeAt(i);
             for (uint32_t i2 = 0; i2 < src->numChildren(); i2++)
             {
-                m_children.insert (i + i2, c->m_children.getAt(i2));
+                m_children.insert(i + i2, c->m_children.get(i2));
 
                 E4XNode* node = c->_getNodeAt(i2);
                 if (notify && (parent == node->getParent()))
@@ -524,9 +523,9 @@ namespace avmplus
             //      the constraint before setting _x[i] = V_.
 
             if (AvmCore::isXML(V))
-                m_children.setAt (i, V);
+                m_children.set(i, V);
             else
-                m_children.setAt (i, xmlClass()->ToXML (V));
+                m_children.set(i, xmlClass()->ToXML (V));
         }
         // step 2h
         else
@@ -572,7 +571,7 @@ namespace avmplus
 
             // delete index from this list
 
-            m_children.removeAt (index);
+            m_children.removeAt(index);
             return true;
         }
     }
@@ -662,7 +661,7 @@ namespace avmplus
 
     void XMLListObject::_appendNode(E4XNode *v)
     {
-        m_children.push(AvmCore::genericObjectToAtom(v));
+        m_children.add(AvmCore::genericObjectToAtom(v));
         m_appended = true;
     }
 
@@ -683,10 +682,10 @@ namespace avmplus
 
             if (v->_length())
             {
-                m_children.checkCapacity(m_children.getLength() + v->_length());
+                m_children.ensureCapacity(m_children.length() + v->_length());
                 for (uint32_t j = 0; j < v->_length(); j++)
                 {
-                    m_children.push(v->m_children.getAt(j));
+                    m_children.add(v->m_children.get(j));
                 }
             }
         }
@@ -696,7 +695,7 @@ namespace avmplus
             if (v)
             {
                 m_appended = true;
-                m_children.push(V);
+                m_children.add(V);
             }
         }
     }
@@ -709,10 +708,10 @@ namespace avmplus
         fixTargetObject();
         XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), m_targetObject, m_targetProperty);
 
-        l->m_children.checkCapacity(numChildren());
+        l->m_children.ensureCapacity(numChildren());
         for (uint32_t i = 0; i < numChildren(); i++)
         {
-            l->m_children.push (_getAt(i)->_deepCopy()->atom());
+            l->m_children.add(_getAt(i)->_deepCopy()->atom());
         }
 
         return l;
@@ -743,8 +742,8 @@ namespace avmplus
 
             for (uint32_t i = 0; i < _length(); i++)
             {
-                Atom a1 = m_children.getAt(i);
-                Atom a2 = v->m_children.getAt(i);
+                Atom a1 = m_children.get(i);
+                Atom a2 = v->m_children.get(i);
                 if ((a1 != a2) && core->equals (_getAt(i)->atom(), v->_getAt(i)->atom()) == falseAtom)
                     return falseAtom;
             }
@@ -840,12 +839,12 @@ namespace avmplus
         if (i >= _length())
             return 0;
 
-        Atom a = m_children.getAt(i);
+        Atom a = m_children.get(i);
         XMLObject* obj = AvmCore::atomToXMLObject(a);
         if (!obj)
         {
             obj = new (core()->GetGC()) XMLObject (toplevel()->xmlClass(), (E4XNode*) AvmCore::atomToGenericObject(a));
-            m_children.setAt(i, obj->atom());
+            m_children.set(i, obj->atom());
         }
         return obj;
     }
@@ -855,7 +854,7 @@ namespace avmplus
         if (i >= _length())
             return 0;
 
-        Atom a = m_children.getAt(i);
+        Atom a = m_children.get(i);
         XMLObject* obj = AvmCore::atomToXMLObject(a);
         if (obj)
             return obj->getNode();
@@ -922,7 +921,7 @@ namespace avmplus
                 // but always occurs (comparing to Rhino)
                 if (/*xmlClass()->getPrettyPrinting() && */i)
                     output << "\n";
-                    AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
+                    NamespaceList AncestorNamespaces(core->GetGC(), kListInitialCapacity);
                     xm->__toXMLString(output, AncestorNamespaces, 0);
             }
         }
@@ -1579,9 +1578,9 @@ namespace avmplus
         // for.
         HeapHashtable* seenXmlRoots = new (gc()) HeapHashtable(gc());
 
-        for (uint32_t i=0, n=m_children.getLength(); i<n; ++i)
+        for (uint32_t i=0, n=m_children.length(); i<n; ++i)
         {
-            Atom child = m_children.getAt(i);
+            Atom child = m_children.get(i);
 
             // list members can be either XMLObjects or E4XNodes
             XMLObject* xmlobj = AvmCore::atomToXMLObject(child);

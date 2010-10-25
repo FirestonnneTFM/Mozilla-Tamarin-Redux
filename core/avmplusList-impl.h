@@ -43,20 +43,20 @@
 namespace avmplus
 {
     template<class T, class ListHelper>
-    ListImpl<T,ListHelper>::ListImpl(typename ListHelper::ALLOCATOR* allocator,
+    ListImpl<T,ListHelper>::ListImpl(MMgc::GC* gc,
                         uint32_t capacity,
                         const T* args) : m_data(NULL)
     {
         if (capacity > kListMaxLength)
             MMgc::GCHeap::SignalObjectTooLarge();
         uint32_t const allocCap = (capacity < kListMinCapacity) ? kListMinCapacity : capacity;
-        typename ListHelper::LISTDATA* newData = allocData(allocator, allocCap);
-        ListHelper::wbData(allocator, this, &m_data, newData);
+        typename ListHelper::LISTDATA* newData = allocData(gc, allocCap);
+        ListHelper::wbData(this, &m_data, newData);
 
         if (args != NULL)
         {
             for (uint32_t i = 0; i < capacity; i++)
-                ListHelper::storeEmpty(allocator, m_data, i, args[i]);
+                ListHelper::storeEmpty(m_data, i, args[i]);
             m_data->len = capacity;
         }
     }
@@ -67,8 +67,7 @@ namespace avmplus
         AvmAssert(m_data != NULL);
         if (m_data->len > 0)
             ListHelper::clearRange(m_data, 0, m_data->len);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        allocator->Free(m_data);
+        ListHelper::free(m_data->gc, m_data);
         m_data = NULL;
     }
 
@@ -78,7 +77,7 @@ namespace avmplus
         // OPTIMIZEME, this method may be worth inlining
         AvmAssert(m_data->len <= m_data->cap);
         ensureCapacityExtra(m_data->len, 1);
-        ListHelper::store(ListHelper::getAllocator(m_data), m_data, m_data->len++, value);
+        ListHelper::store(m_data, m_data->len++, value);
     }
 
     template<class T, class ListHelper>
@@ -86,9 +85,8 @@ namespace avmplus
     {
         uint32_t const n = that.length();
         ensureCapacityExtra(m_data->len, n);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         for (uint32_t i = 0; i < n; ++i)
-            ListHelper::store(allocator, m_data, m_data->len + i, that.get(i));
+            ListHelper::store(m_data, m_data->len + i, that.get(i));
         m_data->len += n;
     }
 
@@ -97,12 +95,11 @@ namespace avmplus
     {
         AvmAssert(m_data->len <= m_data->cap);
         ensureCapacityExtra(m_data->len, 1);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         if (index < m_data->len)
-            ListHelper::moveRange(allocator, m_data, index, index + 1, m_data->len - index);
+            ListHelper::moveRange(m_data, index, index + 1, m_data->len - index);
         else
             index = m_data->len;
-        ListHelper::store(allocator, m_data, index, value);
+        ListHelper::store(m_data, index, value);
         m_data->len++;
     }
 
@@ -117,12 +114,12 @@ namespace avmplus
         }
         if (m_data->cap > kListMinCapacity)
         {
-            typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-            typename ListHelper::LISTDATA* newData = allocData(allocator, kListMinCapacity);
+            MMgc::GC* const gc = m_data->gc;
+            typename ListHelper::LISTDATA* newData = allocData(gc, kListMinCapacity);
             newData->len = 0;
             newData->cap = kListMinCapacity;
-            allocator->Free(m_data);
-            ListHelper::wbData(allocator, this, &m_data, newData);
+            ListHelper::free(gc, m_data);
+            ListHelper::wbData(this, &m_data, newData);
         }
     }
 
@@ -151,8 +148,7 @@ namespace avmplus
         T const old = ListHelper::load(m_data, index);
         if (index < m_data->len-1)
         {
-            typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-            ListHelper::moveRange(allocator, m_data, index+1, index, m_data->len-index-1);
+            ListHelper::moveRange(m_data, index+1, index, m_data->len-index-1);
         }
         else
         {
@@ -181,14 +177,14 @@ namespace avmplus
         MMGC_STATIC_ASSERT(uint64_t(kListMaxLength) + uint64_t(kListMaxLength/4) <= uint64_t(0xFFFFFFFF));
         cap += (cap/4);
         AvmAssert(cap > kListMinCapacity);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-        typename ListHelper::LISTDATA* newData = allocData(allocator, cap);
+        MMgc::GC* const gc = m_data->gc;
+        typename ListHelper::LISTDATA* newData = allocData(gc, cap);
 
         VMPI_memcpy(newData->entries, m_data->entries, m_data->len * sizeof(typename ListHelper::STORAGE));
         newData->len = m_data->len;
         // don't call ListHelper::clearRange here; we want the refCounts to be transferred
-        allocator->Free(m_data);
-        ListHelper::wbData(allocator, this, &m_data, newData);
+        ListHelper::free(gc, m_data);
+        ListHelper::wbData(this, &m_data, newData);
     }
 
     template<class T, class ListHelper>
@@ -196,14 +192,13 @@ namespace avmplus
     {
         uint32_t const len = m_data->len;
         ensureCapacityExtra(len, argc);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         if (index < len)
-            ListHelper::moveRange(allocator, m_data, index, index + argc, len - index);
+            ListHelper::moveRange(m_data, index, index + argc, len - index);
         else
             index = len;
 
         for (uint32_t i = 0; i < argc; ++i)
-            ListHelper::store(allocator, m_data, index + i, args[i]);
+            ListHelper::store(m_data, index + i, args[i]);
 
         m_data->len += argc;
     }
@@ -217,20 +212,19 @@ namespace avmplus
         // have to worry about overflow-checking "insertCount - deleteCount"
         if (insertCount > deleteCount)
             ensureCapacityExtra(len, insertCount - deleteCount);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         if (insertCount < deleteCount)
         {
             ListHelper::clearRange(m_data, insertPoint + insertCount, deleteCount - insertCount);
-            ListHelper::moveRange(allocator, m_data, insertPoint + deleteCount, insertPoint + insertCount, len - insertPoint - deleteCount);
+            ListHelper::moveRange(m_data, insertPoint + deleteCount, insertPoint + insertCount, len - insertPoint - deleteCount);
         }
         else if (insertCount > deleteCount)
         {
-            ListHelper::moveRange(allocator, m_data, insertPoint, insertPoint + insertCount - deleteCount, len - insertPoint);
+            ListHelper::moveRange(m_data, insertPoint, insertPoint + insertCount - deleteCount, len - insertPoint);
         }
 
         for (uint32_t i = 0; i < insertCount; ++i)
         {
-            ListHelper::store(allocator, m_data, insertPoint + i, args[i]);
+            ListHelper::store(m_data, insertPoint + i, args[i]);
         }
 
         m_data->len = len + insertCount - deleteCount;
@@ -245,22 +239,21 @@ namespace avmplus
         // have to worry about overflow-checking "insertCount - deleteCount"
         if (insertCount > deleteCount)
             ensureCapacityExtra(len, insertCount - deleteCount);
-        typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
         if (insertCount < deleteCount)
         {
             ListHelper::clearRange(m_data, insertPoint + insertCount, deleteCount - insertCount);
-            ListHelper::moveRange(allocator, m_data, insertPoint + deleteCount, insertPoint + insertCount, len - insertPoint - deleteCount);
+            ListHelper::moveRange(m_data, insertPoint + deleteCount, insertPoint + insertCount, len - insertPoint - deleteCount);
         }
         else if (insertCount > deleteCount)
         {
-            ListHelper::moveRange(allocator, m_data, insertPoint, insertPoint + insertCount - deleteCount, len - insertPoint);
+            ListHelper::moveRange(m_data, insertPoint, insertPoint + insertCount - deleteCount, len - insertPoint);
         }
 
         for (uint32_t i = 0; i < insertCount; ++i)
         {
             AvmAssert(i + thatOffset < that.length());
             T const value = ListHelper::load(that.m_data, i + thatOffset);
-            ListHelper::store(allocator, m_data, insertPoint + i, value);
+            ListHelper::store(m_data, insertPoint + i, value);
         }
 
         m_data->len = len + insertCount - deleteCount;
@@ -272,14 +265,23 @@ namespace avmplus
         uint32_t const len = m_data->len;
         if (len > 1)
         {
-            typename ListHelper::ALLOCATOR* const allocator = ListHelper::getAllocator(m_data);
-            for (uint32_t i = 0, n = len/2; i < n; i++)
+            if (sizeof(m_data->entries[0]) == sizeof(void*))
             {
-                uint32_t const i2 = len - i - 1;
-                T const v  = ListHelper::load(m_data, i);
-                T const v2 = ListHelper::load(m_data, i2);
-                ListHelper::store(allocator, m_data, i, v2);
-                ListHelper::store(allocator, m_data, i2, v);
+                // It's really only necessary to do this for things that
+                // might be GC pointers, but it doesn't really hurt to do
+                // for other things that just happen to be the same size.
+                m_data->gc->reversePointersWithinBlock((void**)&m_data->entries[0], len);
+            }
+            else
+            {
+                for (uint32_t i = 0, n = len/2; i < n; i++)
+                {
+                    uint32_t const i2 = len - i - 1;
+                    T const v  = ListHelper::load(m_data, i);
+                    T const v2 = ListHelper::load(m_data, i2);
+                    ListHelper::store(m_data, i, v2);
+                    ListHelper::store(m_data, i2, v);
+                }
             }
         }
     }

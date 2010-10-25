@@ -483,8 +483,9 @@ namespace avmplus
 
         if (val_count > 0)
         {
-            DataList<uint32_t> key_indexes(FixedMalloc::GetFixedMalloc(), kListInitialCapacity);
-            DataList<uint32_t> val_indexes(FixedMalloc::GetFixedMalloc(), kListInitialCapacity);
+            MMgc::GC* gc = pool->core->GetGC();
+            DataList<uint32_t> key_indexes(gc, kListInitialCapacity);
+            DataList<uint32_t> val_indexes(gc, kListInitialCapacity);
 
             read_u30_list(key_indexes, val_count, metadata_pos);
             read_u30_list(val_indexes, val_count, metadata_pos);

@@ -63,9 +63,9 @@ namespace avmplus
      *   if embedding in a GC-allocated object, the embedder
      *   must be a GCFinalizedObject or RCObject, *not* a plain GCObject)
      *
-     * Most variants require you to use an MMgc::GC* as the allocator; 
-     * the ones that cannot contain GC-allocated data (DataList and UnmanagedPointerList)
-     * use FixedMalloc instead.
+     * All variants require you to pass in an MMgc::GC*: although some actually
+     * use other allocators (FixedMalloc, system memory, etc), they still need to
+     * be able to inform GC about allocations.
      *
      */
 
@@ -108,6 +108,7 @@ namespace avmplus
     template<class STORAGE>
     struct ListData 
     {
+        MMgc::GC*   gc;
         uint32_t    len;
         uint32_t    cap;
         STORAGE     entries[1];   // lying, really [cap]
@@ -120,10 +121,6 @@ namespace avmplus
     {
     public:
     
-        // The allocator to use -- typically either GC or a wrapper around FixedMalloc.
-        typedef MMgc::FixedMalloc ALLOCATOR;
-        typedef MMgc::FixedMallocOpts ALLOCATORFLAGS;
-    
         // TYPE which is the public-facing type seen by users of the ListImpl
         typedef T TYPE;
 
@@ -133,27 +130,30 @@ namespace avmplus
         // (syntactic sugar)
         typedef ListData<STORAGE> LISTDATA;
 
-        // When calling allocator->Calloc(), these are the flags we should use (kZero, etc).
-        static ALLOCATORFLAGS allocFlags();
+        // Allocate memory. Note that it's not required to use gc to allocate the memory.
+        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
 
-        // Given a pointer to data, return the allocator used to allocate it.
-        // data must not be null.
-        static ALLOCATOR* getAllocator(LISTDATA* data);
+        // Free memory allocated by calloc().
+        static void free(MMgc::GC* gc, void* mem);
+
+        // Return the amount of memory used by this block. (Might exceed the amount requested).
+        // The block must have been allocated by calloc().
+        static size_t getSize(MMgc::GC* gc, void* mem);
 
         // Store the data at the address, using WB if necessary.
         // Any pointer already stored there will be overwritten (but not freed); the caller
         // must ensure that old pointers are freed.
-        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         
         // Load the item and do any conversion necessary from STORAGE to TYPE.
         static TYPE load(LISTDATA* data, uint32_t index);
 
         // Store a value at the given index, using WB as necessary and doing any conversion necessary from TYPE to STORAGE.
-        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void store(LISTDATA* data, uint32_t index, TYPE value);
 
         // Like store(), but the value at the given index is known to be empty (zeroed),
         // which may allow more efficiency.
-        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
         
         // Clear a range starting at index and going for count. Count must be > 0.
         // All entries in the range will be zeroed by this call.
@@ -162,7 +162,7 @@ namespace avmplus
         // Move a range within the given data. It is expected that the caller has
         // already done range checking to ensure that src+count and dst+count constitute
         // valid ranges within data.
-        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
 
     // ----------------------------
@@ -170,20 +170,19 @@ namespace avmplus
     class GCListHelper
     {
     public:
-        typedef MMgc::GC ALLOCATOR;
-        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
         typedef MMgc::GCObject* TYPE;
         typedef MMgc::GCObject* STORAGE;
         typedef ListData<STORAGE> LISTDATA;
         
-        static ALLOCATORFLAGS allocFlags();
-        static ALLOCATOR* getAllocator(LISTDATA* data);
-        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
+        static void free(MMgc::GC* gc, void* mem);
+        static size_t getSize(MMgc::GC* gc, void* mem);
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
-        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void store(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
-        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
 
     // ----------------------------
@@ -191,20 +190,19 @@ namespace avmplus
     class RCListHelper
     {
     public:
-        typedef MMgc::GC ALLOCATOR;
-        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
         typedef MMgc::RCObject* TYPE;
         typedef MMgc::RCObject* STORAGE;
         typedef ListData<STORAGE> LISTDATA;
         
-        static ALLOCATORFLAGS allocFlags();
-        static ALLOCATOR* getAllocator(LISTDATA* data);
-        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
+        static void free(MMgc::GC* gc, void* mem);
+        static size_t getSize(MMgc::GC* gc, void* mem);
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
-        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void store(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
-        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
 
     // ----------------------------
@@ -212,20 +210,19 @@ namespace avmplus
     class AtomListHelper
     {
     public:
-        typedef MMgc::GC ALLOCATOR;
-        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
         typedef Atom TYPE;
         typedef Atom STORAGE;
         typedef ListData<STORAGE> LISTDATA;
 
-        static ALLOCATORFLAGS allocFlags();
-        static ALLOCATOR* getAllocator(LISTDATA* data);
-        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
+        static void free(MMgc::GC* gc, void* mem);
+        static size_t getSize(MMgc::GC* gc, void* mem);
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
-        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void store(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
-        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
 
     // ----------------------------
@@ -233,20 +230,19 @@ namespace avmplus
     class WeakRefListHelper
     {
     public:
-        typedef MMgc::GC ALLOCATOR;
-        typedef MMgc::GC::AllocFlags ALLOCATORFLAGS;
         typedef MMgc::GCObject* TYPE;
         typedef MMgc::GCWeakRef* STORAGE;
         typedef ListData<STORAGE> LISTDATA;
 
-        static ALLOCATORFLAGS allocFlags();
-        static ALLOCATOR* getAllocator(LISTDATA* data);
-        static void wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data);
+        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
+        static void free(MMgc::GC* gc, void* mem);
+        static size_t getSize(MMgc::GC* gc, void* mem);
+        static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
-        static void store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value);
+        static void store(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
-        static void moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
 
     // ----------------------------
@@ -256,7 +252,6 @@ namespace avmplus
     {
     public:
         typedef T TYPE;
-        typedef typename ListHelper::ALLOCATOR ALLOCATOR;
         
     public:
         // capacity is the initial capacity to preallocate for the List.
@@ -267,7 +262,7 @@ namespace avmplus
         // entries, which will be used to initialize the list. The new list will
         // have length equal to capacity.
         //
-        explicit ListImpl(typename ListHelper::ALLOCATOR* allocator, 
+        explicit ListImpl(MMgc::GC* gc, 
                           uint32_t capacity,
                           const T* args = NULL);
 
@@ -364,7 +359,7 @@ namespace avmplus
         // before calling (which is a clear performance win).
         void FASTCALL ensureCapacityImpl(uint32_t cap);
 
-        static typename ListHelper::LISTDATA* allocData(typename ListHelper::ALLOCATOR* allocator, uint32_t cap);
+        static typename ListHelper::LISTDATA* allocData(MMgc::GC* gc, uint32_t cap);
 
     private:
         typename ListHelper::LISTDATA* m_data; // If GC-allocated, this is written with explicit WB
@@ -380,10 +375,9 @@ namespace avmplus
         
     public:
         typedef T TYPE;
-        typedef typename LIST::ALLOCATOR ALLOCATOR;
         
     public:
-        explicit GCList(ALLOCATOR* allocator, 
+        explicit GCList(MMgc::GC* gc, 
                         uint32_t capacity,
                         const T* args = NULL);
 
@@ -437,10 +431,9 @@ namespace avmplus
         
     public:
         typedef T TYPE;
-        typedef typename LIST::ALLOCATOR ALLOCATOR;
         
     public:
-        explicit RCList(ALLOCATOR* allocator, 
+        explicit RCList(MMgc::GC* gc, 
                         uint32_t capacity,
                         const T* args = NULL);
 
@@ -494,10 +487,9 @@ namespace avmplus
         
     public:
         typedef T TYPE;
-        typedef typename LIST::ALLOCATOR ALLOCATOR;
         
     public:
-        explicit UnmanagedPointerList(ALLOCATOR* allocator, 
+        explicit UnmanagedPointerList(MMgc::GC* gc, 
                                       uint32_t capacity,
                                       const T* args = NULL);
 
@@ -543,10 +535,9 @@ namespace avmplus
         
     public:
         typedef T TYPE;
-        typedef typename LIST::ALLOCATOR ALLOCATOR;
         
     public:
-        explicit WeakRefList(ALLOCATOR* allocator, 
+        explicit WeakRefList(MMgc::GC* gc, 
                              uint32_t capacity,
                              const T* args = NULL);
 
@@ -603,10 +594,9 @@ namespace avmplus
 
     public:
         typedef T TYPE;
-        typedef typename BASE::ALLOCATOR ALLOCATOR;
         
     public:
-        explicit DataList(ALLOCATOR* allocator, 
+        explicit DataList(MMgc::GC* gc, 
                           uint32_t capacity,
                           const T* args = NULL);
 
@@ -624,7 +614,7 @@ namespace avmplus
     public:
         T list;
     public:
-        explicit HeapList(typename T::ALLOCATOR* allocator, 
+        explicit HeapList(MMgc::GC* gc, 
                           uint32_t capacity,
                           const typename T::TYPE* args = NULL);
     };

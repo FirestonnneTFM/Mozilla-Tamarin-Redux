@@ -134,7 +134,7 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
-        AtomArray m_denseArr;
+        AtomList m_denseArr;
         
         uint32_t m_lowHTentry; // lowest numeric entry in our hash table
         uint32_t m_length;

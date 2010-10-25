@@ -1585,8 +1585,8 @@ const int kBufferPadding = 16;
         // or AbcParser/Verifier should be enhanced to catch this case.
         static ScriptObject* atomToScriptObject(const Atom atom);
 
-        // Helper function, allows generic objects to work with InlineHashtable
-        // and AtomArray, uses double type which is the only non-RC pointer tag.
+        // Helper function, allows generic objects to work with InlineHashtable,
+        // uses double type which is the only non-RC pointer tag.
         // The key here is that these methods round-trip any pointer value to the
         // same pointer value, there is no casting that might adjust the pointer.
         static Atom genericObjectToAtom(const void* obj);

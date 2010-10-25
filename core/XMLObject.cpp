@@ -42,9 +42,9 @@
 //      Multiname *m_name;
 //      Stringp m_value;
 //      E4XNode *m_parent; // the parent or NULL for top item
-//      AtomArray *m_attributes;
-//      AtomArray *m_namespaces;
-//      AtomArray *m_children;
+//      E4XNodeList *m_attributes;
+//      NamespaceList *m_namespaces;
+//      E4XNodeList *m_children;
 //
 //      kAttribute (AttributeE4XNode)
 //          m_name = Multiname containing namespace:name pair (marked as an attribute)
@@ -847,7 +847,7 @@ namespace avmplus
                     x->setParent(NULL);
 
                     // remove the attribute from m_attributes
-                    m_node->getAttributes()->removeAt (j);
+                    m_node->getAttributes()->list.removeAt(j);
 
                     Multiname previous;
                     x->getQName(&previous, publicNS);
@@ -1097,7 +1097,7 @@ namespace avmplus
         return this->atom();
     }
 
-    Namespace *XMLObject::GenerateUniquePrefix (Namespace *ns, const AtomArray *namespaces) const
+    Namespace* XMLObject::GenerateUniquePrefix(Namespace* ns, const NamespaceList& namespaces) const
     {
         AvmCore *core = this->core();
 
@@ -1106,14 +1106,14 @@ namespace avmplus
 
         // Try to use the empty string as a first try (ISNS changes)
         uint32_t i;
-        for (i = 0; i < namespaces->getLength(); i++)
+        for (i = 0; i < namespaces.length(); i++)
         {
-            Namespace *ns = AvmCore::atomToNamespace (namespaces->getAt(i));
+            Namespace *ns = namespaces.get(i);
             if (ns->getPrefix() == core->kEmptyString->atom())
                 break;
         }
 
-        if (i == namespaces->getLength())
+        if (i == namespaces.length())
         {
             return core->newNamespace (core->kEmptyString->atom(), ns->getURI()->atom());
         }
@@ -1136,9 +1136,9 @@ namespace avmplus
                     s[2] = x3;
                     bool bMatch = false;
                     Atom pre = core->internStringUTF16(s, 3)->atom();
-                    for (uint32_t i = 0; i < namespaces->getLength(); i++)
+                    for (uint32_t i = 0; i < namespaces.length(); i++)
                     {
-                        Namespace *ns = AvmCore::atomToNamespace (namespaces->getAt(i));
+                        Namespace *ns = namespaces.get(i);
                         if (pre == ns->getPrefix())
                         {
                             bMatch = true;
@@ -1158,7 +1158,7 @@ namespace avmplus
     }
 
     // E4X 10.2, pg 29
-    void XMLObject::__toXMLString(PrintWriter &s, AtomArray *AncestorNamespaces, int indentLevel, bool includeChildren) const
+    void XMLObject::__toXMLString(PrintWriter &s, NamespaceList& AncestorNamespaces, int indentLevel, bool includeChildren) const
     {
         AvmCore *core = this->core();
 
@@ -1224,19 +1224,19 @@ namespace avmplus
         // So when were converting to a string, we need to build the inScopeNamespace
         // list here.
 
-        AtomArray *inScopeNS = new (core->GetGC()) AtomArray();
-        m_node->BuildInScopeNamespaceList (core, inScopeNS);
-        uint32_t origLength = (AncestorNamespaces) ? AncestorNamespaces->getLength() : 0;
+        NamespaceList inScopeNS(core->GetGC(), kListInitialCapacity);
+        m_node->BuildInScopeNamespaceList(core, inScopeNS);
+        uint32_t origLength = AncestorNamespaces.length();
 
         // step 8 - ancestorNamespaces passed in
         // step 9/10 - add in our namespaces into ancestorNamespaces if there are no conflicts
-        for (uint32_t i = 0; i < inScopeNS->getLength(); i++)
+        for (uint32_t i = 0; i < inScopeNS.length(); i++)
         {
-            Namespace *ns = AvmCore::atomToNamespace (inScopeNS->getAt(i));
+            Namespace *ns = inScopeNS.get(i);
             uint32_t j;
-            for (j = 0; j < AncestorNamespaces->getLength(); j++)
+            for (j = 0; j < AncestorNamespaces.length(); j++)
             {
-                Namespace *ns2 = AvmCore::atomToNamespace (AncestorNamespaces->getAt(j));
+                Namespace *ns2 = AncestorNamespaces.get(j);
 #ifdef STRING_DEBUG
                 Stringp u1 = ns->getURI();
                 Stringp p1 = core->string(ns->getPrefix());
@@ -1247,9 +1247,9 @@ namespace avmplus
                     break;
             }
 
-            if (j == AncestorNamespaces->getLength()) // a match was not found
+            if (j == AncestorNamespaces.length()) // a match was not found
             {
-                AncestorNamespaces->push (ns->atom());
+                AncestorNamespaces.add(ns);
             }
         }
 
@@ -1258,13 +1258,13 @@ namespace avmplus
         Multiname m;
         AvmAssert (getNode()->getQName(&m, publicNS));
         getNode()->getQName(&m, publicNS);
-        Namespace *thisNodesNamespace = GetNamespace (m, AncestorNamespaces);
+        Namespace *thisNodesNamespace = GetNamespace(m, &AncestorNamespaces);
         AvmAssert(thisNodesNamespace != 0);
         if (thisNodesNamespace->getPrefix() == undefinedAtom)
         {
             // find a prefix and add this namespace to our list
             thisNodesNamespace = GenerateUniquePrefix (thisNodesNamespace, AncestorNamespaces);
-            AncestorNamespaces->push (thisNodesNamespace->atom());
+            AncestorNamespaces.add(thisNodesNamespace);
         }
 
         String *nsPrefix = core->string (thisNodesNamespace->getPrefix());
@@ -1278,14 +1278,14 @@ namespace avmplus
             Multiname nam;
             if (an->getQName(&nam, publicNS))
             {
-                Namespace* ns = GetNamespace(nam, AncestorNamespaces);
+                Namespace* ns = GetNamespace(nam, &AncestorNamespaces);
                 AvmAssert(ns != 0);
                 if (ns->getPrefix() == undefinedAtom)
                 {
                     // find a prefix and add this namespace to our list
-                    ns = GenerateUniquePrefix (ns, AncestorNamespaces);
+                    ns = GenerateUniquePrefix(ns, AncestorNamespaces);
 
-                    AncestorNamespaces->push (ns->atom());
+                    AncestorNamespaces.add(ns);
                 }
             }
         }
@@ -1318,7 +1318,7 @@ namespace avmplus
 
                 // step16b-i - ans = an->getName->getNamespace(AncestorNamespace);
                 AvmAssert(nam.isAttr());
-                Namespace *attr_ns = GetNamespace (nam, AncestorNamespaces);
+                Namespace *attr_ns = GetNamespace(nam, &AncestorNamespaces);
 
                 //!!@step16b-ii - should never get hit now with revised 10.2.1 step 11.
                 AvmAssert(attr_ns->getPrefix() != undefinedAtom);
@@ -1344,9 +1344,9 @@ namespace avmplus
         }
 
         // This adds any NS that were added to our ancestor namespace list (from origLength on up)
-        for (uint32_t i = origLength; i < AncestorNamespaces->getLength(); i++)
+        for (uint32_t i = origLength; i < AncestorNamespaces.length(); i++)
         {
-            Namespace *an = AvmCore::atomToNamespace(AncestorNamespaces->getAt(i));
+            Namespace *an = AncestorNamespaces.get(i);
             if (an->getURI() != core->kEmptyString)
             {
                 s << " xmlns";
@@ -1366,7 +1366,7 @@ namespace avmplus
         }
 
 //      if (thisNodesNamespace)
-//          AncestorNamespaces->push (thisNodesNamespace->atom());
+//          AncestorNamespaces.add(thisNodesNamespace);
 
         // step 18
         if (!m_node->numChildren())
@@ -1408,17 +1408,17 @@ namespace avmplus
         // The namespace for menuName should be output even though the identical namespace
         // was output for the top node.  (Since the item node is using an incompatible
         // namespace with the same prefix.)
-        AtomArray *newNamespaceArray = new (core->GetGC()) AtomArray();
-        uint32_t anLen = AncestorNamespaces->getLength();
+        NamespaceList newNamespaceArray(core->GetGC(), kListInitialCapacity);
+        uint32_t anLen = AncestorNamespaces.length();
         for (uint32_t i = 0; i < anLen; i++)
         {
-            Namespace *first = AvmCore::atomToNamespace(AncestorNamespaces->getAt(i));
+            Namespace *first = AncestorNamespaces.get(i);
             if (i < origLength)
             {
                 uint32_t j;
                 for (j = origLength; j < anLen; j++)
                 {
-                    Namespace *second = AvmCore::atomToNamespace(AncestorNamespaces->getAt(j));
+                    Namespace *second = AncestorNamespaces.get(j);
                     if (second->getPrefix() == first->getPrefix())
                     {
                         break;
@@ -1428,15 +1428,15 @@ namespace avmplus
                 // No match, push our namespace on the list.
                 if (j == anLen)
                 {
-                    newNamespaceArray->push (first->atom());
+                    newNamespaceArray.add(first);
                 }
             }
             else
             {
-                newNamespaceArray->push (first->atom());
+                newNamespaceArray.add(first);
             }
         }
-        uint32_t namespaceLength = newNamespaceArray->getLength();
+        uint32_t namespaceLength = newNamespaceArray.length();
 
         // step 23
         for (uint32_t i = 0; i < _length(); i++)
@@ -1448,11 +1448,12 @@ namespace avmplus
             {
                 s << "\n";
             }
-            xo->__toXMLString (s, newNamespaceArray, nextIndentLevel, includeChildren);
+            xo->__toXMLString(s, newNamespaceArray, nextIndentLevel, includeChildren);
 
             // Our __toXMLString call might have added new namespace onto our list.  We don't want to
             // save these new namespaces so clear them out here.
-            newNamespaceArray->setLength (namespaceLength);
+            while (namespaceLength > newNamespaceArray.length())
+                newNamespaceArray.removeLast();
         }
 
         // Part of the latest spec
@@ -1745,21 +1746,21 @@ namespace avmplus
     {
         AvmCore *core = this->core();
         // step 2
-        AtomArray *inScopeNS = new (core->GetGC()) AtomArray();
+        NamespaceList inScopeNS(core->GetGC(), kListInitialCapacity);
 
         // step 3
-        m_node->BuildInScopeNamespaceList (core, inScopeNS);
+        m_node->BuildInScopeNamespaceList(core, inScopeNS);
 
-        ArrayObject *a = toplevel()->arrayClass->newArray(inScopeNS->getLength());
+        ArrayObject *a = toplevel()->arrayClass->newArray(inScopeNS.length());
 
         uint32_t i;
-        for (i = 0; i < inScopeNS->getLength(); i++)
+        for (i = 0; i < inScopeNS.length(); i++)
         {
-            a->setUintProperty (i, inScopeNS->getAt(i));
+            a->setUintProperty(i, inScopeNS.get(i)->atom());
         }
 
         // !!@ Rhino behavior always seems to return at least one NS
-        if (!inScopeNS->getLength())
+        if (!inScopeNS.length())
         {
             // NOTE use caller's public
             a->setUintProperty (i, core->findPublicNamespace()->atom());
@@ -1893,10 +1894,10 @@ namespace avmplus
         AvmCore *core = this->core();
 
         // step 2
-        AtomArray *inScopeNS = new (core->GetGC()) AtomArray();
+        NamespaceList inScopeNS(core->GetGC(), kListInitialCapacity);
 
         // step 3
-        m_node->BuildInScopeNamespaceList (core, inScopeNS);
+        m_node->BuildInScopeNamespaceList(core, inScopeNS);
 
         // step 5
         if (!argc)
@@ -1911,7 +1912,7 @@ namespace avmplus
             Multiname m;
             AvmAssert(getQName(&m));
             getQName(&m);
-            Namespace *ns = GetNamespace (m, inScopeNS);
+            Namespace *ns = GetNamespace(m, &inScopeNS);
 
             return (ns->atom());
         }
@@ -1919,9 +1920,9 @@ namespace avmplus
         {
             Atom prefix = core->internString(core->string (p_prefix))->atom();
 
-            for (uint32_t i = 0; i < inScopeNS->getLength(); i++)
+            for (uint32_t i = 0; i < inScopeNS.length(); i++)
             {
-                Namespace *ns = AvmCore::atomToNamespace (inScopeNS->getAt(i));
+                Namespace *ns = inScopeNS.get(i);
                 if (ns->getPrefix() == prefix)
                     return ns->atom();
             }
@@ -1942,25 +1943,25 @@ namespace avmplus
         E4XNode *y = m_node->getParent();
 
         // step 4+5
-        AtomArray *ancestorNS = new (core->GetGC()) AtomArray();
+        NamespaceList ancestorNS(core->GetGC(), kListInitialCapacity);
         if (y)
-            y->BuildInScopeNamespaceList (core, ancestorNS);
+            y->BuildInScopeNamespaceList(core, ancestorNS);
 
         uint32_t arrayIndex = 0;
 
         // step 7+8+9+10
         for (uint32_t i = 0; i < m_node->numNamespaces(); i++)
         {
-            Namespace *ns = AvmCore::atomToNamespace (m_node->getNamespaces()->getAt(i));
+            Namespace *ns = m_node->getNamespaces()->list.get(i);
             if (!ns->hasPrefix ())
             {
                 // Emulating Rhino behavior
                 if (ns->getURI() != core->kEmptyString)
                 {
                     bool bMatch = false;
-                    for (uint32_t j = 0; j < ancestorNS->getLength(); j++)
+                    for (uint32_t j = 0; j < ancestorNS.length(); j++)
                     {
-                        Namespace *ns2 = AvmCore::atomToNamespace (ancestorNS->getAt(j));
+                        Namespace *ns2 = ancestorNS.get(j);
                         if (ns->getURI() == ns2->getURI())
                         {
                             bMatch = true;
@@ -1977,9 +1978,9 @@ namespace avmplus
             else // ns.prefix is NOT empty
             {
                 bool bMatch = false;
-                for (uint32_t j = 0; j < ancestorNS->getLength(); j++)
+                for (uint32_t j = 0; j < ancestorNS.length(); j++)
                 {
-                    Namespace *ns2 = AvmCore::atomToNamespace (ancestorNS->getAt(j));
+                    Namespace *ns2 = ancestorNS.get(j);
                     if (ns->getPrefix() == ns2->getPrefix() && ns->getURI() == ns2->getURI())
                     {
                         bMatch = true;
@@ -2143,7 +2144,9 @@ namespace avmplus
         Multiname m;
         AvmAssert(getQName(&m));
         getQName(&m);
-        Namespace *thisNS = GetNamespace (m, m_node->getNamespaces());
+        HeapNamespaceList* hnl = m_node->getNamespaces();
+        const NamespaceList* nsList = hnl ? &hnl->list : NULL;
+        Namespace *thisNS = GetNamespace(m, nsList);
 
         // step 4
         if (thisNS == ns)
@@ -2156,7 +2159,7 @@ namespace avmplus
             Multiname m;
             AvmAssert(a->getQName(&m, publicNS));
             a->getQName(&m, publicNS);
-            Namespace *anNS = GetNamespace (m, m_node->getNamespaces());
+            Namespace *anNS = GetNamespace(m, nsList);
             if (anNS == ns)
                 return this;
         }
@@ -2165,7 +2168,7 @@ namespace avmplus
         int32_t i = m_node->FindMatchingNamespace (core, ns);
         if (i != -1)
         {
-            m_node->getNamespaces()->removeAt(i);
+            m_node->getNamespaces()->list.removeAt(i);
         }
 
         // step 8
@@ -2440,7 +2443,7 @@ namespace avmplus
         }
         else
         {
-            AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
+            NamespaceList AncestorNamespaces(core->GetGC(), kListInitialCapacity);
             StringBuffer s(core);
             __toXMLString(s, AncestorNamespaces, 0);
             return core->newStringUTF8(s.c_str(), s.length())->atom();
@@ -2454,14 +2457,15 @@ namespace avmplus
 
     String *XMLObject::AS3_toXMLString ()
     {
-        AtomArray *AncestorNamespaces = new (MMgc::GC::GetGC(this)) AtomArray();
+        MMgc::GC* gc = MMgc::GC::GetGC(this);
+        NamespaceList AncestorNamespaces(gc, kListInitialCapacity);
         StringBuffer s(core());
         __toXMLString(s, AncestorNamespaces, 0);
         return core()->newStringUTF8(s.c_str());
     }
 
 #ifdef AVMPLUS_VERBOSE
-    PrintWriter& XMLObject::printUsingAncestors(PrintWriter& prw, AtomArray* AncestorNamespaces) const
+    PrintWriter& XMLObject::printUsingAncestors(PrintWriter& prw, NamespaceList& AncestorNamespaces) const
     {
         //
         // [mmorearty 10/24/05] Flex Builder 2.0 relies on this format in order to
@@ -2479,7 +2483,7 @@ namespace avmplus
     Stringp XMLObject::format(AvmCore* core) const
     {
         StringBuffer sb(core); // 256B gc alloc occurs here.
-        AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
+        NamespaceList AncestorNamespaces(core->GetGC(), kListInitialCapacity);
         this->printUsingAncestors(sb, AncestorNamespaces);
         return sb.toString();
     }
@@ -2908,7 +2912,7 @@ namespace avmplus
     }
 
     // E4X 13.3.5.4, pg 69
-    Namespace *XMLObject::GetNamespace (const Multiname &mn, const AtomArray *nsArray) const
+    Namespace* XMLObject::GetNamespace(const Multiname& mn, const NamespaceList* nsArray) const
     {
         AvmCore *core = this->core();
 
@@ -2918,9 +2922,9 @@ namespace avmplus
 
         if (nsArray)
         {
-            for (uint32_t i = 0; i < nsArray->getLength(); i++)
+            for (uint32_t i = 0; i < nsArray->length(); i++)
             {
-                Namespace *ns = AvmCore::atomToNamespace (nsArray->getAt(i));
+                Namespace *ns = nsArray->get(i);
                 AvmAssert(ns!=NULL);
 #ifdef STRING_DEBUG
                 Stringp s1 = ns->getURI();

@@ -45,19 +45,31 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE /*static*/ MMgc::FixedMallocOpts DataListHelper<T>::allocFlags()
+    REALLY_INLINE /*static*/ void* DataListHelper<T>::calloc(MMgc::GC* gc, size_t count, size_t elsize)
     {
-        return MMgc::kNone;
+        MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
+        void* mem = fm->Calloc(count, elsize, MMgc::kNone);
+        gc->SignalDependentAllocation(fm->Size(mem));
+        return mem;
     }
 
     template<class T>
-    REALLY_INLINE /*static*/ typename DataListHelper<T>::ALLOCATOR* DataListHelper<T>::getAllocator(LISTDATA* /*data*/)
+    REALLY_INLINE /*static*/ void DataListHelper<T>::free(MMgc::GC* gc, void* mem)
     {
-        return MMgc::FixedMalloc::GetFixedMalloc();
+        MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
+        gc->SignalDependentDeallocation(fm->Size(mem));
+        fm->Free(mem);
     }
 
     template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::wbData(ALLOCATOR* /*allocator*/, const void* /*container*/, LISTDATA** address, LISTDATA* data)
+    REALLY_INLINE /*static*/ size_t DataListHelper<T>::getSize(MMgc::GC* /*gc*/, void* mem)
+    {
+        MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
+        return fm->Size(mem);
+    }
+
+    template<class T>
+    REALLY_INLINE /*static*/ void DataListHelper<T>::wbData(const void* /*container*/, LISTDATA** address, LISTDATA* data)
     {
         *address = data;
     }
@@ -70,14 +82,14 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::store(ALLOCATOR* /*allocator*/, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void DataListHelper<T>::store(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         data->entries[index] = value;
     }
 
     template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::storeEmpty(ALLOCATOR* /*allocator*/, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void DataListHelper<T>::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
@@ -93,29 +105,34 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::moveRange(ALLOCATOR* /*allocator*/, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
+    REALLY_INLINE /*static*/ void DataListHelper<T>::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
     {
         VMPI_memmove(&data->entries[dstStart], &data->entries[srcStart], count * sizeof(T));
     }
 
     // ----------------------------
 
-    REALLY_INLINE /*static*/ MMgc::GC::AllocFlags GCListHelper::allocFlags()
+    REALLY_INLINE /*static*/ void* GCListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
     {
-        return (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero);
+        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
     }
 
-    REALLY_INLINE /*static*/ GCListHelper::ALLOCATOR* GCListHelper::getAllocator(LISTDATA* data)
+    REALLY_INLINE /*static*/ void GCListHelper::free(MMgc::GC* gc, void* mem)
     {
-        AvmAssert(data != NULL);
-        return MMgc::GC::GetGC(data);
+        gc->Free(mem);
     }
 
-    REALLY_INLINE /*static*/ void GCListHelper::wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data)
+    REALLY_INLINE /*static*/ size_t GCListHelper::getSize(MMgc::GC* gc, void* mem)
     {
-        if (allocator->IsPointerToGCPage(container))
+        return gc->Size(mem);
+    }
+
+    REALLY_INLINE /*static*/ void GCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc;
+        if (gc->IsPointerToGCPage(container))
         {
-            WB(allocator, allocator->FindBeginningFast(container), address, data);
+            WB(gc, gc->FindBeginningFast(container), address, data);
         }
         else
         {
@@ -129,17 +146,17 @@ namespace avmplus
         return data->entries[index];
     }
 
-    REALLY_INLINE /*static*/ void GCListHelper::store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void GCListHelper::store(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
-        WB(allocator, data, &data->entries[index], value);
+        WB(data->gc, data, &data->entries[index], value);
     }
 
-    REALLY_INLINE /*static*/ void GCListHelper::storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void GCListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
-        WB(allocator, data, &data->entries[index], value);
+        WB(data->gc, data, &data->entries[index], value);
     }
 
     REALLY_INLINE /*static*/ void GCListHelper::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
@@ -149,9 +166,10 @@ namespace avmplus
         VMPI_memset(&data->entries[start], 0, count*sizeof(MMgc::GCObject*));
     }
 
-    REALLY_INLINE /*static*/ void GCListHelper::moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
+    REALLY_INLINE /*static*/ void GCListHelper::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
     {
-        allocator->movePointersWithinBlock((void**)data,
+        AvmAssert(data != NULL);
+        data->gc->movePointersWithinBlock((void**)data,
                                            uint32_t((char*)(&data->entries[dstStart]) - (char*)data),
                                            uint32_t((char*)(&data->entries[srcStart]) - (char*)data),
                                            count,
@@ -160,22 +178,27 @@ namespace avmplus
 
     // ----------------------------
 
-    REALLY_INLINE /*static*/ MMgc::GC::AllocFlags RCListHelper::allocFlags()
+    REALLY_INLINE /*static*/ void* RCListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
     {
-        return (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero);
+        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
     }
 
-    REALLY_INLINE /*static*/ RCListHelper::ALLOCATOR* RCListHelper::getAllocator(LISTDATA* data)
+    REALLY_INLINE /*static*/ void RCListHelper::free(MMgc::GC* gc, void* mem)
     {
-        AvmAssert(data != NULL);
-        return MMgc::GC::GetGC(data);
+        gc->Free(mem);
     }
 
-    REALLY_INLINE /*static*/ void RCListHelper::wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data)
+    REALLY_INLINE /*static*/ size_t RCListHelper::getSize(MMgc::GC* gc, void* mem)
     {
-        if (allocator->IsPointerToGCPage(container))
+        return gc->Size(mem);
+    }
+
+    REALLY_INLINE /*static*/ void RCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc;
+        if (gc->IsPointerToGCPage(container))
         {
-            WB(allocator, allocator->FindBeginningFast(container), address, data);
+            WB(gc, gc->FindBeginningFast(container), address, data);
         }
         else
         {
@@ -189,13 +212,13 @@ namespace avmplus
         return data->entries[index];
     }
 
-    REALLY_INLINE /*static*/ void RCListHelper::store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void RCListHelper::store(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
-        WBRC(allocator, data, &data->entries[index], value);
+        WBRC(data->gc, data, &data->entries[index], value);
     }
 
-    REALLY_INLINE /*static*/ void RCListHelper::storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void RCListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
@@ -204,8 +227,8 @@ namespace avmplus
         // the tradition of AvmCore::atomWriteBarrier_ctor...
         if (value)
         {
-            if (allocator->IncrementalMarking())
-                allocator->InlineWriteBarrierTrap(data);
+            if (data->gc->IncrementalMarking())
+                data->gc->InlineWriteBarrierTrap(data);
             value->IncrementRef();
             data->entries[index] = value;
         }
@@ -225,9 +248,10 @@ namespace avmplus
         }
     }
 
-    REALLY_INLINE /*static*/ void RCListHelper::moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
+    REALLY_INLINE /*static*/ void RCListHelper::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
     {
-        allocator->movePointersWithinBlock((void**)data,
+        AvmAssert(data != NULL);
+        data->gc->movePointersWithinBlock((void**)data,
                                            uint32_t((char*)(&data->entries[dstStart]) - (char*)data),
                                            uint32_t((char*)(&data->entries[srcStart]) - (char*)data),
                                            count,
@@ -236,22 +260,27 @@ namespace avmplus
 
      // ----------------------------
 
-    REALLY_INLINE /*static*/ MMgc::GC::AllocFlags AtomListHelper::allocFlags()
+    REALLY_INLINE /*static*/ void* AtomListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
     {
-        return (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero);
+        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
     }
 
-    REALLY_INLINE /*static*/ RCListHelper::ALLOCATOR* AtomListHelper::getAllocator(LISTDATA* data)
+    REALLY_INLINE /*static*/ void AtomListHelper::free(MMgc::GC* gc, void* mem)
     {
-        AvmAssert(data != NULL);
-        return MMgc::GC::GetGC(data);
+        gc->Free(mem);
     }
 
-    REALLY_INLINE /*static*/ void AtomListHelper::wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data)
+    REALLY_INLINE /*static*/ size_t AtomListHelper::getSize(MMgc::GC* gc, void* mem)
     {
-        if (allocator->IsPointerToGCPage(container))
+        return gc->Size(mem);
+    }
+
+    REALLY_INLINE /*static*/ void AtomListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc;
+        if (gc->IsPointerToGCPage(container))
         {
-            WB(allocator, allocator->FindBeginningFast(container), address, data);
+            WB(gc, gc->FindBeginningFast(container), address, data);
         }
         else
         {
@@ -265,17 +294,17 @@ namespace avmplus
         return data->entries[index];
     }
 
-    REALLY_INLINE /*static*/ void AtomListHelper::store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void AtomListHelper::store(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
-        AvmCore::atomWriteBarrier(allocator, data, &data->entries[index], value);
+        AvmCore::atomWriteBarrier(data->gc, data, &data->entries[index], value);
     }
 
-    REALLY_INLINE /*static*/ void AtomListHelper::storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void AtomListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
-        AvmCore::atomWriteBarrier_ctor(allocator, data, &data->entries[index], value);
+        AvmCore::atomWriteBarrier_ctor(data->gc, data, &data->entries[index], value);
     }
 
     REALLY_INLINE /*static*/ void AtomListHelper::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
@@ -285,9 +314,10 @@ namespace avmplus
         AvmCore::decrementAtomRegion(&data->entries[start], count);
     }
 
-    REALLY_INLINE /*static*/ void AtomListHelper::moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
+    REALLY_INLINE /*static*/ void AtomListHelper::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
     {
-        allocator->movePointersWithinBlock((void**)data,
+        AvmAssert(data != NULL);
+        data->gc->movePointersWithinBlock((void**)data,
                                            uint32_t((char*)(&data->entries[dstStart]) - (char*)data),
                                            uint32_t((char*)(&data->entries[srcStart]) - (char*)data),
                                            count,
@@ -296,22 +326,27 @@ namespace avmplus
 
     // ----------------------------
 
-    REALLY_INLINE /*static*/ MMgc::GC::AllocFlags WeakRefListHelper::allocFlags()
+    REALLY_INLINE /*static*/ void* WeakRefListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
     {
-        return (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero);
+        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
     }
 
-    REALLY_INLINE /*static*/ WeakRefListHelper::ALLOCATOR* WeakRefListHelper::getAllocator(LISTDATA* data)
+    REALLY_INLINE /*static*/ void WeakRefListHelper::free(MMgc::GC* gc, void* mem)
     {
-        AvmAssert(data != NULL);
-        return MMgc::GC::GetGC(data);
+        gc->Free(mem);
     }
 
-   REALLY_INLINE /*static*/ void WeakRefListHelper::wbData(ALLOCATOR* allocator, const void* container, LISTDATA** address, LISTDATA* data)
+    REALLY_INLINE /*static*/ size_t WeakRefListHelper::getSize(MMgc::GC* gc, void* mem)
     {
-        if (allocator->IsPointerToGCPage(container))
+        return gc->Size(mem);
+    }
+
+    REALLY_INLINE /*static*/ void WeakRefListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
+    {
+        MMgc::GC* const gc = data->gc;
+        if (gc->IsPointerToGCPage(container))
         {
-            WB(allocator, allocator->FindBeginningFast(container), address, data);
+            WB(gc, gc->FindBeginningFast(container), address, data);
         }
         else
         {
@@ -326,18 +361,18 @@ namespace avmplus
         return weak ? (TYPE)weak->get() : NULL;
     }
 
-    REALLY_INLINE /*static*/ void WeakRefListHelper::store(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void WeakRefListHelper::store(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         MMgc::GCWeakRef* weak = value ? value->GetWeakRef() : NULL;
-        WB(allocator, data, &data->entries[index], weak);
+        WB(data->gc, data, &data->entries[index], weak);
     }
 
-    REALLY_INLINE /*static*/ void WeakRefListHelper::storeEmpty(ALLOCATOR* allocator, LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void WeakRefListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
-        store(allocator, data, index, value);
+        store(data, index, value);
     }
 
     REALLY_INLINE /*static*/ void WeakRefListHelper::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
@@ -347,9 +382,10 @@ namespace avmplus
         VMPI_memset(&data->entries[start], 0, count*sizeof(STORAGE));
     }
 
-    REALLY_INLINE /*static*/ void WeakRefListHelper::moveRange(ALLOCATOR* allocator, LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
+    REALLY_INLINE /*static*/ void WeakRefListHelper::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
     {
-        allocator->movePointersWithinBlock((void**)data,
+        AvmAssert(data != NULL);
+        data->gc->movePointersWithinBlock((void**)data,
                                            uint32_t((char*)(&data->entries[dstStart]) - (char*)data),
                                            uint32_t((char*)(&data->entries[srcStart]) - (char*)data),
                                            count,
@@ -392,7 +428,7 @@ namespace avmplus
             ensureCapacityExtra(index, 1);
             m_data->len = index+1;
         }
-        ListHelper::store(ListHelper::getAllocator(m_data), m_data, index, value);
+        ListHelper::store(m_data, index, value);
     }
 
     template<class T, class ListHelper>
@@ -458,22 +494,24 @@ namespace avmplus
     REALLY_INLINE uint64_t ListImpl<T,ListHelper>::bytesUsed() const
     {
         AvmAssert(m_data != NULL);
-        return ListHelper::getAllocator(m_data)->Size(m_data);
+        return ListHelper::getSize(m_data->gc, m_data);
     }
 
     template<class T, class ListHelper>
-    REALLY_INLINE /*static*/ typename ListHelper::LISTDATA* ListImpl<T,ListHelper>::allocData(typename ListHelper::ALLOCATOR* allocator, uint32_t cap) 
+    REALLY_INLINE /*static*/ typename ListHelper::LISTDATA* ListImpl<T,ListHelper>::allocData(MMgc::GC* gc, uint32_t cap) 
     {
         AvmAssert(cap <= kListMaxLength);
         
-        // Simplify overflow checking by figuring out how many extra T's worth of memory
+        // Simplify overflow checking by figuring out how many extra STORAGE's worth of memory
         // we need to allocate and bumping cap by that much (thus effectively delegating overflow
         // checking to Calloc). We won't overflow because we know cap <= kListMaxLength.
-        size_t const ld_minus_t = sizeof(typename ListHelper::LISTDATA) - sizeof(T);
-        size_t const extra = (ld_minus_t >= sizeof(T)) ?
-                                (ld_minus_t / sizeof(T)) :
+        size_t const entrySize = sizeof(typename ListHelper::STORAGE);
+        size_t const baseSize = sizeof(typename ListHelper::LISTDATA) - entrySize;
+        size_t const extra = (baseSize >= entrySize) ?
+                                ((baseSize + entrySize - 1) / entrySize) : // add entrySize-1 so that we round up, not down
                                 1;
-        typename ListHelper::LISTDATA* newData = ::new (allocator->Calloc(cap + extra, sizeof(T), ListHelper::allocFlags()))(typename ListHelper::LISTDATA);
+        typename ListHelper::LISTDATA* newData = ::new (ListHelper::calloc(gc, cap + extra, entrySize))(typename ListHelper::LISTDATA)();
+        newData->gc = gc;
         newData->len = 0;
         newData->cap = cap;
         return newData;
@@ -483,8 +521,8 @@ namespace avmplus
 
 
     template<class T>
-    REALLY_INLINE GCList<T>::GCList(ALLOCATOR* allocator, uint32_t capacity, const T* args)
-        : m_list(allocator, capacity, (MMgc::GCObject* const*)args)
+    REALLY_INLINE GCList<T>::GCList(MMgc::GC* gc, uint32_t capacity, const T* args)
+        : m_list(gc, capacity, (MMgc::GCObject* const*)args)
     {
         MMGC_STATIC_ASSERT((TypeSniffer<T>::isGCObject::value == true || TypeSniffer<T>::isGCFinalizedObject::value == true) &&
                             TypeSniffer<T>::isRCObject::value == false);
@@ -631,8 +669,8 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE RCList<T>::RCList(ALLOCATOR* allocator, uint32_t capacity, const T* args)
-        : m_list(allocator, capacity, (MMgc::RCObject* const*)args)
+    REALLY_INLINE RCList<T>::RCList(MMgc::GC* gc, uint32_t capacity, const T* args)
+        : m_list(gc, capacity, (MMgc::RCObject* const*)args)
     {
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isRCObject::value == true);
     }
@@ -779,8 +817,8 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE UnmanagedPointerList<T>::UnmanagedPointerList(ALLOCATOR* allocator, uint32_t capacity, const T* args)
-        : m_list(allocator, capacity, (const UnmanagedPointer*)args)
+    REALLY_INLINE UnmanagedPointerList<T>::UnmanagedPointerList(MMgc::GC* gc, uint32_t capacity, const T* args)
+        : m_list(gc, capacity, (const UnmanagedPointer*)args)
     {
         // We must not be a GC/RCObject.
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isGCObject::value == false &&
@@ -932,8 +970,8 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE WeakRefList<T>::WeakRefList(ALLOCATOR* allocator, uint32_t capacity, const T* args)
-        : m_list(allocator, capacity, (MMgc::GCObject* const*)args)
+    REALLY_INLINE WeakRefList<T>::WeakRefList(MMgc::GC* gc, uint32_t capacity, const T* args)
+        : m_list(gc, capacity, (MMgc::GCObject* const*)args)
     {
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isGCObject::value ||
                             TypeSniffer<T>::isGCFinalizedObject::value ||
@@ -1081,8 +1119,8 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE DataList<T>::DataList(ALLOCATOR* allocator, uint32_t capacity, const T* args)
-        : ListImpl< T, DataListHelper<T> >(allocator, capacity, args)
+    REALLY_INLINE DataList<T>::DataList(MMgc::GC* gc, uint32_t capacity, const T* args)
+        : ListImpl< T, DataListHelper<T> >(gc, capacity, args)
     {
         // We must not be a pointer type.
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
@@ -1098,8 +1136,8 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE HeapList<T>::HeapList(typename T::ALLOCATOR* allocator, uint32_t capacity, const typename T::TYPE* args)
-        : list(allocator, capacity, args)
+    REALLY_INLINE HeapList<T>::HeapList(MMgc::GC* gc, uint32_t capacity, const typename T::TYPE* args)
+        : list(gc, capacity, args)
     {
     }
 }

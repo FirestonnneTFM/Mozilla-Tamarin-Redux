@@ -44,7 +44,8 @@ namespace avmplus
 {
     ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, uint32_t capacity)
         : ScriptObject(vtable, proto, 0),
-        m_denseArr(capacity)
+        // NB: GetGC(this) is measurably faster than vtable->...GetGC() in microbenchmarks.
+        m_denseArr(MMgc::GC::GetGC(this), capacity)
     {
         SAMPLE_FRAME("Array", core());
         AvmAssert(traits()->getSizeOfInstance() >= sizeof(ArrayObject));
@@ -60,7 +61,8 @@ namespace avmplus
 
     ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, Atom *argv, int argc)
         : ScriptObject(vtable, proto, 0),
-          m_denseArr(argv, argc),
+          // NB: GetGC(this) is measurably faster than vtable->...GetGC() in microbenchmarks.
+          m_denseArr(MMgc::GC::GetGC(this), argc, argv),
           m_length(argc)
     {
     }
@@ -138,7 +140,7 @@ namespace avmplus
 
             // Move prop from HT to dense Array. No need to update m_length
             Atom lowHT = ScriptObject::getUintProperty (m_lowHTentry);
-            this->m_denseArr.push (lowHT);
+            this->m_denseArr.add(lowHT);
 
             // Delete prop from HT
             ScriptObject::delUintProperty (m_lowHTentry);
@@ -180,7 +182,7 @@ namespace avmplus
             {
                 if (index == getDenseLength())
                 {
-                    this->m_denseArr.push (value);
+                    this->m_denseArr.add(value);
                     if (m_length < getDenseLength())
                         m_length = getDenseLength();
 
@@ -189,7 +191,7 @@ namespace avmplus
                 }
                 else if (index < getDenseLength())
                 {
-                    this->m_denseArr.setAt (index, value);
+                    this->m_denseArr.set(index, value);
                     return;
                 }
                 else
@@ -200,7 +202,7 @@ namespace avmplus
             // If we're NOT dense yet and setting first element, we can create a dense array
             else if (index == 0)
             {
-                m_denseArr.push (value);
+                m_denseArr.add(value);
                 if (!m_length)
                     m_length = 1;
                 else
@@ -239,7 +241,7 @@ namespace avmplus
                 {
                     // if we get here, we have a valid integer index.
                     if ((index < getDenseLength()))
-                        return m_denseArr.getAtFast(index);
+                        return m_denseArr.get(index);
                 }
             }
 
@@ -332,7 +334,7 @@ namespace avmplus
             {
                 if (index == (getDenseLength() - 1))
                 {
-                    m_denseArr.pop();
+                    m_denseArr.removeLast();
                 }
                 // We're deleting an element in the middle of our array.  The lower
                 // part can be left in the dense array but the upper part needs to
@@ -341,7 +343,7 @@ namespace avmplus
                 {
                     for (uint32_t i = index + 1; i < getDenseLength(); i++)
                     {
-                        ScriptObject::setUintProperty (i, m_denseArr.getAtFast(i));
+                        ScriptObject::setUintProperty(i, m_denseArr.get(i));
                     }
                     m_denseArr.splice (index, 0, (getDenseLength() - index), 0);
                 }
@@ -440,7 +442,7 @@ namespace avmplus
         int denseLength = (int) getDenseLength();
         if (index <= denseLength)
         {
-            return m_denseArr.getAtFast (index-1);
+            return m_denseArr.get(index-1);
         }
         else
         {
@@ -515,7 +517,7 @@ namespace avmplus
                 return undefinedAtom;
 
             m_length--;
-            return m_denseArr.pop ();
+            return m_denseArr.removeLast();
         }
 
         if (getLength() != 0)
@@ -534,7 +536,7 @@ namespace avmplus
     {
         if (isSimpleDense())
         {
-            m_denseArr.push (argv, argc);
+            m_denseArr.insert(m_denseArr.length(), argv, argc);
             m_length += argc;
         }
         else
@@ -552,7 +554,7 @@ namespace avmplus
         {
             if (isSimpleDense())
             {
-                m_denseArr.unshift (argv, argc);
+                m_denseArr.insert(0, argv, argc);
                 m_length += argc;
             }
             else
