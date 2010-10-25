@@ -112,6 +112,9 @@ namespace avmplus
         uint32_t    len;
         uint32_t    cap;
         STORAGE     entries[1];   // lying, really [cap]
+        
+        // add an empty, inlined ctor to avoid spurious warnings in MSVC2008
+        REALLY_INLINE explicit ListData() {}
     };
         
     // ----------------------------
