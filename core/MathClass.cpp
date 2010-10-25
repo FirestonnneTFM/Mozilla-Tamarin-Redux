@@ -162,10 +162,8 @@ namespace avmplus
                     and 0 gives Infinity, so if you know x is a zero the test for negative
                     zero is (1/x < 0)."
                 */
-                if (y == x)
-                    if (y == 0.0)
-                        if ((1.0 / y) < 0.0)
-                            x = y;  // pick up negative zero when appropriate
+                if ((1.0 / y) < 0.0)
+                    x = y;  // pick up negative zero when appropriate
             }
         }
         return x;
