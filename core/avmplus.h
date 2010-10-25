@@ -111,7 +111,6 @@ namespace avmplus
     class ArrayClass;
     class ArrayObject;
     class Atan2Method;
-    class AtomArray;
     class AvmCore;
     class AvmPlusScriptableObject;
     class MethodFrame;
@@ -303,7 +302,6 @@ namespace avmplus {
 #include "CodeContext.h"
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
-#include "AtomArray.h"
 #include "FrameState.h"
 #include "Verifier.h"
 #include "ClassClosure.h"
@@ -359,7 +357,6 @@ namespace avmplus {
 #include "AbcEnv-inlines.h"
 #include "AbcParser-inlines.h"
 #include "ArrayObject-inlines.h"
-#include "AtomArray-inlines.h"
 #include "AvmCore-inlines.h"
 #include "avmplusHashtable-inlines.h"
 #include "avmplusList-inlines.h"

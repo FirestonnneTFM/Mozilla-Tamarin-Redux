@@ -44,17 +44,17 @@ namespace avmplus
 {
     REALLY_INLINE bool ArrayObject::hasDense() const
     {
-        return (m_denseArr.getLength() != 0);
+        return (m_denseArr.length() != 0);
     }
 
     REALLY_INLINE bool ArrayObject::isSimpleDense() const
     {
-        return (m_denseArr.getLength() == m_length);
+        return (m_denseArr.length() == m_length);
     }
 
     REALLY_INLINE uint32_t ArrayObject::getDenseLength() const
     {
-        return m_denseArr.getLength();
+        return m_denseArr.length();
     }
 
     REALLY_INLINE Atom ArrayObject::pop()
@@ -83,7 +83,7 @@ namespace avmplus
             if (hasDense())
             {
                 if ((index < getDenseLength()))
-                    return m_denseArr.getAtFast(index);
+                    return m_denseArr.get(index);
             }
         }
 

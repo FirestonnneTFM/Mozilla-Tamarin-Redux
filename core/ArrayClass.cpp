@@ -80,59 +80,6 @@ namespace avmplus
         // generic support: concat, join, pop, push, reverse, shift, slice, sort, splice, unshift
         // NOT generic: toString, toLocaleString
         // unknown: sortOn (our own extension)
-
-#if defined(_DEBUG)
-
-        // AtomArray DRC unit tests, put here b/c this always runs once, has a GC * and
-        // this class has to do with arrays.  this is more convienent that trying to test
-        // through actionscript
-
-        // create an atom
-        Stringp s = core->newConstantStringLatin1("foo");
-        Atom a = s->atom();
-        AvmAssert(s->RefCount()==0);
-        AtomArray *ar = new (gc()) AtomArray();
-
-        // test push/pop
-        ar->push(a); AvmAssert(s->RefCount()==1);
-        ar->push(a); AvmAssert(s->RefCount()==2);
-        ar->pop(); AvmAssert(s->RefCount()==1);
-
-        // reverse
-        ar->push(a); AvmAssert(s->RefCount()==2);
-        ar->reverse(); AvmAssert(s->RefCount()==2);
-
-        // shift
-        ar->shift(); AvmAssert(s->RefCount()==1);
-
-        // splice
-        AtomArray *ar2 = new (gc()) AtomArray();
-        ar->push(a);
-        ar2->push(ar); AvmAssert(s->RefCount()==4);
-        ar->splice(1, 2, 1, ar2, 0);  // [a,a,a]
-        AvmAssert(s->RefCount()==5);
-
-        // unshift
-        Atom as[4] = {a,a,a,a};
-        ar->unshift(as, 4);
-        AvmAssert(s->RefCount()==9);
-
-        // removeAt
-        ar->removeAt(1); AvmAssert(s->RefCount()==8);
-
-        // setAt
-        ar->setAt(2, a); AvmAssert(s->RefCount()==8);
-
-        // insert
-        ar->insert(2, a); AvmAssert(s->RefCount()==9);
-
-        // clear
-        ar->clear(); AvmAssert(s->RefCount() == 2);
-        ar2->clear(); AvmAssert(s->RefCount() == 0);
-
-        gc()->Free(ar);
-        gc()->Free(ar2);
-#endif
     }
 
     /*static*/ ArrayObject* ArrayClass::isArray(Toplevel* toplevel, Atom instance)
@@ -217,7 +164,7 @@ namespace avmplus
             denseLength = a->getDenseLength();
 
             // copy over our dense part
-            out->m_denseArr.push (&a->m_denseArr);
+            out->m_denseArr.add(a->m_denseArr);
             out->m_length += denseLength;
 
             // copy over any non-dense values (or all values if this isn't an array object)
@@ -233,19 +180,19 @@ namespace avmplus
             {
                 ArrayObject *b = (ArrayObject*) AvmCore::atomToScriptObject(atom);
                 // copy over dense parts
-                out->m_denseArr.push (&b->m_denseArr);
+                out->m_denseArr.add(b->m_denseArr);
                 out->m_length += b->getDenseLength();
 
                 // copy over any non-dense values
                 uint32_t len = b->getLength();
                 for (uint32_t j=b->getDenseLength(); j<len; j++) {
-                    out->m_denseArr.push (b->getUintProperty(j));
+                    out->m_denseArr.add(b->getUintProperty(j));
                     out->m_length++;
                 }
             }
             else
             {
-                out->m_denseArr.push (atom);
+                out->m_denseArr.add(atom);
                 out->m_length++;
             }
         }
@@ -334,7 +281,7 @@ namespace avmplus
                 return undefinedAtom;
 
             a->m_length--;
-            return (a->m_denseArr.shift());
+            return (a->m_denseArr.removeFirst());
         }
 
         if (!AvmCore::isObject(thisAtom))
@@ -397,6 +344,8 @@ namespace avmplus
     }
 
     static inline bool defined(Atom atom) { return (atom != undefinedAtom); }
+
+    typedef HeapList<AtomList> HeapAtomList;
 
     /**
      * ArraySort implements actionscript Array.sort().
@@ -463,7 +412,7 @@ namespace avmplus
         //      cmpFunc = DefaultCompareFunc;   // Array.sort()
         //      cmpFunc = ScriptCompareFunc;    // Array.sort(compareFunction)
         int compare(uint32_t lhs, uint32_t rhs) const   { return cmpFunc(this, lhs, rhs); }
-        Atom get(uint32_t i)      const   { return atoms->getAt(index[i]); }
+        Atom get(uint32_t i)      const   { return atoms->list.get(index[i]); }
         void swap(uint32_t j, uint32_t k)
         {
             uint32_t temp = index[j];
@@ -499,11 +448,11 @@ namespace avmplus
         Atom cmpActionScript;
 
         uint32_t *index;
-        AtomArray *atoms;
+        HeapAtomList* atoms;
 
         uint32_t numFields;
         FieldName *fields;
-        AtomArray *fieldatoms;
+        HeapAtomList* fieldatoms;
     };
 
     ArraySort::ArraySort(
@@ -541,8 +490,7 @@ namespace avmplus
         {
 
             index = mmfx_new_array(uint32_t, len);
-            atoms = new (core->GetGC()) AtomArray(len);
-            atoms->setLength(len);
+            atoms = new (core->GetGC()) HeapAtomList(core->GetGC(), len);
         }
 
         if (!index || !atoms)
@@ -561,15 +509,14 @@ namespace avmplus
         // One field value - pre-get our field values so we can just do a regular sort
         if (cmpFunc == ArraySort::FieldCompareFunc && numFields == 1)
         {
-            fieldatoms = new (core->GetGC()) AtomArray(len);
-            fieldatoms->setLength(len);
+            fieldatoms = new (core->GetGC()) HeapAtomList(core->GetGC(), len);
 
             // note, loop needs to go until i = -1, but i is unsigned. 0xffffffff is a valid index, so check (i+1) != 0.
             for (i = (len - 1), j = len; (i+1) != 0; i--)
             {
                 index[i] = i;
                 Atom a = d->getUintProperty(i);
-                fieldatoms->setAt(i, a);
+                fieldatoms->list.set(i, a);
 
                 if (AvmCore::isObject (a))
                 {
@@ -582,7 +529,7 @@ namespace avmplus
 
                     // An undefined prop just becomes undefined in our sort
                     Atom x = toplevel->getproperty(obj->atom(), &mname, obj->vtable);
-                    atoms->setAt(i, x);
+                    atoms->list.set(i, x);
                 }
                 else
                 {
@@ -628,16 +575,16 @@ namespace avmplus
             for (i = (len - 1), j = len; (i+1) != 0; i--)
             {
                 index[i] = i;
-                atoms->setAt(i, d->getUintProperty(i));
+                atoms->list.set(i, d->getUintProperty(i));
 
                 // We want to throw if this is an Array.NUMERIC sort and any items are not numbers,
                 // and not strings that can be converted into numbers
-                if(isNumericCompare && !core->isNumber(atoms->getAt(i)))
+                if(isNumericCompare && !core->isNumber(atoms->list.get(i)))
                 {
-                    double val = AvmCore::number(atoms->getAt(i));
+                    double val = AvmCore::number(atoms->list.get(i));
                     if(MathUtils::isNaN(val))
                         // throw exception (not a Number)
-                        toplevel->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(atoms->getAt(i)), core->toErrorString(core->traits.number_itraits));
+                        toplevel->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(atoms->list.get(i)), core->toErrorString(core->traits.number_itraits));
 
                 }
 
@@ -652,7 +599,7 @@ namespace avmplus
                 // Note that every missing element shrinks the length -- we'll set this new
                 // length at the end of this routine when we are done.
 
-                if (!defined(atoms->getAt(i))) {
+                if (!defined(atoms->list.get(i))) {
                     j--;
 
                     uint32_t temp = index[i];
@@ -711,7 +658,7 @@ namespace avmplus
             // our atoms array so the below code works on the right data. Fieldatoms contain
             // our original objects while atoms contain our objects[field] values for faster
             // sorting.
-            AtomArray *temp = atoms;
+            HeapAtomList* temp = atoms;
             if (fieldatoms)
             {
                 atoms = fieldatoms;
@@ -737,16 +684,8 @@ namespace avmplus
     ArraySort::~ArraySort()
     {
         mmfx_delete_array(index);
-        if(atoms) {
-            atoms->clear();
-            core->GetGC()->Free(atoms);
-            atoms = NULL;
-        }
-        if(fieldatoms) {
-            fieldatoms->clear();
-            core->GetGC()->Free(fieldatoms);
-            fieldatoms = NULL;
-        }
+        delete atoms;
+        delete fieldatoms;
         if(fields) {
             int numFields = (int)GC::Size(fields)/sizeof(FieldName);
             for(int i=0; i<numFields; i++) {
@@ -1376,7 +1315,7 @@ namespace avmplus
         // argument array, thus known to be a true Array rather than a subclass.)
         if (a && a->isSimpleDense() && len == a->m_length && args->isSimpleDense())
         {
-            a->m_denseArr.splice (start, insertCount, deleteCount, &args->m_denseArr, 2);
+            a->m_denseArr.splice(start, insertCount, deleteCount, args->m_denseArr, 2);
             a->m_length += l_shiftAmount;
             return out;
         }

@@ -482,6 +482,11 @@ namespace MMgc
          */
         void movePointersWithinBlock(void** array, uint32_t dstOffsetInBytes, uint32_t srcOffsetInBytes, size_t numPointers, bool zeroEmptied = true);
 
+        /**
+         * Given an array of pointers (or pointer-sized data), reverse the order. 
+         */
+        void reversePointersWithinBlock(void** array, size_t numPointers);
+
     private:
         /**
          * Signal that we've allocated some memory and that collection can be triggered

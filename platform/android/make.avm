@@ -49,7 +49,6 @@ AVMPLUS_SRCS := \
 	ActionBlockConstants.cpp \
 	ArrayClass.cpp \
 	ArrayObject.cpp \
-	AtomArray.cpp \
 	AvmCore.cpp \
 	avm.cpp \
     avmfeatures.cpp \

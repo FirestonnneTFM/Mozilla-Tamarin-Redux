@@ -2563,6 +2563,31 @@ namespace MMgc
         }
     }
 
+    void GC::reversePointersWithinBlock(void** array, size_t numPointers)
+    {
+        if (array == NULL || numPointers <= 1)
+            return;
+       
+        if (marking && 
+            GetMark(array) && 
+            ContainsPointers(array) &&
+            // don't push small items that are moving pointers inside the same array
+            Size(array) > kMarkItemSplitThreshold) 
+        {
+            // this could be optimized to just re-scan the dirty region
+            InlineWriteBarrierTrap(array);
+        }
+        
+        for (size_t i = 0, n = numPointers/2; i < n; i++)
+        {
+            size_t const i2 = numPointers - i - 1;
+            void* const v  = array[i];
+            void* const v2 = array[i2];
+            array[i] = v2;
+            array[i2] = v;
+        }
+    }
+
     uint32_t *GC::AllocBits(int numBytes, int sizeClass)
     {
         uint32_t *bits;

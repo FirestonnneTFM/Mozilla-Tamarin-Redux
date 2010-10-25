@@ -2998,7 +2998,7 @@ namespace avmplus
         bool targetChanged;
         if (!targetState) {
             if (!blockStates)
-                blockStates = new (core->GetGC()) BlockStatesType(MMgc::FixedMalloc::GetFixedMalloc(), MMgc::FixedMalloc::GetFixedMalloc());
+                blockStates = new (core->GetGC()) BlockStatesType(core->GetGC());
             targetState = mmfx_new( FrameState(ms) );
             targetState->abc_pc = target;
             blockStates->map.put(target, targetState);

@@ -115,6 +115,9 @@
 
 namespace avmplus
 {
+    typedef RCList<Namespace*> NamespaceList;
+    typedef HeapList<NamespaceList> HeapNamespaceList;
+
     class XMLObject : public ScriptObject
     {
         XMLClass* xmlClass() const
@@ -249,10 +252,10 @@ namespace avmplus
         inline String* toXMLString () { return AS3_toXMLString (); }
 
         // E4X support routines
-        void __toXMLString(PrintWriter &s, AtomArray *AncestorNamespace, int indentLevel = 0, bool includeChildren = true) const;
+        void __toXMLString(PrintWriter &s, NamespaceList& AncestorNamespace, int indentLevel = 0, bool includeChildren = true) const;
         XMLObject* _deepCopy () const;
 
-        Namespace *GenerateUniquePrefix (Namespace *ns, const AtomArray *namespaces) const;
+        Namespace* GenerateUniquePrefix(Namespace* ns, const NamespaceList& namespaces) const;
 
         static bool notifyNeeded(E4XNode* target);
         void issueNotifications(AvmCore* core, Toplevel* top, E4XNode* initialTarget, Atom target, Stringp type, Atom value, Atom detail=undefinedAtom);
@@ -268,7 +271,7 @@ namespace avmplus
         Stringp getValue();
         bool getQName(Multiname *m);
 
-        Namespace *GetNamespace (const Multiname &mn, const AtomArray *nsArray) const;
+        Namespace* GetNamespace(const Multiname& mn, const NamespaceList* nsArray) const;
 
 #ifdef XML_FILTER_EXPERIMENT
         XMLListObject* filter (Atom propertyName, Atom value);
@@ -292,7 +295,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
     public:
         Stringp format(AvmCore* core) const;
-        PrintWriter& printUsingAncestors(PrintWriter& prw, AtomArray* AncestorNamespaces) const;
+        PrintWriter& printUsingAncestors(PrintWriter& prw, NamespaceList& AncestorNamespaces) const;
 #endif
     private:
         /**

@@ -50,7 +50,6 @@
 		079DF8360F3A882D0031D1B4 /* AbcEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */; };
 		079DF8380F3A882D0031D1B4 /* AbcParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */; };
 		079DF83A0F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */; };
-		079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
 		079DF83D0F3A882D0031D1B4 /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */; };
 		079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
@@ -202,7 +201,6 @@
 		7E87D058122C5B980005FEAF /* AbcEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */; };
 		7E87D059122C5B980005FEAF /* AbcParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BA0F3A882D0031D1B4 /* AbcParser.cpp */; };
 		7E87D05A122C5B980005FEAF /* ActionBlockConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */; };
-		7E87D05B122C5B980005FEAF /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
 		7E87D05D122C5B980005FEAF /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */; };
 		7E87D05E122C5B980005FEAF /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		7E87D05F122C5B980005FEAF /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
@@ -536,8 +534,6 @@
 		079DF7BB0F3A882D0031D1B4 /* AbcParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AbcParser.h; path = ../../../core/AbcParser.h; sourceTree = SOURCE_ROOT; };
 		079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ActionBlockConstants.cpp; path = ../../../core/ActionBlockConstants.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7BF0F3A882D0031D1B4 /* ActionBlockConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ActionBlockConstants.h; path = ../../../core/ActionBlockConstants.h; sourceTree = SOURCE_ROOT; };
-		079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AtomArray.cpp; path = ../../../core/AtomArray.cpp; sourceTree = SOURCE_ROOT; };
-		079DF7C10F3A882D0031D1B4 /* AtomArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AtomArray.h; path = ../../../core/AtomArray.h; sourceTree = SOURCE_ROOT; };
 		079DF7C40F3A882D0031D1B4 /* AtomWriteBarrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AtomWriteBarrier.h; path = ../../../core/AtomWriteBarrier.h; sourceTree = SOURCE_ROOT; };
 		079DF7C50F3A882D0031D1B4 /* avmbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmbuild.h; path = ../../../core/avmbuild.h; sourceTree = SOURCE_ROOT; };
 		079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmCore.cpp; path = ../../../core/AvmCore.cpp; sourceTree = SOURCE_ROOT; };
@@ -932,7 +928,6 @@
 		D9A4F1E810B3382300D0408C /* NamespaceSet-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NamespaceSet-inlines.h"; path = "../../../core/NamespaceSet-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
 		D9B242EC12135FE700C60D44 /* ArrayObject-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ArrayObject-inlines.h"; path = "../../../core/ArrayObject-inlines.h"; sourceTree = SOURCE_ROOT; };
-		D9B242ED12135FE700C60D44 /* AtomArray-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AtomArray-inlines.h"; path = "../../../core/AtomArray-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9B242EE12135FE700C60D44 /* MultinameHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MultinameHashtable-inlines.h"; path = "../../../core/MultinameHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_threads.cpp; path = ../../../extensions/ST_mmgc_threads.cpp; sourceTree = SOURCE_ROOT; };
 		D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_threads.st; path = ../../../extensions/ST_mmgc_threads.st; sourceTree = SOURCE_ROOT; };
@@ -1078,9 +1073,6 @@
 				07E65EDF10BC19A7000D1EB6 /* AbcParser-inlines.h */,
 				079DF7BE0F3A882D0031D1B4 /* ActionBlockConstants.cpp */,
 				079DF7BF0F3A882D0031D1B4 /* ActionBlockConstants.h */,
-				079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */,
-				079DF7C10F3A882D0031D1B4 /* AtomArray.h */,
-				D9B242ED12135FE700C60D44 /* AtomArray-inlines.h */,
 				079DF7C40F3A882D0031D1B4 /* AtomWriteBarrier.h */,
 				079DF7C50F3A882D0031D1B4 /* avmbuild.h */,
 				D935BDEB0FA0EBA7001E3E70 /* avm.cpp */,
@@ -1736,7 +1728,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "avmshell" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* avmshell */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1757,7 +1756,6 @@
 				7E87D058122C5B980005FEAF /* AbcEnv.cpp in Sources */,
 				7E87D059122C5B980005FEAF /* AbcParser.cpp in Sources */,
 				7E87D05A122C5B980005FEAF /* ActionBlockConstants.cpp in Sources */,
-				7E87D05B122C5B980005FEAF /* AtomArray.cpp in Sources */,
 				7E87D05D122C5B980005FEAF /* AvmCore.cpp in Sources */,
 				7E87D05E122C5B980005FEAF /* avmplus.cpp in Sources */,
 				7E87D05F122C5B980005FEAF /* avmplusDebugger.cpp in Sources */,
@@ -1950,7 +1948,6 @@
 				079DF8360F3A882D0031D1B4 /* AbcEnv.cpp in Sources */,
 				079DF8380F3A882D0031D1B4 /* AbcParser.cpp in Sources */,
 				079DF83A0F3A882D0031D1B4 /* ActionBlockConstants.cpp in Sources */,
-				079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */,
 				079DF83D0F3A882D0031D1B4 /* AvmCore.cpp in Sources */,
 				079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */,
 				079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */,

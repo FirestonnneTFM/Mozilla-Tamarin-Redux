@@ -82,11 +82,8 @@ namespace avmplus
     public:
         enum { kInitialCapacity= 64 };
 
-        typedef typename KLIST::ALLOCATOR KALLOCATOR;
-        typedef typename TLIST::ALLOCATOR TALLOCATOR;
-
-        SortedMap(KALLOCATOR* kallocator, TALLOCATOR* tallocator, int cap = kInitialCapacity)
-            : keys(kallocator, cap), values(tallocator, cap) { }
+        SortedMap(MMgc::GC* gc, int cap = kInitialCapacity)
+            : keys(gc, cap), values(gc, cap) { }
 
         bool isEmpty() const
         {
@@ -229,10 +226,9 @@ namespace avmplus
     public:
         MapType map;
     public:
-        explicit HeapSortedMap(typename KLIST::ALLOCATOR* kallocator, 
-                                typename TLIST::ALLOCATOR* tallocator, 
+        explicit HeapSortedMap(MMgc::GC* gc, 
                                 int _capacity = MapType::kInitialCapacity)
-          : map(kallocator, tallocator, _capacity)
+          : map(gc, _capacity)
         {
         }
     };

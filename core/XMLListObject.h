@@ -141,16 +141,16 @@ namespace avmplus
         Atom _equals(Atom V) const;                 // [[Equals]]
         Atom _resolveValue();                       // [[ResolveValue]
 
-        uint32_t numChildren()   const { return m_children.getLength(); };
+        uint32_t numChildren()   const { return m_children.length(); }
 
         // inline version for frequent internal use
-        inline uint32_t _length() const { return (numChildren()); }; //[[Length]]
+        inline uint32_t _length() const { return (numChildren()); } //[[Length]]
 
         // may convert an E4XNode to an XMLObject despite of being const
         XMLObject* _getAt(uint32_t i) const;
         E4XNode*   _getNodeAt(uint32_t i) const;
 
-        inline void checkCapacity(int c) { m_children.checkCapacity(c); }
+        inline void checkCapacity(int c) { m_children.ensureCapacity(c); }
 
         void __toXMLString(PrintWriter &output, Atom AncestorNamespace, int indentLevel = 0);
 
@@ -263,7 +263,7 @@ namespace avmplus
         mutable bool m_appended;
 
         // An array of XMLObjects,or E4XNodes; mutable because E4XNodes may be converted to XMLObjects
-        mutable AtomArray m_children;
+        mutable AtomList m_children;
 
         DECLARE_SLOTS_XMLListObject;
     // ------------------------ DATA SECTION END

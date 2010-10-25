@@ -44,7 +44,6 @@
     <ClCompile Include="..\..\MMgc\GCPolicyManager.cpp" />
     <ClCompile Include="..\..\MMgc\PageMap.cpp" />
     <ClCompile Include="..\..\vmbase\atom.cpp" />
-    <ClCompile Include="..\..\core\AtomArray.cpp" />
     <ClCompile Include="..\..\core\avmplusList.cpp" />
     <ClCompile Include="..\..\core\avm.cpp" />
     <ClCompile Include="..\..\core\AvmCore.cpp" />
@@ -382,8 +381,6 @@
     <ClInclude Include="..\..\MMgc\GCPolicyManager.h" />
     <ClInclude Include="..\..\MMgc\PageMap.h" />
     <ClInclude Include="..\..\vmbase\atom.h" />
-    <ClInclude Include="..\..\core\AtomArray-inlines.h" />
-    <ClInclude Include="..\..\core\AtomArray.h" />
     <ClInclude Include="..\..\core\AtomWriteBarrier.h" />
     <ClInclude Include="..\..\core\avm.h" />
     <ClInclude Include="..\..\core\avmbuild.h" />

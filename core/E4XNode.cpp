@@ -106,11 +106,11 @@ namespace avmplus
 
         if (m_children & SINGLECHILDBIT)
         {
-            convertToAtomArray();
+            convertToE4XNodeList();
         }
 
-        AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
-        aa->push (AvmCore::genericObjectToAtom(childNode));
+        HeapE4XNodeList* aa = ((HeapE4XNodeList*)(uintptr_t)m_children);
+        aa->list.add(childNode);
     }
 
     uint32_t ElementE4XNode::numChildren() const
@@ -122,8 +122,8 @@ namespace avmplus
             return 1;
         else
         {
-            AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
-            return aa->getLength();
+            HeapE4XNodeList* aa = ((HeapE4XNodeList*)(uintptr_t)m_children);
+            return aa->list.length();
         }
     }
 
@@ -131,41 +131,41 @@ namespace avmplus
     {
         if (m_children & ~SINGLECHILDBIT)
         {
-            // !!@ delete our AtomArray
+            // !!@ delete our AtomList
         }
 
         m_children = 0;
     }
 
-    void ElementE4XNode::convertToAtomArray ()
+    void ElementE4XNode::convertToE4XNodeList()
     {
         if (m_children & SINGLECHILDBIT)
         {
             E4XNode *firstChild = (E4XNode *) (m_children & ~SINGLECHILDBIT);
-            AtomArray *aa = new (gc()) AtomArray(2);
-            aa->push (AvmCore::genericObjectToAtom(firstChild));
+            HeapE4XNodeList* aa = new (gc()) HeapE4XNodeList(gc(), 2);
+            aa->list.add(firstChild);
             m_children = uintptr_t(aa);
         }
         else if (!m_children)
         {
-            m_children = uintptr_t(new (gc()) AtomArray (1));
+            m_children = uintptr_t(new (gc()) HeapE4XNodeList(gc(), 1));
         }
     }
 
     void ElementE4XNode::insertChild (uint32_t i, E4XNode *x)
     {
         // m_children->insert (i, a)
-        convertToAtomArray();
-        AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
-        aa->insert (i, AvmCore::genericObjectToAtom(x));
+        convertToE4XNodeList();
+        HeapE4XNodeList* aa = ((HeapE4XNodeList*)(uintptr_t)m_children);
+        aa->list.insert(i, x);
     }
 
     void ElementE4XNode::removeChild (uint32_t i)
     {
         // m_children->removeAt (i)
-        convertToAtomArray();
-        AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
-        aa->removeAt (i);
+        convertToE4XNodeList();
+        HeapE4XNodeList *aa = ((HeapE4XNodeList *)(uintptr_t)m_children);
+        aa->list.removeAt (i);
     }
 
     void ElementE4XNode::setChildAt (uint32_t i, E4XNode *x)
@@ -176,9 +176,9 @@ namespace avmplus
         }
         else
         {
-            convertToAtomArray();
-            AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
-            aa->setAt (i, AvmCore::genericObjectToAtom(x));
+            convertToE4XNodeList();
+            HeapE4XNodeList* aa = ((HeapE4XNodeList *)(uintptr_t)m_children);
+            aa->list.set(i, x);
         }
     }
 
@@ -193,9 +193,8 @@ namespace avmplus
         }
         else
         {
-            AtomArray *aa = (AtomArray *)(uintptr_t)this->m_children;
-            E4XNode *x = (E4XNode *) AvmCore::atomToGenericObject(aa->getAt(i));
-            return x;
+            HeapE4XNodeList* aa = (HeapE4XNodeList*)(uintptr_t)this->m_children;
+            return aa->list.get(i);
         }
     }
 
@@ -305,7 +304,7 @@ namespace avmplus
         int index = -1;
         for (uint32_t i = 0; i < numNamespaces(); i++)
         {
-            Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
+            Namespace *ns2 = getNamespaces()->list.get(i);
             if (ns2->getPrefix() == ns->getPrefix())
                 index = i;
         }
@@ -313,19 +312,19 @@ namespace avmplus
         // step 2d
         if (index != -1)
         {
-            Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(index));
+            Namespace *ns2 = getNamespaces()->list.get(index);
             if (ns2->getURI() != ns->getURI())
             {
                 // remove match from inscopenamespaces
-                m_namespaces->removeAt (index);
+                m_namespaces->list.removeAt(index);
             }
         }
 
         // step 2e - add namespace to inscopenamespaces
         if (!m_namespaces)
-            m_namespaces = new (core->GetGC()) AtomArray(1);
+            m_namespaces = new (core->GetGC()) HeapNamespaceList(core->GetGC(), 1);
 
-        m_namespaces->push (ns->atom());
+        m_namespaces->list.add(ns);
 
         // step 2f
         // If this nodes prefix == n prefix
@@ -341,7 +340,7 @@ namespace avmplus
         //     set the node prefix to undefined
         for (unsigned int i = 0; i < numAttributes(); i++)
         {
-            E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
+            E4XNode *curAttr = m_attributes->list.get(i);
             Multiname ma;
             curAttr->getQName(&ma, publicNS);
             if (!ma.isAnyNamespace() && ma.getNamespace()->getPrefix() == ns->getPrefix())
@@ -357,7 +356,7 @@ namespace avmplus
     {
         for (uint32_t i = 0; i < numNamespaces(); i++)
         {
-            Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
+            Namespace *ns2 = getNamespaces()->list.get(i);
             if (ns2->getURI() == ns->getURI())
             {
                 if (ns->getPrefix() == undefinedAtom)
@@ -400,7 +399,7 @@ namespace avmplus
         {
             for (uint32_t i = 0; i < y->numNamespaces(); i++)
             {
-                Namespace *ns = AvmCore::atomToNamespace(y->getNamespaces()->getAt(i));
+                Namespace *ns = y->getNamespaces()->list.get(i);
                 if (((prefix == core->kEmptyString) && !ns->hasPrefix()) ||
                     (prefix->atom() == ns->getPrefix()))
                 {
@@ -425,18 +424,18 @@ namespace avmplus
         return 0;
     }
 
-    void E4XNode::BuildInScopeNamespaceList (AvmCore* /*core*/, AtomArray *inScopeNS) const
+    void E4XNode::BuildInScopeNamespaceList(AvmCore* /*core*/, NamespaceList& inScopeNS) const
     {
         const E4XNode *y = this;
         while (y)
         {
             for (uint32_t i = 0; i < y->numNamespaces(); i++)
             {
-                Namespace *ns1 = AvmCore::atomToNamespace (y->getNamespaces()->getAt(i));
+                Namespace *ns1 = y->getNamespaces()->list.get(i);
                 uint32_t j;
-                for (j = 0; j < inScopeNS->getLength(); j++)
+                for (j = 0; j < inScopeNS.length(); j++)
                 {
-                    Namespace *ns2 = AvmCore::atomToNamespace (inScopeNS->getAt(j));
+                    Namespace *ns2 = inScopeNS.get(j);
                     if (ns1->getPrefix() == undefinedAtom)
                     {
                         if (ns1->getURI() == ns2->getURI())
@@ -449,13 +448,13 @@ namespace avmplus
                     }
                 }
 
-                if (j == inScopeNS->getLength()) // no match
+                if (j == inScopeNS.length()) // no match
                 {
 #ifdef STRING_DEBUG
                     Stringp u = ns1->getURI();
                     Stringp p = core->string(ns1->getPrefix());
 #endif
-                    inScopeNS->push (ns1->atom());
+                    inScopeNS.add(ns1);
                 }
             }
 
@@ -471,9 +470,9 @@ namespace avmplus
     void ElementE4XNode::addAttribute (E4XNode *x)
     {
         if (!m_attributes)
-            m_attributes = new (gc()) AtomArray (1);
+            m_attributes = new (gc()) HeapE4XNodeList(gc(), 1);
 
-        m_attributes->push (AvmCore::genericObjectToAtom(x));
+        m_attributes->list.add(x);
     }
 
     void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, Namespacep publicNS)
@@ -524,7 +523,7 @@ namespace avmplus
         if (!numAttr)
             return;
 
-        m_attributes = new (core->GetGC()) AtomArray (numAttr);
+        m_attributes = new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numAttr);
 
         // Now we read the attributes
         index = 0;
@@ -558,7 +557,7 @@ namespace avmplus
             attrObj->getQName(&m2, publicNS);
             for (unsigned int i = 0; i < numAttributes(); i++)
             {
-                E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
+                E4XNode *curAttr = m_attributes->list.get(i);
                 Multiname m;
                 curAttr->getQName(&m, publicNS);
                 if (m.matches(&m2))
@@ -567,7 +566,7 @@ namespace avmplus
                 }
             }
 
-            m_attributes->push(AvmCore::genericObjectToAtom(attrObj));
+            m_attributes->list.add(attrObj);
         }
     }
 
@@ -632,18 +631,18 @@ namespace avmplus
             // step 2 - for each ns in inScopeNamespaces
             if (numNamespaces())
             {
-                y->m_namespaces = new (core->GetGC()) AtomArray (numNamespaces());
+                y->m_namespaces = new (core->GetGC()) HeapNamespaceList(core->GetGC(), numNamespaces());
                 uint32_t i;
                 for (i = 0; i < numNamespaces(); i++)
                 {
-                    y->m_namespaces->push(getNamespaces()->getAt(i));
+                    y->m_namespaces->list.add(getNamespaces()->list.get(i));
                 }
             }
 
             // step 3 - duplicate attribute nodes
             if (numAttributes())
             {
-                y->m_attributes = new (core->GetGC()) AtomArray (numAttributes());
+                y->m_attributes = new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numAttributes());
                 uint32_t i;
                 for (i = 0; i < numAttributes(); i++)
                 {
@@ -658,7 +657,7 @@ namespace avmplus
             if (numChildren())
             {
                 AvmAssert(y->m_children == 0);
-                y->m_children = uintptr_t(new (core->GetGC()) AtomArray (numChildren()));
+                y->m_children = uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numChildren()));
                 for (uint32_t k = 0; k < _length(); k++)
                 {
                     E4XNode *child = _getAt(k);
@@ -725,14 +724,14 @@ namespace avmplus
             return false;
 
         // Order of namespaces does not matter
-        AtomArray *ns1 = getNamespaces();
-        AtomArray *ns2 = v->getNamespaces();
+        NamespaceList *ns1 = getNamespaces();
+        NamespaceList *ns2 = v->getNamespaces();
         for (uint32_t n1 = 0; n1 < numNamespaces(); n1++)
         {
-            Namespace *namespace1 = core->atomToNamespace (ns1->getAt (n1));
+            Namespace *namespace1 = ns1->get(n1);
             for (uint32_t n2 = 0; n2 < numNamespaces(); n2++)
             {
-                Namespace *namespace2 = core->atomToNamespace (ns2->getAt (n2));
+                Namespace *namespace2 = ns2->get(n2);
                 if (namespace1->EqualTo (namespace2))
                     break;
             }
@@ -827,7 +826,7 @@ namespace avmplus
 
         if (!m_children)
         {
-            m_children = uintptr_t(new (core->GetGC()) AtomArray (n));
+            m_children = uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), n));
         }
 
         if (xl)
@@ -883,10 +882,10 @@ namespace avmplus
             i = _length();
             // add a blank spot for this child
             if (!m_children)
-                m_children = uintptr_t(new (core->GetGC()) AtomArray (1));
-            convertToAtomArray();
-            AtomArray *aa = ((AtomArray *)(uintptr_t)m_children);
-            aa->push (Atom(0));
+                m_children = uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), 1));
+            convertToE4XNodeList();
+            HeapE4XNodeList* aa = ((HeapE4XNodeList*)(uintptr_t)m_children);
+            aa->list.add(NULL);
         }
 
         E4XNode *prior = _getAt(i);
@@ -1116,7 +1115,7 @@ namespace avmplus
 
         for (uint32_t i=0, n=numNamespaces(); i<n; i++)
         {
-            Namespace *ns1 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
+            Namespace *ns1 = getNamespaces()->list.get(i);
             size += ns1->bytesUsedDeep();
         }
 

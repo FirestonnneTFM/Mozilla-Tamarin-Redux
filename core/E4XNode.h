@@ -159,6 +159,11 @@ namespace avmplus
         #define AUXBIT 0x1
 
     public:
+        
+        typedef GCList<E4XNode*> E4XNodeList;
+        typedef HeapList<E4XNodeList> HeapE4XNodeList;
+
+    public:
         E4XNode(E4XNode* parent) : m_parent(parent), m_nameOrAux(0) { }
 
         // we have virtual functions, so we probably need a virtual dtor
@@ -171,7 +176,7 @@ namespace avmplus
         virtual Stringp getValue() const = 0;
         virtual void setValue (String *s) = 0;
 
-        E4XNode* getParent() const { return m_parent; };
+        E4XNode* getParent() const { return m_parent; }
         void setParent(E4XNode* n) { m_parent = n; }
 
         // Not used as bit fields (only one bit at a time can be set) but
@@ -189,21 +194,21 @@ namespace avmplus
 
         virtual int getClass() const = 0;
 
-        virtual uint32_t numAttributes() const { return 0; };
-        virtual AtomArray *getAttributes() const { return 0; };
-        virtual E4XNode *getAttribute(uint32_t /*index*/) const { return NULL; };
+        virtual uint32_t numAttributes() const { return 0; }
+        virtual HeapE4XNodeList* getAttributes() const { return 0; }
+        virtual E4XNode *getAttribute(uint32_t /*index*/) const { return NULL; }
 
-        virtual uint32_t numNamespaces() const { return 0; };
-        virtual AtomArray *getNamespaces() const { return 0; };
+        virtual uint32_t numNamespaces() const { return 0; }
+        virtual HeapNamespaceList* getNamespaces() const { return 0; }
 
-        virtual uint32_t numChildren()   const { return 0; };
-        virtual E4XNode *_getAt(uint32_t /*i*/) const { return 0; };
+        virtual uint32_t numChildren()   const { return 0; }
+        virtual E4XNode *_getAt(uint32_t /*i*/) const { return 0; }
 
-        virtual void clearChildren() {};
-        virtual void setChildAt (uint32_t /*i*/, E4XNode* /*x*/) {};
-        virtual void insertChild (uint32_t /*i*/, E4XNode* /*x*/) {};
-        virtual void removeChild (uint32_t /*i*/) {};
-        virtual void convertToAtomArray() {};
+        virtual void clearChildren() {}
+        virtual void setChildAt (uint32_t /*i*/, E4XNode* /*x*/) {}
+        virtual void insertChild (uint32_t /*i*/, E4XNode* /*x*/) {}
+        virtual void removeChild (uint32_t /*i*/) {}
+        virtual void convertToE4XNodeList() {}
 
         bool hasSimpleContent() const;
         bool hasComplexContent() const;
@@ -229,7 +234,7 @@ namespace avmplus
         // AddInScopeNamespace (Namespace)
 
         // Corresponds to [[Length]] in the docs
-        virtual uint32_t _length() const { return 0; };
+        virtual uint32_t _length() const { return 0; }
 
         bool _equals(Toplevel* toplevel, AvmCore *core, E4XNode *value) const;
 
@@ -238,12 +243,12 @@ namespace avmplus
         virtual void _insert (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value);
         virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32_t entry, Atom value, Atom pastValue = 0);
         virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS);
-        virtual void _append (E4XNode* /*childNode*/) { AvmAssert(0); };
+        virtual void _append (E4XNode* /*childNode*/) { AvmAssert(0); }
         // Extract a namespace from a tag name, and return the new tag name in tagName
         Namespace *FindNamespace(AvmCore *core, Toplevel *toplevel, Stringp& tagName, bool bAttribute);
         int FindMatchingNamespace(AvmCore *core, Namespace *ns);
 
-        void BuildInScopeNamespaceList(AvmCore *core, AtomArray *list) const;
+        void BuildInScopeNamespaceList(AvmCore *core, NamespaceList& list) const;
         void dispose();
 
         MMgc::GC *gc() const { return MMgc::GC::GetGC(this); }
@@ -267,8 +272,8 @@ namespace avmplus
     public:
         TextE4XNode (E4XNode *parent, String *value);
 
-        int getClass() const { return kText; };
-        Stringp getValue() const { return m_value; };
+        int getClass() const { return kText; }
+        Stringp getValue() const { return m_value; }
         void setValue (String *s) { m_value = s; }
 
 #ifdef DEBUGGER
@@ -284,8 +289,8 @@ namespace avmplus
     public:
         CommentE4XNode (E4XNode *parent, String *value);
 
-        int getClass() const { return kComment; };
-        Stringp getValue() const { return m_value; };
+        int getClass() const { return kComment; }
+        Stringp getValue() const { return m_value; }
         void setValue (String *s) { m_value = s; }
 
 #ifdef DEBUGGER
@@ -301,8 +306,8 @@ namespace avmplus
     public:
         AttributeE4XNode (E4XNode *parent, String *value);
 
-        int getClass() const { return kAttribute; };
-        Stringp getValue() const { return m_value; };
+        int getClass() const { return kAttribute; }
+        Stringp getValue() const { return m_value; }
         void setValue (String *s) { m_value = s; }
 
 #ifdef DEBUGGER
@@ -318,8 +323,8 @@ namespace avmplus
     public:
         CDATAE4XNode (E4XNode *parent, String *value);
 
-        int getClass() const { return kCDATA; };
-        Stringp getValue() const { return m_value; };
+        int getClass() const { return kCDATA; }
+        Stringp getValue() const { return m_value; }
         void setValue (String *s) { m_value = s; }
 
 #ifdef DEBUGGER
@@ -336,8 +341,8 @@ namespace avmplus
     public:
         PIE4XNode (E4XNode *parent, String *value);
 
-        int getClass() const { return kProcessingInstruction; };
-        Stringp getValue() const { return m_value; };
+        int getClass() const { return kProcessingInstruction; }
+        Stringp getValue() const { return m_value; }
         void setValue (String *s) { m_value = s; }
 
 #ifdef DEBUGGER
@@ -349,15 +354,13 @@ namespace avmplus
     // Currently this is 24-bytes in size
     class ElementE4XNode : public E4XNode
     {
-        // This stores E4XNode pointers and NOT Atoms
-        DWB(AtomArray *) m_attributes;
+        DWB(HeapE4XNodeList*) m_attributes;
 
-        // This stores Atoms (atom-ized Namespace pointers)
-        DWB(AtomArray *) m_namespaces;
+        DWB(HeapNamespaceList*) m_namespaces;
 
         // If the low bit of this integer is set, this value points directly
         // to a single child (one E4XNode *).  If there are multiple children,
-        // this points to an AtomArray containing E4XNode pointers (NOT Atoms)
+        // this points to a HeapE4XNodeList
         DWB(uintptr_t) m_children;
         #define SINGLECHILDBIT 0x1
 
@@ -365,33 +368,33 @@ namespace avmplus
 
     public:
         ElementE4XNode (E4XNode *parent);
-        int getClass() const { return kElement; };
+        int getClass() const { return kElement; }
 
-        uint32_t numAttributes() const { return (m_attributes ? m_attributes->getLength() : 0); };
-        AtomArray *getAttributes() const { return m_attributes; };
-        E4XNode *getAttribute(uint32_t index) const { return (E4XNode *)AvmCore::atomToGenericObject(m_attributes->getAt(index)); };
+        uint32_t numAttributes() const { return (m_attributes ? m_attributes->list.length() : 0); }
+        HeapE4XNodeList* getAttributes() const { return m_attributes; }
+        E4XNode *getAttribute(uint32_t index) const { return m_attributes->list.get(index); }
         void addAttribute (E4XNode *x);
 
-        uint32_t numNamespaces() const { return (m_namespaces ? m_namespaces->getLength() : 0); };
-        AtomArray *getNamespaces() const { return m_namespaces; };
+        uint32_t numNamespaces() const { return (m_namespaces ? m_namespaces->list.length() : 0); }
+        HeapNamespaceList* getNamespaces() const { return m_namespaces; }
 
-        uint32_t numChildren()   const;// { return (m_children ? m_children->getLength() : 0); };
+        uint32_t numChildren()   const;
 
         void clearChildren();
         void setChildAt (uint32_t i, E4XNode *x);
         #define SINGLECHILDBIT 0x1
         void insertChild (uint32_t i, E4XNode *x);
         void removeChild (uint32_t i);
-        void convertToAtomArray();
+        void convertToE4XNodeList();
 
-        Stringp getValue() const { return 0; };
+        Stringp getValue() const { return 0; }
         void setValue (String *s) { (void)s; AvmAssert(s == 0); }
 
         void setNotification(AvmCore* core, FunctionObject* f, Namespacep publicNS);
         FunctionObject* getNotification() const;
 
         // E4X support routines below
-        uint32_t _length() const { return numChildren(); };
+        uint32_t _length() const { return numChildren(); }
         E4XNode *_getAt(uint32_t i) const;
 
         void _append (E4XNode *childNode);
