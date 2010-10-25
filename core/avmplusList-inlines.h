@@ -122,9 +122,9 @@ namespace avmplus
         gc->Free(mem);
     }
 
-    REALLY_INLINE /*static*/ size_t GCListHelper::getSize(MMgc::GC* gc, void* mem)
+    REALLY_INLINE /*static*/ size_t GCListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
     {
-        return gc->Size(mem);
+        return MMgc::GC::Size(mem);
     }
 
     REALLY_INLINE /*static*/ void GCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
@@ -188,9 +188,9 @@ namespace avmplus
         gc->Free(mem);
     }
 
-    REALLY_INLINE /*static*/ size_t RCListHelper::getSize(MMgc::GC* gc, void* mem)
+    REALLY_INLINE /*static*/ size_t RCListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
     {
-        return gc->Size(mem);
+        return MMgc::GC::Size(mem);
     }
 
     REALLY_INLINE /*static*/ void RCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
@@ -270,9 +270,9 @@ namespace avmplus
         gc->Free(mem);
     }
 
-    REALLY_INLINE /*static*/ size_t AtomListHelper::getSize(MMgc::GC* gc, void* mem)
+    REALLY_INLINE /*static*/ size_t AtomListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
     {
-        return gc->Size(mem);
+        return MMgc::GC::Size(mem);
     }
 
     REALLY_INLINE /*static*/ void AtomListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
@@ -336,9 +336,9 @@ namespace avmplus
         gc->Free(mem);
     }
 
-    REALLY_INLINE /*static*/ size_t WeakRefListHelper::getSize(MMgc::GC* gc, void* mem)
+    REALLY_INLINE /*static*/ size_t WeakRefListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
     {
-        return gc->Size(mem);
+        return MMgc::GC::Size(mem);
     }
 
     REALLY_INLINE /*static*/ void WeakRefListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
