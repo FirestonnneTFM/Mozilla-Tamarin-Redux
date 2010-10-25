@@ -111,12 +111,15 @@ namespace MMgc
             block->flags[1] = flagbits1;
 #ifdef _DEBUG
             (void)originalSize;
-            if (flags & GC::kZero && !RUNNING_ON_VALGRIND)
+            if (flags & GC::kZero)
             {
-                // AllocBlock should take care of this
-                for(int i=0, n=(int)(requestSize/sizeof(int)); i<n; i++) {
-                    if(((int*)item)[i] != 0)
-                        GCAssert(false);
+                if (!RUNNING_ON_VALGRIND)
+                {
+                    // AllocBlock should take care of this
+                    for(int i=0, n=(int)(requestSize/sizeof(int)); i<n; i++) {
+                        if(((int*)item)[i] != 0)
+                            GCAssert(false);
+                    }
                 }
             }
 #endif
