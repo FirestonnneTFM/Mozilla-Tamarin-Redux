@@ -211,15 +211,6 @@ namespace avmplus
         return false;
     }
 
-    bool DebugFrame::methodName(Stringp&) {
-        return false; // base implementation
-    }
-
-    bool DebugFrame::argumentName(int, Stringp&) {
-        return false; // base implementation
-    }
-
-
     bool DebugFrame::methodName(Stringp&)
     {
         return false;
