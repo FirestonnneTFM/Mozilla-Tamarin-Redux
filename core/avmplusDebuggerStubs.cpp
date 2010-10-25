@@ -52,7 +52,7 @@ namespace avmplus
         , in_trace(false)
         , astraceStartTime(VMPI_getTime())
         , core(core)
-        , abcList(core->GetGC())
+        , abcList(core->GetGC(), kListInitialCapacity)
         , pool2abcIndex()
     {
     }
@@ -140,7 +140,11 @@ namespace avmplus
     }
 
     AbcFile::AbcFile(AvmCore* core, int size)
+        : core(core),
+          source(core->GetGC(), kListInitialCapacity),
+          byteCount(size)
     {
+        sourcemap = new (core->GetGC()) HeapHashtable(core->GetGC());
     }
 
     int AbcFile::sourceCount() const
@@ -168,6 +172,8 @@ namespace avmplus
     }
 
     SourceFile::SourceFile(MMgc::GC* gc, Stringp name)
+        : named(name)
+        , functions(gc, kListInitialCapacity)
     {
     }
 
