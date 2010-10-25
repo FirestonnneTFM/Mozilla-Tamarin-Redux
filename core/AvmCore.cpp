@@ -623,7 +623,7 @@ namespace avmplus
                 compiledMethodInfo.handler.function = aotInfo->activationTraitsInitFunctions[method->method_id()];
                 activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo);
             }
-            method->resolveActivation(toplevel);
+            method->activationTraits()->resolveSignatures(toplevel);
         }
         method->declaringTraits()->initActivationTraits(toplevel);
 #else
@@ -831,6 +831,29 @@ namespace avmplus
         return handleActionBlock(buffer, 0, toplevel, ninit, codeContext, api);
     }
 #endif // VMCFG_EVAL
+
+#ifdef VMCFG_AOT
+    void AvmCore::handleAOT(Toplevel* toplevel, CodeContext* codeContext)
+    {
+        DomainEnv* domainEnv = codeContext->domainEnv();
+        Domain* domain = domainEnv->domain();
+
+        for(uint32_t i=0; i<nAOTInfos; i++)
+        {
+            ReadOnlyScriptBufferImpl scriptBufferImpl(aotInfos[i].abcBytes, aotInfos[i].nABCBytes);
+            ScriptBuffer code(&scriptBufferImpl);
+            NativeInitializer ninit(this, &aotInfos[i], 0, 0);
+
+            PoolObject *userPool = parseActionBlock(code, 0, toplevel, domain, &ninit, getAPI(NULL));
+        
+            #ifdef DEBUGGER
+            AbcParser::addAOTDebugInfo(userPool);
+            #endif
+
+            handleActionPool(userPool, toplevel, codeContext);
+        }
+    }
+#endif // VMCFG_AOT
 
 /*
 11.9.3 The Abstract Equality Comparison Algorithm

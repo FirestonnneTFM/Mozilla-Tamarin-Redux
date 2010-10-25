@@ -856,9 +856,10 @@ class RuntestBase:
                 shutil.copyfile(abcfile, outabc)
                 self.js_print('AOT compilation of %s' % (outabc))
 
-                t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
-                (f,err,exitcode) = self.run_pipe('%s %s %s --output %s --name %s %s %s %s' % (
-                    sys.executable, os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
+				# t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
+				cmd = '%s -Xshell -Xoutput %s %s %s %s' % (os.path.join(self.aotsdk, 'bin/pfi'), output, self.aotextraargs, " ".join(extraabcs), outabc)
+				self.js_print(cmd)
+				(f,err,exitcode) = self.run_pipe(cmd)
 
                 for line in f:
                     self.js_print(("file '%s'>>> " % abcfile) + line.strip())

@@ -81,6 +81,8 @@ namespace avmplus
         this->_native.thunker = native_info->thunker;
         this->_native.handler = native_info->handler;
         this->setAotCompiled();
+        
+        declTraits->core->exec->init(this, native_info);
     }
 #endif
 

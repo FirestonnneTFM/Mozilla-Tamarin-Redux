@@ -454,6 +454,7 @@ namespace avmplus
         BuiltinType paramTraitsBT(int32_t i) const;
         Atom getDefaultValue(int32_t i) const;
 
+        bool allowExtraArgs() const;
         bool argcOk(int32_t argc) const;
         void boxArgs(AvmCore* core, int32_t argc, const uint32_t* ap, Atom* out) const;
 

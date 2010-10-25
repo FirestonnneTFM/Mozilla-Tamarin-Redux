@@ -399,6 +399,13 @@ private:
         GprImtThunkProc _implImtGPR;
     };
 #endif
+
+#ifdef VMCFG_AOT
+public:
+  inline GprMethodProc implGPR() const { return _implGPR; }
+  inline FprMethodProc implFPR() const { return _implFPR; }
+#endif
+  
 };
 
 /**

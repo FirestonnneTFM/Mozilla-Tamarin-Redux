@@ -219,7 +219,18 @@ namespace avmplus
         return false; // base implementation
     }
 
-    DebugStackFrame::DebugStackFrame(int nbr, CallStackNode* tr, Debugger* debug)
+
+    bool DebugFrame::methodName(Stringp&)
+    {
+        return false;
+    }
+
+    bool DebugFrame::argumentName(int, Stringp&)
+    {
+        return false;
+    }
+
+    DebugStackFrame::DebugStackFrame(int nbr, CallStackNode* tr, Debugger* debug) : trace(NULL)
     {
     }
 
@@ -258,7 +269,7 @@ namespace avmplus
 
     bool DebugStackFrame::setLocal(int which, Atom& val)
     {
-        return false;
+       return false;
     }
 }
 

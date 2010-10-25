@@ -520,7 +520,7 @@ namespace avmshell
         {
 #ifdef VMCFG_AOT
             if (filename == NULL) {
-                handleAOT(this, user_codeContext->domainEnv()->domain(), user_codeContext->domainEnv(), shell_toplevel, user_codeContext);
+                handleAOT(shell_toplevel, user_codeContext);
             } else
 #endif
             if (AbcParser::canParse(code) == 0) {
