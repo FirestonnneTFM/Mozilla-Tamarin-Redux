@@ -211,6 +211,14 @@ namespace avmplus
         return false;
     }
 
+    bool DebugFrame::methodName(Stringp&) {
+        return false; // base implementation
+    }
+
+    bool DebugFrame::argumentName(int, Stringp&) {
+        return false; // base implementation
+    }
+
     DebugStackFrame::DebugStackFrame(int nbr, CallStackNode* tr, Debugger* debug)
     {
     }
@@ -222,6 +230,14 @@ namespace avmplus
 
     bool DebugStackFrame::dhis(Atom& a)
     {
+        return false;
+    }
+
+    bool DebugStackFrame::methodName(Stringp& result) {
+        return false;
+    }
+
+    bool DebugStackFrame::argumentName(int which, Stringp& result) {
         return false;
     }
 
