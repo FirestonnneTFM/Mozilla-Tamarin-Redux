@@ -82,6 +82,7 @@ except ImportError:
 
 
 class RuntestBase:
+    abcOnlyExt = '.abc_' # only run, don't compile these abc files - underscore is used so that tests are not deleted when removing old abc files
     abcasmExt = '.abs'
     abcasmRunner = 'bash ../../utils/abcasm/abcasm.sh'
     abcasmShell = 'abcasm/abs_helper'
@@ -971,12 +972,27 @@ class RuntestBase:
                 print 'The pexpect module must be installed to generate ats swfs.'
                 exit(1)
             for test in tests:
+                (testdir, ext) = splitext(test)
+                if self.aotsdk:
+                    # We use the test config file to mark abc files that fail to AOT compile,
+                    # so we need to take account of that here before we try to compile them.
+                    settings = self.getLocalSettings(testdir)
+                    if settings.has_key('.*') and settings['.*'].has_key('skip'):
+                        self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
+                        continue
+                    if test.endswith(self.abcOnlyExt):
+                        #copy the abc
+                        copyFile = string.replace(test, "/", ".")
+                        copyFile = os.path.join( self.aotout, copyFile )
+                        shutil.copy(test, copyFile)
+                        #compile the abc
+                        self.compile_aot( test )
+                        continue
                 if test.endswith(self.executableExtensions):
                     total -= 1
                     continue
                 self.js_print('%d\tcompiling %s' % (total,test))
                 self.compile_test(test)
-                (testdir, ext) = splitext(test)
                 if not exists(testdir+".abc"):
                     print("ERROR abc files %s.abc not created" % (testdir))
                     self.ashErrors.append("abc files %s.abc not created" % (testdir))
@@ -987,11 +1003,6 @@ class RuntestBase:
                         extrabcs = [self.abcasmShell+'.abc']
                         if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
                             self.run_pipe('java -jar %s %s' % (self.asc, self.abcasmShell+'.as'))
-                    if isfile("%s.avm_args" % test):
-                        if open("%s.avm_args" % test).read().find("mops.abc_") >= 0:
-                            mopshelper = os.path.join(self.aotout, "mopshelper.abc")
-                            shutil.copy("mops/mops.abc_", mopshelper)
-                            extrabcs += [mopshelper]
                     self.compile_aot(testdir+".abc", extrabcs)
                 total -= 1;
         else:  #pexpect available

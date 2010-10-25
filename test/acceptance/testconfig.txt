@@ -360,10 +360,50 @@ abcasm/nullCheck/CallStatic, .*-Dverifyonly.*, skip, https://bugzilla.mozilla.or
 ####################
 # AOT specific
 ####################
-as3/sampling/FunctionEntry,		.*AOT.*	, skip, AOT does not yet support profiling
-as3/sampling/InvocationSampling,	.*AOT.*	, skip, AOT does not yet support profiling
-as3/ShellClasses/Domain.as,		.*AOT.*	, skip, AOT does not support loadBytes()
-regress/vector_domain_bug,		.*AOT.*	, skip, AOT does not support loadBytes()
+as3/sampling/FunctionEntry,			.*AOT.*	, skip, AOT does not yet support profiling
+as3/sampling/InvocationSampling,		.*AOT.*	, skip, AOT does not yet support profiling
+as3/ShellClasses/Domain.as,			.*AOT.*	, skip, AOT does not support loadBytes()
+regress/vector_domain_bug,			.*AOT.*	, skip, AOT does not support loadBytes()
+regress/security/bug567284,			.*AOT.*	, skip, AOT does not support loadBytes()
+regress/security/bug_441280,			.*AOT.*	, skip, AOT does not support loadBytes()
+versioning/.*,					.*AOT.*	, skip, AOT does not support versioning yet
+abcasm/bug_481171,				.*AOT.*	, skip, unlabled backwards branches aren't errors with the GO
+as3/Definitions/FunctionAccessors/InfRec,	.*AOT.*	, skip, AOT'ed apps don't support script timeout
+abcasm/bug_554915b,				.*AOT.*	, skip, AOT'ed apps don't support script timeout
+abcasm/bug_554915a,				.*AOT.*	, skip, AOT'ed apps don't support script timeout
+abcasm/bug_555006a,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+abcasm/bug_555006b,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+misc/invalid_opcodes,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_498979,				.*AOT.*	, skip, AOT catches Verify errors at compile time 
+regress/bug_520888,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_548684,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555045,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555048,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555053,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555097a,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555097b,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555097c,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555102,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555542,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555614,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555705,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555612,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_558442a,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_558442b,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/bug_555568,				.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/security/bug_555059b,			.*AOT.*	, skip, AOT catches Verify errors at compile time
+regress/security/bug_556543,			.*AOT.*	, skip, AOT catches Verify errors at compile time
+ecma3/Statements/eregress_74474_002,		.*AOT.*	, skip, FIXME: compiler OOM
+ecma3/Statements/eregress_74474_003,		.*AOT.*	, skip, FIXME: compiler OOM
+spidermonkey/js1_5/Regress/regress-80981,	.*AOT.*	, skip, FIXME: compiler OOM
+spidermonkey/js1_5/Regress/regress-111557,	.*AOT.*	, skip, FIXME: compiler OOM
+spidermonkey/js1_5/Regress/regress-155081,	.*AOT.*	, skip, FIXME: compiler OOM
+spidermonkey/js1_5/Regress/regress-155081-2,	.*AOT.*	, skip, FIXME: compiler OOM
+spidermonkey/js1_5/Regress/regress-224956,	.*AOT.*	, skip, AOT catches Verify errors at compile time
+as3/Vector/initializerLargeVector,		.*AOT.*	, skip, FIXME: compiler OOM
+ecma3/Exceptions/bug127913,			.*AOT.*	, skip, AOT doesn't catch stack overflows.  Watson bug 2741518.
+spidermonkey/js1_5/Exceptions/regress-121658,	.*AOT.*	, skip, AOT doesn't catch stack overflows.  Watson bug 2741518.
+spidermonkey/js1_5/Regress/regress-234389,	.*AOT.*	, skip, AOT doesn't catch stack overflows.  Watson bug 2741518.
 
 ####################
 # Migrated spidermonkey tests

@@ -63,7 +63,6 @@ except ImportError:
     print "   (directory has been moved to test/util)."
 
 class AcceptanceRuntest(RuntestBase):
-    abcOnlyExt = '.abc_'  # only run, don't compile these abc files - underscore is used so that tests are not deleted when removing old abc files
     runESC = False
     escbin = '../../esc/bin/'
     androidthreads = False
