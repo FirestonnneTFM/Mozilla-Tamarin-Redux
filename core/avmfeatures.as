@@ -428,6 +428,7 @@ var FEATURES =
     </requires>
     <defines> VMCFG_AOT </defines>
     <defines> VMCFG_AOTSHELL </defines>
+    <defines> VMCFG_METHODENV_IMPL32 </defines>
   </feature>
 
   <feature>

@@ -1661,14 +1661,21 @@ namespace avmplus
         AvmAssert(aotInfo->activationTraitsInitFunctions != NULL);
         // See comment in initActivationTraits about why this can be called more than once per Traits
         if (activationTraits->init == NULL) {
-        if (aotInfo->activationTraitsInitFunctions[m->method_id()]) {
-            NativeMethodInfo compiledMethodInfo;
-            compiledMethodInfo.thunker = aotThunker;
-            compiledMethodInfo.handler.function = aotInfo->activationTraitsInitFunctions[m->method_id()];
-            activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo);
+            if (aotInfo->activationTraitsInitFunctions[m->method_id()]) {
+                NativeMethodInfo compiledMethodInfo;
+                compiledMethodInfo.thunker = aotThunker;
+                compiledMethodInfo.handler.function = aotInfo->activationTraitsInitFunctions[m->method_id()];
+                activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo);
+            }
+            // The following comes from Verifier::write() TODO: refactor so we can share this code
+            const ScopeTypeChain *scope = m->activationScope();
+            if (scope == NULL) {
+                GC* gc = m->pool()->core->GetGC();
+                scope = m->declaringScope()->cloneWithNewTraits(gc, activationTraits);
+                activationTraits->setDeclaringScopes(scope);
+                m->init_activationScope(scope);
+            }
         }
-        m->resolveActivation(toplevel);
-    }
     }
 
     void Traits::initActivationTraits(Toplevel *toplevel)
@@ -1690,26 +1697,26 @@ namespace avmplus
 
             switch (ne.kind)
             {
-                case TRAIT_Slot:
-                case TRAIT_Const:
-                case TRAIT_Class:
-                    break;
-                case TRAIT_Method:
-                case TRAIT_Getter:
-                case TRAIT_Setter:
-                {
-                    MethodInfo* m = pool->getMethodInfo(ne.id);
-                    if (m->needActivation()) {
-                        hookUpActivationTraitsInitMethodForTraitsMethod(core, toplevel, m);
-                    }
-                    break;
+            case TRAIT_Slot:
+            case TRAIT_Const:
+            case TRAIT_Class:
+                break;
+            case TRAIT_Method:
+            case TRAIT_Getter:
+            case TRAIT_Setter:
+            {
+                MethodInfo* m = pool->getMethodInfo(ne.id);
+                if (m->needActivation()) {
+                    hookUpActivationTraitsInitMethodForTraitsMethod(core, toplevel, m);
                 }
-                default:
-                    // unsupported traits type -- can't happen, caught in AbcParser::parseTraits
-                    AvmAssert(0);
-                    break;
+                break;
             }
-        } // for i
+            default:
+                // unsupported traits type -- can't happen, caught in AbcParser::parseTraits
+                AvmAssert(0);
+                break;
+            }
+        }
     }
 #endif
 

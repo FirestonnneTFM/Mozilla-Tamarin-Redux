@@ -1124,7 +1124,7 @@ static int32_t argCoerceLoop(MethodEnv* env, ARG_TYPE_ITER1 callerTypeIter, ARG_
         // no more normal params for callee
         if (calleeT == VOID_TYPE)
         {
-            if (!info->allowExtraArgs())
+            if (!ms->allowExtraArgs())
             {
                 toplevel->argumentErrorClass()->throwError(kWrongArgumentCountError,
                                                            core->toErrorString(info),
@@ -1465,15 +1465,15 @@ void argDescArgsToAtomv(Atom* args, char* argDesc, MethodEnv* env, va_list ap)
 }
 
 #ifdef VMCFG_AOT
-Atom aotThunker(MethodEnv* env, uint32_t argc, Atom* argv)
+uintptr_t aotThunker(MethodEnv* env, int32_t argc, uint32_t* argv)
 {
     Traits* rt = env->method->getMethodSignature()->returnTraits();
-    return coerce32CdeclArgDescEnter(rt, env, argc, (uint32_t* )argv);
+    return coerce32CdeclArgDescEnter(rt, env, argc, argv);
 }
 
-double aotThunkerN(MethodEnv* env, uint32_t argc, Atom* argv)
+double aotThunkerN(MethodEnv* env, int32_t argc, uint32_t* argv)
 {
-    return coerceNCdeclArgDescEnter(env, argc, (uint32_t* )argv);
+    return coerceNCdeclArgDescEnter(env, argc, argv);
 }
 #endif
 

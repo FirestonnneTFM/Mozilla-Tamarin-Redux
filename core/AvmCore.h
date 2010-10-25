@@ -717,6 +717,20 @@ const int kBufferPadding = 16;
                                     CodeContext *codeContext,
                                     uint32_t api);
 
+#ifdef VMCFG_AOT
+        /**
+         * Parse and execute the ABC blocks linked into the runtime by the AOT
+         * compiler. 
+         * @param toplevel the Toplevel object to execute against.
+         * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
+         * @throws Exception If an error occurs, an Exception object will
+         *         be thrown using the AVM+ exceptions mechanism.
+         *         Calls to handleAOT should be bracketed
+         *         in TRY/CATCH.
+         */
+        void handleAOT(Toplevel* toplevel, CodeContext* codeContext);
+#endif
+
 #ifdef VMCFG_EVAL
         /**
          * Compile the source code held in 'code' and then execute it

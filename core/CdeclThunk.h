@@ -73,8 +73,8 @@ namespace avmplus
     void argDescArgsToAtomv(Atom* args, char* argDesc, MethodEnv* env, va_list ap);
 
 #ifdef VMCFG_AOT
-    Atom aotThunker(MethodEnv* env, uint32_t argc, Atom* argv);
-    double aotThunkerN(MethodEnv* env, uint32_t argc, Atom* argv);
+    uintptr_t aotThunker(MethodEnv* env, int32_t argc, uint32_t* argv);
+    double aotThunkerN(MethodEnv* env, int32_t argc, uint32_t* argv);
 #endif
 }
 

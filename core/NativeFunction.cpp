@@ -131,7 +131,7 @@ namespace avmplus
 #ifdef VMCFG_AOT
     bool NativeInitializer::getCompiledInfo(NativeMethodInfo *info, Multiname &returnTypeName, uint32_t i) const
     {
-        info->thunker = (AvmThunkNativeThunker)0;
+        info->thunker = (GprMethodProc)0;
 
         if (i < compiledMethodCount && compiledMethods[i])
         {
@@ -140,7 +140,7 @@ namespace avmplus
                 Multiname numberTypeName(NUMBER_TYPE->ns(), NUMBER_TYPE->name());
                 isNumberRetType = returnTypeName.matches(&numberTypeName);
             }
-            info->thunker = isNumberRetType ? (AvmThunkNativeThunker)aotThunkerN : (AvmThunkNativeThunker)aotThunker;
+            info->thunker = isNumberRetType ? (GprMethodProc)aotThunkerN : (GprMethodProc)aotThunker;
             info->handler.function = compiledMethods[i];
             return true;
         }

@@ -437,6 +437,11 @@ REALLY_INLINE const uint8_t* MethodSignature::abc_code_start() const
 }
 #endif
 
+REALLY_INLINE bool MethodSignature::allowExtraArgs() const
+{
+    return _allowExtraArgs;
+}
+
 REALLY_INLINE int32_t MethodSignature::requiredParamCount() const
 {
     return _param_count - _optional_count;
