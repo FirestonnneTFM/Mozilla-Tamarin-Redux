@@ -44,8 +44,7 @@ namespace avmplus
 {
     ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, uint32_t capacity)
         : ScriptObject(vtable, proto, 0),
-        // NB: GetGC(this) is measurably faster than vtable->...GetGC() in microbenchmarks.
-        m_denseArr(MMgc::GC::GetGC(this), capacity)
+        m_denseArr(vtable->core()->GetGC(), capacity)
     {
         SAMPLE_FRAME("Array", core());
         AvmAssert(traits()->getSizeOfInstance() >= sizeof(ArrayObject));
@@ -61,8 +60,7 @@ namespace avmplus
 
     ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, Atom *argv, int argc)
         : ScriptObject(vtable, proto, 0),
-          // NB: GetGC(this) is measurably faster than vtable->...GetGC() in microbenchmarks.
-          m_denseArr(MMgc::GC::GetGC(this), argc, argv),
+          m_denseArr(vtable->core()->GetGC(), argc, argv),
           m_length(argc)
     {
     }
