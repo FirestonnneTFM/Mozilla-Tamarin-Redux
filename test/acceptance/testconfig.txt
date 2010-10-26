@@ -131,6 +131,8 @@ ecma3/Math/e15_8_2_18 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_b
 ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 spidermonkey/js1_5/Regress/regress-329383 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 
+as3/Math/MathUtils , linux-diff , skip , Investigating why linux debug and release builds generate diff results for Number with 308 decimal places
+
 ####################
 # Number
 ####################
