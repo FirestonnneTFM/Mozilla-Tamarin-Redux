@@ -39,10 +39,6 @@
 
 #include "avmplus.h"
 
-#ifdef VMCFG_AOT
-#include "AOTCompiler.h"
-#endif
-
 namespace avmplus
 {
     /**
@@ -80,7 +76,7 @@ namespace avmplus
             if(version == 0 && code.getSize() == 24) // only ABC "references" -- these are 0.0 version followed by SHA1
             {
                 void *sha1 = (void *)(code.getBuffer() + 4);
-                for(int i = 0; i < nAOTInfos; i++)
+                for(uint32_t i = 0; i < nAOTInfos; i++)
                 {
                     const AOTInfo *aotInfo = &aotInfos[i];
                     AvmAssert(aotInfo != NULL);

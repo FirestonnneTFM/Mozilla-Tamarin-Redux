@@ -1645,8 +1645,7 @@ namespace avmplus
 
 
 #ifdef VMCFG_AOT
-
-    static inline void hookUpActivationTraitsInitMethodForTraitsMethod(AvmCore* core, Toplevel *toplevel, MethodInfo* m)
+    static inline void hookUpActivationTraitsInitMethodForTraitsMethod(AvmCore* core, MethodInfo* m)
     {
         AvmAssert(m->needActivation());
 
@@ -1678,15 +1677,14 @@ namespace avmplus
         }
     }
 
-    void Traits::initActivationTraits(Toplevel *toplevel)
+    void Traits::initActivationTraits()
     {
         // Note: this can be called multiple times per Traits from initScript, which must call this in case it's needed
         // but is itself called once per Toplevel
         const uint8_t* pos = traitsPosStart();
 
         if (this->init->needActivation()) {
-            MethodInfo* m = this->init;
-            hookUpActivationTraitsInitMethodForTraitsMethod(core, toplevel, this->init);
+            hookUpActivationTraitsInitMethodForTraitsMethod(core, this->init);
         }
 
         NameEntry ne;
@@ -1707,7 +1705,7 @@ namespace avmplus
             {
                 MethodInfo* m = pool->getMethodInfo(ne.id);
                 if (m->needActivation()) {
-                    hookUpActivationTraitsInitMethodForTraitsMethod(core, toplevel, m);
+                    hookUpActivationTraitsInitMethodForTraitsMethod(core, m);
                 }
                 break;
             }

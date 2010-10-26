@@ -386,7 +386,7 @@ namespace avmplus
         void resolveSignatures(const Toplevel* toplevel);
 
 #ifdef VMCFG_AOT
-        void initActivationTraits(Toplevel *toplevel);
+        void initActivationTraits();
 #endif
 
         // convenient wrapper to check for null (returns "BUILTIN_any")

@@ -417,7 +417,7 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc>Enables the ahead-of-time compiler. This feature is highly experimental. </desc>
+    <desc>Enables the ahead-of-time compiler.</desc>
 
     <name> AVMFEATURE_AOT  </name>
     <requires>
@@ -428,6 +428,7 @@ var FEATURES =
     </requires>
     <defines> VMCFG_AOT </defines>
     <defines> VMCFG_AOTSHELL </defines>
+    <defines> VMCFG_CDECL </defines>
     <defines> VMCFG_METHODENV_IMPL32 </defines>
   </feature>
 
@@ -479,6 +480,27 @@ var FEATURES =
          the expedient solution is to only ever allow one or the other -->
     <name> AVMFEATURE_WORDCODE_INTERP </name>
     <name> AVMFEATURE_JIT </name>
+  </at-most-one>
+
+  <at-most-one>
+    <!-- AOT currently implies no JIT or Interpreter, but this could be fixed
+         in the future if necessary -->
+    <name> AVMFEATURE_AOT </name>
+    <name> AVMFEATURE_JIT </name>
+  </at-most-one>
+
+  <at-most-one>
+    <!-- AOT currently implies no JIT or Interpreter, but this could be fixed
+         in the future if necessary -->
+    <name> AVMFEATURE_AOT </name>
+    <name> AVMFEATURE_ABC_INTERP </name>
+  </at-most-one>
+
+  <at-most-one>
+    <!-- AOT currently implies no JIT or Interpreter, but this could be fixed
+         in the future if necessary -->
+    <name> AVMFEATURE_AOT </name>
+    <name> AVMFEATURE_WORDCODE_INTERP </name>
   </at-most-one>
 
   <feature>

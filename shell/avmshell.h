@@ -90,10 +90,6 @@ namespace avmplus
     class Dictionary;
 }
 
-#ifdef VMCFG_AOT
-#include "../aot/AOTCompiler.h"
-#endif
-
 namespace avmshell
 {
     class Shell;
