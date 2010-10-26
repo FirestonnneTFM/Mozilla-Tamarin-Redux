@@ -2098,6 +2098,10 @@ failure:
     //   * otherwise create a new secondary_supertypes list with everything
     //     from the base class, plus the base class itself.  Install this list
     //     back in the base class so it can be shared by other leaf classes.
+    //
+    // allocSupertypeList returns un-scanned memory as we expect the
+    // super types to be otherwise reachable to the GC, we also use
+    // WB_SKIP to tell the GC we're skipping the WB on purpose.
     void Traits::build_secondary_supertypes()
     {
         MMgc::GC* gc = core->GetGC();
@@ -2119,9 +2123,9 @@ failure:
                     // must prepend base to base_list, save the copy on this type and base.
                     count = countSupertypes(base_list);
                     Traits** list = allocSupertypeList(gc, count + 1);
-                    WB(gc, list, list, base);
+                    WB_SKIP(gc, list, list, base);
                     for (uint32_t i=0; i < count; i++)
-                        WB(gc, list, list+i+1, base_list[i]);
+                        WB_SKIP(gc, list, list+i+1, base_list[i]);
                     base->m_secondary_supertypes = list;
                     this->m_secondary_supertypes = list;
                 }
@@ -2139,13 +2143,13 @@ failure:
                 uint32_t total = count + baseCount;
                 list = allocSupertypeList(gc, total);
                 for (Traits **d = list, **s = base->m_secondary_supertypes; *s != NULL; s++, d++)
-                    WB(gc, list, d, *s);
+                    WB_SKIP(gc, list, d, *s);
             } else {
                 list = allocSupertypeList(gc, count);
             }
             this->m_secondary_supertypes = list;
             for (uint32_t i=0; i < count; i++) {
-                WB(gc, list, list+baseCount+i, seen[i]);
+                WB_SKIP(gc, list, list+baseCount+i, seen[i]);
             }
         }
 
@@ -2190,6 +2194,7 @@ failure:
     // create a new supertype list of the given length
     Traits** Traits::allocSupertypeList(GC* gc, uint32_t size)
     {
+        // kContainsPointer left off on purpose, see comments in header.
         return (Traits**) gc->Alloc((size+1) * sizeof(Traits*), MMgc::GC::kZero);
     }
 

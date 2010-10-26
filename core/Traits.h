@@ -361,6 +361,10 @@ namespace avmplus
         TraitsMetadatap getTraitsMetadata();
         bool containsInterface(Traitsp t); // legacy name
         bool subtypeof(Traitsp t);
+        /**
+         * The supertype list is an optimization containing pointers to memory otherwise
+         * reachable, its not allocated with kContainsPointers and write barriers are skipped.
+         */
         static Traits** allocSupertypeList(MMgc:: GC*, uint32_t size);
         static bool canAssign(Traits* lhs, Traits* rhs);
         static Traits* readBinding(Traits* t, Binding b);
