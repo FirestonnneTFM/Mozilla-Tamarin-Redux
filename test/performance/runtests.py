@@ -958,7 +958,7 @@ class PerformanceRuntest(RuntestBase):
             csvwriter = csv.writer(open(self.csvfile, 'a' if self.csvAppend else 'w'))
         except IOError:
             if self.csvfile != 'output.csv':
-                print 'Error attempting to open %s.  Saving to ./output.csv instead'
+                print 'Error attempting to open %s.  Saving to ./output.csv instead' % self.csvfile
                 self.csvfile = 'output.csv'
                 self.outputCsvToFile()
             else:
