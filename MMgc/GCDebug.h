@@ -49,7 +49,7 @@ namespace MMgc
 
     #define GCAssert         AvmAssert
     #define GCAssertMsg      AvmAssertMsg
-    #define GCDebugMsg       vmbase::AvmDebugMsg
+    #define GCDebugMsg       avmplus::AvmDebugMsg
 
 }
 

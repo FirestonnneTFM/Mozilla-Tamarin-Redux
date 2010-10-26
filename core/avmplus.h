@@ -86,8 +86,6 @@
 
 #include "vmbase.h"
 
-using namespace vmbase;
-
 #include "GCTypes.h"
 #include "avmplusVersion.h"
 #include "AvmLog.h"
@@ -96,7 +94,7 @@ using namespace vmbase;
 #include "ErrorConstants.h"
 #include "NativeObjectHelpers.h"
 
-using namespace vmbase::AtomConstants;
+using namespace avmplus::AtomConstants;
 using namespace avmplus::ActionBlockConstants;
 using namespace avmplus::ErrorConstants;
 
@@ -249,16 +247,6 @@ namespace avmplus
 
     #undef AVM_MAP
 }
-
-#ifdef DEBUG
-// Fixme: bug 559132.  export avmplus::AvmAssertFail() to support
-// explicitly the qualified reference in nanojit/nanojit.h.
-namespace avmplus {
-    inline void AvmAssertFail(const char *msg) {
-        vmbase::AvmAssertFail(msg);
-    }
-}
-#endif
 
 #include "MMgc.h"
 #include "QCache.h"
