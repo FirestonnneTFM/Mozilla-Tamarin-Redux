@@ -3506,11 +3506,38 @@ namespace avmplus
             return arg->oprnd1();
         if (op == LIR_addd || op == LIR_subd || op == LIR_muld) {
             LIns *a = arg->oprnd1();
-            LIns *b = arg->oprnd2();
             a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
-            b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
-            if (a && b)
-                return lirout->ins2(arithOpcodeD2I(op), a, b);
+            if (a) {
+                LIns *b = arg->oprnd2();
+                b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
+                if (b)
+                    return lirout->ins2(arithOpcodeD2I(op), a, b);
+            }
+        }
+        // optimize integer division when divisor is non-zero constant integer
+        else if (op == LIR_divd) {
+            LIns *a = arg->oprnd1();
+            LOpcode aOpcode = a->opcode();
+            a = isPromote(aOpcode) ? a->oprnd1() : imm2Int(a);
+            if (a) {
+                LIns *b = arg->oprnd2();
+                b = imm2Int(b);
+                if (b) {
+                    int32_t intConst = b->immI();
+                    if (intConst) {
+                        // use faster unsigned right shift if our arg is unsigned and
+                        // we have just one bit set in the divisor.
+                        if (exactlyOneBit(intConst) && aOpcode == LIR_ui2d) {
+                            return lirout->ins2(LIR_rshui, a, lirout->insImmI(msbSet32(intConst)));
+                        }
+#if NJ_DIVI_SUPPORTED
+                        else {
+                            return lirout->ins2(LIR_divi, a, b);
+                        }
+#endif // NJ_DIVI_SUPPORTED
+                    }
+                }
+            }
         }
 
         // Try to swap a builtin function returning a number to a builtin function returning
