@@ -158,10 +158,11 @@ namespace MMgc
 
     REALLY_INLINE void GC::privateInlineWriteBarrier(const void *container, const void *address, const void *value)
     {
-        GCAssert(!container || IsPointerToGCPage(container));
+        GCAssert(container != NULL);
+        GCAssert(IsPointerToGCObject(GetRealPointer(container)));
         GCAssert(((uintptr_t)address & 3) == 0);
 
-        if (container && marking) {
+        if (marking) {
             GCAssert(address >= container);
             GCAssert(address < (char*)container + Size(container));
             InlineWriteBarrierTrap(container);
