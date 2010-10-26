@@ -136,7 +136,7 @@ namespace avmplus
         // Get (getProperty)
         // HasProperty
         // Put (setProperty)
-        Atom toString ();
+        Stringp toString ();
 
         Atom callProperty(const Multiname* name, int argc, Atom* argv);
 

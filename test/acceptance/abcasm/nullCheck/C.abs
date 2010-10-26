@@ -608,6 +608,15 @@ function runTest10()
     pushnull
     convert_s
     callpropvoid COMPARE_STRICTEQ 3
+ 
+	// test a null String ptr through convert_s which should return "null"
+    findproperty COMPARE_STRICTEQ
+    pushstring "convert_s of string type = null"
+    pushstring "null" // expected
+    pushnull
+    coerce_s		// forces type to string
+    convert_s
+    callpropvoid COMPARE_STRICTEQ 3
     
     findproperty END
     callpropvoid END 0

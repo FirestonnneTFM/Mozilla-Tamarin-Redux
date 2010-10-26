@@ -178,7 +178,7 @@ namespace avmplus
         }
 
         virtual Atom defaultValue();        // ECMA [[DefaultValue]]
-        virtual Atom toString();
+        virtual Stringp toString();
 
         // argv[0] = receiver
         virtual Atom call(int argc, Atom* argv);

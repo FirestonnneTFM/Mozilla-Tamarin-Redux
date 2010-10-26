@@ -1675,7 +1675,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case kSpecialType:
                 return kundefined;
             case kObjectType:
-                return intern(atomToScriptObject(atom)->toString());
+                return internString(atomToScriptObject(atom)->toString());
             case kIntptrType:
 #ifdef AVMPLUS_64BIT
                 return atomCanBeInt32(atom) ?
@@ -2396,7 +2396,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case kNamespaceType:
                 return atomToNamespace(atom)->getURI();
             case kObjectType:
-                return string(atomToScriptObject(atom)->toString());
+                return atomToScriptObject(atom)->toString();
             case kStringType:
                 return atomToString(atom);
             case kSpecialType:

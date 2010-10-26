@@ -535,7 +535,7 @@ namespace avmplus
     // ToPrimitive(input argument, hint String) calls [[DefaultValue]]
     // described in ECMA-262 8.6.2.6.  The [[DefaultValue]] algorithm
     // with hint String is inlined here.
-    Atom ScriptObject::toString()
+    Stringp ScriptObject::toString()
     {
         AvmCore *core = this->core();
         Toplevel* toplevel = this->toplevel();
@@ -550,7 +550,7 @@ namespace avmplus
 
         // if result is primitive, return its ToString
         if (atomKind(result) != kObjectType)
-            return core->string(result)->atom();
+            return core->string(result);
 
         // otherwise call this.valueOf()
         tempname.setName(core->kvalueOf);
@@ -559,11 +559,11 @@ namespace avmplus
 
         // if result is primitive, return it
         if (atomKind(result) != kObjectType)
-            return core->string(result)->atom();
+            return core->string(result);
 
         // could not convert to primitive.
         toplevel->throwTypeError(kConvertToPrimitiveError, core->toErrorString(traits()));
-        return undefinedAtom;
+        return NULL; // unreachable
     }
 
     // this = argv[0] (ignored)
