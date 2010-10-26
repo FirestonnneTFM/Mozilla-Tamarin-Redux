@@ -1187,10 +1187,8 @@ namespace avmplus
             }
 
             INSTR(convert_s) {
-                if ((sp[0] & 7) != kStringType) {
-                    SAVE_EXPC;
-                    sp[0] = core->string(sp[0])->atom();
-                }
+                SAVE_EXPC;
+                sp[0] = core->string(sp[0])->atom();
                 NEXT;
             }
 

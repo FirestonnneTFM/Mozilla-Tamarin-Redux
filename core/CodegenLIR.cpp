@@ -2361,8 +2361,8 @@ namespace avmplus
         if ((val1.traits == STRING_TYPE && val1.notNull) || (val2.traits == STRING_TYPE && val2.notNull)) {
             // string concatenation
             AvmAssert(type == STRING_TYPE);
-            LIns* lhs = convertToString(i);
-            LIns* rhs = convertToString(j);
+            LIns* lhs = convertToString(i, true);
+            LIns* rhs = convertToString(j, true);
             LIns* out = callIns(FUNCTIONID(concatStrings), 3, coreAddr, lhs, rhs);
             localSet(i,  out, type);
             JIT_EVENT(jit_add_a_ss);
@@ -2849,7 +2849,7 @@ namespace avmplus
             break;
 
         case OP_convert_s:
-            localSet(sp, convertToString(sp), STRING_TYPE);
+            localSet(sp, convertToString(sp, false), STRING_TYPE);
             break;
 
         case OP_esc_xelem:
@@ -3112,9 +3112,9 @@ namespace avmplus
         default:
             if (value.notNull) {
                 // not eligible for CSE, and we know it's not null/undefined
-                return callIns(FUNCTIONID(string), 2, coreAddr, loadAtomRep(index));
-            }
-            return callIns(FUNCTIONID(coerce_s), 2, coreAddr, loadAtomRep(index));
+                return emitStringCall(index, FUNCTIONID(string), true); // call string
+            } 
+            return emitStringCall(index, FUNCTIONID(coerce_s), true); // call coerce_s
         }
     }
 
@@ -3177,25 +3177,55 @@ namespace avmplus
         }
     }
 
-    LIns* CodegenLIR::convertToString(int index)
+    LIns *CodegenLIR::emitStringCall(int index, const CallInfo *stringCall, bool preserveNull)
+    {
+        CodegenLabel not_stringptr;
+        CodegenLabel done;
+        suspendCSE();
+        LIns* val = loadAtomRep(index);
+        LIns* result = insAlloc(sizeof(intptr_t));
+        LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
+        // kStringptrType
+        branchToLabel(LIR_jf, eqp(tag, AtomConstants::kStringType), not_stringptr);
+        if (!preserveNull) {
+            // If our value is equal to kStringType, we have a null String ptr
+            branchToLabel(LIR_jt, eqp(val, AtomConstants::kStringType), not_stringptr);
+        }
+        stp(xorp(val, AtomConstants::kStringType), result, 0, ACCSET_OTHER);
+        branchToLabel(LIR_j, NULL, done);
+
+        emitLabel(not_stringptr);
+        stp(callIns(stringCall, 2, coreAddr, val), result, 0, ACCSET_OTHER);
+        emitLabel(done);
+        resumeCSE();
+        return ldp(result, 0, ACCSET_OTHER);
+    }
+
+    // OP_convert_s needs a null String ptr to be converted to "null"
+    // while our other usage prior to concatStrings handles null ptrs 
+    // correctly in AvmCore::concatStrings.  This function is different
+    // than coerceToString in how undefinedAtom is handled: 
+    // convert: undefinedAtom -> "undefined"
+    // coerce:  undefinedAtom -> "null" (see coerce_s)
+    LIns* CodegenLIR::convertToString(int index, bool preserveNull)
     {
         const Value& value = state->value(index);
         Traits* in = value.traits;
         Traits* stringType = STRING_TYPE;
-
-        if (in != stringType || !value.notNull) {
+ 
+        if (in != stringType || (!preserveNull && !value.notNull)) {
             if (in && (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE)) {
                 // convert is the same as coerce
                 return coerceToString(index);
             } else {
-                // explicitly convert to string
-                return callIns(FUNCTIONID(string), 2, coreAddr, loadAtomRep(index));
+                 // explicitly convert to string
+                return emitStringCall (index, FUNCTIONID(string), preserveNull);
             }
         } else {
-            // already String*
-            return localGetp(index);
+             // already String*
+             return localGetp(index);
         }
-    }
+     }
 
     void CodegenLIR::writeNip(const FrameState* state, const uint8_t *pc)
     {

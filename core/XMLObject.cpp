@@ -2414,13 +2414,13 @@ namespace avmplus
     }
 
     // E4X 10.1, page 28
-    Atom XMLObject::toString ()
+    Stringp XMLObject::toString ()
     {
         AvmCore *core = this->core();
 
         if (getClass() & (E4XNode::kText | E4XNode::kCDATA | E4XNode::kAttribute))
         {
-            return m_node->getValue()->atom();
+            return m_node->getValue();
         }
 
         if (hasSimpleContent())
@@ -2434,25 +2434,25 @@ namespace avmplus
                 {
 
                     XMLObject *xo = new (core->GetGC()) XMLObject(toplevel()->xmlClass(), child);
-                    s = core->concatStrings(s, core->string(xo->toString()));
+                    s = core->concatStrings(s, xo->toString());
                     delete xo;
                 }
             }
 
-            return s->atom();
+            return s;
         }
         else
         {
             NamespaceList AncestorNamespaces(core->GetGC(), kListInitialCapacity);
             StringBuffer s(core);
             __toXMLString(s, AncestorNamespaces, 0);
-            return core->newStringUTF8(s.c_str(), s.length())->atom();
+            return core->newStringUTF8(s.c_str(), s.length());
         }
     }
 
     Stringp XMLObject::AS3_toString()
     {
-        return core()->atomToString(toString());
+        return toString();
     }
 
     String *XMLObject::AS3_toXMLString ()

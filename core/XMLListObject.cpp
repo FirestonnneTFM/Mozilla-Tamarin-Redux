@@ -1215,7 +1215,7 @@ namespace avmplus
     }
 
     // E4X 10.1.2, page 28
-    Atom XMLListObject::toString()
+    Stringp XMLListObject::toString()
     {
         AvmCore *core = this->core();
         if (hasSimpleContent ())
@@ -1232,23 +1232,23 @@ namespace avmplus
                 if ((xn->getClass() != E4XNode::kComment) && (xn->getClass() != E4XNode::kProcessingInstruction))
                 {
                     XMLObject *xm = _getAt(i);
-                    output = core->concatStrings(output, core->string (xm->toString()));
+                    output = core->concatStrings(output, xm->toString());
                 }
             }
 
-            return output->atom();
+            return output;
         }
         else
         {
             StringBuffer output(core);
             this->__toXMLString(output, nullStringAtom, 0);
-            return core->newStringUTF8(output.c_str())->atom();
+            return core->newStringUTF8(output.c_str());
         }
     }
 
     Stringp XMLListObject::AS3_toString()
     {
-        return core()->atomToString(toString());
+        return toString();
     }
 
     String *XMLListObject::AS3_toXMLString ()

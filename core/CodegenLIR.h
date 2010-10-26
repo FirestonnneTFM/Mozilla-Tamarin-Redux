@@ -547,7 +547,7 @@ namespace avmplus
         void emitCoerce(uint32_t index, Traits* type);
         void emitCheckNull(LIns* ptr, Traits* type);
         void localSet(int i, LIns* o, Traits* type);
-        LIns* convertToString(int i);
+        LIns* convertToString(int i, bool preserveNull);
         LIns* coerceToString(int i);
         LIns* coerceToNumber(int i);
         LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
@@ -559,9 +559,11 @@ namespace avmplus
         LIns* coerceNumberToInt(int i);
 
         bool inlineBuiltinFunction(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi);
-        LIns *optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
+        LIns* optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
         void suspendCSE();
         void resumeCSE();
+
+        LIns* emitStringCall(int index, const CallInfo *stringCall, bool preserveNull);
 
     public:
         CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel);
