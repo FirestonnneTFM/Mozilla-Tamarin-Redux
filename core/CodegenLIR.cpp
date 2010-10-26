@@ -3178,6 +3178,19 @@ namespace avmplus
 
     LIns *CodegenLIR::emitStringCall(int index, const CallInfo *stringCall, bool preserveNull)
     {
+        // Inline fast path for string conversion.  
+        // if preserveNull == false:
+        //   if ((input & kAtomTypeMask) != kStringType) || (input == kStringType))
+        //     output = stringCall (input)
+        //   else
+        //     output = input ^ kAtomTypeMask;
+        // 
+        // if preserveNull == true:
+        //   if (input & kAtomTypeMask) != kStringType)
+        //     output = stringCall (input)
+        //   else
+        //     output = input ^ kAtomTypeMask;
+
         CodegenLabel not_stringptr;
         CodegenLabel done;
         suspendCSE();
