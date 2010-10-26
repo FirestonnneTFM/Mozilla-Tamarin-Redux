@@ -39,16 +39,15 @@
 
 #include "avmplus.h"
 #include "MethodInfo.h"
-#include "CdeclThunk.h"
 
+#ifdef VMCFG_CDECL
+
+#include "CdeclThunk.h"
 
 namespace avmplus
 {
 
 #define CDECL_VERBOSE 0
-
-#define TODO AvmAssert(false)
-#define UNTESTED AvmAssert(false)
 
         // stores arbitrary Avm values without allocation
         class AvmValue
@@ -124,8 +123,6 @@ namespace avmplus
                 if (!t) {
                     _a = a;
                 } else {
-                    AvmCore* core = t->core;
-
                     switch(Traits::getBuiltinType(t))
                     {
                     case BUILTIN_void:
@@ -208,32 +205,7 @@ enum // we try to stick to 4 bits here instead of the 5 in BUILTIN_xxx
   kVECTOROBJ
 };
 
-static int32_t argTypeFromTraits(const AvmCore* core, Traits* t)
-{
-    if (!t) return kANY;
-
-    switch(Traits::getBuiltinType(t))
-    {
-    case BUILTIN_object: return kOBJECT;
-    case BUILTIN_class: return kCLASS;
-    case BUILTIN_function: return kFUNCTION;
-    case BUILTIN_array: return kARRAY;
-    case BUILTIN_string: return kSTRING;
-    case BUILTIN_number: return kNUMBER;
-    case BUILTIN_int: return kINT;
-    case BUILTIN_uint: return kUINT;
-    case BUILTIN_boolean: return kBOOLEAN;
-    case BUILTIN_void: return kVOID;
-    case BUILTIN_namespace: return kNAMESPACE;
-    case BUILTIN_vectorint: return kVECTORINT;
-    case BUILTIN_vectoruint: return kVECTORUINT;
-    case BUILTIN_vectordouble: return kVECTORDOUBLE;
-    case BUILTIN_vectorobj: return kVECTOROBJ;
-    default: return kOBJECT;
-    }
-}
-
-static Traits* argTraitsFromType(const AvmCore* core, int32_t n)
+static Traits* argTraitsFromType(const AvmCore *core, int32_t n)
 {
     switch(n)
     {
@@ -467,7 +439,7 @@ protected:
     AvmCore* m_core;
 
 public:
-    PtrArgDescIter(void* argDesc, AvmCore* core) : m_p((unsigned char* )argDesc), m_bits(0), m_core(core)
+    PtrArgDescIter(void* argDesc, AvmCore* core) : m_p((unsigned char* )argDesc), m_bitBuf(0), m_bits(0), m_core(core)
     {
     }
 
@@ -579,6 +551,7 @@ public:
 // including MethodEnv
 template <class ARG_TYPE_ITER> static int32_t argDescSize(ARG_TYPE_ITER calleeTypeIter, AvmCore* core)
 {
+    (void)core;
     ArgDescLayout l(NULL);
 
     l.ptrArg(); // MethodEnv
@@ -847,7 +820,7 @@ ASM_FUNC_END(returnCoercerNPop)
 #endif
 
 // something => Number
-double returnCoercerN32Impl(Atom a, Traits* retTraits, MethodEnv* env)
+double returnCoercerN32Impl(Atom a, Traits* /*retTraits*/, MethodEnv* env)
 {
     Traits* calleeRT = env->method->getMethodSignature()->returnTraits();
     AvmValue v;
@@ -959,11 +932,6 @@ static double argN(APType& ap)
     double result = *(double*)ap;
     ap = (APType)((uintptr_t)ap + sizeof(double));
     return result;
-}
-
-static void* argP(va_list& ap)
-{
-    return va_arg(ap, void* );
 }
 
 template <class ARG_ITER> static Atom coerceArgToAny(Toplevel* toplevel, ARG_ITER& ap, Traits* callerT)
@@ -1235,7 +1203,7 @@ static void passBaseArgs(MethodEnv* env, APType& callerAp, ArgDescLayout& l)
 }
 
 // coerces a set of variadic arguments to a cdecl arg description
-template <class ARG_TYPE_ITER, class AP_TYPE> static void* argCoercer(void* callee, MethodEnv* env, Traits* callerRT, ARG_TYPE_ITER callerTypeIter, AP_TYPE callerAp, void* calleeArgDescBuf)
+template <class ARG_TYPE_ITER, class AP_TYPE> static void* argCoercer(void* /*callee*/, MethodEnv* env, Traits* callerRT, ARG_TYPE_ITER callerTypeIter, AP_TYPE callerAp, void* calleeArgDescBuf)
 {
     ArgDescLayout l(calleeArgDescBuf);
 
@@ -1478,3 +1446,5 @@ double aotThunkerN(MethodEnv* env, int32_t argc, uint32_t* argv)
 #endif
 
 }
+
+#endif //VMCFG_CDECL

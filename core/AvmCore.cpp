@@ -41,10 +41,6 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
-#ifdef VMCFG_AOT
-#include "AOTCompiler.h"
-#endif
-
 #ifdef VMCFG_NANOJIT
 #include "CodegenLIR.h"
 #endif
@@ -625,7 +621,7 @@ namespace avmplus
             }
             method->activationTraits()->resolveSignatures(toplevel);
         }
-        method->declaringTraits()->initActivationTraits(toplevel);
+        method->declaringTraits()->initActivationTraits();
 #else
         (void)core;
         (void)toplevel;

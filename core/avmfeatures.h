@@ -92,6 +92,7 @@
 #undef FEATURE_NANOJIT
 #undef VMCFG_AOT
 #undef VMCFG_AOTSHELL
+#undef VMCFG_CDECL
 #undef VMCFG_METHODENV_IMPL32
 #undef VMCFG_INTERPRETER
 #undef VMCFG_INTERPRETER
@@ -367,7 +368,7 @@
 
 /* AVMFEATURE_AOT
  *
- * Enables the ahead-of-time compiler. This feature is highly experimental.
+ * Enables the ahead-of-time compiler.
  */
 #if !defined AVMFEATURE_AOT || AVMFEATURE_AOT != 0 && AVMFEATURE_AOT != 1
 #  error "AVMFEATURE_AOT must be defined and 0 or 1 (only)."
@@ -725,6 +726,8 @@
 
 
 
+
+
 #if AVMSYSTEM_IA32+AVMSYSTEM_AMD64+AVMSYSTEM_ARM+AVMSYSTEM_PPC+AVMSYSTEM_SPARC+AVMSYSTEM_MIPS+AVMSYSTEM_SH4 > 1
 #  error "At most one of AVMSYSTEM_IA32,AVMSYSTEM_AMD64,AVMSYSTEM_ARM,AVMSYSTEM_PPC,AVMSYSTEM_SPARC,AVMSYSTEM_MIPS,AVMSYSTEM_SH4 must be defined."
 #endif
@@ -733,6 +736,15 @@
 #endif
 #if AVMFEATURE_WORDCODE_INTERP+AVMFEATURE_JIT > 1
 #  error "At most one of AVMFEATURE_WORDCODE_INTERP,AVMFEATURE_JIT must be defined."
+#endif
+#if AVMFEATURE_AOT+AVMFEATURE_JIT > 1
+#  error "At most one of AVMFEATURE_AOT,AVMFEATURE_JIT must be defined."
+#endif
+#if AVMFEATURE_AOT+AVMFEATURE_ABC_INTERP > 1
+#  error "At most one of AVMFEATURE_AOT,AVMFEATURE_ABC_INTERP must be defined."
+#endif
+#if AVMFEATURE_AOT+AVMFEATURE_WORDCODE_INTERP > 1
+#  error "At most one of AVMFEATURE_AOT,AVMFEATURE_WORDCODE_INTERP must be defined."
 #endif
 
 #if AVMSYSTEM_UNIX+AVMSYSTEM_MAC+AVMSYSTEM_WIN32+AVMSYSTEM_SYMBIAN != 1
@@ -888,6 +900,9 @@
 #endif
 #if AVMFEATURE_AOT
 #  define VMCFG_AOTSHELL
+#endif
+#if AVMFEATURE_AOT
+#  define VMCFG_CDECL
 #endif
 #if AVMFEATURE_AOT
 #  define VMCFG_METHODENV_IMPL32

@@ -86,8 +86,8 @@ namespace avmplus
     {
         MMgc::GC::AllocaAutoPtr valuesPtr;
         Value *values = (Value *)VMPI_alloca_gc(gc, valuesPtr, sizeof(Value)*nStateTraits);
-        int32_t firstWith = nStateTraits - nStateWithTraits;
-        for (int32_t i = 0; i < nStateTraits; i++)
+        uint32_t firstWith = nStateTraits - nStateWithTraits;
+        for (uint32_t i = 0; i < nStateTraits; i++)
         {
             values[i].traits = stateTraits[i];
             values[i].isWith = i >= firstWith;

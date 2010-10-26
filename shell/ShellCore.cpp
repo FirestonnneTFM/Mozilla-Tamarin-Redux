@@ -353,6 +353,13 @@ namespace avmshell
 
     bool ShellCore::setup(ShellCoreSettings& settings)
     {
+#ifdef VMCFG_AOT
+        if(nAOTInfos == 0) {
+            console << "To run an AOT enabled avmshell you must link in some AOT compiled ABC blocks.\n";
+            return false;
+        }
+#endif
+
         // set the default api version
         if (settings.api <= _max_version_num) {
             this->defaultAPIVersion = settings.api;
