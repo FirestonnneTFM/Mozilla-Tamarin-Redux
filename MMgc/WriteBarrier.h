@@ -65,6 +65,11 @@ inline void write_null(void* p) { *(uintptr_t*)(p) = 0; }
 // put spaces around the template arg to avoid possible digraph warnings
 #define DRCWB(type) MMgc::WriteBarrierRC< type >
 
+// This is used in places where the mutator has convinced itself the
+// barrier isn't necessary.  FIXME: The idea is to check this in DEBUG
+// builds.
+#define WB_SKIP(gc, container, addr, value) *(addr) = value
+
 #ifdef MMGC_POLICY_PROFILING
     #define POLICY_PROFILING_ONLY(x) x
 #else
