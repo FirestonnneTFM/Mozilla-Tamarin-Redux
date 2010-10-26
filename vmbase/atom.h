@@ -41,7 +41,7 @@
 #define __avmplus_atom__
 
 
-namespace vmbase
+namespace avmplus
 {
     // Atom should really be an intptr_t, but doing so can cause problematic compiles
     // because some platforms define intptr_t as an int64_t, and some as a long, which
@@ -190,7 +190,7 @@ namespace vmbase
 #endif
 
     // sadly, these generate better code than the inlines in atom-inlines.h
-    #define atomKind(a)     ((vmbase::Atom)((uintptr_t(a) & 7)))
+    #define atomKind(a)     ((avmplus::Atom)((uintptr_t(a) & 7)))
     #define atomPtr(a)      ((void*)(uintptr_t(a) & ~7))
 
     #define ISNULL(a) (((uintptr_t)a) < (uintptr_t)kSpecialType)

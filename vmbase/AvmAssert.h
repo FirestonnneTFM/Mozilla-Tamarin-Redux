@@ -51,7 +51,7 @@
     }
 #endif
 
-namespace vmbase
+namespace avmplus
 {
     void AvmDebugMsg(bool debuggerBreak, const char* format, ...);
     void AvmDebugMsg(const char* msg, bool debuggerBreak);
@@ -76,7 +76,7 @@ namespace vmbase
         _AvmAssert((condition), __LINE__,__FILE__)
 
     #define AvmAssertMsg(condition,message) \
-        do { vmbase::_AvmAssertMsg((condition), (message)); } while (0) /* no semi */
+        do { avmplus::_AvmAssertMsg((condition), (message)); } while (0) /* no semi */
 
     #define _AvmAssert(condition, line_, file_) \
         __AvmAssert((condition), line_, file_)

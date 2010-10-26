@@ -40,7 +40,7 @@
 
 #include "avmplus.h"
 
-namespace vmbase
+namespace avmplus
 {
     void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
     {

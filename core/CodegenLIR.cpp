@@ -261,7 +261,7 @@ namespace avmplus
             RETURN_METHOD_PTR(ExceptionFrame, f);
         }
 
-    using namespace vmbase;
+    using namespace avmplus;
     using namespace MMgc;
     using namespace nanojit;
 

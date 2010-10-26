@@ -138,7 +138,7 @@ namespace avmplus
 
 #ifdef DEBUG
     // This is called from the Atom code in vmbase
-    bool testIsObject(vmbase::Atom atom)
+    bool testIsObject(avmplus::Atom atom)
     {
         return AvmCore::isObject(atom);
     }

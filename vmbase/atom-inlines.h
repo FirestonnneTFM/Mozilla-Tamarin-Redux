@@ -46,11 +46,11 @@ namespace avmplus
 {
     class ScriptObject;
 #ifdef DEBUG
-    bool testIsObject(vmbase::Atom atom);
+    bool testIsObject(avmplus::Atom atom);
 #endif
 }
 
-namespace vmbase
+namespace avmplus
 {
     using namespace AtomConstants;
 
