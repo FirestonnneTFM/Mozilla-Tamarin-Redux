@@ -265,12 +265,12 @@ namespace avmplus
         uint32_t const len = m_data->len;
         if (len > 1)
         {
-            if (sizeof(m_data->entries[0]) == sizeof(void*))
+            if (sizeof(m_data->entries[0]) == sizeof(void*) && m_data->gc->IsPointerToGCObject(m_data))
             {
                 // It's really only necessary to do this for things that
                 // might be GC pointers, but it doesn't really hurt to do
                 // for other things that just happen to be the same size.
-                m_data->gc->reversePointersWithinBlock((void**)&m_data->entries[0], len);
+                m_data->gc->reversePointersWithinBlock(m_data, offsetof(typename ListHelper::LISTDATA, entries), len);
             }
             else
             {

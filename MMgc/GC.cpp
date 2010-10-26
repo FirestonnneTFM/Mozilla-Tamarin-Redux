@@ -2563,21 +2563,22 @@ namespace MMgc
         }
     }
 
-    void GC::reversePointersWithinBlock(void** array, size_t numPointers)
+    void GC::reversePointersWithinBlock(void* mem, size_t offsetInBytes, size_t numPointers)
     {
-        if (array == NULL || numPointers <= 1)
+        if (mem == NULL || numPointers <= 1)
             return;
        
         if (marking && 
-            GetMark(array) && 
-            ContainsPointers(array) &&
-            // don't push small items that are moving pointers inside the same array
-            Size(array) > kMarkItemSplitThreshold) 
+            GetMark(mem) && 
+            ContainsPointers(mem) &&
+            // don't push small items that are moving pointers inside the same mem
+            Size(mem) > kMarkItemSplitThreshold) 
         {
             // this could be optimized to just re-scan the dirty region
-            InlineWriteBarrierTrap(array);
+            InlineWriteBarrierTrap(mem);
         }
         
+        void** array = (void**)((char*)mem + offsetInBytes);
         for (size_t i = 0, n = numPointers/2; i < n; i++)
         {
             size_t const i2 = numPointers - i - 1;
