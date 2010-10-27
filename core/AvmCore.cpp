@@ -3584,6 +3584,29 @@ return the result of the comparison ToPrimitive(x) == y.
             return internInt((int)ui);
     }
 
+    bool AvmCore::isInternedUint(uint32_t ui, Stringp *result)
+    {
+        int iSlotForIndex;
+        if (ui & 0x80000000) {
+            // FIXME bug 561092: is there a more direct route to slot here?
+            Stringp s = MathUtils::convertDoubleToString(this, double(ui));
+            iSlotForIndex = findString(s);
+        } else {
+            iSlotForIndex = findStringWithIndex(ui);
+        }
+
+        Stringp other = strings[iSlotForIndex];
+        if (other <= AVMPLUS_STRING_DELETED)
+        {
+            return false;
+        }
+        else
+        {
+            *result = other;
+            return true;
+        }
+    }
+
     Stringp AvmCore::internDouble(double d)
     {
         return internString(MathUtils::convertDoubleToString(this, d));

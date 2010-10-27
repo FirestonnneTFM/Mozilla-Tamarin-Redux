@@ -1671,6 +1671,10 @@ const int kBufferPadding = 16;
         Stringp internDouble(double d);
         Stringp internUint32(uint32_t ui);
 
+        /* true return value implies *result set to interned string for ui;
+         * false return value implies ui is not in intern table. */
+        bool isInternedUint(uint32_t ui, Stringp *result);
+
         Stringp internSubstring(Stringp s, int32_t start, int32_t end);
 
         Stringp internIntSlowPath(int value);
