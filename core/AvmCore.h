@@ -1612,6 +1612,7 @@ const int kBufferPadding = 16;
         int findStringLatin1(const char* s, int len);
         int findStringUTF16(const wchar* s, int len);
         int findString(Stringp s);
+        int findStringWithIndex(uint32_t value);
 
         int numStringsCheckLoadBalance();
 
@@ -1672,6 +1673,7 @@ const int kBufferPadding = 16;
 
         Stringp internSubstring(Stringp s, int32_t start, int32_t end);
 
+        Stringp internIntSlowPath(int value);
 
 #ifdef DEBUGGER
         /**

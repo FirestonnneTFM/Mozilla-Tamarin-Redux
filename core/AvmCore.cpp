@@ -3316,6 +3316,54 @@ return the result of the comparison ToPrimitive(x) == y.
         return i;
     }
 
+    int AvmCore::findStringWithIndex(uint32_t value)
+    {
+        int m = numStringsCheckLoadBalance();
+
+        // compute the hash function
+        int hashCode = String::hashCodeUInt(value);
+
+        int bitMask = m - 1;
+
+        // find the slot to use
+        int i = (hashCode&0x7FFFFFFF) & bitMask;
+        int n = 7;
+        Stringp k;
+        uint32_t recv;
+        if (!deletedCount)
+        {
+            while ((k=strings[i]) != NULL) {
+                if (k->parseIndex(recv) && recv == value)
+                    break;
+                i = (i + (n++)) & bitMask; // quadratic probe
+            }
+        }
+        else
+        {
+            int iFirstDeletedSlot = -1;
+            while ((k=strings[i]) != NULL)
+            {
+                if (k == AVMPLUS_STRING_DELETED)
+                {
+                    if (iFirstDeletedSlot < 0)
+                    {
+                        iFirstDeletedSlot = i;
+                    }
+                }
+                else if (k->parseIndex(recv) && recv == value)
+                {
+                    break;
+                }
+                i = (i + (n++)) & bitMask; // quadratic probe
+            }
+
+            if ((k == NULL) && (iFirstDeletedSlot >= 0))
+                i = iFirstDeletedSlot;
+        }
+        return i;
+    }
+
+
     /**
      * namespace hash search.  interned namespaces are as unique as their
      * uri.  We assume uri's are already interned, so interning a namespace
