@@ -53,7 +53,7 @@ namespace avmshell
         DWB(BreakAction*) next;
         DWB(SourceFile*) sourceFile;
         int id;
-        DWB(Stringp) filename;
+        DRCWB(Stringp) filename;
         int linenum;
 
         BreakAction(SourceFile *sourceFile,
@@ -267,7 +267,7 @@ namespace avmshell
         bool activeFlag;
         char *currentSource;
         uint32_t currentSourceLen;
-        DWB(Stringp) currentFile;
+        DRCWB(Stringp) currentFile;
         int breakpointCount;
         bool warnMissingSource;
 
