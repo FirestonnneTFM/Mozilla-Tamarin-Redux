@@ -301,6 +301,27 @@ namespace avmplus
         return hashCode;
     }
 
+    /*static*/ REALLY_INLINE int32_t hashCodeAddChar(int32_t hashCode, char val)
+    {
+        // must be same signed-ness as other hashcode functions.
+        // (match sign propagation in right-shift >> 28, for better or worse)
+        return ((hashCode >> 28) ^ (hashCode << 4) ^ val);
+    }
+
+    /*static*/ REALLY_INLINE int32_t stringLengthUInt(uint32_t value)
+    {
+        if      (value < 10) return 1;
+        else if (value < 100) return 2;
+        else if (value < 1000) return 3;
+        else if (value < 10000) return 4;
+        else if (value < 100000) return 5;
+        else if (value < 1000000) return 6;
+        else if (value < 10000000) return 7;
+        else if (value < 100000000) return 8;
+        else if (value < 1000000000) return 9;
+        else return 10;
+    }
+
 ////////////////////////////// Constructors ////////////////////////////////
 
     // ctor for a static string.
@@ -821,6 +842,46 @@ namespace avmplus
     int32_t String::hashCodeUTF16(const wchar* buf, int32_t len)
     {
         return hashCodeImpl(buf, len);
+    }
+
+    int32_t String::hashCodeUInt(uint32_t value)
+    {
+        // Below is largely partial-evaluated composition of
+        // MathUtils::convertIntegerToStringBuffer and
+        // String::hashCodeLatin1
+
+        int32_t radix = 10;
+
+        int32_t hashCode = 0;
+
+        int32_t len = stringLengthUInt(value);
+
+        if (value == 0)
+        {
+            hashCode = hashCodeAddChar(hashCode, '0');
+        }
+        else
+        {
+            uintptr_t uVal = (uintptr_t)value;
+            uintptr_t factor = 1;
+            uintptr_t cursor = len;
+            while (--cursor)
+                factor *= radix;
+            cursor = len;
+
+            while (cursor > 0)
+            {
+                uintptr_t j = uVal;
+                j /= factor;
+                uVal %= factor;
+                factor /= radix;
+                AvmAssert( j < 10 );
+                hashCode = hashCodeAddChar(hashCode, (char)(j+'0'));
+                cursor--;
+            }
+        }
+
+        return hashCode;
     }
 
     int32_t String::hashCode() const

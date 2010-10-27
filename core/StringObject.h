@@ -193,6 +193,12 @@ namespace avmplus
         Use the same algorithm to produce a hash code for UTF-16 data.
         */
         static  int32_t FASTCALL    hashCodeUTF16(const wchar* buf, int32_t len);
+
+        /**
+        Use the same algorithm to produce hash code for string corresp to value.
+        */
+        static  int32_t FASTCALL    hashCodeUInt(uint32_t value);
+
         /// Return the length in characters.
         REALLY_INLINE   int32_t     length() const { return m_length; }
         // overload used by AS3 glue code.
