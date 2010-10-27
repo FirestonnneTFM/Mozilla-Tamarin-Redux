@@ -340,14 +340,27 @@ namespace avmplus
 
     Atom ScriptObject::getUintProperty(uint32_t i) const
     {
+        // N.B.: a key present in ScriptObject must be interned string;
+        // thus uninterned implies absent (cf. bugzilla 556023).
+
         AvmCore* core = this->core();
 
         if (!(i&MAX_INTEGER_MASK))
         {
             if (!traits()->needsHashtable())
             {
-                Atom name = core->internUint32(i)->atom();
-                return getAtomPropertyFromProtoChain(name, delegate, traits());
+                Stringp interned;
+                bool present = core->isInternedUint(i, &interned);
+                if (present)
+                {
+                    Atom name = interned->atom();
+                    return getAtomPropertyFromProtoChain(name, delegate,
+                                                         traits());
+                }
+                else
+                {
+                    return undefinedAtom;
+                }
             }
             else
             {
@@ -366,7 +379,17 @@ namespace avmplus
         }
         else
         {
-            return getAtomProperty(core->internUint32(i)->atom());
+            Stringp interned;
+            bool present;
+            present = core->isInternedUint(i, &interned);
+            if (present)
+            {
+                return getAtomProperty(interned->atom());
+            }
+            else
+            {
+                return undefinedAtom;
+            }
         }
     }
 
