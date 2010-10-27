@@ -168,7 +168,7 @@ namespace avmshell
         }
 
     private:
-        DWB(ScriptObject*) parent;
+        DRCWB(ScriptObject*) parent;
         HeapMultiname propertyname;
     };
 
