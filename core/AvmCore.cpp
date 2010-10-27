@@ -3170,7 +3170,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
     }
 
-    int AvmCore::findString(Stringp s)
+    REALLY_INLINE int AvmCore::numStringsCheckLoadBalance()
     {
         int m = numStrings;
         // 80% load factor
@@ -3180,6 +3180,12 @@ return the result of the comparison ToPrimitive(x) == y.
             else
                 rehashStrings(m);
         }
+        return m;
+    }
+
+    int AvmCore::findString(Stringp s)
+    {
+        int m = numStringsCheckLoadBalance();
 
         // compute the hash function
         int hashCode = s->hashCode();
@@ -3223,14 +3229,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     int AvmCore::findStringLatin1(const char* s, int len)
     {
-        int m = numStrings;
-        // 80% load factor
-        if (5*(stringCount+deletedCount+1) > 4*m) {
-            if (2*stringCount > m) // 50%
-                rehashStrings(m = m << 1);
-            else
-                rehashStrings(m);
-        }
+        int m = numStringsCheckLoadBalance();
 
         // compute the hash function
         int hashCode = String::hashCodeLatin1(s, len);
@@ -3274,14 +3273,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     int AvmCore::findStringUTF16(const wchar* s, int len)
     {
-        int m = numStrings;
-        // 80% load factor
-        if (5*(stringCount+deletedCount+1) > 4*m) {
-            if (2*stringCount > m) // 50%
-                rehashStrings(m = m << 1);
-            else
-                rehashStrings(m);
-        }
+        int m = numStringsCheckLoadBalance();
 
         // compute the hash function
         int hashCode = String::hashCodeUTF16(s, len);

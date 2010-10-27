@@ -1613,6 +1613,8 @@ const int kBufferPadding = 16;
         int findStringUTF16(const wchar* s, int len);
         int findString(Stringp s);
 
+        int numStringsCheckLoadBalance();
+
         /** search the namespace intern table */
         int findNamespace(Namespacep ns, bool canRehash = true);
         Namespacep gotNamespace(Stringp uri, int32_t api);
