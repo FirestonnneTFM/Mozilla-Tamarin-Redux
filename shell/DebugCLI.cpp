@@ -1074,8 +1074,8 @@ namespace avmshell
                 if (!key)
                     continue;
                 Binding b = iter.value();
-                Multiname* mn = new (core->gc) Multiname(iter.ns(), key);
-                if (!process(mn, AvmCore::bindingKind(b)))
+                Multiname mn(iter.ns(), key);
+                if (!process(&mn, AvmCore::bindingKind(b)))
                     return;
             }
             t = t->base;
@@ -1085,8 +1085,8 @@ namespace avmshell
         int index = 0;
         while ((index = object->nextNameIndex(index)) != 0)
         {
-            Multiname* mn = new (core->gc) Multiname(core->getAnyPublicNamespace(), core->string(object->nextName(index)));
-            if (!process(mn, BKIND_VAR))
+            Multiname mn(core->getAnyPublicNamespace(), core->string(object->nextName(index)));
+            if (!process(&mn, BKIND_VAR))
                 return;
         }
     }
