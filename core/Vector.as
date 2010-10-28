@@ -82,9 +82,7 @@ package __AS3__.vec
             return this;
         }
 
-        AS3 function shift() {
-            return private::_shift();
-        }
+        AS3 native function shift():*;
 
         AS3 function slice(start:Number=0, end:Number=0x7fffffff): Vector$object {
             return this._slice(start, end);
@@ -158,9 +156,7 @@ package __AS3__.vec
             this._reverse();
             return this;
         }
-        AS3 function shift(): int {
-            return private::_shift();
-        }
+        AS3 native function shift():int;
 
         AS3 function slice(start:Number=0, end:Number=0x7fffffff): Vector$int {
             return this._slice(start, end);
@@ -235,9 +231,7 @@ package __AS3__.vec
             return this;
         }
 
-        AS3 function shift(): uint {
-            return private::_shift();
-        }
+        AS3 native function shift():uint;
 
         AS3 function slice(start:Number=0, end:Number=0x7fffffff): Vector$uint {
             return this._slice(start, end);
@@ -311,9 +305,7 @@ package __AS3__.vec
             return this;
         }
 
-        AS3 function shift(): Number {
-            return private::_shift();
-        }
+        AS3 native function shift():Number;
 
         AS3 function slice(start:Number=0, end:Number=0x7fffffff): Vector$double {
             return this._slice(start, end);

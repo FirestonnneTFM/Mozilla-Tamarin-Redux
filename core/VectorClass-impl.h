@@ -394,6 +394,15 @@ namespace avmplus
     }
 
     template<class TLIST>
+    typename TLIST::TYPE TypedVectorObject<TLIST>::AS3_shift()
+    {
+        checkFixed();
+        return m_list.isEmpty() ? 
+                (typename TLIST::TYPE)TypedVectorConstants<typename TLIST::OPAQUE_TYPE>::undefinedValue() :
+                m_list.removeFirst();
+    }
+
+    template<class TLIST>
     uint32_t TypedVectorObject<TLIST>::AS3_unshift(Atom* argv, int argc)
     {
         checkFixed();
