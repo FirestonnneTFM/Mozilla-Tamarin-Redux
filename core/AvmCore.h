@@ -1687,7 +1687,6 @@ const int kBufferPadding = 16;
 #endif
 
         static bool getIndexFromAtom(Atom a, uint32_t *result);
-        static bool getIndexFromString(Stringp s, uint32_t *result);
 
         ScriptBufferImpl* newScriptBuffer(size_t size);
         VTable* newVTable(Traits* traits, VTable* base, Toplevel* toplevel);

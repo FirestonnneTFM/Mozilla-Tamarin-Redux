@@ -464,7 +464,7 @@ namespace avmplus
             // We have an integer argument - direct child lookup
             Stringp nameString = name.getName();
             uint32_t index;
-            if (AvmCore::getIndexFromString (nameString, &index))
+            if (nameString->parseIndex(index))
             {
                 //  //l = ToXMLList (this);
                 //  //return l->get(p);
@@ -554,7 +554,7 @@ namespace avmplus
         {
             Stringp name = m.getName();
             uint32_t index;
-            if (AvmCore::getIndexFromString (name, &index))
+            if (name->parseIndex(index))
             {
                 // Spec says: NOTE: this operation is reserved for future versions of E4X
                 toplevel->throwTypeError(kXMLAssignmentToIndexedXMLNotAllowed);
@@ -826,7 +826,7 @@ namespace avmplus
         {
             Stringp name = m.getName();
             uint32_t index;
-            if (AvmCore::getIndexFromString (name, &index))
+            if (name->parseIndex(index))
             {
                 // Spec says: NOTE: this operation is reserved for future versions of E4X
                 // In Rhino, this silently fails
@@ -1021,7 +1021,7 @@ namespace avmplus
         {
             Stringp name = m.getName();
             uint32_t index;
-            if (AvmCore::getIndexFromString (name, &index))
+            if (name->parseIndex(index))
             {
                 return (index == 0);
             }
@@ -1612,7 +1612,7 @@ namespace avmplus
 
         // We have an integer argument - direct child lookup
         uint32_t index;
-        if (AvmCore::getIndexFromString (core->string(P), &index))
+        if (core->string(P)->parseIndex(index))
         {
             XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass());
             if (index < m_node->numChildren())
@@ -2216,7 +2216,7 @@ namespace avmplus
         }
 
         uint32_t index;
-        if (AvmCore::getIndexFromString (core->string(P), &index))
+        if (core->string(P)->parseIndex(index))
         {
             E4XNode* prior = m_node->_replace (core, toplevel, index, c);
             childChanges(core->knodeChanged, c, prior);
@@ -2674,7 +2674,7 @@ namespace avmplus
             // We have an integer argument - direct child lookup
             Stringp nameString = name.getName();
             uint32_t index;
-            if (AvmCore::getIndexFromString (nameString, &index))
+            if (nameString->parseIndex(index))
             {
                 if (index == 0)
                 {

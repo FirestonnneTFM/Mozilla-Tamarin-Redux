@@ -94,7 +94,7 @@ namespace avmplus
         if (!m->isAnyName() && !m->isAttr())
         {
             uint32_t index;
-            if (!m->isAnyName() && AvmCore::getIndexFromString (m->getName(), &index))
+            if (!m->isAnyName() && m->getName()->parseIndex(index))
             {
                 return getUintProperty (index);
             }
@@ -138,7 +138,7 @@ namespace avmplus
         Toplevel *toplevel = this->toplevel();
 
         uint32_t i;
-        if (!m->isAnyName() && !m->isAttr() && AvmCore::getIndexFromString (m->getName(), &i))
+        if (!m->isAnyName() && !m->isAttr() && m->getName()->parseIndex(i))
         {
             setUintProperty (i, V);
             return;
@@ -187,7 +187,7 @@ namespace avmplus
         {
             Stringp name = m->getName();
             uint32_t index;
-            if (AvmCore::getIndexFromString (name, &index))
+            if (name->parseIndex(index))
             {
                 return this->delUintProperty (index);
             }
@@ -595,7 +595,7 @@ namespace avmplus
         {
             Stringp name = m->getName();
             uint32_t index;
-            if (AvmCore::getIndexFromString (name, &index))
+            if (name->parseIndex(index))
             {
                 return (index < _length());
             }

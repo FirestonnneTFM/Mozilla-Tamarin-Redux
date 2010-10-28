@@ -540,7 +540,7 @@ namespace avmplus
     Atom ByteArrayObject::getMultinameProperty(const Multiname* name) const
     {
         uint32_t index;
-        if (AvmCore::getIndexFromString(name->getName(), &index)) 
+        if (name->getName()->parseIndex(index)) 
         {
             return getUintProperty(index);
         }
@@ -551,7 +551,7 @@ namespace avmplus
     void ByteArrayObject::setMultinameProperty(const Multiname* name, Atom value)
     {
         uint32_t index;
-        if (AvmCore::getIndexFromString(name->getName(), &index)) 
+        if (name->getName()->parseIndex(index)) 
         {
             setUintProperty(index, value);
         }
@@ -564,7 +564,7 @@ namespace avmplus
     bool ByteArrayObject::hasMultinameProperty(const Multiname* name) const
     {
         uint32_t index;
-        if (this->core()->getIndexFromString(name->getName(), &index)) 
+        if (name->getName()->parseIndex(index)) 
         {
             return index < m_byteArray.GetLength();
         }
