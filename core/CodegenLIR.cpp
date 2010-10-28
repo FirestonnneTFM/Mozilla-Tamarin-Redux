@@ -3178,18 +3178,18 @@ namespace avmplus
 
     LIns *CodegenLIR::emitStringCall(int index, const CallInfo *stringCall, bool preserveNull)
     {
-        // Inline fast path for string conversion.  
+        // Inline fast path for string conversion.
         // if preserveNull == false:
         //   if ((input & kAtomTypeMask) != kStringType) || (input == kStringType))
-        //     output = stringCall (input)
+        //     output = stringCall (input);
         //   else
-        //     output = input ^ kAtomTypeMask;
-        // 
+        //     output = input ^ kStringType;
+        //
         // if preserveNull == true:
         //   if (input & kAtomTypeMask) != kStringType)
-        //     output = stringCall (input)
+        //     output = stringCall (input);
         //   else
-        //     output = input ^ kAtomTypeMask;
+        //     output = input ^ kStringType;
 
         CodegenLabel not_stringptr;
         CodegenLabel done;
@@ -3197,7 +3197,7 @@ namespace avmplus
         LIns* val = loadAtomRep(index);
         LIns* result = insAlloc(sizeof(intptr_t));
         LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
-        // kStringptrType
+        // kStringType
         branchToLabel(LIR_jf, eqp(tag, AtomConstants::kStringType), not_stringptr);
         if (!preserveNull) {
             // If our value is equal to kStringType, we have a null String ptr
