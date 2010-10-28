@@ -298,7 +298,7 @@ misc/testJitordieSwitch, ^((?!arm-winmobile-).).*deep, include, include slow tes
 # Bug 586397
 spidermonkey/js1_5/Array/regress-157652, arm-lnx.*deep, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=586397
 # Bug 604547
-misc/testJitordieSwitch, arm-lnx-tvm-release.*deep, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=604547
+misc/testJitordieSwitch, arm-lnx-tvm-release.*deep, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=604547
 
 ####################
 # verifier
