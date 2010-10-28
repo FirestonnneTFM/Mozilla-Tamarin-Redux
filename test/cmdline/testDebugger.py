@@ -141,6 +141,13 @@ def run():
       expectedout=['local2 = 5']
     )
 
+    r.run_test(
+      'debugger print',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='print Function.\nquit\n',
+      expectedout=['const length = 1','function get prototype\(\) = Function']
+    )
+
 if __name__ == '__main__':
     r=RunTestLib()
     r.compile("testdata/debug.as",None,"-d")
