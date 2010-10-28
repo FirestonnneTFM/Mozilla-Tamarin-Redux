@@ -46,17 +46,7 @@
 . ../all/util-calculate-change.sh $1
 
 # download build
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_debugger" ]; then
-    echo "Download AVMSHELL: ${shell_release_debugger}"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release_debugger $buildsdir/$change-${changeid}/$platform/$shell_release_debugger
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_debugger
-fi
+download_shell $shell_release_debugger
 
 # set the release debugger shell
 export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_release_debugger

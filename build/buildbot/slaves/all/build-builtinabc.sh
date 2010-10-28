@@ -58,17 +58,7 @@ echo basedir=$basedir
 ##
 # Download the latest asc.jar if it does not exist
 ##
-if [ ! -e "$basedir/utils/asc.jar" ]; then
-    echo "Download asc.jar"
-    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of asc.jar failed"
-        rm -f $basedir/utils/asc.jar
-        endSilent
-        exit 1
-    }
-fi
+download_asc
 
 echo ""
 echo "Building builtin.abc file using the following ASC version:"
