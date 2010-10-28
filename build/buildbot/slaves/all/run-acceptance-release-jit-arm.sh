@@ -53,32 +53,13 @@
 ##
 # Download the AVMSHELL if it does not exist
 ##
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_arm" ]; then
-    echo "Download AVMSHELL"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release_arm $buildsdir/$change-${changeid}/$platform/$shell_release_arm
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell_release_arm failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_arm
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_arm
-fi
+download_shell $shell_release_arm
 
 
 ##
 # Download the latest asc.jar if it does not exist
 ##
-if [ ! -e "$basedir/utils/asc.jar" ]; then
-    echo "Download asc.jar"
-    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of asc.jar failed"
-        rm -f $basedir/utils/asc.jar
-        exit 1
-    }
-fi
+download_asc
 
 echo ""
 echo "Building ABC files using the following ASC version:"

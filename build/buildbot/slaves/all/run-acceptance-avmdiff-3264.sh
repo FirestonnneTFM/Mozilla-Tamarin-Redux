@@ -52,43 +52,13 @@
 ##
 # Download the AVMSHELL if it does not exist
 ##
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_32" ]; then
-    echo "Download AVMSHELL"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release_32 $buildsdir/$change-${changeid}/$platform/$shell_release_32
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell_release_32 failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_32
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_32
-fi
-
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_64" ]; then
-    echo "Download AVMSHELL"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release_64 $buildsdir/$change-${changeid}/$platform/$shell_release_64
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell_release_64 failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_64
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_64
-fi
+download_shell $shell_release_32
+download_shell $shell_release_64
 
 ##
 # Download the latest asc.jar if it does not exist
 ##
-if [ ! -e "$basedir/utils/asc.jar" ]; then
-    echo "Download asc.jar"
-    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of asc.jar failed"
-        rm -f $basedir/utils/asc.jar
-        exit 1
-    }
-fi
+download_asc
 
 echo ""
 echo "Missing media will be compiled using the following ASC version:"

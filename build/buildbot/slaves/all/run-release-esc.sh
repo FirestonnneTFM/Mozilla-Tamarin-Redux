@@ -58,17 +58,7 @@ echo scriptsdir: $scriptsdir
 ##
 # Download the AVMSHELL if it does not exist
 ##
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
-    echo "Download AVMSHELL"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release $buildsdir/$change-${changeid}/$platform/$shell_release
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell_release failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
-fi
+download_shell $shell_release
 
 chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
 

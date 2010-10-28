@@ -84,32 +84,12 @@ export shell=$filename$shell_extension
 ##
 # Download the AVMSHELL if it does not exist
 ##
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell" ]; then
-    echo "Download AVMSHELL: ${shell}"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell $buildsdir/$change-${changeid}/$platform/$shell
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell
-fi
-
+download_shell $shell
 
 ##
 # Download the latest asc.jar if it does not exist
 ##
-if [ ! -e "$basedir/utils/asc.jar" ]; then
-    echo "Download asc.jar"
-    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of asc.jar failed"
-        rm -f $basedir/utils/asc.jar
-        exit 1
-    }
-fi
+download_asc
 
 
 echo ""

@@ -53,17 +53,7 @@
 ##
 # Download the AVMSHELL if it does not exist
 ##
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_selftest" ]; then
-    echo "Download AVMSHELL"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_selftest $buildsdir/$change-${changeid}/$platform/$shell_selftest
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell_selftest failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_selftest
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_selftest
-fi
+download_shell $shell_selftest
 
 ##
 # Ensure that the system is clean and ready

@@ -73,17 +73,7 @@ export shell=$filename$shell_extension
 ##
 # Download the AVMSHELL if it does not exist
 ##
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell" ]; then
-    echo "Download AVMSHELL: ${shell}"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell $buildsdir/$change-${changeid}/$platform/$shell
-    ret=$?
-    test "$ret" = "0" || {
-        echo "Downloading of $shell failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell
-        exit 1
-    }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell
-fi
+download_shell $shell
 
 
 

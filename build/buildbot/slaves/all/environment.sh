@@ -183,4 +183,54 @@ function endSilent () {
     fi
 }
 
+# Functions to download files to slave machine
+
+##
+# Download the latest asc.jar if it does not exist
+##
+function download_asc () {
+    if [ ! -e "$basedir/utils/asc.jar" ]; then
+        echo "Download asc.jar"
+        ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
+        ret=$?
+        test "$ret" = "0" || {
+            echo "Downloading of asc.jar failed"
+            rm -f $basedir/utils/asc.jar
+            # call endSilent regardless of where this script is called from
+            # as the endSilent function does the test of whether or not to execute
+            endSilent
+            exit 1
+        }
+    fi
+}
+
+##
+# Download the AVMSHELL if it does not exist
+# Requires a single argument: shell name to download
+##
+function download_shell () {
+    if [ -z "$1" ]; then
+        echo "ERROR: Missing Parameter.  Must pass the shell name as a parameter."
+        return 1
+    else
+        local shell=$1
+    fi
+    
+    if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell" ]; then
+        echo "Download AVMSHELL: $shell"
+        ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell $buildsdir/$change-${changeid}/$platform/$shell
+        ret=$?
+        test "$ret" = "0" || {
+            echo "Downloading of $shell failed"
+            rm -f $buildsdir/$change-${changeid}/$platform/$shell
+            # call endSilent regardless of where this script is called from
+            # as the endSilent function does the test of whether or not to execute
+            endSilent   
+            exit 1
+        }
+        chmod +x $buildsdir/$change-${changeid}/$platform/$shell
+    fi
+}
+
+
 
