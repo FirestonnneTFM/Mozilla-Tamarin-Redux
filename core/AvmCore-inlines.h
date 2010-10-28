@@ -556,7 +556,7 @@ REALLY_INLINE /*static*/ bool AvmCore::getIndexFromAtom(Atom a, uint32_t *result
     else
     {
         AvmAssert(AvmCore::isString(a));
-        return AvmCore::getIndexFromString(atomToString(a), result);
+        return atomToString(a)->parseIndex(*result);
     }
 }
 

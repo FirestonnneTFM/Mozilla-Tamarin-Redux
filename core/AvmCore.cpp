@@ -4443,20 +4443,6 @@ return the result of the comparison ToPrimitive(x) == y.
    #endif // DBLTOINT32_INT64
 #endif // !(defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 
-    // This routine is a very specific parser to generate a positive integer from a string.
-    // The following are supported:
-    // "0" - one single digit for zero - NOT "00" or any other form of zero
-    // [1-9]+[0-9]* up to 2^32-2 (4294967294)
-    // 2^32-1 (4294967295) is not supported (see ECMA quote below).
-    // The ECMA that we're supporting with this routine is...
-    // cn:  the ES3 test for a valid array index is
-    //  "A property name P (in the form of a string value) is an array index if and
-    //  only if ToString(ToUint32(P)) is equal to P and ToUint32(P) is not equal to 2^32-1."
-    bool AvmCore::getIndexFromString (Stringp s, uint32_t *result)
-    {
-        return s->parseIndex((uint32_t&) *result);
-    }
-
     int32_t AvmCore::getAPI(PoolObject* pool)
     {
         if (pool != NULL) {
