@@ -746,38 +746,51 @@ namespace avmplus
         register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)fi;
 #endif
 
-        // It's essential that the MethodFrame is cleaned up upon normal exit, to keep core->currentMethodFrame
-        // in order. (a throw past the frame will not perform cleanup.) A manual call just before returning
-        // is *not* adequate, as we need to be able to call aux_memory->methodFrame->exit() *after* our TRY/CATCH
-        //  code has completed (otherwise, it may attempt to "restore" currentStack to a bogus value).
-        // Using a real dtor here ensures we are called after any endTry().
+        // It's essential that the MethodFrame is cleaned up upon normal exit,
+        // to keep core->currentMethodFrame in order.  A throw past the frame
+        // will not perform cleanup.  A manual call just before returning
+        // is *not* adequate, as we need to be able to call
+        // aux_memory->methodFrame->exit() *after* our TRY/CATCH code has
+        // completed (otherwise, it may attempt to "restore" currentStack
+        // to a bogus value).  Using a real dtor here ensures we are called
+        // after any endTry().
         EnterMethodEnv methodFrame(core, env, aux_memory->methodFrame);
 
         register Atom* const scopeBase = framep + ms->local_count();
         register Atom* volatile withBase = NULL;
         NONDEBUGGER_ONLY( register ) int volatile scopeDepth = 0;
         register ScopeChain* const scope = env->scope();
+
+        // Compute base of operand stack.
         register Atom* /* NOT VOLATILE */ sp = scopeBase + ms->max_scope() - 1;
-        // Note: scopes can be anything but null or undefined... but scope0 (the global scope) will always be a ScriptObject*.
-        // Code that uses lots of global variables accesses this frequently, so it's worth caching.
-        ScriptObject* /* NOT VOLATILE */ globalScope = (scope->getSize() > 0) ? AvmCore::atomToScriptObject(scope->getScope(0)) : NULL;
+
+        // Note: scopes can be anything but null or undefined... but scope 0
+        // (the global scope) will always be a ScriptObject*.  Code that uses
+        // lots of global variables accesses this frequently, so it's worth
+        // caching.
+        ScriptObject* /* NOT VOLATILE */ globalScope = (scope->getSize() > 0)
+            ? AvmCore::atomToScriptObject(scope->getScope(0))
+            : NULL;
 
         // OPTIMIZEME - opportunities for streamlining the function entry code.
         //
-        // * With unbox/box optimization introduced and alloca removed so that the parameter
-        //   are as on the heap, we could overlap the outgoing parameter area with the incoming
-        //   locals.  This avoids copying, and will be a win if we don't have to work hard to
+        // * With unbox/box optimization introduced and alloca removed so
+        //   that the parameter are as on the heap, we could overlap the
+        //   outgoing parameter area with the incoming locals.  This avoids
+        //   copying, and will be a win if we don't have to work hard to
         //   figure out when it's applicable.
         //
-        // * A minor point is that rest / arguments could possibly be created by a special opcode
-        //   so that those flags don't have to be checked here.  Unlikely to be a time sink.
+        // * A minor point is that rest / arguments could possibly be
+        //   created by a special opcode so that those flags don't have to be
+        //   checked here.  Unlikely to be a time sink.
         //
-        // Edwin has suggested that the interp() function should simply take a boxed argument
-        // array always and that the call code should always pass a boxed argument array.  We'd
-        // end up with two entry points, one for boxed entry and one for unboxed entry.  For
-        // interpreted code the boxed entry would jump straight into this function, and the
-        // unboxed entry would go through reboxing.  For compiled code it would be the other
-        // way around, probably.
+        // Edwin has suggested that the interp() function should simply take
+        // a boxed argument array always and that the call code should always
+        // pass a boxed argument array.  We'd end up with two entry points,
+        // one for boxed entry and one for unboxed entry.  For interpreted
+        // code the boxed entry would jump straight into this function, and
+        // the unboxed entry would go through reboxing.  For compiled code it
+        // would be the other way around, probably.
 
         {
             // Copy instance and args to local frame
