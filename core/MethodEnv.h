@@ -234,7 +234,7 @@ namespace avmplus
     private:
         Atom findWithProperty(Atom obj, const Multiname* multiname);
 
-        class ActivationMethodTablePair
+        class ActivationMethodTablePair : public GCObject
         {
         public:
             ActivationMethodTablePair(VTable *a, WeakKeyHashtable*wkh);
