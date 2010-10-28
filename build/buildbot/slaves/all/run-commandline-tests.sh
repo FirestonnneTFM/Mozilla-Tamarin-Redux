@@ -45,6 +45,8 @@
 ##
 download_shell $shell_release
 download_shell $shell_release_debugger
+download_shell $shell_debug
+download_shell $shell_debug_debugger
 
 ##
 # Download the latest asc.jar if it does not exist
@@ -55,6 +57,7 @@ export ASC=$basedir/utils/asc.jar
 echo ASC=$ASC
 export AVM=$buildsdir/$change-${changeid}/$platform/$shell_release
 export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_release_debugger
+
 
 echo AVM=$AVM
 echo AVMRD=$AVMRD
@@ -83,7 +86,26 @@ else
     py=$PYTHONWIN
 fi
 $py ./runtests.py > cmdline.txt 2>&1
-ret=$?
+ret_release=$?
+
+
+# run the tests again, this time using debug and debug-debugger shells
+# note that we use the release env vars set to the debug players
+export AVM=$buildsdir/$change-${changeid}/$platform/$shell_debug
+export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
+
+if [ -z "$PYTHONWIN" ]
+then
+    py=python
+else
+    py=$PYTHONWIN
+fi
+# Note that we append to cmdline.txt as we have results from the run above in it
+$py ./runtests.py >> cmdline.txt 2>&1
+ret_debug=$?
+
+# Boolean OR the two returns to get a combined exitcode (ret) value
+ret=$(( $ret_release || $ret_debug ))
 echo "ret=$ret"
 
 cat cmdline.txt
