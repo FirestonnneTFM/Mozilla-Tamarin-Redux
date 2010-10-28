@@ -73,6 +73,8 @@ namespace MMgc
         // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
         static void *operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw());
 
+        static void *operator new(size_t size, GC *gc, size_t extra, GC::AllocFlags flags) GNUC_ONLY(throw());
+
         static void *operator new(size_t size, GC *gc) GNUC_ONLY(throw());
 
         static void operator delete(void *gcObject);
@@ -95,6 +97,11 @@ namespace MMgc
         static void* operator new(size_t size, GC *gc);
         static void operator delete (void *gcObject);
     };
+
+    REALLY_INLINE void *GCObject::operator new(size_t size, GC *gc, size_t extra, GC::AllocFlags flags) GNUC_ONLY(throw())
+    {
+        return gc->AllocExtra(size, extra, flags);
+    }
 
     REALLY_INLINE void *GCObject::operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw())
     {
