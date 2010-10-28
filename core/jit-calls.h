@@ -503,6 +503,10 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     PUREMETHOD(STRINGADDR(String::_charCodeAtIU),  SIG2(I,P,U), String_charCodeAtIU)
     FASTFUNCTION(FUNCADDR(String::equalsWithNullChecks),  SIG2(I,P,P), String_equals)
 
+    PUREMETHOD(STRINGADDR(String::_charAtI),  SIG2(P,P,I), String_charAtI)
+    PUREMETHOD(STRINGADDR(String::_charAtU),  SIG2(P,P,U), String_charAtU)
+    PUREMETHOD(STRINGADDR(String::AS3_charAt),  SIG2(P,P,F), String_charAtF)
+
     // FIXME: Bug 570049
     // Note that Toplevel::throwTypeError() assumes that Toplevel::typeErrorClass()
     // returns non-null.  In contrast, the interpreter signals a nullcheck failure
