@@ -139,7 +139,7 @@ private function _splice(start, deleteCount, items : Array) {
     return result;
 }
 
-private native function _spliceHelper(insertpoint:uint, insertcount:uint, deleteCount:uint, args:Object, offset:int):void;
+private native function _spliceHelper(insertpoint:uint, insertcount:uint, deleteCount:uint, args:Object, offset:uint):void;
 
 private function _shift() {
     if( fixed )

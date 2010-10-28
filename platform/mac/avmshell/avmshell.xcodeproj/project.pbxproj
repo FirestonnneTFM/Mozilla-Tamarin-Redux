@@ -891,6 +891,8 @@
 		8DD76F6C0486A84900D96B5E /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsPosix.cpp; path = ../../../VMPI/SpyUtilsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
+		D90A32C2125D24E20039348E /* VectorClass-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-impl.h"; path = "../../../core/VectorClass-impl.h"; sourceTree = SOURCE_ROOT; };
+		D90A32C3125D24E20039348E /* VectorClass-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-inlines.h"; path = "../../../core/VectorClass-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D92373DC11222458006D8AA3 /* njconfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = njconfig.cpp; path = ../../../nanojit/njconfig.cpp; sourceTree = SOURCE_ROOT; };
 		D92373DD11222458006D8AA3 /* njconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = njconfig.h; path = ../../../nanojit/njconfig.h; sourceTree = SOURCE_ROOT; };
 		D927090C112B5FD700A13EAA /* avmplusHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusHashtable-inlines.h"; path = "../../../core/avmplusHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1272,6 +1274,8 @@
 				079DF8CB0F3A88950031D1B4 /* StringObject.cpp */,
 				079DF8CC0F3A88950031D1B4 /* StringObject.h */,
 				079DF8CD0F3A88950031D1B4 /* VectorClass.cpp */,
+				D90A32C2125D24E20039348E /* VectorClass-impl.h */,
+				D90A32C3125D24E20039348E /* VectorClass-inlines.h */,
 				079DF8CE0F3A88950031D1B4 /* VectorClass.h */,
 				079DF8CF0F3A88950031D1B4 /* XMLClass.cpp */,
 				079DF8D00F3A88950031D1B4 /* XMLClass.h */,

@@ -72,6 +72,54 @@ namespace avmplus
     }
 
     template<class T, class ListHelper>
+    void ListImpl<T,ListHelper>::set_length(uint32_t len)
+    {
+        if (m_data->len != len)
+        {
+            ensureCapacity(len);
+            uint32_t const oldlen = m_data->len;
+            uint32_t start, count;
+            if (len < oldlen)
+            {
+                start = len;
+                count = oldlen - len;
+            }
+            else 
+            {
+                start = oldlen;
+                count = len - oldlen;
+            }
+            ListHelper::clearRange(m_data, start, count);
+            m_data->len = len;
+        }
+    }
+
+    template<class T, class ListHelper>
+    void ListImpl<T,ListHelper>::set_capacity(uint32_t cap)
+    {
+        AvmAssert(m_data != NULL);
+        AvmAssert(cap <= kListMaxLength);
+        if (cap < kListMinCapacity)
+            cap = kListMinCapacity;
+        if (m_data->cap != cap)
+        {
+            MMgc::GC* const gc = m_data->gc;
+            AvmAssert(cap > kListMinCapacity);
+            uint32_t len = m_data->len;
+            // keep existing length if possible (but don't let it exceed cap)
+            if (len > cap)
+                len = cap;
+            typename ListHelper::LISTDATA* newData = allocData(gc, cap);
+            if (len > 0)
+                VMPI_memcpy(newData->entries, m_data->entries, len * sizeof(typename ListHelper::STORAGE));
+            newData->len = len;
+            // don't call ListHelper::clearRange here; we want the refCounts to be transferred
+            ListHelper::free(gc, m_data);
+            ListHelper::wbData(this, &m_data, newData);
+        }
+    }
+
+    template<class T, class ListHelper>
     void ListImpl<T,ListHelper>::add(T value)
     {
         // OPTIMIZEME, this method may be worth inlining
@@ -197,8 +245,13 @@ namespace avmplus
         else
             index = len;
 
-        for (uint32_t i = 0; i < argc; ++i)
-            ListHelper::store(m_data, index + i, args[i]);
+        // allow args == NULL, which leaves the inserted entries empty
+        // (VectorObject makes use of this to avoid temporary storage in some cases)
+        if (args != NULL)
+        {
+            for (uint32_t i = 0; i < argc; ++i)
+                ListHelper::store(m_data, index + i, args[i]);
+        }
 
         m_data->len += argc;
     }
@@ -221,10 +274,15 @@ namespace avmplus
         {
             ListHelper::moveRange(m_data, insertPoint, insertPoint + insertCount - deleteCount, len - insertPoint);
         }
-
-        for (uint32_t i = 0; i < insertCount; ++i)
+        
+        // allow args == NULL, which leaves the inserted entries empty
+        // (VectorObject makes use of this to avoid temporary storage in some cases)
+        if (args != NULL)
         {
-            ListHelper::store(m_data, insertPoint + i, args[i]);
+            for (uint32_t i = 0; i < insertCount; ++i)
+            {
+                ListHelper::store(m_data, insertPoint + i, args[i]);
+            }
         }
 
         m_data->len = len + insertCount - deleteCount;

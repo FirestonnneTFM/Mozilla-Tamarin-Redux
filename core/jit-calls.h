@@ -304,7 +304,6 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
 
     // overloaded helpers that convert a raw value to Atom.  helper will be
     // chosen based on the <T> parameter to getprop_obj_slot, below.
-    typedef struct _Atom* OpaqueAtom;  // so we dont collide with int32_t
     enum Bool32 {};                    // can't use bool when sizeof(bool) != sizeof(int32_t)
     REALLY_INLINE Atom boxslot(AvmCore*, OpaqueAtom a) { return (Atom)a; }
     REALLY_INLINE Atom boxslot(AvmCore*, String* a) { return a->atom(); }

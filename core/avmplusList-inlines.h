@@ -99,7 +99,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE /*static*/ void DataListHelper<T>::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
     {
-        AvmAssert(start + count <= data->len);
+        AvmAssert(start + count <= data->cap);
         AvmAssert(count > 0);
         VMPI_memset(&data->entries[start], 0, count*sizeof(T));
     }
@@ -161,7 +161,7 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void GCListHelper::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
     {
-        AvmAssert(start + count <= data->len);
+        AvmAssert(start + count <= data->cap);
         AvmAssert(count > 0);
         VMPI_memset(&data->entries[start], 0, count*sizeof(MMgc::GCObject*));
     }
@@ -236,7 +236,7 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void RCListHelper::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
     {
-        AvmAssert(start + count <= data->len);
+        AvmAssert(start + count <= data->cap);
         AvmAssert(count > 0);
         for (uint32_t i = start, n = start + count; i < n; i++)
         {
@@ -309,9 +309,9 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void AtomListHelper::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
     {
-        AvmAssert(start + count <= data->len);
+        AvmAssert(start + count <= data->cap);
         AvmAssert(count > 0);
-        AvmCore::decrementAtomRegion(&data->entries[start], count);
+        AvmCore::decrementAtomRegion_null(&data->entries[start], count);
     }
 
     REALLY_INLINE /*static*/ void AtomListHelper::moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count)
@@ -377,7 +377,7 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void WeakRefListHelper::clearRange(LISTDATA* data, uint32_t start, uint32_t count)
     {
-        AvmAssert(start + count <= data->len);
+        AvmAssert(start + count <= data->cap);
         AvmAssert(count > 0);
         VMPI_memset(&data->entries[start], 0, count*sizeof(STORAGE));
     }

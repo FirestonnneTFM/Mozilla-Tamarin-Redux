@@ -249,6 +249,7 @@ namespace avmplus
     #  define tagprof(n,v)
     #endif
 
+    typedef struct _Atom* OpaqueAtom;  // so we dont collide with int32_t
 }
 
 #endif // __avmplus_atom__

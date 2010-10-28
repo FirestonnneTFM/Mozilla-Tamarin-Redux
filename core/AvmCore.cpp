@@ -4552,6 +4552,17 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
+    /*static*/
+    void AvmCore::decrementAtomRegion_null(Atom* arr, int length)
+    {
+        Atom* end = arr + length;
+        while (arr < end)
+        {
+            decr_atom(*arr);
+            *arr++ = nullObjectAtom;
+        }
+    }
+
     /*static*/ void AvmCore::atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
     {
         decr_atom(*address);

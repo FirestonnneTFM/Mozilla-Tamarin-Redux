@@ -1721,7 +1721,10 @@ const int kBufferPadding = 16;
         static void atomWriteBarrier_ctor(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew);
         static void atomWriteBarrier_dtor(Atom *address);
 
+        // fills the area with zero
         static void decrementAtomRegion(Atom *ar, int length);
+        // fills the area with nullObjectAtom
+        static void decrementAtomRegion_null(Atom *ar, int length);
 
     private:
         // hash set containing intern'ed strings

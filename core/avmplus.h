@@ -306,7 +306,7 @@ namespace avmplus
 #include "NumberClass.h"
 #include "IntClass.h"
 #include "ArrayClass.h"
-#include "VectorClass.h"
+#include "ObjectClass.h"
 #include "StringClass.h"
 #include "Date.h"
 #include "DateClass.h"
@@ -315,7 +315,6 @@ namespace avmplus
 #include "Domain.h"
 #include "DomainEnv.h"
 #include "DomainMgr.h"
-#include "ObjectClass.h"
 #include "ErrorClass.h"
 #include "MathClass.h"
 #ifdef VMCFG_EVAL
@@ -323,6 +322,7 @@ namespace avmplus
 #endif
 #include "DataIO.h"
 #include "Toplevel.h"
+#include "VectorClass.h"
 #include "AbcParser.h"
 #include "RegExpObject.h"
 #include "RegExpClass.h"
@@ -364,6 +364,7 @@ namespace avmplus
 #include "Toplevel-inlines.h"
 #include "Traits-inlines.h"
 #include "Verifier-inlines.h"
+#include "VectorClass-inlines.h"
 #include "VTable-inlines.h"
 
 #endif /* __avmplus__ */
