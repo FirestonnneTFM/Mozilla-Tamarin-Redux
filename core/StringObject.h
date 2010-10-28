@@ -431,7 +431,8 @@ namespace avmplus
                 int                 _lastIndexOf(Stringp s, int i=0x7fffffff);
                 int                 AS3_lastIndexOf(Stringp s, double i=0x7fffffff);
 
-                Stringp             _charAt(int i=0);
+                Stringp             _charAtI(int32_t i);
+                Stringp             _charAtU(uint32_t i);
                 Stringp             AS3_charAt(double i=0);
 
                 double              _charCodeAtFI(int32_t i); // returns NaN for out-of-bounds

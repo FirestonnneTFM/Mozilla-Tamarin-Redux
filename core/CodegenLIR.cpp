@@ -797,6 +797,7 @@ namespace avmplus
         get_cache_builder(*alloc1, *pool->codeMgr),
         set_cache_builder(*alloc1, *pool->codeMgr),
         prolog(NULL),
+        specializedCallHashMap(NULL),
         blockLabels(NULL),
         cseFilter(NULL)
         DEBUGGER_ONLY(, haveDebugger(core->debugger() != NULL) )
@@ -3515,13 +3516,68 @@ namespace avmplus
         localSet(loc, coerceToType(loc, result), result);
     }
 
+    // If we have already generated this specialized function, return our 
+    // prior entry instead of re-specializing the same function.  
+    LIns* CodegenLIR::getSpecializedCall(LIns* origCall)
+    {
+        if (!specializedCallHashMap)
+            return NULL;
+
+        return specializedCallHashMap->get(origCall);
+    }
+
+    // Track any specialized function so if we try to specialize the same function
+    // again we can re-use the original one.
+    LIns * CodegenLIR::addSpecializedCall(LIns* origCall, LIns* specializedCall)
+    {
+        if (!specializedCallHashMap)
+            specializedCallHashMap = new (*alloc1) HashMap<LIns *, LIns *>(*alloc1);
+
+        specializedCallHashMap->put(origCall, specializedCall);
+
+        return specializedCall;
+    }
+
+    // Attempt to replace a call with a call to another function, using the
+    // mapping given by 'specs'.  The intent is that the replacement function
+    // yield equivalent semantics in the context in which it will appear, but
+    // more efficiently.  A single replacement is generated for each call LIns*,
+    // and subquent requests to perform the same specializatoin will return
+    // the previously-constructed replacement LIns*.  If an attempt is made to
+    // specialize a function call for which no replacement is given in 'specs', we
+    // return NULL.  It is assumed that the replacement function will return
+    // an int32 value.
+
+    LIns* CodegenLIR::specializeIntCall(LIns* call, Specialization* specs)
+    {
+        LIns *priorCall = getSpecializedCall(call);
+        if (priorCall)
+            return priorCall;
+        
+        const CallInfo *ci = call->callInfo();
+        int i = 0;
+        while (specs[i].oldFunc != NULL) {
+            if (specs[i].oldFunc == ci) {
+                const CallInfo* nci = specs[i].newFunc;
+                AvmAssert(nci->returnType() == ARGTYPE_I);
+                LIns* specialization = callIns(nci, 2, call->arg(1), call->arg(0), INT_TYPE);
+                addSpecializedCall(call, specialization);
+                return specialization;
+            }
+            i++;
+        }
+        return NULL;
+    }
+
     // Return true if we are promoting an int or uint to a double
-    bool CodegenLIR::isPromote(LOpcode op) {
+    bool CodegenLIR::isPromote(LOpcode op) 
+    {
         return op == LIR_ui2d || op == LIR_i2d;
     }
 
     // Return non-null LIns* if input is a constant that fits into a int32_t
-    LIns* CodegenLIR::imm2Int(LIns* imm) {
+    LIns* CodegenLIR::imm2Int(LIns* imm) 
+    {
         if (imm->isImmI())
             ; // just use imm
         else if (imm->isImmD()) {
@@ -3536,6 +3592,13 @@ namespace avmplus
         }
         return imm;
     }
+
+    static Specialization coerceDoubleToInt[] = {
+        { FUNCTIONID(String_charCodeAtFI),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtFU),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtFF),    FUNCTIONID(String_charCodeAtIF) },
+        { 0, 0 }
+    };
 
     // Perform coercion from a double to integer.
     // Try various optimization to avoid double math if possible
@@ -3582,29 +3645,13 @@ namespace avmplus
             }
         }
 
-        // Try to swap a builtin function returning a number to a builtin function returning
-        // an integer for better performance
-        if (op == LIR_calld)
-        {
-            const CallInfo *ci = arg->callInfo();
-            if (ci == FUNCTIONID(String_charCodeAtFI)) {
-                LIns *args[2];
-                args[0] = arg->arg(0);
-                args[1] = arg->arg(1);
-                return lirout->insCall(FUNCTIONID(String_charCodeAtII), args);
-            }
-            else if (ci == FUNCTIONID(String_charCodeAtFU)) {
-                LIns *args[2];
-                args[0] = arg->arg(0);
-                args[1] = arg->arg(1);
-                return lirout->insCall(FUNCTIONID(String_charCodeAtIU), args);
-            }
-            else if (ci == FUNCTIONID(String_charCodeAtFF)) {
-                LIns *args[2];
-                args[0] = arg->arg(0);
-                args[1] = arg->arg(1);
-                return lirout->insCall(FUNCTIONID(String_charCodeAtIF), args);
-            }
+        // Try to replace a call returning a double, which will then be
+        // coerced to an integer, with a call that will produce an equivalent
+        // integer value directly.
+        if (op == LIR_calld) {
+            LIns* specialized = specializeIntCall(arg, coerceDoubleToInt);
+            if (specialized)
+                return specialized;
         }
 
 #ifdef AVMPLUS_64BIT
@@ -3808,6 +3855,29 @@ namespace avmplus
     // This is for VTable->createInstance which is called by OP_construct
     FUNCTION(CALL_INDIRECT, SIG3(P,P,P,P), createInstance)
 
+    bool CodegenLIR::specializeOneArgFunction(Traits *result, const CallInfo *ciInt, const CallInfo *ciUint, const CallInfo *ciNumber)
+    {
+        // One arg that may be a number, int or uint
+        // charCodeAt, charAt
+        int op1 = state->sp();
+        LIns *arg = localGetf(op1);
+        // argument is a constant integer
+        if (arg->isImmD() && ((double)(int32_t)arg->immD() == arg->immD())) {
+            localSet(op1-1, callIns(ciInt, 2, localGetp(op1-1), InsConst((int32_t)arg->immD())), result);
+        }
+        else if (arg->opcode() == LIR_i2d) {
+            localSet(op1-1, callIns(ciInt, 2, localGetp(op1-1), arg->oprnd1()), result);
+        }
+        else if (arg->opcode() == LIR_ui2d) {
+            localSet(op1-1, callIns(ciUint, 2, localGetp(op1-1), arg->oprnd1()), result);
+        }
+        else {
+            localSet(op1-1, callIns(ciNumber, 2, localGetp(op1-1), arg), result);
+        }
+        return true;
+    }
+
+
     bool CodegenLIR::inlineBuiltinFunction(AbcOpcode, intptr_t, int argc, Traits* result, MethodInfo* mi)
     {
         if (haveDebugger)
@@ -3837,25 +3907,16 @@ namespace avmplus
                 }
                 case avmplus::NativeID::String_AS3_charCodeAt: {
                     if (argc == 1) {
-                        int op1 = state->sp();
-                        LIns *arg = localGetf(op1);
-                        // argument is a constant integer
-                        if (arg->isImmD() && ((double)(int32_t)arg->immD() == arg->immD())) {
-                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFI), 2, localGetp(op1-1), InsConst((int32_t)arg->immD())), result);
-                        }
-                        else if (arg->opcode() == LIR_i2d) {
-                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFI), 2, localGetp(op1-1), arg->oprnd1()), result);
-                        }
-                        else if (arg->opcode() == LIR_ui2d) {
-                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFU), 2, localGetp(op1-1), arg->oprnd1()), result);
-                        }
-                        else {
-                            localSet(op1-1, callIns(FUNCTIONID(String_charCodeAtFF), 2, localGetp(op1-1), arg), result);
-                        }
-                        return true;
+                        return specializeOneArgFunction (result, FUNCTIONID(String_charCodeAtFI), FUNCTIONID(String_charCodeAtFU), FUNCTIONID(String_charCodeAtFF));
                     }
                     break;
-                 }
+                }
+                case avmplus::NativeID::String_AS3_charAt: {
+                    if (argc == 1) {
+                        return specializeOneArgFunction (result, FUNCTIONID(String_charAtI), FUNCTIONID(String_charAtU), FUNCTIONID(String_charAtF));
+                    }
+                    break;
+                }
             }
         }
 
@@ -5827,6 +5888,13 @@ namespace avmplus
     // type or value, if constant, of the other argument.  The function call is normally presumed
     // to be the left-hand argument.  The swap parameter, if true, reverses this convention.
 
+    static Specialization intCmpWithNumber[] = {
+        { FUNCTIONID(String_charCodeAtFI),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtFU),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charCodeAtFF),    FUNCTIONID(String_charCodeAtIF) },
+        { 0, 0 }
+    };
+
     LIns *CodegenLIR::optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap)
     {
         LIns* numSide = localGetf(callIndex);
@@ -5856,19 +5924,8 @@ namespace avmplus
                 (icmp == LIR_lti && (swap ? intVal >= 0 : intVal <= 0)) ||
                 (icmp == LIR_lei && (swap ? intVal > 0 : intVal < 0))) {
 
-                if (ci == FUNCTIONID(String_charCodeAtFI)) {
-                    numSide = callIns(FUNCTIONID(String_charCodeAtII), 2, numSide->arg(1), numSide->arg(0), INT_TYPE);
-                }
-                else if (ci == FUNCTIONID(String_charCodeAtFU)) {
-                    numSide = callIns(FUNCTIONID(String_charCodeAtIU), 2, numSide->arg(1), numSide->arg(0), INT_TYPE);
-                }
-                else if (ci == FUNCTIONID(String_charCodeAtFF)) {
-                    numSide = callIns(FUNCTIONID(String_charCodeAtIF), 2, numSide->arg(1), numSide->arg(0), INT_TYPE);
-                }
-                else {
-                    AvmAssert(false);
-                }
-
+                numSide = specializeIntCall(numSide, intCmpWithNumber);
+                AvmAssert(numSide != NULL);
                 if (swap) {
                     return binaryIns(icmp, intSide, numSide);
                 } else {
@@ -5880,11 +5937,46 @@ namespace avmplus
         return NULL;
     }
 
+    static Specialization stringCmpWithString[] = {
+        { FUNCTIONID(String_charAtI),    FUNCTIONID(String_charCodeAtII) },
+        { FUNCTIONID(String_charAtU),    FUNCTIONID(String_charCodeAtIU) },
+        { FUNCTIONID(String_charAtF),    FUNCTIONID(String_charCodeAtIF) },
+        { 0, 0 }
+    };
+
+    LIns *CodegenLIR::optimizeStringCmpWithStringCall(int callIndex, int otherIndex, LOpcode icmp, bool swap)
+    {
+        LIns* callSide = localGetp(callIndex);
+        const CallInfo *ci = callSide->callInfo();
+        if (ci == FUNCTIONID(String_charAtI) || ci == FUNCTIONID(String_charAtU) || ci == FUNCTIONID(String_charAtF)) {
+            LIns*  strSide = localGetp(otherIndex);
+            if (!strSide->isImmP())
+                return NULL;
+
+            String *s = (String *) strSide->immP();
+            // If we have a single character constant string that is not the null
+            // character, we can use charCodeAt which is about 2x faster.
+            if (s->length() == 1 && s->charAt(0) != 0) {
+                int32_t firstChar = s->charAt(0);
+                strSide = InsConst(firstChar);
+                callSide = specializeIntCall(callSide, stringCmpWithString);
+                AvmAssert(callSide != NULL);
+                if (swap) {
+                    return binaryIns(icmp, strSide, callSide);
+                } else {
+                    return binaryIns(icmp, callSide, strSide);
+                }
+            }
+        }
+
+        return NULL;
+    }
+    
     // Faster compares for int, uint, double, boolean
-     LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
-     {
-         Traits* lht = state->value(lhsi).traits;
-         Traits* rht = state->value(rhsi).traits;
+    LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
+    {
+        Traits* lht = state->value(lhsi).traits;
+        Traits* rht = state->value(rhsi).traits;
 
         if (lht == rht && (lht == INT_TYPE || lht == BOOLEAN_TYPE))
         {
@@ -5952,6 +6044,19 @@ namespace avmplus
             LIns* lhs = promoteNumberIns(lht, lhsi);
             LIns* rhs = promoteNumberIns(rht, rhsi);
             return binaryIns(fcmp, lhs, rhs);
+        }
+
+        if (lht == STRING_TYPE && rht == STRING_TYPE) {
+            if (localGetp(lhsi)->opcode() == LIR_calli) {
+                LIns* result = optimizeStringCmpWithStringCall(lhsi, rhsi, icmp, false);
+                if (result)
+                    return result;
+            }
+            else if (localGetp(rhsi)->opcode() == LIR_calli) {
+                LIns* result = optimizeStringCmpWithStringCall(rhsi, lhsi, icmp, true);
+                if (result)
+                    return result;
+            }
         }
 
         return NULL;

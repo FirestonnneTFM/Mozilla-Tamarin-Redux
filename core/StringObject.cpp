@@ -2289,18 +2289,41 @@ namespace avmplus
         return substring(start, end);
     }
 
-    Stringp String::_charAt(int iPos)
+    Stringp String::_charAtI(int32_t iPos)
     {
         AvmCore* core = _core(this);
-        if (iPos < 0 || iPos >= m_length)
-            return core->kEmptyString;
+        // use unsigned compare as faster equivalent to >= 0 && < m_length
+        if (uint32_t(iPos) < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            wchar const ch = (wchar) (getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos];
 
-        wchar const ch = (wchar) charAt(iPos);
-        // newStringUTF16 does the cachedChar optimization internally, but short-circuiting the test
-        // here is worthwhile because it's a pretty common case
-        if (ch < 128)
-            return core->cachedChars[ch];
-        return core->newStringUTF16(&ch, 1);
+            // newStringUTF16 does the cachedChar optimization internally, but short-circuiting the test
+            // here is worthwhile because it's a pretty common case
+            if (ch < 128)
+                return core->cachedChars[ch];
+            return core->newStringUTF16(&ch, 1);
+        }
+        else {
+            return core->kEmptyString;
+        }
+    }
+
+    Stringp String::_charAtU(uint32_t iPos)
+    {
+        AvmCore* core = _core(this);
+        if (iPos < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            wchar const ch = (wchar) (getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos];
+
+            // newStringUTF16 does the cachedChar optimization internally, but short-circuiting the test
+            // here is worthwhile because it's a pretty common case
+            if (ch < 128)
+                return core->cachedChars[ch];
+            return core->newStringUTF16(&ch, 1);
+        }
+        else {
+            return core->kEmptyString;
+        }
     }
 
     Stringp String::AS3_charAt(double dPos)
@@ -2308,7 +2331,21 @@ namespace avmplus
         int32_t iPos;
         INTCLAMP(iPos, dPos, this->length(), 0);
 
-        return _charAt(iPos);
+        AvmCore* core = _core(this);
+        // use unsigned compare as faster equivalent to >= 0 && < m_length
+        if (uint32_t(iPos) < uint32_t(m_length)) {
+            Pointers ptrs(this);
+            wchar const ch = (wchar) (getWidth() == k8) ? ptrs.p8[iPos] : ptrs.p16[iPos];
+
+            // newStringUTF16 does the cachedChar optimization internally, but short-circuiting the test
+            // here is worthwhile because it's a pretty common case
+            if (ch < 128)
+                return core->cachedChars[ch];
+            return core->newStringUTF16(&ch, 1);
+        }
+        else {
+            return core->kEmptyString;
+        }
     }
 
     Stringp String::AS3_toUpperCase()

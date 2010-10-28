@@ -91,7 +91,6 @@ package
         }
 
         // charAt
-        private native function _charAt(i:int=0):String // special-cased in Verifier, don't remove
         AS3 native function charAt(i:Number=0):String
 
         prototype.charAt = function(i:Number=0):String

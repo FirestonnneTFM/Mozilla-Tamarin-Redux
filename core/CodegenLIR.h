@@ -360,6 +360,18 @@ namespace avmplus
 
     typedef HashMap<LIns*, nanojit::BitSet*> LabelBitSet;
 
+    // We may replace an existing function call with another based on the
+    // context in which it appears.  For example, if the result is to be
+    // coerced to another type, there may be another function that directly
+    // generates the same value.   For each such context, an array of
+    // Specialization structures provides a mapping from the old function
+    // to its replacement.
+
+    struct Specialization {
+        const CallInfo* oldFunc;
+        const CallInfo* newFunc;
+    };
+
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
      * of the JIT.  It is intended to be instantiated on the stack once for each
@@ -421,6 +433,7 @@ namespace avmplus
         CacheBuilder<SetCache> set_cache_builder;
         PrologWriter *prolog;
         LIns* prologLastIns;
+        HashMap<LIns*, LIns*> *specializedCallHashMap;
         HashMap<const uint8_t*, CodegenLabel*> *blockLabels;
         LirWriter* redirectWriter;
         CseFilter* cseFilter; // The CseFilter instance for this method, or NULL if none.
@@ -560,8 +573,15 @@ namespace avmplus
 
         bool inlineBuiltinFunction(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi);
         LIns* optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
+        LIns* optimizeStringCmpWithStringCall (int callIndex, int otherIndex, LOpcode icmp, bool swap);
+        bool specializeOneArgFunction(Traits *result, const CallInfo *ciInt, const CallInfo *ciUint, const CallInfo *ciNumber);
+
         void suspendCSE();
         void resumeCSE();
+
+        LIns* getSpecializedCall(LIns* call);
+        LIns* addSpecializedCall(LIns* origCall, LIns* specializedCall);
+        LIns* specializeIntCall(LIns *call, Specialization* specs);
 
         LIns* emitStringCall(int index, const CallInfo *stringCall, bool preserveNull);
 
