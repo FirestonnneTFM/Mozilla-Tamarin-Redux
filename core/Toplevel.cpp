@@ -1347,6 +1347,18 @@ namespace avmplus
         eofErrorClass()->throwError(id);
     }
 
+    void Toplevel::throwReferenceError(int id, String* name, const Traits* traits) const
+    {
+        Multiname mn(core()->findPublicNamespace(), name);
+        referenceErrorClass()->throwError(id, core()->toErrorString(mn), core()->toErrorString(traits));
+    }
+
+    void Toplevel::throwReferenceError(int id, String* name) const
+    {
+        Multiname mn(core()->findPublicNamespace(), name);
+        referenceErrorClass()->throwError(id, core()->toErrorString(mn));
+    }
+
     DateClass* Toplevel::dateClass() { return (DateClass*)getBuiltinClass(avmplus::NativeID::abcclass_Date); }
     RegExpClass* Toplevel::regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
     XMLClass* Toplevel::xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }

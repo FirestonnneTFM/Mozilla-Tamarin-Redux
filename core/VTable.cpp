@@ -185,7 +185,7 @@ namespace avmplus
         AvmCore* core = toplevel->core();
         Namespacep traitsNs = this->traits->ns();
 
-        VTable* objVecVTable = toplevel->objectVectorClass->vtable;
+        VTable* objVecVTable = toplevel->vectorSpecializedClass[kObjectVector]->vtable;
         AbcEnv* objVecAbcEnv = toplevel->vectorobj_cscope->abcEnv();
         Toplevel* objVecToplevel = objVecVTable->toplevel();
         VTable* objVecIVTable = objVecVTable->ivtable;

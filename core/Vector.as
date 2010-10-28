@@ -53,21 +53,14 @@ package __AS3__.vec
             this.fixed = fixed;
         }
 
-        private native function set type(t : Object):void;
-        private native function get type():Object;
-
         // Private helper methods.  These allow most of the implementation to be abstracted into
         // a file that is included from the implementation of the different Vector types.
         private static function castToThisType(item) : Vector$object {
             return item;
         }
 
-        private function newThisType(length:uint=0) : Vector$object {
-            var v : Vector$object = new Vector.<type>(length);
-            //v.type = this.type;
-            return v;
-        }
-
+        private native function newThisType() : Vector$object;
+        
         // Include most of the vector implementation.
         include "VectorImpl.as";
 
@@ -143,9 +136,7 @@ package __AS3__.vec
             return item;
         }
 
-        private static function newThisType(length:uint=0) : Vector$int {
-            return new Vector$int(length);
-        }
+        private native function newThisType() : Vector$int;
 
         // Include most of the vector implementation.
         include "VectorImpl.as";
@@ -221,9 +212,7 @@ package __AS3__.vec
             return item;
         }
 
-        private static function newThisType(length:uint=0) : Vector$uint {
-            return new Vector$uint(length);
-        }
+        private native function newThisType() : Vector$uint;
 
         // Include most of the vector implementation.
         include "VectorImpl.as";
@@ -299,9 +288,7 @@ package __AS3__.vec
             return item;
         }
 
-        private static function newThisType(length:uint=0) : Vector$double {
-            return new Vector$double(length);
-        }
+        private native function newThisType() : Vector$double;
 
         // Include most of the vector implementation.
         include "VectorImpl.as";

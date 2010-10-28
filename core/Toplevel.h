@@ -43,10 +43,15 @@
 
 namespace avmplus
 {
-    class IntVectorClass;
-    class UIntVectorClass;
-    class DoubleVectorClass;
-    class ObjectVectorClass;
+    enum VectorSpecializedClasses
+    {
+        kIntVector,
+        kUIntVector,
+        kDoubleVector,
+        kObjectVector,
+        
+        kVectorSpecializedCount
+    };
     class VectorClass;
 
     /**
@@ -122,6 +127,9 @@ namespace avmplus
 
         void throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const;
         void throwReferenceError(int id, const Multiname& multiname) const;
+
+        void throwReferenceError(int id, String* name, const Traits* traits) const;
+        void throwReferenceError(int id, String* name) const;
 
         inline Toplevel* toplevel() { return this; }
         inline const Toplevel* toplevel() const { return this; }
@@ -470,10 +478,7 @@ namespace avmplus
         DRCWB(IntClass*)            intClass;
         DRCWB(UIntClass*)           uintClass;
         DRCWB(ObjectClass*)         objectClass;
-        DRCWB(IntVectorClass*)      intVectorClass;
-        DRCWB(DoubleVectorClass*)   doubleVectorClass;
-        DRCWB(UIntVectorClass*)     uintVectorClass;
-        DRCWB(ObjectVectorClass*)   objectVectorClass;
+        DRCWB(ClassClosure*)        vectorSpecializedClass[kVectorSpecializedCount];
         DRCWB(VectorClass*)         vectorClass;
         DRCWB(StringClass*)         stringClass;
     // ------------------------ DATA SECTION END

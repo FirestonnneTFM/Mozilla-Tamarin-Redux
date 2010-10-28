@@ -126,6 +126,11 @@ namespace avmplus
     
         // TYPE which is the public-facing type seen by users of the ListImpl
         typedef T TYPE;
+        
+        // OPAQUE_TYPE is the same as TYPE for everything but Atom -- this is a workaround
+        // for the fact that Atom is an int32_t, and as such can't be overloaded properly
+        // in templated code.
+        typedef TYPE OPAQUE_TYPE;
 
         // STORAGE is an internal-only type used to store the value.
         typedef T STORAGE;
@@ -174,6 +179,7 @@ namespace avmplus
     {
     public:
         typedef MMgc::GCObject* TYPE;
+        typedef TYPE OPAQUE_TYPE;
         typedef MMgc::GCObject* STORAGE;
         typedef ListData<STORAGE> LISTDATA;
         
@@ -194,6 +200,7 @@ namespace avmplus
     {
     public:
         typedef MMgc::RCObject* TYPE;
+        typedef TYPE OPAQUE_TYPE;
         typedef MMgc::RCObject* STORAGE;
         typedef ListData<STORAGE> LISTDATA;
         
@@ -214,6 +221,7 @@ namespace avmplus
     {
     public:
         typedef Atom TYPE;
+        typedef OpaqueAtom OPAQUE_TYPE;
         typedef Atom STORAGE;
         typedef ListData<STORAGE> LISTDATA;
 
@@ -234,6 +242,7 @@ namespace avmplus
     {
     public:
         typedef MMgc::GCObject* TYPE;
+        typedef TYPE OPAQUE_TYPE;
         typedef MMgc::GCWeakRef* STORAGE;
         typedef ListData<STORAGE> LISTDATA;
 
@@ -255,6 +264,7 @@ namespace avmplus
     {
     public:
         typedef T TYPE;
+        typedef typename ListHelper::OPAQUE_TYPE OPAQUE_TYPE;
         
     public:
         // capacity is the initial capacity to preallocate for the List.
@@ -278,9 +288,24 @@ namespace avmplus
         // from "number of items contained" if set() is called in a nonlinear fashion.)
         uint32_t length() const;
         
+        // Explicitly set the length of the ListImpl, growing or contracting as necessary.
+        // If growth is necessary, a List-dependent empty value will be stored in the
+        // newly expanded area (typically 0 / null). Note that setting the
+        // length to a smaller value will not necessarily reduce the capacity() value.
+        // Most code should never need to use this method; it's provided mainly for 
+        // Array / Vector code that needs this level of control.
+        void set_length(uint32_t len);
+
         // Return the maximum number of items the ListImpl can contain without needing to allocate
         // more memory.
         uint32_t capacity() const;
+
+        // Explicitly set the capacity of the ListImpl, growing or contracting as necessary.
+        // If the new capacity is <= length(), the length will be reduced. (length will never
+        // increase from this call, however.) Most code should never need to use this method,
+        // as the standard growth algorithm is smart enough for typical use; it's provided mainly for 
+        // Array / Vector code that needs this level of control.
+        void set_capacity(uint32_t cap);
         
         // Return the item at the given index. If the index is >= length(), assert. If the index
         // is < length() but has never had an item stored into it, return 0.
