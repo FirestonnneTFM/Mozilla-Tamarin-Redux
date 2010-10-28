@@ -141,16 +141,6 @@ private function _splice(start, deleteCount, items : Array) {
 
 private native function _spliceHelper(insertpoint:uint, insertcount:uint, deleteCount:uint, args:Object, offset:uint):void;
 
-private function _shift() {
-    if( fixed )
-        Error.throwError(RangeError, 1126);
-    if (length == 0)
-        return undefined;
-    var v = this[0];
-
-    _spliceHelper(0, 0, 1, null, 0);
-    return v;
-}
 AS3 native function unshift(...items) : uint;
 
 // Prototype Methods

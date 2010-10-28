@@ -247,6 +247,7 @@ namespace avmplus
         uint32_t AS3_push(Atom* argv, int argc);
         typename TLIST::TYPE AS3_pop();
         uint32_t AS3_unshift(Atom* argv, int argc);
+        typename TLIST::TYPE AS3_shift();
 
         // ScriptObject method overrides
         virtual bool hasAtomProperty(Atom name) const;
