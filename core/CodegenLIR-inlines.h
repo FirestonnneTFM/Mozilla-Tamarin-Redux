@@ -305,4 +305,15 @@ inline bool InvokerCompiler::copyArgs()
     return args_out->isop(LIR_allocp);
 }
 
+// Return true if JIT failure can be predicted from method signature prior to JIT invocation.
+// This supports a fast-fail mechanism to avoid blowup of non-linear JIT algorithms on atypical
+// methods, e.g., very long or with many variables.
+
+REALLY_INLINE bool CodegenLIR::jitWillFail(const MethodSignaturep ms)
+{
+    // Assembly cannot succeed if frame is too large for NanoJIT.
+    // Large frame sizes can lead to pathological VarTracker behavior -- see bug 601794.
+    return ms->frame_size() * 2 > NJ_MAX_STACK_ENTRY;
+}
+
 } // namespace
