@@ -201,7 +201,20 @@ namespace avmplus
     double UTC(double t)
     {
         double adj = VMPI_getLocalTimeOffset();
-        return (t - adj - VMPI_getDaylightSavingsTA(t - adj));
+
+        // If DST is in effect, and our time value is in a "gap" period
+        // (e.g. between 2:00:00AM and 2:59:59AM when DST occurs at 2:00AM)
+        // we need to adjust the time +1:00 to account for the "spring forward"
+        double dstAdjust = VMPI_getDaylightSavingsTA(t - adj);
+        if (dstAdjust != 0)
+        {
+            // Date/time falls in DST, check if this is a valid time
+            double dst2 = VMPI_getDaylightSavingsTA(t - adj - kMsecPerHour);
+            if (dst2 == 0)
+            t += kMsecPerHour;
+        }
+
+        return (t - adj - dstAdjust);
     }
 
     static double LocalTime(double t)
