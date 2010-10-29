@@ -151,7 +151,11 @@ sync_clean = ShellCommand(
             descriptionDone='Finished Removing the old repository',
             name='Source_Clean',
             workdir="../",
-            haltOnFailure="True")
+            haltOnFailure="True",
+            usePTY="False")
+            # Do not use PTY when calling 'rm' as it will sometimes report a failure.
+            #    http://buildbot.net/trac/ticket/284
+            #    http://buildbot.net/trac/ticket/255
 
 def sync_clone(url):
     return ShellCommand(
@@ -200,8 +204,11 @@ def bb_slaveupdate(slave):
             workdir='../',
             description='Updating SLAVE buildscripts',
             name='BB_SLAVEUpdate',
-            haltOnFailure="True"
-            )
+            haltOnFailure="True",
+            usePTY="False")
+            # Do not use PTY when calling 'cp' as it will sometimes report a failure.
+            #    http://buildbot.net/trac/ticket/284
+            #    http://buildbot.net/trac/ticket/255
 
 bb_lockacquire = BuildShellCommand(
             command=['../all/lock-acquire.sh', WithProperties('%s','revision')],
