@@ -266,7 +266,7 @@ private:
     //
 
     /** Return true if we should eagerly JIT.  False means use interpreter. */
-    bool shouldJit(const MethodInfo*) const;
+    bool shouldJit(const MethodInfo*, const MethodSignaturep) const;
 
     /** True if the JIT is enabled */
     bool isJitEnabled() const;

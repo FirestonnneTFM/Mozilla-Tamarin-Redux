@@ -281,7 +281,7 @@ void BaseExecMgr::verifyMethod(MethodInfo* m, Toplevel *toplevel, AbcEnv* abc_en
     if (m->isNative())
         verifyNative(m, ms);
 #ifdef VMCFG_NANOJIT
-    else if (shouldJit(m))
+    else if (shouldJit(m, ms))
         verifyJit(m, ms, toplevel, abc_env);
 #endif
     else
@@ -300,7 +300,7 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
 #ifdef AVMPLUS_VERBOSE
 # ifdef VMCFG_NANOJIT
     if (m->pool()->isVerbose(VB_execpolicy)) // Currently shouldn't print "unknown", accounting for code evolution.
-        core->console << "execpolicy interp " << m << (shouldJit(m) ? " unknown\n" : " jit-policy\n");
+        core->console << "execpolicy interp " << m << (shouldJit(m, ms) ? " unknown\n" : " jit-policy\n");
 # else
     if (m->pool()->isVerbose(VB_execpolicy))
         core->console << "execpolicy interp " << m << "\n";

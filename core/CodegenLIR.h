@@ -590,6 +590,9 @@ namespace avmplus
         ~CodegenLIR();
         GprMethodProc emitMD();
 
+        // May return true if JIT will always fail based on information known prior to invocation.
+        static bool jitWillFail(const MethodSignaturep ms);
+
         // CodeWriter methods
         void write(const FrameState* state, const uint8_t* pc, AbcOpcode opcode, Traits *type);
         void writeOp1(const FrameState* state, const uint8_t *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);

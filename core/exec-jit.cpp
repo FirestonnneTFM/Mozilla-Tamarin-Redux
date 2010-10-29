@@ -52,10 +52,12 @@ bool BaseExecMgr::isJitEnabled() const
     return runmode == RM_mixed || runmode == RM_jit_all;
 }
 
-bool BaseExecMgr::shouldJit(const MethodInfo* m) const
+bool BaseExecMgr::shouldJit(const MethodInfo* m, const MethodSignaturep ms) const
 {
     Runmode runmode = config.runmode;
-    return runmode == RM_jit_all || (runmode == RM_mixed && !m->isStaticInit());
+    // Run JIT if forcing compilation of all methods, or if the method is not a static initializer
+    // and we have not detected a fast-fail condition prior to invocation.  See bug 601794.
+    return runmode == RM_jit_all || (runmode == RM_mixed && !m->isStaticInit() && !CodegenLIR::jitWillFail(ms));
 }
 
 void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
