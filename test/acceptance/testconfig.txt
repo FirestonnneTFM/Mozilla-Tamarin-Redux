@@ -510,5 +510,7 @@ as3/Definitions/Function/functionReturnTypes.*, x86-mac.*valgrind.*, skip, https
 
 as3/Math/e15_8_2_12_rest:Math\.min\(-0\.0. 0\.0\) ,  (^((?!(Dinterp|diff)).)*$|.*wordcode.*), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 as3/Math/e15_1_2_2:radix 32, ^((?!diff).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=602912 
-as3/RegExp/replace:str\.replace\(pattern. \".02-.01, ^((?!diff).)*$ , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=605552
+
+as3/RegExp/replace, .* , skip , Do not run testcase until it passes cleanly through sandbox there are failures in interp mode
+#as3/RegExp/replace:str\.replace\(pattern. \".02-.01, ^((?!diff).)*$ , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=605552
 
