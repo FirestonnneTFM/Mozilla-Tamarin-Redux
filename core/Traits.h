@@ -254,7 +254,7 @@ namespace avmplus
     {
         friend class TraitsBindings;    // for m_sizeofInstance
         friend class InterfaceIterator;
-        #if defined FEATURE_NANOJIT
+        #ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         #endif
 

@@ -86,7 +86,7 @@ namespace avmplus
         bool linked;    // @todo -- surely there's a spare bit we can use for this.
         bool pad[2];
 
-#if defined FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     private:
         class ImtHolder imt;
 #endif

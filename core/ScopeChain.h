@@ -94,7 +94,7 @@ namespace avmplus
     {
         ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns);
 
-        #if defined FEATURE_NANOJIT
+        #ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         friend class MopsRangeCheckFilter;
         #endif

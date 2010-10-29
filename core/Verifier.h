@@ -58,10 +58,6 @@ namespace avmplus
      * incompatible frame states cause verify errors.
      */
 
-    #if defined FEATURE_NANOJIT
-    class CodegenLIR;
-    #endif
-
 #ifdef VMCFG_RESTARG_OPTIMIZATION
     // Helper used for optimization of ...rest parameters and the 'arguments' array.
     //

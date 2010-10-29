@@ -181,7 +181,7 @@ Atom op_in(E caller_env, Atom name, Atom obj) {
 }
 template Atom op_in(MethodEnv*, Atom, Atom);
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot)
 {
     AvmAssert(env->method->lookup_cache_size() > 0);
@@ -213,7 +213,7 @@ ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot
     WBRC(core->gc, cache, &cache[slot].object, obj);
     return obj;
 }
-#endif // FEATURE_NANOJIT
+#endif // VMCFG_NANOJIT
 
 Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
 {

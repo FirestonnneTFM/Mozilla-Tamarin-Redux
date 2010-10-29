@@ -38,7 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmshell.h"
-#if defined FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 #include "../nanojit/nanojit.h"
 #endif
 #include <float.h>
@@ -683,7 +683,7 @@ namespace avmshell
                         // allow this option even in non-DEBUGGER builds to make test scripts simpler
                         settings.nodebugger = true;
                     }
-#if defined(AVMPLUS_IA32) && defined(FEATURE_NANOJIT)
+#if defined(AVMPLUS_IA32) && defined(VMCFG_NANOJIT)
                     else if (!VMPI_strcmp(arg+2, "nosse")) {
                         settings.njconfig.i386_sse2 = false;
                     }
@@ -691,7 +691,7 @@ namespace avmshell
                         settings.njconfig.i386_fixed_esp = true;
                     }
 #endif /* AVMPLUS_IA32 */
-#if defined(AVMPLUS_ARM) && defined(FEATURE_NANOJIT)
+#if defined(AVMPLUS_ARM) && defined(VMCFG_NANOJIT)
                     else if (!VMPI_strcmp(arg+2, "arm_arch")) {
                         settings.njconfig.arm_arch = (uint8_t)VMPI_strtol(argv[++i], 0, 10);
                     }
@@ -778,7 +778,7 @@ namespace avmshell
                         }
                     }
 #endif /* AVMPLUS_VERBOSE */
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
                     else if (!VMPI_strcmp(arg+2, "nocse")) {
                         settings.njconfig.cseopt = false;
                     }
@@ -786,7 +786,7 @@ namespace avmshell
                         settings.runmode = RM_jit_all;
                         settings.jitordie = true;
                     }
-#endif /* FEATURE_NANOJIT */
+#endif /* VMCFG_NANOJIT */
                     else if (!VMPI_strcmp(arg+2, "interp")) {
                         settings.runmode = RM_interp_all;
                     }
@@ -804,11 +804,11 @@ namespace avmshell
                 else if (!VMPI_strcmp(arg, "-cache_methods") && i+1 < argc ) {
                     settings.cacheSizes.methods = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
                 }
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
                 else if (!VMPI_strcmp(arg, "-Ojit")) {
                     settings.runmode = RM_jit_all;
                 }
-#endif /* FEATURE_NANOJIT */
+#endif /* VMCFG_NANOJIT */
 #ifdef AVMPLUS_JITMAX
                 else if (!VMPI_strcmp(arg, "-jitmax") && i+1 < argc ) {
                     extern int jitmin;
@@ -1137,7 +1137,7 @@ namespace avmshell
 #endif
 #ifdef AVMPLUS_VERBOSE
         AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,minaddr,memstats,sweep,occupancy,execpolicy"
-#  ifdef FEATURE_NANOJIT
+#  ifdef VMCFG_NANOJIT
                ",jit,opt,regs"
 #  endif
                "]]\n");
@@ -1149,7 +1149,7 @@ namespace avmshell
         AvmLog("                           sweep - [memstats] include detailed sweep information \n");
         AvmLog("                           occupancy - [memstats] include occupancy bit graph \n");
         AvmLog("                           execpolicy - shows which execution method (interpretation, compilation) was chosen and why \n");
-#  ifdef FEATURE_NANOJIT
+#  ifdef VMCFG_NANOJIT
         AvmLog("                           jit - output LIR as it is generated, and final assembly code\n");
         AvmLog("                           opt - show details about each optimization pass\n");
         AvmLog("                           regs - show register allocation state after each assembly instruction\n");
@@ -1158,7 +1158,7 @@ namespace avmshell
         AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
         AvmLog("                        are contained in [ ] For example, 'minaddr' requires 'jit' \n");
 #endif
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
         AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
         AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
         AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");

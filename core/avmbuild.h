@@ -70,7 +70,7 @@
 #endif
 
 // This is here because it's for VM debugging.
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 // Enable the jitmax global variables and -jitmax switch to the shell, for bisecting nanojit bugs
 //#define AVMPLUS_JITMAX
 #endif

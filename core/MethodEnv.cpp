@@ -180,7 +180,7 @@ namespace avmplus
         return toplevel()->arrayClass->newarray(extra, extra_count);
     }
 
-#if defined FEATURE_NANOJIT || defined VMCFG_AOT
+#if defined VMCFG_NANOJIT || defined VMCFG_AOT
 
     Atom MethodEnv::getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index)
     {
@@ -402,7 +402,7 @@ namespace avmplus
         }
     }
 
-#if defined FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32_t *ap)
     {
         // create arguments using argv[1..argc].
@@ -429,7 +429,7 @@ namespace avmplus
         return toplevel()->arrayClass->newarray(extra, extra_count);
     }
 
-#endif // FEATURE_NANOJIT
+#endif // VMCFG_NANOJIT
 
     /*bool*/ int32_t MethodEnv::haspropertylate_u(Atom obj, uint32_t index) const
     {
