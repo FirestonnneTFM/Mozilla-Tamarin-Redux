@@ -76,7 +76,7 @@ namespace avmshell
         int langID;                     // copy to ShellCore?
         bool jitordie;                  // copy to config
         Runmode runmode;                // copy to config
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
         nanojit::Config njconfig;       // copy to config
 #endif
         AvmCore::CacheSizes cacheSizes; // Default to unlimited

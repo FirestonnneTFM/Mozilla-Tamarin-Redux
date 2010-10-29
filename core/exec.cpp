@@ -202,7 +202,7 @@ void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
     m->_invoker = invoke_stubs[ctor][typedargs];
     m->_isInterpImpl = 1;
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     if (isJitEnabled()) {
         // Choose an appropriate set of jit->interp stubs.
         // * if the method is a constructor, choose a stub that initializes
@@ -280,7 +280,7 @@ void BaseExecMgr::verifyMethod(MethodInfo* m, Toplevel *toplevel, AbcEnv* abc_en
     MethodSignaturep ms = m->getMethodSignature();
     if (m->isNative())
         verifyNative(m, ms);
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     else if (shouldJit(m))
         verifyJit(m, ms, toplevel, abc_env);
 #endif
@@ -298,7 +298,7 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
 #endif
     verifyCommon(m, ms, toplevel, abc_env, &coder);
 #ifdef AVMPLUS_VERBOSE
-# ifdef FEATURE_NANOJIT
+# ifdef VMCFG_NANOJIT
     if (m->pool()->isVerbose(VB_execpolicy)) // Currently shouldn't print "unknown", accounting for code evolution.
         core->console << "execpolicy interp " << m << (shouldJit(m) ? " unknown\n" : " jit-policy\n");
 # else
@@ -378,7 +378,7 @@ void BaseExecMgr::verifyNative(MethodInfo* m, MethodSignaturep ms)
     }
 }
 
-#ifndef FEATURE_NANOJIT
+#ifndef VMCFG_NANOJIT
 
 // Install the generic, interpretive invoker for a native method.
 // FIXME: Bug 529832 - We could specialize several common cases without JIT compiling.

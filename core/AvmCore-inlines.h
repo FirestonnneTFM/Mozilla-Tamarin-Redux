@@ -91,7 +91,7 @@ REALLY_INLINE QCache* AvmCore::msCache()
     return m_msCache;
 }
 
-#ifdef FEATURE_NANOJIT // accessors
+#ifdef VMCFG_NANOJIT // accessors
 
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
 REALLY_INLINE bool AvmCore::use_sse2() const
@@ -100,7 +100,7 @@ REALLY_INLINE bool AvmCore::use_sse2() const
 }
 #endif
 
-#endif // FEATURE_NANOJIT
+#endif // VMCFG_NANOJIT
 
 #ifdef AVMPLUS_VERBOSE
 REALLY_INLINE /*static*/ bool AvmCore::isBitSet(uint32_t v, uint32_t bit)

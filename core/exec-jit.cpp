@@ -41,7 +41,7 @@
 #include "avmplus.h"
 #include "Interpreter.h"
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 #include "CodegenLIR.h"
 
 namespace avmplus {
@@ -544,4 +544,4 @@ void BaseExecMgr::resolveImtSlotFull(VTable* vtable, uint32_t slot)
 }
 
 } // namespace avmplus
-#endif // FEATURE_NANOJIT
+#endif // VMCFG_NANOJIT

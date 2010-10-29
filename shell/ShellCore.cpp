@@ -64,7 +64,7 @@ namespace avmshell
         , langID(-1)
         , jitordie(AvmCore::jitordie_default)
         , runmode(AvmCore::runmode_default)
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
         , njconfig()
 #endif
         , st_component(NULL)
@@ -395,7 +395,7 @@ namespace avmshell
         config.verifyonly = settings.verifyonly;
 #endif
         config.jitordie = settings.jitordie;
-#if defined FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
         config.njconfig = settings.njconfig;
 #endif
 

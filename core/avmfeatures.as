@@ -158,8 +158,8 @@ var FEATURES =
     <name>      AVMSYSTEM_64BIT </name>
     <precludes> AVMSYSTEM_32BIT </precludes>
     <defines>   VMCFG_64BIT </defines>
-    <defines>   MMGC_64BIT </defines>       <!-- FIXME: legacy name -->
-    <defines>   AVMPLUS_64BIT </defines>    <!-- FIXME: legacy name -->
+    <defines>   MMGC_64BIT </defines>       <!-- FIXME: Bug 536304 legacy name -->
+    <defines>   AVMPLUS_64BIT </defines>    <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -190,7 +190,7 @@ var FEATURES =
     <name>      AVMSYSTEM_BIG_ENDIAN </name>
     <precludes> AVMSYSTEM_LITTLE_ENDIAN </precludes>
     <defines>   VMCFG_BIG_ENDIAN </defines>
-    <defines>   AVMPLUS_BIG_ENDIAN </defines>  <!-- FIXME: legacy name -->
+    <defines>   AVMPLUS_BIG_ENDIAN </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -200,8 +200,8 @@ var FEATURES =
     <name>      AVMSYSTEM_LITTLE_ENDIAN </name>
     <precludes> AVMSYSTEM_BIG_ENDIAN </precludes>
     <defines>   VMCFG_LITTLE_ENDIAN </defines>
-    <defines>   AVMPLUS_LITTLE_ENDIAN </defines>  <!-- FIXME: legacy name -->
-    <defines>   AVM10_BIG_ENDIAN </defines>       <!-- FIXME: legacy name, may be externally visble, should clean up -->
+    <defines>   AVMPLUS_LITTLE_ENDIAN </defines>  <!-- FIXME: Bug 536304 legacy name -->
+    <defines>   AVM10_BIG_ENDIAN </defines>       <!-- FIXME: Bug 536304 legacy name, may be externally visble, should clean up -->
   </feature>
 
   <feature>
@@ -222,8 +222,8 @@ var FEATURES =
     <name>      AVMSYSTEM_IA32 </name>
     <precludes> AVMSYSTEM_64BIT </precludes>
     <defines>   VMCFG_IA32 </defines>
-    <defines>   MMGC_IA32 </defines>     <!-- FIXME: legacy name -->
-    <defines>   AVMPLUS_IA32 </defines>  <!-- FIXME: legacy name -->
+    <defines>   MMGC_IA32 </defines>     <!-- FIXME: Bug 536304 legacy name -->
+    <defines>   AVMPLUS_IA32 </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -232,8 +232,8 @@ var FEATURES =
     <name>     AVMSYSTEM_AMD64 </name>
     <requires> AVMSYSTEM_64BIT </requires>
     <defines>  VMCFG_AMD64 </defines>
-    <defines>  MMGC_AMD64 </defines>     <!-- FIXME: legacy name -->
-    <defines>  AVMPLUS_AMD64 </defines>  <!-- FIXME: legacy name -->
+    <defines>  MMGC_AMD64 </defines>     <!-- FIXME: Bug 536304 legacy name -->
+    <defines>  AVMPLUS_AMD64 </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -242,8 +242,8 @@ var FEATURES =
     <name>      AVMSYSTEM_ARM </name>
     <precludes> AVMSYSTEM_64BIT </precludes>
     <defines>   VMCFG_ARM </defines>
-    <defines>   MMGC_ARM </defines>     <!-- FIXME: legacy name -->
-    <defines>   AVMPLUS_ARM </defines>  <!-- FIXME: legacy name -->
+    <defines>   MMGC_ARM </defines>     <!-- FIXME: Bug 536304 legacy name -->
+    <defines>   AVMPLUS_ARM </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -252,8 +252,8 @@ var FEATURES =
 
     <name>     AVMSYSTEM_PPC </name>
     <defines>  VMCFG_PPC </defines>
-    <defines>  MMGC_PPC </defines>     <!-- FIXME: legacy name -->
-    <defines>  AVMPLUS_PPC </defines>  <!-- FIXME: legacy name -->
+    <defines>  MMGC_PPC </defines>     <!-- FIXME: Bug 536304 legacy name -->
+    <defines>  AVMPLUS_PPC </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -262,8 +262,8 @@ var FEATURES =
     <name>      AVMSYSTEM_SPARC </name>
     <precludes> AVMSYSTEM_64BIT </precludes>
     <defines>   VMCFG_SPARC </defines>
-    <defines>   MMGC_SPARC </defines>     <!-- FIXME: legacy name -->
-    <defines>   AVMPLUS_SPARC </defines>  <!-- FIXME: legacy name -->
+    <defines>   MMGC_SPARC </defines>     <!-- FIXME: Bug 536304 legacy name -->
+    <defines>   AVMPLUS_SPARC </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -271,7 +271,7 @@ var FEATURES =
 
     <name>      AVMSYSTEM_MIPS </name>
     <defines>   VMCFG_MIPS </defines>
-    <defines>   AVMPLUS_MIPS </defines>  <!-- FIXME: legacy name -->
+    <defines>   AVMPLUS_MIPS </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -351,7 +351,7 @@ var FEATURES =
     <defines>  VMCFG_DEBUGGER  </defines>
     <defines>  VMCFG_VERIFYALL </defines>
     <defines>  AVMPLUS_VERBOSE </defines>
-    <defines>  DEBUGGER </defines>           <!-- FIXME: legacy name -->
+    <defines>  DEBUGGER </defines>           <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -413,7 +413,7 @@ var FEATURES =
     <defines> VMCFG_PRECOMP_NAMES </defines>
     <defines> VMCFG_LOOKUP_CACHE </defines>
     <defines> VMCFG_METHODENV_IMPL32 </defines>
-    <defines> FEATURE_NANOJIT </defines>  <!-- FIXME: legacy name -->
+    <defines> FEATURE_NANOJIT </defines> <!-- referenced by nanojit module only -->
   </feature>
 
   <feature>
@@ -526,7 +526,7 @@ var FEATURES =
     <desc> Makes all JIT code buffers read-only whenever JIT code is executing,
            to reduce the probability of heap overflow attacks. </desc>
     <name> AVMFEATURE_PROTECT_JITMEM </name>
-    <defines> AVMPLUS_JIT_READONLY </defines> <!-- fixme: legacy name -->
+    <defines> AVMPLUS_JIT_READONLY </defines> <!-- fixme: Bug 536304 legacy name -->
     <defines> VMCFG_PROTECT_JITMEM </defines>
   </feature>
 

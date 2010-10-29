@@ -244,7 +244,7 @@ typedef unsigned __int64    uint64_t;
     #error "Unrecognized compiler"
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1400 && defined(FEATURE_NANOJIT)
+#if defined(_MSC_VER) && _MSC_VER < 1400 && defined(VMCFG_NANOJIT)
     #define NJ_NO_VARIADIC_MACROS
 #endif
 

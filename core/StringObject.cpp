@@ -791,7 +791,7 @@ namespace avmplus
         return true;
     }
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     /*static*/ int32_t String::equalsWithNullChecks(Stringp s1, Stringp s2)
     {
         if (s1 == s2)
@@ -828,7 +828,7 @@ namespace avmplus
         AvmAssert(0);
         return true;
     }
-#endif // FEATURE_NANOJIT
+#endif // VMCFG_NANOJIT
 
 /////////////////////////////// Hash Codes /////////////////////////////////
 

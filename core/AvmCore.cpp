@@ -166,7 +166,7 @@ namespace avmplus
     const bool AvmCore::jitordie_default = false;
 
 #ifdef AVMPLUS_VERBOSE
-    #if defined FEATURE_NANOJIT
+    #ifdef VMCFG_NANOJIT
         const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0 & ~(nanojit::LC_FragProfile); // LC_FragProfile changes generated code!?!
     #else
         const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0;
@@ -208,14 +208,14 @@ namespace avmplus
                 MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
             else if (substrMatches("occupancy", p, e))
                 MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
-#if defined FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
             else if (substrMatches("jit", p, e))
                  r |= VB_jit | LC_AfterDCE | LC_Native;
              else if (substrMatches("opt", p, e))
                  r |= VB_jit | LC_AfterDCE | LC_Native | LC_Liveness | LC_ReadLIR | LC_AfterSF;
              else if (substrMatches("regs", p, e))
                  r |= VB_jit | LC_AfterDCE | LC_Native | LC_Activation | LC_RegAlloc;
-#endif /* FEATURE_NANOJIT */
+#endif /* VMCFG_NANOJIT */
              else
                  badFlag = (char*)p;
             if (*e < 32)

@@ -39,7 +39,7 @@
 
 #include "nanojit.h"
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 
 namespace nanojit
 {

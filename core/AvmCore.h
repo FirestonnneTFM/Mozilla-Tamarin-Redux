@@ -76,7 +76,7 @@ const int kBufferPadding = 16;
 
     struct Config
     {
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
         // options for nanojit
         nanojit::Config njconfig;
 #endif
@@ -512,7 +512,7 @@ const int kBufferPadding = 16;
         // execution manager, responsible for all invocation
         ExecMgr* exec;
 
-        #ifdef FEATURE_NANOJIT // accessors
+        #ifdef VMCFG_NANOJIT // accessors
             #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
             bool use_sse2() const;
             #endif

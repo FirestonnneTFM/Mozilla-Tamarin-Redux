@@ -51,7 +51,7 @@ namespace avmplus
         Traits* traits;
         bool notNull;
         bool isWith;
-#if defined FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
         // One bit for each of 8 possible SlotStorageTypes for the native representation
         // of this value.  The JIT uses this mask to handle control-flow merges
         // of incompatible values (e.g. int and String*).  At merge points, masks

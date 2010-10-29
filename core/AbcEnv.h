@@ -46,7 +46,7 @@ namespace avmplus
     // runtime info associated with a pool
     class AbcEnv : public MMgc::GCFinalizedObject
     {
-        #if defined FEATURE_NANOJIT
+        #ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         friend class MopsRangeCheckFilter;
         #endif

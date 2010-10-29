@@ -39,7 +39,7 @@
 
 #include "nanojit.h"
 
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
 
 #ifdef VMCFG_VTUNE
 #include "../core/CodegenLIR.h"
@@ -2583,4 +2583,4 @@ namespace nanojit
         return labels.get(label);
     }
 }
-#endif /* FEATURE_NANOJIT */
+#endif /* VMCFG_NANOJIT */

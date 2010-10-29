@@ -43,7 +43,7 @@
 
 namespace avmplus
 {
-    #ifdef FEATURE_NANOJIT
+    #ifdef VMCFG_NANOJIT
     class CodegenLIR;
     #endif
 
@@ -62,7 +62,7 @@ namespace avmplus
         const static int32_t RTNAME = 0x08; // runtime name
         const static int32_t NSSET  = 0x10;
         const static int32_t TYPEPARAM = 0x20;
-        #ifdef FEATURE_NANOJIT
+        #ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         #endif
         friend class HeapMultiname;
