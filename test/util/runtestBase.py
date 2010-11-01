@@ -892,8 +892,7 @@ class RuntestBase:
         if self.genAtsSwfs:
             # get settings as ats excluded files are defined there
             settings = self.getLocalSettings(as_file)
-            if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
-                self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*']['ats_skip']))
+            if self.skipAtsTest(file, settings):
                 return
 
         # additional .as file compiler args
@@ -1044,8 +1043,7 @@ class RuntestBase:
                         if self.genAtsSwfs:
                             # get settings as ats excluded files are defined there
                             settings = self.getLocalSettings(testdir)
-                            if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
-                                self.js_print('ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip']))
+                            if self.skipAtsTest(file, settings):
                                 continue
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
 
@@ -1058,6 +1056,9 @@ class RuntestBase:
                         for util in deps + glob(join(dir,"*Util.as")):
                             cmd += " -in %s" % util #no need to prepend \ to $ when using ash
                         cmd += " %s" % test
+
+                        self.verbose_print('Compiling %s' % test)
+                        self.debug_print(cmd)
 
                         if exists(testdir+".abc"):
                             os.unlink(testdir+".abc")
@@ -1074,6 +1075,15 @@ class RuntestBase:
 
                     #print("%d remaining, %s" % (total,cmd))
         end_time = datetime.today()
+
+    def skipAtsTest(self, file, settings):
+        '''Check testconfig if we should skip the given file.  Returns a boolean'''
+        if settings.has_key('.*'):
+            for key in ['ats_skip', 'skip', 'expectedfail']:
+                if settings['.*'].has_key(key):
+                    self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*'][key]))
+                    return True
+        return False
 
     def loadArgsFile(self, arglist,dir,file, filetype='asc_args'):
         # It is possible that file is actually a partial path rooted to acceptance,
