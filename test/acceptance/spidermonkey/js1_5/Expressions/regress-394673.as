@@ -70,7 +70,7 @@ function build(operation) {
     return function() {
         print('anon func')
         x = a.join(operation);
-        print(x);
+        // print(x);
         
     };
 }

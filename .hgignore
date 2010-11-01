@@ -80,3 +80,4 @@ utils/wmremote/wmrunner/Release/**
 *.opensdf
 *.ipch
 .settings/**
+*.komodoproject

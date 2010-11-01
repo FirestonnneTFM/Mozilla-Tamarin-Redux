@@ -34,8 +34,8 @@
 #
 # configuration is a regular expression with the format {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
 #
-# commands are currently one of : asc.args, expectedfailure, skip, include
-#    expectedfailure - expects the test to fail, comments should provide bug number and a comment
+# commands are currently one of : asc.args, expectedfail, skip, include
+#    expectedfail - expects the test to fail, comments should provide bug number and a comment
 #
 #    The following commands only operate at a testfile level and not individual tests:
 #
@@ -322,12 +322,17 @@ as3/sampling/Callback:Callback: callback called.*, ^((?!-ES).)*$, expectedfail, 
 # ATS Skipped tests - These tests will not be exported when generating ATS swfs
 ####################
 misc/isGlobalObject.as, .*, ats_skip, uses avmplus.System.isGlobal
+misc/doubleTimeout, .*, ats_skip, test purposefully times out the player
+misc/invalid_opcodes, .*, ats_skip, test purposefully throws a VerifyError
+misc/testJitordieSwitch, .*, ats_skip, tests -Djitordie switch in vm shell
 regress/vector_domain_bug.as, .*, ats_skip, uses avmplus::Domain
+regress/bug_515935, .*, ats_skip, test purposefully causes player OOM
+regress/security/bug_441280, .*, ats_skip, uses avmplus::Domain
 as3/ShellClasses/.*, .*, ats_skip, Tests avmplus ShellClasses
 as3/sampling/.*, .*, ats_skip, sampling tests
 as3/DescribeType/.*, .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=520082
 ecma3/Exceptions/exception_011_rt.as, .*, ats_skip, test purposefully throws an uncaught error
-mmgc/.*, .*, ats_skip, mmgc testsf
+mmgc/.*, .*, ats_skip, mmgc tests
 abcasm/.*, .*, ats_skip, abcasm tests
 mops/.*, .*, ats_skip, mops test - we don't have source to generate swf
 regress/vector_domain_bug, .*, ats_skip, uses avmplus.Domain
@@ -341,6 +346,21 @@ ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow test
 ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow tests
 ecma3/Unicode/uE000_PrivateUseArea, .*, ats_skip, bug 499685 skip slow tests
 ecma3/Unicode/uAC00_HangulSyllables, .*, ats_skip, bug 499685 skip slow tests
+
+
+# Skip Versioned test in ATS - see https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+as3/Array/regress_524122,               .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+as3/Vector/bug504525/bug504525,         .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+e4x/XML/e13_4_4_29,                     .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+e4x/XML/e13_4_4_3,                      .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+e4x/XML/e13_4_4_32,                     .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+ecma3/GlobalObject/parseFloat_513018,   .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+ecma3/String/localeCompare_585791,      .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+misc/bug_526662,                        .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+regress/bug_558863,                     .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608760
+
+
+
 
 ####################
 #  --verify skips

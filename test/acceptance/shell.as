@@ -1059,6 +1059,11 @@ function _print(s) {
   trace(s);
 //  trace(s);
 }
+
+function print(s) {
+    trace(s);
+}
+
 // workaround for Debugger vm where error contains more details
 function parseError(error,len) {
   if (error.length>len) {
@@ -1300,5 +1305,3 @@ function singleQuote(text)
 {
   return CHAR_QT + text + CHAR_QT;
 }
-
-

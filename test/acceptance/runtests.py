@@ -124,6 +124,9 @@ class AcceptanceRuntest(RuntestBase):
             elif o in ('--ats',):
                 self.genAtsSwfs = True
                 self.rebuildtests = True
+                # Need to run single threaded since we create a temp file for
+                # every test and this file can collide when using multiple threads
+                self.threads = 1
             elif o in ('--atsdir',):
                 self.atsDir = v
             elif o in ('--verify',):
