@@ -71,6 +71,9 @@ var VERBOSE = true;
 
 var    DEBUG =	false;
 
+// Was this compiled with -AS3?  Boolean Value.
+var as3Enabled = ((new Namespace).valueOf != Namespace.prototype.valueOf);
+
 function typeError( str ){
 	return str.slice(0,TYPEERROR.length+4);
 }
@@ -275,12 +278,6 @@ function writeHeaderToLog( string )	{
 	_print( string );
 }
 // end of print functions
-
-function as3Enabled():Boolean {
-    // return whether the test was compiled with -AS3
-    return ((new Boolean()).valueOf != Boolean.prototype.valueOf)
-}
-
 
 //  When running in the shell, run the garbage collector after the
 //  test has completed.

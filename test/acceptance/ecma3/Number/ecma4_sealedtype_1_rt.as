@@ -63,9 +63,15 @@ function getTestCases() {
 	} catch (e:ReferenceError) {
         thisError = e.toString();
 	} finally {
-        array[item] = new TestCase( SECTION,"toStr=Number.prototype.toString;x=new Number();x.toString=tostr",
-					 "ReferenceError: Error #1056",
-					 referenceError(thisError) );
+        var expectedError = 1056;
+        if (as3Enabled) {
+            expectedError = 1037;
+        }
+        array[item] = new TestCase(
+                            SECTION,
+                            "toStr=Number.prototype.toString;x=new Number();x.toString=tostr",
+                            REFERENCEERROR+expectedError,
+                            referenceError(thisError) );
 	}
     return ( array );
 }

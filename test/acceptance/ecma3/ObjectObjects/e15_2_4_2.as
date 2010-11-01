@@ -74,8 +74,13 @@ function getTestCases() {
 
 	Number.prototype.toString=Object.prototype.toString;
 	myvar = new Number(0);
+    var expectedAns = "[object Number]";
+    if (as3Enabled) {
+        expectedAns = "0";
+    }
+    
     array[item++] = new TestCase( SECTION,  "myvar = new Number(0); myvar.toString = Object.prototype.toString; myvar.toString()",
-                                            "[object Number]",
+                                            expectedAns,
                                              myvar.toString());
 
     // restore
@@ -86,8 +91,12 @@ function getTestCases() {
 
 	String.prototype.toString=Object.prototype.toString;
 	myvar = new String('');
+    expectedAns = "[object String]";
+    if (as3Enabled) {
+        expectedAns = "";
+    }
 	array[item++] = new TestCase( SECTION,  "myvar = new String(''); myvar.toString = Object.prototype.toString; myvar.toString()",
-                                            "[object String]",
+                                            expectedAns,
                                             myvar.toString() );
 
     // restore

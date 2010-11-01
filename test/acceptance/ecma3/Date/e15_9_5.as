@@ -48,24 +48,38 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
 
-	// save
-	var origGetClass:Function = Date.prototype.getClass;
-	var origValueOf:Function = Date.prototype.valueOf;
+    if (as3Enabled) {
+        // Date is a sealed class
+        try{
+            Date.prototype.valueOf=Object.prototype.toString;
+        }catch(e){
+            thisError=e.toString();
+        }finally{
+            array[item++] =new TestCase(SECTION,
+                    "ReferenceError: Error #1037: Cannot assign to a method valueOf on Date.",
+                    "ReferenceError: Error #1037",
+                    referenceError( thisError ) );
+        }
+    } else {    // ES
+        var origGetClass:Function = Date.prototype.getClass;
+        var origValueOf:Function = Date.prototype.valueOf;
+    
+        Date.prototype.getClass = Object.prototype.toString;
+        Date.prototype.valueOf=Object.prototype.toString;
+        array[item++] = new TestCase( SECTION,
+                        "Date.prototype.getClass",
+                        "[object Date]",
+                        Date.prototype.getClass() );
+        array[item++] = new TestCase( SECTION,
+                        "Date.prototype.valueOf()",
+                        "[object Date]",
+                        (Date.prototype.valueOf()) );
+    
+        // restore
+        Date.prototype.getClass = origGetClass;
+        Date.prototype.valueOf = origValueOf;
+    }
 
-	Date.prototype.getClass = Object.prototype.toString;
-	Date.prototype.valueOf=Object.prototype.toString;
-	array[item++] = new TestCase( SECTION,
-				    "Date.prototype.getClass",
-				    "[object Date]",
-				    Date.prototype.getClass() );
-	array[item++] = new TestCase( SECTION,
-				    "Date.prototype.valueOf()",
-				    "[object Date]",
-				    (Date.prototype.valueOf()) );
-
-	// restore
-	Date.prototype.getClass = origGetClass;
-	Date.prototype.valueOf = origValueOf;
 
     return ( array );
 }

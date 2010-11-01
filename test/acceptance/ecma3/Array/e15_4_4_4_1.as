@@ -198,15 +198,18 @@ function getTestCases() {
                                     (A.reverse(), A.length) );
     CheckItems( R, A );
 
-    var S = "var MYOBJECT = new Object_1( \"void 0, 1, null, 2, \'\'\" )";
-    var MYOBJECT = new Object_1( "void 0, 1, null, 2, \'\'" )
-    var R = Reverse( MYOBJECT );
-
-    array[item++] = new TestCase(   SECTION,
-                                    S +";  MYOBJECT.reverse(); MYOBJECT.length",
-                                    R.length,
-                                    (MYOBJECT = new Object_1( "void 0, 1, null, 2, \'\'" ), MYOBJECT.reverse(), MYOBJECT.length) ); // cn  This actually fixes a Spidermonkey testcase bug.  It was checking A.reverse, A.length instead of NewObject
-    CheckItems( R, MYOBJECT );
+    
+    if (!as3Enabled) {
+        var S = "var MYOBJECT = new Object_1( \"void 0, 1, null, 2, \'\'\" )";
+        var MYOBJECT = new Object_1( "void 0, 1, null, 2, \'\'" )
+        var R = Reverse( MYOBJECT );
+    
+        array[item++] = new TestCase(   SECTION,
+                                        S +";  MYOBJECT.reverse(); MYOBJECT.length",
+                                        R.length,
+                                        (MYOBJECT = new Object_1( "void 0, 1, null, 2, \'\'" ), MYOBJECT.reverse(), MYOBJECT.length) ); // cn  This actually fixes a Spidermonkey testcase bug.  It was checking A.reverse, A.length instead of NewObject
+        CheckItems( R, MYOBJECT );
+    }
 
 
 	function CheckItems( R, A ) {

@@ -85,9 +85,15 @@ function getTestCases() {
     }catch(e:Error){
        thisError=e.toString();
     }finally{//print(thisError);
+        
+        var expectedError = 1056;
+        if (as3Enabled) {
+            expectedError = 1037;
+        }
+        
         array[item++] = new TestCase( SECTION,
                                  "myboolean = new Boolean(); myboolean.valueOf = Object.prototype.valueOf; myboolean.valueOf()",
-                                 "ReferenceError: Error #1056",
+                                 REFERENCEERROR+expectedError,
                                  referenceError(thisError) );
      }
     /*array[item++] = new TestCase( SECTION,
@@ -112,7 +118,7 @@ function getTestCases() {
     }finally{//print(thisError);
         array[item++] = new TestCase( SECTION,
         "mymath = Math; mymath.valueOf = Object.prototype.valueOf;mymath.valueOf()",
-        "ReferenceError: Error #1056",referenceError(thisError) );
+        REFERENCEERROR+expectedError,referenceError(thisError) );
      }
    /* array[item++] = new TestCase( SECTION,
                                  "mymath = Math; mymath.valueOf = Object.prototype.valueOf; mymath.valueOf()",
@@ -126,7 +132,7 @@ function getTestCases() {
     }finally{//print(thisError);
         array[item++] = new TestCase( SECTION,
         "mynumber = new Number(); mynumber.valueOf = Object.prototype.valueOf; mynumber.valueOf()",
-        "ReferenceError: Error #1056",referenceError(thisError) );
+        REFERENCEERROR+expectedError,referenceError(thisError) );
      }
 
     /*array[item++] = new TestCase( SECTION,
@@ -142,7 +148,7 @@ function getTestCases() {
     }finally{//print(thisError);
         array[item++] = new TestCase( SECTION,
         "mystring = new String(); mystring.valueOf = Object.prototype.valueOf; mystring.valueOf()",
-        "ReferenceError: Error #1056",referenceError(thisError) );
+        REFERENCEERROR+expectedError,referenceError(thisError) );
      }
    /* array[item++] = new TestCase( SECTION,
                                  "mystring = new String(); mystring.valueOf = Object.prototype.valueOf; mystring.valueOf()",
@@ -157,7 +163,7 @@ function getTestCases() {
     }finally{//print(thisError);
         array[item++] = new TestCase( SECTION,
         "mydate = new Date(); mydate.valueOf = Object.prototype.valueOf; mydate.valueOf()",
-        "ReferenceError: Error #1056",referenceError(thisError) );
+        REFERENCEERROR+expectedError,referenceError(thisError) );
      }
     /*array[item++] = new TestCase( SECTION,
                                  "mydate = new Date(); mydate.valueOf = Object.prototype.valueOf; mydate.valueOf()",

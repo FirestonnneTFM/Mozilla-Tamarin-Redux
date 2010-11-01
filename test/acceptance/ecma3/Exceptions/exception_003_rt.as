@@ -48,6 +48,11 @@ function getTestCases() {
     var array = new Array();
     var item = 0;    
 
+    var expectedError = 1056;
+    if (as3Enabled) {
+        expectedError = 1037;
+    }
+
     Target_1();
 
     function Target_1() {
@@ -69,8 +74,8 @@ function getTestCases() {
                 "string = new String(\"hi\");"+
                 "string.toString = Boolean.prototype.toString" +
                 "string.toString()",
-				REFERENCEERROR+1056,
-				referenceError( result ) );
+                REFERENCEERROR+expectedError,
+                referenceError( result ) );
         }
     }
     return array;

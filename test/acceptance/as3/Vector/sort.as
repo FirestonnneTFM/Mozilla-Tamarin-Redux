@@ -81,7 +81,7 @@ try {
   errormsg=e.toString();
 }
 
-if (as3Enabled()) {
+if (as3Enabled) {
     AddTestCase(
    "sort vector without setting compare function throws exception",
    "ArgumentError: Error #1063",

@@ -99,12 +99,14 @@ function getTestCases() {
         myobj[1] = 4;
         myobj[2] = 5;
 
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION, "myobj = new Object(); myobj.unshift= Array.prototype.unshift;myobj.unshift(0,1,2);", 6, myobj.unshift(0,1,2) );
 
-        array[item++] = new TestCase( SECTION, "myobj = new Object(); myobj.unshift= Array.prototype.unshift;myobj.unshift(0,1,2);", 6, myobj.unshift(0,1,2) );
-
-        for (var i=0; i<6; i++){
-        array[item++] = new TestCase( SECTION, "myobj = new Object(); myobj.unshift= Array.prototype.unshift; myobj.unshift(0,1,2);",i, myobj[i] );
+            for (var i=0; i<6; i++){
+                array[item++] = new TestCase( SECTION, "myobj = new Object(); myobj.unshift= Array.prototype.unshift; myobj.unshift(0,1,2);",i, myobj[i] );
+            }
         }
+        
 	return ( array );
 
 }

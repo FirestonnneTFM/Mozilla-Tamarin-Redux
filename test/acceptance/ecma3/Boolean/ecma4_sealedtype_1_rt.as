@@ -62,7 +62,17 @@ function getTestCases() {
 	} catch (e) {
 		thisError = e.toString();
 	} finally {
-		array[item++] =new TestCase(SECTION,"Cannot create a property on Boolean","ReferenceError: Error #1056",referenceError( thisError ) );
+        if (as3Enabled) {
+            array[item++] =new TestCase(SECTION,
+                                        "Cannot assign to a method toString on Boolean.",
+                                        "ReferenceError: Error #1037",
+                                        referenceError( thisError ) );
+        } else {
+            array[item++] =new TestCase(SECTION,
+                                        "Cannot create a property on Boolean",
+                                        "ReferenceError: Error #1056",
+                                        referenceError( thisError ) );
+        }
 	}
 	return ( array );
 }

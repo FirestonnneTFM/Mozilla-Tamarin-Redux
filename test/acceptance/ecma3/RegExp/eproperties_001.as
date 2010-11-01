@@ -45,8 +45,8 @@ var testcases = getTestCases();
 test();
 
 function getTestCases() {
-	var array = new Array();
-	var item = 0;
+    var array = new Array();
+    var item = 0;
 
     AddRegExpCases( new RegExp, "",   false, false, false, 0 );
     AddRegExpCases( /.*/,       ".*", false, false, false, 0 );
@@ -61,143 +61,147 @@ function getTestCases() {
     AddRegExpCases( /\x45/gm, "\\x45", true, false, true, 0 );
     AddRegExpCases( /\097/gi, "\\097", true, true, false, 0 );
 
-	function AddRegExpCases( re, s, g, i, m, l ) {
+    function AddRegExpCases( re, s, g, i, m, l ) {
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".test == RegExp.prototype.test",
-	                 true,
-	                 re.test == RegExp.prototype.test );
+        
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".toString == RegExp.prototype.toString",
-	                 true,
-	                 re.toString == RegExp.prototype.toString );
+        array[item++] = new TestCase(SECTION,
+                     re + ".toString == RegExp.prototype.toString",
+                     true,
+                     re.toString == RegExp.prototype.toString );
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".constructor == RegExp.prototype.constructor",
-	                 true,
-	                 re.constructor == RegExp.prototype.constructor );
+        array[item++] = new TestCase(SECTION,
+                     re + ".constructor == RegExp.prototype.constructor",
+                     true,
+                     re.constructor == RegExp.prototype.constructor );
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".compile == RegExp.prototype.compile",
-	                 true,
-	                 re.compile == RegExp.prototype.compile );
+        array[item++] = new TestCase(SECTION,
+                     re + ".compile == RegExp.prototype.compile",
+                     true,
+                     re.compile == RegExp.prototype.compile );
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".exec == RegExp.prototype.exec",
-	                 true,
-	                 re.exec == RegExp.prototype.exec );
+        if (!as3Enabled) {
+            array[item++] = new TestCase(SECTION,
+                         re + ".test == RegExp.prototype.test",
+                         true,
+                         re.test == RegExp.prototype.test );
+            
+            array[item++] = new TestCase(SECTION,
+                         re + ".exec == RegExp.prototype.exec",
+                         true,
+                         re.exec == RegExp.prototype.exec );
+        }
+        
+        // properties
 
-	    // properties
-
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".source",
-	                 s,
-	                 re.source );
-	    try{
-	    	re.source = "k";
-	    }catch(e:ReferenceError){
-	        thisError = e.toString();
-	    }finally{
-	        array[item++] = new TestCase(SECTION,
-	        		 re + ".source='k'",
-	                 "ReferenceError: Error #1074",
-	                 referenceError(thisError) );
-	    }
-
-
-
-	    array[item++] = new TestCase(SECTION,
-	    			 "delete"+re + ".source",
-	                 false,
-	                delete re.source);
+        array[item++] = new TestCase(SECTION,
+                     re + ".source",
+                     s,
+                     re.source );
+        try{
+            re.source = "k";
+        }catch(e:ReferenceError){
+            thisError = e.toString();
+        }finally{
+            array[item++] = new TestCase(SECTION,
+                     re + ".source='k'",
+                     "ReferenceError: Error #1074",
+                     referenceError(thisError) );
+        }
 
 
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".toString()",
-	                 "/" + s +"/" + (g?"g":"") + (i?"i":"") +(m?"m":""),
-	                 re.toString() );
-
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".global",
-	                 g,
-	                 re.global );
-
-	     try{
-	        re.global = true;
-	    }catch(e:ReferenceError){
-	         thisError = e.toString();
-	    }finally{
-	         array[item++] = new TestCase(SECTION,
-	         		 re + ".global=true",
-	                 "ReferenceError: Error #1074",
-	                 referenceError(thisError) );
-	    }
+        array[item++] = new TestCase(SECTION,
+                     "delete"+re + ".source",
+                     false,
+                    delete re.source);
 
 
 
-	    array[item++] = new TestCase(SECTION,
-	    			 "delete"+re + ".global",
-	                 false,
-	                delete re.global);
+        array[item++] = new TestCase(SECTION,
+                     re + ".toString()",
+                     "/" + s +"/" + (g?"g":"") + (i?"i":"") +(m?"m":""),
+                     re.toString() );
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".ignoreCase",
-	                 i,
-	                 re.ignoreCase );
+        array[item++] = new TestCase(SECTION,
+                     re + ".global",
+                     g,
+                     re.global );
 
-	    try{
-	        re.ignoreCase = true;
-	    }catch(e:ReferenceError){
-	         thisError = e.toString();
-	    }finally{
-	         array[item++] = new TestCase(SECTION,
-	         		 re + ".ignoreCase=true",
-	                 "ReferenceError: Error #1074",
-	                 referenceError(thisError) );
-	    }
-
-
-
-	    array[item++] = new TestCase(SECTION,
-	    			 "delete"+re + ".ignoreCase",
-	                 false,
-	                delete re.ignoreCase);
-
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".multiline",
-	                 m,
-	                 re.multiline);
-
-	    try{
-	        re.multiline = true;
-	    }catch(e:ReferenceError){
-	         thisError = e.toString();
-	    }finally{
-	         array[item++] = new TestCase(SECTION,
-	         		 re + ".multiline=true",
-	                 "ReferenceError: Error #1074",
-	                 referenceError(thisError) );
-	    }
+         try{
+            re.global = true;
+        }catch(e:ReferenceError){
+             thisError = e.toString();
+        }finally{
+             array[item++] = new TestCase(SECTION,
+                     re + ".global=true",
+                     "ReferenceError: Error #1074",
+                     referenceError(thisError) );
+        }
 
 
 
-	    array[item++] = new TestCase(SECTION,
-	    			 "delete"+re + ".multiline",
-	                 false,
-	                delete re.multiline);
+        array[item++] = new TestCase(SECTION,
+                     "delete"+re + ".global",
+                     false,
+                    delete re.global);
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".lastIndex",
-	                 l,
-	                 re.lastIndex  );
+        array[item++] = new TestCase(SECTION,
+                     re + ".ignoreCase",
+                     i,
+                     re.ignoreCase );
 
-	    array[item++] = new TestCase(SECTION,
-	    			 "delete"+re + ".lastIndex",
-	                 false,
-	                delete re.lastIndex);
-	}
+        try{
+            re.ignoreCase = true;
+        }catch(e:ReferenceError){
+             thisError = e.toString();
+        }finally{
+             array[item++] = new TestCase(SECTION,
+                     re + ".ignoreCase=true",
+                     "ReferenceError: Error #1074",
+                     referenceError(thisError) );
+        }
 
-	return array;
+
+
+        array[item++] = new TestCase(SECTION,
+                     "delete"+re + ".ignoreCase",
+                     false,
+                    delete re.ignoreCase);
+
+        array[item++] = new TestCase(SECTION,
+                     re + ".multiline",
+                     m,
+                     re.multiline);
+
+        try{
+            re.multiline = true;
+        }catch(e:ReferenceError){
+             thisError = e.toString();
+        }finally{
+             array[item++] = new TestCase(SECTION,
+                     re + ".multiline=true",
+                     "ReferenceError: Error #1074",
+                     referenceError(thisError) );
+        }
+
+
+
+        array[item++] = new TestCase(SECTION,
+                     "delete"+re + ".multiline",
+                     false,
+                    delete re.multiline);
+
+        array[item++] = new TestCase(SECTION,
+                     re + ".lastIndex",
+                     l,
+                     re.lastIndex  );
+
+        array[item++] = new TestCase(SECTION,
+                     "delete"+re + ".lastIndex",
+                     false,
+                    delete re.lastIndex);
+    }
+
+    return array;
 }

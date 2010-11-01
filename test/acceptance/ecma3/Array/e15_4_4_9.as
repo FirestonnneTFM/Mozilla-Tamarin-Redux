@@ -125,6 +125,7 @@ function getTestCases() {
 
        array[item++] = new TestCase( SECTION, "MYBIGARR = [0,1,2,.....,100]; MYBIGARR.shift();MYBIGARR.length", 100, MYBIGARR.length );
 
+    if (!as3Enabled) {
        //shift method is not generic it can transferred to other objects for use as method
         var obj = new Object();
         obj.shift = Array.prototype.shift;
@@ -137,7 +138,8 @@ function getTestCases() {
        	array[item++] = new TestCase( SECTION, "obj = new Object(); obj.shift()", 0, obj.shift() );
 
         array[item++] = new TestCase( SECTION, "obj = new Object(); obj.shift();obj.length", 3, obj.length );
-
-        return ( array );
+    }
+    
+    return ( array );
 
 }

@@ -48,23 +48,32 @@ function getTestCases() {
     var array = new Array();
     var item = 0;    
 
-    var result = "Failed";
-    var exception = "No exception thrown";
-    var expect = "Passed";
-
-    try {
+    if (as3Enabled) {
         var MYDATE = new MyDate();
-        result = MYDATE.setTime(0);
-    } catch ( e ) {
-        result = expect;
-        exception = e.toString();
-    }finally{
-
-    array[item++] = new TestCase(
-        SECTION,
-        "MYDATE = new MyDate(); MYDATE.setTime(0)",
-		TYPEERROR+1034,
-		typeError(exception) );
+        array[item++] = new TestCase(
+            SECTION,
+            "MYDATE = new MyDate(); MYDATE.setTime(0)",
+            0,
+            MYDATE.setTime(0));
+    } else {
+        var result = "Failed";
+        var exception = "No exception thrown";
+        var expect = "Passed";
+    
+        try {
+            var MYDATE = new MyDate();
+            result = MYDATE.setTime(0);
+        } catch ( e ) {
+            result = expect;
+            exception = e.toString();
+        }finally{
+    
+        array[item++] = new TestCase(
+            SECTION,
+            "MYDATE = new MyDate(); MYDATE.setTime(0)",
+            TYPEERROR+1034,
+            typeError(exception) );
+        }
     }
     return array;
 }

@@ -99,7 +99,8 @@ function getTestCases() {
 		array[item++] = new TestCase( SECTION, "MYARR = [2,1,8,6]; MYARR.pop();", EXPARR[MYVAR], MYARR[MYVAR] );
 	}
 
-       //pop method is generic so can be transferred to other types of objects
+    if (!as3Enabled) {
+        //pop method is generic so can be transferred to other types of objects
         var obj = new Object();
         obj.pop = Array.prototype.pop;
         obj.length = 4;
@@ -107,15 +108,15 @@ function getTestCases() {
         obj[1] = 1;
         obj[2] = 8;
         obj[3] = 6;
-
         var EXP_OBJRESULT = obj.pop();
-
+    
         array[item++] = new TestCase( SECTION, "obj.pop()", 6, EXP_OBJRESULT );
-
+    
         for (var MYVAR1 = 0; ( MYVAR1 < obj.length ); MYVAR1++)
-	{
-		array[item++] = new TestCase( SECTION, "obj.pop()", EXPARR[MYVAR1], obj[MYVAR1] );
-	}
+        {
+            array[item++] = new TestCase( SECTION, "obj.pop()", EXPARR[MYVAR1], obj[MYVAR1] );
+        }
+    }
 
 
 

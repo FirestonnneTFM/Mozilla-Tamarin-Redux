@@ -47,18 +47,22 @@ function getTestCases() {
     var item:Number = 0;
     var o:Number = 3;
 
-	var thisError:String = "no error thrown";
-	try{
-    	 
-    	o.toString = Number.prototype.toString;
-	} catch (e:ReferenceError) {
-		thisError = e.toString();
-	} finally {
-    	array[item++] = new TestCase(SECTION,  "o = 3; o.toString = Number.prototype.toString; o.toLocaleString()",             
-												"ReferenceError: Error #1056",    
-												referenceError(thisError) );
-	}
-    
+    var thisError:String = "no error thrown";
+    try{
+
+        o.toString = Number.prototype.toString;
+    } catch (e:ReferenceError) {
+        thisError = e.toString();
+    } finally {
+        var expectedError = 1056;
+        if (as3Enabled) {
+            expectedError = 1037;
+        }
+        array[item++] = new TestCase(SECTION,  "o = 3; o.toString = Number.prototype.toString; o.toLocaleString()",
+                                                REFERENCEERROR+expectedError,
+                                                referenceError(thisError) );
+    }
+
 
     return ( array );
 }

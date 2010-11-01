@@ -49,23 +49,32 @@ function getTestCases() {
 
 //    array[item++] = new TestCase("15.7.4.1", "v = Number.prototype.valueOf; num = 3; num.valueOf = v; num.valueOf()", "error",  "v = Number.prototype.valueOf; num = 3; num.valueOf = v; num.valueOf()" );
 /*
-    v = Number.prototype.valueOf; 
-    o = new String('Infinity'); 
+    v = Number.prototype.valueOf;
+    o = new String('Infinity');
     o.valueOf = v;
     array[item++] = new TestCase("15.7.4.1", "v = Number.prototype.valueOf; o = new String('Infinity'); o.valueOf = v; o.valueOf()", "error",  o.valueOf() );*/
 //    array[item++] = new TestCase("15.7.4.1", "v = Number.prototype.valueOf; o = new Object(); o.valueOf = v; o.valueOf()", "error",  "v = Number.prototype.valueOf; o = new Object(); o.valueOf = v; o.valueOf()" );
     var v = Number.prototype.valueOf;
-    var o = new String('Infinity'); 
+    var o = new String('Infinity');
+
+    var expectedError = 1056;
+    if (as3Enabled) {
+        expectedError = 1037;
+    }
+
     try{
         o.valueOf = v;
         o.valueOf();
     }catch(e:ReferenceError){
         thisError=e.toString();
     }finally{
-        array[item++] = new TestCase("15.7.4.1", "v = Number.prototype.valueOf; o = new String('Infinity'); o.valueOf = v; o.valueOf()", "ReferenceError: Error #1056",  referenceError(thisError) ); 
-    }   
-     
-        
+        array[item++] = new TestCase("15.7.4.1",
+                                    "v = Number.prototype.valueOf; o = new String('Infinity'); o.valueOf = v; o.valueOf()",
+                                    REFERENCEERROR+expectedError,
+                                    referenceError(thisError) );
+    }
+
+
 
     return ( array );
 }

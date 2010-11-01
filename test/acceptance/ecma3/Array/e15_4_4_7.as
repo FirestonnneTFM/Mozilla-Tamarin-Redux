@@ -89,6 +89,7 @@ function getTestCases() {
 
 	array[item++] = new TestCase( SECTION, "MYARR = new Array(); MYARR.push(2);", ARRLENGTH, MYARR.push(MYVAR) );
 
+    if (!as3Enabled) {
         //push function is intentionally generic.  It does not require its this value to be         //an array object
 
         var obj = new Object();
@@ -100,14 +101,15 @@ function getTestCases() {
         obj[3]=3;
 
         array[item++] = new TestCase( SECTION, "var obj = new Object(); obj.push(4);", 5, obj.push(4) );
+    }
+    var MYBIGARR = []
 
-        var MYBIGARR = []
+    for (var i=0;i<101;i++){
+        MYBIGARR[MYBIGARR.length] = i;
+    }
 
-        for (var i=0;i<101;i++){
-            MYBIGARR[MYBIGARR.length] = i;
-        }
+    array[item++] = new TestCase( SECTION, "var MYBIGARR[i] = i; MYBIGARR.push(101);", 102, MYBIGARR.push(101) );
 
-        array[item++] = new TestCase( SECTION, "var MYBIGARR[i] = i; MYBIGARR.push(101);", 102, MYBIGARR.push(101) );
 	return ( array );
 
 }

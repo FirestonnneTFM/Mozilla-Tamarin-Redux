@@ -50,6 +50,11 @@ function getTestCases() {
     var item = 0;
 
     var NULL_OBJECT = Object(null);
+    
+    var expectedError = 1056;
+    if (as3Enabled) {
+        expectedError = 1037;
+    }
 
 
            array[item++] = new TestCase( SECTION, "Object(null).valueOf()", NULL_OBJECT,NULL_OBJECT.valueOf());
@@ -94,7 +99,7 @@ function getTestCases() {
        }catch(e4:Error){
            thisError=e4.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(true), MYOB.toString = Object.prototype.toString, MYOB.toString()", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(true), MYOB.toString = Object.prototype.toString, MYOB.toString()", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -110,7 +115,7 @@ function getTestCases() {
        }catch(e5:Error){
            thisError=e5.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(false), MYOB.toString = Object.prototype.toString, MYOB.toString()", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(false), MYOB.toString = Object.prototype.toString, MYOB.toString()", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -124,7 +129,7 @@ function getTestCases() {
        }catch(e6:Error){
            thisError=e6.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(0), MYOB.toString = Object.prototype.toString, MYOB.toString()", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(0), MYOB.toString = Object.prototype.toString, MYOB.toString()", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -142,7 +147,7 @@ function getTestCases() {
        }catch(e7:Error){
            thisError=e7.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(-0), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(-0), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -156,7 +161,7 @@ function getTestCases() {
        }catch(e8:Error){
            thisError=e8.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(1), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(1), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -172,7 +177,7 @@ function getTestCases() {
        }catch(e9:Error){
            thisError=e9.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(-1), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(-1), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -187,7 +192,7 @@ function getTestCases() {
        }catch(e10:Error){
            thisError=e10.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.MAX_VALUE), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.MAX_VALUE), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
     array[item++] = new TestCase( SECTION, "Object(Number.MIN_VALUE).valueOf()",     5e-324,           (Object(Number.MIN_VALUE)).valueOf() );
@@ -201,7 +206,7 @@ function getTestCases() {
        }catch(e11:Error){
            thisError=e11.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.MIN_VALUE), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.MIN_VALUE), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -216,7 +221,7 @@ function getTestCases() {
        }catch(e12:Error){
            thisError=e12.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.POSITIVE_INFINITY), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.POSITIVE_INFINITY), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -231,7 +236,7 @@ function getTestCases() {
        }catch(e13:Error){
            thisError=e13.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.NEGATIVE_INFINITY), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.NEGATIVE_INFINITY), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
   array[item++] = new TestCase( SECTION, "Object(Number.NaN).valueOf()",      Number.NaN,                (Object(Number.NaN)).valueOf() );
@@ -244,7 +249,7 @@ function getTestCases() {
        }catch(e14:Error){
            thisError=e14.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.NaN), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(Number.NaN), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -260,7 +265,7 @@ function getTestCases() {
        }catch(e15:Error){
            thisError=e15.toString();
        }finally{
-         array[item++] = new TestCase( SECTION, "var MYOB = Object('a string'), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+         array[item++] = new TestCase( SECTION, "var MYOB = Object('a string'), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
     array[item++] = new TestCase( SECTION, "Object('').valueOf()",              "",                 (Object("")).valueOf() );
@@ -274,7 +279,7 @@ function getTestCases() {
        }catch(e16:Error){
            thisError=e16.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object(''), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object(''), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -289,7 +294,7 @@ function getTestCases() {
        }catch(e17:Error){
            thisError=e17.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object('\\r\\t\\b\\n\\v\\f'), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object('\\r\\t\\b\\n\\v\\f'), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
@@ -305,7 +310,7 @@ function getTestCases() {
        }catch(e18:Error){
            thisError=e18.toString();
        }finally{
-           array[item++] = new TestCase( SECTION, "var MYOB = Object('\\\'\\\"\\' ), MYOB.toString", "ReferenceError: Error #1056",referenceError(thisError));
+           array[item++] = new TestCase( SECTION, "var MYOB = Object('\\\'\\\"\\' ), MYOB.toString", REFERENCEERROR+expectedError,referenceError(thisError));
         }
 
 
