@@ -68,6 +68,8 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # BUGS:
 # Grouped by feature or platform
 
+regress/bug_606478, mips-lnx-tvm.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=606478
+
 # https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 mmgc/outofmemory , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 
