@@ -101,11 +101,6 @@ function getTestCases() {
 	function AddRegExpCases( re, s, g, i, m, l ){
 
 	    array[item++] = new TestCase(SECTION,
-	    			 re + ".test == RegExp.prototype.test",
-	                 true,
-	                 re.test == RegExp.prototype.test );
-
-	    array[item++] = new TestCase(SECTION,
 	    			 re + ".toString == RegExp.prototype.toString",
 	                 true,
 	                 re.toString == RegExp.prototype.toString );
@@ -120,11 +115,17 @@ function getTestCases() {
 	                 true,
 	                 re.compile == RegExp.prototype.compile );
 
-	    array[item++] = new TestCase(SECTION,
-	    			 re + ".exec == RegExp.prototype.exec",
-	                 true,
-	                 re.exec == RegExp.prototype.exec );
-
+        if (!as3Enabled) {
+            array[item++] = new TestCase(SECTION,
+                         re + ".test == RegExp.prototype.test",
+                         true,
+                         re.test == RegExp.prototype.test );
+    
+            array[item++] = new TestCase(SECTION,
+                         re + ".exec == RegExp.prototype.exec",
+                         true,
+                         re.exec == RegExp.prototype.exec );
+        }
 	    // properties
 
 	    array[item++] = new TestCase(SECTION,

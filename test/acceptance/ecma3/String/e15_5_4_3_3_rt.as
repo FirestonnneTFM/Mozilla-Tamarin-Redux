@@ -51,14 +51,20 @@ function getTestCases() {
     var item = 0;
     var valof=String.prototype.valueOf;
     astring=new Number();
-        
+    
+    var expectedError = 1056;
+    if (as3Enabled) {
+        expectedError = 1037;
+    }
     try{
         astring.valueOf = valof;
     }catch(e:Error){
         thisError=e.toString();
     }finally{
         array[item++] = new TestCase( SECTION,
-                                  "var valof=String.prototype.valueOf; astring=new Number(); astring.valueOf = valof; astring.valueOf()","ReferenceError: Error #1056",referenceError(thisError) )
+                "var valof=String.prototype.valueOf; astring=new Number(); astring.valueOf = valof; astring.valueOf()",
+                REFERENCEERROR+expectedError,
+                referenceError(thisError) )
     }
 
     

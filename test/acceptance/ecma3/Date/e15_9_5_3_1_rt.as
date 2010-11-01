@@ -49,27 +49,28 @@ function getTestCases() {
     var array = new Array();
     var item = 0;    
 
-    //var OBJ = new MyObject( new Date(0) );
-    thisError="no error thrown";
-    try{
+    if (as3Enabled) {
         var OBJ = new MyObject( new Date(0) );
-        OBJ.valueOf();
-       }
-    catch(e){
-             thisError=e.toString();
-            }
-    finally{
-
-
-    /*array[item++] = new TestCase( SECTION,
-                                    "var OBJ = new MyObject( new Date(0) ); OBJ.valueOf()",
-                                    "error",
-                                    OBJ.valueOf() );*/
-    array[item++] = new TestCase( SECTION,
-                                    "var OBJ = new MyObject( new Date(0) ); OBJ.valueOf()",
-                                    "TypeError: Error #1034",
-                                    typeError(thisError));
-
+        array[item++] = new TestCase( SECTION,
+                                        "var OBJ = new MyObject( new Date(0) ); OBJ.valueOf()",
+                                        NaN,
+                                        OBJ.valueOf());
+    } else {
+        thisError="no error thrown";
+        try{
+            var OBJ = new MyObject( new Date(0) );
+            OBJ.valueOf();
+           }
+        catch(e){
+                 thisError=e.toString();
+                }
+        finally{
+        array[item++] = new TestCase( SECTION,
+                                        "var OBJ = new MyObject( new Date(0) ); OBJ.valueOf()",
+                                        "TypeError: Error #1034",
+                                        typeError(thisError));
+    
+        }
     }
     return array;
 }

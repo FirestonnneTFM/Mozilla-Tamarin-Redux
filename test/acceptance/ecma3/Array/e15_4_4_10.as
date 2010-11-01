@@ -113,23 +113,24 @@
 	testcases[count++] = exhaustiveSliceTest("exhaustive slice test 1", a);
 	testcases[count++] = exhaustiveSliceTest("exhaustive slice test 2", b);                testcases[count++] = new TestCase(SECTION, "slice with end parameter undefined", "9.34,string object,,h,i,j,k", a.slice(3)+"");
 	testcases[count++] = new TestCase(SECTION, "slice with both parameters undefined", "1,2,3,4,5,6,7,8,9,0", b.slice()+"");
-        testcases[count++] = new TestCase(SECTION, "slice with start parameter undefined", "1,2,3,4,5", b.slice(undefined,5)+"");
+    testcases[count++] = new TestCase(SECTION, "slice with start parameter undefined", "1,2,3,4,5", b.slice(undefined,5)+"");
 
-        //slice method can be transferred to other objects for use as method
+    //slice method can be transferred to other objects for use as method
 
-        var obj = new Object();
-        obj.slice = Array.prototype.slice;
-        obj.length = 7;
-        obj[0] = 'a';
-        obj[1] = 'test string';
-        obj[2] = 456;
-        obj[3] = 9.34;
-        obj[4] = new String("string object");
-        obj[5] = [];
-        obj[6] = ['h','i','j','k']
+    var obj = new Object();
+    obj.slice = Array.prototype.slice;
+    obj.length = 7;
+    obj[0] = 'a';
+    obj[1] = 'test string';
+    obj[2] = 456;
+    obj[3] = 9.34;
+    obj[4] = new String("string object");
+    obj[5] = [];
+    obj[6] = ['h','i','j','k']
 
+    if (!as3Enabled) {
         testcases[count++] = exhaustiveSliceTest("exhaustive slice test 3", obj);
-
+    
         var obj2 = new Object();
         obj2.slice = Array.prototype.slice;
         obj2.length = 10;
@@ -143,13 +144,15 @@
         obj2[7] = 7;
         obj2[8] = 8;
         obj2[9] = 9;
-
+    
         testcases[count++] = exhaustiveSliceTest("exhaustive slice test 4", obj2);
-
-       testcases[count++] = new TestCase(SECTION, "slice with end parameter undefined", "9.34,string object,,h,i,j,k", obj.slice(3)+"");
-	testcases[count++] = new TestCase(SECTION, "slice with both parameters undefined", "0,1,2,3,4,5,6,7,8,9", obj2.slice()+"");
+    
+        testcases[count++] = new TestCase(SECTION, "slice with end parameter undefined", "9.34,string object,,h,i,j,k", obj.slice(3)+"");
+        testcases[count++] = new TestCase(SECTION, "slice with both parameters undefined", "0,1,2,3,4,5,6,7,8,9", obj2.slice()+"");
         testcases[count++] = new TestCase(SECTION, "slice with start parameter undefined", "0,1,2,3,4", obj2.slice(undefined,5)+"");
-        testcases[count++] = new TestCase(SECTION, "Length property of slice method", 2, Array.prototype.slice.length);
+    }
+    
+    testcases[count++] = new TestCase(SECTION, "Length property of slice method", 2, Array.prototype.slice.length);
 
 	test();
 

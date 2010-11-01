@@ -160,18 +160,16 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getMinutes()",          true, LocalDate.minutes ==    DateCase.getMinutes() );
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
-    
-         array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString=Object.prototype.toString,
-                                          DateCase.myString()) );
-                         
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-                       
-    
-    
-    
+        
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                             DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                             "[object Date]",(DateCase.myString=Object.prototype.toString,
+                                             DateCase.myString()) );
+                            
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     }
 
     function addNewTestCase1( DateString, UTCDate, LocalDate) {
@@ -202,14 +200,16 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==   DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==      DateCase.getMilliseconds() );
     
-         array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString=Object.prototype.toString,
-                                          DateCase.myString()) );
     
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-     
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                              DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                              "[object Date]",(DateCase.myString=Object.prototype.toString,
+                                              DateCase.myString()) );
+        
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     
     }
     
@@ -241,13 +241,14 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
     
-      array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString = Object.prototype.toString,DateCase.myString()) );
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-                          
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                            DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                            "[object Date]",(DateCase.myString = Object.prototype.toString,DateCase.myString()) );
+            
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     }
     
     function addNewTestCase5( DateString, UTCDate, LocalDate) {
@@ -278,13 +279,14 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
     
-      array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString = Object.prototype.toString,DateCase.myString()) );
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-     
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                            DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                            "[object Date]",(DateCase.myString = Object.prototype.toString,DateCase.myString()) );
+            
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     
     }
     
@@ -318,13 +320,14 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
     
-        array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString=Object.prototype.toString,DateCase.myString()) );
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-     
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                              DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                              "[object Date]",(DateCase.myString=Object.prototype.toString,DateCase.myString()) );
+        
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     
     
     }
@@ -359,14 +362,15 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
     
-        array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString=Object.prototype.toString,
-                                          DateCase.myString() ));
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-     
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                              DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                              "[object Date]",(DateCase.myString=Object.prototype.toString,
+                                              DateCase.myString() ));
+        
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     
     }
     function addNewTestCase6( DateString, UTCDate, LocalDate) {
@@ -398,14 +402,15 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
     
-        array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString=Object.prototype.toString,
-                                          DateCase.myString() ));
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-                          
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                              DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                              "[object Date]",(DateCase.myString=Object.prototype.toString,
+                                              DateCase.myString() ));
+        
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     }
     
     function addNewTestCase8( DateString, UTCDate, LocalDate) {
@@ -437,14 +442,15 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
     
-        array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString=Object.prototype.toString,
-                                          DateCase.myString() ));
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-                          
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                              DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                              "[object Date]",(DateCase.myString=Object.prototype.toString,
+                                              DateCase.myString() ));
+        
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     }
     function addNewTestCase7( DateString, UTCDate, LocalDate) {
     
@@ -475,14 +481,15 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          true, LocalDate.seconds ==    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     true, LocalDate.ms ==         DateCase.getMilliseconds() );
     
-        array[item++] = new TestCase( SECTION,
-                                          DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
-                                          "[object Date]",(DateCase.myString=Object.prototype.toString,
-                                          DateCase.myString() ));
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
-                          
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                              DateString+".toString=Object.prototype.toString;"+DateString+".toString()",
+                                              "[object Date]",(DateCase.myString=Object.prototype.toString,
+                                              DateCase.myString() ));
+        
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,DateString+".toString=Object.prototype.toString;"+DateString+".toString()","[object Date]", DateCase.toString() );
+        }
     }
 
     return array;

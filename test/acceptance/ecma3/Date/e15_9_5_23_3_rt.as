@@ -51,21 +51,36 @@ function getTestCases() {
     var item = 0;
     
     var MYDATE = new MyDate(TIME_1970);
-    thisError = "no error thrown";
-    try {
-    	MYDATE.setTime(TIME_2000);
+    
+    if (as3Enabled) {
+        MYDATE.setTime(TIME_2000)
+        array[item++] = new TestCase(SECTION,
+                                "MYDATE.setTime(TIME_2000)",
+                                TIME_2000,
+                                MYDATE.getTime());
+    } else {
+        thisError = "no error thrown";
+        try {
+            MYDATE.setTime(TIME_2000);
+        }
+        catch(e){
+            thisError=e.toString();
+        }
+        finally {
+            trace(thisError)
+            array[item++] = new TestCase(SECTION,
+                                "MYDATE.setTime(TIME_2000)",
+                                "TypeError: Error #1034",
+                                typeError(thisError));
+        }
     }
-    catch(e){
-    	thisError=e.toString();
-    }
-    finally {
-    	array[item++] = new TestCase(SECTION, "MYDATE.setTime(TIME_2000)", "TypeError: Error #1034", typeError(thisError));
-    }
+    
     return array;
 }
 
 function MyDate(value) {
     this.value = value;
     this.setTime = Date.prototype.setTime;
+    this.getTime = Date.prototype.getTime;
     return this;
 }

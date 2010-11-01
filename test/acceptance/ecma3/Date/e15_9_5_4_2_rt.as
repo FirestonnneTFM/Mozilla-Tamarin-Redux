@@ -50,15 +50,25 @@ function getTestCases() {
     var array = new Array();
     var item = 0;
     var MYDATE = new MyDate(TIME_2000);
-    thisError = "no error thrown";
-    try {
-    	MYDATE.getTime();
-    }
-    catch(e) {
-    	thisError = e.toString();
-    }
-    finally {
-    	array[item++] = new TestCase(SECTION, "MYDATE.getTime()", "TypeError: Error #1034", typeError(thisError));
+    
+    if (as3Enabled) {
+        array[item++] = new TestCase(SECTION, "MYDATE.getTime()",
+                                         NaN,
+                                         MYDATE.getTime());
+    } else {
+        
+        thisError = "no error thrown";
+        try {
+            MYDATE.getTime();
+        }
+        catch(e) {
+            thisError = e.toString();
+        }
+        finally {
+            array[item++] = new TestCase(SECTION, "MYDATE.getTime()",
+                                         "TypeError: Error #1034",
+                                         typeError(thisError));
+        }
     }
     return array;
 }

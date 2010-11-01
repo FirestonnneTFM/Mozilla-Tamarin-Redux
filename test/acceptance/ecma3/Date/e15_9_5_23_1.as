@@ -87,23 +87,21 @@ function addTestCase( startTime, setTime ) {
     array[item++] = new TestCase( SECTION, DateString+".getMinutes()",          LocalDate.minutes,  DateCase.getMinutes() );
     array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          LocalDate.seconds,  DateCase.getSeconds() );
     array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     LocalDate.ms,       DateCase.getMilliseconds() );
-    var  thisError = 'no error';
-    try{
-   DateCase.toString = Object.prototype.toString;
-    } catch (e) {
-	thisError = e.toString();
-} finally {
-	array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString","no error",referenceError( thisError ) );
-
+    
+    if (!as3Enabled) {
+        var  thisError = 'no error';
+        try{
+            DateCase.toString = Object.prototype.toString;
+        } catch (e) {
+            thisError = e.toString();
+        } finally {
+            array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString","no error",referenceError( thisError ) );
+        
+        }
+    }
     return array;
 }
 
-
-
-
-
-
-}
 function MyDate() {
     this.year = 0;
     this.month = 0;

@@ -111,16 +111,18 @@ function getTestCases() {
                                         ( i < 3 ? -1 : ( i < 5 ? 3 : 5 ) ),
                                         (n = new Number(Infinity), n.lastIndexOf( 'i', i ) ) );
     }
-    var a = new Array( "abc","def","ghi","jkl","mno","pqr","stu","vwx","yz" );
-    a.lastIndexOf = String.prototype.lastIndexOf;
     
-    for ( var i = 0; i < (a.toString()).length; i++ ) {
-        array[item++] = new TestCase( SECTION,
-                                      "var a = new Array( 'abc','def','ghi','jkl','mno','pqr','stu','vwx','yz' ); a.lastIndexOf = String.prototype.lastIndexOf; a.lastIndexOf( ',mno,p', "+i+" )",
-                                      ( i < 15 ? -1 : 15 ),
-                                      (a.lastIndexOf( ',mno,p', i ) ) );
+    if (!as3Enabled) {
+        var a = new Array( "abc","def","ghi","jkl","mno","pqr","stu","vwx","yz" );
+        a.lastIndexOf = String.prototype.lastIndexOf;
+        
+        for ( var i = 0; i < (a.toString()).length; i++ ) {
+            array[item++] = new TestCase( SECTION,
+                                          "var a = new Array( 'abc','def','ghi','jkl','mno','pqr','stu','vwx','yz' ); a.lastIndexOf = String.prototype.lastIndexOf; a.lastIndexOf( ',mno,p', "+i+" )",
+                                          ( i < 15 ? -1 : 15 ),
+                                          (a.lastIndexOf( ',mno,p', i ) ) );
+        }
     }
-
 
     var origMathLastIndexOf = Math.lastIndexOf;
     for ( var i = 0; i < 15; i ++ ) {

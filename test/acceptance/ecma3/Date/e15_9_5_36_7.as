@@ -93,15 +93,15 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, "DateString+.getSeconds()",          LocalDate.seconds,    DateCase.getSeconds() );
         array[item++] = new TestCase( SECTION, "DateString+.getMilliseconds()",     LocalDate.ms,         DateCase.getMilliseconds() );
     
-        array[item++] = new TestCase( SECTION,
-                                          "DateString+.toString=Object.prototype.toString;+DateString+.toString()",
-                                          "[object Date]",(DateCase.myToString=Object.prototype.toString,
-                                          DateCase.myToString()));
-    
-        DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString; DateCase.toString()","[object Date]", DateCase.toString() );
-       
+        if (!as3Enabled) {
+            array[item++] = new TestCase( SECTION,
+                                              "DateString+.toString=Object.prototype.toString;+DateString+.toString()",
+                                              "[object Date]",(DateCase.myToString=Object.prototype.toString,
+                                              DateCase.myToString()));
         
+            DateCase.toString = Object.prototype.toString;
+            array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString; DateCase.toString()","[object Date]", DateCase.toString() );
+        }
     }
     return array;
 }

@@ -47,6 +47,12 @@ function getTestCases() {
     var item:Number= 0;
     var thisError:String = "no error thrown";
     var o:String = new String();
+    
+    var expectedError = 1056;
+    if (as3Enabled) {
+        expectedError = 1037;
+    }
+    
     try{
      
         o.toString = Number.prototype.toString;
@@ -54,7 +60,10 @@ function getTestCases() {
     }catch(e:ReferenceError){
         thisError=e.toString();
     }finally{
-        array[item++] = new TestCase(SECTION,  "o = new String(); o.toString = Number.prototype.toString; o.toString()",  "ReferenceError: Error #1056",referenceError(thisError));
+        array[item++] = new TestCase(SECTION,
+                            "o = new String(); o.toString = Number.prototype.toString; o.toString()",
+                            REFERENCEERROR+expectedError,
+                            referenceError(thisError));
                      
     } 
      

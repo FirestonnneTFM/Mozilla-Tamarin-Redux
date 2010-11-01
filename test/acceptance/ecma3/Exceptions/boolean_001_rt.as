@@ -51,6 +51,11 @@ function getTestCases() {
 
     var TO_STRING = Boolean.prototype.toString;
 
+    var expectedError = 1056;
+    if (as3Enabled) {
+        expectedError = 1037;
+    }
+
     try {
         var s = new String("Not a Boolean");
         s.toString = TO_STRING;
@@ -62,10 +67,10 @@ function getTestCases() {
     array[item++] = new TestCase(
         SECTION,
         "Assigning Boolean.prototype.toString to a String object ",
-		REFERENCEERROR+1056,
-		referenceError( exception ) );
+        REFERENCEERROR+expectedError,
+        referenceError( exception ) );
     }
-	// new Boolean()
+    // new Boolean()
     try {
         var b = new Boolean();
         b.toString = TO_STRING;
@@ -77,11 +82,11 @@ function getTestCases() {
     array[item++] = new TestCase(
         SECTION,
         "Assigning Boolean.prototype.toString to an instance of new Boolean()",
-		REFERENCEERROR+1056,
-		referenceError( exception ) );
+        REFERENCEERROR+expectedError,
+        referenceError( exception ) );
 
     }
-	// new Boolean(true)
+    // new Boolean(true)
     try {
         var b = new Boolean(true);
         b.toString = TO_STRING;
@@ -93,11 +98,11 @@ function getTestCases() {
     array[item++] = new TestCase(
         SECTION,
         "Assigning Boolean.prototype.toString to an instance of new Boolean(true)",
-		REFERENCEERROR+1056,
-		referenceError( exception ) );
+        REFERENCEERROR+expectedError,
+        referenceError( exception ) );
 
     }
-	// new Boolean(false)
+    // new Boolean(false)
     try {
         var b = new Boolean(false);
         b.toString = TO_STRING;
@@ -109,11 +114,11 @@ function getTestCases() {
     array[item++] = new TestCase(
         SECTION,
         "Assigning Boolean.prototype.toString to an instance of new Boolean(false)",
-		REFERENCEERROR+1056,
-		referenceError( exception ) );
+        REFERENCEERROR+expectedError,
+        referenceError( exception ) );
     }
 
-	// true
+    // true
     try {
         var b = true;
         b.toString = TO_STRING;
@@ -125,11 +130,11 @@ function getTestCases() {
     array[item++] = new TestCase(
         SECTION,
         "Assigning Boolean.prototype.toString to an instance of 'true'",
-		REFERENCEERROR+1056,
-		referenceError( exception ) );
+        REFERENCEERROR+expectedError,
+        referenceError( exception ) );
     }
 
-	// false
+    // false
     try {
         var b = false;
         b.toString = TO_STRING;
@@ -141,8 +146,8 @@ function getTestCases() {
     array[item++] = new TestCase(
         SECTION,
         "Assigning Boolean.prototype.toString to an instance of 'false'",
-		REFERENCEERROR+1056,
-		referenceError( exception ) );
+        REFERENCEERROR+expectedError,
+        referenceError( exception ) );
     }
     return array;
 }

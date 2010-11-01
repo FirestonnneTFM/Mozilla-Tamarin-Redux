@@ -132,69 +132,70 @@ function getTestCases() {
 	array[item++] = new TestCase(SECTION, "section 7", expect, actual );
 
 
-
-	/*
-	 * Now test Array.prototype.sort() on non-Array objects
-	 */
-
-
-	status = inSection(8);
-	var obj = new Object();
-	obj.sort = Array.prototype.sort;
-	obj.length = 4;
-	obj[0] = 0;
-	obj[1] = 1;
-	obj[2] = 2;
-	obj[3] = 3;
-	cmp = function(x,y) {return x-y;};
-	actual = obj.sort(cmp).length;
-	expect = 4;
-	array[item++] = new TestCase(SECTION, "section 8", expect, actual );
-
-
-	/*
-	 * Here again is Brendan's test. Unlike the array case
-	 * above, the setting of obj.length to 2 and then 4
-	 * should NOT cause elements to be deleted
-	 */
-	obj = new Object();
-	obj.sort = Array.prototype.sort;
-	obj.length = 4;
-	obj[0] = 3;
-	obj[1] = 2;
-	obj[2] = 1;
-	obj[3] = 0;
-	cmp = function(x,y) {return x-y;};
-	obj.sort(cmp);  //<---- this is what triggered the buggy behavior below
-	obj.join = Array.prototype.join;
-
-	status = inSection(9);
-	actual = obj.join();
-	expect = '0,1,2,3';
-	array[item++] = new TestCase(SECTION, "section 9", expect, actual );
-
-	status = inSection(10);
-	actual = obj.length;
-	expect = 4;
-	array[item++] = new TestCase(SECTION, "section 10", expect, actual );
-
-	status = inSection(11);
-	obj.length = 2;
-	actual = obj.join();
-	expect = '0,1';
-	array[item++] = new TestCase(SECTION, "section 11", expect, actual );
-
-	/*
-	 * Before this bug was fixed, |actual| held the value '0,1,,'
-	 * as in the Array-object case at top. This bug only occurred
-	 * if Array.prototype.sort() had been applied to |obj|,
-	 * as we have done higher up.
-	 */
-	status = inSection(12);
-	obj.length = 4;
-	actual = obj.join();
-	expect = '0,1,2,3';
-	array[item++] = new TestCase(SECTION, "section 12", expect, actual );
-
+    if (!as3Enabled) {
+        /*
+         * Now test Array.prototype.sort() on non-Array objects
+         */
+    
+    
+        status = inSection(8);
+        var obj = new Object();
+        obj.sort = Array.prototype.sort;
+        obj.length = 4;
+        obj[0] = 0;
+        obj[1] = 1;
+        obj[2] = 2;
+        obj[3] = 3;
+        cmp = function(x,y) {return x-y;};
+        actual = obj.sort(cmp).length;
+        expect = 4;
+        array[item++] = new TestCase(SECTION, "section 8", expect, actual );
+    
+    
+        /*
+         * Here again is Brendan's test. Unlike the array case
+         * above, the setting of obj.length to 2 and then 4
+         * should NOT cause elements to be deleted
+         */
+        obj = new Object();
+        obj.sort = Array.prototype.sort;
+        obj.length = 4;
+        obj[0] = 3;
+        obj[1] = 2;
+        obj[2] = 1;
+        obj[3] = 0;
+        cmp = function(x,y) {return x-y;};
+        obj.sort(cmp);  //<---- this is what triggered the buggy behavior below
+        obj.join = Array.prototype.join;
+    
+        status = inSection(9);
+        actual = obj.join();
+        expect = '0,1,2,3';
+        array[item++] = new TestCase(SECTION, "section 9", expect, actual );
+    
+        status = inSection(10);
+        actual = obj.length;
+        expect = 4;
+        array[item++] = new TestCase(SECTION, "section 10", expect, actual );
+    
+        status = inSection(11);
+        obj.length = 2;
+        actual = obj.join();
+        expect = '0,1';
+        array[item++] = new TestCase(SECTION, "section 11", expect, actual );
+    
+        /*
+         * Before this bug was fixed, |actual| held the value '0,1,,'
+         * as in the Array-object case at top. This bug only occurred
+         * if Array.prototype.sort() had been applied to |obj|,
+         * as we have done higher up.
+         */
+        status = inSection(12);
+        obj.length = 4;
+        actual = obj.join();
+        expect = '0,1,2,3';
+        array[item++] = new TestCase(SECTION, "section 12", expect, actual );
+    }
+    
     return ( array );
 }

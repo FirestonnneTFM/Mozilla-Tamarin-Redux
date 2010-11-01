@@ -48,23 +48,32 @@ function getTestCases() {
     var array = new Array();
     var item = 0;    
 
-    var result = "Failed";
-    var exception = "No exception thrown";
-    var expect = "Passed";
-
-    try {
-    var OBJ = new MyObject( new Date(0) );
-        result = OBJ.toString();
-    } catch ( e ) {
-        result = expect;
-        exception = e.toString();
-    }finally{
-
-    array[item++] = new TestCase(
-        SECTION,
-        "OBJECT = new MyObject( new Date(0)) ; result = OBJ.toString()",
-		"TypeError: Error #1034",
-		typeError( exception ));
+    if (as3Enabled) {
+        var OBJ = new MyObject( new Date(0) );
+        array[item++] = new TestCase(
+            SECTION,
+            "OBJECT = new MyObject( new Date(0)) ; OBJ.toString()",
+            "Invalid Date",
+            OBJ.toString());
+    } else {
+        var result = "Failed";
+        var exception = "No exception thrown";
+        var expect = "Passed";
+        
+        try {
+        var OBJ = new MyObject( new Date(0) );
+            result = OBJ.toString();
+        } catch ( e ) {
+            result = expect;
+            exception = e.toString();
+        }finally{
+    
+        array[item++] = new TestCase(
+            SECTION,
+            "OBJECT = new MyObject( new Date(0)) ; result = OBJ.toString()",
+            "TypeError: Error #1034",
+            typeError( exception ));
+        }
     }
     return array;
 }

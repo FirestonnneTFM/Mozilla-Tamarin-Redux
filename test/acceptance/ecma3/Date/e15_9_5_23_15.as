@@ -86,8 +86,11 @@ function addTestCase( startTime, setTime ) {
     array[item++] = new TestCase( SECTION, DateString+".getSeconds()",          LocalDate.seconds,  DateCase.getSeconds() );
     array[item++] = new TestCase( SECTION, DateString+".getMilliseconds()",     LocalDate.ms,       DateCase.getMilliseconds() );
 
-    DateCase.toString = Object.prototype.toString;
-	array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString; DateCase.toString()","[object Date]", DateCase.toString() );
+    if (!as3Enabled) {
+        DateCase.toString = Object.prototype.toString;
+        array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString; DateCase.toString()","[object Date]", DateCase.toString() );
+    }
+    
     return array;
 }
 function MyDate() {
