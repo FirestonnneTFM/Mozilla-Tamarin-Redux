@@ -123,6 +123,18 @@ namespace avmplus
         void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
     };
 
+    /**
+     * The JITNoise class implements
+     */
+    class JITNoise : public nanojit::Noise {
+    public :
+        JITNoise();
+        // produce a random number from 0-maxValue for the JIT to use in attack mitigation
+        uint32_t getValue(uint32_t maxValue);
+    private:
+        TRandomFast randomSeed;
+    };
+
     // Binding Cache Design
     //
     // When we don't know the type of the base object at a point we access a property,
@@ -437,6 +449,7 @@ namespace avmplus
         HashMap<const uint8_t*, CodegenLabel*> *blockLabels;
         LirWriter* redirectWriter;
         CseFilter* cseFilter; // The CseFilter instance for this method, or NULL if none.
+        JITNoise noise;
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LInsPrinter* vbNames;)
 #ifdef DEBUGGER
