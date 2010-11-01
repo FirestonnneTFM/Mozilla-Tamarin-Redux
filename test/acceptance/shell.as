@@ -1060,10 +1060,6 @@ function _print(s) {
 //  trace(s);
 }
 
-function print(s) {
-    trace(s);
-}
-
 // workaround for Debugger vm where error contains more details
 function parseError(error,len) {
   if (error.length>len) {
