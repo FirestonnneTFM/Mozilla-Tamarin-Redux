@@ -7231,11 +7231,14 @@ namespace avmplus
             if (pool->isVerbose(VB_execpolicy))
                 AvmLog("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
 #endif
-            mgr->codeAlloc.freeAll(assm->codeList);
             // assm puked, or we did something untested, so interpret.
             code = NULL;
-            if (assm->codeList)
-                mgr->codeAlloc.freeAll(assm->codeList);
+#ifdef AVMPLUS_JITMAX
+            // we need to distiguish between an error and the policy saying we want
+            // to interp.   In the latter case, we should free up jit resources.
+            if (!assm->error())
+                assm->cleanupAfterError();
+#endif // AVMPLUS_JITMAX
             PERFM_NVPROF("lir-error",1);
         }
 
@@ -7311,7 +7314,6 @@ namespace avmplus
         alloc1 = NULL;
         mmfx_delete( lir_alloc );
         lir_alloc = NULL;
-        pool->codeMgr->codeAlloc.markAllExec();
     }
 
     // check valid pointer and unbox it (returns ScriptObject*)
