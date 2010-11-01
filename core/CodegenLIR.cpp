@@ -282,6 +282,20 @@ namespace avmplus
     #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
 #endif
 
+    // source of entropy for Assembler
+    JITNoise::JITNoise()
+    {
+        MathUtils::initRandom(&randomSeed);
+    }
+
+    // produce a random number from 0-maxValue for the JIT to use in attack mitigation
+    uint32_t JITNoise::getValue(uint32_t maxValue)
+    {
+        int32_t v = MathUtils::Random(maxValue, &randomSeed);
+        AvmAssert(v>=0);
+        return (uint32_t)v;
+    }
+
     // AccSet conventions
     // nanojit currently supports very coarse grained access-set tags
     // for loads, stores, and calls.  See the comments in LIR.h for a
@@ -799,7 +813,8 @@ namespace avmplus
         prolog(NULL),
         specializedCallHashMap(NULL),
         blockLabels(NULL),
-        cseFilter(NULL)
+        cseFilter(NULL),
+        noise()
         DEBUGGER_ONLY(, haveDebugger(core->debugger() != NULL) )
     {
         #ifdef AVMPLUS_MAC_CARBON
@@ -7171,6 +7186,8 @@ namespace avmplus
         #ifdef VMCFG_VTUNE
         assm->vtuneHandle = vtuneInit(info->getMethodName());
         #endif /* VMCFG_VTUNE */
+
+        assm->setNoiseGenerator( (nanojit::Noise*) &noise );
 
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
