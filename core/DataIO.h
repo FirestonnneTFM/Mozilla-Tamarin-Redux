@@ -160,9 +160,9 @@ namespace avmplus
 
         REALLY_INLINE Endian GetNativeEndian() const
         {
-            #if defined(AVMPLUS_LITTLE_ENDIAN)
+            #if defined(VMCFG_LITTLE_ENDIAN)
             return kLittleEndian;
-            #elif defined(AVMPLUS_BIG_ENDIAN)
+            #elif defined(VMCFG_BIG_ENDIAN)
             return kBigEndian;
             #else
             #error

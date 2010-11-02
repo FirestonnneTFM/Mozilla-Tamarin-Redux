@@ -131,7 +131,7 @@ const int kBufferPadding = 16;
         double_overlay(uint64_t v) { bits64=v; }
 
         double value;
-#if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
+#if defined VMCFG_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
         struct { uint32_t msw, lsw; } words;
 #else
         struct { uint32_t lsw, msw; } words;

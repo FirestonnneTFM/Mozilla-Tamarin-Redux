@@ -190,7 +190,6 @@ var FEATURES =
     <name>      AVMSYSTEM_BIG_ENDIAN </name>
     <precludes> AVMSYSTEM_LITTLE_ENDIAN </precludes>
     <defines>   VMCFG_BIG_ENDIAN </defines>
-    <defines>   AVMPLUS_BIG_ENDIAN </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
 
   <feature>
@@ -200,8 +199,6 @@ var FEATURES =
     <name>      AVMSYSTEM_LITTLE_ENDIAN </name>
     <precludes> AVMSYSTEM_BIG_ENDIAN </precludes>
     <defines>   VMCFG_LITTLE_ENDIAN </defines>
-    <defines>   AVMPLUS_LITTLE_ENDIAN </defines>  <!-- FIXME: Bug 536304 legacy name -->
-    <defines>   AVM10_BIG_ENDIAN </defines>       <!-- FIXME: Bug 536304 legacy name, may be externally visble, should clean up -->
   </feature>
 
   <feature>

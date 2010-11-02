@@ -4069,7 +4069,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::newStringEndianUTF16(bool littleEndian, const wchar* s, int len, bool strict)
     {
-    #ifdef AVMPLUS_LITTLE_ENDIAN
+    #ifdef VMCFG_LITTLE_ENDIAN
         const bool nativeIsLE = true;
     #else
         const bool nativeIsLE = false;
