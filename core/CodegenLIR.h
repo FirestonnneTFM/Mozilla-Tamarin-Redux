@@ -354,6 +354,12 @@ namespace avmplus
         void  liveAlloc(LIns* expr);        // extend lifetime of LIR_allocp, otherwise no-op
         void  emitStart(Allocator&, LirBuffer*, LirWriter*&);
 
+        /**
+         * Compute number of bytes needed for the unboxed representation
+         * of this argument value when passed on the stack.
+         */
+        static int32_t argSize(MethodSignaturep, int32_t i);
+
     protected: // data
         LirWriter *lirout;
         Fragment *frag;
@@ -579,6 +585,7 @@ namespace avmplus
         LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
         LIns* coerceToType(int i, Traits*);
         void emitInitializers();
+        void emitDebugEnter();
 
         bool isPromote(LOpcode op);
         LIns* imm2Int(LIns* imm);
@@ -671,9 +678,6 @@ namespace avmplus
 
         // should unmodified args be copied?  true if we are not coercing in-place
         bool copyArgs(); // true if un-modified args must be copied anyway
-
-        // # of bytes needed for the unboxed representation of this arg
-        int32_t argSize(int32_t i);
 
     private:
         MethodInfo* method;     // MethodInfo for method that we will call
