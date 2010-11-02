@@ -1752,7 +1752,7 @@ namespace avmplus
         {
             bool hasDefaults;
             ValidateInitVisitor() : hasDefaults(false) {}
-            ~ValidateInitVisitor() {}
+            virtual ~ValidateInitVisitor() {}
             void defaultVal(Atom, uint32_t, Traits*)
             {
                 hasDefaults = true;

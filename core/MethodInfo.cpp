@@ -360,7 +360,7 @@ namespace avmplus
         // if we are running jit then the types are native and we need to box them.
         if (_isJitImpl)
         {
-            src = FramePtr(uintptr_t(src) + srcPos*8);
+            src = FramePtr(uintptr_t(src) + srcPos * VARSIZE);
             AvmAssert(sstArr != NULL);
             return nativeLocalToAtom(this->pool()->core, src, (SlotStorageType)sstArr[srcPos]);
         }
@@ -403,7 +403,7 @@ namespace avmplus
         if (_isJitImpl)
         {
             AvmAssert(sstArr != NULL);
-            dst = FramePtr(uintptr_t(dst) + dstPos*8);
+            dst = FramePtr(uintptr_t(dst) + dstPos * VARSIZE);
             switch ((SlotStorageType)sstArr[dstPos])
             {
                 case SST_double:
@@ -548,8 +548,6 @@ namespace avmplus
             ap += (bt == BUILTIN_number ? sizeof(double) : sizeof(Atom)) / sizeof(int32_t);
         }
     }
-
-    static uint32_t argSize(Traits* t) { return Traits::getBuiltinType(t) == BUILTIN_number ? sizeof(double) : sizeof(Atom); }
 
     MethodSignature* FASTCALL MethodInfo::_buildMethodSignature(const Toplevel* toplevel)
     {

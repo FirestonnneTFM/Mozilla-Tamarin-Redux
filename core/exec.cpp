@@ -43,6 +43,15 @@
 
 namespace avmplus {
 
+// Computes the size in bytes of an argument of type t, when passed
+// using the VM-wide AS3 calling convention.
+int argSize(Traits* t)
+{
+    return Traits::getBuiltinType(t) == BUILTIN_number
+            ? (int)sizeof(double)
+            : (int)sizeof(Atom);
+}
+
 BaseExecMgr* BaseExecMgr::exec(VTable* vtable)
 {
     return (BaseExecMgr*) vtable->core()->exec;
@@ -157,7 +166,7 @@ void BaseExecMgr::initObj(MethodEnv* env, ScriptObject* obj)
     struct InterpInitVisitor: public InitVisitor {
         ScriptObject* obj;
         InterpInitVisitor(ScriptObject* obj) : obj(obj) {}
-        ~InterpInitVisitor() {}
+        virtual ~InterpInitVisitor() {}
         void defaultVal(Atom val, uint32_t slot, Traits*) {
             // Assign the default value.
             // Keep in sync with interpreter INSTR(setslot).

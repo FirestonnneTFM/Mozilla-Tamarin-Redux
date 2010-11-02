@@ -667,7 +667,7 @@ namespace avmplus
 #ifdef DEBUG
         jit_sst[i] = uint8_t(1 << sst);
 #endif
-        lirout->insStore(o, vars, i * 8, ACCSET_VARS);
+        lirout->insStore(o, vars, i * VARSIZE, ACCSET_VARS);
         lirout->insStore(LIR_sti2c, InsConst(sst), tags, i, ACCSET_TAGS);
     }
 
@@ -1206,8 +1206,8 @@ namespace avmplus
         }
 
         REALLY_INLINE int varOffsetToIndex(int offset) {
-            AvmAssert(IS_ALIGNED(offset, 8));
-            return offset >> 3;
+            AvmAssert(IS_ALIGNED(offset, VARSIZE));
+            return offset / VARSIZE;
         }
 
         // keep track of the value stored in var d and update notnull
@@ -1337,7 +1337,7 @@ namespace avmplus
                   (v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) ||
                   (v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE));
 #endif
-        return lirout->insLoad(LIR_ldi, vars, i*8, ACCSET_VARS);
+        return lirout->insLoad(LIR_ldi, vars, i * VARSIZE, ACCSET_VARS);
     }
 
     LIns* CodegenLIR::localGetf(int i) {
@@ -1345,7 +1345,7 @@ namespace avmplus
         const Value& v = state->value(i);
         AvmAssert(v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE);
 #endif
-        return lirout->insLoad(LIR_ldd, vars, i*8, ACCSET_VARS);
+        return lirout->insLoad(LIR_ldd, vars, i * VARSIZE, ACCSET_VARS);
     }
 
     // Load a pointer-sized var, and update null tracking state if the driver
@@ -1360,12 +1360,12 @@ namespace avmplus
                       !(v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) &&
                       !(v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE) &&
                       !(v.sst_mask == (1 << SST_double) && v.traits == NUMBER_TYPE));
-            ins = lirout->insLoad(LIR_ldp, vars, i*8, ACCSET_VARS);
+            ins = lirout->insLoad(LIR_ldp, vars, i * VARSIZE, ACCSET_VARS);
         } else {
             // more than one representation is possible: convert to atom using tag found at runtime.
             AvmAssert(bt(v.traits) == BUILTIN_any || bt(v.traits) == BUILTIN_object);
             LIns* tag = lirout->insLoad(LIR_lduc2ui, tags, i, ACCSET_TAGS);
-            LIns* varAddr = leaIns(i*8, vars);
+            LIns* varAddr = leaIns(i * VARSIZE, vars);
             ins = callIns(FUNCTIONID(makeatom), 3, coreAddr, varAddr, tag);
         }
         if (v.notNull)
@@ -1454,8 +1454,8 @@ namespace avmplus
         }
 
         void trackVarStore(LIns *value, int d) {
-            AvmAssert(IS_ALIGNED(d, 8));
-            int i = d >> 3;
+            AvmAssert(IS_ALIGNED(d, VARSIZE));
+            int i = d / VARSIZE;
             if (i >= nvar)
                 return;
             varTracker[i] = value;
@@ -1782,7 +1782,7 @@ namespace avmplus
         #endif
 
         // allocate room for our local variables
-        vars = insAlloc(framesize * 8);         // sizeof(double)=8 bytes per var
+        vars = insAlloc(framesize * VARSIZE);   // room for double|Atom|int|pointer
         tags = insAlloc(framesize);             // one tag byte per var
         prolog_buf->sp = vars;
         varTracker->init(vars, tags);
@@ -1868,9 +1868,8 @@ namespace avmplus
         {
             // compute offset of first optional arg
             int offset = 0;
-            for (int i=0, n=required_count; i <= n; i++) {
-                offset += ms->paramTraitsBT(i) == BUILTIN_number ? sizeof(double) : sizeof(Atom);
-            }
+            for (int i=0, n=required_count; i <= n; i++)
+                offset += argSize(ms, i);
 
             // now copy the default optional values
             LIns* argcarg = argc_param;
@@ -2001,29 +2000,6 @@ namespace avmplus
             localSet(i, undefConst, NULL); // void would be more precise
         }
 
-        varTracker->initNotNull(state);
-
-        // Generate code to initialize the object, if we are compiling an initializer.
-        // This is intentionally before debugEnter(), to match interpreter behavior.
-        if (info->isConstructor())
-            emitInitializers();
-
-        #ifdef DEBUGGER
-        if (haveDebugger) {
-            for (int i = ms->scope_base(), n = ms->stack_base(); i < n; ++i) {
-                localSet(i, undefConst, VOID_TYPE);
-            }
-
-            callIns(FUNCTIONID(debugEnter), 5,
-                env_param,
-                tags,
-                csn,
-                vars,
-                driver->hasReachableExceptions() ? _save_eip : InsConstPtr(0)
-                );
-        }
-        #endif // DEBUGGER
-
         /// SWITCH PIPELINE FROM PROLOG TO BODY
         verbose_only( if (vbWriter) { vbWriter->flush();} )
         // we have written the prolog to prolog_buf, now create a new
@@ -2044,6 +2020,16 @@ namespace avmplus
         body->ins0(LIR_start);
         redirectWriter->out = body;
         /// END SWITCH CODE
+
+        varTracker->initNotNull(state);
+
+        // Generate code to initialize the object, if we are compiling an initializer.
+        // This is intentionally before debugEnter(), to match interpreter behavior.
+        if (info->isConstructor())
+            emitInitializers();
+
+        if (haveDebugger)
+            emitDebugEnter();
 
         if (driver->hasReachableExceptions()) {
             // _ef.beginTry(core);
@@ -2066,7 +2052,7 @@ namespace avmplus
         struct JitInitVisitor: public InitVisitor {
             CodegenLIR *jit;
             JitInitVisitor(CodegenLIR *jit) : jit(jit) {}
-            ~JitInitVisitor() {}
+            virtual ~JitInitVisitor() {}
             void defaultVal(Atom value, uint32_t slot, Traits* slotType) {
 #ifdef NJ_VERBOSE
                 if (jit->verbose()) {
@@ -2083,6 +2069,21 @@ namespace avmplus
         Traits* t = info->declaringTraits();
         const TraitsBindings *tb = t->getTraitsBindings();
         t->visitInitBody(&visitor, toplevel, tb);
+    }
+
+    void CodegenLIR::emitDebugEnter()
+    {
+        #ifdef DEBUGGER
+        for (int i = ms->scope_base(), n = ms->stack_base(); i < n; ++i)
+            localSet(i, undefConst, VOID_TYPE);
+
+        callIns(FUNCTIONID(debugEnter), 5,
+            env_param,
+            tags,
+            csn,
+            vars,
+            driver->hasReachableExceptions() ? _save_eip : InsConstPtr(0));
+        #endif // DEBUGGER
     }
 
     void CodegenLIR::copyParam(int i, int& offset) {
@@ -3087,7 +3088,7 @@ namespace avmplus
                                 loadEnvToplevel(),
                                 InsConstPtr(multiname),
                                 loadAtomRep(state->sp()),
-                                leaIns(restLocal*8, vars),
+                                leaIns(restLocal * VARSIZE, vars),
                                 restArgc,
                                 (info->needRest() ?
                                     binaryIns(LIR_addp, ap_param, InsConstPtr((void*)(ms->rest_offset()))) :
@@ -4088,23 +4089,23 @@ namespace avmplus
             LIns* v;
             switch (bt(paramType)) {
             case BUILTIN_number:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldd, vars, index*8, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldd, vars, index * VARSIZE, ACCSET_VARS);
                 std(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(double);
                 break;
             case BUILTIN_int:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index*8, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * VARSIZE, ACCSET_VARS);
                 stp(i2p(v), ap, disp, ACCSET_OTHER);
                 disp += sizeof(intptr_t);
                 break;
             case BUILTIN_uint:
             case BUILTIN_boolean:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index*8, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldi, vars, index * VARSIZE, ACCSET_VARS);
                 stp(ui2p(v), ap, disp, ACCSET_OTHER);
                 disp += sizeof(uintptr_t);
                 break;
             default:
-                v = (i == 0) ? obj : lirout->insLoad(LIR_ldp, vars, index*8, ACCSET_VARS);
+                v = (i == 0) ? obj : lirout->insLoad(LIR_ldp, vars, index * VARSIZE, ACCSET_VARS);
                 stp(v, ap, disp, ACCSET_OTHER);
                 disp += sizeof(void*);
                 break;
@@ -6206,7 +6207,7 @@ namespace avmplus
             // _ef.beginCatch()
             int stackBase = ms->stack_base();
             LIns* pc = loadIns(LIR_ldp, 0, _save_eip, ACCSET_OTHER);
-            LIns* slotAddr = leaIns(stackBase * 8, vars);
+            LIns* slotAddr = leaIns(stackBase * VARSIZE, vars);
             LIns* tagAddr = leaIns(stackBase, tags);
             LIns* handler_ordinal = callIns(FUNCTIONID(beginCatch), 6, coreAddr, _ef, InsConstPtr(info), pc, slotAddr, tagAddr);
 
@@ -6730,8 +6731,8 @@ namespace avmplus
     {
         AvmAssert(ins->isop(LIR_addp));
         if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 8));
-            int d = int(uintptr_t(ins->oprnd2()->immP()) >> 3);
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), VARSIZE));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) / VARSIZE);
             varlivein.set(d);
         }
     }
@@ -6742,8 +6743,8 @@ namespace avmplus
     {
         AvmAssert(ins->isop(LIR_addp));
         if (ins->oprnd1() == vars && ins->oprnd2()->isImmP()) {
-            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), 8));
-            int d = int(uintptr_t(ins->oprnd2()->immP()) >> 3);
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->immP(), VARSIZE));
+            int d = int(uintptr_t(ins->oprnd2()->immP()) / VARSIZE);
             varlivein.clear(d);
             taglivein.clear(d);
         }
@@ -6871,7 +6872,7 @@ namespace avmplus
                 case LIR_std:
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
-                        int d = i->disp() >> 3;
+                        int d = i->disp() / VARSIZE;
                         varlivein.clear(d);
                     } else if (i->oprnd2() == tags) {
                         int d = i->disp(); // 1 byte per tag
@@ -6892,7 +6893,7 @@ namespace avmplus
                 case LIR_ldd:
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
-                        int d = i->disp() >> 3;
+                        int d = i->disp() / VARSIZE;
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
@@ -6993,7 +6994,7 @@ namespace avmplus
                 case LIR_std:
                 case LIR_sti2c:
                     if (i->oprnd2() == vars) {
-                        int d = i->disp() >> 3;
+                        int d = i->disp() / VARSIZE;
                         if (!varlivein.get(d)) {
                             verbose_only(if (verbose)
                                 AvmLog("- %s\n", printer->formatIns(&b, i));)
@@ -7035,7 +7036,7 @@ namespace avmplus
                 case LIR_ldd:
                 case LIR_lduc2ui: case LIR_ldc2i:
                     if (i->oprnd1() == vars) {
-                        int d = i->disp() >> 3;
+                        int d = i->disp() / VARSIZE;
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
@@ -7319,6 +7320,11 @@ namespace avmplus
         callIns(FUNCTIONID(coerceobj_atom), 3, env, atom, InsConstPtr(t));
         return andp(atom, ~7);
     }
+
+    int32_t LirHelper::argSize(MethodSignaturep ms, int i)
+    {
+        return avmplus::argSize(ms->paramTraits(i));
+    }
 }
 
 namespace nanojit
@@ -7598,11 +7604,6 @@ namespace avmplus
         }
     }
 
-    int32_t InvokerCompiler::argSize(int i)
-    {
-        return ms->paramTraitsBT(i) == BUILTIN_number ? sizeof(double) : sizeof(Atom);
-    }
-
     void InvokerCompiler::downcast_args(LIns* env_param, LIns* argc_param, LIns* args_param)
     {
         // the receiver arg (arg0) only needs to be unboxed, not coerced
@@ -7613,7 +7614,7 @@ namespace avmplus
         LIns* native = atomToNative(ms->paramTraitsBT(0), atom);
         if (native != atom || copyArgs())
             lirout->insStore(native, args_out, 0, ACCSET_OTHER);
-        int offset = argSize(0);
+        int offset = argSize(ms, 0);
 
         // the required args need to be coerced and unboxed
         int i;
@@ -7623,7 +7624,7 @@ namespace avmplus
                 core->console << "arg " << i << " " << ms->paramTraits(i) << "\n";
             )
             downcast_arg(i, offset, env_param, args_param);
-            offset += argSize(i);
+            offset += argSize(ms, i);
         }
 
         // optional args also need coercing and unboxing when they're present
@@ -7639,7 +7640,7 @@ namespace avmplus
                 // if (argc < i) { goto done }
                 branches[branch_count++] = jlti(argc_param, i);
                 downcast_arg(i, offset, env_param, args_param);
-                offset += argSize(i);
+                offset += argSize(ms, i);
             }
             if (branch_count > 0) {
                 // done: patch all the optional-arg branches

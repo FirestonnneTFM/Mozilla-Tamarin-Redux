@@ -98,6 +98,20 @@ typedef GprImtThunkProcRetType (*GprImtThunkProc)(class ImtThunkEnv*,
         int argc, uint32_t* args, uintptr_t idd);
 
 /**
+ * Size of a variable in a JIT stack frame, in bytes.  VARSIZE is large
+ * enough to hold double, int, pointers, or Atom on 32-bit or 64-bit cpus.
+ * This is an aspect of the JIT implementation, but is defined here because
+ * the debugger boxing/unboxing code in MethodInfo needs to know it.
+ */
+static const size_t VARSIZE = 8;
+
+/**
+ * Compute number of bytes needed for the unboxed representation
+ * of this argument value when passed on the stack.
+ */
+int32_t argSize(Traits*);
+
+/**
  * BaseExecMgr implements for all policies, and encapsulates
  * jit+abc, abc-only, and wordcode-only mechanisms.  This could be improved
  * by factoring into multiple implementations.
