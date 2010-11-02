@@ -152,7 +152,7 @@ sync_clean = ShellCommand(
             name='Source_Clean',
             workdir="../",
             haltOnFailure="True",
-            usePTY="False")
+            usePTY=False)
             # Do not use PTY when calling 'rm' as it will sometimes report a failure.
             #    http://buildbot.net/trac/ticket/284
             #    http://buildbot.net/trac/ticket/255
@@ -205,7 +205,7 @@ def bb_slaveupdate(slave):
             description='Updating SLAVE buildscripts',
             name='BB_SLAVEUpdate',
             haltOnFailure="True",
-            usePTY="False")
+            usePTY=False)
             # Do not use PTY when calling 'cp' as it will sometimes report a failure.
             #    http://buildbot.net/trac/ticket/284
             #    http://buildbot.net/trac/ticket/255
