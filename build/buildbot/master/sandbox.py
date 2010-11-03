@@ -1635,8 +1635,8 @@ class sandbox:
     #### builder for linux-mips-test      ####
     ##########################################
     sb_linux_mips_test_factory = factory.BuildFactory()
-    sb_linux_mips_test_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs="--threads=1 --timeout=300 --random"))
-    sb_linux_mips_test_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs="--threads=1 --timeout=300 --random"))
+    sb_linux_mips_test_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs="--threads=1 --timeout=600 --random"))
+    sb_linux_mips_test_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs="--threads=1 --timeout=600 --random"))
     sb_linux_mips_test_factory.addStep(util_process_clean)
     sb_linux_mips_test_factory.addStep(util_clean_buildsdir)
     sb_linux_mips_test_factory.addStep(sync_clean)

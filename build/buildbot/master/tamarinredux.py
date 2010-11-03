@@ -1705,8 +1705,8 @@ class tamarinredux:
     #### builder for linux-mips-test      ####
     ##########################################
     linux_mips_test_factory = factory.BuildFactory()
-    linux_mips_test_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs="--threads=1 --timeout=300 --random"))
-    linux_mips_test_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs="--threads=1 --timeout=300 --random"))
+    linux_mips_test_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs="--threads=1 --timeout=600 --random"))
+    linux_mips_test_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs="--threads=1 --timeout=600 --random"))
     linux_mips_test_factory.addStep(util_process_clean)
     linux_mips_test_factory.addStep(util_clean_buildsdir)
     linux_mips_test_factory.addStep(sync_clean)
