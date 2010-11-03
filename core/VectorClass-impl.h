@@ -88,11 +88,9 @@ namespace avmplus
     // ----------------------------
 
     template<class OBJ>
-    TypedVectorClass<OBJ>::TypedVectorClass(VTable* vtable, VectorSpecializedClasses which)
+    TypedVectorClass<OBJ>::TypedVectorClass(VTable* vtable)
         : TypedVectorClassBase(vtable)
     {
-        if (!toplevel()->vectorSpecializedClass[which])
-            toplevel()->vectorSpecializedClass[which] = this;
         setPrototypePtr(toplevel()->objectClass->construct());
     }
 
@@ -100,6 +98,15 @@ namespace avmplus
     ScriptObject* TypedVectorClass<OBJ>::createInstance(VTable* ivtable, ScriptObject* prototype)
     {
         return new (core()->GetGC(), ivtable->getExtraSize()) OBJ(ivtable, prototype, this);
+    }
+
+    template<class OBJ>
+    OBJ* TypedVectorClass<OBJ>::newVector(uint32_t length)
+    {
+        OBJ* v = new (core()->GetGC(), ivtable()->getExtraSize()) OBJ(ivtable(), prototypePtr(), this);
+        if (length > 0)
+            v->set_length(length);
+        return v;
     }
 
     template<class OBJ>
@@ -112,36 +119,36 @@ namespace avmplus
 
     // ----------------------------
 
-    TypedVectorObjectBase::TypedVectorObjectBase(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
+    VectorBaseObject::VectorBaseObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
         : ScriptObject(ivtable, delegate)
         , m_vecClass(vecClass)
         , m_fixed(false)
     {
     }
 
-    TypedVectorObjectBase* TypedVectorObjectBase::newVector()
+    VectorBaseObject* VectorBaseObject::_newVector()
     {
-        TypedVectorObjectBase* v = (TypedVectorObjectBase*)m_vecClass->createInstance(m_vecClass->ivtable(), m_vecClass->prototypePtr());
+        VectorBaseObject* v = (VectorBaseObject*)m_vecClass->createInstance(m_vecClass->ivtable(), m_vecClass->prototypePtr());
         v->m_vecClass = this->m_vecClass;
         return v;
     }
 
-    void TypedVectorObjectBase::throwErrorDouble_read(double d) const
+    void VectorBaseObject::throwErrorDouble_read(double d) const
     {
         toplevel()->throwReferenceError(kReadSealedError, core()->doubleToString(d), traits());
     }
 
-    void TypedVectorObjectBase::throwErrorDouble_write(double d) const
+    void VectorBaseObject::throwErrorDouble_write(double d) const
     {
         toplevel()->throwReferenceError(kWriteSealedError, core()->doubleToString(d), traits());
     }
 
-    void FASTCALL TypedVectorObjectBase::throwFixedError() const
+    void FASTCALL VectorBaseObject::throwFixedError() const
     {
         toplevel()->throwRangeError(kVectorFixedError);
     }
 
-    Atom TypedVectorObjectBase::_mapImpl(ScriptObject* callback, Atom thisObject, TypedVectorObjectBase* r, uint32_t len)
+    Atom VectorBaseObject::_mapImpl(ScriptObject* callback, Atom thisObject, VectorBaseObject* r, uint32_t len)
     {
         AvmCore* core = this->core();
         if (callback)
@@ -164,7 +171,7 @@ namespace avmplus
         return r->atom();
     }
 
-    Atom TypedVectorObjectBase::_filterImpl(ScriptObject* callback, Atom thisObject, TypedVectorObjectBase* r, uint32_t len)
+    Atom VectorBaseObject::_filterImpl(ScriptObject* callback, Atom thisObject, VectorBaseObject* r, uint32_t len)
     {
         AvmCore* core = this->core();
         if (callback)
@@ -193,7 +200,7 @@ namespace avmplus
 
     template<class TLIST>
     TypedVectorObject<TLIST>::TypedVectorObject(VTable* ivtable, ScriptObject* delegate, MMgc::GC* gc, TypedVectorClassBase* vecClass)
-        : TypedVectorObjectBase(ivtable, delegate, vecClass)
+        : VectorBaseObject(ivtable, delegate, vecClass)
         , m_list(gc, 0)
     {
     }
@@ -255,6 +262,18 @@ namespace avmplus
     }
 
     template<class TLIST>
+    /*virtual*/ uint32_t TypedVectorObject<TLIST>::getLength() const
+    {
+        return get_length();
+    }
+
+    template<class TLIST>
+    /*virtual*/ void TypedVectorObject<TLIST>::setLength(uint32_t length)
+    {
+        set_length(length);
+    }
+
+    template<class TLIST>
     void TypedVectorObject<TLIST>::set_length(uint32_t newLength)
     {
         checkFixed();
@@ -310,7 +329,7 @@ namespace avmplus
     template<class TLIST>
     Atom TypedVectorObject<TLIST>::_map(ScriptObject* callback, Atom thisObject)
     {
-        TypedVectorObject<TLIST>* r = (TypedVectorObject<TLIST>*)newVector();
+        TypedVectorObject<TLIST>* r = (TypedVectorObject<TLIST>*)_newVector();
         uint32_t const len = m_list.length();
         r->set_length(len);
         return _mapImpl(callback, thisObject, r, len);
@@ -319,7 +338,7 @@ namespace avmplus
     template<class TLIST>
     Atom TypedVectorObject<TLIST>::_filter(ScriptObject* callback, Atom thisObject)
     {
-        TypedVectorObject<TLIST>* r = (TypedVectorObject<TLIST>*)newVector();
+        TypedVectorObject<TLIST>* r = (TypedVectorObject<TLIST>*)_newVector();
         uint32_t const len = m_list.length();
         return _filterImpl(callback, thisObject, r, len);
     }

@@ -66,7 +66,7 @@ namespace avmplus
     // helper method
     // sets index to the uint32_t value of name, if it can be converted
     // isNumber is set to true if name was a number (whether it was a uint32_t value or not)
-    TypedVectorObjectBase::VectorIndexStatus TypedVectorObjectBase::getVectorIndex(Atom name, uint32_t& index) const
+    VectorBaseObject::VectorIndexStatus VectorBaseObject::getVectorIndex(Atom name, uint32_t& index) const
     {
         if (AvmCore::getIndexFromAtom(name, &index))
         {
@@ -117,19 +117,19 @@ namespace avmplus
         Toplevel* toplevel = this->toplevel();
         if (typeClass == NULL)
         {
-            result = toplevel->vectorSpecializedClass[kObjectVector];
+            result = toplevel->objectVectorClass;
         }
         else if (typeClass == toplevel->intClass)
         {
-            result = toplevel->vectorSpecializedClass[kIntVector];
+            result = toplevel->intVectorClass;
         }
         else if (typeClass == toplevel->uintClass)
         {
-            result = toplevel->vectorSpecializedClass[kUIntVector];
+            result = toplevel->uintVectorClass;
         }
         else if (typeClass == toplevel->numberClass)
         {
-            result = toplevel->vectorSpecializedClass[kDoubleVector];
+            result = toplevel->doubleVectorClass;
         }
         else
         {
@@ -150,7 +150,7 @@ namespace avmplus
                 parameterizedVector->setDelegate(toplevel->classClass->prototypePtr());
 
                 // Is this right?  Should each instantiation get its own prototype?
-                parameterizedVector->setPrototypePtr(toplevel->vectorSpecializedClass[kObjectVector]->prototypePtr());
+                parameterizedVector->setPrototypePtr(toplevel->objectVectorClass->prototypePtr());
                 typeDomain->addParameterizedType(typeClass, parameterizedVector);
 
                 result = parameterizedVector;
@@ -202,32 +202,40 @@ namespace avmplus
     // ----------------------------
 
     IntVectorClass::IntVectorClass(VTable* vtable) 
-        : TypedVectorClass<IntVectorObject>(vtable, kIntVector)
+        : TypedVectorClass<IntVectorObject>(vtable)
     {
+        if (!toplevel()->intVectorClass)
+            toplevel()->intVectorClass = this;
         this->m_typeTraits = toplevel()->intClass->traits()->itraits;
     }
 
     // ----------------------------
 
     UIntVectorClass::UIntVectorClass(VTable* vtable) 
-        : TypedVectorClass<UIntVectorObject>(vtable, kUIntVector)
+        : TypedVectorClass<UIntVectorObject>(vtable)
     {
+        if (!toplevel()->uintVectorClass)
+            toplevel()->uintVectorClass = this;
         this->m_typeTraits = toplevel()->uintClass->traits()->itraits;
     }
 
     // ----------------------------
 
     DoubleVectorClass::DoubleVectorClass(VTable* vtable) 
-        : TypedVectorClass<DoubleVectorObject>(vtable, kDoubleVector)
+        : TypedVectorClass<DoubleVectorObject>(vtable)
     {
+        if (!toplevel()->doubleVectorClass)
+            toplevel()->doubleVectorClass = this;
         this->m_typeTraits = toplevel()->numberClass->traits()->itraits;
     }
 
     // ----------------------------
 
     ObjectVectorClass::ObjectVectorClass(VTable* vtable) 
-        : TypedVectorClass<ObjectVectorObject>(vtable, kObjectVector)
+        : TypedVectorClass<ObjectVectorObject>(vtable)
     {
+        if (!toplevel()->objectVectorClass)
+            toplevel()->objectVectorClass = this;
         this->m_typeTraits = toplevel()->objectClass->traits()->itraits;
     }
 
@@ -238,9 +246,9 @@ namespace avmplus
     {
     }
 
-    IntVectorObject* IntVectorObject::newThisType() 
+    IntVectorObject* IntVectorObject::newThisType()
     { 
-        return (IntVectorObject*)newVector(); 
+        return (IntVectorObject*)_newVector(); 
     }
 
     // ----------------------------
@@ -250,9 +258,9 @@ namespace avmplus
     {
     }
 
-    UIntVectorObject* UIntVectorObject::newThisType() 
+    UIntVectorObject* UIntVectorObject::newThisType()
     { 
-        return (UIntVectorObject*)newVector(); 
+        return (UIntVectorObject*)_newVector(); 
     }
 
     // ----------------------------
@@ -262,9 +270,9 @@ namespace avmplus
     {
     }
 
-    DoubleVectorObject* DoubleVectorObject::newThisType() 
+    DoubleVectorObject* DoubleVectorObject::newThisType()
     { 
-        return (DoubleVectorObject*)newVector(); 
+        return (DoubleVectorObject*)_newVector(); 
     }
 
     // ----------------------------
@@ -274,8 +282,8 @@ namespace avmplus
     {
     }
 
-    ObjectVectorObject* ObjectVectorObject::newThisType() 
+    ObjectVectorObject* ObjectVectorObject::newThisType()
     { 
-        return (ObjectVectorObject*)newVector(); 
+        return (ObjectVectorObject*)_newVector(); 
     }
 }
