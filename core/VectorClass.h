@@ -65,7 +65,7 @@ namespace avmplus
 
         // make a Vector of subtype Vector<typeClass>,
         // eg is typeClass == StringClass then return a new Vector<String>
-        ObjectVectorObject* newVector(ClassClosure* typeClass, uint32_t length);
+        ObjectVectorObject* newVector(ClassClosure* typeClass, uint32_t length = 0);
 
         DECLARE_SLOTS_VectorClass;
     };
@@ -103,10 +103,12 @@ namespace avmplus
 
     public:
 
-        explicit TypedVectorClass(VTable* vtable, VectorSpecializedClasses which);
+        explicit TypedVectorClass(VTable* vtable);
 
         // ClassClosure overrides
         virtual ScriptObject* createInstance(VTable* ivtable, ScriptObject* prototype);
+
+        OBJ* newVector(uint32_t length = 0);
 
     protected:
         virtual Atom createAndInitVectorFromObject(ScriptObject* so, uint32_t len);
@@ -174,10 +176,10 @@ namespace avmplus
 
     // ----------------------------
 
-    class TypedVectorObjectBase : public ScriptObject
+    class VectorBaseObject : public ScriptObject
     {
     public:
-        explicit TypedVectorObjectBase(VTable* ivtable, 
+        explicit VectorBaseObject(VTable* ivtable, 
                                        ScriptObject* delegate, 
                                        TypedVectorClassBase* vecClass);
 
@@ -185,12 +187,21 @@ namespace avmplus
         bool get_fixed() const;
         void set_fixed(bool fixed);
 
+        // used by Flash code for AMF3
+        ClassClosure* getType() const;
+
+        // AIR needs to be able to get/set the length of an arbitrary
+        // Vector without knowing its subclass; these simply forward into the
+        // appropriate calls of the well-typed subclass.
+        virtual uint32_t getLength() const = 0;
+        virtual void setLength(uint32_t length) = 0;
+
     protected:
         
-        Atom _mapImpl(ScriptObject* callback, Atom thisObject, TypedVectorObjectBase* r, uint32_t len);
-        Atom _filterImpl(ScriptObject* callback, Atom thisObject, TypedVectorObjectBase* r, uint32_t len); 
+        Atom _mapImpl(ScriptObject* callback, Atom thisObject, VectorBaseObject* r, uint32_t len);
+        Atom _filterImpl(ScriptObject* callback, Atom thisObject, VectorBaseObject* r, uint32_t len); 
 
-        TypedVectorObjectBase* newVector();
+        VectorBaseObject* _newVector();
 
         void checkFixed() const;
         void FASTCALL throwFixedError() const;
@@ -212,8 +223,7 @@ namespace avmplus
 
         enum VectorIndexStatus { kNotNumber, kInvalidNumber, kValidNumber };
         VectorIndexStatus getVectorIndex(Atom name, uint32_t& index) const;
-
-    protected:
+    
         DRCWB(TypedVectorClassBase*)    m_vecClass;
         bool                            m_fixed;
     };
@@ -221,7 +231,7 @@ namespace avmplus
     // ----------------------------
 
     template<class TLIST>
-    class TypedVectorObject : public TypedVectorObjectBase
+    class TypedVectorObject : public VectorBaseObject
     {
         // Strange but true: this is how you friend-declare a template class.
         template<class OBJ>
@@ -234,6 +244,10 @@ namespace avmplus
                                    ScriptObject* delegate, 
                                    MMgc::GC* gc, 
                                    TypedVectorClassBase* vecClass);
+
+        // overrides 
+        virtual uint32_t getLength() const;
+        virtual void setLength(uint32_t length);
 
         // AS3 native getter/setter implementations
         uint32_t get_length() const;
@@ -259,6 +273,11 @@ namespace avmplus
         virtual Atom nextName(int index);
         virtual Atom nextValue(int index);
         virtual int nextNameIndex(int index);
+        
+        // "fast" methods that don't range-check in nondebug builds
+        // and are inlined; for internal use by various bits of Flash glue code
+        typename TLIST::TYPE getUintPropertyFast(uint32_t index) const;
+        void setUintPropertyFast(uint32_t index, typename TLIST::TYPE value);
 
         // JIT helpers -- not for public use!
         // (declared public only to avoid a painful 'friend' declaration)

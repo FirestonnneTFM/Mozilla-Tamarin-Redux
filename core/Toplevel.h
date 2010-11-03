@@ -43,15 +43,6 @@
 
 namespace avmplus
 {
-    enum VectorSpecializedClasses
-    {
-        kIntVector,
-        kUIntVector,
-        kDoubleVector,
-        kObjectVector,
-        
-        kVectorSpecializedCount
-    };
     class VectorClass;
 
     /**
@@ -478,7 +469,10 @@ namespace avmplus
         DRCWB(IntClass*)            intClass;
         DRCWB(UIntClass*)           uintClass;
         DRCWB(ObjectClass*)         objectClass;
-        DRCWB(ClassClosure*)        vectorSpecializedClass[kVectorSpecializedCount];
+        DRCWB(IntVectorClass*)      intVectorClass;
+        DRCWB(UIntVectorClass*)     uintVectorClass;
+        DRCWB(DoubleVectorClass*)   doubleVectorClass;
+        DRCWB(ObjectVectorClass*)   objectVectorClass;
         DRCWB(VectorClass*)         vectorClass;
         DRCWB(StringClass*)         stringClass;
     // ------------------------ DATA SECTION END

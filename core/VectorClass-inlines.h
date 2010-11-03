@@ -82,65 +82,82 @@ namespace avmplus
 
     // ----------------------------
 
-    REALLY_INLINE bool TypedVectorObjectBase::get_fixed() const
+    REALLY_INLINE bool VectorBaseObject::get_fixed() const
     {
         return m_fixed;
     }
 
-    REALLY_INLINE void TypedVectorObjectBase::set_fixed(bool f)
+    REALLY_INLINE void VectorBaseObject::set_fixed(bool f)
     {
         m_fixed = f;
     }
 
-    REALLY_INLINE void TypedVectorObjectBase::checkFixed() const
+    REALLY_INLINE void VectorBaseObject::checkFixed() const
     {
         if (m_fixed)
             throwFixedError();
     }
 
-    REALLY_INLINE void TypedVectorObjectBase::atomToValue(Atom atom, int32_t& value)
+    REALLY_INLINE ClassClosure* VectorBaseObject::getType() const
+    {
+        return m_vecClass;
+    }
+
+    REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, int32_t& value)
     {
         value = AvmCore::integer(atom);
     }
     
-    REALLY_INLINE Atom TypedVectorObjectBase::valueToAtom(const int32_t& value) const
+    REALLY_INLINE Atom VectorBaseObject::valueToAtom(const int32_t& value) const
     {
         return core()->intToAtom(value);
     }
 
-    REALLY_INLINE void TypedVectorObjectBase::atomToValue(Atom atom, uint32_t& value)
+    REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, uint32_t& value)
     {
         value = AvmCore::toUInt32(atom);
     }
     
-    REALLY_INLINE Atom TypedVectorObjectBase::valueToAtom(const uint32_t& value) const
+    REALLY_INLINE Atom VectorBaseObject::valueToAtom(const uint32_t& value) const
     {
         return core()->uintToAtom(value);
     }
 
-    REALLY_INLINE void TypedVectorObjectBase::atomToValue(Atom atom, double& value)
+    REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, double& value)
     {
         value = AvmCore::number(atom);
     }
     
-    REALLY_INLINE Atom TypedVectorObjectBase::valueToAtom(const double& value) const
+    REALLY_INLINE Atom VectorBaseObject::valueToAtom(const double& value) const
     {
         return core()->doubleToAtom(value);
     }
 
-    REALLY_INLINE void TypedVectorObjectBase::atomToValue(Atom atom, OpaqueAtom& value)
+    REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, OpaqueAtom& value)
     {
         AvmAssert(m_vecClass != NULL);
         atom = m_vecClass->checkType(atom);
         value = (OpaqueAtom)atom;
     }
     
-    REALLY_INLINE Atom TypedVectorObjectBase::valueToAtom(const OpaqueAtom& value) const
+    REALLY_INLINE Atom VectorBaseObject::valueToAtom(const OpaqueAtom& value) const
     {
         return (Atom)value;
     }
 
     // ----------------------------
+
+    template<class TLIST>
+    REALLY_INLINE typename TLIST::TYPE TypedVectorObject<TLIST>::getUintPropertyFast(uint32_t index) const
+    {
+        return m_list.get(index);
+    }
+    
+    template<class TLIST>
+    REALLY_INLINE void TypedVectorObject<TLIST>::setUintPropertyFast(uint32_t index, typename TLIST::TYPE value)
+    {
+        m_list.set(index, value);
+    }
 
     template<class TLIST>
     REALLY_INLINE uint32_t TypedVectorObject<TLIST>::get_length() const
