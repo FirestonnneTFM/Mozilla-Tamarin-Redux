@@ -160,7 +160,7 @@ namespace avmplus
 
     public:
         
-        typedef GCList<E4XNode*> E4XNodeList;
+        typedef GCList<E4XNode> E4XNodeList;
         typedef HeapList<E4XNodeList> HeapE4XNodeList;
 
     public:

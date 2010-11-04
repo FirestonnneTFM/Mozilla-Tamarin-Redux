@@ -134,7 +134,7 @@ namespace avmshell
 
     static void handleDoABC(int type, SwfParser &parser, int taglen,
                   Toplevel* toplevel, CodeContext* codeContext,
-                  GCList<PoolObject*>& deferred)
+                  GCList<PoolObject>& deferred)
     {
         AvmCore *core = toplevel->core();
         int tagstart = parser.pos;
@@ -189,7 +189,7 @@ namespace avmshell
         parser.pos = 4; // skip magic #
         uint32_t swflen = parser.readU32();
         AvmCore *core = toplevel->core();
-        GCList<PoolObject*> deferred(core->gc, kListInitialCapacity);
+        GCList<PoolObject> deferred(core->gc, kListInitialCapacity);
         if (swf[0] == 'C') {
             // decompress the swf
             swflen -= 8;

@@ -115,7 +115,7 @@ namespace avmplus
     // ------------------------ DATA SECTION BEGIN
     private:
         friend class DomainMgr;
-        GCList<ScriptEnv*>              m_namedScriptEnvsList; // list of ScriptEnv, corresponds to domain->m_namedScriptsList
+        GCList<ScriptEnv>               m_namedScriptEnvsList; // list of ScriptEnv, corresponds to domain->m_namedScriptsList
         DWB(Domain*)                    m_domain;       // Domain associated with this DomainEnv
         DWB(Toplevel*)                  m_toplevel;
         // scratch memory to use if the memory object is NULL...

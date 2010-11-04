@@ -140,7 +140,7 @@ Traits* DomainMgr::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname
     return found;
 }
 
-static void addScript(Stringp name, Namespacep ns, MethodInfo* script, GCList<MethodInfo*>& scriptList, MultinameHashtable* scriptMap)
+static void addScript(Stringp name, Namespacep ns, MethodInfo* script, GCList<MethodInfo>& scriptList, MultinameHashtable* scriptMap)
 {
     scriptList.add(script);
     // note that this is idx+1 -- can't use idx=0 since that's BIND_NONE
@@ -227,7 +227,7 @@ MethodInfo* DomainMgr::findScriptInPoolByMultiname(PoolObject* pool, const Multi
     return f;
 }
 
-void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv*>& envs)
+void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv>& envs)
 {
     HeapHashtable* ht = new(core->GetGC()) HeapHashtable(core->GetGC());
     for (uint32_t i = 0, n = envs.length(); i < n; ++i)
@@ -281,7 +281,7 @@ void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv*>& env
 }
 
 #ifdef _DEBUG
-/*static*/ void DomainMgr::verifyMatchingLookup(Binding b, const GCList<MethodInfo*>& listMI, const GCList<ScriptEnv*>& listSE)
+/*static*/ void DomainMgr::verifyMatchingLookup(Binding b, const GCList<MethodInfo>& listMI, const GCList<ScriptEnv>& listSE)
 {
     // Note that when code is lazily inited, these lists might not be identical.
     // So we only verify that the part we need to look up matches properly.

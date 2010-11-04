@@ -1220,7 +1220,7 @@ namespace avmplus
         if (double_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        GCList<const GCDouble*>& cpool_double = pool->cpool_double;
+        GCList<GCDouble>& cpool_double = pool->cpool_double;
         cpool_double.ensureCapacity(double_count);
         pool->constantDoubleCount = double_count;
 
@@ -1234,7 +1234,7 @@ namespace avmplus
             int offset = (int)(pos-startpos);
 #endif
             double value = readDouble(pos);
-            cpool_double.set(i, (const GCDouble*)(core->allocDouble(value)&~7));
+            cpool_double.set(i, (GCDouble*)(core->allocDouble(value)&~7));
             #ifdef AVMPLUS_VERBOSE
             if(pool->isVerbose(VB_parse)) {
                 core->console << "    " << offset << ":" << "cpool_double["<<i<<"]="
@@ -1302,7 +1302,7 @@ namespace avmplus
         if (ns_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        RCList<Namespacep> &cpool_ns = pool->cpool_ns;
+        RCList<Namespace> &cpool_ns = pool->cpool_ns;
 
         MMGC_MEM_TYPE(pool);
         cpool_ns.ensureCapacity(ns_count);
@@ -1403,7 +1403,7 @@ namespace avmplus
         if (ns_set_count > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
 
-        GCList<NamespaceSetp>& cpool_ns_set = pool->cpool_ns_set;
+        GCList<NamespaceSet>& cpool_ns_set = pool->cpool_ns_set;
         cpool_ns_set.ensureCapacity(ns_set_count);
         pool->constantNsSetCount = ns_set_count;
 

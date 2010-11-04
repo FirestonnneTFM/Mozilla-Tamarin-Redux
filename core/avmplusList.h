@@ -402,34 +402,34 @@ namespace avmplus
         typedef ListImpl<MMgc::GCObject*, GCListHelper> LIST;
         
     public:
-        typedef T TYPE;
+        typedef T* TYPE;
         
     public:
         explicit GCList(MMgc::GC* gc, 
                         uint32_t capacity,
-                        const T* args = NULL);
+                        const TYPE* args = NULL);
 
         bool isEmpty() const;
         uint32_t length() const;
         uint32_t capacity() const;
-        T get(uint32_t index) const;
-        T first() const;
-        T last() const;
-        void set(uint32_t index, T value);
-        void add(T value);
+        TYPE get(uint32_t index) const;
+        TYPE first() const;
+        TYPE last() const;
+        void set(uint32_t index, TYPE value);
+        void add(TYPE value);
         void add(const GCList<T>& that);
-        void insert(uint32_t index, T value);
-        void insert(uint32_t index, const T* args, uint32_t argc);
-        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void insert(uint32_t index, TYPE value);
+        void insert(uint32_t index, const TYPE* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const GCList<T>& args, uint32_t argsOffset);
         void reverse();
         void clear();
-        int32_t indexOf(T value) const;
-        int32_t lastIndexOf(T value) const;
-        T removeAt(uint32_t index);
-        T removeFirst();
-        T removeLast();
-        T operator[](uint32_t index) const;
+        int32_t indexOf(TYPE value) const;
+        int32_t lastIndexOf(TYPE value) const;
+        TYPE removeAt(uint32_t index);
+        TYPE removeFirst();
+        TYPE removeLast();
+        TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
 
@@ -458,34 +458,34 @@ namespace avmplus
         typedef ListImpl<MMgc::RCObject*, RCListHelper> LIST;
         
     public:
-        typedef T TYPE;
+        typedef T* TYPE;
         
     public:
         explicit RCList(MMgc::GC* gc, 
                         uint32_t capacity,
-                        const T* args = NULL);
+                        const TYPE* args = NULL);
 
         bool isEmpty() const;
         uint32_t length() const;
         uint32_t capacity() const;
-        T get(uint32_t index) const;
-        T first() const;
-        T last() const;
-        void set(uint32_t index, T value);
-        void add(T value);
+        TYPE get(uint32_t index) const;
+        TYPE first() const;
+        TYPE last() const;
+        void set(uint32_t index, TYPE value);
+        void add(TYPE value);
         void add(const RCList<T>& that);
-        void insert(uint32_t index, T value);
-        void insert(uint32_t index, const T* args, uint32_t argc);
-        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void insert(uint32_t index, TYPE value);
+        void insert(uint32_t index, const TYPE* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const RCList<T>& args, uint32_t argsOffset);
         void reverse();
         void clear();
-        int32_t indexOf(T value) const;
-        int32_t lastIndexOf(T value) const;
-        T removeAt(uint32_t index);
-        T removeFirst();
-        T removeLast();
-        T operator[](uint32_t index) const;
+        int32_t indexOf(TYPE value) const;
+        int32_t lastIndexOf(TYPE value) const;
+        TYPE removeAt(uint32_t index);
+        TYPE removeFirst();
+        TYPE removeLast();
+        TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
 
@@ -562,34 +562,34 @@ namespace avmplus
         typedef ListImpl<MMgc::GCObject*, WeakRefListHelper> LIST;
         
     public:
-        typedef T TYPE;
+        typedef T* TYPE;
         
     public:
         explicit WeakRefList(MMgc::GC* gc, 
                              uint32_t capacity,
-                             const T* args = NULL);
+                             const TYPE* args = NULL);
 
         bool isEmpty() const;
         uint32_t length() const;
         uint32_t capacity() const;
-        T get(uint32_t index) const;
-        T first() const;
-        T last() const;
-        void set(uint32_t index, T value);
-        void add(T value);
+        TYPE get(uint32_t index) const;
+        TYPE first() const;
+        TYPE last() const;
+        void set(uint32_t index, TYPE value);
+        void add(TYPE value);
         void add(const WeakRefList<T>& that);
-        void insert(uint32_t index, T value);
-        void insert(uint32_t index, const T* args, uint32_t argc);
-        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
+        void insert(uint32_t index, TYPE value);
+        void insert(uint32_t index, const TYPE* args, uint32_t argc);
+        void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const WeakRefList<T>& args, uint32_t argsOffset);
         void reverse();
         void clear();
-        int32_t indexOf(T value) const;
-        int32_t lastIndexOf(T value) const;
-        T removeAt(uint32_t index);
-        T removeFirst();
-        T removeLast();
-        T operator[](uint32_t index) const;
+        int32_t indexOf(TYPE value) const;
+        int32_t lastIndexOf(TYPE value) const;
+        TYPE removeAt(uint32_t index);
+        TYPE removeFirst();
+        TYPE removeLast();
+        TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
 

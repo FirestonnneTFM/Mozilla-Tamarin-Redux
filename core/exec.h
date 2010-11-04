@@ -349,8 +349,8 @@ private:
     AvmCore* core;
     const struct Config& config;
 #ifdef VMCFG_VERIFYALL
-    GCList<MethodInfo*> verifyFunctionQueue;
-    GCList<Traits*> verifyTraitsQueue;
+    GCList<MethodInfo> verifyFunctionQueue;
+    GCList<Traits> verifyTraitsQueue;
 #endif
 };
 

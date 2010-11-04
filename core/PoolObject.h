@@ -91,9 +91,9 @@ namespace avmplus
         /** constants */
         DataList<int32_t> cpool_int;
         DataList<uint32_t> cpool_uint;
-        GCList<const GCDouble*> cpool_double;
-        RCList<Namespacep> cpool_ns;
-        GCList<NamespaceSetp> cpool_ns_set;
+        GCList<GCDouble> cpool_double;
+        RCList<Namespace> cpool_ns;
+        GCList<NamespaceSet> cpool_ns_set;
 
 #ifndef AVMPLUS_64BIT
         // lists to keep int/uint atoms "sticky".
@@ -189,7 +189,7 @@ namespace avmplus
         friend class DomainMgr;
         DWB(MultinameHashtable*)                    m_namedTraits;
         DWB(MultinameHashtable*)                    m_namedScriptsMap;
-        GCList<MethodInfo*>                         m_namedScriptsList;           // list of MethodInfo* for the scripts
+        GCList<MethodInfo>                          m_namedScriptsList;           // list of MethodInfo* for the scripts
 
     private:
         union ConstantStringData
@@ -204,11 +204,11 @@ namespace avmplus
         // points behind end of ABC string data - see AbcParser.cpp
         const uint8_t *                             _abcStringEnd;
         DWB(ConstantStringData*)                    _abcStrings;                // The length is constantStringCount
-        GCList<Traits*>                             _classes;
-        GCList<Traits*>                             _scripts;
-        GCList<MethodInfo*>                         _methods;
+        GCList<Traits>                              _classes;
+        GCList<Traits>                              _scripts;
+        GCList<MethodInfo>                          _methods;
 #ifdef DEBUGGER
-        GCList<DebuggerMethodInfo*>                 _method_dmi;
+        GCList<DebuggerMethodInfo>                  _method_dmi;
 #endif
 #if VMCFG_METHOD_NAMES
         // only allocated & populated if core->config.methodName is true...

@@ -523,7 +523,7 @@ bool BaseExecMgr::resolveImtSlotSelf(VTable* vtable, uint32_t slot)
 void BaseExecMgr::resolveImtSlotFull(VTable* vtable, uint32_t slot)
 {
     MMgc::GC* gc = core->GetGC();
-    GCList<VTable*> work_stack(gc, kListInitialCapacity);
+    GCList<VTable> work_stack(gc, kListInitialCapacity);
 
     work_stack.add(vtable);
 

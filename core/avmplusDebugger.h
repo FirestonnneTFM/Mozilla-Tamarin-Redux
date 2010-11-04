@@ -504,7 +504,7 @@ namespace avmplus
         bool scanCode(AbcFile* file, PoolObject* pool, MethodInfo* m);
 
         // all abc files
-        GCList<AbcInfo*>                abcList;
+        GCList<AbcInfo>                 abcList;
         MMgc::GCHashtable               pool2abcIndex;
 
     private:
@@ -554,7 +554,7 @@ namespace avmplus
 
     protected:
         Stringp                         named;
-        GCList<MethodInfo*>             functions;
+        GCList<MethodInfo>              functions;
         BitSet                          sourceLines;    // lines that have source code on them
         BitSet                          breakpoints;
     };
@@ -597,7 +597,7 @@ namespace avmplus
     protected:
         AvmCore*            core;
         DWB(HeapHashtable*) sourcemap;  // maps filename to that file's index in "sources"
-        GCList<SourceFile*>   source;     // all source files used in this abc file
+        GCList<SourceFile>  source;     // all source files used in this abc file
         int                 byteCount;  // # bytes of bytecode
     };
 

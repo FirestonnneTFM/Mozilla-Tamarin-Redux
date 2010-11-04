@@ -61,7 +61,7 @@ namespace avmplus
         friend class DomainMgr;
         DWB(MultinameHashtable*)        m_namedTraits;
         DWB(MultinameHashtable*)        m_namedScriptsMap;
-        GCList<MethodInfo*>             m_namedScriptsList;        // list of MethodInfo* for the scripts
+        GCList<MethodInfo>              m_namedScriptsList;        // list of MethodInfo* for the scripts
         DWB(HeapHashtable*)             m_parameterizedTypes;
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
