@@ -152,7 +152,7 @@ namespace avmplus
     // ------------------------ DATA SECTION BEGIN
     private:
         ScriptBuffer                code;
-        GCList<Traits*>             instances;
+        GCList<Traits>              instances;
         Toplevel* const             toplevel;
         Domain* const               domain;
         AvmCore*                    core;

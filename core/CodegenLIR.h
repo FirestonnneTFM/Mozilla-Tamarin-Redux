@@ -400,8 +400,8 @@ namespace avmplus
 
        #ifdef VTUNE
        bool hasDebugInfo;
-       GCList<JITCodeInfo*> jitInfoList;
-       GCList<LineNumberRecord*> jitPendingRecords;
+       GCList<JITCodeInfo> jitInfoList;
+       GCList<LineNumberRecord> jitPendingRecords;
        void jitPushInfo();
        JITCodeInfo* jitCurrentInfo();
 

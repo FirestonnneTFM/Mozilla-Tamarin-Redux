@@ -81,7 +81,7 @@ namespace avmplus
         Stringp text;
         enum TagType nodeType;
         bool empty;
-        RCList<Stringp> attributes;
+        RCList<String> attributes;
 
         /**
          * nextAttribute is used to iterate over the

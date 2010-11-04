@@ -160,7 +160,7 @@ namespace avmplus
     private:
         enum { kGrowthIncr = 4096 };
 
-        typedef WeakRefList<GlobalMemorySubscriber*> WeakSubscriberList;
+        typedef WeakRefList<GlobalMemorySubscriber> WeakSubscriberList;
 
     private:
         void NotifySubscribers();

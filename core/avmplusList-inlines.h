@@ -521,11 +521,12 @@ namespace avmplus
 
 
     template<class T>
-    REALLY_INLINE GCList<T>::GCList(MMgc::GC* gc, uint32_t capacity, const T* args)
+    REALLY_INLINE GCList<T>::GCList(MMgc::GC* gc, uint32_t capacity, const TYPE* args)
         : m_list(gc, capacity, (MMgc::GCObject* const*)args)
     {
         MMGC_STATIC_ASSERT((TypeSniffer<T>::isGCObject::value == true || TypeSniffer<T>::isGCFinalizedObject::value == true) &&
                             TypeSniffer<T>::isRCObject::value == false);
+        MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
     }
 
     template<class T>
@@ -547,31 +548,31 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE T GCList<T>::get(uint32_t index) const
+    REALLY_INLINE typename GCList<T>::TYPE GCList<T>::get(uint32_t index) const
     {
-        return (T)m_list.get(index);
+        return (TYPE)m_list.get(index);
     }
 
     template<class T>
-    REALLY_INLINE T GCList<T>::first() const
+    REALLY_INLINE typename GCList<T>::TYPE GCList<T>::first() const
     {
         return (T)m_list.first();
     }
 
     template<class T>
-    REALLY_INLINE T GCList<T>::last() const
+    REALLY_INLINE typename GCList<T>::TYPE GCList<T>::last() const
     {
         return (T)m_list.last();
     }
 
     template<class T>
-    REALLY_INLINE void GCList<T>::set(uint32_t index, T value)
+    REALLY_INLINE void GCList<T>::set(uint32_t index, TYPE value)
     {
         m_list.set(index, to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE void GCList<T>::add(T value)
+    REALLY_INLINE void GCList<T>::add(TYPE value)
     {
         m_list.add(to_gc(value));
     }
@@ -583,19 +584,19 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void GCList<T>::insert(uint32_t index, T value)
+    REALLY_INLINE void GCList<T>::insert(uint32_t index, TYPE value)
     {
         m_list.insert(index, to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE void GCList<T>::insert(uint32_t index, const T* args, uint32_t argc)
+    REALLY_INLINE void GCList<T>::insert(uint32_t index, const TYPE* args, uint32_t argc)
     {
         m_list.insert(index, args, argc);
     }
 
     template<class T>
-    REALLY_INLINE void GCList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args)
+    REALLY_INLINE void GCList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args)
     {
         m_list.splice(insertPoint, insertCount, deleteCount, args);
     }
@@ -619,39 +620,39 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE int32_t GCList<T>::indexOf(T value) const
+    REALLY_INLINE int32_t GCList<T>::indexOf(TYPE value) const
     {
         return m_list.indexOf(to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE int32_t GCList<T>::lastIndexOf(T value) const
+    REALLY_INLINE int32_t GCList<T>::lastIndexOf(TYPE value) const
     {
         return m_list.lastIndexOf(to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE T GCList<T>::removeAt(uint32_t index)
+    REALLY_INLINE typename GCList<T>::TYPE GCList<T>::removeAt(uint32_t index)
     {
-        return (T)m_list.removeAt(index);
+        return (TYPE)m_list.removeAt(index);
     }
 
     template<class T>
-    REALLY_INLINE T GCList<T>::removeFirst()
+    REALLY_INLINE typename GCList<T>::TYPE GCList<T>::removeFirst()
     {
-        return (T)m_list.removeFirst();
+        return (TYPE)m_list.removeFirst();
     }
 
     template<class T>
-    REALLY_INLINE T GCList<T>::removeLast()
+    REALLY_INLINE typename GCList<T>::TYPE GCList<T>::removeLast()
     {
-        return (T)m_list.removeLast();
+        return (TYPE)m_list.removeLast();
     }
 
     template<class T>
-    REALLY_INLINE T GCList<T>::operator[](uint32_t index) const
+    REALLY_INLINE typename GCList<T>::TYPE GCList<T>::operator[](uint32_t index) const
     {
-        return (T)m_list[index];
+        return (TYPE)m_list[index];
     }
 
     template<class T>
@@ -669,10 +670,11 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE RCList<T>::RCList(MMgc::GC* gc, uint32_t capacity, const T* args)
+    REALLY_INLINE RCList<T>::RCList(MMgc::GC* gc, uint32_t capacity, const TYPE* args)
         : m_list(gc, capacity, (MMgc::RCObject* const*)args)
     {
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isRCObject::value == true);
+        MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
     }
 
     template<class T>
@@ -694,31 +696,31 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE T RCList<T>::get(uint32_t index) const
+    REALLY_INLINE typename RCList<T>::TYPE RCList<T>::get(uint32_t index) const
     {
-        return (T)m_list.get(index);
+        return (TYPE)m_list.get(index);
     }
 
     template<class T>
-    REALLY_INLINE T RCList<T>::first() const
+    REALLY_INLINE typename RCList<T>::TYPE RCList<T>::first() const
     {
-        return (T)m_list.first();
+        return (TYPE)m_list.first();
     }
 
     template<class T>
-    REALLY_INLINE T RCList<T>::last() const
+    REALLY_INLINE typename RCList<T>::TYPE RCList<T>::last() const
     {
-        return (T)m_list.last();
+        return (TYPE)m_list.last();
     }
 
     template<class T>
-    REALLY_INLINE void RCList<T>::set(uint32_t index, T value)
+    REALLY_INLINE void RCList<T>::set(uint32_t index, TYPE value)
     {
         m_list.set(index, value);
     }
 
     template<class T>
-    REALLY_INLINE void RCList<T>::add(T value)
+    REALLY_INLINE void RCList<T>::add(TYPE value)
     {
         m_list.add(value);
     }
@@ -730,19 +732,19 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void RCList<T>::insert(uint32_t index, T value)
+    REALLY_INLINE void RCList<T>::insert(uint32_t index, TYPE value)
     {
         m_list.insert(index, value);
     }
 
     template<class T>
-    REALLY_INLINE void RCList<T>::insert(uint32_t index, const T* args, uint32_t argc)
+    REALLY_INLINE void RCList<T>::insert(uint32_t index, const TYPE* args, uint32_t argc)
     {
         m_list.insert(index, args, argc);
     }
 
     template<class T>
-    REALLY_INLINE void RCList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args)
+    REALLY_INLINE void RCList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args)
     {
         m_list.splice(insertPoint, insertCount, deleteCount, args);
     }
@@ -766,39 +768,39 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE int32_t RCList<T>::indexOf(T value) const
+    REALLY_INLINE int32_t RCList<T>::indexOf(TYPE value) const
     {
         return m_list.indexOf(value);
     }
 
     template<class T>
-    REALLY_INLINE int32_t RCList<T>::lastIndexOf(T value) const
+    REALLY_INLINE int32_t RCList<T>::lastIndexOf(TYPE value) const
     {
         return m_list.lastIndexOf(value);
     }
 
     template<class T>
-    REALLY_INLINE T RCList<T>::removeAt(uint32_t index)
+    REALLY_INLINE typename RCList<T>::TYPE RCList<T>::removeAt(uint32_t index)
     {
-        return (T)m_list.removeAt(index);
+        return (TYPE)m_list.removeAt(index);
     }
 
     template<class T>
-    REALLY_INLINE T RCList<T>::removeFirst()
+    REALLY_INLINE typename RCList<T>::TYPE RCList<T>::removeFirst()
     {
-        return (T)m_list.removeFirst();
+        return (TYPE)m_list.removeFirst();
     }
 
     template<class T>
-    REALLY_INLINE T RCList<T>::removeLast()
+    REALLY_INLINE typename RCList<T>::TYPE RCList<T>::removeLast()
     {
-        return (T)m_list.removeLast();
+        return (TYPE)m_list.removeLast();
     }
 
     template<class T>
-    REALLY_INLINE T RCList<T>::operator[](uint32_t index) const
+    REALLY_INLINE typename RCList<T>::TYPE RCList<T>::operator[](uint32_t index) const
     {
-        return (T)m_list[index];
+        return (TYPE)m_list[index];
     }
 
     template<class T>
@@ -970,12 +972,13 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE WeakRefList<T>::WeakRefList(MMgc::GC* gc, uint32_t capacity, const T* args)
+    REALLY_INLINE WeakRefList<T>::WeakRefList(MMgc::GC* gc, uint32_t capacity, const TYPE* args)
         : m_list(gc, capacity, (MMgc::GCObject* const*)args)
     {
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isGCObject::value ||
                             TypeSniffer<T>::isGCFinalizedObject::value ||
                             TypeSniffer<T>::isRCObject::value);
+        MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
     }
 
     template<class T>
@@ -997,31 +1000,31 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE T WeakRefList<T>::get(uint32_t index) const
+    REALLY_INLINE typename WeakRefList<T>::TYPE WeakRefList<T>::get(uint32_t index) const
     {
-        return (T)m_list.get(index);
+        return (TYPE)m_list.get(index);
     }
 
     template<class T>
-    REALLY_INLINE T WeakRefList<T>::first() const
+    REALLY_INLINE typename WeakRefList<T>::TYPE WeakRefList<T>::first() const
     {
-        return (T)m_list.first();
+        return (TYPE)m_list.first();
     }
 
     template<class T>
-    REALLY_INLINE T WeakRefList<T>::last() const
+    REALLY_INLINE typename WeakRefList<T>::TYPE WeakRefList<T>::last() const
     {
-        return (T)m_list.last();
+        return (TYPE)m_list.last();
     }
 
     template<class T>
-    REALLY_INLINE void WeakRefList<T>::set(uint32_t index, T value)
+    REALLY_INLINE void WeakRefList<T>::set(uint32_t index, TYPE value)
     {
         m_list.set(index, to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE void WeakRefList<T>::add(T value)
+    REALLY_INLINE void WeakRefList<T>::add(TYPE value)
     {
         m_list.add(to_gc(value));
     }
@@ -1033,19 +1036,19 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void WeakRefList<T>::insert(uint32_t index, T value)
+    REALLY_INLINE void WeakRefList<T>::insert(uint32_t index, TYPE value)
     {
         m_list.insert(index, to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE void WeakRefList<T>::insert(uint32_t index, const T* args, uint32_t argc)
+    REALLY_INLINE void WeakRefList<T>::insert(uint32_t index, const TYPE* args, uint32_t argc)
     {
         m_list.insert(index, args, argc);
     }
 
     template<class T>
-    REALLY_INLINE void WeakRefList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args)
+    REALLY_INLINE void WeakRefList<T>::splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args)
     {
         m_list.splice(insertPoint, insertCount, deleteCount, args);
     }
@@ -1069,39 +1072,39 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE int32_t WeakRefList<T>::indexOf(T value) const
+    REALLY_INLINE int32_t WeakRefList<T>::indexOf(TYPE value) const
     {
         return m_list.indexOf(to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE int32_t WeakRefList<T>::lastIndexOf(T value) const
+    REALLY_INLINE int32_t WeakRefList<T>::lastIndexOf(TYPE value) const
     {
         return m_list.lastIndexOf(to_gc(value));
     }
 
     template<class T>
-    REALLY_INLINE T WeakRefList<T>::removeAt(uint32_t index)
+    REALLY_INLINE typename WeakRefList<T>::TYPE WeakRefList<T>::removeAt(uint32_t index)
     {
-        return (T)m_list.removeAt(index);
+        return (TYPE)m_list.removeAt(index);
     }
 
     template<class T>
-    REALLY_INLINE T WeakRefList<T>::removeFirst()
+    REALLY_INLINE typename WeakRefList<T>::TYPE WeakRefList<T>::removeFirst()
     {
-        return (T)m_list.removeFirst();
+        return (TYPE)m_list.removeFirst();
     }
 
     template<class T>
-    REALLY_INLINE T WeakRefList<T>::removeLast()
+    REALLY_INLINE typename WeakRefList<T>::TYPE WeakRefList<T>::removeLast()
     {
-        return (T)m_list.removeLast();
+        return (TYPE)m_list.removeLast();
     }
 
     template<class T>
-    REALLY_INLINE T WeakRefList<T>::operator[](uint32_t index) const
+    REALLY_INLINE typename WeakRefList<T>::TYPE WeakRefList<T>::operator[](uint32_t index) const
     {
-        return (T)m_list[index];
+        return (TYPE)m_list[index];
     }
 
     template<class T>

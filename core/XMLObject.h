@@ -115,7 +115,7 @@
 
 namespace avmplus
 {
-    typedef RCList<Namespace*> NamespaceList;
+    typedef RCList<Namespace> NamespaceList;
     typedef HeapList<NamespaceList> HeapNamespaceList;
 
     class XMLObject : public ScriptObject

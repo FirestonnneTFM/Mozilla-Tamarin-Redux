@@ -654,7 +654,7 @@ namespace avmplus
         // already knows about for the Pool/Domain that correspond to the AbcEnv/DomainEnv.
         // Note that the order of the list doesn't matter (DomainMgr will use a hashtable
         // to do the relevant association).
-        GCList<ScriptEnv*> envs(GetGC(), pool->scriptCount());
+        GCList<ScriptEnv> envs(GetGC(), pool->scriptCount());
 
         // some code relies on the final script being initialized first, so we
         // must continue that behavior

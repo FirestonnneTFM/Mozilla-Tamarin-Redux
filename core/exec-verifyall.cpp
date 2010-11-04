@@ -136,7 +136,7 @@ Atom verifyOnlyInvoker(MethodEnv*, int32_t, Atom*)
 // process the work queues until they are empty.
 void BaseExecMgr::verifyEarly(Toplevel* toplevel, AbcEnv* abc_env)
 {
-    GCList<MethodInfo*> verifyQueue2(core->GetGC(), kListInitialCapacity);
+    GCList<MethodInfo> verifyQueue2(core->GetGC(), kListInitialCapacity);
     int verified;
     do {
         verified = 0;

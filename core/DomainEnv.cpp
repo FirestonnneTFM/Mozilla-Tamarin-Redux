@@ -57,11 +57,11 @@ namespace avmplus
         }
 
     #ifdef _DEBUG
-        GCList<Domain*> dl(core->GetGC(), 0);
+        GCList<Domain> dl(core->GetGC(), 0);
         for (Domain* di = m_domain; di != NULL; di = di->base())
             dl.add(di);
 
-        GCList<DomainEnv*> el(core->GetGC(), 0);
+        GCList<DomainEnv> el(core->GetGC(), 0);
         for (DomainEnv* di = this; di != NULL; di = di->base())
             el.add(di);
 

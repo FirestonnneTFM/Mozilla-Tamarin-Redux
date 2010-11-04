@@ -63,7 +63,7 @@ public:
     void addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, MethodInfo* script);
     MethodInfo* findScriptInPoolByMultiname(PoolObject* pool, const Multiname& multiname);
 
-    void addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv*>& envs);
+    void addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv>& envs);
     ScriptEnv* findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, const Multiname& multiname);
     ScriptEnv* findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Multiname& multiname);
 
@@ -82,7 +82,7 @@ private:
     ScriptEnv* findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* domainEnv, Stringp name);
 #endif
 #ifdef _DEBUG
-    static void verifyMatchingLookup(Binding b, const GCList<MethodInfo*>& listMI, const GCList<ScriptEnv*>& listSE);
+    static void verifyMatchingLookup(Binding b, const GCList<MethodInfo>& listMI, const GCList<ScriptEnv>& listSE);
 #endif
 
 private:

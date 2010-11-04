@@ -72,7 +72,7 @@ namespace avmplus
     // ------------------------ DATA SECTION BEGIN
     private:
         friend class DomainMgr;
-        GCList<ScriptEnv*>          m_namedScriptEnvsList;    // list of ScriptEnvs, corresponds to pool->m_namedScriptsList
+        GCList<ScriptEnv>           m_namedScriptEnvsList;    // list of ScriptEnvs, corresponds to pool->m_namedScriptsList
     private:
         PoolObject* const           m_pool;
         DomainEnv* const            m_domainEnv;    // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code

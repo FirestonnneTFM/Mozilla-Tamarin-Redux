@@ -273,7 +273,7 @@ namespace avmplus
             }
 
             // yuck, replicate buggy behavior in FP9/10
-            RCList<Namespacep> nsremoval(gc, kListInitialCapacity);
+            RCList<Namespace> nsremoval(gc, kListInitialCapacity);
             if (flags & HIDE_NSURI_METHODS)
             {
                 for (TraitsBindingsp tbi = tb->base; tbi; tbi = tbi->base)
