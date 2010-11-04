@@ -49,142 +49,6 @@ namespace avmplus
     {
         using namespace ActionBlockConstants;
 
-        // Context management
-        
-        enum CtxType {
-            CTX_Activation,
-            CTX_Break,
-            CTX_Catch,
-            CTX_Continue,
-            CTX_Finally,
-            CTX_Function,
-            CTX_ClassMethod,
-            CTX_Program,
-            CTX_With
-        };
-        
-        class Ctx {
-        public:
-            Ctx(CtxType tag, Ctx* next)
-                : tag(tag)
-                , next(next)
-            {
-            }
-            
-            const CtxType  tag;
-            Ctx * const    next;
-        };
-
-        class ControlFlowCtx : public Ctx {
-        public:
-            ControlFlowCtx(CtxType tag, Label* label, Ctx* ctx0)
-                : Ctx(tag, ctx0)
-                , label(label)
-            {
-            }
-            Label * const label;
-        };
-        
-        class BreakCtx : public ControlFlowCtx {
-        public:
-            BreakCtx(Label* label, Ctx* ctx0, Str* label_name=NULL)
-                : ControlFlowCtx(CTX_Break, label, ctx0)
-                , label_name(label_name)
-            {
-            }
-            Str * const label_name;
-        };
-        
-        class ContinueCtx : public ControlFlowCtx {
-        public:
-            ContinueCtx(Label* label, Seq<Str*>* label_names, Ctx* ctx0) 
-                : ControlFlowCtx(CTX_Continue, label, ctx0)
-                , label_names(label_names)
-            {
-            }
-            Seq<Str*>* const label_names;
-        };
-    
-        class ScopeCtx : public Ctx {
-        public:
-            ScopeCtx(CtxType tag, uint32_t scope_reg, Ctx* ctx0)
-                : Ctx(tag, ctx0)
-                , scope_reg(scope_reg)
-            {
-            }
-            const uint32_t scope_reg;
-        };
-        
-        class WithCtx : public ScopeCtx {
-        public:
-            WithCtx(uint32_t scope_reg, Ctx* ctx0)
-                : ScopeCtx(CTX_With, scope_reg, ctx0)
-            {
-            }
-        };
-        
-        struct CatchCtx : public ScopeCtx {
-            CatchCtx(uint32_t scope_reg, Ctx* ctx0)
-                : ScopeCtx(CTX_Catch, scope_reg, ctx0)
-            {
-            }
-        };
-        
-        class ActivationCtx : public ScopeCtx {
-        public:
-            ActivationCtx(uint32_t scope_reg, Ctx* ctx0)
-                : ScopeCtx(CTX_Activation, scope_reg, ctx0)
-            {
-            }
-        };
-        
-        class FinallyCtx : public Ctx {
-        public:
-            FinallyCtx(Allocator* allocator, Label* Lfinally, uint32_t returnreg, Ctx* ctx0)
-                : Ctx(CTX_Finally, ctx0)
-                , Lfinally(Lfinally)
-                , returnreg(returnreg)
-                , nextLabel(0)
-                , returnLabels(allocator)
-            {
-            }
-            
-            uint32_t addReturnLabel(Label* l);
-            
-            Label * const Lfinally;
-            const uint32_t returnreg;
-            uint32_t nextLabel;
-            SeqBuilder<Label*> returnLabels;
-        };
-        
-        uint32_t FinallyCtx::addReturnLabel(Label* l)
-        {
-            returnLabels.addAtEnd(l);
-            return nextLabel++;
-        }
-        
-        class FunctionCtx : public Ctx {
-        public:
-            FunctionCtx(Allocator* allocator)
-                : Ctx(CTX_Function, NULL)
-                , namespaces(allocator)
-            {
-            }
-            SeqBuilder<NamespaceDefn*> namespaces;
-        };
-        
-        class ProgramCtx : public Ctx {
-        public:
-            ProgramCtx(Allocator* allocator, uint32_t capture_reg) 
-                : Ctx(CTX_Program, NULL)
-                , namespaces(allocator)
-                , capture_reg(capture_reg)
-            {
-            }
-            SeqBuilder<NamespaceDefn*> namespaces;
-            const uint32_t capture_reg;
-        };
-        
         static bool matchLabel(Ctx* ctx, Str* label)
         {
             if (label == NULL)
@@ -239,25 +103,17 @@ namespace avmplus
             compiler->syntaxError(pos, msg);
         }
 
-        inline bool mustPushThis(CtxType tag) {
-            return tag == CTX_ClassMethod || tag == CTX_Program;
-        }
-
-        inline bool mustPushScopeReg(CtxType tag) {
-            return tag == CTX_With || tag == CTX_Catch || tag == CTX_Activation;
-        }
-        
         static void restoreScopes(Cogen* cogen, Ctx* ctx) 
         {
             if (ctx == NULL)
                 return;
             if (ctx->tag != CTX_Function && ctx->tag != CTX_ClassMethod)
                 restoreScopes(cogen, ctx->next);
-            if (mustPushThis(ctx->tag)) {
+            if (ctx->mustPushThis()) {
                 cogen->I_getlocal(0);
                 cogen->I_pushscope();
             }
-            if (mustPushScopeReg(ctx->tag)) {
+            if (ctx->mustPushScopeReg()) {
                 ScopeCtx* ctx1 = (ScopeCtx*)ctx;
                 cogen->I_getlocal(ctx1->scope_reg);
                 if (ctx1->tag == CTX_With)
