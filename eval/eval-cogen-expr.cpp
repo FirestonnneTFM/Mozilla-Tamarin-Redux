@@ -620,6 +620,18 @@ namespace avmplus
         {
             switch (fn->tag()) {
                 case TAG_qualifiedName: {
+                    // This code is incorrect if the name that's being referenced is
+                    // bound by 'with', because in that case the binding object should be 
+                    // pushed as the receiver object (according to ES-262).  But the AVM+ 
+                    // does not have an instruction that performs the correct operation: 
+                    // callproplex passes NULL as the receiver object, while callproperty 
+                    // passes a non-NULL object.  So in the context of a WITH we would 
+                    // have to simulate the correct behavior by performing a scope chain 
+                    // walk, querying each WITH object for the property and calling it 
+                    // if present, otherwise calling the function if it is lexically bound,
+                    // otherwise calling the global function.  ASC has the same problem
+                    // (and also does not solve it), so no actual bug here, just an
+                    // incompatibility.
                     Name n(cogen, ctx, fn, true);
                     n.setup();
                     cogen->I_callproplex(n.sym, cogen->arguments(arguments, ctx));
