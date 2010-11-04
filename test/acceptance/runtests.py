@@ -266,7 +266,10 @@ class AcceptanceRuntest(RuntestBase):
                     return outputCalls
                 else:
                     self.allfails += 1
-                    outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
+                    outputCalls.append((self.js_print, ('%s' % '\n'.join(compileOutput),)))
+                    outputCalls.append((self.fail,(testName, 'FAILED! file did not compile: %s' %
+                                                   testName, self.failmsgs)))
+                    return outputCalls
 
         if self.runSource or self.eval:
             incfiles=self.build_incfiles(testName)
