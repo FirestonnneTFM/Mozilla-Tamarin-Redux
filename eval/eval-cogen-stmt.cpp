@@ -84,19 +84,14 @@ namespace avmplus
                 }
                 
                 if (ctx->tag == CTX_Finally) {
-                    // FIXME: unstructured control flow past 'finally' clauses
-                    /* The verifier can't deal with all these combinations, it appears to
-                     be a limitation of how it does control flow analysis.  So throw
-                     a SyntaxError here until the verifier can be fixed.
-                     
-                     let myreturn = stk.nextReturn++;
-                     asm.I_pushint(ctx.cp.int32(myreturn));
-                     asm.I_setlocal(stk.returnreg);
-                     asm.I_jump(stk.label);
-                     stk.returnAddresses[myreturn] = asm.I_label(undefined);
-                     
-                     */
-                    compiler->internalError(pos, "Limitation: Can't generate code for break/continue/return past 'finally' block yet.");
+                    FinallyCtx* ctx2 = (FinallyCtx*)ctx;
+                    Label* Lreturn = newLabel();
+                    uint32_t myReturnLabel = ctx2->addReturnLabel(Lreturn);
+                    I_pushuint(emitUInt(myReturnLabel));
+                    I_coerce_a();
+                    I_setlocal(ctx2->returnreg);
+                    I_jump(ctx2->Lfinally);
+                    I_label(Lreturn);
                 }
                 ctx = ctx->next;
             }
@@ -705,6 +700,7 @@ namespace avmplus
             // scope of the generated exception handler.
             
             cogen->I_pushuint(cogen->emitUInt(myend));  // return to Lend
+            cogen->I_coerce_a();
             cogen->I_setlocal(returnreg);
             cogen->I_jump(Lfinally);                    // control continues at Lend below
             
@@ -724,6 +720,7 @@ namespace avmplus
             restoreScopes(cogen, ctx);          // finally block needs correct scopes
             
             cogen->I_pushuint(cogen->emitUInt(myreturn));
+            cogen->I_coerce_a();
             cogen->I_setlocal(returnreg);
             cogen->I_jump(Lfinally);            // control continues at Lreturn directly below
             cogen->I_label(Lreturn);
@@ -746,6 +743,7 @@ namespace avmplus
             for ( i=0, labels = fctx.returnLabels.get() ; labels != NULL ; i++, labels = labels->tl ) {
                 cogen->I_getlocal(returnreg);
                 cogen->I_pushuint(cogen->emitUInt(i));
+                cogen->I_coerce_a();
                 cogen->I_ifeq(labels->hd);
             }
                 
