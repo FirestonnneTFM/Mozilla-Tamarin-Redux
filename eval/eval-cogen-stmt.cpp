@@ -125,29 +125,31 @@ namespace avmplus
         
         // Statement code generators
 
-        void Program::cogenBody(Cogen* cogen, uint32_t activation_reg)
+        void Program::cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation_reg)
         {
             (void)activation_reg;
             AvmAssert(activation_reg == 0);
+            AvmAssert(ctx->tag == CTX_Program);
             uint32_t capture_reg = cogen->getTemp();
             cogen->I_pushundefined();
             cogen->I_coerce_a();
             cogen->I_setlocal(capture_reg);
-            ProgramCtx ctx(cogen->allocator, capture_reg);
+            ProgramCtx ctx1(cogen->allocator, capture_reg);
             for ( Seq<Stmt*>* stmts = this->stmts ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, &ctx);
+                stmts->hd->cogen(cogen, &ctx1);
             cogen->I_getlocal(capture_reg);
             cogen->I_returnvalue();
         }
 
-        void FunctionDefn::cogenBody(Cogen* cogen, uint32_t activation_reg)
+        void FunctionDefn::cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation_reg)
         {
+            (void)ctx;
             FunctionCtx ctx0(cogen->allocator);
             ActivationCtx ctx1(activation_reg, &ctx0);
-            Ctx* ctx = activation_reg == 0 ? (Ctx*)&ctx0 : (Ctx*)&ctx1;
+            Ctx* ctx2 = activation_reg == 0 ? (Ctx*)&ctx0 : (Ctx*)&ctx1;
             
             for ( Seq<Stmt*>* stmts = this->stmts ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, ctx);
+                stmts->hd->cogen(cogen, ctx2);
             cogen->I_returnvoid();
         }
         
@@ -173,7 +175,7 @@ namespace avmplus
         void ExprStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
             cogen->I_debugline(pos);
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             Ctx* c;
             for ( c = ctx ; c->tag != CTX_Program && c->tag != CTX_Function && c->tag != CTX_ClassMethod ; c = c->next )
                 ;
@@ -189,7 +191,7 @@ namespace avmplus
         {
             Label* L1 = cogen->newLabel();
             cogen->I_debugline(pos);
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             cogen->I_iffalse(L1);
             consequent->cogen(cogen, ctx);
             if (alternate != NULL) {
@@ -209,7 +211,7 @@ namespace avmplus
             Label* Lcont  = cogen->newLabel();
             cogen->I_label(Lcont);
             cogen->I_debugline(pos);
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             cogen->I_iffalse(Lbreak);
             BreakCtx ctx1(Lbreak, ctx);
             ContinueCtx ctx2(Lcont, labels, &ctx1);
@@ -229,7 +231,7 @@ namespace avmplus
             body->cogen(cogen, &ctx2);
             cogen->I_label(Lcont);
             cogen->I_debugline(pos);
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             cogen->I_iftrue(Ltop);
             cogen->I_label(Lbreak);
         }
@@ -240,12 +242,12 @@ namespace avmplus
             Label* Lcont = cogen->newLabel();
             Label* Ltop = cogen->newLabel();
             if (init != NULL) {
-                init->cogen(cogen);
+                init->cogen(cogen, ctx);
                 cogen->I_pop();
             }
             cogen->I_label(Ltop);
             if (test != NULL) {
-                test->cogen(cogen);
+                test->cogen(cogen, ctx);
                 cogen->I_iffalse(Lbreak);
             }
             BreakCtx ctx1(Lbreak, ctx);
@@ -253,7 +255,7 @@ namespace avmplus
             body->cogen(cogen, &ctx2);
             cogen->I_label(Lcont);
             if (update != NULL) {
-                update->cogen(cogen);
+                update->cogen(cogen, ctx);
                 cogen->I_pop();
             }
             cogen->I_jump(Ltop);
@@ -286,10 +288,10 @@ namespace avmplus
             uint32_t T_val = cogen->getTemp();
             
             if (init != lhs) {
-                init->cogen(cogen);
+                init->cogen(cogen, ctx);
                 cogen->I_pop();
             }
-            obj->cogen(cogen);
+            obj->cogen(cogen, ctx);
 
             cogen->I_coerce_a();
             cogen->I_setlocal(T_obj);
@@ -317,7 +319,7 @@ namespace avmplus
             else 
                 cogen->I_nextname();
             cogen->I_setlocal(T_val);
-            (ALLOC(AssignExpr, (OPR_assign, lhs, ALLOC(RefLocalExpr, (T_val)))))->cogen(cogen);
+            (ALLOC(AssignExpr, (OPR_assign, lhs, ALLOC(RefLocalExpr, (T_val)))))->cogen(cogen, ctx);
             cogen->I_pop();
             
             BreakCtx ctx1(Lbreak, ctx);
@@ -363,10 +365,10 @@ namespace avmplus
                                            pos);
         }
         
-        void ThrowStmt::cogen(Cogen* cogen, Ctx*)
+        void ThrowStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
             cogen->I_debugline(pos);
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             cogen->I_throw();
         }
 
@@ -381,7 +383,7 @@ namespace avmplus
             
             if (expr != NULL) {
                 cogen->I_debugline(pos);
-                expr->cogen(cogen);
+                expr->cogen(cogen, ctx);
                 tmp = cogen->getTemp();
                 cogen->I_coerce_a();
                 cogen->I_setlocal(tmp);
@@ -407,7 +409,7 @@ namespace avmplus
             uint32_t scopereg = cogen->getTemp();
             
             cogen->I_debugline(pos);
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             cogen->I_dup();
             cogen->I_setlocal(scopereg);
             cogen->I_pushwith();
@@ -500,7 +502,7 @@ namespace avmplus
                 }
             }
 
-            expr->cogen(cogen);                             // switch value
+            expr->cogen(cogen, ctx);                             // switch value
             cogen->I_coerce_a();
             cogen->I_setlocal(tmp);
 
@@ -584,7 +586,7 @@ namespace avmplus
             Label* Lbreak = cogen->newLabel();
             
             cogen->I_debugline(pos);
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             cogen->I_coerce_a();
             cogen->I_setlocal(tmp);
             cogen->I_jump(Lnext);
@@ -605,7 +607,7 @@ namespace avmplus
                         Lnext = NULL;
                     }
                     cogen->I_debugline(c->pos);
-                    c->expr->cogen(cogen);                  // check for match
+                    c->expr->cogen(cogen, ctx);                  // check for match
                     cogen->I_getlocal(tmp);
                     cogen->I_strictequals();
                     Lnext = cogen->newLabel();
@@ -801,9 +803,9 @@ namespace avmplus
             AvmAssert(!"Not implemented: ImportStmt");
         }
 
-        void DefaultXmlNamespaceStmt::cogen(Cogen* cogen, Ctx*)
+        void DefaultXmlNamespaceStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             cogen->I_dxnslate();
         }
     }

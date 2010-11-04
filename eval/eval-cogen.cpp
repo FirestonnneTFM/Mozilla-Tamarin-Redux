@@ -308,7 +308,7 @@ namespace avmplus
             stackMovement(OP_lookupswitch);
         }
 
-        void FunctionDefn::cogenGuts(Compiler* compiler, ABCMethodInfo** info, ABCMethodBodyInfo** body)
+        void FunctionDefn::cogenGuts(Compiler* compiler, Ctx* ctx, ABCMethodInfo** info, ABCMethodBodyInfo** body)
         {
             Allocator* allocator = compiler->allocator;
             ABCFile* abc = &compiler->abc;
@@ -372,7 +372,7 @@ namespace avmplus
             traits = ALLOC(ABCTraitsTable, (compiler));
             *body = ALLOC(ABCMethodBodyInfo, (compiler, *info, traits, 1 + numparams + (uses_arguments || (rest_param != NULL))));
 
-            cogen(&(*body)->cogen);
+            cogen(&(*body)->cogen, ctx);
         
             uint32_t flags = 0;
             AvmAssert( !(uses_arguments && (rest_param != NULL)) );
@@ -385,7 +385,7 @@ namespace avmplus
             (*info)->setFlags((uint8_t)((*body)->getFlags() | flags));
         }
 
-        void CodeBlock::cogen(Cogen* cogen)
+        void CodeBlock::cogen(Cogen* cogen, Ctx* ctx)
         {
             Compiler* compiler = cogen->compiler;
             ABCFile* abc = cogen->abc;
@@ -447,7 +447,8 @@ namespace avmplus
                     // then don't emit code for looking it up at run-time
                     // here, but just reference the definition of the other
                     // binding?  (That's an optimization.)
-                    value->cogen(cogen);
+                    //value->cogen(cogen);
+                    compiler->internalError(0, "Namespace should have been resolved before code generation");
                 }
                 cogen->I_initproperty(id);
             }
@@ -475,14 +476,14 @@ namespace avmplus
                 FunctionDefn* func = functions->hd;
                 ABCMethodInfo* fn_info;
                 ABCMethodBodyInfo* fn_body;
-                func->cogenGuts(compiler, &fn_info, &fn_body);
+                func->cogenGuts(compiler, ctx, &fn_info, &fn_body);
                 uint32_t fname = abc->addQName(compiler->NS_public, cogen->emitString(func->name));
                 cogen->I_getlocal(activation);
                 cogen->I_newfunction(fn_info->index);
                 cogen->I_setproperty(fname);
             }
             
-            cogenBody(cogen, activation);
+            cogenBody(cogen, ctx, activation);
         }
     }
 }

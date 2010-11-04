@@ -148,9 +148,9 @@ public:
     }
 
     virtual ~CodeBlock();
-    virtual void cogenBody(Cogen* cogen, uint32_t activation) = 0;
+    virtual void cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation) = 0;
     
-    void cogen(Cogen* cogen);
+    void cogen(Cogen* cogen, Ctx* ctx);
     
     CodeType tag;
     Seq<Binding*>* const bindings;
@@ -166,7 +166,7 @@ public:
     {
     }
     
-    virtual void cogenBody(Cogen* cogen, uint32_t activation);
+    virtual void cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation);
 };
 
 class ClassDefn {
@@ -224,11 +224,11 @@ public:
     {
     }
 
-    virtual void cogenBody(Cogen* cogen, uint32_t activation);
+    virtual void cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation);
 
     // Common code for function code generation.  Create MethodInfo and MethodBodyInfo;
     // generate code for the function; set the function's flags properly.
-    void cogenGuts(Compiler* compiler, ABCMethodInfo** info, ABCMethodBodyInfo** body);
+    void cogenGuts(Compiler* compiler, Ctx* ctx, ABCMethodInfo** info, ABCMethodBodyInfo** body);
 
     Str* name;                          // Name of function or NULL.  Not const because we sometimes need to set it to NULL.
     Seq<FunctionParam*>* const params;  // List of fixed parameters
@@ -261,7 +261,9 @@ enum Tag {
     TAG_literalUInt,
     TAG_literalDouble,
     TAG_literalRegExp,
-    TAG_literalFunction
+    TAG_literalFunction,
+    TAG_commonNamespace,
+    TAG_namespaceRef
 };
 
 // Tags returned from NameComponent::tag()
@@ -337,7 +339,7 @@ class Expr {
 public:
     Expr(uint32_t pos=0) : pos(pos) {}
     virtual ~Expr() {}  // Not really, but otherwise gcc drowns us in warnings
-    virtual void cogen(Cogen* cogen) = 0;   // override for value computation
+    virtual void cogen(Cogen* cogen, Ctx* ctx) = 0;   // override for value computation
     virtual Tag tag() const { return TAG_expr; }
     const uint32_t pos;
 };
@@ -345,7 +347,7 @@ public:
 class LiteralObject : public Expr {
 public:
     LiteralObject(Seq<LiteralField*>* fields, uint32_t pos) : Expr(pos), fields(fields) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Seq<LiteralField*>* const fields;
 };
 
@@ -359,28 +361,28 @@ public:
 class LiteralArray : public Expr {
 public:
     LiteralArray(Seq<Expr*>* elements, uint32_t pos) : Expr(pos), elements(elements) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Seq<Expr*>* const elements;
 };
 
 class LiteralUndefined : public Expr {
 public:
     LiteralUndefined(uint32_t pos) : Expr(pos) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalUndefined; }
 };
 
 class LiteralNull : public Expr {
 public:
     LiteralNull(uint32_t pos) : Expr(pos) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalNull; }
 };
 
 class LiteralInt : public Expr {
 public:
     LiteralInt(int32_t value, uint32_t pos) : Expr(pos), value(value) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalInt; }
     const int32_t value;
 };
@@ -388,7 +390,7 @@ public:
 class LiteralUInt : public Expr {
 public:
     LiteralUInt(uint32_t value, uint32_t pos) : Expr(pos), value(value) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalUInt; }
     const uint32_t value;
 };
@@ -396,7 +398,7 @@ public:
 class LiteralDouble : public Expr {
 public:
     LiteralDouble(double value, uint32_t pos) : Expr(pos), value(value) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalDouble; }
     const double value;
 };
@@ -404,7 +406,7 @@ public:
 class LiteralBoolean : public Expr {
 public:
     LiteralBoolean(bool value, uint32_t pos) : Expr(pos), value(value) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalBoolean; }
     const bool value;
 };
@@ -412,7 +414,7 @@ public:
 class LiteralString : public Expr {
 public:
     LiteralString(Str* value, uint32_t pos) : Expr(pos), value(value) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalString; }
     Str* const value;
 };
@@ -420,7 +422,7 @@ public:
 class LiteralRegExp : public Expr {
 public:
     LiteralRegExp(Str* value, uint32_t pos) : Expr(pos), value(value) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalRegExp; }
     Str* const value;
 };
@@ -428,7 +430,7 @@ public:
 class LiteralFunction : public Expr {
 public:
     LiteralFunction(FunctionDefn* function) : function(function) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_literalFunction; }
     FunctionDefn* const function;
 };
@@ -441,20 +443,20 @@ public:
         , is_list(is_list)
     {
     }
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Seq<Expr*>* const exprs;
     const bool is_list;
 };
 
 class ThisExpr : public Expr {
 public:
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
 };
 
 class NewExpr : public Expr {
 public:
     NewExpr(Expr* fn, Seq<Expr*>* arguments) : fn(fn), arguments(arguments) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Expr* const fn;
     Seq<Expr*>* const arguments;
 };
@@ -462,7 +464,7 @@ public:
 class CallExpr : public Expr {
 public:
     CallExpr(Expr* fn, Seq<Expr*>* arguments, uint32_t pos) : Expr(pos), fn(fn), arguments(arguments) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Expr* const fn;
     Seq<Expr*>* const arguments;
 };
@@ -470,7 +472,7 @@ public:
 class ConditionalExpr : public Expr {
 public:
     ConditionalExpr(Expr* e1, Expr* e2, Expr* e3) : e1(e1), e2(e2), e3(e3) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Expr* const e1;
     Expr* const e2;
     Expr* const e3;
@@ -479,7 +481,7 @@ public:
 class AssignExpr : public Expr {
 public:
     AssignExpr(Binop op, Expr* lhs, Expr* rhs) : op(op), lhs(lhs), rhs(rhs) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     const Binop op;
     Expr* const lhs;
     Expr* const rhs;
@@ -488,7 +490,7 @@ public:
 class BinaryExpr : public Expr {
 public:
     BinaryExpr(Binop op, Expr* lhs, Expr* rhs) : op(op), lhs(lhs), rhs(rhs) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     const Binop op;
     Expr* const lhs;
     Expr* const rhs;
@@ -497,8 +499,8 @@ public:
 class UnaryExpr : public Expr {
 public:
     UnaryExpr(Unop op, Expr* expr) : op(op), expr(expr) {}
-    virtual void cogen(Cogen* cogen);
-    void incdec(Cogen* cogen, bool pre, bool inc);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+    void incdec(Cogen* cogen, Ctx* ctx, bool pre, bool inc);
     Unop const op;
     Expr* const expr;
 };
@@ -506,14 +508,14 @@ public:
 class RefLocalExpr : public Expr {
 public:
     RefLocalExpr(uint32_t local) : local(local) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     const uint32_t local;
 };
 
 class FilterExpr : public Expr {
 public:
     FilterExpr(Expr* obj, Expr* filter, uint32_t pos) : Expr(pos), obj(obj), filter(filter) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Expr * const obj;
     Expr * const filter;
 };
@@ -521,7 +523,7 @@ public:
 class DescendantsExpr : public Expr {
 public:
     DescendantsExpr(Expr* obj, QualifiedName* name, uint32_t pos) : Expr(pos), obj(obj), name(name) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Expr * const obj;
     QualifiedName * const name;
 };
@@ -535,7 +537,7 @@ enum Escapement {
 class EscapeExpr : public Expr {
 public:
     EscapeExpr(Expr* expr, Escapement esc) : Expr(0), expr(expr), esc(esc) {}
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     Expr * const expr;
     const Escapement esc;
 };
@@ -565,7 +567,7 @@ public:
     {
         AvmAssert(name != NULL);
     }
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_qualifiedName; }
     NameComponent * const qualifier;
     NameComponent * const name;
@@ -581,7 +583,7 @@ public:
     {
         AvmAssert(obj != NULL && name != NULL);
     }
-    virtual void cogen(Cogen* cogen);
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
     virtual Tag tag() const { return TAG_objectRef; }
     Expr * const obj;
     QualifiedName * const name;
