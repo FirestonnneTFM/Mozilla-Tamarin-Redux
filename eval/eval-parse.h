@@ -138,11 +138,12 @@ enum CodeType {
 
 class CodeBlock {
 public:
-    CodeBlock(CodeType tag, Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Stmt*>* stmts)
+    CodeBlock(CodeType tag, Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts)
         : tag(tag)
         , bindings(bindings)
         , functions(functions)
         , namespaces(namespaces)
+        , openNamespaces(openNamespaces)
         , stmts(stmts)
     {
     }
@@ -156,13 +157,14 @@ public:
     Seq<Binding*>* const bindings;
     Seq<FunctionDefn*>* const functions;
     Seq<NamespaceDefn*>* const namespaces;
+    Seq<Namespace*>* const openNamespaces;
     Seq<Stmt*>* const stmts;
 };
 
 class Program : public CodeBlock {
 public:
-    Program(Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Stmt*>* stmts) 
-        : CodeBlock(CODE_Program, bindings, functions, namespaces, stmts)
+    Program(Seq<Binding*>* bindings, Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts) 
+        : CodeBlock(CODE_Program, bindings, functions, namespaces, openNamespaces, stmts)
     {
     }
     
@@ -208,11 +210,11 @@ class FunctionDefn : public CodeBlock {
 public:
     FunctionDefn(Str* name, Seq<Binding*>* bindings, 
                  Seq<FunctionParam*>* params, uint32_t numparams, FunctionParam* rest_param, QualifiedName* return_type_name,
-                 Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Stmt*>* stmts, 
+                 Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Namespace*>* openNamespaces, Seq<Stmt*>* stmts, 
                  bool uses_arguments,
                  bool uses_dxns,
                  bool optional_arguments)
-        : CodeBlock(CODE_Function, bindings, functions, namespaces, stmts)
+        : CodeBlock(CODE_Function, bindings, functions, namespaces, openNamespaces, stmts)
         , name(name)
         , params(params)
         , numparams(numparams)
@@ -805,21 +807,6 @@ public:
     Seq<Stmt*>* const stmts;
 };
 
-class UseNamespaceStmt : public Stmt {
-public:
-    UseNamespaceStmt(uint32_t pos, Str* name) : Stmt(pos), name(name) {}
-    virtual void cogen(Cogen* cogen, Ctx* ctx);
-    Str * const name;
-};
-
-class ImportStmt : public Stmt {
-public:
-    // The last component of 'name' is NULL if the name ends with '*'
-    ImportStmt(uint32_t pos, Seq<Str*>* name) : Stmt(pos), name(name) {}
-    virtual void cogen(Cogen* cogen, Ctx* ctx);
-    Seq<Str*> * const name;
-};
-
 class WithStmt : public Stmt {
 public:
     WithStmt(uint32_t pos, Expr* expr, Stmt* body) : Stmt(pos), expr(expr), body(body) {}
@@ -833,6 +820,29 @@ public:
     DefaultXmlNamespaceStmt(uint32_t pos, Expr* expr) : Stmt(pos), expr(expr) {};
     virtual void cogen(Cogen* cogen, Ctx* ctx);
     Expr* const expr;
+};
+
+// Base class for various kinds of namespace values
+class Namespace {
+public:
+    virtual ~Namespace() {}
+    virtual Tag tag() const = 0;
+};
+
+// A string-based namespace.
+class CommonNamespace : public Namespace {
+public:
+    CommonNamespace(Str* name) : name(name) {}
+    virtual Tag tag() const { return TAG_commonNamespace; }
+    Str* const name;
+};
+
+// A reference to a namespace binding, must be resolved at compile time
+class NamespaceRef : public Namespace {
+public:
+    NamespaceRef(Str* id) : id(id) {}
+    virtual Tag tag() const { return TAG_namespaceRef; }
+    Str* const id;
 };
 
 class Parser {
@@ -930,8 +940,6 @@ private:
     // Statement parser
     
     Stmt* statement();
-    Stmt* useStatement();
-    Stmt* importStatement();
     Stmt* labeledStatement();
     Stmt* returnStatement();
     Stmt* breakStatement();
@@ -948,6 +956,8 @@ private:
     Stmt* tryStatement();
     Seq<CatchClause*>* catches();
     CatchClause* catchClause();
+    Stmt* useStatement();
+    Stmt* importStatement();
     Stmt* varStatement(bool is_const);
     Stmt* withStatement();
 
@@ -1003,6 +1013,7 @@ private:
         SeqBuilder<Binding*> bindings;
         SeqBuilder<FunctionDefn*> functionDefinitions;
         SeqBuilder<NamespaceDefn*> namespaces;
+        SeqBuilder<Namespace*> openNamespaces;
         const RibType tag;
         bool uses_finally;
         bool uses_catch;
@@ -1026,6 +1037,9 @@ private:
     void addMethodBinding(FunctionDefn* fn, BindingRib* rib);
     void addClass(ClassDefn* cls);
     void addInterface(InterfaceDefn* iface);
+    void addOpenNamespace(Namespace* ns);
+    void addUnqualifiedImport(Seq<Str*>* name); // import a.b.*; name would have length 2
+    void addQualifiedImport(Seq<Str*>* name);   // import a.b.c; name would have length 3
     void setUsesFinally();
     void setUsesCatch();
     void setUsesArguments();

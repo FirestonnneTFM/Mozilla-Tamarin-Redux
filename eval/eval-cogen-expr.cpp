@@ -444,6 +444,7 @@ namespace avmplus
                                                ALLOC(Seq<FunctionDefn*>, 
                                                      (function)), 
                                                NULL,
+                                               NULL,
                                                ALLOC(Seq<Stmt*>, 
                                                      (ALLOC(ReturnStmt, 
                                                             (0, ALLOC(QualifiedName, 

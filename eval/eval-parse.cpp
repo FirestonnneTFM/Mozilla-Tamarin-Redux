@@ -114,6 +114,7 @@ namespace avmplus
             : bindings(allocator)
             , functionDefinitions(allocator)
             , namespaces(allocator)
+            , openNamespaces(allocator)
             , tag(tag)
             , uses_finally(false)
             , uses_catch(false)
@@ -156,7 +157,7 @@ namespace avmplus
             while (hd() == T_Package) 
                 package();
             Seq<Stmt*>* stmts = directives(SFLAG_Toplevel);
-            Program* prog = ALLOC(Program, (topRib->bindings.get(), topRib->functionDefinitions.get(), topRib->namespaces.get(), stmts));
+            Program* prog = ALLOC(Program, (topRib->bindings.get(), topRib->functionDefinitions.get(), topRib->namespaces.get(), topRib->openNamespaces.get(), stmts));
             popBindingRib();
             return prog;
         }
@@ -624,6 +625,22 @@ namespace avmplus
             topRib->namespaces.addAtEnd(ALLOC(NamespaceDefn, (name, expr)));
         }
 
+        void Parser::addQualifiedImport(Seq<Str*>* name)
+        {
+            // A map from the last element of the name to the name
+            compiler->internalError(0, "Qualified import not supported, use an unqualified import instead");
+        }
+        
+        void Parser::addUnqualifiedImport(Seq<Str*>* name)
+        {
+            // Nothing we care about at this time
+        }
+        
+        void Parser::addOpenNamespace(Namespace* ns)
+        {
+            topRib->openNamespaces.addAtEnd(ns);
+        }
+
         void Parser::setUsesFinally()
         {
             topRib->uses_finally = true;
@@ -728,11 +745,12 @@ namespace avmplus
             Seq<FunctionDefn*>* fndefs = topRib->functionDefinitions.get();
             Seq<Binding*>* bindings = topRib->bindings.get();
             Seq<NamespaceDefn*>* namespaces = topRib->namespaces.get();
+            Seq<Namespace*>* openNamespaces = topRib->openNamespaces.get();
             bool uses_arguments = topRib->uses_arguments;
             bool uses_dxns = topRib->uses_dxns;
             bool optional_arguments = topRib->optional_arguments;
             popBindingRib();
-            return ALLOC(FunctionDefn, (name, bindings, params.get(), numparams, rest_param, return_type_name, fndefs, namespaces, stmts, 
+            return ALLOC(FunctionDefn, (name, bindings, params.get(), numparams, rest_param, return_type_name, fndefs, namespaces, openNamespaces, stmts, 
                                         uses_arguments, 
                                         uses_dxns, 
                                         optional_arguments));

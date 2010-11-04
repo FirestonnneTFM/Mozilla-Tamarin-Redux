@@ -793,16 +793,6 @@ namespace avmplus
             cogen->I_jump(Lend);
         }
         
-        void UseNamespaceStmt::cogen(Cogen* /* cogen*/, Ctx* /* ctx*/)
-        {
-            AvmAssert(!"Not implemented: UseNamespaceStmt");
-        }
-
-        void ImportStmt::cogen(Cogen* /* cogen */, Ctx* /* ctx */)
-        {
-            AvmAssert(!"Not implemented: ImportStmt");
-        }
-
         void DefaultXmlNamespaceStmt::cogen(Cogen* cogen, Ctx* ctx)
         {
             expr->cogen(cogen, ctx);

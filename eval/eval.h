@@ -108,7 +108,7 @@ namespace avmplus
     {
         using namespace ActionBlockConstants;
         
-        // Types
+        // Types.
         //
         // egrep '^class ' *.h | awk '{ print $2 }' | sort | awk '{ print "class " $1 ";" }'
         
@@ -129,11 +129,13 @@ namespace avmplus
         class ABCSlotTrait;
         class ABCTrait;
         class ABCTraitsTable;
+        class ActivationCtx;
         class Allocator;
         class AssignExpr;
         class BinaryExpr;
         class Binding;
         class BlockStmt;
+        class BreakCtx;
         class BreakStmt;
         class ByteBuffer;
         class CVAnonNS;
@@ -145,10 +147,16 @@ namespace avmplus
         class ClassDefn;
         class CodeBlock;
         class Cogen;
+        class CommonNamespace;
+        class Compiler;
         class ComputedName;
         class ConditionalExpr;
         class ConstValue;
+        class ContinueCtx;
         class ContinueStmt;
+        class ControlFlowCtx;
+        class Ctx;
+        class DefaultValue;
         class DefaultXmlNamespaceStmt;
         class DescendantsExpr;
         class DoWhileStmt;
@@ -157,12 +165,13 @@ namespace avmplus
         class Expr;
         class ExprStmt;
         class FilterExpr;
+        class FinallyCtx;
         class ForInStmt;
         class ForStmt;
+        class FunctionCtx;
         class FunctionDefn;
         class FunctionParam;
         class IfStmt;
-        class ImportStmt;
         class InterfaceDefn;
         class Label;
         class LabelSetStmt;
@@ -182,15 +191,20 @@ namespace avmplus
         class LiteralUndefined;
         class NameComponent;
         class NameExpr;
+        class Namespace;
         class NamespaceDefn;
+        class NamespaceRef;
         class NewExpr;
         class ObjectRef;
         class Parser;
         class Program;
+        class ProgramCtx;
         class QualifiedName;
         class Qualifier;
         class RefLocalExpr;
         class ReturnStmt;
+        class SBChunk;
+        class ScopeCtx;
         class SimpleName;
         class Stmt;
         class Str;
@@ -200,16 +214,14 @@ namespace avmplus
         class ThrowStmt;
         class TryStmt;
         class UnaryExpr;
-        class UseNamespaceStmt;
         class WhileStmt;
         class WildcardName;
+        class WithCtx;
         class WithStmt;
         class XmlInitializer;
         
         // some special cases
         
-        class Compiler;
-        class Ctx;
         class XmlContext;
         
         /**
