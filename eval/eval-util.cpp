@@ -130,6 +130,7 @@ namespace avmplus
         template class SeqBuilder<FunctionParam*>;
         template class SeqBuilder<Label*>;
         template class SeqBuilder<LiteralField*>;
+        template class SeqBuilder<Namespace*>;
         template class SeqBuilder<NamespaceDefn*>;
         template class SeqBuilder<Stmt*>;
         template class SeqBuilder<Str*>;

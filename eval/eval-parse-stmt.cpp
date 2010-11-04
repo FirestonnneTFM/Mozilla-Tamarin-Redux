@@ -283,28 +283,44 @@ namespace avmplus
                 compiler->syntaxError(pos, SYNTAXERR_ILLEGAL_USE);
             eat(T_Identifier);
             Str* ns = identifier();
-            return ALLOC(UseNamespaceStmt, (pos, ns));
+            addOpenNamespace(ALLOC(NamespaceRef, (ns)));
+            return ALLOC(EmptyStmt, ());
         }
         
         // <import> ::= "import" <ident> { "." <ident> }* { "." "*" }
         Stmt* Parser::importStatement()
         {
-            uint32_t pos = position();
             SeqBuilder<Str*> name(allocator);
+            StringBuilder id(compiler);
+            
             eat(T_Import);
-            if (hd() == T_Identifier)
+            if (hd() == T_Identifier) {
                 name.addAtEnd(identValue());
+                id.append(identValue());
+            }
             eat(T_Identifier);
+            bool qualified = true;
             while (match(T_Dot)) {
                 if (hd() == T_Multiply) {
-                    name.addAtEnd(NULL);
+                    match(T_Multiply);
+                    qualified = false;
                     break;
                 }
-                if (hd() == T_Identifier)
+                id.append(".");
+                if (hd() == T_Identifier) {
                     name.addAtEnd(identValue());
+                    id.append(identValue());
+                }
                 eat(T_Identifier);
             }
-            return ALLOC(ImportStmt, (pos, name.get()));
+            Seq<Str*>* n = name.get();
+            if (qualified)
+                addQualifiedImport(n);
+            else {
+                addOpenNamespace(ALLOC(CommonNamespace, (id.str())));
+                addUnqualifiedImport(n);
+            }
+            return ALLOC(EmptyStmt, ());
         }
         
         Stmt* Parser::labeledStatement()
