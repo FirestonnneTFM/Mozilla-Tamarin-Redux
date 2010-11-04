@@ -330,8 +330,7 @@ REALLY_INLINE /*static*/ int32_t AvmCore::integer_i(Atom a)
     }
     else
     {
-        // TODO since we know value is legal int, use faster d->i
-        return MathUtils::real2int(atomToDouble(a));
+        return int32_t(atomToDouble(a));
     }
 }
 
@@ -345,7 +344,6 @@ REALLY_INLINE /*static*/ uint32_t AvmCore::integer_u(Atom a)
     }
     else
     {
-        // TODO figure out real2int for unsigned
         return (uint32_t) atomToDouble(a);
     }
 }

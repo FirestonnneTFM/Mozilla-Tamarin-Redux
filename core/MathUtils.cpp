@@ -449,7 +449,7 @@ namespace avmplus
 #elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
         int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
 #else
-        int32_t intValue = MathUtils::real2int(value);
+        int32_t intValue = int32_t(value);
 #endif
         return intValue;
     }
@@ -859,7 +859,7 @@ namespace avmplus
 #elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
             int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
 #else
-            int32_t intValue = real2int(value);
+            int32_t intValue = int32_t(value);
 #endif
             if ((value == (double)(intValue)) && ((uint32_t)intValue != 0x80000000))
                 return convertIntegerToStringBase10(core, intValue, kTreatAsSigned);

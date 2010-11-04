@@ -2361,13 +2361,12 @@ return the result of the comparison ToPrimitive(x) == y.
             if (bt == BUILTIN_int)
             {
                 const double d = atomToDouble(atom);
-                const int32_t i = MathUtils::real2int(d);
+                const int32_t i = int32_t(d);
                 return d == (double)i;
             }
             if (bt == BUILTIN_uint)
             {
                 const double d = atomToDouble(atom);
-                // ISSUE use real2int?
                 const uint32_t u = (uint32_t)d;
                 return d == (double)u;
             }
@@ -4028,7 +4027,7 @@ return the result of the comparison ToPrimitive(x) == y.
     #elif defined(_MAC) && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
         int intval = _mm_cvttsd_si32(_mm_set_sd(n));
     #else
-        int intval = MathUtils::real2int(n);
+        int intval = int32_t(n);
     #endif
 
         // make sure n is integer value that fits in 29 bits
@@ -4174,15 +4173,15 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         // Try a simple case first to see if we have a in-range float value
 
-#if defined(WIN32) && defined(AVMPLUS_IA32) // this is the same #define as in MathUtils for the real2int there
-        // WIN32's real2int returns 0x80000000 if d is not in a valid integer range
-        int intval = MathUtils::real2int(d);
+#if defined(AVMPLUS_IA32) 
+        // x86 int32_t(double) returns 0x80000000 if d is not in a valid integer range
+        int intval = int32_t(d);
         if (intval != 0x80000000)
             return intval;
 #elif defined(AVMPLUS_SPARC) || defined(AVMPLUS_ARM)
-        // real2int in those cases just maps to an int cast which should give:
+        // an int cast which should give:
         // +/-0.0:0 +/-nan:0 +/-ind:0 -inf:0x80000000 +inf:0x7fffffff den:0 >=0x7fffffff:x7fffffff <=0x80000000:0x80000000
-        int intval = MathUtils::real2int(d);
+        int intval = int32_t(d);
         if (intval != 0x7fffffff && intval != (int)0x80000000)
             return intval;
 #endif
@@ -4259,19 +4258,19 @@ return the result of the comparison ToPrimitive(x) == y.
             // doubles to ints).
             if (d < 0.0)
             {
-                int intVal = MathUtils::real2int (ad - 2147483648.0);
+                int intVal = int32_t (ad - 2147483648.0);
                 return 0x80000000 - intVal;
             }
             // This case is a large positive number overflowing to negative.
             else
             {
-                int intVal = MathUtils::real2int (ad - 2147483648.0);
+                int intVal = int32_t (ad - 2147483648.0);
                 return 0x80000000 + intVal;
             }
         }
         else
         {
-            return MathUtils::real2int(d < 0.0 ? -ad : ad);
+            return int32_t(d < 0.0 ? -ad : ad);
         }
     }
 #else
