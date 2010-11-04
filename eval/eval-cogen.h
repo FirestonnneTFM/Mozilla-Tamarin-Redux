@@ -177,6 +177,7 @@ public:
         , nsset(nsset)
         , openNamespaces(openNamespaces)
     {
+        (void)allocator;
     }
     const uint32_t nsset;                   // Will be something other than 0 if this variable scope has a multiname qualifier (namespace set)
     Seq<Namespace*>* const openNamespaces;  // Not including ""
