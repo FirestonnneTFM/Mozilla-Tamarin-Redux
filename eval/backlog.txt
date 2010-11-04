@@ -38,9 +38,6 @@ Parser:
 
 Code generator:
 
-  P2:
-  - return/continue/break out of "finally" clause
-
   P3:
   - qualified 'import' statement
   - 'const' statement and definition
