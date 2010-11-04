@@ -49,10 +49,6 @@ namespace avmplus
     REALLY_INLINE double MathUtils::min(double x, double y) { return (x < y) ? x : y; }
     REALLY_INLINE double MathUtils::nan() { return kNaN; }
 
-    #if !defined(WIN32) || !defined(AVMPLUS_IA32)
-    REALLY_INLINE int32_t MathUtils::real2int(double val) { return (int32_t) val; }
-    #endif
-
     REALLY_INLINE double MathUtils::round(double value)
     {
         return MathUtils::floor(value + 0.5);
