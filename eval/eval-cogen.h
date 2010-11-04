@@ -81,6 +81,8 @@ public:
     
     bool mustPushThis();           // context requires a 'this' value to be pushed onto the scope chain
     bool mustPushScopeReg();       // context requires a scope object stored in a scope register to be pushed onto the scope chain
+    
+    VarScopeCtx * findVarScope();  // Should never be NULL
 };
 
 class ControlFlowCtx : public Ctx {
@@ -168,25 +170,33 @@ public:
     SeqBuilder<Label*> returnLabels;
 };
 
-class FunctionCtx : public Ctx {
+class VarScopeCtx : public Ctx {
 public:
-    FunctionCtx(Allocator* allocator)
-        : Ctx(CTX_Function, NULL)
-        , namespaces(allocator)
+    VarScopeCtx(CtxType tag, uint32_t nsset, Seq<Namespace*>* openNamespaces, Allocator* allocator, Ctx* prev)
+        : Ctx(tag, prev)
+        , nsset(nsset)
+        , openNamespaces(openNamespaces)
     {
     }
-    SeqBuilder<NamespaceDefn*> namespaces;
+    const uint32_t nsset;                   // Will be something other than 0 if this variable scope has a multiname qualifier (namespace set)
+    Seq<Namespace*>* const openNamespaces;  // Not including ""
 };
 
-class ProgramCtx : public Ctx {
+class FunctionCtx : public VarScopeCtx {
 public:
-    ProgramCtx(Allocator* allocator, uint32_t capture_reg) 
-        : Ctx(CTX_Program, NULL)
-        , namespaces(allocator)
+    FunctionCtx(Allocator* allocator, uint32_t nsset, Seq<Namespace*>* openNamespaces, Ctx* prev)
+        : VarScopeCtx(CTX_Function, nsset, openNamespaces, allocator, prev)
+    {
+    }
+};
+
+class ProgramCtx : public VarScopeCtx {
+public:
+    ProgramCtx(Allocator* allocator, uint32_t nsset, Seq<Namespace*>* openNamespaces, uint32_t capture_reg) 
+        : VarScopeCtx(CTX_Program, nsset, openNamespaces, allocator, NULL)
         , capture_reg(capture_reg)
     {
     }
-    SeqBuilder<NamespaceDefn*> namespaces;
     const uint32_t capture_reg;
 };
 

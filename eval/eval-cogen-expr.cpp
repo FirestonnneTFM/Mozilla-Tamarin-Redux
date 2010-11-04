@@ -132,10 +132,21 @@ namespace avmplus
                         sym = cogen->abc->addRTQName(cogen->emitString(((SimpleName*)name)->name),
                                                      qname->is_attr);
                     }
-                    else
-                        sym = cogen->abc->addQName((ns_wildcard ? 0 : compiler->NS_public), 
-                                                   cogen->emitString(((SimpleName*)name)->name),
-                                                   qname->is_attr);
+                    else {
+                        VarScopeCtx* vs = ctx->findVarScope();
+                        // here we either have just the public namespace, or the public namespace
+                        // plus some open namespaces; in the latter case we need to generate a
+                        // multiname presumably.  We don't want to have to call addNsset here
+                        // every time so be sure to cache the nsset for the current scope somewhere.
+                        if (vs->nsset != 0 && ns_wildcard == 0 && !qname->is_attr)
+                            sym = cogen->abc->addMultiname(vs->nsset, 
+                                                           cogen->emitString(((SimpleName*)name)->name),
+                                                           false);
+                        else
+                            sym = cogen->abc->addQName((ns_wildcard ? 0 : compiler->NS_public), 
+                                                       cogen->emitString(((SimpleName*)name)->name),
+                                                       qname->is_attr);
+                    }
                     break;
                 case TAG_wildcardName:
                     if (nsreg != 0)

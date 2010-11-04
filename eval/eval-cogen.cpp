@@ -48,6 +48,14 @@ namespace avmplus
     namespace RTC
     {
         using namespace ActionBlockConstants;
+
+        VarScopeCtx * Ctx::findVarScope()
+        {
+            Ctx* ctx = this;
+            while (ctx->tag != CTX_Function && ctx->tag != CTX_ClassMethod && ctx->tag != CTX_Program)
+                ctx = ctx->next;
+            return (VarScopeCtx*)ctx;
+        }
         
         const Cogen::BinopMapping Cogen::binopMapping[] = {
         {0, 0},                 // unused
@@ -487,6 +495,20 @@ namespace avmplus
             }
             
             cogenBody(cogen, ctx, activation);
+        }
+
+        uint32_t Cogen::buildNssetWithPublic(Seq<Namespace*>* ns)
+        {
+            SeqBuilder<uint32_t> s(allocator);
+            s.addAtEnd(compiler->NS_public);
+            while (ns != NULL) {
+                if (ns->hd->tag() != TAG_commonNamespace)
+                    compiler->internalError(0, "Namespace should have been resolved before now.");
+                CommonNamespace* cns = (CommonNamespace*)ns->hd;
+                s.addAtEnd(abc->addNamespace(CONSTANT_Namespace, abc->addString(cns->name)));
+                ns = ns->tl;
+            }
+            return abc->addNsset(s.get());
         }
     }
 }

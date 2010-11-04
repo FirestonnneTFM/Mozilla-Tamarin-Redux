@@ -134,17 +134,28 @@ namespace avmplus
             cogen->I_pushundefined();
             cogen->I_coerce_a();
             cogen->I_setlocal(capture_reg);
-            ProgramCtx ctx1(cogen->allocator, capture_reg);
             for ( Seq<Stmt*>* stmts = this->stmts ; stmts != NULL ; stmts = stmts->tl )
-                stmts->hd->cogen(cogen, &ctx1);
+                stmts->hd->cogen(cogen, ctx);
             cogen->I_getlocal(capture_reg);
             cogen->I_returnvalue();
         }
 
         void FunctionDefn::cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation_reg)
         {
-            (void)ctx;
-            FunctionCtx ctx0(cogen->allocator);
+            // Inherit open namespaces
+            VarScopeCtx* vs = ctx->findVarScope();
+            Seq<Namespace*>* openNamespaces = vs->openNamespaces;
+            uint32_t nsset = vs->nsset;
+            if (this->openNamespaces != NULL) {
+                Allocator* allocator = cogen->allocator;
+                Seq<Namespace*>* ons = this->openNamespaces;
+                while (ons != NULL) {
+                    openNamespaces = ALLOC(Seq<Namespace*>, (ons->hd, openNamespaces));
+                    ons = ons->tl;
+                }
+                nsset = cogen->buildNssetWithPublic(openNamespaces);
+            }
+            FunctionCtx ctx0(cogen->allocator, nsset, openNamespaces, ctx);
             ActivationCtx ctx1(activation_reg, &ctx0);
             Ctx* ctx2 = activation_reg == 0 ? (Ctx*)&ctx0 : (Ctx*)&ctx1;
             

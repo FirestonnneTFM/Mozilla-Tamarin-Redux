@@ -214,6 +214,7 @@ namespace avmplus
         class ThrowStmt;
         class TryStmt;
         class UnaryExpr;
+        class VarScopeCtx;
         class WhileStmt;
         class WildcardName;
         class WithCtx;
