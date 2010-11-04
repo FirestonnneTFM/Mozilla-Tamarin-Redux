@@ -1,5 +1,5 @@
 Run-time compiler for ActionScript 3 - some usage and implementation notes.
-2009-01-05 / lhansen@adobe.com
+2010-10-30 / lhansen@adobe.com
 
 
 = AS3 support =
@@ -10,6 +10,7 @@ AS3 extensions supported so far (also see notes below):
 - Type annotations
 - "namespace" definitions
 - "include" directive
+- unqualified "import" directive (ie, 'import foo.*')
 - operators "is", "as", "to"
 - E4X
 
@@ -27,6 +28,21 @@ directive.
 Recursive includes are allowed, currently to unlimited depth without
 checking for cycles, as names are not canonicalized.  It is easy to
 place a depth limit in the parser.
+
+
+= Changes to the language relative to ASC =
+
+- 'use namespace' and 'import' are allowed even as the substatements
+  of 'if' etc, not just on the top level of blocks.  Seems silly to
+  prohibit the former use when it's allowed for 'var' and 'const'.
+
+- We aim not to early-bind to any global names, unlike ASC, except
+  names with predefined meaning (""::Object, etc) in contexts where
+  they are used to implement language semantics (and even there it
+  may not matter due to how loading works).  ASC has different
+  behavior for "var x:T = new T()" if there is more than one T
+  visible: it early-binds to the first in standard mode and to both
+  in strict mode.  The standard-mode behavior is likely a bug.
 
 
 = Other documentation =
