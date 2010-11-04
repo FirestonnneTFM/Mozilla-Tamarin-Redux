@@ -627,12 +627,14 @@ namespace avmplus
 
         void Parser::addQualifiedImport(Seq<Str*>* name)
         {
+			(void)name;
             // A map from the last element of the name to the name
             compiler->internalError(0, "Qualified import not supported, use an unqualified import instead");
         }
         
         void Parser::addUnqualifiedImport(Seq<Str*>* name)
         {
+			(void)name;
             // Nothing we care about at this time
         }
         
