@@ -215,7 +215,10 @@ namespace avmplus
             ABCTraitsTable* global_traits = ALLOC(ABCTraitsTable, (this));
             ABCMethodInfo* global_info = ALLOC(ABCMethodInfo, (this, abc.addString("script$init"), 0, NULL, 0, NULL, 0));
             ABCMethodBodyInfo* global_body = ALLOC(ABCMethodBodyInfo, (this, global_info, global_traits, 1));
-            ProgramCtx ctx(global_body->cogen.allocator, global_body->cogen.getTemp());
+            uint32_t nsset = 0;
+            if (program->openNamespaces != NULL)
+                nsset = global_body->cogen.buildNssetWithPublic(program->openNamespaces);
+            ProgramCtx ctx(global_body->cogen.allocator, nsset, program->openNamespaces, global_body->cogen.getTemp());
             program->cogen(&global_body->cogen, &ctx);
             global_info->setFlags(global_body->getFlags() | abcMethod_SETS_DXNS);
 
