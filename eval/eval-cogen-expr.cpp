@@ -53,8 +53,8 @@ namespace avmplus
         
         class Name {
         public:
-            Name(Cogen* cogen, Expr* expr, bool strict);
-            Name(Cogen* cogen, QualifiedName* name);
+            Name(Cogen* cogen, Ctx* ctx, Expr* expr, bool strict);
+            Name(Cogen* cogen, Ctx* ctx, QualifiedName* name);
             ~Name();
             
             void setup();
@@ -65,11 +65,11 @@ namespace avmplus
             uint32_t sym;
 
         private:
-            void computeName(QualifiedName* qname);
+            void computeName(QualifiedName* qname, Ctx* ctx);
         };
 
         // Compute the base object (on the stack) and the name information.
-        Name::Name(Cogen* cogen, Expr* expr, bool strict)
+        Name::Name(Cogen* cogen, Ctx* ctx, Expr* expr, bool strict)
             : cogen(cogen)
             , nsreg(0)
             , namereg(0)
@@ -77,8 +77,8 @@ namespace avmplus
             Tag tag = expr->tag();
             AvmAssert( tag == TAG_objectRef || tag == TAG_qualifiedName );
             if (tag == TAG_objectRef)
-                ((ObjectRef*)expr)->obj->cogen(cogen);
-            computeName(tag == TAG_objectRef ? ((ObjectRef*)expr)->name : (QualifiedName*)expr);
+                ((ObjectRef*)expr)->obj->cogen(cogen, ctx);
+            computeName((tag == TAG_objectRef ? ((ObjectRef*)expr)->name : (QualifiedName*)expr), ctx);
             if (tag == TAG_qualifiedName) {
                 if (strict)
                     cogen->I_findpropstrict(sym);
@@ -88,19 +88,19 @@ namespace avmplus
         }
 
         // Compute the name information.
-        Name::Name(Cogen* cogen, QualifiedName* qname)
+        Name::Name(Cogen* cogen, Ctx* ctx, QualifiedName* qname)
             : cogen(cogen)
             , nsreg(0)
             , namereg(0)
         {
-            computeName(qname);
+            computeName(qname, ctx);
         }
         
         // Significant performance improvements for qualified names if the namespace can be resolved at compile time.
         // See notes in the implementation of the 'namespace' definition; the machinery has to be implemented for
         // 'use default namespace' in any case.
 
-        void Name::computeName(QualifiedName* qname)
+        void Name::computeName(QualifiedName* qname, Ctx* ctx)
         {
             Compiler* compiler = cogen->compiler;
             bool ns_wildcard = false;
@@ -147,7 +147,7 @@ namespace avmplus
                     if (ns_wildcard)
                         compiler->syntaxError(qname->pos, SYNTAXERR_ILLEGAL_QNAME);
                     namereg = cogen->getTemp();
-                    ((ComputedName*)name)->expr->cogen(cogen);
+                    ((ComputedName*)name)->expr->cogen(cogen, ctx);
                     cogen->I_setlocal(namereg);
                     if (nsreg != 0)
                         sym = cogen->abc->addRTQNameL(qname->is_attr);
@@ -175,55 +175,57 @@ namespace avmplus
                 cogen->I_getlocal(namereg);
         }
         
-        void QualifiedName::cogen(Cogen* cogen)
+        void QualifiedName::cogen(Cogen* cogen, Ctx* ctx)
         {
-            Name n(cogen, this);
+            (void)ctx;
+            Name n(cogen, ctx, this);
             n.setup();
             cogen->I_findpropstrict(n.sym);
             n.setup();
             cogen->I_getproperty(n.sym);
         }
         
-        void ObjectRef::cogen(Cogen* cogen)
+        void ObjectRef::cogen(Cogen* cogen, Ctx* ctx)
         {
-            obj->cogen(cogen);
+            obj->cogen(cogen, ctx);
             if ((name->qualifier == NULL || name->qualifier->tag() == TAG_wildcardName) && name->name->tag() == TAG_wildcardName && !name->is_attr)
                 cogen->I_callproperty(cogen->compiler->ID_children, 0);
             else {
-                Name n(cogen, name);
+                Name n(cogen, ctx, name);
                 n.setup();
                 cogen->I_getproperty(n.sym);
             }
         }
         
-        void RefLocalExpr::cogen(Cogen* cogen)
+        void RefLocalExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             cogen->I_getlocal(local);
         }
 
-        void ConditionalExpr::cogen(Cogen* cogen)
+        void ConditionalExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
             Label* L0 = cogen->newLabel();
             Label* L1 = cogen->newLabel();
             
-            e1->cogen(cogen);
+            e1->cogen(cogen, ctx);
             cogen->I_iffalse(L0);
-            e2->cogen(cogen);
+            e2->cogen(cogen, ctx);
             cogen->I_coerce_a();
             cogen->I_jump(L1);
             cogen->I_label(L0);
-            e3->cogen(cogen);
+            e3->cogen(cogen, ctx);
             cogen->I_coerce_a();
             cogen->I_label(L1);
         }
 
-        void AssignExpr::cogen(Cogen* cogen)
+        void AssignExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
             AvmAssert( lhs->tag() == TAG_objectRef || lhs->tag() == TAG_qualifiedName );
 
             // Compute the object onto the stack, and elements of the name into locals if necessary
             bool is_assign = op == OPR_assign || op == OPR_init;
-            Name n(cogen, lhs, !is_assign);
+            Name n(cogen, ctx, lhs, !is_assign);
 
             // Read the value if we need it
             if (!is_assign) {
@@ -233,7 +235,7 @@ namespace avmplus
             }
             
             // Compute the rhs
-            rhs->cogen(cogen);
+            rhs->cogen(cogen, ctx);
             
             // Compute the operator if we need it
             if (!is_assign) {
@@ -256,42 +258,42 @@ namespace avmplus
             cogen->I_kill(t);
         }
 
-        void BinaryExpr::cogen(Cogen* cogen)
+        void BinaryExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
             if (op == OPR_logicalAnd) {
                 Label* L0 = cogen->newLabel();
                 
-                lhs->cogen(cogen);
+                lhs->cogen(cogen, ctx);
                 cogen->I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
                 cogen->I_dup();
                 cogen->I_coerce_b();
                 cogen->I_iffalse(L0);
                 cogen->I_pop();
-                rhs->cogen(cogen);
+                rhs->cogen(cogen, ctx);
                 cogen->I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
                 cogen->I_label(L0);
             }
             else if (op == OPR_logicalOr) {
                 Label* L0 = cogen->newLabel();
                 
-                lhs->cogen(cogen);
+                lhs->cogen(cogen, ctx);
                 cogen->I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
                 cogen->I_dup();
                 cogen->I_coerce_b();
                 cogen->I_iftrue(L0);
                 cogen->I_pop();
-                rhs->cogen(cogen);
+                rhs->cogen(cogen, ctx);
                 cogen->I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
                 cogen->I_label(L0);
             }
             else if (op == OPR_comma) {
-                lhs->cogen(cogen);
+                lhs->cogen(cogen, ctx);
                 cogen->I_pop();
-                rhs->cogen(cogen);
+                rhs->cogen(cogen, ctx);
             }
             else {
-                lhs->cogen(cogen);
-                rhs->cogen(cogen);
+                lhs->cogen(cogen, ctx);
+                rhs->cogen(cogen, ctx);
                 bool isNegated;
                 cogen->I_opcode(cogen->binopToOpcode(op, &isNegated));
                 if (isNegated)
@@ -299,19 +301,19 @@ namespace avmplus
             }
         }
 
-        void UnaryExpr::cogen(Cogen* cogen)
+        void UnaryExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
             Compiler* compiler = cogen->compiler;
             switch (op) {
                 case OPR_delete: {
                     if (expr->tag() == TAG_qualifiedName || expr->tag() == TAG_objectRef) {
-                        Name n(cogen, expr, false);
+                        Name n(cogen, ctx, expr, false);
                         n.setup();
                         cogen->I_deleteproperty(n.sym);
                     }
                     else {
                         // FIXME: e4x requires that if the value computed here is an XMLList then a TypeError (ID 1119) is thrown.
-                        expr->cogen(cogen);
+                        expr->cogen(cogen, ctx);
                         cogen->I_pop();
                         cogen->I_pushtrue();
                     }
@@ -319,57 +321,57 @@ namespace avmplus
                 }
                     
                 case OPR_void:
-                    expr->cogen(cogen);
+                    expr->cogen(cogen, ctx);
                     cogen->I_pop();
                     cogen->I_pushundefined();
                     break;
 
                 case OPR_typeof:
                     if (expr->tag() == TAG_qualifiedName) {
-                        Name n(cogen, (QualifiedName*)expr);
+                        Name n(cogen, ctx, (QualifiedName*)expr);
                         n.setup();
                         cogen->I_findproperty(n.sym);
                         n.setup();
                         cogen->I_getproperty(n.sym);
                     }
                     else 
-                        expr->cogen(cogen);
+                        expr->cogen(cogen, ctx);
                     cogen->I_typeof();
                     break;
 
                 case OPR_preIncr: 
-                    incdec(cogen, true, true); 
+                    incdec(cogen, ctx, true, true); 
                     break;
                     
                 case OPR_preDecr: 
-                    incdec(cogen, true, false); 
+                    incdec(cogen, ctx, true, false); 
                     break;
                     
                 case OPR_postIncr: 
-                    incdec(cogen, false, true); 
+                    incdec(cogen, ctx, false, true); 
                     break;
                     
                 case OPR_postDecr: 
-                    incdec(cogen, false, false); 
+                    incdec(cogen, ctx, false, false); 
                     break;
                     
                 case OPR_unplus:
-                    expr->cogen(cogen);
+                    expr->cogen(cogen, ctx);
                     cogen->I_coerce_d();
                     break;
                     
                 case OPR_unminus:
-                    expr->cogen(cogen);
+                    expr->cogen(cogen, ctx);
                     cogen->I_negate();
                     break;
                     
                 case OPR_bitwiseNot:
-                    expr->cogen(cogen);
+                    expr->cogen(cogen, ctx);
                     cogen->I_bitnot();
                     break;
                     
                 case OPR_not:
-                    expr->cogen(cogen);
+                    expr->cogen(cogen, ctx);
                     cogen->I_not();
                     break;
                     
@@ -378,9 +380,10 @@ namespace avmplus
             }
         }
         
-        void UnaryExpr::incdec(Cogen* cogen, bool pre, bool inc)
+        void UnaryExpr::incdec(Cogen* cogen, Ctx* ctx, bool pre, bool inc)
         {
-            Name n(cogen, expr, true);
+            (void)ctx;
+            Name n(cogen, ctx, expr, true);
             cogen->I_dup();
             n.setup();
             cogen->I_getproperty(n.sym);
@@ -413,12 +416,13 @@ namespace avmplus
             cogen->I_kill(t);
         }
         
-        void ThisExpr::cogen(Cogen* cogen)
+        void ThisExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             cogen->I_getlocal(0);
         }
         
-        void LiteralFunction::cogen(Cogen* cogen)
+        void LiteralFunction::cogen(Cogen* cogen, Ctx* ctx)
         {
             if (function->name != NULL) {
                 // For a named function expression F with name N, create a new 
@@ -439,7 +443,7 @@ namespace avmplus
                                                NULL,
                                                ALLOC(Seq<FunctionDefn*>, 
                                                      (function)), 
-                                               NULL, 
+                                               NULL,
                                                ALLOC(Seq<Stmt*>, 
                                                      (ALLOC(ReturnStmt, 
                                                             (0, ALLOC(QualifiedName, 
@@ -452,28 +456,29 @@ namespace avmplus
                                               false)))),
                                  NULL,
                                  0));
-                e->cogen(cogen);
+                e->cogen(cogen, ctx);
             }
             else {
                 ABCMethodInfo* fn_info;
                 ABCMethodBodyInfo* fn_body;
-                function->cogenGuts(cogen->compiler, &fn_info, &fn_body);
+                function->cogenGuts(cogen->compiler, ctx, &fn_info, &fn_body);
                 cogen->I_newfunction(fn_info->index);
             }
         }
 
-        void LiteralObject::cogen(Cogen* cogen)
+        void LiteralObject::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             uint32_t i=0;
             for ( Seq<LiteralField*>* fields = this->fields ; fields != NULL ; fields = fields->tl ) {
                 cogen->I_pushstring(cogen->emitString(fields->hd->name));
-                fields->hd->value->cogen(cogen);
+                fields->hd->value->cogen(cogen, ctx);
                 i++;
             }
             cogen->I_newobject(i);
         }
         
-        void LiteralArray::cogen(Cogen* cogen)
+        void LiteralArray::cogen(Cogen* cogen, Ctx* ctx)
         {
             uint32_t i = 0;
             Seq<Expr*>* exprs = elements;
@@ -484,7 +489,7 @@ namespace avmplus
                 Expr* e = exprs->hd;
                 if (e == NULL)
                     break;
-                e->cogen(cogen);
+                e->cogen(cogen, ctx);
                 i++;
             }
             cogen->I_newarray(i);
@@ -496,7 +501,7 @@ namespace avmplus
                     Expr* e = exprs->hd;
                     if (e != NULL) {
                         cogen->I_dup();
-                        e->cogen(cogen);
+                        e->cogen(cogen, ctx);
                         cogen->I_setproperty(cogen->abc->addQName(compiler->NS_public,cogen->emitString(compiler->intern(i))));
                         last_was_undefined = false;
                     }
@@ -511,8 +516,10 @@ namespace avmplus
             }
         }
 
-        void LiteralRegExp::cogen(Cogen* cogen)
+        void LiteralRegExp::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
+            
             Compiler* compiler = cogen->compiler;
             
             // value is "/.../flags"
@@ -535,90 +542,97 @@ namespace avmplus
             cogen->I_constructprop(compiler->ID_RegExp, 2);
         }
 
-        void LiteralNull::cogen(Cogen* cogen)
+        void LiteralNull::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             cogen->I_pushnull();
         }
         
-        void LiteralUndefined::cogen(Cogen* cogen)
+        void LiteralUndefined::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             cogen->I_pushundefined();
         }
         
-        void LiteralInt::cogen(Cogen* cogen)
+        void LiteralInt::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             if (value >= -128 && value < 128)
                 cogen->I_pushbyte((uint8_t)(value & 0xFF));
             else
                 cogen->I_pushint(cogen->emitInt(value));
         }
 
-        void LiteralUInt::cogen(Cogen* cogen)
+        void LiteralUInt::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             if (value < 128)
                 cogen->I_pushbyte((uint8_t)(value & 0xFF));
             else
                 cogen->I_pushuint(cogen->emitUInt(value));
         }
         
-        void LiteralDouble::cogen(Cogen* cogen)
+        void LiteralDouble::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             if (MathUtils::isNaN(value))
                 cogen->I_pushnan();
             else
                 cogen->I_pushdouble(cogen->emitDouble(value));
         }
             
-        void LiteralBoolean::cogen(Cogen* cogen)
+        void LiteralBoolean::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             if (value)
                 cogen->I_pushtrue();
             else
                 cogen->I_pushfalse();
         }
 
-        void LiteralString::cogen(Cogen* cogen)
+        void LiteralString::cogen(Cogen* cogen, Ctx* ctx)
         {
+            (void)ctx;
             cogen->I_pushstring(cogen->emitString(value));
         }
 
-        uint32_t Cogen::arguments(Seq<Expr*>* args)
+        uint32_t Cogen::arguments(Seq<Expr*>* args, Ctx* ctx)
         {
             uint32_t i = 0;
             for ( ; args != NULL ; args = args->tl, i++ )
-                args->hd->cogen(this);
+                args->hd->cogen(this, ctx);
             return i;
         }
 
-        void CallExpr::cogen(Cogen* cogen)
+        void CallExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
             switch (fn->tag()) {
                 case TAG_qualifiedName: {
-                    Name n(cogen, fn, true);
+                    Name n(cogen, ctx, fn, true);
                     n.setup();
-                    cogen->I_callproplex(n.sym, cogen->arguments(arguments));
+                    cogen->I_callproplex(n.sym, cogen->arguments(arguments, ctx));
                     break;
                 }
                 case TAG_objectRef: {
-                    Name n(cogen, fn, false);
+                    Name n(cogen, ctx, fn, false);
                     n.setup();
-                    cogen->I_callproperty(n.sym, cogen->arguments(arguments));
+                    cogen->I_callproperty(n.sym, cogen->arguments(arguments, ctx));
                     break;
                 }
                 default:
-                    fn->cogen(cogen);
+                    fn->cogen(cogen, ctx);
                     cogen->I_pushnull();
-                    cogen->I_call(cogen->arguments(arguments));
+                    cogen->I_call(cogen->arguments(arguments, ctx));
             }
         }
 
-        void NewExpr::cogen(Cogen* cogen)
+        void NewExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
-            fn->cogen(cogen);
-            cogen->I_construct(cogen->arguments(arguments));
+            fn->cogen(cogen, ctx);
+            cogen->I_construct(cogen->arguments(arguments, ctx));
         }
 
-        void XmlInitializer::cogen(Cogen* cogen)
+        void XmlInitializer::cogen(Cogen* cogen, Ctx* ctx)
         {
             Compiler* compiler = cogen->compiler;
             uint32_t id = is_list ? compiler->ID_XMLList : compiler->ID_XML;
@@ -627,7 +641,7 @@ namespace avmplus
             cogen->I_getproperty(id);
             cogen->I_pushstring(cogen->emitString(compiler->SYM_));
             for ( Seq<Expr*>* exprs = this->exprs ; exprs != NULL ; exprs = exprs->tl ) {
-                exprs->hd->cogen(cogen);
+                exprs->hd->cogen(cogen, ctx);
                 cogen->I_convert_s();
                 cogen->I_add();
             }
@@ -640,9 +654,9 @@ namespace avmplus
             cogen->I_construct(1);
         }
         
-        void EscapeExpr::cogen(Cogen* cogen)
+        void EscapeExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
-            expr->cogen(cogen);
+            expr->cogen(cogen, ctx);
             switch (esc) {
                 case ESC_attributeValue:
                     cogen->I_esc_xattr();
@@ -659,7 +673,7 @@ namespace avmplus
         // and an object to a common filter function.  But it only makes a difference
         // if filter expressions are very common, and they probably aren't.
         
-        void FilterExpr::cogen(Cogen* cogen)
+        void FilterExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
             Compiler* compiler = cogen->compiler;
             uint32_t t_xmllist = cogen->getTemp();
@@ -673,7 +687,7 @@ namespace avmplus
             Label* L_skip = cogen->newLabel();
             Label* L_done = cogen->newLabel();
 
-            obj->cogen(cogen);
+            obj->cogen(cogen, ctx);
             cogen->I_checkfilter();
 
             // convert to XMLList
@@ -724,7 +738,7 @@ namespace avmplus
             // with (item) b := <filter>
             cogen->I_getlocal(t_item);
             cogen->I_pushwith();
-            filter->cogen(cogen);
+            filter->cogen(cogen, ctx);
             cogen->I_popscope();
             
             // if b result += item
@@ -754,10 +768,10 @@ namespace avmplus
             cogen->I_kill(t_item);
         }
         
-        void DescendantsExpr::cogen(Cogen* cogen)
+        void DescendantsExpr::cogen(Cogen* cogen, Ctx* ctx)
         {
-            obj->cogen(cogen);
-            Name n(cogen, name);
+            obj->cogen(cogen, ctx);
+            Name n(cogen, ctx, name);
             n.setup();
             cogen->I_getdescendants(n.sym);
         }

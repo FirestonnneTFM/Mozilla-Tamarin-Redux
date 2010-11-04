@@ -357,18 +357,19 @@ public:
     uint32_t emitConstTrait(uint32_t name, uint32_t type);
     uint32_t emitMethodTrait(uint32_t name, uint32_t method);
     uint32_t emitException(uint32_t from, uint32_t to, uint32_t target, uint32_t type, uint32_t name_index);
-    
+
     static uint32_t emitTypeName(Compiler* abc, QualifiedName* t);
 
     Label*   newLabel();
     uint32_t getTemp();
     void unstructuredControlFlow(Ctx* ctx, bool (hit)(Ctx*,void*), void* package, bool jump, SyntaxError msg, uint32_t pos=0);
     void standardMethod(bool is_function, Seq<Str*>* params, Seq<FunctionDefn*>* functions, Seq<Str*>* vars, Seq<Stmt*>* stmts);
-    uint32_t arguments(Seq<Expr*>* args);
+    uint32_t arguments(Seq<Expr*>* args, Ctx* ctx);
     void startCatch();
 
     AbcOpcode binopToOpcode(Binop op, bool* isNegated);
-    
+    uint32_t buildNssetWithPublic(Seq<Namespace*>* ns);
+
     Compiler* const compiler;
     ABCFile* const abc;
     Allocator * const allocator;
