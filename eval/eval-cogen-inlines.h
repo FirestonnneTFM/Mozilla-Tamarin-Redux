@@ -39,6 +39,15 @@
 
 // This file is included into eval.h
 
+inline bool Ctx::mustPushThis() { return tag == CTX_ClassMethod || tag == CTX_Program; }
+inline bool Ctx::mustPushScopeReg() { return tag == CTX_With || tag == CTX_Catch || tag == CTX_Activation; }
+
+inline uint32_t FinallyCtx::addReturnLabel(Label* l)
+{
+    returnLabels.addAtEnd(l);
+    return nextLabel++;
+}
+
 inline uint32_t Cogen::emitInt(int32_t i) { return abc->addInt(i); }
 inline uint32_t Cogen::emitUInt(uint32_t u) { return abc->addUInt(u); }
 inline uint32_t Cogen::emitDouble(double d) { return abc->addDouble(d); }

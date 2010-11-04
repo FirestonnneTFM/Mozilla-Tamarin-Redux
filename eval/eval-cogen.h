@@ -53,6 +53,143 @@ public:
     const uint32_t index;
 };
 
+
+// Context management
+
+enum CtxType {
+    CTX_Activation,
+    CTX_Break,
+    CTX_Catch,
+    CTX_Continue,
+    CTX_Finally,
+    CTX_Function,
+    CTX_ClassMethod,
+    CTX_Program,
+    CTX_With
+};
+
+class Ctx {
+public:
+    Ctx(CtxType tag, Ctx* next)
+        : tag(tag)
+        , next(next)
+    {
+    }
+    
+    const CtxType  tag;
+    Ctx * const    next;
+    
+    bool mustPushThis();           // context requires a 'this' value to be pushed onto the scope chain
+    bool mustPushScopeReg();       // context requires a scope object stored in a scope register to be pushed onto the scope chain
+};
+
+class ControlFlowCtx : public Ctx {
+public:
+    ControlFlowCtx(CtxType tag, Label* label, Ctx* ctx0)
+        : Ctx(tag, ctx0)
+        , label(label)
+    {
+    }
+    Label * const label;
+};
+
+class BreakCtx : public ControlFlowCtx {
+public:
+    BreakCtx(Label* label, Ctx* ctx0, Str* label_name=NULL)
+        : ControlFlowCtx(CTX_Break, label, ctx0)
+        , label_name(label_name)
+    {
+    }
+    Str * const label_name;
+};
+
+class ContinueCtx : public ControlFlowCtx {
+public:
+    ContinueCtx(Label* label, Seq<Str*>* label_names, Ctx* ctx0) 
+        : ControlFlowCtx(CTX_Continue, label, ctx0)
+        , label_names(label_names)
+    {
+    }
+    Seq<Str*>* const label_names;
+};
+
+// Represents a scope to restore to the scope chain, pushed by 'with'
+// or 'catch' or reified activation objects, see subclasses.
+
+class ScopeCtx : public Ctx {
+public:
+    ScopeCtx(CtxType tag, uint32_t scope_reg, Ctx* ctx0)
+        : Ctx(tag, ctx0)
+        , scope_reg(scope_reg)
+    {
+    }
+    const uint32_t scope_reg;
+};
+
+class WithCtx : public ScopeCtx {
+public:
+    WithCtx(uint32_t scope_reg, Ctx* ctx0)
+        : ScopeCtx(CTX_With, scope_reg, ctx0)
+    {
+    }
+};
+
+struct CatchCtx : public ScopeCtx {
+    CatchCtx(uint32_t scope_reg, Ctx* ctx0)
+        : ScopeCtx(CTX_Catch, scope_reg, ctx0)
+    {
+    }
+};
+
+class ActivationCtx : public ScopeCtx {
+public:
+    ActivationCtx(uint32_t scope_reg, Ctx* ctx0)
+        : ScopeCtx(CTX_Activation, scope_reg, ctx0)
+    {
+    }
+};
+
+class FinallyCtx : public Ctx {
+public:
+    FinallyCtx(Allocator* allocator, Label* Lfinally, uint32_t returnreg, Ctx* ctx0)
+        : Ctx(CTX_Finally, ctx0)
+        , Lfinally(Lfinally)
+        , returnreg(returnreg)
+        , nextLabel(0)
+        , returnLabels(allocator)
+    {
+    }
+    
+    uint32_t addReturnLabel(Label* l);
+    
+    Label * const Lfinally;
+    const uint32_t returnreg;
+    uint32_t nextLabel;
+    SeqBuilder<Label*> returnLabels;
+};
+
+class FunctionCtx : public Ctx {
+public:
+    FunctionCtx(Allocator* allocator)
+        : Ctx(CTX_Function, NULL)
+        , namespaces(allocator)
+    {
+    }
+    SeqBuilder<NamespaceDefn*> namespaces;
+};
+
+class ProgramCtx : public Ctx {
+public:
+    ProgramCtx(Allocator* allocator, uint32_t capture_reg) 
+        : Ctx(CTX_Program, NULL)
+        , namespaces(allocator)
+        , capture_reg(capture_reg)
+    {
+    }
+    SeqBuilder<NamespaceDefn*> namespaces;
+    const uint32_t capture_reg;
+};
+
 /**
  * Instruction and value emitter.
  *
