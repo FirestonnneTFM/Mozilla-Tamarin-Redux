@@ -634,6 +634,8 @@ class RuntestBase:
         for i in range(len(startDir)):
             if startDir[i][-1] == '/':
                 startDir[i] = startDir[i][:-1]
+            if startDir[i].startswith('./'):
+                startDir[i] = startDir[i][2:]
         tests = [a for a in startDir if isfile(a) and self.istest(a, fileExtentions)]
         for a in [d for d in startDir if isdir(d) and not (basename(d) in self.exclude)]:
             for d, dirs, files in walk(a, followlinks=True):
