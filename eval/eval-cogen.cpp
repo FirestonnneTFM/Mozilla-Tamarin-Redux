@@ -389,7 +389,7 @@ namespace avmplus
         {
             Compiler* compiler = cogen->compiler;
             ABCFile* abc = cogen->abc;
-            uint32_t activation = 0;
+            uint32_t activation = 0;    // 0 means "unallocated"
             FunctionDefn* fn = NULL;
             
             if (tag == CODE_Function)
@@ -435,6 +435,7 @@ namespace avmplus
                     ns = abc->addNamespace(CONSTANT_Namespace, cogen->emitString(compiler->intern(compiler->namespace_counter++)));
                 else if (value->tag() == TAG_literalString)
                     ns = abc->addNamespace(CONSTANT_ExplicitNamespace, cogen->emitString(((LiteralString*)value)->value));
+                AvmAssert(activation != 0);
                 cogen->I_getlocal(activation);
                 if (ns != 0)
                     cogen->I_pushnamespace(ns);
@@ -458,11 +459,13 @@ namespace avmplus
                 Seq<FunctionParam*>* params=fn->params;
                 for ( ; params != NULL ; params = params->tl, i++ ) {
                     uint32_t id = abc->addQName(compiler->NS_public, cogen->emitString(params->hd->name));
+                    AvmAssert(activation != 0);
                     cogen->I_getlocal(activation);
                     cogen->I_getlocal(i);
                     cogen->I_setproperty(id);
                 }
                 if (fn->uses_arguments || fn->rest_param) {
+                    AvmAssert(activation != 0);
                     cogen->I_getlocal(activation);
                     cogen->I_getlocal(i);
                     if (fn->uses_arguments)

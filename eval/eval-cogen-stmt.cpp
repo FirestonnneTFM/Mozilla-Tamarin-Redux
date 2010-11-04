@@ -128,9 +128,9 @@ namespace avmplus
         void Program::cogenBody(Cogen* cogen, Ctx* ctx, uint32_t activation_reg)
         {
             (void)activation_reg;
-            AvmAssert(activation_reg == 0);
+            AvmAssert(activation_reg == 0);     // Because programs don't have activation records
             AvmAssert(ctx->tag == CTX_Program);
-            uint32_t capture_reg = cogen->getTemp();
+            uint32_t capture_reg = ((ProgramCtx*)ctx)->capture_reg;
             cogen->I_pushundefined();
             cogen->I_coerce_a();
             cogen->I_setlocal(capture_reg);
