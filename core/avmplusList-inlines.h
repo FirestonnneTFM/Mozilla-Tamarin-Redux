@@ -556,13 +556,13 @@ namespace avmplus
     template<class T>
     REALLY_INLINE typename GCList<T>::TYPE GCList<T>::first() const
     {
-        return (T)m_list.first();
+        return (TYPE)m_list.first();
     }
 
     template<class T>
     REALLY_INLINE typename GCList<T>::TYPE GCList<T>::last() const
     {
-        return (T)m_list.last();
+        return (TYPE)m_list.last();
     }
 
     template<class T>
