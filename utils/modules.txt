@@ -118,7 +118,7 @@ builtin avmplus::quickBigPowTen
 builtin avmplus::quickPowTen
 builtin avmplus::quickPowTwo
 builtin avmplus::powInt
-bulitin avmplus:ByteArrayGlue.obj
+builtin avmplus:ByteArrayGlue.obj
 builtin avmplus:DataIO.obj
 
 builtin avmplus:NumberClass.obj
