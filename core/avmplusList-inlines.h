@@ -517,6 +517,16 @@ namespace avmplus
         return newData;
     }
     
+    template<class T, class ListHelper>
+    REALLY_INLINE void ListImpl<T,ListHelper>::skipDestructor()
+    {
+        // Note that we explicit do not attempt to free the data here;
+        // this method should only be called in situations where we
+        // know that MMGC has already been torn down, thus an attempt
+        // to free the data would be unsafe.
+        m_data = NULL;
+    }
+
     // ----------------------------
 
 
@@ -667,6 +677,12 @@ namespace avmplus
         return m_list.bytesUsed();
     }
 
+    template<class T>
+    REALLY_INLINE void GCList<T>::skipDestructor()
+    {
+        m_list.skipDestructor();
+    }
+
     // ----------------------------
 
     template<class T>
@@ -813,6 +829,12 @@ namespace avmplus
     REALLY_INLINE uint64_t RCList<T>::bytesUsed() const
     {
         return m_list.bytesUsed();
+    }
+
+    template<class T>
+    REALLY_INLINE void RCList<T>::skipDestructor()
+    {
+        m_list.skipDestructor();
     }
 
 
@@ -969,6 +991,12 @@ namespace avmplus
         return m_list.bytesUsed();
     }
 
+    template<class T>
+    REALLY_INLINE void UnmanagedPointerList<T>::skipDestructor()
+    {
+        m_list.skipDestructor();
+    }
+
     // ----------------------------
 
     template<class T>
@@ -1117,6 +1145,12 @@ namespace avmplus
     REALLY_INLINE uint64_t WeakRefList<T>::bytesUsed() const
     {
         return m_list.bytesUsed();
+    }
+
+    template<class T>
+    REALLY_INLINE void WeakRefList<T>::skipDestructor()
+    {
+        m_list.skipDestructor();
     }
 
     // ----------------------------

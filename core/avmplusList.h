@@ -375,6 +375,13 @@ namespace avmplus
         // Return the number of bytes used for the ListImpl's dynamically-allocated storage.
         uint64_t bytesUsed() const; 
 
+        // Zero out the data field; this is necessary in unusual situations where the List's dtor
+        // can be run after MMGC is torn down (which would result in using a stale pointer).
+        // *** DANGER*** Most code should never need (or want) to use this call;
+        // it renders the list unsafe to use, and calling *any* method on the list afterwards
+        // (other than the dtor) will result in a crash. 
+        void skipDestructor();
+
     private:
         ListImpl<T,ListHelper>& operator=(const ListImpl<T,ListHelper>& other); // unimplemented
         explicit ListImpl(const ListImpl<T,ListHelper>& other);                 // unimplemented
@@ -432,6 +439,7 @@ namespace avmplus
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
+        void skipDestructor();
 
     private:
         GCList<T>& operator=(const GCList<T>& other);     // unimplemented
@@ -488,6 +496,7 @@ namespace avmplus
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
+        void skipDestructor();
 
     private:
         RCList<T>& operator=(const RCList<T>& other);     // unimplemented
@@ -544,6 +553,7 @@ namespace avmplus
         T operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
+        void skipDestructor();
 
     private:
         UnmanagedPointerList<T>& operator=(const UnmanagedPointerList<T>& other);       // unimplemented
@@ -592,6 +602,7 @@ namespace avmplus
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
+        void skipDestructor();
 
     private:
         WeakRefList<T>& operator=(const WeakRefList<T>& other);     // unimplemented

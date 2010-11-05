@@ -64,11 +64,16 @@ namespace avmplus
     template<class T, class ListHelper>
     ListImpl<T,ListHelper>::~ListImpl()
     {
-        AvmAssert(m_data != NULL);
-        if (m_data->len > 0)
-            ListHelper::clearRange(m_data, 0, m_data->len);
-        ListHelper::free(m_data->gc, m_data);
-        m_data = NULL;
+        // Normally, m_data can't be null, but a call to neuter() can 
+        // cause this to happen. This is necessary for certain shutdown
+        // conditions in Flash/AIR.
+        if (m_data != NULL)
+        {
+            if (m_data->len > 0)
+                ListHelper::clearRange(m_data, 0, m_data->len);
+            ListHelper::free(m_data->gc, m_data);
+            m_data = NULL;
+        }
     }
 
     template<class T, class ListHelper>
