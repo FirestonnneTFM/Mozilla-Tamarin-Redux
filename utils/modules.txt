@@ -88,6 +88,8 @@ nanojit avmplus:RegAlloc.obj
 nanojit avmplus:Allocator.obj
 nanojit avmplus:Containers.obj
 nanojit avmplus:njconfig.obj
+nanojit avmplus:exec.obj
+nanojit avmplus:exec-jit.obj
 
 vm avmplus:Interpreter.obj
 vm avmplus::Interpreter
@@ -100,6 +102,7 @@ vm avmplus::SortedIntMap
 vm avmplus::FrameState
 vm avmplus:FrameState.obj
 vm avmplus:Coder.obj
+vm vmbase:AvmAssert.obj
 
 builtin avmplus:MathUtils.obj
 builtin avmplus:MathClass.obj
@@ -115,6 +118,8 @@ builtin avmplus::quickBigPowTen
 builtin avmplus::quickPowTen
 builtin avmplus::quickPowTwo
 builtin avmplus::powInt
+bulitin avmplus:ByteArrayGlue.obj
+builtin avmplus:DataIO.obj
 
 builtin avmplus:NumberClass.obj
 builtin avmplus:IntClass.obj
@@ -208,6 +213,7 @@ vm avmplus:Multiname.obj
 vm avmplus:NamespaceSet.obj
 vm avmplus:BuiltinTraits.obj
 vm avmplus:Domain.obj
+vm avmplus:DomainMgr.obj
 vm avmplus:DomainEnv.obj
 vm avmplus:VTable.obj
 vm avmplus:NativeFunction.obj
