@@ -171,14 +171,8 @@ return *((intptr_t*)&_method);
 #endif
 
 #ifdef AVMPLUS_64BIT
-#define AVMCORE_integer         AvmCore::integer64
-#define AVMCORE_integer_d       AvmCore::integer64_d
-#define AVMCORE_integer_d_sse2  AvmCore::integer64_d_sse2
 #define PTR_SCALE 3
 #else
-#define AVMCORE_integer         AvmCore::integer
-#define AVMCORE_integer_d       AvmCore::integer_d
-#define AVMCORE_integer_d_sse2  AvmCore::integer_d_sse2
 #define PTR_SCALE 2
 #endif
 
@@ -3624,65 +3618,93 @@ namespace avmplus
     {
         LIns *arg = localGetf(loc);
         LOpcode op = arg->opcode();
-        if (isPromote(op))
-            return arg->oprnd1();
-        if (op == LIR_addd || op == LIR_subd || op == LIR_muld) {
-            LIns *a = arg->oprnd1();
-            a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
-            if (a) {
-                LIns *b = arg->oprnd2();
-                b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
-                if (b)
-                    return lirout->ins2(arithOpcodeD2I(op), a, b);
+        switch (op) {
+            case LIR_ui2d:
+            case LIR_i2d:
+                return arg->oprnd1();
+            case LIR_addd:
+            case LIR_subd:
+            case LIR_muld: {
+                LIns *a = arg->oprnd1();
+                a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
+                if (a) {
+                    LIns *b = arg->oprnd2();
+                    b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
+                    if (b)
+                        return lirout->ins2(arithOpcodeD2I(op), a, b);
+                }
+                break;
             }
-        }
-        // optimize integer division when divisor is non-zero constant integer
-        else if (op == LIR_divd) {
-            LIns *a = arg->oprnd1();
-            LOpcode aOpcode = a->opcode();
-            a = isPromote(aOpcode) ? a->oprnd1() : imm2Int(a);
-            if (a) {
-                LIns *b = arg->oprnd2();
-                b = imm2Int(b);
-                if (b) {
-                    int32_t intConst = b->immI();
-                    if (intConst) {
-                        // use faster unsigned right shift if our arg is unsigned and
-                        // we have just one bit set in the divisor.
-                        if (exactlyOneBit(intConst) && aOpcode == LIR_ui2d) {
-                            return lirout->ins2(LIR_rshui, a, lirout->insImmI(msbSet32(intConst)));
-                        }
+            // optimize integer division when divisor is non-zero constant integer
+            case LIR_divd: {
+                LIns *a = arg->oprnd1();
+                LOpcode aOpcode = a->opcode();
+                a = isPromote(aOpcode) ? a->oprnd1() : imm2Int(a);
+                if (a) {
+                    LIns *b = arg->oprnd2();
+                    b = imm2Int(b);
+                    if (b) {
+                        int32_t intConst = b->immI();
+                        if (intConst) {
+                            // use faster unsigned right shift if our arg is unsigned and
+                            // we have just one bit set in the divisor.
+                            if (exactlyOneBit(intConst) && aOpcode == LIR_ui2d) {
+                                return lirout->ins2(LIR_rshui, a, lirout->insImmI(msbSet32(intConst)));
+                            }
 #if NJ_DIVI_SUPPORTED
-                        else {
-                            return lirout->ins2(LIR_divi, a, b);
-                        }
+                            else {
+                                return lirout->ins2(LIR_divi, a, b);
+                            }
 #endif // NJ_DIVI_SUPPORTED
+                        }
                     }
                 }
+                break;
+            }
+#ifdef AVMPLUS_64BIT
+            case LIR_immq:
+#endif // AVMPLUS_64BIT
+            case LIR_immd:
+                // const fold
+                return InsConst(AvmCore::integer_d(arg->immD()));
+            // Try to replace a call returning a double, which will then be
+            // coerced to an integer, with a call that will produce an equivalent
+            // integer value directly.
+            case LIR_calld: {
+                LIns* specialized = specializeIntCall(arg, coerceDoubleToInt);
+                if (specialized)
+                    return specialized;
             }
         }
 
-        // Try to replace a call returning a double, which will then be
-        // coerced to an integer, with a call that will produce an equivalent
-        // integer value directly.
-        if (op == LIR_calld) {
-            LIns* specialized = specializeIntCall(arg, coerceDoubleToInt);
-            if (specialized)
-                return specialized;
+        // For SSE capable machines, inline our double to integer conversion
+        // using the CVTTSD2SI instruction.  If we get a 0x80000000 return
+        // value, our double is outside the valid integer range we fallback
+        // to calling doubleToInt32.
+#if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
+#ifndef AVMPLUS_AMD64
+        SSE2_ONLY(if(core->config.njconfig.i386_sse2))
+#endif // AVMPLUS_AMD64       
+        {
+            suspendCSE();
+            CodegenLabel skip_label("goodint");
+            LIns* intResult = insAlloc(sizeof(int32_t));
+            LIns* fastd2i = lirout->ins1(LIR_d2i, arg);
+            sti(fastd2i, intResult, 0, ACCSET_STORE_ANY);      // int32_t index
+            LIns *c = binaryIns(LIR_eqi, fastd2i, InsConst(1L << 31));
+            branchToLabel(LIR_jf, c, skip_label);
+            LIns *funcCall = callIns(FUNCTIONID(doubleToInt32), 1, arg);
+            sti(funcCall, intResult, 0, ACCSET_STORE_ANY);      // int32_t index
+            emitLabel(skip_label);
+            LIns *result = loadIns(LIR_ldi, 0, intResult, ACCSET_LOAD_ANY);
+            resumeCSE();
+            return result;
         }
+#endif // AVMPLUS_IA32 || AVMPLUS_AMD64
 
-#ifdef AVMPLUS_64BIT
-        else if (op == LIR_immq) {
-            // const fold
-            return InsConst(AvmCore::integer_d(arg->immD()));
-        }
-#endif
-
-        SSE2_ONLY(if(core->config.njconfig.i386_sse2) {
-            return callIns(FUNCTIONID(integer_d_sse2), 1, arg);
-        })
-
-        return callIns(FUNCTIONID(integer_d), 1, arg);
+#ifndef AVMPLUS_AMD64
+         return callIns(FUNCTIONID(integer_d), 1, arg);
+#endif // AVMPLUS_AMD64
     }
 
 
