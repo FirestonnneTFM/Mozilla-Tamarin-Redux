@@ -290,36 +290,6 @@ REALLY_INLINE /*static*/ double AvmCore::toInteger(Atom atom)
     }
 }
 
-#ifdef AVMPLUS_64BIT
-
-REALLY_INLINE /*static*/ int64_t AvmCore::integer64(Atom atom)
-{
-    return (int64_t)integer(atom);
-}
-
-REALLY_INLINE /*static*/ int64_t AvmCore::integer64_i(Atom atom)
-{
-    return (int64_t)integer_i(atom);
-}
-
-REALLY_INLINE /*static*/ int64_t AvmCore::integer64_d(double d)
-{
-#ifdef AVMPLUS_AMD64
-    return (int64_t)integer_d_sse2(d);
-#else
-    return (int64_t)integer_d(d);
-#endif
-}
-
-#ifdef AVMPLUS_AMD64
-REALLY_INLINE /*static*/ int64_t AvmCore::integer64_d_sse2(double d)
-{
-    return (int64_t)integer_d_sse2(d);
-}
-#endif
-
-#endif // AVMPLUS_64BIT
-
 REALLY_INLINE /*static*/ int32_t AvmCore::integer_i(Atom a)
 {
     if (atomIsIntptr(a))

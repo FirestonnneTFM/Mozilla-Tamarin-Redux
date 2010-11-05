@@ -1093,14 +1093,6 @@ const int kBufferPadding = 16;
          * decoded.  Otherwise, it is coerced to the int type
          * and returned.  This is ToInt32() from E3 section 9.5
          */
-#ifdef AVMPLUS_64BIT
-        static  int64_t integer64(Atom atom);
-        static  int64_t integer64_i(Atom atom);
-        static  int64_t integer64_d(double d);
-    #ifdef AVMPLUS_AMD64
-        static  int64_t integer64_d_sse2(double d);
-    #endif
-#endif
         static int32_t integer(Atom atom);
 
         // convert atom to integer when we know it is already a legal signed-32 bit int value
@@ -1117,7 +1109,6 @@ const int kBufferPadding = 16;
         Atom doubleToAtom_sse2(double n);
 #endif
 
-    private:
         static int doubleToInt32(double d);
 
     public:
