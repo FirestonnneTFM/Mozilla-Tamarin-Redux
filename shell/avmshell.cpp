@@ -805,6 +805,10 @@ namespace avmshell
                     settings.cacheSizes.methods = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
                 }
 #ifdef VMCFG_NANOJIT
+                else if (!VMPI_strcmp(arg, "-jitharden")) {
+                    settings.njconfig.harden_nop_insertion = true;
+                    settings.njconfig.harden_function_alignment = true;
+                }
                 else if (!VMPI_strcmp(arg, "-Ojit")) {
                     settings.runmode = RM_jit_all;
                 }
