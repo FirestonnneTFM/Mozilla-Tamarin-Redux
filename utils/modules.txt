@@ -351,6 +351,7 @@ shell WinPortUtils.obj
 shell avmshellWin.obj
 shell WinFile.obj
 shell WinDebugUtils.obj
+shell <linker-defined>
 
 darkMatter <Anon *
 
