@@ -33,15 +33,15 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK ***** 
+ * ***** END LICENSE BLOCK *****
  *
 * See http://bugzilla.mozilla.org/show_bug.cgi?id=606478
-* 
+*
 */
 
 var SECTION = "606478";
 var VERSION = "AS3";
-var TITLE   = "Bug 606478";
+var TITLE   = "Bug 606478 - Test only works in North America";
 var bug = "606478";
 
 startTest();
@@ -56,14 +56,29 @@ function getTestCases() {
     var status:String = '';
     var actual:String = '';
     var expect:String= '';
+    var x:int = 0;
 
-    var d2:Date = new Date(2010, 2, 14, 2);
-    status = "new Date(2010, 2, 14, 2)";
-	
-    actual = d2.toLocaleString();
-    expect = "Sun Mar 14 2010 03:00:00 AM";
-
-    array[0] = new TestCase(SECTION, status, expect, actual);
+    // Check DST start for 1990-2006 (first sunday in april)
+    for (var year=1990; year<=2006; year++) {
+        // Get the correct sunday
+        var date:Date = new Date(GetFirstSundayInApril(TimeFromYear(year)));
+        // set the time to 2 am
+        actual = (new Date(date.toLocaleDateString()+" 02:00:00 AM")).toLocaleString();
+        status = "new Date("+date.toLocaleDateString()+" 02:00:00 AM)";
+        expect = date.toLocaleDateString()+" 03:00:00 AM"
+        array[x++] = new TestCase(SECTION, status, expect, actual);
+    }
+    
+    // Check DST start for 2007-2015 (second sunday in march)
+    for (var year=2007; year<=2015; year++) {
+        // Get the correct sunday
+        var date:Date = new Date(GetSecondSundayInMarch(TimeFromYear(year)));
+        // set the time to 2 am
+        actual = (new Date(date.toLocaleDateString()+" 02:00:00 AM")).toLocaleString();
+        status = "new Date("+date.toLocaleDateString()+" 02:00:00 AM)";
+        expect = date.toLocaleDateString()+" 03:00:00 AM"
+        array[x++] = new TestCase(SECTION, status, expect, actual);
+    }
 
     return array;
 }

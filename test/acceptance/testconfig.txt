@@ -68,7 +68,8 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # BUGS:
 # Grouped by feature or platform
 
-regress/bug_606478, mips-lnx-tvm.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=606478
+# Some operating systems do not adjust past dates for historical DST settings
+regress/bug_606478:.*(19\d\d|200[0-6]).*, (mips-lnx|win(?!.*diff)).*, expectedfail, Operating system does not adjust past dates for historical DST settings
 
 # https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 mmgc/outofmemory , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=541358
@@ -551,3 +552,5 @@ ecma3/Expressions/e11_2_1_5, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https:
 ecma3/ObjectObjects/e15_2_1_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
 ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
 ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+
+
