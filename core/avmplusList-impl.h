@@ -349,6 +349,22 @@ namespace avmplus
         }
     }
 
+    template<class T, class ListHelper>
+    uint32_t ListImpl<T,ListHelper>::removeNullItems()
+    {
+        // Prune back-to-front to avoid unnecessary memory copies
+        uint32_t removed = 0;
+        for (uint32_t i = m_data->len; i > 0; --i)
+        {
+            if (ListHelper::load(m_data, i-1) == (T)0)
+            {
+                ListHelper::clearRange(m_data, i-1, 1);
+                ++removed;
+            }
+        }
+        m_data->len -= removed;
+        return removed;
+	}
 }
 
 #endif /* __avmplus_List_impl__ */

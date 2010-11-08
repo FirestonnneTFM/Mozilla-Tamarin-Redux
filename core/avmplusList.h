@@ -382,6 +382,12 @@ namespace avmplus
         // (other than the dtor) will result in a crash. 
         void skipDestructor();
 
+        // This removes all items from the list that have have a value of null/0. 
+        // This is currently used only to implement WeakRefList::removeCollectedItems,
+        // and is not exposed via other lists.
+        // Return the number of items removed.
+        uint32_t removeNullItems();
+
     private:
         ListImpl<T,ListHelper>& operator=(const ListImpl<T,ListHelper>& other); // unimplemented
         explicit ListImpl(const ListImpl<T,ListHelper>& other);                 // unimplemented
@@ -603,6 +609,10 @@ namespace avmplus
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
         void skipDestructor();
+
+        // This removes all items from the list that have been collected. 
+        // Return the number of items removed.
+        uint32_t removeCollectedItems();
 
     private:
         WeakRefList<T>& operator=(const WeakRefList<T>& other);     // unimplemented

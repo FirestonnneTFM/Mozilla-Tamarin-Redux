@@ -1153,6 +1153,12 @@ namespace avmplus
         m_list.skipDestructor();
     }
 
+    template<class T>
+    REALLY_INLINE uint32_t WeakRefList<T>::removeCollectedItems()
+    {
+        return m_list.removeNullItems();
+    }
+
     // ----------------------------
 
     template<class T>
