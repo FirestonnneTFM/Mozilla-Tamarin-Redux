@@ -41,14 +41,19 @@
  */
 
 // import flash.system in order to determine what we are being run in
-import flash.system.Capabilities;
+import flash.system.*;
 var playerType:String = Capabilities.playerType;
 
 
 var	completed =	false;
 var	testcases; 
 var tc = 0;
-//var version; // ISSUE:: need to know why we need to comment this out
+
+// SECTION and VERSION cannot be 'var' because this file is included into 
+// test cases where SECTION and VERSION are redefined with 'var'; ASC
+// barfs on that.  On the other hand, that means every test /must/
+// define SECTION and VERSION, or the eval tests will not work because
+// this file is not included into the test case when testing with eval.
 
 SECTION	= "";
 VERSION	= "";

@@ -45,6 +45,8 @@
  */
 //-------------------------------------------------------------------------------------------------
 var THE_ERROR = "return_error";
+var SECTION = "exception regression";
+var VERSION = "ECMA_3";
 
 startTest();
 
