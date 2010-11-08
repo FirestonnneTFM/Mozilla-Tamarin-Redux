@@ -292,5 +292,136 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
     return ::InterlockedCompareExchange((LPLONG)&lock->lock, 1, 0) == 0;
 }
 
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
+{
+#ifdef UNDER_CE
+    return InterlockedIncrement(const_cast<LONG*>((volatile LONG*)value)); // Barrier semantics are not actually documented
+#else
+    return InterlockedIncrement((volatile LONG*)value);
+#endif
+}
+
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
+{
+    // No barrier-less version is available
+    return VMPI_atomicIncAndGet32WithBarrier(value);
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
+{
+#ifdef UNDER_CE
+    return InterlockedDecrement(const_cast<LONG*>((volatile LONG*)value)); // Barrier semantics are not actually documented
+#else
+    return InterlockedDecrement((volatile LONG*)value);
+#endif
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32(volatile int32_t* value)
+{
+    // No barrier-less version is available
+    return VMPI_atomicDecAndGet32WithBarrier(value);
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+#ifdef UNDER_CE
+    return InterlockedCompareExchange(const_cast<LONG*>((volatile LONG*)address), newValue, oldValue) == oldValue;  // Barrier semantics are not actually documented
+#else
+    return InterlockedCompareExchange((volatile LONG*)address, newValue, oldValue) == oldValue;
+#endif
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+    return VMPI_compareAndSwap32WithBarrier(oldValue, newValue, address);
+}
+
+REALLY_INLINE void VMPI_memoryBarrier()
+{
+    // FIXME: bug 609820 Memory barrier (fence) for win32
+    //
+    // void MemoryBarrier(void) is only available >= Vista
+    // This is a temp solution until we have a x86 asm version.
+    volatile int32_t dummy;
+    VMPI_atomicIncAndGet32WithBarrier(&dummy);
+}
+
+/**
+ * Threads waiting on a conditional variable are recorded in a list
+ * of WaitingThread structs.
+ */
+struct WaitingThread {
+    WaitingThread* next;
+    DWORD threadID;
+    bool notified;
+};
+
+/**
+ * A condition variable is implemented as a linked list of waiting threads.
+ * The variable itself needs to record only the head and the tail of the list.
+ */
+struct vmpi_condvar_t {
+    WaitingThread* head;
+    WaitingThread* tail;
+};
+
+typedef CRITICAL_SECTION       vmpi_mutex_t;
+typedef LPVOID                 vmpi_thread_arg_t; // Argument type for thread start function
+typedef DWORD                  vmpi_thread_rtn_t; // Return type for thread start function
+typedef LPTHREAD_START_ROUTINE vmpi_thread_start_t;
+
+struct vmpi_thread_attr_t {
+    size_t stackSize;
+    size_t guardSize;
+    int priority;
+};
+
+#define VMPI_THREAD_START_CC   WINAPI
+
+REALLY_INLINE bool VMPI_recursiveMutexInit(vmpi_mutex_t* mutex)
+{
+    InitializeCriticalSection(mutex);
+    return true;
+}
+
+REALLY_INLINE bool VMPI_recursiveMutexDestroy(vmpi_mutex_t* mutex)
+{
+    DeleteCriticalSection(mutex);
+    return true;
+}
+
+REALLY_INLINE bool VMPI_recursiveMutexTryLock(vmpi_mutex_t* mutex)
+{
+    return TryEnterCriticalSection(mutex) != 0;
+}
+
+REALLY_INLINE void VMPI_recursiveMutexLock(vmpi_mutex_t* mutex)
+{
+    EnterCriticalSection(mutex);
+}
+
+REALLY_INLINE void VMPI_recursiveMutexUnlock(vmpi_mutex_t* mutex)
+{
+    LeaveCriticalSection(mutex);
+}
+
+REALLY_INLINE bool VMPI_condVarInit(vmpi_condvar_t* condvar)
+{
+    condvar->head = NULL;
+    condvar->tail = NULL;
+    return true;
+}
+
+REALLY_INLINE bool VMPI_condVarDestroy(vmpi_condvar_t* condvar)
+{
+    (void)condvar;
+    return true;
+}
+
+REALLY_INLINE vmpi_thread_t VMPI_currentThread()
+{
+    return (vmpi_thread_t) (uintptr_t)GetCurrentThreadId();
+}
+
 #endif // __avmplus_win32_platform__
 
