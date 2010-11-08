@@ -3245,10 +3245,10 @@ namespace avmplus
                  // explicitly convert to string
                 return emitStringCall (index, FUNCTIONID(string), preserveNull);
             }
-        } else {
-             // already String*
-             return localGetp(index);
         }
+
+        // already String*
+        return localGetp(index);
      }
 
     void CodegenLIR::writeNip(const FrameState* state, const uint8_t *pc)
