@@ -105,11 +105,13 @@ enum QualifierTag {
 
 class Qualifier {
 public:
-    Qualifier() : tag(QUAL_none), is_native(false), is_static(false), is_prototype(false), name(NULL) {}
+    Qualifier() : tag(QUAL_none), is_native(false), is_static(false), is_prototype(false), is_dynamic(false), is_override(false), name(NULL) {}
     QualifierTag tag;
     bool is_native;
     bool is_static;
     bool is_prototype;
+    bool is_dynamic;
+    bool is_override;
     Str* name;
 };
 
@@ -274,6 +276,7 @@ enum NameTag {
     TAG_simpleName,             // instance of SimpleName
     TAG_wildcardName,           // instance of WildcardName
     TAG_computedName,           // instance of ComputedName
+    TAG_builtinNamespace,       // instance of BuiltinNamespace
 };
 
 
@@ -471,6 +474,13 @@ public:
     Seq<Expr*>* const arguments;
 };
 
+class SuperExpr : public Expr {
+public:
+    SuperExpr(Expr* obj) : obj(obj) {}
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+    Expr* const obj;
+};
+
 class ConditionalExpr : public Expr {
 public:
     ConditionalExpr(Expr* e1, Expr* e2, Expr* e3) : e1(e1), e2(e2), e3(e3) {}
@@ -620,6 +630,13 @@ public:
     Expr* const expr;
 };
 
+// private, protected, public, internal
+class BuiltinNamespace : public NameComponent {
+public:
+    BuiltinNamespace(Token t) : t(t) {}
+    virtual NameTag tag() const { return TAG_builtinNamespace; }
+    const Token t;
+};
 
 // Statement nodes
 
@@ -815,6 +832,16 @@ public:
     Stmt* const body;
 };
 
+// This is for base class constructor calls; base class method calls are represented
+// as ExprStmts containing ObjectRef nodes with a SuperExpr left-hand-side and a CallExpr
+// right-hand-side.
+class SuperStmt : public Stmt {
+public:
+    SuperStmt(uint32_t pos, Seq<Expr*>* arguments) : Stmt(pos), arguments(arguments) {}
+    virtual void cogen(Cogen* cogen, Ctx* ctx);
+    Seq<Expr*>* const arguments;
+};
+
 class DefaultXmlNamespaceStmt : public Stmt {
 public:
     DefaultXmlNamespaceStmt(uint32_t pos, Expr* expr) : Stmt(pos), expr(expr) {};
@@ -884,9 +911,9 @@ private:
     void classDefinition(int flags, Qualifier* qual);
     void interfaceDefinition(int flags, Qualifier* qual);
     void namespaceDefinition(int flags, Qualifier* qualifier);
-    void functionDefinition(Qualifier* qualifier);
+    void functionDefinition(Qualifier* qualifier, bool getters_and_setters, bool require_body);
     Stmt* variableDefinition(Qualifier* qualifier);
-    FunctionDefn* functionGuts(Qualifier* qual, bool require_name);
+    FunctionDefn* functionGuts(Qualifier* qual, bool require_name, bool getters_and_setters, bool require_body);
     Expr* varBindings(uint32_t* pos, bool is_const=false, int flags=0, uint32_t* numbindings=NULL, Expr** firstName=NULL);
     bool namespaceQualifier(int flags, Qualifier* qualifier);
     
@@ -913,6 +940,7 @@ private:
     Seq<Expr*>* argumentList();
     Expr* memberExpression();
     Expr* memberExpressionPrime(Expr* expr);
+    Expr* superExpression();
     Expr* callExpression();
     Expr* callExpressionPrime(Expr* call_expr);
     Expr* newExpression (int new_count=0);
@@ -960,6 +988,7 @@ private:
     Stmt* importStatement();
     Stmt* varStatement(bool is_const);
     Stmt* withStatement();
+    Stmt* superStatement();
 
     // Xml initializers
     

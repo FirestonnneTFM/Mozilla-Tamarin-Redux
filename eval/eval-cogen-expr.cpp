@@ -387,7 +387,7 @@ namespace avmplus
                     break;
                     
                 default:
-                    compiler->internalError(pos, "Unimplemented unary operation");
+                    compiler->internalError(pos, "Unrecognized unary operation");
             }
         }
         
@@ -798,6 +798,13 @@ namespace avmplus
             Name n(cogen, ctx, name);
             n.setup();
             cogen->I_getdescendants(n.sym);
+        }
+        
+        void SuperExpr::cogen(Cogen* cogen, Ctx* ctx)
+        {
+			(void)ctx;
+            Compiler* compiler = cogen->compiler;
+            compiler->internalError(pos, "Unimplemented: superExpr");
         }
     }
 }

@@ -244,8 +244,8 @@ namespace avmplus
          * tends to be very rare in practice.
          *
          * Note that subscanners that consume input until something
-         * happens (like strings and comments) will need to check for 0 as
-         * well.
+         * happens (like strings and comments and xml) will need to check 
+         * for 0 as well.
          */
         Token Lexer::lexImpl()
         {
@@ -398,6 +398,10 @@ namespace avmplus
                                 
                             case '&':
                                 idx++;
+                                if (*idx == '=') {
+                                    idx++;
+                                    return T_LogicalAndAssign;
+                                }
                                 return T_LogicalAnd;
                                 
                             default:
@@ -433,6 +437,10 @@ namespace avmplus
                                 
                             case '|':
                                 idx++;
+                                if (*idx == '=') {
+                                    idx++;
+                                    return T_LogicalOrAssign;
+                                }
                                 return T_LogicalOr;
                                 
                             default:
@@ -499,7 +507,7 @@ namespace avmplus
                         
                     case '@':
                         return T_AtSign;
-
+                        
                         // Begin generated code
                     case 'a': 
                         if (idx[0] == 's' &&
@@ -613,6 +621,18 @@ namespace avmplus
                                     goto bigswitch_end;
                                 idx += 1;
                                 return T_Do;
+                            case 'y': 
+                                if (idx[1] == 'n' &&
+                                    idx[2] == 'a' &&
+                                    idx[3] == 'm' &&
+                                    idx[4] == 'i' &&
+                                    idx[5] == 'c' &&
+                                    !compiler->es3_keywords &&
+                                    notPartOfIdent(idx[6])) {
+                                    idx += 6;
+                                    return T_Dynamic;
+                                }
+                                goto bigswitch_end;
                             default:
                                 goto bigswitch_end;
                         }
@@ -818,6 +838,20 @@ namespace avmplus
                             default:
                                 goto bigswitch_end;
                         }
+                    case 'o': 
+                        if (idx[0] == 'v' &&
+                            idx[1] == 'e' &&
+                            idx[2] == 'r' &&
+                            idx[3] == 'r' &&
+                            idx[4] == 'i' &&
+                            idx[5] == 'd' &&
+                            idx[6] == 'e' &&
+                            !compiler->es3_keywords &&
+                            notPartOfIdent(idx[7])) {
+                            idx += 7;
+                            return T_Override;
+                        }
+                        goto bigswitch_end;
                     case 'p': 
                         switch(idx[0]) {
                             case 'a': 
@@ -1045,7 +1079,7 @@ namespace avmplus
                         int c = idx[-1];
                         
                         // No-break space.
-
+                        
                         if (c == 0x00A0)
                             continue;
                         
@@ -1102,7 +1136,7 @@ namespace avmplus
                 // If the scanner is used to re-check whether an identifier
                 // containing a backslash sequence looks like a keyword then
                 // we can stop here.
-
+                
                 if (keyword_or_ident) {
                     DEBUG_ONLY(last_token = T_Identifier);
                     return T_Identifier;
