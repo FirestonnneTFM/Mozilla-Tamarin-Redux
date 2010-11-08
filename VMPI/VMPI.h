@@ -597,4 +597,352 @@ extern void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg
  */
 extern uintptr_t VMPI_getThreadStackBase();
 
+/**
+ * Atomically increments and returns the value pointed to by 'value'.
+ * If the implementation allows, then no memory barrier will be applied.
+ *
+ * @param value Points to the value to increment
+ * @return The incremented value
+ */
+extern int32_t VMPI_atomicIncAndGet32(volatile int32_t* value);
+
+/**
+ * Atomically increments and returns the value pointed to by 'value'.
+ * The operation includes a full memory barrier.
+ *
+ * @param value Points to the value to increment
+ * @return The incremented value
+ */
+extern int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value);
+
+/**
+ * Atomically decrements and returns the value pointed to by 'value'.
+ * If the implementation allows, then no memory barrier will be applied.
+ *
+ * @param value Points to the value to increment
+ * @return The decremented value
+ */
+extern int32_t VMPI_atomicDecAndGet32(volatile int32_t* value);
+
+/**
+ * Atomically decrements and returns the value pointed to by 'value'.
+ * The operation includes a full memory barrier.
+ *
+ * @param value Points to the value to increment
+ * @return The decremented value
+ */
+extern int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value);
+
+/**
+ * Performs an atomic Compare-And-Swap operation.
+ * If the contents at 'address' are equal to 'oldValue', then they
+ * are replaced with 'newValue'.
+ *
+ * @param oldValue The value to compare
+ * @param newValue The value to swap-in, if oldValue is the current value
+ * @param address The address of the value to update
+ * @return true if the update was successful
+ */
+extern bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address);
+
+/**
+ * Performs an atomic Compare-And-Swap operation.
+ * If the contents at 'address' are equal to 'oldValue', then they
+ * are replaced with 'newValue'.
+ *
+ * The operation includes a full memory barrier.
+ *
+ * @param oldValue The value to compare
+ * @param newValue The value to swap-in, if oldValue is the current value
+ * @param address The address of the value to update
+ * @return true if the update was successful
+ */
+extern bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address);
+
+/**
+ * Inserts a read and write memory barrier (fence).
+ */
+extern void VMPI_memoryBarrier();
+
+/**
+ * Creates a new thread to start immediate execution at the function 'start_fn',
+ * with the argument 'arg'.
+ *
+ * The thread will be created with attributes described by 'attr'. If attr is NULL
+ * then the platform's default attributes will be used. Changing values within attr
+ * after the thread has started execution has no effect.
+ * Note that it is platform dependent if non-default attributes are honored or completely ignored.
+ * As of Nov 2010, support should be:
+ *               pthread     win32 (XP version APIs)
+ * priority        no         yes
+ * stack size      yes        yes
+ * guard size      yes        no
+ *
+ *
+ * @param thread On successful thread creation, the thread's id is stored into the location referenced by 'thread'
+ * @param attr The attributes with which to start the thread. If NULL, then the platform's default attributes will be used
+ * @param start_fn The starting function of the new thread
+ * @param arg The single argument to be passed to start_fn
+ * @return true if the new thread was successfully created
+ */
+extern bool VMPI_threadCreate(vmpi_thread_t* thread, vmpi_thread_attr_t* attr, vmpi_thread_start_t start_fn, vmpi_thread_arg_t arg);
+
+/**
+ * Indicates to the thread implementation that resources for the given thread
+ * can be reclaimed when the thread terminates.
+ * After a thread has been detached, any attempt to join the thread has undefined behavior.
+ * Multiple detachments of the same thread results in undefined behavior.
+ *
+ * @param thread The thread to detach
+ * @return true if the thread was successfully detached
+ */
+extern bool VMPI_threadDetach(vmpi_thread_t thread);
+
+/**
+ * De-schedules the calling thread for 'timeout_millis' milliseconds.
+ * The thread may spuriously awaken before the timeout.
+ *
+ * @param timeout_millis The length of time to sleep (in milliseconds)
+ */
+extern void VMPI_threadSleep(int32_t timeout_millis);
+
+/**
+ * Causes the calling thread to block until the given thread has terminated.
+ * If the given thread has already terminated but is not detached then the function
+ * immediately returns.
+ * If the given thread has already terminated and been detached then the
+ * behavior is undefined.
+ * If the given thread is the calling thread then the behavior is undefined.
+ * IMPORTANT: This function should not be assumed to be thread safe; the behavior of racing threads
+ * wanting to join the same thread is platform dependent.
+ *
+ * @param thread The thread for the calling thread to join
+ */
+extern void VMPI_threadJoin(vmpi_thread_t thread);
+
+/**
+ * Initializes the vmpi_mutex_t structure referenced by 'mutex' to be used as a recursive mutex.
+ * Note that mutex should be allocated by the caller.
+ *
+ * @param mutex The pre-allocated vmpi_mutex_t to initialize
+ * @return true if the mutex was successfully initialized
+ */
+extern bool VMPI_recursiveMutexInit(vmpi_mutex_t* mutex);
+
+/**
+ * Destroys the given mutex.
+ * Note that destroying a locked mutex results in undefined behavior
+ *
+ * @param mutex The mutex to destroy
+ * @return true if the mutex was successfully destroyed
+ */
+extern bool VMPI_recursiveMutexDestroy(vmpi_mutex_t* mutex);
+
+/**
+ * Locks the given mutex.
+ * If the mutex is currently held by another thread then the calling thread blocks until it is available.
+ * The mutex is recursive whereby successive lock operations by the same thread increments the
+ * mutex's lock-count. Each subsequent unlock operation decrements the lock-count until reaching zeroing, resulting
+ * in an unlocked mutex.
+ * The limit and effects of lock-count overflow is dependent on the platform thread implementation.
+ *
+ * @param mutex The mutex to lock
+ */
+extern void VMPI_recursiveMutexLock(vmpi_mutex_t* mutex);
+
+/**
+ * Identical to VMPI_recursiveMutexLock, except if the mutex is locked by another thread the
+ * call returns immediately.
+ *
+ * @param mutex The mutex to lock
+ * @return true if the mutex was successfully acquired or recursively locked.
+ */
+extern bool VMPI_recursiveMutexTryLock(vmpi_mutex_t* mutex);
+
+/**
+ * Unlocks the given mutex.
+ * If the mutex is recursively locked then unlocking decrements the lock-count. On reaching a
+ * lock-count of zero, the mutex is unlocked.
+ * Attempting to unlock a mutex not held by the calling thread results in undefined behaviour.
+ *
+ * @param mutex The mutex to unlock
+ */
+extern void VMPI_recursiveMutexUnlock(vmpi_mutex_t* mutex);
+
+/**
+ * Initializes the vmpi_condvar_t structure referenced by 'condvar' to be used as a condition variable.
+ * Note that condvar should be allocated by the caller.
+ *
+ * @param condvar The pre-allocated vmpi_condvar_t to initialize
+ * @return true if the condition variable was successfully initialized
+ */
+extern bool VMPI_condVarInit(vmpi_condvar_t* condvar);
+
+/**
+ * Destroys the given condition variable.
+ * Note that destroying a condition variable which has waiting threads results in undefined behavior.
+ *
+ * @param condvar The condition variable to destroy
+ * @return true if the condition variable was successfully destroyed
+ */
+extern bool VMPI_condVarDestroy(vmpi_condvar_t* condvar);
+
+/**
+ * Blocks the calling thread on the given condition variable.
+ * The calling thread must own the given mutex or the results are undefined.
+ * When the thread is blocked, it releases its lock on the mutex.
+ * The thread remains blocked until the condition variable is signaled
+ * (either individually or via a broadcast). Post-wait, the thread will attempt
+ * to re-acquire mutex. When the mutex is re-acquired, this function will return.
+ *
+ * Note that a waiting thread may spuriously awaken without being signaled.
+ * Waiting on a single condition variable with multiple mutexes results in undefined behavior.
+ * Waiting on a condition variable with a recursively locked mutex results in undefined behavior.
+ *
+ * @param condvar The condition variable on which to block
+ * @param mutex The mutex to release whilst waiting and re-acquire when signaled
+ */
+extern void VMPI_condVarWait(vmpi_condvar_t* condvar, vmpi_mutex_t* mutex);
+
+/**
+ * Blocks the calling thread on the given condition variable.
+ * The calling thread must own the given mutex or the results are undefined.
+ * When the thread is blocked, it releases its lock on the mutex.
+ * The thread remains blocked until the condition variable is signaled
+ * (either individually or via a broadcast), or the specified timeout period has expired.
+ * Post-wait, the thread will attempt to re-acquire mutex. When the mutex is re-acquired, this function will return.
+ *
+ * Note that a waiting thread may spuriously awaken before the timeout period has ended without being signaled.
+ * Waiting on a single condition variable with multiple mutexes results in undefined behavior.
+ * Waiting on a condition variable with a recursively locked mutex results in undefined behavior.
+ *
+ * @param condvar The condition variable on which to block
+ * @param mutex The mutex to release whilst waiting and re-acquire when signaled
+ * @param timeout_millis The maximum amount of time to wait to be signaled
+ * @return true if the timeout period expired
+ */
+extern bool VMPI_condVarTimedWait(vmpi_condvar_t* condvar, vmpi_mutex_t* mutex, int32_t timeout_millis);
+
+/**
+ * Signals all threads waiting on the given condition variable.
+ * If no threads are waiting then the function simply returns.
+ *
+ * @param condvar The condition variable to signal
+ * @see VMPI_condVarWait
+ * @see VMPI_condVarTimedWait
+ */
+extern void VMPI_condVarBroadcast(vmpi_condvar_t* condvar);
+
+/**
+ * Signals a single thread waiting on the given condition variable.
+ * If no threads are waiting then the function simply returns.
+ * This function does not imply any fairness policy when selecting the thread to wake.
+ *
+ * @param condvar The condition variable to signal
+ * @see VMPI_condVarWait
+ * @see VMPI_condVarTimedWait
+ */
+extern void VMPI_condVarSignal(vmpi_condvar_t* condvar);
+
+/**
+ * Initializes the vmpi_thread_attr_t structure referenced by 'attr' with the default
+ * values for the platform.
+ *
+ * @param attr The pre-allocated vmpi_thread_attr_t to initialize
+ * @return true if the vmpi_thread_attr_t was successfully initialized
+ */
+extern bool VMPI_threadAttrInit(vmpi_thread_attr_t* attr);
+
+/**
+ * Destroys the vmpi_thread_attr_t structure referenced by 'attr'.
+ * Attempting to pass a destroyed vmpi_thread_attr_t to any of the
+ * VMPI_threadAttr* functions results in undefined behavior.
+ *
+ * @param attr The pre-allocated vmpi_thread_attr_t to destroy
+ * @return true if the vmpi_thread_attr_t was successfully destroyed
+ */
+extern bool VMPI_threadAttrDestroy(vmpi_thread_attr_t* attr);
+
+/**
+ * Updates the guard-size attribute of the given vmpi_thread_attr_t.
+ *
+ * Note that on some platforms the size of a thread's guard region
+ * is fixed, so passing a non-default value to VMPI_threadCreate via
+ * vmpi_thread_attr_t may have no effect. As of Nov' 2010, this is
+ * known to be true for win32 (XP API version).
+ *
+ * @param attr A reference to vmpi_thread_attr_t to update
+ * @param size The new guard size
+ * @return true if the vmpi_thread_attr_t was successfully updated
+ */
+extern bool VMPI_threadAttrSetGuardSize(vmpi_thread_attr_t* attr, size_t size);
+
+/**
+ * Updates the stack-size attribute of the given vmpi_thread_attr_t.
+ *
+ * When passed to the VMPI_threadCreate function, the stack-size
+ * described vmpi_thread_attr_t will determine the initial
+ * stack size allocated to the thread.
+ *
+ * @param attr A reference to vmpi_thread_attr_t to update
+ * @param size The new stack size
+ * @return true if the vmpi_thread_attr_t was successfully updated
+ */
+extern bool VMPI_threadAttrSetStackSize(vmpi_thread_attr_t* attr, size_t size);
+
+/**
+ * Updates the priority attribute of the given vmpi_thread_attr_t
+ * to 'low-priority'.
+ *
+ * Note that on some platforms changing the priority of newly started threads
+ * will have no effect (as priorities are assigned at the process-level).
+ * As of Nov' 2010, this is known to be true for the POSIX platforms.
+ *
+ * @param attr A reference to vmpi_thread_attr_t to update
+ * @return true if the vmpi_thread_attr_t was successfully updated
+ */
+extern void VMPI_threadAttrSetPriorityLow(vmpi_thread_attr_t* attr);
+
+/**
+ * Updates the priority attribute of the given vmpi_thread_attr_t
+ * to 'normal-priority'.
+ *
+ * Note that on some platforms changing the priority of newly started threads
+ * will have no effect (as priorities are assigned at the process-level).
+ * As of Nov' 2010, this is known to be true for the POSIX platforms.
+ *
+ * @param attr A reference to vmpi_thread_attr_t to update
+ * @return true if the vmpi_thread_attr_t was successfully updated
+ */
+extern void VMPI_threadAttrSetPriorityNormal(vmpi_thread_attr_t* attr);
+
+/**
+ * Updates the priority attribute of the given vmpi_thread_attr_t
+ * to 'high-priority'.
+ *
+ * Note that on some platforms changing the priority of newly started threads
+ * will have no effect (as priorities are assigned at the process-level).
+ * As of Nov' 2010, this is known to be true for the POSIX platforms.
+ *
+ * @param attr A reference to vmpi_thread_attr_t to update
+ * @return true if the vmpi_thread_attr_t was successfully updated
+ */
+extern void VMPI_threadAttrSetPriorityHigh(vmpi_thread_attr_t* attr);
+
+/**
+ * Returns the platform's default size for stack guards.
+ *
+ * @return default stack guard size
+ */
+extern size_t VMPI_threadAttrDefaultGuardSize();
+
+/**
+ * Returns the platform's default size for new stacks.
+ *
+ * @return default stack size
+ */
+extern size_t VMPI_threadAttrDefaultStackSize();
+
+
+
 #endif /* __avmplus_VMPI__ */

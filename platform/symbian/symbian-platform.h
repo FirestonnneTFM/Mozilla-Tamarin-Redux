@@ -177,4 +177,8 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
     return pthread_mutex_trylock((pthread_mutex_t*)&lock->lock) == 0;
 }
 
+#define EMULATE_ATOMICS_WITH_PTHREAD_MUTEX
+
+#include "../VMPI/ThreadsPosix-inlines.h"
+
 #endif // __avmplus_symbian_platform__

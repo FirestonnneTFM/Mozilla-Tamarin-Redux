@@ -241,4 +241,65 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock)
     return false;
 }
 
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
+{
+#if MACOSX_DEPLOYMENT_TARGET == MACOSX_DEPLOYMENT_TARGET_10_4
+    return OSAtomicIncrement32Barrier(const_cast<int32_t*>(value));
+#else
+    return OSAtomicIncrement32Barrier(value);
+#endif
+}
+
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
+{
+#if MACOSX_DEPLOYMENT_TARGET == MACOSX_DEPLOYMENT_TARGET_10_4
+    return OSAtomicIncrement32(const_cast<int32_t*>(value));
+#else
+    return OSAtomicIncrement32(value);
+#endif
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
+{
+#if MACOSX_DEPLOYMENT_TARGET == MACOSX_DEPLOYMENT_TARGET_10_4
+    return OSAtomicDecrement32Barrier(const_cast<int32_t*>(value));
+#else
+    return OSAtomicDecrement32Barrier(value);
+#endif
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32(volatile int32_t* value)
+{
+#if MACOSX_DEPLOYMENT_TARGET == MACOSX_DEPLOYMENT_TARGET_10_4
+    return OSAtomicDecrement32(const_cast<int32_t*>(value));
+#else
+    return OSAtomicDecrement32(value);
+#endif
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+#if MACOSX_DEPLOYMENT_TARGET == MACOSX_DEPLOYMENT_TARGET_10_4
+    return OSAtomicCompareAndSwap32(oldValue, newValue, const_cast<int32_t*>(address));
+#else
+    return OSAtomicCompareAndSwap32(oldValue, newValue, address);
+#endif
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+#if MACOSX_DEPLOYMENT_TARGET == MACOSX_DEPLOYMENT_TARGET_10_4
+    return OSAtomicCompareAndSwap32Barrier(oldValue, newValue, const_cast<int32_t*>(address));
+#else
+    return OSAtomicCompareAndSwap32Barrier(oldValue, newValue, address);
+#endif
+}
+
+REALLY_INLINE void VMPI_memoryBarrier()
+{
+    OSMemoryBarrier();
+}
+
+#include "../VMPI/ThreadsPosix-inlines.h"
+
 #endif // __avmplus_mac_platform__
