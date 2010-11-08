@@ -61,7 +61,7 @@ namespace avmplus
          };
          */
         const Parser::TokenMapping Parser::tokenMapping[] = {
-        { 0, 0, 0, 0, 0, 0, 0,              OPR_as },           // T_As
+        { 0, 0, 0, 1, 0, 0, 0,              OPR_as },           // T_As
         { 0, 0, 0, 0, 0, 0, 0,              OPR_assign },       // T_Assign,
         { 0, 0, 0, 0, 0, 0, 0,              OPR_bitwiseAnd },   // T_BitwiseAnd,
         { 1, 0, 0, 0, 0, 0, 0,              OPR_bitwiseAnd },   // T_BitwiseAndAssign,
@@ -154,6 +154,7 @@ namespace avmplus
         Program* Parser::program()
         {
             pushBindingRib(RIB_Program);
+            addNamespaceBinding(compiler->SYM_AS3, ALLOC(LiteralString, (compiler->intern("http://adobe.com/AS3/2006/builtin"), 0)));
             while (hd() == T_Package) 
                 package();
             Seq<Stmt*>* stmts = directives(SFLAG_Toplevel);
@@ -196,7 +197,7 @@ namespace avmplus
         {
             (void)out_instance_init;
             SeqBuilder<Stmt*> stmts(allocator);     // In a class body, this is also the class_init
-            Qualifier qual;
+            Qualifier qual;                         // ns / native / static / prototype / dynamic / override
             while (hd() != T_RightBrace && hd() != T_EOS) {
                 switch (hd())
                 {
@@ -205,11 +206,13 @@ namespace avmplus
                     case T_Protected:
                     case T_Public:
                     case T_Internal:
+                    case T_Dynamic:
+                    case T_Override:
                     case T_Identifier:
                         if (flags & SFLAG_Interface)
                             compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
                         if (namespaceQualifier(flags, &qual))
-                            break;
+                            continue;
 
                         AvmAssert(hd() == T_Identifier);
 
@@ -217,56 +220,65 @@ namespace avmplus
                             if (qual.tag != QUAL_none || qual.is_native || qual.is_static || qual.is_prototype)
                                 compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_INCLUDE);
                             includeDirective();
+                            break;
                         }
-                        else if (hd() == T_Identifier && identValue() == compiler->SYM_namespace) {
+                        if (hd() == T_Identifier && identValue() == compiler->SYM_namespace) {
                             if (qual.is_native || qual.is_static || qual.is_prototype)
                                 compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_NAMESPACE);
                             namespaceDefinition(flags, &qual);
+                            break;
                         }
-                        else
-                            goto default_case;
-                        break;
+                        goto default_case;
                         
                     case T_Const:
                     case T_Var:
                         if (flags & SFLAG_Interface)
                             compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_IN_INTERFACE);
-                        if (qual.is_native || qual.is_prototype)
-                            compiler->syntaxError(position(), SYNTAXERR_NOT_NATIVE_OR_PROTO);
+                        if (qual.is_native || 
+                            qual.is_prototype ||
+                            qual.is_dynamic ||
+                            qual.is_override ||
+                            (qual.is_static && !(flags & SFLAG_Class)) ||
+                            (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
+                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
                         if (flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)) {
                             // FIXME: if inside a class, the statement goes into the instance initializer ... except if static...
                             stmts.addAtEnd(variableDefinition(&qual));
                             break;
                         }
-                        else {
-                            // Variable or constant may not be qualified except at the top level or inside a class
-                            if (qual.is_static || qual.tag != QUAL_none)
-                                compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-                            goto default_case;
-                        }
+                        goto default_case;
                         
                     case T_Function:
-                        if (!(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)))
-                            if (qual.tag != QUAL_none || qual.is_native)
-                                compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
+                        if (qual.is_native ||
+                            qual.is_dynamic ||
+                            ((qual.is_static || qual.is_override || qual.is_prototype) && !(flags & SFLAG_Class)) ||
+                            (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
+                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
                         // FIXME: if inside a class or interface, we want to pick up the methods.
                         // FIXME: if inside a class, it goes into the instance... except if static...
-                        functionDefinition(&qual);
+                        functionDefinition(&qual, (flags & SFLAG_Class) != 0, (flags & SFLAG_Interface) == 0);
                         break;
 
                     case T_Class:
                         if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
                             compiler->syntaxError(position(), SYNTAXERR_CLASS_NOT_ALLOWED);
-                        if (qual.is_native)
-                            compiler->syntaxError(position(), SYNTAXERR_CLASS_NATIVE);
+                        if (qual.is_native ||
+                            qual.is_prototype ||
+                            qual.is_override ||
+                            qual.is_static)
+                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
                         classDefinition(flags, &qual);
                         break;
                         
                     case T_Interface:
                         if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
                             compiler->syntaxError(position(), SYNTAXERR_INTERFACE_NOT_ALLOWED);
-                        if (qual.is_native)
-                            compiler->syntaxError(position(), SYNTAXERR_INTERFACE_NATIVE);
+                        if (qual.is_native ||
+                            qual.is_prototype ||
+                            qual.is_dynamic ||
+                            qual.is_override ||
+                            (qual.tag != QUAL_none && qual.tag != QUAL_public))
+                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
                         interfaceDefinition(flags, &qual);
                         break;
                         
@@ -274,22 +286,30 @@ namespace avmplus
                     default_case:
                         if (flags & SFLAG_Interface)
                             compiler->syntaxError(position(), SYNTAXERR_STMT_IN_INTERFACE);
-                        if (qual.tag != QUAL_none || qual.is_native)
+                        if (qual.tag != QUAL_none || 
+                            qual.is_static ||
+                            qual.is_override ||
+                            qual.is_prototype ||
+                            qual.is_dynamic ||
+                            qual.is_native)
                             compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_STMT);
                         stmts.addAtEnd(statement());
                         break;
                 }
+                qual = Qualifier();
             }
             return stmts.get();
         }
         
-        // Handles 'static' and 'prototype' too.
+        // Handles 'static' and 'prototype' and 'dynamic' and 'override' too.
         // Returns true if we took it, false to go to the default case (for identifier).
         //
         // This checks constraints among qualifiers: that there are no duplicates, that
         // they are internally consistent (no "native prototype", no "<ns> prototype",
-        // no "static prototype"), that keyworded qualifiers are only used where they
-        // make sense ("prototype" and "static" in classes, etc).
+        // no "static prototype").
+        //
+        // However, this does not check whether keyworded qualifiers are only used where
+        // they make sense; that is delegated to directives().
 
         bool Parser::namespaceQualifier(int flags, Qualifier* qual)
         {
@@ -315,7 +335,7 @@ namespace avmplus
                 case T_Public:
                     if (!(flags & (SFLAG_Class|SFLAG_Package)) || qual->tag != QUAL_none || qual->is_prototype)
                         compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "public");
-                    eat(T_Protected);
+                    eat(T_Public);
                     qual->tag = QUAL_public;
                     return true;
                 case T_Internal:
@@ -323,6 +343,18 @@ namespace avmplus
                         compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "internal");
                     eat(T_Internal);
                     qual->tag = QUAL_internal;
+                    return true;
+                case T_Dynamic:
+                    if (!(flags & (SFLAG_Toplevel|SFLAG_Package)) || qual->is_dynamic)
+                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "dynamic");
+                    eat(T_Dynamic);
+                    qual->is_dynamic = true;
+                    return true;
+                case T_Override:
+                    if (!(flags & SFLAG_Class) || qual->is_override)
+                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "override");
+                    eat(T_Override);
+                    qual->is_override = true;
                     return true;
                 case T_Identifier:
                     if (identValue() == compiler->SYM_namespace)
@@ -415,7 +447,6 @@ namespace avmplus
         }
         
         // Namespaces are:
-        //  - disallowed at the top level or in packages according to Jeff, but E4X test suite uses them on the global level
         //  - allowed at the top level of classes
         //  - allowed in functions and blocks
         //  - hoisted to the function level and scoped to the entire function
@@ -425,7 +456,7 @@ namespace avmplus
         void Parser::namespaceDefinition(int flags, Qualifier* /*qual*/)
         {
             uint32_t pos = position();
-            if (!(flags & (SFLAG_Function|SFLAG_Toplevel))) // no classes yet...
+            if (!(flags & (SFLAG_Function|SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)))
                 compiler->syntaxError(pos, SYNTAXERR_KWD_NOT_ALLOWED, "namespace");
             eat(T_Identifier);
             Str * name = identifier();
@@ -578,13 +609,13 @@ namespace avmplus
         void Parser::addClass(ClassDefn* cls)
         {
             (void)cls;
-            compiler->internalError(0, "Class definitions cannot be processed");
+            compiler->internalError(0, "Unimplemented: Class definitions cannot be processed");
         }
         
         void Parser::addInterface(InterfaceDefn* iface)
         {
             (void)iface;
-            compiler->internalError(0, "Interface definitions cannot be processed");
+            compiler->internalError(0, "Unimplemented: Interface definitions cannot be processed");
         }
         
         void Parser::addFunctionBinding(FunctionDefn* fn)
@@ -593,6 +624,7 @@ namespace avmplus
             topRib->functionDefinitions.addAtEnd(fn);
         }
 
+        // FIXME: this ignores namespaces
         void Parser::addVarBinding(Str* name, QualifiedName* type_name)
         {
             Binding* b = findBinding(name, TAG_varBinding);
@@ -629,7 +661,7 @@ namespace avmplus
         {
 			(void)name;
             // A map from the last element of the name to the name
-            compiler->internalError(0, "Qualified import not supported, use an unqualified import instead");
+            compiler->internalError(0, "Unimplemented: Qualified import not supported, use an unqualified import instead");
         }
         
         void Parser::addUnqualifiedImport(Seq<Str*>* name)
@@ -653,9 +685,9 @@ namespace avmplus
             topRib->uses_catch = true;
         }
 
-        void Parser::functionDefinition(Qualifier* qual)
+        void Parser::functionDefinition(Qualifier* qual, bool getters_and_setters, bool require_body)
         {
-            FunctionDefn* fn = functionGuts(qual, true);
+            FunctionDefn* fn = functionGuts(qual, true, getters_and_setters, require_body);
             if (topRib->tag == RIB_Instance) {
                 // class or interface
                 if (qual->is_static) {
@@ -676,7 +708,7 @@ namespace avmplus
             return statement();
         }
 
-        FunctionDefn* Parser::functionGuts(Qualifier* qual, bool require_name)
+        FunctionDefn* Parser::functionGuts(Qualifier* qual, bool require_name, bool getters_and_setters, bool require_body)
         {
             if (qual->is_native)
                 compiler->syntaxError(position(), SYNTAXERR_NATIVE_NOT_SUPPORTED);
@@ -686,9 +718,16 @@ namespace avmplus
             eat(T_Function);
             uint32_t pos = position();
             Str* name = NULL;
+            bool isSetter = false;
+            bool isGetter = false;
             FunctionParam * rest_param = NULL;
             if (require_name || hd() == T_Identifier)
                 name = identifier();
+            if (name != NULL && hd() == T_Identifier && getters_and_setters) {
+                isGetter = (name == compiler->SYM_get);
+                isSetter = (name == compiler->SYM_set);
+                name = identifier();
+            }
             pushBindingRib(RIB_Function);
             eat(T_LeftParen);
             SeqBuilder<FunctionParam*> params(allocator);
@@ -734,24 +773,40 @@ namespace avmplus
                 else
                     return_type_name = typeExpression();
             }
-            eat(T_LeftBrace);
-            Seq<Stmt*>* stmts = directives(SFLAG_Function);
-            eat(T_RightBrace);
-            // Rest takes precedence over 'arguments'
-            if (topRib->uses_arguments) {
-                if (rest_param == NULL)
-                    addVarBinding(compiler->SYM_arguments, NULL);
-                else
-                    topRib->uses_arguments = false;
-            }
-            Seq<FunctionDefn*>* fndefs = topRib->functionDefinitions.get();
-            Seq<Binding*>* bindings = topRib->bindings.get();
-            Seq<NamespaceDefn*>* namespaces = topRib->namespaces.get();
-            Seq<Namespace*>* openNamespaces = topRib->openNamespaces.get();
-            bool uses_arguments = topRib->uses_arguments;
-            bool uses_dxns = topRib->uses_dxns;
+            Seq<Stmt*>* stmts = NULL;
+            Seq<FunctionDefn*>* fndefs = NULL;
+            Seq<Binding*>* bindings = NULL;
+            Seq<NamespaceDefn*>* namespaces = NULL;
+            Seq<Namespace*>* openNamespaces = NULL;
+            bool uses_arguments = false;
+            bool uses_dxns = false;
             bool optional_arguments = topRib->optional_arguments;
+            if (require_body)
+            {
+                eat(T_LeftBrace);
+                stmts = directives(SFLAG_Function);
+                eat(T_RightBrace);
+                // Rest takes precedence over 'arguments'
+                if (topRib->uses_arguments) {
+                    if (rest_param == NULL)
+                        addVarBinding(compiler->SYM_arguments, NULL);
+                    else
+                        topRib->uses_arguments = false;
+                }
+                fndefs = topRib->functionDefinitions.get();
+                bindings = topRib->bindings.get();
+                namespaces = topRib->namespaces.get();
+                openNamespaces = topRib->openNamespaces.get();
+                uses_arguments = topRib->uses_arguments;
+                uses_dxns = topRib->uses_dxns;
+            }
+            else
+                semicolon();
+
             popBindingRib();
+            // FIXME: transmit isGetter and isSetter
+            (void)isGetter;
+            (void)isSetter;
             return ALLOC(FunctionDefn, (name, bindings, params.get(), numparams, rest_param, return_type_name, fndefs, namespaces, openNamespaces, stmts, 
                                         uses_arguments, 
                                         uses_dxns, 

@@ -142,7 +142,7 @@ namespace avmplus
                         // FIXME: should block-internal function definition be initialized on block entry?
                         uint32_t pos = position();
                         Qualifier qual;
-                        FunctionDefn* fn = functionGuts(&qual, true);
+                        FunctionDefn* fn = functionGuts(&qual, true, false, true);
                         Str* name = fn->name;
                         fn->name = NULL;
                         addVarBinding(name, NULL);
@@ -159,9 +159,7 @@ namespace avmplus
                     }
                     
                 case T_Super:
-                    compiler->internalError(position(), "Unimplemented: 'super'");
-                    /*NOTREACHED*/
-                    return NULL;
+                    return superStatement();
                     
                 default: {
                     if (hd() == T_Identifier && hd2() == T_Colon)
@@ -235,7 +233,7 @@ namespace avmplus
             AvmAssert( !is_const || firstName == NULL );
 
             Expr* inits = NULL;
-            eat(T_Var);
+            eat(is_const ? T_Const : T_Var);
             *pos = position();
             if (numbindings)
                 *numbindings = 0;
@@ -250,8 +248,10 @@ namespace avmplus
                     *numbindings += 1;
                 if (!is_const)
                     addVarBinding(name, type_name);
+                /*
                 if (is_const && hd() != T_Assign)
                     compiler->syntaxError(*pos, SYNTAXERR_CONST_INIT_REQD);
+                */
                 if (match(T_Assign)) {
                     Expr* init = assignmentExpression(flags);
                     Expr* lhs = ALLOC(QualifiedName, (NULL, ALLOC(SimpleName, (name)), false, *pos));
@@ -596,6 +596,25 @@ namespace avmplus
             Expr* expr = parenExpression();
             Stmt* body = statement();
             return ALLOC(WithStmt, (pos, expr, body));
+        }
+
+        // This also parses super expressions when they appear in the statement position.
+        Stmt* Parser::superStatement()
+        {
+            eat (T_Super);
+            uint32_t pos = position();
+            Seq<Expr*>* arguments = NULL;
+            bool argsPresent = false;
+            if (hd() == T_LeftParen) {
+                argsPresent = true;
+                arguments = argumentList();
+            }
+            if (argsPresent && hd() != T_Dot && hd() != T_LeftBracket)
+                return ALLOC(SuperStmt, (pos, arguments));
+            if (argsPresent && (arguments == NULL || arguments->tl != NULL))
+                compiler->syntaxError(pos, SYNTAXERR_ONE_ARGUMENT_REQUIRED);
+            Expr* obj = argsPresent ? arguments->hd : ALLOC(ThisExpr, ());
+            return ALLOC(ExprStmt, (pos, propertyOperator(ALLOC(SuperExpr, (obj)))));
         }
     }
 }

@@ -67,7 +67,7 @@ namespace avmplus
         /* SYNTAXERR_ILLEGAL_INCLUDE */      "Illegal 'include' directive",
         /* SYNTAXERR_ILLEGAL_NAMESPACE */    "Illegal 'namespace' directive",
         /* SYNTAXERR_ILLEGAL_IN_INTERFACE */ "Variable or constant definition not allowed in interface",
-        /* SYNTAXERR_NOT_NATIVE_OR_PROTO */  "Variable or constant may not be 'native' or 'prototype'",
+        /* SYNTAXERR_ONE_ARGUMENT_REQUIRED */"Exactly one argument required",
         /* SYNTAXERR_NO_FUNCTIONS_IN_BLOCKS*/"Function definitions cannot be block-local",
         /* SYNTAXERR_SEMICOLON_OR_NEWLINE */ "Expecting semicolon or newline",
         /* SYNTAXERR_CONST_INIT_REQD */      "'const' bindings must be initialized",
@@ -80,9 +80,9 @@ namespace avmplus
         /* SYNTAXERR_DUPLICATE_DEFAULT */    "Duplicate 'default' clause",
         /* SYNTAXERR_EXPECT_CASE_OR_DEFAULT*/"Expecting 'case' or 'default'",
         /* SYNTAXERR_CLASS_NOT_ALLOWED */    "Class not allowed here",
-        /* SYNTAXERR_CLASS_NATIVE */         "Class may not be 'native'",
+        /* SYNTAXERR_PROPERTY_OPERATOR_REQUIRED */ "Property operator required",
         /* SYNTAXERR_INTERFACE_NOT_ALLOWED */"Interface not allowed here",
-        /* SYNTAXERR_INTERFACE_NATIVE */     "Interface may not be 'native'",
+        /* SYNTAXERR_unused3 */              "Unused 3",
         /* SYNTAXERR_STMT_IN_INTERFACE */    "Statements not allowed in interface",
         /* SYNTAXERR_ILLEGAL_STMT */         "Illegal statement",
         /* SYNTAXERR_KWD_NOT_ALLOWED */      "'%s' not allowed here",
@@ -154,6 +154,7 @@ namespace avmplus
             , parser(this, &lexer)
             , abc(this)
             , SYM_(intern(""))
+            , SYM_AS3(intern("AS3"))
             , SYM_Array(intern("Array"))
             , SYM_Namespace(intern("Namespace"))
             , SYM_Number(intern("Number"))

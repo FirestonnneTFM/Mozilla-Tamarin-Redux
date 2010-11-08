@@ -56,9 +56,11 @@ namespace avmplus
             switch (ctx->tag) {
                 case CTX_Continue: {
                     Seq<Str*>* labels = ((ContinueCtx*)ctx)->label_names;
-                    while (labels != NULL)
+                    while (labels != NULL) {
                         if (label == labels->hd)
                             return true;
+                        labels = labels->tl;
+                    }
                     return false;
                 }
                 case CTX_Break:
@@ -806,6 +808,13 @@ namespace avmplus
         {
             expr->cogen(cogen, ctx);
             cogen->I_dxnslate();
+        }
+        
+        void SuperStmt::cogen(Cogen* cogen, Ctx* ctx)
+        {
+			(void)ctx;
+            Compiler* compiler = cogen->compiler;
+            compiler->internalError(pos, "Unimplemented: superStmt");
         }
     }
 }

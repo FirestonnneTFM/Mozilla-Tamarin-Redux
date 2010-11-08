@@ -90,6 +90,7 @@ public:
 
     // Pre-interned strings signifying themselves, keep alphabetical
     Str * const SYM_;           // ""
+    Str * const SYM_AS3;
     Str * const SYM_Array;
     Str * const SYM_Namespace;
     Str * const SYM_Number;

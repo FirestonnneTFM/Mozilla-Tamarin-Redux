@@ -57,6 +57,8 @@ namespace avmplus
             if ((n->qualifier != NULL && n->qualifier->tag() != TAG_simpleName) ||
                 n->name->tag() != TAG_simpleName)
                 compiler->syntaxError(n->pos, SYNTAXERR_ILLEGAL_TYPENAME);
+            if (hd() == T_LeftDotAngle)
+                compiler->internalError(position(), "Unimplemented: Cannot parse vector types");
             return n;
         }
 
@@ -67,6 +69,18 @@ namespace avmplus
             NameComponent* n = NULL;
             if (match(T_Multiply))
                 n = ALLOC(WildcardName, ());
+            else if (match(T_Public)) {
+                n = ALLOC(BuiltinNamespace, (T_Public));
+            }
+            else if (match(T_Protected)) {
+                n = ALLOC(BuiltinNamespace, (T_Protected));
+            }
+            else if (match(T_Private)) {
+                n = ALLOC(BuiltinNamespace, (T_Private));
+            }
+            else if (match(T_Internal)) {
+                n = ALLOC(BuiltinNamespace, (T_Internal));
+            }
             else {
                 name = identifier();
                 n = ALLOC(SimpleName, (name));
@@ -195,7 +209,7 @@ namespace avmplus
         Expr* Parser::functionExpression()
         {
             Qualifier qual;
-            return ALLOC(LiteralFunction, (functionGuts(&qual, false)));
+            return ALLOC(LiteralFunction, (functionGuts(&qual, false, false, true)));
         }
         
         Expr* Parser::primaryExpression()
@@ -249,7 +263,10 @@ namespace avmplus
                 case T_This:
                     next();
                     return ALLOC(ThisExpr, ());
-                    
+
+                case T_Super:
+                    return superExpression();
+
                 case T_LeftParen:
                     return parenExpression();
                     
@@ -325,8 +342,10 @@ namespace avmplus
                     eat (T_RightBracket);
                     return ALLOC(ObjectRef, (obj, ALLOC(QualifiedName, (NULL, ALLOC(ComputedName, (expr)), false, pos)), pos));
                 }
+                case T_LeftDotAngle:
+                    compiler->internalError(position(), "Unimplemented: Cannot parse vector syntax");
                 default:
-                    compiler->internalError(position(), "propertyOperator: %d", (int)hd());
+                    compiler->internalError(position(), "Unexpected token in propertyOperator: %d", (int)hd());
                     /*NOTREACHED*/
                     return NULL;
             }
@@ -351,6 +370,10 @@ namespace avmplus
             switch (hd ()) {
                 case T_New: {
                     next();
+                    if (hd() == T_LessThan) {
+                        // vector initializer
+                        compiler->internalError(position(), "Unimplemented: Cannot parse vector initializer");
+                    }
                     Expr* object_expr = memberExpression ();
                     Seq<Expr*>* argument_exprs = argumentList();
                     return memberExpressionPrime (ALLOC(NewExpr, (object_expr, argument_exprs)));
@@ -376,6 +399,24 @@ namespace avmplus
             }
         }
         
+        Expr* Parser::superExpression ()
+        {
+            eat (T_Super);
+            uint32_t pos = position();
+            Seq<Expr*>* arguments = NULL;
+            bool argsPresent = false;
+            if (hd() == T_LeftParen) {
+                argsPresent = true;
+                arguments = argumentList();
+            }
+            if (argsPresent && (arguments == NULL || arguments->tl != NULL))
+                compiler->syntaxError(pos, SYNTAXERR_ONE_ARGUMENT_REQUIRED);
+            if (hd() != T_Dot && hd() != T_LeftBracket)
+                compiler->syntaxError(pos, SYNTAXERR_PROPERTY_OPERATOR_REQUIRED);
+            Expr* obj = argsPresent ? arguments->hd : ALLOC(ThisExpr, ());
+            return propertyOperator(ALLOC(SuperExpr, (obj)));
+        }
+
         Expr* Parser::callExpression ()
         {
             uint32_t pos = position();
@@ -397,6 +438,7 @@ namespace avmplus
                 }
                 case T_LeftBracket:
                 case T_Dot:
+                case T_LeftDotAngle:
                     return callExpressionPrime (propertyOperator (call_expr));
                 default:
                     return call_expr;
@@ -408,8 +450,13 @@ namespace avmplus
             Expr* call_expression;
             
             bool is_new = match(T_New);
-            if (is_new)
+            if (is_new) {
+                if (hd() == T_LessThan) {
+                    // vector initializer
+                    compiler->internalError(position(), "Unimplemented: Cannot parse vector initializer");
+                }
                 call_expression = newExpression (new_count+1);
+            }
             else
                 call_expression = memberExpression();
                     

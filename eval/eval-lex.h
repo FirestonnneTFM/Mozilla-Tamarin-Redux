@@ -137,6 +137,7 @@ enum Token {
     T_Default,
     /*T_Delete,*/
     T_Do,
+    T_Dynamic,
     T_Else,
     T_Extends,
     T_False,
@@ -154,6 +155,7 @@ enum Token {
     T_Native,
     T_New,
     T_Null,
+    T_Override,
     T_Package,
     T_Private,
     T_Protected,

@@ -443,8 +443,12 @@ namespace avmplus
                     ns = abc->addNamespace(CONSTANT_Namespace, cogen->emitString(compiler->intern(compiler->namespace_counter++)));
                 else if (value->tag() == TAG_literalString)
                     ns = abc->addNamespace(CONSTANT_ExplicitNamespace, cogen->emitString(((LiteralString*)value)->value));
-                AvmAssert(activation != 0);
-                cogen->I_getlocal(activation);
+                if (tag == CODE_Program)
+                    cogen->I_getlocal(0);
+                else {
+                    AvmAssert(activation != 0);
+                    cogen->I_getlocal(activation);
+                }
                 if (ns != 0)
                     cogen->I_pushnamespace(ns);
                 else {
