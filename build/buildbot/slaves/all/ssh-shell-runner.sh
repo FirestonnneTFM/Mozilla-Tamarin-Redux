@@ -38,8 +38,14 @@
 
 # TODO: MIPS boxes are not sourcing /etc/profile or /etc/bashrc when
 #       a non-interactive SSH connection is made. This means that the
-#       env var TZ=EST5EDT will not be set causing failures in date tests
-export TZ=EST5EDT
+#       env var TZ will not be set causing failures in date tests
+#
+#       Start of Daylight saving time : M3.2.0/02:00:00
+#       meaning 3rd month, 2nd week, 0th day(sunday), 2 am
+#       End of Daylight saving time : M11.1.0/02:00:00 
+#       meaning 11th month, 1st week, 0th day(sunday), 2 am
+
+export TZ="EST5EDT,M3.2.0/02:00:00,M11.1.0/02:00:00"
 
 cd /root/app
 ./avmshell $*
