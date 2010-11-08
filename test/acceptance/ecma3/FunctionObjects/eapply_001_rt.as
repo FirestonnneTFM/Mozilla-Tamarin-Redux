@@ -38,6 +38,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SECTION = "apply regression";
+var VERSION = "ECMA_3";
+
 trace("STATUS: f.apply crash test.");
 
 trace("BUGNUMBER: 21836");
