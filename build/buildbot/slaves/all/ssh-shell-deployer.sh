@@ -53,6 +53,7 @@ then
     exit 1
 fi
 
+exitcode=0
 
 ##
 # Calculate the change number and change id
@@ -60,9 +61,22 @@ fi
 . ../all/util-calculate-change.sh $1
 
 filename=$2
-test "$filename" = "" && {
+if [[ "$filename" = "" ]]; then
     filename=$shell_release
-}
+fi
+
+# Deploy ssh-shell-runner.sh
+echo "Installing ssh-shell-runner.sh"
+ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm ssh-shell-runner.sh"
+scp ../all/ssh-shell-runner.sh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/ssh-shell-runner.sh
+# make sure file copied over
+if [[ "$?" -ne "0" ]]; then 
+        echo "Error copying ssh-shell-runner.sh."
+        # If there was an error copying the script abort
+        exit 1
+fi
+# set executable bit for ssh-shell-runner.sh
+ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;chmod +x ssh-shell-runner.sh"
 
 echo""
 echo "Installing $filename"
@@ -77,7 +91,6 @@ scp $filename $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DI
 ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;chmod +x avmshell;./avmshell" > /tmp/stdout
 
 # Verify that the shell was successfully deployed
-exitcode=0
 deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $6}'`
 if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ]; 
 then
