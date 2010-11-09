@@ -69,7 +69,7 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # Grouped by feature or platform
 
 # Some operating systems do not adjust past dates for historical DST settings
-regress/bug_606478:.*(19\d\d|200[0-6]).*, (mips-lnx|win(?!.*diff)).*, expectedfail, Operating system does not adjust past dates for historical DST settings
+regress/bug_606478:.*(19\d\d|200[0-6]).*, .*(mips-lnx|win(?!.*diff)).*, expectedfail, Operating system does not adjust past dates for historical DST settings
 
 # https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 mmgc/outofmemory , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=541358
