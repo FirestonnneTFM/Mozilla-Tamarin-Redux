@@ -3684,7 +3684,7 @@ namespace avmplus
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
 #ifndef AVMPLUS_AMD64
         SSE2_ONLY(if(core->config.njconfig.i386_sse2))
-#endif // AVMPLUS_AMD64       
+#endif // AVMPLUS_AMD64
         {
             suspendCSE();
             CodegenLabel skip_label("goodint");
@@ -3915,7 +3915,6 @@ namespace avmplus
         }
         return true;
     }
-
 
     bool CodegenLIR::inlineBuiltinFunction(AbcOpcode, intptr_t, int argc, Traits* result, MethodInfo* mi)
     {
