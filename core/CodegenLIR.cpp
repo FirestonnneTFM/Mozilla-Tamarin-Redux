@@ -3144,7 +3144,7 @@ namespace avmplus
             //     intptr_t val = CONVERT_TO_ATOM(arg);
             //     if ((val & kAtomTypeMask) != kIntptrType) goto not_intptr;   # test for kIntptrType tag
             //     # kIntptrType
-            //     rslt = val >> kAtomTypeSize;                                 # extract integer value
+            //     rslt = double(val >> kAtomTypeSize);                         # extract integer value and convert to double
             //     goto done;
             // not_intptr:
             //     if ((val & kAtomTypeMask) != kDoubleType) goto not_double;   # test for kDoubleType tag
