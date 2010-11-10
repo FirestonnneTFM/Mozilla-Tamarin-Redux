@@ -128,7 +128,7 @@ namespace MMgc
 #  pragma warning(disable:4355) // 'this': used in base member initializer list
 #endif
 
-    GC::GC(GCHeap *gcheap, GCMode mode)
+    GC::GC(GCHeap *gcheap, GCMode mode, GCConfig *config/*=NULL*/)
         :
         greedy(mode == kGreedyGC),
         nogc(mode == kDisableGC),
@@ -143,7 +143,7 @@ namespace MMgc
         incrementalValidationPedantic(false),
 #endif
         rcRootSegments(NULL),
-        policy(this, gcheap),
+        policy(this, gcheap, config),
         t0(VMPI_getPerformanceCounter()),
         lastStartMarkIncrementCount(0),
         sweeps(0),
