@@ -44,6 +44,26 @@
 namespace MMgc
 {
     /**
+     * Configuration options for GC and GCPolicyManager construction.
+     */
+    class GCConfig
+    {
+    public:
+        /* Positive value denotes heap size, in blocks, below which we
+         * do not collect; non-positive denotes "choose default value
+         * for threshold."
+         */
+        uint32_t collectionThreshold;
+
+        /* selects defaults for all configuration parameters. */
+        GCConfig();
+    private: // unimplemented ctors/methods.
+        GCConfig(GCConfig&);
+        GCConfig& operator=(GCConfig&);
+    };
+
+
+    /**
      * A policy manager for garbage collection.
      *
      * The policy manager centralizes policy decisions about how and when to run garbage
@@ -66,7 +86,8 @@ namespace MMgc
      */
     class GCPolicyManager {
     public:
-        GCPolicyManager(GC* gc, GCHeap* heap);
+        /* NULL config means select defaults for configuration parameters. */
+        GCPolicyManager(GC* gc, GCHeap* heap, GCConfig* config=NULL);
 
         /**
          * Clean up and print any final statistics.  Should be called from the very

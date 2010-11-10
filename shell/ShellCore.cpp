@@ -61,6 +61,7 @@ namespace avmshell
         , nogc(false)
         , incremental(true)
         , fixedcheck(true)
+        , gcthreshold(0)
         , langID(-1)
         , jitordie(AvmCore::jitordie_default)
         , runmode(AvmCore::runmode_default)

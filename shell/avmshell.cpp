@@ -159,7 +159,10 @@ namespace avmshell
     /* static */
     void Shell::singleWorker(ShellSettings& settings)
     {
-        MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode()) );
+        MMgc::GCConfig gcconfig;
+        gcconfig.collectionThreshold = settings.gcthreshold;
+
+        MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode(), &gcconfig) );
         {
             MMGC_GCENTER(gc);
             ShellCore* shell = new ShellCoreImpl(gc, settings, true);
@@ -401,6 +404,9 @@ namespace avmshell
         ThreadNode** const  threads(new ThreadNode*[numthreads]);
         CoreNode** const    cores(new CoreNode*[numcores]);
 
+        MMgc::GCConfig gcconfig;
+        gcconfig.collectionThreshold = settings.gcthreshold;
+
         // Going multi-threaded.
 
         // Create and start threads.  They add themselves to the free list.
@@ -412,7 +418,7 @@ namespace avmshell
         // Create collectors and cores.
         // Extra credit: perform setup in parallel on the threads.
         for ( int i=0 ; i < numcores ; i++ ) {
-            MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode());
+            MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode(), &gcconfig);
             MMGC_GCENTER(gc);
             cores[i] = new CoreNode(new ShellCoreImpl(gc, settings, false), i);
             if (!cores[i]->core->setup(settings))
@@ -719,6 +725,9 @@ namespace avmshell
                     }
                     else if (!VMPI_strcmp(arg+2, "nofixedcheck")) {
                         settings.fixedcheck = false;
+                    }
+                    else if (!VMPI_strcmp(arg+2, "gcthreshold") && i+1 < argc) {
+                        settings.gcthreshold = VMPI_strtol(argv[++i], 0, 10);
                     }
 #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
                     else if (!VMPI_strcmp(arg+2, "astrace") && i+1 < argc ) {
@@ -1133,6 +1142,7 @@ namespace avmshell
         AvmLog("          [-Dgreedy]    collect before every allocation\n");
         AvmLog("          [-Dnogc]      don't collect\n");
         AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+        AvmLog("          [-Dgcthreshold N] lower bound on allocation budget, in blocks, between collection completions\n");
         AvmLog("          [-Dnofixedcheck]  don't check FixedMalloc deallocations for correctness (sometimes expensive)\n");
 #ifdef DEBUGGER
         AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");

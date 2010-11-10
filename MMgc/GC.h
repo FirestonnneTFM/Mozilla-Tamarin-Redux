@@ -361,7 +361,8 @@ namespace MMgc
             kNonincrementalGC   // nonincremental collection
         };
 
-        GC(GCHeap *heap, GCMode mode);
+        /* NULL config means select defaults for configuration parameters. */
+        GC(GCHeap *heap, GCMode mode, GCConfig *config = NULL);
 
         virtual ~GC();
 
