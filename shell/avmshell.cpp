@@ -1167,6 +1167,7 @@ namespace avmshell
         AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
         AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");
         AvmLog("          [-Dnocse]     disable CSE optimization \n");
+        AvmLog("          [-jitharden]  enable jit hardening techniques\n");
     #ifdef AVMPLUS_IA32
         AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");
