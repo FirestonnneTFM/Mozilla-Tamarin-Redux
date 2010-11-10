@@ -68,7 +68,7 @@ class AcceptanceRuntest(RuntestBase):
     androidthreads = False
     androiddevices = []
     verifyonly = False
-    swfversions = [9,10,11]
+    swfversions = [9,10,11,12]
 
     def __init__(self):
         # Set threads to # of available cpus/cores
