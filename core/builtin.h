@@ -178,326 +178,326 @@ const uint32_t Object_private__propertyIsEnumerable = 22;
 const uint32_t Object_protected__setPropertyIsEnumerable = 23;
 const uint32_t Object_private__isPrototypeOf = 24;
 const uint32_t Object_private__toString = 25;
-const uint32_t Class_prototype_get = 39;
-const uint32_t Function_prototype_get = 47;
-const uint32_t Function_prototype_set = 48;
-const uint32_t Function_length_get = 49;
-const uint32_t Function_AS3_call = 50;
-const uint32_t Function_AS3_apply = 51;
-const uint32_t Namespace_prefix_get = 56;
-const uint32_t Namespace_uri_get = 57;
-const uint32_t Number_private__numberToString = 73;
-const uint32_t Number_private__convert = 74;
-const uint32_t Number_private__minValue = 75;
-const uint32_t String_AS3_fromCharCode = 125;
-const uint32_t String_private__match = 126;
-const uint32_t String_private__replace = 127;
-const uint32_t String_private__search = 128;
-const uint32_t String_private__split = 129;
-const uint32_t String_length_get = 130;
-const uint32_t String_private__indexOf = 131;
-const uint32_t String_AS3_indexOf = 132;
-const uint32_t String_private__lastIndexOf = 133;
-const uint32_t String_AS3_lastIndexOf = 134;
-const uint32_t String_AS3_charAt = 135;
-const uint32_t String_AS3_charCodeAt = 136;
-const uint32_t String_AS3_localeCompare = 138;
-const uint32_t String_private__slice = 142;
-const uint32_t String_AS3_slice = 143;
-const uint32_t String_private__substring = 145;
-const uint32_t String_AS3_substring = 146;
-const uint32_t String_private__substr = 147;
-const uint32_t String_AS3_substr = 148;
-const uint32_t String_AS3_toLowerCase = 149;
-const uint32_t String_AS3_toUpperCase = 151;
-const uint32_t Array_private__pop = 178;
-const uint32_t Array_private__reverse = 179;
-const uint32_t Array_private__concat = 180;
-const uint32_t Array_private__shift = 181;
-const uint32_t Array_private__slice = 182;
-const uint32_t Array_private__unshift = 183;
-const uint32_t Array_private__splice = 184;
-const uint32_t Array_private__sort = 185;
-const uint32_t Array_private__sortOn = 186;
-const uint32_t Array_private__indexOf = 187;
-const uint32_t Array_private__lastIndexOf = 188;
-const uint32_t Array_private__every = 189;
-const uint32_t Array_private__filter = 190;
-const uint32_t Array_private__forEach = 191;
-const uint32_t Array_private__map = 192;
-const uint32_t Array_private__some = 193;
-const uint32_t Array_length_get = 194;
-const uint32_t Array_length_set = 195;
-const uint32_t Array_AS3_pop = 198;
-const uint32_t Array_AS3_push = 199;
-const uint32_t Array_AS3_unshift = 204;
-const uint32_t __AS3___vec_Vector_object_private__every = 238;
-const uint32_t __AS3___vec_Vector_object_private__forEach = 239;
-const uint32_t __AS3___vec_Vector_object_private__some = 240;
-const uint32_t __AS3___vec_Vector_object_private__sort = 241;
-const uint32_t __AS3___vec_Vector_object_private_newThisType = 243;
-const uint32_t __AS3___vec_Vector_object_length_get = 244;
-const uint32_t __AS3___vec_Vector_object_length_set = 245;
-const uint32_t __AS3___vec_Vector_object_fixed_set = 246;
-const uint32_t __AS3___vec_Vector_object_fixed_get = 247;
-const uint32_t __AS3___vec_Vector_object_AS3_push = 255;
-const uint32_t __AS3___vec_Vector_object_private__reverse = 256;
-const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 260;
-const uint32_t __AS3___vec_Vector_object_AS3_unshift = 261;
-const uint32_t __AS3___vec_Vector_object_private__filter = 262;
-const uint32_t __AS3___vec_Vector_object_private__map = 263;
-const uint32_t __AS3___vec_Vector_object_AS3_pop = 267;
-const uint32_t __AS3___vec_Vector_object_AS3_shift = 269;
-const uint32_t __AS3___vec_Vector_int_private__every = 296;
-const uint32_t __AS3___vec_Vector_int_private__forEach = 297;
-const uint32_t __AS3___vec_Vector_int_private__some = 298;
-const uint32_t __AS3___vec_Vector_int_private__sort = 299;
-const uint32_t __AS3___vec_Vector_int_private_newThisType = 301;
-const uint32_t __AS3___vec_Vector_int_length_get = 302;
-const uint32_t __AS3___vec_Vector_int_length_set = 303;
-const uint32_t __AS3___vec_Vector_int_fixed_set = 304;
-const uint32_t __AS3___vec_Vector_int_fixed_get = 305;
-const uint32_t __AS3___vec_Vector_int_AS3_push = 313;
-const uint32_t __AS3___vec_Vector_int_private__reverse = 314;
-const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 318;
-const uint32_t __AS3___vec_Vector_int_AS3_unshift = 319;
-const uint32_t __AS3___vec_Vector_int_private__filter = 320;
-const uint32_t __AS3___vec_Vector_int_private__map = 321;
-const uint32_t __AS3___vec_Vector_int_AS3_pop = 325;
-const uint32_t __AS3___vec_Vector_int_AS3_shift = 327;
-const uint32_t __AS3___vec_Vector_uint_private__every = 354;
-const uint32_t __AS3___vec_Vector_uint_private__forEach = 355;
-const uint32_t __AS3___vec_Vector_uint_private__some = 356;
-const uint32_t __AS3___vec_Vector_uint_private__sort = 357;
-const uint32_t __AS3___vec_Vector_uint_private_newThisType = 359;
-const uint32_t __AS3___vec_Vector_uint_length_get = 360;
-const uint32_t __AS3___vec_Vector_uint_length_set = 361;
-const uint32_t __AS3___vec_Vector_uint_fixed_set = 362;
-const uint32_t __AS3___vec_Vector_uint_fixed_get = 363;
-const uint32_t __AS3___vec_Vector_uint_AS3_push = 371;
-const uint32_t __AS3___vec_Vector_uint_private__reverse = 372;
-const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 376;
-const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 377;
-const uint32_t __AS3___vec_Vector_uint_private__filter = 378;
-const uint32_t __AS3___vec_Vector_uint_private__map = 379;
-const uint32_t __AS3___vec_Vector_uint_AS3_pop = 383;
-const uint32_t __AS3___vec_Vector_uint_AS3_shift = 385;
-const uint32_t __AS3___vec_Vector_double_private__every = 412;
-const uint32_t __AS3___vec_Vector_double_private__forEach = 413;
-const uint32_t __AS3___vec_Vector_double_private__some = 414;
-const uint32_t __AS3___vec_Vector_double_private__sort = 415;
-const uint32_t __AS3___vec_Vector_double_private_newThisType = 417;
-const uint32_t __AS3___vec_Vector_double_length_get = 418;
-const uint32_t __AS3___vec_Vector_double_length_set = 419;
-const uint32_t __AS3___vec_Vector_double_fixed_set = 420;
-const uint32_t __AS3___vec_Vector_double_fixed_get = 421;
-const uint32_t __AS3___vec_Vector_double_AS3_push = 429;
-const uint32_t __AS3___vec_Vector_double_private__reverse = 430;
-const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 434;
-const uint32_t __AS3___vec_Vector_double_AS3_unshift = 435;
-const uint32_t __AS3___vec_Vector_double_private__filter = 436;
-const uint32_t __AS3___vec_Vector_double_private__map = 437;
-const uint32_t __AS3___vec_Vector_double_AS3_pop = 441;
-const uint32_t __AS3___vec_Vector_double_AS3_shift = 443;
-const uint32_t Math_private__min = 455;
-const uint32_t Math_private__max = 456;
-const uint32_t Math_abs = 457;
-const uint32_t Math_acos = 458;
-const uint32_t Math_asin = 459;
-const uint32_t Math_atan = 460;
-const uint32_t Math_ceil = 461;
-const uint32_t Math_cos = 462;
-const uint32_t Math_exp = 463;
-const uint32_t Math_floor = 464;
-const uint32_t Math_log = 465;
-const uint32_t Math_round = 466;
-const uint32_t Math_sin = 467;
-const uint32_t Math_sqrt = 468;
-const uint32_t Math_tan = 469;
-const uint32_t Math_atan2 = 470;
-const uint32_t Math_pow = 471;
-const uint32_t Math_max = 472;
-const uint32_t Math_min = 473;
-const uint32_t Math_random = 474;
-const uint32_t Error_getErrorMessage = 479;
-const uint32_t Error_getStackTrace = 483;
-const uint32_t Date_parse = 556;
-const uint32_t Date_UTC = 557;
-const uint32_t Date_AS3_valueOf = 558;
-const uint32_t Date_private__toString = 559;
-const uint32_t Date_private__setTime = 560;
-const uint32_t Date_private__get = 561;
-const uint32_t Date_AS3_getUTCFullYear = 570;
-const uint32_t Date_AS3_getUTCMonth = 571;
-const uint32_t Date_AS3_getUTCDate = 572;
-const uint32_t Date_AS3_getUTCDay = 573;
-const uint32_t Date_AS3_getUTCHours = 574;
-const uint32_t Date_AS3_getUTCMinutes = 575;
-const uint32_t Date_AS3_getUTCSeconds = 576;
-const uint32_t Date_AS3_getUTCMilliseconds = 577;
-const uint32_t Date_AS3_getFullYear = 578;
-const uint32_t Date_AS3_getMonth = 579;
-const uint32_t Date_AS3_getDate = 580;
-const uint32_t Date_AS3_getDay = 581;
-const uint32_t Date_AS3_getHours = 582;
-const uint32_t Date_AS3_getMinutes = 583;
-const uint32_t Date_AS3_getSeconds = 584;
-const uint32_t Date_AS3_getMilliseconds = 585;
-const uint32_t Date_AS3_getTimezoneOffset = 586;
-const uint32_t Date_AS3_getTime = 587;
-const uint32_t Date_private__setFullYear = 588;
-const uint32_t Date_private__setMonth = 589;
-const uint32_t Date_private__setDate = 590;
-const uint32_t Date_private__setHours = 591;
-const uint32_t Date_private__setMinutes = 592;
-const uint32_t Date_private__setSeconds = 593;
-const uint32_t Date_private__setMilliseconds = 594;
-const uint32_t Date_private__setUTCFullYear = 595;
-const uint32_t Date_private__setUTCMonth = 596;
-const uint32_t Date_private__setUTCDate = 597;
-const uint32_t Date_private__setUTCHours = 598;
-const uint32_t Date_private__setUTCMinutes = 599;
-const uint32_t Date_private__setUTCSeconds = 600;
-const uint32_t Date_private__setUTCMilliseconds = 601;
-const uint32_t RegExp_source_get = 655;
-const uint32_t RegExp_global_get = 656;
-const uint32_t RegExp_ignoreCase_get = 657;
-const uint32_t RegExp_multiline_get = 658;
-const uint32_t RegExp_lastIndex_get = 659;
-const uint32_t RegExp_lastIndex_set = 660;
-const uint32_t RegExp_dotall_get = 661;
-const uint32_t RegExp_extended_get = 662;
-const uint32_t RegExp_AS3_exec = 663;
-const uint32_t XML_ignoreComments_get = 709;
-const uint32_t XML_ignoreComments_set = 710;
-const uint32_t XML_ignoreProcessingInstructions_get = 711;
-const uint32_t XML_ignoreProcessingInstructions_set = 712;
-const uint32_t XML_ignoreWhitespace_get = 713;
-const uint32_t XML_ignoreWhitespace_set = 714;
-const uint32_t XML_prettyPrinting_get = 715;
-const uint32_t XML_prettyPrinting_set = 716;
-const uint32_t XML_prettyIndent_get = 717;
-const uint32_t XML_prettyIndent_set = 718;
-const uint32_t XML_AS3_toString = 722;
-const uint32_t XML_AS3_hasOwnProperty = 723;
-const uint32_t XML_AS3_propertyIsEnumerable = 724;
-const uint32_t XML_AS3_addNamespace = 725;
-const uint32_t XML_AS3_appendChild = 726;
-const uint32_t XML_AS3_attribute = 727;
-const uint32_t XML_AS3_attributes = 728;
-const uint32_t XML_AS3_child = 729;
-const uint32_t XML_AS3_childIndex = 730;
-const uint32_t XML_AS3_children = 731;
-const uint32_t XML_AS3_comments = 732;
-const uint32_t XML_AS3_contains = 733;
-const uint32_t XML_AS3_copy = 734;
-const uint32_t XML_AS3_descendants = 735;
-const uint32_t XML_AS3_elements = 736;
-const uint32_t XML_AS3_hasComplexContent = 737;
-const uint32_t XML_AS3_hasSimpleContent = 738;
-const uint32_t XML_AS3_inScopeNamespaces = 739;
-const uint32_t XML_AS3_insertChildAfter = 740;
-const uint32_t XML_AS3_insertChildBefore = 741;
-const uint32_t XML_AS3_localName = 743;
-const uint32_t XML_AS3_name = 744;
-const uint32_t XML_private__namespace = 745;
-const uint32_t XML_AS3_namespaceDeclarations = 747;
-const uint32_t XML_AS3_nodeKind = 748;
-const uint32_t XML_AS3_normalize = 749;
-const uint32_t XML_AS3_parent = 750;
-const uint32_t XML_AS3_processingInstructions = 751;
-const uint32_t XML_AS3_prependChild = 752;
-const uint32_t XML_AS3_removeNamespace = 753;
-const uint32_t XML_AS3_replace = 754;
-const uint32_t XML_AS3_setChildren = 755;
-const uint32_t XML_AS3_setLocalName = 756;
-const uint32_t XML_AS3_setName = 757;
-const uint32_t XML_AS3_setNamespace = 758;
-const uint32_t XML_AS3_text = 759;
-const uint32_t XML_AS3_toXMLString = 760;
-const uint32_t XML_AS3_notification = 761;
-const uint32_t XML_AS3_setNotification = 762;
-const uint32_t XMLList_AS3_toString = 804;
-const uint32_t XMLList_AS3_hasOwnProperty = 806;
-const uint32_t XMLList_AS3_propertyIsEnumerable = 807;
-const uint32_t XMLList_AS3_attribute = 808;
-const uint32_t XMLList_AS3_attributes = 809;
-const uint32_t XMLList_AS3_child = 810;
-const uint32_t XMLList_AS3_children = 811;
-const uint32_t XMLList_AS3_comments = 812;
-const uint32_t XMLList_AS3_contains = 813;
-const uint32_t XMLList_AS3_copy = 814;
-const uint32_t XMLList_AS3_descendants = 815;
-const uint32_t XMLList_AS3_elements = 816;
-const uint32_t XMLList_AS3_hasComplexContent = 817;
-const uint32_t XMLList_AS3_hasSimpleContent = 818;
-const uint32_t XMLList_AS3_length = 819;
-const uint32_t XMLList_AS3_name = 820;
-const uint32_t XMLList_AS3_normalize = 821;
-const uint32_t XMLList_AS3_parent = 822;
-const uint32_t XMLList_AS3_processingInstructions = 823;
-const uint32_t XMLList_AS3_text = 824;
-const uint32_t XMLList_AS3_toXMLString = 825;
-const uint32_t XMLList_AS3_addNamespace = 826;
-const uint32_t XMLList_AS3_appendChild = 827;
-const uint32_t XMLList_AS3_childIndex = 828;
-const uint32_t XMLList_AS3_inScopeNamespaces = 829;
-const uint32_t XMLList_AS3_insertChildAfter = 830;
-const uint32_t XMLList_AS3_insertChildBefore = 831;
-const uint32_t XMLList_AS3_nodeKind = 832;
-const uint32_t XMLList_private__namespace = 833;
-const uint32_t XMLList_AS3_localName = 835;
-const uint32_t XMLList_AS3_namespaceDeclarations = 836;
-const uint32_t XMLList_AS3_prependChild = 837;
-const uint32_t XMLList_AS3_removeNamespace = 838;
-const uint32_t XMLList_AS3_replace = 839;
-const uint32_t XMLList_AS3_setChildren = 840;
-const uint32_t XMLList_AS3_setLocalName = 841;
-const uint32_t XMLList_AS3_setName = 842;
-const uint32_t XMLList_AS3_setNamespace = 843;
-const uint32_t QName_localName_get = 847;
-const uint32_t QName_uri_get = 848;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 895;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 896;
-const uint32_t flash_utils_ByteArray_readBytes = 898;
-const uint32_t flash_utils_ByteArray_writeBytes = 899;
-const uint32_t flash_utils_ByteArray_writeBoolean = 900;
-const uint32_t flash_utils_ByteArray_writeByte = 901;
-const uint32_t flash_utils_ByteArray_writeShort = 902;
-const uint32_t flash_utils_ByteArray_writeInt = 903;
-const uint32_t flash_utils_ByteArray_writeUnsignedInt = 904;
-const uint32_t flash_utils_ByteArray_writeFloat = 905;
-const uint32_t flash_utils_ByteArray_writeDouble = 906;
-const uint32_t flash_utils_ByteArray_writeMultiByte = 907;
-const uint32_t flash_utils_ByteArray_writeUTF = 908;
-const uint32_t flash_utils_ByteArray_writeUTFBytes = 909;
-const uint32_t flash_utils_ByteArray_readBoolean = 910;
-const uint32_t flash_utils_ByteArray_readByte = 911;
-const uint32_t flash_utils_ByteArray_readUnsignedByte = 912;
-const uint32_t flash_utils_ByteArray_readShort = 913;
-const uint32_t flash_utils_ByteArray_readUnsignedShort = 914;
-const uint32_t flash_utils_ByteArray_readInt = 915;
-const uint32_t flash_utils_ByteArray_readUnsignedInt = 916;
-const uint32_t flash_utils_ByteArray_readFloat = 917;
-const uint32_t flash_utils_ByteArray_readDouble = 918;
-const uint32_t flash_utils_ByteArray_readMultiByte = 919;
-const uint32_t flash_utils_ByteArray_readUTF = 920;
-const uint32_t flash_utils_ByteArray_readUTFBytes = 921;
-const uint32_t flash_utils_ByteArray_length_get = 922;
-const uint32_t flash_utils_ByteArray_length_set = 923;
-const uint32_t flash_utils_ByteArray_writeObject = 924;
-const uint32_t flash_utils_ByteArray_readObject = 925;
-const uint32_t flash_utils_ByteArray_private__compress = 927;
-const uint32_t flash_utils_ByteArray_private__uncompress = 929;
-const uint32_t flash_utils_ByteArray_private__toString = 931;
-const uint32_t flash_utils_ByteArray_bytesAvailable_get = 932;
-const uint32_t flash_utils_ByteArray_position_get = 933;
-const uint32_t flash_utils_ByteArray_position_set = 934;
-const uint32_t flash_utils_ByteArray_objectEncoding_get = 935;
-const uint32_t flash_utils_ByteArray_objectEncoding_set = 936;
-const uint32_t flash_utils_ByteArray_endian_get = 937;
-const uint32_t flash_utils_ByteArray_endian_set = 938;
-const uint32_t flash_utils_ByteArray_clear = 939;
+const uint32_t Class_prototype_get = 40;
+const uint32_t Function_prototype_get = 48;
+const uint32_t Function_prototype_set = 49;
+const uint32_t Function_length_get = 50;
+const uint32_t Function_AS3_call = 51;
+const uint32_t Function_AS3_apply = 52;
+const uint32_t Namespace_prefix_get = 57;
+const uint32_t Namespace_uri_get = 58;
+const uint32_t Number_private__numberToString = 74;
+const uint32_t Number_private__convert = 75;
+const uint32_t Number_private__minValue = 76;
+const uint32_t String_AS3_fromCharCode = 126;
+const uint32_t String_private__match = 127;
+const uint32_t String_private__replace = 128;
+const uint32_t String_private__search = 129;
+const uint32_t String_private__split = 130;
+const uint32_t String_length_get = 131;
+const uint32_t String_private__indexOf = 132;
+const uint32_t String_AS3_indexOf = 133;
+const uint32_t String_private__lastIndexOf = 134;
+const uint32_t String_AS3_lastIndexOf = 135;
+const uint32_t String_AS3_charAt = 136;
+const uint32_t String_AS3_charCodeAt = 137;
+const uint32_t String_AS3_localeCompare = 139;
+const uint32_t String_private__slice = 143;
+const uint32_t String_AS3_slice = 144;
+const uint32_t String_private__substring = 146;
+const uint32_t String_AS3_substring = 147;
+const uint32_t String_private__substr = 148;
+const uint32_t String_AS3_substr = 149;
+const uint32_t String_AS3_toLowerCase = 150;
+const uint32_t String_AS3_toUpperCase = 152;
+const uint32_t Array_private__pop = 179;
+const uint32_t Array_private__reverse = 180;
+const uint32_t Array_private__concat = 181;
+const uint32_t Array_private__shift = 182;
+const uint32_t Array_private__slice = 183;
+const uint32_t Array_private__unshift = 184;
+const uint32_t Array_private__splice = 185;
+const uint32_t Array_private__sort = 186;
+const uint32_t Array_private__sortOn = 187;
+const uint32_t Array_private__indexOf = 188;
+const uint32_t Array_private__lastIndexOf = 189;
+const uint32_t Array_private__every = 190;
+const uint32_t Array_private__filter = 191;
+const uint32_t Array_private__forEach = 192;
+const uint32_t Array_private__map = 193;
+const uint32_t Array_private__some = 194;
+const uint32_t Array_length_get = 195;
+const uint32_t Array_length_set = 196;
+const uint32_t Array_AS3_pop = 199;
+const uint32_t Array_AS3_push = 200;
+const uint32_t Array_AS3_unshift = 205;
+const uint32_t __AS3___vec_Vector_object_private__every = 239;
+const uint32_t __AS3___vec_Vector_object_private__forEach = 240;
+const uint32_t __AS3___vec_Vector_object_private__some = 241;
+const uint32_t __AS3___vec_Vector_object_private__sort = 242;
+const uint32_t __AS3___vec_Vector_object_private_newThisType = 244;
+const uint32_t __AS3___vec_Vector_object_length_get = 245;
+const uint32_t __AS3___vec_Vector_object_length_set = 246;
+const uint32_t __AS3___vec_Vector_object_fixed_set = 247;
+const uint32_t __AS3___vec_Vector_object_fixed_get = 248;
+const uint32_t __AS3___vec_Vector_object_AS3_push = 256;
+const uint32_t __AS3___vec_Vector_object_private__reverse = 257;
+const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 261;
+const uint32_t __AS3___vec_Vector_object_AS3_unshift = 262;
+const uint32_t __AS3___vec_Vector_object_private__filter = 263;
+const uint32_t __AS3___vec_Vector_object_private__map = 264;
+const uint32_t __AS3___vec_Vector_object_AS3_pop = 268;
+const uint32_t __AS3___vec_Vector_object_AS3_shift = 270;
+const uint32_t __AS3___vec_Vector_int_private__every = 297;
+const uint32_t __AS3___vec_Vector_int_private__forEach = 298;
+const uint32_t __AS3___vec_Vector_int_private__some = 299;
+const uint32_t __AS3___vec_Vector_int_private__sort = 300;
+const uint32_t __AS3___vec_Vector_int_private_newThisType = 302;
+const uint32_t __AS3___vec_Vector_int_length_get = 303;
+const uint32_t __AS3___vec_Vector_int_length_set = 304;
+const uint32_t __AS3___vec_Vector_int_fixed_set = 305;
+const uint32_t __AS3___vec_Vector_int_fixed_get = 306;
+const uint32_t __AS3___vec_Vector_int_AS3_push = 314;
+const uint32_t __AS3___vec_Vector_int_private__reverse = 315;
+const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 319;
+const uint32_t __AS3___vec_Vector_int_AS3_unshift = 320;
+const uint32_t __AS3___vec_Vector_int_private__filter = 321;
+const uint32_t __AS3___vec_Vector_int_private__map = 322;
+const uint32_t __AS3___vec_Vector_int_AS3_pop = 326;
+const uint32_t __AS3___vec_Vector_int_AS3_shift = 328;
+const uint32_t __AS3___vec_Vector_uint_private__every = 355;
+const uint32_t __AS3___vec_Vector_uint_private__forEach = 356;
+const uint32_t __AS3___vec_Vector_uint_private__some = 357;
+const uint32_t __AS3___vec_Vector_uint_private__sort = 358;
+const uint32_t __AS3___vec_Vector_uint_private_newThisType = 360;
+const uint32_t __AS3___vec_Vector_uint_length_get = 361;
+const uint32_t __AS3___vec_Vector_uint_length_set = 362;
+const uint32_t __AS3___vec_Vector_uint_fixed_set = 363;
+const uint32_t __AS3___vec_Vector_uint_fixed_get = 364;
+const uint32_t __AS3___vec_Vector_uint_AS3_push = 372;
+const uint32_t __AS3___vec_Vector_uint_private__reverse = 373;
+const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 377;
+const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 378;
+const uint32_t __AS3___vec_Vector_uint_private__filter = 379;
+const uint32_t __AS3___vec_Vector_uint_private__map = 380;
+const uint32_t __AS3___vec_Vector_uint_AS3_pop = 384;
+const uint32_t __AS3___vec_Vector_uint_AS3_shift = 386;
+const uint32_t __AS3___vec_Vector_double_private__every = 413;
+const uint32_t __AS3___vec_Vector_double_private__forEach = 414;
+const uint32_t __AS3___vec_Vector_double_private__some = 415;
+const uint32_t __AS3___vec_Vector_double_private__sort = 416;
+const uint32_t __AS3___vec_Vector_double_private_newThisType = 418;
+const uint32_t __AS3___vec_Vector_double_length_get = 419;
+const uint32_t __AS3___vec_Vector_double_length_set = 420;
+const uint32_t __AS3___vec_Vector_double_fixed_set = 421;
+const uint32_t __AS3___vec_Vector_double_fixed_get = 422;
+const uint32_t __AS3___vec_Vector_double_AS3_push = 430;
+const uint32_t __AS3___vec_Vector_double_private__reverse = 431;
+const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 435;
+const uint32_t __AS3___vec_Vector_double_AS3_unshift = 436;
+const uint32_t __AS3___vec_Vector_double_private__filter = 437;
+const uint32_t __AS3___vec_Vector_double_private__map = 438;
+const uint32_t __AS3___vec_Vector_double_AS3_pop = 442;
+const uint32_t __AS3___vec_Vector_double_AS3_shift = 444;
+const uint32_t Math_private__min = 456;
+const uint32_t Math_private__max = 457;
+const uint32_t Math_abs = 458;
+const uint32_t Math_acos = 459;
+const uint32_t Math_asin = 460;
+const uint32_t Math_atan = 461;
+const uint32_t Math_ceil = 462;
+const uint32_t Math_cos = 463;
+const uint32_t Math_exp = 464;
+const uint32_t Math_floor = 465;
+const uint32_t Math_log = 466;
+const uint32_t Math_round = 467;
+const uint32_t Math_sin = 468;
+const uint32_t Math_sqrt = 469;
+const uint32_t Math_tan = 470;
+const uint32_t Math_atan2 = 471;
+const uint32_t Math_pow = 472;
+const uint32_t Math_max = 473;
+const uint32_t Math_min = 474;
+const uint32_t Math_random = 475;
+const uint32_t Error_getErrorMessage = 480;
+const uint32_t Error_getStackTrace = 484;
+const uint32_t Date_parse = 557;
+const uint32_t Date_UTC = 558;
+const uint32_t Date_AS3_valueOf = 559;
+const uint32_t Date_private__toString = 560;
+const uint32_t Date_private__setTime = 561;
+const uint32_t Date_private__get = 562;
+const uint32_t Date_AS3_getUTCFullYear = 571;
+const uint32_t Date_AS3_getUTCMonth = 572;
+const uint32_t Date_AS3_getUTCDate = 573;
+const uint32_t Date_AS3_getUTCDay = 574;
+const uint32_t Date_AS3_getUTCHours = 575;
+const uint32_t Date_AS3_getUTCMinutes = 576;
+const uint32_t Date_AS3_getUTCSeconds = 577;
+const uint32_t Date_AS3_getUTCMilliseconds = 578;
+const uint32_t Date_AS3_getFullYear = 579;
+const uint32_t Date_AS3_getMonth = 580;
+const uint32_t Date_AS3_getDate = 581;
+const uint32_t Date_AS3_getDay = 582;
+const uint32_t Date_AS3_getHours = 583;
+const uint32_t Date_AS3_getMinutes = 584;
+const uint32_t Date_AS3_getSeconds = 585;
+const uint32_t Date_AS3_getMilliseconds = 586;
+const uint32_t Date_AS3_getTimezoneOffset = 587;
+const uint32_t Date_AS3_getTime = 588;
+const uint32_t Date_private__setFullYear = 589;
+const uint32_t Date_private__setMonth = 590;
+const uint32_t Date_private__setDate = 591;
+const uint32_t Date_private__setHours = 592;
+const uint32_t Date_private__setMinutes = 593;
+const uint32_t Date_private__setSeconds = 594;
+const uint32_t Date_private__setMilliseconds = 595;
+const uint32_t Date_private__setUTCFullYear = 596;
+const uint32_t Date_private__setUTCMonth = 597;
+const uint32_t Date_private__setUTCDate = 598;
+const uint32_t Date_private__setUTCHours = 599;
+const uint32_t Date_private__setUTCMinutes = 600;
+const uint32_t Date_private__setUTCSeconds = 601;
+const uint32_t Date_private__setUTCMilliseconds = 602;
+const uint32_t RegExp_source_get = 656;
+const uint32_t RegExp_global_get = 657;
+const uint32_t RegExp_ignoreCase_get = 658;
+const uint32_t RegExp_multiline_get = 659;
+const uint32_t RegExp_lastIndex_get = 660;
+const uint32_t RegExp_lastIndex_set = 661;
+const uint32_t RegExp_dotall_get = 662;
+const uint32_t RegExp_extended_get = 663;
+const uint32_t RegExp_AS3_exec = 664;
+const uint32_t XML_ignoreComments_get = 710;
+const uint32_t XML_ignoreComments_set = 711;
+const uint32_t XML_ignoreProcessingInstructions_get = 712;
+const uint32_t XML_ignoreProcessingInstructions_set = 713;
+const uint32_t XML_ignoreWhitespace_get = 714;
+const uint32_t XML_ignoreWhitespace_set = 715;
+const uint32_t XML_prettyPrinting_get = 716;
+const uint32_t XML_prettyPrinting_set = 717;
+const uint32_t XML_prettyIndent_get = 718;
+const uint32_t XML_prettyIndent_set = 719;
+const uint32_t XML_AS3_toString = 723;
+const uint32_t XML_AS3_hasOwnProperty = 724;
+const uint32_t XML_AS3_propertyIsEnumerable = 725;
+const uint32_t XML_AS3_addNamespace = 726;
+const uint32_t XML_AS3_appendChild = 727;
+const uint32_t XML_AS3_attribute = 728;
+const uint32_t XML_AS3_attributes = 729;
+const uint32_t XML_AS3_child = 730;
+const uint32_t XML_AS3_childIndex = 731;
+const uint32_t XML_AS3_children = 732;
+const uint32_t XML_AS3_comments = 733;
+const uint32_t XML_AS3_contains = 734;
+const uint32_t XML_AS3_copy = 735;
+const uint32_t XML_AS3_descendants = 736;
+const uint32_t XML_AS3_elements = 737;
+const uint32_t XML_AS3_hasComplexContent = 738;
+const uint32_t XML_AS3_hasSimpleContent = 739;
+const uint32_t XML_AS3_inScopeNamespaces = 740;
+const uint32_t XML_AS3_insertChildAfter = 741;
+const uint32_t XML_AS3_insertChildBefore = 742;
+const uint32_t XML_AS3_localName = 744;
+const uint32_t XML_AS3_name = 745;
+const uint32_t XML_private__namespace = 746;
+const uint32_t XML_AS3_namespaceDeclarations = 748;
+const uint32_t XML_AS3_nodeKind = 749;
+const uint32_t XML_AS3_normalize = 750;
+const uint32_t XML_AS3_parent = 751;
+const uint32_t XML_AS3_processingInstructions = 752;
+const uint32_t XML_AS3_prependChild = 753;
+const uint32_t XML_AS3_removeNamespace = 754;
+const uint32_t XML_AS3_replace = 755;
+const uint32_t XML_AS3_setChildren = 756;
+const uint32_t XML_AS3_setLocalName = 757;
+const uint32_t XML_AS3_setName = 758;
+const uint32_t XML_AS3_setNamespace = 759;
+const uint32_t XML_AS3_text = 760;
+const uint32_t XML_AS3_toXMLString = 761;
+const uint32_t XML_AS3_notification = 762;
+const uint32_t XML_AS3_setNotification = 763;
+const uint32_t XMLList_AS3_toString = 805;
+const uint32_t XMLList_AS3_hasOwnProperty = 807;
+const uint32_t XMLList_AS3_propertyIsEnumerable = 808;
+const uint32_t XMLList_AS3_attribute = 809;
+const uint32_t XMLList_AS3_attributes = 810;
+const uint32_t XMLList_AS3_child = 811;
+const uint32_t XMLList_AS3_children = 812;
+const uint32_t XMLList_AS3_comments = 813;
+const uint32_t XMLList_AS3_contains = 814;
+const uint32_t XMLList_AS3_copy = 815;
+const uint32_t XMLList_AS3_descendants = 816;
+const uint32_t XMLList_AS3_elements = 817;
+const uint32_t XMLList_AS3_hasComplexContent = 818;
+const uint32_t XMLList_AS3_hasSimpleContent = 819;
+const uint32_t XMLList_AS3_length = 820;
+const uint32_t XMLList_AS3_name = 821;
+const uint32_t XMLList_AS3_normalize = 822;
+const uint32_t XMLList_AS3_parent = 823;
+const uint32_t XMLList_AS3_processingInstructions = 824;
+const uint32_t XMLList_AS3_text = 825;
+const uint32_t XMLList_AS3_toXMLString = 826;
+const uint32_t XMLList_AS3_addNamespace = 827;
+const uint32_t XMLList_AS3_appendChild = 828;
+const uint32_t XMLList_AS3_childIndex = 829;
+const uint32_t XMLList_AS3_inScopeNamespaces = 830;
+const uint32_t XMLList_AS3_insertChildAfter = 831;
+const uint32_t XMLList_AS3_insertChildBefore = 832;
+const uint32_t XMLList_AS3_nodeKind = 833;
+const uint32_t XMLList_private__namespace = 834;
+const uint32_t XMLList_AS3_localName = 836;
+const uint32_t XMLList_AS3_namespaceDeclarations = 837;
+const uint32_t XMLList_AS3_prependChild = 838;
+const uint32_t XMLList_AS3_removeNamespace = 839;
+const uint32_t XMLList_AS3_replace = 840;
+const uint32_t XMLList_AS3_setChildren = 841;
+const uint32_t XMLList_AS3_setLocalName = 842;
+const uint32_t XMLList_AS3_setName = 843;
+const uint32_t XMLList_AS3_setNamespace = 844;
+const uint32_t QName_localName_get = 848;
+const uint32_t QName_uri_get = 849;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 896;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 897;
+const uint32_t flash_utils_ByteArray_readBytes = 899;
+const uint32_t flash_utils_ByteArray_writeBytes = 900;
+const uint32_t flash_utils_ByteArray_writeBoolean = 901;
+const uint32_t flash_utils_ByteArray_writeByte = 902;
+const uint32_t flash_utils_ByteArray_writeShort = 903;
+const uint32_t flash_utils_ByteArray_writeInt = 904;
+const uint32_t flash_utils_ByteArray_writeUnsignedInt = 905;
+const uint32_t flash_utils_ByteArray_writeFloat = 906;
+const uint32_t flash_utils_ByteArray_writeDouble = 907;
+const uint32_t flash_utils_ByteArray_writeMultiByte = 908;
+const uint32_t flash_utils_ByteArray_writeUTF = 909;
+const uint32_t flash_utils_ByteArray_writeUTFBytes = 910;
+const uint32_t flash_utils_ByteArray_readBoolean = 911;
+const uint32_t flash_utils_ByteArray_readByte = 912;
+const uint32_t flash_utils_ByteArray_readUnsignedByte = 913;
+const uint32_t flash_utils_ByteArray_readShort = 914;
+const uint32_t flash_utils_ByteArray_readUnsignedShort = 915;
+const uint32_t flash_utils_ByteArray_readInt = 916;
+const uint32_t flash_utils_ByteArray_readUnsignedInt = 917;
+const uint32_t flash_utils_ByteArray_readFloat = 918;
+const uint32_t flash_utils_ByteArray_readDouble = 919;
+const uint32_t flash_utils_ByteArray_readMultiByte = 920;
+const uint32_t flash_utils_ByteArray_readUTF = 921;
+const uint32_t flash_utils_ByteArray_readUTFBytes = 922;
+const uint32_t flash_utils_ByteArray_length_get = 923;
+const uint32_t flash_utils_ByteArray_length_set = 924;
+const uint32_t flash_utils_ByteArray_writeObject = 925;
+const uint32_t flash_utils_ByteArray_readObject = 926;
+const uint32_t flash_utils_ByteArray_private__compress = 928;
+const uint32_t flash_utils_ByteArray_private__uncompress = 930;
+const uint32_t flash_utils_ByteArray_private__toString = 932;
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 933;
+const uint32_t flash_utils_ByteArray_position_get = 934;
+const uint32_t flash_utils_ByteArray_position_set = 935;
+const uint32_t flash_utils_ByteArray_objectEncoding_get = 936;
+const uint32_t flash_utils_ByteArray_objectEncoding_set = 937;
+const uint32_t flash_utils_ByteArray_endian_get = 938;
+const uint32_t flash_utils_ByteArray_endian_set = 939;
+const uint32_t flash_utils_ByteArray_clear = 940;
 
 extern double Math_private__min_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern double Math_private__max_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -842,14 +842,6 @@ extern AvmBox native_script_function_avmplus_getQualifiedSuperclassName_thunk(Av
 
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 
-extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_512___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_512___________thunk
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_512___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_512___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_512___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_512___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_512___________thunk
-
 extern AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__filter_thunk  builtin_a2a_oaoa_thunk
 #define Array_private__map_thunk  builtin_a2a_oaoa_thunk
@@ -1062,15 +1054,17 @@ extern AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define flash_utils_ByteArray_readInt_thunk  builtin_i2a_o_thunk
 #define flash_utils_ByteArray_readShort_thunk  builtin_i2a_o_thunk
 
-extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
+extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
 
 extern double builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_charCodeAt_thunk  builtin_d2d_sd_opti0_thunk
@@ -1113,6 +1107,16 @@ extern AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 
 extern AvmBox builtin_s2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define flash_utils_ByteArray_readUTFBytes_thunk  builtin_s2a_ou_thunk
+
+extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
 
 extern AvmBox builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
@@ -1186,17 +1190,13 @@ extern AvmBox builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 extern AvmBox builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define RegExp_AS3_exec_thunk  builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk
 
-extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
 
 extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__toString_thunk  builtin_s2a_oi_thunk
