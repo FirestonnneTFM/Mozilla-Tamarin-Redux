@@ -49,7 +49,7 @@ from glob import glob
 from sys import argv, exit
 from getopt import getopt
 from itertools import count
-from time import time
+from time import time, tzname
 
 # add parent dir to python module search path
 sys.path.append('..')
@@ -236,6 +236,25 @@ class AcceptanceRuntest(RuntestBase):
             self.allskips += 1
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
+
+        # Check for a timezone file
+        if isfile('%s.tz' % ast):
+            tz_file = open('%s.tz' % ast)
+            valid_timezones = []
+            for line in tz_file:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                valid_timezones.append(line)
+            # check if current tz is in the list
+            if str(tzname) not in valid_timezones:
+                outputCalls.append((self.js_print,
+                                    ('  skipping... reason: Current timezone: %s not in %s.tz timezones:\n' \
+                                     '                      %s'
+                                     % (tzname, ast, ','.join(valid_timezones)),)))
+                self.allskips += 1
+                outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+                return outputCalls
 
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName) and ext not in self.executableExtensions:
