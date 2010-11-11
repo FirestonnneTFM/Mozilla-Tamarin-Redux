@@ -355,6 +355,7 @@ SHELL_SRCS := ../../shell/ConsoleOutputStream.cpp \
   ../../shell/../extensions/ST_mmgc_dependent.cpp \
   ../../shell/../extensions/ST_mmgc_gcheap.cpp \
   ../../shell/../extensions/ST_mmgc_finalize_uninit.cpp \
+  ../../shell/../extensions/ST_vmpi_threads.cpp \
   ../../shell/../extensions/ST_mmgc_575631.cpp \
 	android_cpuid.cpp
 

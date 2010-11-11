@@ -1695,6 +1695,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\ST_vmpi_threads.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\swf.cpp"
 				>
 			</File>
