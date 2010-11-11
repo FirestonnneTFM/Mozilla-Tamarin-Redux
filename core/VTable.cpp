@@ -87,7 +87,6 @@ namespace avmplus
         }
 
         // populate method table
-
         const TraitsBindingsp td = traits->getTraitsBindings();
         const TraitsBindingsp btd = td->base;
         for (uint32_t i = 0, n = td->methodCount; i < n; i++)
@@ -96,12 +95,13 @@ namespace avmplus
 
             if (btd && i < btd->methodCount && method == btd->getMethod(i))
             {
-                    // inherited method
-                    //this->methods[i] = base->methods[i];
+                // inherited method
+                // this->methods[i] = base->methods[i];
                 WB(gc, this, &methods[i], base->methods[i]);
                 continue;
             }
-                    // new definition
+
+            // new definition
             if (method != NULL)
             {
                 //this->methods[i] = new (gc) MethodEnv(method, this);
@@ -117,8 +117,8 @@ namespace avmplus
             #endif
         }
 
-            // this is done here b/c this property of the traits isn't set until the
-            // Dictionary's ClassClosure is called
+        // this is done here b/c this property of the traits isn't set until the
+        // Dictionary's ClassClosure is called
         if (base && base->traits->isDictionary())
             traits->set_isDictionary();
 
