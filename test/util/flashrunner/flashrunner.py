@@ -110,7 +110,7 @@ def putdword(bytes,n):
     bytes.append(n&0xFF)
     bytes.append((n>>8)&0xFF)
     bytes.append((n>>16)&0xFF)
-    bytes.append((n>>24)&0xFF)	
+    bytes.append((n>>24)&0xFF)
 
 def buildswf(data):
     bytes=[]
@@ -136,7 +136,7 @@ def buildswf(data):
     putbyte(bytes,12)
     # number of frames=1
     putword(bytes,1)
-    # FileAttributes tag, 69 = AS3|usenetwork	
+    # FileAttributes tag, 69 = AS3|usenetwork
     putword(bytes,(69<<6)+4)
     putdword(bytes,0x00000008|0x00000001)
     # set ScriptLimits tag, MaxRecursionDepth and ScriptTimeoutSeconds
@@ -147,7 +147,7 @@ def buildswf(data):
     putword(bytes,(72<<6)+0x3f)
     putdword(bytes,len(data))
     for i in range(len(data)):
-       	putbyte(bytes,ord(data[i]))
+        putbyte(bytes,ord(data[i]))
     # showframe
     putword(bytes,1<<6)
     setlength(bytes)
@@ -156,7 +156,7 @@ def buildswf(data):
 def killbrowser(process):
     try:
         if ostype=="win":
-    	    win32api.TerminateProcess(int(process._handle), -1)
+            win32api.TerminateProcess(int(process._handle), -1)
         elif ostype=="lnx":
             if playertype=='ff' or playertype=='firefox':
                 os.system("killall firefox-bin")
