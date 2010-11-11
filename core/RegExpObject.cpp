@@ -726,7 +726,7 @@ namespace avmplus
             if (newLastIndex < subjectLength)
             {
                 uint32_t ch;
-                int n = UnicodeUtils::Utf8ToUcs4((const uint8_t*)src+newLastIndex, subjectLength-newLastIndex, &ch);
+                int n = UnicodeUtils::Utf8ToUcs4((const uint8_t*)src+newLastIndex, subjectLength-newLastIndex, &ch, core()->currentBugCompatibility()->bugzilla609416);
                 if (n <= 0)
                 {
                     // Invalid UTF8 sequence, advance one uint8_t

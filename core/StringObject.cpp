@@ -2709,6 +2709,7 @@ namespace avmplus
                 uint32_t uch;
                 int32_t bytesRead;
                 Pointers dst(s); // NB, we assume that Utf8ToUcs4 doesn't allocate memory!
+                bool bugzilla609416 = core->currentBugCompatibility()->bugzilla609416;
                 while (len > 0)
                 {
                     if (*((int8_t*) buffer) > 0)
@@ -2719,7 +2720,7 @@ namespace avmplus
                     }
                     else
                     {
-                        bytesRead = UnicodeUtils::Utf8ToUcs4(buffer, len, &uch);
+                        bytesRead = UnicodeUtils::Utf8ToUcs4(buffer, len, &uch, bugzilla609416);
                         if (bytesRead == 0)
                         {
                             // invalid sequence (only if strict was false)

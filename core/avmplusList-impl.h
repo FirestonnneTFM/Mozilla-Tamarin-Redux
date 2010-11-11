@@ -364,7 +364,7 @@ namespace avmplus
         }
         m_data->len -= removed;
         return removed;
-	}
+    }
 }
 
 #endif /* __avmplus_List_impl__ */

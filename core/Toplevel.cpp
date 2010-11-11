@@ -1002,6 +1002,8 @@ namespace avmplus
         StUTF16String in16(in);
         const wchar *src = in16.c_str();
         int len = in->length();
+        
+        bool bugzilla609416 = core->currentBugCompatibility()->bugzilla609416;
 
         while (len--) {
             wchar ch = *src;
@@ -1021,8 +1023,17 @@ namespace avmplus
                     if (src[1] < 0xDC00 || src[1] > 0xDFFF) {
                         return NULL;
                     }
-                    V = (ch - 0xD800) * 0x400 + (src[1] - 0xDC00) * 0x10000;
-                    src += 2;
+                    if (bugzilla609416)
+                    {
+                        V = (ch - 0xD800) * 0x400 + (src[1] - 0xDC00) + 0x10000;
+                        src += 2;
+                        len--; // need to reduce the len to account for the surrogate byte we just read
+                    }
+                    else
+                    {
+                        V = (ch - 0xD800) * 0x400 + (src[1] - 0xDC00) * 0x10000;
+                        src += 2;
+                    }
                 } else {
                     V = ch;
                     src++;
@@ -1047,6 +1058,8 @@ namespace avmplus
         int length = in->length();
         wchar *out = (wchar*) core->GetGC()->Alloc(length*2+1); // decoded result is at most length wchar chars long
         int outLen = 0;
+        
+        bool bugzilla609416 = core->currentBugCompatibility()->bugzilla609416;
 
         for (int k = 0; k < length; k++) {
             wchar C = chars[k];
@@ -1113,7 +1126,7 @@ namespace avmplus
 
                     // 29. Let V be the value obtained by applying the UTF-8 transformation
                     // to Octets, that is, from an array of octets into a 32-bit value.
-                    if (!UnicodeUtils::Utf8ToUcs4(Octets, n, &V)) {
+                    if (!UnicodeUtils::Utf8ToUcs4(Octets, n, &V, bugzilla609416)) {
                         return NULL;
                     }
                 }

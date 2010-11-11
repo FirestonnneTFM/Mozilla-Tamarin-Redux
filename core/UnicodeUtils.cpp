@@ -303,7 +303,8 @@ namespace avmplus
 
     int32_t UnicodeUtils::Utf8ToUcs4(const uint8_t *chars,
                                      int32_t len,
-                                     uint32_t *out)
+                                     uint32_t *out,
+                                     bool bugzilla609416)
     {
         // U-00000000 - U-0000007F:     0xxxxxxx
         // U-00000080 - U-000007FF:     110xxxxx 10xxxxxx
@@ -356,8 +357,16 @@ namespace avmplus
                 n = 6;
                 b = chars[0]&0x01;
                 break;
+            default:  // invalid character, should not get here
+                if (bugzilla609416)
+                {
+                    return 0;
+                }
             }
-            // fall through intentional
+            if (bugzilla609416)
+            {
+                break;
+            }
 
         default: // invalid character, should not get here
             return 0;
