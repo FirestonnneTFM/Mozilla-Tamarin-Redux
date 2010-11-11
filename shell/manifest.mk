@@ -75,6 +75,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_mmgc_575631.cpp \
   $(curdir)/../extensions/ST_mmgc_580603.cpp \
   $(curdir)/../extensions/ST_mmgc_gcheap.cpp \
+  $(curdir)/../extensions/ST_vmpi_threads.cpp \
   $(NULL)
 
 ifeq (windows,$(TARGET_OS))
