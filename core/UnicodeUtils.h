@@ -131,7 +131,8 @@ namespace avmplus
          */
         static int32_t Utf8ToUcs4(const uint8_t *chars,
                                   int32_t len,
-                                  uint32_t *out);
+                                  uint32_t *out,
+                                  bool bugzilla609416);
 
         /**
          * Ucs4ToUtf8 takes a single 32-bit UCS-4 character as
