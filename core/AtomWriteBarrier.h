@@ -40,65 +40,63 @@
 #ifndef __avmplus_AtomWriteBarrier__
 #define __avmplus_AtomWriteBarrier__
 
-
 namespace avmplus
 {
-        // Optimized Atom write barrier
-        class AtomWB
+    // Optimized Atom write barrier
+    class AtomWB : public MMgc::AtomWBCore
+    {
+    public:
+        explicit AtomWB() : AtomWBCore(nullObjectAtom)
         {
-        public:
-            explicit AtomWB() : m_atom(nullObjectAtom)
+            // nothing
+        }
+
+        explicit AtomWB(Atom t)  // : AtomWBCore(t) -- not necessary, atomWriteBarrier_ctor handles it
+        {
+            MMgc::GC* const gc = MMgc::GC::GetGC(this);
+            void* const container = gc->FindBeginningFast(this);
+            AvmCore::atomWriteBarrier_ctor(gc, container, &m_atom, t);
+        }
+
+        ~AtomWB()
+        {
+            AvmCore::atomWriteBarrier_dtor(&m_atom);
+        }
+
+        Atom operator=(Atom tNew)
+        {
+            MMgc::GC* const gc = MMgc::GC::GetGC(this);
+            void* const container = gc->FindBeginningFast(this);
+            set(gc, container, tNew);
+            return tNew;
+        }
+
+        // if you know the container, this saves a call to FindBeginningFast...
+        // which adds up in (e.g.) heavy E4X usage
+        inline void set(MMgc::GC* gc, const void* container, Atom atomNew)
+        {
+            if (m_atom != atomNew)
             {
-                // nothing
+                AvmCore::atomWriteBarrier(gc, container, &m_atom, atomNew);
             }
+        }
 
-            explicit AtomWB(Atom t)  // : m_atom(t) -- not necessary, atomWriteBarrier_ctor handles it
+        inline operator const Atom&() const { return m_atom; }
+        
+    private:
+        explicit AtomWB(const AtomWB& toCopy); // unimplemented
+        void operator=(const AtomWB& wb); // unimplemented
+
+        Atom set(Atom atomNew)
+        {
+            if (m_atom != atomNew)
             {
-                MMgc::GC* const gc = MMgc::GC::GetGC(this);
-                void* const container = gc->FindBeginningFast(this);
-                AvmCore::atomWriteBarrier_ctor(gc, container, &m_atom, t);
+                MMgc::GC* gc = MMgc::GC::GetGC(this);
+                AvmCore::atomWriteBarrier(gc, gc->FindBeginningFast(this), &m_atom, atomNew);
             }
-
-            ~AtomWB()
-            {
-                AvmCore::atomWriteBarrier_dtor(&m_atom);
-            }
-
-            Atom operator=(Atom tNew)
-            {
-                MMgc::GC* const gc = MMgc::GC::GetGC(this);
-                void* const container = gc->FindBeginningFast(this);
-                set(gc, container, tNew);
-                return tNew;
-            }
-
-            // if you know the container, this saves a call to FindBeginningFast...
-            // which adds up in (e.g.) heavy E4X usage
-            inline void set(MMgc::GC* gc, const void* container, Atom atomNew)
-            {
-                if (m_atom != atomNew)
-                {
-                    AvmCore::atomWriteBarrier(gc, container, &m_atom, atomNew);
-                }
-            }
-
-            inline operator const Atom&() const { return m_atom; }
-
-        private:
-            explicit AtomWB(const AtomWB& toCopy); // unimplemented
-            void operator=(const AtomWB& wb); // unimplemented
-
-            Atom set(Atom atomNew)
-            {
-                if (m_atom != atomNew)
-                {
-                    MMgc::GC* gc = MMgc::GC::GetGC(this);
-                    AvmCore::atomWriteBarrier(gc, gc->FindBeginningFast(this), &m_atom, atomNew);
-                }
-                return atomNew;
-            }
-            Atom m_atom;
-        };
+            return atomNew;
+        }
+    };
 #define ATOM_WB AtomWB
 #define WBATOM(gc, c, a, v) AvmCore::atomWriteBarrier(gc, c, a, v)
 }

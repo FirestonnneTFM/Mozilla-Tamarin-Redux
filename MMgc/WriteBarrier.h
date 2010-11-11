@@ -363,6 +363,34 @@ namespace MMgc
 
         T t;
     };
+
+    // This is intended to be subclassed by avmplus::AtomWB /only/.  It provides the
+    // minimum of functionality required by exact tracing of AtomWB smart pointers.
+
+    class AtomWBCore
+    {
+        friend class GC;
+        
+    public:
+        /** @return the Atom value held by the pointer. */
+        avmplus::Atom value() const { return m_atom; }
+        
+    protected:
+        AtomWBCore(avmplus::Atom a) : m_atom(a) {}
+        AtomWBCore() {}
+        
+        avmplus::Atom m_atom;
+        
+    private:
+        explicit AtomWBCore(const AtomWBCore& toCopy);  // unimplemented
+        void operator=(const AtomWBCore& wb);           // unimplemented
+        
+        /**
+         * @return the location of the Atom slot.  Used by GC::TraceAtom(AtomWBCore*)
+         * to implement MMGC_HEAP_GRAPH.
+         */
+        avmplus::Atom* location() { return &m_atom; }
+    };
 }
 
 #endif // _WRITE_BARRIER_H_
