@@ -47,28 +47,32 @@
 [3,air,full]=666:AIR_1_5_2
 [4,player,full]=667:FP_10_1
 [4,air,full]=668:AIR_2_0
-[5,player,system]=670:FP_SYS
 [5,air,full]=669:AIR_2_5
-[5,air,system]=671:AIR_SYS
+[6,player,full]=670:FP_10_2
+[6,player,system]=672:FP_SYS
+[6,air,full]=671:AIR_2_6
+[6,air,system]=673:AIR_SYS
 */
 
 static const uint32_t _min_version_num = 660;
-static const uint32_t _max_version_num = 671;
-static const uint32_t _versions_count[] = {12, 7, 10, 6, 5, 7, 4, 5, 3, 2, 2, 1, };
+static const uint32_t _max_version_num = 673;
+static const uint32_t _versions_count[] = {14, 8, 12, 7, 6, 9, 5, 7, 4, 3, 4, 2, 2, 1, };
 
-static const uint32_t _versions [][12] = {
-  {660, 661, 662, 663, 664, 665, 666, 667, 668, 670, 669, 671, },
-  {661, 663, 664, 666, 668, 669, 671, },
-  {662, 663, 664, 665, 666, 667, 668, 670, 669, 671, },
-  {663, 664, 666, 668, 669, 671, },
-  {664, 666, 668, 669, 671, },
-  {665, 666, 667, 668, 670, 669, 671, },
-  {666, 668, 669, 671, },
-  {667, 668, 670, 669, 671, },
-  {668, 669, 671, },
-  {669, 671, },
-  {670, 671, },
-  {671, },
+static const uint32_t _versions [][14] = {
+  {660, 661, 662, 663, 664, 665, 666, 667, 668, 669, 670, 672, 671, 673, },
+  {661, 663, 664, 666, 668, 669, 671, 673, },
+  {662, 663, 664, 665, 666, 667, 668, 669, 670, 672, 671, 673, },
+  {663, 664, 666, 668, 669, 671, 673, },
+  {664, 666, 668, 669, 671, 673, },
+  {665, 666, 667, 668, 669, 670, 672, 671, 673, },
+  {666, 668, 669, 671, 673, },
+  {667, 668, 669, 670, 672, 671, 673, },
+  {668, 669, 671, 673, },
+  {669, 671, 673, },
+  {670, 672, 671, 673, },
+  {671, 673, },
+  {672, 673, },
+  {673, },
 };
 static const uint32_t _uris_count = 35;
 static const char* _uris [] = {
@@ -108,5 +112,5 @@ static const char* _uris [] = {
   "flash.utils",
   "flash.xml",
 };
-static const int32_t _api_compat [] = {0xfff, 0xb5a, 0xffc, 0xb58, 0xb50, 0xfe0, 0xb40, 0xf80, 0xb00, 0xa00, 0xc00, 0x800, };
-static const uint32_t _max_nonsys_version_num = 669;
+static const int32_t _api_compat [] = {0x3fff, 0x2b5a, 0x3ffc, 0x2b58, 0x2b50, 0x3fe0, 0x2b40, 0x3f80, 0x2b00, 0x2a00, 0x3c00, 0x2800, 0x3000, 0x2000, };
+static const uint32_t _max_nonsys_version_num = 671;

@@ -77,58 +77,68 @@ ASC and AVM to control the visibility of names in the API.
   <release id="1">
     <product id="player">
       <profile id="full">
-	<version id="662" alias="FP_10_0"/>
+	      <version id="662" alias="FP_10_0"/>
       </profile>
     </product>
     <product id="air">
       <profile id="full">
-	<version id="663" alias="AIR_1_5"/>
+	      <version id="663" alias="AIR_1_5"/>
       </profile>
     </product>
   </release>
   <release id="2">
     <product id="air">
       <profile id="full">
-	<version id="664" alias="AIR_1_5_1"/>
+	      <version id="664" alias="AIR_1_5_1"/>
       </profile>
     </product>
   </release>
   <release id="3">
     <product id="player">
       <profile id="full">
-	<version id="665" alias="FP_10_0_32"/>
+      	<version id="665" alias="FP_10_0_32"/>
       </profile>
     </product>
     <product id="air">
       <profile id="full">
-	<version id="666" alias="AIR_1_5_2"/>
+	      <version id="666" alias="AIR_1_5_2"/>
       </profile>
     </product>
   </release>
   <release id="4">
     <product id="player">
       <profile id="full">
-	<version id="667" alias="FP_10_1"/>
+      	<version id="667" alias="FP_10_1"/>
       </profile>
     </product>
     <product id="air">
       <profile id="full">
-	<version id="668" alias="AIR_2_0"/>
+	      <version id="668" alias="AIR_2_0"/>
       </profile>
     </product>
   </release>
   <release id="5">
+    <product id="air">
+      <profile id="full">
+	      <version id="669" alias="AIR_2_5"/>
+      </profile>
+    </product>
+  </release>
+  <release id="6">
     <product id="player">
+      <profile id="full">
+        <version id="670" alias="FP_10_2"/>
+      </profile>
       <profile id="system">
-	<version id="670" alias="FP_SYS"/>
+        <version id="672" alias="FP_SYS"/>
       </profile>
     </product>
     <product id="air">
       <profile id="full">
-	<version id="669" alias="AIR_2_5"/>
+        <version id="671" alias="AIR_2_6"/>
       </profile>
       <profile id="system">
-	<version id="671" alias="AIR_SYS"/>
+        <version id="673" alias="AIR_SYS"/>
       </profile>
     </product>
   </release>
