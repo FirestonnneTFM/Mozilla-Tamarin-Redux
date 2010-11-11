@@ -462,7 +462,6 @@ spidermonkey/js1_5/Regress/regress-311071, .*, skip, how should e4x comments beh
 spidermonkey/js1_5/Regress/regress-31255, .*, skip, how should e4x comments behave in as3?
 spidermonkey/js1_5/Regress/regress-334807-0.*, .*, skip, need to investigate if this is a legit bug
 spidermonkey/js1_5/Regress/regress-352009, .*, skip, should array comprehension work?
-spidermonkey/js1_5/Regress/regress-511859:valid sequence U\+(800|10000|10FFFF), ^((?!diff).)*$, expectedfail, need to investigate
 
 spidermonkey/js1_5/Regress/regress-230216-1:Section 1.*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550976
 spidermonkey/js1_5/Regress/regress-247179:RegExp \\b.*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550984
