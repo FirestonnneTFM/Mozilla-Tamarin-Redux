@@ -496,6 +496,8 @@ spidermonkey/js1_5/Regress/regress-98901, .*, skip, https://bugs.adobe.com/jira/
 spidermonkey/js1_5/Regress/regress-89443, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
 spidermonkey/js1_5/Regress/regress-96526-003, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
 
+spidermonkey/js1_5/Regress/regress-511859, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=611531
+
 ### Spidermonkey JS1_6 ###
 spidermonkey/js1_6/Array/regress-290592:.*length, ^((?!diff).)*$, expectedfail, related to https://bugzilla.mozilla.org/show_bug.cgi?id=551032
 spidermonkey/js1_6/Array/regress-290592:(Array.forEach.*(mutate|on sparse array)|sparsestrings: every.*), ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=553088
