@@ -7684,8 +7684,13 @@ namespace avmplus
             nanojit::live(&in, live_alloc, frag, &codeMgr->log);
         })
 
+        // disable hardening features when compiling thunks
+        nanojit::Config cfg = core->config.njconfig;
+        cfg.harden_function_alignment = false;
+        cfg.harden_nop_insertion = false;
+
         Assembler *assm = new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator, *lir_alloc,
-            core, &codeMgr->log, core->config.njconfig);
+            core, &codeMgr->log, cfg);
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
         LirReader bufreader(frag->lastIns);
