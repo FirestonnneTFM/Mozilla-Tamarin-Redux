@@ -271,13 +271,16 @@ namespace avmplus
         uintptr_t                   activationOrMCTable;
     public:
 #ifdef VMCFG_LOOKUP_CACHE
-        class LookupCache : public MMgc::GCObject
+        class LookupCache
         {
         public:
             uint32_t timestamp;
             DRCWB(ScriptObject*) object;
         };
         DWB(LookupCache*) lookup_cache;
+
+        // Populate lookup_cache, which should be NULL at the time of the call.
+        void createLookupCache();
 #endif
     // ------------------------ DATA SECTION END
     };

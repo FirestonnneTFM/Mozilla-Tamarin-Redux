@@ -691,10 +691,8 @@ namespace avmplus
         // to do this when the lookup cache is being used by wordcode.  we do not
         // want to run this in the abc interpreter when combined with the JIT.
 
-        if (info->lookup_cache_size() > 0 && env->lookup_cache == NULL) {
-            using namespace MMgc;
-            env->lookup_cache = (MethodEnv::LookupCache*)core->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->lookup_cache_size(), GC::kContainsPointers|GC::kZero);
-        }
+        if (info->lookup_cache_size() > 0 && env->lookup_cache == NULL)
+            env->createLookupCache();
 #endif
 
         // always do a stack check; this not only checks true stack overflows
