@@ -1509,27 +1509,18 @@ namespace avmplus
       / Notes
       /   The fast random number generator has some unique qualities:
       /
-      /   1) It generates an exact and repeatable sequence of pseudorandom
-      /      integers between 1 and 2^n-1, inclusive.  Zero is not generated.
-      /   2) The same sequence repeats every 2^n-1 generations.
-      /   3) Each number can be generated extremely rapidly.
-      /
-      /   This returns the first random number in the sequence.
+      /   1) The same sequence repeats every 2^n-1 generations.
+      /   2) Each number can be generated extremely rapidly.
       /
       / Entry
       /   pRandomFast = Pointer to data structure for current state of a fast
       /     pseudorandom number generator.
-      /   n = A value which sets the number of unique values to generate before
-      /     repeating.  This value can range from 2 to 32, inclusive.  If an
-      /     invalid value (such as zero) is passed in, 32 is assumed.
       /--------------------------------------------*/
     void MathUtils::RandomFastInit(pTRandomFast pRandomFast)
     {
-        int32_t n = 31; // Changed from 32 to 31 per Prince
+        int32_t n = 31; // Changed from 32 to 31 per Prince (you mean "The Artist"?)
 
-        /* The sequence always starts with 1. */
-        //    pRandomFast->uValue = 1L;
-        pRandomFast->uValue = (uint32_t)(VMPI_getTime());
+        pRandomFast->uValue = (uint32_t)(VMPI_getPerformanceCounter());
 
         /* Figure out the sequence length (2^n - 1). */
         pRandomFast->uSequenceLength = (1L << n) - 1L;
@@ -1631,11 +1622,8 @@ namespace avmplus
     /* ------------------------------------------------------------------------------ */
     int32_t MathUtils::GenerateRandomNumber(pTRandomFast pRandomFast)
     {
-        /* Fill out gRandomFast if it is uninitialized.
-           /  This means seed hasn't been set.  Sequence of numbers will be
-           /  the same every time player is run. */
+        // Fill out gRandomFast if it is uninitialized.
         if (pRandomFast->uValue == 0) {
-            /* Initialize 32 bit pure random number generator. */
             RandomFastInit(pRandomFast);
         }
 

@@ -3124,7 +3124,7 @@ namespace avmplus
             if (value.notNull) {
                 // not eligible for CSE, and we know it's not null/undefined
                 return emitStringCall(index, FUNCTIONID(string), true); // call string
-            } 
+            }
             return emitStringCall(index, FUNCTIONID(coerce_s), true); // call coerce_s
         }
     }
@@ -3226,9 +3226,9 @@ namespace avmplus
     }
 
     // OP_convert_s needs a null String ptr to be converted to "null"
-    // while our other usage prior to concatStrings handles null ptrs 
+    // while our other usage prior to concatStrings handles null ptrs
     // correctly in AvmCore::concatStrings.  This function is different
-    // than coerceToString in how undefinedAtom is handled: 
+    // than coerceToString in how undefinedAtom is handled:
     // convert: undefinedAtom -> "undefined"
     // coerce:  undefinedAtom -> "null" (see coerce_s)
     LIns* CodegenLIR::convertToString(int index, bool preserveNull)
@@ -3236,7 +3236,7 @@ namespace avmplus
         const Value& value = state->value(index);
         Traits* in = value.traits;
         Traits* stringType = STRING_TYPE;
- 
+
         if (in != stringType || (!preserveNull && !value.notNull)) {
             if (in && (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE)) {
                 // convert is the same as coerce
@@ -3527,8 +3527,8 @@ namespace avmplus
         localSet(loc, coerceToType(loc, result), result);
     }
 
-    // If we have already generated this specialized function, return our 
-    // prior entry instead of re-specializing the same function.  
+    // If we have already generated this specialized function, return our
+    // prior entry instead of re-specializing the same function.
     LIns* CodegenLIR::getSpecializedCall(LIns* origCall)
     {
         if (!specializedCallHashMap)
@@ -3564,7 +3564,7 @@ namespace avmplus
         LIns *priorCall = getSpecializedCall(call);
         if (priorCall)
             return priorCall;
-        
+
         const CallInfo *ci = call->callInfo();
         int i = 0;
         while (specs[i].oldFunc != NULL) {
@@ -3581,13 +3581,13 @@ namespace avmplus
     }
 
     // Return true if we are promoting an int or uint to a double
-    bool CodegenLIR::isPromote(LOpcode op) 
+    bool CodegenLIR::isPromote(LOpcode op)
     {
         return op == LIR_ui2d || op == LIR_i2d;
     }
 
     // Return non-null LIns* if input is a constant that fits into a int32_t
-    LIns* CodegenLIR::imm2Int(LIns* imm) 
+    LIns* CodegenLIR::imm2Int(LIns* imm)
     {
         if (imm->isImmI())
             ; // just use imm
@@ -6009,7 +6009,7 @@ namespace avmplus
 
         return NULL;
     }
-    
+
     // Faster compares for int, uint, double, boolean
     LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
     {
@@ -7209,7 +7209,7 @@ namespace avmplus
         assm->vtuneHandle = vtuneInit(info->getMethodName());
         #endif /* VMCFG_VTUNE */
 
-        assm->setNoiseGenerator( (nanojit::Noise*) &noise );
+        assm->setNoiseGenerator( &noise );
 
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
