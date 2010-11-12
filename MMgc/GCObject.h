@@ -518,13 +518,24 @@ namespace MMgc
         T t;
     };
 
-    template<class T>
+    template<class T, bool checkMissingWB=true>
     class RCPtr
     {
     public:
-        RCPtr() { t = NULL; }
+        RCPtr()
+        {
+            if(checkMissingWB)
+                GCAssertMsg(GC::GetActiveGC() == NULL
+                            || !GC::GetActiveGC()->IsPointerToGCPage(this),
+                            "Need to use DRCWB on GC memory");
+            t = NULL;
+        }
         RCPtr(T _t) : t(_t)
         {
+            if(checkMissingWB)
+                GCAssertMsg(GC::GetActiveGC() == NULL
+                            || !GC::GetActiveGC()->IsPointerToGCPage(this),
+                            "Need to use DRCWB on GC memory");
             if(valid())
                 t->IncrementRef();
         }
@@ -592,7 +603,8 @@ namespace MMgc
 
 
 // put spaces around the template arg to avoid possible digraph warnings
-#define DRC(_type) MMgc::RCPtr< _type >
+#define DRC(_type) MMgc::RCPtr< _type, true >
+#define DRC_NOWB(_type) MMgc::RCPtr< _type, false >
 
 #undef GNUC_ONLY
 
