@@ -1523,6 +1523,16 @@ namespace avmplus
         return (WeakKeyHashtable*)(activationOrMCTable&~7);
     }
 
+#ifdef VMCFG_LOOKUP_CACHE
+    void MethodEnv::createLookupCache()
+    {
+        AvmAssert(lookup_cache == NULL);
+
+        using namespace MMgc;
+        lookup_cache = (LookupCache*)core()->gc->Calloc(method->lookup_cache_size(), sizeof(LookupCache), GC::kContainsPointers | GC::kZero);
+    }
+#endif
+
 #ifdef _DEBUG
     void FASTCALL check_unbox(MethodEnv* env, bool u)
     {

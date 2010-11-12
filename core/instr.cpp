@@ -190,12 +190,9 @@ ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot
     if (!cache) {
         // todo - do this earlier.  This extra test in the fast path
         // is repugnant but hasn't shown itself to be a problem in practice.
-        using namespace MMgc;
-        size_t nbytes = sizeof(*cache) * env->method->lookup_cache_size();
-        _nvprof("lookup_cache_bytes", nbytes);
-        AvmCore* core = env->core();
-        cache = (MethodEnv::LookupCache*) core->gc->Alloc(nbytes, GC::kContainsPointers | GC::kZero);
-        env->lookup_cache = cache;
+        _nvprof("lookup_cache_bytes", sizeof(*cache) * env->method->lookup_cache_size());
+        env->createLookupCache();
+        cache = env->lookup_cache;
     }
 
     // check for valid cache
