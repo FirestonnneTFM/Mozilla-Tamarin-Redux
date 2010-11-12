@@ -41,7 +41,8 @@
 # ***** END LICENSE BLOCK ***** */
 #
 
-import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, threading
+import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string
+import re, platform, threading, time
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -49,7 +50,7 @@ from glob import glob
 from sys import argv, exit
 from getopt import getopt
 from itertools import count
-from time import time, tzname
+
 
 # add parent dir to python module search path
 sys.path.append('..')
@@ -239,23 +240,9 @@ class AcceptanceRuntest(RuntestBase):
 
         # Check for a timezone file
         if isfile('%s.tz' % ast):
-            tz_file = open('%s.tz' % ast)
-            valid_timezones = []
-            for line in tz_file:
-                line = line.strip()
-                if not line or line.startswith('#'):
-                    continue
-                valid_timezones.append(line)
-            # check if current tz is in the list
-            if str(tzname) not in valid_timezones:
-                outputCalls.append((self.js_print,
-                                    ('  skipping... reason: Current timezone: %s not in %s.tz timezones:\n' \
-                                     '                      %s'
-                                     % (tzname, ast, ','.join(valid_timezones)),)))
-                self.allskips += 1
-                outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+            if not self.valid_time_zone(ast, testnum, outputCalls):
                 return outputCalls
-
+        
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName) and ext not in self.executableExtensions:
             os.unlink(testName)
@@ -325,6 +312,43 @@ class AcceptanceRuntest(RuntestBase):
 
         return outputCalls
 
+    def valid_time_zone(self, testname, testnum, outputCalls):
+        '''Read in the associated time zone (testname.as.tz) file and
+            check if we match that timezone.  Returns a boolean indicating
+            whether we are in the right timezone'''
+        tz_file = open('%s.tz' % testname)
+        valid_timezones = []
+        for line in tz_file:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            valid_timezones.append(line)
+        
+        # windows python time.tzname returns time zone strings instead of
+        # abbreviations.  Take the string and condense it so that it matches
+        # the unix tzname values.  Not ideal, but works for most time zones.
+        # e.g.: computer set to Pacific Standard Time
+        # windows tzname = ('Pacific Standard Time', 'Pacific Daylight Time')
+        # cygwin  tzname = ('PST', 'PDT')
+        if self.osName == 'win' and not self.cygwin:
+            print('win tz: ', time.tzname)
+            # extract only the upper case letters from the windows time zone
+            tzname = tuple([''.join(re.findall('[A-Z]',tz)) for tz in time.tzname])
+        else:
+            tzname = time.tzname
+        print('tzname = ', tzname)
+        # check if current tz is in the list
+        if str(tzname) not in valid_timezones:
+            outputCalls.append(
+                    (self.js_print,
+                    ('  skipping... reason: Current timezone: %s not in %s.tz timezones:\n' \
+                     '                      %s'
+                    % (tzname, testname, ','.join(valid_timezones)),)))
+            outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, testname), '<b>', '</b><br/>')));
+            self.allskips += 1
+            return False
+        return True
+    
     def compile_support_files(self, support_dir, outputCalls):
         for p, dirs, files in walk(support_dir):
             for f in files:
@@ -366,7 +390,7 @@ class AcceptanceRuntest(RuntestBase):
         lunpass = 0
         ltimeout = 0
         lassert = 0
-        starttime=time()
+        starttime=time.time()
 
         if self.aotsdk and self.aotout:
             avm_args = ""
@@ -561,7 +585,7 @@ class AcceptanceRuntest(RuntestBase):
         else:
             outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d\n' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
         if self.show_time:
-            outputCalls.insert(0,(self.js_print,('%s running %s %s %s time %.1f' % (testnum, ast, extraVmArgs, abcargs, time()-starttime), '<b>', '</b><br/>')));
+            outputCalls.insert(0,(self.js_print,('%s running %s %s %s time %.1f' % (testnum, ast, extraVmArgs, abcargs, time.time()-starttime), '<b>', '</b><br/>')));
         else:
             outputCalls.insert(0,(self.js_print,('%s running %s %s %s' % (testnum, ast, extraVmArgs, abcargs), '<b>', '</b><br/>')));
 
