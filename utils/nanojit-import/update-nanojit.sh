@@ -110,7 +110,8 @@ python $SCRIPTDIR/find-child.py \
     --dst=$SRCDIR \
     --start=$NANOJIT_CENTRAL_REV \
     --filemap=$SCRIPTDIR/nanojit-import-filemap \
-    >$TMPDIR/import-splicemap
+    >$TMPDIR/import-splicemap \
+|| exit 0
 
 hg convert --config convert.hg.saverev=True \
     --config convert.hg.startrev=$(cut -d ' ' -f 1 $TMPDIR/import-splicemap) \
