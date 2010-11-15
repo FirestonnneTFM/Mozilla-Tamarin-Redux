@@ -140,7 +140,12 @@ namespace avmplus
 
             m_owner->m_array = newArray;
             m_owner->m_capacity = newCapacity;
-            m_owner->m_copyOnWriteOwner = NULL;
+            if (m_owner->m_copyOnWriteOwner != NULL)
+            {
+                m_owner->m_copyOnWriteOwner = NULL;
+                // Set this to NULL so we don't attempt to delete it in our dtor.
+                m_oldArray = NULL;
+            }
         }
     }
 
@@ -168,7 +173,8 @@ namespace avmplus
         {
             m_owner->NotifySubscribers();
         }
-        if (m_oldArray != m_owner->m_array) 
+        // m_oldArray could be NULL if we grew a copy-on-write ByteArray.
+        if (m_oldArray != NULL && m_oldArray != m_owner->m_array) 
         {
             m_owner->TellGcDeleteBufferMemory(m_oldArray, m_oldLength);
             mmfx_delete_array(m_oldArray);
