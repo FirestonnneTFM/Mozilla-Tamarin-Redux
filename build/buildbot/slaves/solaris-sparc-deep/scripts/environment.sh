@@ -48,4 +48,4 @@ export shell_extension=
 . ../all/environment.sh
 export platform=solaris
 
-
+export TZ=US/Eastern
