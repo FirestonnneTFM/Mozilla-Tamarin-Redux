@@ -609,9 +609,9 @@ namespace MMgc
         while(p < end) {
             const void *val = GC::Pointer(*p++);
 
-#ifndef NVALGRIND
+#ifdef MMGC_VALGRIND
             if (end == (void*)gc->GetStackTop())
-                VALGRIND_MAKE_MEM_DEFINED(&val, sizeof(val));
+                VALGRIND_MAKE_MEM_DEFINED(&val, sizeof(vale));
 #endif // !NVALGRIND
 
             if(val < _memStart || val >= _memEnd)
