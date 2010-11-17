@@ -356,8 +356,11 @@ namespace avmplus
         for (uint32_t i = 0, n = m_data->len; i < n; ++i)
         {
             T const v  = ListHelper::load(m_data, i);
-            if (v != (T)0 && kept < i)
-                ListHelper::store(m_data, kept++, v);
+            if (v != (T)0)
+            {
+                if (kept++ < i)
+                    ListHelper::store(m_data, kept, v);
+            }
         }
         uint32_t const removed = m_data->len - kept;
         if (kept < m_data->len)
