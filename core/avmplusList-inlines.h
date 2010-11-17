@@ -89,10 +89,15 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void DataListHelper<T>::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
-        AvmAssert(data->entries[index] == 0);
+        // This is commented out because it's not necessary for safety of a DataList, 
+        // and it can generate an assert in List::insert(), which uses storeInEmpty() for efficiency;
+        // since DataListHelper::moveRange doesn't zero out the cleared space we could get this
+        // assertion firing. Better to neuter this assertion than add a unnecessary zeroing-out
+        // to moveRange() just to pacify it.
+        // AvmAssert(data->entries[index] == 0);
         data->entries[index] = value;
     }
 
@@ -152,7 +157,7 @@ namespace avmplus
         WB(data->gc, data, &data->entries[index], value);
     }
 
-    REALLY_INLINE /*static*/ void GCListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void GCListHelper::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
@@ -218,7 +223,7 @@ namespace avmplus
         WBRC(data->gc, data, &data->entries[index], value);
     }
 
-    REALLY_INLINE /*static*/ void RCListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void RCListHelper::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
@@ -300,10 +305,12 @@ namespace avmplus
         AvmCore::atomWriteBarrier(data->gc, data, &data->entries[index], value);
     }
 
-    REALLY_INLINE /*static*/ void AtomListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void AtomListHelper::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
-        AvmAssert(data->entries[index] == 0);
+        // newly-allocated space clears to 0; clearRange() clears to nullObjectAtom. 
+        // Both are "empty" as far as AtomList is concerned.
+        AvmAssert(data->entries[index] == 0 || data->entries[index] == nullObjectAtom);
         AvmCore::atomWriteBarrier_ctor(data->gc, data, &data->entries[index], value);
     }
 
@@ -368,7 +375,7 @@ namespace avmplus
         WB(data->gc, data, &data->entries[index], weak);
     }
 
-    REALLY_INLINE /*static*/ void WeakRefListHelper::storeEmpty(LISTDATA* data, uint32_t index, TYPE value)
+    REALLY_INLINE /*static*/ void WeakRefListHelper::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
         AvmAssert(data->entries[index] == 0);
