@@ -604,6 +604,9 @@ namespace MMgc
 
 // put spaces around the template arg to avoid possible digraph warnings
 #define DRC(_type) MMgc::RCPtr< _type, true >
+
+// This is a temporary bandaid for places where DRC is asserting due to
+// it being used on GC memory, use DRCWB instead.
 #define DRC_NOWB(_type) MMgc::RCPtr< _type, false >
 
 #undef GNUC_ONLY
