@@ -352,17 +352,19 @@ namespace avmplus
     template<class T, class ListHelper>
     uint32_t ListImpl<T,ListHelper>::removeNullItems()
     {
-        // Prune back-to-front to avoid unnecessary memory copies
-        uint32_t removed = 0;
-        for (uint32_t i = m_data->len; i > 0; --i)
+        uint32_t kept = 0;
+        for (uint32_t i = 0, n = m_data->len; i < n; ++i)
         {
-            if (ListHelper::load(m_data, i-1) == (T)0)
-            {
-                ListHelper::clearRange(m_data, i-1, 1);
-                ++removed;
-            }
+            T const v  = ListHelper::load(m_data, i);
+            if (v != (T)0 && kept < i)
+                ListHelper::store(m_data, kept++, v);
         }
-        m_data->len -= removed;
+        uint32_t const removed = m_data->len - kept;
+        if (kept < m_data->len)
+        {
+            ListHelper::clearRange(m_data, kept, removed);
+            m_data->len = kept;
+        }
         return removed;
     }
 }
