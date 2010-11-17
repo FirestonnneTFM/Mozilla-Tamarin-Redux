@@ -90,12 +90,8 @@ namespace MMgc
         return (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
     }
 
-    REALLY_INLINE GC* GC::GetActiveGC() 
-    {
-        GCHeap *heap = GCHeap::GetGCHeap();
-        if(heap && heap->GetEnterFrame())
-            return heap->GetEnterFrame()->GetActiveGC();
-        return NULL;
+    REALLY_INLINE GC* GC::GetActiveGC() {
+        return GCHeap::GetGCHeap()->GetEnterFrame()->GetActiveGC();
     }
 
     REALLY_INLINE void GC::QueueCollection()

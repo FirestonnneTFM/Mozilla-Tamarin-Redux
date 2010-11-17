@@ -52,7 +52,6 @@
 //void *operator new[] (size_t size);
 
 // Sun Studio doesn't support default parameters for operator new, so break up as two functions
-#ifndef GCREF_NOGLOBALGCNEW
 REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc)
 {
     return gc->AllocPtrZero(size);
@@ -63,259 +62,24 @@ REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc, int flags)
     return gc->Alloc(size, flags);
 }
 
-#else
-//  If this isn't defined, the built-in placement new operator will think
-//  we're trying to use the MMgc::GC * as our target memory for new.  Override
-//  this with a guaranteed assert so that these errors are found.
-REALLY_INLINE void *operator new(size_t /*size*/, MMgc::GC */*gc*/)
-{
-    GCAssert(!"\"new (gc)\" should not be called directly. Use GCFactory to allocate from the garbage collector" );
-    GCHeap::Abort();
-    return (void *)NULL;
-}
-
-REALLY_INLINE void *operator new(size_t /*size*/, MMgc::GC */*gc*/, int /*flags*/)
-{
-    GCAssert(!"\"new (gc, flags)\" should not be called directly. Use GCFactory to allocate from the garbage collector" );
-    GCHeap::Abort();
-    return (void *)NULL;
-}
-#endif
-
-
 namespace MMgc
 {
-    //  Since GCFinalizedObject doesn't derive from GCObject, create a GCMemberRefGCBase
-    //  class so that we don't have to copy/paste this in both inner class definitions
-
-    //  GCMemberRefGCBase class:
-    //
-    //  Separate definitons of GCMemberRef for GCObject and GCFinalizedObject are necessary in order to
-    //  restrict usage of GCMemberRef only as member variables of GCObject or GCFinalizedObject.  We do not
-    //  want to allow GCMemberRef to be declared on a non-GCObject (except for GCRoots-- see definition in GCRoot::GCMemberRef)
-    //  The GCMemberRefGCBase class contains the shared functionality between GCObject::GCMeberRef and GCFinalizedObject::GCMemberRef.
-    //
-    //  The GCMemberRefGCBase takes an additional template parameter so that it can automagically
-    //  apply WriteBarrierRC on RCObjects and WriteBarrier on everything else.
-    //  The Default implementation assumes NON-RCObjects
-    template <class T, GCObjectType N>
-    class GCMemberRefGCBase : public GCRef<T>
-    {
-    private:
-        //  'set' is invoked whenever the garbage collected pointer value 't' changes
-        REALLY_INLINE void set(const T *tNew)
-        {
-            GC::WriteBarrier(&(this->t), (const void*)tNew);
-        }
-
-    protected:
-
-        //  In order to keep the usage syntax uniform as "GCMemberRef",
-        //  Protect the constructors so that only "GCMeberRef" subclasses are allowed to use this object.
-        explicit REALLY_INLINE GCMemberRefGCBase()
-        : GCRef<T>(DEBUG_ARG(false))
-        {
-        }
-
-        template <class T2>
-        explicit REALLY_INLINE GCMemberRefGCBase(const GCRef<T2> &other)
-        : GCRef<T>(DEBUG_ARG(false))
-        {
-            set(ProtectedGetOtherRawPtr(other));
-        }
-
-        ~GCMemberRefGCBase()
-        {
-            if (this->t)
-            {
-                set(0);
-            }
-        }
-    public:
-
-        REALLY_INLINE GCMemberRefGCBase& operator =(const GCMemberRefGCBase &other)
-        {
-            set(ProtectedGetOtherRawPtr(other));
-            return *this;
-        }
-
-        template <class T2>
-        REALLY_INLINE void operator =(const GCRef<T2>& other)
-        {
-            set(ProtectedGetOtherRawPtr(other));
-        }
-
-        //  Overload the T* assignment operator so that we can set GCMemberRef's directly to NULL.
-        //  The "Clear" method is another way to do this.
-        REALLY_INLINE void operator=(T *tNew)
-        {
-#ifdef GCREF_RAWPTRASSIGNMENT
-            GCAssert(tNew == NULL);
-#endif
-            set(tNew);
-        }
-
-        //  Sets the reference to NULL.  Syntactically the same as assigning the member ref to NULL
-        //  GCMemberRef<T> obj = (T*)NULL;
-        REALLY_INLINE void Clear()
-        {
-            set(NULL);
-        }
-    };
-
-    //  This GCMemberRefGCBase template specialization is for RCObjects (and subclasses of RCObject)
-    template <class T>
-    class GCMemberRefGCBase<T, MMgc::kTypeRCObject> : public GCRef<T>
-    {
-    private:
-        REALLY_INLINE void set(const T *tNew)
-        {
-            GC::WriteBarrierRC(&(this->t), (const void*)tNew);
-        }
-
-    public:
-
-        explicit REALLY_INLINE GCMemberRefGCBase()
-        : GCRef<T>(DEBUG_ARG(false))
-        {
-            //  This causes compile error for primitive types that are defined incorrectly
-            //  and causes a runtime error for GCObjects that are defined incorrectly
-            GCAssert(T::gcObjectType == MMgc::kTypeRCObject);
-        }
-
-        template <class T2>
-        explicit REALLY_INLINE GCMemberRefGCBase(const GCRef<T2> &other)
-        : GCRef<T>(DEBUG_ARG(false))
-        {
-            //  This causes compile error for primitive types that are defined incorrectly
-            //  and causes a runtime error for GCObjects that are defined incorrectly
-            GCAssert(T::gcObjectType == MMgc::kTypeRCObject);
-            set(ProtectedGetOtherRawPtr(other));
-        }
-
-        REALLY_INLINE ~GCMemberRefGCBase()
-        {
-            if (this->t)
-            {
-                GC::WriteBarrierRC_dtor(&(this->t));
-            }
-        }
-
-        REALLY_INLINE GCMemberRefGCBase& operator =(const GCMemberRefGCBase &other)
-        {
-            set(ProtectedGetOtherRawPtr(other));
-            return *this;
-        }
-
-        template <class T2>
-        REALLY_INLINE void operator =(const GCRef<T2>& other)
-        {
-            set(ProtectedGetOtherRawPtr(other));
-        }
-
-        REALLY_INLINE void operator=(T *tNew)
-        {
-#ifdef GCREF_RAWPTRASSIGNMENT
-            GCAssert(tNew == NULL);
-#endif
-            set(tNew);
-        }
-
-        REALLY_INLINE void Clear()
-        {
-            set(NULL);
-        }
-
-    };
-
-
     /**
      * Baseclass for GC managed objects that aren't finalized
      */
     class GCObject
     {
-        template <class T, GCObjectType N> friend class GCFactory;
-        template <class T, GCObjectType N> friend class GCFactoryRawPtr;
-
-    public:
-
-        //  GCObject's local definition of GCMemberRef
-        template<class T, GCObjectType N = T::gcObjectType>
-        class GCMemberRef : public GCMemberRefGCBase<T, N>
-        {
-        public:
-
-            template <class T2>
-            REALLY_INLINE void operator =(const GCRef<T2>& other)
-            {
-                    GCMemberRefGCBase<T,N>::operator=(other);
-            }
-
-            REALLY_INLINE void operator=(T *tNew)
-            {
-                    GCMemberRefGCBase<T,N>::operator=(tNew);
-            }
-
-            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
-            REALLY_INLINE GCMemberRef(){}
-
-            template <class T2>
-            explicit REALLY_INLINE GCMemberRef(const GCRef<T2> &other) : GCMemberRefGCBase<T,N>(other) {}
-
-            template < class T2 >
-            REALLY_INLINE operator GCRef<T2>()
-            {
-                return GCRef<T2>(this->t);
-            }
-
-        private:
-
-            //  Avoid accidental copies by privatizing the copy constructor
-            GCMemberRef(const GCMemberRef &other);
-
-
-        };
-
-    private:
-
-        //  operator new should be private so that only GCFactory can create GCObjects directly
-#ifndef GCREF_USEGCFACTORYFORGCOBJECTS
     public:
         // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
         static void *operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw());
+
         static void *operator new(size_t size, GC *gc, size_t extra, GC::AllocFlags flags) GNUC_ONLY(throw());
 
         static void *operator new(size_t size, GC *gc) GNUC_ONLY(throw());
-    private:
-#else
-        static void *operator new(size_t size);
-#endif
-#ifndef GCREF_PRIVATEGCOBJECTDESTRUCT
-    public:
-#endif
-        //  privatize destructor so that subclasses don't think they're destructor will get called
-        ~GCObject(){}
-#ifdef GCREF_NOADDRESOPERATORGCOBJECT
-        //  privatize operator& so that you cannot get a pointer from a GCObject instance
-    private:
-        GCObject * operator&(){ return this;}
-#endif
-    public:
-        //  gcObjectType defines this object as a 'GCObject' for GCMemberRef/GCFactory template specialization
-        static const GCObjectType gcObjectType = kTypeGCObject;
 
         static void operator delete(void *gcObject);
 
         GCWeakRef *GetWeakRef() const;
-
-        //  Create a GCRef from "this"
-        template <class T>
-        REALLY_INLINE GCRef<T> GetThisRef()
-        {
-                GCRef<T> thisRef(this);
-                return thisRef;
-        }
-
     };
 
     /**
@@ -325,79 +89,15 @@ namespace MMgc
     //: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
     // the most base class (GCObject) not having any virtual methods)
     {
-        template <class T, GCObjectType N> friend class GCFactory;
-        template <class T, GCObjectType N> friend class GCFactoryRawPtr;
-
     public:
-
-        //  Define GCFinalizedObject's local definition of GCMemberRef
-        template<class T, GCObjectType N = T::gcObjectType>
-        class GCMemberRef : public GCMemberRefGCBase<T, N>
-        {
-        public:
-
-            template <class T2>
-            REALLY_INLINE void operator =(const GCRef<T2>& other)
-            {
-                GCMemberRefGCBase<T,N>::operator=(other);
-            }
-
-            REALLY_INLINE void operator=(T *tNew)
-            {
-                GCMemberRefGCBase<T,N>::operator=(tNew);
-            }
-
-            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
-            GCMemberRef(){}
-
-            template <class T2>
-            explicit REALLY_INLINE GCMemberRef(const GCRef<T2> &other) : GCMemberRefGCBase<T,N>(other) {}
-
-            template < class T2 >
-            REALLY_INLINE operator GCRef<T2>()
-            {
-                return GCRef<T2>(this->t);
-            }
-
-        private:
-
-            //  Avoid accidental copies by privatizing the copy constructor
-            GCMemberRef(const GCMemberRef &other);
-
-
-        };
-        //  operator new should be private so that only GCFactory can create GCFinalizedObjects directly
-#ifndef GCREF_USEGCFACTORYFORGCOBJECTS
-    public:
-#else
-    private:
-#endif
-        static void* operator new(size_t size, GC *gc, size_t extra);
-        static void* operator new(size_t size, GC *gc);
-
-#ifdef GCREF_NOADDRESOPERATORGCFINALIZEDOBJECT
-        //  privatize operator& so that you cannot get a pointer from a GCFinalizedObject instance
-    private:
-        GCFinalizedObject * operator&(){ return this;}
-#endif
-    public:
-        //  gcObjectType defines this object as a 'GCFinalizedObject' for GCMemberRef/GCFactory template specialization
-        static const GCObjectType gcObjectType = kTypeGCFinalizedObject;
-
         GCWeakRef *GetWeakRef() const;
 
-        //  Create a GCRef from "this"
-        template <class T>
-        REALLY_INLINE GCRef<T> GetThisRef()
-        {
-                GCRef<T> thisRef((T*)this);
-                return thisRef;
-        }
         virtual ~GCFinalizedObject();
+        static void* operator new(size_t size, GC *gc, size_t extra);
+        static void* operator new(size_t size, GC *gc);
         static void operator delete (void *gcObject);
     };
 
-#ifndef GCREF_USEGCFACTORYFORGCOBJECTS
     REALLY_INLINE void *GCObject::operator new(size_t size, GC *gc, size_t extra, GC::AllocFlags flags) GNUC_ONLY(throw())
     {
         return gc->AllocExtra(size, extra, flags);
@@ -412,7 +112,6 @@ namespace MMgc
     {
         return gc->AllocPtrZero(size);
     }
-#endif // GCREF_USEGCFACTORYFORGCOBJECTS
 
     REALLY_INLINE void GCObject::operator delete(void *gcObject)
     {
@@ -502,11 +201,7 @@ namespace MMgc
     {
         friend class GC;
         friend class ZCT;
-#ifndef GCREF_USEGCFACTORYFORGCOBJECTS
     public:
-#else
-    private:
-#endif
         REALLY_INLINE static void *operator new(size_t size, GC *gc, size_t extra)
         {
             return gc->AllocExtraRCObject(size, extra);
@@ -516,9 +211,7 @@ namespace MMgc
         {
             return gc->AllocRCObject(size);
         }
-    public:
-        //  gcObjectType defines this object as a 'RCObject' for GCMemberRef/GCFactory template specialization
-        static const GCObjectType gcObjectType = kTypeRCObject;
+
         REALLY_INLINE RCObject()
         {
             composite = 1;
@@ -911,9 +604,6 @@ namespace MMgc
 
 // put spaces around the template arg to avoid possible digraph warnings
 #define DRC(_type) MMgc::RCPtr< _type, true >
-
-// This is a temporary bandaid for places where DRC is asserting due to
-// it being used on GC memory, use DRCWB instead.
 #define DRC_NOWB(_type) MMgc::RCPtr< _type, false >
 
 #undef GNUC_ONLY
