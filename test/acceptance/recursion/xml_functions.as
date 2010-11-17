@@ -89,9 +89,6 @@ function getTestCases()
 
     var xml = createXML(1000);
 
-	//	for(var i=0;i<1000;i++)
-	//		createXML(500+i)
-
     try {
 	var copied = xml.copy();
 	var res = xml == copied;
