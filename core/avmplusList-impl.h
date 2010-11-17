@@ -56,7 +56,7 @@ namespace avmplus
         if (args != NULL)
         {
             for (uint32_t i = 0; i < capacity; i++)
-                ListHelper::storeEmpty(m_data, i, args[i]);
+                ListHelper::storeInEmpty(m_data, i, args[i]);
             m_data->len = capacity;
         }
     }
@@ -130,7 +130,7 @@ namespace avmplus
         // OPTIMIZEME, this method may be worth inlining
         AvmAssert(m_data->len <= m_data->cap);
         ensureCapacityExtra(m_data->len, 1);
-        ListHelper::store(m_data, m_data->len++, value);
+        ListHelper::storeInEmpty(m_data, m_data->len++, value);
     }
 
     template<class T, class ListHelper>
@@ -139,7 +139,7 @@ namespace avmplus
         uint32_t const n = that.length();
         ensureCapacityExtra(m_data->len, n);
         for (uint32_t i = 0; i < n; ++i)
-            ListHelper::store(m_data, m_data->len + i, that.get(i));
+            ListHelper::storeInEmpty(m_data, m_data->len + i, that.get(i));
         m_data->len += n;
     }
 
@@ -152,7 +152,7 @@ namespace avmplus
             ListHelper::moveRange(m_data, index, index + 1, m_data->len - index);
         else
             index = m_data->len;
-        ListHelper::store(m_data, index, value);
+        ListHelper::storeInEmpty(m_data, index, value);
         m_data->len++;
     }
 
@@ -255,7 +255,7 @@ namespace avmplus
         if (args != NULL)
         {
             for (uint32_t i = 0; i < argc; ++i)
-                ListHelper::store(m_data, index + i, args[i]);
+                ListHelper::storeInEmpty(m_data, index + i, args[i]);
         }
 
         m_data->len += argc;

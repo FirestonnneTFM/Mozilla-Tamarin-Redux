@@ -161,7 +161,7 @@ namespace avmplus
 
         // Like store(), but the value at the given index is known to be empty (zeroed),
         // which may allow more efficiency.
-        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         
         // Clear a range starting at index and going for count. Count must be > 0.
         // All entries in the range will be zeroed by this call.
@@ -189,7 +189,7 @@ namespace avmplus
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
@@ -210,7 +210,7 @@ namespace avmplus
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
@@ -231,7 +231,7 @@ namespace avmplus
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
@@ -252,7 +252,7 @@ namespace avmplus
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
-        static void storeEmpty(LISTDATA* data, uint32_t index, TYPE value);
+        static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
     };
