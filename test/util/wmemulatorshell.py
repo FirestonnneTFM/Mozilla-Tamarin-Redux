@@ -52,7 +52,7 @@ def runTest():
     while dir==None:
         dirs=os.listdir(dirbase)
         random.shuffle(dirs)    
-#        print "SHELL: looking for free emulator : %d" % (time.time()-starttime)
+#        print("SHELL: looking for free emulator : %d" % (time.time()-starttime))
         for eachdir in dirs:
             try:
                 sdate=str(datetime.datetime.today())+"\n"
@@ -77,14 +77,14 @@ def runTest():
                         return (-1,'ERROR: lock file does not exist')
                     break
             except:
-                print "ERROR: exception lock file"
+                print("ERROR: exception lock file")
                 try:
                     os.unlink(dir+"/lock")
                 except:
                     pass
                 return (-1,"ERROR: exception writing lock file")
         time.sleep(.1)     
-#    print "SHELL: running emulator %s : %d" % (dir,time.time()-starttime)
+#    print("SHELL: running emulator %s : %d" % (dir,time.time()-starttime))
     ddir="\\Storage Card\\media"
     cmdfile=dir+"/nextvm.txt"
     dlog='%s/media/%s.log' % (dir,base)
@@ -105,7 +105,7 @@ def runTest():
         if os.path.exists(exitcodefile):
             os.unlink(exitcodefile)
     except:
-        print "ERROR: exception deleting file"
+        print("ERROR: exception deleting file")
         try:
             os.unlink(dir+'/lock')
         except:
@@ -146,7 +146,7 @@ def runTest():
         file.write("-log %s \"%s\%s.abc\" " % (args,ddir,base))
         file.close()
     except:
-        print "ERROR: write command file failed"
+        print("ERROR: write command file failed")
         try:
             os.unlink(dir+'/lock')
         except:
@@ -154,11 +154,11 @@ def runTest():
         return (-1,"ERROR: write command file failed")
         
 #   wait until emulator deletes nextvm.txt command file
-#    print "SHELL: wrote file %s : %d" % (cmdfile,time.time()-starttime)
+#    print("SHELL: wrote file %s : %d" % (cmdfile,time.time()-starttime))
     while os.path.exists(cmdfile):
         time.sleep(.1)
         
-#    print "SHELL: detected test finished %d" % (time.time()-starttime)
+#    print("SHELL: detected test finished %d" % (time.time()-starttime))
     if os.path.exists(dlog)==False:
         try:
             os.unlink(dir+'/lock')
@@ -183,24 +183,24 @@ def runTest():
             exitcode=int(exitcodestr.strip())
             file.close()
         except:
-            print 'exception reading exit code file'
+            print('exception reading exit code file')
             try:
                 os.unlink(dir+'/lock')
             except:
                 pass
             return (-1,"exception reading exit code file")
     else:
-        print "ERROR: cannot find exit code file %s" % exitcodefile
+        print("ERROR: cannot find exit code file %s" % exitcodefile)
         if os.path.exists(dir+'/lock'):
             os.unlink(dir+'/lock')
         return (-1,"ERROR: cannot find exit code file %s" % exitcodefile)
 
 #  remove lock, another thread can use the emulator while the shell reads the output log
-#    print "SHELL: finished %s : %d" % (abc,time.time()-starttime)
+#    print("SHELL: finished %s : %d" % (abc,time.time()-starttime))
     try:
         os.unlink(dir+'/lock')
     except:
-        print "exception deleting %s/lock" % dir
+        print("exception deleting %s/lock" % dir)
         return (-1,"exception deleting %s/lock" %dir)
 
 # read and print the log file
@@ -209,14 +209,14 @@ def runTest():
        sysout=file.read()
        print(sysout)
     except:
-       print "ERROR: failed to read log  %s" % dlog
+       print("ERROR: failed to read log  %s" % dlog)
        return (-1,"ERROR: failed to read log %s" % dlog)
     return (exitcode,"succeeded")
 
 
 # main
 if len(sys.argv)==1:
-    print "ERROR: not enough arguments, usage: %s arguments... test_file.abc" % sys.argv[0]
+    print("ERROR: not enough arguments, usage: %s arguments... test_file.abc" % sys.argv[0])
     sys.exit(1)
 
 starttime=time.time()
@@ -233,14 +233,14 @@ dirbase=cwd+"/../util/emulator_files"
 if 'EMULATORDIR' in os.environ:
     dirbase=os.environ['EMULATORDIR'].strip()
 if os.path.isdir(dirbase)==False:
-    print "ERROR: emulator directory '%s' not found" % dirbase
+    print("ERROR: emulator directory '%s' not found" % dirbase)
     sys.exit(1)
 
 # if .log file is not written try multiple attempts
 attempts=0
 retrys=0
 while retrys<5:
-    #print "attempt %d, retry %d" % (attempts,retrys)
+    #print("attempt %d, retry %d" % (attempts,retrys))
     (res,sysout)=runTest()
     #print("exit code=%d reason=%s"  % (res,sysout))
     if res!=-1 and res!=1:

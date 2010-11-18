@@ -60,9 +60,9 @@ from getopt import getopt
 from itertools import count
 from time import time,sleep
 import shutil
-import which
 import traceback
-import threadpool
+from . import which
+from . import threadpool
 
 # For Python 2.6 and above, use native subprocess.Popen
 if sys.version_info[0] >= 3 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6):
@@ -72,8 +72,8 @@ else:
 
 
 # runtestUtils must be imported after "from os.path import *" as walk is overridden
-from runtestUtils import *
-
+from . import runtestUtils
+from .runtestUtils import walk,parseArgStringToList,TimeOutException,join,convertToCsv,detectCPUs,dict_match,formatMemoryList,formatMemory,list_match,parseArgStringToList,pPrint,splitList,genAtsArgs,moveAtsSwf,conf95,mean,rel_std_dev,standard_deviation,tDist,variance,getSignalName,signalNames
 
 try:
     import pexpect
@@ -192,39 +192,39 @@ class RuntestBase:
         self.run()
 
     def usage(self, c):
-        print 'usage: %s [options] [tests]' % basename(argv[0])
-        print ' -v --verbose       enable additional output'
-        print ' -E --avm           avmplus command to use'
-        print ' -a --asc           compiler to use'
-        print ' -g --globalabc     DEPRECATED but still works - use builtin.abc (used to be location of global.abc)'
-        print ' -b --builtinabc    location of builtin.abc'
-        print ' -s --shellabc      location of shell_toplevel.abc'
-        print ' -x --exclude       comma separated list of directories to skip'
-        print ' -h --help          display help and exit'
-        print ' -t --notime        do not generate timestamps (cleaner diffs)'
-        print ' -f --forcerebuild  force rebuild all test files'
-        print ' -c --config        sets the config string [default OS-tvm]'
-        print '    --addtoconfig   add string to default config'
-        print ' -q --quiet         display minimum output during testrun'
-        print ' -l --log           also log all output to given logfile'
-        print '    --valgrind      run tests under valgrind'
-        print '    --summaryonly   only display final summary'
-        print '    --rebuildtests  rebuild the tests only - do not run against VM'
-        print '    --showtimes     shows the time for each test'
-        print '    --ascargs       args to pass to asc on rebuild of test files'
-        print '                    can also pass in -no-Argname to remove arg'
-        print '    --vmargs        args to pass to vm'
-        print '    --timeout       max time to run all tests'
-        print '    --testtimeout   max time to let a test run, in sec (default -1 = never timeout)'
-        print '    --html          also create an html output file'
-        print '    --notimecheck   do not recompile .abc if timestamp is older than .as'
-        print '    --java          location of java executable (default=java)'
-        print '    --javaargs      arguments to pass to java'
-        print '    --random        run tests in random order'
-        print '    --seed          explicitly specify random seed for --random'
-        print '    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.'
-        print '    --aotout        where the resulting binaries should be put (defaults to the location of the as file).'
-        print '    --aotargs       any extra arguments to pass to compile.py.'
+        print('usage: %s [options] [tests]' % basename(argv[0]))
+        print(' -v --verbose       enable additional output')
+        print(' -E --avm           avmplus command to use')
+        print(' -a --asc           compiler to use')
+        print(' -g --globalabc     DEPRECATED but still works - use builtin.abc (used to be location of global.abc)')
+        print(' -b --builtinabc    location of builtin.abc')
+        print(' -s --shellabc      location of shell_toplevel.abc')
+        print(' -x --exclude       comma separated list of directories to skip')
+        print(' -h --help          display help and exit')
+        print(' -t --notime        do not generate timestamps (cleaner diffs)')
+        print(' -f --forcerebuild  force rebuild all test files')
+        print(' -c --config        sets the config string [default OS-tvm]')
+        print('    --addtoconfig   add string to default config')
+        print(' -q --quiet         display minimum output during testrun')
+        print(' -l --log           also log all output to given logfile')
+        print('    --valgrind      run tests under valgrind')
+        print('    --summaryonly   only display final summary')
+        print('    --rebuildtests  rebuild the tests only - do not run against VM')
+        print('    --showtimes     shows the time for each test')
+        print('    --ascargs       args to pass to asc on rebuild of test files')
+        print('                    can also pass in -no-Argname to remove arg')
+        print('    --vmargs        args to pass to vm')
+        print('    --timeout       max time to run all tests')
+        print('    --testtimeout   max time to let a test run, in sec (default -1 = never timeout)')
+        print('    --html          also create an html output file')
+        print('    --notimecheck   do not recompile .abc if timestamp is older than .as')
+        print('    --java          location of java executable (default=java)')
+        print('    --javaargs      arguments to pass to java')
+        print('    --random        run tests in random order')
+        print('    --seed          explicitly specify random seed for --random')
+        print('    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.')
+        print('    --aotout        where the resulting binaries should be put (defaults to the location of the as file).')
+        print('    --aotargs       any extra arguments to pass to compile.py.')
         
 
 
@@ -288,13 +288,13 @@ class RuntestBase:
                     self.timeout = int(v)
                     self.testTimeOut=int(v)
                 except ValueError:
-                    print 'Incorrect timeout value: %s\n' % v
+                    print('Incorrect timeout value: %s\n' % v)
                     self.usage(2)
             elif o in ('--testtimeout',):
                 try:
                     self.testTimeOut=int(v)
                 except ValueError:
-                    print 'Incorrect testtimeout value: %s\n' % v
+                    print('Incorrect testtimeout value: %s\n' % v)
                     self.usage(2)
             elif o in ('-d',):
                 # Note that this is not documented in the usage text.  This
@@ -304,7 +304,7 @@ class RuntestBase:
                 self.rebuildtests = True
                 self.ascversion = self.getAscVersion(self.asc)
                 if not pexpect:
-                    print 'To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net'
+                    print('To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net')
             elif o in ('-q', '--quiet'):
                 self.quiet = True
             elif o in ('--summaryonly',):
@@ -332,7 +332,7 @@ class RuntestBase:
                 try:
                     self.randomSeed = int(v)
                 except ValueError:
-                    print 'Incorrect seed value: %s\n' % v
+                    print('Incorrect seed value: %s\n' % v)
                     self.usage(2)
             elif o in ('--aotsdk',):
                 self.aotsdk = v
@@ -557,7 +557,7 @@ class RuntestBase:
         (testdir, ext) = splitext(as_file)
         if not self.eval:
             for util in glob(join(testdir,'*'+self.sourceExt)) + glob(join(dir,'*Util'+self.sourceExt)):
-                files.append(string.replace(util, "$", "\$"))
+                files.append(util.replace("$", "\$"))
         return files
 
     def checkExecutable(self,exe, msg):
@@ -620,7 +620,7 @@ class RuntestBase:
                 if not isfile(self.js_output):
                     break
 
-        print 'Writing results to %s' % self.js_output
+        print('Writing results to %s' % self.js_output)
         self.js_output_f = open(self.js_output, 'w')
         self.js_output_f.close()
 
@@ -701,7 +701,7 @@ class RuntestBase:
             # have a local testconfig, so we create a copy of the global settings to not overwrite
             includes = list(self.includes) #copy list - don't use reference
             includes.extend(localIncludes)
-            if localSettings.has_key(root):
+            if root in localSettings:
                 settings.update(localSettings[root])
         return settings
 
@@ -799,14 +799,20 @@ class RuntestBase:
             sys.stdout.write('.')
             sys.stdout.flush()
         else:
-            print m
+            try:
+                print(m)
+            except:
+                print('invalid characters in output')
             sys.stdout.flush()
         if self.js_output:
-            self.js_output_f = open(self.js_output, 'a')
-            if self.logFileType == 'html':
-                self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
-            else:
-                self.js_output_f.write('%s\n' % m)
+            try:
+                self.js_output_f = open(self.js_output, 'a')
+                if self.logFileType == 'html':
+                    self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
+                else:
+                    self.js_output_f.write('%s\n' % m)
+            except:
+                pass
             self.js_output_f.close()
 
     def printOutput(self,request, outputCalls=None):
@@ -814,7 +820,7 @@ class RuntestBase:
         if outputCalls:
             for call in outputCalls:
                 try:
-                    apply(call[0],call[1])
+                    call[0](*call[1])
                 except TypeError:
                     # intermittent issue: TypeError: verbose_print() takes at most 4 arguments (53 given)
                     # see https://bugzilla.mozilla.org/show_bug.cgi?id=564124
@@ -850,9 +856,9 @@ class RuntestBase:
                 if self.aotout:
                     output = self.aotout
 
-                outname = string.replace(abcfile, "./", "")
-                outname = string.replace(outname, ".abc", "")
-                outname = string.replace(outname, "/", ".")
+                outname = abcfile.replace("./", "")
+                outname = outname.replace(".abc", "")
+                outname = outname.replace("/", ".")
                 outabc = os.path.join(output, outname + ".abc")
 
                 shutil.copyfile(abcfile, outabc)
@@ -944,7 +950,7 @@ class RuntestBase:
                     # don't escape $ when running windows python
                     cmd += ' -in %s' % util 
                 else:
-                    cmd += ' -in %s' % string.replace(util, '$', '\$')
+                    cmd += ' -in %s' % util.replace('$', '\$')
                 
         elif as_file.endswith(self.abcasmExt):
             javaArgList = parseArgStringToList(self.javaargs)
@@ -971,7 +977,7 @@ class RuntestBase:
         total=len(tests)
         if not pexpect:
             if self.genAtsSwfs:
-                print 'The pexpect module must be installed to generate ats swfs.'
+                print('The pexpect module must be installed to generate ats swfs.')
                 exit(1)
             for test in tests:
                 (testdir, ext) = splitext(test)
@@ -979,12 +985,12 @@ class RuntestBase:
                     # We use the test config file to mark abc files that fail to AOT compile,
                     # so we need to take account of that here before we try to compile them.
                     settings = self.getLocalSettings(testdir)
-                    if settings.has_key('.*') and settings['.*'].has_key('skip'):
+                    if '.*' in settings and 'skip' in settings['.*']:
                         self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
                         continue
                     if test.endswith(self.abcOnlyExt):
                         #copy the abc
-                        copyFile = string.replace(test, "/", ".")
+                        copyFile = test.replace("/", ".")
                         copyFile = os.path.join( self.aotout, copyFile )
                         shutil.copy(test, copyFile)
                         #compile the abc
@@ -1000,7 +1006,7 @@ class RuntestBase:
                     self.ashErrors.append("abc files %s.abc not created" % (testdir))
                 else:
                     extrabcs = []
-                    # print "test: %s" % test
+                    # print("test: %s" % test)
                     if test.endswith(self.abcasmExt):
                         extrabcs = [self.abcasmShell+'.abc']
                         if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
@@ -1080,9 +1086,9 @@ class RuntestBase:
 
     def skipAtsTest(self, file, settings):
         '''Check testconfig if we should skip the given file.  Returns a boolean'''
-        if settings.has_key('.*'):
+        if '.*' in settings:
             for key in ['ats_skip', 'skip', 'expectedfail']:
-                if settings['.*'].has_key(key):
+                if key in settings['.*']:
                     self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*'][key]))
                     return True
         return False
@@ -1120,11 +1126,11 @@ class RuntestBase:
         elif (ascargs[0] != 'override') and (ascargs[0] != 'merge'): # default to merge if mode not recognized
             ascargs[0] = 'merge'
         # replace the $DIR keyword with actual directory
-        ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
+        ascargs[1] = ascargs[1].replace('$DIR', currentdir)
         if ascargs[1].find('$SHELLABC') != -1:
             if not isfile(self.shellabc):   # TODO: not the best place to check for this
                 exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % self.shellabc)
-            ascargs[1] = string.replace(ascargs[1], '$SHELLABC', self.shellabc)
+            ascargs[1] = ascargs[1].replace('$SHELLABC', self.shellabc)
         ascargs[1] = parseArgStringToList(ascargs[1])
         removeArgList = self.asc_negative_args[:]   # get a copy of the negative args list
         argList = []
@@ -1179,11 +1185,11 @@ class RuntestBase:
                 self.lock.acquire()
                 self.cleanup()
                 exit(0)
-            except SystemExit, e:
+            except SystemExit:
                 main.dismissWorkers(self.threads)
                 self.killCurrentPids()
                 self.lock.acquire()
-                print e
+                print(sys.exc_info())
                 exit(0)
 
         if self.genAtsSwfs:
@@ -1220,11 +1226,20 @@ class RuntestBase:
 
             starttime=time()
             (output, err) = p.communicate()
-            output = output.split('\n') if output else []
-            if output and output[-1].strip() == '': # strip empty line at end
+            if output:
+                output = output.decode('utf_8','replace')
+                output = output.split('\n')
+            else:
+                output = []
+            if len(output)>0 and output[-1].strip() == '': # strip empty line at end
                 output = output[:-1]
-            err = err.split('\n') if err else []
-            if err and err[-1].strip() == '':
+
+            if err:
+                err = err.decode('utf_8','replace')
+                err = err.split('\n')
+            else:
+                err=[]
+            if len(err)>0 and err[-1].strip() == '':
                 err = err[:-1]
 
             exitCode = p.returncode
@@ -1241,6 +1256,38 @@ class RuntestBase:
             return (output,err,exitCode)
         except KeyboardInterrupt:
             self.killCurrentPids()
+
+    def convertBufferToString(self,output):
+        output=output[2:-1]
+        ptr=0
+        while True:
+            fnd=output.find('\\',ptr)
+            if fnd==-1:
+                break
+            if output[fnd+1:fnd+2]=='\\':
+                output=output[0:fnd]+'\\'+output[fnd+2:]
+                ptr=fnd+1
+            elif output[fnd+1:fnd+2]=='n':
+                output=output[0:fnd]+'\n'+output[fnd+2:]
+                ptr=fnd+1
+            elif output[fnd+1:fnd+2]=="'":
+                output=output[0:fnd]+"'"+output[fnd+2:]
+                ptr=fnd+1
+            elif output[fnd+1:fnd+2]=='t':
+                output=output[0:fnd]+'\t'+output[fnd+2:]
+                ptr=fnd+1
+            elif output[fnd+1:fnd+2]=='r':
+                output=output[0:fnd]+'\r'+output[fnd+2:]
+                ptr=fnd+1
+            elif output[fnd+1:fnd+4]=='x0c':
+                output=output[0:fnd]+'\x0c'+output[fnd+4:]
+                ptr=fnd+3
+            elif output[fnd+1:fnd+4]=='x0b':
+                output=output[0:fnd]+'\x0b'+output[fnd+4:]
+                ptr=fnd+3
+            else:
+                ptr=fnd+1
+        return output
 
     ### Run Tests ###
 
@@ -1265,7 +1312,7 @@ class RuntestBase:
 
         if self.verify:
             if not re.search('debug', self.config):
-                print 'Avm Debugger build must be used when running --verify'
+                print('Avm Debugger build must be used when running --verify')
                 sys.exit(1)
             if not isfile(self.abcdump+'.abc'): # check that abcdump.abc is built
                 self.run_pipe('"%s" -jar %s -import %s -import %s %s' % (self.java, self.asc, self.builtinabc, self.shellabc, self.abcdump+'.as'))
@@ -1304,7 +1351,7 @@ class RuntestBase:
                         main.poll()
                         if self.timeout and time()-self.timeoutStartTime > self.timeout:
                             raise TimeOutException
-                        #print "(active worker threads: %i)" % (threadpool.threading.activeCount()-1, )
+                        #print("(active worker threads: %i)" % (threadpool.threading.activeCount()-1, ))
                     except threadpool.NoResultsPending:
                         break
                 if main.dismissedWorkers:
@@ -1315,11 +1362,11 @@ class RuntestBase:
                 self.lock.acquire()
                 self.cleanup()
                 exit(0)
-            except SystemExit, e:
+            except SystemExit:
                 main.dismissWorkers(self.threads)
                 self.killCurrentPids()
                 self.lock.acquire()
-                print e
+                print(sys.exc_info())
                 exit(0)
 
     #
@@ -1394,7 +1441,7 @@ class RuntestBase:
                 self.js_print('assertions           : %d' % self.allasserts, '<br>', '')
 
             if self.js_output:
-                print 'Results were written to %s' % self.js_output
+                print('Results were written to %s' % self.js_output)
 
         if self.writeResultProperties:
             logfile = open('result.properties', 'w')
@@ -1469,8 +1516,8 @@ class RuntestBase:
 
     # this will be called when an exception occurs within a thread
     def handle_exception(self, request, exc_info):
-        print traceback.print_tb(exc_info[2])
-        print exc_info[1]
+        print(traceback.print_tb(exc_info[2]))
+        print(exc_info[1])
         sys.exit(1)
 
     def setTimestamp(self):
@@ -1528,22 +1575,22 @@ class RuntestBase:
             emulator_args=os.environ['EMULATORARGS'].strip()
 
         if self.avm==None or os.path.isfile(self.avm)==False:
-            print 'ERROR: AVM must be set and point to the avmshell_arm.exe shell'
+            print('ERROR: AVM must be set and point to the avmshell_arm.exe shell')
             sys.exit(1)
         if os.path.isfile(emulator)==False:
-            print "ERROR: device emulator does not exist '%s', set EMULATOR environment variable to the correct emulator" % emulator
+            print("ERROR: device emulator does not exist '%s', set EMULATOR environment variable to the correct emulator" % emulator)
             sys.exit(1)
         if os.path.isfile(emulator_image)==False:
-            print "ERROR: device emulator image does not exist, '%s', set EMULATORIMAGE environment variable to the correct emulator image" % emulator_image
+            print("ERROR: device emulator image does not exist, '%s', set EMULATORIMAGE environment variable to the correct emulator image" % emulator_image)
             sys.exit(1)
         if os.path.isfile(cerunner)==False:
-            print "ERROR: cerunner tool does not exist '%s', set CERUNNER environment variable to the correct path to cerunner.exe" % cerunner
+            print("ERROR: cerunner tool does not exist '%s', set CERUNNER environment variable to the correct path to cerunner.exe" % cerunner)
             sys.exit(1)
         if os.path.isdir(shared)==False:
             os.mkdir(shared)
 
         self.avmce=self.avm
-        if os.environ.has_key('PYTHONWIN'):
+        if 'PYTHONWIN' in os.environ:
             self.avm=os.environ['PYTHONWIN']+"  "+cwd+"/../util/wmemulatorshell.py"
         else:
             self.avm=cwd+"/../util/wmemulatorshell.py"
@@ -1554,12 +1601,12 @@ class RuntestBase:
         versionfile.close()
         self.compile_test(cwd+'/version.as')
         if os.path.isfile(versionabc)==False:
-            print "ERROR: compiling %s/version.as" % cwd
+            print("ERROR: compiling %s/version.as" % cwd)
             sys.exit(1)
         if os.path.isdir(shared)==False:
             os.mkdir(shared)
         if len(os.listdir(shared))>self.threads:
-            print "ERROR: emulator directory '%s' must be removed before running tests" % shared
+            print("ERROR: emulator directory '%s' must be removed before running tests" % shared)
             sys.exit(1)
 
         for num in range(emthreads):
@@ -1567,10 +1614,10 @@ class RuntestBase:
             if os.path.isdir(sharedir)==False:
                 os.mkdir(sharedir)
             if os.path.isfile(sharedir+'/lock'):
-                print "WARNING: the emulator has an open lock file, removing it"
+                print("WARNING: the emulator has an open lock file, removing it")
                 os.unlink(sharedir+"/lock")
             if os.path.isfile(sharedir+'/running.txt'):
-                print "detected emulator is already running, if not delete %s/running.txt" % sharedir
+                print("detected emulator is already running, if not delete %s/running.txt" % sharedir)
             if os.path.isdir(sharedir+"/shell")==False:
                 os.mkdir(sharedir+"/shell")
             if os.path.isdir(sharedir+"/media")==False:
@@ -1607,10 +1654,10 @@ class RuntestBase:
                         f.close()
                     except:
                         data='unknown'
-                    print " emulator %d shell version => %s" % (i,data)
+                    print(" emulator %d shell version => %s" % (i,data))
             if time()-timestart>60*5:
-                print "ERROR: emulators %s did not start after 5 minutes" % versions
-                print "I'm guessing deleting the files '%s/share?/running.txt' will fix the problem" % (shared)
+                print("ERROR: emulators %s did not start after 5 minutes" % versions)
+                print("I'm guessing deleting the files '%s/share?/running.txt' will fix the problem" % (shared))
                 sys.exit(1)
             sleep(.1)
         # cleanup version.as and version.abc
@@ -1620,4 +1667,4 @@ class RuntestBase:
             if exists(cwd+"/version.abc"):
                 os.unlink(cwd+"/version.abc")
         except:
-            print 'exception deleting %s/version.as or %s/version.abc' % (cwd,cwd)
+            print('exception deleting %s/version.as or %s/version.abc' % (cwd,cwd))
