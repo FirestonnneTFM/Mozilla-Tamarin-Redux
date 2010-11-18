@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 inline uint32_t ABCFile::addMethod(ABCMethodInfo* m) 
 {
@@ -140,3 +142,4 @@ inline uint32_t ABCExceptionTable::addAtEnd(ABCExceptionInfo* e)
     exceptions.addAtEnd(e);
     return exceptionCount++;
 }
+}}

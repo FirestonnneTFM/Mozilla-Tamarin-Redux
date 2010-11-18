@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 // Utility functions
 
@@ -239,3 +241,4 @@ private:
     Seq<T>* last;
 };
 
+}}

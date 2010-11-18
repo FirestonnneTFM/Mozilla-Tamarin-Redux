@@ -313,7 +313,11 @@ namespace avmplus
             virtual void throwSyntaxError(const char* msgz) = 0;
         };
         
-        // type definitions
+
+    }
+}
+
+// type definitions
         
 #include "eval-util.h"
 #include "eval-lex.h"
@@ -323,15 +327,12 @@ namespace avmplus
 #include "eval-compile.h"
 #include "eval-unicode.h"
 
-        // all inline functions for those types
+// all inline functions for those types
 
 #include "eval-util-inlines.h"
 #include "eval-abc-inlines.h"
 #include "eval-lex-inlines.h"
 #include "eval-parse-inlines.h"
 #include "eval-cogen-inlines.h"
-
-    }
-}
 
 #endif // VMCFG_EVAL

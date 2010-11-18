@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 enum Token {
     // Operators
@@ -400,3 +402,4 @@ private:
     // Character attributes for the ASCII range, bit vectors of the CHAR_ATTR_ values above.
     static const uint8_t char_attrs[128];
 };
+}}

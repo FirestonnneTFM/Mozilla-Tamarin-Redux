@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 inline bool Ctx::mustPushThis() { return tag == CTX_ClassMethod || tag == CTX_Program; }
 inline bool Ctx::mustPushScopeReg() { return tag == CTX_With || tag == CTX_Catch || tag == CTX_Activation; }
@@ -223,3 +225,5 @@ inline void Cogen::I_pushbyte(int8_t b) { emitOpS8(OP_pushbyte, b); }
 
 inline void Cogen::I_setslot(uint32_t index) { emitOpU30(OP_setslot, index); }
 inline void Cogen::I_opcode(AbcOpcode opcode) { emitOp(opcode); }
+
+}}

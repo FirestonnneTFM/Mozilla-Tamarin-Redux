@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 /* Structures and methods for constructing and emitting ABC code. */
 
@@ -315,3 +317,4 @@ public:
 };
 
 
+}}

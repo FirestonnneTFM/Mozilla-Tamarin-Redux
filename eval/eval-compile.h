@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 /**
  * The compiler acts as a coordinating class, managing memory, interning strings, 
@@ -139,3 +141,4 @@ public:
     const uint32_t MNL_public;      // [public]::<>
     const uint32_t MNL_public_attr; // [public]::<> for @attr names
 };
+}}

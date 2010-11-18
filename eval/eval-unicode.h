@@ -38,6 +38,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 bool isNonASCIIIdentifierStart(wchar c);
 bool isNonASCIIIdentifierSubsequent(wchar c);
+}}

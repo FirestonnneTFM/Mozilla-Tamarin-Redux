@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 class Label {
 public:
@@ -428,3 +430,4 @@ private:
     uint32_t scope_depth;
 };
 
+}}
