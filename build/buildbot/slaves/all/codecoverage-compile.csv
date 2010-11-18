@@ -1,0 +1,5 @@
+display_name, shell_name, configure options, env_script, notes
+Release32, avmshell_cov, --enable-shell, env32, "Release 32bit"
+ReleaseDebugger32, avmshell_s_cov, --enable-shell --enable-debugger, env32, "ReleaseDebugger 32bit"
+Debug32, avmshell_d_cov, --enable-shell --enable-debug, env32, "Debug 32bit"
+DebugDebugger32, avmshell_sd_cov, --enable-shell --enable-debug --enable-debugger, env32, "DebugDebugger 32bit"
