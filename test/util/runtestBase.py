@@ -101,6 +101,7 @@ class RuntestBase:
     builtinabc = ''
     config = ''
     escbin = ''
+    failconfig = 'failconfig.txt'
     includes = None
     java = 'java'
     javaargs = ''
@@ -190,6 +191,10 @@ class RuntestBase:
         self.altsearchpath=None
 
         self.run()
+
+    def run(self):
+        '''Implement Me'''
+        pass
 
     def usage(self, c):
         print('usage: %s [options] [tests]' % basename(argv[0]))
@@ -677,11 +682,10 @@ class RuntestBase:
         checkTestList(tests)
         return tests
 
+    # TODO: rename to getTestSettings(self, test)
     def getLocalSettings(self, root):
-        # get settings for this test - both from root dir testconfig.txt and
-        # any testconfig.txt in the current dir
+        # get settings for this test - from root dir testconfig.txt
         settings = {}
-        dir = os.path.split(root)[0]
         # when more than one filename regexp matches, we choose to use the longest:
         # e.g: given asc/.* and asc/testname - asc/testname will take precedence
         # since it has longer total length
@@ -695,14 +699,6 @@ class RuntestBase:
                             settings[k2].update(self.settings[k][k2])
                         else:
                             settings[k2] = self.settings[k][k2].copy()
-
-        if isfile(join(dir,self.testconfig)):
-            localSettings, localIncludes = self.parseTestConfig(dir)
-            # have a local testconfig, so we create a copy of the global settings to not overwrite
-            includes = list(self.includes) #copy list - don't use reference
-            includes.extend(localIncludes)
-            if root in localSettings:
-                settings.update(localSettings[root])
         return settings
 
     def istest(self,f, fileExtentions):
@@ -717,46 +713,70 @@ class RuntestBase:
             d = dirname(d)
         yield '.'   # yield the test dir root
 
-    def parseTestConfig(self, dir):
+    def parseTestConfig(self, config_file):
+        '''read a configuration file and parse it into the settings dictionary'''
         settings={}
-        includes=[]
-        names=None
-        lines=[]
+        multi_line = ''
+        line_num = 0
 
-        if isfile(join(dir,self.testconfig)):
-            if join(dir, '') == './':
-                for line in open(join(dir,self.testconfig)).read().splitlines():
-                    lines.append(line)
+        # the field format is:
+        # 0. testname:testcase (testcase optional)
+        # 1. include configurations
+        # 2. exclude configurations
+        # 3. directive
+        # 4. comment
+        for line in open(config_file, 'r').readlines():
+            line_num += 1
+            line = line.strip()
+            if line.startswith('#') or not line:
+                # skip comments and empty lines
+                continue
+            elif line.endswith('\\'):
+                # multi-line entry, save and load the next line
+                multi_line += line[:-1]
+                continue
+            elif multi_line:
+                # last line of multi-line entry
+                line = multi_line + line
+                multi_line = ''
+            # set maxsplit to 4 to not split on any commas in comments
+            fields = line.split(',', 4)
+            # clean up any field whitespace and assign to readable vars
+            try:
+                test, include_config, exclude_config, directive, comment = [s.strip() for s in fields]
+            except ValueError:
+                print('ERROR Parsing configuration file %s at line %s:' % (config_file, line_num))
+                print('  %s has %s fields, expected 5 fields' % (fields[0].strip(), len(fields)))
+                #DEBUG
+                raise
+                #exit(1)
+            # split the test name from testcase
+            if ':' in test:
+                test, testcase = [s.strip() for s in test.split(':', 1)]
             else:
-                # if this is not the root testconfig, append the path before the testname
-                for line in open(join(dir,self.testconfig)).read().splitlines():
-                    lines.append('%s/%s' %(dir,line))
-            for line in lines:
-                if line.startswith('#') or len(line)==0:
-                    continue
-                fields = line.split(',',3)
-                for f in range(len(fields)):
-                    fields[f]=fields[f].strip()
-                while len(fields)<4:
-                    fields.append('')
-                # only split first : - any : after the first one may be part of the testcase name
-                names=fields[0].split(':', 1)
-                if len(names)==1:
-                    names.append('.*')
-                # remove any trailing extension if specified
-                # TODO: add abs to here
-                if names[0][-3:] == self.sourceExt:
-                    names[0]=names[0][:-3]
-                # fields[1] = config
-                # fields[2] = command
-                # fields[3] = description
-                # only add settings for current config
-                if re.search('^%s$' % fields[1],self.config):
-                    if fields[2]=='include':
-                        includes.append(fields[0])
-                    settings.setdefault(names[0], {}).setdefault(names[1],{})
-                    settings[names[0]][names[1]][fields[2]]=fields[3]
-        return settings, includes
+                testcase = '.*'
+            if test.endswith((self.sourceExt, self.abcOnlyExt, self.abcasmExt)):
+                ext = test[test.rfind('.'):]
+                print('WARNING Parsing configuration file %s at line %s:' % (config_file, line_num))
+                print('  %s contains an unnecessary file extension %s' % (test, ext))
+                test = test[:test.rfind('.')]
+            if not comment:
+                print('WARNING Parsing configuration file %s at line %s:' % (config_file, line_num))
+                print('  No comment found for %s' % test)
+            # only add settings for current config and only re.search if defined
+            try:
+                include_match = re.search(include_config, self.config) if include_config else None
+                exclude_match = re.search(exclude_config, self.config) if exclude_config else None
+            except re.error as e:
+                print('ERROR Parsing configuration file %s at line %s:' % (config_file, line_num))
+                print('  regex is malformed: %s' % e)
+                exit(1)
+            if include_match and not exclude_match:
+                settings.setdefault(test, {}).setdefault(testcase,{})
+                settings[test][testcase][directive] = comment
+        
+        return settings
+        
 
     def parseRootConfigFiles(self):
         # Load any root .asc_args and .java_args files so they don' have to be
@@ -806,11 +826,11 @@ class RuntestBase:
             sys.stdout.flush()
         if self.js_output:
             try:
-                self.js_output_f = open(self.js_output, 'a')
-                if self.logFileType == 'html':
-                    self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
-                else:
-                    self.js_output_f.write('%s\n' % m)
+            self.js_output_f = open(self.js_output, 'a')
+            if self.logFileType == 'html':
+                self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
+            else:
+                self.js_output_f.write('%s\n' % m)
             except:
                 pass
             self.js_output_f.close()

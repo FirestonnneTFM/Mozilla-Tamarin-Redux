@@ -158,8 +158,8 @@ class AcceptanceRuntest(RuntestBase):
         # extension lists must be tuples
         self.otherTestExtensions = (self.abcasmExt,)
         self.executableExtensions = (self.abcOnlyExt,)
-        # Load the root testconfig file
-        self.settings, self.includes = self.parseTestConfig('.')
+        # test configuration is contained in two files: failconfig & testconfig)
+        self.settings = self.parseTestConfig(self.testconfig) & self.parsTestConfig(self.failconfig)
         self.tests = self.getTestsList(self.args)
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
