@@ -74,7 +74,7 @@ def detectCPUs():
     """
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-        if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+        if "SC_NPROCESSORS_ONLN" in os.sysconf_names:
             # Linux & Unix:
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
@@ -83,7 +83,7 @@ def detectCPUs():
             p = subprocess.Popen("sysctl -n hw.ncpu", shell=True, close_fds=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             return int(p.stdout.read())
     # Windows:
-    if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+    if "NUMBER_OF_PROCESSORS" in os.environ:
         ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
         if ncpus > 0:
             return ncpus
@@ -92,7 +92,7 @@ def detectCPUs():
 def dict_match(dict,test,value):
     for k in dict.keys():
         if re.search(k,test):
-            if dict[k].has_key(value):
+            if value in dict[k]:
                 return dict[k][value]
 
 def formatMemoryList(lst):
@@ -178,7 +178,7 @@ def moveAtsSwf(dir, file, atsDir):
     try:
         shutil.move('%s/%s.swf' % (dir,name),'%s/%s_.swf' % (atsOut,name))
     except IOError:
-        print 'Error attempting to move %s/%s_.swf' % (dir,name)
+        print('Error attempting to move %s/%s_.swf' % (dir,name))
     except:
         raise
 
@@ -248,12 +248,13 @@ def join(a,b):
 
 def walk(top, topdown=True, onerror=None, followlinks=False):
     '''Updated version of os.path.walk that will follow symbolic links'''
+
     try:
         names = os.listdir(top)
         names.sort()
-    except os.error, err:
+    except os.error:
         if onerror is not None:
-            onerror(err)
+            onerror(sys.excinfo()[0])
         return
 
     dirs, nondirs = [], []

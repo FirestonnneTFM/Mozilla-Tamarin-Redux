@@ -54,14 +54,9 @@ from itertools import count
 
 # add parent dir to python module search path
 sys.path.append('..')
-
-try:
-    from util.runtestBase import RuntestBase
-    # runtestUtils must be imported after "from os.path import *" as walk is overridden
-    from util.runtestUtils import *
-except ImportError:
-    print "Import error.  Please make sure that the test/acceptance/util directory has been deleted."
-    print "   (directory has been moved to test/util)."
+from util.runtestBase import RuntestBase
+# runtestUtils must be imported after "from os.path import *" as walk is overridden
+from util.runtestUtils import *
 
 class AcceptanceRuntest(RuntestBase):
     runESC = False
@@ -83,18 +78,18 @@ class AcceptanceRuntest(RuntestBase):
 
     def usage(self, c):
         RuntestBase.usage(self, c)
-        print '    --esc           run esc instead of avm'
-        print '    --escbin        location of esc/bin directory - defaults to ../../esc/bin'
-        print '    --eval          use run-time compiler'
-        print '    --ext           set the testfile extension (defaults to .as)'
-        print '    --ats           generate ats swfs instead of running tests'
-        print '    --atsdir        base output directory for ats swfs - defaults to ATS_SWFS'
-        print '    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially'
-        print '    --androidthreads    assign a thread for each android device connected.'
-        print '    --verify        run a verify pass instead of running abcs'
-        print '    --verifyonly    run a -Dverifyonly pass: only checks test exitcode'
-        print '    --remoteip      IP/DNS address of the machine to run the tests on.'
-        print '    --remoteuser    user name to use to connect to the remote machine.'
+        print('    --esc           run esc instead of avm')
+        print('    --escbin        location of esc/bin directory - defaults to ../../esc/bin')
+        print('    --eval          use run-time compiler')
+        print('    --ext           set the testfile extension (defaults to .as)')
+        print('    --ats           generate ats swfs instead of running tests')
+        print('    --atsdir        base output directory for ats swfs - defaults to ATS_SWFS')
+        print('    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially')
+        print('    --androidthreads    assign a thread for each android device connected.')
+        print('    --verify        run a verify pass instead of running abcs')
+        print('    --verifyonly    run a -Dverifyonly pass: only checks test exitcode')
+        print('    --remoteip      IP/DNS address of the machine to run the tests on.')
+        print('    --remoteuser    user name to use to connect to the remote machine.')
         exit(c)
 
     def setOptions(self):
@@ -120,7 +115,7 @@ class AcceptanceRuntest(RuntestBase):
                 try:
                     self.threads=int(v)
                 except ValueError:
-                    print 'Incorrect threads value: %s\n' % v
+                    print('Incorrect threads value: %s\n' % v)
                     self.usage(2)
             elif o in ('--ats',):
                 self.genAtsSwfs = True
@@ -155,7 +150,7 @@ class AcceptanceRuntest(RuntestBase):
             exit('You must be running a debugger build in order to use the -Dverifyonly option')
         if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
             if re.search('^arm-winmobile-emulator',self.config)==None:
-                print 'ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe'
+                print('ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe')
                 sys.exit(1)
             self.setupCEEmulators()
         if self.htmlOutput and not self.rebuildtests:
@@ -225,14 +220,14 @@ class AcceptanceRuntest(RuntestBase):
         settings = self.getLocalSettings(root)
 
         # skip tests that can't be verified
-        if self.verify and settings.has_key('.*') and settings['.*'].has_key('verify_skip'):
+        if self.verify and '.*' in settings and 'verify_skip' in settings['.*']:
             outputCalls.append((self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['verify_skip'],)))
             self.allskips += 1
             return outputCalls
 
         # skip entire test if specified
-        if settings.has_key('.*') and settings['.*'].has_key('skip') and not settings['.*'].has_key('include'):
+        if '.*' in settings and 'skip' in settings['.*'] and not 'include' in settings['.*']:
             outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['skip'],)))
             self.allskips += 1
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
@@ -365,7 +360,7 @@ class AcceptanceRuntest(RuntestBase):
 
     def process_avm_args_line(self, line, dir):
         abcargs = ''
-        line = string.replace(line, "$DIR", dir)
+        line = line.replace("$DIR", dir)
         if line.find('--') != -1:
             (extraVmArgs, abcargs) = line.split('--')
         else:
@@ -398,8 +393,8 @@ class AcceptanceRuntest(RuntestBase):
                 avm_args = open("%s.avm_args" % ast).readline()
                 if avm_args.find("mops") >= 0:
                     avm_args = ""
-            progname = string.replace(testName, ".abc", "")
-            progname = string.replace(progname, "/", ".")
+            progname = testName.replace(".abc", "")
+            progname = progname.replace("/", ".")
             progpath = os.path.join(self.aotout, progname)
             if self.remoteip:
                 retryCount = 5
@@ -420,7 +415,7 @@ class AcceptanceRuntest(RuntestBase):
                 self.run_pipe(cmd, outputCalls=outputCalls)
             else:
                 cmd = "%s %s" % (progpath, avm_args)
-                # print "about to execute: " + cmd
+                # print("about to execute: " + cmd)
                 (f,err,exitcode) = self.run_pipe(cmd, outputCalls=outputCalls)
         elif ast.endswith(self.abcasmExt):
             # make sure util file has been compiled
@@ -548,7 +543,7 @@ class AcceptanceRuntest(RuntestBase):
                                 lfail += 1
                                 outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
             except:
-                print 'exception running avm'
+                print('exception running avm')
                 raise
 
             # exitcode check
@@ -572,7 +567,10 @@ class AcceptanceRuntest(RuntestBase):
                         lpass = 1
                     else:
                         lfail = 1
-                        outputCalls.append((self.fail,(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
+                        outputmsg=''
+                        for l in outputLines:
+                            outputmsg+=l.strip()+'|'
+                        outputCalls.append((self.fail,(testName, '   FAILED contained no testcase messages - reason: %s' % outputmsg, self.failmsgs)))
 
         self.allfails += lfail
         self.allpasses += lpass
@@ -632,9 +630,11 @@ class AcceptanceRuntest(RuntestBase):
                 outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d Signal Name: %s FAILED!'
                                                % (expectedExitcode,exitcode,getSignalName(abs(exitcode))),
                                                self.failmsgs)))
+                outputmsg=''
+                for l in f+err:
+                    outputmsg+=l.strip()+'|'
                 outputCalls.append((self.fail,(testName, 'captured output: %s'
-                                               % string.join([l.strip() for l in f+err], ' | '),
-                                               self.failmsgs)))
+                                               % outputmsg,self.failmsgs)))
                 lfail+= 1
         return lfail, lexpfail, expectedExitcode
 

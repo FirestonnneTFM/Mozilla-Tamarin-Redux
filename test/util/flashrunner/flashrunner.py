@@ -172,7 +172,7 @@ def killbrowser(process):
         else:
             print("ERROR: unsupported platform, cannot kill player")
     except:
-        print "ERROR: cannot terminate player"
+        print("ERROR: cannot terminate player")
         time.sleep(1)
 
 def buildhtmlshell(name):

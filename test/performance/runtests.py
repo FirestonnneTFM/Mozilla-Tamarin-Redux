@@ -62,8 +62,8 @@ try:
     from util.runtestBase import RuntestBase
     from util.runtestUtils import *
 except ImportError:
-    print "Import error.  Please make sure that the test/acceptance/util directory has been deleted."
-    print "   (directory has been moved to test/util)."
+    print("Import error.  Please make sure that the test/acceptance/util directory has been deleted.")
+    print("   (directory has been moved to test/util).")
 
 # Constants
 DEFAULT_TRUNCATE_LEN = 6  # default len of number fields when displaying results
@@ -191,29 +191,29 @@ class PerformanceRuntest(RuntestBase):
 
     def usage(self, c):
         RuntestBase.usage(self, c)
-        print " -S --avm2          second avmplus command to use"
-        print "    --avmname       nickname for avm to use as column header"
-        print "    --avm2name      nickname for avm2 to use as column header"
-        print "    --detail        display results in 'old-style' format"
-        print "    --raw           output all raw test values"
-        print " -i --iterations    number of times to repeat test"
-        print " -l --log           logs results to a file"
-        print " -k --socketlog     logs results to a socket server"
-        print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
-        print " -m --memory        logs the high water memory mark"
-        print "    --metrics=      display specified metrics: either a comma-separated list of"
-        print "                    metrics names (e.g. v8), or the keyword all."
-        print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
-        print "    --vm2version    specify version of avm2"
-        print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
-        print "    --nooptimize    do not optimize files when compiling"
-        print "    --perfm         parse the perfm results from avm"
-        print "    --csv=          also output to csv file, filename required"
-        print "    --csvappend     append to csv file instead of overwriting"
-        print "    --score         compute and print geometric mean of scores"
-        print "    --index=        index file to use (must end with .py)"
-        print "    --saveindex=    save results to given index file name"
-        print "    --fullpath      print out full path for each test"
+        print(" -S --avm2          second avmplus command to use")
+        print("    --avmname       nickname for avm to use as column header")
+        print("    --avm2name      nickname for avm2 to use as column header")
+        print("    --detail        display results in 'old-style' format")
+        print("    --raw           output all raw test values")
+        print(" -i --iterations    number of times to repeat test")
+        print(" -l --log           logs results to a file")
+        print(" -k --socketlog     logs results to a socket server")
+        print(" -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)")
+        print(" -m --memory        logs the high water memory mark")
+        print("    --metrics=      display specified metrics: either a comma-separated list of")
+        print("                    metrics names (e.g. v8), or the keyword all.")
+        print("    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable")
+        print("    --vm2version    specify version of avm2")
+        print("    --vmargs2       args to pass to avm2, if not specified --vmargs will be used")
+        print("    --nooptimize    do not optimize files when compiling")
+        print("    --perfm         parse the perfm results from avm")
+        print("    --csv=          also output to csv file, filename required")
+        print("    --csvappend     append to csv file instead of overwriting")
+        print("    --score         compute and print geometric mean of scores")
+        print("    --index=        index file to use (must end with .py)")
+        print("    --saveindex=    save results to given index file name")
+        print("    --fullpath      print out full path for each test")
         exit(c)
 
     def setOptions(self):
@@ -238,7 +238,7 @@ class PerformanceRuntest(RuntestBase):
                 try:
                     self.iterations = int(v)
                 except ValueError:
-                    print 'Incorrect iterations value: %s\n' % v
+                    print('Incorrect iterations value: %s\n' % v)
                     self.usage(2)
             elif o in ('-l','--log'):
                 self.logFileType='log'
@@ -295,11 +295,11 @@ class PerformanceRuntest(RuntestBase):
         # to the classvar of the same name
         self.indexFile = indexFile[:-3] if indexFile.endswith('.py') else indexFile
         try:
-            exec 'from %s import testIndexDict' % self.indexFile
+            exec('from %s import testIndexDict' % self.indexFile)
             self.testIndexDict = testIndexDict
         except ImportError:
             # TODO: friendlyfy this error message
-            print 'Error attempting to import %s:' % self.indexFile
+            print('Error attempting to import %s:' % self.indexFile)
             raise
 
     def compile_test(self, as_file):
@@ -342,15 +342,15 @@ class PerformanceRuntest(RuntestBase):
         try:
             from metricinfo import metric_info
         except ImportError:
-            print 'Error loading metricinfo.py file.'
+            print('Error loading metricinfo.py file.')
             raise
 
         # verify that the loaded metric_info dictionary is valid
         for metric in metric_info:
             if 'best' not in metric_info[metric]:
-                print '\nWarning: metricinfo.py - the %s metric does not have a "best" key defined - defaulting to min\n' % metric
+                print('\nWarning: metricinfo.py - the %s metric does not have a "best" key defined - defaulting to min\n' % metric)
             elif not isinstance(metric_info[metric]['best'],(types.FunctionType,types.BuiltinFunctionType)):
-                print '\nWarning: metricinfo.py - the "best" value for the %s metric must be a function - defaulting to min' % metric
+                print('\nWarning: metricinfo.py - the "best" value for the %s metric must be a function - defaulting to min' % metric)
             # if the metric does not have a largerIsFaster value defined, default it to False
             if 'largerIsFaster' not in metric_info[metric]:
                 metric_info[metric]['largerIsFaster'] = False
@@ -476,7 +476,7 @@ class PerformanceRuntest(RuntestBase):
             # have a local testconfig, so we create a copy of the global settings to not overwrite
             includes = list(self.includes) #copy list - don't use reference
             includes.extend(localIncludes)
-            if localSettings.has_key(testname):
+            if testname in localSettings:
                 settings.update(localSettings[testname])
 
         return settings, includes
@@ -484,7 +484,7 @@ class PerformanceRuntest(RuntestBase):
     def parsePerfTestOutput(self, output, resultDict):
         '''Parse the given lines of output for test results'''
         if self.debug:
-            print output
+            print(output)
 
         if self.memory:
             memoryhigh = 0
@@ -632,13 +632,13 @@ class PerformanceRuntest(RuntestBase):
                                        'count':scoreDict[metric]['count']+1}
 
     def printScoreSummary(self):
-        print 'Score for %s:' % (self.avmname,)
+        print('Score for %s:' % (self.avmname))
         for k,v in self.score1.iteritems():
-            print '  %s = %s' % (k, str(pow(v['score'],1.0/v['count'])))
+            print('  %s = %s' % (k, str(pow(v['score'],1.0/v['count']))))
         if self.score2:
-            print 'Score for %s' % (self.avm2name,)
+            print('Score for %s' % (self.avm2name,))
             for k,v in self.score2.iteritems():
-                print '  %s = %s' % (k, str(pow(v['score'],1.0/v['count'])))
+                print('  %s = %s' % (k, str(pow(v['score'],1.0/v['count']))))
 
     def formatResult(self, result, truncateLen=DEFAULT_TRUNCATE_LEN, sigFigs = 1, metric = ''):
         '''Format the test result for display'''
@@ -686,7 +686,7 @@ class PerformanceRuntest(RuntestBase):
         if includes and not list_match(includes,root):
             return
 
-        if settings.has_key('.*') and settings['.*'].has_key('skip'):
+        if '.*' in settings and 'skip' in settings['.*']:
             self.verbose_print('  skipping %s' % testName)
             self.allskips += 1
             return
@@ -718,10 +718,10 @@ class PerformanceRuntest(RuntestBase):
 
         for i in range(self.iterations):
             if self.aotsdk and self.aotout:
-                progname = string.replace(testName, ".as", "")
-                progname = string.replace(progname, "/", ".")
+                progname = testName.replace(".as", "")
+                progname = progname.replace("/", ".")
                 (f1,err,exitcode) = self.run_pipe(os.path.join(self.aotout, progname))
-                # print "about to execute: " + os.path.join(self.aotout, progname)
+                # print("about to execute: " + os.path.join(self.aotout, progname))
                 exitcode = 0 # hack!
             else:
                 (f1,err,exitcode) = self.run_pipe("%s %s %s" % (self.avm, self.vmargs, abc))
@@ -808,7 +808,7 @@ class PerformanceRuntest(RuntestBase):
         numMetrics = len(testData[testName])
 
         if numMetrics == 1:
-            metric = testData[testName].keys()[0]
+            metric = list(testData[testName].keys())[0]
             # print out metric info if needed
             self.checkForMetricChange(metric)
 
@@ -958,14 +958,14 @@ class PerformanceRuntest(RuntestBase):
             csvwriter = csv.writer(open(self.csvfile, 'a' if self.csvAppend else 'w'))
         except IOError:
             if self.csvfile != 'output.csv':
-                print 'Error attempting to open %s.  Saving to ./output.csv instead' % self.csvfile
+                print('Error attempting to open %s.  Saving to ./output.csv instead' % self.csvfile)
                 self.csvfile = 'output.csv'
                 self.outputCsvToFile()
             else:
-                print 'Error attempting to write to output.csv file - aborting.'
+                print('Error attempting to write to output.csv file - aborting.')
             return
         
-        print 'Writing out csv data to %s' % self.csvfile
+        print('Writing out csv data to %s' % self.csvfile)
         
         # TODO: generation of the options dict needs to be moved to runtestBase
         # more work is needed to get that working there
@@ -1034,7 +1034,7 @@ except SystemExit:
     raise
 except TypeError:
     # This is the error thrown when ctrl-c'ing out of a testrun
-    print '\nKeyboard Interrupt'
+    print('\nKeyboard Interrupt')
 except:
-    print 'Runtest Abnormal Exit'
+    print('Runtest Abnormal Exit')
     raise
