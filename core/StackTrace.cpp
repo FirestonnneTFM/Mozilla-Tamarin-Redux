@@ -254,7 +254,7 @@ namespace avmplus
     {
         AvmCore *core = method->pool()->core;
         StringBuffer sb(core);
-        sb << "\tat" << method;
+        sb << "\tat " << method;
         if (filename)
             sb << "[" << filename << ":";
         return sb.toString();
