@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 inline void* Allocator::alloc(size_t nbytes)
 {
@@ -142,3 +144,4 @@ inline uint32_t StringBuilder::length()
     return len;
 }
 
+}}

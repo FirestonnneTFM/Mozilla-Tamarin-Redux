@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 inline Token Lexer::lex(uint32_t* linep, TokenValue* valuep)
 {
@@ -150,3 +152,4 @@ inline bool Lexer::getTrace() const
 }
 
 #endif
+}}

@@ -38,6 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This file is included into eval.h
+namespace avmplus {
+namespace RTC {
 
 inline bool Parser::newline() 
 {
@@ -151,3 +153,4 @@ inline void Parser::xmlPushback(wchar c)
 {
     lexer->xmlPushback(c);
 }
+}}
