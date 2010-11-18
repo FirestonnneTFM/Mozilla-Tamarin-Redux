@@ -1657,14 +1657,14 @@ namespace avmplus
         AvmAssert(m->method_id() < aotInfo->nActivationTraits);
         AvmAssert(aotInfo->activationTraits[m->method_id()] == activationTraits);
 
-        AvmAssert(aotInfo->activationTraitsInitFunctions != NULL);
+        AvmAssert(aotInfo->activationInfo != NULL);
         // See comment in initActivationTraits about why this can be called more than once per Traits
         if (activationTraits->init == NULL) {
-            if (aotInfo->activationTraitsInitFunctions[m->method_id()]) {
+            if (aotInfo->activationInfo[m->method_id()].initHandler) {
                 NativeMethodInfo compiledMethodInfo;
                 compiledMethodInfo.thunker = aotThunker;
-                compiledMethodInfo.handler.function = aotInfo->activationTraitsInitFunctions[m->method_id()];
-                activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo);
+                compiledMethodInfo.handler.function = aotInfo->activationInfo[m->method_id()].initHandler;
+                activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[m->method_id()].initMethodId);
             }
             // The following comes from Verifier::write() TODO: refactor so we can share this code
             const ScopeTypeChain *scope = m->activationScope();

@@ -50,6 +50,7 @@ namespace avmplus
 
     public:
         /** vtable for the activation scope inside this method */
+        ScriptObject* newUninitializedActivation();
         ScriptObject* newActivation();
 
         /** getter lazily creates table which maps SO->MC */

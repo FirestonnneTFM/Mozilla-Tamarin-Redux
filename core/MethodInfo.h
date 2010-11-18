@@ -109,7 +109,7 @@ namespace avmplus
         MethodInfo(InitMethodStub, Traits* declTraits);
 
 #ifdef VMCFG_AOT
-        MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info);
+        MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t methodId);
 #endif
 
         bool usesCallerContext() const;

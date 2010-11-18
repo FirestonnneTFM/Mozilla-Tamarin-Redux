@@ -147,10 +147,23 @@ REALLY_INLINE Atom MethodEnv::coerceEnter(int32_t argc, Atom* args)
 REALLY_INLINE ScriptEnv::ScriptEnv(MethodInfo* _method, ScopeChain* _scope)
     : MethodEnv(_method, _scope)
 {
+#ifdef VMCFG_AOT
+    int method_id = _method->method_id();;
+    AbcEnv *abcEnv = _scope->abcEnv();
+    if(method_id != -1 && abcEnv->getMethod(method_id) == NULL)
+        abcEnv->setMethod(method_id, this);
+#endif
 }
 
 REALLY_INLINE FunctionEnv::FunctionEnv(MethodInfo* _method, ScopeChain* _scope)
     : MethodEnv(_method, _scope)
-{ }
+{
+#ifdef VMCFG_AOT
+    int method_id = _method->method_id();;
+    AbcEnv *abcEnv = _scope->abcEnv();
+    if(method_id != -1 && abcEnv->getMethod(method_id) == NULL)
+        abcEnv->setMethod(method_id, this);
+#endif
+}
 
 } // namespace avmplus

@@ -613,11 +613,11 @@ namespace avmplus
             AvmAssert(activationTraits != NULL);
             AvmAssert(method->method_id() < aotInfo->nActivationTraits);
             aotInfo->activationTraits[method->method_id()] = activationTraits;
-            if (aotInfo->activationTraitsInitFunctions[method->method_id()] != NULL) {
+            if (aotInfo->activationInfo[method->method_id()].initHandler != NULL) {
                 NativeMethodInfo compiledMethodInfo;
                 compiledMethodInfo.thunker = aotThunker;
-                compiledMethodInfo.handler.function = aotInfo->activationTraitsInitFunctions[method->method_id()];
-                activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo);
+                compiledMethodInfo.handler.function = aotInfo->activationInfo[method->method_id()].initHandler;
+                activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[method->method_id()].initMethodId);
             }
             method->activationTraits()->resolveSignatures(toplevel);
         }

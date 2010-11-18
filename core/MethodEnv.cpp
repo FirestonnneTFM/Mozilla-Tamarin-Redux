@@ -1487,14 +1487,20 @@ namespace avmplus
         return activation;
     }
 
-    ScriptObject *MethodEnv::newActivation()
+    ScriptObject *MethodEnv::newUninitializedActivation()
     {
         VTable *vtable = getActivationVTable();
         AvmCore *core = this->core();
         MMgc::GC *gc = core->GetGC();
         SAMPLE_FRAME("[activation-object]", core);
         ScriptObject* obj = new (gc, vtable->getExtraSize()) ScriptObject(vtable, 0/*delegate*/);
-        MethodEnv *init = vtable->init;
+        return obj;
+    }
+
+    ScriptObject *MethodEnv::newActivation()
+    {
+        ScriptObject* obj = newUninitializedActivation();
+        MethodEnv *init = obj->vtable->init;
         if (init)
             init->coerceEnter(obj->atom());
         return obj;

@@ -66,14 +66,14 @@ namespace avmplus
     }
 
 #ifdef VMCFG_AOT
-    MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info) :
+    MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t methodId) :
         MethodInfoProcHolder(),
         _msref(declTraits->pool->core->GetGC()->emptyWeakRef),
         _declarer(declTraits),
         _activation(NULL),
         _pool(declTraits->pool),
         _abc_info_pos(NULL),
-        _method_id(-1),
+        _method_id(methodId),
         _hasMethodBody(1),
         _isResolved(1)
     {

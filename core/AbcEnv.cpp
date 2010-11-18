@@ -58,6 +58,13 @@ namespace avmplus
             m_invocationCounts = (uint64_t*)_pool->core->GetGC()->Alloc(_pool->methodCount() * sizeof(uint64_t), MMgc::GC::kZero);
         }
 #endif
+
+#ifdef VMCFG_AOT
+      AvmAssert(_pool->aotInfo != NULL);
+      AvmAssert(_pool->aotInfo->abcEnv != NULL);
+      if(*(_pool->aotInfo->abcEnv) == NULL)
+          *(_pool->aotInfo->abcEnv) = this;
+#endif
     }
 
     AbcEnv::~AbcEnv()
