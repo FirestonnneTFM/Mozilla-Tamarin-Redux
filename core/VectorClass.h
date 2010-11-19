@@ -206,9 +206,6 @@ namespace avmplus
         void checkFixed() const;
         void FASTCALL throwFixedError() const;
 
-        void throwErrorDouble_read(double d) const;
-        void throwErrorDouble_write(double d) const;
-
         void atomToValue(Atom atom, int32_t& value);
         Atom valueToAtom(const int32_t& value) const;
 
@@ -281,10 +278,6 @@ namespace avmplus
 
         // JIT helpers -- not for public use!
         // (declared public only to avoid a painful 'friend' declaration)
-        Atom _getDoubleProperty(double d) const;
-        void _setDoubleProperty(double d, Atom value);
-        typename TLIST::TYPE _getNativeDoubleProperty(double d) const;
-        void _setNativeDoubleProperty(double d, typename TLIST::TYPE value);
         typename TLIST::TYPE _getNativeIntProperty(int32_t index) const;
         void _setNativeIntProperty(int32_t index, typename TLIST::TYPE value);
         typename TLIST::TYPE _getNativeUintProperty(uint32_t index) const;
@@ -305,9 +298,6 @@ namespace avmplus
 
         uint32_t checkReadIndex_u(uint32_t index) const;
         uint32_t checkWriteIndex_u(uint32_t index) const;
-
-        uint32_t checkReadIndex_d(double index_d) const;
-        uint32_t checkWriteIndex_d(double index_d) const;
 
         // variant of _spliceHelper with explicit array of Atom.
         // (Not exposed to AS3.)

@@ -57,7 +57,7 @@ REALLY_INLINE uint32_t TraitsBindings::SlotInfo::offset() const
 
 REALLY_INLINE TraitsBindings::TraitsBindings(Traits* _owner,
                     TraitsBindingsp _base,
-                    MultinameHashtable* _bindings,
+                    MultinameBindingHashtable* _bindings,
                     uint32_t _slotCount,
                     uint32_t _methodCount,
                     bool typesValid) :

@@ -43,8 +43,8 @@
 namespace avmplus
 {
     Domain::Domain(AvmCore* core, Domain* base, uint32_t baseCount)
-        : m_namedTraits(new (core->GetGC()) MultinameHashtable())
-        , m_namedScriptsMap(new (core->GetGC()) MultinameHashtable())
+        : m_namedTraits(new (core->GetGC()) MultinameTraitsHashtable())
+        , m_namedScriptsMap(new (core->GetGC()) MultinameBindingHashtable())
         , m_namedScriptsList(core->GetGC(), 0)
         , m_parameterizedTypes(new (core->GetGC()) HeapHashtable(core->GetGC()))
         , m_baseCount(baseCount)

@@ -187,8 +187,8 @@ namespace avmplus
 
     private:
         friend class DomainMgr;
-        DWB(MultinameHashtable*)                    m_namedTraits;
-        DWB(MultinameHashtable*)                    m_namedScriptsMap;
+        DWB(MultinameTraitsHashtable*)                    m_namedTraits;
+        DWB(MultinameBindingHashtable*)                    m_namedScriptsMap;
         GCList<MethodInfo>                          m_namedScriptsList;           // list of MethodInfo* for the scripts
 
     private:

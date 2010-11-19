@@ -55,7 +55,7 @@ namespace avmplus
     {
     private:
         friend class AvmCore;
-        friend class MultinameHashtable;
+        template <class VALUE_TYPE, class VALUE_WRITER> friend class MultinameHashtable;
         // Should these be Stringp's?
         Atom m_prefix;
         API m_api;
