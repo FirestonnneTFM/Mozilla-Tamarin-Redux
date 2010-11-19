@@ -133,16 +133,6 @@ namespace avmplus
         return v;
     }
 
-    void VectorBaseObject::throwErrorDouble_read(double d) const
-    {
-        toplevel()->throwReferenceError(kReadSealedError, core()->doubleToString(d), traits());
-    }
-
-    void VectorBaseObject::throwErrorDouble_write(double d) const
-    {
-        toplevel()->throwReferenceError(kWriteSealedError, core()->doubleToString(d), traits());
-    }
-
     void FASTCALL VectorBaseObject::throwFixedError() const
     {
         toplevel()->throwRangeError(kVectorFixedError);
@@ -427,36 +417,6 @@ namespace avmplus
         checkFixed();
         _splice(0, argc, 0, argv);
         return m_list.length();
-    }
-
-    template<class TLIST>
-    Atom TypedVectorObject<TLIST>::_getDoubleProperty(double d) const
-    {
-        uint32_t const index = checkReadIndex_d(d);
-        return valueToAtom((typename TLIST::OPAQUE_TYPE)m_list.get(index));
-    }
-
-    template<class TLIST>
-    void TypedVectorObject<TLIST>::_setDoubleProperty(double d, Atom value)
-    {
-        uint32_t const index = checkWriteIndex_d(d);
-        typename TLIST::OPAQUE_TYPE tmp;
-        atomToValue(value, tmp);
-        m_list.set(index, (typename TLIST::TYPE)tmp);
-    }
-
-    template<class TLIST>
-    typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeDoubleProperty(double d) const
-    {
-        uint32_t const index = checkReadIndex_d(d);
-        return m_list.get(index);
-    }
-
-    template<class TLIST>
-    void TypedVectorObject<TLIST>::_setNativeDoubleProperty(double d, typename TLIST::TYPE value)
-    {
-        uint32_t const index = checkWriteIndex_d(d);
-        m_list.set(index, value);
     }
 
     template<class TLIST>
