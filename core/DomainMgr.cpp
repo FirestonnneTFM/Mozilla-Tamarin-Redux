@@ -54,7 +54,7 @@ void DomainMgr::addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Tr
 
     if (t == NULL)
     {
-        pool->domain->m_namedTraits->add(name, ns, (Binding)traits);
+        pool->domain->m_namedTraits->add(name, ns, traits);
     }
 }
 
@@ -71,7 +71,7 @@ void DomainMgr::addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespace
 
     if (t == NULL)
     {
-        pool->m_namedTraits->add(name, ns, (Binding)itraits);
+        pool->m_namedTraits->add(name, ns, itraits);
     }
 }
 
@@ -140,7 +140,7 @@ Traits* DomainMgr::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname
     return found;
 }
 
-static void addScript(Stringp name, Namespacep ns, MethodInfo* script, GCList<MethodInfo>& scriptList, MultinameHashtable* scriptMap)
+static void addScript(Stringp name, Namespacep ns, MethodInfo* script, GCList<MethodInfo>& scriptList, MultinameBindingHashtable* scriptMap)
 {
     scriptList.add(script);
     // note that this is idx+1 -- can't use idx=0 since that's BIND_NONE

@@ -122,7 +122,7 @@ namespace avmplus
         Stringp poolstr(PoolObject* pool, uint32_t index);
         void setpropmulti(ScriptObject* o, const KVPair* kv, uint32_t count);
         Stringp str(StringId i);
-        static void addBindings(AvmCore* core, MultinameHashtable* bindings, TraitsBindingsp tb, uint32_t flags);
+        static void addBindings(AvmCore* core, MultinameBindingHashtable* bindings, TraitsBindingsp tb, uint32_t flags);
 
     private:
         Toplevel* m_toplevel;

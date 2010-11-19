@@ -166,7 +166,7 @@ namespace avmplus
         return a;
     }
 
-    void TypeDescriber::addBindings(AvmCore* core, MultinameHashtable* bindings, TraitsBindingsp tb, uint32_t flags)
+    void TypeDescriber::addBindings(AvmCore* core, MultinameBindingHashtable* bindings, TraitsBindingsp tb, uint32_t flags)
     {
         if (!tb) return;
         if ((flags & TypeDescriber::HIDE_OBJECT) && !tb->base && !tb->owner->isInterface()) return;
@@ -255,7 +255,7 @@ namespace avmplus
 
             // make a flattened set of bindings so we don't have to check for overrides as we go.
             // This is not terribly efficient, but doesn't need to be.
-            MultinameHashtable* mybind = new (gc) MultinameHashtable();
+            MultinameBindingHashtable* mybind = new (gc) MultinameBindingHashtable();
             addBindings(m_toplevel->core(), mybind, tb, flags);
 
             // Don't want interface methods, so post-process and wipe out any

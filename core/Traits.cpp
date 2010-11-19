@@ -52,7 +52,7 @@ namespace avmplus
     /*static*/ TraitsBindings* TraitsBindings::alloc(GC* gc,
                                                 Traits* _owner,
                                                 TraitsBindingsp _base,
-                                                MultinameHashtable* _bindings,
+                                                MultinameBindingHashtable* _bindings,
                                                 uint32_t slotCount,
                                                 uint32_t methodCount,
                                                 bool typesValid)
@@ -403,7 +403,7 @@ namespace avmplus
         }
     }
 
-    void Traits::addVersionedBindings(MultinameHashtable* bindings,
+    void Traits::addVersionedBindings(MultinameBindingHashtable* bindings,
                                       Stringp name,
                                       NamespaceSetp nss,
                                       Binding binding) const
@@ -733,7 +733,7 @@ namespace avmplus
     }
 
     void Traits::buildBindings(TraitsBindingsp basetb,
-                                MultinameHashtable* bindings,
+                                MultinameBindingHashtable* bindings,
                                 uint32_t& slotCount,
                                 uint32_t& methodCount,
                                 SlotSizeInfo* slotSizeInfo,
@@ -1228,7 +1228,7 @@ namespace avmplus
         const int32_t bindingCap = m_bindingCapLog2 ? (1 << m_bindingCapLog2) : 2;
 
         MMgc::GC* gc = core->GetGC();
-        MultinameHashtable* bindings = new (gc) MultinameHashtable(bindingCap);
+        MultinameBindingHashtable* bindings = new (gc) MultinameBindingHashtable(bindingCap);
         AvmAssert(bindings->numQuads == bindingCap);
 
         if (this->posType() == TRAITSTYPE_CATCH)
