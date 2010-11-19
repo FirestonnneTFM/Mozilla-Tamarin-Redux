@@ -326,12 +326,10 @@ class AcceptanceRuntest(RuntestBase):
         # windows tzname = ('Pacific Standard Time', 'Pacific Daylight Time')
         # cygwin  tzname = ('PST', 'PDT')
         if self.osName == 'win' and not self.cygwin:
-            print('win tz: ', time.tzname)
             # extract only the upper case letters from the windows time zone
             tzname = tuple([''.join(re.findall('[A-Z]',tz)) for tz in time.tzname])
         else:
             tzname = time.tzname
-        print('tzname = ', tzname)
         # check if current tz is in the list
         if str(tzname) not in valid_timezones:
             outputCalls.append(
