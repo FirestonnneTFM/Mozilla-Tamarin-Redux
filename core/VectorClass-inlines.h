@@ -216,26 +216,6 @@ namespace avmplus
             throwRangeError(index);
         return index;
     }
-    
-    template<class TLIST>
-    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkReadIndex_d(double d) const
-    {
-        int32_t const i = int32_t(d);
-        if (i != d)
-            throwErrorDouble_read(d);
-        // Implicitly convert negative values to large uints, which will always be > length
-        return checkReadIndex_u(uint32_t(i));
-    }
-
-    template<class TLIST>
-    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkWriteIndex_d(double d) const
-    {
-        int32_t const i = int32_t(d);
-        if (i != d)
-            throwErrorDouble_write(d);
-        // Implicitly convert negative values to large uints, which will always be > length
-        return checkWriteIndex_u(uint32_t(i));
-    }
 }
 
 #endif /* __avmplus_VectorClass__ */

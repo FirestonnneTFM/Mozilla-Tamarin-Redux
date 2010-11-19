@@ -39,49 +39,56 @@
 
 namespace avmplus
 {
-
-REALLY_INLINE bool MultinameHashtable::matchNS(uintptr_t uri, API apis, Namespacep ns)
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE bool MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::matchNS(uintptr_t uri, API apis, Namespacep ns)
 {
     AvmAssert(ns->getURI()->isInterned());
     return (apis & ns->m_api) && uri == ns->m_uri;
 }
 
-REALLY_INLINE Binding MultinameHashtable::get(Stringp name, NamespaceSetp nsset) const
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::get(Stringp name, NamespaceSetp nsset) const
 {
     return getNSSet(name, nsset)->value;
 }
 
-REALLY_INLINE Binding MultinameHashtable::getMulti(const Multiname& name) const
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::getMulti(const Multiname& name) const
 {
     return getMulti(&name);
 }
 
-REALLY_INLINE Stringp MultinameHashtable::keyAt(int index) const
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE Stringp MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::keyAt(int index) const
 {
     AvmAssert(m_quads[index-1].name != NULL); return m_quads[index-1].name;
 }
 
-REALLY_INLINE Namespacep MultinameHashtable::nsAt(int index) const
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE Namespacep MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::nsAt(int index) const
 {
     return m_quads[index-1].ns;
 }
 
-REALLY_INLINE Binding MultinameHashtable::valueAt(int index) const
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::valueAt(int index) const
 {
     return m_quads[index-1].value;
 }
 
-REALLY_INLINE API MultinameHashtable::apisAt(int index) const
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE API MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::apisAt(int index) const
 {
     return m_quads[index-1].apis();
 }
 
-REALLY_INLINE size_t MultinameHashtable::allocatedSize() const
+template <class VALUE_TYPE, class VALUE_WRITER>
+REALLY_INLINE size_t MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::allocatedSize() const
 {
-    return numQuads * sizeof(Quad);
+    return numQuads * sizeof(Quad<VALUE_TYPE>);
 }
 
-REALLY_INLINE StMNHTIterator::StMNHTIterator(MultinameHashtable* mnht) :
+REALLY_INLINE StMNHTIterator::StMNHTIterator(MultinameBindingHashtable* mnht) :
     m_mnht(mnht),
     m_cur(mnht->m_quads - 1),
     m_end(mnht->m_quads + mnht->numQuads)
@@ -113,4 +120,20 @@ REALLY_INLINE API StMNHTIterator::apis() const
     return m_cur->apis();
 }
 
+/*static*/
+REALLY_INLINE void BindingType::store(MMgc::GC* gc, void *, void **addr, void *value)
+{
+    // In theory, this assert can fire if a binding index happens to
+    // point to GC memory, highly unlikely and it is worth keeping us
+    // honest in Binding usage by doing this.
+    (void)gc;
+    AvmAssert(!gc->IsPointerToGCPage(value));
+    *addr = value;
+}
+
+/*static*/
+REALLY_INLINE void GCObjectType::store(MMgc::GC* gc, void *container, void **addr, void *value)
+{
+    WB(gc, container, addr, value);
+}
 } // namespace avmplus
