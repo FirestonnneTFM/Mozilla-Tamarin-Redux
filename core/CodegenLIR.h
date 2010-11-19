@@ -341,9 +341,11 @@ namespace avmplus
         LIns* sti(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* stp(LIns* val, LIns* p, int32_t d, AccSet);
         LIns* std(LIns* val, LIns* p, int32_t d, AccSet);
+        LIns* stForTraits(Traits *t, LIns* val, LIns* p, int32_t d, AccSet);
         LIns* ldi(LIns* p, int32_t d, AccSet);
         LIns* ldd(LIns* p, int32_t d, AccSet);
         LIns* ldp(LIns* p, int32_t d, AccSet);
+        LIns* ldForTraits(Traits *t, LIns* p, int32_t d, AccSet);
         LIns* livep(LIns*);
         LIns* param(int n, const char *name);
         LIns* lshi(LIns* a, int32_t b);
@@ -472,36 +474,37 @@ namespace avmplus
         ValidateWriter* validate3; // ValidateWriter for method body.
 #endif
 
-        LIns *insAlloc(int32_t);
-        LIns *atomToNativeRep(int loc, LIns *i);
-        LIns *atomToNativeRep(Traits *, LIns *i);
-        LIns *ptrToNativeRep(Traits*, LIns*);
-        LIns *loadAtomRep(int i);
-        LIns *leaIns(int32_t d, LIns *base);
-        LIns *localGet(int i);
-        LIns *localGetp(int i);
-        LIns *localGetf(int i);
-        LIns *localCopy(int i); // sniff's type from FrameState
+        LIns* insAlloc(int32_t);
+        LIns* insAllocForTraits(Traits *t);
+        LIns* atomToNativeRep(int loc, LIns *i);
+        LIns* atomToNativeRep(Traits *, LIns *i);
+        LIns* ptrToNativeRep(Traits*, LIns*);
+        LIns* loadAtomRep(int i);
+        LIns* leaIns(int32_t d, LIns *base);
+        LIns* localGet(int i);
+        LIns* localGetp(int i);
+        LIns* localGetf(int i);
+        LIns* localCopy(int i); // sniff's type from FrameState
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
-        LIns *branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label);
+        LIns* branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label);
         void branchToAbcPos(LOpcode op, LIns *cond, const uint8_t* target);
-        LIns *retIns(LIns *val);
-        LIns *mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
-        LIns *loadEnvScope();
-        LIns *loadEnvVTable();
-        LIns *loadEnvAbcEnv();
-        LIns *loadEnvDomainEnv();
-        LIns *loadEnvToplevel();
-        LIns *copyMultiname(const Multiname* multiname);
-        LIns *initMultiname(const Multiname* multiname, int& csp, bool isDelete =false);
-        LIns *storeAtomArgs(int count, int index);
-        LIns *storeAtomArgs(LIns *obj, int count, int index);
-        LIns *promoteNumberIns(Traits *t, int i);
-        LIns *loadVTable(LIns* obj, Traits* t);
-        LIns *cmpEq(const CallInfo *fid, int lhsi, int rhsi);
-        LIns *cmpLt(int lhsi, int rhsi);
-        LIns *cmpLe(int lhsi, int rhsi);
-        LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
+        LIns* retIns(LIns *val);
+        LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
+        LIns* loadEnvScope();
+        LIns* loadEnvVTable();
+        LIns* loadEnvAbcEnv();
+        LIns* loadEnvDomainEnv();
+        LIns* loadEnvToplevel();
+        LIns* copyMultiname(const Multiname* multiname);
+        LIns* initMultiname(const Multiname* multiname, int& csp, bool isDelete =false);
+        LIns* storeAtomArgs(int count, int index);
+        LIns* storeAtomArgs(LIns *obj, int count, int index);
+        LIns* promoteNumberIns(Traits *t, int i);
+        LIns* loadVTable(LIns* obj, Traits* t);
+        LIns* cmpEq(const CallInfo *fid, int lhsi, int rhsi);
+        LIns* cmpLt(int lhsi, int rhsi);
+        LIns* cmpLe(int lhsi, int rhsi);
+        LIns* cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
         debug_only( bool isPointer(int i); )
         void emitSetPc(const uint8_t* pc);
         void emitSampleCheck();
@@ -524,14 +527,14 @@ namespace avmplus
         // on successful jit, allocate memory for BindingCache instances, if necessary
         void initBindingCache();
 
-        LIns *loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet, LoadQual loadQual=LOAD_NORMAL);
-        LIns *storeIns(LOpcode op, LIns* val, int32_t disp, LIns *base, AccSet accSet);
-        LIns *Ins(LOpcode op);
-        LIns *Ins(LOpcode op, LIns *a);
-        LIns *i2dIns(LIns* v);
-        LIns *ui2dIns(LIns* v);
-        LIns *p2dIns(LIns* v);
-        LIns *binaryIns(LOpcode op, LIns *a, LIns *b);
+        LIns* loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet, LoadQual loadQual=LOAD_NORMAL);
+        LIns* storeIns(LOpcode op, LIns* val, int32_t disp, LIns *base, AccSet accSet);
+        LIns* Ins(LOpcode op);
+        LIns* Ins(LOpcode op, LIns *a);
+        LIns* i2dIns(LIns* v);
+        LIns* ui2dIns(LIns* v);
+        LIns* p2dIns(LIns* v);
+        LIns* binaryIns(LOpcode op, LIns *a, LIns *b);
         LIns* callIns(const CallInfo *, uint32_t argc, ...);
 
         /** emit a constructor call, and early bind if possible */
@@ -578,6 +581,8 @@ namespace avmplus
         void emitGetGlobalScope(int dest);
         void emitCoerce(uint32_t index, Traits* type);
         void emitCheckNull(LIns* ptr, Traits* type);
+        LIns* emitGetIntProperty(int objIndex, LIns *index, Traits *result, bool bUnsigned);
+        void emitSetIntProperty(int objIndex, int valIndex, LIns *index, bool bUnsigned);
         void localSet(int i, LIns* o, Traits* type);
         LIns* convertToString(int i, bool preserveNull);
         LIns* coerceToString(int i);
@@ -604,6 +609,8 @@ namespace avmplus
         LIns* specializeIntCall(LIns *call, Specialization* specs);
 
         LIns* emitStringCall(int index, const CallInfo *stringCall, bool preserveNull);
+
+        LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
 
     public:
         CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel);

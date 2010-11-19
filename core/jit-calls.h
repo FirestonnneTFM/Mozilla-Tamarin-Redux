@@ -859,6 +859,46 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     }
     FUNCTION(FUNCADDR(getprop_index), SIG4(A,P,A,P,A), getprop_index)
 
+#ifdef VMCFG_FASTPATH_ADD_INLINE
+    // This is equivalent to getprop_index but performs addition of index1 and index2
+    // to compute the index. This is only run when (index1+index2) overflows an int32_t value
+    // or is negative and is not time critical.
+    Atom getprop_index_add(MethodEnv* caller_env, Atom obj, const Multiname *name, int32_t index1, int32_t index2)
+    {
+        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 + (double) index2);
+        if (atomIsIntptr(index) && atomCanBeUint32(index)) {
+            if (isObjectPtr(obj)) {
+                _nvprof("getprop_index_add P-fast", 1);
+                return AvmCore::atomToScriptObject(obj)->getUintProperty(uint32_t(atomGetIntptr(index)));
+            }
+        }
+        _nvprof("getprop_index_add P-fast", 0);
+        Multiname tempname = *name;
+        VTable* vtable = toVTable(caller_env->toplevel(), obj);
+        return caller_env->getpropertyHelper(obj, &tempname, vtable, index);
+    }
+    FUNCTION(FUNCADDR(getprop_index_add), SIG5(A,P,A,P,I,I), getprop_index_add)
+
+    // This is equivalent to getprop_index but performs subtraction of index1 and index2
+    // to compute the index. This is only run when (index1-index2) overflows an int32_t value
+    // or is negative and is not time critical.
+    Atom getprop_index_subtract(MethodEnv* caller_env, Atom obj, const Multiname *name, int32_t index1, int32_t index2)
+    {
+        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 - (double) index2);
+        if (atomIsIntptr(index) && atomCanBeUint32(index)) {
+            if (isObjectPtr(obj)) {
+                _nvprof("getprop_index_subtract P-fast", 1);
+                return AvmCore::atomToScriptObject(obj)->getUintProperty(uint32_t(atomGetIntptr(index)));
+            }
+        }
+        _nvprof("getprop_index_subtract P-fast", 0);
+        Multiname tempname = *name;
+        VTable* vtable = toVTable(caller_env->toplevel(), obj);
+        return caller_env->getpropertyHelper(obj, &tempname, vtable, index);
+    }
+    FUNCTION(FUNCADDR(getprop_index_subtract), SIG5(A,P,A,P,I,I), getprop_index_subtract)
+#endif // VMCFG_FASTPATH_ADD_INLINE
+
     // called when we don't know the base object type and we have a runtime
     // index expression that is public and therefore able to access dynamic properties.
     // (typically this is late-bound array access)
@@ -879,6 +919,50 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     }
     FUNCTION(FUNCADDR(setprop_index),  SIG5(V,P,A,P,A,A), setprop_index)
 
+#ifdef VMCFG_FASTPATH_ADD_INLINE
+    // This is equivalent to setprop_index but performs addition of index1 and index2
+    // to compute the index. This is only run when (index1+index2) overflows an int32_t value
+    // or is negative and is not time critical.
+    void setprop_index_add(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, int32_t index1, int32_t index2)
+    {
+        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 + (double) index2);
+        if (isObjectPtr(obj)) {
+            if (atomIsIntptr(index) && atomCanBeUint32(index)) {
+                // todo: obj is probably a dense array or vector
+                AvmCore::atomToScriptObject(obj)->setUintProperty(uint32_t(atomGetIntptr(index)), value);
+                _nvprof("setprop_index_add P-fast", 1);
+                return;
+            }
+        }
+
+        _nvprof("setprop_index_add P-fast", 0);
+        Multiname tempname = *name;
+        caller_env->setpropertyHelper(obj, &tempname, value, toVTable(caller_env->toplevel(), obj), index);
+    }
+    FUNCTION(FUNCADDR(setprop_index_add),  SIG6(V,P,A,P,A,I,I), setprop_index_add)
+
+    // This is equivalent to setprop_index but performs subtraction of index1 and index2
+    // to compute the index. This is only run when (index1-index2) overflows an int32_t value
+    // or is negative and is not time critical.
+    void setprop_index_subtract(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, int32_t index1, int32_t index2)
+    {
+        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 - (double) index2);
+        if (isObjectPtr(obj)) {
+            if (atomIsIntptr(index) && atomCanBeUint32(index)) {
+                // todo: obj is probably a dense array or vector
+                AvmCore::atomToScriptObject(obj)->setUintProperty(uint32_t(atomGetIntptr(index)), value);
+                _nvprof("setprop_index_subtract P-fast", 1);
+                return;
+            }
+        }
+
+        _nvprof("setprop_index_subtract P-fast", 0);
+        Multiname tempname = *name;
+        caller_env->setpropertyHelper(obj, &tempname, value, toVTable(caller_env->toplevel(), obj), index);
+    }
+    FUNCTION(FUNCADDR(setprop_index_subtract),  SIG6(V,P,A,P,A,I,I), setprop_index_subtract)
+#endif // VMCFG_FASTPATH_ADD_INLINE
+
     // helper for OP_initproperty, called when the namespace has a dynamic name
     // but known namespace that includes public, typical for late bound a[i] = ...
     // expressions occurring within constructors.
@@ -890,6 +974,34 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
         caller_env->initpropertyHelper(obj, &tempname, value, vtable, index);
     }
     FUNCTION(FUNCADDR(initprop_index),  SIG5(V,P,A,P,A,A), initprop_index)
+
+#ifdef VMCFG_FASTPATH_ADD_INLINE
+    // This is equivalent to initprop_index but performs addition of index1 and index2
+    // to compute the index. This is only run when (index1+index2) overflows an int32_t value
+    // or is negative and is not time critical.
+    void initprop_index_add(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, int32_t index1, int32_t index2)
+    {
+        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 + (double) index2);
+        _nvprof("initprop_index_add", 1);
+        Multiname tempname = *name;
+        VTable* vtable = toVTable(caller_env->toplevel(), obj);
+        caller_env->initpropertyHelper(obj, &tempname, value, vtable, index);
+    }
+    FUNCTION(FUNCADDR(initprop_index_add),  SIG6(V,P,A,P,A,I,I), initprop_index_add)
+
+    // This is equivalent to initprop_index but performs subtraction of index1 and index2
+    // to compute the index. This is only run when (index1-index2) overflows an int32_t value
+    // or is negative and is not time critical.
+    void initprop_index_subtract(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, int32_t index1, int32_t index2)
+    {
+        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 - (double) index2);
+        _nvprof("initprop_index_subtract", 1);
+        Multiname tempname = *name;
+        VTable* vtable = toVTable(caller_env->toplevel(), obj);
+        caller_env->initpropertyHelper(obj, &tempname, value, vtable, index);
+    }
+    FUNCTION(FUNCADDR(initprop_index_subtract),  SIG6(V,P,A,P,A,I,I), initprop_index_subtract)
+#endif // VMCFG_FASTPATH_ADD_INLINE
 
     METHOD(COREADDR(AvmCore::setDxns), SIG3(V,P,P,P), setDxns)
     METHOD(COREADDR(AvmCore::setDxnsLate), SIG3(V,P,P,A), setDxnsLate)
@@ -1004,26 +1116,6 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getUintProperty), SIG2(A,P,U), DoubleVectorObject_getUintProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getNativeUintProperty), SIG2(F,P,U), DoubleVectorObject_getNativeUintProperty)
-
-    METHOD(VECTORDOUBLEADDRF(DoubleVectorObject::_getNativeDoubleProperty), SIG2(F,P,F), DoubleVectorObject_getNativeDoubleProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getNativeDoubleProperty), SIG2(I,P,F), IntVectorObject_getNativeDoubleProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeDoubleProperty), SIG2(U,P,F), UIntVectorObject_getNativeDoubleProperty)
-
-    METHOD(ARRAYADDR(ArrayObject::_getDoubleProperty), SIG2(A,P,F), ArrayObject_getDoubleProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getDoubleProperty), SIG2(F,P,F), DoubleVectorObject_getDoubleProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getDoubleProperty), SIG2(I,P,F), IntVectorObject_getDoubleProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getDoubleProperty), SIG2(U,P,F), UIntVectorObject_getDoubleProperty)
-    METHOD(VECTOROBJADDR(ObjectVectorObject::_getDoubleProperty), SIG2(A,P,F), ObjectVectorObject_getDoubleProperty)
-
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,F), DoubleVectorObject_setNativeDoubleProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,I), IntVectorObject_setNativeDoubleProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,U), UIntVectorObject_setNativeDoubleProperty)
-
-    METHOD(ARRAYADDR(ArrayObject::_setDoubleProperty), SIG3(V,P,F,A), ArrayObject_setDoubleProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setDoubleProperty), SIG3(V,P,F,A), DoubleVectorObject_setDoubleProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setDoubleProperty), SIG3(V,P,F,A), IntVectorObject_setDoubleProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setDoubleProperty), SIG3(V,P,F,A), UIntVectorObject_setDoubleProperty)
-    METHOD(VECTOROBJADDR(ObjectVectorObject::_setDoubleProperty), SIG3(V,P,F,A), ObjectVectorObject_setDoubleProperty)
 
     METHOD(VECTORINTADDR(IntVectorObject::_getUintProperty), SIG2(A,P,U), IntVectorObject_getUintProperty)
     METHOD(VECTORUINTADDR(UIntVectorObject::_getUintProperty), SIG2(A,P,U), UIntVectorObject_getUintProperty)

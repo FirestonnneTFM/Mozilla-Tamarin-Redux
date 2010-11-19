@@ -58,6 +58,11 @@ namespace vtune {
 using namespace vtune;
 #endif // VMCFG_VTUNE
 
+// Sparc, ARM and SH4 have buggy LIR_d2i support (bug 613189)
+#if (defined(NANOJIT_SPARC) || defined(NANOJIT_SH4) || defined(NANOJIT_ARM))
+# undef NJ_F2I_SUPPORTED
+# define NJ_F2I_SUPPORTED 0
+#endif
 
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
 # define SSE2_ONLY(...) __VA_ARGS__
@@ -105,33 +110,6 @@ bar = _method; \
 return foo;
 #else
 #define RETURN_METHOD_PTR(_class, _method) \
-return *((intptr_t*)&_method);
-#endif
-
-#ifdef AVMPLUS_ARM
-#ifdef _MSC_VER
-#define RETURN_METHOD_PTR_F(_class, _method) \
-return *((int*)&_method);
-#else
-#define RETURN_METHOD_PTR_F(_class, _method) \
-union { \
-    double (_class::*bar)(); \
-    int foo[2]; \
-}; \
-bar = _method; \
-return foo[0];
-#endif
-
-#elif defined __GNUC__
-#define RETURN_METHOD_PTR_F(_class, _method) \
-union { \
-    double (_class::*bar)(); \
-    intptr_t foo; \
-}; \
-bar = _method; \
-return foo;
-#else
-#define RETURN_METHOD_PTR_F(_class, _method) \
 return *((intptr_t*)&_method);
 #endif
 
@@ -188,7 +166,6 @@ namespace avmplus
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
-        #define VECTORDOUBLEADDRF(f) vectorDoubleAddrF((double (DoubleVectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -239,11 +216,6 @@ namespace avmplus
         intptr_t vectorDoubleAddr(int (DoubleVectorObject::*f)())
         {
             RETURN_METHOD_PTR(DoubleVectorObject, f);
-        }
-
-        intptr_t vectorDoubleAddrF(double (DoubleVectorObject::*f)())
-        {
-            RETURN_METHOD_PTR_F(DoubleVectorObject, f);
         }
 
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
@@ -4315,6 +4287,206 @@ namespace avmplus
 
     typedef const CallInfo *CallInfop;
 
+    // Generate code for get obj[index] where index is a signed or unsigned integer type
+    LIns* CodegenLIR::emitGetIntProperty(int objIndexOnStack, LIns *index, Traits *result, bool bUnsigned)
+    {
+        Traits* objType = state->value(objIndexOnStack).traits;
+        bool valIsAtom = true;
+        LIns *value;
+
+        if (objType == ARRAY_TYPE) {
+            value = callIns((bUnsigned ?
+                FUNCTIONID(ArrayObject_getUintProperty) :
+                FUNCTIONID(ArrayObject_getIntProperty)),
+                2, localGetp(objIndexOnStack), index);
+        }            
+        else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
+            value = callIns((bUnsigned ?
+                FUNCTIONID(ObjectVectorObject_getUintProperty) :
+                FUNCTIONID(ObjectVectorObject_getIntProperty)),
+                2, localGetp(objIndexOnStack), index);
+        }
+        else if (objType == VECTORINT_TYPE) {
+            if (result == INT_TYPE || result == UINT_TYPE) {
+                value = callIns((bUnsigned ?
+                    FUNCTIONID(IntVectorObject_getNativeUintProperty) :
+                    FUNCTIONID(IntVectorObject_getNativeIntProperty)),
+                    2, localGetp(objIndexOnStack), index);
+                valIsAtom = false;
+            }
+            else {
+                value = callIns((bUnsigned ?
+                    FUNCTIONID(IntVectorObject_getUintProperty) :
+                    FUNCTIONID(IntVectorObject_getIntProperty)),
+                    2, localGetp(objIndexOnStack), index);
+            }
+        }
+        else if (objType == VECTORUINT_TYPE) {
+            if (result == INT_TYPE || result == UINT_TYPE) {
+                value = callIns((bUnsigned ?
+                    FUNCTIONID(UIntVectorObject_getNativeUintProperty) :
+                    FUNCTIONID(UIntVectorObject_getNativeIntProperty)),
+                    2, localGetp(objIndexOnStack), index);
+                valIsAtom = false;
+            }
+            else {
+                value = callIns((bUnsigned ?
+                    FUNCTIONID(UIntVectorObject_getUintProperty) :
+                    FUNCTIONID(UIntVectorObject_getIntProperty)),
+                    2, localGetp(objIndexOnStack), index);
+            }
+        }
+        else if (objType == VECTORDOUBLE_TYPE) {
+            if (result == NUMBER_TYPE) {
+                value = callIns(bUnsigned ?
+                    FUNCTIONID(DoubleVectorObject_getNativeUintProperty) :
+                    FUNCTIONID(DoubleVectorObject_getNativeIntProperty), 
+                    2, localGetp(objIndexOnStack), index);
+                valIsAtom = false;
+            }
+            else {
+                value = callIns(bUnsigned ?
+                    FUNCTIONID(DoubleVectorObject_getUintProperty) : 
+                    FUNCTIONID(DoubleVectorObject_getIntProperty), 
+                    2, localGetp(objIndexOnStack), index);
+            }
+        }
+        else {
+            value = callIns(bUnsigned ? 
+                FUNCTIONID(getpropertylate_u) :
+                FUNCTIONID(getpropertylate_i),
+                3, env_param, loadAtomRep(objIndexOnStack), index);
+        }
+
+        return valIsAtom ? atomToNativeRep(result, value) : value;
+    }
+
+    // Generate code for 'obj[index] = value' where index is a signed or unsigned integer type
+    void CodegenLIR::emitSetIntProperty(int objIndexOnStack, int valIndexOnStack, LIns *index, bool bUnsigned)
+    {
+        Traits* valueType = state->value(valIndexOnStack).traits;
+        Traits* objType = state->value(objIndexOnStack).traits;
+
+        if (objType == ARRAY_TYPE) {
+            LIns* value = loadAtomRep(valIndexOnStack);
+            callIns((bUnsigned ?
+                FUNCTIONID(ArrayObject_setUintProperty) :
+                FUNCTIONID(ArrayObject_setIntProperty)),
+                3, localGetp(objIndexOnStack), index, value);
+        }
+        else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
+            LIns* value = loadAtomRep(valIndexOnStack);
+            callIns((bUnsigned ?
+                FUNCTIONID(ObjectVectorObject_setUintProperty) :
+                FUNCTIONID(ObjectVectorObject_setIntProperty)),
+                3, localGetp(objIndexOnStack), index, value);
+        }
+        else if (objType == VECTORINT_TYPE) {
+            if (valueType == INT_TYPE || valueType == UINT_TYPE) {
+                LIns* value = localGet(valIndexOnStack);
+                callIns((bUnsigned ?
+                    FUNCTIONID(IntVectorObject_setNativeUintProperty) :
+                    FUNCTIONID(IntVectorObject_setNativeIntProperty)),
+                    3, localGetp(objIndexOnStack), index, value);
+            }
+            else {
+                LIns* value = loadAtomRep(valIndexOnStack);
+                value = callIns((bUnsigned ?
+                    FUNCTIONID(IntVectorObject_setUintProperty) :
+                    FUNCTIONID(IntVectorObject_setIntProperty)),
+                    3, localGetp(objIndexOnStack), index, value);
+            }
+        }
+        else if (objType == VECTORUINT_TYPE) {
+            if (valueType == INT_TYPE || valueType == UINT_TYPE) {
+                LIns* value = localGet(valIndexOnStack);
+                callIns((bUnsigned ?
+                    FUNCTIONID(UIntVectorObject_setNativeUintProperty) :
+                    FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
+                    3, localGetp(objIndexOnStack), index, value);
+            }
+            else {
+                LIns* value = loadAtomRep(valIndexOnStack);
+                value = callIns((bUnsigned ?
+                    FUNCTIONID(UIntVectorObject_setUintProperty) :
+                    FUNCTIONID(UIntVectorObject_setIntProperty)),
+                    3, localGetp(objIndexOnStack), index, value);
+            }
+        }
+        else if (objType == VECTORDOUBLE_TYPE) {
+            if (valueType == NUMBER_TYPE) {
+                LIns* value = localGetf(valIndexOnStack);
+                callIns(bUnsigned ? 
+                    FUNCTIONID(DoubleVectorObject_setNativeUintProperty) :
+                    FUNCTIONID(DoubleVectorObject_setNativeIntProperty),
+                    3, localGetp(objIndexOnStack), index, value);
+            }
+            else {
+                LIns* value = loadAtomRep(valIndexOnStack);
+                value = callIns(bUnsigned ? 
+                    FUNCTIONID(DoubleVectorObject_setUintProperty) :
+                    FUNCTIONID(DoubleVectorObject_setIntProperty),
+                    3, localGetp(objIndexOnStack), index, value);
+            }
+        }
+        else {
+            LIns* value = loadAtomRep(valIndexOnStack);
+            callIns(bUnsigned ? 
+                FUNCTIONID(setpropertylate_u) :
+                FUNCTIONID(setpropertylate_i),
+                4, env_param, loadAtomRep(objIndexOnStack), index, value);
+        }
+    }
+
+    // Try to optimize our input argument to the fastest possible type.
+    //   Non-negative integer constants can be considered unsigned.
+    //   Promotions from int/uint to number can be used as integers.
+    //   Double constants that are actually integers can be used as integers.
+    LIns *CodegenLIR::optimizeIndexArgumentType(int32_t sp, Traits** indexType)
+    {
+        LIns *index = NULL;
+        if (*indexType == INT_TYPE) {
+            index = localGet(sp);
+            if (index->isImmI() && index->immI() > 0) {
+                *indexType = UINT_TYPE;
+            }
+
+            return index;
+        }
+        else if (*indexType == UINT_TYPE) {
+            return localGet(sp);
+        }
+        // Convert number inputs to ints or uints if they are promotions
+        // from int, uint or constant integers promoted
+        else if (*indexType == NUMBER_TYPE) {
+            index = localGetf(sp);
+            if (index->opcode() == LIR_i2d) {
+                *indexType = INT_TYPE;
+                return index->oprnd1();
+            }
+            else if (index->opcode() == LIR_ui2d) {
+                *indexType = UINT_TYPE;
+                return index->oprnd1();
+            }
+            else if (index->isImmD())
+            {
+                double d = index->immD();
+                int32_t i = int32_t(d);
+                if (i == d) {
+                    if (i >= 0) {
+                        *indexType = UINT_TYPE;
+                    }
+                    else {
+                        *indexType = INT_TYPE;
+                    }
+                    return InsConst(i);
+                }
+            }
+        }
+
+        return index;
+    }
+
     void CodegenLIR::emit(AbcOpcode opcode, uintptr_t op1, uintptr_t op2, Traits* result)
     {
         int sp = state->sp();
@@ -5075,214 +5247,115 @@ namespace avmplus
                 const Multiname* multiname = pool->precomputedMultiname((int)op1);
                 bool attr = multiname->isAttr();
                 Traits* indexType = state->value(sp).traits;
-                int objDisp = sp;
-
+                LIns* index = NULL;
                 bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->containsAnyPublicNamespace();
-                if (maybeIntegerIndex && indexType == INT_TYPE)
-                {
-                    bool valIsAtom = true;
-                    LIns* index = localGet(objDisp--);
+                
+                if (maybeIntegerIndex)
+                    index = optimizeIndexArgumentType(sp, &indexType);
 
-                    if (multiname->isRtns())
-                    {
-                        // Discard runtime namespace
-                        objDisp--;
-                    }
-
-                    Traits* objType = state->value(objDisp).traits;
-
-                    LIns *value;
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)) )
-                    {
-                        value = callIns((objType==ARRAY_TYPE ?
-                                        FUNCTIONID(ArrayObject_getIntProperty) :
-                                        FUNCTIONID(ObjectVectorObject_getIntProperty)), 2,
-                            localGetp(sp-1), index);
-                    }
-                    else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE)
-                    {
-                        if( result == INT_TYPE || result == UINT_TYPE)
-                        {
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_getNativeIntProperty) :
-                                                    FUNCTIONID(UIntVectorObject_getNativeIntProperty)), 2,
-                            localGetp(sp-1), index);
-                            valIsAtom = false;
-                        }
-                        else
-                        {
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_getIntProperty) :
-                                                    FUNCTIONID(UIntVectorObject_getIntProperty)), 2,
-                            localGetp(sp-1), index);
-                        }
-                    }
-                    else if( objType == VECTORDOUBLE_TYPE )
-                    {
-                        if( result == NUMBER_TYPE )
-                        {
-                            value = callIns(FUNCTIONID(DoubleVectorObject_getNativeIntProperty), 2,
-                                localGetp(sp-1), index);
-                            valIsAtom = false;
-                        }
-                        else
-                        {
-                            value = callIns(FUNCTIONID(DoubleVectorObject_getIntProperty), 2,
-                                localGetp(sp-1), index);
-                        }
-                    }
-                    else
-                    {
-                        value = callIns(FUNCTIONID(getpropertylate_i), 3,
-                            env_param, loadAtomRep(sp-1), index);
-                    }
-
-                    localSet(sp-1, valIsAtom?atomToNativeRep(result, value):value, result);
+                if (maybeIntegerIndex && indexType == INT_TYPE) {
+                    LIns *value = emitGetIntProperty(sp-1, index, result, false);
+                    localSet(sp-1, value, result);
                 }
-                else if (maybeIntegerIndex && indexType == UINT_TYPE)
-                {
-                    bool valIsAtom = true;
-
-                    LIns* index = localGet(objDisp--);
-
-                    if (multiname->isRtns())
-                    {
-                        // Discard runtime namespace
-                        objDisp--;
-                    }
-
-                    Traits* objType = state->value(objDisp).traits;
-
-                    LIns *value;
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
-                    {
-                        value = callIns((objType==ARRAY_TYPE ?
-                                                FUNCTIONID(ArrayObject_getUintProperty) :
-                                                FUNCTIONID(ObjectVectorObject_getUintProperty)), 2,
-                            localGetp(sp-1), index);
-                    }
-                    else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
-                    {
-                        if( result == INT_TYPE || result == UINT_TYPE )
-                        {
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_getNativeUintProperty) :
-                                                    FUNCTIONID(UIntVectorObject_getNativeUintProperty)), 2,
-                            localGetp(sp-1), index);
-                            valIsAtom = false;
-                        }
-                        else
-                        {
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_getUintProperty) :
-                                                    FUNCTIONID(UIntVectorObject_getUintProperty)), 2,
-                            localGetp(sp-1), index);
-                        }
-                    }
-                    else if( objType == VECTORDOUBLE_TYPE )
-                    {
-                        if( result == NUMBER_TYPE )//|| result == UINT_TYPE)
-                        {
-                            value = callIns(FUNCTIONID(DoubleVectorObject_getNativeUintProperty), 2,
-                                localGetp(sp-1), index);
-                            valIsAtom = false;
-                        }
-                        else
-                        {
-                            value = callIns(FUNCTIONID(DoubleVectorObject_getUintProperty), 2,
-                                localGetp(sp-1), index);
-                        }
-                    }
-                    else
-                    {
-                        value = callIns(FUNCTIONID(getpropertylate_u), 3,
-                            env_param, loadAtomRep(sp-1), index);
-                    }
-
-                    localSet(sp-1, valIsAtom?atomToNativeRep(result, value):value, result);
+                else if (maybeIntegerIndex && indexType == UINT_TYPE) {
+                    LIns *value = emitGetIntProperty(sp-1, index, result, true);
+                    localSet(sp-1, value, result);
                 }
-                else if (maybeIntegerIndex && indexType == NUMBER_TYPE)
-                {
-                    bool valIsAtom = true;
-
-                    LIns* index = localGetf(objDisp--);
-
+                else if (maybeIntegerIndex && indexType == NUMBER_TYPE) {
                     LIns *value;
-                    if (multiname->isRtns())
-                    {
-                        // Discard runtime namespace
-                        objDisp--;
-                    }
-                    Traits* objType = state->value(objDisp).traits;
 
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)) )
-                    {
-                        value = callIns((objType==ARRAY_TYPE ?
-                            FUNCTIONID(ArrayObject_getDoubleProperty) :
-                            FUNCTIONID(ObjectVectorObject_getDoubleProperty)), 2,
-                            localGetp(sp-1), index);
+                    CodegenLabel slow_path("slow");
+                    CodegenLabel done_path("done");
+                    suspendCSE();
+
+#if defined(VMCFG_FASTPATH_ADD_INLINE) || NJ_F2I_SUPPORTED
+                    LIns* tempResult = insAllocForTraits(result);
+#endif // defined(VMCFG_FASTPATH_ADD_INLINE) || NJ_F2I_SUPPORTED
+
+                    bool bGeneratedFastPath = false;
+#ifdef VMCFG_FASTPATH_ADD_INLINE
+                    LOpcode op = index->opcode();
+                    if (op == LIR_addd || op == LIR_subd) {
+                        LIns *a = index->oprnd1();
+                        LIns *b = index->oprnd2();
+                        // Our addjovi only works with signed integers so don't use isPromote.  
+                        a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
+                        b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
+                        if (a && b) {
+                            // Inline fast path for index generated from integer add
+                            // if (a+b) does not overflow && ((a+b) >= 0)
+                            //   call getUintProperty(obj, a + b)
+                            // else
+                            //   call getprop_index_add (env, obj, multiname, a, b)
+                            // (for subtraction, we emit (a-b) and call getprop_index_subtract)
+                            LIns *addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
+                            branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
+                            value = emitGetIntProperty(sp-1, addOp, result, true);
+                            stForTraits(result, value, tempResult, 0, ACCSET_STORE_ANY);
+                            branchToLabel(LIR_j, NULL, done_path);
+
+                            emitLabel(slow_path);
+                            LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
+                            value = callIns((op == LIR_addd) ? 
+                                FUNCTIONID(getprop_index_add) : FUNCTIONID(getprop_index_subtract), 5,
+                                env_param, loadAtomRep(sp-1), multi, a, b);
+
+                            stForTraits(result, atomToNativeRep(result, value), tempResult, 0, ACCSET_STORE_ANY);
+                            emitLabel(done_path);
+
+                            localSet(sp-1, ldForTraits(result, tempResult, 0, ACCSET_LOAD_ANY), result);
+                            bGeneratedFastPath = true;
+                        }
                     }
-                    else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
-                    {
-                        if( result == INT_TYPE || result == UINT_TYPE )
-                        {
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_getNativeDoubleProperty) :
-                                                    FUNCTIONID(UIntVectorObject_getNativeDoubleProperty)), 2,
-                            localGetp(sp-1), index);
-                            valIsAtom = false;
-                        }
-                        else
-                        {
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_getDoubleProperty) :
-                                                    FUNCTIONID(UIntVectorObject_getDoubleProperty)), 2,
-                            localGetp(sp-1), index);
-                        }
-                    }
-                    else if (objType == VECTORDOUBLE_TYPE)
-                    {
-                        if (result == NUMBER_TYPE) {
-                            value = callIns(FUNCTIONID(DoubleVectorObject_getNativeDoubleProperty), 2,
-                                localGetp(sp-1), index);
-                            valIsAtom = false;
-                        }
-                        else
-                        {
-                            value = callIns(FUNCTIONID(DoubleVectorObject_getDoubleProperty), 2,
-                                localGetp(sp-1), index);
-                        }
-                    }
-                    else
-                    {
+#endif // VMCFG_FASTPATH_ADD_INLINE
+                    if (!bGeneratedFastPath) {
+#if NJ_F2I_SUPPORTED
+                        // Inline fast path for index values that are unsigned integers
+                        // if ((i2d(d2i(index)) == index) && d2i(index) >= 0)
+                        //   call getProperty[uint]
+                        // else
+                        //   call getprop_index
+                        //
+                        LIns *intIndex = lirout->ins1(LIR_d2i, index);
+                        LIns *dIndex = i2dIns(intIndex);
+
+                        // if (i2d(d2i(index)) != index), not a valid int
+                        branchToLabel(LIR_jf, binaryIns(LIR_eqd, dIndex, index), slow_path);
+                        // if intIndex < 0, not a valid unsigned int
+                        branchToLabel(LIR_jt, binaryIns(LIR_lti, intIndex, InsConst(0)), slow_path);
+
+                        value = emitGetIntProperty(sp-1, intIndex, result, true);
+                        stForTraits(result, value, tempResult, 0, ACCSET_STORE_ANY);
+                        branchToLabel(LIR_j, NULL, done_path);
+
+                        emitLabel(slow_path);
+#endif // NJ_F2I_SUPPORTED 
                         LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
-
                         index = nativeToAtom(index, NUMBER_TYPE);
-                        // back out from above subtraction
-                        if (multiname->isRtns())
-                            objDisp++;
-                        AvmAssert(state->value(objDisp).notNull);
-                        LIns* obj = loadAtomRep(objDisp);
                         value = callIns(FUNCTIONID(getprop_index), 4,
-                                            env_param, obj, multi, index);
-
+                                            env_param, loadAtomRep(sp-1), multi, index);
+#if NJ_F2I_SUPPORTED
+                        stForTraits(result, atomToNativeRep(result, value), tempResult, 0, ACCSET_STORE_ANY);
+                        emitLabel(done_path);
+                        localSet(sp-1, ldForTraits(result, tempResult, 0, ACCSET_LOAD_ANY), result);
+#else
+                        localSet(sp-1, atomToNativeRep(result, value), result);
+#endif // NJ_F2I_SUPPORTED 
                     }
-                    localSet(sp-1, valIsAtom?atomToNativeRep(result, value):value, result);
-
+                    resumeCSE();
                 }
-                else if (maybeIntegerIndex && indexType != STRING_TYPE)
-                {
+                else if (maybeIntegerIndex && indexType != STRING_TYPE) {
                     LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
-                    LIns* index = loadAtomRep(objDisp--);
-                    AvmAssert(state->value(objDisp).notNull);
-                    LIns* obj = loadAtomRep(objDisp);
+                    LIns* index = loadAtomRep(sp);
+                    AvmAssert(state->value(sp-1).notNull);
+                    LIns* obj = loadAtomRep(sp-1);
                     LIns* value = callIns(FUNCTIONID(getprop_index), 4,
                                         env_param, obj, multi, index);
 
-                    localSet(objDisp, atomToNativeRep(result, value), result);
+                    localSet(sp-1, atomToNativeRep(result, value), result);
                 }
-                else
-                {
+                else {
+                    int objDisp = sp;
                     LIns* multi = initMultiname(multiname, objDisp);
                     AvmAssert(state->value(objDisp).notNull);
 
@@ -5311,252 +5384,115 @@ namespace avmplus
                 // stack out:
                 // obj = sp[-1]
                 //env->setproperty(obj, multiname, sp[0], toVTable(obj));
-                //LIns* value = loadAtomRep(sp);
 
                 const Multiname* multiname = (const Multiname*)op1;
                 bool attr = multiname->isAttr();
                 Traits* indexType = state->value(sp-1).traits;
-                Traits* valueType = state->value(sp).traits;
-                int objDisp = sp-1;
-
+                LIns* index = NULL;
                 bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->containsAnyPublicNamespace();
 
-                if (maybeIntegerIndex && indexType == INT_TYPE)
-                {
-                    LIns* index = localGet(objDisp--);
+                if (maybeIntegerIndex)
+                    index = optimizeIndexArgumentType(sp-1, &indexType);
 
-                    if (multiname->isRtns())
-                    {
-                        // Discard runtime namespace
-                        objDisp--;
-                    }
-
-                    Traits* objType = state->value(objDisp).traits;
-
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
-                    {
-                        LIns* value = loadAtomRep(sp);
-                        callIns((objType==ARRAY_TYPE ?
-                                        FUNCTIONID(ArrayObject_setIntProperty) :
-                                        FUNCTIONID(ObjectVectorObject_setIntProperty)), 3,
-                            localGetp(objDisp), index, value);
-                    }
-                    else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
-                    {
-                        if( valueType == INT_TYPE )
-                        {
-                            LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ?
-                                            FUNCTIONID(IntVectorObject_setNativeIntProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
-                                            3,
-                                            localGetp(objDisp), index, value);
-                        }
-                        else if( valueType == UINT_TYPE )
-                        {
-                            LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ?
-                                            FUNCTIONID(IntVectorObject_setNativeIntProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
-                                            3,
-                                            localGetp(objDisp), index, value);
-                        }
-                        else
-                        {
-                            LIns* value = loadAtomRep(sp);
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_setIntProperty) :
-                                                    FUNCTIONID(UIntVectorObject_setIntProperty)),
-                                                    3,
-                                                    localGetp(objDisp), index, value);
-                        }
-                    }
-                    else if(objType == VECTORDOUBLE_TYPE)
-                    {
-                        if( valueType == NUMBER_TYPE )
-                        {
-                            LIns* value = localGetf(sp);
-                            callIns(FUNCTIONID(DoubleVectorObject_setNativeIntProperty), 3,
-                                localGetp(objDisp), index, value);
-                        }
-                        else
-                        {
-                            LIns* value = loadAtomRep(sp);
-                            value = callIns(FUNCTIONID(DoubleVectorObject_setIntProperty), 3,
-                                localGetp(objDisp), index, value);
-                        }
-                    }
-                    else
-                    {
-                        LIns* value = loadAtomRep(sp);
-                        callIns(FUNCTIONID(setpropertylate_i), 4,
-                            env_param, loadAtomRep(objDisp), index, value);
-                    }
+                if (maybeIntegerIndex && indexType == INT_TYPE) {
+                    emitSetIntProperty(sp-2, sp, index, false);
                 }
-                else if (maybeIntegerIndex && indexType == UINT_TYPE)
-                {
-                    LIns* index = localGet(objDisp--);
-
-                    if (multiname->isRtns())
-                    {
-                        // Discard runtime namespace
-                        objDisp--;
-                    }
-
-                    Traits* objType = state->value(objDisp).traits;
-
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
-                    {
-                        LIns* value = loadAtomRep(sp);
-                        callIns((objType==ARRAY_TYPE ?
-                                        FUNCTIONID(ArrayObject_setUintProperty) :
-                                        FUNCTIONID(ObjectVectorObject_setUintProperty)), 3,
-                            localGetp(objDisp), index, value);
-                    }
-                    else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
-                    {
-                        if( valueType == INT_TYPE )
-                        {
-                            LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ?
-                                            FUNCTIONID(IntVectorObject_setNativeUintProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeUintProperty)),
-                                            3,
-                                            localGetp(objDisp), index, value);
-                        }
-                        else if( valueType == UINT_TYPE )
-                        {
-                            LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ?
-                                            FUNCTIONID(IntVectorObject_setNativeUintProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeUintProperty)),
-                                            3,
-                                            localGetp(objDisp), index, value);
-                        }
-                        else
-                        {
-                            LIns* value = loadAtomRep(sp);
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_setUintProperty) :
-                                                    FUNCTIONID(UIntVectorObject_setUintProperty)),
-                                                    3,
-                                                    localGetp(objDisp), index, value);
-                        }
-                    }
-                    else if(objType == VECTORDOUBLE_TYPE)
-                    {
-                        if( valueType == NUMBER_TYPE )
-                        {
-                            LIns* value = localGetf(sp);
-                            callIns(FUNCTIONID(DoubleVectorObject_setNativeUintProperty), 3,
-                                localGetp(objDisp), index, value);
-                        }
-                        else
-                        {
-                            LIns* value = loadAtomRep(sp);
-                            value = callIns(FUNCTIONID(DoubleVectorObject_setUintProperty), 3,
-                                localGetp(objDisp), index, value);
-                        }
-                    }
-                    else
-                    {
-                        LIns* value = loadAtomRep(sp);
-                        callIns(FUNCTIONID(setpropertylate_u), 4,
-                            env_param, loadAtomRep(objDisp), index, value);
-                    }
+                else if (maybeIntegerIndex && indexType == UINT_TYPE) {
+                    emitSetIntProperty(sp-2, sp, index, true);
                 }
-                else if (maybeIntegerIndex && indexType == NUMBER_TYPE)
-                {
-                    LIns* index = localGetf(objDisp--);
-                    if (multiname->isRtns())
-                    {
-                        // Discard runtime namespace
-                        objDisp--;
-                    }
+                else if (maybeIntegerIndex && indexType == NUMBER_TYPE) {
+                    CodegenLabel slow_path("slow");
+                    CodegenLabel done_path("done");
+                    suspendCSE();
 
-                    Traits* objType = state->value(objDisp).traits;
+                    bool bGeneratedFastPath = false;
+#ifdef VMCFG_FASTPATH_ADD_INLINE
+                    LOpcode op = index->opcode();
+                    if (op == LIR_addd || op == LIR_subd) {
+                        LIns *a = index->oprnd1();
+                        LIns *b = index->oprnd2();
+                        // Our addjovi only works with signed integers.  
+                        a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
+                        b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
+                        if (a && b) {
+                            // Inline fast path for index generated from integer add
+                            // if (a + b) does not overflow && ((a+b) >= 0)
+                            //   call setProperty(obj, value, a + b)
+                            // else
+                            //   call set/initprop_index_add(env, obj, name, value, a, b)
+                            // (for subtraction, we emit (a-b) and call set/initprop_index_subtract)
+                            LIns *addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
+                            branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
+                            emitSetIntProperty(sp-2, sp, addOp, true);
+                            branchToLabel(LIR_j, NULL, done_path);
 
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
-                    {
-                        LIns* value = loadAtomRep(sp);
-                        callIns((objType==ARRAY_TYPE ?
-                                        FUNCTIONID(ArrayObject_setDoubleProperty) :
-                                        FUNCTIONID(ObjectVectorObject_setDoubleProperty)), 3,
-                            localGetp(objDisp), index, value);
-                    }
-                    else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
-                    {
-                        if( valueType == INT_TYPE )
-                        {
-                            LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ?
-                                            FUNCTIONID(IntVectorObject_setNativeDoubleProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeDoubleProperty)),
-                                            3,
-                                            localGetp(objDisp), index, value);
-                        }
-                        else if( valueType == UINT_TYPE )
-                        {
-                            LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ?
-                                            FUNCTIONID(IntVectorObject_setNativeDoubleProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeDoubleProperty)),
-                                            3,
-                                            localGetp(objDisp), index, value);
-                        }
-                        else
-                        {
+                            emitLabel(slow_path);
+                            LIns* name = InsConstPtr(multiname); // precomputed multiname
                             LIns* value = loadAtomRep(sp);
-                            value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_setDoubleProperty) :
-                                                    FUNCTIONID(UIntVectorObject_setDoubleProperty)),
-                                                    3,
-                                                    localGetp(objDisp), index, value);
+                            AvmAssert(state->value(sp-2).notNull);
+                            LIns* obj = loadAtomRep(sp-2);
+                            const CallInfo *func;
+                            if (op == LIR_addd) {
+                                func = opcode==OP_setproperty ? FUNCTIONID(setprop_index_add) :
+                                                                FUNCTIONID(initprop_index_add);
+                            }
+                            else {
+                                func = opcode==OP_setproperty ? FUNCTIONID(setprop_index_subtract) :
+                                                                FUNCTIONID(initprop_index_subtract);
+                            }
+                            callIns(func, 6, env_param, obj, name, value, a, b);
+                            emitLabel(done_path);
+                            bGeneratedFastPath = true;
                         }
                     }
-                    else if(objType == VECTORDOUBLE_TYPE)
-                    {
-                        if( valueType == NUMBER_TYPE )
-                        {
-                            LIns* value = localGetf(sp);
-                            callIns(FUNCTIONID(DoubleVectorObject_setNativeDoubleProperty), 3,
-                                localGetp(objDisp), index, value);
-                        }
-                        else
-                        {
-                            LIns* value = loadAtomRep(sp);
-                            value = callIns(FUNCTIONID(DoubleVectorObject_setDoubleProperty), 3,
-                                localGetp(objDisp), index, value);
-                        }
-                    }
-                    else
-                    {
+#endif // VMCFG_FASTPATH_ADD_INLINE
+                    if (!bGeneratedFastPath) {
+#if NJ_F2I_SUPPORTED
+                        // Inline fast path for index values that are unsigned integers
+                        // if ((i2d(d2i(index)) == index) && d2i(index) >= 0)
+                        //   call setProperty[uint] 
+                        // else
+                        //   call setprop_index
+                        //
+                        LIns *intIndex = lirout->ins1(LIR_d2i, index);
+                        LIns *dIndex = i2dIns(intIndex);
+
+                        // if (i2d(d2i(index)) != index), not a valid int
+                        branchToLabel(LIR_jf, binaryIns(LIR_eqd, dIndex, index), slow_path);
+                        // if intIndex < 0, not a valid unsigned int
+                        branchToLabel(LIR_jt, binaryIns(LIR_lti, intIndex, InsConst(0)), slow_path);
+
+                        emitSetIntProperty(sp-2, sp, intIndex, true);
+                        branchToLabel(LIR_j, NULL, done_path);
+
+                        emitLabel(slow_path);
+#endif // NJ_F2I_SUPPORTED
                         LIns* name = InsConstPtr(multiname); // precomputed multiname
                         LIns* value = loadAtomRep(sp);
-                        index = nativeToAtom(index, indexType);
-                        // back out the above subtraction to match code below.
-                        if (multiname->isRtns())
-                            objDisp++;
-                        AvmAssert(state->value(objDisp).notNull);
-                        LIns* obj = loadAtomRep(objDisp);
+                        index = nativeToAtom(index, NUMBER_TYPE);
+                        AvmAssert(state->value(sp-2).notNull);
+                        LIns* obj = loadAtomRep(sp-2);
                         const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setprop_index) :
                                                             FUNCTIONID(initprop_index);
                         callIns(func, 5, env_param, obj, name, value, index);
+#if NJ_F2I_SUPPORTED
+                        emitLabel(done_path);
+#endif // NJ_F2I_SUPPORTED
                     }
+                    resumeCSE();
                 }
-                else if (maybeIntegerIndex)
-                {
+                else if (maybeIntegerIndex) {
                     LIns* name = InsConstPtr(multiname); // precomputed multiname
                     LIns* value = loadAtomRep(sp);
-                    LIns* index = loadAtomRep(objDisp--);
-                    AvmAssert(state->value(objDisp).notNull);
-                    LIns* obj = loadAtomRep(objDisp);
+                    LIns* index = loadAtomRep(sp-1);
+                    AvmAssert(state->value(sp-2).notNull);
+                    LIns* obj = loadAtomRep(sp-2);
                     const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setprop_index) :
                                                         FUNCTIONID(initprop_index);
                     callIns(func, 5, env_param, obj, name, value, index);
                 }
-                else
-                {
+                else {
+                    int objDisp = sp-1;
                     LIns* value = loadAtomRep(sp);
                     LIns* multi = initMultiname(multiname, objDisp);
                     AvmAssert(state->value(objDisp).notNull);
@@ -5575,8 +5511,7 @@ namespace avmplus
                             liveAlloc(multi);
                         }
                     }
-                    else
-                    {
+                    else {
                         // initproplate is rare in jit code because we typically interpret static
                         // initializers, and constructor initializers tend to early-bind successfully.
                         callIns(FUNCTIONID(initprop_late), 4, env_param, obj, multi, value);
@@ -6686,6 +6621,50 @@ namespace avmplus
 
     LIns* CodegenLIR::insAlloc(int32_t size) {
         return lirout->insAlloc(size >= 4 ? size : 4);
+    }
+
+    LIns* CodegenLIR::insAllocForTraits(Traits *t)
+    {
+        switch (bt(t)) {
+            case BUILTIN_number:
+                return insAlloc(sizeof(double));
+                break;
+            case BUILTIN_int:
+            case BUILTIN_uint:
+            case BUILTIN_boolean:
+                return insAlloc(sizeof(int32_t));
+                break;
+            default:
+                return insAlloc(sizeof(intptr_t));
+        }
+    }
+
+    LIns* LirHelper::stForTraits(Traits *t, LIns* val, LIns* p, int32_t d, AccSet accSet)
+    {
+        switch (bt(t)) {
+            case BUILTIN_number:
+                return std(val, p, d, accSet);
+            case BUILTIN_int:
+            case BUILTIN_uint:
+            case BUILTIN_boolean:
+                return sti(val, p, d, accSet);
+            default:
+                return stp(val, p, d, accSet);
+        }
+    }
+
+    LIns* LirHelper::ldForTraits(Traits *t, LIns* p, int32_t d, AccSet accSet)
+    {
+        switch (bt(t)) {
+            case BUILTIN_number:
+                return ldd(p, d, accSet);
+            case BUILTIN_int:
+            case BUILTIN_uint:
+            case BUILTIN_boolean:
+                return ldi(p, d, accSet);
+            default:
+                return ldp(p, d, accSet);
+        }
     }
 
     CodeMgr::CodeMgr() : codeAlloc(), bindingCaches(NULL)
