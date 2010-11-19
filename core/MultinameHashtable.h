@@ -58,41 +58,49 @@ namespace avmplus
     const Binding BIND_AMBIGUOUS = (Binding)-1;
     const Binding BIND_NONE      = (Binding)BKIND_NONE;      // no such binding
 
+    // Quad shall be four words; we want the alignment and the space
+    // conservation.  There are static asserts in
+    // MultinameHashtable.cpp to check that condition.  See also
+    // bugzilla 534317.
+
+    // This can't be an inner class of MultinameHashtable anymore due
+    // to template limitations (also encountered with List classes).
+    // Specifically, how to declare getNSSet's return value eluded me.
+    // Neither MultinameHashtable::Quad (complains about missing
+    // template params) nor with the params (syntax error) was
+    // acceptable go GCC.
+    template <class VALUE_TYPE>
+    class Quad
+    {
+    public:
+        Stringp    name;
+        Namespacep ns;
+        VALUE_TYPE    value;
+        uintptr_t  apisAndMultiNS;
+        
+        // 'multiNs' is 1 if the given name exists elsewhere with a different namespace.
+        // 'apis' is the bit vector of API versions.
+        //
+        // The values share a word for space reasons.  The low bit holds 'multiNS',
+        // the word shifted right 1 holds 'apis'.
+        //
+        // NOTE, some code in MultinameHashtable.cpp operates directly on this
+        // representation when the values are updated.
+        
+        REALLY_INLINE uint32_t multiNS() const { return (uint32_t)(apisAndMultiNS & 1); }
+        REALLY_INLINE API apis() const { return (API)(apisAndMultiNS >> 1); }
+    };
+
     /**
-     * Hashtable for mapping <name, ns> pairs to a Binding
+     * Hashtable for mapping <name, ns> pairs to a value, which can be
+     * a Binding or a Traits.
      */
+    template <class VALUE_TYPE, class VALUE_WRITER>
     class MultinameHashtable : public MMgc::GCObject
     {
         friend class StMNHTIterator;
 
     private:
-        // Quad shall be four words; we want the alignment and the space conservation.
-        // There are static asserts in MultinameHashtable.cpp to check that condition.
-        // See also bugzilla 534317.
-
-        class Quad
-        {
-        public:
-            Stringp    name;
-            Namespacep ns;
-            Binding    value;
-            uintptr_t  apisAndMultiNS;
-
-            // 'multiNs' is 1 if the given name exists elsewhere with a different namespace.
-            // 'apis' is the bit vector of API versions.
-            //
-            // The values share a word for space reasons.  The low bit holds 'multiNS',
-            // the word shifted right 1 holds 'apis'.
-            //
-            // NOTE, some code in MultinameHashtable.cpp operates directly on this
-            // representation when the values are updated.
-
-            REALLY_INLINE uint32_t multiNS() const { return (uint32_t)(apisAndMultiNS & 1); }
-            REALLY_INLINE API apis() const { return (API)(apisAndMultiNS >> 1); }
-        };
-
-    private:
-
         /**
          * Finds the hash bucket corresponding to the key <name,ns>
          * in the hash table starting at t, containing tLen
@@ -100,8 +108,8 @@ namespace avmplus
          */
         // match if they are the same or if they have the same base ns and ns api is in apis
         static bool matchNS(uintptr_t uri, API apis, Namespacep ns);
-        static int find(Stringp name, Namespacep ns, const Quad *t, unsigned tLen);
-        void rehash(const Quad *oldAtoms, int oldlen, Quad *newAtoms, int newlen);
+        static int find(Stringp name, Namespacep ns, const Quad<VALUE_TYPE> *t, unsigned tLen);
+        void rehash(const Quad<VALUE_TYPE> *oldAtoms, int oldlen, Quad<VALUE_TYPE> *newAtoms, int newlen);
 
         /**
          * Called to grow the Hashtable, particularly by add.
@@ -136,45 +144,64 @@ namespace avmplus
          * @name operations on name/ns/binding quads
          */
         /*@{*/
-        void    put(Stringp name, Namespacep ns, Binding value);
-        Binding get(Stringp name, Namespacep ns) const;
-        Binding get(Stringp name, NamespaceSetp nsset) const;
-        Binding getName(Stringp name) const;
-        Binding getMulti(const Multiname* name) const;
-        Binding getMulti(const Multiname& name) const;
+        VALUE_TYPE get(Stringp name, Namespacep ns) const;
+        VALUE_TYPE get(Stringp name, NamespaceSetp nsset) const;
+        VALUE_TYPE getName(Stringp name) const;
+        VALUE_TYPE getMulti(const Multiname* name) const;
+        VALUE_TYPE getMulti(const Multiname& name) const;
 
         // return the NS that unambigously matches in "match" (or null for none/ambiguous)
-        Binding getMulti(const Multiname& name, Namespacep& match) const;
+        VALUE_TYPE getMulti(const Multiname& name, Namespacep& match) const;
         /*@}*/
 
-        /**
-         * Adds a name/value pair to a hash table.  Automatically
-         * grows the hash table if it is full.
-         */
-        void add(Stringp name, Namespacep ns, Binding value);
 
         // note: if you are just doing a single iteration thru a single MNHT,
         // it's more efficient (and easier) to use StMNHTIterator instead.
         int FASTCALL next(int index) const;
         Stringp keyAt(int index) const;
         Namespacep nsAt(int index) const;
-        Binding valueAt(int index) const;
+        VALUE_TYPE valueAt(int index) const;
         API apisAt(int index) const;
 
         size_t allocatedSize() const;
 
+        /**
+         * Adds a name/value pair to a hash table.  Automatically
+         * grows the hash table if it is full.
+         */
+        void add(Stringp name, Namespacep ns, VALUE_TYPE value);
+
+        void put(Stringp name, Namespacep ns, VALUE_TYPE value);
+
     private:
-        const Quad* getNSSet(Stringp name, NamespaceSetp nsset) const;
+        const Quad<VALUE_TYPE>* getNSSet(Stringp name, NamespaceSetp nsset) const;
 
     protected:
         void Init(int capacity);
 
     // ------------------------ DATA SECTION BEGIN
-    private:    Quad* m_quads;          // property hashtable (written with explicit WB)
+    private:    Quad<VALUE_TYPE>* m_quads;          // property hashtable (written with explicit WB)
     public:     int size;               // no. of properties
     public:     int numQuads;           // size of hashtable
     // ------------------------ DATA SECTION END
     };
+
+    class BindingType
+    {
+    public:
+        //        const static Binding NONE = NULL;
+        static void store(MMgc::GC*, void *, void **addr, void *value);
+    };
+
+    class GCObjectType
+    {
+    public:
+        //        const Traitsp NONE = NULL;
+        static void store(MMgc::GC* gc, void *container, void **addr, void *value);
+    };
+
+    typedef MultinameHashtable<Binding, BindingType> MultinameBindingHashtable;
+    typedef MultinameHashtable<Traitsp, GCObjectType> MultinameTraitsHashtable;
 
 
     // Note: unlike MNHT::next(), StMNHTIterator::next()
@@ -194,12 +221,13 @@ namespace avmplus
     class StMNHTIterator
     {
     private:
-        MultinameHashtable* const volatile m_mnht; // kept just to ensure it doesn't get collected -- must be volatile!
-        const MultinameHashtable::Quad* m_cur;
-        const MultinameHashtable::Quad* const m_end; // one past the end
+
+        MultinameBindingHashtable* const volatile m_mnht; // kept just to ensure it doesn't get collected -- must be volatile!
+        const Quad<Binding>* m_cur;
+        const Quad<Binding>* const m_end; // one past the end
 
     public:
-        StMNHTIterator(MultinameHashtable* mnht);
+        StMNHTIterator(MultinameBindingHashtable* mnht);
         bool next();
         Stringp key() const;
         Namespacep ns() const;

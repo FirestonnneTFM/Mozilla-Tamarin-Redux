@@ -126,7 +126,7 @@ namespace avmplus
     private:
         TraitsBindings(Traits* _owner,
                             TraitsBindingsp _base,
-                            MultinameHashtable* _bindings,
+                            MultinameBindingHashtable* _bindings,
                             uint32_t _slotCount,
                             uint32_t _methodCount,
                             bool typesValid);
@@ -136,7 +136,7 @@ namespace avmplus
 
     public:
 
-        static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameHashtable* _bindings, uint32_t slotCount, uint32_t methodCount, bool typesValid);
+        static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameBindingHashtable* _bindings, uint32_t slotCount, uint32_t methodCount, bool typesValid);
 
         void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo, uint32_t slotAreaCount, uint32_t sizeOfSlotArea) const;
 
@@ -175,7 +175,7 @@ namespace avmplus
     // ------------------------ DATA SECTION BEGIN
         public:     const Traitsp                   owner;
         public:     const TraitsBindingsp           base;
-        private:    MultinameHashtable* const       m_bindings;
+        private:    MultinameBindingHashtable* const       m_bindings;
         public:     const uint32_t                  slotCount;          // including slots in our base classes
         public:     const uint32_t                  methodCount;        // including methods in our base classes
         private:    uint32_t                        m_slotSize;         // size of slot area in bytes, including base classes (only valid after resolveSignatures)
@@ -297,7 +297,7 @@ namespace avmplus
         uint32_t computeSlotAreaStart(const SlotSizeInfo& slotSizeInfo) const;
 
         void buildBindings(TraitsBindingsp basetb,
-                            MultinameHashtable* bindings,
+                            MultinameBindingHashtable* bindings,
                             uint32_t& slotCount,
                             uint32_t& methodCount,
                             SlotSizeInfo* slotSizeInfo,
@@ -315,7 +315,7 @@ namespace avmplus
         Binding getOverride(TraitsBindingsp basetb, Namespacep ns, Stringp name, int tag, const Toplevel *toplevel) const;
         void ensureNonFinal(MethodInfo* minfo, const Toplevel* toplevel) const;
 
-        void addVersionedBindings(MultinameHashtable* bindings,
+        void addVersionedBindings(MultinameBindingHashtable* bindings,
                                   Stringp name,
                                   NamespaceSetp compat_nss,
                                   Binding binding) const;
