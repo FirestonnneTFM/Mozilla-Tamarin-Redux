@@ -174,7 +174,7 @@ package apivergen
             for each (var product_id in product_ids) {
                 var d3 = [];
                 d2.push(d3);
-                product = release.product.(@id == product_id);
+                var product = release.product.(@id == product_id);
                 var default_version = product.version==void 0 ? default_version : product.version.@id;
                 for each (var profile_id in profile_ids) {
                     var profile = product.profile.(@id == profile_id);

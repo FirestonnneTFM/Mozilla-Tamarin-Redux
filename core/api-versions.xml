@@ -129,16 +129,28 @@ ASC and AVM to control the visibility of names in the API.
       <profile id="full">
         <version id="670" alias="FP_10_2"/>
       </profile>
-      <profile id="system">
-        <version id="672" alias="FP_SYS"/>
-      </profile>
-    </product>
+      </product>
     <product id="air">
       <profile id="full">
         <version id="671" alias="AIR_2_6"/>
       </profile>
+    </product>
+  </release>
+  <release id="7">
+	<product id="player">
+	  <profile id="full">
+		<version id="672" alias="SWF_12"/>
+	  </profile>
+	  <profile id="system">
+        <version id="674" alias="FP_SYS"/>
+      </profile>
+    </product>
+    <product id="air">
+      <profile id="full">
+        <version id="673" alias="AIR_2_7"/>
+      </profile>
       <profile id="system">
-        <version id="673" alias="AIR_SYS"/>
+        <version id="675" alias="AIR_SYS"/>
       </profile>
     </product>
   </release>
