@@ -406,7 +406,7 @@ void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
     DWORD oldProtectFlags = 0;
     DWORD newProtectFlags = 0;
     if ( makeItSo )
-        newProtectFlags = PAGE_EXECUTE_READWRITE;
+        newProtectFlags = PAGE_EXECUTE_READ;
     else
         newProtectFlags = PAGE_READWRITE;
 
