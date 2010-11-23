@@ -598,14 +598,10 @@ namespace avmplus
                 // id is unused here
                 MethodInfo* f = resolveMethodInfo(method_index);
 
-                #if VMCFG_METHOD_NAMES
                 if (core->config.methodNames)
                 {
                     pool->_method_name_indices.set(method_index, -int32_t(qn_index));
                 }
-                #else
-                (void)qn_index;
-                #endif
 
                 // since this function is ref'ed here, we know the receiver type.
                 if (!f->makeMethodOf(traits))
@@ -678,12 +674,10 @@ namespace avmplus
                 pool->_method_dmi.set(i, NULL);
         }
 #endif
-#if VMCFG_METHOD_NAMES
         if (core->config.methodNames)
         {
             pool->_method_name_indices.ensureCapacity(size);
         }
-#endif
 
 #ifdef AVMPLUS_VERBOSE
         const uint8_t* startpos = pos;
@@ -794,12 +788,10 @@ namespace avmplus
                 info->setAotCompiled();
 #endif
 
-            #if VMCFG_METHOD_NAMES
             if (core->config.methodNames)
             {
                 pool->_method_name_indices.set(i, int32_t(name_index));
             }
-            #endif
 
             if (abcFlags & abcMethod_HAS_OPTIONAL)
             {

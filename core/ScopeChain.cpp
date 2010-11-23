@@ -110,7 +110,6 @@ namespace avmplus
         return nscope;
     }
 
-    #if VMCFG_METHOD_NAMES
     PrintWriter& ScopeTypeChain::print(PrintWriter& prw) const
     {
         prw << "STC:{traits=" << traits() << ":";
@@ -124,7 +123,6 @@ namespace avmplus
         }
         return prw << "]";
     }
-    #endif
 
     bool ScopeTypeChain::equals(const ScopeTypeChain* that) const
     {
@@ -186,7 +184,6 @@ namespace avmplus
         WBATOM(gc, this, &_scopes[i], value);
     }
 
-    #if VMCFG_METHOD_NAMES
     PrintWriter& ScopeChain::print(PrintWriter& prw) const
     {
         prw << "SC:{dxns=(" << _defaultXmlNamespace << ")," << _scopeTraits << ",V:[";
@@ -197,5 +194,4 @@ namespace avmplus
         }
         return prw << "]}";
     }
-    #endif
 }
