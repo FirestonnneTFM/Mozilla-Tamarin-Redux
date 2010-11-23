@@ -75,16 +75,6 @@
 //#define AVMPLUS_JITMAX
 #endif
 
-// This is here because it's not yet been refactored.
-// FIXME: refactor this.
-#ifndef VMCFG_METHOD_NAMES
-    #if defined AVMPLUS_VERBOSE || defined DEBUGGER
-        #define VMCFG_METHOD_NAMES 1
-    #else
-        #define VMCFG_METHOD_NAMES 0
-    #endif
-#endif
-
 // This is here because it's an always-enabled switch to externally sourced code:
 // PCRE should always be compiled as a statically linked library, never as a shared
 // library.  See pcre/pcre_internal.h, pcre/pcre.h, and pcre/config.h.

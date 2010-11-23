@@ -902,7 +902,6 @@ namespace avmplus
         return declaringTraits()->init == this;
     }
 
-#if VMCFG_METHOD_NAMES
     Stringp MethodInfo::getMethodName(bool includeAllNamespaces) const
     {
         Stringp methodName = NULL;
@@ -1010,6 +1009,5 @@ namespace avmplus
 
         return name;
     }
-#endif
 
 }

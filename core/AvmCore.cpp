@@ -372,9 +372,7 @@ namespace avmplus
         kNeedsDxns = internConstantStringLatin1("NeedsDxns");
         kVersion = internConstantStringLatin1("Version");
 
-#if VMCFG_METHOD_NAMES
         kanonymousFunc = newConstantStringLatin1("<anonymous>");
-#endif
 
         klittleEndian = internConstantStringLatin1("littleEndian");
         kbigEndian = internConstantStringLatin1("bigEndian");

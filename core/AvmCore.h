@@ -915,9 +915,7 @@ const int kBufferPadding = 16;
         DRC(Stringp) kcallee;
         DRC(Stringp) kNeedsDxns;
         DRC(Stringp) kVersion;
-#if VMCFG_METHOD_NAMES
         DRC(Stringp) kanonymousFunc;
-#endif
         // From here at least the spelling mirrors exactly the spelling in the string constant
         DRC(Stringp) klittleEndian;
         DRC(Stringp) kbigEndian;

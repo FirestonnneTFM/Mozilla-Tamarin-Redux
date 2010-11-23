@@ -78,9 +78,7 @@ namespace avmplus
 #ifdef DEBUGGER
         , _method_dmi(core->GetGC(), 0)
 #endif
-#if VMCFG_METHOD_NAMES
         , _method_name_indices(core->GetGC(), 0)
-#endif
         , api(api)
 #ifdef VMCFG_AOT
         , aotInfo(NULL)
@@ -700,7 +698,6 @@ range_error:
     }
 #endif
 
-#if VMCFG_METHOD_NAMES
     Stringp PoolObject::getMethodInfoName(uint32_t i)
     {
         Stringp name = NULL;
@@ -730,5 +727,4 @@ range_error:
         }
         return name;
     }
-#endif
 }

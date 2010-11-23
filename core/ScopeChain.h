@@ -65,9 +65,7 @@ namespace avmplus
         Traits* getScopeTraitsAt(uint32_t i) const;
         bool getScopeIsWithAt(uint32_t i) const;
 
-        #if VMCFG_METHOD_NAMES
         PrintWriter& print(PrintWriter& prw) const;
-        #endif
 
         bool equals(const ScopeTypeChain* that) const;
 
@@ -118,10 +116,7 @@ namespace avmplus
         Atom getScope(int32_t i) const;
         void setScope(MMgc::GC* gc, int32_t i, Atom value);
         Namespacep getDefaultNamespace() const;
-
-        #if VMCFG_METHOD_NAMES
         PrintWriter& print(PrintWriter& prw) const;
-        #endif
 
     // ------------------------ DATA SECTION BEGIN
     private:
