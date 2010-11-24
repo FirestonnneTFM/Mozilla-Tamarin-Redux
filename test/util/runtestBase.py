@@ -100,6 +100,9 @@ class RuntestBase:
     avm_features = ''
     builtinabc = ''
     config = ''
+    config_directives = ['expectedfail', 'skip', 'ats_skip', 'verify_skip',
+                         'deep', 'performance']
+    directives = None
     escbin = ''
     failconfig = 'failconfig.txt'
     includes = None
@@ -630,6 +633,9 @@ class RuntestBase:
         self.js_output_f.close()
 
     def getTestsList(self, startDir):
+        '''Get all possible tests to run, then parse it down depending on
+            configuration.  Returns list of tests to run'''
+        # Gather the list of all possible tests
         fileExtentions = (self.sourceExt,) + self.executableExtensions + self.otherTestExtensions
         if self.altsearchpath!=None:
             newstartDir=[]
@@ -662,43 +668,40 @@ class RuntestBase:
                 for x in [x for x in self.exclude+utilDirs if x in dirs]:
                     dirs.remove(x)
         
-        def checkTestList(testlist):
-            if len(testlist) == 0:
+        def check_test_list(testlist):
+            if not testlist:
                 self.js_print('No tests found!')
                 self.js_print('Exiting ...')
                 sys.exit(1)
         
-        # modify testlist based on testconfig settings
-        if self.includes:
-            # only run the tests in the include list
-            include_test_list = []
-            for test in tests:
-                for include in self.includes:
-                    if re.search(include, test):
-                        include_test_list.append(test)
-            checkTestList(include_test_list)
-            return include_test_list
+        def filter_test_list(directive):
+            # pare down the testlist to only tests that match directive
+            test_list = []
+            if directive in self.directives:
+                for test in tests:
+                    for test_re in self.directives[directive]:
+                        if re.search(test_re, test):
+                            test_list.append(test)
+            return test_list
         
-        checkTestList(tests)
+        if 'deep' in self.config:
+            tests = filter_test_list('deep')
+        elif 'performance' in self.config:
+            tests = filter_test_list('performance')
+        
+        check_test_list(tests)
         return tests
 
-    # TODO: rename to getTestSettings(self, test)
-    def getLocalSettings(self, root):
-        # get settings for this test - from root dir testconfig.txt
+    def getTestSettings(self, root):
+        # return settings for this test
         settings = {}
-        # when more than one filename regexp matches, we choose to use the longest:
-        # e.g: given asc/.* and asc/testname - asc/testname will take precedence
-        # since it has longer total length
-        longestKeyMatch = 0
         for k in self.settings.keys():
             if re.search('^'+k+'$', root):
-                if len(k) > longestKeyMatch:
-                    longestKeyMatch = len(k)
-                    for k2 in self.settings[k].keys():
-                        if k2 in settings:
-                            settings[k2].update(self.settings[k][k2])
-                        else:
-                            settings[k2] = self.settings[k][k2].copy()
+                for k2 in self.settings[k].keys():
+                    if k2 in settings:
+                        settings[k2].update(self.settings[k][k2])
+                    else:
+                        settings[k2] = self.settings[k][k2].copy()
         return settings
 
     def istest(self,f, fileExtentions):
@@ -715,10 +718,19 @@ class RuntestBase:
 
     def parseTestConfig(self, config_file):
         '''read a configuration file and parse it into the settings dictionary'''
-        settings={}
+        settings = {}
+        directives = {}
         multi_line = ''
         line_num = 0
-
+        
+        def print_parse_error(error_type, file_name, line, msg):
+            '''Print out parsing errors in config files'''
+            print('%s Parsing configuration file %s at line %s:' %
+                  (error_type, file_name, line))
+            print(msg)
+            if error_type == 'ERROR':
+                exit(1)
+            
         # the field format is:
         # 0. testname:testcase (testcase optional)
         # 1. include configurations
@@ -745,11 +757,14 @@ class RuntestBase:
             try:
                 test, include_config, exclude_config, directive, comment = [s.strip() for s in fields]
             except ValueError:
-                print('ERROR Parsing configuration file %s at line %s:' % (config_file, line_num))
-                print('  %s has %s fields, expected 5 fields' % (fields[0].strip(), len(fields)))
-                #DEBUG
-                raise
-                #exit(1)
+                msg = '  %s has %s fields, expected 5 fields' % (fields[0].strip(), len(fields))
+                print_parse_error('ERROR', config_file, line_num, msg)
+            # Verify that a valid directive was defined
+            directive = directive.lower()
+            if directive not in self.config_directives:
+                msg = '  Unrecognized directive: %s.  Valid directives are: %s' \
+                      % (directive, ', '.join(self.config_directives))
+                print_parse_error('ERROR', config_file, line_num, msg)
             # split the test name from testcase
             if ':' in test:
                 test, testcase = [s.strip() for s in test.split(':', 1)]
@@ -757,25 +772,27 @@ class RuntestBase:
                 testcase = '.*'
             if test.endswith((self.sourceExt, self.abcOnlyExt, self.abcasmExt)):
                 ext = test[test.rfind('.'):]
-                print('WARNING Parsing configuration file %s at line %s:' % (config_file, line_num))
-                print('  %s contains an unnecessary file extension %s' % (test, ext))
+                msg = '  %s contains an unnecessary file extension %s' % (test, ext)
+                print_parse_error('WARNING', config_file, line_num, msg)
                 test = test[:test.rfind('.')]
             if not comment:
-                print('WARNING Parsing configuration file %s at line %s:' % (config_file, line_num))
-                print('  No comment found for %s' % test)
+                print_parse_error('WARNING', config_file, line_num,
+                                  '  No comment found for %s' % test)
             # only add settings for current config and only re.search if defined
             try:
                 include_match = re.search(include_config, self.config) if include_config else None
                 exclude_match = re.search(exclude_config, self.config) if exclude_config else None
-            except re.error as e:
-                print('ERROR Parsing configuration file %s at line %s:' % (config_file, line_num))
-                print('  regex is malformed: %s' % e)
-                exit(1)
+            except re.error:
+                print_parse_error('ERROR', config_file, line_num,
+                                  '  regex is malformed: %s' % sys.exc_info()[1])
             if include_match and not exclude_match:
                 settings.setdefault(test, {}).setdefault(testcase,{})
                 settings[test][testcase][directive] = comment
+                # also store test-level settings by directive
+                if testcase == '.*':
+                    directives.setdefault(directive, []).append(test)                
         
-        return settings
+        return settings, directives
         
 
     def parseRootConfigFiles(self):
@@ -826,11 +843,11 @@ class RuntestBase:
             sys.stdout.flush()
         if self.js_output:
             try:
-            self.js_output_f = open(self.js_output, 'a')
-            if self.logFileType == 'html':
-                self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
-            else:
-                self.js_output_f.write('%s\n' % m)
+                self.js_output_f = open(self.js_output, 'a')
+                if self.logFileType == 'html':
+                    self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
+                else:
+                    self.js_output_f.write('%s\n' % m)
             except:
                 pass
             self.js_output_f.close()
@@ -919,7 +936,7 @@ class RuntestBase:
 
         if self.genAtsSwfs:
             # get settings as ats excluded files are defined there
-            settings = self.getLocalSettings(as_file)
+            settings = self.getTestSettings(as_file)
             if self.skipAtsTest(file, settings):
                 return
 
@@ -1004,7 +1021,7 @@ class RuntestBase:
                 if self.aotsdk:
                     # We use the test config file to mark abc files that fail to AOT compile,
                     # so we need to take account of that here before we try to compile them.
-                    settings = self.getLocalSettings(testdir)
+                    settings = self.getTestSettings(testdir)
                     if '.*' in settings and 'skip' in settings['.*']:
                         self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
                         continue
@@ -1070,7 +1087,7 @@ class RuntestBase:
 
                         if self.genAtsSwfs:
                             # get settings as ats excluded files are defined there
-                            settings = self.getLocalSettings(testdir)
+                            settings = self.getTestSettings(testdir)
                             if self.skipAtsTest(file, settings):
                                 continue
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
@@ -1322,7 +1339,7 @@ class RuntestBase:
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True)
 
     def runTests(self, testList):
-        testnum = len(testList)
+        testnum = len(testList) + 1
         if self.random:
             if not self.randomSeed:
                 self.randomSeed = abs(hash(os.urandom(20)))     # Take the absolute val so that seeds are not negative

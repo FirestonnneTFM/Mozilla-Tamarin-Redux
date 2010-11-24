@@ -158,8 +158,13 @@ class AcceptanceRuntest(RuntestBase):
         # extension lists must be tuples
         self.otherTestExtensions = (self.abcasmExt,)
         self.executableExtensions = (self.abcOnlyExt,)
+        
         # test configuration is contained in two files: failconfig & testconfig)
-        self.settings = self.parseTestConfig(self.testconfig) & self.parsTestConfig(self.failconfig)
+        self.settings, self.directives = self.parseTestConfig(self.testconfig)
+        failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
+        self.settings.update(failconfig_settings)
+        self.directives.update(failconfig_directives)
+        
         self.tests = self.getTestsList(self.args)
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
@@ -200,6 +205,16 @@ class AcceptanceRuntest(RuntestBase):
                 sys.exit(1)
             print("detected %d android devices" % (len(self.androiddevices)/self.threads))
             self.threads=len(self.androiddevices)
+    
+    def skip_test(self, ast, testnum, settings, key):
+        '''Skip the given test, returns output_calls'''
+        output_calls = []
+        output_calls.append((self.js_print, ('%d running %s' % (testnum, ast),
+                                             '<b>', '</b><br/>')))
+        output_calls.append((self.js_print,('  skipping... reason: %s' %
+                                            settings['.*'][key],)))
+        self.allskips += 1
+        return output_calls
      
     def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
@@ -217,22 +232,20 @@ class AcceptanceRuntest(RuntestBase):
 
         includes = self.includes #list
 
-        settings = self.getLocalSettings(root)
-
-        # skip tests that can't be verified
-        if self.verify and '.*' in settings and 'verify_skip' in settings['.*']:
-            outputCalls.append((self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
-            outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['verify_skip'],)))
-            self.allskips += 1
-            return outputCalls
+        settings = self.getTestSettings(root)
 
         # skip entire test if specified
-        if '.*' in settings and 'skip' in settings['.*'] and not 'include' in settings['.*']:
-            outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['skip'],)))
-            self.allskips += 1
-            outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
-            return outputCalls
-
+        if '.*' in settings and 'skip' in settings['.*']:
+            return self.skip_test(ast, testnum, settings, 'skip')
+        
+        # skip tests that can't be verified
+        if self.verify and '.*' in settings and 'verify_skip' in settings['.*']:
+            return self.skip_test(ast, testnum, settings, 'verify_skip')
+        
+        if 'deep' not in self.config and '.*' in settings and \
+           'deep' in settings['.*']:
+            return self.skip_test(ast, testnum, settings, 'deep')
+            
         # Check for a timezone file
         if isfile('%s.tz' % ast):
             if not self.valid_time_zone(ast, testnum, outputCalls):
