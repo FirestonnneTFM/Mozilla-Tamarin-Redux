@@ -296,7 +296,9 @@ namespace avmplus
     PRINT_AMP_OPERATOR_SUPPORT(Multiname)
 #else
     PRINT_STAR_OPERATOR_SUPPORT(String,"(null)")
+    PRINT_STAR_OPERATOR_SUPPORT(Traits,"*")
     PRINT_STAR_OPERATOR_SUPPORT_NULL(Namespace)
+    PRINT_STAR_OPERATOR_SUPPORT_NULL(ScopeTypeChain)
     PRINT_AMP_OPERATOR_SUPPORT(Multiname)
 #endif
 
