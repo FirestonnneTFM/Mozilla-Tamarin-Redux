@@ -179,9 +179,7 @@ namespace avmplus
 #ifdef DEBUGGER
         DebuggerMethodInfo* getDebuggerMethodInfo(uint32_t i) const;
 #endif
-#if VMCFG_METHOD_NAMES
         Stringp getMethodInfoName(uint32_t i);
-#endif
 
         void dynamicizeStrings();
 
@@ -210,12 +208,11 @@ namespace avmplus
 #ifdef DEBUGGER
         GCList<DebuggerMethodInfo>                  _method_dmi;
 #endif
-#if VMCFG_METHOD_NAMES
-        // only allocated & populated if core->config.methodName is true...
-        // if positive, an index into cpool_string; if negative, an index into cpool_mn
-        // (always safe because those indices are limited to 30 bits)
+        // Only allocated & populated if core->config.methodName is true.
+        // Indexed by MethodInfo::_method_id, if the value is positive, it's an index into cpool_string; 
+        // if negative, an index into cpool_mn. 
+        // Always safe because those indices are limited to 30 bits.
         DataList<int32_t>                           _method_name_indices;
-#endif
                 void                                setupConstantStrings(uint32_t count);
         uint32_t api;
 

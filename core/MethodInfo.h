@@ -190,10 +190,8 @@ namespace avmplus
 
     public:
 
-#if VMCFG_METHOD_NAMES
         Stringp FASTCALL getMethodNameWithTraits(Traits* declaringTraits, bool includeAllNamespaces = false) const;
         Stringp FASTCALL getMethodName(bool includeAllNamespaces = false) const;
-#endif
 
 #ifdef AVMPLUS_VERBOSE
         PrintWriter& print(PrintWriter& prw) const;
@@ -309,7 +307,7 @@ namespace avmplus
             NativeInfo          _native;            // stuff used only for Native methods (formerly in NativeMethod)
             AbcInfo             _abc;               // stuff used only for bytecode methods (formerly in MethodInfo)
         };
-#if VMCFG_METHOD_NAMES && defined(AVMPLUS_SAMPLER)
+#ifdef AVMPLUS_SAMPLER
         mutable DRCWB(Stringp)  _methodName;
 #endif
 

@@ -1729,7 +1729,6 @@ namespace avmplus
             (a && b && !a->isMachineType() && !b->isMachineType());
     }
 
-#if VMCFG_METHOD_NAMES
     PrintWriter& Traits::print(PrintWriter& prw, bool includeAllNamespaces) const
     {
         if (name() != NULL) {
@@ -1739,7 +1738,6 @@ namespace avmplus
         }
         return prw;
     }
-#endif
 
     void Traits::genInitBody(const Toplevel* toplevel, TraitsBindings* tb)
     {

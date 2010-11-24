@@ -421,10 +421,7 @@ namespace avmplus
         void destroyInstance(ScriptObject *obj) const;
 
     public:
-#if VMCFG_METHOD_NAMES
         PrintWriter& print(PrintWriter& prw, bool includeAllNamespaces = false) const;
-#endif
-
         void setDeclaringScopes(const ScopeTypeChain* stc);
 
         Namespacep ns() const;

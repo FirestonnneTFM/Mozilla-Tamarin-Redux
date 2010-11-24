@@ -151,10 +151,8 @@ namespace avmplus
         PrintWriter& operator<< (asAtomHex a);
         PrintWriter& operator<< (asUTF16 a);
         PrintWriter& operator<< (bool b);
-    #if VMCFG_METHOD_NAMES
         PrintWriter& operator<< (const ScopeTypeChain* s);
         PrintWriter& operator<< (const ScopeChain* s);
-    #endif
 
         void writeAtom(Atom atom);
         void writeAtomHex(Atom atom);

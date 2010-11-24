@@ -332,9 +332,6 @@ class PassedMailNotifier(CustomMail):
         # cachedResults is a list of dicts: {'name':name, 'build':build, 'results':results}
         projectName = self.status.getProjectName()
         
-        from dbgp.client import brk
-        brk(host="localhost", port=9000)
-        
         # build will be the same for all messages, so just use the first one
         build = cachedResults[0]['build']
         
