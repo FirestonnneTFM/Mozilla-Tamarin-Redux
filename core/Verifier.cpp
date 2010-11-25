@@ -1292,7 +1292,7 @@ namespace avmplus
             case OP_newclass:
             {
                 checkStack(1, 1);
-                // must be a CONSTANT_Multiname
+                // imm30 is the class_id of the class object to create.
                 Traits* ctraits = checkClassInfo(imm30);
                 emitCoerce(CLASS_TYPE, state->sp());
                 coder->writeOp1(state, pc, opcode, imm30, ctraits);
