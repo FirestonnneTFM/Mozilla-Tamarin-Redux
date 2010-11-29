@@ -212,6 +212,8 @@ namespace avmplus
     class XMLParser;
     class XMLTag;
 
+    template<class TLIST> class VectorAccessor;
+
     struct WordOpcodeAttr;
 
     typedef Traits* Traitsp;
