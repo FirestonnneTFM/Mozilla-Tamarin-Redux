@@ -75,10 +75,13 @@ else:
 from . import runtestUtils
 from .runtestUtils import walk,parseArgStringToList,TimeOutException,join,convertToCsv,detectCPUs,dict_match,formatMemoryList,formatMemory,list_match,parseArgStringToList,pPrint,splitList,genAtsArgs,moveAtsSwf,conf95,mean,rel_std_dev,standard_deviation,tDist,variance,getSignalName,signalNames
 
-try:
-    import pexpect
-except ImportError:
-    pexpect = False
+pexpect = False
+if sys.version_info[0] < 3:
+    try:
+        import pexpect
+        pexpect = True
+    except ImportError:
+        pass
 
 
 class RuntestBase:
