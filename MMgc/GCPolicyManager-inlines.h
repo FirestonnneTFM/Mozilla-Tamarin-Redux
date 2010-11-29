@@ -105,12 +105,28 @@ namespace MMgc
         return remainingMinorAllocationBudget < 0;
     }
 
-    REALLY_INLINE void GCPolicyManager::signalMarkWork(size_t nbytes)
+    // OPTIMIZEME: the byte counts are needed for policy, but the object counts are only for
+    // unspecified profiling and we could in principle enable object counting only in a
+    // profiling mode.
+
+    REALLY_INLINE void GCPolicyManager::signalExactMarkWork(size_t nbytes)
     {
-        objectsScannedLastCollection++;
-        bytesScannedLastCollection += uint32_t(nbytes);
+        objectsScannedExactlyLastCollection++;
+        bytesScannedExactlyLastCollection += uint32_t(nbytes);
     }
-    
+
+    REALLY_INLINE void GCPolicyManager::signalConservativeMarkWork(size_t nbytes)
+    {
+        objectsScannedConservativelyLastCollection++;
+        bytesScannedConservativelyLastCollection += uint32_t(nbytes);
+    }
+
+    REALLY_INLINE void GCPolicyManager::signalPointerfreeMarkWork(size_t nbytes)
+    {
+        objectsScannedPointerfreeLastCollection++;
+        bytesScannedPointerfreeLastCollection += uint32_t(nbytes);
+    }
+
     REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
     {
         remainingMinorAllocationBudget += int32_t(nbytes);

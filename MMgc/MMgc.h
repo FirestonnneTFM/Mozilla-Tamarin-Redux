@@ -140,6 +140,12 @@
     #define MMGC_MEMORY_PROFILER_ARG(x)
 #endif
 
+#ifdef MMGC_MEMORY_INFO
+    #define MEMORY_INFO_ARG(x) , x
+#else
+    #define MEMORY_INFO_ARG(x)
+#endif
+
 // MMGC_FASTBITS enables a potentially faster representation of the per-block bit table. 
 // The representation is fairly well hidden from most of the GC code; only GC::GetGCBits
 // and GCAlloc / GCLargeAlloc take it into account.
@@ -223,10 +229,10 @@ namespace MMgc
 #include "ZCT.h"
 #include "HeapGraph.h"
 #include "GCPolicyManager.h"
+#include "WriteBarrier.h"
 #include "GC.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"
-#include "WriteBarrier.h"
 
 #include "Shared-inlines.h"
 #include "GCHashtable-inlines.h"
@@ -239,6 +245,7 @@ namespace MMgc
 #include "ZCT-inlines.h"
 #include "GCPolicyManager-inlines.h"
 #include "GC-inlines.h"
+#include "WriteBarrier-inlines.h"
 
 // remove these when the player stops using them
 #define MMGC_DRC

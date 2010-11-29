@@ -389,16 +389,47 @@ namespace MMgc
         MarkItem(item);
         markerActive--;
     }
+
+    REALLY_INLINE void GC::PushWorkItem_Unsafe(GCWorkItem item)
+    {
+        PushWorkItem(item);
+    }
 #else
     REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
     {
-        GCAssert(item.ptr != NULL);
-        GCAssert(!item.IsGCItem() || IsPointerToGCObject(GetRealPointer(item.ptr)));
+#ifdef _DEBUG
+        WorkItemInvariants(item);
+#endif
+        PushWorkItem_Unsafe(item);
+    }
+
+    REALLY_INLINE void GC::PushWorkItem_Unsafe(GCWorkItem item)
+    {
         if (!m_incrementalWork.Push(item))
             SignalMarkStackOverflow(item);
     }
 #endif
 
+#ifdef _DEBUG
+    void GC::WorkItemInvariants(GCWorkItem item)
+    {
+        GCAssert(item.ptr != NULL);
+        if (item.IsGCItem())
+        {
+            GCAssert(IsPointerToGCObject(GetRealPointer(item.ptr)));
+            GCAssert(ContainsPointers(item.ptr));
+            GCAssert(!IsRCObject(item.ptr) || ((RCObject*)item.ptr)->composite != 0);
+            GCAssert((GetGCBits(GetRealPointer(item.ptr)) & (kQueued|kMark)) == kQueued);
+        }
+        else
+        {
+            // Some roots are on GC pages - a little unclear why, as of yet.  So for
+            // now just require non-GCItems not to point to GC objects.
+            GCAssert(!IsPointerToGCPage(GetRealPointer(item.ptr)) || !IsPointerToGCObject(GetRealPointer(item.ptr)));
+        }
+    }
+#endif
+    
     void GC::PushWorkItem_MayFail(GCWorkItem &item)
     {
         if (item.ptr)
@@ -699,8 +730,31 @@ namespace MMgc
             ClearFinalized(item);
         if(HasWeakRef(item))
             ClearWeakRef(item);
+        
+        // This is necessary if the destructor has been run because the destructor snaps
+        // the vtable back to GCTraceableBase, which has illegal-to-call base methods for
+        // gcTrace and gcTraceLarge.  Those base methods are there to ensure that we
+        // do not try to exactly trace destructed objects.
+        if(IsExactlyTraced(item))
+            ClearExactlyTraced(item);
     }
 
+    void GC::Zero(const void* userptr)
+    {
+        if (IsFinalized(userptr)) {
+            GCFinalizedObject* obj = (GCFinalizedObject*)userptr;
+            VMPI_memset((char*)obj + sizeof(GCFinalizedObject), 0, GC::Size(obj) - sizeof(GCFinalizedObject));
+        }
+        else if (IsExactlyTraced(userptr)) {
+            GCTraceableObject* obj = (GCTraceableObject*)userptr;
+            VMPI_memset((char*)obj + sizeof(GCTraceableObject), 0, GC::Size(obj) - sizeof(GCTraceableObject));
+        }
+        else {
+            GCObject* obj = (GCObject*)userptr;
+            VMPI_memset((char*)obj + sizeof(GCObject), 0, GC::Size(obj) - sizeof(GCObject));
+        }
+    }
+    
     // Observe that nbytes is never more than kBlockSize, and the budget applies only to
     // objects tied up in quick lists, not in on-block free lists.  So given that the
     // total budget for the GC is at least kBlockSize, the loop is guaranteed to terminate.
@@ -1874,28 +1928,27 @@ namespace MMgc
         // instance has been exhausted.
 
         void* ptr;
-        uint32_t size;
 
         markerActive++;
 
         for(int i=0; i < kNumSizeClasses; i++) {
             GCAllocIterator iter1(containsPointersRCAllocs[i]);
-            while (iter1.GetNextMarkedObject(ptr, size)) {
-                GCWorkItem item(ptr, size, GCWorkItem::kGCObject);
+            while (iter1.GetNextMarkedObject(ptr)) {
+                GCWorkItem item(ptr, 0, GCWorkItem::kGCObject);
                 MarkItem(item);
                 Mark();
             }
             GCAllocIterator iter2(containsPointersAllocs[i]);
-            while (iter2.GetNextMarkedObject(ptr, size)) {
-                GCWorkItem item(ptr, size, GCWorkItem::kGCObject);
+            while (iter2.GetNextMarkedObject(ptr)) {
+                GCWorkItem item(ptr, 0, GCWorkItem::kGCObject);
                 MarkItem(item);
                 Mark();
             }
         }
 
         GCLargeAllocIterator iter3(largeAlloc);
-        while (iter3.GetNextMarkedObject(ptr, size)) {
-            GCWorkItem item(ptr, size, GCWorkItem::kGCObject);
+        while (iter3.GetNextMarkedObject(ptr)) {
+            GCWorkItem item(ptr, 0, GCWorkItem::kGCObject);
             MarkItem(item);
             Mark();
         }
@@ -1923,13 +1976,21 @@ namespace MMgc
         m_markStackOverflow = true;
     }
 
-    // HandleLargeMarkItem handles work items that are too big to
-    // marked atomically.  We split the work item into two chunks: a
+    // HandleLargeMarkItem handles work items that are too big to be
+    // marked atomically.  It does so by splitting the work into chunks;
+    // the incremental marker then gets an opportunity to stop marking 
+    // after processing each chunk.
+    //
+    // An object is "too large" if its size is larger than kLargestAlloc.
+    // There is an older technical reason for that having to do with
+    // additional state space only being available in large objects,
+    // as detailed in the following.
+    //
+    // Conceptually we split a large work item into two chunks: a
     // small head (which we mark now) and a large tail (which we push
-    // onto the stack).  The tail is a non-gcobject regardless of
-    // whether the head is a gcobject.  THE HEAD MUST BE MARKED FIRST
-    // because this ensures that the mark on the object is set
-    // immediately; that is necessary for write barrier correctness.
+    // onto the stack).  THE HEAD MUST BE MARKED FIRST because this
+    // ensures that the mark on the object is set immediately; that
+    // is necessary for write barrier correctness.
     //
     // Why use kLargestAlloc as the split value?
     //
@@ -1938,18 +1999,20 @@ namespace MMgc
     // from being deleted explicitly by GC::Free while the object is
     // on the mark stack.  We can't have it both ways, so split objects
     // are protected against being freed by carrying another bit that
-    // prevents deletion when it is set.  Because we do not want to expand
-    // the number of header bits per object from 4 to 8, we only have
-    // this extra bit on large objects (where there's plenty of space).
-    // Thus the cutoff for splitting is exactly kLargestObject: only
-    // large objects that can carry this bit are split.
+    // prevents deletion when it is set.  We only have this extra bit on
+    // large objects (where there's plenty of space).  Thus the cutoff for 
+    // splitting is exactly kLargestObject: only large objects that can
+    // carry this bit are split.  (That reason predates the expansion
+    // of per-object bits from four to eight.  Now that we have more header
+    // bits we could carry the bit everywhere and choose a different
+    // threshold.)
     //
     // In addition, the queued flag still prevents the object from
     // being deleted.
     //
-    // The free-protection flags are reset by a special GCWorkItem
+    // The free-protection flags are reset by a special GCWorkItem sentinel
     // that is pushed on the stack below the two parts of the object that
-    // is being split; when that is later popped, it resets the flag
+    // is being split; when the sentinel is later popped, it resets the flag
     // and returns.
     //
     // The complexity with the free-protection flags may go away if we
@@ -1963,21 +2026,50 @@ namespace MMgc
     // tail is entirely equivalent to discarding the work items that
     // would result from scanning the tail.
     //
-    // Large GCRoot's are also split here.  MarkAllRoots pushes a
+    // Large GCRoots are also split here.  MarkAllRoots pushes a
     // sentinel item on the stack that will be right below the GCRoot.
     // If the GCRoot is deleted it uses the sentinel pointer to clear
     // the tail work item from GCRoot::Destroy along with the sentinel
     // itself.
+    //
+    // Conservatively marked objects are split so that the tail is a
+    // non-gcobject regardless of whether the head is a gcobject.
+    //
+    // Exactly marked objects are not split per se, but state is kept on
+    // the mark stack to allow the gcTraceLarge method to be called
+    // repeatedly.
+    //
+    // When a large object is first encountered it is marked as visited, and
+    // that's necessary for the write barrier.  However, it remains on the queue
+    // without being marked as queued (since marked+queued == free) and anyway
+    // that would prevent it from being added to the write barrier's queue.
+    // Thus it is possible for an object, or part of it, to be on both
+    // queues at the same time.  That's not incorrect, and it's not even
+    // particularly inefficient, as the best we could do would be to pop
+    // the object off the mark stack when it is pushed onto the barrier queue.
+    //
+    // Given partial marking of large objects it's not obvious that marking
+    // will terminate (an object could be moved off the barrier stack by
+    // IncrementalMark, then copied back onto the barrier stack by the write
+    // barrier), but it does: mark work is driven by allocation, and when
+    // allocation has reached a limit the final phase of GC is run which marks
+    // whatever remains to be marked nonincrementally.
 
     bool GC::HandleLargeMarkItem(GCWorkItem &wi, size_t& size)
     {
-        if (wi.IsSentinelItem()) {
-            if(wi.GetSentinelType() == GCWorkItem::kGCLargeAlloc) {
+        GCTraceableBase* exactlyTraced = NULL;
+        size_t cursor = 0;
+
+        if (wi.IsSentinel1Item())
+        {
+            if(wi.GetSentinel1Type() == GCWorkItem::kGCLargeAlloc)
+            {
                 // Unprotect an item that was protected earlier, see comment block above.
                 GCLargeAlloc::UnprotectAgainstFree(wi.GetSentinelPointer());
             }
 
-            if(wi.GetSentinelType() == GCWorkItem::kGCRoot) {
+            if(wi.GetSentinel1Type() == GCWorkItem::kGCRoot)
+            {
                 // The GCRoot is no longer on the stack, clear the pointers into the stack.
                 GCRoot *sentinelRoot = (GCRoot*)wi.GetSentinelPointer();
                 sentinelRoot->ClearMarkStackSentinelPointer();
@@ -1985,72 +2077,185 @@ namespace MMgc
             return true;
         }
 
-        if (wi.IsGCItem()) {
+        if (wi.IsGCItem())
+        {
+            // An ounce of prevention...
+            GCAssert(ContainsPointers(wi.ptr));
+
             // Need to protect it against 'Free': push a magic item representing this object
             // that will prevent this split item from being freed, see comment block above.
+
             GCLargeAlloc::ProtectAgainstFree(wi.ptr);
             PushWorkItem(GCWorkItem(wi.ptr, GCWorkItem::kGCLargeAlloc));
+
+            // Is it a large, exactly traced item?
+
+            void *userptr = (void*)wi.ptr;
+            void *realptr = GetRealPointer(userptr);
+
+            gcbits_t& bits = GetGCBits(realptr);
+
+            if ((bits & kVirtualGCTrace) == kVirtualGCTrace)
+            {
+                // Create a mark state for the large, exactly traced object.
+                //
+                // We have two words of information to store: the pointer to the object
+                // (which we need in order to get the vtable) and the cursor value.  The
+                // cursor value is not really very well bounded, and we don't want the
+                // sentinel value to have too many insignificant low-order bits, so we
+                // need to use two items here.
+                //
+                // It's important that the top item triggers action in the marker and that
+                // the bottom item is inert and is just discarded if it appears by itself,
+                // which is possible in the presence of mark stack overflows.
+
+                // Set up large exactly traced object.  The cursor is zero and already set.
+                exactlyTraced = (GCTraceableBase*)wi.ptr;
+
+                // Mark the object though it remains on the queue, this means it may also
+                // end up on the barrier stack while still on the mark stack but that's
+                // fine, and inevitable.
+                SetMark(exactlyTraced);
+
+                policy.signalExactMarkWork(size);
+                
+                // Save the state: cursor underneath and object on top.
+                PushWorkItem(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
+                PushWorkItem(GCWorkItem(wi.ptr, GCWorkItem::kLargeExactlyTracedTail));
+            }
+        }
+        else if (wi.IsSentinel2Item())
+        {
+            if (wi.GetSentinel2Type() == GCWorkItem::kLargeExactlyTracedTail)
+            {
+                // The cursor is in the second item.
+                GCWorkItem payload = m_incrementalWork.Pop();
+                
+                GCAssert(payload.GetSentinel2Type() == GCWorkItem::kInertPayload);
+                
+                // Set up for some more tracing.
+                exactlyTraced = (GCTraceableBase*)wi.GetSentinelPointer();
+                cursor = (size_t)payload.GetSentinelPointer();
+
+                // Save the new state.
+                PushWorkItem(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
+                PushWorkItem(GCWorkItem(wi.ptr, GCWorkItem::kLargeExactlyTracedTail));
+            }
+            else if (wi.GetSentinel2Type() == GCWorkItem::kInertPayload) {
+                // Discard it - we're seeing this because of some arbitrary popping during
+                // overflow handling.
+                return true;
+            }
+            else {
+                GCAssert(!"Unexpected sentinel value.");
+            }
+        }
+
+        if (exactlyTraced != NULL)
+        {
+            if (!exactlyTraced->gcTraceLarge(this, cursor>>2))
+            {
+                // No items were pushed, so clean up.
+                m_incrementalWork.Pop();        // Object
+                m_incrementalWork.Pop();        // cursor
+            }
+
+            return true;    // Do not fall through to conservative tracing in MarkItem
         }
 
         PushWorkItem(GCWorkItem((void*)(wi.iptr + kLargestAlloc),
                                 uint32_t(size - kLargestAlloc),
                                 wi.HasInteriorPtrs() ? GCWorkItem::kStackMemory : GCWorkItem::kNonGCObject));
-
+        
         size = kMarkItemSplitThreshold;
         return false;
     }
 
-
     // This will mark the item whether the item was previously marked or not.
     // The mark stack overflow logic depends on that.
+    //
+    // The common case is a small and exactly traced gc-item, and the marker
+    // biases in favor of that, as well as large exactly traced gc-items.
+    //
+    // Large gc-items are recognizable by a header bit designating the object
+    // as large, the bit is set in the large-object allocator.
 
     void GC::MarkItem(GCWorkItem &wi)
     {
         GCAssert(markerActive);
 
+        // Can't assert the general WorkItemInvariants here - some objects on the mark
+        // stack may have been cleared out through explicit deletion or such objects
+        // may have been transfered from the barrier stack, and there's nothing we
+        // can do about it now.  (Explicit deletion needs to be removed from the API.)
+        // The exact marker still works because the mark-exactly bit is cleared in
+        // AbortFree.  However, explicitly deleted objects that are queued 
+        // will be marked conservatively and will sometimes show up as false positive 
+        // in the profiling of conservatively marked objects.
+
         size_t size = wi.GetSize();
-        uintptr_t *p = (uintptr_t*) wi.ptr;
+        
+        // The common case is a small and exactly traced gc item.
+        
+        // EXACTGC OPTIMIZEME: It's doubtful that it's cost-effective to have the
+        // IsGCItem test on the hot path if we could instead have two mark stacks 
+        // or a split mark stack.  That way the test could be lifted out into the
+        // caller of MarkItem, where we can frequently hoist it out of a loop.
+
+        if (wi.IsGCItem())
+        {
+            void *userptr = (void*)wi.ptr;
+            void *realptr = GetRealPointer(userptr);
+            GCAssert(GetGC(realptr) == this);
+            GCAssert(IsPointerToGCObject(realptr));
+
+            gcbits_t& bits = GetGCBits(realptr);
+
+            if ((bits & (kVirtualGCTrace|kLargeObject)) == kVirtualGCTrace)
+            {
+                // Inlined and merged SetMark, since we have the bits anyway. 
+                bits = (bits & ~kQueued) | kMark;
+                ((GCTraceableBase*)userptr)->gcTrace(this);
+                policy.signalExactMarkWork(size);
+                return;
+            }
+        }
 
         // Control mark stack growth and ensure incrementality:
         //
         // Here we consider whether to split the object into multiple pieces.
         // A cutoff of kLargestAlloc is imposed on us by external factors, see
         // discussion below.  Ideally we'd choose a limit that isn't "too small"
+        // A cutoff of kLargestAlloc is imposed on us by external factors.  
+        // Ideally we'd choose a limit that isn't "too small"
         // because then we'll split too many objects, and isn't "too large"
         // because then the mark stack growth won't be throttled properly.
         //
         // See bugzilla #495049 for a discussion of this problem.
         //
         // See comments above HandleLargeMarkItem for the mechanics of how this
-        // is done and why kMarkItemSplitThreshold == kLargestAlloc
+        // is done and why kMarkItemSplitThreshold == kLargestAlloc.
+
         if (size > kMarkItemSplitThreshold)
         {
             if(HandleLargeMarkItem(wi, size))
                 return;
         }
-
-        policy.signalMarkWork(size);
-
-        uintptr_t *end = p + (size / sizeof(void*));
-        // set the mark bits on this guy
+        
+        // Conservative tracing - what we know & love.
+        
         if(wi.IsGCItem())
         {
-            int b = SetMark(wi.ptr);
-            (void)b;
-#ifdef _DEBUG
-            // def ref validation does a Trace which can
-            // cause things on the work queue to be already marked
-            // in incremental GC
-            if(!validateDefRef) {
-                //GCAssert(!b);
-            }
-#endif
+            SetMark(wi.ptr);
         }
 
+        policy.signalConservativeMarkWork(size);
+    
+        uintptr_t *p = (uintptr_t*) wi.ptr;
+        uintptr_t *end = p + (size / sizeof(void*));
         while(p < end)
         {
-            uintptr_t val = *p;
-            TraceConservativePointer(val, wi.HasInteriorPtrs() != 0 HEAP_GRAPH_ARG(p));
+            TraceConservativePointer(uintptr_t(*p), wi.HasInteriorPtrs() != 0 HEAP_GRAPH_ARG(p));
             p++;
         }
     }
@@ -2134,7 +2339,13 @@ namespace MMgc
                 if(block->containsPointers)
                 {
                     const void *realItem = GetUserPointer(item);
-                    GCWorkItem newItem(realItem, itemSize, GCWorkItem::kGCObject);
+                    GCWorkItem newItem(realItem, 0, GCWorkItem::kGCObject);
+                    // EXACTGC INVESTIGATEME - is recursive marking still a good idea?  Note that we
+                    // expect the bulk of the marking to be exact, and exact marking is not recursive,
+                    // it always uses the mark stack.  (On the other hand it's type-aware and can
+                    // avoid pushing leaf objects onto the mark stack.)  If conservative marking is
+                    // merely a last-ditch mechanism then there's little reason to assume that
+                    // recursive marking will buy us much here.
                     if(((uintptr_t)realItem & GCHeap::kBlockMask) != thisPage || mark_item_recursion_control == 0)
                     {
                         bits2 |= kQueued;
@@ -2150,7 +2361,7 @@ namespace MMgc
                 else
                 {
                     bits2 |= kMark;
-                    policy.signalMarkWork(itemSize);
+                    policy.signalPointerfreeMarkWork(itemSize);
                 }
 #ifdef MMGC_HEAP_GRAPH
                 markerGraph.edge(loc, GetUserPointer(item));
@@ -2198,13 +2409,13 @@ namespace MMgc
                 if(b->containsPointers)
                 {
                     b->flags[0] |= kQueued;
-                    PushWorkItem(GCWorkItem(GetUserPointer(item), itemSize, GCWorkItem::kGCObject));
+                    PushWorkItem(GCWorkItem(GetUserPointer(item), 0, GCWorkItem::kGCObject));
                 }
                 else
                 {
                     // doesn't need marking go right to black
                     b->flags[0] |= kMark;
-                    policy.signalMarkWork(itemSize);
+                    policy.signalPointerfreeMarkWork(itemSize);
                 }
 #ifdef MMGC_HEAP_GRAPH
                 markerGraph.edge(loc, GetUserPointer(item));
@@ -2215,6 +2426,80 @@ namespace MMgc
 #ifdef MMGC_POINTINESS_PROFILING
         policy.signalDemographics(size/sizeof(void*), could_be_pointer, actually_is_pointer);
 #endif
+    }
+
+    void GC::TracePointer(void* obj /* user pointer */ HEAP_GRAPH_ARG(const uintptr_t *loc))
+    {
+        GCAssert(((uintptr_t)obj & 7) == 0);
+        
+        if (obj == NULL)
+            return;
+        
+        gcbits_t& bits2 = GetGCBits(GetRealPointer(obj));
+
+        // We cannot yet assert the following.  The reason is an interaction between
+        // exact tracing, stack pinning, and reference counting.  Reference counts
+        // must reflect at least the number of references from exactly traced objects.
+        // But code that maintains arrays of reference counts and cleverly "transfers"
+        // the counts from one copy of the array to the other without resetting the
+        // exact-trace bit or clearing the object or freeing it will end up in a
+        // situation where, if the dead array copy is reached during tracing, the
+        // reference counts will be wrong and the assert will hit.  The object can be
+        // reached even if the C++ code is correct since we trace the stack and some
+        // objects conservatively.  The problem will disappear when we remove
+        // reference counting.
+        //
+        // Another problem here is that explicit deletion of objects can create
+        // dangling pointers that will also hit the assert, but in that case there are
+        // other, more insidious bugs, so explicit deletion has to be dealt with in
+        // any case.
+        // GCAssert((bits2 & (kMark|kQueued)) != (kMark|kQueued));
+        
+        GCAssert(ContainsPointers(obj) || (bits2 & kQueued) == 0);
+
+        // EXACTGC OPTMIZEME: Here we can fold the ContainsPointers test into
+        // the marked test if there's a bit in the header indicating pointerfulness.
+
+        if ((bits2 & (kMark|kQueued)) == 0)
+        {
+            if (ContainsPointers(obj)) {
+                bits2 |= kQueued;
+                GCWorkItem newItem(obj, 0, GCWorkItem::kGCObject);
+                PushWorkItem(newItem);
+            }
+            else {
+                bits2 |= kMark;
+                policy.signalPointerfreeMarkWork(Size(obj));
+            }
+#ifdef MMGC_HEAP_GRAPH
+            markerGraph.edge(loc, obj);
+#endif
+        }
+    }
+
+    void GC::TraceAtomValue(avmplus::Atom a HEAP_GRAPH_ARG(avmplus::Atom *loc))
+    {
+        switch (a & 7)
+        {
+#ifdef DEBUG
+            case avmplus::AtomConstants::kUnusedAtomTag:
+                // Tracing is not necessary here.  Generic GCObjects should have been laundered
+                // through the genericObjectToAtom API and will be tagged kDoubleType (see comments
+                // below for why that is a botch).  Anything tagged with kUnusedAtomTag is non-GC
+                // storage.
+                break;
+#endif
+            case avmplus::AtomConstants::kObjectType:
+            case avmplus::AtomConstants::kStringType:
+            case avmplus::AtomConstants::kNamespaceType:
+                TracePointer((GCTraceableBase*)(a & ~7) HEAP_GRAPH_ARG((uintptr_t*)loc));
+                break;
+            case avmplus::AtomConstants::kDoubleType:
+                // Bugzilla 594870: Must trace semi-conservatively because of the genericObjectToAtom API:
+                // the object we're looking at may or may not contain pointers, and we don't know.
+                TracePointer((void*)(a & ~7) HEAP_GRAPH_ARG((uintptr_t*)loc));
+                break;
+        }
     }
 
     void GC::IncrementalMark()
@@ -2253,6 +2538,7 @@ namespace MMgc
         // used to be 'static' instead of 'const'), beware that using a static var
         // here requires a lock.  It may also be wrong to have one shared global for
         // the value, and in any case it may belong in the policy manager.
+
         const unsigned int checkTimeIncrements = 100;
         uint64_t start = VMPI_getPerformanceCounter();
 
@@ -2261,6 +2547,10 @@ namespace MMgc
 
         uint64_t ticks = start + time * VMPI_getPerformanceFrequency() / 1000;
         do {
+            // EXACTGC OPTIMIZEME: Count can overestimate the amount of work on the stack
+            // because exactly traced large split items occupy two slots on the
+            // mark stack.  Thus the loop must also test for whether the stack
+            // is empty.
             unsigned int count = m_incrementalWork.Count();
             if (count == 0) {
                 CheckBarrierWork();
@@ -2271,7 +2561,7 @@ namespace MMgc
             if (count > checkTimeIncrements) {
                 count = checkTimeIncrements;
             }
-            for(unsigned int i=0; i<count; i++)
+            for(unsigned int i=0; i<count && !m_incrementalWork.IsEmpty() ; i++)
             {
                 GCWorkItem item = m_incrementalWork.Pop();
                 MarkItem(item);
@@ -2419,7 +2709,10 @@ namespace MMgc
                 break;
         while (m_barrierWork.Count() > 0) {
             GCWorkItem item = m_barrierWork.Pop();
-            PushWorkItem(item);
+            // The general invariants may be violated here - see comment block at the
+            // beginning of MarkItem() for how deleted objects can foul up the works.
+            // So use the invariant-unaware API.
+            PushWorkItem_Unsafe(item);
         }
     }
 
@@ -2510,22 +2803,28 @@ namespace MMgc
             SetMark(container);
             return;
         }
-        GCWorkItem item(container, (uint32_t)Size(container), GCWorkItem::kGCObject);
+        GCWorkItem item(container, 0, GCWorkItem::kGCObject);
         // Note, pushing directly here works right now because PushWorkItem never
         // performs any processing (breaking up a large object into shorter
         // segments, for example).  If that changes, we must probably introduce
         // PushBarrierItem to do the same thing for m_barrierWork.
+#ifdef _DEBUG
+        // If this fails it's because the write barrier hits on an already-deleted
+        // object - which is a bug to be sure, but we don't know if we may have to
+        // support it anyway.
+        WorkItemInvariants(item);
+#endif
         if (!m_barrierWork.Push(item))
             PushWorkItem(item);
     }
 
-    void GC::movePointers(void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers)
+    void GC::movePointers(void* dstObject, void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers)
     {
-        if(marking && GetMark(dstArray) && ContainsPointers(dstArray) &&
+        if(marking && GetMark(dstObject) && ContainsPointers(dstObject) &&
            // don't push small items that are moving pointers inside the same array
-           (dstArray != srcArray || Size(dstArray) > kMarkItemSplitThreshold)) {
+           (dstArray != srcArray || Size(dstObject) > kMarkItemSplitThreshold)) {
             // this could be optimized to just re-scan the dirty region
-            InlineWriteBarrierTrap(dstArray);
+            InlineWriteBarrierTrap(dstObject);
         }
         VMPI_memmove(dstArray + dstOffset, srcArray + srcOffset, numPointers * sizeof(void*));
     }
@@ -2717,7 +3016,7 @@ namespace MMgc
                 // so instead of asserting that we are presweeping, we
                 // use that condition as a guard.
                 if (gc->Presweeping())
-                    gc->PushWorkItem(GCWorkItem(m_obj, uint32_t(GC::Size(m_obj)), GCWorkItem::kGCObject));
+                    gc->PushWorkItem(GCWorkItem(m_obj, 0, GCWorkItem::kGCObject));
             }
         }
 
