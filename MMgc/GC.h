@@ -65,6 +65,82 @@
 #  define VMPI_alloca_gc(gc, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
 #endif
 
+// Used by the GC annotation macros, can also be used manually in a pinch.
+
+#define GC_DECLARE_EXACT_METHODS \
+    public: \
+        virtual void gcTrace(MMgc::GC* gc); \
+        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+
+// Annotations for exact GC.  These are not merely macros, they are
+// also processed by a script that generates tracing code.  See the
+// comment block in utils/exactgc.as for full documentation.  See
+// core/Domain.h for a simple example of how to use them.
+
+// Class is C++ implementation of AS3 class: Use this to declare the
+// class.
+#define GC_AS3_EXACT(cls, basecls)  cls : public basecls
+#define GC_AS3_EXACT_IFDEF(cls, basecls, ifdef)  cls : public basecls
+#define GC_AS3_EXACT_WITH_HOOK(cls, basecls)  cls : public basecls
+
+// Class is internal to the runtime or host software, not exposed to
+// AS3: Use this to declare the class.
+#define GC_CPP_EXACT(cls, basecls)  cls : public basecls
+#define GC_CPP_EXACT_IFDEF(cls, basecls, ifdef)  cls : public basecls
+#define GC_CPP_EXACT_WITH_HOOK(cls, basecls)  cls : public basecls
+
+// Before the first data member in a class
+#define GC_DATA_BEGIN(cls)  GC_DECLARE_EXACT_METHODS
+
+// After the last data member in a class
+#define GC_DATA_END(cls)
+
+// Convenient shorthand, lots of glue classes have no manually
+// defined data on the C++ side.
+#define GC_NO_DATA(cls) \
+    GC_DATA_BEGIN(cls) \
+    GC_DATA_END(cls)
+
+// Atom field
+#define GC_ATOM(field) field
+#define GC_ATOM_IFDEF(field,ifdef) field
+#define GC_ATOM_IFNDEF(field,ifdef) field
+#define GC_ATOM_IF(field,if_) field
+
+// Exact pointer field
+#define GC_POINTER(field) field
+#define GC_POINTER_IFDEF(field,ifdef) field
+#define GC_POINTER_IFNDEF(field,ifdef) field
+#define GC_POINTER_IF(field,if_) field
+
+// Conservative pointer field
+#define GC_CONSERVATIVE(field) field
+#define GC_CONSERVATIVE_IFDEF(field,ifdef) field
+#define GC_CONSERVATIVE_IFNDEF(field,ifdef) field
+#define GC_CONSERVATIVE_IF(field,if_) field
+
+// Substructure fields: the field must provide a method 'void gcTrace(MMgc::GC* gc)' 
+// that is typically inline.  All List<> fields are substructure fields, and the
+// List<> templates provide the tracing functions.
+#define GC_STRUCTURE(field) field
+#define GC_STRUCTURE_IFDEF(field,ifdef) field
+#define GC_STRUCTURE_IFNDEF(field,ifdef) field
+#define GC_STRUCTURE_IF(field,ifdef) field
+
+// Trailing pointer array fields: The 'k' is used to declare an array,
+// it is almost always 1 (and may be redundant here - don't know yet).
+// The 'count' is an efficient expression that yields the allocated
+// size of the array; if it contains commas or parentheses it /must/
+// be enclosed in double quotes.
+#define GC_POINTERS(field,k,count) field[k]
+#define GC_POINTERS_SMALL(field,k,count) field[k] // note, this is a hint
+
+#define GC_ATOMS(field,k,count) field[k]
+#define GC_ATOMS_SMALL(field,k,count) field[k] // note, this is a hint
+
+#define GC_STRUCTURES(field,k,count) field[k]
+#define GC_STRUCTURES_SMALL(field,k,count) field[k]
+
 namespace avmplus
 {
     class AvmCore;
