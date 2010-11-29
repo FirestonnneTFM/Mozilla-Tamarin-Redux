@@ -64,13 +64,14 @@ const int kBufferPadding = 16;
 
     enum VB_Bits {
         // Output control bits for verbose mode
-        VB_builtins     = 1<<31, // display output for builtins (default is to ignore any builtins)
-        VB_parse        = 1<<30, // abc parsing information
-        VB_verify       = 1<<29, // verification information
-        VB_interp       = 1<<28, // interpreter information
-        VB_jit          = 1<<27, // jit information
-        VB_traits       = 1<<26, // traits creation information
-        VB_execpolicy   = 1<<25  // traits creation information
+         VB_builtins     = 1<<31 // display output for builtins (default is to ignore any builtins)
+        ,VB_parse        = 1<<30 // abc parsing information
+        ,VB_verify       = 1<<29 // verification information
+        ,VB_interp       = 1<<28 // interpreter information
+        ,VB_jit          = 1<<27 // jit information
+        ,VB_traits       = 1<<26 // traits creation information
+        ,VB_execpolicy   = 1<<25  // traits creation information
+        ,VB_raw          = 1<<24  // native code (via nanojit) is displayed in raw (i.e unbuffered bottom-up) fashion.
         // @warning make sure these don't collide with LC_xxx bits
     };
 
@@ -268,7 +269,7 @@ const int kBufferPadding = 16;
             VersionCount,
 
             kLatest = kSWF12    // alias for "most recent"; will be changed as new versions are added.
-                                
+
         };
 
         /** These are the external names for swf versions - all integers.
@@ -335,7 +336,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla526662:1;      // XMLParser stops at NUL char
         unsigned bugzilla558863:1;      // in operator on bytearray throws exception for non-natural number
         unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
-        unsigned bugzilla609416:1;      // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs      
+        unsigned bugzilla609416:1;      // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs
 
     protected:
         friend class AvmCore;
@@ -722,7 +723,7 @@ const int kBufferPadding = 16;
 #ifdef VMCFG_AOT
         /**
          * Parse and execute the ABC blocks linked into the runtime by the AOT
-         * compiler. 
+         * compiler.
          * @param toplevel the Toplevel object to execute against.
          * @param codeContext CodeContext to use for execution (implicitly specifies DomainEnv)
          * @throws Exception If an error occurs, an Exception object will
@@ -940,7 +941,7 @@ const int kBufferPadding = 16;
         DRC(Stringp) kindex;
         DRC(Stringp) kinput;
         DRC(Stringp) kemptyCtor;
-        
+
         DRC(Stringp) kAsterisk;     // '*'
         DRC(Stringp) kColon;        // ':'
         DRC(Stringp) kUnderscore;   // '_'
