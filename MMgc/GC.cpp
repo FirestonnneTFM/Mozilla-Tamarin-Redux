@@ -718,14 +718,19 @@ namespace MMgc
 
     void GC::AbortFree(const void* item)
     {
+        // Always clear the contents to avoid false retention of data: the
+        // object will henceforth be scanned conservatively, and it may be
+        // reachable from the stack or from other objects (dangling pointers
+        // caused by improper use of Free(), or non-pointers interpreted
+        // as pointers by the conservative scanner).
+        Zero(item);
+
         // FIXME - https://bugzilla.mozilla.org/show_bug.cgi?id=589102.
-        // (a) This code presumes we got here via delete, but that may not always 
-        //     be true, and if we didn't then it isn't right to clear the finalized
-        //     bit nor the weak ref bit.
-        // (b) If we can't free an object it may be that we should clear it, to
-        //     avoid hanging onto pointers to other objects.  AtomArray::checkCapacity
-        //     clears an object explicitly before freeing it always but should not have
-        //     to do that.
+        // The following actions presume we got here via delete, but that may not
+        // always be true, and if we didn't then it isn't right to clear the
+        // finalized bit, the weak ref bit, and possibly not the exactly traced bit.
+        
+        // Perform all cleanup actions
         if(IsFinalized(item))
             ClearFinalized(item);
         if(HasWeakRef(item))
