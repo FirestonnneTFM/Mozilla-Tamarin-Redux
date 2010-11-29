@@ -500,24 +500,6 @@ namespace MMgc
 #endif // MMGC_MEMORY_INFO
     };
 
-    template<class T>
-    class ZeroPtr
-    {
-    public:
-        ZeroPtr() { t = NULL; }
-        ZeroPtr(T _t) : t(_t) { }
-        ~ZeroPtr()
-        {
-            t = NULL;
-        }
-
-        operator T() { return t; }
-        bool operator!=(T other) { return other != t; }
-        T operator->() const { return t; }
-    private:
-        T t;
-    };
-
     template<class T, bool checkMissingWB=true>
     class RCPtr
     {
@@ -581,8 +563,6 @@ namespace MMgc
         {
             return (T) t;
         }
-
-        operator ZeroPtr<T>() const { return t; }
 
         bool operator!=(T other) { return other != t; }
 

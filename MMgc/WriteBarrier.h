@@ -275,8 +275,6 @@ namespace MMgc
         // let us peek at it without a cast
         REALLY_INLINE T value() const { return t; }
 
-        REALLY_INLINE operator ZeroPtr<T>() const { return t; }
-
         REALLY_INLINE bool operator!=(T other) const { return other != t; }
 
         REALLY_INLINE T operator->() const
@@ -339,8 +337,6 @@ namespace MMgc
         REALLY_INLINE T value() const { return t; }
 
         REALLY_INLINE operator T() const { return t; }
-
-        REALLY_INLINE operator ZeroPtr<T>() const { return t; }
 
         REALLY_INLINE bool operator!=(T other) const { return other != t; }
 
