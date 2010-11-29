@@ -1325,7 +1325,11 @@ namespace MMgc
         void MarkAllRoots(bool deep=false);
         void Mark();
         void MarkQueueAndStack(bool scanStack=true);
+#ifdef MMGC_CONSERVATIVE_PROFILER
+        void MarkItem(GCWorkItem &wi, bool isRoot=false);
+#else
         void MarkItem(GCWorkItem &wi);
+#endif
         bool HandleLargeMarkItem(GCWorkItem &wi, size_t &size);
         void EstablishSweepInvariants();
         void ClearMarkStack();
@@ -1402,6 +1406,9 @@ public:
         void DumpMemoryInfo();
 #ifdef MMGC_MEMORY_PROFILER
         void DumpPauseInfo();
+#endif
+#ifdef MMGC_CONSERVATIVE_PROFILER
+        ObjectPopulationProfiler* demos;
 #endif
 
 private:

@@ -174,6 +174,9 @@ namespace MMgc
         m_roots(0),
         m_callbacks(0),
         zct()
+#ifdef MMGC_CONSERVATIVE_PROFILER
+        , demos(0)
+#endif
 #ifdef DEBUGGER
         , m_sampler(NULL)
 #endif
@@ -266,6 +269,11 @@ namespace MMgc
 
         Alloc(2048);
 
+#ifdef MMGC_CONSERVATIVE_PROFILER
+        if (demos == NULL && heap->profiler != NULL)
+            demos = new ObjectPopulationProfiler(this, "Conservative scanning volume incurred by allocation site");
+#endif
+
         gcheap->AddGC(this);
         gcheap->AddOOMCallback(this);
 
@@ -277,6 +285,14 @@ namespace MMgc
 
     GC::~GC()
     {
+#ifdef MMGC_CONSERVATIVE_PROFILER
+        if (demos != NULL)
+        {
+            demos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
+            delete demos;
+            demos = NULL;
+        }
+#endif
         policy.shutdown();
         allocaShutdown();
 
@@ -1871,7 +1887,11 @@ namespace MMgc
                     if(item->GetSentinelPointer() == r)
                         r->SetMarkStackSentinelPointer(item);
                 }
+#ifdef MMGC_CONSERVATIVE_PROFILER
+                MarkItem(item, true);
+#else
                 MarkItem(item);
+#endif
                 if (deep)
                     Mark();
             }
@@ -2185,7 +2205,11 @@ namespace MMgc
     // Large gc-items are recognizable by a header bit designating the object
     // as large, the bit is set in the large-object allocator.
 
-    void GC::MarkItem(GCWorkItem &wi)
+    void GC::MarkItem(GCWorkItem &wi
+#ifdef MMGC_CONSERVATIVE_PROFILER
+                      , bool isRoot
+#endif
+                      )
     {
         GCAssert(markerActive);
 
@@ -2255,7 +2279,36 @@ namespace MMgc
         }
 
         policy.signalConservativeMarkWork(size);
-    
+#ifdef MMGC_CONSERVATIVE_PROFILER
+        MemoryProfiler* profiler = heap->GetProfiler();
+        if (profiler != NULL)
+        {
+            // There isn't really information to decisively tell roots and stacks apart,
+            // but since we only recognize interior pointers from the stack at present
+            // we make use of that fact for the time being.
+            
+            // Note for roots and stack we must use 'size', which is the amount we're
+            // marking at this increment.  Using it means we don't get a good idea of
+            // how large the roots and stacks actually are.  FIXME.
+
+            if (wi.IsGCItem())
+            {
+                GCAssert(!(GetGCBits(GetRealPointer(wi.ptr)) & kVirtualGCTrace));
+                demos->accountForObject(wi.ptr);
+            }
+            else if (wi.HasInteriorPtrs())
+                demos->accountForStack(size);
+            else if (isRoot)
+                demos->accountForRoot(size);
+            else {
+                /* skip it - it's a chunk of a large object that's been split, it has already
+                 * been accounted for because the accounting for the header piece will
+                 * account for the entire object
+                 */
+            }
+        }
+#endif
+        
         uintptr_t *p = (uintptr_t*) wi.ptr;
         uintptr_t *end = p + (size / sizeof(void*));
         while(p < end)
@@ -2337,6 +2390,7 @@ namespace MMgc
 #ifdef MMGC_POINTINESS_PROFILING
             actually_is_pointer++;
 #endif
+
             gcbits_t& bits2 = block->bits[GCAlloc::GetBitsIndex(block, item)];
             if ((bits2 & (kMark|kQueued)) == 0)
             {
