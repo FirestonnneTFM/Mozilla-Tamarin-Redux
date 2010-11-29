@@ -78,156 +78,6 @@ inline void write_null(void* p) { *(uintptr_t*)(p) = 0; }
 
 namespace MMgc
 {
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWriteRC(const void *address, const void *value)
-    {
-        RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
-        if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
-            rc->DecrementRef();
-        }
-        GCAssert(IsPointerIntoGCObject(address));
-        MMGC_WB_EDGE(address, value);
-        *(uintptr_t*)address = (uintptr_t) value;
-        rc = (RCObject*)Pointer(value);
-        if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
-            rc->IncrementRef();
-        }
-    }
-
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWriteRC_ctor(const void *address, const void *value)
-    {
-        // assume existing contents of address are potentially uninitialized,
-        // so don't bother even making an assertion.
-        GCAssert(IsPointerIntoGCObject(address));
-        MMGC_WB_EDGE(address, value);
-        *(uintptr_t*)address = (uintptr_t) value;
-        RCObject *rc = (RCObject*)Pointer(value);
-        if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
-            rc->IncrementRef();
-        }
-    }
-
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWriteRC_dtor(const void *address)
-    {
-        GCAssert(IsPointerIntoGCObject(address));
-        RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
-        MMGC_WB_EDGE(address, NULL);
-        if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
-            rc->DecrementRef();
-            *(uintptr_t*)address = 0;
-        }
-    }
-
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWrite(const void *address, const void *value)
-    {
-        GCAssert(!IsRCObjectSafe(value));
-        GCAssert(IsPointerIntoGCObject(address));
-        MMGC_WB_EDGE(address, value);
-        *(uintptr_t*)address = (uintptr_t) value;
-    }
-
-    /*private*/
-    REALLY_INLINE void GC::InlineWriteBarrierTrap(const void *container)
-    {
-        GCAssert(marking);
-        GCAssert(IsPointerToGCPage(container));
-
-        POLICY_PROFILING_ONLY(int stage=0;)
-        // If the object is black then it needs to be gray, because we just stored
-        // something into it.
-        //
-        // It's good to check 'marking' because it provides a performance boost if it is
-        // true less than maybe 2/3 of the time - it avoids more expensive computation.
-        // We don't check 'collecting' because that's much less often true; it's checked
-        // inside WriteBarrierHit.  We make it a precondition for this function because
-        // some computations can be elided if it is checked earlier.
-        //
-        // Testing shows that it's /sometimes/ useful to check the right hand side of the
-        // assignment for NULL, but this depends on the program and for the time being
-        // the right hand side isn't available here and isn't checked.
-
-        if (IsMarkedThenMakeQueued(container))
-        {
-            POLICY_PROFILING_ONLY(stage=1;)
-            WriteBarrierHit(container);
-        }
-        POLICY_PROFILING_ONLY( policy.signalWriteBarrierWork(stage); )
-    }
-
-    REALLY_INLINE void GC::privateInlineWriteBarrier(const void *container, const void *address, const void *value)
-    {
-        GCAssert(container != NULL);
-        GCAssert(IsPointerToGCObject(GetRealPointer(container)));
-        GCAssert(((uintptr_t)address & 3) == 0);
-
-        if (marking) {
-            GCAssert(address >= container);
-            GCAssert(address < (char*)container + Size(container));
-            InlineWriteBarrierTrap(container);
-        }
-        WriteBarrierWrite(address, value);
-    }
-
-    REALLY_INLINE void GC::privateInlineWriteBarrier(const void *address, const void *value)
-    {
-        GCAssert(((uintptr_t)address & 3) == 0);
-
-        if (marking) {
-            const void* container = FindBeginningFast(address);
-
-            GCAssert(IsPointerToGCPage(container));
-            GCAssert(address >= container);
-            GCAssert(address < (char*)container + Size(container));
-
-            InlineWriteBarrierTrap(container);
-        }
-        WriteBarrierWrite(address, value);
-    }
-
-    REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *container, const void *address, const void *value)
-    {
-        GCAssert(IsPointerToGCPage(container));
-        GCAssert(((uintptr_t)container & 3) == 0);
-        GCAssert(((uintptr_t)address & 2) == 0);
-        GCAssert(address >= container);
-        GCAssert(address < (char*)container + Size(container));
-
-        if (marking)
-            InlineWriteBarrierTrap(container);
-        WriteBarrierWriteRC(address, value);
-    }
-
-    REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *address, const void *value)
-    {
-        if (marking) {
-            const void* container = FindBeginningFast(address);
-
-            GCAssert(IsPointerToGCPage(container));
-            GCAssert(((uintptr_t)container & 3) == 0);
-            GCAssert(((uintptr_t)address & 2) == 0);
-            GCAssert(address >= container);
-            GCAssert(address < (char*)container + Size(container));
-
-            InlineWriteBarrierTrap(container);
-        }
-        WriteBarrierWriteRC(address, value);
-    }
-
-    REALLY_INLINE void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
-    {
-        (void)value;  // Can't get rid of this parameter now; part of an existing API
-
-        if (marking)
-            privateConservativeWriteBarrierNoSubstitute(address);
-    }
-
     /**
      * WB is a smart pointer write barrier meant to be used on any field of a GC object that
      * may point to another GC object.  A write barrier may only be avoided if if the field is
@@ -236,14 +86,13 @@ namespace MMgc
      */
     template<class T> class WriteBarrier
     {
+#ifdef MMGC_HEAP_GRAPH
+        friend class GC;    // for location()
+#endif
+        
     private:
-        // Always pay for a single real function call; then inline & optimize massively in WriteBarrier()
-        REALLY_INLINE
-        T set(const T tNew)
-        {
-            GC::WriteBarrier(&t, (const void*)tNew);    // updates 't'
-            return tNew;
-        }
+        T set(const T tNew);
+
     public:
         explicit REALLY_INLINE WriteBarrier() : t(0)
         {
@@ -287,6 +136,10 @@ namespace MMgc
         // WriteBarriers on the stack with it
         WriteBarrier(const WriteBarrier<T>& toCopy);    // unimplemented
 
+#ifdef MMGC_HEAP_GRAPH
+        const T* location() const { return &t; }
+#endif
+        
         T t;
     };
 
@@ -296,33 +149,23 @@ namespace MMgc
      */
     template<class T> class WriteBarrierRC
     {
+#ifdef MMGC_HEAP_GRAPH
+        friend class GC;    // for location()
+#endif
+
     private:
-        // Always pay for a single real function call; then inline & optimize massively in WriteBarrierRC()
-        REALLY_INLINE T set(const T tNew)
-        {
-            GC::WriteBarrierRC(&t, (const void*)tNew);  // updates 't'
-            return tNew;
-        }
+        T set(const T tNew);
 
     public:
         explicit REALLY_INLINE WriteBarrierRC() : t(0)
         {
         }
 
-        explicit REALLY_INLINE WriteBarrierRC(const T _t) // : t(0) -- not necessary, WriteBarrierRC_ctor handles it
-        {
-            GC::WriteBarrierRC_ctor(&t, (const void*)_t);
-        }
+        explicit WriteBarrierRC(const T _t);
 
-        REALLY_INLINE ~WriteBarrierRC()
-        {
-            GC::WriteBarrierRC_dtor(&t);
-        }
+        ~WriteBarrierRC();
 
-        REALLY_INLINE void set(MMgc::GC* gc, void* container, T newValue)
-        {
-            WBRC(gc, container, &t, newValue);
-        }
+        void set(MMgc::GC* gc, void* container, T newValue);
 
         REALLY_INLINE T operator=(const WriteBarrierRC<T>& wb)
         {
@@ -357,6 +200,10 @@ namespace MMgc
         // WriteBarrierRCs on the stack with it
         WriteBarrierRC(const WriteBarrierRC<T>& toCopy);
 
+#ifdef MMGC_HEAP_GRAPH
+        const T* location() const { return &t; }
+#endif
+        
         T t;
     };
 

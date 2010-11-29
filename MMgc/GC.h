@@ -68,6 +68,7 @@
 namespace avmplus
 {
     class AvmCore;
+    class Traits;
 #ifdef VMCFG_SELFTEST
     class ST_mmgc_basics;
 #endif
@@ -260,6 +261,7 @@ namespace MMgc
 #ifdef VMCFG_SELFTEST
         friend class avmplus::ST_mmgc_basics;
 #endif
+        friend class avmplus::Traits;    // We may be able to throttle back on this by making TracePointer visible, but OK for now
     public:
 
         /**
@@ -467,24 +469,45 @@ namespace MMgc
         void SignalDependentDeallocation(size_t nbytes);
 
         /**
-         * Replacement for VMPI_memmove for arrays of GC pointers that
-         * will properly account for mark state (since the GC now
-         * splits up large objects on the mark stack a memmove from the mutator
-         * can occur while an objection is partially marked).  Start must be
-         * a GC object and src and dst must be pointers in start.
+         * Move a subarray of pointers to managed objects from within one managed object
+         * to within another managed object, with efficient handling of write barriers.  The
+         * source and destination objects can be the same object.
+         *
+         * @param dstObject is a pointer to the base of the destination object (as returned from GC::Alloc, say)
+         * @param dstArray is the pointer to the base of the destination slot array within dstObject
+         * @param dstOffset is the offset within dstArray, in number of pointers, of the first destination slot
+         * @param srcArray is the pointer to the base of the source slot array within some unspecified source object
+         * @param srcOffset is the offset within srcArray, in number of pointers, of the first source slot
+         * @param numPointers is the number of pointers to move.
          */
-        void movePointers(void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers);
+        void movePointers(void* dstObject, void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers);
 
         /**
-         * Optimized version for moving within a single block of memory. Note that the 
-         * offsets are in bytes, not in void* indices, to allow for an array that is
-         * offset from the start of a block. If zeroEmptied is true, then the area "moved out of"
-         * will be zeroed (generally a good idea, to avoid phantom GC references or possible RC naughtiness)
+         * Move a subarray of pointers to managed objects from one place within
+         * one managed object to another place within the same object, with efficient
+         * handling of write barriers.
+         *
+         * NOTE that the units of offsets are bytes, not pointers, allowing for a pointer array
+         * that is offset from the start of an object.
+         *
+         * FIXME: Bugzilla 615193 This method is misnamed, "Block" has a specific meaning within
+         * MMgc and "managed object" ain't it.
+         *
+         * @param array is some base address inside the managed object
+         * @param dstOffsetInBytes is the offset in bytes from array at which to start writing pointers
+         * @param srcOffsetInBytes is the offset in bytes from array at which to start reading poitners
+         * @param numPointers is the number of pointers to move
+         * @param zeroEmptied is true if the space that is emptied (the top area if moving down, the bottom area
+         *        if moving up) should be zeroed.  Only pass false for this parameter if you know that that
+         *        will not create reference counting or false retention bugs.
          */
         void movePointersWithinBlock(void** array, uint32_t dstOffsetInBytes, uint32_t srcOffsetInBytes, size_t numPointers, bool zeroEmptied = true);
 
         /**
-         * Given a a GC memory block, reverse the order of numPointers worth of pointers (or pointer-sized data), starting at offsetInBytes from mem. 
+         * Given a a GC memory block, reverse the order of numPointers worth of pointers (or pointer-sized data), starting at offsetInBytes from mem.
+         *
+         * FIXME: Bugzilla 615193: This method is misnamed, "Block" has a specific meaning within
+         * MMgc and "managed object" ain't it.
          */
         void reversePointersWithinBlock(void* mem, size_t offsetInBytes, size_t numPointers);
 
@@ -575,6 +598,12 @@ namespace MMgc
         void FreeNotNull(const void *ptr);
 
         /**
+         * Zero the body of the object but leave any vtable and header bits unchanged.
+         * Use with caution - intended for certain debugging applications.
+         */
+        void Zero(const void *ptr);
+
+        /**
          * @return the size of a managed object given a user or real pointer to its
          * beginning.  The returned value may be bigger than what was asked for.
          */
@@ -596,7 +625,7 @@ namespace MMgc
         /**
          * Mark the given object as live.
          */
-        static int SetMark(const void *userptr);
+        static void SetMark(const void *userptr);
 
         /**
          * @return the queued bit for the given object: zero if not set, nonzero if set.
@@ -623,6 +652,34 @@ namespace MMgc
          * a weak reference.
          */
         static void SetHasWeakRef(const void *userptr, bool flag);
+
+        /**
+         * Mark the object as having a virtual gcTrace/gcTraceLarge pair.  If the
+         * object is subsequently reached by the marker it will be marked using
+         * those methods.
+         *
+         * EXACTGC INVESTIGATE: what happens if the object is subsequently split 
+         * on the mark stack?  The scenario is this: the object is not marked for exact
+         * tracing and is pushed onto the mark stack.  The object is large, so it is
+         * split; there are two cases: One, the object is marked as exactly traced before it
+         * is reached, this should be no problem because we make no assumptions about
+         * the object when it is pushed.  Two, the object is marked as exactly traced
+         * after we've traced the object's head.  In this case, will we reliably continue
+         * to trace it conservatively?  I've yet to see why the answer would be "no",
+         * but leaving this comment here for posterity.
+         */
+        static void SetHasGCTrace(const void* userptr);
+        
+        /**
+         * Query the exactly traced flag.
+         */
+        static int IsExactlyTraced(const void* userptr);
+        
+        /**
+         * Clear the exactly traced flag.  If the object is subsequently reached
+         * by the marker it will be scanned conservatively.
+         */
+        static void ClearExactlyTraced(const void* userptr);
 
         /**
          * Used by sub-allocators to obtain memory.
@@ -957,6 +1014,56 @@ namespace MMgc
         void PushWorkItem_MayFail(GCWorkItem &item);
         bool GetMarkStackOverflow() const { return m_markStackOverflow; }
 
+        // If the object is not marked and is not on the mark queue, then mark it and
+        // return true.  Otherwise return false.
+        //
+        // This method is intended to be used by gcTrace implementations that trace
+        // single-owner objects directly (eg, the atom table of an InlineHashtable),
+        // where the owned object does not have a vtable.  Use sparingly.
+        static bool TraceObjectGuard(const void* userptr);
+
+        // Let the contents at *loc be 'obj'.
+        // 'obj' is a possibly-null pointer to an object that may or may not be marked or queued and large or small
+        // and may or may not contain pointers.  The object will be marked (if not pointer-containing) or pushed 
+        // onto the mark queue (if pointer-containing) if not already marked or queued.
+        template <class T>
+        void TraceLocation(T* const * loc);
+
+        template <class T>
+        void TraceLocation(MMgc::WriteBarrier<T> const * loc);
+        
+        template <class T>
+        void TraceLocation(MMgc::WriteBarrierRC<T> const * loc);
+        
+        void TraceAtom(AtomWBCore * loc);
+        
+        // ditto, but the pointer at *loc may have tags or other information in the low three bits that we will discard.
+        void TraceLocation(uintptr_t* loc);
+
+        // ditto, but the pointer at *loc will have tags in the low three bits that we will use to direct interpretation
+        // of the value.  (This should be called TraceLocation but as long as Atom is an uintptr_t C++ gets in the way.)
+        void TraceAtom(avmplus::Atom* loc);
+
+        // Let the contents at *loc be 'val'.
+        // 'val' is some value that may be a pointer.  It may or may not be NULL.  It may or may
+        // not carry a tag.  It may or may not point to GC'd storage.  If it points to GC'd storage
+        // then it may or may not point to an object (as opposed to into one, or into free space).
+        // If it is a pointer to an object then that object may or may not already be marked or queued
+        // and large or small.  If the object is neither marked nor queued it is pushed onto the mark
+        // queue (if it contains pointers) or marked (if it does not contain pointers).
+        void TraceConservativeLocation(uintptr_t* loc);
+
+        // Trace an array of pointers as if by TraceLocation(void**).  Does not bounds check.
+        template <class T>
+        void TraceLocations(T** p, size_t numobjects);
+
+        // Trace an array of possibly-tagged pointer values as if by TraceLocation(uintptr_t*).  Does not bounds check.
+        void TraceLocations(uintptr_t* p, size_t numobjects);
+
+        // Trace an array of tagged values as if by TraceLocation(Atom*).  Does not bounds check.
+        // (This should be called TraceLocation but as long as Atom is an uintptr_t C++ gets in the way.)
+        void TraceAtoms(avmplus::Atom* atoms, size_t numatoms);
+        
     private:
         // 'val' is some value that may be a pointer.  It may or may not be NULL.  It may or may
         // not carry a tag.  It may or may not point to GC'd storage.  If it points to GC'd storage
@@ -968,7 +1075,17 @@ namespace MMgc
         // into an object.
         // 'loc' is the location within the containing object from which 'val' was read.
         void TraceConservativePointer(uintptr_t val, bool handleInteriorPtrs HEAP_GRAPH_ARG(uintptr_t* loc));
+        
+        // 'obj' is a possibly-null pointer to an object that may or may not be marked or queued and large or small
+        // and may or may not contain pointers.  'loc' is the location from which 'obj' was read.  The object will
+        // be marked (if not pointer-containing) or pushed onto the mark queue (if pointer-containing) if not already
+        // marked or queued.
+        void TracePointer(void* obj /* user pointer */ HEAP_GRAPH_ARG(const uintptr_t *loc));
 
+        // Trace an array of tagged atom values.  Does not bounds check - assumes that
+        // there are at least 'numatoms' atoms to trace.
+        void TraceAtomValue(avmplus::Atom atom HEAP_GRAPH_ARG(avmplus::Atom *loc));
+        
     public:
 #ifdef DEBUG
         // Check that invariants for an inactive GC hold
@@ -1293,7 +1410,17 @@ private:
         // item.ptr must not be NULL.
         void PushWorkItem(GCWorkItem item);
 
+        // Like PushWorkItem but does not try to assert the WorkItemInvariants;
+        // they don't hold when transfering items from the barrier stack, for
+        // example.
+        void PushWorkItem_Unsafe(GCWorkItem item);
+
 #ifdef _DEBUG
+        /**
+         * Check that a work item is consistent.
+         */
+        void WorkItemInvariants(GCWorkItem item);
+        
         /**
          * Check the consistency of the free lists for all the allocators.
          */

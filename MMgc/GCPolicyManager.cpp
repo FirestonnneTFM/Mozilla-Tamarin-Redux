@@ -97,10 +97,18 @@ namespace MMgc
         , blocksOwned(0)
         , maxBlocksOwned(0)
         , dependentAllocation(0)
-        , objectsScannedTotal(0)
-        , objectsScannedLastCollection(0)
-        , bytesScannedTotal(0)
-        , bytesScannedLastCollection(0)
+        , objectsScannedExactlyLastCollection(0)
+        , objectsScannedConservativelyLastCollection(0)
+        , objectsScannedPointerfreeLastCollection(0)
+        , bytesScannedExactlyLastCollection(0)
+        , bytesScannedConservativelyLastCollection(0)
+        , bytesScannedPointerfreeLastCollection(0)
+        , objectsScannedExactlyTotal(0)
+        , objectsScannedConservativelyTotal(0)
+        , objectsScannedPointerfreeTotal(0)
+        , bytesScannedExactlyTotal(0)
+        , bytesScannedConservativelyTotal(0)
+        , bytesScannedPointerfreeTotal(0)
         , start_time(0)
         , start_event(NO_EVENT)
         , collectionThreshold((config != NULL
@@ -267,7 +275,7 @@ namespace MMgc
     void GCPolicyManager::endAdjustingR()
     {
         adjustR_totalTime += now() - adjustR_startTime;
-        R = double(bytesScannedTotal) / (double(adjustR_totalTime) / double(VMPI_getPerformanceFrequency()));
+        R = (double(bytesScannedExactlyTotal) + double(bytesScannedConservativelyTotal) + double(bytesScannedPointerfreeTotal)) / (double(adjustR_totalTime) / double(VMPI_getPerformanceFrequency()));
         if (R < R_LOWER_LIMIT)
             R = R_LOWER_LIMIT;
     }
@@ -398,11 +406,13 @@ namespace MMgc
     }
 
     uint64_t GCPolicyManager::bytesMarked() {
-        return bytesScannedTotal + bytesScannedLastCollection;
+        return ((bytesScannedExactlyTotal + bytesScannedConservativelyTotal + bytesScannedPointerfreeTotal) + 
+                (bytesScannedExactlyLastCollection + bytesScannedConservativelyLastCollection + bytesScannedPointerfreeLastCollection));
     }
 
     uint64_t GCPolicyManager::objectsMarked() {
-        return objectsScannedTotal + objectsScannedLastCollection;
+        return ((objectsScannedExactlyTotal + objectsScannedConservativelyTotal + objectsScannedPointerfreeTotal) +
+                (objectsScannedExactlyLastCollection + objectsScannedConservativelyLastCollection + objectsScannedPointerfreeLastCollection));
     }
 
     uint32_t GCPolicyManager::queryZCTBudget(uint32_t zctSizeBlocks) {
@@ -458,10 +468,18 @@ namespace MMgc
                 timeMaxIncrementalMarkLastCollection = 0;
                 timeMaxFinalRootAndStackScanLastCollection = 0;
                 timeMaxFinalizeAndSweepLastCollection = 0;
-                objectsScannedTotal += objectsScannedLastCollection;
-                objectsScannedLastCollection = 0;
-                bytesScannedTotal += bytesScannedLastCollection;
-                bytesScannedLastCollection = 0;
+                objectsScannedExactlyTotal += objectsScannedExactlyLastCollection;
+                objectsScannedConservativelyTotal += objectsScannedConservativelyLastCollection;
+                objectsScannedPointerfreeTotal += objectsScannedPointerfreeLastCollection;
+                objectsScannedExactlyLastCollection = 0;
+                objectsScannedConservativelyLastCollection = 0;
+                objectsScannedPointerfreeLastCollection = 0;
+                bytesScannedExactlyTotal += bytesScannedExactlyLastCollection;
+                bytesScannedConservativelyTotal += bytesScannedConservativelyLastCollection;
+                bytesScannedPointerfreeTotal += bytesScannedPointerfreeLastCollection;
+                bytesScannedExactlyLastCollection = 0;
+                bytesScannedConservativelyLastCollection = 0;
+                bytesScannedPointerfreeLastCollection = 0;
 #ifdef MMGC_POINTINESS_PROFILING
                 candidateWords = 0;
                 couldBePointer = 0;
@@ -677,13 +695,23 @@ namespace MMgc
 #endif
         if (afterCollection || gc->IncrementalMarking())
         {
-            GCLog("[gcbehavior] markitem-last-gc: objects=%u bytes=%u\n",
-                  unsigned(objectsScannedLastCollection),
-                  unsigned(bytesScannedLastCollection));
+            GCLog("[gcbehavior] markitem-last-gc-objects: exactly=%u conservatively=%u pointerfree=%u\n",
+                  unsigned(objectsScannedExactlyLastCollection),
+                  unsigned(objectsScannedConservativelyLastCollection),
+                  unsigned(objectsScannedPointerfreeLastCollection));
+            GCLog("[gcbehavior] markitem-last-gc-bytes: exactly=%u conservatively=%u pointerfree=%u\n",
+                  unsigned(bytesScannedExactlyLastCollection),
+                  unsigned(bytesScannedConservativelyLastCollection),
+                  unsigned(bytesScannedPointerfreeLastCollection));
         }
-        GCLog("[gcbehavior] markitem-all-gc: objects=%.0f bytes=%.0f\n",
-              double(objectsScannedLastCollection + objectsScannedTotal),
-              double(bytesScannedLastCollection + bytesScannedTotal));
+        GCLog("[gcbehavior] markitem-all-gc-objects: exactly=%llu conservatively=%llu pointerfree=%llu\n",
+              (unsigned long long)(objectsScannedExactlyLastCollection + objectsScannedExactlyTotal),
+              (unsigned long long)(objectsScannedConservativelyLastCollection + objectsScannedConservativelyTotal),
+              (unsigned long long)(objectsScannedPointerfreeLastCollection + objectsScannedPointerfreeTotal));
+        GCLog("[gcbehavior] markitem-all-gc-bytes: exactly=%llu conservatively=%llu pointerfree=%llu\n",
+              (unsigned long long)(bytesScannedExactlyLastCollection + bytesScannedExactlyTotal),
+              (unsigned long long)(bytesScannedConservativelyLastCollection + bytesScannedConservativelyTotal),
+              (unsigned long long)(bytesScannedPointerfreeLastCollection + bytesScannedPointerfreeTotal));
 
         size_t blimit = ARRAY_SIZE(barrierStageLastCollection);
         utotal = 0;

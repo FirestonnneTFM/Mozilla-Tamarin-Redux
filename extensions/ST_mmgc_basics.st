@@ -283,8 +283,8 @@ delete gc;
                 delete [] (char*)fauxRoot->Get();
                 delete fauxRoot;
                 if(sentinel) {
-                    %%verify sentinel->GetSentinelType() == GCWorkItem::kDeadItem
-                    %%verify testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() == GCWorkItem::kDeadItem
+                    %%verify sentinel->GetSentinel1Type() == GCWorkItem::kDeadItem
+                    %%verify testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinel1Type() == GCWorkItem::kDeadItem
                 }
             }
             testGC->Mark();

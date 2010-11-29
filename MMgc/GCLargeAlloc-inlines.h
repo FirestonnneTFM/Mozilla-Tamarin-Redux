@@ -114,14 +114,13 @@ namespace MMgc
     {
     }
 
-    REALLY_INLINE bool GCLargeAllocIterator::GetNextMarkedObject(void*& out_ptr, uint32_t& out_size)
+    REALLY_INLINE bool GCLargeAllocIterator::GetNextMarkedObject(void*& out_ptr)
     {
         while (block != NULL) {
             GCLargeAlloc::LargeBlock* b = block;
             block = GCLargeAlloc::Next(block);
             if ((b->flags[0] & kMark) != 0 && (b->containsPointers != 0)) {
                 out_ptr = GetUserPointer(b->GetObject());
-                out_size = b->size - (uint32_t)DebugSize();
                 return true;
             }
         }
