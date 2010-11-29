@@ -83,7 +83,7 @@ namespace MMgc
 
         if (block)
         {
-            gcbits_t flagbits0 = 0;
+            gcbits_t flagbits0 = kLargeObject;
             gcbits_t flagbits1 = 0;
             flagbits0 |= ((flags&GC::kFinalize) != 0) ? kFinalizable : 0;
 

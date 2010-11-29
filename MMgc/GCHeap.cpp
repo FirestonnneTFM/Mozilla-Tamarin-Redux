@@ -2617,17 +2617,8 @@ namespace MMgc
     void GCHeap::InitProfiler()
     {
         GCAssert(IsProfilerInitialized() == false);
-        profiler = NULL;
 
-#ifdef MMGC_MEMORY_INFO
-        bool profilingEnabled = true;
-#else
-        bool profilingEnabled = VMPI_isMemoryProfilingEnabled();
-#endif
-        if(profilingEnabled)
-        {
-            profiler = new MemoryProfiler();
-        }
+        profiler = VMPI_isMemoryProfilingEnabled() ? new MemoryProfiler() : NULL;
     }
 
 #endif //MMGC_MEMORY_PROFILER

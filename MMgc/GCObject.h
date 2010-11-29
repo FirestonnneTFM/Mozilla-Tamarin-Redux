@@ -65,7 +65,8 @@ REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc, int flags)
 namespace MMgc
 {
     /**
-     * Baseclass for GC managed objects that aren't finalized
+     * Base class for GC managed objects that aren't finalized and are
+     * conservatively traced.
      */
     class GCObject
     {
@@ -82,17 +83,111 @@ namespace MMgc
         GCWeakRef *GetWeakRef() const;
     };
 
-    /**
-     *  Baseclass for GC managed objects that are finalized
-     */
-    class GCFinalizedObject
-    //: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
-    // the most base class (GCObject) not having any virtual methods)
+    // GCTraceableBase is internal to MMgc.
+    //
+    // Observe that clients of GCTraceableObject and GCFinalizedObject can
+    // implement one or the other gcTrace method, if the object is known always
+    // to be large or small.  In practice, variable-length objects
+    // must implement both methods, though often the "small" method can delegate
+    // to the "large" method.  Utility functions are provided to make this
+    // delegation easy.
+    //
+    // NOTE: Given the differences in object size between 32-bit and 64-bit systems
+    // it can be dangerous to make assumptions close to the cutoff.
+    //
+    // NOTE: We will almost certainly consolidate the two tracing methods into
+    // a single tracing method, to make the system simpler to use.
+
+    class GCTraceableBase
     {
     public:
+        virtual ~GCTraceableBase() { /* must be empty */ }
+        
+        // This is for small objects (no larger than kLargestAlloc).  The
+        // method must trace all pointers in the object.
+        //
+        // The base version of this method aborts the process - you must
+        // override if there's a chance that it can be called, and you
+        // must never delegate to the base method.
+
+        virtual void gcTrace(GC* gc);
+        
+        // This is for large objects (larger than kLargestAlloc).  This method
+        // may be called multiple times on a single object.  On the first call
+        // 'cursor' will be 0, and it will increment after that.  Any value
+        // must be accepted for 'cursor' but unless it is 0 then it will be
+        // one greater than it was on the last invocation for the same object.
+        // On each invocation the method should attempt to do marking work
+        // corresponding roughly to kLargestAlloc/sizeof(void*) words.  If
+        // any marking work was done then true /must/ be returned.  If no
+        // marking work was done the false should be returned as the object will
+        // be re-visited until that happens.
+        //
+        // Note that marking may start over without first reaching the end
+        // of the object, as a result of updates interleaved with marking.  A
+        // restarted marking is indicated by a cursor == 0.
+        //
+        // The base version of this method aborts the process - you must
+        // override if there's a chance that it can be called, and you
+        // must never delegate to the base method.
+        
+        virtual bool gcTraceLarge(GC* gc, size_t cursor);
+
+        // The class must have an empty operator 'delete' to prevent the C++
+        // compiler from inserting a call to the system's delete operator into
+        // the base class destructor.
+        static void operator delete(void *) { /* must be empty */ }
+
+        // For quick-and-dirty implementation of gcTraceLarge when there's a useful
+        // gcTrace: this delegates to gcTrace by calling gcTrace and returning true
+        // when cursor is zero, then returning false for any other value of cursor.
+
+        bool gcTraceLargeAsSmall(GC* gc, size_t cursor);
+
+        // For quick-and-dirty implementation of gcTrace when there's a useful gcTraceLarge:
+        // this delegates to gcTraceLarge by calling gcTraceLarge repeatedly with increasing
+        // cursor values until it returns false.
+
+        void gcTraceSmallAsLarge(GC* gc);
+    };
+
+    /**
+     * Base class for GC-managed objects that are not finalizable but have
+     * virtual gcTrace methods.  This must be used as the most base class
+     * instead of GCObject, it can't be mixed in later.
+     *
+     * Note that subtypes that want to be traced exactly still have to set
+     * the traceable bit in their constructor by calling MMgc::setExact on the
+     * object, it is not done for them here.
+     *
+     * The operators and methods here are exactly like those of GCObject.
+     */
+    class GCTraceableObject : public GCTraceableBase
+    {
+    public:
+        // This class can only have an empty destructor.
+        
+        static void *operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw());
+        static void *operator new(size_t size, GC *gc) GNUC_ONLY(throw());
+        static void operator delete(void *gcObject);
+        
+        GCWeakRef *GetWeakRef() const;
+    };
+
+    /**
+     * Baseclass for GC managed objects that are finalized.
+     *
+     * Note that subtypes that want to be traced exactly still have to set
+     * the traceable bit in their constructor by calling MMgc::setExact(), 
+     * it is not done for them here.
+     */
+    class GCFinalizedObject : public GCTraceableBase
+    {
+    public:
+        // This class can only have an empty destructor.
+        
         GCWeakRef *GetWeakRef() const;
 
-        virtual ~GCFinalizedObject();
         static void* operator new(size_t size, GC *gc, size_t extra);
         static void* operator new(size_t size, GC *gc);
         static void operator delete (void *gcObject);
@@ -123,11 +218,33 @@ namespace MMgc
         return GC::GetWeakRef(this);
     }
 
-    REALLY_INLINE GCFinalizedObject::~GCFinalizedObject()
+    REALLY_INLINE void GCTraceableBase::gcTraceSmallAsLarge(GC* gc)
     {
-        // Nothing
+        size_t cursor = 0;
+        while (gcTraceLarge(gc, cursor++))
+            ;
     }
 
+    REALLY_INLINE void *GCTraceableObject::operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw())
+    {
+        return gc->AllocExtraPtrZero(size, extra);
+    }
+    
+    REALLY_INLINE void *GCTraceableObject::operator new(size_t size, GC *gc) GNUC_ONLY(throw())
+    {
+        return gc->AllocPtrZero(size);
+    }
+    
+    REALLY_INLINE void GCTraceableObject::operator delete(void *gcObject)
+    {
+        GC::GetGC(gcObject)->FreeNotNull(gcObject);
+    }
+    
+    REALLY_INLINE GCWeakRef* GCTraceableObject::GetWeakRef() const
+    {
+        return GC::GetWeakRef(this);
+    }
+    
     REALLY_INLINE GCWeakRef* GCFinalizedObject::GetWeakRef() const
     {
         return GC::GetWeakRef(this);
@@ -225,6 +342,9 @@ namespace MMgc
             // it is already in the ZCT.  So remove it if necessary.
             if (InZCT())
                 GC::GetGC(this)->RemoveFromZCT(this REFCOUNT_PROFILING_ARG(true));
+            // We'd like to assert this but can't, for the moment.  The case is handled 
+            // in the allocator instead, see call paths ending at AbortFree.
+            //GCAssert((GC::GetGC(this)->GetGCBits(this) & (kMark|kQueued)) != kQueued);
             composite = 0;
         }
 
@@ -500,24 +620,6 @@ namespace MMgc
 #endif // MMGC_MEMORY_INFO
     };
 
-    template<class T>
-    class ZeroPtr
-    {
-    public:
-        ZeroPtr() { t = NULL; }
-        ZeroPtr(T _t) : t(_t) { }
-        ~ZeroPtr()
-        {
-            t = NULL;
-        }
-
-        operator T() { return t; }
-        bool operator!=(T other) { return other != t; }
-        T operator->() const { return t; }
-    private:
-        T t;
-    };
-
     template<class T, bool checkMissingWB=true>
     class RCPtr
     {
@@ -582,8 +684,6 @@ namespace MMgc
             return (T) t;
         }
 
-        operator ZeroPtr<T>() const { return t; }
-
         bool operator!=(T other) { return other != t; }
 
         T operator->() const
@@ -600,8 +700,7 @@ namespace MMgc
         inline bool valid() { return (uintptr_t)t > 1; }
         T t;
     };
-
-
+    
 // put spaces around the template arg to avoid possible digraph warnings
 #define DRC(_type) MMgc::RCPtr< _type, true >
 

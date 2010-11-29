@@ -828,6 +828,7 @@
 		079DFC970F3AB9640031D1B4 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		07A8D2DD0F5EEA2B0005E66C /* OOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OOM.h; path = ../../../MMgc/OOM.h; sourceTree = SOURCE_ROOT; };
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
+		07B1D9C21288521400685347 /* WriteBarrier-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "WriteBarrier-inlines.h"; path = "../../../MMgc/WriteBarrier-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07C0F7BE0FDE897100B0E09A /* BasicList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BasicList.h; path = ../../../MMgc/BasicList.h; sourceTree = SOURCE_ROOT; };
 		07C2E83A10A193FC00C773C6 /* SpyUtilsSymbian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsSymbian.cpp; path = ../../../VMPI/SpyUtilsSymbian.cpp; sourceTree = SOURCE_ROOT; };
 		07C2E83B10A193FC00C773C6 /* SymbianDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbianDebugUtils.cpp; path = ../../../VMPI/SymbianDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -1545,6 +1546,7 @@
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
+				07B1D9C21288521400685347 /* WriteBarrier-inlines.h */,
 				07689A9E101DC28000BC72AA /* ZCT.cpp */,
 				07689A9F101DC28000BC72AA /* ZCT.h */,
 				076899071019D3AC00BC72AA /* ZCT-inlines.h */,
@@ -1744,7 +1746,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "avmshell" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,

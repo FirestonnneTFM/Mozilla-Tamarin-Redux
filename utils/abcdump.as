@@ -1568,18 +1568,14 @@ package abcdump
         var data:ByteArray = File.readByteArray(file)
         data.endian = "littleEndian"
         var version:uint = data.readUnsignedInt()
-        switch (version) {
+        switch (version&0xffffff) {
         case 46<<16|14:
         case 46<<16|15:
         case 46<<16|16:
             var abc:Abc = new Abc(data)
             abc.dump()
             break
-        case 67|87<<8|83<<16|10<<24: // SWC10
-        case 67|87<<8|83<<16|9<<24: // SWC9
-        case 67|87<<8|83<<16|8<<24: // SWC8
-        case 67|87<<8|83<<16|7<<24: // SWC7
-        case 67|87<<8|83<<16|6<<24: // SWC6
+        case 67|87<<8|83<<16: // SWC
             var udata:ByteArray = new ByteArray
             udata.endian = "littleEndian"
             data.position = 8
@@ -1594,13 +1590,7 @@ package abcdump
             udata.position = 0
             /*var swf:Swf =*/ new Swf(udata)
             break
-        case 70|87<<8|83<<16|10<<24: // SWF10
-        case 70|87<<8|83<<16|9<<24: // SWF9
-        case 70|87<<8|83<<16|8<<24: // SWF8
-        case 70|87<<8|83<<16|7<<24: // SWF7
-        case 70|87<<8|83<<16|6<<24: // SWF6
-        case 70|87<<8|83<<16|5<<24: // SWF5
-        case 70|87<<8|83<<16|4<<24: // SWF4
+        case 70|87<<8|83<<16: // SWF
             if (doDecompressOnly)
                System.exit(0)
             data.position = 8 // skip header and length
