@@ -126,6 +126,18 @@
 // this might be good to enable in a heightened DEBUG build, it triggers bug 561402
 //#define MMGC_POISON_MEMORY_FROM_OS
 
+#ifdef MMGC_MEMORY_PROFILER
+    // Internal: profile uses of the conservative marker
+    //
+    // When MMGC_CONSERVATIVE_PROFILER is enabled the VM avoids explicitly freeing
+    // objects in some cases, see eg InlineHashtable and AtomList.  The reason is
+    // that freeing an object that's on the mark stack will lead to the object
+    // being conservatively traced (its kVirtualGCTrace bit is disabled by AbortFree)
+    // and that confuses the statistics.  Instead of freeing the object the VM will
+    // zero it.
+    //#define MMGC_CONSERVATIVE_PROFILER
+#endif
+
 #ifdef MMGC_REFCOUNT_PROFILING
     #define REFCOUNT_PROFILING_ONLY(x) x
     #define REFCOUNT_PROFILING_ARG(x) , x
