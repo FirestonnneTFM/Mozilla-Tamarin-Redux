@@ -42,6 +42,23 @@
 
 namespace MMgc
 {
+    void GCTraceableBase::gcTrace(GC* gc)
+    {
+        (void)gc;
+        GCAssert(!"Only overridden implementations of GCTraceableBase::gcTrace should ever be called");
+        GCHeap::GetGCHeap()->Abort();
+    }
+
+    bool GCTraceableBase::gcTraceLarge(GC* gc, size_t cursor)
+    {
+        (void)gc;
+        (void)cursor;
+        GCAssert(!"Only overridden implementations of GCTraceableBase::gcTraceLarge should ever be called");
+        GCHeap::GetGCHeap()->Abort();
+        /*NOTREACHED*/
+        return false;
+    }
+    
 #ifdef MMGC_RC_HISTORY
 
     void RCObject::DumpHistory()
@@ -54,4 +71,13 @@ namespace MMgc
     }
 
 #endif
+
+    bool GCTraceableBase::gcTraceLargeAsSmall(GC* gc, size_t cursor)
+    {
+        if (cursor == 0) {
+            gcTrace(gc); 
+            return true;
+        }
+        return false; 
+    }
 }

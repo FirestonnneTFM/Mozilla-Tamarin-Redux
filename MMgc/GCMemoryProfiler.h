@@ -81,6 +81,50 @@ namespace MMgc
 
     typedef GCHashtableBase<const void*, GCStackTraceHashtableKeyHandler,GCHashtableAllocHandler_VMPI> GCStackTraceHashtable_VMPI;
 
+    class ObjectPopulationProfiler : public GCAllocObject
+    {
+    public:
+        enum DumpMode {
+            BY_VOLUME,
+            BY_COUNT
+        };
+
+        ObjectPopulationProfiler(GC* gc, const char* profileName);
+        ~ObjectPopulationProfiler();
+
+        void accountForObject(const void* obj);
+        void accountForRoot(size_t size);
+        void accountForStack(size_t size);
+
+        void dumpTopBacktraces(int howmany, DumpMode mode=BY_VOLUME);
+        
+    private:
+
+        GC* gc;
+        GCHeap* heap;
+        const char* profileName;
+        
+        // Roots and stacks
+        struct Summary
+        {
+            Summary() : numobjects(0), numbytes(0) {}
+
+            size_t   numobjects;
+            uint64_t numbytes;
+        };
+
+        Summary roots;
+        Summary rootHistogram[32];
+        Summary stacks;
+        Summary stackHistogram[32];
+        
+        // Objects
+        struct PopulationNode;
+
+        PopulationNode *list;
+        uint32_t length;
+    };
+
     class MemoryProfiler : public GCAllocObject
     {
     public:

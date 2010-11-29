@@ -158,7 +158,7 @@ namespace MMgc
     public:
         GCLargeAllocIterator(MMgc::GCLargeAlloc* alloc);
 
-        bool GetNextMarkedObject(void*& out_ptr, uint32_t& out_size);
+        bool GetNextMarkedObject(void*& out_ptr);
 
     private:
         GCLargeAlloc* const alloc;

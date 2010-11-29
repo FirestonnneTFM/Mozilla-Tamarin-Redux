@@ -171,16 +171,29 @@ namespace MMgc
          */
         void signalBlockDeallocation(size_t numblocks);
 
+        /* The mark work signaling methods may only be called between the signals
+         * START_StartIncrementalMark and END_FinalizeAndSweep, and mark work signaled
+         * after a START event may not be reflected in the values returned by
+         * objectsMarked() and bytesMarked() until after the corresponding END event
+         * has been signaled.
+         */
         /**
          * Situation: signal that one pointer-containing object, whose size is nbytes,
-         * has been scanned by the garbage collector.
-         *
-         * This may only be called between the signals START_StartIncrementalMark and
-         * END_FinalizeAndSweep, and mark work signaled after a START event may not be
-         * reflected in the values returned by objectsMarked() and bytesMarked() until
-         * after the corresponding END event has been signaled.
+         * has been traced precisely by the garbage collector.
          */
-        /*REALLY_INLINE*/ void signalMarkWork(size_t nbytes);
+        void signalExactMarkWork(size_t nbytes);
+        
+        /**
+         * Situation: signal that one pointer-containing object, whose size is nbytes,
+         * has been traced conservatively by the garbage collector.
+         */
+        void signalConservativeMarkWork(size_t nbytes);
+        
+        /**
+         * Situation: signal that one pointer-free object, whose size is nbytes,
+         * has been traced by the garbage collector.
+         */
+        void signalPointerfreeMarkWork(size_t nbytes);
 
         /**
          * Situation: signal that some number of bytes have just been successfully
@@ -429,20 +442,27 @@ namespace MMgc
         // Dependent allocation for this GC
         size_t dependentAllocation;
 
-        // The number of objects scanned since startup (which is equivalent to the number
-        // of calls to GC::MarkItem), less the number scanned during the last
-        // collection cycle.
-        uint64_t objectsScannedTotal;
-
         // The number of objects scanned during the last collection cycle.
-        uint32_t objectsScannedLastCollection;
-
-        // The number of bytes scanned since startup less the ones scanned during the
-        // last collection cycle.
-        uint64_t bytesScannedTotal;
+        uint32_t objectsScannedExactlyLastCollection;
+        uint32_t objectsScannedConservativelyLastCollection;
+        uint32_t objectsScannedPointerfreeLastCollection;
 
         // The number of bytes scanned during the last collection cycle.
-        uint32_t bytesScannedLastCollection;
+        uint32_t bytesScannedExactlyLastCollection;
+        uint32_t bytesScannedConservativelyLastCollection;
+        uint32_t bytesScannedPointerfreeLastCollection;
+
+        // The number of objects scanned since startup, less the number scanned
+        // during the last collection cycle.
+        uint64_t objectsScannedExactlyTotal;
+        uint64_t objectsScannedConservativelyTotal;
+        uint64_t objectsScannedPointerfreeTotal;
+        
+        // The number of bytes scanned since startup less the ones scanned during the
+        // last collection cycle.
+        uint64_t bytesScannedExactlyTotal;
+        uint64_t bytesScannedConservativelyTotal;
+        uint64_t bytesScannedPointerfreeTotal;
 
         // Temporaries for holding the start time / start event until the end event arrives
         uint64_t start_time;

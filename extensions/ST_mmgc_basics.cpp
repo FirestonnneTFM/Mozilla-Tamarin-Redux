@@ -387,9 +387,9 @@ verifyPass(sentinel != NULL, "sentinel != NULL", __FILE__, __LINE__);
                 delete fauxRoot;
                 if(sentinel) {
 #line 286 "ST_mmgc_basics.st"
-verifyPass(sentinel->GetSentinelType() == GCWorkItem::kDeadItem, "sentinel->GetSentinelType() == GCWorkItem::kDeadItem", __FILE__, __LINE__);
+verifyPass(sentinel->GetSentinel1Type() == GCWorkItem::kDeadItem, "sentinel->GetSentinel1Type() == GCWorkItem::kDeadItem", __FILE__, __LINE__);
 #line 287 "ST_mmgc_basics.st"
-verifyPass(testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() == GCWorkItem::kDeadItem, "testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() == GCWorkItem::kDeadItem", __FILE__, __LINE__);
+verifyPass(testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinel1Type() == GCWorkItem::kDeadItem, "testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinel1Type() == GCWorkItem::kDeadItem", __FILE__, __LINE__);
                 }
             }
             testGC->Mark();

@@ -65,26 +65,38 @@ namespace MMgc
         // A sentinel is a work item that doesn't actually do any mark work but
         // causes some action to be taken when encountered, see GC::HandleLargeMarkItem.
         // It is stored in lower bits of ptr, so again we only have 2 bits to play with.
-        enum GCSentinelItemType
+        // Since we need more bits than that, we have multiple sentinel tags.
+        
+        enum GCSentinel1ItemType
         {
             kDeadItem=3, // Pop asserts on 0
             kGCLargeAlloc=1,
             kGCRoot=2,
         };
 
+        // More sentinel tags (they use a different pseudo-size value).
+        enum GCSentinel2ItemType
+        {
+            kLargeExactlyTracedTail=1,
+            kInertPayload=2,
+        };
+        
         // FIXME? The initialization is redundant for most locals and for the mark stack we
         // don't want to have to init all the elements in the array as it makes allocating a mark
         // stack segment expensive.  I believe we could safely get rid of the two initializing
         // clauses here.  --lars
         GCWorkItem() : ptr(NULL), _size(0) { }
         GCWorkItem(const void *p, uint32_t s, GCWorkItemType itemType);
-        GCWorkItem(const void *p, GCSentinelItemType type);
+        GCWorkItem(const void *p, GCSentinel1ItemType type);
+        GCWorkItem(const void *p, GCSentinel2ItemType type);
 
-        uint32_t GetSize() const { return _size & ~3; }
+        uint32_t GetSize() const;
         uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
         uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
-        uint32_t IsSentinelItem() const { return GetSize() == kSentinelSize; }
-        uint32_t GetSentinelType() const { return iptr & 3; }
+        bool IsSentinel1Item() const { return (_size & ~3) == kSentinel1Size; }
+        bool IsSentinel2Item() const { return (_size & ~3) == kSentinel2Size; }
+        GCSentinel1ItemType GetSentinel1Type() const { return (GCSentinel1ItemType)(iptr & 3); }
+        GCSentinel2ItemType GetSentinel2Type() const { return (GCSentinel2ItemType)(iptr & 3); }
         void *GetSentinelPointer() const { return (void*) (iptr & ~3); }
 
         // Cancel item by clearing its pointer, setting sentinel to
@@ -92,7 +104,8 @@ namespace MMgc
         // and HandleLargeMarkItem.
         void Clear();
 
-        static const uint32_t kSentinelSize = ~0U - 3;
+        static const uint32_t kSentinel1Size = ~0U - 3; // low two bits
+        static const uint32_t kSentinel2Size = ~0U - 7; //    must be zero
 
         // If a WI is a GC item, `ptr` is the UserPointer; it must not
         // be the RealPointer nor an interior pointer.  When _size
@@ -149,6 +162,9 @@ namespace MMgc
 
         /** @return the number of elements on the stack. */
         uint32_t Count();
+
+        /** @return true if the stack is empty */
+        bool IsEmpty();
 
         /** Pop all elements off the stack, discard the cached extra segment. */
         void Clear();
@@ -263,6 +279,13 @@ namespace MMgc
     {
         GCAssert(m_top > m_base);
         return m_top-1;
+    }
+
+    REALLY_INLINE bool GCMarkStack::IsEmpty()
+    {
+        // See Invariants(): m_top == m_base only when there is no older segment
+        // and the current segment is empty.
+        return m_top == m_base;
     }
 
     REALLY_INLINE uint32_t GCMarkStack::Count()

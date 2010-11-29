@@ -46,6 +46,17 @@
 
 namespace MMgc
 {
+    // Top level
+
+    // Set the bit on the object that flags it as having a virtual gcTrace/gcTraceLarge
+    // pair of methods.  Return the object.
+    template<class T>
+    REALLY_INLINE T* setExact(T* value)
+    {
+        GC::SetHasGCTrace(value);
+        return value;
+    }
+    
     // GCRoot
 
     REALLY_INLINE void *GCRoot::operator new(size_t size)
@@ -311,17 +322,26 @@ namespace MMgc
     }
 
     /*static*/
-    REALLY_INLINE int GC::SetMark(const void *userptr)
+    REALLY_INLINE void GC::SetMark(const void *userptr)
     {
         const void *realptr = GetRealPointer(userptr);
         GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
         gcbits_t& bits = GetGCBits(realptr);
-        int set = bits & kMark;
-        bits |= kMark;
-        bits &= ~kQueued;
-        return set;
+        bits = (bits | kMark) & ~kQueued;
     }
 
+    REALLY_INLINE bool GC::TraceObjectGuard(const void* userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        gcbits_t& bits = GetGCBits(realptr);
+        if ((bits & (kMark|kQueued)) == 0) {
+            bits |= kMark;
+            return true;
+        }
+        return false;
+    }
+    
     REALLY_INLINE int GC::GetQueued(const void *userptr)
     {
         const void *realptr = GetRealPointer(userptr);
@@ -360,6 +380,30 @@ namespace MMgc
         return GetGCBits(realptr) & kFinalizable;
     }
 
+    /*static*/
+    REALLY_INLINE void GC::SetHasGCTrace(const void* userptr)
+    {
+        const void* realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        GetGCBits(realptr) |= kVirtualGCTrace;
+    }
+
+    /*static*/
+    REALLY_INLINE int GC::IsExactlyTraced(const void *userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        return GetGCBits(realptr) & kVirtualGCTrace;
+    }
+    
+    /*static*/
+    REALLY_INLINE void GC::ClearExactlyTraced(const void *userptr)
+    {
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+        GetGCBits(realptr) &= ~kVirtualGCTrace;
+    }
+    
     /*static*/
     REALLY_INLINE int GC::HasWeakRef(const void *userptr)
     {
@@ -514,6 +558,75 @@ namespace MMgc
         return (GetGCBits(realptr) & kQueued) != 0;
     }
 
+    template<class T>
+    REALLY_INLINE void GC::TraceLocation(T* const * loc)
+    {
+        TracePointer((void*)*loc HEAP_GRAPH_ARG((uintptr_t*)loc));
+    }
+
+    REALLY_INLINE void GC::TraceLocation(uintptr_t* loc)
+    {
+        TracePointer((void*)(*loc & ~7) HEAP_GRAPH_ARG(loc));
+    }
+
+    REALLY_INLINE void GC::TraceAtom(avmplus::Atom* loc)
+    {
+        TraceAtomValue(*loc HEAP_GRAPH_ARG(loc));
+    }
+
+    template <class T>
+    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrier<T> const * loc)
+    {
+        TracePointer((void*)loc->value() HEAP_GRAPH_ARG((uintptr_t*)loc->location()));
+    }
+
+    template <>
+    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrier<uintptr_t> const * loc)
+    {
+        TracePointer((void*)(loc->value() & ~7) HEAP_GRAPH_ARG(loc->location()));
+    }
+    
+    template <class T>
+    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrierRC<T> const * loc)
+    {
+        TracePointer((void*)loc->value() HEAP_GRAPH_ARG((uintptr_t*)loc->location()));
+    }
+
+    template <>
+    REALLY_INLINE void GC::TraceLocation(MMgc::WriteBarrierRC<uintptr_t> const * loc)
+    {
+        TracePointer((void*)(loc->value() & ~7) HEAP_GRAPH_ARG(loc->location()));
+    }
+    
+    REALLY_INLINE void GC::TraceAtom(AtomWBCore* loc)
+    {
+        TraceAtomValue(loc->value() HEAP_GRAPH_ARG(loc->location()));
+    }
+    
+    template<class T>
+    REALLY_INLINE void GC::TraceLocations(T** p, size_t numobjects)
+    {
+        for ( size_t i=0 ; i < numobjects ; i++ )
+            TracePointer(p[i] HEAP_GRAPH_ARG((uintptr_t*)(p+i)));
+    }
+
+    REALLY_INLINE void GC::TraceLocations(uintptr_t* p, size_t numobjects)
+    {
+        for ( size_t i=0 ; i < numobjects ; i++ )
+            TracePointer((void*)(p[i] & ~7) HEAP_GRAPH_ARG(p+i));
+    }
+    
+    REALLY_INLINE void GC::TraceAtoms(avmplus::Atom* p, size_t numobjects)
+    {
+        for ( size_t i=0 ; i < numobjects ; i++ )
+            TraceAtomValue(p[i] HEAP_GRAPH_ARG(p+i));
+    }
+
+    REALLY_INLINE void GC::TraceConservativeLocation(uintptr_t* loc)
+    {
+        TraceConservativePointer(*loc, false HEAP_GRAPH_ARG(loc));
+    }
+
     REALLY_INLINE PageMap::PageType GC::GetPageMapValue(uintptr_t addr) const
     {
         GCAssert(pageMap.AddrIsMappable(addr));
@@ -649,6 +762,11 @@ namespace MMgc
 #endif
     {
         GCAssert((s & 3) == 0);
+        // The size is computed on demand for GC objects by GCWorkItem::GetSize(), so
+        // should always be passed as zero here.  Long term the size may not be stored
+        // in the mark item at all as it will only be needed for conservatively
+        // traced objects and for very accurate accounting.
+        GCAssert(workItemType != GCWorkItem::kGCObject || s == 0);
 #ifdef _DEBUG
         if (IsGCItem()) {
             GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
@@ -656,18 +774,28 @@ namespace MMgc
 #endif
     }
 
-    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinelItemType type)
+    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel1ItemType type)
         : iptr(uintptr_t(p) | type),
-          _size(kSentinelSize)
+          _size(kSentinel1Size)
+    {}
+
+    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel2ItemType type)
+        : iptr(uintptr_t(p) | type),
+          _size(kSentinel2Size)
     {}
 
     REALLY_INLINE void GCWorkItem::Clear()
     {
         iptr = kDeadItem;
         // use sentinel so we're skipped off the fast path in MarkItem
-        _size = kSentinelSize;
+        _size = kSentinel1Size;
     }
 
+    REALLY_INLINE uint32_t GCWorkItem::GetSize() const
+    {
+        return uint32_t(IsGCItem() ? GC::Size(ptr) : _size & ~3);
+    }
+    
     REALLY_INLINE bool GCAutoEnter::Entered()
     {
         return m_gc != NULL;

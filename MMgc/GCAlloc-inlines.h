@@ -192,7 +192,7 @@ namespace MMgc
     {
     }
 
-    REALLY_INLINE bool GCAllocIterator::GetNextMarkedObject(void*& out_ptr, uint32_t& out_size)
+    REALLY_INLINE bool GCAllocIterator::GetNextMarkedObject(void*& out_ptr)
     {
         for (;;) {
             if (idx == limit) {
@@ -204,7 +204,6 @@ namespace MMgc
             uint32_t i = idx++;
             if ((GC::GetGCBits(block->items + i*size) & (kMark|kQueued)) == kMark) {
                 out_ptr = GetUserPointer(block->items + i*size);
-                out_size = size - (uint32_t)DebugSize();
                 return true;
             }
         }

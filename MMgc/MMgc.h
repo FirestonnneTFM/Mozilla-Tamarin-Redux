@@ -126,6 +126,18 @@
 // this might be good to enable in a heightened DEBUG build, it triggers bug 561402
 //#define MMGC_POISON_MEMORY_FROM_OS
 
+#ifdef MMGC_MEMORY_PROFILER
+    // Internal: profile uses of the conservative marker
+    //
+    // When MMGC_CONSERVATIVE_PROFILER is enabled the VM avoids explicitly freeing
+    // objects in some cases, see eg InlineHashtable and AtomList.  The reason is
+    // that freeing an object that's on the mark stack will lead to the object
+    // being conservatively traced (its kVirtualGCTrace bit is disabled by AbortFree)
+    // and that confuses the statistics.  Instead of freeing the object the VM will
+    // zero it.
+    //#define MMGC_CONSERVATIVE_PROFILER
+#endif
+
 #ifdef MMGC_REFCOUNT_PROFILING
     #define REFCOUNT_PROFILING_ONLY(x) x
     #define REFCOUNT_PROFILING_ARG(x) , x
@@ -138,6 +150,12 @@
     #define MMGC_MEMORY_PROFILER_ARG(x) , x
 #else
     #define MMGC_MEMORY_PROFILER_ARG(x)
+#endif
+
+#ifdef MMGC_MEMORY_INFO
+    #define MEMORY_INFO_ARG(x) , x
+#else
+    #define MEMORY_INFO_ARG(x)
 #endif
 
 // MMGC_FASTBITS enables a potentially faster representation of the per-block bit table. 
@@ -182,6 +200,12 @@
 // https://bugzilla.mozilla.org/show_bug.cgi?id=581070
 //#define MMGC_USE_UNIFORM_PAGEMAP
 
+#ifdef MMGC_HEAP_GRAPH
+    #define HEAP_GRAPH_ARG(x) , x
+#else
+    #define HEAP_GRAPH_ARG(x)
+#endif
+
 namespace MMgc
 {
     class GC;
@@ -217,10 +241,10 @@ namespace MMgc
 #include "ZCT.h"
 #include "HeapGraph.h"
 #include "GCPolicyManager.h"
+#include "WriteBarrier.h"
 #include "GC.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"
-#include "WriteBarrier.h"
 
 #include "Shared-inlines.h"
 #include "GCHashtable-inlines.h"
@@ -233,6 +257,7 @@ namespace MMgc
 #include "ZCT-inlines.h"
 #include "GCPolicyManager-inlines.h"
 #include "GC-inlines.h"
+#include "WriteBarrier-inlines.h"
 
 // remove these when the player stops using them
 #define MMGC_DRC

@@ -169,7 +169,7 @@ namespace MMgc
     StackTrace *MemoryProfiler::GetAllocationTraceLocked(const void *obj)
     {
         AllocInfo* info = (AllocInfo*)allocInfoTable.get(obj);
-        GCAssert(info != NULL);
+        //GCAssert(info != NULL);
         return info ? info->allocTrace : NULL;
     }
 
@@ -729,6 +729,158 @@ namespace MMgc
         return NULL;
     }
 
+    struct ObjectPopulationProfiler::PopulationNode : public GCAllocObject
+    {
+        PopulationNode(StackTrace* trace) : trace(trace), numobjects(0), numbytes(0), next(NULL) {}
+        
+        StackTrace* trace;
+        size_t numobjects;
+        uint64_t numbytes;
+        PopulationNode* next;
+    };
+    
+    ObjectPopulationProfiler::ObjectPopulationProfiler(GC* gc, const char* profileName)
+        : gc(gc)
+        , heap(gc->GetGCHeap())
+        , profileName(profileName)
+        , list(NULL)
+        , length(0)
+    {
+    }
+
+    ObjectPopulationProfiler::~ObjectPopulationProfiler()
+    {
+        while (list != NULL)
+        {
+            PopulationNode* pn = list;
+            list = list->next;
+            delete pn;
+        }
+    }
+
+    void ObjectPopulationProfiler::accountForObject(const void* obj)
+    {
+        StackTrace* trace = heap->GetProfiler()->GetAllocationTrace(obj);
+        if (trace != NULL)
+        {
+            size_t size = GC::Size(obj);
+            PopulationNode* l = list;
+            while (l != NULL)
+            {
+                int i;
+                for ( i=0; i < kMaxStackTrace && l->trace->ips[i] == trace->ips[i] ; i++ )
+                    ;
+                if (i == kMaxStackTrace)
+                    break;
+                l = l->next;
+            }
+            
+            if (l == NULL)
+            {
+                PopulationNode* pn = new PopulationNode(trace);
+                length++;
+                pn->next = list;
+                list = pn;
+                l = pn;
+            }
+            
+            l->numobjects++;
+            l->numbytes += size;
+        }
+    }
+
+    static uint32_t log2(uint32_t n)
+    {
+        uint32_t result = 0;
+        while (n > 1) {
+            result += 1;
+            n >>= 1;
+        }
+        return result;
+    }
+
+    void ObjectPopulationProfiler::accountForRoot(size_t size)
+    {
+        roots.numobjects++;
+        roots.numbytes += size;
+        uint32_t slot = log2(uint32_t(size));
+        rootHistogram[slot].numobjects++;
+        rootHistogram[slot].numbytes += size;
+    }
+
+    void ObjectPopulationProfiler::accountForStack(size_t size)
+    {
+        stacks.numobjects++;
+        stacks.numbytes += size;
+        uint32_t slot = log2(uint32_t(size));
+        stackHistogram[slot].numobjects++;
+        stackHistogram[slot].numbytes += size;
+    }
+    
+    // Sort by byte volume, then dump the top entries
+    
+    void ObjectPopulationProfiler::dumpTopBacktraces(int howmany, DumpMode mode)
+    {
+        MMgc::GC::AllocaAutoPtr _popnode;
+        PopulationNode** xs = (PopulationNode**)VMPI_alloca_gc(gc, _popnode, howmany*sizeof(PopulationNode*));
+        int live = 0;
+        
+        for ( PopulationNode* l = list ; l != NULL ; l = l->next )
+        {
+            bool inserted = false;
+            for ( int i=0 ; i < live && !inserted ; i++ )
+            {
+                bool insert = false;
+                if (mode == BY_VOLUME)
+                    insert = l->numbytes > xs[i]->numbytes;
+                else if (mode == BY_COUNT)
+                    insert = l->numobjects > xs[i]->numobjects || (l->numobjects == xs[i]->numobjects && l->numbytes > xs[i]->numbytes);
+                if (insert)
+                {
+                    for ( int j=howmany-1 ; j > i ; j-- )
+                        xs[j] = xs[j-1];
+                    xs[i] = l;
+                    inserted = true;
+                }
+            }
+            if (!inserted && live < howmany)
+            {
+                xs[live] = l;
+                inserted = true;
+            }
+            if (inserted && live < howmany)
+                live++;
+        }
+
+        GCLog("Object population profile: %s\n", profileName);
+        GCLog("Nodes: %u\n", (unsigned)length);
+        GCLog("Roots:  %llu bytes scanned  - %u objs scanned\n", (unsigned long long)roots.numbytes, (unsigned)roots.numobjects);
+        for ( size_t i=0 ; i < ARRAY_SIZE(rootHistogram) ; i++ )
+        {
+            if (rootHistogram[i].numobjects > 0)
+                GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
+                      (1 << i),
+                      (1 << (i+1))-1,
+                      (unsigned long long)rootHistogram[i].numbytes, (unsigned)rootHistogram[i].numobjects);
+        }
+        GCLog("Stacks: %llu bytes scanned  - %u objs scanned\n", (unsigned long long)stacks.numbytes, (unsigned)stacks.numobjects);
+        for ( size_t i=0 ; i < ARRAY_SIZE(stackHistogram) ; i++ )
+        {
+            if (stackHistogram[i].numobjects > 0)
+                GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
+                      (1 << i),
+                      (1 << (i+1))-1,
+                      (unsigned long long)stackHistogram[i].numbytes, (unsigned)stackHistogram[i].numobjects);
+        }
+        GCLog("Objects:\n");
+        for ( int i=0 ; i < live ; i++ )
+        {
+            GCLog("  %llu bytes scanned - %u objs scanned", (unsigned long long)xs[i]->numbytes, (unsigned)xs[i]->numobjects);
+            PrintStackTrace(xs[i]->trace);
+            GCLog("\n");
+        }
+    }
+    
 #else
 
     void PrintAllocStackTrace(const void *) {}
@@ -736,8 +888,7 @@ namespace MMgc
     const char* GetAllocationName(const void *) { return NULL; }
 
 #endif //MMGC_MEMORY_PROFILER
-
-
+    
 #ifdef MMGC_MEMORY_INFO
 
 // end user servicable parts
