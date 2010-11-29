@@ -2032,12 +2032,6 @@ namespace MMgc
         policy.signalMarkWork(size);
 
         uintptr_t *end = p + (size / sizeof(void*));
-        uintptr_t thisPage = (uintptr_t)p & GCHeap::kBlockMask;
-#ifdef MMGC_POINTINESS_PROFILING
-        uint32_t could_be_pointer = 0;
-        uint32_t actually_is_pointer = 0;
-#endif
-
         // set the mark bits on this guy
         if(wi.IsGCItem())
         {
@@ -2053,27 +2047,37 @@ namespace MMgc
 #endif
         }
 
-        uintptr_t _memStart = pageMap.MemStart();
-        uintptr_t _memEnd = pageMap.MemEnd();
-
         while(p < end)
         {
-            uintptr_t val = *p++;
+            uintptr_t val = *p;
+            TraceConservativePointer(val, wi.HasInteriorPtrs() != 0 HEAP_GRAPH_ARG(p));
+            p++;
+        }
+    }
+
+    void GC::TraceConservativePointer(uintptr_t val, bool handleInteriorPtrs HEAP_GRAPH_ARG(uintptr_t* loc))
+    {
+        uintptr_t thisPage = val & GCHeap::kBlockMask;
+#ifdef MMGC_POINTINESS_PROFILING
+        uint32_t could_be_pointer = 0;
+        uint32_t actually_is_pointer = 0;
+#endif
+        int bits;
 #ifdef MMGC_VALGRIND
-            if (wi.HasInteriorPtrs()) {
+            if (handleInteriorPtrs) {
                 VALGRIND_MAKE_MEM_DEFINED(&val, sizeof(val));
             }
 #endif // MMGC_VALGRIND
 
-            if(val < _memStart || val >= _memEnd)
-                continue;
+            if(val < pageMap.MemStart() || val >= pageMap.MemEnd())
+                goto end;
 
 #ifdef MMGC_POINTINESS_PROFILING
             could_be_pointer++;
 #endif
 
             // normalize and divide by 4K to get index
-            int bits = GetPageMapValue(val);
+            bits = GetPageMapValue(val);
 
             if (bits == PageMap::kGCAllocPage)
             {
@@ -2081,13 +2085,13 @@ namespace MMgc
                 int itemNum;
                 GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) (val & GCHeap::kBlockMask);
 
-                if (wi.HasInteriorPtrs())
+                if (handleInteriorPtrs)
                 {
                     item = (void*) val;
 
                     // guard against bogus pointers to the block header
                     if(item < block->items)
-                        continue;
+                        goto end;
 
                     itemNum = GCAlloc::GetObjectIndex(block, item);
 
@@ -2101,7 +2105,7 @@ namespace MMgc
 
                     // guard against bogus pointers to the block header
                     if(item < block->items)
-                        continue;
+                        goto end;
 
                     itemNum = GCAlloc::GetObjectIndex(block, item);
 
@@ -2116,7 +2120,7 @@ namespace MMgc
                             item = block->items + itemNum * block->size;
                         else
 #endif // MMGC_64BIT
-                            continue;
+                            goto end;
                     }
                 }
 
@@ -2149,21 +2153,21 @@ namespace MMgc
                         policy.signalMarkWork(itemSize);
                     }
 #ifdef MMGC_HEAP_GRAPH
-                    markerGraph.edge(p-1, GetUserPointer(item));
+                    markerGraph.edge(loc, GetUserPointer(item));
 #endif
                 }
             }
-            else if (bits == PageMap::kGCLargeAllocPageFirst || (wi.HasInteriorPtrs() && bits == PageMap::kGCLargeAllocPageRest))
+            else if (bits == PageMap::kGCLargeAllocPageFirst || (handleInteriorPtrs && bits == PageMap::kGCLargeAllocPageRest))
             {
                 const void* item;
 
-                if (wi.HasInteriorPtrs())
+                if (handleInteriorPtrs)
                 {
                     if (bits == PageMap::kGCLargeAllocPageFirst)
                     {
                         // guard against bogus pointers to the block header
                         if ((val & GCHeap::kOffsetMask) < sizeof(GCLargeAlloc::LargeBlock))
-                            continue;
+                            goto end;
 
                         item = (void *) ((val & GCHeap::kBlockMask) | sizeof(GCLargeAlloc::LargeBlock));
                     }
@@ -2180,7 +2184,7 @@ namespace MMgc
                     // If |item| doesn't point to the start of the page, it's not
                     // really a pointer.
                     if(((uintptr_t) item & GCHeap::kOffsetMask) != sizeof(GCLargeAlloc::LargeBlock))
-                        continue;
+                        goto end;
                 }
 
 #ifdef MMGC_POINTINESS_PROFILING
@@ -2203,11 +2207,11 @@ namespace MMgc
                         policy.signalMarkWork(itemSize);
                     }
 #ifdef MMGC_HEAP_GRAPH
-                    markerGraph.edge(p-1, GetUserPointer(item));
+                    markerGraph.edge(loc, GetUserPointer(item));
 #endif
                 }
             }
-        }
+    end: ;
 #ifdef MMGC_POINTINESS_PROFILING
         policy.signalDemographics(size/sizeof(void*), could_be_pointer, actually_is_pointer);
 #endif
