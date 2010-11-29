@@ -7189,7 +7189,7 @@ namespace avmplus
         assm->setNoiseGenerator( &noise );
 
         verbose_only( StringList asmOutput(*lir_alloc); )
-        verbose_only( assm->_outputCache = &asmOutput; )
+        verbose_only( if (!pool->isVerbose(VB_raw)) assm->_outputCache = &asmOutput; )
 
         assm->beginAssembly(frag);
         SeqReader seqReader(frag->lastIns, prologLastIns);
@@ -7669,7 +7669,7 @@ namespace avmplus
         Assembler *assm = new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator, *lir_alloc,
             core, &codeMgr->log, cfg);
         verbose_only( StringList asmOutput(*lir_alloc); )
-        verbose_only( assm->_outputCache = &asmOutput; )
+        verbose_only( if (!pool->isVerbose(VB_raw)) assm->_outputCache = &asmOutput; )
         LirReader bufreader(frag->lastIns);
         assm->beginAssembly(frag);
         assm->assemble(frag, &bufreader);
@@ -7761,3 +7761,4 @@ namespace avmplus
 }
 
 #endif // VMCFG_NANOJIT
+
