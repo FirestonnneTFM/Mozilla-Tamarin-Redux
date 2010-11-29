@@ -4299,7 +4299,7 @@ namespace avmplus
                 FUNCTIONID(ArrayObject_getUintProperty) :
                 FUNCTIONID(ArrayObject_getIntProperty)),
                 2, localGetp(objIndexOnStack), index);
-        }            
+        }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
             value = callIns((bUnsigned ?
                 FUNCTIONID(ObjectVectorObject_getUintProperty) :
@@ -4340,19 +4340,19 @@ namespace avmplus
             if (result == NUMBER_TYPE) {
                 value = callIns(bUnsigned ?
                     FUNCTIONID(DoubleVectorObject_getNativeUintProperty) :
-                    FUNCTIONID(DoubleVectorObject_getNativeIntProperty), 
+                    FUNCTIONID(DoubleVectorObject_getNativeIntProperty),
                     2, localGetp(objIndexOnStack), index);
                 valIsAtom = false;
             }
             else {
                 value = callIns(bUnsigned ?
-                    FUNCTIONID(DoubleVectorObject_getUintProperty) : 
-                    FUNCTIONID(DoubleVectorObject_getIntProperty), 
+                    FUNCTIONID(DoubleVectorObject_getUintProperty) :
+                    FUNCTIONID(DoubleVectorObject_getIntProperty),
                     2, localGetp(objIndexOnStack), index);
             }
         }
         else {
-            value = callIns(bUnsigned ? 
+            value = callIns(bUnsigned ?
                 FUNCTIONID(getpropertylate_u) :
                 FUNCTIONID(getpropertylate_i),
                 3, env_param, loadAtomRep(objIndexOnStack), index);
@@ -4416,14 +4416,14 @@ namespace avmplus
         else if (objType == VECTORDOUBLE_TYPE) {
             if (valueType == NUMBER_TYPE) {
                 LIns* value = localGetf(valIndexOnStack);
-                callIns(bUnsigned ? 
+                callIns(bUnsigned ?
                     FUNCTIONID(DoubleVectorObject_setNativeUintProperty) :
                     FUNCTIONID(DoubleVectorObject_setNativeIntProperty),
                     3, localGetp(objIndexOnStack), index, value);
             }
             else {
                 LIns* value = loadAtomRep(valIndexOnStack);
-                value = callIns(bUnsigned ? 
+                value = callIns(bUnsigned ?
                     FUNCTIONID(DoubleVectorObject_setUintProperty) :
                     FUNCTIONID(DoubleVectorObject_setIntProperty),
                     3, localGetp(objIndexOnStack), index, value);
@@ -4431,7 +4431,7 @@ namespace avmplus
         }
         else {
             LIns* value = loadAtomRep(valIndexOnStack);
-            callIns(bUnsigned ? 
+            callIns(bUnsigned ?
                 FUNCTIONID(setpropertylate_u) :
                 FUNCTIONID(setpropertylate_i),
                 4, env_param, loadAtomRep(objIndexOnStack), index, value);
@@ -5249,7 +5249,7 @@ namespace avmplus
                 Traits* indexType = state->value(sp).traits;
                 LIns* index = NULL;
                 bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->containsAnyPublicNamespace();
-                
+
                 if (maybeIntegerIndex)
                     index = optimizeIndexArgumentType(sp, &indexType);
 
@@ -5278,7 +5278,7 @@ namespace avmplus
                     if (op == LIR_addd || op == LIR_subd) {
                         LIns *a = index->oprnd1();
                         LIns *b = index->oprnd2();
-                        // Our addjovi only works with signed integers so don't use isPromote.  
+                        // Our addjovi only works with signed integers so don't use isPromote.
                         a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
                         b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
                         if (a && b) {
@@ -5296,7 +5296,7 @@ namespace avmplus
 
                             emitLabel(slow_path);
                             LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
-                            value = callIns((op == LIR_addd) ? 
+                            value = callIns((op == LIR_addd) ?
                                 FUNCTIONID(getprop_index_add) : FUNCTIONID(getprop_index_subtract), 5,
                                 env_param, loadAtomRep(sp-1), multi, a, b);
 
@@ -5329,7 +5329,7 @@ namespace avmplus
                         branchToLabel(LIR_j, NULL, done_path);
 
                         emitLabel(slow_path);
-#endif // NJ_F2I_SUPPORTED 
+#endif // NJ_F2I_SUPPORTED
                         LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
                         index = nativeToAtom(index, NUMBER_TYPE);
                         value = callIns(FUNCTIONID(getprop_index), 4,
@@ -5340,7 +5340,7 @@ namespace avmplus
                         localSet(sp-1, ldForTraits(result, tempResult, 0, ACCSET_LOAD_ANY), result);
 #else
                         localSet(sp-1, atomToNativeRep(result, value), result);
-#endif // NJ_F2I_SUPPORTED 
+#endif // NJ_F2I_SUPPORTED
                     }
                     resumeCSE();
                 }
@@ -5411,7 +5411,7 @@ namespace avmplus
                     if (op == LIR_addd || op == LIR_subd) {
                         LIns *a = index->oprnd1();
                         LIns *b = index->oprnd2();
-                        // Our addjovi only works with signed integers.  
+                        // Our addjovi only works with signed integers.
                         a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
                         b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
                         if (a && b) {
@@ -5450,7 +5450,7 @@ namespace avmplus
 #if NJ_F2I_SUPPORTED
                         // Inline fast path for index values that are unsigned integers
                         // if ((i2d(d2i(index)) == index) && d2i(index) >= 0)
-                        //   call setProperty[uint] 
+                        //   call setProperty[uint]
                         // else
                         //   call setprop_index
                         //
