@@ -262,6 +262,8 @@ namespace avmplus
     template<class T, class ListHelper>
     class ListImpl
     {
+        template<class TLIST> friend class VectorAccessor;
+
     public:
         typedef T TYPE;
         typedef typename ListHelper::OPAQUE_TYPE OPAQUE_TYPE;

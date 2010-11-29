@@ -230,10 +230,9 @@ namespace avmplus
     template<class TLIST>
     class TypedVectorObject : public VectorBaseObject
     {
-        // Strange but true: this is how you friend-declare a template class.
-        template<class OBJ>
-        friend class TypedVectorClass;
-        
+        template<class OBJ> friend class TypedVectorClass;
+        template<class TLISTVA> friend class VectorAccessor;
+
     public:
         typedef TLIST LIST;
     public:
@@ -313,6 +312,28 @@ namespace avmplus
         TLIST                           m_list;
     };
 
+    // Some code internal to Flash/AIR needs to directly get/set the contents of Vectors;
+    // this class provides an implicit lock/unlock mechanism. We guarantee that 
+    // the value returned by addr() is valid for reading/writing for the lifespan of
+    // the VectorAccessor (but only for entries 0...get_length()-1, of course).
+    // length() is identical to VectorObject::get_length() but is provided here for symmetry.
+    // This should obviously only be used in cases where performance is critical, or
+    // other circumstances requires it (eg, to pass an array of numbers to a GPU
+    // without intermediate copying). Note that it is explicitly legal to pass
+    // a NULL VectorObject to the ctor (which will cause addr() to also return NULL
+    // and length() to return 0).
+    template<class TLIST>
+    class VectorAccessor
+    {
+    public:
+        explicit VectorAccessor(TypedVectorObject<TLIST>* v);
+        typename TLIST::TYPE* addr();
+        uint32_t length();
+
+    private:
+        TypedVectorObject<TLIST>* m_vector;
+    };
+
     // ----------------------------
 
     class IntVectorObject : public TypedVectorObject< DataList<int32_t> > 
@@ -325,6 +346,7 @@ namespace avmplus
 
         DECLARE_SLOTS_IntVectorObject;
     };
+    typedef VectorAccessor< DataList<int32_t> > IntVectorAccessor;
 
     // ----------------------------
 
@@ -338,6 +360,7 @@ namespace avmplus
 
         DECLARE_SLOTS_UIntVectorObject;
     };
+    typedef VectorAccessor< DataList<uint32_t> > UIntVectorAccessor;
 
     // ----------------------------
 
@@ -351,6 +374,7 @@ namespace avmplus
 
         DECLARE_SLOTS_DoubleVectorObject;
     };
+    typedef VectorAccessor< DataList<double> > DoubleVectorAccessor;
 
     // ----------------------------
 
@@ -364,6 +388,10 @@ namespace avmplus
 
         DECLARE_SLOTS_ObjectVectorObject;
     };
+    // This is explicitly NOT provided, as 
+    // (1) there's currently no need for it, and 
+    // (2) it would require WB hackery on the part of the user, which is error-prone
+    //typedef VectorAccessor<Atom> ObjectVectorAccessor;
 
     // ----------------------------
 }
