@@ -2064,153 +2064,153 @@ namespace MMgc
 #endif
         int bits;
 #ifdef MMGC_VALGRIND
-            if (handleInteriorPtrs) {
-                VALGRIND_MAKE_MEM_DEFINED(&val, sizeof(val));
-            }
+        if (handleInteriorPtrs) {
+            VALGRIND_MAKE_MEM_DEFINED(&val, sizeof(val));
+        }
 #endif // MMGC_VALGRIND
 
-            if(val < pageMap.MemStart() || val >= pageMap.MemEnd())
-                goto end;
+        if(val < pageMap.MemStart() || val >= pageMap.MemEnd())
+            goto end;
 
 #ifdef MMGC_POINTINESS_PROFILING
-            could_be_pointer++;
+        could_be_pointer++;
 #endif
 
-            // normalize and divide by 4K to get index
-            bits = GetPageMapValue(val);
+        // normalize and divide by 4K to get index
+        bits = GetPageMapValue(val);
 
-            if (bits == PageMap::kGCAllocPage)
+        if (bits == PageMap::kGCAllocPage)
+        {
+            const void *item;
+            int itemNum;
+            GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) (val & GCHeap::kBlockMask);
+
+            if (handleInteriorPtrs)
             {
-                const void *item;
-                int itemNum;
-                GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) (val & GCHeap::kBlockMask);
+                item = (void*) val;
+                
+                // guard against bogus pointers to the block header
+                if(item < block->items)
+                    goto end;
 
-                if (handleInteriorPtrs)
+                itemNum = GCAlloc::GetObjectIndex(block, item);
+
+                // adjust |item| to the beginning of the allocation
+                item = block->items + itemNum * block->size;
+            }
+            else
+            {
+                // back up to real beginning
+                item = GetRealPointer((const void*) (val & ~7));
+
+                // guard against bogus pointers to the block header
+                if(item < block->items)
+                    goto end;
+
+                itemNum = GCAlloc::GetObjectIndex(block, item);
+
+                // if |item| doesn't point to the beginning of an allocation,
+                // it's not considered a pointer.
+                if (block->items + itemNum * block->size != item)
                 {
-                    item = (void*) val;
-
-                    // guard against bogus pointers to the block header
-                    if(item < block->items)
-                        goto end;
-
-                    itemNum = GCAlloc::GetObjectIndex(block, item);
-
-                    // adjust |item| to the beginning of the allocation
-                    item = block->items + itemNum * block->size;
-                }
-                else
-                {
-                    // back up to real beginning
-                    item = GetRealPointer((const void*) (val & ~7));
-
-                    // guard against bogus pointers to the block header
-                    if(item < block->items)
-                        goto end;
-
-                    itemNum = GCAlloc::GetObjectIndex(block, item);
-
-                    // if |item| doesn't point to the beginning of an allocation,
-                    // it's not considered a pointer.
-                    if (block->items + itemNum * block->size != item)
-                    {
 #ifdef MMGC_64BIT
-                        // Doubly-inherited classes have two vtables so are offset 8 more bytes than normal.
-                        // Handle that here (shows up with PlayerScriptBufferImpl object in the Flash player)
-                        if ((block->items + itemNum * block->size + sizeof(void *)) == item)
-                            item = block->items + itemNum * block->size;
-                        else
-#endif // MMGC_64BIT
-                            goto end;
-                    }
-                }
-
-#ifdef MMGC_POINTINESS_PROFILING
-                actually_is_pointer++;
-#endif
-                gcbits_t& bits2 = block->bits[GCAlloc::GetBitsIndex(block, item)];
-                if ((bits2 & (kMark|kQueued)) == 0)
-                {
-                    uint32_t itemSize = block->size - (uint32_t)DebugSize();
-                    if(block->containsPointers)
-                    {
-                        const void *realItem = GetUserPointer(item);
-                        GCWorkItem newItem(realItem, itemSize, GCWorkItem::kGCObject);
-                        if(((uintptr_t)realItem & GCHeap::kBlockMask) != thisPage || mark_item_recursion_control == 0)
-                        {
-                            bits2 |= kQueued;
-                            PushWorkItem(newItem);
-                        }
-                        else
-                        {
-                            mark_item_recursion_control--;
-                            MarkItem(newItem);
-                            mark_item_recursion_control++;
-                        }
-                    }
+                    // Doubly-inherited classes have two vtables so are offset 8 more bytes than normal.
+                    // Handle that here (shows up with PlayerScriptBufferImpl object in the Flash player)
+                    if ((block->items + itemNum * block->size + sizeof(void *)) == item)
+                        item = block->items + itemNum * block->size;
                     else
-                    {
-                        bits2 |= kMark;
-                        policy.signalMarkWork(itemSize);
-                    }
-#ifdef MMGC_HEAP_GRAPH
-                    markerGraph.edge(loc, GetUserPointer(item));
-#endif
+#endif // MMGC_64BIT
+                        goto end;
                 }
             }
-            else if (bits == PageMap::kGCLargeAllocPageFirst || (handleInteriorPtrs && bits == PageMap::kGCLargeAllocPageRest))
+
+#ifdef MMGC_POINTINESS_PROFILING
+            actually_is_pointer++;
+#endif
+            gcbits_t& bits2 = block->bits[GCAlloc::GetBitsIndex(block, item)];
+            if ((bits2 & (kMark|kQueued)) == 0)
             {
-                const void* item;
-
-                if (handleInteriorPtrs)
+                uint32_t itemSize = block->size - (uint32_t)DebugSize();
+                if(block->containsPointers)
                 {
-                    if (bits == PageMap::kGCLargeAllocPageFirst)
+                    const void *realItem = GetUserPointer(item);
+                    GCWorkItem newItem(realItem, itemSize, GCWorkItem::kGCObject);
+                    if(((uintptr_t)realItem & GCHeap::kBlockMask) != thisPage || mark_item_recursion_control == 0)
                     {
-                        // guard against bogus pointers to the block header
-                        if ((val & GCHeap::kOffsetMask) < sizeof(GCLargeAlloc::LargeBlock))
-                            goto end;
-
-                        item = (void *) ((val & GCHeap::kBlockMask) | sizeof(GCLargeAlloc::LargeBlock));
+                        bits2 |= kQueued;
+                        PushWorkItem(newItem);
                     }
                     else
                     {
-                        item = GetRealPointer(FindBeginning((void *) val));
+                        mark_item_recursion_control--;
+                        MarkItem(newItem);
+                        mark_item_recursion_control++;
                     }
                 }
                 else
                 {
-                    // back up to real beginning
-                    item = GetRealPointer((const void*) (val & ~7));
-
-                    // If |item| doesn't point to the start of the page, it's not
-                    // really a pointer.
-                    if(((uintptr_t) item & GCHeap::kOffsetMask) != sizeof(GCLargeAlloc::LargeBlock))
-                        goto end;
+                    bits2 |= kMark;
+                    policy.signalMarkWork(itemSize);
                 }
-
-#ifdef MMGC_POINTINESS_PROFILING
-                actually_is_pointer++;
-#endif
-
-                GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetLargeBlock(item);
-                if((b->flags[0] & (kQueued|kMark)) == 0)
-                {
-                    uint32_t itemSize = b->size - (uint32_t)DebugSize();
-                    if(b->containsPointers)
-                    {
-                        b->flags[0] |= kQueued;
-                        PushWorkItem(GCWorkItem(GetUserPointer(item), itemSize, GCWorkItem::kGCObject));
-                    }
-                    else
-                    {
-                        // doesn't need marking go right to black
-                        b->flags[0] |= kMark;
-                        policy.signalMarkWork(itemSize);
-                    }
 #ifdef MMGC_HEAP_GRAPH
-                    markerGraph.edge(loc, GetUserPointer(item));
+                markerGraph.edge(loc, GetUserPointer(item));
 #endif
+            }
+        }
+        else if (bits == PageMap::kGCLargeAllocPageFirst || (handleInteriorPtrs && bits == PageMap::kGCLargeAllocPageRest))
+        {
+            const void* item;
+            
+            if (handleInteriorPtrs)
+            {
+                if (bits == PageMap::kGCLargeAllocPageFirst)
+                {
+                    // guard against bogus pointers to the block header
+                    if ((val & GCHeap::kOffsetMask) < sizeof(GCLargeAlloc::LargeBlock))
+                        goto end;
+                    
+                    item = (void *) ((val & GCHeap::kBlockMask) | sizeof(GCLargeAlloc::LargeBlock));
+                }
+                else
+                {
+                    item = GetRealPointer(FindBeginning((void *) val));
                 }
             }
+            else
+            {
+                // back up to real beginning
+                item = GetRealPointer((const void*) (val & ~7));
+                
+                // If |item| doesn't point to the start of the page, it's not
+                // really a pointer.
+                if(((uintptr_t) item & GCHeap::kOffsetMask) != sizeof(GCLargeAlloc::LargeBlock))
+                    goto end;
+            }
+            
+#ifdef MMGC_POINTINESS_PROFILING
+            actually_is_pointer++;
+#endif
+
+            GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetLargeBlock(item);
+            if((b->flags[0] & (kQueued|kMark)) == 0)
+            {
+                uint32_t itemSize = b->size - (uint32_t)DebugSize();
+                if(b->containsPointers)
+                {
+                    b->flags[0] |= kQueued;
+                    PushWorkItem(GCWorkItem(GetUserPointer(item), itemSize, GCWorkItem::kGCObject));
+                }
+                else
+                {
+                    // doesn't need marking go right to black
+                    b->flags[0] |= kMark;
+                    policy.signalMarkWork(itemSize);
+                }
+#ifdef MMGC_HEAP_GRAPH
+                markerGraph.edge(loc, GetUserPointer(item));
+#endif
+            }
+        }
     end: ;
 #ifdef MMGC_POINTINESS_PROFILING
         policy.signalDemographics(size/sizeof(void*), could_be_pointer, actually_is_pointer);
