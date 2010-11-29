@@ -6628,12 +6628,10 @@ namespace avmplus
         switch (bt(t)) {
             case BUILTIN_number:
                 return insAlloc(sizeof(double));
-                break;
             case BUILTIN_int:
             case BUILTIN_uint:
             case BUILTIN_boolean:
                 return insAlloc(sizeof(int32_t));
-                break;
             default:
                 return insAlloc(sizeof(intptr_t));
         }
