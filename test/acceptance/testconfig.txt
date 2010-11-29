@@ -319,7 +319,10 @@ regress/bug_555705, .*-Dverifyall.*, skip, test throws an expected verifyerror t
 # as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
 # ProcessSampling:GetSizeSamples intermittently fails
 as3/sampling/ProcessSampling ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-as3/sampling/Callback:Callback: callback called.*, ^((?!-ES).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=603814
+# Fails with -AS3
+# as3/sampling/Callback:Callback: callback called.*, ^((?!-ES).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=603814
+# Fails generally now because sampling in MMgc has been disabled entirely
+as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=614529
 
 ####################
 # ATS Skipped tests - These tests will not be exported when generating ATS swfs
