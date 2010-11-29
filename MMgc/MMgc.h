@@ -182,6 +182,12 @@
 // https://bugzilla.mozilla.org/show_bug.cgi?id=581070
 //#define MMGC_USE_UNIFORM_PAGEMAP
 
+#ifdef MMGC_HEAP_GRAPH
+    #define HEAP_GRAPH_ARG(x) , x
+#else
+    #define HEAP_GRAPH_ARG(x)
+#endif
+
 namespace MMgc
 {
     class GC;

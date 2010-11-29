@@ -957,6 +957,19 @@ namespace MMgc
         void PushWorkItem_MayFail(GCWorkItem &item);
         bool GetMarkStackOverflow() const { return m_markStackOverflow; }
 
+    private:
+        // 'val' is some value that may be a pointer.  It may or may not be NULL.  It may or may
+        // not carry a tag.  It may or may not point to GC'd storage.  If it points to GC'd storage
+        // then it may or may not point to an object (as opposed to into one, or into free space).
+        // If it is a pointer to an object then that object may or may not already be marked or queued
+        // and large or small.  If the object is neither marked nor queued it is pushed onto the mark
+        // queue (if it contains pointers) or marked (if it does not contain pointers).  If
+        // 'handleInteriorPtrs' is true then the pointer is recognized as a pointer even if it points
+        // into an object.
+        // 'loc' is the location within the containing object from which 'val' was read.
+        void TraceConservativePointer(uintptr_t val, bool handleInteriorPtrs HEAP_GRAPH_ARG(uintptr_t* loc));
+
+    public:
 #ifdef DEBUG
         // Check that invariants for an inactive GC hold
         void ShouldBeInactive();
