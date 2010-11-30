@@ -25,39 +25,39 @@
 
 ########################################################################################################################
 # DOCUMENTATION:
-#    the acceptance/testconfig.txt controls when test files and test cases are marked as expected failure and skip for a specific configuration.
+#   acceptance/testconfig.txt controls when test files and test cases are
+#   marked as expected failure and skip for a specific configuration.
 #
-#    the general format for non-comment lines in this file is comma separated:
-#       test ,  configuration  ,  command (expectedfailure, skip,include)   ,  comments
+#   testconfig.txt should only be used for permanent entries not due to bugs.
+#   failconfig.txt should be used for all bugs.
 #
-# test is a regular expression consisting of path to file relative from test/acceptance  ':' (separator) testcase
+#   the format for non-comment lines in this file is comma separated:
+#   test, include config, exclude config, command, comments
 #
-# configuration is a regular expression with the format {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+# field descriptions:   
 #
-# commands are currently one of : asc.args, expectedfail, skip, include
-#    expectedfail - expects the test to fail, comments should provide bug number and a comment
+# test: a regular expression consisting of path to file relative from test/acceptance
+#   The format is "filename:testcase name" where the : and testcase name are optional.
+#   If a testcase name is not specified, then the command will apply to the entire test.
 #
-#    The following commands only operate at a testfile level and not individual tests:
+# include config & exclude config both are regexp to match the configuration
+#   string with the format {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
 #
-#    skip - the test is not run, for example the configuration does not support
-#           a feature or the file is not a test and is a helper file to another test
-#    include - includes a specific testcase even if the parent has been skipped
-#              overrides any skip command defined for the same configuration
-#    ats_skip - don't generate an ATS swf as these files are not ATS compatible
-#    verify_skip - skip test when doing a verify run
+# all configs that match the include config and do not match the exclude 
+#   config will apply to the command.
 #
-# comments: please include bug reference, date, and reason for the entry
-
-# NOTES:
-# Filename matching:
-#    When more than one test/filename regexp matches, we choose to match to the longest regexp
-#    e.g:
-#       given someDir/.* and someDir/myTestname
-#       someDir/myTestname will take precedence since it has longer total length
+# commands are one of:
+#   expectedfail - expects the test or testcase(s) to fail
 #
-# To specify that a configuration string DOES NOT contain certain strings use Zero-width negative lookahead: (?!regex)
-#    For example, to set an expected failure for all test runs EXCEPT when -Dinterp is used, use the following:
-#    ^((?!Dinterp).)*$
+#   The following commands only operate at a testfile level and not individual tests:
+#
+#   ats_skip - don't generate an ATS swf as these files are not ATS compatible
+#   deep - test should only run in deep phase for specified configs
+#   skip - the test is not run, for example the configuration does not support
+#          a feature or the file is not a test and is a helper file to another test
+#   verify_skip - skip test when doing a verify run
+#
+# comments: please include bug reference and reason for the entry
 #
 ########################################################################################################################
 

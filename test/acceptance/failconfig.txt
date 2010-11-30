@@ -23,6 +23,44 @@
 #
 # ***** END LICENSE BLOCK ***** */
 
+########################################################################################################################
+# DOCUMENTATION:
+#   acceptance/failconfig.txt controls when test files and test cases are
+#   marked as expected failure and skip for a specific configuration.
+#
+#   testconfig.txt should only be used for permanent entries not due to bugs.
+#   failconfig.txt should be used for all bugs.
+#
+#   the format for non-comment lines in this file is comma separated:
+#   test, include config, exclude config, command, comments
+#
+# field descriptions:   
+#
+# test: a regular expression consisting of path to file relative from test/acceptance
+#   The format is "filename:testcase name" where the : and testcase name are optional.
+#   If a testcase name is not specified, then the command will apply to the entire test.
+#
+# include config & exclude config both are regexp to match the configuration
+#   string with the format {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+#
+# all configs that match the include config and do not match the exclude 
+#   config will apply to the command.
+#
+# commands are one of:
+#   expectedfail - expects the test or testcase(s) to fail
+#
+#   The following commands only operate at a testfile level and not individual tests:
+#
+#   ats_skip - don't generate an ATS swf as these files are not ATS compatible
+#   deep - test should only run in deep phase for specified configs
+#   skip - the test is not run, for example the configuration does not support
+#          a feature or the file is not a test and is a helper file to another test
+#   verify_skip - skip test when doing a verify run
+#
+# comments: please include bug reference and reason for the entry
+#
+########################################################################################################################
+
 mmgc/outofmemory, .* , , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 
 ####################
@@ -167,7 +205,7 @@ spidermonkey/js1_5/Regress/regress-367561-01, .*,, skip, need to build large tes
 spidermonkey/js1_5/Regress/regress-367561-03, .*,, skip, need to build large test string
 spidermonkey/js1_5/Regress/regress-396684, .*,, skip, need to build large test string
 spidermonkey/js1_5/String/regress-179068, .*,,  skip, need to build large test string
-spidermonkey/js1_5/Expressions/regress-394673,, .*, skip, need to figure out a way to evaluate a long long chain of && ||
+spidermonkey/js1_5/Expressions/regress-394673, .*,, skip, need to figure out a way to evaluate a long long chain of && ||
 spidermonkey/js1_5/Regress/regress-290575, .*,, skip, test evaluates function with 32768 arguments - need to convert to not use Function Body or eval
 
 spidermonkey/js1_5/Regress/regress-191668, .*,, skip, should (0 <!- 0) be legal?
