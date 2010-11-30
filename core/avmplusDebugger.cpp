@@ -132,13 +132,6 @@ namespace avmplus
         if (!changed && !exited)
             return;  // still on the same line in the same function?
 
-        Profiler* profiler = core->profiler();
-        Sampler* s = core->get_sampler();
-        if (profiler && profiler->profilingDataWanted && profiler->profileSwitch && !(s && s->sampling()))
-        {
-            profiler->sendLineTimestamp(line);
-        }
-
         // tracing information
         if (!exited)
             traceLine(line);
@@ -208,25 +201,13 @@ namespace avmplus
 
     void Debugger::debugFile(Stringp filename)
     {
-        AvmAssert( core->callStack != 0 );
-        if (!core->callStack)
-            return;
+       AvmAssert( core->callStack != 0 );
+       if (!core->callStack)
+           return;
 
-        AvmAssert(filename != 0);
+       AvmAssert(filename != 0);
 
-        Stringp prev = core->callStack->filename();
-        core->callStack->set_filename(filename);
-
-        // filename changed
-        if (prev != filename)
-        {
-            Profiler* profiler = core->profiler();
-            Sampler* s = core->get_sampler();
-            if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
-            {
-                profiler->sendDebugFileURL(filename);
-            }
-        }
+       core->callStack->set_filename(filename);
     }
 
     void Debugger::debugMethod(MethodEnv* /*env*/)

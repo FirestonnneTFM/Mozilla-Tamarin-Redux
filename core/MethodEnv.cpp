@@ -90,11 +90,7 @@ namespace avmplus
         AvmAssert(this != 0);
         AvmCore* core = this->core();
 
-        // update profiler
-        Profiler* profiler = core->profiler();
         Sampler* s = core->get_sampler();
-        if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
-            profiler->sendFunctionEnter(method);
 
         // this shouldn't ever be called unless there's a debugger
         AvmAssert(core->debugger() != NULL);
@@ -120,12 +116,7 @@ namespace avmplus
         AvmAssert(callstack != 0);
         AvmCore* core = this->core();
 
-        // update profiler
-        Profiler* profiler = core->profiler();
         Sampler* s = core->get_sampler();
-        if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
-            profiler->sendFunctionExit();
-
         if (s != 0)
         {
             // do this before popping the stack, so that the time slice
