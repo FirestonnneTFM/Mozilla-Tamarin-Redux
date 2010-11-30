@@ -70,6 +70,9 @@ class AcceptanceRuntest(RuntestBase):
         # Set threads to # of available cpus/cores
         self.threads = detectCPUs()
         RuntestBase.__init__(self)
+    
+    def __str__(self):
+        return 'AcceptanceRuntest'
 
     def setEnvironVars(self):
         RuntestBase.setEnvironVars(self)
