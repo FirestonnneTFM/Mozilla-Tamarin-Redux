@@ -456,8 +456,8 @@ namespace avmplus
         {
             // When we error, put the original data back
             m_array = origData;
-            m_length = origCap;
-            m_capacity = origLen;
+            m_length = origLen;
+            m_capacity = origCap;
             m_position = origPos;
             SetCopyOnWriteOwner(origCopyOnWriteOwner);
             toplevel()->throwIOError(kCompressedDataError);
