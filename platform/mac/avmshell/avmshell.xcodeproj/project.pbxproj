@@ -54,7 +54,6 @@
 		079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
 		079DF8410F3A882D0031D1B4 /* avmplusHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CF0F3A882D0031D1B4 /* avmplusHashtable.cpp */; };
-		079DF8420F3A882D0031D1B4 /* avmplusProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7D20F3A882D0031D1B4 /* avmplusProfiler.cpp */; };
 		079DF8430F3A882D0031D1B4 /* AvmPlusScriptableObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7D40F3A882D0031D1B4 /* AvmPlusScriptableObject.cpp */; };
 		079DF8440F3A882D0031D1B4 /* BigInteger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7DA0F3A882D0031D1B4 /* BigInteger.cpp */; };
 		079DF8450F3A882D0031D1B4 /* BuiltinTraits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7DE0F3A882D0031D1B4 /* BuiltinTraits.cpp */; };
@@ -207,7 +206,6 @@
 		7E87D05E122C5B980005FEAF /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		7E87D05F122C5B980005FEAF /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
 		7E87D060122C5B980005FEAF /* avmplusHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CF0F3A882D0031D1B4 /* avmplusHashtable.cpp */; };
-		7E87D061122C5B980005FEAF /* avmplusProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7D20F3A882D0031D1B4 /* avmplusProfiler.cpp */; };
 		7E87D062122C5B980005FEAF /* AvmPlusScriptableObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7D40F3A882D0031D1B4 /* AvmPlusScriptableObject.cpp */; };
 		7E87D063122C5B980005FEAF /* BigInteger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7DA0F3A882D0031D1B4 /* BigInteger.cpp */; };
 		7E87D064122C5B980005FEAF /* BuiltinTraits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7DE0F3A882D0031D1B4 /* BuiltinTraits.cpp */; };
@@ -549,7 +547,6 @@
 		079DF7CF0F3A882D0031D1B4 /* avmplusHashtable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmplusHashtable.cpp; path = ../../../core/avmplusHashtable.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7D00F3A882D0031D1B4 /* avmplusHashtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusHashtable.h; path = ../../../core/avmplusHashtable.h; sourceTree = SOURCE_ROOT; };
 		079DF7D10F3A882D0031D1B4 /* avmplusList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusList.h; path = ../../../core/avmplusList.h; sourceTree = SOURCE_ROOT; };
-		079DF7D20F3A882D0031D1B4 /* avmplusProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmplusProfiler.cpp; path = ../../../core/avmplusProfiler.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7D30F3A882D0031D1B4 /* avmplusProfiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusProfiler.h; path = ../../../core/avmplusProfiler.h; sourceTree = SOURCE_ROOT; };
 		079DF7D40F3A882D0031D1B4 /* AvmPlusScriptableObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmPlusScriptableObject.cpp; path = ../../../core/AvmPlusScriptableObject.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7D50F3A882D0031D1B4 /* AvmPlusScriptableObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmPlusScriptableObject.h; path = ../../../core/AvmPlusScriptableObject.h; sourceTree = SOURCE_ROOT; };
@@ -1109,7 +1106,6 @@
 				079DF7D10F3A882D0031D1B4 /* avmplusList.h */,
 				D92B139711EB96B7008170E3 /* avmplusList-impl.h */,
 				D92B139811EB96B7008170E3 /* avmplusList-inlines.h */,
-				079DF7D20F3A882D0031D1B4 /* avmplusProfiler.cpp */,
 				079DF7D30F3A882D0031D1B4 /* avmplusProfiler.h */,
 				079DF7D40F3A882D0031D1B4 /* AvmPlusScriptableObject.cpp */,
 				079DF7D50F3A882D0031D1B4 /* AvmPlusScriptableObject.h */,
@@ -1778,7 +1774,6 @@
 				7E87D05E122C5B980005FEAF /* avmplus.cpp in Sources */,
 				7E87D05F122C5B980005FEAF /* avmplusDebugger.cpp in Sources */,
 				7E87D060122C5B980005FEAF /* avmplusHashtable.cpp in Sources */,
-				7E87D061122C5B980005FEAF /* avmplusProfiler.cpp in Sources */,
 				7E87D062122C5B980005FEAF /* AvmPlusScriptableObject.cpp in Sources */,
 				7E87D063122C5B980005FEAF /* BigInteger.cpp in Sources */,
 				7E87D064122C5B980005FEAF /* BuiltinTraits.cpp in Sources */,
@@ -1972,7 +1967,6 @@
 				079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */,
 				079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */,
 				079DF8410F3A882D0031D1B4 /* avmplusHashtable.cpp in Sources */,
-				079DF8420F3A882D0031D1B4 /* avmplusProfiler.cpp in Sources */,
 				079DF8430F3A882D0031D1B4 /* AvmPlusScriptableObject.cpp in Sources */,
 				079DF8440F3A882D0031D1B4 /* BigInteger.cpp in Sources */,
 				079DF8450F3A882D0031D1B4 /* BuiltinTraits.cpp in Sources */,

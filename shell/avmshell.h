@@ -110,7 +110,6 @@ namespace avmshell
 #include "FileClass.h"
 #include "DomainClass.h"
 #include "DebugCLI.h"
-#include "Profiler.h"
 #include "DataIO.h"
 #include "DictionaryGlue.h"
 #include "SamplerScript.h"
