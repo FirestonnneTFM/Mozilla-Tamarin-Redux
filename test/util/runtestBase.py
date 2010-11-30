@@ -84,7 +84,7 @@ if sys.version_info[0] < 3:
         pass
 
 
-class RuntestBase:
+class RuntestBase(object):
     abcOnlyExt = '.abc_' # only run, don't compile these abc files - underscore is used so that tests are not deleted when removing old abc files
     abcasmExt = '.abs'
     abcasmRunner = 'bash ../../utils/abcasm/abcasm.sh'
@@ -103,8 +103,10 @@ class RuntestBase:
     avm_features = ''
     builtinabc = ''
     config = ''
+    
+    # note that include is on valid for performance runtests config
     config_directives = ['expectedfail', 'skip', 'ats_skip', 'verify_skip',
-                         'deep', 'performance']
+                         'deep', 'performance', 'include']
     directives = None
     escbin = ''
     failconfig = 'failconfig.txt'
@@ -197,6 +199,9 @@ class RuntestBase:
         self.altsearchpath=None
 
         self.run()
+
+    def __str__(self):
+        return 'RuntestBase'
 
     def run(self):
         '''Implement Me'''
@@ -691,6 +696,10 @@ class RuntestBase:
             tests = filter_test_list('deep')
         elif 'performance' in self.config:
             tests = filter_test_list('performance')
+        
+        # We still use the include directive in performance tests
+        if str(self) == 'PerformanceRuntest' and 'include' in self.directives:
+            tests = filter_test_list('include')
         
         check_test_list(tests)
         return tests
