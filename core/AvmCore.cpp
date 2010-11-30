@@ -215,6 +215,8 @@ namespace avmplus
                  r |= VB_jit | LC_AfterDCE | LC_Native | LC_Liveness | LC_ReadLIR | LC_AfterSF;
              else if (substrMatches("regs", p, e))
                  r |= VB_jit | LC_AfterDCE | LC_Native | LC_Activation | LC_RegAlloc;
+             else if (substrMatches("raw", p, e))
+                 r |= VB_raw;
 #endif /* VMCFG_NANOJIT */
              else
                  badFlag = (char*)p;
@@ -839,7 +841,7 @@ namespace avmplus
             NativeInitializer ninit(this, &aotInfos[i], 0, 0);
 
             PoolObject *userPool = parseActionBlock(code, 0, toplevel, domain, &ninit, getAPI(NULL));
-        
+
             #ifdef DEBUGGER
             AbcParser::addAOTDebugInfo(userPool);
             #endif
@@ -4171,7 +4173,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         // Try a simple case first to see if we have a in-range float value
 
-#if defined(AVMPLUS_IA32) 
+#if defined(AVMPLUS_IA32)
         // x86 int32_t(double) returns 0x80000000 if d is not in a valid integer range
         int intval = int32_t(d);
         if (intval != 0x80000000)

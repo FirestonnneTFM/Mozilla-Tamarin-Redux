@@ -56,7 +56,6 @@ AVMPLUS_SRCS := \
 	avmplusDebugger.cpp \
 	avmplusHashtable.cpp \
 	avmplusList.cpp \
-	avmplusProfiler.cpp \
 	AvmPlusScriptableObject.cpp \
 	BigInteger.cpp \
 	BooleanClass.cpp \

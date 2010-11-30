@@ -179,7 +179,7 @@ namespace avmshell
             AvmAssert(allowDebugger >= 0);
             return allowDebugger ? new (GetGC()) DebugCLI(this, (avmplus::Debugger::TraceLevel)tracelevel) : NULL;
         }
-        virtual avmplus::Profiler* createProfiler() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) Profiler(this) : NULL; }
+
 #endif
 #ifdef VMCFG_EVAL
         virtual String* readFileForEval(String* referencing_filename, String* filename);

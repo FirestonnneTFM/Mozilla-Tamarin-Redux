@@ -45,14 +45,9 @@ namespace avmplus
 {
 #ifdef DEBUGGER
     /**
-     * The Profiler class is a pure virtual base class.  It specifies
-     * an interface which must be implemented by profilers that
-     * wish to plug in to the AVM+ virtual machine.
-     *
-     * A program embedding AVM+ may set AvmCore::profiler to an
-     * instance of a Profiler subclass.  AvmCore::profiler will be
-     * informed about events of interest to profilers, such as
-     * function entry and exit and execution of each line of code.
+     * The Profiler class used to contain a profiler that is now no
+     * longer in use. However, it still contains AS3 function showRedrawRegions,
+     * and so it cannot be deleted.
      */
     class Profiler : public MMgc::GCFinalizedObject
     {
@@ -62,79 +57,6 @@ namespace avmplus
         }
 
         virtual ~Profiler() {}
-
-        /**
-         * This will be called to notify the profiler that the
-         * source file for which line number information is reported
-         * has changed.
-         * @param url the URL of the new source file, as encoded
-         *            in the OP_debugfile bytecode
-         */
-        virtual void sendDebugFileURL(String* url) = 0;
-
-        /**
-         * This will be called to notify the profiler that the
-         * line number has changed.
-         * @param linenumber the line number of the source file, as encoded
-         *                   in the OP_debugline bytecode
-         */
-        virtual void sendLineTimestamp(int linenumber) = 0;
-
-        /**
-         * This will be called when ActionScript profile(boolean)
-         * is called. profile(boolean) is used to turn on
-         * and off profiling, so that certain ActionScript
-         * can be profiled.
-         * @param on the setting for profiling. true turns
-         *           profiling on, false turns it off for
-         *           this section of ActionScript.
-         */
-        virtual void setEnabled(bool on) = 0;
-
-        /**
-         * This will be called to notify the profiler that a
-         * function has been entered.
-         *
-         * There will be a matching call to sendFunctionExit,
-         * unless an exception is thrown.
-         *
-         * @param method  the method being entered
-         */
-        virtual void sendFunctionEnter(MethodInfo* method) = 0;
-
-        /**
-         * This will be called to notify the profiler that a
-         * function has been exited.
-         *
-         * This is always called to match a previous call to
-         * sendFunctionEnter.
-         */
-        virtual void sendFunctionExit() = 0;
-
-        /**
-         * This will be called to notify the profiler that an
-         * exception was thrown and execution will commence in
-         * the given method's catch handler
-         *
-         * @param method  the method being entered
-         */
-        virtual void sendCatch(MethodInfo* method) = 0;
-
-        /**
-         * Is profiling wanted at all?
-         */
-        bool profilingDataWanted;
-
-        /**
-         * Is heap profiling wanted?
-         */
-        bool heapProfilingWanted;
-
-        /**
-         * Is profiling on right now, given the usage of AS profile(boolean)?
-         * The main code to turn on and off this value is Profiler::SetProfileSwitch().
-         */
-        bool profileSwitch;
     };
 #endif
 }
