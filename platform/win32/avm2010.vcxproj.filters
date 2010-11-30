@@ -81,9 +81,6 @@
     <ClCompile Include="..\..\core\avmplusHashtable.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\core\avmplusProfiler.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\core\AvmPlusScriptableObject.cpp">
       <Filter>core</Filter>
     </ClCompile>

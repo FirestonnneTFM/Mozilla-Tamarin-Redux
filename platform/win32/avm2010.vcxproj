@@ -62,7 +62,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\core\avmplusHashtable.cpp" />
-    <ClCompile Include="..\..\core\avmplusProfiler.cpp" />
     <ClCompile Include="..\..\core\AvmPlusScriptableObject.cpp" />
     <ClCompile Include="..\..\core\BigInteger.cpp" />
     <ClCompile Include="..\..\core\BooleanClass.cpp" />
