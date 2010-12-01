@@ -54,8 +54,6 @@ namespace avmplus
             Domain* domain,
             const NativeInitializer* natives);
 
-        ~AbcParser();
-
         /**
          * parse an .abc file
          * @param code
@@ -161,8 +159,7 @@ namespace avmplus
         const NativeInitializer*    natives;
         uint8_t*                    abcStart;
         uint8_t*                    abcEnd; // one past the end, actually
-        Stringp*                    metaNames;
-        Stringp                     kNeedsDxns;
+        RCList<String>              metaNames;
         int32_t                     version;
         uint32_t                    classCount;
     // ------------------------ DATA SECTION END
