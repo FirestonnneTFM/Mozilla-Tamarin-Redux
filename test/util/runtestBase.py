@@ -75,11 +75,11 @@ else:
 from . import runtestUtils
 from .runtestUtils import walk,parseArgStringToList,TimeOutException,join,convertToCsv,detectCPUs,dict_match,formatMemoryList,formatMemory,list_match,parseArgStringToList,pPrint,splitList,genAtsArgs,moveAtsSwf,conf95,mean,rel_std_dev,standard_deviation,tDist,variance,getSignalName,signalNames
 
-pexpect = False
+pexpect_module_present = False
 if sys.version_info[0] < 3:
     try:
         import pexpect
-        pexpect = True
+        pexpect_module_present = True
     except ImportError:
         pass
 
@@ -319,7 +319,7 @@ class RuntestBase(object):
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
                 self.ascversion = self.getAscVersion(self.asc)
-                if not pexpect:
+                if not pexpect_module_present:
                     print('To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net')
             elif o in ('-q', '--quiet'):
                 self.quiet = True
@@ -1024,7 +1024,7 @@ class RuntestBase(object):
         start_time = datetime.today()
         #print("starting compile of %d tests at %s" % (len(tests),start_time))
         total=len(tests)
-        if not pexpect:
+        if not pexpect_module_present:
             if self.genAtsSwfs:
                 print('The pexpect module must be installed to generate ats swfs.')
                 exit(1)
