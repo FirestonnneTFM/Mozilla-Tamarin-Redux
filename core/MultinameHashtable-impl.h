@@ -53,7 +53,7 @@ namespace avmplus
         MMGC_MEM_TYPE(this);
         Quad<VALUE_TYPE>* newAtoms = (Quad<VALUE_TYPE> *) gc->Calloc(capacity, sizeof(Quad<VALUE_TYPE>), GC::kContainsPointers|GC::kZero);
         rehash(m_quads, numQuads, newAtoms, capacity);
-        gc->Free(m_quads);
+        freeQuads(gc);
         WB(gc, this, &m_quads, newAtoms);
         numQuads = capacity;
     }
@@ -125,8 +125,15 @@ namespace avmplus
     template <class VALUE_TYPE, class VALUE_WRITER>
     MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::~MultinameHashtable()
     {
-        GC *gc = GC::GetGC(this);
-        gc->Free(m_quads);
+        freeQuads(GC::GetGC(this));
+    }
+
+    template <class VALUE_TYPE, class VALUE_WRITER>
+    void MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::freeQuads(MMgc::GC* gc)
+    {
+        Quad<VALUE_TYPE>* quads = m_quads;
+        m_quads = NULL;     // Avoid dangling m_quad
+        gc->Free(quads);
     }
 
     template <class VALUE_TYPE, class VALUE_WRITER>
