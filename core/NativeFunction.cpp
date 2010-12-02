@@ -50,11 +50,13 @@ namespace avmplus
 
 #ifndef VMCFG_AOT
     NativeInitializer::NativeInitializer(AvmCore* _core,
+                                            char const* const* _versioned_uris,
                                             const uint8_t* _abcData,
                                             uint32_t _abcDataLen,
                                             uint32_t _methodCount,
                                             uint32_t _classCount) :
         core(_core),
+        versioned_uris(_versioned_uris),
         abcData(_abcData),
         abcDataLen(_abcDataLen),
         methods((MethodType*)core->GetGC()->Calloc(_methodCount, sizeof(MethodType), GC::kZero)),
@@ -62,13 +64,17 @@ namespace avmplus
         methodCount(_methodCount),
         classCount(_classCount)
     {
+        if (versioned_uris)
+            core->addVersionedURIs(versioned_uris);
     }
 #else
     NativeInitializer::NativeInitializer(AvmCore* _core,
+                                            char const* const* _versioned_uris,
                                             const AOTInfo *_aotInfo,
                                             uint32_t _methodCount,
                                             uint32_t _classCount) :
         core(_core),
+        versioned_uris(_versioned_uris),
         abcData(_aotInfo->abcBytes),
         abcDataLen(_aotInfo->nABCBytes),
         methods((MethodType*)core->GetGC()->Calloc((_methodCount>0 ? _methodCount : 1), sizeof(MethodType), GC::kZero)),
@@ -79,6 +85,8 @@ namespace avmplus
         , compiledMethods(_aotInfo->abcMethods)
         , compiledMethodCount(_aotInfo->nABCMethods)
     {
+        if (versioned_uris)
+            core->addVersionedURIs(versioned_uris);
     }
 #endif
 

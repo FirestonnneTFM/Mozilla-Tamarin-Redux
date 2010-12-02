@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 import avmplus.*;
+import avmshell.*;
 
 var SECTION = 'API Versioning - classes';
 var VERSION = 'AS3';

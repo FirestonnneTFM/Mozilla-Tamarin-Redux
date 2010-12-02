@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 import avmplus.*;
+import avmshell.*;
 
 var SECTION = 'API Versioning - globals';
 var VERSION = 'AS3';
@@ -138,18 +139,18 @@ versionTest(function() { return public_getset_666_660 }, 'public_getset_666_660'
 versionTest(function() { return public_getset_664_662_666 }, 'public_getset_664_662_666', ea[11]);
 versionTest(function() { return public_getset_665_660_661_662 }, 'public_getset_665_660_661_662', ea[12]);
 
-versionTest(function() { avmplus.public_getset = true; return true; }, 'public_getset', ea_set[0]);
-versionTest(function() { avmplus.public_getset_660 = true; return true; }, 'public_getset_660', ea_set[1]);
-versionTest(function() { avmplus.public_getset_661 = true; return true; }, 'public_getset_661', ea_set[2]);
-versionTest(function() { avmplus.public_getset_662 = true; return true; }, 'public_getset_662', ea_set[3]);
-versionTest(function() { avmplus.public_getset_663 = true; return true; }, 'public_getset_663', ea_set[4]);
-versionTest(function() { avmplus.public_getset_664 = true; return true; }, 'public_getset_664', ea_set[5]);
-versionTest(function() { avmplus.public_getset_665 = true; return true; }, 'public_getset_665', ea_set[6]);
-versionTest(function() { avmplus.public_getset_666 = true; return true; }, 'public_getset_666', ea_set[7]);
-versionTest(function() { avmplus.public_getset_667 = true; return true; }, 'public_getset_667', ea_set[8]);
-versionTest(function() { avmplus.public_getset_661_662 = true; return true; }, 'public_getset_661_662', ea_set[9]);
-versionTest(function() { avmplus.public_getset_666_660 = true; return true; }, 'public_getset_666_660', ea_set[10]);
-versionTest(function() { avmplus.public_getset_664_662_666 = true; return true; }, 'public_getset_664_662_666', ea_set[11]);
-versionTest(function() { avmplus.public_getset_665_660_661_662 = true; return true; }, 'public_getset_665_660_661_662', ea_set[12]);
+versionTest(function() { avmshell.public_getset = true; return true; }, 'public_getset', ea_set[0]);
+versionTest(function() { avmshell.public_getset_660 = true; return true; }, 'public_getset_660', ea_set[1]);
+versionTest(function() { avmshell.public_getset_661 = true; return true; }, 'public_getset_661', ea_set[2]);
+versionTest(function() { avmshell.public_getset_662 = true; return true; }, 'public_getset_662', ea_set[3]);
+versionTest(function() { avmshell.public_getset_663 = true; return true; }, 'public_getset_663', ea_set[4]);
+versionTest(function() { avmshell.public_getset_664 = true; return true; }, 'public_getset_664', ea_set[5]);
+versionTest(function() { avmshell.public_getset_665 = true; return true; }, 'public_getset_665', ea_set[6]);
+versionTest(function() { avmshell.public_getset_666 = true; return true; }, 'public_getset_666', ea_set[7]);
+versionTest(function() { avmshell.public_getset_667 = true; return true; }, 'public_getset_667', ea_set[8]);
+versionTest(function() { avmshell.public_getset_661_662 = true; return true; }, 'public_getset_661_662', ea_set[9]);
+versionTest(function() { avmshell.public_getset_666_660 = true; return true; }, 'public_getset_666_660', ea_set[10]);
+versionTest(function() { avmshell.public_getset_664_662_666 = true; return true; }, 'public_getset_664_662_666', ea_set[11]);
+versionTest(function() { avmshell.public_getset_665_660_661_662 = true; return true; }, 'public_getset_665_660_661_662', ea_set[12]);
 
 test();

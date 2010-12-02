@@ -99,8 +99,6 @@ namespace avmshell
 
         setAPIInfo(_min_version_num,
                    _max_version_num-_min_version_num+1,
-                   _uris_count,
-                   (const char**) _uris,
                    (int32_t*) _api_compat);
     }
 
@@ -366,18 +364,12 @@ namespace avmshell
             this->defaultAPIVersion = settings.api;
         }
         else {
-            // if there is at least on versioned uri, then there must be a version matrix
-            if (_uris_count > 0) {
-                // Last api of any row is largestApiUtils::getLargestVersion(this);
-                // Using the largest API is really not ideal, because it means AIR_SYS / FP_SYS
-                // are open to random ABC code in the shell.  We don't want that normally.
-                // Instead use the largest nonsys value as computed by the preprocessor.
-                //this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
-                this->defaultAPIVersion = _max_nonsys_version_num;
-            }
-            else {
-                this->defaultAPIVersion = 0;
-            }
+            // Last api of any row is largestApiUtils::getLargestVersion(this);
+            // Using the largest API is really not ideal, because it means AIR_SYS / FP_SYS
+            // are open to random ABC code in the shell.  We don't want that normally.
+            // Instead use the largest nonsys value as computed by the preprocessor.
+            //this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
+            this->defaultAPIVersion = _max_nonsys_version_num;
         }
         //console << "defaultAPIVersion=" << defaultAPIVersion;
         this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));

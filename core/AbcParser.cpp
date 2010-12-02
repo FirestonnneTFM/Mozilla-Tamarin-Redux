@@ -87,7 +87,7 @@ namespace avmplus
                         ReadOnlyScriptBufferImpl scriptBufferImpl(aotInfo->abcBytes, aotInfo->nABCBytes);
                         ScriptBuffer code(&scriptBufferImpl);
 
-                        NativeInitializer ninit(core, aotInfo, 0, 0);
+                        NativeInitializer ninit(core, NULL, aotInfo, 0, 0);
                         PoolObject *pool = decodeAbc(core, code, toplevel, domain, &ninit, api);
                         AvmAssert(pool != NULL);
                         AvmAssert(!pool->isBuiltin);

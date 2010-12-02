@@ -187,7 +187,9 @@ package {
 */
 
 // API Versioning - Globals
-package avmplus {
+// moved from "avmplus" to "avmshell" to avoid having avmplus be unversioned in builtin, but versioned in shell
+package avmshell 
+{
     public var public_var:Boolean = true;
     [API(660)] public var public_var_660:Boolean = true;
     [API(661)] public var public_var_661:Boolean = true;
@@ -261,7 +263,8 @@ package avmplus {
 }
 
 // API Versioning - Classes
-package avmplus {
+// moved from "avmplus" to "avmshell" to avoid having avmplus be unversioned in builtin, but versioned in shell
+package avmshell {
     public class public_class {
 
         public var public_var:Boolean = true;
