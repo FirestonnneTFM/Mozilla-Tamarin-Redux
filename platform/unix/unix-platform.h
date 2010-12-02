@@ -127,6 +127,15 @@
 #include <pthread.h>
 #include <signal.h>
 
+#ifdef ANDROID
+#define USE_CUTILS_ATOMICS FALSE
+#if USE_CUTILS_ATOMICS
+#include <cutils/atomic.h>
+#else
+#include <sys/atomics.h>
+#endif
+#endif
+
 #ifdef SOLARIS
  #include <alloca.h>
  #include <atomic.h>
@@ -299,8 +308,110 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 
 #endif
 
-#ifdef AVMSYSTEM_ARM
-//FIXME: bug 609809 VMPI atomic primitives for Android should use the Bionic lib
+#ifdef ANDROID
+// Nov' 2010.
+// There is some confusion as to which atomics API
+// to use for Android. (See bug 609809).
+// The sys/atomics.h implementation, as of Nov' 2010,
+// apparently does not include memory barriers, so it is
+// not suitable for multi-core. The cutils/atomic.h
+// implementation is dynamically linked and will feature
+// barriers when necessary, but its current implementation is
+// anecdotally the same as sys/atomics.h.
+//
+// For now, the sys/atomics.h implementation is used as it is
+// already being used in the player.
+//
+// Note that on single-core devices, memory barriers are
+// no-ops on all architectures that we support, so the
+// VMPI_memoryBarrier() and VMPI_*WithBarrier functions
+// fulfill their documented API.
+//
+// Linking with sys/atomics.h causes linker warnings such as:
+// "warning: type and size of dynamic symbol `__atomic_inc'
+// are not defined". These also occur in player builds and are
+// currently ignored.
+#if USE_CUTILS_ATOMICS
+
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
+{
+    return android_atomic_inc(value) - 1;
+}
+
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
+{
+    return VMPI_atomicIncAndGet32WithBarrier(value);
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
+{
+    return android_atomic_dec(value) + 1;
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32(volatile int32_t* value)
+{
+    return VMPI_atomicDecAndGet32WithBarrier(value);
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+    return android_atomic_cmpxchg(oldValue, newValue, address) == 0;
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+    return VMPI_compareAndSwap32WithBarrier(oldValue, newValue, address);
+}
+
+REALLY_INLINE void VMPI_memoryBarrier()
+{
+    // No memory barrier native API
+    volatile int32_t dummy;
+    VMPI_compareAndSwap32WithBarrier(0, 1, &dummy);
+}
+
+#else // USE_CUTILS_ATOMICS
+
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
+{
+    return __atomic_inc((volatile int*)value) - 1;
+}
+
+REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
+{
+    return VMPI_atomicIncAndGet32WithBarrier(value);
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
+{
+    return __atomic_dec((volatile int*)value) - 1;
+}
+
+REALLY_INLINE int32_t VMPI_atomicDecAndGet32(volatile int32_t* value)
+{
+    return VMPI_atomicDecAndGet32WithBarrier(value);
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+    return __atomic_cmpxchg((int)oldValue, (int)newValue, (volatile int*)address) == 0;
+}
+
+REALLY_INLINE bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address)
+{
+    return VMPI_compareAndSwap32WithBarrier(oldValue, newValue, address);
+}
+
+REALLY_INLINE void VMPI_memoryBarrier()
+{
+    // No memory barrier native API
+    volatile int32_t dummy;
+    VMPI_compareAndSwap32WithBarrier(0, 1, &dummy);
+}
+
+#endif // USE_CUTILS_ATOMICS
+
+#elif defined(AVMSYSTEM_ARM)
 //FIXME: bug 609810 VMPI atomic primitives for ARM require inline-asm implementations
 #define EMULATE_ATOMICS_WITH_PTHREAD_MUTEX
 
