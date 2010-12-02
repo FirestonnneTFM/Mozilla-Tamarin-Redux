@@ -203,6 +203,10 @@ LFLAGS_HEADLESS := -nostdlib -Bdynamic \
 	-Wl,-rpath-link=$(ANDROID_PRODUCT_OUT)/system/lib \
 	$(ANDROID_PRODUCT_OUT)/obj/lib/crtbegin_dynamic.o \
 	$(ANDROID_PRODUCT_OUT)/obj/lib/crtend_android.o
+	
+# Define these to use the ctuils atomics API
+#LFLAGS_HEADLESS := $(LFLAGS_HEADLESS) -lcutils
+#INC := $(INC) -I$(ANDROID_BUILD_TOP)/system/core/include
 
 ifndef VERBOSE
 	VERBOSE := 
