@@ -75,6 +75,7 @@ package abcdump
 
     var totalSize:int
     var opSizes:Array = new Array(256)
+    var opCounts:Array = new Array(256)
 
     function dumpPrint(s) {
         if (doExtractAbs)
@@ -541,6 +542,7 @@ package abcdump
                     var size:int = code.position - start
                     totalSize += size
                     opSizes[opcode] = int(opSizes[opcode]) + size
+                    opCounts[opcode] = int(opCounts[opcode]) + 1
                     dumpPrint(s)
                 }
                 if (exceptions) {
@@ -1128,7 +1130,7 @@ package abcdump
             }
             infoPrint("ScriptInfo size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
         }
-
+        
         function parseMethodBodies()
         {
             var start:int = data.position
@@ -1185,7 +1187,7 @@ package abcdump
                     m.dump(this,indent)
             }
 
-            infoPrint("OPCODE\tSIZE\t% OF "+totalSize)
+            infoPrint(align(14,"OPCODE",' ',"left")+"\tCOUNT\t SIZE\t% OF "+totalSize)
             var done = []
             for (;;)
             {
@@ -1202,8 +1204,16 @@ package abcdump
                 if (max == -1)
                     break;
                 done[max] = 1;
-                infoPrint(opNames[max]+"\t"+int(opSizes[max])+"\t"+int(100*opSizes[max]/totalSize)+"%")
+                infoPrint(opNames[max]+"\t"+align(6,int(opCounts[max]))+"\t"+align(6,int(opSizes[max]))+"\t"+align(2,int(100*opSizes[max]/totalSize))+"%")
             }
+        }
+
+        // right/left align 's' to 'len' characters using 'pad' as padding
+        function align(len, s, pad=' ', ment='right')
+        {
+            return (ment == 'right')
+                ? new Array(Math.max(0,len-String(s).length)).join(pad)+String(s)
+                : new String(s)+Array(Math.max(0,len-String(s).length)).join(pad)
         }
     }
 
