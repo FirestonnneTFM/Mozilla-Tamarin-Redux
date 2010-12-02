@@ -250,6 +250,7 @@ namespace avmplus
         void setAtoms(Atom* atoms);
         Atom* getAtoms();
         const Atom* getAtoms() const;
+        void freeAtoms();
         static uint32_t FindOneBit(uint32_t value);
         Atom removeDontEnumMask(Atom a) const;
         bool enumerable(Atom a) const;

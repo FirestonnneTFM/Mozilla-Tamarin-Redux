@@ -73,10 +73,9 @@ namespace avmplus
     {
         Atom* atoms = getAtoms();
         if(atoms) {
-            GC *gc = GC::GetGC(atoms);
             // deliberately ignore the final two entries if hasIterIndex(), since they aren't Atoms
             AvmCore::decrementAtomRegion(atoms, getCapacity());
-            gc->Free (atoms);
+            freeAtoms();
         }
         m_atomsAndFlags = 0;
         m_size = 0;
@@ -275,7 +274,7 @@ namespace avmplus
             newIterIndices[1] = oldIterIndices[1];
         }
         m_size = rehash(atoms, oldCapacity, newAtoms, newCapacity);
-        gc->Free(atoms);
+        freeAtoms();
         setAtoms(newAtoms);
         setCapacity(newCapacity);
         clrHasDeletedItems();
@@ -349,7 +348,7 @@ namespace avmplus
             Atom* newAtoms = (Atom*)gc->Calloc(cap+2, sizeof(Atom), GC::kContainsPointers|GC::kZero);
             // no need to rehash: size is the same as far as atoms are concerned
             VMPI_memcpy(newAtoms, atoms, cap*sizeof(Atom));
-            gc->Free(atoms);
+            freeAtoms();
             atoms = newAtoms;
             m_atomsAndFlags |= kHasIterIndex;
             setAtoms(newAtoms);
