@@ -1012,14 +1012,17 @@ const int kBufferPadding = 16;
          * @param apis_sizes Array of sizes of arrays of compatible APIs
          * @param apis_count Count of API versions
          * @param apis       Array of arrays of compatible APIs
-         * @param uris_count Count of URIs
-         * @param uris       Array of versioned URIs
          */
         void setAPIInfo(uint32_t apis_start,
                         uint32_t apis_count,
-                        uint32_t uris_count, const char** uris,
                         const int32_t* api_compat);
-
+        
+        /**
+         * Add to the list of URIs that must be versioned for namespaces.
+         *
+         * @param uris       NULL-terminated list of URIs that will need versioning
+         */
+        void addVersionedURIs(char const* const* uris);
 
         bool isVersionedURI(Stringp uri);
 
@@ -1727,11 +1730,16 @@ const int kBufferPadding = 16;
         // API versioning state
         uint32_t          apis_start;  // first api number
         uint32_t          apis_count;  // count of apis
-        uint32_t          uris_count;  // count of uris
-        const char**      uris;        // array of uris
         const int32_t*    api_compat;  // array of compatible api bit masks
         int32_t           largest_api;
         int32_t           active_api_flags;
+        HeapHashtable*    m_versionedURIs;
+#ifdef _DEBUG
+#define DEBUG_API_VERSIONING
+#endif
+#ifdef DEBUG_API_VERSIONING
+        HeapHashtable*    m_unversionedURIs;
+#endif
 
 #ifdef VMCFG_LOOKUP_CACHE
     private:

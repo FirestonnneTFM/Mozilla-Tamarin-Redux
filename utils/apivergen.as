@@ -134,7 +134,6 @@ package apivergen
     function process (fname) {
         var api = new XML (File.read (fname));
         var versions = api.versions;
-        var uris = api.uris;
         var releases = versions..release;
         var products = releases[releases.length()-1]..product;
         var profiles = products[products.length()-1]..profile;
@@ -201,36 +200,6 @@ package apivergen
         frag.maximalNonSys = String(maximalNonSys) + ";\n";
         frag.config_names = config_names;
 
-        // emit the array of versions_count array
-        var version_count;
-        out += "[] = {";
-        for (var v = min_version; v <= max_version; ++v) {
-            version_count = 0;
-            gen(d1,find(v,d1,3),3, function (x) { if(x>=0) version_count += 1 });
-            out += version_count + ", ";
-        }
-        out += "};\n\n";
-        frag.versions_count = out;
-        out = "";
-
-        // emit the versions matrix
-        frag.versions = "["+(Number(max_version)-Number(min_version)+1)+"]";
-        out += "{\n";
-        for (var v = min_version; v <= max_version; ++v) {
-            out += "  {";
-            gen(d1,find(v,d1,3),3, function (x) { if(x>=0) out += x + ", " });
-            out += "},\n";
-        }
-        out += "};\n";
-        frag.versions_initializer = out;
-
-        frag.uris_count = "" + uris.uri.length() + ";\n";
-        out = "{\n";
-        for each (var v in uris.uri) {
-            out += "  \"" + v.@id + "\",\n";
-        }
-        out += "};\n";
-        frag.uris = out;
         frag.min_version_num = min_version + ";\n";
         frag.max_version_num = max_version + ";\n";
 
@@ -254,31 +223,8 @@ package apivergen
         var out = frag.documentation;
         out += "static const uint32_t _min_version_num = " + frag.min_version_num;
         out += "static const uint32_t _max_version_num = " + frag.max_version_num;
-        out += "static const uint32_t _versions_count" + frag.versions_count;
-        out += "static const uint32_t _versions []" + frag.versions;
-        out += " = " + frag.versions_initializer;
-        out += "static const uint32_t _uris_count = " + frag.uris_count;
-        out += "static const char* _uris [] = " + frag.uris;
         out += "static const int32_t _api_compat [] = " + frag.api_compat_initializer;
         out += "static const uint32_t _max_nonsys_version_num = " + frag.maximalNonSys;
-        return out;
-    }
-
-    /*
-      emit java
-    */
-
-    function emitj(frag) {
-        var out = frag.documentation;
-        out += "package macromedia.asc.util;\n";
-        out += "public class APIVersions {\n";
-        out += "public static int min_version_num = " + frag.min_version_num;
-        out += "public static int max_version_num = " + frag.max_version_num;
-        out += "public static int versions [][]";
-        out += " = " + frag.versions_initializer;
-        out += "public static String uris [] = " + frag.uris;
-        out += "public static int api_compat [] = " + frag.api_compat_initializer;
-        out += "};\n";
         return out;
     }
 
@@ -302,6 +248,5 @@ package apivergen
     var fname = argv[argv.length-1];
     var frags = process(fname);
     File.write("api-versions.h", emitc(frags));
-    File.write("api-versions.java", emitj(frags));
     File.write("api-versions.as", emitas(frags));
 }
