@@ -158,6 +158,13 @@ namespace avmplus
         return (const Atom*)(m_atomsAndFlags & ~kAtomFlags);
     }
 
+    REALLY_INLINE void InlineHashtable::freeAtoms()
+    {
+        Atom* atoms = (Atom*)(m_atomsAndFlags & ~kAtomFlags);
+        m_atomsAndFlags = m_atomsAndFlags & kAtomFlags;  // Must clear the pointer bits to avoid a dangling pointer
+        MMgc::GC::GetGC(atoms)->Free(atoms);
+    }
+
     // @todo -- move this mess to VMPI, see https://bugzilla.mozilla.org/show_bug.cgi?id=546354
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     REALLY_INLINE /*static*/ uint32_t InlineHashtable::FindOneBit(uint32_t value)
