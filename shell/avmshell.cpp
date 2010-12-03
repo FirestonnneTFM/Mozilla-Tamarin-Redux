@@ -1142,6 +1142,7 @@ namespace avmshell
         AvmLog("          [-Dgreedy]    collect before every allocation\n");
         AvmLog("          [-Dnogc]      don't collect\n");
         AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+        AvmLog("          [-Dnodebugger] do not initialize the debugger (in DEBUGGER builds)\n");
         AvmLog("          [-Dgcthreshold N] lower bound on allocation budget, in blocks, between collection completions\n");
         AvmLog("          [-Dnofixedcheck]  don't check FixedMalloc deallocations for correctness (sometimes expensive)\n");
 #ifdef DEBUGGER
