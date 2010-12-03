@@ -1394,7 +1394,7 @@ namespace avmplus
                     }
                 }
 
-                // default - do getproperty at runtime
+                // Default: do setproperty or initproperty at runtime.
 
                 coder->writeOp2(state, pc, opcode, imm30, n, propTraits);
                 state->pop(n);
