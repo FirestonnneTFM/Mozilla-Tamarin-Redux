@@ -597,18 +597,21 @@ namespace avmplus
     {
         switch (getType())
         {
-            case kDynamic:
-                // never necessary to WB() when we store NULL
-                _gc(this)->FreeNotNull(m_buffer.pv);
+            case kDynamic: {
+                // Never necessary to WB() when we store NULL over a non-RC pointer
+                void* pv = m_buffer.pv;
+                m_buffer.pv = NULL;         // Avoid dangling the pointer
+                _gc(this)->FreeNotNull(pv);
                 break;
+            }
             case kDependent:
-                // WBRC() is however desirable when we store NULL
+                // WBRC() is however necessary when we store NULL over an RC pointer
                 WBRC_NULL(&m_extra.master);
                 break;
             default: ; // kStatic
         }
         m_extra.master = NULL;  // might have already been cleared above, but that's ok
-        m_buffer.p8 = NULL;
+        m_buffer.p8 = NULL;     // might have already been cleared above, but that's ok
         m_length = 0;
         m_bitsAndFlags = 0;
     }
@@ -2932,8 +2935,10 @@ namespace avmplus
 
     StUTF8String::~StUTF8String()
     {
-        if (m_buffer != &k_zero.c8)
+        if (m_buffer != &k_zero.c8) {
+            // StrUTF8String is only ever stack allocated so it's OK just to free m_buffer without NULLing it first.
             GC::GetGC(m_buffer)->Free(m_buffer);
+        }
     }
 
     StUTF16String::StUTF16String(Stringp str)
@@ -2961,8 +2966,10 @@ namespace avmplus
 
     StUTF16String::~StUTF16String()
     {
-        if (m_buffer != &k_zero.u16)
+        if (m_buffer != &k_zero.u16) {
+            // StrUTF16String is only ever stack allocated so it's OK just to free m_buffer without NULLing it first.
             GC::GetGC(m_buffer)->Free(m_buffer);
+        }
     }
 
     // The following table is the length of an UTF-8 sequence, indexed by the
