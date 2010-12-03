@@ -402,11 +402,11 @@ const int kBufferPadding = 16;
         MMgc::GC * const gc;
 
 
-    #ifdef _DEBUG
+#ifdef _DEBUG
             // Only the thread used to create the AvmCore is allowed to modify currentMethodFrame (and thus, use EnterCodeContext).
             // We don't enforce this in Release builds, but check for it and assert in Debug builds.
             vmpi_thread_t       codeContextThread;
-    #endif
+#endif
 
     public:
 
@@ -421,7 +421,7 @@ const int kBufferPadding = 16;
 
     private:
 
-        #ifdef DEBUGGER
+#ifdef DEBUGGER
         private:
             Debugger*       _debugger;
             Profiler*       _profiler;
@@ -438,7 +438,7 @@ const int kBufferPadding = 16;
         public:
             int                 langID;
             bool                passAllExceptionsToDebugger;
-        #endif
+#endif
 
     private:
         class LivePoolNode : public MMgc::GCRoot
@@ -515,17 +515,18 @@ const int kBufferPadding = 16;
         // execution manager, responsible for all invocation
         ExecMgr* exec;
 
-        #ifdef VMCFG_NANOJIT // accessors
-            #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
-            bool use_sse2() const;
-            #endif
-        #endif
-        #ifdef AVMPLUS_VERBOSE
+#ifdef VMCFG_NANOJIT // accessors
+#if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
+        bool use_sse2() const;
+#endif
+#endif
+
+#ifdef AVMPLUS_VERBOSE
         bool isVerbose(uint32_t b) const;
         static bool isBitSet(uint32_t v, uint32_t bit);
         static uint32_t parseVerboseFlags(const char* arg, char*& badFlag);
         virtual const char* identifyDomain(Domain* domain);
-        #endif
+#endif
 
         enum InterruptReason {
             // normal state.  must be 0 to allow efficient code for interrupt checks
@@ -650,9 +651,9 @@ const int kBufferPadding = 16;
          */
         NamespaceSet* publicNamespaces;
 
-        #ifdef AVMPLUS_WITH_JNI
+#ifdef AVMPLUS_WITH_JNI
         Java* java;     /* java vm control */
-        #endif
+#endif
 
         /**
          * Execute an ABC file that has been parsed into a
@@ -876,10 +877,10 @@ const int kBufferPadding = 16;
 #ifdef AVMPLUS_VERBOSE
         /** Disassembles an opcode and places the text in str. */
         void formatOpcode(PrintWriter& out, const uint8_t *pc, const uint8_t *code_end, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
-# ifdef VMCFG_WORDCODE
+#ifdef VMCFG_WORDCODE
         void formatOpcode(PrintWriter& out, const uintptr_t *pc, const uintptr_t *code_end, WordOpcode opcode, ptrdiff_t off, PoolObject* pool);
         void formatBits(PrintWriter& buffer, uint32_t bits);
-# endif
+#endif
         static void formatMultiname(PrintWriter& out, uint32_t index, PoolObject* pool);
 #endif
 
@@ -1382,7 +1383,7 @@ const int kBufferPadding = 16;
          */
         virtual String* getErrorMessage(int errorID);
 
-        #ifdef DEBUGGER
+#ifdef DEBUGGER
         /**
          * willExceptionBeCaught walks all the way up the
          * ActionScript stack to see if there is any "catch"
@@ -1391,7 +1392,7 @@ const int kBufferPadding = 16;
          */
         bool willExceptionBeCaught(Exception* exception);
 
-        #ifndef VMCFG_DEBUGGER_STUB
+#ifndef VMCFG_DEBUGGER_STUB
         /**
          * findErrorMessage searches an error messages table.
          * Only available in debugger builds.
@@ -1400,7 +1401,7 @@ const int kBufferPadding = 16;
                                  int* mapTable,
                                  const char** errorTable,
                                  int numErrors);
-        #endif
+#endif
 
         /**
          * Determines the language id of the given platform
@@ -1413,9 +1414,9 @@ const int kBufferPadding = 16;
          */
         StackTrace* newStackTrace();
 
-        #ifdef _DEBUG
+#ifdef _DEBUG
         void dumpStackTrace();
-        #endif
+#endif
 
         /** The call stack of currently executing code. */
         CallStackNode *callStack;
@@ -1568,7 +1569,7 @@ const int kBufferPadding = 16;
 
         /** number of deleted entries in our String table */
         int deletedCount;
-        #define AVMPLUS_STRING_DELETED ((Stringp)(1))
+#define AVMPLUS_STRING_DELETED ((Stringp)(1))
 
         /** size of interned Namespace table */
         int nsCount;
@@ -1737,6 +1738,7 @@ const int kBufferPadding = 16;
 #ifdef _DEBUG
 #define DEBUG_API_VERSIONING
 #endif
+
 #ifdef DEBUG_API_VERSIONING
         HeapHashtable*    m_unversionedURIs;
 #endif
