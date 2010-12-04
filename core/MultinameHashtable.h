@@ -124,6 +124,9 @@ namespace avmplus
          */
         void grow();
 
+        // Free the m_quads array, clear m_quads
+        void freeQuads(MMgc::GC* gc);
+
     public:
         /** kDefaultCapacity must be a power of 2 */
         const static int kDefaultCapacity = 8;

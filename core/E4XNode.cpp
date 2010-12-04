@@ -264,6 +264,8 @@ namespace avmplus
 
         E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (name, ns);
         //m_nameOrAux = AUXBIT | int(aux);
+        // Clear it out in case there's already a name there.
+        WBRC_NULL(&m_nameOrAux);
         WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr_t(aux));
     }
 

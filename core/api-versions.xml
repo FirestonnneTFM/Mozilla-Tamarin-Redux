@@ -155,41 +155,4 @@ ASC and AVM to control the visibility of names in the API.
     </product>
   </release>
 </versions>
-<uris>
-  <uri id=""/>
-  <uri id="__AS3__.vec"/>
-  <uri id="adobe.utils"/>
-  <uri id="avmplus"/>
-  <uri id="flash.accessibility"/>
-  <uri id="flash.automation"/>
-  <uri id="flash.data"/>
-  <uri id="flash.debugger"/>
-  <uri id="flash.desktop"/>
-  <uri id="flash.display"/>
-  <uri id="flash.errors"/>
-  <uri id="flash.events"/>
-  <uri id="flash.external"/>
-  <uri id="flash.filesystem"/>
-  <uri id="flash.filters"/>
-  <uri id="flash.geom"/>
-  <uri id="flash.globalization"/>
-  <uri id="flash.html"/>
-  <uri id="flash.html.script"/>
-  <uri id="flash.media"/>
-  <uri id="flash.net"/>
-  <uri id="flash.net.dns"/>
-  <uri id="flash.net.drm"/>
-  <uri id="flash.printing"/>
-  <uri id="flash.profiler"/>
-  <uri id="flash.sampler"/>
-  <uri id="flash.security"/>
-  <uri id="flash.sensors"/>
-  <uri id="flash.system"/>
-  <uri id="flash.text"/>
-  <uri id="flash.text.engine"/>
-  <uri id="flash.text.ime"/>
-  <uri id="flash.ui"/>
-  <uri id="flash.utils"/>
-  <uri id="flash.xml"/>
-</uris>
 </api>

@@ -318,6 +318,11 @@ namespace avmplus
         builtinPool                 = NULL;
         builtinDomain               = NULL;
         builtinBugCompatibility     = NULL;
+        
+        m_versionedURIs = new(gc) HeapHashtable(gc);
+#ifdef DEBUG_API_VERSIONING
+        m_unversionedURIs = new(gc) HeapHashtable(gc);
+#endif
 
         m_domainMgr = new(gc) DomainMgr(this);
 
@@ -510,6 +515,7 @@ namespace avmplus
 
 #ifdef VMCFG_AOT
         NativeInitializer ninit(this,
+                                avmplus::NativeID::builtin_versioned_uris,
                                 &builtin_aotInfo,
                                 avmplus::NativeID::builtin_abc_method_count,
                                 avmplus::NativeID::builtin_abc_class_count);
@@ -838,7 +844,7 @@ namespace avmplus
         {
             ReadOnlyScriptBufferImpl scriptBufferImpl(aotInfos[i].abcBytes, aotInfos[i].nABCBytes);
             ScriptBuffer code(&scriptBufferImpl);
-            NativeInitializer ninit(this, &aotInfos[i], 0, 0);
+            NativeInitializer ninit(this, NULL, &aotInfos[i], 0, 0);
 
             PoolObject *userPool = parseActionBlock(code, 0, toplevel, domain, &ninit, getAPI(NULL));
 
@@ -4739,21 +4745,38 @@ return the result of the comparison ToPrimitive(x) == y.
 
     void AvmCore::setAPIInfo(uint32_t apis_start,
                              uint32_t apis_count,
-                             uint32_t uris_count, const char** uris,
                              const API* api_compat)
     {
         this->apis_start  = apis_start;
         this->apis_count  = apis_count;
-        this->uris_count  = uris_count;
-        this->uris        = uris;
         this->api_compat  = api_compat;
         this->largest_api = 0x1 << (apis_count-1);
         this->active_api_flags = 0;
+        
+        // the public namespace (empty uri) is always versioned.
+        this->m_versionedURIs->get_ht()->add(kEmptyString->atom(), trueAtom);
+
         // cache public namespaces
         this->publicNamespaces = NamespaceSet::_create(GetGC(), apis_count);
         for (uint32_t i = 0; i < apis_count; ++i) {
             Namespacep ns = this->internNamespace(this->newNamespace(kEmptyString, Namespace::NS_Public, 0x1<<i));
             publicNamespaces->_initNsAt(i, ns);
+        }
+    }
+
+    void AvmCore::addVersionedURIs(char const* const* uris)
+    {
+        while (*uris != NULL)
+        {
+            String* uri = internConstantStringLatin1(*uris++);
+#ifdef DEBUG_API_VERSIONING
+            if (m_unversionedURIs->get_ht()->get(uri->atom()) != undefinedAtom)
+            {
+                VMPI_log(StUTF8String(uri).c_str());
+                AvmAssert(!"a URI that is used in unversioned form must not later be used in versioned form");
+            }
+#endif
+            m_versionedURIs->get_ht()->add(uri->atom(), trueAtom);
         }
     }
 
@@ -4893,52 +4916,14 @@ return the result of the comparison ToPrimitive(x) == y.
 
     bool AvmCore::isVersionedURI(Stringp uri)
     {
-        // versioning is turned off
-        if (uris_count == 0)
-            return false;
-
-        if (uri->isEmpty())
-            return true;
-
-        // binary search (requires uris to be sorted). avoids the need
-        // to call getBaseURI, and to search the whole list in negative
-        // cases.
-        uint32_t i = this->uris_count / 2;
-        uint32_t l1 = (uint32_t)uri->length();
-        for (uint32_t j = i; j;) {
-            const char* probe = this->uris[i];
-            int32_t r = 0;
-            uint32_t l2 = (uint32_t)strlen(probe);
-            uint32_t len = l1 < l2 ? l1 : l2;
-            for (uint32_t k = 0; k < len; k++) {
-                wchar c1 = uri->charAt(k);
-                wchar c2 = probe[k];
-                if (c1 == c2)
-                    continue;
-                r = c1 - c2;
-                break;
-            }
-            // we have a match if the prefixes match and the strings are the same
-            // length modulo the version mark, if there is one. (this code assumes
-            // the uri being checked does not have a unicode characters above 0xF8FF
-            // in its last position)
-            if (r==0) {
-                if (l1==l2 || (l1==l2+1 && uri->charAt(l2) > ApiUtils::MIN_API_MARK)) {
-                    return true;
-                }
-                else {
-                    // keep looking, in the right direction based on length
-                    r = l1-l2;
-                }
-            }
-
-            j /= 2;
-            if (r < 0)
-                i = i - j;
-            else
-                i = i + j;
-        }
-        return false;
+        AvmAssert(uri != NULL);
+        AvmAssert(uri->isInterned());
+        bool const r = m_versionedURIs->get_ht()->get(uri->atom()) != undefinedAtom;
+#ifdef DEBUG_API_VERSIONING
+        if (!r)
+            m_unversionedURIs->get_ht()->add(uri->atom(), trueAtom);
+#endif
+        return r;
     }
 
     API ApiUtils::toAPI(AvmCore* core, uint32_t v)
