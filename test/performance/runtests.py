@@ -134,9 +134,6 @@ class PerformanceRuntest(RuntestBase):
 
     def __init__(self):
         RuntestBase.__init__(self)
-    
-    def __str__(self):
-        return 'PerformanceRuntest'
 
     def run(self):
         self.setEnvironVars()
@@ -148,7 +145,7 @@ class PerformanceRuntest(RuntestBase):
         self.checkPath(['avm2'])
         self.determineOS()
         # Load the root testconfig file
-        self.settings, self.directives = self.parseTestConfig(self.testconfig)
+        self.settings, self.includes = self.parseTestConfig('.')
         self.tests = self.getTestsList(self.args)
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
@@ -683,7 +680,11 @@ class PerformanceRuntest(RuntestBase):
         tname = root[root.rfind('/')+1:]
         abc = "%s.abc" % root
 
-        settings = self.get_test_settings(root)
+        settings, includes = self.loadTestSettings(dir, root)
+
+        #TODO: possibly handle includes by building test list?  This works for now...
+        if includes and not list_match(includes,root):
+            return
 
         if '.*' in settings and 'skip' in settings['.*']:
             self.verbose_print('  skipping %s' % testName)
@@ -1034,7 +1035,6 @@ except SystemExit:
 except TypeError:
     # This is the error thrown when ctrl-c'ing out of a testrun
     print('\nKeyboard Interrupt')
-    raise
 except:
     print('Runtest Abnormal Exit')
     raise
