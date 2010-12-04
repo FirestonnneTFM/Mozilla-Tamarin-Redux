@@ -51,11 +51,8 @@
 #
 #   The following commands only operate at a testfile level and not individual tests:
 #
-#   ats_skip - don't generate an ATS swf as these files are not ATS compatible
-#   deep - test should only run in deep phase for specified configs
 #   skip - the test is not run, for example the configuration does not support
 #          a feature or the file is not a test and is a helper file to another test
-#   verify_skip - skip test when doing a verify run
 #
 # comments: please include bug reference and reason for the entry
 #
