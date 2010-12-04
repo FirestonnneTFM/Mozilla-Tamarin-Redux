@@ -235,7 +235,7 @@ class AcceptanceRuntest(RuntestBase):
 
         includes = self.includes #list
 
-        settings = self.getTestSettings(root)
+        settings = self.get_test_settings(root)
 
         # skip entire test if specified
         if '.*' in settings and 'skip' in settings['.*']:

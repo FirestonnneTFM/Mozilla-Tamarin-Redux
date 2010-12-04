@@ -683,7 +683,7 @@ class PerformanceRuntest(RuntestBase):
         tname = root[root.rfind('/')+1:]
         abc = "%s.abc" % root
 
-        settings = self.getTestSettings(root)
+        settings = self.get_test_settings(root)
 
         if '.*' in settings and 'skip' in settings['.*']:
             self.verbose_print('  skipping %s' % testName)

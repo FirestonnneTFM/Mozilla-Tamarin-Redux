@@ -104,7 +104,7 @@ class RuntestBase(object):
     builtinabc = ''
     config = ''
     
-    # note that include is on valid for performance runtests config
+    # note that include is only valid for performance runtests config
     config_directives = ['expectedfail', 'skip', 'ats_skip', 'verify_skip',
                          'deep', 'performance', 'include']
     directives = None
@@ -704,7 +704,7 @@ class RuntestBase(object):
         check_test_list(tests)
         return tests
 
-    def getTestSettings(self, root):
+    def get_test_settings(self, root):
         # return settings for this test
         settings = {}
         for k in self.settings.keys():
@@ -948,7 +948,7 @@ class RuntestBase(object):
 
         if self.genAtsSwfs:
             # get settings as ats excluded files are defined there
-            settings = self.getTestSettings(as_file)
+            settings = self.get_test_settings(as_file)
             if self.skipAtsTest(file, settings):
                 return
 
@@ -1033,7 +1033,7 @@ class RuntestBase(object):
                 if self.aotsdk:
                     # We use the test config file to mark abc files that fail to AOT compile,
                     # so we need to take account of that here before we try to compile them.
-                    settings = self.getTestSettings(testdir)
+                    settings = self.get_test_settings(testdir)
                     if '.*' in settings and 'skip' in settings['.*']:
                         self.js_print('Skipping -daa %s ... reason: %s' % (test,settings['.*']['skip']))
                         continue
@@ -1099,7 +1099,7 @@ class RuntestBase(object):
 
                         if self.genAtsSwfs:
                             # get settings as ats excluded files are defined there
-                            settings = self.getTestSettings(testdir)
+                            settings = self.get_test_settings(testdir)
                             if self.skipAtsTest(file, settings):
                                 continue
                             arglist.extend(genAtsArgs(dir,file,self.atstemplate))
