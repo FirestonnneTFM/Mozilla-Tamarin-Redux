@@ -70,9 +70,6 @@ class AcceptanceRuntest(RuntestBase):
         # Set threads to # of available cpus/cores
         self.threads = detectCPUs()
         RuntestBase.__init__(self)
-    
-    def __str__(self):
-        return 'AcceptanceRuntest'
 
     def setEnvironVars(self):
         RuntestBase.setEnvironVars(self)
@@ -161,13 +158,8 @@ class AcceptanceRuntest(RuntestBase):
         # extension lists must be tuples
         self.otherTestExtensions = (self.abcasmExt,)
         self.executableExtensions = (self.abcOnlyExt,)
-        
-        # test configuration is contained in two files: failconfig & testconfig)
-        self.settings, self.directives = self.parseTestConfig(self.testconfig)
-        failconfig_settings, failconfig_directives = self.parseTestConfig(self.failconfig)
-        self.settings.update(failconfig_settings)
-        self.directives.update(failconfig_directives)
-        
+        # Load the root testconfig file
+        self.settings, self.includes = self.parseTestConfig('.')
         self.tests = self.getTestsList(self.args)
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
@@ -208,16 +200,6 @@ class AcceptanceRuntest(RuntestBase):
                 sys.exit(1)
             print("detected %d android devices" % (len(self.androiddevices)/self.threads))
             self.threads=len(self.androiddevices)
-    
-    def skip_test(self, ast, testnum, settings, key):
-        '''Skip the given test, returns output_calls'''
-        output_calls = []
-        output_calls.append((self.js_print, ('%d running %s' % (testnum, ast),
-                                             '<b>', '</b><br/>')))
-        output_calls.append((self.js_print,('  skipping... reason: %s' %
-                                            settings['.*'][key],)))
-        self.allskips += 1
-        return output_calls
      
     def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
@@ -235,20 +217,22 @@ class AcceptanceRuntest(RuntestBase):
 
         includes = self.includes #list
 
-        settings = self.get_test_settings(root)
+        settings = self.getLocalSettings(root)
 
-        # skip entire test if specified
-        if '.*' in settings and 'skip' in settings['.*']:
-            return self.skip_test(ast, testnum, settings, 'skip')
-        
         # skip tests that can't be verified
         if self.verify and '.*' in settings and 'verify_skip' in settings['.*']:
-            return self.skip_test(ast, testnum, settings, 'verify_skip')
-        
-        if 'deep' not in self.config and '.*' in settings and \
-           'deep' in settings['.*']:
-            return self.skip_test(ast, testnum, settings, 'deep')
-            
+            outputCalls.append((self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+            outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['verify_skip'],)))
+            self.allskips += 1
+            return outputCalls
+
+        # skip entire test if specified
+        if '.*' in settings and 'skip' in settings['.*'] and not 'include' in settings['.*']:
+            outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['skip'],)))
+            self.allskips += 1
+            outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+            return outputCalls
+
         # Check for a timezone file
         if isfile('%s.tz' % ast):
             if not self.valid_time_zone(ast, testnum, outputCalls):
@@ -392,7 +376,6 @@ class AcceptanceRuntest(RuntestBase):
                    extraVmArgs+=" --threadid=%d --androidid=%s %s" % (n,self.androiddevices[n],extraVmArgs)
             except:
                 print(sys.exc_info())
-        
         outputCalls = []
         lpass = 0
         lfail = 0
@@ -466,51 +449,103 @@ class AcceptanceRuntest(RuntestBase):
         # Test has been run, handle output
         if self.verifyonly:
             # only check the exit code when running a verifyonly pass
-            ec_lfail, ec_lexpfail, expectedExitcode = self.check_exit_code(
-                exitcode, root, testName, f, err, settings, outputCalls)
+            ec_lfail, ec_lexpfail, expectedExitcode = self.checkExitCode(exitcode, root, testName, f, err, settings, outputCalls)
             if ec_lfail or ec_lexpfail:
                 lfail += ec_lfail
                 lexpfail += ec_lexpfail
             else:
                 lpass += 1
         elif not self.verify:
-            outputLines = []
-            if isfile(root+'.out'):
-                lpass, lfail, lexpfail, lunpass = self.check_out_file(
-                                            root, f+err, settings, outputCalls)
-            else:
-                for line in f+err:
-                    outputLines.append(line)
-                    outputCalls.append((self.verbose_print,('   %s' % line.strip(),)))
-                    if 'Assertion failed:' in line:
-                        lassert += 1
-                        outputCalls.append((self.fail,(testName+extraVmArgs, line, self.assertmsgs)))
-                    testcase=''
-                    if len(line)>9:
-                        testcase=line.strip()
-                    skipTestDesc = dict_match(settings,testcase,'skip')
-                    if skipTestDesc:
-                        outputCalls.append((self.js_print,('  skipping "%s" ... reason: %s' % (line.strip(),skipTestDesc),)))
-                        self.allskips+=1
-                        continue
-                    if 'PASSED!' in line:
-                        res=dict_match(settings,testcase,'expectedfail')
-                        if res:
-                            outputCalls.append((self.fail,(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, self.unpassmsgs)))
-                            lunpass += 1
-                        else:
-                            lpass += 1
-                    if 'FAILED!' in line:
-                        res=dict_match(settings,testcase,'expectedfail')
-                        if res:
-                            outputCalls.append((self.fail,(testName, 'expected failure: ' + line.strip() + ' reason: '+res, self.expfailmsgs)))
-                            lexpfail += 1
-                        else:
-                            lfail += 1
-                            outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
+            try:
+                outputLines = []
+                if isfile(root+'.out'):
+                    # override standard runtests behavior, just compare the .out file with stdout+stderr
+                    actual = [line.strip() for line in f+err if line.strip()]
+                    try:
+                        outfile = open(root+'.out', 'r')
+                        expectedOut = [line.strip() for line in outfile.readlines() if line.strip()]
+                        outfile.close()
+                        outputCalls.append((self.verbose_print,('%s.out file (expected):' % root,)))
+                        outputCalls.append((self.verbose_print,(expectedOut,)))
+                        outputCalls.append((self.verbose_print,('\nactual output:',)))
+                        outputCalls.append((self.verbose_print,(actual,)))
+                        # check settings if this should be an expected failure
+                        expectedfail = dict_match(settings,'','expectedfail')
+                        # .out files can contain regex but must be prefaced with REGEXP as the first line in the file
+                        try:
+                            if expectedOut[0] == 'REGEXP':
+                                expectedOut = expectedOut[1:]
+                                if len(actual) < len(expectedOut):
+                                    # pad actual output w/ empty lines
+                                    for i in range(len(expectedOut)-len(actual)):
+                                        actual.append('')
+                                for i in range(len(actual)):
+                                    if not re.search(expectedOut[i], actual[i]):
+                                        raise IndexError
+                            else:
+                                if actual != expectedOut:
+                                    raise IndexError
+                            # test passed - check to make sure its not an expected failure
+                            if expectedfail:
+                                outputCalls.append((self.fail,(
+                                    testName, 'unexpected .out file pass. ' +
+                                    ' reason: '+expectedfail, self.unpassmsgs)))
+                                lunpass += 1
+                            else:
+                                lpass += 1
+                        except IndexError:
+                            # test failed
+                            if expectedfail:
+                                outputCalls.append((self.fail,(
+                                    testName,
+                                    'expected failure: .out file does not match stdout+stderr. ' +
+                                    ' reason: '+expectedfail, self.expfailmsgs)))
+                                lexpfail += 1
+                            else:
+                                outputCalls.append((self.fail,(testName,
+                                    '.out file does not match output:\n%s.out file (expected):\n%s\nactual output:\n%s' % (root, expectedOut,actual),
+                                    self.failmsgs)))
+                                lfail += 1
+                    except IOError:
+                        outputLines.append((self.js_print,('Error opening %s.out' % root,)))
+                        lfail += 1
+                else:
+                    for line in f+err:
+                        outputLines.append(line)
+                        outputCalls.append((self.verbose_print,('   %s' % line.strip(),)))
+                        if 'Assertion failed:' in line:
+                            lassert += 1
+                            outputCalls.append((self.fail,(testName+extraVmArgs, line, self.assertmsgs)))
+                        testcase=''
+                        if len(line)>9:
+                            testcase=line.strip()
+                        skipTestDesc = dict_match(settings,testcase,'skip')
+                        includeTestDesc = dict_match(settings, testcase, 'include')
+                        if skipTestDesc and not includeTestDesc:
+                            outputCalls.append((self.js_print,('  skipping "%s" ... reason: %s' % (line.strip(),skipTestDesc),)))
+                            self.allskips+=1
+                            continue
+                        if 'PASSED!' in line:
+                            res=dict_match(settings,testcase,'expectedfail')
+                            if res:
+                                outputCalls.append((self.fail,(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, self.unpassmsgs)))
+                                lunpass += 1
+                            else:
+                                lpass += 1
+                        if 'FAILED!' in line:
+                            res=dict_match(settings,testcase,'expectedfail')
+                            if res:
+                                outputCalls.append((self.fail,(testName, 'expected failure: ' + line.strip() + ' reason: '+res, self.expfailmsgs)))
+                                lexpfail += 1
+                            else:
+                                lfail += 1
+                                outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
+            except:
+                print('exception running avm')
+                raise
 
             # exitcode check
-            ec_lfail, ec_lexpfail, expectedExitcode = self.check_exit_code(exitcode, root, testName, f, err, settings, outputCalls)
+            ec_lfail, ec_lexpfail, expectedExitcode = self.checkExitCode(exitcode, root, testName, f, err, settings, outputCalls)
             if ec_lfail or ec_lexpfail:
                 lfail += ec_lfail
                 lexpfail += ec_lexpfail
@@ -553,63 +588,7 @@ class AcceptanceRuntest(RuntestBase):
 
         return outputCalls
 
-    def check_out_file(self, root, output, settings, outputCalls):
-        # override standard runtests behavior, just compare the .out file with stdout+stderr
-        lpass, lfail, lexpfail, lunpass = 0, 0, 0, 0
-        actual = [line.strip() for line in output if line.strip()]
-        try:
-            outfile = open(root+'.out', 'r')
-            expectedOut = [line.strip() for line in outfile.readlines() if line.strip()]
-            outfile.close()
-        except IOError:
-            outputCalls.append((self.js_print,('Error opening %s.out' % root,)))
-            lfail += 1
-            return lpass, lfail, lexpfail, lunpass
-            
-        outputCalls.append((self.verbose_print,('%s.out file (expected):' % root,)))
-        outputCalls.append((self.verbose_print,(expectedOut,)))
-        outputCalls.append((self.verbose_print,('\nactual output:',)))
-        outputCalls.append((self.verbose_print,(actual,)))
-        # check settings if this should be an expected failure
-        expectedfail = dict_match(settings,'','expectedfail')
-        # .out files can contain regex but must be prefaced with REGEXP as the first line in the file
-        try:
-            if expectedOut[0] == 'REGEXP':
-                expectedOut = expectedOut[1:]
-                if len(actual) < len(expectedOut):
-                    # pad actual output w/ empty lines
-                    for i in range(len(expectedOut)-len(actual)):
-                        actual.append('')
-                for i in range(len(actual)):
-                    if not re.search(expectedOut[i], actual[i]):
-                        raise IndexError
-            else:
-                if actual != expectedOut:
-                    raise IndexError
-            # test passed - check to make sure its not an expected failure
-            if expectedfail:
-                outputCalls.append((self.fail,(
-                    testName, 'unexpected .out file pass. ' +
-                    ' reason: '+expectedfail, self.unpassmsgs)))
-                lunpass += 1
-            else:
-                lpass += 1
-        except IndexError:
-            # test failed
-            if expectedfail:
-                outputCalls.append((self.fail,(
-                    testName,
-                    'expected failure: .out file does not match stdout+stderr. ' +
-                    ' reason: '+expectedfail, self.expfailmsgs)))
-                lexpfail += 1
-            else:
-                outputCalls.append((self.fail,(testName,
-                    '.out file does not match output:\n%s.out file (expected):\n%s\nactual output:\n%s' % (root, expectedOut,actual),
-                    self.failmsgs)))
-                lfail += 1
-        return lpass, lfail, lexpfail, lunpass
-                    
-    def check_exit_code(self, exitcode, root, testName, f, err, settings, outputCalls):
+    def checkExitCode(self, exitcode, root, testName, f, err, settings, outputCalls):
         '''Check the exitcode for a test against any expected non-zero exitcodes
             Return the fail and the expected exitcode if non-zero
         '''
@@ -637,7 +616,6 @@ class AcceptanceRuntest(RuntestBase):
                 expectedExitcode=int(open(root+".exitcode").read())
             except:
                 print("ERROR: reading exit code file '%s' should contain an integer")
-        
         res=dict_match(settings,'exitcode','expectedfail')
         
         if exitcode!=expectedExitcode:
