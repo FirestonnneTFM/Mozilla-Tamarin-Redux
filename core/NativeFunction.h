@@ -224,6 +224,7 @@ namespace avmplus
     {
     public:
         NativeInitializer(AvmCore* core,
+            char const* const* versioned_uris,
             #ifdef VMCFG_AOT
                 const AOTInfo *aotInfo,
             #else
@@ -275,6 +276,7 @@ namespace avmplus
 
     private:
         AvmCore* const                          core;
+        char const* const*                      versioned_uris;
         const uint8_t* const                    abcData;
         uint32_t const                          abcDataLen;
         MethodType* const                       methods;
@@ -409,6 +411,7 @@ namespace avmplus
     #define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
         PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain) { \
             NativeInitializer ninit(core, \
+                avmplus::NativeID::NAME##_versioned_uris, \
                 avmplus::NativeID::NAME##_abc_data, \
                 avmplus::NativeID::NAME##_abc_length, \
                 avmplus::NativeID::NAME##_abc_method_count, \
@@ -475,6 +478,7 @@ namespace avmplus
     #define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
         PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain) { \
             NativeInitializer ninit(core, \
+                avmplus::NativeID::NAME##_versioned_uris, \
                 avmplus::NativeID::NAME##_abc_data, \
                 avmplus::NativeID::NAME##_abc_length, \
                 avmplus::NativeID::NAME##_abc_method_count, \

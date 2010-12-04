@@ -1122,7 +1122,7 @@ namespace avmplus
             case OP_debugfile:
                 //checkStack(0,0)
                 #if defined(DEBUGGER) || defined(VMCFG_VTUNE)
-                checkCpoolOperand(imm30, kStringType);
+                checkStringOperand(imm30);
                 #endif
                 coder->write(state, pc, opcode);
                 break;
@@ -1131,7 +1131,7 @@ namespace avmplus
                 //checkStack(0,0)
                 if (!info->setsDxns())
                     verifyFailed(kIllegalSetDxns, core->toErrorString(info));
-                checkCpoolOperand(imm30, kStringType);
+                checkStringOperand(imm30);
                 coder->write(state, pc, opcode);
                 break;
 
@@ -1146,8 +1146,7 @@ namespace avmplus
 
             case OP_pushstring:
                 checkStack(0,1);
-                if (imm30 == 0 || imm30 >= pool->constantStringCount)
-                    verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantStringCount));
+                checkStringOperand(imm30);
                 coder->write(state, pc, opcode, STRING_TYPE);
                 state->push(STRING_TYPE, pool->getString(imm30) != NULL);
                 break;
@@ -1395,7 +1394,7 @@ namespace avmplus
                     }
                 }
 
-                // default - do getproperty at runtime
+                // Default: do setproperty or initproperty at runtime.
 
                 coder->writeOp2(state, pc, opcode, imm30, n, propTraits);
                 state->pop(n);
@@ -2295,7 +2294,7 @@ namespace avmplus
                     // see Debugger::scanCode
                     const uint8_t* pc2 = pc + 2;
                     uint32_t index = AvmCore::readU32(pc2);
-                    checkCpoolOperand(index, kStringType);
+                    checkStringOperand(index);
                 }
 #endif
                 coder->write(state, pc, opcode);
@@ -3155,33 +3154,23 @@ namespace avmplus
         return common;
     }
 
-    void Verifier::checkCpoolOperand(uint32_t index, int requiredAtomType)
+    void Verifier::checkStringOperand(uint32_t index)
     {
-        switch( requiredAtomType )
-        {
-        case kStringType:
-            if( !index || index >= pool->constantStringCount )
-            {
-                verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantStringCount));
-            }
-            break;
+        if (!index || index >= pool->constantStringCount)
+            verifyFailed(kCpoolIndexRangeError, core->toErrorString(index),
+                         core->toErrorString(pool->constantStringCount));
+    }
 
-        case kObjectType:
-            if( !index || index >= pool->cpool_mn_offsets.length() )
-            {
-                verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->cpool_mn_offsets.length()));
-            }
-            break;
-
-        default:
-            verifyFailed(kCpoolEntryWrongTypeError, core->toErrorString(index));
-            break;
-        }
+    void Verifier::checkNameOperand(uint32_t index)
+    {
+        if (!index || index >= pool->cpool_mn_offsets.length())
+            verifyFailed(kCpoolIndexRangeError, core->toErrorString(index),
+                         core->toErrorString(pool->cpool_mn_offsets.length()));
     }
 
     void Verifier::checkConstantMultiname(uint32_t index, Multiname& m)
     {
-        checkCpoolOperand(index, kObjectType);
+        checkNameOperand(index);
         pool->parseMultiname(m, index);
     }
 

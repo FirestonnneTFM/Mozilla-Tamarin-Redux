@@ -234,7 +234,8 @@ namespace avmplus
         Traits* checkClassInfo(uint32_t class_id);
         void checkTarget(const uint8_t* current, const uint8_t* target);
         bool mergeState(FrameState*);
-        void checkCpoolOperand(uint32_t index, int requiredAtomType);
+        void checkStringOperand(uint32_t index);
+        void checkNameOperand(uint32_t index);
         void checkConstantMultiname(uint32_t index, Multiname &m);
         Traits* checkSlot(Traits* traits, int slot_id);
         Traits* findCommonBase(Traits* t1, Traits* t2);

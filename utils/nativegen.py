@@ -128,6 +128,9 @@ CTYPE_STRING        = 6
 CTYPE_NAMESPACE     = 7
 CTYPE_OBJECT        = 8
 
+MIN_API_MARK = 0xE000
+MAX_API_MARK = 0xF8FF
+
 MPL_HEADER = "/* ***** BEGIN LICENSE BLOCK *****\n" \
             " * Version: MPL 1.1/GPL 2.0/LGPL 2.1\n" \
             " *\n" \
@@ -259,6 +262,14 @@ def ns_prefix(ns, iscls):
         p += "_"
     return p
 
+def stripVersion(uri):
+    if len(uri) > 0:
+        uri16 = uri.decode('utf8')
+        cc = ord(uri16[-1])
+        if cc >= MIN_API_MARK and cc <= MAX_API_MARK:
+            return cc-MIN_API_MARK, uri16[0:len(uri16)-1].encode('utf8')
+    return -1,uri
+
 class Namespace:
     uri = ""
     kind = 0
@@ -276,6 +287,16 @@ class Namespace:
         return self.kind in [CONSTANT_PrivateNs]
     def isProtected(self):
         return self.kind in [CONSTANT_ProtectedNs, CONSTANT_StaticProtectedNs]
+    def stripVersion(self):
+        api, strippeduri = stripVersion(self.uri)
+        # it's important to return 'self' (and not an identical clone)
+        # if we are unversioned, otherwise native methods with custom namespaces
+        # may be emitted incorrectly
+        if api < 0:
+            return self
+        newself = Namespace(strippeduri, self.kind)
+        newself.srcname = self.srcname
+        return newself
 
 class QName:
     ns = None
@@ -300,31 +321,6 @@ class Multiname:
         nsStrings = map(lambda ns: u'"' + ns.decode("utf8") + u'"', self.nsset)
         stringForNSSet = u'[' + u', '.join(nsStrings) + u']'
         return stringForNSSet + u'::' + unicode(self.name.decode("utf8"))
-
-def stripVersion(ns):
-    # version markers are 3 bytes beginning with 0xE0 or greater
-    if len(ns.uri) < 3:
-        return ns
-    if ns.uri[len(ns.uri)-3] > chr(0xE0):
-        ns.uri = ns.uri[0:len(ns.uri)-3]
-    return ns
-
-def isVersionedNamespace(ns):
-    # version markers are 3 bytes beginning with 0xE0 or greater
-    if len(ns.uri) < 3:
-        return False
-    if ns.uri[len(ns.uri)-3] > chr(0xE0):
-        ns.uri = ns.uri[0:len(ns.uri)-3]
-        return True
-    return False
-
-def isVersionedName(name):
-    if isinstance(name, QName):
-        return isVersionedNamespace(name.ns)
-    for ns in name.nsset:
-        if isVersionedNamespace(ns):
-            return True
-        return False
 
 class TypeName:
     name = ""
@@ -576,6 +572,7 @@ class Abc:
     scriptName = ""
     publicNs = Namespace("", CONSTANT_Namespace)
     anyNs = Namespace("*", CONSTANT_Namespace)
+    versioned_uris = {}
 
     magic = 0
 
@@ -730,7 +727,18 @@ class Abc:
                             CONSTANT_ProtectedNs,
                             CONSTANT_ExplicitNamespace,
                             CONSTANT_StaticProtectedNs]:
-                self.namespaces[i] = Namespace(self.strings[self.data.readU30()], nskind)
+                uri = self.strings[self.data.readU30()]
+                self.namespaces[i] = Namespace(uri, nskind)
+                # if it's public, and the final char has the magic "version mark",
+                # it's a versioned namespace uri
+                if nskind in [CONSTANT_Namespace, CONSTANT_PackageNs]:
+                    api, strippeduri = stripVersion(uri)
+                    if api >= 0:
+                        if not strippeduri in self.versioned_uris:
+                            self.versioned_uris[strippeduri] = []
+                        if not api in self.versioned_uris[strippeduri]:
+                            self.versioned_uris[strippeduri].append(api)
+
             elif nskind in [CONSTANT_PrivateNs]:
                 self.data.readU30() # skip
                 self.namespaces[i] = Namespace("private", CONSTANT_PrivateNs)
@@ -851,7 +859,7 @@ class Abc:
             return name
         if len(name.nsset) == 0:
             return QName(Namespace("", CONSTANT_Namespace), name.name)
-        return QName(stripVersion(name.nsset[0]), name.name)
+        return QName(name.nsset[0].stripVersion(), name.name)
 
     def qname(self, name):
         if (not self.nameToQName.has_key(id(name))):
@@ -1211,11 +1219,12 @@ class AbcThunkGen:
         out_c.println(' '.join(map(lambda ns: u'namespace %s {' % ns, nativeIDNamespaces)))
         out_c.println('')
 
-        out_h.println("extern const uint32_t "+name+"_abc_class_count;")
-        out_h.println("extern const uint32_t "+name+"_abc_script_count;")
-        out_h.println("extern const uint32_t "+name+"_abc_method_count;")
-        out_h.println("extern const uint32_t "+name+"_abc_length;")
-        out_h.println("extern const uint8_t "+name+"_abc_data[];");
+        out_h.println('extern const uint32_t '+name+"_abc_class_count;")
+        out_h.println('extern const uint32_t '+name+"_abc_script_count;")
+        out_h.println('extern const uint32_t '+name+"_abc_method_count;")
+        out_h.println('extern const uint32_t '+name+"_abc_length;")
+        out_h.println('extern const uint8_t '+name+"_abc_data[];");
+        out_h.println('extern const char* const '+name+"_versioned_uris[];");
 
         out_c.println("const uint32_t "+name+"_abc_class_count = "+str(len(abc.classes))+";");
         out_c.println("const uint32_t "+name+"_abc_script_count = "+str(len(abc.scripts))+";");
@@ -1369,8 +1378,8 @@ class AbcThunkGen:
 
         if opts.externmethodandclassetables:
             out_c.println("");
-            out_c.println("extern const NativeClassInfo* "+name+"_classEntriesExtern = "+name+"_classEntries;");
-            out_c.println("extern const NativeMethodInfo* "+name+"_methodEntriesExtern = "+name+"_methodEntries;");
+            out_c.println('extern const NativeClassInfo* '+name+"_classEntriesExtern = "+name+"_classEntries;");
+            out_c.println('extern const NativeMethodInfo* '+name+"_methodEntriesExtern = "+name+"_methodEntries;");
 
         out_c.println("");
         out_c.println("/* abc */");
@@ -1383,6 +1392,23 @@ class AbcThunkGen:
                 out_c.prnt(",")
             if i%16 == 15:
                 out_c.println("");
+        out_c.println("};");
+        out_c.println('')
+
+        out_c.println("");
+        out_c.println("/* versioned_uris */");
+        out_c.println("const char* const "+name+"_versioned_uris[] = {");
+        out_c.indent += 1
+        # don't really need to sort 'em, but helps keep output stable
+        sorted_keys = sorted(abc.versioned_uris.keys())
+        for i in sorted_keys:
+            # The empty URI (aka "public") is always versioned 
+            # (and special-cased by the versioning code in AvmCore)
+            # so don't bother emitting it.
+            if len(i) > 0:
+                out_c.println('"%s", // %s' % (i, str(sorted(abc.versioned_uris[i]))))
+        out_c.println('NULL')
+        out_c.indent -= 1
         out_c.println("};");
         out_c.println('')
 
@@ -1711,7 +1737,7 @@ class AbcThunkGen:
         if m.kind == TRAIT_Setter:
             ret = "void"
         decl = self.thunkDecl(name, ret)
-        self.out_h.println("extern "+decl+";");
+        self.out_h.println('extern '+decl+";");
 
     def emitThunkBody(self, name, receiver, m, directcall):
         rettraits = self.lookupTraits(m.returnType)

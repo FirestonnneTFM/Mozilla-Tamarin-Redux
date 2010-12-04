@@ -488,6 +488,7 @@
 		072EA1080F4C1D1B009F11E6 /* smoketest.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest.as; path = ../../../eval/smoketest.as; sourceTree = SOURCE_ROOT; };
 		072EA1090F4C1D1B009F11E6 /* smoketest2.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest2.as; path = ../../../eval/smoketest2.as; sourceTree = SOURCE_ROOT; };
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
+		073739F112A65F5F00F888F6 /* MultinameHashtable-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MultinameHashtable-impl.h"; path = "../../../core/MultinameHashtable-impl.h"; sourceTree = SOURCE_ROOT; };
 		073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_gcheap.cpp; path = ../../../extensions/ST_mmgc_gcheap.cpp; sourceTree = SOURCE_ROOT; };
 		073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_gcheap.st; path = ../../../extensions/ST_mmgc_gcheap.st; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
@@ -1072,8 +1073,6 @@
 		079DF7B00F3A86D50031D1B4 /* core */ = {
 			isa = PBXGroup;
 			children = (
-				D987E32011C19E5700474022 /* DomainMgr.cpp */,
-				D987E32111C19E5700474022 /* DomainMgr.h */,
 				079DF7B50F3A882D0031D1B4 /* AbcData.cpp */,
 				079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */,
 				07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */,
@@ -1133,6 +1132,8 @@
 				079DF7E80F3A882D0031D1B4 /* Domain.h */,
 				079DF7E90F3A882D0031D1B4 /* DomainEnv.cpp */,
 				079DF7EA0F3A882D0031D1B4 /* DomainEnv.h */,
+				D987E32011C19E5700474022 /* DomainMgr.cpp */,
+				D987E32111C19E5700474022 /* DomainMgr.h */,
 				079DF7EB0F3A882D0031D1B4 /* E4XNode.cpp */,
 				079DF7EC0F3A882D0031D1B4 /* E4XNode.h */,
 				079DF7ED0F3A882D0031D1B4 /* Exception.cpp */,
@@ -1166,6 +1167,7 @@
 				D9A4F1C710B3362F00D0408C /* Multiname-inlines.h */,
 				079DF7FF0F3A882D0031D1B4 /* MultinameHashtable.cpp */,
 				079DF8000F3A882D0031D1B4 /* MultinameHashtable.h */,
+				073739F112A65F5F00F888F6 /* MultinameHashtable-impl.h */,
 				D9B242EE12135FE700C60D44 /* MultinameHashtable-inlines.h */,
 				079DF8010F3A882D0031D1B4 /* Namespace.cpp */,
 				079DF8020F3A882D0031D1B4 /* Namespace.h */,
@@ -1742,7 +1744,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "avmshell" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,

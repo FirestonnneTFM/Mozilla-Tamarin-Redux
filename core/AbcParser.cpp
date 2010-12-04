@@ -87,7 +87,7 @@ namespace avmplus
                         ReadOnlyScriptBufferImpl scriptBufferImpl(aotInfo->abcBytes, aotInfo->nABCBytes);
                         ScriptBuffer code(&scriptBufferImpl);
 
-                        NativeInitializer ninit(core, aotInfo, 0, 0);
+                        NativeInitializer ninit(core, NULL, aotInfo, 0, 0);
                         PoolObject *pool = decodeAbc(core, code, toplevel, domain, &ninit, api);
                         AvmAssert(pool != NULL);
                         AvmAssert(!pool->isBuiltin);
@@ -209,7 +209,8 @@ namespace avmplus
         const NativeInitializer* natives)
         : instances(core->GetGC(), 0),
           toplevel(toplevel),
-          domain(domain)
+          domain(domain),
+          metaNames(core->GetGC(), 0)
     {
         this->core = core;
         this->code = code;
@@ -222,13 +223,6 @@ namespace avmplus
         abcEnd = &code[(int)code.getSize()];
 
         classCount = 0;
-        metaNames = NULL;
-    }
-
-    AbcParser::~AbcParser()
-    {
-        if (metaNames)
-            core->GetGC()->Free(metaNames);
     }
 
     REALLY_INLINE void AbcParser::computeInstanceSizeAndSlotsOffset(int class_id,
@@ -503,7 +497,7 @@ namespace avmplus
                 for (uint32_t metadata = 0; metadata < metadataCount; ++metadata)
                 {
                     const uint32_t index = readU30(pos);
-                    if (index >= pool->metadataCount || !metaNames)
+                    if (index >= pool->metadataCount)
                         toplevel->throwVerifyError(kCorruptABCError);
                     Stringp name = metaNames[index];
                     if (name == core->kNeedsDxns)
@@ -844,7 +838,7 @@ namespace avmplus
 
         if (metadataCount > 0)
         {
-            metaNames = (Stringp*) core->GetGC()->Calloc(metadataCount, sizeof(Stringp), MMgc::GC::kContainsPointers);
+            metaNames.ensureCapacity(metadataCount-1);  // Pre-size the list
 
             for (uint32_t i=0; i < metadataCount; i++)
             {
@@ -852,8 +846,7 @@ namespace avmplus
                 // MetadataInfo
                 uint32_t index = readU30(pos);
                 Stringp name = resolveUtf8(index);
-                // constant pool names are stuck and always reachable via PoolObject, DRC or WB
-                metaNames[i] = name;
+                metaNames.set(i, name);
 
                 #ifdef AVMPLUS_VERBOSE
                 if(pool->isVerbose(VB_parse)) {

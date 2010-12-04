@@ -3078,8 +3078,13 @@ namespace MMgc
                 // cleared mark bits isn't legal in GCAlloc::Finalize,
                 // so instead of asserting that we are presweeping, we
                 // use that condition as a guard.
-                if (gc->Presweeping())
+                if (gc->Presweeping()) {
+                    // Bugzilla 615511:
+                    // PushWorkItem does not set the queued bit, but every object on
+                    // the mark stack must have the queued bit set.
+                    GC::GetGCBits(GetRealPointer(m_obj)) |= kQueued;
                     gc->PushWorkItem(GCWorkItem(m_obj, 0, GCWorkItem::kGCObject));
+                }
             }
         }
 

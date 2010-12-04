@@ -113,6 +113,7 @@ extern const uint32_t builtin_abc_script_count;
 extern const uint32_t builtin_abc_method_count;
 extern const uint32_t builtin_abc_length;
 extern const uint8_t builtin_abc_data[];
+extern const char* const builtin_versioned_uris[];
 AVMTHUNK_DECLARE_NATIVE_INITIALIZER(builtin)
 
 /* classes */
