@@ -92,6 +92,27 @@ namespace avmshell
         return core()->newConstantStringLatin1(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
     }
 
+    Stringp SystemClass::getFeatures()
+    {
+        return core()->newConstantStringLatin1(avmfeatures);
+    }
+
+    Stringp SystemClass::getRunmode()
+    {
+        ShellCore* core = (ShellCore*)this->core();
+        if (core->config.runmode == RM_mixed)
+            return core->newConstantStringLatin1("mixed");
+        if (core->config.runmode == RM_jit_all)
+        {
+            if (core->config.jitordie)
+                return core->newConstantStringLatin1("jitordie");
+            return core->newConstantStringLatin1("jit");
+        }
+        if (core->config.runmode == RM_interp_all)
+            return core->newConstantStringLatin1("interp");
+        return core->newConstantStringLatin1("unknown");
+    }
+
     void SystemClass::write(Stringp s)
     {
         if (!s)

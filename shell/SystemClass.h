@@ -113,6 +113,20 @@ namespace avmshell
          * "1.0 d100"
          */
         Stringp getAvmplusVersion();
+        
+        /**
+         * Implementation of System.getFeatures
+         * AS usage: System.getFeatures();
+         * Returns the compiled in features of AVM+
+         */
+        Stringp getFeatures();
+        
+        /**
+         * Implementation of System.getRunmode
+         * AS usage: System.getRunmode();
+         * Returns the current runmode
+         */
+        Stringp getRunmode();
 
         /**
          * Implementation of System.exec

@@ -77,6 +77,8 @@ package avmplus
         public native static function exec(command:String):int
 
         public native static function getAvmplusVersion():String
+        public native static function getFeatures():String
+        public native static function getRunmode():String
         public native static function trace(a:Array):void
         public native static function write(s:String):void
         public native static function debugger():void
