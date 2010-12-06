@@ -186,6 +186,68 @@ namespace MMgc
         /** if your object goes away after the GC is deleted this can be useful */
         void Destroy();
 
+        //  GCRoot's GCMember definition, no WriteBarrier but handle ref count updates.
+        template <class T>
+        class GCMember : public GCRef<T>
+        {
+        private:
+            //  'set' method handles logic whenever the GC pointer value changes
+            REALLY_INLINE void set(T *tNew)
+            {
+                if (this->t != NULL)
+                {
+                    //  This is NOOP for GCObject and GCFinalizedObject
+                    this->t->DecrementRef();
+                }
+                if (tNew != NULL)
+                {
+                    //  This is NOOP for GCObject and GCFinalizedObject
+                    tNew->IncrementRef();
+                }
+                this->t = tNew;
+            }
+            
+            // Don't allow members to be copied, don't think we'll need it.
+            GCMember<T>(const GCMember<T> &other);
+            
+        public:x
+            GCMember() : GCRef<T>(){}
+
+            //  This constructor takes any other GCRef<T2>
+
+            template <class T2>
+            explicit REALLY_INLINE GCMember(const GCRef<T2> &other)
+                : GCRef<T>()
+            {
+                set(ProtectedGetOtherRawPtr(other));
+            }
+            
+            //  Make sure to decrement the refcount on RCObjects when this GCMember is destroyed
+            ~GCMember()
+            {
+                set(NULL);
+            }
+
+            //  Override assignement to make sure our 'set' operation is invoked
+            template <class T2>
+            REALLY_INLINE void operator =(const GCRef<T2> &other)
+            {
+                set(ProtectedGetOtherRawPtr(other));
+            }
+
+            REALLY_INLINE void operator=(T *tNew)
+            {
+                set(tNew);
+            }
+
+            //  Handle the default assignement operator
+            REALLY_INLINE GCMember& operator =(const GCMember &other)
+            {
+                set(ProtectedGetOtherRawPtr(other));
+                return *this;
+            }
+        };
+        
     private:
         GC * gc;
 
