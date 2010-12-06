@@ -210,7 +210,7 @@ namespace MMgc
             // Don't allow members to be copied, don't think we'll need it.
             GCMember<T>(const GCMember<T> &other);
             
-        public:x
+        public:
             GCMember() : GCRef<T>(){}
 
             //  This constructor takes any other GCRef<T2>
