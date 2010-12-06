@@ -71,6 +71,49 @@ namespace MMgc
     class GCObject
     {
     public:
+
+        // Methods used by GCMember<T>
+        REALLY_INLINE static void WriteBarrier(void **address, void *value)
+        {
+            GC::WriteBarrier(address, value);
+        }
+        
+        // These are noops overridden by RCObject to do the right thing.
+        REALLY_INLINE void IncrementRef() {}
+        REALLY_INLINE void DecrementRef() {}
+                        
+        //  GCObject's local definition of GCMember
+        template<class T>
+        class GCMember : public GCMemberBase<T>
+        {
+        public:
+                        
+            template <class T2>
+            REALLY_INLINE void operator =(const GCRef<T2>& other)
+            {
+                GCMemberBase<T>::operator=(other);
+            }
+
+            REALLY_INLINE void operator=(T *tNew)
+            {
+                GCMemberBase<T>::operator=(tNew);
+            }
+
+            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
+            REALLY_INLINE GCMember(){}
+        
+            template <class T2>
+            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
+            REALLY_INLINE GCMember(T* valuePtr)
+            {
+                GCMemberBase<T>::operator=(valuePtr);
+            }
+        private:
+                
+            //  Avoid accidental copies by privatizing the copy constructor.
+            GCMember(const GCMember &other);
+        };
+        
         // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
         static void *operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw());
 
@@ -81,6 +124,15 @@ namespace MMgc
         static void operator delete(void *gcObject);
 
         GCWeakRef *GetWeakRef() const;
+
+        //  Create a GCRef from "this" with parameter for auto template specialization.
+        template <class T>
+        REALLY_INLINE GCRef<T> GetThisRef(const T *ths) const
+        {
+            GCAssert(ths == (const T*)this);
+            GCRef<T> ref((T*)ths);
+            return ref;
+        }
     };
 
     // GCTraceableBase is internal to MMgc.
@@ -178,14 +230,64 @@ namespace MMgc
      * Baseclass for GC managed objects that are finalized.
      *
      * Note that subtypes that want to be traced exactly still have to set
-     * the traceable bit in their constructor by calling MMgc::setExact(), 
+     * the traceable bit in their constructor by calling MMgc::setExact(),
      * it is not done for them here.
      */
     class GCFinalizedObject : public GCTraceableBase
     {
     public:
         // This class can only have an empty destructor.
+                
+        // Methods used by GCMember<T>
+        REALLY_INLINE static void WriteBarrier(void **address, void *value)
+        {
+            GC::WriteBarrier(address, value);
+        }
         
+        // These are noops overridden by RCObject to do the right thing.
+        REALLY_INLINE void IncrementRef() {}
+        REALLY_INLINE void DecrementRef() {}
+
+        //  Define GCFinalizedObject's local definition of GCMember
+        template<class T>
+        class GCMember : public GCMemberBase<T>
+        {
+        public:
+            
+            template <class T2>
+            REALLY_INLINE void operator =(const GCRef<T2>& other)
+            {
+                GCMemberBase<T>::operator=(other);
+            }
+
+            REALLY_INLINE void operator=(T *tNew)
+            {
+                GCMemberBase<T>::operator=(tNew);
+            }
+
+            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
+            GCMember(){}
+            REALLY_INLINE GCMember(T* valuePtr)
+            {
+                GCMemberBase<T>::operator=(valuePtr);
+            }
+            template <class T2>
+            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
+        private:
+                
+            //  Avoid accidental copies by privatizing the copy constructor.
+            GCMember(const GCMember &other);
+        };
+
+        //  Create a GCRef from "this" with parameter for auto template specialization.
+        template <class T>
+        REALLY_INLINE GCRef<T> GetThisRef(const T *ths) const
+        {
+            GCAssert(ths == (const T*) this);
+            GCRef<T> ref((T*)ths);
+            return ref;
+        }
+
         GCWeakRef *GetWeakRef() const;
 
         static void* operator new(size_t size, GC *gc, size_t extra);
@@ -328,6 +430,13 @@ namespace MMgc
         {
             return gc->AllocRCObject(size);
         }
+    public:
+
+        // Used by GCMember<T>
+        REALLY_INLINE static void WriteBarrier(void **address, void *value)
+        {
+            GC::WriteBarrierRC(address, value);
+        }
 
         REALLY_INLINE RCObject()
         {
@@ -342,7 +451,7 @@ namespace MMgc
             // it is already in the ZCT.  So remove it if necessary.
             if (InZCT())
                 GC::GetGC(this)->RemoveFromZCT(this REFCOUNT_PROFILING_ARG(true));
-            // We'd like to assert this but can't, for the moment.  The case is handled 
+            // We'd like to assert this but can't, for the moment.  The case is handled
             // in the allocator instead, see call paths ending at AbortFree.
             //GCAssert((GC::GetGC(this)->GetGCBits(this) & (kMark|kQueued)) != kQueued);
             composite = 0;

@@ -242,7 +242,9 @@ namespace MMgc
 #include "HeapGraph.h"
 #include "GCPolicyManager.h"
 #include "WriteBarrier.h"
+#include "GCRef.h"
 #include "GC.h"
+#include "GCMemberBase.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"
 
