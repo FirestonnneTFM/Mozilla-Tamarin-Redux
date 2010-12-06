@@ -2,7 +2,9 @@
 
 #
 # usage: fixtabs file ...
-# convert tabs to spaces and strip trailing whitespace
+# convert tabs to spaces and strip trailing whitespace, but ignore lines of
+# pure whitespace (XCode likes to insert these and MMgc is riddled with them).
+# See bug 600536 for some context on this.
 #
 # example usage to fix all files that contain the VIM space-only modelines (expandtab):
 # fixtabs `grep -l expandtab *`
@@ -10,9 +12,6 @@
 
 for file in $*; do
 	cp $file $file.tmp
-# this used to be:
-# expand -4 <$file.tmp | perl -p -e 's/\s+\n$/\n/go;' >$file
-# see bug 600536
-	expand -4 <$file.tmp >$file
+	expand -4 <$file.tmp | perl -p -e 's/(\S)\s+\n$/\1\n/go;' >$file
 	rm $file.tmp
 done
