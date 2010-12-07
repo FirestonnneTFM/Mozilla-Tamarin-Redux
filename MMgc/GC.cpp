@@ -2795,30 +2795,28 @@ namespace MMgc
         privateInlineWriteBarrierRC(container, address, value);
     }
 
-    /* static */ void GC::WriteBarrierRC(const void *address, const void *value)
+    /* static */
+    void GC::WriteBarrierRC(const void *address, const void *value)
     {
-        GC* gc = GC::GetGC(address);
-        gc->privateInlineWriteBarrierRC(address, value);
+        InlineWriteBarrierRC(address, value);
     }
 
-    /* static */ void GC::WriteBarrierRC_ctor(const void *address, const void *value)
+    /* static */
+    void GC::WriteBarrierRC_ctor(const void *address, const void *value)
     {
-        GC* gc = GC::GetGC(address);
-        if (gc->marking)
-            gc->InlineWriteBarrierTrap(gc->FindBeginningFast(address));
-        gc->WriteBarrierWriteRC_ctor(address, value);
+        InlineWriteBarrierRC_ctor(address, value);
     }
 
-    /* static */ void GC::WriteBarrierRC_dtor(const void *address)
+    /* static */
+    void GC::WriteBarrierRC_dtor(const void *address)
     {
-        GC* gc = GC::GetGC(address);
-        gc->WriteBarrierWriteRC_dtor(address);
+        InlineWriteBarrierRC_dtor(address);
     }
 
-    /* static */ void GC::WriteBarrier(const void *address, const void *value)
+    /* static */
+    void GC::WriteBarrier(const void *address, const void *value)
     {
-        GC* gc = GC::GetGC(address);
-        gc->privateInlineWriteBarrier(address, value);
+        InlineWriteBarrier(address, value);
     }
 
     // It might appear that this can be optimized easily, but not so - there's a

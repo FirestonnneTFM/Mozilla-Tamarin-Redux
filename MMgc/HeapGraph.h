@@ -47,7 +47,7 @@
 
 #else
 
-#define MMGC_WB_EDGE(_a, _v) {if(GCHeap::GetGCHeap()->config.dumpFalsePositives) mutatorGraph.edge(_a, _v); }
+#define MMGC_WB_EDGE(_a, _v) {if(GCHeap::GetGCHeap()->config.dumpFalsePositives) GetActiveGC()->mutatorGraph.edge(_a, _v); }
 
 namespace MMgc
 {
