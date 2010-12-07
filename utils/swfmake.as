@@ -109,7 +109,7 @@ package swfmake
 
     for ( i=0 ; i < input_names.length ; i++ ) {
 	s = input_names[i];
-	var bytes = ByteArray.readFile(s);
+	var bytes = File.readByteArray(s);
 	body.writeShort((82 << 6) | 63);  // DoABC, extended length
 	body.writeUnsignedInt(bytes.length + 4 + s.length + 1);
 	body.writeUnsignedInt(0);         // flags
