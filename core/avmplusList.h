@@ -454,13 +454,6 @@ namespace avmplus
         explicit GCList(const GCList<T>& other);          // unimplemented
         void* operator new(size_t size);                  // unimplemented, use HeapList instead
 
-        // This is a little hackery that is necessary due to the fact that GCFinalizedObject
-        // doesn't extend GCObject, but can be treated equivalently in this context.
-        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCObject* o) { return o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCObject* o) { return (MMgc::GCObject*)o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
-
     private:
         LIST m_list;
     };
@@ -620,13 +613,6 @@ namespace avmplus
         WeakRefList<T>& operator=(const WeakRefList<T>& other);     // unimplemented
         explicit WeakRefList(const WeakRefList<T>& other);          // unimplemented
         void* operator new(size_t size);                            // unimplemented, use HeapList instead
-
-        // This is a little hackery that is necessary due to the fact that GCFinalizedObject
-        // doesn't extend GCObject, but can be treated equivalently in this context.
-        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCObject* o) { return o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCObject* o) { return (MMgc::GCObject*)o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return (MMgc::GCObject*)o; }
 
     private:
         LIST m_list;
