@@ -46,59 +46,111 @@
 
 namespace MMgc
 {
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWriteRC(const void *address, const void *value)
+    /*static private*/
+    REALLY_INLINE void GC::WriteField(const void *address, const void *value)
     {
-        RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
-        if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
-            rc->DecrementRef();
-        }
-        GCAssert(IsPointerIntoGCObject(address));
+#ifdef DEBUG
+        GCAssert(((uintptr_t)address & 3) == 0);
+        GC *gc = GetActiveGC();
+        GCAssertMsg(gc != NULL, "Illegal for a GC write to occur when the GC isn't entered");
+        GCAssert(gc->IsPointerIntoGCObject(address));
+        GCAssert(Pointer(value)==NULL || gc->IsPointerToGCObject(GetRealPointer(Pointer(value))));
+        GCAssert(ContainsPointers(gc->FindBeginning(address)));
+#endif
         MMGC_WB_EDGE(address, value);
         *(uintptr_t*)address = (uintptr_t) value;
+    }
+
+    /*static private*/
+    REALLY_INLINE void GC::WriteFieldNonRC(const void *address, const void *value)
+    {
+#ifdef DEBUG
+        GC *gc = GetActiveGC();
+        GCAssertMsg(gc != NULL, "Illegal for a GC write to occur when the GC isn't entered");
+        if(Pointer(value) != NULL)
+            GCAssert(!gc->IsRCObjectSafe(Pointer(value)));
+        const void *valAtAddr = Pointer(*(void**)address);
+        if(valAtAddr != NULL)
+            GCAssert(!gc->IsRCObjectSafe(valAtAddr));
+#endif
+        WriteField(address, value);
+    }
+
+    /*static private*/
+    REALLY_INLINE void GC::WriteFieldRC(const void *address, const void *value)
+    {
+#ifdef DEBUG
+        GC *gc = GetActiveGC();
+        if(Pointer(value) != NULL)
+            GCAssert(gc->IsRCObjectSafe(Pointer(value)));
+        const void *valAtAddr = Pointer(*(void**)address);
+        if(valAtAddr != NULL)
+            GCAssert(gc->IsRCObjectSafe(valAtAddr));
+#endif
+        RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
+        if(rc != NULL) {
+            rc->DecrementRef();
+        }
+        WriteField(address, value);
         rc = (RCObject*)Pointer(value);
         if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
             rc->IncrementRef();
         }
     }
 
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWriteRC_ctor(const void *address, const void *value)
+    /*static private*/
+    REALLY_INLINE void GC::InlineWriteBarrier(const void *address, const void *value)
     {
-        // assume existing contents of address are potentially uninitialized,
-        // so don't bother even making an assertion.
-        GCAssert(IsPointerIntoGCObject(address));
-        MMGC_WB_EDGE(address, value);
-        *(uintptr_t*)address = (uintptr_t) value;
+       if(Pointer(value) != NULL)
+           GetGC(value)->InlineWriteBarrierGuardedTrap(address);
+       WriteFieldNonRC(address, value);
+    }
+
+    /*static private*/
+    REALLY_INLINE void GC::InlineWriteBarrierRC(const void *address, const void *value)
+    {
+        if(Pointer(value) != NULL)
+            GetGC(value)->InlineWriteBarrierGuardedTrap(address);
+        WriteFieldRC(address, value);
+    }
+
+    /*static private*/
+    REALLY_INLINE void GC::InlineWriteBarrierRC_ctor(const void *address, const void *value)
+    {
+        GCAssert(*(void**)address == NULL);
         RCObject *rc = (RCObject*)Pointer(value);
-        if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
+        if(rc != NULL)
+        {
+            GCAssert(GetGC(rc)->IsRCObjectSafe(rc));
+            GetGC(rc)->InlineWriteBarrierGuardedTrap(address);
             rc->IncrementRef();
         }
+        WriteField(address, value);
     }
 
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWriteRC_dtor(const void *address)
+    /*static private*/
+    REALLY_INLINE void GC::InlineWriteBarrierRC_dtor(const void *address)
     {
-        GCAssert(IsPointerIntoGCObject(address));
         RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
-        MMGC_WB_EDGE(address, NULL);
-        if(rc != NULL) {
-            GCAssert(IsRCObjectSafe(rc));
+        if(rc != NULL)
+        {
+            GCAssert(GetGC(rc)->IsRCObjectSafe(rc));
             rc->DecrementRef();
-            *(uintptr_t*)address = 0;
         }
-    }
-
-    /*private*/
-    REALLY_INLINE void GC::WriteBarrierWrite(const void *address, const void *value)
+        WriteField(address, NULL);
+     }
+ 
+    REALLY_INLINE void GC::InlineWriteBarrierGuardedTrap(const void *address)
     {
-        GCAssert(!IsRCObjectSafe(value));
-        GCAssert(IsPointerIntoGCObject(address));
-        MMGC_WB_EDGE(address, value);
-        *(uintptr_t*)address = (uintptr_t) value;
+        if (marking) {
+            const void* container = FindBeginningFast(address);
+
+            GCAssert(IsPointerToGCPage(container));
+            GCAssert(address >= container);
+            GCAssert(address < (char*)container + Size(container));
+            
+            InlineWriteBarrierTrap(container);
+        }
     }
 
     /*private*/
@@ -133,59 +185,36 @@ namespace MMgc
     {
         GCAssert(container != NULL);
         GCAssert(IsPointerToGCObject(GetRealPointer(container)));
-        GCAssert(((uintptr_t)address & 3) == 0);
-
-        if (marking) {
-            GCAssert(address >= container);
-            GCAssert(address < (char*)container + Size(container));
-            InlineWriteBarrierTrap(container);
-        }
-        WriteBarrierWrite(address, value);
-    }
-
-    REALLY_INLINE void GC::privateInlineWriteBarrier(const void *address, const void *value)
-    {
-        GCAssert(((uintptr_t)address & 3) == 0);
-
-        if (marking) {
-            const void* container = FindBeginningFast(address);
-
-            GCAssert(IsPointerToGCPage(container));
-            GCAssert(address >= container);
-            GCAssert(address < (char*)container + Size(container));
-
-            InlineWriteBarrierTrap(container);
-        }
-        WriteBarrierWrite(address, value);
-    }
-
-    REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *container, const void *address, const void *value)
-    {
-        GCAssert(IsPointerToGCPage(container));
-        GCAssert(((uintptr_t)container & 3) == 0);
-        GCAssert(((uintptr_t)address & 2) == 0);
         GCAssert(address >= container);
         GCAssert(address < (char*)container + Size(container));
 
         if (marking)
             InlineWriteBarrierTrap(container);
-        WriteBarrierWriteRC(address, value);
+        WriteFieldNonRC(address, value);
+    }
+
+    REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *container, const void *address, const void *value)
+    {
+        GCAssert(container != NULL);
+        GCAssert(IsPointerToGCObject(GetRealPointer(container)));
+        GCAssert(address >= container);
+        GCAssert(address < (char*)container + Size(container));
+
+        if (marking)
+            InlineWriteBarrierTrap(container);
+        WriteFieldRC(address, value);
+    }
+
+    REALLY_INLINE void GC::privateInlineWriteBarrier(const void *address, const void *value)
+    {
+        InlineWriteBarrierGuardedTrap(address);
+        WriteFieldNonRC(address, value);
     }
 
     REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *address, const void *value)
     {
-        if (marking) {
-            const void* container = FindBeginningFast(address);
-
-            GCAssert(IsPointerToGCPage(container));
-            GCAssert(((uintptr_t)container & 3) == 0);
-            GCAssert(((uintptr_t)address & 2) == 0);
-            GCAssert(address >= container);
-            GCAssert(address < (char*)container + Size(container));
-
-            InlineWriteBarrierTrap(container);
-        }
-        WriteBarrierWriteRC(address, value);
+        InlineWriteBarrierGuardedTrap(address);
+        WriteFieldRC(address, value);
     }
 
     REALLY_INLINE void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)

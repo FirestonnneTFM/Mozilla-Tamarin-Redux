@@ -396,6 +396,15 @@ namespace MMgc
         friend class ZCT;
         friend class AutoRCRootSegment;
         friend class GCPolicyManager;
+
+        // WriteBarrier classes use private write barriers.
+        template<class T> friend class WriteBarrier;
+        template<class T> friend class WriteBarrierRC;
+
+        // The new GCMember delegates to methods in these classes that
+        // use the private write barriers.
+        friend class GCObject;
+        friend class GCFinalizedObject;
 #ifdef VMCFG_SELFTEST
         friend class avmplus::ST_mmgc_basics;
 #endif
@@ -750,7 +759,7 @@ namespace MMgc
         /**
          * @return the GC object associated with a managed object.
          * this item must be a small item (<1968) or the first page of a large allocation,
-         * it won't work on secondary pages of a large allocation,
+         * it won't work on secondary pages of a large allocation.
          */
         static GC* GetGC(const void *item);
 
@@ -863,23 +872,64 @@ namespace MMgc
         //
         // Write barrier.  Those that are REALLY_INLINE are defined in WriteBarrier.h.
 
+        /**
+         * Perform the actual store of value into *address. Abstraction so we can put
+         * the heap graph code in one place, all write barriers need to call this.
+         */
+        static void WriteField(const void *address, const void *value);
+
+        /**
+         * WriteField with assertions that value and pointer at address are NULL
+         * or not RCObjects.
+         */
+        static void WriteFieldNonRC(const void *address, const void *value);
+
+        /**
+         * Do a WriteField and also update reference counts.
+         */
+        static void WriteFieldRC(const void *address, const void *value);
+
+        /**
+         * Helper for write barrier's given only an address, container is
+         * calculated using FindBeginning.
+         */
+        void InlineWriteBarrierGuardedTrap(const void *address);
+
+        /**
+         * These functions are the implementations of the out-of-line
+         * functions below, see below for docs.
+         */
+        static void InlineWriteBarrier(const void *address, const void *value);
+        static void InlineWriteBarrierRC(const void *address, const void *value);
+        static void InlineWriteBarrierRC_ctor(const void *address, const void *value);
+        static void InlineWriteBarrierRC_dtor(const void *address);
+
+        /**
+         * Static out of line versions of write barriers, primarily
+         * for use from smart pointer classes WriteBarrier<T> and
+         * WriteBarrierRC<T>.
+         *
+         * These have the added overhead of having to calculate the
+         * container address and GC*.  An assert will fire if the
+         * 'value' passed to WriteBarrier is an RCObject or if there
+         * is a pointer at 'address' that is an RCObject.  Similarly
+         * the RC forms will assert on non-RCObjects.
+         */
+        static void FASTCALL WriteBarrier(const void *address, const void *value);
+        static void FASTCALL WriteBarrierRC(const void *address, const void *value);
+        // Optimized version that ignores the value at address, it must be NULL.
+        static void FASTCALL WriteBarrierRC_ctor(const void *address, const void *value);
+
+    public:
+
+        /**
+         * This is the implementation of the WBRC_NULL so its
+         * public. There's no write barrier performed, just NULL the
+         * field and decrement the ref count.
+         */
+        static void FASTCALL WriteBarrierRC_dtor(const void *address);
+        
     private:
-        /**
-         * Perform the actual store of value into *address, adjusting reference counts.
-         */
-        /*REALLY_INLINE*/ void WriteBarrierWriteRC(const void *address, const void *value);
-
-        /*
-         * Streamlined versions to be used from the ctor/dtor of containers.
-         */
-        /*REALLY_INLINE*/ void WriteBarrierWriteRC_ctor(const void *address, const void *value);
-        /*REALLY_INLINE*/ void WriteBarrierWriteRC_dtor(const void *address);
-
-        /**
-         * Perform the actual store of value into *address.  (This is just a store, but there
-         * is additional error checking in debug builds.)
-         */
-        /*REALLY_INLINE*/ void WriteBarrierWrite(const void *address, const void *value);
 
         /**
          * The marker is running and the container object has just been transitioned from
@@ -952,13 +1002,6 @@ namespace MMgc
         void privateWriteBarrier(const void *container, const void *address, const void *value);
 
         /**
-         * A write barrier that finds the container's address and the container's
-         * GC and then performs a standard write barrier operation (see privateWriteBarrier).
-         * Finally stores value into *address.
-         */
-        static void WriteBarrier(const void *address, const void *value);
-
-        /**
          * Standard write barrier write for RC values.  If marking is ongoing, and the 'container'
          * is black (ie marked and not queued) and the 'value' is white (ie unmarked and not queued)
          * then make sure to queue value for marking.
@@ -976,19 +1019,6 @@ namespace MMgc
          * This is called by the WBRC macro in WriteBarrier.h - not an API to be used otherwise.
          */
         void privateWriteBarrierRC(const void *container, const void *address, const void *value);
-
-        /**
-         * A write barrier that finds the container's address and the container's GC
-         * and then performs a standard RC write barrier operation (see privateWriteBarrierRC).
-         */
-        static void FASTCALL WriteBarrierRC(const void *address, const void *value);
-
-        /**
-         * Like WriteBarrierRC, but used when calling from a container's ctor/dtor.
-         * We can avoid some unnecessary work in each case.
-         */
-        static void FASTCALL WriteBarrierRC_ctor(const void *address, const void *value);
-        static void FASTCALL WriteBarrierRC_dtor(const void *address);
 
         /**
          * Host API: if 'address' points to a GC page (it can point into an object, not just
