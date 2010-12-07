@@ -77,6 +77,8 @@ def _configSub(ostest, cputest):
         os = 'linux'
     elif ostest.startswith('sunos'):
         os = 'sunos'
+    elif ostest.startswith('android'):
+        os = 'android'
     else:
         raise Exception('Unrecognized OS: ' + ostest)
 
@@ -259,7 +261,7 @@ class Configuration:
                 self._acvars['CXXFLAGS'] += ' -arch ppc64 '
                 self._acvars['LDFLAGS'] += ' -arch ppc64 '
             else:
-                raise Exception("Unexpected Darwin processor.")
+                raise Exception("Unexpected Darwin processor while setting CXX.")
                 
             if 'CC' in os.environ:
                 self._acvars['CC'] = os.environ['CC']
@@ -276,7 +278,7 @@ class Configuration:
                 self._acvars['CC'] = 'gcc'
                 self._acvars['CFLAGS'] += ' -arch ppc64 '
             else:
-                raise Exception("Unexpected Darwin processor.")
+                raise Exception("Unexpected Darwin processor while setting CC.")
 
         elif self._target[0] == 'linux':
             self._acvars.update({
@@ -297,7 +299,24 @@ class Configuration:
                 self._acvars.update({'CXXFLAGS' : ''})
                 self._acvars.update({'LDFLAGS' : ''})
                 self._acvars.update({'zlib_EXTRA_CFLAGS' : ''})
-                
+
+        elif self._target[0] == 'android':
+            self._acvars.update({
+                'CPPFLAGS'     : '',
+                'CXXFLAGS'     : '',
+                'DLL_CFLAGS'   : '',
+                'LDFLAGS'      : '-lc -lm -lstdc++ -lssl -lgcc',
+                'AR'           : 'arm-eabi-ar',
+                'AS'           : 'arm-eabi-as',
+                'MKSTATICLIB'  : '$(AR) -rcs $(1)',
+                'MKDLL'        : '$(CXX) -shared -o $(1)',
+                'MKPROGRAM'    : '$(CXX) $(LFLAGS_HEADLESS) $(SEARCH_DIRS) -o $(1)',
+                'STRIP'        : 'arm-eabi-strip',
+                'LD'           : 'arm-eabi-ld',
+                'CXX'          : 'arm-eabi-g++',
+                'CC'           : 'arm-eabi-gcc'
+                })
+            
         elif self._target[0] == 'sunos':
             if options.getBoolArg("gcc", False):
                 self._acvars.update({

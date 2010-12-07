@@ -101,6 +101,14 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(NULL)
 endif
 
+ifeq (android,$(TARGET_OS))
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/avmshellUnix.cpp \
+  $(curdir)/PosixFile.cpp \
+  $(curdir)/PosixPartialPlatform.cpp \
+  $(NULL)
+endif
+
 ifeq (sunos,$(TARGET_OS))
 shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellUnix.cpp \
