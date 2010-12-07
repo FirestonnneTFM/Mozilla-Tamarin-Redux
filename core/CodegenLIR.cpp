@@ -7137,7 +7137,7 @@ namespace avmplus
         }
         #endif
 
-        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log, core->config.njconfig);
+        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, &mgr->log, core->config.njconfig);
         #ifdef VMCFG_VTUNE
         assm->vtuneHandle = vtuneInit(info->getMethodName());
         #endif /* VMCFG_VTUNE */
@@ -7623,7 +7623,7 @@ namespace avmplus
         cfg.harden_nop_insertion = false;
 
         Assembler *assm = new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator, *lir_alloc,
-            core, &codeMgr->log, cfg);
+            &codeMgr->log, cfg);
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( if (!pool->isVerbose(VB_raw)) assm->_outputCache = &asmOutput; )
         LirReader bufreader(frag->lastIns);
