@@ -47,20 +47,11 @@
     #define GNUC_ONLY(x)
 #endif
 
-// VC++ wants these declared
-//void *operator new(size_t size);
-//void *operator new[] (size_t size);
-
-// Sun Studio doesn't support default parameters for operator new, so break up as two functions
-REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc)
-{
-    return gc->AllocPtrZero(size);
-}
-
-REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc, int flags)
-{
-    return gc->Alloc(size, flags);
-}
+// These are declared but not implemented so we can catch uses of them
+// as link errors.   If we remove these we run the risk of new (GC*) being
+// compiled as a call to placement new.
+void *operator new(size_t size, MMgc::GC *gc);
+void *operator new(size_t size, MMgc::GC *gc, int flags);
 
 namespace MMgc
 {
