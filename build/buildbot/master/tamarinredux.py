@@ -733,50 +733,18 @@ class tamarinredux:
     android_compile_factory.addStep(sync_update)
     android_compile_factory.addStep(bb_slaveupdate(slave="android"))
     android_compile_factory.addStep(compile_builtin)
-    android_compile_factory.addStep(BuildShellCommand(
-                command=['./build-debug-shell-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='building debug shell...',
-                descriptionDone='finished building debug shell.',
-                name="Build_Debug",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-    android_compile_factory.addStep(BuildShellCommand(
-                command=['./build-release-shell-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='building release shell...',
-                descriptionDone='finished building release shell.',
-                name="Build_Release",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-    android_compile_factory.addStep(BuildShellCommand(
-                command=['./build-check-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='running build check...',
-                descriptionDone='finished build check.',
-                name="Build_Check",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-    android_compile_factory.addStep(BuildShellCommand(
-                command=['./upload-asteam-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='running upload to asteam...',
-                descriptionDone='finished upload to asteam.',
-                name="Upload_ASTEAM",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-
+    android_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--enable-shell --arm-arch=armv7-a --target=arm-android", upload="false"))
+    android_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug --arm-arch=armv7-a --target=arm-android", upload="false"))
+    android_compile_factory.addStep(compile_buildcheck_local)
+    android_compile_factory.addStep(util_upload_asteam_local)
+    
     android_compile_builder = {
                 'name': "android-compile",
                 'slavename': "android",
                 'factory': android_compile_factory,
                 'builddir': './android-compile',
     }
-    
+
     ###############################
     #### builder for linux-arm ####
     ###############################

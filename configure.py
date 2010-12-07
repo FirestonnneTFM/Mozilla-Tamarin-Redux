@@ -41,6 +41,16 @@
 # This script runs just like a traditional configure script, to do configuration
 # testing and makefile generation.
 
+#****************************************************************************
+# If you're building android the following Android SDK commands must be run
+# before invoking configure.py and the makefile it produces:
+#        The android sdk volume should be mounted to /Volumes/android
+#        cd /Volumes/android/device
+#        run . build/envsetup.sh
+#        run choosecombo and press enter at each prompt
+#
+#****************************************************************************
+
 import os
 import os.path
 import sys
@@ -58,6 +68,7 @@ import build.getopt
 import build.avmfeatures
 
 
+# Used to set the mac SDK parameters
 def _setSDKParams(sdk_version,os_ver):
         
     # On 10.5/6 systems, and only if "--mac-sdk=104u" is passed in, compile for the 10.4u SDK and override CC/CXX (set in configuration.py) to use gcc/gxx 4.0.x
@@ -82,10 +93,27 @@ def _setSDKParams(sdk_version,os_ver):
     else:
         return os_ver,sdk_number
 
+# Used to set GCC flags for the android build
+def _setGCCVersionedFlags(FLAGS, MAJOR_VERSION, MINOR_VERSION, current_cpu):
+    #  can't enable -Werror for gcc prior to 4.3 due to unavoidable "clobbered" warnings in Interpreter.cpp
+    # warnings have been updated to try to include all those enabled by current Flash/AIR builds -- disable with caution, or risk integration pain
+    if MAJOR_VERSION >= 4:
+        FLAGS += "-Wstrict-null-sentinel "
+        if (MAJOR_VERSION == 4 and MINOR_VERSION <= 2) or current_cpu == 'mips': # 4.0 - 4.2
+            FLAGS += "-Wstrict-aliasing=0 "
+        else: # gcc 4.3 or later
+            FLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
+
+    return FLAGS
+
 o = build.getopt.Options()
 
 config = Configuration(thisdir, options = o,
                        sourcefile = 'core/avmplus.h')
+
+arm_fpu = o.getBoolArg("arm-fpu",False)
+arm_neon = o.getBoolArg("arm-neon",False)
+arm_arch = o.arm_arch
 
 buildTamarin = o.getBoolArg('tamarin', True)
 if buildTamarin:
@@ -95,6 +123,7 @@ buildShell = o.getBoolArg("shell", False)
 if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
+the_os, cpu = config.getTarget()
 
 APP_CPPFLAGS = "-DAVMSHELL_BUILD "
 APP_CXXFLAGS = ""
@@ -113,6 +142,7 @@ AVMSHELL_LDFLAGS = ""
 MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
+DISABLE_RTMPE = None
 
 if 'APP_CPPFLAGS' in os.environ:
     APP_CPPFLAGS += os.environ['APP_CPPFLAGS'] + " "
@@ -144,6 +174,8 @@ if 'NSPR_INCLUDES' in os.environ:
     NSPR_INCLUDES += os.environ['NSPR_INCLUDES'] + " "
 if 'NSPR_LDOPTS' in os.environ:
     NSPR_LDOPTS += os.environ['NSPR_LDOPTS'] + " "
+if 'DISABLE_RTMPE' in os.environ:
+    DISABLE_RTMPE += os.environ['DISABLE_RTMPE'] + " "    
 if o.getBoolArg('valgrind', False, False):
     OPT_CXXFLAGS = "-O1 -g "
 
@@ -171,13 +203,7 @@ MMGC_DYNAMIC = o.getBoolArg('mmgc-shared', False)
 if MMGC_DYNAMIC:
     MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
-
-arm_fpu = o.getBoolArg("arm-fpu",False)
-arm_neon = o.getBoolArg("arm-neon",False)
-arm_arch = o.arm_arch
-
-the_os, cpu = config.getTarget()
-
+    
 # For -Wreorder, see https://bugzilla.mozilla.org/show_bug.cgi?id=475750
 if config.getCompiler() == 'GCC':
     if 'CXX' in os.environ:
@@ -189,15 +215,79 @@ if config.getCompiler() == 'GCC':
     ver_arr = ver.split('.')
     GCC_MAJOR_VERSION = int(ver_arr[0])
     GCC_MINOR_VERSION = int(ver_arr[1])
-    #  can't enable -Werror for gcc prior to 4.3 due to unavoidable "clobbered" warnings in Interpreter.cpp
-    # warnings have been updated to try to include all those enabled by current Flash/AIR builds -- disable with caution, or risk integration pain
-    APP_CXXFLAGS = "-Wall -Wcast-align -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof -Wno-switch -Wparentheses -Wpointer-arith -Wreorder -Wsign-compare -Wunused-parameter -Wwrite-strings -Wno-ctor-dtor-privacy -Woverloaded-virtual -Wsign-promo -Wno-char-subscripts -fmessage-length=0 -fno-exceptions -fno-rtti -fno-check-new -fstrict-aliasing -fsigned-char  "
-    if GCC_MAJOR_VERSION >= 4:
-        APP_CXXFLAGS += "-Wstrict-null-sentinel "
-        if (GCC_MAJOR_VERSION == 4 and GCC_MINOR_VERSION <= 2) or cpu == 'mips': # 4.0 - 4.2
-            APP_CXXFLAGS += "-Wstrict-aliasing=0 "
-        else: # gcc 4.3 or later
-            APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
+
+
+    if the_os == 'android':
+        try:
+            ANDROID_BUILD_TOP = os.environ['ANDROID_BUILD_TOP']
+        except:
+            print('\nANDROID_BUILD_TOP not found in environment\nPlease mount android.dmg and cd to /Volumes/android/device\n' \
+                  'Run . build/envsetup.sh\nRun choosecombo and press enter at each prompt\n')
+            exit(0)
+
+        ANDROID_INCLUDES = "-I$(ANDROID_BUILD_TOP)/bionic/libc/arch-arm/include "\
+                           "-I$(ANDROID_BUILD_TOP)/bionic/libc/kernel/arch-arm "\
+                           "-I$(ANDROID_BUILD_TOP)/bionic/libc/kernel/common "\
+                           "-I$(ANDROID_BUILD_TOP)/bionic/libm/include "\
+                           "-I$(ANDROID_BUILD_TOP)/bionic/libstdc++/include "\
+                           "-I$(ANDROID_BUILD_TOP)/bionic/libc/include "\
+                           "-I$(ANDROID_BUILD_TOP)/external/webkit/WebKit/android/stl "\
+                           "-I$(ANDROID_BUILD_TOP)/external/openssl/include "\
+                           "-I$(ANDROID_BUILD_TOP)/frameworks/base/opengl/include "
+
+        # These flags are shared with some of the other builds such as ARM, but better to keep them separate here for flexibility
+        COMMON_CXX_FLAGS = "-Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof " \
+                           "-Wno-switch -Wpointer-arith -Wwrite-strings -Woverloaded-virtual -Wsign-promo " \
+                           "-fmessage-length=0 -fno-exceptions -fno-rtti -fsigned-char "
+
+        # Additional flags used by android
+        APP_CXX_FLAGS = "%s -Wctor-dtor-privacy -Wlogical-op -Wstrict-overflow=1 " \
+                    "-Wmissing-include-dirs -Wno-missing-field-initializers -Wno-type-limits -Wno-unused-parameter " \
+                    "-Wnon-virtual-dtor -Wstrict-null-sentinel -Wno-missing-braces -Wno-multichar -Wno-psabi -Wno-reorder " \
+                    "-fno-strict-aliasing -fpic -funwind-tables -fstack-protector -finline-limit=200 -MD -fwrapv " % COMMON_CXX_FLAGS
+        APP_CXXFLAGS += _setGCCVersionedFlags(APP_CXX_FLAGS, GCC_MAJOR_VERSION, GCC_MINOR_VERSION, cpu)
+
+        # LFLAGS_HEADLESS gets picked up in configuration.py by MKPROGRAM
+        LFLAGS_HEADLESS = "-nostdlib -Bdynamic -Wl,-T,"\
+                          "$(ANDROID_BUILD_TOP)/build/core/armelf.x -Wl,"\
+                          "-dynamic-linker,/system/bin/linker -Wl,"\
+                          "-z,nocopyreloc "\
+                          "-L$(ANDROID_BUILD_TOP)/out/target/product/generic/system/lib -Wl,"\
+                          "-rpath-link=$(ANDROID_BUILD_TOP)/out/target/product/generic/system/lib "\
+                          "$(ANDROID_BUILD_TOP)/out/target/product/generic/obj/lib/crtbegin_dynamic.o "\
+                          "$(ANDROID_BUILD_TOP)/out/target/product/generic/obj/lib/crtend_android.o "
+
+        # SEARCH_DIRS gets picked up in configuration.py by MKPROGRAM
+        SEARCH_DIRS = "-L/Volumes/Builds$(topsrcdir)/objdir-release/"
+
+        BASE_M_FLAGS = "-mlong-calls -mthumb-interwork -mthumb"
+
+        if arm_arch == "armv7-a" or arm_arch == None:
+            BASE_CXX_FLAGS = "%s -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -D__ARM_ARCH__=7 " \
+                        "-DARMV6_ASSEMBLY -DTARGET_NEON -DSDK_ON2_OPT -DSDK_ON2_OPT_ARM11 -DFP_ON2_USE_C_FILTERING_FUNCTIONS " % BASE_M_FLAGS
+            APP_CXXFLAGS += BASE_CXX_FLAGS
+
+        elif arm_arch == "armv6":
+            BASE_CXX_FLAGS = "%s -march=armv6 -mfloat-abi=soft -D__ARM_ARCH__=6 -DARMV5_ASSEMBLY -DARMV6_ASSEMBLY " % BASE_M_FLAGS
+            APP_CXXFLAGS += BASE_CXX_FLAGS
+            LFLAGS_HEADLESS += "-Wl,--no-enum-size-warning"
+
+        elif arm_arch == "armv5":
+            BASE_CXX_FLAGS = "%s -march=armv5te -mfloat-abi=soft -mtune=xscale -D__ARM_ARCH__=5 -DARMV5_ASSEMBLY " % BASE_M_FLAGS
+            APP_CXXFLAGS += BASE_CXX_FLAGS
+            LFLAGS_HEADLESS += "-Wl,--no-enum-size-warning"
+
+        else:
+            raise Exception('Unrecognized architecture: %s' % arm_arch)
+
+        APP_CPPFLAGS += "-DAVMPLUS_UNIX -DUNIX -Dlinux -DUSE_PTHREAD_MUTEX -DNO_SYS_SIGNAL -DHAVE_STDARG -DNO_CONSOLE_FWRITE -DAVMPLUS_ARM %s" % ANDROID_INCLUDES
+
+    else:
+        APP_CXXFLAGS = "-Wall -Wcast-align -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof -Wno-switch "\
+                       "-Wparentheses -Wpointer-arith -Wreorder -Wsign-compare -Wunused-parameter -Wwrite-strings -Wno-ctor-dtor-privacy -Woverloaded-virtual "\
+                       "-Wsign-promo -Wno-char-subscripts -fmessage-length=0 -fno-exceptions -fno-rtti -fno-check-new -fstrict-aliasing -fsigned-char  "
+        APP_CXXFLAGS += _setGCCVersionedFlags(APP_CXXFLAGS, GCC_MAJOR_VERSION, GCC_MINOR_VERSION, cpu)
+
     if cpu == 'sh4':
         APP_CXXFLAGS += "-mieee -Wno-cast-align "
 
@@ -332,6 +422,22 @@ elif the_os == "linux":
 #        OPT_CXXFLAGS += '-fno-schedule-insns2 '
     if config.getDebug():
         OS_LIBS.append("dl")
+elif the_os == "android":
+    MMGC_DEFINES.update({'AVMFEATURE_OVERRIDE_GLOBAL_NEW': 0,
+            'RTMFPUTIL_OVERRIDE_OPERATOR_NEW': None})
+
+    BASE_D_FLAGS = "-DANDROID -DNETSCAPE -DDISABLE_DRM -DGENERIC_PLATFORM -DHAVE_SYS_UIO_H -Dlinux -DNEEDS_IN6_H -DUNIX -Dcompress=zlib_compress "
+    if DISABLE_RTMPE:
+        BASE_D_FLAGS += "-DDISABLE_RTMPE "
+
+    APP_CXXFLAGS += BASE_D_FLAGS
+
+    if config.getDebug():
+        DEBUG_CXXFLAGS += "-DDEBUG -D_DEBUG -DASYNC_DEBUG -O0 -ggdb3 "
+        DEBUG_CPPFLAGS = ""
+    else:
+        APP_CXXFLAGS += "-DNDEBUG -O3 -fomit-frame-pointer -fvisibility=hidden -finline-functions -fgcse-after-reload -frerun-cse-after-loop -frename-registers -fvisibility-inlines-hidden "
+        DEBUG_CPPFLAGS = ""
 elif the_os == "sunos":
     if config.getCompiler() != 'GCC':
         APP_CXXFLAGS = "-template=no%extdef -erroff"
@@ -400,6 +506,10 @@ config.subst("MMGC_CPPFLAGS", MMGC_CPPFLAGS)
 config.subst("AVMSHELL_CPPFLAGS", AVMSHELL_CPPFLAGS)
 config.subst("AVMSHELL_LDFLAGS", AVMSHELL_LDFLAGS)
 config.subst("MMGC_DYNAMIC", MMGC_DYNAMIC and 1 or '')
+if the_os == "android":
+    config.subst("LFLAGS_HEADLESS", LFLAGS_HEADLESS)
+    config.subst("SEARCH_DIRS", SEARCH_DIRS)
+
 config.generate("Makefile")
 
 o.finish()

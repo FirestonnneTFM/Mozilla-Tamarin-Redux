@@ -90,6 +90,9 @@ endif
 ifeq (linux,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/unix)
 endif
+ifeq (android,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/unix)
+endif
 ifeq (sunos,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/unix)
 endif
