@@ -4884,7 +4884,7 @@ return the result of the comparison ToPrimitive(x) == y.
         return x;
     }
 
-    API ApiUtils::getCompatibleAPIs(AvmCore* core, API api)
+    API ApiUtils::getCompatibleAPIs(AvmCore* /*core*/, API api)
     {
         if (api==0)
             return 0;
@@ -4920,13 +4920,13 @@ return the result of the comparison ToPrimitive(x) == y.
         return r;
     }
 
-    API ApiUtils::toAPI(AvmCore* core, ApiVersion v)
+    API ApiUtils::toAPI(AvmCore* /*core*/, ApiVersion v)
     {
         AvmAssert(v >= kApiVersion_min && v <= kApiVersion_min+kApiVersion_count);
         return 0x1 << (v-kApiVersion_min);
     }
 
-    ApiVersion ApiUtils::toVersion(AvmCore* core, API api)
+    ApiVersion ApiUtils::toVersion(AvmCore* /*core*/, API api)
     {
         AvmAssert(api != 0);
         uint32_t x = apiBit(api);
