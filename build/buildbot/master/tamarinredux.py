@@ -2253,8 +2253,6 @@ class tamarinredux:
     linux_deep_factory.addStep(test_generic(name="Release-Djitordie", shellname="avmshell", vmargs="-Djitordie", config="", scriptargs=""))
     linux_deep_factory.addStep(test_generic(name="ReleaseDebugger-nodebugger", shellname="avmshell_s", vmargs="-Dnodebugger", config="", scriptargs=""))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger-nodebugger", shellname="avmshell_sd", vmargs="-Dnodebugger", config="", scriptargs=""))
-    linux_deep_factory.addStep(compile_generic(name="Release-nojit", shellname="avmshell_nojit", args="--enable-shell --disable-jit", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
-    linux_deep_factory.addStep(test_generic(name="Release-nojit", shellname="avmshell_nojit", vmargs="", config="x86-lnx-tvm-release-nojit", scriptargs=""))
     linux_deep_factory.addStep(compile_generic(name="Release-system-malloc", shellname="avmshell_sysmalloc", args="--enable-shell --enable-use-system-malloc", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_USE_SYSTEM_MALLOC"))
     linux_deep_factory.addStep(test_generic(name="Release-system-malloc", shellname="avmshell_sysmalloc", vmargs="", config="x86-lnx-tvm-release-use-system-malloc", scriptargs=""))
     linux_deep_factory.addStep(test_misc)
