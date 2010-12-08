@@ -56,10 +56,9 @@ namespace avmplus
     private:
         friend class AvmCore;
         template <class VALUE_TYPE, class VALUE_WRITER> friend class MultinameHashtable;
-        // Should these be Stringp's?
-        Atom m_prefix;
-        API m_api;
-        uintptr_t m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
+        AtomWB const    m_prefix;
+        API             m_api;
+        uintptr_t       m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
 
     public:
         enum NamespaceType
@@ -91,10 +90,6 @@ namespace avmplus
          * virtual version of atom():
          */
         virtual Atom toAtom() const { return atom(); }
-
-        // This is called in ONE place in the XML code.  The URI of a namespace
-        // should never change but its prefix can change in this special case
-        void setPrefix (Atom pre);
 
         bool hasPrefix () const;
 
