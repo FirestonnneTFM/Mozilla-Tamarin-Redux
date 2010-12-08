@@ -248,6 +248,12 @@ namespace avmshell
         return BugCompatibility::kNames[v];
     }
 
+    int32_t SystemClass::get_apiVersion()
+    {
+        ShellCore* core = (ShellCore*)this->core();
+        return core->defaultAPIVersion;
+    }
+
     void SystemClass::forceFullCollection()
     {
         core()->GetGC()->Collect();

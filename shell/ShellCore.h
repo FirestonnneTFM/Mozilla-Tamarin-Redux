@@ -84,7 +84,7 @@ namespace avmshell
         const char* st_component;
         const char* st_category;
         const char* st_name;
-        uint32_t api;
+        ApiVersion api;
         BugCompatibility::Version swfVersion;
 
         MMgc::GC::GCMode gcMode()
@@ -127,7 +127,7 @@ namespace avmshell
          *
          * Requires: MMGC_ENTER and MMGC_GCENTER(gc) on the stack.
          */
-        bool setup(ShellCoreSettings& settings);
+        bool setup(const ShellCoreSettings& settings);
 
         /**
          * Load the contents from the file and run them in the context of this core's
@@ -218,7 +218,7 @@ namespace avmshell
         // the CodeContext/DomainEnv that user code will run in (as opposed
         // to the Shell's builtin classes, eg System, File, Domain).
         ShellCodeContext* user_codeContext;
-        uint32_t defaultAPIVersion;
+        ApiVersion defaultAPIVersion;
         BugCompatibility::Version defaultBugCompatibilityVersion;
     };
 

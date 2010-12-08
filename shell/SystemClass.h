@@ -165,6 +165,7 @@ namespace avmshell
         double get_privateMemory();
 
         int32_t get_swfVersion();
+        int32_t get_apiVersion();
 
         // Initiate a garbage collection; future versions will not return before completed.
         void forceFullCollection();
