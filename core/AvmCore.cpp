@@ -3412,12 +3412,12 @@ return the result of the comparison ToPrimitive(x) == y.
         return i;
     }
 
-    Namespacep AvmCore::gotNamespace(Stringp uri, int32_t api)
+    Namespacep AvmCore::gotNamespace(uintptr_t uriAndType, int32_t api)
     {
         int m = numNamespaces;
 
         // compute the hash function
-        int hashCode = (int)(((uintptr_t)uri)>>3);  // FIXME possibly hash api mask too
+        int hashCode = (int)(((uintptr_t)uriAndType)>>3);  // FIXME possibly hash api mask too
 
         int bitMask = m - 1;
 
@@ -3426,7 +3426,7 @@ return the result of the comparison ToPrimitive(x) == y.
         int n = 7;
         Namespacep k;
         while ((k=namespaces[i]) != NULL &&
-               (k->getURI() != uri ||
+               (k->m_uri != uriAndType ||
                 k->m_api != api)) {
             i = (i + (n++)) & bitMask; // quadratic probe
         }
@@ -4899,7 +4899,7 @@ return the result of the comparison ToPrimitive(x) == y.
         if (!isVersionedNS(core, ns->getType(), ns->getURI()))
             return ns;
 
-        Namespacep ns2 = core->gotNamespace(ns->getURI(), api);
+        Namespacep ns2 = core->gotNamespace(ns->m_uri, api);
         if (ns2 != NULL) {
             return ns2;
         }
