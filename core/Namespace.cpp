@@ -45,22 +45,23 @@ using namespace MMgc;
 namespace avmplus
 {
     // See E4X 13.2.2, pg 64
-    Namespace::Namespace(Atom prefix, Stringp uri, NamespaceType flags)
+    Namespace::Namespace(Atom prefix, Stringp uri, NamespaceType flags) :
 #ifdef DEBUGGER
-        : AvmPlusScriptableObject(sotNamespace())
+        AvmPlusScriptableObject(sotNamespace()),
 #endif // DEBUGGER
+        m_prefix(prefix)
     {
         // verify our parameters are interned strings
-        AvmAssert (uri->isInterned());
+        AvmAssert(uri->isInterned());
         // prefix can be an interned string, undefined, or null
-        AvmAssert (AvmCore::isName(prefix) || AvmCore::isNullOrUndefined(prefix));
-        setPrefix(prefix);
+        AvmAssert(AvmCore::isName(prefix) || AvmCore::isNullOrUndefined(prefix));
+        // ensure that if the incoming Atom is a string, that it's interned
+        AvmAssert(AvmCore::isString(prefix) ? (AvmCore::atomToString(prefix))->isInterned() : 1);
         setUri(uri, flags);
     }
 
     Namespace::~Namespace()
     {
-        WBATOM(MMgc::GC::GetGC(this), this, &m_prefix, 0);
         setUri(NULL, NS_Public);
         setAPI(0);
     }
@@ -68,15 +69,6 @@ namespace avmplus
     void Namespace::setUri(Stringp uri, NamespaceType flags)
     {
         WBRC(GC::GetGC(this), this, &m_uri, (int32_t)flags | (uintptr_t) uri);
-    }
-
-    void Namespace::setPrefix(Atom pre)
-    {
-        AvmAssert (AvmCore::isName(pre) || AvmCore::isNullOrUndefined(pre));
-        // ensure that if the incoming Atom is a string, that it's interned
-        AvmAssert(AvmCore::isString(pre) ? (AvmCore::atomToString(pre))->isInterned() : 1);
-
-        WBATOM(MMgc::GC::GetGC(this), this, &m_prefix, pre);
     }
 
     bool Namespace::hasPrefix() const

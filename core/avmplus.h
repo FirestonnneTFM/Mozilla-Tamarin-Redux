@@ -262,6 +262,7 @@ namespace avmplus
 #include "SortedMap.h"
 #include "BitSet.h"
 #include "AvmPlusScriptableObject.h"
+#include "AtomWriteBarrier.h"
 #include "Namespace.h"
 #include "StringObject.h"
 #include "MultinameHashtable.h"
@@ -275,7 +276,6 @@ namespace avmplus
 #include "exec.h"
 #include "api-versions.h"
 #include "AvmCore.h"
-#include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"
 #include "Traits.h"
 #include "VTable.h"
@@ -345,6 +345,7 @@ namespace avmplus
 // inline implementations
 #include "vmbase-inlines.h"
 
+#include "AtomWriteBarrier-inlines.h"
 #include "AbcEnv-inlines.h"
 #include "AbcParser-inlines.h"
 #include "ArrayObject-inlines.h"
