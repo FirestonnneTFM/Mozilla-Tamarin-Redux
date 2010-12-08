@@ -55,6 +55,7 @@ namespace avmplus
     {
     private:
         friend class AvmCore;
+        friend class ApiUtils;
         template <class VALUE_TYPE, class VALUE_WRITER> friend class MultinameHashtable;
         AtomWB const    m_prefix;
         API             m_api;

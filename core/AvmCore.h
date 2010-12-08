@@ -1602,7 +1602,7 @@ const int kBufferPadding = 16;
 
         /** search the namespace intern table */
         int findNamespace(Namespacep ns, bool canRehash = true);
-        Namespacep gotNamespace(Stringp uri, int32_t api);
+        Namespacep gotNamespace(uintptr_t uriAndType, int32_t api);
 
     public:
 
