@@ -558,3 +558,6 @@ ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, h
 ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
 
 
+as3/sampling/BackwardBranches , .* , skip, Bugzilla 614529
+as3/sampling/Callback , .* , skip,  Bugzilla 614529
+as3/sampling/FunctionEntry , .* , skip,  Bugzilla 614529

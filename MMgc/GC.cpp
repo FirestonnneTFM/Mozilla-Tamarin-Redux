@@ -41,10 +41,6 @@
 #include "MMgc.h"
 #include "StaticAssert.h"
 
-#undef AVMPLUS_SAMPLER // Bugzilla 614529
-#undef SAMPLE_FRAME
-#undef SAMPLE_CHECK
-
 #ifdef AVMPLUS_SAMPLER
  //sampling support
 #include "avmplus.h"

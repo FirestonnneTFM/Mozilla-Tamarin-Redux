@@ -573,7 +573,9 @@ namespace avmplus
 
     void Sampler::setCallback(ScriptObject* callback)
     {
-        this->callback = callback;
+        (void)callback;
+        // FIXME: bug 614529
+        //this->callback = callback;
     }
 
     void Sampler::stopSampling()
