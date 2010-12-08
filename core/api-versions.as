@@ -50,6 +50,6 @@ CONFIG const AIR_2_5 = 669;
 CONFIG const FP_10_2 = 670;
 CONFIG const AIR_2_6 = 671;
 CONFIG const SWF_12 = 672;
-CONFIG const FP_SYS = 674;
 CONFIG const AIR_2_7 = 673;
+CONFIG const FP_SYS = 674;
 CONFIG const AIR_SYS = 675;

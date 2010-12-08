@@ -40,7 +40,6 @@
 #include "avmshell.h"
 
 #include "shell_toplevel.cpp"
-#include "api-versions.h"       // Really a cpp file
 
 namespace avmshell
 {
@@ -71,7 +70,7 @@ namespace avmshell
         , st_component(NULL)
         , st_category(NULL)
         , st_name(NULL)
-        , api(0xffffffff)
+        , api(kApiVersion_default)
         , swfVersion(BugCompatibility::kLatest)
     {
     }
@@ -96,10 +95,6 @@ namespace avmshell
         consoleOutputStream = new (gc) ConsoleOutputStream(gc);
 
         setConsoleStream(consoleOutputStream);
-
-        setAPIInfo(_min_version_num,
-                   _max_version_num-_min_version_num+1,
-                   (int32_t*) _api_compat);
     }
 
     void ShellCore::stackOverflow(Toplevel* toplevel)
@@ -350,7 +345,7 @@ namespace avmshell
     }
 #endif
 
-    bool ShellCore::setup(ShellCoreSettings& settings)
+    bool ShellCore::setup(const ShellCoreSettings& settings)
     {
 #ifdef VMCFG_AOT
         if(nAOTInfos == 0) {
@@ -360,18 +355,7 @@ namespace avmshell
 #endif
 
         // set the default api version
-        if (settings.api <= _max_version_num) {
-            this->defaultAPIVersion = settings.api;
-        }
-        else {
-            // Last api of any row is largestApiUtils::getLargestVersion(this);
-            // Using the largest API is really not ideal, because it means AIR_SYS / FP_SYS
-            // are open to random ABC code in the shell.  We don't want that normally.
-            // Instead use the largest nonsys value as computed by the preprocessor.
-            //this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
-            this->defaultAPIVersion = _max_nonsys_version_num;
-        }
-        //console << "defaultAPIVersion=" << defaultAPIVersion;
+        this->defaultAPIVersion = settings.api;
         this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
 
         this->defaultBugCompatibilityVersion = settings.swfVersion;

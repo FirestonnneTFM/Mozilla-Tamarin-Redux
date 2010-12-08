@@ -112,6 +112,9 @@ package avmplus
         // return the value passed to -swfversion at launch (or the default value, if -swfversion was not specified)
         public native static function get swfVersion():int;
 
+        // return the value passed to -api at launch (or the default value, if -api was not specified)
+        public native static function get apiVersion():int;
+
         public native static function disposeXML(xml:XML):void;
     }
 
@@ -192,175 +195,183 @@ package {
 // moved from "avmplus" to "avmshell" to avoid having avmplus be unversioned in builtin, but versioned in shell
 package avmshell 
 {
+    include "../core/api-versions.as"
+    
+    // Shadow the declarations into public vars solely so that the acceptance tests
+    // can read them; they can't simple include api-versions.as because the CONFIG
+    // namespace is special and available only to builtin code (which the acceptance
+    // tests aren't).
+    public const API_FP_9_0 = CONFIG::FP_9_0;
+    public const API_AIR_1_0 = CONFIG::AIR_1_0;
+    public const API_FP_10_0 = CONFIG::FP_10_0;
+    public const API_AIR_1_5 = CONFIG::AIR_1_5;
+    public const API_AIR_1_5_1 = CONFIG::AIR_1_5_1;
+    public const API_FP_10_0_32 = CONFIG::FP_10_0_32;
+    public const API_AIR_1_5_2 = CONFIG::AIR_1_5_2;
+
     public var public_var:Boolean = true;
-    [API(660)] public var public_var_660:Boolean = true;
-    [API(661)] public var public_var_661:Boolean = true;
-    [API(662)] public var public_var_662:Boolean = true;
-    [API(663)] public var public_var_663:Boolean = true;
-    [API(664)] public var public_var_664:Boolean = true;
-    [API(665)] public var public_var_665:Boolean = true;
-    //[API(666)] public var public_var_666:Boolean = true;
-    //[API(667)] public var public_var_667:Boolean = true;
-    [API(661,662)] public var public_var_661_662:Boolean = true;
-    [API(666,660)] public var public_var_666_660:Boolean = true;
-    [API(664,662,666)] public var public_var_664_662_666:Boolean = true;
-    [API(665,660,661,662)] public var public_var_665_660_661_662:Boolean = true;
+    [API(CONFIG::FP_9_0)] public var public_var_FP_9_0:Boolean = true;
+    [API(CONFIG::AIR_1_0)] public var public_var_AIR_1_0:Boolean = true;
+    [API(CONFIG::FP_10_0)] public var public_var_FP_10_0:Boolean = true;
+    [API(CONFIG::AIR_1_5)] public var public_var_AIR_1_5:Boolean = true;
+    [API(CONFIG::AIR_1_5_1)] public var public_var_AIR_1_5_1:Boolean = true;
+    [API(CONFIG::FP_10_0_32)] public var public_var_FP_10_0_32:Boolean = true;
+    [API(CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_2:Boolean = true;
+    [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_AIR_1_0_FP_10_0:Boolean = true;
+    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public var public_var_AIR_1_5_2_FP_9_0:Boolean = true;
+    [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
+    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
 
     public const public_const:Boolean = true;
-    [API(660)] public const public_const_660:Boolean = true;
-    [API(661)] public const public_const_661:Boolean = true;
-    [API(662)] public const public_const_662:Boolean = true;
-    [API(663)] public const public_const_663:Boolean = true;
-    [API(664)] public const public_const_664:Boolean = true;
-    [API(665)] public const public_const_665:Boolean = true;
-    //[API(666)] public const public_const_666:Boolean = true;
-    //[API(667)] public const public_const_667:Boolean = true;
-    [API(661,662)] public const public_const_661_662:Boolean = true;
-    [API(666,660)] public const public_const_666_660:Boolean = true;
-    [API(664,662,666)] public const public_const_664_662_666:Boolean = true;
-    [API(665,660,661,662)] public const public_const_665_660_661_662:Boolean = true;
+    [API(CONFIG::FP_9_0)] public const public_const_FP_9_0:Boolean = true;
+    [API(CONFIG::AIR_1_0)] public const public_const_AIR_1_0:Boolean = true;
+    [API(CONFIG::FP_10_0)] public const public_const_FP_10_0:Boolean = true;
+    [API(CONFIG::AIR_1_5)] public const public_const_AIR_1_5:Boolean = true;
+    [API(CONFIG::AIR_1_5_1)] public const public_const_AIR_1_5_1:Boolean = true;
+    [API(CONFIG::FP_10_0_32)] public const public_const_FP_10_0_32:Boolean = true;
+    [API(CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_2:Boolean = true;
+    [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_AIR_1_0_FP_10_0:Boolean = true;
+    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public const public_const_AIR_1_5_2_FP_9_0:Boolean = true;
+    [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
+    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
 
     public function public_function():Boolean { return true; }
-    [API(660)] public function public_function_660():Boolean { return true; }
-    [API(661)] public function public_function_661():Boolean { return true; }
-    [API(662)] public function public_function_662():Boolean { return true; }
-    [API(663)] public function public_function_663():Boolean { return true; }
-    [API(664)] public function public_function_664():Boolean { return true; }
-    [API(665)] public function public_function_665():Boolean { return true; }
-    //[API(666)] public function public_function_666():Boolean { return true; }
-    //[API(667)] public function public_function_667():Boolean { return true; }
-    [API(661,662)] public function public_function_661_662():Boolean { return true; }
-    [API(666,660)] public function public_function_666_660():Boolean { return true; }
-    [API(664,662,666)] public function public_function_664_662_666():Boolean { return true; }
-    [API(665,660,661,662)] public function public_function_665_660_661_662():Boolean { return true; }
+    [API(CONFIG::FP_9_0)] public function public_function_FP_9_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_0)] public function public_function_AIR_1_0():Boolean { return true; }
+    [API(CONFIG::FP_10_0)] public function public_function_FP_10_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_5)] public function public_function_AIR_1_5():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_1)] public function public_function_AIR_1_5_1():Boolean { return true; }
+    [API(CONFIG::FP_10_0_32)] public function public_function_FP_10_0_32():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_2():Boolean { return true; }
+    [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_AIR_1_0_FP_10_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function public_function_AIR_1_5_2_FP_9_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
+    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
 
     public function get public_getset():Boolean { return true; }
-    [API(660)] public function get public_getset_660():Boolean { return true; }
-    [API(661)] public function get public_getset_661():Boolean { return true; }
-    [API(662)] public function get public_getset_662():Boolean { return true; }
-    [API(663)] public function get public_getset_663():Boolean { return true; }
-    [API(664)] public function get public_getset_664():Boolean { return true; }
-    [API(665)] public function get public_getset_665():Boolean { return true; }
-    //[API(666)] public function get public_getset_666():Boolean { return true; }
-    //[API(667)] public function get public_getset_667():Boolean { return true; }
-    [API(661,662)] public function get public_getset_661_662():Boolean { return true; }
-    [API(666,660)] public function get public_getset_666_660():Boolean { return true; }
-    [API(664,662,666)] public function get public_getset_664_662_666():Boolean { return true; }
-    [API(665,660,661,662)] public function get public_getset_665_660_661_662():Boolean { return true; }
+    [API(CONFIG::FP_9_0)] public function get public_getset_FP_9_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_0)] public function get public_getset_AIR_1_0():Boolean { return true; }
+    [API(CONFIG::FP_10_0)] public function get public_getset_FP_10_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_5)] public function get public_getset_AIR_1_5():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_1)] public function get public_getset_AIR_1_5_1():Boolean { return true; }
+    [API(CONFIG::FP_10_0_32)] public function get public_getset_FP_10_0_32():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_2():Boolean { return true; }
+    [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_AIR_1_0_FP_10_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function get public_getset_AIR_1_5_2_FP_9_0():Boolean { return true; }
+    [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
+    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
 
     public function set public_getset(x:*):void {  }
-    [API(660)] public function set public_getset_660(x:*):void {  }
-    [API(661)] public function set public_getset_661(x:*):void {  }
-    [API(662)] public function set public_getset_662(x:*):void {  }
-    [API(663)] public function set public_getset_663(x:*):void {  }
-    [API(664)] public function set public_getset_664(x:*):void {  }
-    [API(665)] public function set public_getset_665(x:*):void {  }
-    //[API(666)] public function set public_getset_666(x:*):void {  }
-    //[API(667)] public function set public_getset_667(x:*):void {  }
-    [API(661,662)] public function set public_getset_661_662(x:*):void {  }
-    [API(666,660)] public function set public_getset_666_660(x:*):void {  }
-    [API(664,662,666)] public function set public_getset_664_662_666(x:*):void {  }
-    [API(665,660,661,662)] public function set public_getset_665_660_661_662(x:*):void {  }
+    [API(CONFIG::FP_9_0)] public function set public_getset_FP_9_0(x:*):void {  }
+    [API(CONFIG::AIR_1_0)] public function set public_getset_AIR_1_0(x:*):void {  }
+    [API(CONFIG::FP_10_0)] public function set public_getset_FP_10_0(x:*):void {  }
+    [API(CONFIG::AIR_1_5)] public function set public_getset_AIR_1_5(x:*):void {  }
+    [API(CONFIG::AIR_1_5_1)] public function set public_getset_AIR_1_5_1(x:*):void {  }
+    [API(CONFIG::FP_10_0_32)] public function set public_getset_FP_10_0_32(x:*):void {  }
+    [API(CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_2(x:*):void {  }
+    [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_AIR_1_0_FP_10_0(x:*):void {  }
+    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function set public_getset_AIR_1_5_2_FP_9_0(x:*):void {  }
+    [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2(x:*):void {  }
+    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0(x:*):void {  }
 
 }
 
 // API Versioning - Classes
 // moved from "avmplus" to "avmshell" to avoid having avmplus be unversioned in builtin, but versioned in shell
-package avmshell {
-    public class public_class {
+package avmshell 
+{
+    public class public_class 
+    {
 
         public var public_var:Boolean = true;
-        [API(660)] public var public_var_660:Boolean = true;
-        [API(661)] public var public_var_661:Boolean = true;
-        [API(662)] public var public_var_662:Boolean = true;
-        [API(663)] public var public_var_663:Boolean = true;
-        [API(664)] public var public_var_664:Boolean = true;
-        [API(665)] public var public_var_665:Boolean = true;
-        //[API(666)] public var public_var_666:Boolean = true;
-        //[API(667)] public var public_var_667:Boolean = true;
-        [API(661,662)] public var public_var_661_662:Boolean = true;
-        [API(666,660)] public var public_var_666_660:Boolean = true;
-        [API(664,662,666)] public var public_var_664_662_666:Boolean = true;
-        [API(665,660,661,662)] public var public_var_665_660_661_662:Boolean = true;
+        [API(CONFIG::FP_9_0)] public var public_var_FP_9_0:Boolean = true;
+        [API(CONFIG::AIR_1_0)] public var public_var_AIR_1_0:Boolean = true;
+        [API(CONFIG::FP_10_0)] public var public_var_FP_10_0:Boolean = true;
+        [API(CONFIG::AIR_1_5)] public var public_var_AIR_1_5:Boolean = true;
+        [API(CONFIG::AIR_1_5_1)] public var public_var_AIR_1_5_1:Boolean = true;
+        [API(CONFIG::FP_10_0_32)] public var public_var_FP_10_0_32:Boolean = true;
+        [API(CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_2:Boolean = true;
+        [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_AIR_1_0_FP_10_0:Boolean = true;
+        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public var public_var_AIR_1_5_2_FP_9_0:Boolean = true;
+        [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
+        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
 
         public const public_const:Boolean = true;
-        [API(660)] public const public_const_660:Boolean = true;
-        [API(661)] public const public_const_661:Boolean = true;
-        [API(662)] public const public_const_662:Boolean = true;
-        [API(663)] public const public_const_663:Boolean = true;
-        [API(664)] public const public_const_664:Boolean = true;
-        [API(665)] public const public_const_665:Boolean = true;
-        //[API(666)] public const public_const_666:Boolean = true;
-        //[API(667)] public const public_const_667:Boolean = true;
-        [API(661,662)] public const public_const_661_662:Boolean = true;
-        [API(666,660)] public const public_const_666_660:Boolean = true;
-        [API(664,662,666)] public const public_const_664_662_666:Boolean = true;
-        [API(665,660,661,662)] public const public_const_665_660_661_662:Boolean = true;
+        [API(CONFIG::FP_9_0)] public const public_const_FP_9_0:Boolean = true;
+        [API(CONFIG::AIR_1_0)] public const public_const_AIR_1_0:Boolean = true;
+        [API(CONFIG::FP_10_0)] public const public_const_FP_10_0:Boolean = true;
+        [API(CONFIG::AIR_1_5)] public const public_const_AIR_1_5:Boolean = true;
+        [API(CONFIG::AIR_1_5_1)] public const public_const_AIR_1_5_1:Boolean = true;
+        [API(CONFIG::FP_10_0_32)] public const public_const_FP_10_0_32:Boolean = true;
+        [API(CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_2:Boolean = true;
+        [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_AIR_1_0_FP_10_0:Boolean = true;
+        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public const public_const_AIR_1_5_2_FP_9_0:Boolean = true;
+        [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
+        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
 
         public function public_function():Boolean { return true; }
-        [API(660)] public function public_function_660():Boolean { return true; }
-        [API(661)] public function public_function_661():Boolean { return true; }
-        [API(662)] public function public_function_662():Boolean { return true; }
-        [API(663)] public function public_function_663():Boolean { return true; }
-        [API(664)] public function public_function_664():Boolean { return true; }
-        [API(665)] public function public_function_665():Boolean { return true; }
-        //[API(666)] public function public_function_666():Boolean { return true; }
-        //[API(667)] public function public_function_667():Boolean { return true; }
-        [API(661,662)] public function public_function_661_662():Boolean { return true; }
-        [API(666,660)] public function public_function_666_660():Boolean { return true; }
-        [API(664,662,666)] public function public_function_664_662_666():Boolean { return true; }
-        [API(665,660,661,662)] public function public_function_665_660_661_662():Boolean { return true; }
+        [API(CONFIG::FP_9_0)] public function public_function_FP_9_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_0)] public function public_function_AIR_1_0():Boolean { return true; }
+        [API(CONFIG::FP_10_0)] public function public_function_FP_10_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_5)] public function public_function_AIR_1_5():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_1)] public function public_function_AIR_1_5_1():Boolean { return true; }
+        [API(CONFIG::FP_10_0_32)] public function public_function_FP_10_0_32():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_2():Boolean { return true; }
+        [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_AIR_1_0_FP_10_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function public_function_AIR_1_5_2_FP_9_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
+        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
 
         public function get public_getset():Boolean { return true; }
-        [API(660)] public function get public_getset_660():Boolean { return true; }
-        [API(661)] public function get public_getset_661():Boolean { return true; }
-        [API(662)] public function get public_getset_662():Boolean { return true; }
-        [API(663)] public function get public_getset_663():Boolean { return true; }
-        [API(664)] public function get public_getset_664():Boolean { return true; }
-        [API(665)] public function get public_getset_665():Boolean { return true; }
-        //[API(666)] public function get public_getset_666():Boolean { return true; }
-        //[API(667)] public function get public_getset_667():Boolean { return true; }
-        [API(661,662)] public function get public_getset_661_662():Boolean { return true; }
-        [API(666,660)] public function get public_getset_666_660():Boolean { return true; }
-        [API(664,662,666)] public function get public_getset_664_662_666():Boolean { return true; }
-        [API(665,660,661,662)] public function get public_getset_665_660_661_662():Boolean { return true; }
+        [API(CONFIG::FP_9_0)] public function get public_getset_FP_9_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_0)] public function get public_getset_AIR_1_0():Boolean { return true; }
+        [API(CONFIG::FP_10_0)] public function get public_getset_FP_10_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_5)] public function get public_getset_AIR_1_5():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_1)] public function get public_getset_AIR_1_5_1():Boolean { return true; }
+        [API(CONFIG::FP_10_0_32)] public function get public_getset_FP_10_0_32():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_2():Boolean { return true; }
+        [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_AIR_1_0_FP_10_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function get public_getset_AIR_1_5_2_FP_9_0():Boolean { return true; }
+        [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
+        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
 
         public function set public_getset(x:*):void {  }
-        [API(660)] public function set public_getset_660(x:*):void {  }
-        [API(661)] public function set public_getset_661(x:*):void {  }
-        [API(662)] public function set public_getset_662(x:*):void {  }
-        [API(663)] public function set public_getset_663(x:*):void {  }
-        [API(664)] public function set public_getset_664(x:*):void {  }
-        [API(665)] public function set public_getset_665(x:*):void {  }
-        //[API(666)] public function set public_getset_666(x:*):void {  }
-        //[API(667)] public function set public_getset_667(x:*):void {  }
-        [API(661,662)] public function set public_getset_661_662(x:*):void {  }
-        [API(666,660)] public function set public_getset_666_660(x:*):void {  }
-        [API(664,662,666)] public function set public_getset_664_662_666(x:*):void {  }
-        [API(665,660,661,662)] public function set public_getset_665_660_661_662(x:*):void {  }
+        [API(CONFIG::FP_9_0)] public function set public_getset_FP_9_0(x:*):void {  }
+        [API(CONFIG::AIR_1_0)] public function set public_getset_AIR_1_0(x:*):void {  }
+        [API(CONFIG::FP_10_0)] public function set public_getset_FP_10_0(x:*):void {  }
+        [API(CONFIG::AIR_1_5)] public function set public_getset_AIR_1_5(x:*):void {  }
+        [API(CONFIG::AIR_1_5_1)] public function set public_getset_AIR_1_5_1(x:*):void {  }
+        [API(CONFIG::FP_10_0_32)] public function set public_getset_FP_10_0_32(x:*):void {  }
+        [API(CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_2(x:*):void {  }
+        [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_AIR_1_0_FP_10_0(x:*):void {  }
+        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function set public_getset_AIR_1_5_2_FP_9_0(x:*):void {  }
+        [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2(x:*):void {  }
+        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0(x:*):void {  }
     }
 
-    [API(660)] public class  public_class_660 {  }
-    [API(661)] public class  public_class_661 {  }
-    [API(662)] public class  public_class_662 {  }
-    [API(663)] public class  public_class_663 {  }
-    [API(664)] public class  public_class_664 {  }
-    [API(665)] public class  public_class_665 {  }
-    [API(661,662)] public class  public_class_661_662 {  }
-    [API(666,660)] public class  public_class_666_660 {  }
-    [API(664,662,666)] public class  public_class_664_662_666 {  }
-    [API(665,660,661,662)] public class  public_class_665_660_661_662 {  }
+    [API(CONFIG::FP_9_0)] public class  public_class_FP_9_0 {  }
+    [API(CONFIG::AIR_1_0)] public class  public_class_AIR_1_0 {  }
+    [API(CONFIG::FP_10_0)] public class  public_class_FP_10_0 {  }
+    [API(CONFIG::AIR_1_5)] public class  public_class_AIR_1_5 {  }
+    [API(CONFIG::AIR_1_5_1)] public class  public_class_AIR_1_5_1 {  }
+    [API(CONFIG::FP_10_0_32)] public class  public_class_FP_10_0_32 {  }
+    [API(CONFIG::AIR_1_5_2)] public class  public_class_AIR_1_5_2 {  }
+    [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public class  public_class_AIR_1_0_FP_10_0 {  }
+    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public class  public_class_AIR_1_5_2_FP_9_0 {  }
+    [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public class  public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2 {  }
+    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public class  public_class_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 {  }
 
     public interface  public_interface {}
-    [API(660)] public interface  public_interface_660 {  }
-    [API(661)] public interface  public_interface_661 {  }
-    [API(662)] public interface  public_interface_662 {  }
-    [API(663)] public interface  public_interface_663 {  }
-    [API(664)] public interface  public_interface_664 {  }
-    [API(665)] public interface  public_interface_665 {  }
-    [API(661,662)] public interface  public_interface_661_662 {  }
-    [API(666,660)] public interface  public_interface_666_660 {  }
-    [API(664,662,666)] public interface  public_interface_664_662_666 {  }
-    [API(665,660,661,662)] public interface  public_interface_665_660_661_662 {  }
+    [API(CONFIG::FP_9_0)] public interface  public_interface_FP_9_0 {  }
+    [API(CONFIG::AIR_1_0)] public interface  public_interface_AIR_1_0 {  }
+    [API(CONFIG::FP_10_0)] public interface  public_interface_FP_10_0 {  }
+    [API(CONFIG::AIR_1_5)] public interface  public_interface_AIR_1_5 {  }
+    [API(CONFIG::AIR_1_5_1)] public interface  public_interface_AIR_1_5_1 {  }
+    [API(CONFIG::FP_10_0_32)] public interface  public_interface_FP_10_0_32 {  }
+    [API(CONFIG::AIR_1_5_2)] public interface  public_interface_AIR_1_5_2 {  }
+    [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public interface  public_interface_AIR_1_0_FP_10_0 {  }
+    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public interface  public_interface_AIR_1_5_2_FP_9_0 {  }
+    [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public interface  public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2 {  }
+    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public interface  public_interface_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 {  }
 
 }

@@ -999,7 +999,13 @@ namespace avmshell
                 }
 #endif /* DEBUGGER */
                 else if (!VMPI_strcmp(arg, "-api") && i+1 < argc) {
-                    settings.api = VMPI_atoi(argv[i+1]);
+                    bool badFlag;
+                    settings.api = ApiUtils::parseApiVersion(argv[i+1], badFlag);
+                    if (badFlag)
+                    {
+                        AvmLog("Unknown api version'%s'\n", argv[i+1]);
+                        usage();
+                    }
                     i++;
                 }
                 else if (VMPI_strcmp(arg, "-swfversion") == 0 && i+1 < argc) {

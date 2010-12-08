@@ -197,17 +197,21 @@ package apivergen
         out += "*/\n\n";
         frag.documentation = out;
         out = "";
-        frag.maximalNonSys = String(maximalNonSys) + ";\n";
-        frag.config_names = config_names;
+        frag.maximalNonSys = maximalNonSys;
+        // sort them by value, as we rely on emitting them in that order
+        frag.config_names = config_names.sortOn("value");
 
-        frag.min_version_num = min_version + ";\n";
-        frag.max_version_num = max_version + ";\n";
+        frag.min_version_num = min_version
+        frag.max_version_num = max_version
 
-        out = "{";
-        for (var v = min_version; v <= max_version; ++v) {
-            var api = 0;
-            gen(d1,find(v,d1,3),3, function (x) { if(x>=0) api |= 0x1 << x-min_version });
-            out += "0x" + api.toString(16) + ", ";
+       out = "{\n";
+       for (var v = min_version; v <= max_version; ++v) {
+           var apinum:int = 0;
+           gen(d1, find(v,d1,3), 3, function(x) { if (x>=0) apinum |= 0x1 << (x-min_version) });
+           out += "    0x" + apinum.toString(16);
+           if (v < max_version)
+               out += ", ";
+           out += "\n";
         }
         out += "};\n";
         frag.api_compat_initializer = out;
@@ -219,12 +223,62 @@ package apivergen
       emit c code
     */
 
-    function emitc(frag) {
+    function emith(frag) 
+    {
         var out = frag.documentation;
-        out += "static const uint32_t _min_version_num = " + frag.min_version_num;
-        out += "static const uint32_t _max_version_num = " + frag.max_version_num;
-        out += "static const int32_t _api_compat [] = " + frag.api_compat_initializer;
-        out += "static const uint32_t _max_nonsys_version_num = " + frag.maximalNonSys;
+        out += "#ifndef api_versions_H_\n";
+        out += "#define api_versions_H_\n";
+        out += "\n";
+        out += "namespace avmplus {\n";
+        out += "\n";
+        out += "enum ApiVersion {\n";
+        var c = frag.config_names;
+        for ( var i=0 ; i < c.length ; i++ )
+        {
+            out += "    kApiVersion_" + c[i].name + " = " + c[i].value + ",\n";
+        }
+        out += "\n";
+        out += "    kApiVersion_min = " + frag.min_version_num + ",\n";
+        out += "    kApiVersion_max = " + frag.max_version_num + ",\n";
+        out += "\n";
+        out += "    kApiVersion_default = " + frag.maximalNonSys + "\n";
+        out += "};\n";
+        out += "\n";
+        // kApiVersion_count isn't a valid ApiVersion, it goes in a different enum
+        out += "enum {\n";
+        out += "    kApiVersion_count = " + (frag.max_version_num - frag.min_version_num + 1) + "\n";
+        out += "};\n";
+        out += "\n";
+        out += "extern int32_t const kApiCompat[kApiVersion_count];\n";
+        out += "extern const char* const kApiVersionNames[kApiVersion_count];\n";
+        out += "\n";
+        out += "}";
+        out += "\n";
+        out += "#endif // api_versions_H_\n";
+        return out;
+    }
+
+    function emitcpp(frag) 
+    {
+        var out = frag.documentation;
+        out += "namespace avmplus {\n";
+        out += "\n";
+        out += "int32_t const kApiCompat[kApiVersion_count] = " + frag.api_compat_initializer;
+        out += "const char* const kApiVersionNames[kApiVersion_count] = {\n";
+        // this relies on config_names being sorted in ascending order,
+        // and having no holes.
+        var c = frag.config_names;
+        for ( var i=0 ; i < c.length ; i++ )
+        {
+            out += '    "' + c[i].name + '"';
+            if (i < c.length - 1)
+               out += ", ";
+            out += "\n";
+        }
+        out += "};\n";
+        out += "\n";
+        out += "}";
+
         return out;
     }
 
@@ -247,6 +301,7 @@ package apivergen
     var argv = System.argv;
     var fname = argv[argv.length-1];
     var frags = process(fname);
-    File.write("api-versions.h", emitc(frags));
+    File.write("api-versions.h", emith(frags));
+    File.write("api-versions.cpp", emitcpp(frags));
     File.write("api-versions.as", emitas(frags));
 }

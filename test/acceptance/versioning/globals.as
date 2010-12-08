@@ -49,108 +49,97 @@ var re:String;
 var re1065:String = 'ReferenceError: Error #1065';
 var re1056:String = 'ReferenceError: Error #1056';
 
-// get api version passed in using abc args
-var argv = System.argv;
-var apiVersion:int = int(argv[argv.length-1]);
+var apiVersion:int = System.apiVersion;
 
 // expected answers
 var apiExpectedAns:Array = [];
-re = re1065;         //   0   660   661   662   663   664   665   665   666   
-apiExpectedAns[0]   = [true, true,   re,   re,   re,   re,   re,   re,   re,   re, true,   re, true];
-apiExpectedAns[660] = [true, true,   re,   re,   re,   re,   re,   re,   re,   re, true,   re, true];
-apiExpectedAns[661] = [true, true, true,   re,   re,   re,   re,   re,   re, true, true,   re, true];
-apiExpectedAns[662] = [true, true,   re, true,   re,   re,   re,   re,   re, true, true, true, true];
-apiExpectedAns[663] = [true, true, true, true, true,   re,   re,   re,   re, true, true, true, true];
-apiExpectedAns[664] = [true, true, true, true, true, true,   re,   re,   re, true, true, true, true];
-apiExpectedAns[665] = [true, true,   re, true,   re,   re, true,   re,   re, true, true, true, true];
-apiExpectedAns[666] = [true, true, true, true, true, true, true, true,   re, true, true, true, true];
-apiExpectedAns[667] = [true, true, true, true, true, true, true, true, true, true, true, true, true];
+re = re1065;                          
+apiExpectedAns[API_FP_9_0]          = [true, true,   re,   re,   re,   re,   re,   re,   re,   re, true,   re, true];
+apiExpectedAns[API_AIR_1_0]         = [true, true, true,   re,   re,   re,   re,   re,   re, true, true,   re, true];
+apiExpectedAns[API_FP_10_0]         = [true, true,   re, true,   re,   re,   re,   re,   re, true, true, true, true];
+apiExpectedAns[API_AIR_1_5]         = [true, true, true, true, true,   re,   re,   re,   re, true, true, true, true];
+apiExpectedAns[API_AIR_1_5_1]       = [true, true, true, true, true, true,   re,   re,   re, true, true, true, true];
+apiExpectedAns[API_FP_10_0_32]      = [true, true,   re, true,   re,   re, true,   re,   re, true, true, true, true];
+apiExpectedAns[API_AIR_1_5_2]       = [true, true, true, true, true, true, true, true,   re, true, true, true, true];
 
 // expected answer for set
 var apiExpectedSetAns:Array =[];
 re = re1056; // missing set generates a 1056 ref error
-apiExpectedSetAns[0]   = [true, true,   re,   re,   re,   re,   re,   re,   re,   re, true,   re, true];
-apiExpectedSetAns[660] = [true, true,   re,   re,   re,   re,   re,   re,   re,   re, true,   re, true];
-apiExpectedSetAns[661] = [true, true, true,   re,   re,   re,   re,   re,   re, true, true,   re, true];
-apiExpectedSetAns[662] = [true, true,   re, true,   re,   re,   re,   re,   re, true, true, true, true];
-apiExpectedSetAns[663] = [true, true, true, true, true,   re,   re,   re,   re, true, true, true, true];
-apiExpectedSetAns[664] = [true, true, true, true, true, true,   re,   re,   re, true, true, true, true];
-apiExpectedSetAns[665] = [true, true,   re, true,   re,   re, true,   re,   re, true, true, true, true];
-apiExpectedSetAns[666] = [true, true, true, true, true, true, true, true,   re, true, true, true, true];
-apiExpectedSetAns[667] = [true, true, true, true, true, true, true, true, true, true, true, true, true];
+apiExpectedSetAns[API_FP_9_0]       = [true, true,   re,   re,   re,   re,   re,   re,   re,   re, true,   re, true];
+apiExpectedSetAns[API_AIR_1_0]      = [true, true, true,   re,   re,   re,   re,   re,   re, true, true,   re, true];
+apiExpectedSetAns[API_FP_10_0]      = [true, true,   re, true,   re,   re,   re,   re,   re, true, true, true, true];
+apiExpectedSetAns[API_AIR_1_5]      = [true, true, true, true, true,   re,   re,   re,   re, true, true, true, true];
+apiExpectedSetAns[API_AIR_1_5_1]    = [true, true, true, true, true, true,   re,   re,   re, true, true, true, true];
+apiExpectedSetAns[API_FP_10_0_32]   = [true, true,   re, true,   re,   re, true,   re,   re, true, true, true, true];
+apiExpectedSetAns[API_AIR_1_5_2]    = [true, true, true, true, true, true, true, true,   re, true, true, true, true];
 
 // set expected answers to specified api version 
 var ea:Array = apiExpectedAns[apiVersion]
 var ea_set:Array = apiExpectedSetAns[apiVersion]
 
 versionTest(function() { return public_var }, 'public_var', ea[0]);
-versionTest(function() { return public_var_660 }, 'public_var_660', ea[1]);
-versionTest(function() { return public_var_661 }, 'public_var_661', ea[2]);
-versionTest(function() { return public_var_662 }, 'public_var_662', ea[3]);
-versionTest(function() { return public_var_663 }, 'public_var_663', ea[4]);
-versionTest(function() { return public_var_664 }, 'public_var_664', ea[5]);
-versionTest(function() { return public_var_665 }, 'public_var_665', ea[6]);
-versionTest(function() { return public_var_666 }, 'public_var_666', ea[7]);
-versionTest(function() { return public_var_667 }, 'public_var_667', ea[8]);
-versionTest(function() { return public_var_661_662 }, 'public_var_661_662', ea[9]);
-versionTest(function() { return public_var_666_660 }, 'public_var_666_660', ea[10]);
-versionTest(function() { return public_var_664_662_666 }, 'public_var_664_662_666', ea[11]);
-versionTest(function() { return public_var_665_660_661_662 }, 'public_var_665_660_661_662', ea[12]);
+versionTest(function() { return public_var_FP_9_0 }, 'public_var_FP_9_0', ea[1]);
+versionTest(function() { return public_var_AIR_1_0 }, 'public_var_AIR_1_0', ea[2]);
+versionTest(function() { return public_var_FP_10_0 }, 'public_var_FP_10_0', ea[3]);
+versionTest(function() { return public_var_AIR_1_5 }, 'public_var_AIR_1_5', ea[4]);
+versionTest(function() { return public_var_AIR_1_5_1 }, 'public_var_AIR_1_5_1', ea[5]);
+versionTest(function() { return public_var_FP_10_0_32 }, 'public_var_FP_10_0_32', ea[6]);
+versionTest(function() { return public_var_AIR_1_5_2 }, 'public_var_AIR_1_5_2', ea[7]);
+versionTest(function() { return public_var_AIR_1_0_FP_10_0 }, 'public_var_AIR_1_0_FP_10_0', ea[9]);
+versionTest(function() { return public_var_AIR_1_5_2_FP_9_0 }, 'public_var_AIR_1_5_2_FP_9_0', ea[10]);
+versionTest(function() { return public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2 }, 'public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2', ea[11]);
+versionTest(function() { return public_var_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 }, 'public_var_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0', ea[12]);
 
 versionTest(function() { return public_const }, 'public_const', ea[0]);
-versionTest(function() { return public_const_660 }, 'public_const_660', ea[1]);
-versionTest(function() { return public_const_661 }, 'public_const_661', ea[2]);
-versionTest(function() { return public_const_662 }, 'public_const_662', ea[3]);
-versionTest(function() { return public_const_663 }, 'public_const_663', ea[4]);
-versionTest(function() { return public_const_664 }, 'public_const_664', ea[5]);
-versionTest(function() { return public_const_665 }, 'public_const_665', ea[6]);
-versionTest(function() { return public_const_666 }, 'public_const_666', ea[7]);
-versionTest(function() { return public_const_667 }, 'public_const_667', ea[8]);
-versionTest(function() { return public_const_661_662 }, 'public_const_661_662', ea[9]);
-versionTest(function() { return public_const_666_660 }, 'public_const_666_660', ea[10]);
-versionTest(function() { return public_const_664_662_666 }, 'public_const_664_662_666', ea[11]);
-versionTest(function() { return public_const_665_660_661_662 }, 'public_const_665_660_661_662', ea[12]);
+versionTest(function() { return public_const_FP_9_0 }, 'public_const_FP_9_0', ea[1]);
+versionTest(function() { return public_const_AIR_1_0 }, 'public_const_AIR_1_0', ea[2]);
+versionTest(function() { return public_const_FP_10_0 }, 'public_const_FP_10_0', ea[3]);
+versionTest(function() { return public_const_AIR_1_5 }, 'public_const_AIR_1_5', ea[4]);
+versionTest(function() { return public_const_AIR_1_5_1 }, 'public_const_AIR_1_5_1', ea[5]);
+versionTest(function() { return public_const_FP_10_0_32 }, 'public_const_FP_10_0_32', ea[6]);
+versionTest(function() { return public_const_AIR_1_5_2 }, 'public_const_AIR_1_5_2', ea[7]);
+versionTest(function() { return public_const_AIR_1_0_FP_10_0 }, 'public_const_AIR_1_0_FP_10_0', ea[9]);
+versionTest(function() { return public_const_AIR_1_5_2_FP_9_0 }, 'public_const_AIR_1_5_2_FP_9_0', ea[10]);
+versionTest(function() { return public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2 }, 'public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2', ea[11]);
+versionTest(function() { return public_const_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 }, 'public_const_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0', ea[12]);
 
 versionTest(function() { return public_function()}, 'public_function', ea[0]);
-versionTest(function() { return public_function_660()}, 'public_function_660', ea[1]);
-versionTest(function() { return public_function_661()}, 'public_function_661', ea[2]);
-versionTest(function() { return public_function_662()}, 'public_function_662', ea[3]);
-versionTest(function() { return public_function_663()}, 'public_function_663', ea[4]);
-versionTest(function() { return public_function_664()}, 'public_function_664', ea[5]);
-versionTest(function() { return public_function_665()}, 'public_function_665', ea[6]);
-versionTest(function() { return public_function_666()}, 'public_function_666', ea[7]);
-versionTest(function() { return public_function_667()}, 'public_function_667', ea[8]);
-versionTest(function() { return public_function_661_662()}, 'public_function_661_662', ea[9]);
-versionTest(function() { return public_function_666_660()}, 'public_function_666_660', ea[10]);
-versionTest(function() { return public_function_664_662_666()}, 'public_function_664_662_666', ea[11]);
-versionTest(function() { return public_function_665_660_661_662()}, 'public_function_665_660_661_662', ea[12]);
+versionTest(function() { return public_function_FP_9_0()}, 'public_function_FP_9_0', ea[1]);
+versionTest(function() { return public_function_AIR_1_0()}, 'public_function_AIR_1_0', ea[2]);
+versionTest(function() { return public_function_FP_10_0()}, 'public_function_FP_10_0', ea[3]);
+versionTest(function() { return public_function_AIR_1_5()}, 'public_function_AIR_1_5', ea[4]);
+versionTest(function() { return public_function_AIR_1_5_1()}, 'public_function_AIR_1_5_1', ea[5]);
+versionTest(function() { return public_function_FP_10_0_32()}, 'public_function_FP_10_0_32', ea[6]);
+versionTest(function() { return public_function_AIR_1_5_2()}, 'public_function_AIR_1_5_2', ea[7]);
+versionTest(function() { return public_function_AIR_1_0_FP_10_0()}, 'public_function_AIR_1_0_FP_10_0', ea[9]);
+versionTest(function() { return public_function_AIR_1_5_2_FP_9_0()}, 'public_function_AIR_1_5_2_FP_9_0', ea[10]);
+versionTest(function() { return public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2()}, 'public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2', ea[11]);
+versionTest(function() { return public_function_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0()}, 'public_function_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0', ea[12]);
 
 versionTest(function() { return public_getset }, 'public_getset', ea[0]);
-versionTest(function() { return public_getset_660 }, 'public_getset_660', ea[1]);
-versionTest(function() { return public_getset_661 }, 'public_getset_661', ea[2]);
-versionTest(function() { return public_getset_662 }, 'public_getset_662', ea[3]);
-versionTest(function() { return public_getset_663 }, 'public_getset_663', ea[4]);
-versionTest(function() { return public_getset_664 }, 'public_getset_664', ea[5]);
-versionTest(function() { return public_getset_665 }, 'public_getset_665', ea[6]);
-versionTest(function() { return public_getset_666 }, 'public_getset_666', ea[7]);
-versionTest(function() { return public_getset_667 }, 'public_getset_667', ea[8]);
-versionTest(function() { return public_getset_661_662 }, 'public_getset_661_662', ea[9]);
-versionTest(function() { return public_getset_666_660 }, 'public_getset_666_660', ea[10]);
-versionTest(function() { return public_getset_664_662_666 }, 'public_getset_664_662_666', ea[11]);
-versionTest(function() { return public_getset_665_660_661_662 }, 'public_getset_665_660_661_662', ea[12]);
+versionTest(function() { return public_getset_FP_9_0 }, 'public_getset_FP_9_0', ea[1]);
+versionTest(function() { return public_getset_AIR_1_0 }, 'public_getset_AIR_1_0', ea[2]);
+versionTest(function() { return public_getset_FP_10_0 }, 'public_getset_FP_10_0', ea[3]);
+versionTest(function() { return public_getset_AIR_1_5 }, 'public_getset_AIR_1_5', ea[4]);
+versionTest(function() { return public_getset_AIR_1_5_1 }, 'public_getset_AIR_1_5_1', ea[5]);
+versionTest(function() { return public_getset_FP_10_0_32 }, 'public_getset_FP_10_0_32', ea[6]);
+versionTest(function() { return public_getset_AIR_1_5_2 }, 'public_getset_AIR_1_5_2', ea[7]);
+versionTest(function() { return public_getset_AIR_1_0_FP_10_0 }, 'public_getset_AIR_1_0_FP_10_0', ea[9]);
+versionTest(function() { return public_getset_AIR_1_5_2_FP_9_0 }, 'public_getset_AIR_1_5_2_FP_9_0', ea[10]);
+versionTest(function() { return public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2 }, 'public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2', ea[11]);
+versionTest(function() { return public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 }, 'public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0', ea[12]);
 
 versionTest(function() { avmshell.public_getset = true; return true; }, 'public_getset', ea_set[0]);
-versionTest(function() { avmshell.public_getset_660 = true; return true; }, 'public_getset_660', ea_set[1]);
-versionTest(function() { avmshell.public_getset_661 = true; return true; }, 'public_getset_661', ea_set[2]);
-versionTest(function() { avmshell.public_getset_662 = true; return true; }, 'public_getset_662', ea_set[3]);
-versionTest(function() { avmshell.public_getset_663 = true; return true; }, 'public_getset_663', ea_set[4]);
-versionTest(function() { avmshell.public_getset_664 = true; return true; }, 'public_getset_664', ea_set[5]);
-versionTest(function() { avmshell.public_getset_665 = true; return true; }, 'public_getset_665', ea_set[6]);
-versionTest(function() { avmshell.public_getset_666 = true; return true; }, 'public_getset_666', ea_set[7]);
-versionTest(function() { avmshell.public_getset_667 = true; return true; }, 'public_getset_667', ea_set[8]);
-versionTest(function() { avmshell.public_getset_661_662 = true; return true; }, 'public_getset_661_662', ea_set[9]);
-versionTest(function() { avmshell.public_getset_666_660 = true; return true; }, 'public_getset_666_660', ea_set[10]);
-versionTest(function() { avmshell.public_getset_664_662_666 = true; return true; }, 'public_getset_664_662_666', ea_set[11]);
-versionTest(function() { avmshell.public_getset_665_660_661_662 = true; return true; }, 'public_getset_665_660_661_662', ea_set[12]);
+versionTest(function() { avmshell.public_getset_FP_9_0 = true; return true; }, 'public_getset_FP_9_0', ea_set[1]);
+versionTest(function() { avmshell.public_getset_AIR_1_0 = true; return true; }, 'public_getset_AIR_1_0', ea_set[2]);
+versionTest(function() { avmshell.public_getset_FP_10_0 = true; return true; }, 'public_getset_FP_10_0', ea_set[3]);
+versionTest(function() { avmshell.public_getset_AIR_1_5 = true; return true; }, 'public_getset_AIR_1_5', ea_set[4]);
+versionTest(function() { avmshell.public_getset_AIR_1_5_1 = true; return true; }, 'public_getset_AIR_1_5_1', ea_set[5]);
+versionTest(function() { avmshell.public_getset_FP_10_0_32 = true; return true; }, 'public_getset_FP_10_0_32', ea_set[6]);
+versionTest(function() { avmshell.public_getset_AIR_1_5_2 = true; return true; }, 'public_getset_AIR_1_5_2', ea_set[7]);
+versionTest(function() { avmshell.public_getset_AIR_1_0_FP_10_0 = true; return true; }, 'public_getset_AIR_1_0_FP_10_0', ea_set[9]);
+versionTest(function() { avmshell.public_getset_AIR_1_5_2_FP_9_0 = true; return true; }, 'public_getset_AIR_1_5_2_FP_9_0', ea_set[10]);
+versionTest(function() { avmshell.public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2 = true; return true; }, 'public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2', ea_set[11]);
+versionTest(function() { avmshell.public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 = true; return true; }, 'public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0', ea_set[12]);
 
 test();

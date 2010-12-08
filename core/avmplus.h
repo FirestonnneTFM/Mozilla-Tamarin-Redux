@@ -273,6 +273,7 @@ namespace avmplus
 #include "../nanojit/njconfig.h"
 #include "Coder.h"
 #include "exec.h"
+#include "api-versions.h"
 #include "AvmCore.h"
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"

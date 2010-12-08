@@ -1007,18 +1007,6 @@ const int kBufferPadding = 16;
          */
 
         /**
-         * Set the AVM wide version information on startup.
-         *
-         * @param apis_start First first API version number
-         * @param apis_sizes Array of sizes of arrays of compatible APIs
-         * @param apis_count Count of API versions
-         * @param apis       Array of arrays of compatible APIs
-         */
-        void setAPIInfo(uint32_t apis_start,
-                        uint32_t apis_count,
-                        const int32_t* api_compat);
-        
-        /**
          * Add to the list of URIs that must be versioned for namespaces.
          *
          * @param uris       NULL-terminated list of URIs that will need versioning
@@ -1729,9 +1717,6 @@ const int kBufferPadding = 16;
         DRC(Namespacep) * namespaces;
 
         // API versioning state
-        uint32_t          apis_start;  // first api number
-        uint32_t          apis_count;  // count of apis
-        const int32_t*    api_compat;  // array of compatible api bit masks
         int32_t           largest_api;
         int32_t           active_api_flags;
         HeapHashtable*    m_versionedURIs;
@@ -1866,7 +1851,7 @@ const int kBufferPadding = 16;
         /**
          * Map an api bitmask to its cooresponding version number
          */
-        static uint32_t toVersion(AvmCore* core, API api);
+        static ApiVersion toVersion(AvmCore* core, API api);
 
         /**
          * Strip the given uri of its version marker, if it has one
@@ -1908,7 +1893,13 @@ const int kBufferPadding = 16;
         /**
          * Convert a version number to an api bitmask
          */
-        static API toAPI(AvmCore* core, uint32_t v);
+        static API toAPI(AvmCore* core, ApiVersion v);
+
+        /**
+         * Convert a version name to a version enum
+         */
+        static ApiVersion parseApiVersion(const char* p, bool& badFlag);
+
     };
 }
 

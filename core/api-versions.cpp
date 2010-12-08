@@ -56,41 +56,43 @@
 [7,air,system]=675:AIR_SYS
 */
 
-#ifndef api_versions_H_
-#define api_versions_H_
-
 namespace avmplus {
 
-enum ApiVersion {
-    kApiVersion_FP_9_0 = 660,
-    kApiVersion_AIR_1_0 = 661,
-    kApiVersion_FP_10_0 = 662,
-    kApiVersion_AIR_1_5 = 663,
-    kApiVersion_AIR_1_5_1 = 664,
-    kApiVersion_FP_10_0_32 = 665,
-    kApiVersion_AIR_1_5_2 = 666,
-    kApiVersion_FP_10_1 = 667,
-    kApiVersion_AIR_2_0 = 668,
-    kApiVersion_AIR_2_5 = 669,
-    kApiVersion_FP_10_2 = 670,
-    kApiVersion_AIR_2_6 = 671,
-    kApiVersion_SWF_12 = 672,
-    kApiVersion_AIR_2_7 = 673,
-    kApiVersion_FP_SYS = 674,
-    kApiVersion_AIR_SYS = 675,
-
-    kApiVersion_min = 660,
-    kApiVersion_max = 675,
-
-    kApiVersion_default = 673
+int32_t const kApiCompat[kApiVersion_count] = {
+    0xffff, 
+    0xab5a, 
+    0xfffc, 
+    0xab58, 
+    0xab50, 
+    0xffe0, 
+    0xab40, 
+    0xff80, 
+    0xab00, 
+    0xaa00, 
+    0xfc00, 
+    0xa800, 
+    0xf000, 
+    0xa000, 
+    0xc000, 
+    0x8000
 };
-
-enum {
-    kApiVersion_count = 16
+const char* const kApiVersionNames[kApiVersion_count] = {
+    "FP_9_0", 
+    "AIR_1_0", 
+    "FP_10_0", 
+    "AIR_1_5", 
+    "AIR_1_5_1", 
+    "FP_10_0_32", 
+    "AIR_1_5_2", 
+    "FP_10_1", 
+    "AIR_2_0", 
+    "AIR_2_5", 
+    "FP_10_2", 
+    "AIR_2_6", 
+    "SWF_12", 
+    "AIR_2_7", 
+    "FP_SYS", 
+    "AIR_SYS"
 };
-
-extern int32_t const kApiCompat[kApiVersion_count];
-extern const char* const kApiVersionNames[kApiVersion_count];
 
 }
-#endif // api_versions_H_
