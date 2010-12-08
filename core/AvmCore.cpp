@@ -4197,7 +4197,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #if defined(AVMPLUS_IA32)
         // x86 int32_t(double) returns 0x80000000 if d is not in a valid integer range
         int intval = int32_t(d);
-        if (intval != 0x80000000)
+        if (intval != (int)0x80000000)
             return intval;
 #elif defined(AVMPLUS_SPARC) || defined(AVMPLUS_ARM)
         // an int cast which should give:
