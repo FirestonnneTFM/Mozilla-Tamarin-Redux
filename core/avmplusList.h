@@ -458,9 +458,9 @@ namespace avmplus
         // This is a little hackery that is necessary due to the fact that GCFinalizedObject
         // doesn't extend GCObject, but can be treated equivalently in this context.
         REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCObject* o) { return o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return static_cast<MMgc::GCObject*>(o); }
+        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return reinterpret_cast<MMgc::GCObject*>(o); }
         REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCObject* o) { return const_cast<MMgc::GCObject*>(o); }
-        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return static_cast<MMgc::GCObject*>(o); }
+        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return reinterpret_cast<MMgc::GCObject*>(o); }
 
         REALLY_INLINE static TYPE from_gc(MMgc::GCObject* o) { return static_cast<TYPE>(T::from_GCObjectPointer(o)); }
 
@@ -627,9 +627,9 @@ namespace avmplus
         // This is a little hackery that is necessary due to the fact that GCFinalizedObject
         // doesn't extend GCObject, but can be treated equivalently in this context.
         REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCObject* o) { return o; }
-        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return static_cast<MMgc::GCObject*>(o); }
+        REALLY_INLINE static MMgc::GCObject* to_gc(MMgc::GCFinalizedObject* o) { return reinterpret_cast<MMgc::GCObject*>(o); }
         REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCObject* o) { return const_cast<MMgc::GCObject*>(o); }
-        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return static_cast<MMgc::GCObject*>(o); }
+        REALLY_INLINE static MMgc::GCObject* to_gc(const MMgc::GCFinalizedObject* o) { return reinterpret_cast<MMgc::GCObject*>(o); }
 
         // Must jump through some hoops to ensure that if TYPE is a GCFinalizedObject, we use reinterpret_cast,
         // and if not, we use static_cast
