@@ -48,6 +48,7 @@
  * which is quite picky.  Disable warnings we don't care about.
  */
 #ifdef _MSC_VER
+    #pragma warning(disable:4946) // reinterpret_cast used between related classes (bugzilla 615964)
     #pragma warning(disable:4127) // conditional expression is constant - appears to be compiler noise primarily
     #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
     #pragma warning(disable:4251) // X needs to have dll-interface to be used by clients of class Y
