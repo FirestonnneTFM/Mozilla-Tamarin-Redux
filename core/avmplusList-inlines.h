@@ -586,13 +586,13 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void GCList<T>::set(uint32_t index, TYPE value)
     {
-        m_list.set(index, reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.set(index, to_gc(value));
     }
 
     template<class T>
     REALLY_INLINE void GCList<T>::add(TYPE value)
     {
-        m_list.add(reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.add(to_gc(value));
     }
 
     template<class T>
@@ -604,7 +604,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void GCList<T>::insert(uint32_t index, TYPE value)
     {
-        m_list.insert(index, reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.insert(index, to_gc(value));
     }
 
     template<class T>
@@ -640,13 +640,13 @@ namespace avmplus
     template<class T>
     REALLY_INLINE int32_t GCList<T>::indexOf(TYPE value) const
     {
-        return m_list.indexOf(reinterpret_cast<MMgc::GCObject*>(value));
+        return m_list.indexOf(to_gc(value));
     }
 
     template<class T>
     REALLY_INLINE int32_t GCList<T>::lastIndexOf(TYPE value) const
     {
-        return m_list.lastIndexOf(reinterpret_cast<MMgc::GCObject*>(value));
+        return m_list.lastIndexOf(to_gc(value));
     }
 
     template<class T>
@@ -1056,13 +1056,13 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void WeakRefList<T>::set(uint32_t index, TYPE value)
     {
-        m_list.set(index, reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.set(index, to_gc(value));
     }
 
     template<class T>
     REALLY_INLINE void WeakRefList<T>::add(TYPE value)
     {
-        m_list.add(reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.add(to_gc(value));
     }
 
     template<class T>
@@ -1074,7 +1074,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void WeakRefList<T>::insert(uint32_t index, TYPE value)
     {
-        m_list.insert(index, reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.insert(index, to_gc(value));
     }
 
     template<class T>
@@ -1110,13 +1110,13 @@ namespace avmplus
     template<class T>
     REALLY_INLINE int32_t WeakRefList<T>::indexOf(TYPE value) const
     {
-        return m_list.indexOf(reinterpret_cast<MMgc::GCObject*>(value));
+        return m_list.indexOf(to_gc(value));
     }
 
     template<class T>
     REALLY_INLINE int32_t WeakRefList<T>::lastIndexOf(TYPE value) const
     {
-        return m_list.lastIndexOf(reinterpret_cast<MMgc::GCObject*>(value));
+        return m_list.lastIndexOf(to_gc(value));
     }
 
     template<class T>
