@@ -63,11 +63,6 @@ namespace MMgc
     {
     public:
 
-        REALLY_INLINE static GCObject* from_GCObjectPointer(GCObject* o)
-        {
-            return o;
-        }
-
         // Methods used by GCMember<T>
         REALLY_INLINE static void WriteBarrier(void **address, void *value)
         {
@@ -232,12 +227,6 @@ namespace MMgc
     class GCFinalizedObject : public GCTraceableBase
     {
     public:
-        REALLY_INLINE static GCFinalizedObject* from_GCObjectPointer(GCObject* o)
-        {
-            // we must use reinterpret_cast; a C-style cast will cause MSVC to generate bad code
-            return reinterpret_cast<GCFinalizedObject*>(o);
-        }
-
         // This class can only have an empty destructor.
                 
         // Methods used by GCMember<T>
