@@ -43,6 +43,14 @@
 #endif
 #include <float.h>
 
+#include "avmplus-gc-interlock.h"
+#include "extensions-gc-interlock.h"
+#include "avmshell-gc-interlock.h"
+#include "extensions-as3-gc.h"
+#include "extensions-cpp-gc.h"
+#include "avmshell-as3-gc.h"
+#include "avmshell-cpp-gc.h"
+
 namespace avmshell
 {
 #ifdef AVMPLUS_WIN32
