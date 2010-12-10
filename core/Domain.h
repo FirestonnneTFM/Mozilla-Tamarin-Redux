@@ -42,8 +42,10 @@
 
 namespace avmplus
 {
-    class Domain : public MMgc::GCObject
+    class GC_CPP_EXACT(Domain, MMgc::GCTraceableObject)
     {
+        friend class DomainMgr;
+
     private:
         Domain(AvmCore* core, Domain* base, uint32_t baseCount);
 
@@ -57,17 +59,20 @@ namespace avmplus
         ClassClosure* getParameterizedType(ClassClosure* type);
         void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
 
+    GC_DATA_BEGIN(Domain)
+
     private:
-        friend class DomainMgr;
-        DWB(MultinameTraitsHashtable*)  m_namedTraits;
-        DWB(MultinameBindingHashtable*) m_namedScriptsMap;
-        GCList<MethodInfo>              m_namedScriptsList;        // list of MethodInfo* for the scripts
-        DWB(HeapHashtable*)             m_parameterizedTypes;
+        DWB(MultinameTraitsHashtable*)  GC_POINTER(m_namedTraits);
+        DWB(MultinameBindingHashtable*) GC_POINTER(m_namedScriptsMap);
+        GCList<MethodInfo>              GC_STRUCTURE(m_namedScriptsList);        // list of MethodInfo* for the scripts
+        DWB(HeapHashtable*)             GC_POINTER(m_parameterizedTypes);
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.
         uint32_t const                  m_baseCount; // number of entries in m_bases
-        Domain*                         m_bases[1];  // lying: really [m_baseCount]
+        Domain*                         GC_POINTERS_SMALL(m_bases, 1, m_baseCount);
+
+    GC_DATA_END(Domain)
     };
 
 }

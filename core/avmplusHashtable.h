@@ -152,6 +152,10 @@ namespace avmplus
         Atom keyAt(int index);
         Atom valueAt(int index);
 
+        // Must be called by the embedder of the InlineHashtable as InlineHashtable does not
+        // have a vtable and cannot implement exact tracing through the normal mechanism.
+        void gcTrace(MMgc::GC* gc);
+
     protected:
 
         /* See CPP for load factor variants. */
@@ -290,12 +294,15 @@ namespace avmplus
     // ------------------------ DATA SECTION END
     };
 
-    class HeapHashtable : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT(HeapHashtable, MMgc::GCFinalizedObject)
     {
+        GC_DATA_BEGIN(HeapHashtable)
+        
     protected:
-        InlineHashtable ht;
+        InlineHashtable GC_STRUCTURE(ht);
+        
+        GC_DATA_END(HeapHashtable)
 
-    public:
         /**
          * initialize with a known capacity.  i.e. we can fit minSize
          * elements in without rehashing.
@@ -303,7 +310,11 @@ namespace avmplus
          * @param capacity  # of logical slots
          */
         HeapHashtable(MMgc::GC* gc, int32_t capacity = InlineHashtable::kDefaultCapacity);
+
+    public:
+        static HeapHashtable* create(MMgc::GC* gc, int32_t capacity = InlineHashtable::kDefaultCapacity);
         virtual ~HeapHashtable();
+
         InlineHashtable* get_ht();
 
         void reset();

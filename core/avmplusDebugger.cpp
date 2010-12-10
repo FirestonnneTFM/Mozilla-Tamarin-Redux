@@ -366,7 +366,7 @@ namespace avmplus
 #endif
 
         // first off we build an AbcInfo object
-        AbcFile* abc = new (core->GetGC()) AbcFile(core, (int)code.getSize());
+        AbcFile* abc = AbcFile::create(core->GetGC(), core, (int)code.getSize());
 
         // now let's scan the abc resources pulling out what we need
         scanResources(abc, pool);
@@ -511,7 +511,7 @@ namespace avmplus
                     active = file->sourceNamed(name);
                     if (active == NULL)
                     {
-                        active = new (core->GetGC()) SourceFile(core->GetGC(), name);
+                        active = SourceFile::create(core->GetGC(), name);
                         file->sourceAdd(active);
                     }
                     break;
@@ -754,7 +754,7 @@ namespace avmplus
           source(core->GetGC(), kListInitialCapacity),
           byteCount(size)
     {
-        sourcemap = new (core->GetGC()) HeapHashtable(core->GetGC());
+        sourcemap = HeapHashtable::create(core->GetGC());
     }
 
     int AbcFile::sourceCount() const

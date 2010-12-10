@@ -91,12 +91,32 @@ namespace avmplus
         REALLY_INLINE API apis() const { return (API)(apisAndMultiNS >> 1); }
     };
 
+    template <class VALUE_TYPE>
+    class QuadContainer : public MMgc::GCTraceableObject
+    {
+    private:
+        QuadContainer(uint32_t capacity) : capacity(capacity) {}
+
+    public:
+        static QuadContainer<VALUE_TYPE>* create(MMgc::GC* gc, uint32_t capacity);
+
+        virtual void gcTrace(MMgc::GC* gc);
+        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+
+        const uint32_t capacity;
+#ifdef AVMPLUS_64BIT
+        uint32_t padding;
+#endif
+        // Now it should at least be word-aligned.  FIXME - do we want better than that?
+        Quad<VALUE_TYPE> quads[1];  // Actual size is capacity
+    };
+    
     /**
      * Hashtable for mapping <name, ns> pairs to a value, which can be
      * a Binding or a Traits.
      */
     template <class VALUE_TYPE, class VALUE_WRITER>
-    class MultinameHashtable : public MMgc::GCObject
+    class MultinameHashtable : public MMgc::GCTraceableObject
     {
         friend class StMNHTIterator;
 
@@ -127,6 +147,8 @@ namespace avmplus
         // Free the m_quads array, clear m_quads
         void freeQuads(MMgc::GC* gc);
 
+        MultinameHashtable(int capacity);
+
     public:
         /** kDefaultCapacity must be a power of 2 */
         const static int kDefaultCapacity = 8;
@@ -137,9 +159,15 @@ namespace avmplus
          * @param heap
          * @param capacity  # of logical slots
          */
-        MultinameHashtable(int capacity = kDefaultCapacity);
+        REALLY_INLINE static MultinameHashtable* create(MMgc::GC* gc, int capacity = kDefaultCapacity)
+        {
+            return MMgc::setExact(new (gc) MultinameHashtable(capacity));
+        }
 
         ~MultinameHashtable();
+
+        virtual void gcTrace(MMgc::GC* gc);
+        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
 
         bool isFull() const;
 
@@ -183,7 +211,7 @@ namespace avmplus
         void Init(int capacity);
 
     // ------------------------ DATA SECTION BEGIN
-    private:    Quad<VALUE_TYPE>* m_quads;          // property hashtable (written with explicit WB)
+    private:    QuadContainer<VALUE_TYPE>* m_quads; // property hashtable (written with explicit WB)
     public:     int size;               // no. of properties
     public:     int numQuads;           // size of hashtable
     // ------------------------ DATA SECTION END

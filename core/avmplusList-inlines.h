@@ -42,6 +42,30 @@
 
 namespace avmplus
 {
+    template<>
+    REALLY_INLINE void TracedListData<Atom>::gcTrace(MMgc::GC* gc)
+    {
+        gc->TraceAtoms(entries, len);
+    }
+
+    template<>
+    REALLY_INLINE bool TracedListData<Atom>::gcTraceLarge(MMgc::GC* gc, size_t cursor)
+    {
+        return gcTraceLargeAsSmall(gc, cursor);
+    }
+    
+    template<class T>
+    inline void TracedListData<T>::gcTrace(MMgc::GC* gc)
+    {
+        gc->TraceLocations(entries, len);
+    }
+
+    template<class T>
+    inline bool TracedListData<T>::gcTraceLarge(MMgc::GC* gc, size_t cursor)
+    {
+        return gcTraceLargeAsSmall(gc, cursor);
+    }
+    
     // ----------------------------
 
     template<class T>
@@ -115,6 +139,18 @@ namespace avmplus
         VMPI_memmove(&data->entries[dstStart], &data->entries[srcStart], count * sizeof(T));
     }
 
+    template<class T>
+    REALLY_INLINE /*static*/ void DataListHelper<T>::gcTrace(MMgc::GC* gc, LISTDATA** loc)
+    {
+        // EXACTGC OPTIMIZEME - the check is not ideal, the information is technically
+        // available statically.  But DataList<> allocates with FixedMalloc so our choice
+        // here is either checking that the memory is GC memory, or tracing it
+        // conservatively.  Generally the check + precise trace is expected to be more
+        // performant.  The difference is small.
+        if (gc->IsPointerToGCPage(*loc))
+            gc->TraceLocation(loc);
+    }
+
     // ----------------------------
 
     REALLY_INLINE /*static*/ void* GCListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
@@ -124,7 +160,11 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void GCListHelper::free(MMgc::GC* gc, void* mem)
     {
+#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
+        gc->Zero(mem);
+#else
         gc->Free(mem);
+#endif
     }
 
     REALLY_INLINE /*static*/ size_t GCListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
@@ -181,6 +221,11 @@ namespace avmplus
                                            /*zeroEmptied*/ true);
     }
 
+    REALLY_INLINE /*static*/ void GCListHelper::gcTrace(MMgc::GC* gc, LISTDATA** loc)
+    {
+        gc->TraceLocation(loc);
+    }
+    
     // ----------------------------
 
     REALLY_INLINE /*static*/ void* RCListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
@@ -190,7 +235,11 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void RCListHelper::free(MMgc::GC* gc, void* mem)
     {
+#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
+        gc->Zero(mem);
+#else
         gc->Free(mem);
+#endif
     }
 
     REALLY_INLINE /*static*/ size_t RCListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
@@ -263,7 +312,12 @@ namespace avmplus
                                            /*zeroEmptied*/ true);
     }
 
-     // ----------------------------
+    REALLY_INLINE /*static*/ void RCListHelper::gcTrace(MMgc::GC* gc, LISTDATA** loc)
+    {
+        gc->TraceLocation(loc);
+    }
+
+    // ----------------------------
 
     REALLY_INLINE /*static*/ void* AtomListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
     {
@@ -272,7 +326,11 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void AtomListHelper::free(MMgc::GC* gc, void* mem)
     {
+#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
+        gc->Zero(mem);
+#else
         gc->Free(mem);
+#endif
     }
 
     REALLY_INLINE /*static*/ size_t AtomListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
@@ -331,6 +389,11 @@ namespace avmplus
                                            /*zeroEmptied*/ true);
     }
 
+    REALLY_INLINE /*static*/ void AtomListHelper::gcTrace(MMgc::GC* gc, LISTDATA** loc)
+    {
+        gc->TraceLocation(loc);
+    }
+
     // ----------------------------
 
     REALLY_INLINE /*static*/ void* WeakRefListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
@@ -340,7 +403,11 @@ namespace avmplus
 
     REALLY_INLINE /*static*/ void WeakRefListHelper::free(MMgc::GC* gc, void* mem)
     {
+#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
+        gc->Zero(mem);
+#else
         gc->Free(mem);
+#endif
     }
 
     REALLY_INLINE /*static*/ size_t WeakRefListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
@@ -397,6 +464,11 @@ namespace avmplus
                                            uint32_t((char*)(&data->entries[srcStart]) - (char*)data),
                                            count,
                                            /*zeroEmptied*/ true);
+    }
+
+    REALLY_INLINE /*static*/ void WeakRefListHelper::gcTrace(MMgc::GC* gc, LISTDATA** loc)
+    {
+        gc->TraceLocation(loc);
     }
 
     // ----------------------------
@@ -518,6 +590,8 @@ namespace avmplus
                                 ((baseSize + entrySize - 1) / entrySize) : // add entrySize-1 so that we round up, not down
                                 1;
         typename ListHelper::LISTDATA* newData = ::new (ListHelper::calloc(gc, cap + extra, entrySize))(typename ListHelper::LISTDATA)();
+        if (gc->IsPointerToGCPage(newData))
+            MMgc::setExact(newData);
         newData->gc = gc;
         newData->len = 0;
         newData->cap = cap;
@@ -541,7 +615,9 @@ namespace avmplus
     REALLY_INLINE GCList<T>::GCList(MMgc::GC* gc, uint32_t capacity, const TYPE* args)
         : m_list(gc, capacity, (MMgc::GCObject* const*)args)
     {
-        MMGC_STATIC_ASSERT((TypeSniffer<T>::isGCObject::value == true || TypeSniffer<T>::isGCFinalizedObject::value == true) &&
+        MMGC_STATIC_ASSERT((TypeSniffer<T>::isGCObject::value == true || 
+                            TypeSniffer<T>::isGCFinalizedObject::value == true ||
+                            TypeSniffer<T>::isGCTraceableObject::value == true) &&
                             TypeSniffer<T>::isRCObject::value == false);
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
     }
@@ -688,6 +764,12 @@ namespace avmplus
     REALLY_INLINE void GCList<T>::skipDestructor()
     {
         m_list.skipDestructor();
+    }
+
+    template<class T>
+    REALLY_INLINE void GCList<T>::gcTrace(MMgc::GC* gc)
+    {
+        m_list.gcTrace(gc);
     }
 
     // ----------------------------
@@ -844,7 +926,13 @@ namespace avmplus
         m_list.skipDestructor();
     }
 
-
+    template<class T>
+    REALLY_INLINE void RCList<T>::gcTrace(MMgc::GC* gc)
+    {
+        m_list.gcTrace(gc);
+    }
+    
+    
     // ----------------------------
 
     template<class T>
@@ -854,7 +942,8 @@ namespace avmplus
         // We must not be a GC/RCObject.
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isGCObject::value == false &&
                             TypeSniffer<T>::isGCFinalizedObject::value == false &&
-                            TypeSniffer<T>::isRCObject::value == false);
+                            TypeSniffer<T>::isRCObject::value == false &&
+                            TypeSniffer<T>::isGCTraceableObject::value == false);
 
         // BUT we MUST be a pointer type.
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == false);
@@ -1004,6 +1093,12 @@ namespace avmplus
         m_list.skipDestructor();
     }
 
+    template<class T>
+    REALLY_INLINE void UnmanagedPointerList<T>::gcTrace(MMgc::GC* gc)
+    {
+        m_list.gcTrace(gc);
+    }
+    
     // ----------------------------
 
     template<class T>
@@ -1012,7 +1107,8 @@ namespace avmplus
     {
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isGCObject::value ||
                             TypeSniffer<T>::isGCFinalizedObject::value ||
-                            TypeSniffer<T>::isRCObject::value);
+                            TypeSniffer<T>::isRCObject::value || 
+                            TypeSniffer<T>::isGCTraceableObject::value);
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
     }
 
@@ -1166,6 +1262,12 @@ namespace avmplus
         return m_list.removeNullItems();
     }
 
+    template<class T>
+    REALLY_INLINE void WeakRefList<T>::gcTrace(MMgc::GC* gc)
+    {
+        m_list.gcTrace(gc);
+    }
+
     // ----------------------------
 
     template<class T>
@@ -1179,10 +1281,12 @@ namespace avmplus
         // certainly making a mistake. (Redundant to the above check, but left in
         // for emphasis.)
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isGCObject::value == false &&
-                            TypeSniffer<T>::isGCFinalizedObject::value == false &&
-                            TypeSniffer<T>::isRCObject::value == false);
+                           TypeSniffer<T>::isGCFinalizedObject::value == false &&
+                           TypeSniffer<T>::isRCObject::value == false &&
+                           TypeSniffer<T>::isGCTraceableObject::value == false);
     }
 
+    
     // ----------------------------
 
     template<class T>

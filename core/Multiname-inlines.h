@@ -161,6 +161,12 @@ REALLY_INLINE Multiname::~Multiname()
     next_index = 0;
 }
 
+REALLY_INLINE void Multiname::gcTrace(MMgc::GC* gc)
+{
+    gc->TraceLocation((const void**)&name);
+    gc->TraceLocation((const void**)&ns);    // or nsset
+}
+    
 REALLY_INLINE bool Multiname::containsAnyPublicNamespace() const
 {
     if (!nsset)
@@ -337,6 +343,11 @@ REALLY_INLINE const HeapMultiname& HeapMultiname::operator=(const Multiname& tha
     return *this;
 }
 
+REALLY_INLINE void HeapMultiname::gcTrace(MMgc::GC* gc)
+{
+    name.gcTrace(gc);
+}
+    
 REALLY_INLINE Stringp HeapMultiname::getName() const
 {
     return name.getName();

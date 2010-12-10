@@ -69,20 +69,32 @@
 
 namespace avmplus
 {
-    class QCachedItem : public MMgc::GCObject
+    // QCachedItem is not meant to be instantiated as-is, but to be subclassed.
+
+    class GC_CPP_EXACT(QCachedItem, MMgc::GCTraceableObject)
     {
         friend class QCache;
-    public:
+    protected:
         inline QCachedItem() : next(NULL) { }
+        
     private:
-        QCachedItem*    next;   // written with explicit WB
+        GC_DATA_BEGIN(QCachedItem)
+        
+        QCachedItem*    GC_POINTER(next);   // written with explicit WB
+
+        GC_DATA_END(QCachedItem)
     };
 
-    class QCache : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT(QCache, MMgc::GCFinalizedObject)
     {
-    public:
-
+    private:        
         QCache(uint32_t _max, MMgc::GC* _gc);
+    public:
+        REALLY_INLINE static QCache* create(uint32_t max, MMgc::GC* gc)
+        {
+            return MMgc::setExact(new (gc) QCache(max, gc));
+        }
+
         ~QCache();
 
         inline uint32_t count() const { return m_count; }
@@ -100,12 +112,16 @@ namespace avmplus
         void validate() const;
         #endif
 
+        GC_DATA_BEGIN(QCache)
+
     private:
         MMgc::GC*               m_gc;
-        QCachedItem*            m_head;
+        QCachedItem*            GC_POINTER(m_head);
         uint32_t                m_count;
         uint32_t                m_max;
         TRandomFast             m_rand;
+        
+        GC_DATA_END(QCache)
     };
 }
 

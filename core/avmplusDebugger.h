@@ -57,7 +57,7 @@ namespace avmplus
      * ----------------------------------------------------------
      */
 
-    class SourceInfo : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT_IFDEF(SourceInfo, MMgc::GCFinalizedObject, DEBUGGER)
     {
     public:
         /**
@@ -102,9 +102,13 @@ namespace avmplus
          * the indicated line.
          */
         virtual bool hasBreakpoint(int linenum) = 0;
+        
+        GC_DATA_BEGIN(SourceInfo)
+        // No traced fields, but subclasses are exactly traced
+        GC_DATA_END(SourceInfo)
     };
 
-    class AbcInfo : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT_IFDEF(AbcInfo, MMgc::GCFinalizedObject, DEBUGGER)
     {
     public:
         /**
@@ -126,6 +130,9 @@ namespace avmplus
          * Number of bytes in the abc file.
          */
         virtual int size() const = 0;
+        
+        GC_DATA_BEGIN(AbcInfo)
+        GC_DATA_END(AbcInfo)
     };
 
     class DebugFrame : public MMgc::GCObject
@@ -201,15 +208,13 @@ namespace avmplus
      * example of a Debugger subclass that provides a simple
      * gdb-like interface.
      */
-    class Debugger : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT_IFDEF(Debugger, MMgc::GCFinalizedObject, DEBUGGER)
     {
+        friend class AbcParser;
+        friend class DebugStackFrame;
+        
+        // --- BEGIN TYPES ---------------
     public:
-        /**
-         * --------------------------------------------------
-         *    Trace facility for dumping out method entry
-         * line number and file name information while executing
-         * --------------------------------------------------
-         */
 
         typedef enum _TraceLevel
         {
@@ -220,13 +225,54 @@ namespace avmplus
             TRACE_METHODS_AND_LINES_WITH_ARGS = 4   // method entry, arguments and line numbers
         } TraceLevel;
 
-        //typedef void (*TraceCallback_i)( Stringp fileName, int linenum, Stringp methodName, Stringp methodArgs );
+    protected:
+        class StepState {
+        public:
+            StepState() { clear(); }
+            void clear() { flag = false; depth = startingDepth = -1; }
+            
+            bool flag;
+            int depth;
+            int startingDepth;
+        };
+        // --- END TYPES ---------------
+        
+        // --- BEGIN DATA SECTION --------------------
+        GC_DATA_BEGIN(Debugger)
+        
+    public:
         TraceLevel                  astrace_console;
         TraceLevel                  astrace_callback;
-        DRCWB(FunctionObject*)      trace_callback;
+        DRCWB(FunctionObject*)      GC_POINTER(trace_callback);
         bool                        in_trace;
-        uint64_t                        astraceStartTime;
+        uint64_t                    astraceStartTime;
 
+    protected:
+        AvmCore*                    core;
+        
+        StepState                   stepState;
+        StepState                   oldStepState;
+        
+        // all abc files
+        GCList<AbcInfo>             GC_STRUCTURE(abcList);
+        MMgc::GCHashtable           pool2abcIndex;
+
+        
+        GC_DATA_END(Debugger)
+        // --- END DATA SECTION --------------------
+        
+    public:
+        /**
+         * --------------------------------------------------
+         *    Trace facility for dumping out method entry
+         * line number and file name information while executing
+         * --------------------------------------------------
+         */
+        //typedef void (*TraceCallback_i)( Stringp fileName, int linenum, Stringp methodName, Stringp methodArgs );
+    
+        // helper: find a StackTrace object for a given frame number
+        CallStackNode* locateTrace(int frameNbr);
+        
         void disableAllTracing();  // shuts down all tracing operations
 
         void traceMethod(MethodInfo* fnc, bool ignoreArgs=false);
@@ -478,34 +524,9 @@ namespace avmplus
         static MethodInfo* functionFor(SourceInfo* src, int line, DebugStackFrame* frame); // protected
         static Atom autoAtomAt(DebugFrame* frame, int index, AutoVarKind kind);
 
-        friend class AbcParser;
-        friend class DebugStackFrame;
-
-        AvmCore *core;
-
-        class StepState {
-        public:
-            StepState() { clear(); }
-            void clear() { flag = false; depth = startingDepth = -1; }
-
-            bool flag;
-            int depth;
-            int startingDepth;
-        };
-
-        StepState stepState;
-        StepState oldStepState;
-
-        // helper: find a StackTrace object for a given frame number
-        CallStackNode* locateTrace(int frameNbr);
-
         // internal helper functions for parsing abcfiles
         void scanResources(AbcFile* file, PoolObject* pool);
         bool scanCode(AbcFile* file, PoolObject* pool, MethodInfo* m);
-
-        // all abc files
-        GCList<AbcInfo>                 abcList;
-        MMgc::GCHashtable               pool2abcIndex;
 
     private:
         void traceCallback(int line);
@@ -523,10 +544,16 @@ namespace avmplus
      * ----------------------------------------------------------
      */
 
-    class SourceFile : public SourceInfo
+    class GC_CPP_EXACT_IFDEF(SourceFile, SourceInfo, DEBUGGER)
     {
-    public:
+    private:
         SourceFile(MMgc::GC* gc, Stringp name);
+        
+    public:
+        REALLY_INLINE static SourceFile* create(MMgc::GC* gc, Stringp name)
+        {
+            return MMgc::setExact(new (gc) SourceFile(gc, name));
+        }
 
         /**
          * name of source file
@@ -552,16 +579,32 @@ namespace avmplus
         bool clearBreakpoint(int linenum);
         bool hasBreakpoint(int linenum);
 
+        GC_DATA_BEGIN(SourceFile)
+
     protected:
-        Stringp                         named;
-        GCList<MethodInfo>              functions;
+        Stringp                         GC_POINTER(named);
+        GCList<MethodInfo>              GC_STRUCTURE(functions);
         BitSet                          sourceLines;    // lines that have source code on them
         BitSet                          breakpoints;
+        
+        GC_DATA_END(SourceFile)
     };
 
-    class AbcFile : public AbcInfo
+    /**
+     * Contains all known debug information regarding a single
+     * abc/swf file
+     */
+    class GC_CPP_EXACT_IFDEF(AbcFile, AbcInfo, DEBUGGER)
     {
+    private:
+        AbcFile(AvmCore* core, int size);
+        
     public:
+        REALLY_INLINE static AbcFile* create(MMgc::GC* gc, AvmCore* core, int size)
+        {
+            return MMgc::setExact(new (gc) AbcFile(core, size));
+        }
+        
         /**
          * Information about the source files encountered within this abc file.
          */
@@ -578,12 +621,6 @@ namespace avmplus
         int size() const;
 
         /**
-         * Contains all known debug information regarding a single
-         * abc/swf file
-         */
-        AbcFile(AvmCore* core, int size);
-
-        /**
          * Add source file to list; no check for uniqueness
          */
         void sourceAdd(SourceFile* s);
@@ -594,11 +631,15 @@ namespace avmplus
          */
         SourceFile* sourceNamed(Stringp name);
 
+        GC_DATA_BEGIN(AbcFile)
+
     protected:
         AvmCore*            core;
-        DWB(HeapHashtable*) sourcemap;  // maps filename to that file's index in "sources"
-        GCList<SourceFile>  source;     // all source files used in this abc file
-        int                 byteCount;  // # bytes of bytecode
+        DWB(HeapHashtable*) GC_POINTER(sourcemap);  // maps filename to that file's index in "sources"
+        GCList<SourceFile>  GC_STRUCTURE(source);   // all source files used in this abc file
+        int                 byteCount;              // # bytes of bytecode
+        
+        GC_DATA_END(AbcFile)
     };
 
     class DebugStackFrame : public DebugFrame

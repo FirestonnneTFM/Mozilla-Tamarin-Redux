@@ -40,6 +40,11 @@
 namespace avmplus
 {
 
+REALLY_INLINE MethodEnv* MethodEnv::create(MMgc::GC* gc, MethodInfo* method, ScopeChain* scope)
+{
+    return MMgc::setExact(new (gc) MethodEnv(method, scope));
+}
+
 REALLY_INLINE AbcEnv* MethodEnv::abcEnv() const
 {
     return _scope->abcEnv();

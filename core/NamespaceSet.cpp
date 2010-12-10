@@ -46,14 +46,14 @@ namespace avmplus
     {
         AvmAssert(count <= 0x7fffffff); // should be impossible since ABC only allow U30...
         size_t extra = (count >= 1 ? count-1 : 0)*sizeof(Namespacep);
-        NamespaceSet* nsset = new (gc, extra) NamespaceSet;
+        NamespaceSet* nsset = MMgc::setExact(new (gc, extra) NamespaceSet());
         nsset->_countAndFlags = count<<1;
         return nsset;
     }
 
     /*static*/ const NamespaceSet* NamespaceSet::create(MMgc::GC* gc, Namespacep ns)
     {
-        NamespaceSet* nsset = new (gc) NamespaceSet;
+        NamespaceSet* nsset = MMgc::setExact(new (gc) NamespaceSet());
         nsset->_countAndFlags = (1<<1) | (ns->isPublic() ? 1 : 0);
         nsset->_namespaces[0] = ns;
         return nsset;

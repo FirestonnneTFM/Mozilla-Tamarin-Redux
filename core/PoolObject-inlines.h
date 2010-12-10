@@ -40,10 +40,15 @@
 namespace avmplus
 {
 
+REALLY_INLINE PoolObject* PoolObject::create(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api)
+{
+    return MMgc::setExact(new (core->GetGC()) PoolObject(core, sb, startpos, api));
+}
+
 #ifdef VMCFG_PRECOMP_NAMES
 REALLY_INLINE const Multiname* PoolObject::precomputedMultiname(int32_t index)
 {
-    return precompNames->multinames[index];
+    return precompNames->get(index);
 }
 #endif
 

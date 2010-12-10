@@ -43,10 +43,10 @@
 namespace avmplus
 {
     Domain::Domain(AvmCore* core, Domain* base, uint32_t baseCount)
-        : m_namedTraits(new (core->GetGC()) MultinameTraitsHashtable())
-        , m_namedScriptsMap(new (core->GetGC()) MultinameBindingHashtable())
+        : m_namedTraits(MultinameTraitsHashtable::create(core->GetGC()))
+        , m_namedScriptsMap(MultinameBindingHashtable::create(core->GetGC()))
         , m_namedScriptsList(core->GetGC(), 0)
-        , m_parameterizedTypes(new (core->GetGC()) HeapHashtable(core->GetGC()))
+        , m_parameterizedTypes(HeapHashtable::create(core->GetGC()))
         , m_baseCount(baseCount)
     {
         WB(core->GetGC(), this, &m_bases[0], this);
@@ -65,7 +65,7 @@ namespace avmplus
         // to get our immediate base, even if our base is NULL, thus
         // avoiding a check in the implementation of base().
         uint32_t extra = baseCount * sizeof(Domain*);
-        return new (core->GetGC(), extra) Domain(core, base, baseCount);
+        return MMgc::setExact(new (core->GetGC(), extra) Domain(core, base, baseCount));
     }
 
     ClassClosure* Domain::getParameterizedType(ClassClosure* type)

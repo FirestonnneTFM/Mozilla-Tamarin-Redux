@@ -48,12 +48,14 @@ namespace avmplus
     /**
      * class Toplevel
      */
-    class Toplevel : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT(Toplevel, MMgc::GCFinalizedObject)
     {
-    public:
+    protected:
         Toplevel(AbcEnv* abcEnv);
+    public:
+        static Toplevel* create(MMgc::GC* gc, AbcEnv* abcEnv);
+
         void init_mainEntryPoint(ScriptEnv* main);
-        virtual ~Toplevel() {} // silence compiler warnings
 
         AbcEnv* abcEnv() const;
         DomainEnv* domainEnv() const;
@@ -448,33 +450,38 @@ namespace avmplus
         ClassClosure* resolveBuiltinClass(int class_id);
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(Toplevel)
+
     private:
-        DWB(AbcEnv*)                _abcEnv;
-        DWB(ClassClosure**)         _builtinClasses;
-        DWB(ScriptEnv*)             _mainEntryPoint;
+        DWB(AbcEnv*)                GC_POINTER(_abcEnv);
+        DWB(ExactHeapList<RCList<ClassClosure> >*)
+                                    GC_POINTER(_builtinClasses);
+        DWB(ScriptEnv*)             GC_POINTER(_mainEntryPoint);
     public:
-        DWB(VTable*)                object_ivtable;
-        DWB(VTable*)                class_ivtable;
-        DWB(ScopeChain*)            object_cscope;
-        DWB(ScopeChain*)            vectorobj_cscope;
-        DWB(ScopeChain*)            vectorobj_iscope;
+        DWB(VTable*)                GC_POINTER(object_ivtable);
+        DWB(VTable*)                GC_POINTER(class_ivtable);
+        DWB(ScopeChain*)            GC_POINTER(object_cscope);
+        DWB(ScopeChain*)            GC_POINTER(vectorobj_cscope);
+        DWB(ScopeChain*)            GC_POINTER(vectorobj_iscope);
     public:
-        DRCWB(ArrayClass*)          arrayClass;
-        DRCWB(BooleanClass*)        booleanClass;
-        DRCWB(ClassClass*)          classClass;
-        DRCWB(FunctionClass*)       functionClass;
-        DRCWB(MethodClosureClass*)  methodClosureClass;
-        DRCWB(NamespaceClass*)      namespaceClass;
-        DRCWB(NumberClass*)         numberClass;
-        DRCWB(IntClass*)            intClass;
-        DRCWB(UIntClass*)           uintClass;
-        DRCWB(ObjectClass*)         objectClass;
-        DRCWB(IntVectorClass*)      intVectorClass;
-        DRCWB(UIntVectorClass*)     uintVectorClass;
-        DRCWB(DoubleVectorClass*)   doubleVectorClass;
-        DRCWB(ObjectVectorClass*)   objectVectorClass;
-        DRCWB(VectorClass*)         vectorClass;
-        DRCWB(StringClass*)         stringClass;
+        DRCWB(ArrayClass*)          GC_POINTER(arrayClass);
+        DRCWB(BooleanClass*)        GC_POINTER(booleanClass);
+        DRCWB(ClassClass*)          GC_POINTER(classClass);
+        DRCWB(FunctionClass*)       GC_POINTER(functionClass);
+        DRCWB(MethodClosureClass*)  GC_POINTER(methodClosureClass);
+        DRCWB(NamespaceClass*)      GC_POINTER(namespaceClass);
+        DRCWB(NumberClass*)         GC_POINTER(numberClass);
+        DRCWB(IntClass*)            GC_POINTER(intClass);
+        DRCWB(UIntClass*)           GC_POINTER(uintClass);
+        DRCWB(ObjectClass*)         GC_POINTER(objectClass);
+        DRCWB(IntVectorClass*)      GC_POINTER(intVectorClass);
+        DRCWB(DoubleVectorClass*)   GC_POINTER(doubleVectorClass);
+        DRCWB(UIntVectorClass*)     GC_POINTER(uintVectorClass);
+        DRCWB(ObjectVectorClass*)   GC_POINTER(objectVectorClass);
+        DRCWB(VectorClass*)         GC_POINTER(vectorClass);
+        DRCWB(StringClass*)         GC_POINTER(stringClass);
+
+        GC_DATA_END(Toplevel)
     // ------------------------ DATA SECTION END
     };
 }

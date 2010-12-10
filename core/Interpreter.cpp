@@ -3197,8 +3197,8 @@ namespace avmplus
             findpropglobal_impl:
                 u1 = *pc++;      // multiname_index
                 u2 = *pc++;      // cache_slot
-                if (core->lookupCacheIsValid(env->lookup_cache[u2].timestamp)) {
-                    *(++sp) = env->lookup_cache[u2].object->atom();
+                if (core->lookupCacheIsValid(env->lookup_cache->get(uint32_t(u2)).timestamp)) {
+                    *(++sp) = env->lookup_cache->get(uint32_t(u2)).object->atom();
                     NEXT;
                 }
                 SAVE_EXPC;
@@ -3216,8 +3216,8 @@ namespace avmplus
                 else
                 {
                     *(++sp) = a1;
-                    env->lookup_cache[u2].timestamp = core->lookupCacheTimestamp();
-                    WBRC(core->GetGC(), env->lookup_cache, &env->lookup_cache[u2].object, AvmCore::atomToScriptObject(sp[0]));
+                    env->lookup_cache->get(uint32_t(u2)).timestamp = core->lookupCacheTimestamp();
+                    WBRC(core->GetGC(), env->lookup_cache, &env->lookup_cache->get(uint32_t(u2)).object, AvmCore::atomToScriptObject(sp[0]));
                 }
                 NEXT;
             }

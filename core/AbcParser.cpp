@@ -775,7 +775,7 @@ namespace avmplus
 
             const int optional_count = (abcFlags & abcMethod_HAS_OPTIONAL) ? readU30(pos) : 0;
 
-            MethodInfo* info = new (core->GetGC()) MethodInfo(i, pool, info_pos, abcFlags, ni);
+            MethodInfo* info = MethodInfo::create(core->GetGC(), i, pool, info_pos, abcFlags, ni);
 
 #ifdef VMCFG_AOT
             if (isCompiled)
@@ -1127,7 +1127,7 @@ namespace avmplus
 
     void AbcParser::parseCpool(API api)
     {
-        pool = new (core->GetGC()) PoolObject(core, code, pos, api);
+        pool = PoolObject::create(core, code, pos, api);
         pool->domain = domain;
 
 #ifdef VMCFG_AOT
@@ -1243,7 +1243,7 @@ namespace avmplus
 
         pool->_abcStringStart = pos;
 
-        PoolObject::ConstantStringData* dataP = pool->_abcStrings;
+        ConstantStringData* dataP = pool->_abcStrings->data;
         AvmAssert(core->kEmptyString != NULL);
         dataP->str = core->kEmptyString;
         for(uint32_t i = 1; i < string_count; ++i)
@@ -1266,7 +1266,7 @@ namespace avmplus
                 // can cause dynamicizeStrings to make poor decisions. So clean up before throwing.
                 pool->_abcStringStart = NULL;
                 pool->_abcStringEnd = NULL;
-                VMPI_memset(pool->_abcStrings, 0, string_count*sizeof(PoolObject::ConstantStringData*));
+                VMPI_memset(pool->_abcStrings->data, 0, string_count*sizeof(ConstantStringData*));
                 toplevel->throwVerifyError(kCorruptABCError);
             }
 

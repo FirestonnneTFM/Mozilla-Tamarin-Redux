@@ -121,6 +121,20 @@ namespace avmplus
         pool->core->exec->init(this, native_info);
     }
 
+    void MethodInfo::gcTraceHook_MethodInfo(MMgc::GC* gc)
+    {
+        if (_isNative) {
+            // _native - nothing to do
+        }
+        else {
+            gc->TraceLocation(&_abc.exceptions);
+#ifdef VMCFG_WORDCODE
+            gc->TraceLocation(&_abc.word_code.translated_code);
+            gc->TraceLocation(&_abc.word_code.exceptions);
+#endif
+        }
+    }
+
     void MethodInfo::init_activationTraits(Traits* t)
     {
         AvmAssert(_activation.getTraits() == NULL);
@@ -230,7 +244,7 @@ namespace avmplus
         MMgc::GC* gc = core->GetGC();
         const uint32_t extra = (local_count <= 1) ? 0 : (sizeof(Stringp)*(local_count-1));
 
-        DebuggerMethodInfo* dmi = new (gc, extra) DebuggerMethodInfo(local_count, codeSize, max_scopes);
+        DebuggerMethodInfo* dmi = MMgc::setExact(new (gc, extra) DebuggerMethodInfo(local_count, codeSize, max_scopes));
         const Stringp undef = core->kundefined;
         for (int32_t i=0; i<local_count; i++)
         {
@@ -566,8 +580,14 @@ namespace avmplus
         // optional_count yet, so over-allocate for the worst case. (we know optional_count<=param_count).
         // this wastes space, but since we only cache a few dozen of these, it's preferable to walking the data twice
         // to get an exact count.
+        //
+        // It is /critical/ to correct exact tracing of the MethodSignature that param_count is written
+        // into the object before any types are written into _args, and that optional_count is written
+        // into the object before any default values are written into _args.
+
         const uint32_t extra = sizeof(MethodSignature::AtomOrType) * (param_count + (hasOptional() ? param_count : 0));
-        MethodSignature* ms = new (gc, extra) MethodSignature();
+        MethodSignature* ms = MethodSignature::create(gc, extra, param_count);
+        
         if (pos)
         {
             returnType = pool->resolveTypeName(pos, toplevel, /*allowVoid=*/true);
@@ -608,13 +628,14 @@ namespace avmplus
                     // oops -- the ms we allocated is too small, has no space for optional values
                     // but it's easy to re-create, especially since we know the types are all null
                     const uint32_t extra = sizeof(MethodSignature::AtomOrType) * (param_count + param_count);
-                    ms = new (gc, extra) MethodSignature();
+                    ms = MethodSignature::create(gc, extra, param_count);
                     // don't need to re-set paramTypes: they are inited to NULL which is the right value
                 }
             }
             if (_isUnchecked)
             {
                 optional_count = param_count;
+                ms->_optional_count = optional_count;
                 for (uint32_t j=0; j < optional_count; j++)
                 {
                     //WBATOM(gc, ms, &ms->_args[param_count+1+j].defaultValue, undefinedAtom);
@@ -627,6 +648,7 @@ namespace avmplus
             if (hasOptional())
             {
                 optional_count = AvmCore::readU32(pos);
+                ms->_optional_count = optional_count;
                 for (uint32_t j=0; j < optional_count; j++)
                 {
                     const int32_t param = param_count-optional_count+1+j;
@@ -686,8 +708,9 @@ namespace avmplus
         // doubleword aligned.
         ms->_frame_size = (ms->_frame_size + 1) & ~1;
         #endif
-        ms->_param_count = param_count;
-        ms->_optional_count = optional_count;
+        // _param_count and _optional_count were written earlier for reasons of GC correctness
+        //ms->_param_count = param_count;
+        //ms->_optional_count = optional_count;
         ms->_rest_offset = rest_offset;
         ms->_isNative = this->_isNative;
         ms->_allowExtraArgs = this->_needRest || this->_needArguments || this->_ignoreRest;
@@ -1010,4 +1033,12 @@ namespace avmplus
         return name;
     }
 
+    void MethodSignature::gcTraceHook_MethodSignature(MMgc::GC* gc)
+    {
+        int32_t numitems = 1+_param_count+_optional_count;
+        for ( int32_t i=0 ; i < numitems ; i++ ) {
+            if (atomKind(_args[i].defaultValue) == 0)
+                gc->TraceLocation(&_args[i].paramType);
+        }
+    }
 }

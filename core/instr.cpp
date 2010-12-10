@@ -186,7 +186,7 @@ ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot
 {
     AvmAssert(env->method->lookup_cache_size() > 0);
     AvmAssert(slot < (uint32_t)env->method->lookup_cache_size());
-    MethodEnv::LookupCache *cache = env->lookup_cache;
+    ExactStructContainer<MethodEnv::LookupCache>* cache = env->lookup_cache;
     if (!cache) {
         // todo - do this earlier.  This extra test in the fast path
         // is repugnant but hasn't shown itself to be a problem in practice.
@@ -197,17 +197,17 @@ ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot
 
     // check for valid cache
     AvmCore* core = env->core();
-    if (core->lookupCacheIsValid(cache[slot].timestamp)) {
+    if (core->lookupCacheIsValid(cache->get(slot).timestamp)) {
         _nvprof("finddef P-fast", 1);
-        return cache[slot].object;
+        return cache->get(slot).object;
     }
 
     // miss
     _nvprof("finddef P-fast", 0);
     ScriptObject* obj = env->finddef(name);
     AvmAssert(obj != NULL); // or else finddef would have thrown an exception.
-    cache[slot].timestamp = core->lookupCacheTimestamp();
-    WBRC(core->gc, cache, &cache[slot].object, obj);
+    cache->get(slot).timestamp = core->lookupCacheTimestamp();
+    WBRC(core->gc, cache, &cache->get(slot).object, obj);
     return obj;
 }
 #endif // VMCFG_NANOJIT

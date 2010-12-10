@@ -46,7 +46,7 @@ namespace avmplus
      *
      * Note: ScopeTypeChain is now immutable; once created it cannot be modified
      */
-    class ScopeTypeChain : public MMgc::GCObject
+    class GC_CPP_EXACT(ScopeTypeChain, MMgc::GCTraceableObject)
     {
     private:
         ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits);
@@ -76,26 +76,30 @@ namespace avmplus
         static const uintptr_t ISWITH = 0x01;
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(ScopeTypeChain)
+        
     public:
         const int32_t       size;
         const int32_t       fullsize;
     private:
-        Traits* const       _traits;
-        uintptr_t           _scopes[1]; // actual length = fullsize;
+        Traits* const       GC_POINTER(_traits);
+        uintptr_t           GC_POINTERS_SMALL(_scopes, 1, fullsize); // Tagged pointers to Traits objects.
+
+        GC_DATA_END(ScopeTypeChain)
     // ------------------------ DATA SECTION END
     };
 
     /**
     * a captured scope chain
     */
-    class ScopeChain : public MMgc::GCObject
-    {
-        ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns);
-
-        #ifdef VMCFG_NANOJIT
+    class GC_CPP_EXACT(ScopeChain, MMgc::GCTraceableObject)
+    {        
+#ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         friend class MopsRangeCheckFilter;
-        #endif
+#endif
+    private:
+        ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns);
 
     public:
 
@@ -119,12 +123,16 @@ namespace avmplus
         PrintWriter& print(PrintWriter& prw) const;
 
     // ------------------------ DATA SECTION BEGIN
+    GC_DATA_BEGIN(ScopeChain)
+
     private:
-        VTable* const                   _vtable;
-        AbcEnv* const                   _abcEnv;
-        const ScopeTypeChain* const     _scopeTraits;
-        DRCWB(Namespacep) const         _defaultXmlNamespace;
-        Atom                            _scopes[1];         // actual length == size
+        VTable* const                   GC_POINTER(_vtable);
+        AbcEnv* const                   GC_POINTER(_abcEnv);
+        const ScopeTypeChain* const     GC_POINTER(_scopeTraits);
+        DRCWB(Namespacep) const         GC_POINTER(_defaultXmlNamespace);
+        Atom                            GC_ATOMS_SMALL(_scopes, 1, "getSize()");
+
+    GC_DATA_END(ScopeChain)
     // ------------------------ DATA SECTION END
     };
 

@@ -213,22 +213,18 @@ namespace avmplus
     // ------------------------ DATA SECTION END
     };
 
-    class StackTrace : public MMgc::GCObject
+    class GC_CPP_EXACT_IFDEF(StackTrace, MMgc::GCTraceableObject, DEBUGGER)
     {
+        StackTrace(int depth) : depth(depth) {}
+
     public:
+        REALLY_INLINE static StackTrace* create(MMgc::GC* gc, int depth)
+        {
+            size_t extra = depth > 0 ? sizeof(StackTrace::Element) * (depth-1) : 0;
+            return MMgc::setExact(new (gc, extra) StackTrace(depth));
+        }
+
         Stringp format(AvmCore* core);
-
-        /**
-         * The dump and format methods display a human-readable
-         * version of the stack trace.  To avoid thousands of
-         * lines of output, such as would happen in an infinite
-         * recursion, no more than kMaxDisplayDepth levels will
-         * be displayed.
-         */
-        const static int kMaxDisplayDepth = 64;
-
-        int depth;
-        DRCWB(Stringp) stringRep;
 
         struct Element
         {
@@ -245,7 +241,7 @@ namespace avmplus
                 {
                     Stringp     m_fakename;     // needed just for fake CallStackNodes, null otherwise
                     Stringp     m_filename;     // in the form "C:\path\to\package\root;package/package;filename"
-                               }u;
+                } u;
                 uint64_t        m_functionId;
             };
 
@@ -254,40 +250,67 @@ namespace avmplus
                 if (csn.functionId() != 0)
                 {
                     m_info      = (MethodInfo*) EXTERNAL_CALL_FRAME;
-                #ifdef VMCFG_64BIT
-                                       u.m_fakename    = NULL;         // let's keep the stack nice and clean
-                #endif
+#ifdef VMCFG_64BIT
+                    u.m_fakename    = NULL;         // let's keep the stack nice and clean
+#endif
                     m_functionId = csn.functionId();
                 }
                 else
                 {
                     m_info      = csn.info();       // will be NULL if the element is from a fake CallStackNode
-                                       u.m_fakename    = csn.fakename();
-                                       u.m_filename    = csn.filename();
+                    u.m_fakename    = csn.fakename();
+                    u.m_filename    = csn.filename();
                 }
                 m_linenum   = csn.linenum();
-            #ifdef VMCFG_64BIT
+#ifdef VMCFG_64BIT
                 m_pad       = 0;    // let's keep the stack nice and clean
-            #endif
+#endif
             }
+            
+            inline void gcTrace(MMgc::GC* gc)
+            {
+                gc->TraceLocation(&m_info);
+                gc->TraceLocation(&u.m_filename);
+            }
+
             inline bool isAS3Sample() const { return m_info != (MethodInfo*) EXTERNAL_CALL_FRAME; }
             // WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
             inline MethodInfo* info() const { return isAS3Sample() ? m_info : NULL; }
-            #ifdef _DEBUG
+#ifdef _DEBUG
             // used in Sampler::presweep to check if the fake name is null or marked
-                       inline Stringp fakename() const { return isAS3Sample() ? u.m_fakename : NULL; }
-            #endif
-                       inline Stringp name() const     { return isAS3Sample() ? ((!u.m_fakename && m_info) ? m_info->getMethodName() : u.m_fakename) : NULL; }
-                       inline Stringp filename() const { return isAS3Sample() ? u.m_filename : NULL; }
+            inline Stringp fakename() const { return isAS3Sample() ? u.m_fakename : NULL; }
+#endif
+            inline Stringp name() const     { return isAS3Sample() ? ((!u.m_fakename && m_info) ? m_info->getMethodName() : u.m_fakename) : NULL; }
+            inline Stringp filename() const { return isAS3Sample() ? u.m_filename : NULL; }
             inline int32_t linenum() const { return m_linenum; }
             inline uint64_t functionId() const { return isAS3Sample() ? 0 : m_functionId; }
         };
+
         bool equals(StackTrace::Element* e, int depth);
         static uintptr_t hashCode(StackTrace::Element* e, int depth);
 
-        Element elements[1];
     private:
         void dumpFilename(Stringp filename, PrintWriter& out) const;
+        
+    public:
+        /**
+         * The dump and format methods display a human-readable
+         * version of the stack trace.  To avoid thousands of
+         * lines of output, such as would happen in an infinite
+         * recursion, no more than kMaxDisplayDepth levels will
+         * be displayed.
+         */
+        const static int kMaxDisplayDepth = 64;
+
+        // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(StackTrace)
+        
+        const int       depth;
+        DRCWB(Stringp)  GC_POINTER(stringRep);
+        Element         GC_STRUCTURES(elements, 1, depth);
+        
+        GC_DATA_END(StackTrace)
+        // ------------------------ DATA SECTION END
     };
 
 #endif

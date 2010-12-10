@@ -101,7 +101,7 @@ namespace avmplus
     bool isAtomOrRCObjectSlot(SlotStorageType sst);
     SlotStorageType valueStorageType(BuiltinType bt);
 
-    class TraitsBindings : public QCachedItem
+    class GC_CPP_EXACT_WITH_HOOK(TraitsBindings, QCachedItem)
     {
         friend class Traits;
         friend class StTraitsBindingsIterator;
@@ -172,15 +172,23 @@ namespace avmplus
         bool checkLegalInterfaces(AvmCore* core) const;
         void fixOneInterfaceBindings(Traitsp ifc);
 
+    private:
+        void gcTraceHook_TraitsBindings(MMgc::GC* gc); // Traces additional trailing data if m_typesValid != 0
+
     // ------------------------ DATA SECTION BEGIN
-        public:     const Traitsp                   owner;
-        public:     const TraitsBindingsp           base;
-        private:    MultinameBindingHashtable* const       m_bindings;
-        public:     const uint32_t                  slotCount;          // including slots in our base classes
-        public:     const uint32_t                  methodCount;        // including methods in our base classes
-        private:    uint32_t                        m_slotSize;         // size of slot area in bytes, including base classes (only valid after resolveSignatures)
-        private:    const uint32_t                  m_typesValid;       // bool, just int for alignment
+        GC_DATA_BEGIN(TraitsBindings)
+        
+        public:     const Traitsp                    GC_POINTER(owner);
+        public:     const TraitsBindingsp            GC_POINTER(base);
+        private:    MultinameBindingHashtable* const GC_POINTER(m_bindings);
+        public:     const uint32_t                   slotCount;          // including slots in our base classes
+        public:     const uint32_t                   methodCount;        // including methods in our base classes
+        private:    uint32_t                         m_slotSize;         // size of slot area in bytes, including base classes (only valid after resolveSignatures)
+        private:    const uint32_t                   m_typesValid;       // bool, just int for alignment
         // plus extra at end, iff m_typesValid is nonzero
+        // DOCUMENTME - /what/ is at the end?
+        
+        GC_DATA_END(TraitsBindings)
     // ------------------------ DATA SECTION END
 
     };
@@ -202,12 +210,17 @@ namespace avmplus
         StTraitsBindingsIterator(TraitsBindingsp tb);
     };
 
-    class TraitsMetadata : public QCachedItem
+    class GC_CPP_EXACT(TraitsMetadata, QCachedItem)
     {
         friend class Traits;
 
     public:
         typedef const uint8_t* MetadataPtr;
+
+        REALLY_INLINE static TraitsMetadata* create(MMgc::GC* gc, size_t extra, TraitsMetadatap _base, PoolObject* _residingPool, MetadataPtr _metadata_pos, uint32_t _slotCount, uint32_t _methodCount)
+        {
+            return MMgc::setExact(new (gc, extra) TraitsMetadata(_base, _residingPool, _metadata_pos, _slotCount, _methodCount));
+        }
 
     private:
         TraitsMetadata(TraitsMetadatap _base, PoolObject* _residingPool, MetadataPtr _metadata_pos, uint32_t _slotCount, uint32_t _methodCount);
@@ -217,14 +230,20 @@ namespace avmplus
         MetadataPtr getSlotMetadataPos(uint32_t i, PoolObject*& residingPool) const;
         MetadataPtr getMethodMetadataPos(uint32_t i, PoolObject*& residingPool) const;
 
+    public:
+
     // ------------------------ DATA SECTION BEGIN
-        public:     const TraitsMetadatap           base;
-        private:    PoolObject* const               residingPool;
+        GC_DATA_BEGIN(TraitsMetadata)
+        
+        public:     const TraitsMetadatap           GC_POINTER(base);
+        private:    PoolObject* const               GC_POINTER(residingPool);
         public:     const uint32_t                  slotCount;          // including slots in our base classes
         public:     const uint32_t                  methodCount;        // including methods in our base classes
         private:    MetadataPtr                     metadataPos;
         private:    MetadataPtr*                    slotMetadataPos;
         private:    MetadataPtr*                    methodMetadataPos;
+
+        GC_DATA_END(TraitsMetadata)
     // ------------------------ DATA SECTION END
     };
 
@@ -250,7 +269,7 @@ namespace avmplus
      * binding to an accessor, binding to a virtual function,
      * binding to a final function.
      */
-    class Traits : public MMgc::GCObject
+    class GC_CPP_EXACT(Traits, MMgc::GCTraceableObject)
     {
         friend class TraitsBindings;    // for m_sizeofInstance
         friend class InterfaceIterator;
@@ -530,29 +549,33 @@ namespace avmplus
         private:    static const int        MAX_PRIMARY_SUPERTYPE = 8;
 
     // ------------------------ DATA SECTION BEGIN
-    public:     AvmCore* const          core;       // @todo remove, can get from pool->core
-    public:     Traits* const           base;       // Pointer to the base traits; that is, the traits of the base class
-    private:    DWB(Traits*)            m_supertype_cache;    // 1-entry cache for subtypeof=true
+        GC_DATA_BEGIN(Traits)
+
+    public:     AvmCore* const          core;                           // @todo remove, can get from pool->core
+    public:     Traits* const           GC_POINTER(base);               // Pointer to the base traits; that is, the traits of the base class
+    private:    DWB(Traits*)            GC_POINTER(m_supertype_cache);  // 1-entry cache for subtypeof=true
     private:    MMgc::GCHiddenPointer<Traits*>
-                                        m_supertype_neg_cache;  // 1-entry cache for subtypeof=false (hidden to avoid pinning)
-    private:    Traits*                 m_primary_supertypes[MAX_PRIMARY_SUPERTYPE]; // contains the first several base classes, written with explicit WB's
-    private:    DWB(Traits**)           m_secondary_supertypes;
-    public:     PoolObject* const       pool;       // The constant pool owning this definition. never null.
-    public:     Traits*                 itraits;    // if this type is a factory, itraits is non-null and points to the type created by this factory.
-    private:    DRCWB(Namespacep)       _ns;            // The namespace of the class described by this traits object
-    private:    DRCWB(Stringp)          _name;      // The name of the class described by this traits object
-    public:     DRCWB(Namespacep)       protectedNamespace; // protected namespace, if any
-    public:     DWB(MethodInfo*)        init;               // not a call/init union b/c smart pointers and union's don't mix
+                                        m_supertype_neg_cache;          // 1-entry cache for subtypeof=false (hidden to avoid pinning)
+    private:    Traits*                 GC_POINTERS_SMALL(m_primary_supertypes, MAX_PRIMARY_SUPERTYPE, MAX_PRIMARY_SUPERTYPE);
+                                                                        // m_primary_supertypes contains the first several base classes, written with explicit WB's
+    private:    DWB(Traits**)           GC_POINTER(m_secondary_supertypes);
+    public:     PoolObject* const       GC_POINTER(pool);               // The constant pool owning this definition. never null.
+    public:     Traits*                 GC_POINTER(itraits);            // if this type is a factory, itraits is non-null and points to the type created by this factory.
+    private:    DRCWB(Namespacep)       GC_POINTER(_ns);                // The namespace of the class described by this traits object
+    private:    DRCWB(Stringp)          GC_POINTER(_name);              // The name of the class described by this traits object
+    public:     DRCWB(Namespacep)       GC_POINTER(protectedNamespace); // protected namespace, if any
+    public:     DWB(MethodInfo*)        GC_POINTER(init);               // not a call/init union b/c smart pointers and union's don't mix
     private:    CreateClassClosureProc  m_createClassClosure;
-    private:    const TraitsPosPtr      m_traitsPos;        // ptr into our ABC definition, depending on m_posType
+    private:    const TraitsPosPtr      m_traitsPos;                    // ptr into our ABC definition, depending on m_posType
     private:    const uint8_t*          metadata_pos;
-    private:    FixedBitSet             m_slotDestroyInfo;      // bitset for non-native slots, destruction of native slots is left to C++ write barriers
-    private:    DWB(MMgc::GCWeakRef*)   m_tbref;                // our TraitsBindings
-    private:    DWB(MMgc::GCWeakRef*)   m_tmref;                // our TraitsMetadata
+    private:    FixedBitSet             GC_STRUCTURE(m_slotDestroyInfo);// bitset for non-native slots, destruction of native slots is left to C++ write barriers
+    private:    DWB(MMgc::GCWeakRef*)   GC_POINTER(m_tbref);            // our TraitsBindings
+    private:    DWB(MMgc::GCWeakRef*)   GC_POINTER(m_tmref);            // our TraitsMetadata
     private:    DWB(const ScopeTypeChain*)
-                                        m_declaringScope;
+                                        GC_POINTER(m_declaringScope);
 #ifdef VMCFG_CACHE_GQCN
-    private:    DRCWB(Stringp)          _fullname;      // value returned by formatClassName
+    private:    DRCWB(Stringp)          GC_POINTER_IFDEF(_fullname, VMCFG_CACHE_GQCN);
+                                                                        // _fullname is the value returned by formatClassName
 #endif
     private:    uint16_t                m_sizeofInstance;   // sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
     private:    uint16_t                m_offsetofSlots;    // offset of first slot.
@@ -575,6 +598,8 @@ namespace avmplus
 #ifdef _DEBUG
     private:    uint32_t                m_bindingsVerified:1;       // set once bindings have been verified
 #endif
+        
+        GC_DATA_END(Traits)
     // ------------------------ DATA SECTION END
     };
 

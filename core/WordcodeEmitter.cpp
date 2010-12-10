@@ -206,8 +206,7 @@ namespace avmplus
 
         const ExceptionHandlerTable* old_table = info->abc_exceptions();
         int exception_count = old_table->exception_count;
-        size_t extra = sizeof(ExceptionHandler)*(exception_count - 1);
-        ExceptionHandlerTable* new_table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
+        ExceptionHandlerTable* new_table = ExceptionHandlerTable::create(core->GetGC(), exception_count);
 
         // Insert items in the exn list for from, to, and target, with the pc pointing
         // to the correct triggering instruction in the ABC and the update loc

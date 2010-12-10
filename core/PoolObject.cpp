@@ -64,8 +64,8 @@ namespace avmplus
 #endif
         cpool_mn_offsets(core->GetGC(), 0),
         metadata_infos(core->GetGC(), 0),
-        m_namedTraits(new(core->GetGC()) MultinameTraitsHashtable()),
-        m_namedScriptsMap(new(core->GetGC()) MultinameBindingHashtable()),
+        m_namedTraits(MultinameTraitsHashtable::create(core->GetGC())),
+        m_namedScriptsMap(MultinameBindingHashtable::create(core->GetGC())),
         m_namedScriptsList(core->GetGC(), 0),
         _code(sb.getImpl()),
         _abcStart(startPos),
@@ -91,11 +91,20 @@ namespace avmplus
 
     PoolObject::~PoolObject()
     {
-        #ifdef VMCFG_NANOJIT
+#ifdef VMCFG_NANOJIT
         mmfx_delete( codeMgr );
-        #endif
+#endif
     }
 
+    void PoolObject::gcTraceHook_PoolObject(MMgc::GC* gc)
+    {
+        (void)gc;
+#ifdef VMCFG_NANOJIT
+        if (codeMgr != NULL)
+            codeMgr->gcTrace(gc);
+#endif
+    }
+    
     void PoolObject::dynamicizeStrings()
     {
         if (!MMgc::GC::GetGC(this)->Destroying())
@@ -103,7 +112,7 @@ namespace avmplus
             // make all strings created so far dynamic,
             // making sure that no pointers into ABC data persist
             // (string 0 is always core->kEmptyString: skip it)
-            ConstantStringData* dataP = _abcStrings;
+            ConstantStringData* dataP = _abcStrings->data;
             for (uint32_t i = 1; i < constantStringCount; i++)
             {
                 ++dataP;
@@ -144,6 +153,36 @@ namespace avmplus
 
     ////////////////////////////////////////////////////////////////////
 
+    void ConstantStringContainer::gcTrace(MMgc::GC* gc)
+    {
+        gcTraceSmallAsLarge(gc);
+    }
+    
+    bool ConstantStringContainer::gcTraceLarge(MMgc::GC* gc, size_t cursor)
+    {
+        size_t cap = pool->constantStringCount;
+        const uint32_t work_increment = 2000/sizeof(void*);
+        if (work_increment * cursor >= cap)
+            return false;
+
+        size_t work = work_increment;
+        if (work_increment * (cursor + 1) >= cap)
+            work = cap - (work_increment * cursor);
+        
+        const uint8_t *start = pool->_abcStringStart;
+        const uint8_t *end = pool->_abcStringEnd;
+
+        // Skip strings into the ABC data, everything else is a real String pointer
+        for ( size_t i=0 ; i < work ; i++ ) {
+            ConstantStringData& item = data[(work_increment * cursor) + i];
+            if (item.abcPtr >= start && item.abcPtr < end)
+                continue;
+            gc->TraceLocation(&item.str);
+        }
+        return true;
+        
+    }
+
     void PoolObject::setupConstantStrings(uint32_t count)
     {
         // Always allocate slot 0 in the data array, which will be
@@ -163,13 +202,14 @@ namespace avmplus
         // Bugzilla 574427.
         if (count == 0)
             count = 1;
-        _abcStrings = (ConstantStringData*)core->gc->Calloc(count, sizeof(ConstantStringData), MMgc::GC::kZero|MMgc::GC::kContainsPointers);
+        // FIXME: worry about overflow in the 'extra' computation
+        _abcStrings = ConstantStringContainer::create(core->gc, (count-1) * sizeof(ConstantStringData), this);
         constantStringCount = count;
     }
 
     Stringp PoolObject::getString(int32_t index) const
     {
-        ConstantStringData* dataP = _abcStrings + index;
+        ConstantStringData* dataP = _abcStrings->data + index;
         if (dataP->abcPtr >= _abcStringStart && dataP->abcPtr < _abcStringEnd)
         {
             // String not created yet; grab the pointer to the (verified) ABC data
@@ -660,41 +700,28 @@ range_error:
 #ifdef VMCFG_PRECOMP_NAMES
     void PoolObject::initPrecomputedMultinames()
     {
-        if (this->precompNames == NULL)
+        if (precompNames == NULL)
         {
-            size_t nNames = this->cpool_mn_offsets.length();
-            if (nNames == 0)
-                nNames = 1;
-            this->precompNames = new (core->GetGC(), (nNames-1)*sizeof(HeapMultiname)) PrecomputedMultinames(this);
+            MMgc::GC* gc = core->GetGC();
+            uint32_t nNames = cpool_mn_offsets.length();
+            precompNames = ExactStructContainer<HeapMultiname>::create(gc, destroyPrecomputedMultinames, nNames);
+            for (uint32_t i=1; i < nNames; i++) {
+                Multiname mn;
+                parseMultiname(mn, i);
+                precompNames->get(i).setMultiname(gc, precompNames, mn);
+            }
         }
     }
 
-    PrecomputedMultinames::PrecomputedMultinames(PoolObject* pool)
-        : nNames (0)
+    void PoolObject::destroyPrecomputedMultinames(ExactStructContainer<HeapMultiname>* self)
     {
-        // The HeapMultinames will all have been initialized to zero on allocation, which is the
-        // state the HeapMultiname constructor would have left them in, had it been run (though
-        // it hasn't).  So below it is correct to assign the Multiname mn to the HeapMultiname
-        // multinames[i], the assignment operator will operate on sane values and will handle
-        // write barriers correctly.
-        nNames = pool->cpool_mn_offsets.length();
-        MMgc::GC* gc = MMgc::GC::GetGC(this);
-        const void* container = gc->FindBeginningFast(this);
-        for (uint32_t i=1; i < nNames; i++) {
-            Multiname mn;
-            pool->parseMultiname(mn, i);
-            multinames[i].setMultiname(gc, container, mn);
-        }
-    }
-
-    PrecomputedMultinames::~PrecomputedMultinames() {
         // Destroy each HeapMultiname to properly decrement reference counts on
-        // RC'd parts of HeapMultiname.
-        MMgc::GC* gc = MMgc::GC::GetGC(this);
-        const void* container = gc->FindBeginningFast(this);
+        // RC'd parts of HeapMultiname as soon as possible.
+        MMgc::GC* gc = MMgc::GC::GetGC(self);
         Multiname mn;
+        uint32_t nNames = self->capacity();
         for (uint32_t i=1; i < nNames; i++)
-            multinames[i].setMultiname(gc, container, mn);
+            self->get(i).setMultiname(gc, self, mn);
     }
 #endif
 
@@ -712,10 +739,10 @@ range_error:
             else
             {
 #ifdef VMCFG_PRECOMP_NAMES
-                // PrecomputedMultinames may not be inited yet, but we'll need them eventually,
+                // Precomputed multinames may not be inited yet, but we'll need them eventually,
                 // so go ahead and init them now
                 this->initPrecomputedMultinames();
-                const Multiname& mn = this->precompNames->multinames[-index];
+                const Multiname& mn = precompNames->get(-index);
 #else
                 Multiname mn;
                 this->parseMultiname(mn, -index);

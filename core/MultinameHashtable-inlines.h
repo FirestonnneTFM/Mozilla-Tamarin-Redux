@@ -61,25 +61,25 @@ REALLY_INLINE VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::getMulti(
 template <class VALUE_TYPE, class VALUE_WRITER>
 REALLY_INLINE Stringp MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::keyAt(int index) const
 {
-    AvmAssert(m_quads[index-1].name != NULL); return m_quads[index-1].name;
+    AvmAssert(m_quads->quads[index-1].name != NULL); return m_quads->quads[index-1].name;
 }
 
 template <class VALUE_TYPE, class VALUE_WRITER>
 REALLY_INLINE Namespacep MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::nsAt(int index) const
 {
-    return m_quads[index-1].ns;
+    return m_quads->quads[index-1].ns;
 }
 
 template <class VALUE_TYPE, class VALUE_WRITER>
 REALLY_INLINE VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::valueAt(int index) const
 {
-    return m_quads[index-1].value;
+    return m_quads->quads[index-1].value;
 }
 
 template <class VALUE_TYPE, class VALUE_WRITER>
 REALLY_INLINE API MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::apisAt(int index) const
 {
-    return m_quads[index-1].apis();
+    return m_quads->quads[index-1].apis();
 }
 
 template <class VALUE_TYPE, class VALUE_WRITER>
@@ -90,8 +90,8 @@ REALLY_INLINE size_t MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::allocatedSize
 
 REALLY_INLINE StMNHTIterator::StMNHTIterator(MultinameBindingHashtable* mnht) :
     m_mnht(mnht),
-    m_cur(mnht->m_quads - 1),
-    m_end(mnht->m_quads + mnht->numQuads)
+    m_cur(mnht->m_quads->quads - 1),
+    m_end(mnht->m_quads->quads + mnht->numQuads)
 { }
 
 REALLY_INLINE bool StMNHTIterator::next()

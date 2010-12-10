@@ -42,7 +42,7 @@
 
 namespace avmplus
 {
-    class VTable : public MMgc::GCObject
+    class GC_CPP_EXACT(VTable, MMgc::GCTraceableObject)
     {
         friend class CodegenLIR;
         friend class ImtThunkEnv;
@@ -74,13 +74,16 @@ namespace avmplus
 #endif
 
     // ------------------------ DATA SECTION BEGIN
+    GC_DATA_BEGIN(VTable)
+
     private:
-        Toplevel* const _toplevel;
+        Toplevel* const GC_POINTER(_toplevel);
+
     public:
-        DWB(MethodEnv*) init;
-        DWB(VTable*) base;
-        DWB(VTable*) ivtable;
-        Traits* const traits;
+        DWB(MethodEnv*) GC_POINTER(init);
+        DWB(VTable*)    GC_POINTER(base);
+        DWB(VTable*)    GC_POINTER(ivtable);
+        Traits* const   GC_POINTER(traits);
         ScriptObject* (*createInstance)(ClassClosure* cls, VTable* ivtable);
         bool basecase;
         bool linked;    // @todo -- surely there's a spare bit we can use for this.
@@ -88,10 +91,23 @@ namespace avmplus
 
 #ifdef VMCFG_NANOJIT
     private:
-        class ImtHolder imt;
+        ImtHolder       GC_STRUCTURE_IFDEF(imt, FEATURE_NANOJIT);
 #endif
+
     public:
-        MethodEnv* methods[1]; // virtual method table
+        // Virtual method table.
+        //
+        // The tracer needs the table size.  It's probably wrong to
+        // try to get the number of methods from the traits, because
+        // it looks like that could cause thrashing in the traits
+        // cache.  It is also not ideal to use the object's allocated
+        // size, but it /is/ reasonably correct to do so because the
+        // object is zeroed on allocation, and that saves one word of
+        // storage.  However, there's some space in VTable and we
+        // could keep a 16-bit count, probably, if we're really worried.
+        MethodEnv*      GC_POINTERS(methods, 1, "(MMgc::GC::Size(this) - offsetof(VTable, methods)) / sizeof(MethodEnv*)");
+
+    GC_DATA_END(VTable)
     // ------------------------ DATA SECTION END
     };
 }

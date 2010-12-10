@@ -84,6 +84,9 @@ namespace avmplus
         Multiname(Namespacep ns, Stringp name, bool qualified);
         ~Multiname();
 
+        // Utility used by exact tracers of multiname values
+        void gcTrace(MMgc::GC* gc);
+        
         Stringp getName() const;
         void setName(Stringp _name);
         void setName(const Multiname* other);
@@ -199,6 +202,9 @@ namespace avmplus
         const HeapMultiname& operator=(const HeapMultiname& that);
         const HeapMultiname& operator=(const Multiname& that);
 
+        // Utility used by exact tracers of multiname values
+        void gcTrace(MMgc::GC* gc);
+        
         // Use this to set when the location of the HeapMultiname within its parent
         // object is not within the first block of the parent object.  See bugzilla 525875.
         void setMultiname(MMgc::GC* gc, const void* container, const Multiname& other);

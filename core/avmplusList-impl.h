@@ -371,6 +371,12 @@ namespace avmplus
         }
         return removed;
     }
+
+    template<class T, class ListHelper>
+    void ListImpl<T,ListHelper>::gcTrace(MMgc::GC* gc)
+    {
+        ListHelper::gcTrace(gc, &m_data);
+    }
 }
 
 #endif /* __avmplus_List_impl__ */

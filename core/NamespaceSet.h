@@ -58,17 +58,22 @@ namespace avmplus
      * NamespaceSet is a reference to 0 or more namespaces.  It consists
      * of a list of namespaces.
      */
-    class NamespaceSet : public MMgc::GCObject
+    class GC_CPP_EXACT(NamespaceSet, MMgc::GCTraceableObject)
     {
         friend class AbcParser;
         friend class AvmCore;
         friend class Toplevel;
+
+        GC_DATA_BEGIN(NamespaceSet)
+        
     private:
         // hi 31 bits: count
         // lo bit: containsAnyPublic flag
         uint32_t _countAndFlags;
-        Namespacep _namespaces[1/*namespaceCount*/];
+        Namespacep GC_POINTERS_SMALL(_namespaces, 1, "count()");
 
+        GC_DATA_END(NamespaceSet)
+        
     private:
         NamespaceSet();
 

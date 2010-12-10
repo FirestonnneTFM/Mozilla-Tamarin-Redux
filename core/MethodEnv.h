@@ -43,20 +43,23 @@
 
 namespace avmplus
 {
-    class MethodEnv : public MethodEnvProcHolder
+    class GC_CPP_EXACT(MethodEnv, MethodEnvProcHolder)
     {
         friend class CodegenLIR;
         friend class BaseExecMgr;
 
+    protected:
+        MethodEnv(MethodInfo* method, ScopeChain* scope);
+        
     public:
+        static MethodEnv* create(MMgc::GC* gc, MethodInfo* method, ScopeChain* scope);
+
         /** vtable for the activation scope inside this method */
         ScriptObject* newUninitializedActivation();
         ScriptObject* newActivation();
 
         /** getter lazily creates table which maps SO->MC */
         WeakKeyHashtable *getMethodClosureTable();
-
-        MethodEnv(MethodInfo* method, ScopeChain* scope);
 
         AbcEnv* abcEnv() const;
         AvmCore* core() const;
@@ -235,7 +238,7 @@ namespace avmplus
     private:
         Atom findWithProperty(Atom obj, const Multiname* multiname);
 
-        class ActivationMethodTablePair : public GCObject
+        class ActivationMethodTablePair : public MMgc::GCObject
         {
         public:
             ActivationMethodTablePair(VTable *a, WeakKeyHashtable*wkh);
@@ -262,50 +265,87 @@ namespace avmplus
     protected:
         VTable* vtable() const;
 
-    // ------------------------ DATA SECTION BEGIN
-    public:
-        MethodInfo* const method;
-    protected:
-        // pointers are write-once so we don't need WB's
-        ScopeChain* const           _scope;
-    private:
-        uintptr_t                   activationOrMCTable;
-    public:
 #ifdef VMCFG_LOOKUP_CACHE
+    public:
+        // LookupCache is part of an ExactStructContainer<> array, hence the gcTrace method.
         class LookupCache
         {
         public:
             uint32_t timestamp;
             DRCWB(ScriptObject*) object;
+            
+            REALLY_INLINE void gcTrace(MMgc::GC* gc)
+            {
+                gc->TraceLocation(&object);
+            }
         };
-        DWB(LookupCache*) lookup_cache;
 
         // Populate lookup_cache, which should be NULL at the time of the call.
         void createLookupCache();
+        
+        // Clear out the lookup cache elements
+        static void cleanLookupCache(ExactStructContainer<LookupCache>* self);
 #endif
+
+    // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(MethodEnv)
+
+    public:
+        MethodInfo* const           GC_POINTER(method);
+    protected:
+        // pointers are write-once so we don't need WB's
+        ScopeChain* const           GC_POINTER(_scope);
+    private:
+        uintptr_t                   GC_CONSERVATIVE(activationOrMCTable);
+    public:
+#ifdef VMCFG_LOOKUP_CACHE
+        DWB(ExactStructContainer<LookupCache>*)
+                                    GC_POINTER_IFDEF(lookup_cache, VMCFG_LOOKUP_CACHE);
+#endif
+
+        GC_DATA_END(MethodEnv)
     // ------------------------ DATA SECTION END
     };
 
-    class ScriptEnv : public MethodEnv
+    class GC_CPP_EXACT(ScriptEnv, MethodEnv)
     {
-    public:
         ScriptEnv(MethodInfo* _method, ScopeChain* _scope);
+    public:
+        REALLY_INLINE static ScriptEnv* create(MMgc::GC* gc, MethodInfo* _method, ScopeChain* _scope)
+        {
+            return MMgc::setExact(new (gc) ScriptEnv(_method, _scope));
+        }
+
         ScriptObject* initGlobal();
         static ScopeChain* createScriptScope(const ScopeTypeChain* stc, VTable* _vtable, AbcEnv* _abcEnv);
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(ScriptEnv)
+        
     public:
-        DRCWB(ScriptObject*) global; // initially null, set after initialization
+        DRCWB(ScriptObject*) GC_POINTER(global); // initially null, set after initialization
+        
+        GC_DATA_END(ScriptEnv)
     // ------------------------ DATA SECTION END
     };
 
-    class FunctionEnv : public MethodEnv
+    class GC_CPP_EXACT(FunctionEnv, MethodEnv)
     {
-      public:
         FunctionEnv(MethodInfo* _method, ScopeChain* _scope);
+
+    public:
+        REALLY_INLINE static FunctionEnv* create(MMgc::GC* gc, MethodInfo* _method, ScopeChain* _scope)
+        {
+            return MMgc::setExact(new (gc) FunctionEnv(_method, _scope));
+        }
+
     // ------------------------ DATA SECTION BEGIN
-      public:
-        DRCWB(ClassClosure*) closure;
+        GC_DATA_BEGIN(FunctionEnv)
+        
+    public:
+        DRCWB(ClassClosure*) GC_POINTER(closure);
+        
+        GC_DATA_END(FunctionEnv)
     // ------------------------ DATA SECTION END
     };
 }

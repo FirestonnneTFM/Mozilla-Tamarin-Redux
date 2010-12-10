@@ -727,7 +727,7 @@ namespace avmplus
             fscope->setScope(gc, i, *scopes++);
         }
 
-        FunctionEnv* fenv = new (gc) FunctionEnv(function, fscope);
+        FunctionEnv* fenv = FunctionEnv::create(gc, function, fscope);
         FunctionObject* c = new (gc, fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
         c->setDelegate(functionClass->prototypePtr());
 
@@ -1521,12 +1521,17 @@ namespace avmplus
     }
 
 #ifdef VMCFG_LOOKUP_CACHE
+    void MethodEnv::cleanLookupCache(ExactStructContainer<LookupCache>* self)
+    {
+        for ( uint32_t i=0 ; i < self->capacity() ; i++ )
+            self->get(i).object = NULL;
+    }
+
     void MethodEnv::createLookupCache()
     {
         AvmAssert(lookup_cache == NULL);
 
-        using namespace MMgc;
-        lookup_cache = (LookupCache*)core()->gc->Calloc(method->lookup_cache_size(), sizeof(LookupCache), GC::kContainsPointers | GC::kZero);
+        lookup_cache = ExactStructContainer<LookupCache>::create(core()->gc, cleanLookupCache, method->lookup_cache_size());
     }
 #endif
 
