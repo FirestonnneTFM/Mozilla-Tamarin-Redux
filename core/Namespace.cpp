@@ -58,6 +58,8 @@ namespace avmplus
         // ensure that if the incoming Atom is a string, that it's interned
         AvmAssert(AvmCore::isString(prefix) ? (AvmCore::atomToString(prefix))->isInterned() : 1);
         setUri(uri, flags);
+        
+        MMgc::setExact(this);
     }
 
     Namespace::~Namespace()
@@ -66,6 +68,12 @@ namespace avmplus
         setAPI(0);
     }
 
+    void Namespace::gcTrace(MMgc::GC* gc)
+    {
+        gc->TraceAtom(&m_prefix);
+        gc->TraceLocation(&m_uri);
+    }
+    
     void Namespace::setUri(Stringp uri, NamespaceType flags)
     {
         WBRC(GC::GetGC(this), this, &m_uri, (int32_t)flags | (uintptr_t) uri);
