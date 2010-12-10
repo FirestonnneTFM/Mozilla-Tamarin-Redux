@@ -147,6 +147,8 @@ namespace avmplus
 
         virtual                     ~String();
 
+        virtual void                gcTrace(MMgc::GC* gc);
+
         /**
         Create a string with a given width out of this string. If the width is equal to the current
         width, return this instance. If the desired width is too narrow to fit, or kAuto is passed

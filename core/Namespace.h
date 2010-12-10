@@ -57,7 +57,7 @@ namespace avmplus
         friend class AvmCore;
         friend class ApiUtils;
         template <class VALUE_TYPE, class VALUE_WRITER> friend class MultinameHashtable;
-        AtomWB const    m_prefix;
+        AtomWB          m_prefix;
         API             m_api;
         uintptr_t       m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
 
@@ -73,6 +73,8 @@ namespace avmplus
         };
         Namespace(Atom prefix, Stringp uri, NamespaceType type);
         ~Namespace();
+
+        virtual void gcTrace(MMgc::GC* gc);
 
         inline Atom getPrefix() const { return get_prefix(); }
         Stringp getURI() const;

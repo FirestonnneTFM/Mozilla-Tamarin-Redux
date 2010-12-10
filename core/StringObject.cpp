@@ -337,6 +337,8 @@ namespace avmplus
     {
         AvmAssert(m_length >= 0);
         AvmAssert((uint64_t(m_length) << getWidth()) <= 0x7FFFFFFFU);
+        
+        MMgc::setExact(this);
     }
 
     // ctor for a dynamic string.
@@ -365,6 +367,8 @@ namespace avmplus
 #else
         (void)gc;
 #endif
+        
+        MMgc::setExact(this);
     }
 
     // ctor for a dependent string.
@@ -399,6 +403,8 @@ namespace avmplus
         master->IncrementRef();
         (void)gc;
 #endif
+        
+        MMgc::setExact(this);
     }
 
     // add a and b and check for overflow
@@ -591,7 +597,7 @@ namespace avmplus
         return newStr;
     }
 
-/////////////////////////////// Destructors ////////////////////////////////
+/////////////////////////////// Destructors & tracers ////////////////////////////////
 
     String::~String()
     {
@@ -616,7 +622,21 @@ namespace avmplus
         m_bitsAndFlags = 0;
     }
 
-/////////////////////////////// Conversions ////////////////////////////////
+    /*virtual*/
+    void String::gcTrace(GC* gc)
+    {
+        switch (getType())
+        {
+            case kDynamic:
+                gc->TraceLocation(&m_buffer.pv);
+                break;
+            case kDependent:
+                gc->TraceLocation(&m_extra.master);
+                break;
+        }
+    }
+
+    /////////////////////////////// Conversions ////////////////////////////////
 
     void String::makeDynamic(const uint8_t* dataStart, uint32_t dataSize)
     {
