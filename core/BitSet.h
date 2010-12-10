@@ -190,6 +190,12 @@ namespace avmplus
         {
         }
 
+        inline void gcTrace(MMgc::GC* gc)
+        {
+            if (!(m_bits & 1))
+                gc->TraceLocation(&m_bits);
+        }
+
         // blows away existing content, sets all bits to 0
         inline void resize(MMgc::GC* gc, uint32_t cap)
         {

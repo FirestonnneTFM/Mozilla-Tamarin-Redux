@@ -229,7 +229,7 @@ MethodInfo* DomainMgr::findScriptInPoolByMultiname(PoolObject* pool, const Multi
 
 void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv>& envs)
 {
-    HeapHashtable* ht = new(core->GetGC()) HeapHashtable(core->GetGC());
+    HeapHashtable* ht = HeapHashtable::create(core->GetGC());
     for (uint32_t i = 0, n = envs.length(); i < n; ++i)
     {
         ScriptEnv* se = envs[i];

@@ -1576,7 +1576,7 @@ namespace avmplus
         // We don't want to count their memory twice, so this hashtable keeps
         // track of the root E4XNodes whose memory we have already accounted
         // for.
-        HeapHashtable* seenXmlRoots = new (gc()) HeapHashtable(gc());
+        HeapHashtable* seenXmlRoots = HeapHashtable::create(gc());
 
         for (uint32_t i=0, n=m_children.length(); i<n; ++i)
         {

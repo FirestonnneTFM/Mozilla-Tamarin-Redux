@@ -77,9 +77,9 @@ namespace avmshell
 
     ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
     {
-        shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count,
-                                                                sizeof(ClassClosure*),
-                                                                MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+        shellClasses = ExactHeapList< RCList<ClassClosure> >::create(core()->gc, avmplus::NativeID::shell_toplevel_abc_class_count);
+        if (avmplus::NativeID::shell_toplevel_abc_class_count > 0)
+            shellClasses->list.set(avmplus::NativeID::shell_toplevel_abc_class_count-1, 0);
     }
 
     ShellCore::ShellCore(MMgc::GC* gc)
@@ -194,7 +194,7 @@ namespace avmshell
 
     /*virtual*/ Toplevel* ShellCore::createToplevel(AbcEnv* abcEnv)
     {
-        return new (GetGC()) ShellToplevel(abcEnv);
+        return ShellToplevel::create(GetGC(), abcEnv);
     }
 
 #ifdef VMCFG_EVAL

@@ -45,10 +45,11 @@ namespace avmplus
 {
     Toplevel::Toplevel(AbcEnv* abcEnv) : _abcEnv(abcEnv)
     {
-        _builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->classCount(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
-
         AvmCore* core = this->core();
         MMgc::GC* gc = core->GetGC();
+
+        _builtinClasses = ExactHeapList< RCList<ClassClosure> >::create(gc, core->builtinPool->classCount());
+        _builtinClasses->list.set(core->builtinPool->classCount()-1, 0);
 
         // create a temp object vtable to use, since the real one isn't created yet
         // later, in OP_newclass, we'll replace with the real Object vtable, so methods
@@ -86,8 +87,7 @@ namespace avmplus
 #endif
         AvmAssert(_mainEntryPoint == global()->vtable->init);
         ClassClosure* cc = findClassInScriptEnv(class_id, _mainEntryPoint);
-        //builtinClasses[class_id] = cc;
-        WBRC(core()->GetGC(), _builtinClasses, &_builtinClasses[class_id], cc);
+        _builtinClasses->list.set(class_id, cc);
         return cc;
     }
 

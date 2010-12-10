@@ -177,7 +177,7 @@ namespace avmshell
         virtual avmplus::Debugger* createDebugger(int tracelevel)
         {
             AvmAssert(allowDebugger >= 0);
-            return allowDebugger ? new (GetGC()) DebugCLI(this, (avmplus::Debugger::TraceLevel)tracelevel) : NULL;
+            return allowDebugger ? DebugCLI::create(GetGC(), this, (avmplus::Debugger::TraceLevel)tracelevel) : NULL;
         }
 
 #endif
@@ -222,12 +222,18 @@ namespace avmshell
         BugCompatibility::Version defaultBugCompatibilityVersion;
     };
 
-    class ShellToplevel : public Toplevel
+    class GC_CPP_EXACT(ShellToplevel, avmplus::Toplevel)
     {
         friend class ShellCore;
 
-    public:
+    private:
         ShellToplevel(AbcEnv* abcEnv);
+    
+    public:
+        REALLY_INLINE static ShellToplevel* create(MMgc::GC* gc, AbcEnv* abcEnv)
+        {
+            return MMgc::setExact(new (gc) ShellToplevel(abcEnv));
+        }
 
         ShellCore* core() const {
             return (ShellCore*)Toplevel::core();
@@ -235,19 +241,23 @@ namespace avmshell
 
         virtual ClassClosure *getBuiltinExtensionClass(int class_id)
         {
-            return shellClasses[class_id] ? shellClasses[class_id] : resolveShellClass(class_id);
+            return shellClasses->list[class_id] ? shellClasses->list[class_id] : resolveShellClass(class_id);
         }
 
     private:
         ClassClosure* resolveShellClass(int class_id)
         {
             ClassClosure* cc = findClassInScriptEnv(class_id, shellEntryPoint);
-            WBRC(core()->GetGC(), shellClasses, &shellClasses[class_id], cc);
+            shellClasses->list.set(class_id, cc);
             return cc;
         }
 
-        DWB(ScriptEnv*) shellEntryPoint;
-        DWB(ClassClosure**) shellClasses;
+        GC_DATA_BEGIN(ShellToplevel)
+        
+        DWB(ScriptEnv*)                             GC_POINTER(shellEntryPoint);
+        DWB(ExactHeapList< RCList<ClassClosure> >*) GC_POINTER(shellClasses);
+
+        GC_DATA_END(ShellToplevel)
     };
 }
 

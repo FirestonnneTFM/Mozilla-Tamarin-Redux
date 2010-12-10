@@ -114,14 +114,8 @@
 
 namespace avmplus
 {
-    class E4XNodeAux : public MMgc::GCObject
+    class GC_CPP_EXACT(E4XNodeAux, MMgc::GCTraceableObject)
     {
-        DRCWB(Stringp)      m_name;
-        DRCWB(Namespace*)       m_ns;
-
-        /** callback on changes to children, attribute, name or namespace */
-        DRCWB(FunctionObject*)  m_notification;
-
         friend class E4XNode;
         friend class ElementE4XNode;
 
@@ -131,6 +125,17 @@ namespace avmplus
 #ifdef DEBUGGER
         uint64_t bytesUsed() const;
 #endif
+
+    private:
+        GC_DATA_BEGIN(E4XNodeAux)
+
+        DRCWB(Stringp)          GC_POINTER(m_name);
+        DRCWB(Namespace*)       GC_POINTER(m_ns);
+
+        /** callback on changes to children, attribute, name or namespace */
+        DRCWB(FunctionObject*)  GC_POINTER(m_notification);
+
+        GC_DATA_END(E4XNodeAux)
     };
 
     ///////////////////////////////////////////////////
@@ -142,21 +147,25 @@ namespace avmplus
     // Currently this is 12-bytes in size (4 bytes wasted by GC)
     // Element nodes are 24 bytes
     // All other nodes are 16 bytes
-    class E4XNode : public MMgc::GCObject
+    class GC_CPP_EXACT(E4XNode, MMgc::GCTraceableObject)
     {
         friend class ElementE4XNode;
 
     protected:
+        GC_DATA_BEGIN(E4XNode)
+        
         /** Either null or an E4XNode, valid for all node types */
-        DWB(E4XNode*) m_parent;
+        DWB(E4XNode*) GC_POINTER(m_parent);
 
         // If this is a simple name with no namespace or notification function,
         // we just have a string pointer.  Otherwise, we're a E4XNodeAux value
         // containing a name + namespace as well as a notification function.
         // E4XNodeAux *
         // String *
-        uintptr_t m_nameOrAux;
+        uintptr_t GC_POINTER(m_nameOrAux);
         #define AUXBIT 0x1
+
+        GC_DATA_END(E4XNode)
 
     public:
         
@@ -265,9 +274,11 @@ namespace avmplus
 #endif
     };
 
-    class TextE4XNode : public E4XNode
+    class GC_CPP_EXACT(TextE4XNode, E4XNode)
     {
-        DRCWB(Stringp) m_value;
+        GC_DATA_BEGIN(TextE4XNode)
+        DRCWB(Stringp) GC_POINTER(m_value);
+        GC_DATA_END(TextE4XNode)
 
     public:
         TextE4XNode (E4XNode *parent, String *value);
@@ -282,9 +293,11 @@ namespace avmplus
 #endif
     };
 
-    class CommentE4XNode : public E4XNode
+    class GC_CPP_EXACT(CommentE4XNode, E4XNode)
     {
-        DRCWB(Stringp) m_value;
+        GC_DATA_BEGIN(CommentE4XNode)
+        DRCWB(Stringp) GC_POINTER(m_value);
+        GC_DATA_END(CommentE4XNode)
 
     public:
         CommentE4XNode (E4XNode *parent, String *value);
@@ -299,9 +312,11 @@ namespace avmplus
 #endif
     };
 
-    class AttributeE4XNode : public E4XNode
+    class GC_CPP_EXACT(AttributeE4XNode, E4XNode)
     {
-        DRCWB(Stringp) m_value;
+        GC_DATA_BEGIN(AttributeE4XNode)
+        DRCWB(Stringp) GC_POINTER(m_value);
+        GC_DATA_END(AttributeE4XNode)
 
     public:
         AttributeE4XNode (E4XNode *parent, String *value);
@@ -316,9 +331,11 @@ namespace avmplus
 #endif
     };
 
-    class CDATAE4XNode : public E4XNode
+    class GC_CPP_EXACT(CDATAE4XNode, E4XNode)
     {
-        DRCWB(Stringp) m_value;
+        GC_DATA_BEGIN(CDATAE4XNode)
+        DRCWB(Stringp) GC_POINTER(m_value);
+        GC_DATA_END(CDATAE4XNode)
 
     public:
         CDATAE4XNode (E4XNode *parent, String *value);
@@ -333,10 +350,11 @@ namespace avmplus
 #endif
     };
 
-    class PIE4XNode : public E4XNode
+    class GC_CPP_EXACT(PIE4XNode, E4XNode)
     {
-        /** only when m_class != kElement */
-        DRCWB(Stringp) m_value;
+        GC_DATA_BEGIN(PIE4XNode)
+        DRCWB(Stringp) GC_POINTER(m_value); // only when m_class != kElement
+        GC_DATA_END(PIE4XNode)
 
     public:
         PIE4XNode (E4XNode *parent, String *value);
@@ -352,17 +370,21 @@ namespace avmplus
     };
 
     // Currently this is 24-bytes in size
-    class ElementE4XNode : public E4XNode
+    class GC_CPP_EXACT(ElementE4XNode, E4XNode)
     {
-        DWB(HeapE4XNodeList*) m_attributes;
+        GC_DATA_BEGIN(ElementE4XNode)
 
-        DWB(HeapNamespaceList*) m_namespaces;
+        DWB(HeapE4XNodeList*) GC_POINTER(m_attributes);
+
+        DWB(HeapNamespaceList*) GC_POINTER(m_namespaces);
 
         // If the low bit of this integer is set, this value points directly
         // to a single child (one E4XNode *).  If there are multiple children,
         // this points to a HeapE4XNodeList
-        DWB(uintptr_t) m_children;
+        DWB(uintptr_t) GC_POINTER(m_children);
         #define SINGLECHILDBIT 0x1
+
+        GC_DATA_END(ElementE4XNode)
 
         friend class E4XNode;
 

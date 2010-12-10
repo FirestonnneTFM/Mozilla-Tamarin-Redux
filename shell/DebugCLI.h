@@ -176,8 +176,10 @@ namespace avmshell
      * A simple command line interface for the Debugger.
      * Supports a gdb-like command line.
      */
-    class DebugCLI : public avmplus::Debugger
+    class GC_CPP_EXACT_IFDEF(DebugCLI, avmplus::Debugger, DEBUGGER)
     {
+    private:
+        DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel);
     public:
         /** @name command codes */
         /*@{*/
@@ -222,7 +224,11 @@ namespace avmshell
             int id;
         };
 
-        DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel);
+        REALLY_INLINE static DebugCLI* create(MMgc::GC* gc, AvmCore *core, Debugger::TraceLevel tracelevel)
+        {
+            return MMgc::setExact(new (gc) DebugCLI(core, tracelevel));
+        }
+
         ~DebugCLI();
 
         void enterDebugger();
@@ -263,21 +269,26 @@ namespace avmshell
          */
         Stringp formatValue(Atom value);
 
+        GC_DATA_BEGIN(DebugCLI)
+        
     private:
         bool activeFlag;
         char *currentSource;
         uint32_t currentSourceLen;
-        DRCWB(Stringp) currentFile;
+        DRCWB(Stringp) GC_POINTER(currentFile);
         int breakpointCount;
         bool warnMissingSource;
 
-        DWB(BreakAction*) firstBreakAction;
-        DWB(BreakAction*) lastBreakAction;
+        DWB(BreakAction*) GC_POINTER(firstBreakAction);
+        DWB(BreakAction*) GC_POINTER(lastBreakAction);
 
         enum { kMaxCommandLine = 1024 };
         char commandLine[kMaxCommandLine];
         char lastCommand[kMaxCommandLine];
         char *currentToken;
+        
+        GC_DATA_END(DebugCLI)
+
         char *nextToken();
 
         void printIP();

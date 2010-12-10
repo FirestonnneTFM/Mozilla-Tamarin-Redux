@@ -129,7 +129,7 @@ namespace avmplus
     {
         AvmCore* core = this->core();
         AbcEnv* abcEnv = scope->abcEnv();
-        MethodEnv* methodEnv = new (core->GetGC()) MethodEnv(func, scope);
+        MethodEnv* methodEnv = MethodEnv::create(core->GetGC(), func, scope);
         // register this env in the callstatic method table
         int method_id = func->method_id();
         if (method_id != -1)

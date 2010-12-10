@@ -162,7 +162,12 @@ namespace avmplus
     {
         Atom* atoms = (Atom*)(m_atomsAndFlags & ~kAtomFlags);
         m_atomsAndFlags = m_atomsAndFlags & kAtomFlags;  // Must clear the pointer bits to avoid a dangling pointer
-        MMgc::GC::GetGC(atoms)->Free(atoms);
+        MMgc::GC* gc = MMgc::GC::GetGC(atoms);
+#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
+        gc->Zero(atoms);
+#else
+        gc->Free(atoms);
+#endif
     }
 
     // @todo -- move this mess to VMPI, see https://bugzilla.mozilla.org/show_bug.cgi?id=546354
@@ -258,6 +263,12 @@ namespace avmplus
         return ht.next(index);
     }
 
+    REALLY_INLINE void InlineHashtable::gcTrace(MMgc::GC* gc)
+    {
+        if (getAtoms() != NULL && MMgc::GC::TraceObjectGuard(getAtoms()))
+            gc->TraceAtoms(getAtoms(), getCapacity());
+    }
+
     REALLY_INLINE Atom HeapHashtableRC::keyAt(int index)
     {
         return ht.keyAt(index);
@@ -302,6 +313,11 @@ namespace avmplus
     REALLY_INLINE MMgc::RCObject* HeapHashtableRC::untagAtom(Atom a)
     {
         return (MMgc::RCObject*)atomPtr(a);
+    }
+
+    REALLY_INLINE HeapHashtable* HeapHashtable::create(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)
+    {
+        return MMgc::setExact(new (gc) HeapHashtable(gc, capacity));
     }
 
     REALLY_INLINE HeapHashtable::HeapHashtable(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)

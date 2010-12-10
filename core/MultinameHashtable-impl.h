@@ -45,14 +45,26 @@ using namespace MMgc;
 namespace avmplus
 {
     template <class VALUE_TYPE, class VALUE_WRITER>
+    void MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::gcTrace(MMgc::GC *gc)
+    {
+        gc->TraceLocation(&m_quads);
+    }
+    
+    template <class VALUE_TYPE, class VALUE_WRITER>
+    bool MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::gcTraceLarge(MMgc::GC *gc, size_t cursor)
+    {
+        return gcTraceLargeAsSmall(gc, cursor);
+    }
+    
+    template <class VALUE_TYPE, class VALUE_WRITER>
     void MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::grow()
     {
         // double our table
         int capacity = numQuads*2;
         MMgc::GC* gc = MMgc::GC::GetGC(this);
         MMGC_MEM_TYPE(this);
-        Quad<VALUE_TYPE>* newAtoms = (Quad<VALUE_TYPE> *) gc->Calloc(capacity, sizeof(Quad<VALUE_TYPE>), GC::kContainsPointers|GC::kZero);
-        rehash(m_quads, numQuads, newAtoms, capacity);
+        QuadContainer<VALUE_TYPE>* newAtoms = QuadContainer<VALUE_TYPE>::create(gc, capacity);
+        rehash(m_quads->quads, numQuads, newAtoms->quads, capacity);
         freeQuads(gc);
         WB(gc, this, &m_quads, newAtoms);
         numQuads = capacity;
@@ -117,7 +129,7 @@ namespace avmplus
 
             AvmAssert(numQuads > 0);
             MMGC_MEM_TYPE(this);
-            Quad<VALUE_TYPE>* newAtoms = (Quad<VALUE_TYPE> *) gc->Alloc (sizeof(Quad<VALUE_TYPE>) * numQuads, GC::kContainsPointers|GC::kZero);
+            QuadContainer<VALUE_TYPE>* newAtoms = QuadContainer<VALUE_TYPE>::create(gc, numQuads);
             WB(gc, this, &m_quads, newAtoms);
         }
     }
@@ -131,7 +143,7 @@ namespace avmplus
     template <class VALUE_TYPE, class VALUE_WRITER>
     void MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::freeQuads(MMgc::GC* gc)
     {
-        Quad<VALUE_TYPE>* quads = m_quads;
+        QuadContainer<VALUE_TYPE>* quads = m_quads;
         m_quads = NULL;     // Avoid dangling m_quad
         gc->Free(quads);
     }
@@ -168,6 +180,29 @@ namespace avmplus
         return i;
     }
 
+    template <class VALUE_TYPE>
+    REALLY_INLINE QuadContainer<VALUE_TYPE>* QuadContainer<VALUE_TYPE>::create(MMgc::GC* gc, uint32_t capacity)
+    {
+        return MMgc::setExact(new (gc, sizeof(Quad<VALUE_TYPE>) * (capacity-1)) QuadContainer(capacity));
+    }
+    
+    template <class VALUE_TYPE>
+    void QuadContainer<VALUE_TYPE>::gcTrace(MMgc::GC* gc)
+    {
+        for ( uint32_t i=0 ; i < capacity ; i++ ) {
+            Quad<VALUE_TYPE>& q = quads[i];
+            gc->TraceLocation(&q.name);
+            gc->TraceLocation(&q.ns);
+            gc->TraceConservativeLocation((uintptr_t*)&q.value);
+        }
+    }
+
+    template <class VALUE_TYPE>
+    bool QuadContainer<VALUE_TYPE>::gcTraceLarge(MMgc::GC* gc, size_t cursor)
+    {
+        return gcTraceLargeAsSmall(gc, cursor);
+    }
+    
     /**
      * since identifiers are always interned strings, they can't be 0,
      * so we can use 0 as the empty value.
@@ -196,7 +231,7 @@ namespace avmplus
         unsigned i = ((0x7FFFFFF8 & (uintptr_t)mnameName)>>3) & bitMask;
         Stringp atomName;
 
-        const Quad<VALUE_TYPE>* t = m_quads;
+        const Quad<VALUE_TYPE>* t = m_quads->quads;
         while ((atomName = t[i].name) != EMPTY)
         {
             if (atomName == mnameName)
@@ -255,7 +290,7 @@ found1:
     VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::get(Stringp name, Namespacep ns) const
     {
         AvmAssert(ns->getURI()->isInterned());
-        const Quad<VALUE_TYPE>* t = m_quads;
+        const Quad<VALUE_TYPE>* t = m_quads->quads;
         int i = find(name, ns, t, numQuads);
         if (t[i].name == name)
         {
@@ -269,7 +304,7 @@ found1:
     template <class VALUE_TYPE, class VALUE_WRITER>
     VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::getName(Stringp name) const
     {
-        const Quad<VALUE_TYPE>* t = m_quads;
+        const Quad<VALUE_TYPE>* t = m_quads->quads;
         for (int i=0, n=numQuads; i < n; i++)
         {
             if (t[i].name == name)
@@ -307,7 +342,7 @@ found1:
     int FASTCALL MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::next(int index) const
     {
         // Advance to first non-empty slot.
-        const Quad<VALUE_TYPE>* t = m_quads;
+        const Quad<VALUE_TYPE>* t = m_quads->quads;
         while (index < numQuads) {
             if (t[index++].name != NULL) {
                 return index;
@@ -345,7 +380,7 @@ found1:
         // entries with a different ns than what we are adding, all of those name
         // entries should be marked as multiNS.
         Quad<VALUE_TYPE>* cur;
-        Quad<VALUE_TYPE>* const quadbase = m_quads;
+        Quad<VALUE_TYPE>* const quadbase = m_quads->quads;
         {
             int n = 7;
             int const bitmask = (numQuads - 1);
@@ -386,15 +421,15 @@ found1:
         // New table entry for this <name,ns> pair
         size++;
         //quads[i].name = name;
-        WBRC(gc, quadbase, &cur->name, name);
+        WBRC(gc, m_quads, &cur->name, name);
         //quads[i].ns = ns;
-        WBRC(gc, quadbase, &cur->ns, ns);
+        WBRC(gc, m_quads, &cur->ns, ns);
         cur->apisAndMultiNS = (cur->apisAndMultiNS & ~1) | multiNS;
         
     write_value:
         //quads[i].value = value;
         //WB(gc, quadbase, &cur->value, value);
-        VALUE_WRITER::store(gc, quadbase, (void**)&cur->value, (void*)value);
+        VALUE_WRITER::store(gc, m_quads, (void**)&cur->value, (void*)value);
         AvmAssert((ns->getAPI() & 0x80000000U) == 0);
         cur->apisAndMultiNS |= (uintptr_t)ns->getAPI() << 1;
     }

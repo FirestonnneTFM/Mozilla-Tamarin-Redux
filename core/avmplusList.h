@@ -78,6 +78,7 @@ namespace avmplus
         typedef MMgc::is_base_of<MMgc::GCObject, baseType>              isGCObject;
         typedef MMgc::is_base_of<MMgc::GCFinalizedObject, baseType>     isGCFinalizedObject;
         typedef MMgc::is_base_of<MMgc::RCObject, baseType>              isRCObject;
+        typedef MMgc::is_base_of<MMgc::GCTraceableObject, baseType>     isGCTraceableObject;
     };
     
     // ----------------------------
@@ -116,7 +117,24 @@ namespace avmplus
         // add an empty, inlined ctor to avoid spurious warnings in MSVC2008
         REALLY_INLINE explicit ListData() {}
     };
+
+    // Do not subclass this without considering the exact-tracing
+    // protocol implications: observe that setExact is called in
+    // the constructor, so every subclass must be exactly traced.
+    template<class STORAGE>
+    struct TracedListData : public MMgc::GCTraceableObject
+    {
+        MMgc::GC*   gc;
+        uint32_t    len;
+        uint32_t    cap;
+        STORAGE     entries[1];   // lying, really [cap]
         
+        TracedListData() { MMgc::setExact(this); }
+
+        virtual void gcTrace(MMgc::GC* gc);
+        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+    };
+    
     // ----------------------------
     // ----------------------------
     template<class T>
@@ -171,6 +189,9 @@ namespace avmplus
         // already done range checking to ensure that src+count and dst+count constitute
         // valid ranges within data.
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        
+        // Trace GC pointers in the data, if appropriate for the data type.
+        static void gcTrace(MMgc::GC* gc, LISTDATA** data);
     };
 
     // ----------------------------
@@ -181,7 +202,7 @@ namespace avmplus
         typedef MMgc::GCObject* TYPE;
         typedef TYPE OPAQUE_TYPE;
         typedef MMgc::GCObject* STORAGE;
-        typedef ListData<STORAGE> LISTDATA;
+        typedef TracedListData<STORAGE> LISTDATA;
         
         static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
         static void free(MMgc::GC* gc, void* mem);
@@ -192,6 +213,7 @@ namespace avmplus
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void gcTrace(MMgc::GC* gc, LISTDATA** loc);
     };
 
     // ----------------------------
@@ -202,7 +224,7 @@ namespace avmplus
         typedef MMgc::RCObject* TYPE;
         typedef TYPE OPAQUE_TYPE;
         typedef MMgc::RCObject* STORAGE;
-        typedef ListData<STORAGE> LISTDATA;
+        typedef TracedListData<STORAGE> LISTDATA;
         
         static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
         static void free(MMgc::GC* gc, void* mem);
@@ -213,6 +235,7 @@ namespace avmplus
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void gcTrace(MMgc::GC* gc, LISTDATA** loc);
     };
 
     // ----------------------------
@@ -223,7 +246,7 @@ namespace avmplus
         typedef Atom TYPE;
         typedef OpaqueAtom OPAQUE_TYPE;
         typedef Atom STORAGE;
-        typedef ListData<STORAGE> LISTDATA;
+        typedef TracedListData<STORAGE> LISTDATA;
 
         static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
         static void free(MMgc::GC* gc, void* mem);
@@ -234,6 +257,7 @@ namespace avmplus
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void gcTrace(MMgc::GC* gc, LISTDATA** loc);
     };
 
     // ----------------------------
@@ -244,7 +268,7 @@ namespace avmplus
         typedef MMgc::GCObject* TYPE;
         typedef TYPE OPAQUE_TYPE;
         typedef MMgc::GCWeakRef* STORAGE;
-        typedef ListData<STORAGE> LISTDATA;
+        typedef TracedListData<STORAGE> LISTDATA;
 
         static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
         static void free(MMgc::GC* gc, void* mem);
@@ -255,6 +279,7 @@ namespace avmplus
         static void storeInEmpty(LISTDATA* data, uint32_t index, TYPE value);
         static void clearRange(LISTDATA* data, uint32_t start, uint32_t count);
         static void moveRange(LISTDATA* data, uint32_t srcStart, uint32_t dstStart, uint32_t count);
+        static void gcTrace(MMgc::GC* gc, LISTDATA** loc);
     };
 
     // ----------------------------
@@ -384,12 +409,15 @@ namespace avmplus
         // (other than the dtor) will result in a crash. 
         void skipDestructor();
 
+        // Trace GC pointers in the owned data, if appropriate for the data type.
+        void gcTrace(MMgc::GC* gc);
+
         // This removes all items from the list that have have a value of null/0. 
         // This is currently used only to implement WeakRefList::removeCollectedItems,
         // and is not exposed via other lists.
         // Return the number of items removed.
         uint32_t removeNullItems();
-
+        
     private:
         ListImpl<T,ListHelper>& operator=(const ListImpl<T,ListHelper>& other); // unimplemented
         explicit ListImpl(const ListImpl<T,ListHelper>& other);                 // unimplemented
@@ -448,6 +476,7 @@ namespace avmplus
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
         void skipDestructor();
+        void gcTrace(MMgc::GC* gc);
 
     private:
         GCList<T>& operator=(const GCList<T>& other);     // unimplemented
@@ -498,6 +527,7 @@ namespace avmplus
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
         void skipDestructor();
+        void gcTrace(MMgc::GC* gc);
 
     private:
         RCList<T>& operator=(const RCList<T>& other);     // unimplemented
@@ -555,6 +585,7 @@ namespace avmplus
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
         void skipDestructor();
+        void gcTrace(MMgc::GC* gc);
 
     private:
         UnmanagedPointerList<T>& operator=(const UnmanagedPointerList<T>& other);       // unimplemented
@@ -604,6 +635,7 @@ namespace avmplus
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const; 
         void skipDestructor();
+        void gcTrace(MMgc::GC* gc);
 
         // This removes all items from the list that have been collected. 
         // Return the number of items removed.
@@ -645,6 +677,8 @@ namespace avmplus
 
     // ----------------------------
 
+    // A conservatively traced heap-allocated list of managed objects.
+
     template<class T>
     class HeapList : public MMgc::GCFinalizedObject
     {
@@ -655,7 +689,36 @@ namespace avmplus
                           uint32_t capacity,
                           const typename T::TYPE* args = NULL);
     };
+    
+    // ----------------------------
 
+    // An exactly traced heap-allocated list.
+
+    template<class T>
+    class ExactHeapList : public HeapList<T>
+    {
+    private:
+        explicit ExactHeapList(MMgc::GC* gc, 
+                               uint32_t capacity,
+                               const typename T::TYPE* args = NULL)
+            : HeapList<T>(gc, capacity, args)
+        {
+        }
+            
+    public:
+        REALLY_INLINE static ExactHeapList* create(MMgc::GC* gc, 
+                                                   uint32_t capacity, 
+                                                   const typename T::TYPE* args = NULL)
+        {
+            return MMgc::setExact(new (gc) ExactHeapList(gc, capacity, args));
+        }
+        
+        virtual void gcTrace(MMgc::GC* gc)
+        {
+            this->list.gcTrace(gc);
+        }
+    };
+    
     // ----------------------------
 
 }

@@ -467,7 +467,7 @@ namespace avmplus
         if (!core->xmlEntities)
         {
             // Lazy creation of the XML entities table.
-            core->xmlEntities = new (core->GetGC()) HeapHashtable(core->GetGC());
+            core->xmlEntities = HeapHashtable::create(core->GetGC());
 
             const char *entities = "&amp\0\"quot\0'apos\0<lt\0>gt\0\xA0nbsp\0";
 

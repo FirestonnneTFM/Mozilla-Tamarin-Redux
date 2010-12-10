@@ -102,6 +102,13 @@ namespace avmplus
      */
     class ExceptionHandler
     {
+    public:
+        inline void gcTrace(MMgc::GC* gc)
+        {
+            gc->TraceLocation(&traits);
+            gc->TraceLocation(&scopeTraits);
+        }
+
     // ------------------------ DATA SECTION BEGIN
     public:
         Traits* traits;         // The type of exceptions handled by this exception handler.
@@ -117,15 +124,26 @@ namespace avmplus
      * The list of exception handlers in a MethodInfo entry in an
      * ABC file is parsed into an ExceptionHandlerTable object.
      */
-    class ExceptionHandlerTable : public MMgc::GCObject
+    class GC_CPP_EXACT(ExceptionHandlerTable, MMgc::GCTraceableObject)
     {
     public:
+        static ExceptionHandlerTable* create(MMgc::GC* gc, int exception_count)
+        { 
+            size_t extra = exception_count == 0 ? 0 : sizeof(ExceptionHandler)*(exception_count-1);
+            return MMgc::setExact(new (gc, extra) ExceptionHandlerTable(exception_count));
+        }
+
+    private:
         ExceptionHandlerTable(int exception_count);
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(ExceptionHandlerTable)
+        
     public:
         int32_t exception_count;
-        ExceptionHandler exceptions[1];
+        ExceptionHandler GC_STRUCTURES(exceptions, 1, exception_count);
+
+        GC_DATA_END(ExceptionHandlerTable)
     // ------------------------ DATA SECTION END
     };
 

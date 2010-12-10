@@ -40,6 +40,11 @@
 namespace avmplus
 {
 
+REALLY_INLINE AbcEnv* AbcEnv::create(MMgc::GC* gc, PoolObject* builtinPool, CodeContext* builtinCodeContext)
+{
+    return MMgc::setExact(new (gc, AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext));
+}
+    
 REALLY_INLINE AvmCore* AbcEnv::core() const
 {
     return m_core;

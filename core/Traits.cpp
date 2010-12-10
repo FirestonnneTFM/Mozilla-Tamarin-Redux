@@ -61,7 +61,7 @@ namespace avmplus
                                 slotCount * sizeof(SlotInfo) + methodCount * sizeof(MethodInfo) :
                                 0;
 
-        TraitsBindings* tb = new (gc, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount, typesValid);
+        TraitsBindings* tb = MMgc::setExact(new (gc, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount, typesValid));
         if (_base && typesValid)
         {
             if (_base->slotCount)
@@ -75,6 +75,19 @@ namespace avmplus
                 VMPI_memcpy(&tb->getMethods()[0], &_base->getMethods()[0], _base->methodCount * sizeof(MethodInfo));
         }
         return tb;
+    }
+
+    void TraitsBindings::gcTraceHook_TraitsBindings(MMgc::GC* gc)
+    {
+        if (m_typesValid)
+        {
+            SlotInfo* slots = getSlots();
+            for ( uint32_t i=0 ; i < slotCount ; i++ )
+                gc->TraceLocation(&slots[i].type);
+            TraitsBindings::BindingMethodInfo* methods = getMethods();
+            for ( uint32_t i=0 ; i < methodCount ; i++ )
+                gc->TraceLocation(&methods[i].f);
+        }
     }
 
     Binding TraitsBindings::findBinding(Stringp name) const
@@ -505,14 +518,14 @@ namespace avmplus
     {
         AvmAssert(posType != TRAITSTYPE_CATCH);
         AvmAssert(pool != NULL);
-        Traits* traits = new (pool->core->GetGC()) Traits(pool, base, objectSize, offsetOfSlots, traitsPos, posType);
+        Traits* traits = MMgc::setExact(new (pool->core->GetGC()) Traits(pool, base, objectSize, offsetOfSlots, traitsPos, posType));
         return traits;
     }
 
     /*static*/ Traits* Traits::newCatchTraits(const Toplevel* toplevel, PoolObject* pool, TraitsPosPtr traitsPos, Stringp name, Namespacep ns)
     {
         AvmAssert(pool != NULL);
-        Traits* traits = new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH);
+        Traits* traits = MMgc::setExact(new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH));
         traits->final = true;
         traits->set_names(ns, name);
         traits->verifyBindings(toplevel);
@@ -1228,7 +1241,7 @@ namespace avmplus
         const int32_t bindingCap = m_bindingCapLog2 ? (1 << m_bindingCapLog2) : 2;
 
         MMgc::GC* gc = core->GetGC();
-        MultinameBindingHashtable* bindings = new (gc) MultinameBindingHashtable(bindingCap);
+        MultinameBindingHashtable* bindings = MultinameBindingHashtable::create(gc, bindingCap);
         AvmAssert(bindings->numQuads == bindingCap);
 
         if (this->posType() == TRAITSTYPE_CATCH)
@@ -1339,7 +1352,7 @@ namespace avmplus
 
         const uint32_t extra = td->slotCount * sizeof(TraitsMetadata::MetadataPtr) + td->methodCount * sizeof(TraitsMetadata::MetadataPtr);
 
-        TraitsMetadata* tm = new (gc, extra) TraitsMetadata(basetm, this->pool, this->metadata_pos, td->slotCount, td->methodCount);
+        TraitsMetadata* tm = TraitsMetadata::create(gc, extra, basetm, this->pool, this->metadata_pos, td->slotCount, td->methodCount);
         tm->slotMetadataPos = (TraitsMetadata::MetadataPtr*)(tm + 1);
         tm->methodMetadataPos = (TraitsMetadata::MetadataPtr*)(tm->slotMetadataPos + tm->slotCount);
 
@@ -1763,7 +1776,7 @@ namespace avmplus
         if (visitor.hasDefaults && !this->init)
         {
             // Make a do-nothing init method.
-            this->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, this);
+            this->init = MethodInfo::create(core->gc, MethodInfo::kInitMethodStub, this);
             AvmAssert(this->init->declaringTraits() == this);
             static const uint8_t body[] = {
                 2, // max_stack

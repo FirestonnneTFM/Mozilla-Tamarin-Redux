@@ -39,7 +39,6 @@
 
 namespace avmplus
 {
-
 REALLY_INLINE ScopeOrTraits::ScopeOrTraits(Traits* t) : _scopeOrTraits((uintptr_t)t)
 {
 }
@@ -366,6 +365,11 @@ REALLY_INLINE MethodSignaturep MethodInfo::getMethodSignature()
     if ((ms = (MethodSignaturep)_msref->get()) == NULL)
         ms = _getMethodSignature();
     return ms;
+}
+
+REALLY_INLINE MethodSignature::MethodSignature(int32_t param_count)
+{
+    _param_count = param_count;
 }
 
 REALLY_INLINE Traits* MethodSignature::returnTraits() const

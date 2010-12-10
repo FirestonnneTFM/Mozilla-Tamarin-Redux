@@ -47,25 +47,6 @@ namespace avmplus
     class CodeMgr;
 #endif
 
-#ifdef VMCFG_PRECOMP_NAMES
-
-    /* This should not be a root because it can be large and root scanning is atomic,
-     * leading to uncontrollable GC pauses for large roots.
-     *
-     * The use of HeapMultiname guarantees correct write barrier behavior for the parts
-     * of multinames.  The object itself is anchored in a PoolObject.
-     */
-    class PrecomputedMultinames : public MMgc::GCFinalizedObject
-    {
-    public:
-        PrecomputedMultinames(PoolObject* pool);
-        ~PrecomputedMultinames();
-        uint32_t nNames;                        // Number of elements
-        HeapMultiname multinames[1];            // Allocated size is MAX(1,nName)
-    };
-
-#endif  // VMCFG_PRECOMP_NAMES
-
     // This is intended to be exactly the size of a double in memory.
     // (We use compile-time assertions to verify this.)
     class GCDouble : public MMgc::GCObject
@@ -74,41 +55,89 @@ namespace avmplus
         double value;
     };
 
+    // Used within ConstantStringContainer
+    union ConstantStringData
+    {
+        Stringp     str;
+        const uint8_t* abcPtr;
+    };
+    
+    // Used within PoolObject.
+    //
+    // The macros for exact tracing fail us here: The interpretation
+    // of each element depends on data from the pool, so we can't treat this
+    // with GC_STRUCTURES.  Instead there's a hand-written tracer.  No doubt
+    // we could concoct a mechanism to handle this case but we should only
+    // do so if we see more instances of it.
+    
+    class ConstantStringContainer : public MMgc::GCTraceableObject
+    {
+    private:
+        ConstantStringContainer(PoolObject* pool) : pool(pool) {}
+        
+    public:
+        REALLY_INLINE static ConstantStringContainer* create(MMgc::GC* gc, size_t extra, PoolObject* pool)
+        {
+            return MMgc::setExact(new (gc, extra) ConstantStringContainer(pool));
+        }
+
+        virtual void gcTrace(MMgc::GC* gc);
+        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        
+        PoolObject* const pool;
+        
+        // The real length is max(1,pool->constantStringCount).
+        ConstantStringData data[1];
+    };
+
     /**
      * The PoolObject class is a container for the pool of resources
      * decoded from an ABC file: the constant pool, the methods
      * defined in the ABC, the classes defined in the ABC, and so on.
      */
-    class PoolObject : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT_WITH_HOOK(PoolObject, MMgc::GCFinalizedObject)
     {
         friend class AbcParser;
+        friend class ConstantStringContainer;
 
+        PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api);
+        
     public:
-        AvmCore *core;
+        static PoolObject* create(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api);
 
+        ~PoolObject();
+
+        void gcTraceHook_PoolObject(MMgc::GC* gc);
+ 
         int32_t getAPI();
 
+        // TODO - group the data members of this class, it's a mess.
+        
+        GC_DATA_BEGIN(PoolObject)
+
+        AvmCore *core;
+
         /** constants */
-        DataList<int32_t> cpool_int;
-        DataList<uint32_t> cpool_uint;
-        GCList<GCDouble> cpool_double;
-        RCList<Namespace> cpool_ns;
-        GCList<NamespaceSet> cpool_ns_set;
+        DataList<int32_t>       GC_STRUCTURE(cpool_int);
+        DataList<uint32_t>      GC_STRUCTURE(cpool_uint);
+        GCList<GCDouble>        GC_STRUCTURE(cpool_double);
+        RCList<Namespace>       GC_STRUCTURE(cpool_ns);
+        GCList<NamespaceSet>    GC_STRUCTURE(cpool_ns_set);
 
 #ifndef AVMPLUS_64BIT
         // lists to keep int/uint atoms "sticky".
         // @todo this can/should go away when we convert to 64-bit Box atoms.
-        AtomList cpool_int_atoms;
-        AtomList cpool_uint_atoms;
+        AtomList GC_STRUCTURE_IFNDEF(cpool_int_atoms, AVMPLUS_64BIT);
+        AtomList GC_STRUCTURE_IFNDEF(cpool_uint_atoms, AVMPLUS_64BIT);
 #endif
 
-        DataList<uint32_t> cpool_mn_offsets;
+        DataList<uint32_t> GC_STRUCTURE(cpool_mn_offsets);
 
         /** metadata -- ptrs into ABC, not gc-allocated */
-        UnmanagedPointerList<const uint8_t*> metadata_infos;
+        UnmanagedPointerList<const uint8_t*> GC_STRUCTURE(metadata_infos);
 
         /** domain */
-        DWB(Domain*) domain;
+        DWB(Domain*) GC_POINTER(domain);
 
         /** # of elements in metadata array */
         uint32_t metadataCount;
@@ -124,18 +153,17 @@ namespace avmplus
 
 #ifdef VMCFG_PRECOMP_NAMES
     private:
-        DWB(PrecomputedMultinames*) precompNames;   // a GCFinalizedObject
+        DWB(ExactStructContainer<HeapMultiname>*) GC_POINTER_IFDEF(precompNames, VMCFG_PRECOMP_NAMES);   // a GCFinalizedObject
     public:
         void initPrecomputedMultinames();
         const Multiname* precomputedMultiname(int32_t index);
+        
+        static void destroyPrecomputedMultinames(ExactStructContainer<HeapMultiname>* self);
 #endif
 
         #ifdef VMCFG_NANOJIT
-        CodeMgr* codeMgr;
+        CodeMgr* codeMgr;   // Traced by gcTraceHook, above
         #endif
-
-        PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api);
-        ~PoolObject();
 
         // search metadata record at meta_pos for name, return true if present
         bool hasMetadataName(const uint8_t* meta_pos, const String* name);
@@ -185,34 +213,29 @@ namespace avmplus
 
     private:
         friend class DomainMgr;
-        DWB(MultinameTraitsHashtable*)                    m_namedTraits;
-        DWB(MultinameBindingHashtable*)                    m_namedScriptsMap;
-        GCList<MethodInfo>                          m_namedScriptsList;           // list of MethodInfo* for the scripts
+        DWB(MultinameTraitsHashtable*)              GC_POINTER(m_namedTraits);
+        DWB(MultinameBindingHashtable*)             GC_POINTER(m_namedScriptsMap);
+        GCList<MethodInfo>                          GC_STRUCTURE(m_namedScriptsList); // list of MethodInfo* for the scripts
 
     private:
-        union ConstantStringData
-        {
-            Stringp     str;
-            const uint8_t* abcPtr;
-        };
-        DWB(ScriptBufferImpl*)                      _code;
+        DWB(ScriptBufferImpl*)                      GC_POINTER(_code);
         const uint8_t * const                       _abcStart;
         // start of static ABC string data
         const uint8_t *                             _abcStringStart;
         // points behind end of ABC string data - see AbcParser.cpp
         const uint8_t *                             _abcStringEnd;
-        DWB(ConstantStringData*)                    _abcStrings;                // The length is constantStringCount
-        GCList<Traits>                              _classes;
-        GCList<Traits>                              _scripts;
-        GCList<MethodInfo>                          _methods;
+        DWB(ConstantStringContainer*)               GC_POINTER(_abcStrings);                // The length is constantStringCount
+        GCList<Traits>                              GC_STRUCTURE(_classes);
+        GCList<Traits>                              GC_STRUCTURE(_scripts);
+        GCList<MethodInfo>                          GC_STRUCTURE(_methods);
 #ifdef DEBUGGER
-        GCList<DebuggerMethodInfo>                  _method_dmi;
+        GCList<DebuggerMethodInfo>                  GC_STRUCTURE_IFDEF(_method_dmi, DEBUGGER);
 #endif
         // Only allocated & populated if core->config.methodName is true.
         // Indexed by MethodInfo::_method_id, if the value is positive, it's an index into cpool_string; 
         // if negative, an index into cpool_mn. 
         // Always safe because those indices are limited to 30 bits.
-        DataList<int32_t>                           _method_name_indices;
+        DataList<int32_t>                           GC_STRUCTURE(_method_name_indices);
                 void                                setupConstantStrings(uint32_t count);
         uint32_t api;
 
@@ -225,8 +248,11 @@ namespace avmplus
         bool                        isBuiltin;  // true if this pool is baked into the player.  used to control whether callees will set their context.
 
     #ifdef VMCFG_AOT
+    #error "If AOTInfo is a traced type then aotInfo needs a GC_POINTER_IFDEF annotation"
         const AOTInfo* aotInfo;
     #endif
+        
+        GC_DATA_END(PoolObject)
     };
 }
 

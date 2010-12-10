@@ -44,15 +44,20 @@
 namespace avmplus
 {
     // runtime info associated with a pool
-    class AbcEnv : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT(AbcEnv, MMgc::GCFinalizedObject)
     {
+        friend class DomainMgr;
+
         #ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         friend class MopsRangeCheckFilter;
         #endif
 
-    public:
         AbcEnv(PoolObject* _pool, CodeContext * _codeContext);
+        
+    public:
+        static AbcEnv* create(MMgc::GC* gc, PoolObject* builtinPool, CodeContext* builtinCodeContext);
+        
         ~AbcEnv();
 
         AvmCore* core() const;
@@ -70,18 +75,21 @@ namespace avmplus
         static size_t calcExtra(PoolObject* pool);
 
     // ------------------------ DATA SECTION BEGIN
+    GC_DATA_BEGIN(AbcEnv)
+        
     private:
-        friend class DomainMgr;
-        GCList<ScriptEnv>           m_namedScriptEnvsList;    // list of ScriptEnvs, corresponds to pool->m_namedScriptsList
+        GCList<ScriptEnv>           GC_STRUCTURE( m_namedScriptEnvsList ); // list of ScriptEnvs, corresponds to pool->m_namedScriptsList
     private:
-        PoolObject* const           m_pool;
-        DomainEnv* const            m_domainEnv;    // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code
-        CodeContext* const          m_codeContext;
+        PoolObject* const           GC_POINTER( m_pool );
+        DomainEnv* const            GC_POINTER( m_domainEnv );           // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code
+        CodeContext* const          GC_POINTER( m_codeContext );
 #ifdef DEBUGGER
-        DWB(uint64_t*)              m_invocationCounts; // actual size will hold pool->methodCount methods, only allocated if debugger exists
+        DWB(uint64_t*)              GC_POINTER_IFDEF( m_invocationCounts, DEBUGGER );    // actual size will hold pool->methodCount methods, only allocated if debugger exists
 #endif
         AvmCore* const              m_core;
-        MethodEnv*                  m_methods[1];       // actual size will hold pool->methodCount methods
+        MethodEnv*                  GC_POINTERS(m_methods, 1, "m_pool->methodCount()");  // actual size will hold pool->methodCount methods
+        
+    GC_DATA_END(AbcEnv)
     // ------------------------ DATA SECTION END
     };
 

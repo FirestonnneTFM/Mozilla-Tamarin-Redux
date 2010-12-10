@@ -40,6 +40,11 @@
 namespace avmplus
 {
 
+REALLY_INLINE Toplevel* Toplevel::create(MMgc::GC* gc, AbcEnv* abcEnv)
+{
+    return MMgc::setExact(new (gc) Toplevel(abcEnv));
+}
+    
 REALLY_INLINE Atom Toplevel::callproperty(Atom base, const Multiname* name, int argc, Atom* atomv, VTable* vtable)
 {
     AssertNotNull(base);
@@ -89,9 +94,9 @@ REALLY_INLINE Atom Toplevel::coerce(Atom atom, Traits* expected) const
 
 REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
 {
-    return _builtinClasses[class_id]
-        ? _builtinClasses[class_id]
-        : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
+    if (_builtinClasses->list[class_id])
+        return _builtinClasses->list[class_id];
+    return const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
 }
 
 REALLY_INLINE ErrorClass* Toplevel::getErrorClass(int class_id) const 

@@ -60,27 +60,32 @@ namespace avmplus
          const ScopeTypeChain* getScope() const;
          void setTraits(MMgc::GC* gc, void* container, Traits* t);
          void setScope(MMgc::GC* gc, void* container, const ScopeTypeChain* s);
+         
+         REALLY_INLINE void gcTrace(MMgc::GC* gc) { gc->TraceLocation(&_scopeOrTraits); }
      };
 
 #ifdef DEBUGGER
     class AbcFile;
-    class DebuggerMethodInfo : public MMgc::GCObject
+    class GC_CPP_EXACT_IFDEF(DebuggerMethodInfo, MMgc::GCTraceableObject, "DEBUGGER")
     {
     private:
         explicit DebuggerMethodInfo(int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes);
 
     public:
-
         static DebuggerMethodInfo* create(AvmCore* core, int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes);
 
-        DWB(AbcFile*)           file;               // the abc file from which this method came
+        GC_DATA_BEGIN(DebuggerMethodInfo)
+
+        DWB(AbcFile*)           GC_POINTER(file);               // the abc file from which this method came
         int32_t                 firstSourceLine;    // source line number where function starts
         int32_t                 lastSourceLine;     // source line number where function ends
         int32_t                 offsetInAbc;        // offset in abc file
         uint32_t                codeSize;           // abc size pre-jit, native size post jit
         const int32_t           local_count;        // FIXME: merge with localCount above; this one may be visible to a debugger?
         const int32_t           max_scopes;         // FIXME: merge with maxScopeDepth above; this one is not used by the VM but may be visible to a debugger?
-        Stringp                 localNames[1];      // array of names for args and locals in framep order, written with explicit WBRC (actually local_count)
+        Stringp                 GC_POINTERS_SMALL(localNames, 1, local_count);      // array of names for args and locals in framep order, written with explicit WBRC (actually local_count)
+        
+        GC_DATA_END(DebuggerMethodInfo)
     };
 #endif
 
@@ -91,27 +96,48 @@ namespace avmplus
      * can be executed by the VM: Actionscript functions,
      * native functions, etc.
      */
-    class MethodInfo : public MethodInfoProcHolder
+    class GC_CPP_EXACT_WITH_HOOK(MethodInfo, MethodInfoProcHolder)
     {
         friend class CodegenLIR;
         friend class BaseExecMgr;
 
     public:
+        enum InitMethodStub { kInitMethodStub };
+
+    private:
         // ctor for all normal methods.
         MethodInfo(int32_t _method_id,
-                    PoolObject* pool,
-                    const uint8_t* abc_info_pos,
-                    uint8_t abcFlags,
-                    const NativeMethodInfo* native_info);
+                   PoolObject* pool,
+                   const uint8_t* abc_info_pos,
+                   uint8_t abcFlags,
+                   const NativeMethodInfo* native_info);
 
         // special ctor for the methodinfo generated for slot-initialization when no init method is present
-        enum InitMethodStub { kInitMethodStub };
         MethodInfo(InitMethodStub, Traits* declTraits);
 
-#ifdef VMCFG_AOT
-        MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t methodId);
-#endif
+    public:
+        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, 
+                                                int32_t _method_id,
+                                                PoolObject* pool,
+                                                const uint8_t* abc_info_pos,
+                                                uint8_t abcFlags,
+                                                const NativeMethodInfo* native_info)
+        {
+            return MMgc::setExact(new (gc) MethodInfo(_method_id, pool, abc_info_pos, abcFlags, native_info));
+        }
 
+        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits)
+        {
+            return MMgc::setExact(new (gc) MethodInfo(stub, declTraits));
+        }
+        
+#ifdef VMCFG_AOT
+        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits, const NativeMethodInfo* native_info)
+        {
+            return MMgc::setExact(new (gc) MethodInfo(stub, declTraits, native_info));
+        }
+#endif
+        
         bool usesCallerContext() const;
 
         // Builtin + non-native functions always need the dxns code emitted
@@ -294,21 +320,26 @@ namespace avmplus
     #endif
         };
 
+        void gcTraceHook_MethodInfo(MMgc::GC* gc);
+        
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(MethodInfo)
+        
     private:
-        DWB(MMgc::GCWeakRef*)   _msref;                     // our MethodSignature
-        ScopeOrTraits           _declarer;
-        ScopeOrTraits           _activation;
-        PoolObject* const       _pool;
+        DWB(MMgc::GCWeakRef*)   GC_POINTER(_msref); // our MethodSignature
+        ScopeOrTraits           GC_STRUCTURE(_declarer);
+        ScopeOrTraits           GC_STRUCTURE(_activation);
+        PoolObject* const       GC_POINTER(_pool);
         const uint8_t* const    _abc_info_pos;      // pointer to abc MethodInfo record
         const int               _method_id;
         union
+        // This union is traced by the gcTraceHook()
         {
             NativeInfo          _native;            // stuff used only for Native methods (formerly in NativeMethod)
             AbcInfo             _abc;               // stuff used only for bytecode methods (formerly in MethodInfo)
         };
 #ifdef AVMPLUS_SAMPLER
-        mutable DRCWB(Stringp)  _methodName;
+        mutable DRCWB(Stringp)  GC_POINTER_IFDEF(_methodName, AVMPLUS_SAMPLER);
 #endif
 
         // -------- FLAGS SECTION
@@ -411,15 +442,23 @@ namespace avmplus
         // If true, Function.apply & call() use a fast path that only works
         // for JIT and Native code, not interpreted code.
         uint32_t                _apply_fastpath:1;
-
+        
+        GC_DATA_END(MethodInfo)
     // ------------------------ DATA SECTION END
     };
 
-    class MethodSignature : public QCachedItem
+    class GC_CPP_EXACT_WITH_HOOK(MethodSignature, QCachedItem)
     {
         friend class MethodInfo;
     public:
+        REALLY_INLINE static MethodSignature* create(MMgc::GC* gc, size_t extra, int32_t param_count)
+        {
+            return MMgc::setExact(new (gc, extra) MethodSignature(param_count));
+        }
+            
     private:
+        MethodSignature(int32_t param_count);
+        
         union AtomOrType
         {
             Traits* paramType;
@@ -456,9 +495,14 @@ namespace avmplus
         bool argcOk(int32_t argc) const;
         void boxArgs(AvmCore* core, int32_t argc, const uint32_t* ap, Atom* out) const;
 
-    // ------------------------ DATA SECTION BEGIN
     private:
-        Traits*     _returnTraits;      // written with explicit WB
+        void gcTraceHook_MethodSignature(MMgc::GC* gc);
+
+    // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(MethodSignature)
+
+    private:
+        Traits*     GC_POINTER(_returnTraits);      // written with explicit WB
     #ifdef VMCFG_WORDCODE
     #else
         const uint8_t*  _abc_code_start; // start of ABC body
@@ -474,7 +518,9 @@ namespace avmplus
         // might as well avoid per-bit access as long as we have the space.
         bool        _isNative;          // dupe of owner's flag of same name.
         bool        _allowExtraArgs;    // == _needRest | _needArguments | _ignoreRest
-        AtomOrType  _args[1];           // lying, actually 1+param_count+optional_count
+        AtomOrType  _args[1];           // lying, actually 1+param_count+optional_count.  Traced by gcTraceHook().
+        
+        GC_DATA_END(MethodSignature)
     // ------------------------ DATA SECTION END
     };
 

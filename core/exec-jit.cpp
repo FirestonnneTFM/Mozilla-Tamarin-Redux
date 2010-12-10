@@ -257,22 +257,44 @@ static void sortImtThunkEntries(ImtThunkEntry* map, uint32_t count)
 // one of these.  The code pointer will point to dispatchImt(), and the
 // table of collding ImtEntries is allocated just past the end of the object.
 // see ImtThunkEnv::entries() to see how it is accessed.
+//
+// We have manually written tracers here because the class is defined in
+// a cpp file; generated tracers require the class to be visible because
+// the tracer will be in a different file.
+
 class ImtThunkEnv : public MethodEnvProcHolder
 {
-public:
+private:
     ImtThunkEnv(VTable*);
     ImtThunkEnv(uint32_t imtMapCount);
+public:
+    virtual void gcTrace(MMgc::GC* gc);
+    virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+
+    static ImtThunkEnv* create(MMgc::GC* gc, VTable* v);
+    static ImtThunkEnv* create(MMgc::GC* gc, uint32_t imtMapCount);
+
     struct ImtThunkEntry* entries() const;
 
 // ------------------------ DATA SECTION BEGIN
 public:
     union {
-        VTable* vtable;
-        uint32_t imtMapCount;
+        VTable*   vtable;
+        uint32_t  imtMapCount;
     };
 // ------------------------ DATA SECTION END
 };
 
+REALLY_INLINE ImtThunkEnv* ImtThunkEnv::create(MMgc::GC* gc, VTable* v)
+{
+    return MMgc::setExact(new (gc) ImtThunkEnv(v));
+}
+
+REALLY_INLINE ImtThunkEnv* ImtThunkEnv::create(MMgc::GC* gc, uint32_t imtMapCount)
+{
+    return MMgc::setExact(new (gc, imtMapCount * sizeof(ImtThunkEntry)) ImtThunkEnv(imtMapCount));
+}
+    
 REALLY_INLINE ImtThunkEnv::ImtThunkEnv(VTable* v)
     : vtable(v)
 {}
@@ -286,13 +308,21 @@ REALLY_INLINE struct ImtThunkEntry* ImtThunkEnv::entries() const
     return (struct ImtThunkEntry*)(this+1);
 }
 
+void ImtThunkEnv::gcTrace(MMgc::GC* gc) {
+    gc->TraceConservativeLocation((uintptr_t*)&vtable);
+}
+
+bool ImtThunkEnv::gcTraceLarge(MMgc::GC* gc, size_t cursor) {
+    return gcTraceLargeAsSmall(gc, cursor);
+}
+
 // Build the initial IMT for this vtable, if JIT is enabled.
 void BaseExecMgr::notifyVTableResolved(VTable* vtable)
 {
     if (isJitEnabled()) {
         GC* gc = core->gc;
         // fixme: do we need one of these per unique vtable?
-        ImtThunkEnv* ite = new (gc) ImtThunkEnv(vtable);
+        ImtThunkEnv* ite = ImtThunkEnv::create(gc, vtable);
         ite->_implGPR = (GprMethodProc) resolveImt;
         for (uint32_t i=0; i < ImtHolder::IMT_SIZE; i++) {
             // they all share the same ImtThunkEnv for now
@@ -501,7 +531,7 @@ bool BaseExecMgr::resolveImtSlotSelf(VTable* vtable, uint32_t slot)
             ite = (ImtThunkEnv*) vtable->methods[imtMap->disp_id];
             gc->Free(imtMap);
         } else {
-            ite = new (gc, imtMapCount * sizeof(ImtThunkEntry)) ImtThunkEnv(imtMapCount);
+            ite = ImtThunkEnv::create(gc, imtMapCount);
             ite->_implGPR = (GprMethodProc) dispatchImt;
             ImtThunkEntry* m = ite->entries();
             ImtEntry* e = imtMap;

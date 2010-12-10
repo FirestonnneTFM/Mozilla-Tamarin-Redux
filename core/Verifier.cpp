@@ -3247,8 +3247,7 @@ namespace avmplus
             if (exception_count == 0 || (size_t)(exception_count-1) > SIZE_T_MAX / sizeof(ExceptionHandler))
                 verifyFailed(kIllegalExceptionHandlerError);
 
-            size_t extra = sizeof(ExceptionHandler)*(exception_count-1);
-            ExceptionHandlerTable* table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
+            ExceptionHandlerTable* table = ExceptionHandlerTable::create(core->GetGC(), exception_count);
             ExceptionHandler *handler = table->exceptions;
             for (int i=0; i < exception_count; i++, handler++)
             {

@@ -373,7 +373,7 @@ public:
  * Base class for MethodInfo which contains invocation pointers.  These
  * pointers are private to the ExecMgr instance and hence declared here.
  */
-class MethodInfoProcHolder : public MMgc::GCObject
+class GC_CPP_EXACT(MethodInfoProcHolder, MMgc::GCTraceableObject)
 {
     friend class ImtThunkEnv;
     friend class InvokerCompiler;
@@ -383,6 +383,8 @@ class MethodInfoProcHolder : public MMgc::GCObject
 protected:
     MethodInfoProcHolder();
 
+    GC_DATA_BEGIN(MethodInfoProcHolder)
+
 private:
     union {
         GprMethodProc _implGPR;
@@ -390,6 +392,8 @@ private:
     };
     /** pointer to invoker used when callee must coerce args. */
     AtomMethodProc _invoker;
+    
+    GC_DATA_END(MethodInfoProcHolder)
 };
 
 /**
@@ -398,13 +402,16 @@ private:
  * load along the call fast path.  Calls from C++ or the Interpreter
  * always go through MethodInfo._invoker.
  */
-class MethodEnvProcHolder : public MMgc::GCObject
+class GC_CPP_EXACT(MethodEnvProcHolder, MMgc::GCTraceableObject)
 {
     friend class CodegenLIR;
     friend class BaseExecMgr;
 
 protected:
     MethodEnvProcHolder();
+    
+    GC_NO_DATA(MethodEnvProcHolder)
+
 #ifdef VMCFG_METHODENV_IMPL32
 private:
     union {
@@ -446,6 +453,12 @@ class ImtHolder
     static uint32_t hashIID(uintptr_t iid);  // Hash the IID into an IMT slot number.
     static uint32_t hashIID(MethodInfo*);    // Hash the method's IID into an IMT slot number.
     class ImtThunkEnv* entries[IMT_SIZE];
+    
+public:
+    void gcTrace(MMgc::GC* gc)
+    {
+        gc->TraceLocations((void**)entries, IMT_SIZE);
+    }
 };
 
 #if defined(_MSC_VER) && defined(AVMPLUS_IA32)

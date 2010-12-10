@@ -267,9 +267,9 @@ namespace avmplus
         , passAllExceptionsToDebugger(false)
 #endif
         , livePools(NULL)
-        , m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
-        , m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
-        , m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))
+        , m_tbCache(QCache::create(CacheSizes::DEFAULT_BINDINGS, g))
+        , m_tmCache(QCache::create(CacheSizes::DEFAULT_METADATA, g))
+        , m_msCache(QCache::create(CacheSizes::DEFAULT_METHODS, g))
         , m_domainMgr(NULL)
         , exec(NULL)
         , currentMethodFrame(NULL)
@@ -325,9 +325,9 @@ namespace avmplus
         builtinDomain               = NULL;
         builtinBugCompatibility     = NULL;
         
-        m_versionedURIs = new(gc) HeapHashtable(gc);
+        m_versionedURIs = HeapHashtable::create(gc);
 #ifdef DEBUG_API_VERSIONING
-        m_unversionedURIs = new(gc) HeapHashtable(gc);
+        m_unversionedURIs = HeapHashtable::create(gc);
 #endif
 
         m_domainMgr = new(gc) DomainMgr(this);
@@ -664,7 +664,7 @@ namespace avmplus
             scriptTraits->setDeclaringScopes(scriptSTC);
         }
         ScopeChain* scriptScope = ScriptEnv::createScriptScope(scriptSTC, scriptVTable, abcEnv);
-        ScriptEnv* scriptEnv = new (this->GetGC()) ScriptEnv(scriptTraits->init, scriptScope);
+        ScriptEnv* scriptEnv = ScriptEnv::create(this->GetGC(), scriptTraits->init, scriptScope);
         scriptVTable->init = scriptEnv;
 
         initScriptActivationTraits(this, toplevel, scriptTraits->init);
@@ -739,7 +739,7 @@ namespace avmplus
         AvmAssert(builtinPool != NULL);
         AvmAssert(builtinPool->scriptCount() != 0);
 
-        AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext);
+        AbcEnv* abcEnv = AbcEnv::create(GetGC(), builtinPool, builtinCodeContext);
 
         Toplevel* toplevel = createToplevel(abcEnv);
 
@@ -773,7 +773,7 @@ namespace avmplus
         AvmAssert(codeContext->domainEnv() != NULL);
         AvmAssert(codeContext->domainEnv()->domain() == pool->domain);
 
-        AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(pool)) AbcEnv(pool, codeContext);
+        AbcEnv* abcEnv = AbcEnv::create(GetGC(), pool, codeContext);
         return initAllScripts(toplevel, abcEnv);
     }
 
@@ -3078,7 +3078,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Toplevel* AvmCore::createToplevel(AbcEnv* abcEnv)
     {
-        return new (GetGC()) Toplevel(abcEnv);
+        return Toplevel::create(GetGC(), abcEnv);
     }
 
     const BugCompatibility* AvmCore::createBugCompatibility(BugCompatibility::Version v)
@@ -3811,7 +3811,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         const uint32_t count = traits->getTraitsBindings()->methodCount;
         size_t extraSize = sizeof(MethodEnv*)*(count > 0 ? count-1 : 0);
-        return new (GetGC(), extraSize) VTable(traits, base, toplevel);
+        return MMgc::setExact(new (GetGC(), extraSize) VTable(traits, base, toplevel));
     }
 
     RegExpObject* AvmCore::newRegExp(RegExpClass* regexpClass,
@@ -4146,18 +4146,13 @@ return the result of the comparison ToPrimitive(x) == y.
     StackTrace* AvmCore::newStackTrace()
     {
         int depth = callStack ? callStack->depth() : 0;
-        int extra = depth > 0 ? sizeof(StackTrace::Element) * (depth-1) : 0;
-        StackTrace* stackTrace = new (GetGC(), extra) StackTrace();
-        if (stackTrace)
-        {
-            stackTrace->depth = depth;
-            CallStackNode *curr = callStack;
-            StackTrace::Element *element = stackTrace->elements;
-            while (curr) {
-                element->set(*curr);
-                element++;
-                curr = curr->next();
-            }
+        StackTrace* stackTrace = StackTrace::create(GetGC(), depth);
+        CallStackNode *curr = callStack;
+        StackTrace::Element *element = stackTrace->elements;
+        while (curr) {
+            element->set(*curr);
+            element++;
+            curr = curr->next();
         }
         return stackTrace;
     }

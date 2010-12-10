@@ -581,7 +581,7 @@
 		079DF7F50F3A882D0031D1B4 /* MathUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MathUtils.cpp; path = ../../../core/MathUtils.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7F60F3A882D0031D1B4 /* MathUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MathUtils.h; path = ../../../core/MathUtils.h; sourceTree = SOURCE_ROOT; };
 		079DF7F70F3A882D0031D1B4 /* MethodClosure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MethodClosure.cpp; path = ../../../core/MethodClosure.cpp; sourceTree = SOURCE_ROOT; };
-		079DF7F80F3A882D0031D1B4 /* MethodClosure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MethodClosure.h; path = ../../../core/MethodClosure.h; sourceTree = SOURCE_ROOT; };
+		079DF7F80F3A882D0031D1B4 /* MethodClosure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MethodClosure.h; path = "/Users/lhansen/work/redux-revolution/core/MethodClosure.h"; sourceTree = "<absolute>"; };
 		079DF7F90F3A882D0031D1B4 /* MethodEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MethodEnv.cpp; path = ../../../core/MethodEnv.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7FA0F3A882D0031D1B4 /* MethodEnv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MethodEnv.h; path = ../../../core/MethodEnv.h; sourceTree = SOURCE_ROOT; };
 		079DF7FB0F3A882D0031D1B4 /* MethodInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MethodInfo.cpp; path = ../../../core/MethodInfo.cpp; sourceTree = SOURCE_ROOT; };
@@ -854,6 +854,7 @@
 		07E65EE510BC19A7000D1EB6 /* ScopeChain-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ScopeChain-inlines.h"; path = "../../../core/ScopeChain-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07E65EE610BC19A7000D1EB6 /* Verifier-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Verifier-inlines.h"; path = "../../../core/Verifier-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07ED27EF0FBD78C4007E3950 /* GCStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCStack.cpp; path = ../../../MMgc/GCStack.cpp; sourceTree = SOURCE_ROOT; };
+		07FBECBD1291529500F51879 /* avmplusContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusContainer.h; path = ../../../core/avmplusContainer.h; sourceTree = SOURCE_ROOT; };
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
 		198CF91711B973BD00A939C7 /* exec-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "exec-inlines.h"; path = "../../../core/exec-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1096,6 +1097,7 @@
 				3FDDC5410F60A07400E29821 /* AvmLog.h */,
 				079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */,
 				079DF7CB0F3A882D0031D1B4 /* avmplus.h */,
+				07FBECBD1291529500F51879 /* avmplusContainer.h */,
 				079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */,
 				079DF7CE0F3A882D0031D1B4 /* avmplusDebugger.h */,
 				079DF7CF0F3A882D0031D1B4 /* avmplusHashtable.cpp */,

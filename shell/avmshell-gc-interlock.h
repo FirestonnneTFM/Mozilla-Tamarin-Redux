@@ -37,4 +37,6 @@
 
 /* machine generated file via utils/exactgc.as -- do not edit */
 
+#define avmshell_DebugCLI_isExactInterlock 1
+#define avmshell_ShellToplevel_isExactInterlock 1
 

@@ -45,10 +45,13 @@ namespace avmplus
 {
     // needs to be a subclass of GCObject so we can convert to/from a WeakRef...
     // DomainEnv wants to be a finalized object anyway so let's use GCFinalizedObject
-    class GlobalMemorySubscriber : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT(GlobalMemorySubscriber, MMgc::GCFinalizedObject)
     {
     public:
         virtual void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize) = 0;
+        
+        GC_DATA_BEGIN(GlobalMemorySubscriber)
+        GC_DATA_END(GlobalMemorySubscriber)
     };
 
     // an ABC
@@ -60,8 +63,9 @@ namespace avmplus
         virtual bool removeSubscriber(GlobalMemorySubscriber* subscriber) = 0;
     };
 
-    class DomainEnv : public GlobalMemorySubscriber
+    class GC_CPP_EXACT(DomainEnv, GlobalMemorySubscriber)
     {
+        friend class DomainMgr;
         friend class MopsRangeCheckFilter;
     private:
         DomainEnv(AvmCore* core, Domain* domain, DomainEnv* base, uint32_t baseCount);
@@ -113,11 +117,12 @@ namespace avmplus
         };
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(DomainEnv)
+
     private:
-        friend class DomainMgr;
-        GCList<ScriptEnv>               m_namedScriptEnvsList; // list of ScriptEnv, corresponds to domain->m_namedScriptsList
-        DWB(Domain*)                    m_domain;       // Domain associated with this DomainEnv
-        DWB(Toplevel*)                  m_toplevel;
+        GCList<ScriptEnv>               GC_STRUCTURE(m_namedScriptEnvsList); // list of ScriptEnv, corresponds to domain->m_namedScriptsList
+        DWB(Domain*)                    GC_POINTER(  m_domain);       // Domain associated with this DomainEnv
+        DWB(Toplevel*)                  GC_POINTER(  m_toplevel);
         // scratch memory to use if the memory object is NULL...
         // allocated via mmfx_new, which is required by nanojit
         Scratch*                        m_globalMemoryScratch;
@@ -125,12 +130,14 @@ namespace avmplus
         uint8_t*                        m_globalMemoryBase;
         uint32_t                        m_globalMemorySize;
         // the actual memory object (can be NULL)
-        DRCWB(ScriptObject*)            m_globalMemoryProviderObject;
+        DRCWB(ScriptObject*)            GC_POINTER(  m_globalMemoryProviderObject);
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.
         uint32_t const                  m_baseCount; // number of entries in m_bases
-        DomainEnv*                      m_bases[1];  // lying: really [m_baseCount]
+        DomainEnv*                      GC_POINTERS_SMALL(m_bases, 1, m_baseCount);
+
+        GC_DATA_END(DomainEnv)
     // ------------------------ DATA SECTION END
     };
 }

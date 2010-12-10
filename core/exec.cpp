@@ -86,7 +86,7 @@ BaseExecMgr::~BaseExecMgr()
 void BaseExecMgr::init(MethodInfo* m, const NativeMethodInfo* native_info)
 {
 #ifndef MEMORY_INFO
-    MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
+//    MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
 #endif
 
     if (native_info) {
