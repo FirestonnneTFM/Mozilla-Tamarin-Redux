@@ -43,17 +43,33 @@
 
 namespace avmplus
 {
+#define avmplus_ScriptObject_isExactInterlock 1
+
     /**
      * one actionscript object.  might or might not be a function.
      * Base class for all objects visible to script code.
      */
     class ScriptObject : public AvmPlusScriptableObject
     {
-    public:
-
+    protected:
         ScriptObject(VTable* vtable, ScriptObject* delegate);
-        ScriptObject(VTable* vtable, ScriptObject* delegate, int capacity);
+        ScriptObject(VTable* vtable, ScriptObject* delegate, int htCapacity);
+
+    public:
+        REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate)
+        {
+            return MMgc::setExact(new (gc, vtable->getExtraSize()) ScriptObject(vtable, delegate));
+        }
+        
+        REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity)
+        {
+            return MMgc::setExact(new (gc, vtable->getExtraSize()) ScriptObject(vtable, delegate, htCapacity));
+        }
+
         ~ScriptObject();
+
+        virtual void gcTrace(MMgc::GC* gc);
+        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
 
         ScriptObject* getDelegate() const { return delegate; }
         void setDelegate(ScriptObject *d) { delegate = d; }

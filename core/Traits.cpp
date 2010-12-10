@@ -1930,6 +1930,58 @@ namespace avmplus
         }
     }
 
+    void Traits::traceSlots(MMgc::GC* gc, ScriptObject* obj) const
+    {
+        if (m_slotDestroyInfo.test(0))
+        {
+            const uint32_t slotAreaSize = getSlotAreaSize();
+            union {
+                char* p_8;
+                uint32_t* p;
+            };
+            p_8 = (char*)obj + m_sizeofInstance;
+            
+            AvmAssert(m_slotDestroyInfo.cap() >= 1);
+            AvmAssert((uintptr_t(p) & 3) == 0);
+            const uint32_t bitsUsed = slotAreaSize / sizeof(uint32_t);  // not sizeof(Atom)!
+            
+            traceSlotsFromBitmap(gc, p, m_slotDestroyInfo, bitsUsed);
+        }
+    }
+
+    // OPTIMIZEME: We can do better than traceInfo.test, which is probably
+    // going to be about a dozen instructions on interesting architectures.
+    // A fairly trivial optimization would be to provide an API on FixedBitSet
+    // that provides uint32_t values representing sets of 32 bits, and
+    // make the loop here doubly nested.  That would also allow us to skip
+    // quickly areas of objects that have all non-pointer data.
+    
+    void Traits::traceSlotsFromBitmap(MMgc::GC* gc, uint32_t* p, const FixedBitSet& traceInfo, uint32_t bitsUsed) const
+    {
+        for (uint32_t bit = 1; bit <= bitsUsed; bit++) 
+        {
+            if (traceInfo.test(bit))
+            {
+#ifdef AVMPLUS_64BIT
+                AvmAssert((uintptr_t(p) & 7) == 0); // we had better be on an 8-byte boundary...
+#endif
+                avmplus::Atom a = *(const avmplus::Atom*)p;
+                if (atomKind(a) <= avmplus::AtomConstants::kNamespaceType)
+                {
+                    // This includes untagged pointers to String, Namespace, ScriptObject.
+                    AvmAssert(atomPtr(a) == NULL || gc->IsRCObject(atomPtr(a)));
+                    gc->TracePointer(atomPtr(a) HEAP_GRAPH_ARG((uintptr_t*)p));
+                }
+                else if (atomKind(a) == avmplus::AtomConstants::kDoubleType)
+                {
+                    AvmAssert(atomPtr(a) != NULL);
+                    gc->TracePointer(atomPtr(a) HEAP_GRAPH_ARG((uintptr_t*)p));
+                }
+            }
+            p++;
+        }
+    }
+    
     Stringp Traits::formatClassName()
     {
 #ifdef VMCFG_CACHE_GQCN

@@ -438,7 +438,37 @@ namespace avmplus
         Stringp formatClassName();
 
         void destroyInstance(ScriptObject *obj) const;
+        void traceSlots(MMgc::GC* gc, ScriptObject* obj) const;
 
+    private:
+        
+        // Trace slot storage.  'p' points to the first word.  A slot may be
+        // a tagged atom, an untagged pointer, or raw bits.  If an untagged
+        // pointer, or an atom tagged as object, string, or namespace, then
+        // the value is an RCObject (really an AvmPlusScriptableObject), though
+        // the pointer may be null.  If there are doubles they are either inline
+        // as raw bits or tagged as atoms (pointers to boxes).
+        //
+        // OPTIMIZEME:
+        //
+        // We want a small selection of tracers here, depending on the density of
+        // traceable slots in a particular object's slot storage.  Tracing from
+        // a bitmap is fine if the slots are rich in pointers or atoms; tracing
+        // from a list of slot offsets might be better for a sparse structure.
+        // Perhaps a list of /exception/ slot offsets might work well for very
+        // dense objects as well.
+        //
+        // If the JIT is present we probably want to compile tracers, because a
+        // jitted tracer won't have to interpret any layout data structure at
+        // run time.
+        
+        // Trace slot storage from a bitmap; useful for pointer-dense objects.  
+        // 'traceInfo' marks the locations to care about (one bit per 32-bit word,
+        // even on 64-bit systems).  'bitsUsed' is the number of bits to examine
+        // in traceInfo, starting with bit 1.
+        
+        void traceSlotsFromBitmap(MMgc::GC* gc, uint32_t* p, const avmplus::FixedBitSet& traceInfo, uint32_t bitsUsed) const;
+        
     public:
         PrintWriter& print(PrintWriter& prw, bool includeAllNamespaces = false) const;
         void setDeclaringScopes(const ScopeTypeChain* stc);

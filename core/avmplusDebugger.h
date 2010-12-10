@@ -103,9 +103,7 @@ namespace avmplus
          */
         virtual bool hasBreakpoint(int linenum) = 0;
         
-        GC_DATA_BEGIN(SourceInfo)
-        // No traced fields, but subclasses are exactly traced
-        GC_DATA_END(SourceInfo)
+        GC_NO_DATA(SourceInfo)
     };
 
     class GC_CPP_EXACT_IFDEF(AbcInfo, MMgc::GCFinalizedObject, DEBUGGER)
@@ -131,8 +129,7 @@ namespace avmplus
          */
         virtual int size() const = 0;
         
-        GC_DATA_BEGIN(AbcInfo)
-        GC_DATA_END(AbcInfo)
+        GC_NO_DATA(AbcInfo)
     };
 
     class DebugFrame : public MMgc::GCObject
