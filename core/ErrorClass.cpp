@@ -104,7 +104,7 @@ namespace avmplus
     ScriptObject* ErrorClass::createInstance(VTable *ivtable,
                                              ScriptObject *prototype)
     {
-        return new (ivtable->gc(), ivtable->getExtraSize()) ErrorObject(ivtable, prototype);
+        return ErrorObject::create(ivtable->gc(), ivtable, prototype);
     }
 
     /**

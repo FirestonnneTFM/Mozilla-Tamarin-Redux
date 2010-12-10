@@ -53,13 +53,13 @@ namespace avmplus
         AvmCore* core = this->core();
 
         ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
-        setPrototypePtr(new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype));
+        setPrototypePtr(RegExpObject::create(core->GetGC(), this, object_prototype));
     }
 
     ScriptObject* RegExpClass::createInstance(VTable *ivtable, ScriptObject* /*prototype*/)
     {
         AvmCore* core = this->core();
-        return new (core->GetGC(), ivtable->getExtraSize()) RegExpObject(this, core->kEmptyString, core->kEmptyString);
+        return RegExpObject::create(core->GetGC(), ivtable, this, core->kEmptyString, core->kEmptyString);
     }
 
     // this = argv[0] (ignored)
@@ -99,7 +99,7 @@ namespace avmplus
             }
             // Return a clone of the RegExp object
             RegExpObject* regExpObject = (RegExpObject*)AvmCore::atomToScriptObject(patternAtom);
-            return (new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(regExpObject))->atom();
+            return RegExpObject::create(core->GetGC(), this, regExpObject)->atom();
         } else {
             if (patternAtom != undefinedAtom) {
                 pattern = core->string(argv[1]);
@@ -114,7 +114,7 @@ namespace avmplus
             options = core->string(optionsAtom);
         }
 
-        RegExpObject* inst = new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this, pattern, options);
+        RegExpObject* inst = RegExpObject::create(core->GetGC(), this, pattern, options);
         return inst->atom();
     }
 }

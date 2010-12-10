@@ -381,6 +381,18 @@ bool NamespaceSet::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
     return gcTraceLargeAsSmall(gc, _xact_cursor);
 }
 
+void NativeErrorClass::gcTrace(MMgc::GC* gc)
+{
+    (void)gc;
+    ClassClosure::gcTrace(gc);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+}
+
+bool NativeErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+{
+    return gcTraceLargeAsSmall(gc, _xact_cursor);
+}
+
 void PIE4XNode::gcTrace(MMgc::GC* gc)
 {
     (void)gc;
@@ -659,6 +671,19 @@ bool TraitsMetadata::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
     return gcTraceLargeAsSmall(gc, _xact_cursor);
 }
 
+void TypedVectorClassBase::gcTrace(MMgc::GC* gc)
+{
+    (void)gc;
+    ClassClosure::gcTrace(gc);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    gc->TraceLocation(&m_typeTraits);
+}
+
+bool TypedVectorClassBase::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+{
+    return gcTraceLargeAsSmall(gc, _xact_cursor);
+}
+
 bool VTable::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
 {
     if (_xact_cursor == 0) {
@@ -685,6 +710,19 @@ bool VTable::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
 void VTable::gcTrace(MMgc::GC* gc)
 {
     gcTraceSmallAsLarge(gc);
+}
+
+void VectorBaseObject::gcTrace(MMgc::GC* gc)
+{
+    (void)gc;
+    ScriptObject::gcTrace(gc);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    gc->TraceLocation(&m_vecClass);
+}
+
+bool VectorBaseObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+{
+    return gcTraceLargeAsSmall(gc, _xact_cursor);
 }
 
 }

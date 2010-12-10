@@ -46,10 +46,15 @@ namespace avmplus
     /**
      * class Function
      */
-    class FunctionClass : public ClassClosure
+    class GC_AS3_EXACT(FunctionClass, ClassClosure)
     {
-    public:
+    protected:
         FunctionClass(VTable* cvtable);
+    public:
+        REALLY_INLINE static FunctionClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) FunctionClass(cvtable));
+        }
 
         ClassClosure *createEmptyFunction();
 
@@ -66,14 +71,28 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(FunctionClass)
+
         DECLARE_SLOTS_FunctionClass;
     // ------------------------ DATA SECTION END
     };
 
-    class FunctionObject : public ClassClosure
+    class GC_AS3_EXACT(FunctionObject, ClassClosure)
     {
+    protected:
+        FunctionObject(VTable* cvtable, MethodEnv* call)
+            : ClassClosure(cvtable)
+            , _call(call)
+        {
+            AvmAssert(_call != NULL);
+        }
+
     public:
-        FunctionObject(VTable* cvtable, MethodEnv* call) : ClassClosure(cvtable), _call(call) { AvmAssert(_call != NULL); }
+        static FunctionObject* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call)
+        {
+            return MMgc::setExact(new (gc, vtable->getExtraSize()) FunctionObject (vtable, call));
+        }
+
         Atom AS3_call(Atom thisAtom, Atom *argv, int argc);
         Atom AS3_apply(Atom thisAtom, Atom argArray);
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
@@ -88,8 +107,12 @@ namespace avmplus
         virtual Atom get_coerced_receiver(Atom a);
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(FunctionObject)
+
     protected:
-        DWB(MethodEnv*) _call;
+        DWB(MethodEnv*) GC_POINTER(_call);
+
+        GC_DATA_END(FunctionObject)
 
     private:
         DECLARE_SLOTS_FunctionObject;

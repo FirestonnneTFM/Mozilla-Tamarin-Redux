@@ -46,11 +46,17 @@ namespace avmplus
     /**
      * class Array
      */
-    class ArrayClass : public ClassClosure
+    class GC_AS3_EXACT(ArrayClass, ClassClosure)
     {
-    public:
+    protected:
         ArrayClass(VTable* cvtable);
-
+        
+    public:
+        REALLY_INLINE static ArrayClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ArrayClass(cvtable));
+        }
+        
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]
@@ -128,6 +134,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(ArrayClass)
+
         DECLARE_SLOTS_ArrayClass;
     // ------------------------ DATA SECTION END
     };

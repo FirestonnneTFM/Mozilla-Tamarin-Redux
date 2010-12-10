@@ -43,7 +43,7 @@ package avmplus {
 import flash.utils.ByteArray
 import avmplus.File
 
-[native(cls="::avmshell::DomainClass", instance="::avmshell::DomainObject", methods="auto")]
+[native(cls="DomainClass", gc="exact", instance="DomainObject", methods="auto")]
 public class Domain
 {
     private native function init(base:Domain):void;

@@ -46,10 +46,16 @@ namespace avmplus
     /**
      * class RegExpClass.
      */
-    class RegExpClass : public ClassClosure
+    class GC_AS3_EXACT(RegExpClass, ClassClosure)
     {
-    public:
+    protected:
         RegExpClass(VTable* cvtable);
+        
+    public:
+        REALLY_INLINE static RegExpClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) RegExpClass(cvtable));
+        }
 
         // this = argv[0]
         // arg1 = argv[1]
@@ -65,6 +71,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(RegExpClass)
+
         DECLARE_SLOTS_RegExpClass;
     // ------------------------ DATA SECTION END
     };

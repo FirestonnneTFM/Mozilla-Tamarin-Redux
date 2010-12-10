@@ -97,13 +97,13 @@ namespace avmplus
     template<class OBJ>
     ScriptObject* TypedVectorClass<OBJ>::createInstance(VTable* ivtable, ScriptObject* prototype)
     {
-        return new (core()->GetGC(), ivtable->getExtraSize()) OBJ(ivtable, prototype, this);
+        return OBJ::create(core()->GetGC(), ivtable, prototype, this);
     }
 
     template<class OBJ>
     OBJ* TypedVectorClass<OBJ>::newVector(uint32_t length)
     {
-        OBJ* v = new (core()->GetGC(), ivtable()->getExtraSize()) OBJ(ivtable(), prototypePtr(), this);
+        OBJ* v = OBJ::create(core()->GetGC(), ivtable(), prototypePtr(), this);
         if (length > 0)
             v->set_length(length);
         return v;
@@ -112,7 +112,7 @@ namespace avmplus
     template<class OBJ>
     Atom TypedVectorClass<OBJ>::createAndInitVectorFromObject(ScriptObject* so_args, uint32_t len)
     {
-        OBJ* v = new (core()->GetGC(), ivtable()->getExtraSize()) OBJ(ivtable(), prototypePtr(), this);
+        OBJ* v = OBJ::create(core()->GetGC(), ivtable(), prototypePtr(), this);
         v->_spliceHelper_so(0, len, 0, so_args, 0);
         return v->atom();
     }

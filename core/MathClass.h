@@ -46,10 +46,16 @@ namespace avmplus
     /**
      * class Math
      */
-    class MathClass : public ClassClosure
+    class GC_AS3_EXACT(MathClass, ClassClosure)
     {
-    public:
+    protected:
         MathClass(VTable* cvtable);
+    public:
+        REALLY_INLINE static MathClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) MathClass(cvtable));
+        }
+
         ~MathClass()
         {
             seed.uValue = 0;
@@ -96,6 +102,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(MathClass)
+
         TRandomFast seed;
 
         DECLARE_SLOTS_MathClass;

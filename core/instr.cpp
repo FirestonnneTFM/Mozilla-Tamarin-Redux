@@ -423,7 +423,7 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
 
     if (AvmCore::isXMLorXMLList(lhs) && AvmCore::isXMLorXMLList(rhs))
     {
-        XMLListObject *l = new (core->GetGC()) XMLListObject(atomObj(lhs)->toplevel()->xmlListClass());
+        XMLListObject *l = XMLListObject::create(core->GetGC(), atomObj(lhs)->toplevel()->xmlListClass());
         l->_append(lhs);
         l->_append(rhs);
         return l->atom();
@@ -549,7 +549,7 @@ Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
 
     if (AvmCore::isXMLorXMLList(lhs) && AvmCore::isXMLorXMLList(rhs))
     {
-        XMLListObject *l = new (core->GetGC()) XMLListObject(atomObj(lhs)->toplevel()->xmlListClass());
+        XMLListObject *l = XMLListObject::create(core->GetGC(), atomObj(lhs)->toplevel()->xmlListClass());
         l->_append(lhs);
         l->_append(rhs);
         return l->atom();

@@ -39,4 +39,66 @@
 
 namespace avmplus
 {
+void DictionaryClass::gcTrace(MMgc::GC* gc)
+{
+    (void)gc;
+#ifndef GC_TRIVIAL_TRACER_DictionaryClass
+    m_slots_DictionaryClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+}
+
+bool DictionaryClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+{
+    return gcTraceLargeAsSmall(gc, _xact_cursor);
+}
+
+void DictionaryObject::gcTrace(MMgc::GC* gc)
+{
+    (void)gc;
+#ifndef GC_TRIVIAL_TRACER_DictionaryObject
+    m_slots_DictionaryObject.gcTracePrivateProperties(gc);
+#endif
+    ScriptObject::gcTrace(gc);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+}
+
+bool DictionaryObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+{
+    return gcTraceLargeAsSmall(gc, _xact_cursor);
+}
+
+void DomainClass::gcTrace(MMgc::GC* gc)
+{
+    (void)gc;
+#ifndef GC_TRIVIAL_TRACER_DomainClass
+    m_slots_DomainClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+}
+
+bool DomainClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+{
+    return gcTraceLargeAsSmall(gc, _xact_cursor);
+}
+
+void DomainObject::gcTrace(MMgc::GC* gc)
+{
+    (void)gc;
+#ifndef GC_TRIVIAL_TRACER_DomainObject
+    m_slots_DomainObject.gcTracePrivateProperties(gc);
+#endif
+    ScriptObject::gcTrace(gc);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    gc->TraceLocation(&domainEnv);
+    gc->TraceLocation(&domainToplevel);
+}
+
+bool DomainObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+{
+    return gcTraceLargeAsSmall(gc, _xact_cursor);
+}
+
 }

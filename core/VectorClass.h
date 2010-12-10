@@ -45,10 +45,15 @@ namespace avmplus
 {
     // ----------------------------
 
-    class VectorClass : public ClassClosure
+    class GC_AS3_EXACT(VectorClass, ClassClosure)
     {
-    public:
+    protected:
         VectorClass(VTable* vtable);
+    public:
+        REALLY_INLINE static VectorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) VectorClass(cvtable));
+        }
 
         /**
         *  This unspecialized class cannot be instantiated.
@@ -67,15 +72,20 @@ namespace avmplus
         // eg is typeClass == StringClass then return a new Vector<String>
         ObjectVectorObject* newVector(ClassClosure* typeClass, uint32_t length = 0);
 
+    private:
+        GC_NO_DATA(VectorClass)
+
         DECLARE_SLOTS_VectorClass;
     };
 
     // ----------------------------
 
-    class TypedVectorClassBase : public ClassClosure
+    class GC_CPP_EXACT(TypedVectorClassBase, ClassClosure)
     {
-    public:
+    protected:
         explicit TypedVectorClassBase(VTable* vtable);
+
+    public:
         Atom checkType(Atom a);
 
         // ClassClosure overrides
@@ -91,7 +101,11 @@ namespace avmplus
         virtual Atom createAndInitVectorFromObject(ScriptObject* so, uint32_t len) = 0;
 
     protected:
-        DWB(Traits*) m_typeTraits;
+        GC_DATA_BEGIN(TypedVectorClassBase)
+
+        DWB(Traits*) GC_POINTER(m_typeTraits);
+
+        GC_DATA_END(TypedVectorClassBase)
     };
 
     // ----------------------------
@@ -101,14 +115,19 @@ namespace avmplus
     {
         friend class VectorClass;
 
-    public:
-
+    protected:
         explicit TypedVectorClass(VTable* vtable);
 
+    public:
         // ClassClosure overrides
         virtual ScriptObject* createInstance(VTable* ivtable, ScriptObject* prototype);
 
         OBJ* newVector(uint32_t length = 0);
+
+        virtual void gcTrace(MMgc::GC* gc)
+        {
+            TypedVectorClassBase::gcTrace(gc);
+        }
 
     protected:
         virtual Atom createAndInitVectorFromObject(ScriptObject* so, uint32_t len);
@@ -117,40 +136,68 @@ namespace avmplus
 
     // ----------------------------
 
-    class IntVectorClass : public TypedVectorClass<IntVectorObject>
+    class GC_AS3_EXACT(IntVectorClass, TypedVectorClass<IntVectorObject>)
     {
-    public:
+    private:
         explicit IntVectorClass(VTable* vtable);
+    public:
+        REALLY_INLINE static IntVectorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) IntVectorClass(cvtable));
+        }
+
+        GC_NO_DATA(IntVectorClass)
 
         DECLARE_SLOTS_IntVectorClass;
     };
 
     // ----------------------------
 
-    class UIntVectorClass : public TypedVectorClass<UIntVectorObject>
+    class GC_AS3_EXACT(UIntVectorClass, TypedVectorClass<UIntVectorObject>)
     {
-    public:
+    private:
         explicit UIntVectorClass(VTable* vtable);
+    public:
+        REALLY_INLINE static UIntVectorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) UIntVectorClass(cvtable));
+        }
+
+        GC_NO_DATA(UIntVectorClass)
 
         DECLARE_SLOTS_UIntVectorClass;
     };
 
     // ----------------------------
 
-    class DoubleVectorClass : public TypedVectorClass<DoubleVectorObject>
+    class GC_AS3_EXACT(DoubleVectorClass, TypedVectorClass<DoubleVectorObject>)
     {
-    public:
+    private:
         explicit DoubleVectorClass(VTable* vtable);
+    public:
+        REALLY_INLINE static DoubleVectorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) DoubleVectorClass(cvtable));
+        }
+
+        GC_NO_DATA(DoubleVectorClass)
 
         DECLARE_SLOTS_DoubleVectorClass;
     };
 
     // ----------------------------
 
-    class ObjectVectorClass : public TypedVectorClass<ObjectVectorObject>
+    class GC_AS3_EXACT(ObjectVectorClass, TypedVectorClass<ObjectVectorObject>)
     {
-    public:
+    private:
         explicit ObjectVectorClass(VTable* vtable);
+    public:
+        REALLY_INLINE static ObjectVectorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ObjectVectorClass(cvtable));
+        }
+
+        GC_NO_DATA(ObjectVectorClass)
 
         DECLARE_SLOTS_ObjectVectorClass;
     };
@@ -176,13 +223,14 @@ namespace avmplus
 
     // ----------------------------
 
-    class VectorBaseObject : public ScriptObject
+    class GC_CPP_EXACT(VectorBaseObject, ScriptObject)
     {
-    public:
+    protected:
         explicit VectorBaseObject(VTable* ivtable, 
-                                       ScriptObject* delegate, 
-                                       TypedVectorClassBase* vecClass);
+                                  ScriptObject* delegate, 
+                                  TypedVectorClassBase* vecClass);
 
+    public:
         // AS3 native getter/setter implementations
         bool get_fixed() const;
         void set_fixed(bool fixed);
@@ -221,8 +269,12 @@ namespace avmplus
         enum VectorIndexStatus { kNotNumber, kInvalidNumber, kValidNumber };
         VectorIndexStatus getVectorIndex(Atom name, uint32_t& index) const;
     
-        DRCWB(TypedVectorClassBase*)    m_vecClass;
+        GC_DATA_BEGIN(VectorBaseObject)
+
+        DRCWB(TypedVectorClassBase*)    GC_POINTER(m_vecClass);
         bool                            m_fixed;
+
+        GC_DATA_END(VectorBaseObject)
     };
 
     // ----------------------------
@@ -235,12 +287,14 @@ namespace avmplus
 
     public:
         typedef TLIST LIST;
-    public:
+
+    protected:
         explicit TypedVectorObject(VTable* ivtable, 
                                    ScriptObject* delegate, 
                                    MMgc::GC* gc, 
                                    TypedVectorClassBase* vecClass);
 
+    public:
         // overrides 
         virtual uint32_t getLength() const;
         virtual void setLength(uint32_t length);
@@ -308,6 +362,13 @@ namespace avmplus
         // _spliceHelper for when we already know that we have an object that is *not* of our Vector type.
         void _spliceHelper_so(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, ScriptObject* so_args, uint32_t offset);
 
+    public:
+        virtual void gcTrace(MMgc::GC* gc)
+        {
+            VectorBaseObject::gcTrace(gc);
+            m_list.gcTrace(gc);
+        }
+
     private:
         TLIST                           m_list;
     };
@@ -336,57 +397,101 @@ namespace avmplus
 
     // ----------------------------
 
-    class IntVectorObject : public TypedVectorObject< DataList<int32_t> > 
+    class GC_AS3_EXACT(IntVectorObject, TypedVectorObject< DataList<int32_t> >)
     {
-    public:
+    protected:
         explicit IntVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass);
+
+    public:
+        REALLY_INLINE static IntVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) IntVectorObject(ivtable, delegate, vecClass));
+        }
 
         // AS3 native function implementations
         IntVectorObject* newThisType();
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        GC_NO_DATA(IntVectorObject)
+
         DECLARE_SLOTS_IntVectorObject;
+    // ------------------------ DATA SECTION END
     };
     typedef VectorAccessor< DataList<int32_t> > IntVectorAccessor;
 
     // ----------------------------
 
-    class UIntVectorObject : public TypedVectorObject< DataList<uint32_t> > 
+    class GC_AS3_EXACT(UIntVectorObject, TypedVectorObject< DataList<uint32_t> >)
     {
+    protected:
+        explicit UIntVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase * vecClass);
+
     public:
-        explicit UIntVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass);
+        REALLY_INLINE static UIntVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) UIntVectorObject(ivtable, delegate, vecClass));
+        }
 
         // AS3 native function implementations
         UIntVectorObject* newThisType();
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        GC_NO_DATA(UIntVectorObject)
+
         DECLARE_SLOTS_UIntVectorObject;
+    // ------------------------ DATA SECTION END
     };
     typedef VectorAccessor< DataList<uint32_t> > UIntVectorAccessor;
 
     // ----------------------------
 
-    class DoubleVectorObject : public TypedVectorObject< DataList<double> > 
+    class GC_AS3_EXACT(DoubleVectorObject, TypedVectorObject< DataList<double> >)
     {
-    public:
+    protected:
         explicit DoubleVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass);
+
+    public:
+        REALLY_INLINE static DoubleVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) DoubleVectorObject(ivtable, delegate, vecClass));
+        }
 
         // AS3 native function implementations
         DoubleVectorObject* newThisType();
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        GC_NO_DATA(DoubleVectorObject)
+
         DECLARE_SLOTS_DoubleVectorObject;
+    // ------------------------ DATA SECTION END
     };
     typedef VectorAccessor< DataList<double> > DoubleVectorAccessor;
 
     // ----------------------------
 
-    class ObjectVectorObject : public TypedVectorObject< AtomList >
+    class GC_AS3_EXACT(ObjectVectorObject, TypedVectorObject< AtomList >)
     {
-    public:
+    protected:
         explicit ObjectVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass);
 
+    public:
+        REALLY_INLINE static ObjectVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ObjectVectorObject(ivtable, delegate, vecClass));
+        }
+    
         // AS3 native function implementations
         ObjectVectorObject* newThisType();
 
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        GC_NO_DATA(ObjectVectorObject)
+
         DECLARE_SLOTS_ObjectVectorObject;
+    // ------------------------ DATA SECTION END
     };
     // This is explicitly NOT provided, as 
     // (1) there's currently no need for it, and 

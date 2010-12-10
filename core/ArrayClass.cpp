@@ -74,7 +74,7 @@ namespace avmplus
 
         VTable* ivtable = this->ivtable();
         ScriptObject* objectPrototype = toplevel->objectClass->prototypePtr();
-        setPrototypePtr(new (core->GetGC(), ivtable->getExtraSize()) ArrayObject(ivtable, objectPrototype, 0));
+        setPrototypePtr(ArrayObject::create(core->GetGC(), ivtable, objectPrototype, 0));
 
         // According to ECMAscript spec (ECMA-262.pdf)
         // generic support: concat, join, pop, push, reverse, shift, slice, sort, splice, unshift
@@ -1356,24 +1356,17 @@ namespace avmplus
 
     ArrayObject* ArrayClass::newarray(Atom* argv, int argc)
     {
-        VTable* ivtable = this->ivtable();
-        ArrayObject *a = new (core()->GetGC(), ivtable->getExtraSize())
-            ArrayObject(ivtable, prototypePtr(), argv, argc);
-        return a;
+        return ArrayObject::create(core()->GetGC(), ivtable(), prototypePtr(), argv, argc);
     }
 
     ArrayObject* ArrayClass::newArray(uint32_t capacity)
     {
-        VTable* ivtable = this->ivtable();
-        ArrayObject *a = new (core()->GetGC(), ivtable->getExtraSize())
-            ArrayObject(ivtable, prototypePtr(), capacity);
-        return a;
+        return ArrayObject::create(core()->GetGC(), ivtable(), prototypePtr(), capacity);
     }
-
 
     ArrayObject* ArrayClass::createInstance(VTable *ivtable, ScriptObject* prototype)
     {
-        return new (core()->GetGC(), ivtable->getExtraSize()) ArrayObject(ivtable, prototype, 0);
+        return ArrayObject::create(core()->GetGC(), ivtable, prototype, 0);
     }
 
     /*static*/ int ArrayClass::generic_indexOf(Toplevel* toplevel, Atom thisAtom, Atom searchElement, int startIndex)

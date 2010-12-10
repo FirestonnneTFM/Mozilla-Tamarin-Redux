@@ -75,7 +75,8 @@ namespace avmplus
             Atom parent = x->parent();
             if (parent == undefinedAtom)
                 parent = nullObjectAtom;
-            XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), parent, bFound ? &m : 0);
+            XMLListObject *xl = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass(), parent, bFound ? &m : 0);
+
             xl->_append (arg);
             return xl->atom();
         }
@@ -100,9 +101,9 @@ namespace avmplus
             //parentString << "\">";
             //parentString << s;
             //parentString << "</parent>";
-            XMLObject *x = new (core->GetGC()) XMLObject(toplevel->xmlClass(), s, defaultNamespace);
+            XMLObject *x = XMLObject::create(core->GetGC(), toplevel->xmlClass(), s, defaultNamespace);
 
-            XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel->xmlListClass());
+            XMLListObject *xl = XMLListObject::create(core->GetGC(), toplevel->xmlListClass());
             for (uint32_t i = 0; i < x->getNode()->_length(); i++)
             {
                 E4XNode *c = x->getNode()->_getAt (i);
@@ -133,7 +134,7 @@ namespace avmplus
         // if args[0] is xmllist, create new list and call append
         if (AvmCore::isXMLList(argv[1]))
         {
-            XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass());
+            XMLListObject *l = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass());
             l->_append (argv[1]);
             return l->atom();
         }

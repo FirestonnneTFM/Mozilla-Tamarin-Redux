@@ -44,7 +44,7 @@
 namespace avmshell
 {
     // this class exists solely to test native classes that use MI.
-    class MIClass : public ClassClosure
+    class MIClass : public avmplus::ClassClosure
     {
     public:
         MIClass(VTable* cvtable) : ClassClosure(cvtable) {}
@@ -64,7 +64,7 @@ namespace avmshell
     };
 
     // this class exists solely to test native classes that use MI.
-    class MIObjectImpl : public ScriptObject
+    class MIObjectImpl : public avmplus::ScriptObject
     {
     public:
         const double amount;
@@ -87,12 +87,17 @@ namespace avmshell
      * Included as an example for writers of native methods,
      * and also to provide some useful QA instrumentation.
      */
-    class SystemClass : public ClassClosure
+    class GC_AS3_EXACT(SystemClass, avmplus::ClassClosure)
     {
         uint64_t initialTime;
 
-    public:
         SystemClass(VTable* cvtable);
+    public:
+        REALLY_INLINE static SystemClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) SystemClass(cvtable));
+        }
+
         ~SystemClass();
 
         // set by shell
@@ -180,6 +185,8 @@ namespace avmshell
         bool isGlobal(Atom o);
 
         void disposeXML(XMLObject *xmlObject);
+
+        GC_NO_DATA(SystemClass)
 
         DECLARE_SLOTS_SystemClass;
     };

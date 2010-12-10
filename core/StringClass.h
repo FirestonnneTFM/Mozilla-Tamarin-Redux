@@ -46,10 +46,16 @@ namespace avmplus
     /**
      * class StringClass
      */
-    class StringClass : public ClassClosure
+    class GC_AS3_EXACT(StringClass, ClassClosure)
     {
-    public:
+    protected:
         StringClass(VTable* cvtable);
+        
+    public:
+        REALLY_INLINE static StringClass* create(MMgc::GC *gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) StringClass(cvtable));
+        }
 
         // this = argv[0]
         // arg1 = argv[1]
@@ -74,6 +80,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(StringClass)
+
         DECLARE_SLOTS_StringClass;
     // ------------------------ DATA SECTION END
     };

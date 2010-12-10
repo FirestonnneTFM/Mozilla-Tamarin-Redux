@@ -3818,8 +3818,7 @@ return the result of the comparison ToPrimitive(x) == y.
                                   Stringp pattern,
                                   Stringp options)
     {
-        return new (GetGC(), regexpClass->ivtable()->getExtraSize()) RegExpObject(regexpClass,
-                                                         pattern, options);
+        return RegExpObject::create(GetGC(), regexpClass, pattern, options);
     }
 
     Namespacep AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)

@@ -46,10 +46,15 @@ namespace avmplus
     /**
      * class XMLListClass
      */
-    class XMLListClass : public ClassClosure
+    class GC_AS3_EXACT(XMLListClass, ClassClosure)
     {
-    public:
+    protected:
         XMLListClass(VTable* cvtable);
+    public:
+        REALLY_INLINE static XMLListClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) XMLListClass(cvtable));
+        }
 
         // this = argv[0]
         // arg1 = argv[1]
@@ -65,6 +70,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(XMLListClass)
+
         DECLARE_SLOTS_XMLListClass;
     // ------------------------ DATA SECTION END
     };

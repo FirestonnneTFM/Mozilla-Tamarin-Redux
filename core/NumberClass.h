@@ -46,10 +46,15 @@ namespace avmplus
     /**
      * class Number
      */
-    class NumberClass : public ClassClosure
+    class GC_AS3_EXACT(NumberClass, ClassClosure)
     {
-    public:
+    protected:
         NumberClass(VTable* cvtable);
+    public:
+        REALLY_INLINE static NumberClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) NumberClass(cvtable));
+        }
 
         // this = argv[0] (ignored)
         // arg1 = argv[1]
@@ -71,6 +76,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:    
+        GC_NO_DATA(NumberClass)
+
         DECLARE_SLOTS_NumberClass;
     // ------------------------ DATA SECTION END
     };

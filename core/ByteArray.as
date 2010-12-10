@@ -139,7 +139,7 @@ CONFIG::BYTEARRAY_API_AIR
  * @playerversion Lite 4
  */
 
-[native(cls="ByteArrayClass", instance="ByteArrayObject", methods="auto")]
+[native(cls="ByteArrayClass", gc="exact", instance="ByteArrayObject", methods="auto")]
 public class ByteArray implements IDataInput, IDataOutput
 {
 

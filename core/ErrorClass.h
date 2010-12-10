@@ -46,10 +46,16 @@ namespace avmplus
     /**
      * class Error
      */
-    class ErrorClass : public ClassClosure
+    class GC_AS3_EXACT(ErrorClass, ClassClosure)
     {
-    public:
+    protected:
         ErrorClass(VTable* cvtable);
+        
+    public:
+        REALLY_INLINE static ErrorClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ErrorClass(cvtable));
+        }
 
         Atom call(int argc, Atom* argv)
         {
@@ -75,6 +81,8 @@ namespace avmplus
 #endif /* DEBUGGER */
 
     // ------------------------ DATA SECTION BEGIN
+        GC_NO_DATA(ErrorClass)
+
     private:
         DECLARE_SLOTS_ErrorClass;
     // ------------------------ DATA SECTION END
@@ -88,13 +96,20 @@ namespace avmplus
      * ScriptObject is the presence of the stack trace, which
      * can be retrieved with the getStackTrace method.
      */
-    class ErrorObject : public ScriptObject
+    class GC_AS3_EXACT(ErrorObject,ScriptObject)
     {
-    public:
+    protected:
         ErrorObject(VTable *vtable, ScriptObject *delegate);
+
+    public:
+        REALLY_INLINE static ErrorObject* create(MMgc::GC* gc, VTable *ivtable, ScriptObject *prototype)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ErrorObject(ivtable, prototype));
+        }
+
         ~ErrorObject() {
 #ifdef DEBUGGER
-            stackTrace = 0;
+            stackTrace = NULL;
 #endif
         }
 
@@ -104,10 +119,14 @@ namespace avmplus
 #endif
         
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(ErrorObject)
+
     private:
 #ifdef DEBUGGER
-        StackTrace* stackTrace;
+        StackTrace* GC_POINTER_IFDEF(stackTrace,DEBUGGER);
 #endif /* DEBUGGER */
+
+        GC_DATA_END(ErrorObject)
 
         DECLARE_SLOTS_ErrorObject;
     // ------------------------ DATA SECTION END
@@ -116,40 +135,123 @@ namespace avmplus
     /**
      * NativeErrorClass
      *
-     * This class exists primarily to override the [[Call]] entry point
+     * This class exists to override the [[Call]] entry point
      * to the class closure, so that it constructs an error object
      * instead of attempting a coercion.
      */
-    class NativeErrorClass : public ClassClosure
+    class GC_CPP_EXACT(NativeErrorClass, ClassClosure)
     {
-    public:
+    protected:
         NativeErrorClass(VTable* cvtable);
 
+    public:
         Atom call(int argc, Atom* argv)
         {
             return construct(argc, argv);
         }
+
+        GC_NO_DATA(NativeErrorClass)
     };
 
     #define DECLARE_NATIVE_ERROR_CLASS(cls, obj)                                                \
-        class obj : public ErrorObject                                                          \
+        class obj : public ErrorObject                                                    \
         {                                                                                       \
-        public:                                                                                 \
+        protected:                                                                              \
             REALLY_INLINE obj(VTable *vtable, ScriptObject *delegate)                           \
                 : ErrorObject(vtable, delegate) {}                                              \
+        public:                                                                                 \
+            REALLY_INLINE static obj* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate) { \
+                return MMgc::setExact(new (gc, ivtable->getExtraSize()) obj(ivtable, delegate)); \
+            }                                                                                   \
+        private:                                                                                \
+            virtual void gcTrace(MMgc::GC* gc); \
+            virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor); \
             DECLARE_SLOTS_##obj;                                                                \
         };                                                                                      \
+                                                                                                \
         class cls : public NativeErrorClass                                                     \
         {                                                                                       \
-        public:                                                                                 \
+        protected:                                                                              \
             REALLY_INLINE cls(VTable* cvtable)                                                  \
                 : NativeErrorClass(cvtable) {}                                                  \
+        public:                                                                                 \
+            REALLY_INLINE static cls* create(MMgc::GC* gc, VTable* cvtable)                     \
+            {                                                                                   \
+                return MMgc::setExact(new (gc, cvtable->getExtraSize()) cls(cvtable));          \
+            }                                                                                   \
             ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate)               \
             {                                                                                   \
-                return new (ivtable->gc(), ivtable->getExtraSize()) obj(ivtable, delegate);     \
+                return obj::create(ivtable->gc(), ivtable, delegate);                           \
             }                                                                                   \
+            virtual void gcTrace(MMgc::GC* gc); \
+            virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor); \
             DECLARE_SLOTS_##cls;                                                                \
         };
+
+    // This is a hack that's required because the tracer generator really needs
+    // to examine the output of the DECLARE_NATIVE_ERROR_CLASS macro expansions
+    // (or actually the partial macro expansions - stopping before GC_AS3_EXACT
+    // is expanded), but as things stand it will examine the macros themselves.
+    //
+    // It's probably the case that the macros don't pay for themselves.
+
+#if 0
+      GC_AS3_EXACT(DefinitionErrorClass, NativeErrorClass)
+      GC_NO_DATA(DefinitionErrorClass)
+      GC_AS3_EXACT(DefinitionErrorObject, ErrorObject)
+      GC_NO_DATA(DefinitionErrorObject)
+      
+      GC_AS3_EXACT(EvalErrorClass, NativeErrorClass)
+      GC_NO_DATA(EvalErrorClass)
+      GC_AS3_EXACT(EvalErrorObject, ErrorObject)
+      GC_NO_DATA(EvalErrorObject)
+
+      GC_AS3_EXACT(RangeErrorClass, NativeErrorClass)
+      GC_NO_DATA(RangeErrorClass)
+      GC_AS3_EXACT(RangeErrorObject, ErrorObject)
+      GC_NO_DATA(RangeErrorObject)
+      
+      GC_AS3_EXACT(ReferenceErrorClass, NativeErrorClass)
+      GC_NO_DATA(ReferenceErrorClass)
+      GC_AS3_EXACT(ReferenceErrorObject, ErrorObject)
+      GC_NO_DATA(ReferenceErrorObject)
+
+      GC_AS3_EXACT(SecurityErrorClass, NativeErrorClass)
+      GC_NO_DATA(SecurityErrorClass)
+      GC_AS3_EXACT(SecurityErrorObject, ErrorObject)
+      GC_NO_DATA(SecurityErrorObject)
+
+      GC_AS3_EXACT(SyntaxErrorClass, NativeErrorClass)
+      GC_NO_DATA(SyntaxErrorClass)
+      GC_AS3_EXACT(SyntaxErrorObject, ErrorObject)
+      GC_NO_DATA(SyntaxErrorObject)
+
+      GC_AS3_EXACT(TypeErrorClass, NativeErrorClass)
+      GC_NO_DATA(TypeErrorClass)
+      GC_AS3_EXACT(TypeErrorObject, ErrorObject)
+      GC_NO_DATA(TypeErrorObject)
+
+      GC_AS3_EXACT(URIErrorClass, NativeErrorClass)
+      GC_NO_DATA(URIErrorClass)
+      GC_AS3_EXACT(URIErrorObject, ErrorObject)
+      GC_NO_DATA(URIErrorObject)
+
+      GC_AS3_EXACT(VerifyErrorClass, NativeErrorClass)
+      GC_NO_DATA(VerifyErrorClass)
+      GC_AS3_EXACT(VerifyErrorObject, ErrorObject)
+      GC_NO_DATA(VerifyErrorObject)
+
+      GC_AS3_EXACT(UninitializedErrorClass, NativeErrorClass)
+      GC_NO_DATA(UninitializedErrorClass)
+      GC_AS3_EXACT(UninitializedErrorObject, ErrorObject)
+      GC_NO_DATA(UninitializedErrorObject)
+
+      GC_AS3_EXACT(ArgumentErrorClass, NativeErrorClass)
+      GC_NO_DATA(ArgumentErrorClass)
+      GC_AS3_EXACT(ArgumentErrorObject, ErrorObject)
+      GC_NO_DATA(ArgumentErrorObject)
+#endif
+
     DECLARE_NATIVE_ERROR_CLASS(DefinitionErrorClass, DefinitionErrorObject)
     DECLARE_NATIVE_ERROR_CLASS(EvalErrorClass, EvalErrorObject)
     DECLARE_NATIVE_ERROR_CLASS(RangeErrorClass, RangeErrorObject)
@@ -161,7 +263,6 @@ namespace avmplus
     DECLARE_NATIVE_ERROR_CLASS(VerifyErrorClass, VerifyErrorObject)
     DECLARE_NATIVE_ERROR_CLASS(UninitializedErrorClass, UninitializedErrorObject)
     DECLARE_NATIVE_ERROR_CLASS(ArgumentErrorClass, ArgumentErrorObject)
-
 }
 
 #endif /* __avmplus_ErrorClass__ */

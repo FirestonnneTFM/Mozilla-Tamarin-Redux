@@ -46,10 +46,16 @@ namespace avmplus
     /**
      * class DateClass
      */
-    class DateClass : public ClassClosure
+    class GC_AS3_EXACT(DateClass, ClassClosure)
     {
-    public:
+    protected:
         DateClass(VTable* cvtable);
+
+    public:
+        REALLY_INLINE static DateClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) DateClass(cvtable));
+        }
 
         // this = argv[0]
         // arg1 = argv[1]
@@ -79,6 +85,8 @@ namespace avmplus
         double      stringToDateDouble(Stringp s);
 
     // ------------------------ DATA SECTION BEGIN
+        GC_NO_DATA(DateClass)
+
     private:
         DECLARE_SLOTS_DateClass;
     // ------------------------ DATA SECTION END

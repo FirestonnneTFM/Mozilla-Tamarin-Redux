@@ -125,7 +125,7 @@ namespace avmplus
         if (!ref || ref->isNull())
         {
             VTable* ivtable = this->ivtable();
-            mc = (new (core()->GetGC(), ivtable->getExtraSize()) MethodClosure(ivtable, m, obj));
+            mc = MMgc::setExact(new (core()->GetGC(), ivtable->getExtraSize()) MethodClosure(ivtable, m, obj));
             // since MC inherits from CC, we must explicitly set the prototype and delegate since the
             // ctor will leave those null (and without delegate set, apply() and friends won't be found
             // in pure ES3 code)

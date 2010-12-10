@@ -46,11 +46,18 @@ namespace avmplus
     /**
      * class XMLClass
      */
-    class XMLClass : public ClassClosure
+    class GC_AS3_EXACT(XMLClass, ClassClosure)
     {
-    public:
+    protected:
         XMLClass(VTable* cvtable);
+        
+    public:
         ~XMLClass();
+
+        REALLY_INLINE static XMLClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) XMLClass(cvtable));
+        }
 
         // this = argv[0]
         // arg1 = argv[1]
@@ -63,14 +70,6 @@ namespace avmplus
         Atom construct(int argc, Atom* argv);
 
         Atom ToXML(Atom arg);
-
-        enum flags
-        {
-            kFlagIgnoreComments = 0x01,
-            kFlagIgnoreProcessingInstructions = 0x02,
-            kFlagIgnoreWhitespace = 0x04,
-            kFlagPrettyPrinting = 0x08
-        };
 
         // static props/funcs off the XML object
         // XML.ignoreComments
@@ -99,11 +98,23 @@ namespace avmplus
 
         bool okToPrettyPrint() { return (get_prettyPrinting() && (m_prettyIndent >= 0)); }
 
+        enum flags
+        {
+            kFlagIgnoreComments = 0x01,
+            kFlagIgnoreProcessingInstructions = 0x02,
+            kFlagIgnoreWhitespace = 0x04,
+            kFlagPrettyPrinting = 0x08
+        };
+        
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(XMLClass)
+
     public:
         int m_prettyIndent;
         uint8_t m_flags;
-        
+
+        GC_DATA_END(XMLClass)
+
     private:
         DECLARE_SLOTS_XMLClass;
     // ------------------------ DATA SECTION END
@@ -112,10 +123,16 @@ namespace avmplus
     /**
      * class QName
      */
-    class QNameClass : public ClassClosure
+    class GC_AS3_EXACT(QNameClass, ClassClosure)
     {
-    public:
+    protected:
         QNameClass(VTable* cvtable);
+
+    public:
+        REALLY_INLINE static QNameClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) QNameClass(cvtable));
+        }
 
         // this = argv[0]
         // arg1 = argv[1]
@@ -129,6 +146,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(QNameClass)
+
         DECLARE_SLOTS_QNameClass;
     // ------------------------ DATA SECTION END
     };

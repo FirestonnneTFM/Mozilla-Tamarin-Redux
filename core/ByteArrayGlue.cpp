@@ -875,7 +875,7 @@ namespace avmplus
 
     ScriptObject* ByteArrayClass::createInstance(VTable* ivtable, ScriptObject* prototype)
     {
-        return new (ivtable->gc(), ivtable->getExtraSize()) ByteArrayObject(ivtable, prototype, (ObjectEncoding)get_defaultObjectEncoding());
+        return ByteArrayObject::create(ivtable->gc(), ivtable, prototype, (ObjectEncoding)get_defaultObjectEncoding());
     }
 
     ByteArrayObject* ByteArrayClass::constructByteArray()

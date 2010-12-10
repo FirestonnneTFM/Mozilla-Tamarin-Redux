@@ -40,8 +40,14 @@
 
 #include "avmshell.h"
 
-namespace avmshell
+#ifndef AVMSHELL_BUILD
+#error "This file is only for use with avmshell"
+#endif
+
+namespace avmplus
 {
+    using namespace avmshell;
+    
     DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
         : ScriptObject(vtable, delegate)
     {
@@ -187,7 +193,7 @@ done:
     ScriptObject* DomainClass::createInstance(VTable *ivtable,
                                               ScriptObject *prototype)
     {
-        return new (core()->GetGC(), ivtable->getExtraSize()) DomainObject(ivtable, prototype);
+        return DomainObject::create(core()->GetGC(), ivtable, prototype);
     }
 
     DomainObject* DomainClass::get_currentDomain()

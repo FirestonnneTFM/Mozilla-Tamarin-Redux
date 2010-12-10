@@ -39,7 +39,7 @@
 
 package
 {
-    [native(cls="DateClass", instance="DateObject", methods="auto", customconstruct=true)]
+    [native(cls="DateClass", gc="exact", instance="DateObject", methods="auto", customconstruct=true)]
     public final dynamic class Date
     {
         // Date.length = 7 per ES3

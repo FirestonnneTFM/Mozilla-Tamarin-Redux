@@ -46,10 +46,15 @@ namespace avmplus
     /**
      * class int
      */
-    class IntClass : public ClassClosure
+    class GC_AS3_EXACT(IntClass, ClassClosure)
     {
-    public:
+    protected:
         IntClass(VTable* cvtable);
+    public:
+        REALLY_INLINE static IntClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) IntClass(cvtable));
+        }
 
         // this = argv[0] (ignored)
         // arg1 = argv[1]
@@ -66,6 +71,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(IntClass)
+
         DECLARE_SLOTS_IntClass;
     // ------------------------ DATA SECTION END
     };
@@ -73,11 +80,16 @@ namespace avmplus
     /**
      * class uint
      */
-    class UIntClass : public ClassClosure
+    class GC_AS3_EXACT(UIntClass, ClassClosure)
     {
-    public:
+    protected:
         UIntClass(VTable* cvtable);
-
+    public:
+        REALLY_INLINE static UIntClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) UIntClass(cvtable));
+        }
+        
         // this = argv[0] (ignored)
         // arg1 = argv[1]
         // argN = argv[argc]
@@ -93,6 +105,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(UIntClass)
+
         DECLARE_SLOTS_UIntClass;
     // ------------------------ DATA SECTION END
     };

@@ -46,10 +46,16 @@ namespace avmplus
     /**
      * class Boolean
      */
-    class BooleanClass : public ClassClosure
+    class GC_AS3_EXACT(BooleanClass, ClassClosure)
     {
-    public:
+    protected:
         BooleanClass(VTable* vtable);
+
+    public:
+        REALLY_INLINE static BooleanClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) BooleanClass(cvtable));
+        }
 
         // this = argv[0] (ignored)
         // arg1 = argv[1]
@@ -66,6 +72,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(BooleanClass)
+
         DECLARE_SLOTS_BooleanClass;
     // ------------------------ DATA SECTION END
     };

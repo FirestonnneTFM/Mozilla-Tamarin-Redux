@@ -39,4 +39,5 @@
 
 #define avmshell_DebugCLI_isExactInterlock 1
 #define avmshell_ShellToplevel_isExactInterlock 1
+#define avmshell_SystemClass_isExactInterlock 1
 

@@ -43,6 +43,17 @@
 
 namespace avmplus
 {
+    // For some hand-written tracers that are used by generated tracers.
+
+#define avmplus_TypedVectorClassXDoubleVectorObjectX_isExactInterlock 1
+#define avmplus_TypedVectorClassXIntVectorObjectX_isExactInterlock 1
+#define avmplus_TypedVectorClassXUIntVectorObjectX_isExactInterlock 1
+#define avmplus_TypedVectorClassXObjectVectorObjectX_isExactInterlock 1
+#define avmplus_TypedVectorObjectXDataListXdoubleXX_isExactInterlock 1
+#define avmplus_TypedVectorObjectXDataListXint32_tXX_isExactInterlock 1
+#define avmplus_TypedVectorObjectXDataListXuint32_tXX_isExactInterlock 1
+#define avmplus_TypedVectorObjectXAtomListX_isExactInterlock 1
+    
     // ----------------------------
 
     REALLY_INLINE TypedVectorClassBase::TypedVectorClassBase(VTable* vtable)
