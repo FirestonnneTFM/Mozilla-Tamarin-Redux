@@ -63,7 +63,7 @@ package avmplus
         public native function plus(i:Number):Number;
     }
 
-    [native(cls="::avmshell::SystemClass", methods="auto")]
+    [native(cls="::avmshell::SystemClass", classgc="exact", methods="auto")]
     public class System
     {
         // this metadata exists solely so that nativegen.py will encounter it during shell building,

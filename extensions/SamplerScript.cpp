@@ -235,8 +235,7 @@ namespace avmplus
         Atom nextValue(int index)
         {
             Multiname mn(currTraits->nsAt(index), currTraits->keyAt(index), true);
-            QNameObject *qname = new (gc(), toplevel()->qnameClass()->ivtable()->getExtraSize())
-                                    QNameObject(toplevel()->qnameClass(), mn);
+            QNameObject *qname = QNameObject::create(gc(), toplevel()->qnameClass(), mn);
 
             return qname->atom();
         }

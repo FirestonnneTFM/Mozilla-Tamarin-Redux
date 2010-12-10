@@ -37,7 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
- #ifndef __avmplus_XMLListObject__
+#ifndef __avmplus_XMLListObject__
 #define __avmplus_XMLListObject__
 
 
@@ -91,20 +91,24 @@ namespace avmplus
      * The XMLListObject class is the C++ implementation of the
      * "XMLList" type in the E4X Specification.
      */
-    class XMLListObject : public ScriptObject
+    class GC_AS3_EXACT(XMLListObject, ScriptObject)
     {
         friend class XMLObject;
         
+    protected:
+        XMLListObject(XMLListClass *type, Atom targetObject, const Multiname* targetProperty);
+
+    public:
+        REALLY_INLINE static XMLListObject* create(MMgc::GC* gc, XMLListClass* cls, Atom targetObject = nullObjectAtom, const Multiname* targetProperty = 0)
+        {
+            return MMgc::setExact(new (gc) XMLListObject(cls, targetObject, targetProperty));
+        }
+        
+    private:
         XMLClass* xmlClass() const
         {
             return toplevel()->xmlClass();
         }
-
-    private:
-        
-        void fixTargetObject() const;
-
-        void setTargetObject(Atom a) const { m_targetObject.set(MMgc::GC::GetGC(this), this, a); }
 
     public:
         // Functions that override object version
@@ -251,19 +255,23 @@ namespace avmplus
         /*override*/ uint64_t bytesUsed() const;
 #endif
 
-    public:
-
-        XMLListObject(XMLListClass *type, Atom targetObject = nullObjectAtom, const Multiname* targetProperty = 0);
+    private:
+        void fixTargetObject() const;
+        void setTargetObject(Atom a) const { m_targetObject.set(MMgc::GC::GetGC(this), this, a); }
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(XMLListObject)
+
     private:
         // These three members are mutable because fixTargetObject may modify them
-        mutable HeapMultiname m_targetProperty;
-        mutable ATOM_WB m_targetObject;
-        mutable bool m_appended;
+        mutable HeapMultiname GC_STRUCTURE(m_targetProperty);
+        mutable ATOM_WB       GC_ATOM(m_targetObject);
+        mutable bool          m_appended;
 
         // An array of XMLObjects,or E4XNodes; mutable because E4XNodes may be converted to XMLObjects
-        mutable AtomList m_children;
+        mutable AtomList      GC_STRUCTURE(m_children);
+
+        GC_DATA_END(XMLListObject)
 
         DECLARE_SLOTS_XMLListObject;
     // ------------------------ DATA SECTION END

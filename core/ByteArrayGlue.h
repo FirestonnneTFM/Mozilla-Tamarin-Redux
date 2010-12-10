@@ -174,6 +174,19 @@ namespace avmplus
         ByteArray(const ByteArray& lhs);        // unimplemented
         ByteArray& operator=(const ByteArray&); // unimplemented
 
+    public:
+        void gcTrace(MMgc::GC* gc)
+        {
+            // This tracer assumes the following (true as of 2010-12-08):
+            //  - GlobalMemoryProvider has no fields
+            //  - m_array is allocated with FixedMalloc
+            gc->TraceLocation(&m_toplevel);
+            gc->TraceLocation(&m_copyOnWriteOwner);
+            m_subscribers.gcTrace(gc);
+            DataInput::gcTrace(gc);
+            DataOutput::gcTrace(gc);
+        }
+
     private:
         Toplevel* const         m_toplevel;
         MMgc::GC* const         m_gc;
@@ -201,10 +214,16 @@ namespace avmplus
         uint32_t                m_position;
     };
 
-    class ByteArrayObject : public ScriptObject
+    class GC_AS3_EXACT(ByteArrayObject, ScriptObject)
     {
-    public:
+    protected:
         ByteArrayObject(VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding);
+
+    public:
+        REALLY_INLINE static ByteArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ByteArrayObject(ivtable, delegate, defaultEncoding));
+        }
 
         virtual bool hasAtomProperty(Atom name) const;
         virtual void setAtomProperty(Atom name, Atom value);
@@ -279,20 +298,34 @@ namespace avmplus
 
         ByteArray::CompressionAlgorithm algorithmToEnum(String* algorithm);
 
+    // ------------------------ DATA SECTION BEGIN
     private:
+        GC_DATA_BEGIN(ByteArrayObject)
+
         MMgc::Cleaner   c;
-        ByteArray       m_byteArray;
+        ByteArray       GC_STRUCTURE(m_byteArray);
+
+        GC_DATA_END(ByteArrayObject)
+
         DECLARE_SLOTS_ByteArrayObject;
+    // ------------------------ DATA SECTION END
     };
 
     //
     // ByteArrayClass
     //
 
-    class ByteArrayClass : public ClassClosure
+    class GC_AS3_EXACT(ByteArrayClass, ClassClosure)
     {
-    public:
+    protected:
         ByteArrayClass(VTable *vtable);
+
+    public:
+        REALLY_INLINE static ByteArrayClass* create(MMgc::GC* gc, VTable* vtable)
+        {
+            return MMgc::setExact(new (gc, vtable->getExtraSize()) ByteArrayClass(vtable));
+        }
+
         ~ByteArrayClass() { }
 
         ByteArrayObject* constructByteArray();
@@ -302,7 +335,11 @@ namespace avmplus
         uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }
         void set_defaultObjectEncoding(uint32_t version) { set_private__defaultObjectEncoding(version); }
         
+    // ------------------------ DATA SECTION BEGIN
+        GC_NO_DATA(ByteArrayClass)
+
         DECLARE_SLOTS_ByteArrayClass;
+    // ------------------------ DATA SECTION END
     };
 }
 

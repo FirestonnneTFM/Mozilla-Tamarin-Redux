@@ -1026,6 +1026,11 @@ extern AvmBox builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define flash_utils_ByteArray_readUnsignedInt_thunk  builtin_u2a_o_thunk
 #define flash_utils_ByteArray_readUnsignedShort_thunk  builtin_u2a_o_thunk
 
+extern AvmBox builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define String_private__slice_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
+#define String_private__substr_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
+#define String_private__substring_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
+
 extern AvmBox builtin_func_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_avmplus_describeTypeJSON_thunk  builtin_func_a2a_oau_thunk
 
@@ -1055,17 +1060,15 @@ extern AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define flash_utils_ByteArray_readInt_thunk  builtin_i2a_o_thunk
 #define flash_utils_ByteArray_readShort_thunk  builtin_i2a_o_thunk
 
-extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
 
 extern double builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_charCodeAt_thunk  builtin_d2d_sd_opti0_thunk
@@ -1108,16 +1111,6 @@ extern AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 
 extern AvmBox builtin_s2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define flash_utils_ByteArray_readUTFBytes_thunk  builtin_s2a_ou_thunk
-
-extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
 
 extern AvmBox builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
@@ -1191,13 +1184,17 @@ extern AvmBox builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 extern AvmBox builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define RegExp_AS3_exec_thunk  builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk
 
-extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_513___________thunk
+extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
 
 extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__toString_thunk  builtin_s2a_oi_thunk
@@ -1232,10 +1229,13 @@ extern AvmBox builtin_v2a_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define flash_utils_ByteArray_writeDouble_thunk  builtin_v2a_od_thunk
 #define flash_utils_ByteArray_writeFloat_thunk  builtin_v2a_od_thunk
 
-extern AvmBox builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_private__slice_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
-#define String_private__substr_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
-#define String_private__substring_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
+extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
 
 extern AvmBox builtin_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define XML_ignoreComments_set_thunk  builtin_v2a_ob_thunk
@@ -1355,6 +1355,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_ObjectClass
 };
 #define DECLARE_SLOTS_ObjectClass \
     private: \
@@ -1374,6 +1375,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_ClassClass
 };
 #define DECLARE_SLOTS_ClassClass \
     private: \
@@ -1391,6 +1393,7 @@ class ClassClosureSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_ClassClosure
 };
 #define DECLARE_SLOTS_ClassClosure \
     private: \
@@ -1407,6 +1410,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_FunctionClass
 };
 #define DECLARE_SLOTS_FunctionClass \
     private: \
@@ -1424,6 +1428,7 @@ class FunctionObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_FunctionObject
 };
 #define DECLARE_SLOTS_FunctionObject \
     private: \
@@ -1440,6 +1445,11 @@ public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceAtom(&m_length);
+    }
 };
 #define DECLARE_SLOTS_NamespaceClass \
     private: \
@@ -1459,6 +1469,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_BooleanClass
 };
 #define DECLARE_SLOTS_BooleanClass \
     private: \
@@ -1494,6 +1505,7 @@ private:
     double m_POSITIVE_INFINITY;
     double m_MIN_VALUE;
     double m_MAX_VALUE;
+#define GC_TRIVIAL_TRACER_NumberClass
 };
 #define DECLARE_SLOTS_NumberClass \
     private: \
@@ -1525,6 +1537,7 @@ private:
     int32_t m_MIN_VALUE;
     int32_t m_MAX_VALUE;
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_IntClass
 };
 #define DECLARE_SLOTS_IntClass \
     private: \
@@ -1550,6 +1563,7 @@ private:
     uint32_t m_MIN_VALUE;
     uint32_t m_MAX_VALUE;
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_UIntClass
 };
 #define DECLARE_SLOTS_UIntClass \
     private: \
@@ -1571,6 +1585,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_StringClass
 };
 #define DECLARE_SLOTS_StringClass \
     private: \
@@ -1600,6 +1615,7 @@ private:
     uint32_t m_RETURNINDEXEDARRAY;
     uint32_t m_NUMERIC;
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_ArrayClass
 };
 #define DECLARE_SLOTS_ArrayClass \
     private: \
@@ -1622,6 +1638,7 @@ class ArrayObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_ArrayObject
 };
 #define DECLARE_SLOTS_ArrayObject \
     private: \
@@ -1636,6 +1653,7 @@ class VectorClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_VectorClass
 };
 #define DECLARE_SLOTS_VectorClass \
     private: \
@@ -1650,6 +1668,7 @@ class ObjectVectorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_ObjectVectorObject
 };
 #define DECLARE_SLOTS_ObjectVectorObject \
     private: \
@@ -1664,6 +1683,7 @@ class ObjectVectorClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_ObjectVectorClass
 };
 #define DECLARE_SLOTS_ObjectVectorClass \
     private: \
@@ -1678,6 +1698,7 @@ class IntVectorClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_IntVectorClass
 };
 #define DECLARE_SLOTS_IntVectorClass \
     private: \
@@ -1692,6 +1713,7 @@ class IntVectorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_IntVectorObject
 };
 #define DECLARE_SLOTS_IntVectorObject \
     private: \
@@ -1706,6 +1728,7 @@ class UIntVectorClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_UIntVectorClass
 };
 #define DECLARE_SLOTS_UIntVectorClass \
     private: \
@@ -1720,6 +1743,7 @@ class UIntVectorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_UIntVectorObject
 };
 #define DECLARE_SLOTS_UIntVectorObject \
     private: \
@@ -1734,6 +1758,7 @@ class DoubleVectorClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DoubleVectorClass
 };
 #define DECLARE_SLOTS_DoubleVectorClass \
     private: \
@@ -1748,6 +1773,7 @@ class DoubleVectorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DoubleVectorObject
 };
 #define DECLARE_SLOTS_DoubleVectorObject \
     private: \
@@ -1762,6 +1788,7 @@ class MethodClosureClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_MethodClosureClass
 };
 #define DECLARE_SLOTS_MethodClosureClass \
     private: \
@@ -1776,6 +1803,7 @@ class MethodClosureSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_MethodClosure
 };
 #define DECLARE_SLOTS_MethodClosure \
     private: \
@@ -1808,6 +1836,7 @@ private:
     double m_SQRT1_2;
     double m_SQRT2;
     double m_private_NegInfinity;
+#define GC_TRIVIAL_TRACER_MathClass
 };
 #define DECLARE_SLOTS_MathClass \
     private: \
@@ -1835,6 +1864,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_ErrorClass
 };
 #define DECLARE_SLOTS_ErrorClass \
     private: \
@@ -1861,6 +1891,12 @@ private:
     int32_t m_private__errorID;
     ATOM_WB m_message;
     ATOM_WB m_name;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceAtom(&m_message);
+        gc->TraceAtom(&m_name);
+    }
 };
 #define DECLARE_SLOTS_ErrorObject \
     private: \
@@ -1885,6 +1921,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_DefinitionErrorClass
 };
 #define DECLARE_SLOTS_DefinitionErrorClass \
     private: \
@@ -1902,6 +1939,7 @@ class DefinitionErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DefinitionErrorObject
 };
 #define DECLARE_SLOTS_DefinitionErrorObject \
     private: \
@@ -1918,6 +1956,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_EvalErrorClass
 };
 #define DECLARE_SLOTS_EvalErrorClass \
     private: \
@@ -1935,6 +1974,7 @@ class EvalErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_EvalErrorObject
 };
 #define DECLARE_SLOTS_EvalErrorObject \
     private: \
@@ -1951,6 +1991,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_RangeErrorClass
 };
 #define DECLARE_SLOTS_RangeErrorClass \
     private: \
@@ -1968,6 +2009,7 @@ class RangeErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_RangeErrorObject
 };
 #define DECLARE_SLOTS_RangeErrorObject \
     private: \
@@ -1984,6 +2026,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_ReferenceErrorClass
 };
 #define DECLARE_SLOTS_ReferenceErrorClass \
     private: \
@@ -2001,6 +2044,7 @@ class ReferenceErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_ReferenceErrorObject
 };
 #define DECLARE_SLOTS_ReferenceErrorObject \
     private: \
@@ -2017,6 +2061,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_SecurityErrorClass
 };
 #define DECLARE_SLOTS_SecurityErrorClass \
     private: \
@@ -2034,6 +2079,7 @@ class SecurityErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_SecurityErrorObject
 };
 #define DECLARE_SLOTS_SecurityErrorObject \
     private: \
@@ -2050,6 +2096,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_SyntaxErrorClass
 };
 #define DECLARE_SLOTS_SyntaxErrorClass \
     private: \
@@ -2067,6 +2114,7 @@ class SyntaxErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_SyntaxErrorObject
 };
 #define DECLARE_SLOTS_SyntaxErrorObject \
     private: \
@@ -2083,6 +2131,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_TypeErrorClass
 };
 #define DECLARE_SLOTS_TypeErrorClass \
     private: \
@@ -2100,6 +2149,7 @@ class TypeErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_TypeErrorObject
 };
 #define DECLARE_SLOTS_TypeErrorObject \
     private: \
@@ -2116,6 +2166,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_URIErrorClass
 };
 #define DECLARE_SLOTS_URIErrorClass \
     private: \
@@ -2133,6 +2184,7 @@ class URIErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_URIErrorObject
 };
 #define DECLARE_SLOTS_URIErrorObject \
     private: \
@@ -2149,6 +2201,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_VerifyErrorClass
 };
 #define DECLARE_SLOTS_VerifyErrorClass \
     private: \
@@ -2166,6 +2219,7 @@ class VerifyErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_VerifyErrorObject
 };
 #define DECLARE_SLOTS_VerifyErrorObject \
     private: \
@@ -2182,6 +2236,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_UninitializedErrorClass
 };
 #define DECLARE_SLOTS_UninitializedErrorClass \
     private: \
@@ -2199,6 +2254,7 @@ class UninitializedErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_UninitializedErrorObject
 };
 #define DECLARE_SLOTS_UninitializedErrorObject \
     private: \
@@ -2215,6 +2271,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_ArgumentErrorClass
 };
 #define DECLARE_SLOTS_ArgumentErrorClass \
     private: \
@@ -2232,6 +2289,7 @@ class ArgumentErrorObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_ArgumentErrorObject
 };
 #define DECLARE_SLOTS_ArgumentErrorObject \
     private: \
@@ -2248,6 +2306,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_DateClass
 };
 #define DECLARE_SLOTS_DateClass \
     private: \
@@ -2265,6 +2324,7 @@ class DateObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DateObject
 };
 #define DECLARE_SLOTS_DateObject \
     private: \
@@ -2281,6 +2341,7 @@ public:
     REALLY_INLINE int32_t get_length() const { return m_length; }
 private:
     int32_t m_length;
+#define GC_TRIVIAL_TRACER_RegExpClass
 };
 #define DECLARE_SLOTS_RegExpClass \
     private: \
@@ -2298,6 +2359,7 @@ class RegExpObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_RegExpObject
 };
 #define DECLARE_SLOTS_RegExpObject \
     private: \
@@ -2314,6 +2376,11 @@ public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceAtom(&m_length);
+    }
 };
 #define DECLARE_SLOTS_XMLClass \
     private: \
@@ -2331,6 +2398,7 @@ class XMLObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_XMLObject
 };
 #define DECLARE_SLOTS_XMLObject \
     private: \
@@ -2347,6 +2415,11 @@ public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceAtom(&m_length);
+    }
 };
 #define DECLARE_SLOTS_XMLListClass \
     private: \
@@ -2364,6 +2437,7 @@ class XMLListObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_XMLListObject
 };
 #define DECLARE_SLOTS_XMLListObject \
     private: \
@@ -2380,6 +2454,11 @@ public:
     REALLY_INLINE AvmBox get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceAtom(&m_length);
+    }
 };
 #define DECLARE_SLOTS_QNameClass \
     private: \
@@ -2397,6 +2476,7 @@ class QNameObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_QNameObject
 };
 #define DECLARE_SLOTS_QNameObject \
     private: \
@@ -2414,6 +2494,7 @@ public:
     REALLY_INLINE void set_private__defaultObjectEncoding(uint32_t newVal) { m_private__defaultObjectEncoding = newVal; }
 private:
     uint32_t m_private__defaultObjectEncoding;
+#define GC_TRIVIAL_TRACER_ByteArrayClass
 };
 #define DECLARE_SLOTS_ByteArrayClass \
     private: \
@@ -2432,6 +2513,7 @@ class ByteArrayObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_ByteArrayObject
 };
 #define DECLARE_SLOTS_ByteArrayObject \
     private: \

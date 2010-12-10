@@ -40,7 +40,9 @@
 
 package
 {
-    [native(cls="NumberClass", instance="double", methods="auto", customconstruct=true)]
+    // No instancegc, value is primitive.
+
+    [native(cls="NumberClass", classgc="exact", instance="double", methods="auto", customconstruct=true)]
     public final class Number
     {
         // Number.length = 1 per ES3
@@ -128,7 +130,9 @@ package
         _dontEnumPrototype(prototype);
     }
 
-    [native(cls="IntClass", instance="int32_t", methods="auto", customconstruct=true)]
+    // No instancegc, value is primitive.
+
+    [native(cls="IntClass", classgc="exact", instance="int32_t", methods="auto", customconstruct=true)]
     public final class int
     {
         // based on Number: E262 {ReadOnly, DontDelete, DontEnum}
@@ -196,7 +200,9 @@ package
         _dontEnumPrototype(prototype);
     }
 
-    [native(cls="UIntClass", instance="uint32_t", methods="auto", customconstruct=true)]
+    // No instancegc, value is primitive.
+
+    [native(cls="UIntClass", classgc="exact", instance="uint32_t", methods="auto", customconstruct=true)]
     public final class uint
     {
         // based on Number: E262 {ReadOnly, DontDelete, DontEnum}

@@ -262,7 +262,7 @@ namespace avmplus
             return;
         }
 
-        E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (name, ns);
+        E4XNodeAux *aux = E4XNodeAux::create(core->GetGC(), name, ns);
         //m_nameOrAux = AUXBIT | int(aux);
         // Clear it out in case there's already a name there.
         WBRC_NULL(&m_nameOrAux);
@@ -545,7 +545,7 @@ namespace avmplus
             }
 
             // !!@ intern our attributeValue??
-            E4XNode *attrObj = new(core->GetGC()) AttributeE4XNode(this, attributeValue);
+            E4XNode *attrObj = AttributeE4XNode::create(core->GetGC(), this, attributeValue);
 
             Namespace *ns = this->FindNamespace(core, toplevel, attributeName, true);
             if (!ns)
@@ -601,22 +601,22 @@ namespace avmplus
         switch (this->getClass())
         {
         case kAttribute:
-            x = new (core->GetGC()) AttributeE4XNode (0, getValue());
+            x = AttributeE4XNode::create(core->GetGC(), 0, getValue());
             break;
         case kText:
-            x = new (core->GetGC()) TextE4XNode (0, getValue());
+            x = TextE4XNode::create(core->GetGC(), 0, getValue());
             break;
         case kCDATA:
-            x = new (core->GetGC()) CDATAE4XNode (0, getValue());
+            x = CDATAE4XNode::create(core->GetGC(), 0, getValue());
             break;
         case kComment:
-            x = new (core->GetGC()) CommentE4XNode (0, getValue());
+            x = CommentE4XNode::create(core->GetGC(), 0, getValue());
             break;
         case kProcessingInstruction:
-            x = new (core->GetGC()) PIE4XNode (0, getValue());
+            x = PIE4XNode::create(core->GetGC(), 0, getValue());
             break;
         case kElement:
-            x = new (core->GetGC()) ElementE4XNode (0);
+            x = ElementE4XNode::create(core->GetGC(), 0);
             break;
         }
 
@@ -927,7 +927,7 @@ namespace avmplus
         else
         {
             Stringp s = core->string(V);
-            E4XNode *newXML = new (core->GetGC()) TextE4XNode(this, s);
+            E4XNode *newXML = TextE4XNode::create(core->GetGC(), this, s);
             // if this[i] is going away, clear its parent
             if (prior)
             {
@@ -941,7 +941,7 @@ namespace avmplus
                 Atom detail = prior ? prior->getValue()->atom() : 0;
                 if (!detail)
                     detail = pastValue;
-                XMLObject* target = new (core->GetGC()) XMLObject(toplevel->xmlClass(), newXML);
+                XMLObject* target = XMLObject::create(core->GetGC(), toplevel->xmlClass(), newXML);
                 target->nonChildChanges(core->ktextSet, newXML->getValue()->atom(), detail);
             }
         }
@@ -962,7 +962,7 @@ namespace avmplus
         else
         {
             Stringp str = (String *)(nameOrAux);
-            E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, publicNS, f);
+            E4XNodeAux *aux = E4XNodeAux::create(core->GetGC(), str, publicNS, f);
             //m_nameOrAux = AUXBIT | int(aux);
             WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr_t(aux));
         }

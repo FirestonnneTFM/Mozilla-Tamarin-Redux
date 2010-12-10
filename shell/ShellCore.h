@@ -112,7 +112,7 @@ namespace avmshell
     class ShellCore : public AvmCore
     {
     friend class SystemClass;
-    friend class DomainObject;
+        friend class avmplus::DomainObject;
     public:
         /**
          * Create a new core with the given GC (one gc per core).

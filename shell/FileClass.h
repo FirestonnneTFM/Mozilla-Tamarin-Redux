@@ -48,7 +48,7 @@ namespace avmshell
      * Included as an example for writers of native methods,
      * and also to provide some useful QA instrumentation.
      */
-    class FileClass : public ClassClosure
+    class FileClass : public avmplus::ClassClosure
     {
     public:
         FileClass(VTable* cvtable);

@@ -56,14 +56,14 @@ namespace avmplus
 
     void ClassClosure::createVanillaPrototype()
     {
-        prototype = toplevel()->objectClass->construct();
+        m_prototype = toplevel()->objectClass->construct();
     }
 
     Atom ClassClosure::get_prototype()
     {
         // Illegal to apply this getter to anything but instances of Class
         // (verifier should ensure this)
-        return prototype ? prototype->atom() : undefinedAtom;
+        return m_prototype ? m_prototype->atom() : undefinedAtom;
     }
 
     void ClassClosure::set_prototype(Atom value)
@@ -88,7 +88,7 @@ namespace avmplus
 
     void ClassClosure::setPrototypePtr(ScriptObject* p)
     {
-        prototype = p;
+        m_prototype = p;
         if (p == NULL)
             this->ivtable()->createInstance = ScriptObject::genericCreateInstance;
     }

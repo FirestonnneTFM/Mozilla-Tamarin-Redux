@@ -41,7 +41,7 @@ package {
 
 // E4X definitions.  based on ECMA-357
 
-[native(cls="XMLClass", instance="XMLObject", methods="auto", customconstruct=true)]
+[native(cls="XMLClass", gc="exact", instance="XMLObject", methods="auto", customconstruct=true)]
 public final dynamic class XML extends Object
 {
     // { ReadOnly, DontDelete, DontEnum }
@@ -397,7 +397,7 @@ public final dynamic class XML extends Object
     _dontEnumPrototype(prototype);
 }
 
-[native(cls="XMLListClass", instance="XMLListObject", methods="auto", customconstruct=true)]
+[native(cls="XMLListClass", gc="exact", instance="XMLListObject", methods="auto", customconstruct=true)]
 public final dynamic class XMLList extends Object
 {
     // { ReadOnly, DontDelete, DontEnum }
@@ -677,7 +677,7 @@ public final dynamic class XMLList extends Object
 
 }
 
-[native(cls="QNameClass", instance="QNameObject", methods="auto", customconstruct=true)]
+[native(cls="QNameClass", gc="exact", instance="QNameObject", methods="auto", customconstruct=true)]
 public final class QName extends Object
 {
     // E262 {DontDelete, ReadOnly, DontEnum}

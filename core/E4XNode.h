@@ -119,8 +119,14 @@ namespace avmplus
         friend class E4XNode;
         friend class ElementE4XNode;
 
-    public:
+    private:
         E4XNodeAux(Stringp s, Namespace* ns, FunctionObject* notify = NULL);
+
+    public:
+        REALLY_INLINE static E4XNodeAux* create(MMgc::GC* gc, Stringp name, Namespace *ns, FunctionObject* notify = NULL)
+        {
+            return MMgc::setExact(new (gc) E4XNodeAux (name, ns, notify));
+        }
 
 #ifdef DEBUGGER
         uint64_t bytesUsed() const;
@@ -167,17 +173,15 @@ namespace avmplus
 
         GC_DATA_END(E4XNode)
 
+    protected:
+        E4XNode(E4XNode* parent) : m_parent(parent), m_nameOrAux(0) { }
+        
     public:
         
         typedef GCList<E4XNode> E4XNodeList;
         typedef HeapList<E4XNodeList> HeapE4XNodeList;
 
     public:
-        E4XNode(E4XNode* parent) : m_parent(parent), m_nameOrAux(0) { }
-
-        // we have virtual functions, so we probably need a virtual dtor
-        virtual ~E4XNode() {}
-
         bool getQName (Multiname *mn, Namespacep publicNS) const;
         void setQName (AvmCore *core, Stringp name, Namespace *ns = 0);
         void setQName (AvmCore *core, const Multiname *mn);
@@ -280,8 +284,12 @@ namespace avmplus
         DRCWB(Stringp) GC_POINTER(m_value);
         GC_DATA_END(TextE4XNode)
 
-    public:
         TextE4XNode (E4XNode *parent, String *value);
+    public:
+        REALLY_INLINE static TextE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
+        {
+            return MMgc::setExact(new (gc) TextE4XNode(parent, value));
+        }
 
         int getClass() const { return kText; }
         Stringp getValue() const { return m_value; }
@@ -299,8 +307,12 @@ namespace avmplus
         DRCWB(Stringp) GC_POINTER(m_value);
         GC_DATA_END(CommentE4XNode)
 
-    public:
         CommentE4XNode (E4XNode *parent, String *value);
+    public:
+        REALLY_INLINE static CommentE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
+        {
+            return MMgc::setExact(new (gc) CommentE4XNode(parent, value));
+        }
 
         int getClass() const { return kComment; }
         Stringp getValue() const { return m_value; }
@@ -318,8 +330,13 @@ namespace avmplus
         DRCWB(Stringp) GC_POINTER(m_value);
         GC_DATA_END(AttributeE4XNode)
 
-    public:
         AttributeE4XNode (E4XNode *parent, String *value);
+        
+    public:
+        REALLY_INLINE static AttributeE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
+        {
+            return MMgc::setExact(new (gc) AttributeE4XNode(parent, value));
+        }
 
         int getClass() const { return kAttribute; }
         Stringp getValue() const { return m_value; }
@@ -337,8 +354,12 @@ namespace avmplus
         DRCWB(Stringp) GC_POINTER(m_value);
         GC_DATA_END(CDATAE4XNode)
 
-    public:
         CDATAE4XNode (E4XNode *parent, String *value);
+    public:
+        REALLY_INLINE static CDATAE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
+        {
+            return MMgc::setExact(new (gc) CDATAE4XNode(parent, value));
+        }
 
         int getClass() const { return kCDATA; }
         Stringp getValue() const { return m_value; }
@@ -356,8 +377,12 @@ namespace avmplus
         DRCWB(Stringp) GC_POINTER(m_value); // only when m_class != kElement
         GC_DATA_END(PIE4XNode)
 
-    public:
         PIE4XNode (E4XNode *parent, String *value);
+    public:
+        REALLY_INLINE static PIE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
+        {
+            return MMgc::setExact(new (gc) PIE4XNode(parent, value));
+        }
 
         int getClass() const { return kProcessingInstruction; }
         Stringp getValue() const { return m_value; }
@@ -388,8 +413,13 @@ namespace avmplus
 
         friend class E4XNode;
 
-    public:
         ElementE4XNode (E4XNode *parent);
+    public:
+        REALLY_INLINE static ElementE4XNode* create(MMgc::GC* gc, E4XNode *parent)
+        {
+            return MMgc::setExact(new (gc) ElementE4XNode(parent));
+        }
+
         int getClass() const { return kElement; }
 
         uint32_t numAttributes() const { return (m_attributes ? m_attributes->list.length() : 0); }

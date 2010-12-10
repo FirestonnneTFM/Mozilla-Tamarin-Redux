@@ -176,6 +176,8 @@ namespace avmplus
         void ThrowMemoryError();
         void ThrowRangeError();
         
+        REALLY_INLINE void gcTrace(MMgc::GC* gc) { (void)gc; }
+
     private:
         // OPTIMIZEME these will fit into bytes, might be a tiny worthwhile savings
         ObjectEncoding  m_objectEncoding;
@@ -204,6 +206,11 @@ namespace avmplus
 
     protected:
         void CheckEOF(uint32_t count);
+
+        REALLY_INLINE void gcTrace(MMgc::GC* gc)
+        {
+            DataIOBase::gcTrace(gc);
+        }
     };
 
     class DataOutput : virtual public DataIOBase
@@ -224,6 +231,12 @@ namespace avmplus
         void WriteUTFBytes(String *str);
         void WriteByteArray(ByteArray& buffer, uint32_t offset, uint32_t count);
         void WriteObject(Atom atom);
+        
+    protected:
+        REALLY_INLINE void gcTrace(MMgc::GC* gc)
+        {
+            DataIOBase::gcTrace(gc);
+        }
     };
 }
 

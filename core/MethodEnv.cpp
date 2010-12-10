@@ -726,7 +726,7 @@ namespace avmplus
         }
 
         FunctionEnv* fenv = FunctionEnv::create(gc, function, fscope);
-        FunctionObject* c = new (gc, fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
+        FunctionObject* c = FunctionObject::create(gc, fvtable, fenv);
         c->setDelegate(functionClass->prototypePtr());
 
         c->createVanillaPrototype();
@@ -764,7 +764,7 @@ namespace avmplus
             cc_construct_index = (p.offsets[0] - 1) / sizeof(void*);
             // Now that we have the offset, get the pointer value for the
             // base ClassClosure::construct method.  This is what we compare to below.
-            ClassClosure* obj_cc = new (cc->gc(), sizeof(ClassClosure)+100) ClassClosure(cc->toplevel()->objectClass->vtable);
+            ClassClosure* obj_cc = ClassClosure::create(cc->gc(), sizeof(ClassClosure)+100, cc->toplevel()->objectClass->vtable);
             void*** obj_ptr = (void***)obj_cc;
             cc_construct_ptr = (void*) (obj_ptr[0][cc_construct_index]);
             delete obj_cc;
@@ -910,7 +910,7 @@ namespace avmplus
         }
         else
         {
-            cc = new (core->GetGC(), cvtable->getExtraSize()) ClassClosure(cvtable);
+            cc = ClassClosure::create(core->GetGC(), cvtable);
             AvmAssert(cc->prototypePtr() == NULL);
             cc->createVanillaPrototype();
         }

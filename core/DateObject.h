@@ -47,14 +47,14 @@ namespace avmplus
      * The DateObject class is the C++ implementation of instances
      * of the Date class in the ECMA-262 Specification.
      */
-    class DateObject : public ScriptObject
+    class GC_AS3_EXACT(DateObject, ScriptObject)
     {
-    public:
+    protected:
         /**
          * This variant is only used for creating the prototype
          */
-        DateObject(DateClass *type, ScriptObject *objectPrototype)
-            : ScriptObject(type->ivtable(), objectPrototype)
+        DateObject(VTable* ivtable, ScriptObject *objectPrototype)
+            : ScriptObject(ivtable, objectPrototype)
         {
             SAMPLE_FRAME("Date", core());
             AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
@@ -72,6 +72,17 @@ namespace avmplus
             this->date = date;
         }
 
+    public:
+        REALLY_INLINE static DateObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* prototype)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) DateObject(ivtable, prototype));
+        }
+
+        REALLY_INLINE static DateObject* create(MMgc::GC* gc, DateClass* type, const Date& date)
+        {
+            return MMgc::setExact(new (gc, type->ivtable()->getExtraSize()) DateObject(type, date));
+        }
+        
         // renamed to avoid hiding ScriptObject::toString
         Stringp _toString(int index);
         double AS3_valueOf();
@@ -121,8 +132,12 @@ namespace avmplus
         
     // ------------------------ DATA SECTION BEGIN
     public:
-        Date date;
-        
+        GC_DATA_BEGIN(DateObject)
+
+        Date date;           // Not subject to GC, contains no pointers
+
+        GC_DATA_END(DateObject)
+
     private:
         DECLARE_SLOTS_DateObject;
     // ------------------------ DATA SECTION END

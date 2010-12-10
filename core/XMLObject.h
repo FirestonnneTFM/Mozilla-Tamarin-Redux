@@ -118,8 +118,24 @@ namespace avmplus
     typedef RCList<Namespace> NamespaceList;
     typedef HeapList<NamespaceList> HeapNamespaceList;
 
-    class XMLObject : public ScriptObject
+    class GC_AS3_EXACT(XMLObject, ScriptObject)
     {
+    protected:
+        XMLObject(XMLClass *type, Stringp s=NULL, Namespace *defaultNamespace=NULL);
+        XMLObject(XMLClass *type, E4XNode *node);
+        
+    public:
+        REALLY_INLINE static XMLObject* create(MMgc::GC* gc, XMLClass *type, Stringp s=NULL, Namespacep defaultNamespace=NULL)
+        {
+            return MMgc::setExact(new (gc) XMLObject(type, s, defaultNamespace));
+        }
+        
+        REALLY_INLINE static XMLObject* create(MMgc::GC* gc, XMLClass *type, E4XNode *node)
+        {
+            return MMgc::setExact(new (gc) XMLObject(type, node));
+        }
+
+    private:
         XMLClass* xmlClass() const
         {
             return toplevel()->xmlClass();
@@ -284,10 +300,6 @@ namespace avmplus
         uint64_t bytesUsedShallow() const;
 #endif
 
-    public:
-        XMLObject(XMLClass *type, Stringp s=NULL, Namespace *defaultNamespace=NULL);
-        XMLObject(XMLClass *type, E4XNode *node);
-
         // public/static so that Flash/AIR can test for this special-case
         // without replicating the logic and possibly getting it different.
         static bool fixBugzilla444630(AvmCore* core);
@@ -308,11 +320,16 @@ namespace avmplus
         Atom maybeEscapeChild(Atom child);
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(XMLObject)
+
     protected:
-        DWB(E4XNode*) m_node;
+        DWB(E4XNode*) GC_POINTER(m_node);
 
     private:
-        Namespacep publicNS;
+        Namespace*    GC_POINTER(publicNS);
+
+        GC_DATA_END(XMLObject)
+
         DECLARE_SLOTS_XMLObject;
     // ------------------------ DATA SECTION END
     };
@@ -326,20 +343,36 @@ namespace avmplus
      * having the overhead of an AttributeName class that wraps the QName class, we just use a boolean
      * inside the QName to differentiate betweent the two types.
      */
-    class QNameObject : public ScriptObject
+    class GC_AS3_EXACT(QNameObject, ScriptObject)
     {
+    protected:
+        QNameObject(QNameClass *type, const Multiname &mn);
+        QNameObject(QNameClass *type, Atom name, bool bAttribute=false);
+        QNameObject(QNameClass *type, Namespace *nameSpace, Atom name, bool bAttribute=false);
+
+    public:
+        REALLY_INLINE static QNameObject* create(MMgc::GC* gc, QNameClass* cls, const Multiname &mn)
+        {
+            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) QNameObject(cls, mn));
+        }
+        
+        REALLY_INLINE static QNameObject* create(MMgc::GC* gc, QNameClass* cls, Atom attributeName, bool bAttribute=false)
+        {
+            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) QNameObject(cls, attributeName, bAttribute));
+        }
+        
+        REALLY_INLINE static QNameObject* create(MMgc::GC* gc, QNameClass* cls, Namespace* ns, Atom attributeName, bool bAttribute=false)
+        {
+            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) QNameObject(cls, ns, attributeName, bAttribute));
+        }
+        
+    private:
         XMLClass* xmlClass() const
         {
             return toplevel()->xmlClass();
         }
 
-        friend class QNameClass;
-
     public:
-        QNameObject(QNameClass *type, const Multiname &mn);
-        QNameObject(QNameClass *type, Atom name, bool bAttribute=false);
-        QNameObject(QNameClass *type, Namespace *nameSpace, Atom name, bool bAttribute=false);
-
         Atom getURI() const;
         Stringp get_localName() const;
         Atom get_uri() const;
@@ -357,8 +390,13 @@ namespace avmplus
         }
 
     // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(QNameObject)
+
     private:
-        HeapMultiname m_mn;
+        HeapMultiname GC_STRUCTURE(m_mn);
+
+        GC_DATA_END(QNameObject)
+
         DECLARE_SLOTS_QNameObject;
     // ------------------------ DATA SECTION END
     };

@@ -46,6 +46,8 @@ namespace avmplus {
     class DeleteObjectSampleObject; // flash.sampler::DeleteObjectSample
     class DictionaryClass; // flash.utils::Dictionary$
     class DictionaryObject; // flash.utils::Dictionary
+    class DomainClass; // avmplus::Domain$
+    class DomainObject; // avmplus::Domain
     class JObject; // avmplus::JObject
     class JObjectClass; // avmplus::JObject$
     class NewObjectSampleClass; // flash.sampler::NewObjectSample$
@@ -62,8 +64,6 @@ namespace avmplus {
 }
 
 namespace avmshell {
-    class DomainClass; // avmplus::Domain$
-    class DomainObject; // avmplus::Domain
     class FileClass; // avmplus::File$
     class MIClass; // avmplus::MI$
     class MIObject; // avmplus::MI
@@ -433,6 +433,11 @@ public:
     REALLY_INLINE ArrayObject* get_argv() const { return m_argv; }
 private:
     DRCWB(ArrayObject*) m_argv;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_argv);
+    }
 };
 #define DECLARE_SLOTS_SystemClass \
     private: \
@@ -459,30 +464,32 @@ private:
 
 // avmplus::Domain$
 //-----------------------------------------------------------
-class _avmshell_DomainClassSlots
+class DomainClassSlots
 {
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DomainClass
 };
 #define DECLARE_SLOTS_DomainClass \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-        typedef avmplus::NativeID::_avmshell_DomainClassSlots EmptySlotsStruct_DomainClass
+        typedef avmplus::NativeID::DomainClassSlots EmptySlotsStruct_DomainClass
 //-----------------------------------------------------------
 
 // avmplus::Domain
 //-----------------------------------------------------------
-class _avmshell_DomainObjectSlots
+class DomainObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DomainObject
 };
 #define DECLARE_SLOTS_DomainObject \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-        typedef avmplus::NativeID::_avmshell_DomainObjectSlots EmptySlotsStruct_DomainObject
+        typedef avmplus::NativeID::DomainObjectSlots EmptySlotsStruct_DomainObject
 //-----------------------------------------------------------
 
 // flash.sampler::StackFrame$
@@ -699,6 +706,7 @@ class DictionaryClassSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DictionaryClass
 };
 #define DECLARE_SLOTS_DictionaryClass \
     private: \
@@ -713,6 +721,7 @@ class DictionaryObjectSlots
     friend class SlotOffsetsAndAsserts;
 public:
 private:
+#define GC_TRIVIAL_TRACER_DictionaryObject
 };
 #define DECLARE_SLOTS_DictionaryObject \
     private: \

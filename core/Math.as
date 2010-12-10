@@ -40,7 +40,10 @@
 package
 {
 
-[native(cls="MathClass", instance="double", methods="auto", customconstruct=true)]
+// Note, no instances.
+// FIXME: the 'instance' spec here is wrong, workaround for a bug in nativegen.py?
+
+[native(cls="MathClass", classgc="exact", instance="double", methods="auto", customconstruct=true)]
 public final class Math
 {
     // the value properties of math are {DontEnum,DontDelete,ReadOnly}

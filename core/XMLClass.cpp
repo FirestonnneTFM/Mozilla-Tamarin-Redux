@@ -162,14 +162,14 @@ namespace avmplus
 
             // 2. Parse parentString as a W3C element information info e
             // 3. If the parse fails, throw a SyntaxError exception
-            XMLObject *x = new (core->GetGC()) XMLObject(toplevel->xmlClass(), core->string(arg), defaultNamespace);
+            XMLObject *x = XMLObject::create(core->GetGC(), toplevel->xmlClass(), core->string(arg), defaultNamespace);
 
             // 4. x = toXML(e);
             // 5. if x.length == 0
             //       return new xml object
             if (!x->getNode()->_length())
             {
-                x->setNode( new (core->GetGC()) TextE4XNode(0, core->kEmptyString) );
+                x->setNode( TextE4XNode::create(core->GetGC(), 0, core->kEmptyString) );
             }
             // 6. else if x.length == 1
             //       x[0].parent = null
@@ -317,14 +317,14 @@ namespace avmplus
         AvmCore* core = this->core();
 
         if (argc == 0)
-            return (new (core->GetGC(), ivtable()->getExtraSize()) QNameObject(this, undefinedAtom))->atom();
+            return QNameObject::create(core->GetGC(), this, undefinedAtom)->atom();
 
         if (argc == 1)
         {
             if (core->isObject(argv[1]) && AvmCore::istype(argv[1], core->traits.qName_itraits))
                 return argv[1];
 
-            return (new (core->GetGC(), ivtable()->getExtraSize()) QNameObject(this, argv[1]))->atom();
+            return QNameObject::create(core->GetGC(), this, argv[1])->atom();
         }
         else
         {
@@ -332,7 +332,7 @@ namespace avmplus
             if (a == undefinedAtom)
             {
                 // ns undefined same as unspecified
-                return (new (core->GetGC(), ivtable()->getExtraSize()) QNameObject(this, argv[2]))->atom();
+                return QNameObject::create(core->GetGC(), this, argv[2])->atom();
             }
             else
             {
@@ -348,7 +348,7 @@ namespace avmplus
                     ns = core->atomToNamespace(a);
                 else
                     ns = core->newNamespace (a);
-                return (new (core->GetGC(), ivtable()->getExtraSize()) QNameObject(this, ns, argv[2]))->atom();
+                return QNameObject::create(core->GetGC(), this, ns, argv[2])->atom();
             }
         }
     }

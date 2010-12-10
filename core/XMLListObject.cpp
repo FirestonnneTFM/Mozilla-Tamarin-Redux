@@ -102,7 +102,7 @@ namespace avmplus
 
         // step 2
         //QNameObject* qname = new (core->GetGC()) QNameObject(toplevel->qnameClass(), *m);
-        XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel->xmlListClass(), this->atom(), m);
+        XMLListObject *l = XMLListObject::create(core->GetGC(), toplevel->xmlListClass(), this->atom(), m);
 
         // step 3
         for (uint32_t i = 0; i < _length(); i++)
@@ -209,7 +209,7 @@ namespace avmplus
     {
         AvmCore *core = this->core();
 
-        XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass());
+        XMLListObject *l = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass());
         for (uint32_t i = 0; i < numChildren(); i++)
         {
             if (_getNodeAt(i)->getClass() == E4XNode::kElement)
@@ -306,7 +306,7 @@ namespace avmplus
                 if (AvmCore::isXMLList(attributesExist) && (AvmCore::atomToXMLList(attributesExist)->_length() > 0))
                     return;
 
-                y = new (core->GetGC()) AttributeE4XNode (AvmCore::atomToXML(r), 0);
+                y = AttributeE4XNode::create(core->GetGC(), AvmCore::atomToXML(r), 0);
                 y->setQName (core, m_targetProperty);
 
                 // warning: it looks like this is sent prior to the attribute being added.
@@ -319,11 +319,11 @@ namespace avmplus
                 ((AvmCore::isXML(V) && AvmCore::atomToXML(V)->getClass() == E4XNode::kAttribute)) ||
                 ((AvmCore::isXML(V) && AvmCore::atomToXML(V)->getClass() == E4XNode::kText)))
             {
-                y = new (core->GetGC()) TextE4XNode (AvmCore::atomToXML(r), 0);
+                y = TextE4XNode::create(core->GetGC(), AvmCore::atomToXML(r), 0);
             }
             else
             {
-                y = new (core->GetGC()) ElementE4XNode (AvmCore::atomToXML(r));
+                y = ElementE4XNode::create(core->GetGC(), AvmCore::atomToXML(r));
                 y->setQName (core, this->m_targetProperty);
             }
 
@@ -420,7 +420,7 @@ namespace avmplus
         {
             // create a shallow copy c of V
             XMLListObject *src = AvmCore::atomToXMLList(V);
-            XMLListObject *c = new (core->GetGC()) XMLListObject(toplevel->xmlListClass());
+            XMLListObject *c = XMLListObject::create(core->GetGC(), toplevel->xmlListClass());
 
             c->m_children.ensureCapacity(src->numChildren());
             for (uint32_t i2 = 0; i2 < src->numChildren(); i2++)
@@ -452,7 +452,7 @@ namespace avmplus
 
             bool notify = (parent && XMLObject::notifyNeeded(parent));
             XMLObject* prior =  (notify) ? _getAt(i) : 0;
-            XMLObject* target = (notify) ? (new (core->GetGC())  XMLObject (toplevel->xmlClass(), parent)) : 0;
+            XMLObject* target = (notify) ? XMLObject::create(core->GetGC(), toplevel->xmlClass(), parent) : 0;
 
             m_children.removeAt(i);
             for (uint32_t i2 = 0; i2 < src->numChildren(); i2++)
@@ -498,12 +498,12 @@ namespace avmplus
                     if (parent->_getAt(q) == _getNodeAt(i))
                     {
                         parent->_replace (core, toplevel, q, V);
-                        XMLObject *xo = new (core->GetGC()) XMLObject (toplevel->xmlClass(), parent->_getAt(q));
+                        XMLObject *xo = XMLObject::create(core->GetGC(), toplevel->xmlClass(), parent->_getAt(q));
                         V = xo->atom();
 
                         if (XMLObject::notifyNeeded(parent))
                         {
-                            XMLObject *po = new (core->GetGC()) XMLObject (toplevel->xmlClass(), parent);
+                            XMLObject *po = XMLObject::create(core->GetGC(), toplevel->xmlClass(), parent);
                             po->childChanges(core->knodeAdded, xo->atom());
                         }
                         break;
@@ -563,7 +563,7 @@ namespace avmplus
                     if (XMLObject::notifyNeeded(px->getNode()) && x->getClass() == E4XNode::kElement)
                     {
                         AvmCore *core = this->core();
-                        XMLObject *r = new (core->GetGC())  XMLObject (xmlClass(), x);
+                        XMLObject *r = XMLObject::create(core->GetGC(), xmlClass(), x);
                         px->childChanges(core->knodeRemoved, r->atom());
                     }
                 }
@@ -643,7 +643,7 @@ namespace avmplus
                 if (target && target->getNode() != v->getParent())
                 {
                     // create only a new target object if the old one does not match
-                    XMLObject *p = new (core->GetGC()) XMLObject (toplevel()->xmlClass(), v->getParent());
+                    XMLObject *p = XMLObject::create(core->GetGC(), toplevel()->xmlClass(), v->getParent());
                     setTargetObject(p->atom());
                 }
             }
@@ -706,7 +706,7 @@ namespace avmplus
         AvmCore *core = this->core();
 
         fixTargetObject();
-        XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), m_targetObject, m_targetProperty);
+        XMLListObject *l = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass(), m_targetObject, m_targetProperty);
 
         l->m_children.ensureCapacity(numChildren());
         for (uint32_t i = 0; i < numChildren(); i++)
@@ -843,7 +843,7 @@ namespace avmplus
         XMLObject* obj = AvmCore::atomToXMLObject(a);
         if (!obj)
         {
-            obj = new (core()->GetGC()) XMLObject (toplevel()->xmlClass(), (E4XNode*) AvmCore::atomToGenericObject(a));
+            obj = XMLObject::create(core()->GetGC(), toplevel()->xmlClass(), (E4XNode*) AvmCore::atomToGenericObject(a));
             m_children.set(i, obj->atom());
         }
         return obj;
@@ -953,7 +953,7 @@ namespace avmplus
     {
         AvmCore *core = this->core();
 
-        XMLListObject *m = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), this->atom());
+        XMLListObject *m = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass(), this->atom());
 
         for (uint32_t i = 0; i < _length(); i++)
         {
@@ -977,7 +977,7 @@ namespace avmplus
     {
         AvmCore *core = this->core();
 
-        XMLListObject *m = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), this->atom());
+        XMLListObject *m = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass(), this->atom());
 
         for (uint32_t i = 0; i < _length(); i++)
         {
@@ -1022,7 +1022,7 @@ namespace avmplus
         Multiname m;
         toplevel->ToXMLName (name, m);
 
-        XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel->xmlListClass(), this->atom(), &m);
+        XMLListObject *xl = XMLListObject::create(core->GetGC(), toplevel->xmlListClass(), this->atom(), &m);
 
         for (uint32_t i = 0; i < _length(); i++)
         {
@@ -1165,7 +1165,7 @@ namespace avmplus
     XMLListObject *XMLListObject::AS3_processingInstructions (Atom name) // name defaults to '*'
     {
         AvmCore *core = this->core();
-        XMLListObject *m = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), this->atom());
+        XMLListObject *m = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass(), this->atom());
 
         for (uint32_t i = 0; i < _length(); i++)
         {
@@ -1196,7 +1196,7 @@ namespace avmplus
     {
         AvmCore *core = this->core();
 
-        XMLListObject *m = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), this->atom());
+        XMLListObject *m = XMLListObject::create(core->GetGC(), toplevel()->xmlListClass(), this->atom());
 
         for (uint32_t i = 0; i < _length(); i++)
         {
@@ -1527,7 +1527,7 @@ namespace avmplus
         toplevel()->CoerceE4XMultiname(&m, name);
 
         // filter opcode experiment
-        XMLListObject *l = new (core()->gc) XMLListObject(toplevel()->xmlListClass());
+        XMLListObject *l = XMLListObject::create(core()->gc, toplevel()->xmlListClass());
         for (uint32_t i = 0; i < _length(); i++)
         {
             XMLObject *xm = _getAt(i);

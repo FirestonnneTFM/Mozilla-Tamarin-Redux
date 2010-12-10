@@ -47,10 +47,16 @@ namespace avmplus
      * class Class - the builtin Class that defines the type of each user defined class
      * and all other builtin classes.  (not to be confused with a superclass).
      */
-    class ClassClass : public ClassClosure
+    class GC_AS3_EXACT(ClassClass, ClassClosure)
     {
-    public:
+    protected:
         ClassClass(VTable* cvtable);
+
+    public:
+        REALLY_INLINE static ClassClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ClassClass(cvtable));
+        }
 
         // this = argv[0] (ignored)
         // arg1 = argv[1]
@@ -58,6 +64,8 @@ namespace avmplus
         Atom construct(int argc, Atom* argv);
 
     // ------------------------ DATA SECTION BEGIN
+        GC_NO_DATA(ClassClass)
+
     private:
         DECLARE_SLOTS_ClassClass;
     // ------------------------ DATA SECTION END

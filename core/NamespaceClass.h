@@ -46,10 +46,16 @@ namespace avmplus
     /**
      * class Namespace - the type of namespace objects
      */
-    class NamespaceClass : public ClassClosure
+    class GC_AS3_EXACT(NamespaceClass, ClassClosure)
     {
-    public:
+    protected:
         NamespaceClass(VTable* cvtable);
+        
+    public:
+        REALLY_INLINE static NamespaceClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) NamespaceClass(cvtable));
+        }
 
         // this = argv[0] (ignored)
         // arg1 = argv[1]
@@ -63,6 +69,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(NamespaceClass)
+
         DECLARE_SLOTS_NamespaceClass;
     // ------------------------ DATA SECTION END
     };

@@ -47,10 +47,16 @@ namespace avmplus
      * class Object
      * base class for all objects in ES4
      */
-    class ObjectClass : public ClassClosure
+    class GC_AS3_EXACT(ObjectClass, ClassClosure)
     {
-    public:
+    protected:
         ObjectClass(VTable* cvtable);
+        
+    public:
+        REALLY_INLINE static ObjectClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ObjectClass(cvtable));
+        }
 
         void initPrototype();
 
@@ -75,6 +81,8 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
+        GC_NO_DATA(ObjectClass)
+
         DECLARE_SLOTS_ObjectClass;
     // ------------------------ DATA SECTION END
     };

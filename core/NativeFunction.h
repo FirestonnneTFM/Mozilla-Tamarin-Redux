@@ -303,10 +303,20 @@ namespace avmplus
             ASSERT_FUNC(cc->traits(), cc->traits()->itraits); \
             return cc; \
         }
+    #define AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(CLS, FQCLS, ASSERT_FUNC) \
+        static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
+        { \
+            FQCLS* cc = FQCLS::create(cvtable->gc(), cvtable); \
+            ASSERT_FUNC(cc->traits(), cc->traits()->itraits); \
+            return cc; \
+        }
 #else
     #define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, ASSERT_FUNC) \
         static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
         { return new (cvtable->gc(), cvtable->getExtraSize()) FQCLS(cvtable); }
+    #define AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(CLS, FQCLS, ASSERT_FUNC) \
+        static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
+        { return FQCLS::create(cvtable->gc(), cvtable); }
 #endif
 
 #ifdef VMCFG_AOT

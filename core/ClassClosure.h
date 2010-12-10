@@ -46,12 +46,22 @@ namespace avmplus
     /**
      * a user defined class, ie class MyClass
      */
-    class ClassClosure : public ScriptObject
+    class GC_AS3_EXACT(ClassClosure, ScriptObject)
     {
-    public:
-
+    protected:
         ClassClosure(VTable *cvtable);
 
+    public:
+        REALLY_INLINE static ClassClosure* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ClassClosure(cvtable));
+        }
+
+        REALLY_INLINE static ClassClosure* create(MMgc::GC* gc, size_t extraSize, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, extraSize) ClassClosure(cvtable));
+        }
+        
         Atom get_prototype();
         void set_prototype(Atom p);
 
@@ -89,8 +99,14 @@ namespace avmplus
         PrintWriter& print(PrintWriter& prw) const;
 #endif
     // ------------------------ DATA SECTION BEGIN
-    private: DRCWB(ScriptObject*) prototype;
-    DECLARE_SLOTS_ClassClosure;
+        GC_DATA_BEGIN(ClassClosure)
+
+    private: 
+        DRCWB(ScriptObject*)  GC_POINTER(m_prototype);
+
+        GC_DATA_END(ClassClosure)
+
+        DECLARE_SLOTS_ClassClosure;
     // ------------------------ DATA SECTION END
     };
 }

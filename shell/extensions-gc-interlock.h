@@ -37,4 +37,8 @@
 
 /* machine generated file via utils/exactgc.as -- do not edit */
 
+#define avmplus_DictionaryClass_isExactInterlock 1
+#define avmplus_DictionaryObject_isExactInterlock 1
+#define avmplus_DomainClass_isExactInterlock 1
+#define avmplus_DomainObject_isExactInterlock 1
 

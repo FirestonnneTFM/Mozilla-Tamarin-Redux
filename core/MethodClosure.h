@@ -43,10 +43,15 @@
 
 namespace avmplus
 {
-    class MethodClosureClass : public ClassClosure
+    class GC_AS3_EXACT(MethodClosureClass, ClassClosure)
     {
-    public:
         MethodClosureClass(VTable* cvtable);
+
+    public:
+        REALLY_INLINE static MethodClosureClass* create(MMgc::GC* gc, VTable* cvtable)
+        {
+            return MMgc::setExact(new (gc, cvtable->getExtraSize()) MethodClosureClass(cvtable));
+        }
 
         // Function called as constructor ... not supported from user code
         // this = argv[0] (ignored)
@@ -58,6 +63,9 @@ namespace avmplus
         Atom call(int argc, Atom* argv);
 
         MethodClosure* create(MethodEnv* env, Atom savedThis);
+        
+        GC_NO_DATA(MethodClosureClass)
+
         DECLARE_SLOTS_MethodClosureClass;
     };
 
@@ -74,7 +82,7 @@ namespace avmplus
      * MethodClosure is invoked, the method is invoked with
      * "this" pointing to the remembered instance.
      */
-    class MethodClosure : public FunctionObject
+    class GC_AS3_EXACT(MethodClosure, FunctionObject)
     {
         friend class MethodClosureClass;
         MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis);
@@ -97,7 +105,12 @@ namespace avmplus
         virtual Atom get_coerced_receiver(Atom a);
 
     protected:
-        ATOM_WB _savedThis;
+        GC_DATA_BEGIN(MethodClosure)
+        
+        ATOM_WB GC_ATOM(_savedThis);
+        
+        GC_DATA_END(MethodClosure)
+
         DECLARE_SLOTS_MethodClosure;
     };
 }

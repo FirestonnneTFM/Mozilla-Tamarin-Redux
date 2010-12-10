@@ -45,7 +45,7 @@ namespace avmplus
 
 REALLY_INLINE ScriptObject* ClassClosure::prototypePtr()
 {
-    return prototype;
+    return m_prototype;
 }
 
 REALLY_INLINE VTable* ClassClosure::ivtable() const

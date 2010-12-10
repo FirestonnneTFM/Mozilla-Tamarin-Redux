@@ -187,7 +187,7 @@ namespace avmplus
                     if (q->isAttr())
                         return q;
                     else
-                        return new (core->GetGC(), qnameClass()->ivtable()->getExtraSize()) QNameObject(qnameClass(), attributeName, true);
+                        return QNameObject::create(core->GetGC(), qnameClass(), attributeName, true);
                 }
                 else
                 {
@@ -206,7 +206,7 @@ namespace avmplus
                 throwTypeError(kConvertUndefinedToObjectError);
             }
 
-            return new (core->GetGC(), qnameClass()->ivtable()->getExtraSize()) QNameObject(qnameClass(), attributeName, true);
+            return QNameObject::create(core->GetGC(), qnameClass(), attributeName, true);
         }
         else
         {

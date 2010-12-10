@@ -47,7 +47,7 @@ namespace avmplus
         : ClassClosure(cvtable)
     {
         ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
-        setPrototypePtr(new (core()->GetGC(), ivtable()->getExtraSize()) DateObject(this, object_prototype));
+        setPrototypePtr(DateObject::create(core()->GetGC(), ivtable(), object_prototype));
     }
 
     // this = argv[0] (ignored)
@@ -62,7 +62,7 @@ namespace avmplus
                                     AvmCore::number(argv[1]) );
 
             Date   date(dateAsDouble);
-            return (new (core->GetGC(), ivtable()->getExtraSize()) DateObject(this, date))->atom();
+            return DateObject::create(core->GetGC(), this, date)->atom();
         }
         else if (argc != 0) {
             double num[7] = { 0, 0, 1, 0, 0, 0, 0 }; // defaults
@@ -81,10 +81,10 @@ namespace avmplus
                       num[6],
                       false);
 
-            return (new (core->GetGC(), ivtable()->getExtraSize()) DateObject(this, date))->atom();
+            return DateObject::create(core->GetGC(), this, date)->atom();
         } else {
             Date date;
-            return (new (core->GetGC(), ivtable()->getExtraSize()) DateObject(this, date))->atom();
+            return DateObject::create(core->GetGC(), this, date)->atom();
         }
     }
 

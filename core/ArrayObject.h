@@ -49,19 +49,28 @@ namespace avmplus
      * special "get" and "put" semantics and to maintain the virtual
      * "length" property.
      */
-    class ArrayObject : public ScriptObject
+    class GC_AS3_EXACT(ArrayObject, ScriptObject)
     {
-        friend class ArrayClass;
-
     private:
         // forcibly-inlined version used by various hot methods to ensure inlining;
         // see definition for more info.
         Atom getUintPropertyImpl(uint32_t index) const;
 
-    public:
-
+    protected:
         ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity);
         ArrayObject(VTable* ivtable, ScriptObject *delegate, Atom *argv, int argc);
+
+    public:
+        REALLY_INLINE static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, uint32_t capacity)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, capacity));
+        }
+
+        REALLY_INLINE static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, Atom *argv, int argc)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, argv, argc));
+        }
+        
         ~ArrayObject();
 
         bool hasDense() const;
@@ -130,12 +139,17 @@ namespace avmplus
         static const uint32_t NO_LOW_HTENTRY  = 0;
 
     // ------------------------ DATA SECTION BEGIN
-    private:
-        AtomList m_denseArr;
+        GC_DATA_BEGIN(ArrayObject)
+
+    public: // Used by ArrayClass
+        AtomList GC_STRUCTURE(m_denseArr);
         
         uint32_t m_lowHTentry; // lowest numeric entry in our hash table
         uint32_t m_length;
         
+        GC_DATA_END(ArrayObject)
+
+    private:
         DECLARE_SLOTS_ArrayObject;
     // ------------------------ DATA SECTION END
     };
