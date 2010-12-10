@@ -55,16 +55,6 @@ void VMPI_tlsDestroy(uintptr_t tlsId)
     TlsFree((DWORD)tlsId);
 }
 
-bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
-{
-    return TlsSetValue((DWORD)tlsId, value) == TRUE;
-}
-
-void* VMPI_tlsGetValue(uintptr_t tlsId)
-{
-    return TlsGetValue((DWORD)tlsId);
-}
-
 bool VMPI_threadCreate(vmpi_thread_t* thread, vmpi_thread_attr_t* attr, vmpi_thread_start_t start_fn, vmpi_thread_arg_t arg)
 {
     DWORD id;
