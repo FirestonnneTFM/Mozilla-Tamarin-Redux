@@ -549,13 +549,15 @@ as3/RegExp/replace, .* , skip , Do not run testcase until it passes cleanly thro
 ecma3/Boolean/e15_6_4_2_2:tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr;x=new Boolean\(false\), ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608132
 ecma3/Boolean/e15_6_4_2_3:tostr=Boolean.prototype.toString; Boolean.prototype.toString=tostr; x=false, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608132
 
-ecma3/Boolean/e15_6_4_3_2, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Boolean/e15_6_4_3_3, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Expressions/e11_2_1_2, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/Expressions/e11_2_1_5, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/ObjectObjects/e15_2_1_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
-ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+# These failed before exact tracing landed, then started working again.
+# Probably there's still a bug so just skip them.
+ecma3/Boolean/e15_6_4_3_2, ppc64-mac-tvm-(?!.*Dinterp).*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Boolean/e15_6_4_3_3, ppc64-mac-tvm-(?!.*Dinterp).*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Expressions/e11_2_1_2, ppc64-mac-tvm-(?!.*Dinterp).*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/Expressions/e11_2_1_5, ppc64-mac-tvm-(?!.*Dinterp).*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/ObjectObjects/e15_2_1_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/ObjectObjects/e15_2_2_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
+ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=608130
 
 
 as3/sampling/BackwardBranches , .* , skip, Bugzilla 614529
