@@ -363,7 +363,7 @@ REALLY_INLINE /*static*/ bool AvmCore::isName(Atom atom)
 
 REALLY_INLINE ScriptObject* AvmCore::newObject(VTable *vtable, ScriptObject *delegate)
 {
-    return new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
+    return ScriptObject::create(GetGC(), vtable, delegate);
 }
 
 /** Helper function; reads a signed 24-bit integer from pc */

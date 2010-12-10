@@ -87,6 +87,51 @@ namespace avmplus
         vtable->traits->destroyInstance(this);
     }
 
+    /* The storage for a ScriptObject or a subclass SO of ScriptObject is
+     * laid out as follows.
+     *
+     *   - first the bits of the C++ class; if there are pointers here
+     *     then they must be traced explicitly by the appropriate class's
+     *     gcTrace method
+     *   - then the bits for the ActionScript slots
+     *   - optionally an InlineHashtable for dynamic properties
+     *
+     * The in-line slots are native and their representation is described
+     * by the Traits object (vtable->traits).  They are not named, but named
+     * lookup is possible by going to the Traits object, which contains
+     * a name->slot map.
+     *
+     * The InlineHashtable always stores Atoms.
+     */
+    void ScriptObject::gcTrace(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&vtable);
+        gc->TraceLocation(&delegate);
+        traits()->traceSlots(gc, this);
+        if (traits()->needsHashtable())
+        {
+            // Avoid initializing the hash table here
+            InlineHashtable* iht = getTableNoInit();
+            iht->gcTrace(gc);
+            
+            if (vtable->traits->isDictionary())
+            {
+                // This code was ripped out of ScriptObject::getTableNoInit
+                union {
+                    uint8_t* p;
+                    HeapHashtable** hht;
+                };
+                p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+                gc->TraceLocation(hht);
+            }
+        }
+    }
+
+    bool ScriptObject::gcTraceLarge(MMgc::GC* gc, size_t cursor)
+    {
+        return gcTraceLargeAsSmall(gc, cursor);
+    }
+
     void ScriptObject::initHashtable(int capacity /*=InlineHashtable::kDefaultCapacity*/)
     {
         AvmAssert(vtable->traits->isDictionary() == 0); //should not be called DictionaryObject uses HeapHashtable

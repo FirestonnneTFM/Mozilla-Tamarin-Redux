@@ -546,9 +546,7 @@ namespace avmplus
         VTable* object_ivtable = toplevel()->object_ivtable;
         AvmCore* core = this->core();
 
-        ScriptObject* o = new (core->GetGC(), object_ivtable->getExtraSize())
-            ScriptObject(object_ivtable, toplevel()->objectClass->prototypePtr(),
-                    2*argc+1);
+        ScriptObject* o = ScriptObject::create(core->GetGC(), object_ivtable, toplevel()->objectClass->prototypePtr(), 2*argc+1);
 
         for (; argc-- > 0; sp -= 2)
         {
@@ -1484,7 +1482,7 @@ namespace avmplus
         AvmCore *core = this->core();
         MMgc::GC *gc = core->GetGC();
         SAMPLE_FRAME("[activation-object]", core);
-        ScriptObject* obj = new (gc, vtable->getExtraSize()) ScriptObject(vtable, 0/*delegate*/);
+        ScriptObject* obj = ScriptObject::create(gc, vtable, 0/*delegate*/);
         return obj;
     }
 
