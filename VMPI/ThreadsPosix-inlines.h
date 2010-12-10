@@ -92,6 +92,16 @@ REALLY_INLINE vmpi_thread_t VMPI_currentThread()
     return pthread_self();
 }
 
+REALLY_INLINE bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
+{
+    return pthread_setspecific((pthread_key_t)tlsId, value) == 0;
+}
+
+REALLY_INLINE void* VMPI_tlsGetValue(uintptr_t tlsId)
+{
+    return pthread_getspecific((pthread_key_t)tlsId);
+}
+
 // This is clearly very slow, and should only be used for testing purposes.
 #ifdef EMULATE_ATOMICS_WITH_PTHREAD_MUTEX
 

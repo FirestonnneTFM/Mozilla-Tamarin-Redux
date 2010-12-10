@@ -62,18 +62,6 @@ void VMPI_tlsDestroy(uintptr_t tlsId)
     pthread_key_delete((pthread_key_t)tlsId);
 }
 
-bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
-{
-    const int r = pthread_setspecific((pthread_key_t)tlsId, value);
-    GCAssert(pthread_getspecific((pthread_key_t)tlsId) == value);
-    return (r == 0);
-}
-
-void* VMPI_tlsGetValue(uintptr_t tlsId)
-{
-    return pthread_getspecific((pthread_key_t)tlsId);
-}
-
 bool VMPI_threadCreate(vmpi_thread_t* thread, vmpi_thread_attr_t* attr, vmpi_thread_start_t start_fn, vmpi_thread_arg_t arg)
 {
     return pthread_create(thread, attr, start_fn, arg) == 0;
