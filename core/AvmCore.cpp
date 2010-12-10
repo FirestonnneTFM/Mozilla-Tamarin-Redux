@@ -52,6 +52,10 @@
 
 #include "api-versions.cpp"
 
+#include "avmplus-gc-interlock.h"
+#include "avmplus-as3-gc.h"
+#include "avmplus-cpp-gc.h"
+
 namespace avmplus
 {
     using namespace MMgc;
