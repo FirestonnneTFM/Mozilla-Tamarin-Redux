@@ -121,6 +121,8 @@ AS3 function some(checker, thisObj: Object=null): Boolean {
 private function _slice(start: Number=0, end: Number=0x7fffffff) {
     var first:uint = clamp( start, length );
     var limit:uint = clamp( end, length );
+    if (limit < first)
+        limit = first;
     var result = newThisType();
     result.private::_spliceHelper(0, limit-first, 0, this, first);
 
