@@ -515,6 +515,7 @@ namespace avmplus
         static int autoVarCount(DebugStackFrame* frame, AutoVarKind kind);
         static Stringp methodNameAt(DebugStackFrame* frame);
         static void printString(Stringp string);
+        static void printAtom(Atom atom);
         static void printMethod(MethodInfo* method);
 
     protected:
