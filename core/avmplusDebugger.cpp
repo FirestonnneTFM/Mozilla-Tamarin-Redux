@@ -703,6 +703,14 @@ namespace avmplus
          fflush(stdout);
      }
 
+     void Debugger::printAtom(Atom atom) {
+         StringBuffer buf(AvmCore::getActiveCore());
+         buf.writeAtom(atom);
+         fputs(buf.c_str(), stdout);
+         // flush in case debugger output is interleaved with process output
+         fflush(stdout);
+     }
+
      void Debugger::printMethod(MethodInfo* info) {
           String* name = info->getMethodName();
           if (!name) return;

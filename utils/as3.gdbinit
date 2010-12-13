@@ -55,8 +55,8 @@ define asprintframe
       set var $argname = avmplus::Debugger::autoVarName($frame, $j, avmplus::Debugger::AUTO_ARGUMENT)
       aspstring $argname 
       echo =
-      set var $fmt = avmplus::AvmCore::getActiveCore()->format(avmplus::Debugger::autoAtomAt($frame, $j, avmplus::Debugger::AUTO_ARGUMENT))
-      aspstring $fmt
+      set var $_atom = avmplus::Debugger::autoAtomAt($frame, $j, avmplus::Debugger::AUTO_ARGUMENT)
+      call (void)avmplus::Debugger::printAtom($_atom)
       set var $j = $j + 1
       if ($j != $vcount) 
         echo ,
