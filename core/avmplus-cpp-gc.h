@@ -436,9 +436,7 @@ void PoolObject::gcTrace(MMgc::GC* gc)
     gc->TraceLocation(&m_namedScriptsMap);
     gc->TraceLocation(&m_namedTraits);
     metadata_infos.gcTrace(gc);
-#ifdef VMCFG_PRECOMP_NAMES
     gc->TraceLocation(&precompNames);
-#endif
 }
 
 bool PoolObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)

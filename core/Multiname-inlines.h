@@ -292,7 +292,6 @@ REALLY_INLINE void Multiname::setAnyNamespace()
     ns = NULL;
 }
 
-#ifdef VMCFG_PRECOMP_NAMES
 REALLY_INLINE void Multiname::IncrementRef()
 {
     if (name != NULL)
@@ -308,7 +307,6 @@ REALLY_INLINE void Multiname::DecrementRef()
     if (ns != NULL && (flags & NSSET) == 0)
         ns->DecrementRef();
 }
-#endif
 
 REALLY_INLINE HeapMultiname::HeapMultiname()
 { /* our embedded Multiname inits itself to all zero */ }
