@@ -151,15 +151,14 @@ namespace avmplus
         uint32_t constantNsCount;
         uint32_t constantNsSetCount;
 
-#ifdef VMCFG_PRECOMP_NAMES
     private:
-        DWB(ExactStructContainer<HeapMultiname>*) GC_POINTER_IFDEF(precompNames, VMCFG_PRECOMP_NAMES);   // a GCFinalizedObject
+        DWB(ExactStructContainer<HeapMultiname>*) GC_POINTER(precompNames);   // a GCFinalizedObject
     public:
         void initPrecomputedMultinames();
         const Multiname* precomputedMultiname(int32_t index);
         
         static void destroyPrecomputedMultinames(ExactStructContainer<HeapMultiname>* self);
-#endif
+
 
         #ifdef VMCFG_NANOJIT
         CodeMgr* codeMgr;   // Traced by gcTraceHook, above

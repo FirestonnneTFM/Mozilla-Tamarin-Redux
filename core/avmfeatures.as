@@ -407,7 +407,6 @@ var FEATURES =
      </exactly-one>
     </requires>
     <defines> VMCFG_NANOJIT  </defines>
-    <defines> VMCFG_PRECOMP_NAMES </defines>
     <defines> VMCFG_LOOKUP_CACHE </defines>
     <defines> VMCFG_METHODENV_IMPL32 </defines>
     <defines> FEATURE_NANOJIT </defines> <!-- referenced by nanojit module only -->
@@ -447,7 +446,6 @@ var FEATURES =
     <defines>    VMCFG_INTERPRETER  </defines>
     <defines>    VMCFG_WORDCODE  </defines>
     <defines>    VMCFG_WORDCODE_PEEPHOLE  </defines>
-    <defines>    VMCFG_PRECOMP_NAMES </defines>
     <defines>    VMCFG_LOOKUP_CACHE </defines>
   </feature>
 

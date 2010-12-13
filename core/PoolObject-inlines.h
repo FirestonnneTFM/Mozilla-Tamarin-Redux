@@ -45,12 +45,10 @@ REALLY_INLINE PoolObject* PoolObject::create(AvmCore* core, ScriptBuffer& sb, co
     return MMgc::setExact(new (core->GetGC()) PoolObject(core, sb, startpos, api));
 }
 
-#ifdef VMCFG_PRECOMP_NAMES
 REALLY_INLINE const Multiname* PoolObject::precomputedMultiname(int32_t index)
 {
     return precompNames->get(index);
 }
-#endif
 
 REALLY_INLINE int32_t PoolObject::getAPI()
 {

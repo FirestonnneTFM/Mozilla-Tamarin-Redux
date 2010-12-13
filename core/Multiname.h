@@ -134,7 +134,6 @@ namespace avmplus
         void setAnyNamespace();
         bool matches(const Multiname *mn) const;
 
-#ifdef VMCFG_PRECOMP_NAMES
         // As an optimization a Multiname may be part of a GCRoot.  The following
         // two methods make sure the reference counted dependents of a Multiname
         // stick around (or not, as the case may be).  The reference counts are
@@ -143,7 +142,6 @@ namespace avmplus
     public:
         void IncrementRef();
         void DecrementRef();
-#endif
 
 //#ifdef AVMPLUS_VERBOSE
     public:

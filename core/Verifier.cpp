@@ -78,9 +78,7 @@ namespace avmplus
         verbose = pool->isVerbose(VB_verify);
         #endif
 
-        #ifdef VMCFG_PRECOMP_NAMES
         pool->initPrecomputedMultinames();
-        #endif
     }
 
     Verifier::~Verifier()

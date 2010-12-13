@@ -697,7 +697,6 @@ range_error:
         return false;
     }
 
-#ifdef VMCFG_PRECOMP_NAMES
     void PoolObject::initPrecomputedMultinames()
     {
         if (precompNames == NULL)
@@ -723,7 +722,6 @@ range_error:
         for (uint32_t i=1; i < nNames; i++)
             self->get(i).setMultiname(gc, self, mn);
     }
-#endif
 
     Stringp PoolObject::getMethodInfoName(uint32_t i)
     {
@@ -738,15 +736,10 @@ range_error:
             }
             else
             {
-#ifdef VMCFG_PRECOMP_NAMES
                 // Precomputed multinames may not be inited yet, but we'll need them eventually,
                 // so go ahead and init them now
                 this->initPrecomputedMultinames();
                 const Multiname& mn = precompNames->get(-index);
-#else
-                Multiname mn;
-                this->parseMultiname(mn, -index);
-#endif
                 StringBuffer sb(core);
                 sb << Multiname::Format(&mn);
                 name = sb.toString();
