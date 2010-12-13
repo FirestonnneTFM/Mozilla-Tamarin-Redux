@@ -126,7 +126,8 @@ uint64_t VMPI_getTime()
 {
     struct timeval tv;
     ::gettimeofday(&tv, NULL);
-    uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+    //typecast tv.tv_sec to uint64_t to prevent overflow when multiplying by 1000.
+    uint64_t result = ((uint64_t)tv.tv_sec * 1000) + (tv.tv_usec / 1000);
     return result;
 }
 
