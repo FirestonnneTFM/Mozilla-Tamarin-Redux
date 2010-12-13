@@ -78,6 +78,14 @@ namespace avmplus
     #define AvmAssertMsg(condition,message) \
         do { avmplus::_AvmAssertMsg((condition), (message)); } while (0) /* no semi */
 
+    #define AvmAssertMsgCanThrow(condition,message,core) \
+        do { TRY ((core), kCatchAction_ReportAsError) { \
+                avmplus::_AvmAssertMsg((condition), (message)); \
+             } CATCH(Exception* e) { avmplus::_AvmAssertMsg(0, "Exception caught in assert!\n"); (void)e; } \
+             END_CATCH \
+             END_TRY \
+        } while (0) /* no semi */
+
     #define _AvmAssert(condition, line_, file_) \
         __AvmAssert((condition), line_, file_)
 
@@ -87,6 +95,9 @@ namespace avmplus
         } while (0) /* no semi */
 
 #else
+
+    #define AvmAssertMsgCanThrow(condition,message,core) \
+        do { } while (0) /* no semi */
 
     #define AvmAssertMsg(condition,message) \
         do { } while (0) /* no semi */

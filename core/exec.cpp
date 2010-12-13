@@ -409,7 +409,7 @@ void BaseExecMgr::notifyVTableResolved(VTable*)
 Atom* FASTCALL BaseExecMgr::unbox1(MethodEnv* env, Atom atom, Traits* t, Atom* arg0)
 {
     (void)env;
-    AvmAssert(atom == env->toplevel()->coerce(atom, t)); // Atom must be correct type already, we're just unboxing it.
+    AvmAssertMsgCanThrow(atom == env->toplevel()->coerce(atom, t),"",env->core()); // Atom must be correct type already, we're just unboxing it.
     switch (Traits::getBuiltinType(t))
     {
         case BUILTIN_any:
@@ -711,7 +711,7 @@ Atom BaseExecMgr::apply(MethodEnv* env, Atom thisArg, ArrayObject *a)
     }
 
     // Caller will coerce instance if necessary, so make sure it was done.
-    AvmAssert(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)));
+    AvmAssertMsgCanThrow(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)),"",env->core());
 
     // Tail call inhibited by local allocation/deallocation.
     MMgc::GC::AllocaAutoPtr _atomv;
@@ -741,7 +741,7 @@ Atom BaseExecMgr::call(MethodEnv* env, Atom thisArg, int argc, Atom *argv)
     }
 
     // Caller will coerce instance if necessary, so make sure it was done.
-    AvmAssert(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)));
+    AvmAssertMsgCanThrow(thisArg == coerce(env, thisArg, env->get_ms()->paramTraits(0)),"",env->core());
 
     // Tail call inhibited by local allocation/deallocation.
     MMgc::GC::AllocaAutoPtr _atomv;
@@ -780,7 +780,7 @@ Atom BaseExecMgr::invokeInterp(MethodEnv* env, int32_t argc, Atom* atomv)
     checkArgc(env, argc, ms);
 
     // Caller will coerce instance if necessary, so make sure it was done.
-    AvmAssert(atomv[0] == coerce(env, atomv[0], ms->paramTraits(0)));
+    AvmAssertMsgCanThrow(atomv[0] == coerce(env, atomv[0], ms->paramTraits(0)),"",env->core());
 
     const int32_t param_count = ms->param_count();
     const int32_t end = argc >= param_count ? param_count : argc;
@@ -801,7 +801,8 @@ Atom BaseExecMgr::invokeInterpNoCoerce(MethodEnv* env, int32_t argc, Atom* atomv
 #ifdef DEBUG
     AvmAssert(isInterpreted(env));
     // caller will coerce instance if necessary, so make sure it was done.
-    AvmAssert(atomv[0] == coerce(env, atomv[0], ms->paramTraits(0)));
+    AvmAssertMsgCanThrow(atomv[0] == coerce(env, atomv[0], ms->paramTraits(0)),"",env->core());
+
     const int32_t param_count = ms->param_count();
     const int32_t end = argc >= param_count ? param_count : argc;
     for (int32_t i=1 ; i <= end ; i++ )
