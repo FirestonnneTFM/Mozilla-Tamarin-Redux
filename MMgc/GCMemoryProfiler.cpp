@@ -637,7 +637,7 @@ namespace MMgc
         };
 
         {
-            size_t num_traces = 0;
+            uint32_t num_traces = 0;
             GCStackTraceHashtable_VMPI::Iterator iter(&stackTraceMap);
             const void *obj;
             while((obj = iter.nextKey()) != NULL)
