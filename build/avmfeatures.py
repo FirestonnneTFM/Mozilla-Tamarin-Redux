@@ -163,4 +163,8 @@ def featureSettings(o):
         args += "-DAVMTWEAK_EPOC_EMULATOR=1 "
     if (arg == False):
         args += "-DAVMTWEAK_EPOC_EMULATOR=0 "
+    if o.getBoolArg("exact-tracing"):
+        args += "-DAVMTWEAK_EXACT_TRACING=1 -DAVMTWEAK_SELECTABLE_EXACT_TRACING=0 "
+    if o.getBoolArg("selectable-exact-tracing"):
+        args += "-DAVMTWEAK_SELECTABLE_EXACT_TRACING=1 -DAVMTWEAK_EXACT_TRACING=0 "
     return args

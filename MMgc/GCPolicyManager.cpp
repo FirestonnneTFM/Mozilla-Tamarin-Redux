@@ -61,6 +61,7 @@ namespace MMgc
 
     GCConfig::GCConfig()
         : collectionThreshold(0)
+        , exactTracing(true)
     {}
 
     GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap, GCConfig* config/*=NULL*/)

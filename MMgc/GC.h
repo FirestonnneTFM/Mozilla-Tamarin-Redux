@@ -1379,6 +1379,9 @@ namespace MMgc
         uint32_t enterCount;
 
         GCRoot* emptyWeakRefRoot;
+#ifdef VMCFG_SELECTABLE_EXACT_TRACING
+        const gcbits_t runtimeSelectableExactnessFlag; // 0 or kVirtualGCTrace
+#endif
 
         GCMarkStack m_incrementalWork;
         void StartIncrementalMark();

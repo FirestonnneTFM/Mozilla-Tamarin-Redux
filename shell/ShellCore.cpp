@@ -59,6 +59,7 @@ namespace avmshell
         , greedy(false)
         , nogc(false)
         , incremental(true)
+        , exactgc(true)
         , fixedcheck(true)
         , gcthreshold(0)
         , langID(-1)

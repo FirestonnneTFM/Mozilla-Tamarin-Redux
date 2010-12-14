@@ -662,6 +662,25 @@ var FEATURES =
     <default> false </default>
   </tweak>
 
+  <tweak>
+    <desc> Compile-time selected exact tracing </desc>
+    <name> AVMTWEAK_EXACT_TRACING </name>
+    <defines> VMCFG_EXACT_TRACING </defines>
+    <default> true </default>
+  </tweak>
+  
+  <tweak>
+    <desc> Run-time selectable exact tracing, for experimentation </desc>
+    <name> AVMTWEAK_SELECTABLE_EXACT_TRACING </name>
+    <defines> VMCFG_SELECTABLE_EXACT_TRACING </defines>
+    <default> false </default>
+  </tweak>
+
+  <at-most-one>
+    <name> AVMTWEAK_EXACT_TRACING </name>
+    <name> AVMTWEAK_SELECTABLE_EXACT_TRACING </name>
+  </at-most-one>
+  
 </features>;
 
 /****************************************************************************
