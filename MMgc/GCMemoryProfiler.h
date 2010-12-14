@@ -132,6 +132,7 @@ namespace MMgc
         ~MemoryProfiler();
         void RecordAllocation(const void *item, size_t askSize, size_t gotSize);
         void RecordDeallocation(const void *item, size_t size);
+        void DumpAllocationProfile();
         void DumpFatties();
         void DumpSimple();
         const char *GetAllocationName(const void *obj);
@@ -140,6 +141,16 @@ namespace MMgc
         StackTrace *GetStackTrace();
         size_t GetAskSize(const void* item);
 
+        enum SortMode {
+            BY_VOLUME,
+            BY_COUNT
+        };
+
+        // Dump top allocation stacks, sorted.
+        // - limit is the number of stacks to dump; 0 means all
+        // - sort is the field to sort by: totalSize or totalCount
+        void DumpSimpleByTotal(uint32_t limit=40, SortMode sort=BY_VOLUME);
+        
     private:
         StackTrace *GetStackTraceLocked();
         StackTrace *GetAllocationTraceLocked(const void *obj);

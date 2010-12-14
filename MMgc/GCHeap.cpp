@@ -262,6 +262,10 @@ namespace MMgc
 
     void GCHeap::DestroyInstance()
     {
+#ifdef MMGC_MEMORY_PROFILER
+        if (profiler) 
+            profiler->DumpAllocationProfile();
+#endif
 #if defined MMGC_POLICY_PROFILING && !defined AVMSHELL_BUILD
         endGCLogToFile();
 #endif

@@ -218,6 +218,7 @@ namespace MMgc
 
     void MemoryProfiler::RecordAllocation(const void *item, size_t askSize, size_t gotSize)
     {
+        GCAssert(gotSize != 0);
         MMGC_LOCK(lock);
         (void)askSize;
 
@@ -626,6 +627,115 @@ namespace MMgc
             PrintStackTrace(trace);
         }
         GCLog("%llu traces", (unsigned long long)num_traces);
+    }
+
+    void MemoryProfiler::DumpSimpleByTotal(uint32_t limit, MemoryProfiler::SortMode sort)
+    {
+        struct Item {
+            uint64_t value;
+            StackTrace* trace;
+        };
+
+        {
+            size_t num_traces = 0;
+            GCStackTraceHashtable_VMPI::Iterator iter(&stackTraceMap);
+            const void *obj;
+            while((obj = iter.nextKey()) != NULL)
+                num_traces++;
+            
+            if (limit == 0 || limit > num_traces)
+                limit = num_traces;
+        }
+
+        // This array is sorted in decreasing order by 'value'
+        Item* traces = (Item*)VMPI_alloc(sizeof(Item) * limit);
+        
+        if (traces == NULL) {
+            GCAssert(!"Could not allocate array to hold stacktrace pointers");
+            return;
+        }
+
+        for ( uint32_t i=0 ; i < limit ; i++ )
+        {
+            traces[i].value = 0;
+            traces[i].trace = NULL;
+        }
+        
+        {
+            GCStackTraceHashtable_VMPI::Iterator iter(&stackTraceMap);
+            const void *obj;
+            while((obj = iter.nextKey()) != NULL)
+            {
+                StackTrace *trace = (StackTrace*)iter.value();
+
+                if (trace->totalSize == 0)
+                    continue;
+
+                Item it;
+                it.value = sort == BY_VOLUME ? trace->totalSize : trace->totalCount;
+                it.trace = trace;
+
+                // OPTIMIZEME: This works OK for short arrays, less well for longer.
+                uint32_t i=0;
+                while (i < limit && it.value <= traces[i].value)
+                    i++;
+                if (i < limit) {
+                    for ( uint32_t j=limit-1 ; j > i ; j-- )
+                        traces[j] = traces[j-1];
+                    traces[i] = it;
+                }
+            }
+        }
+        
+        for ( uint32_t i=0 ; i < limit && traces[i].value > 0 ; i++ ) {
+            GCLog("%llu b - %u items - ", (unsigned long long)traces[i].trace->totalSize, (unsigned)traces[i].trace->totalCount);
+            PrintStackTrace(traces[i].trace);
+        }
+    }
+
+    void MemoryProfiler::DumpAllocationProfile()
+    {
+        // No particular reason this has to be AVMSHELL_BUILD only, but that's
+        // what we've tested so far.  Environment variables are not kosher in
+        // all settings.
+        //
+        // Note you may want to inspect the implementation of VMPI_setupPCResolution
+        // to make sure symbol resolution is available and enabled, otherwise
+        // the profiles won't make a lot of sense.
+#ifdef AVMSHELL_BUILD
+        // Ad-hoc configuration.  If MMGC_PROFILE_CONFIG is present we try to 
+        // interpret it.  Its presence means we want allocation site profiling,
+        // not leak profiling.  The string additionally can be empty, but if not
+        // empty it has this form:
+        //   n,sort
+        // where:
+        //   - n=0 means "unlimited" and otherwise "number of traces we want",
+        //     the default is 40
+        //   - sort="volume" means we sort by allocation volume, "count" means
+        //     we sort by allocation count, the default is "volume".
+        const char *x = VMPI_getenv("MMGC_PROFILE_CONFIG");
+        if (x != NULL && VMPI_strlen(x) < 100)
+        {
+            char buf[100];
+            unsigned limit;
+            int len;
+            MemoryProfiler::SortMode s;
+            if (VMPI_sscanf(x, "%u,%s%n", &limit, buf, &len) == 2 && unsigned(len) == VMPI_strlen(x)) {
+                if (VMPI_strcmp(buf, "count") == 0)
+                    s = MemoryProfiler::BY_COUNT;
+                else 
+                    s = MemoryProfiler::BY_VOLUME;
+            }
+            else if (VMPI_sscanf(x, "%u%n", &limit, &len) == 1 && unsigned(len) == VMPI_strlen(x)) {
+                s = MemoryProfiler::BY_VOLUME;
+            }
+            else {
+                limit=40;
+                s = MemoryProfiler::BY_VOLUME;
+            }
+            DumpSimpleByTotal(limit, s);
+        }
+#endif
     }
 
     void SetMemTag(const char *s)
