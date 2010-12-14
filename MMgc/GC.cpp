@@ -161,6 +161,9 @@ namespace MMgc
         stackEnter(0),
         enterCount(0),
         emptyWeakRefRoot(0),
+#ifdef VMCFG_SELECTABLE_EXACT_TRACING
+        runtimeSelectableExactnessFlag(config == NULL || config->exactTracing ? kVirtualGCTrace : 0),
+#endif
         m_markStackOverflow(false),
         mark_item_recursion_control(20),    // About 3KB as measured with GCC 4.1 on MacOS X (144 bytes / frame), May 2009
         sizeClassIndex(kSizeClassIndex),    // see comment in GC.h

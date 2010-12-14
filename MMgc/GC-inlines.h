@@ -385,7 +385,13 @@ namespace MMgc
     {
         const void* realptr = GetRealPointer(userptr);
         GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
+#if defined VMCFG_EXACT_TRACING
         GetGCBits(realptr) |= kVirtualGCTrace;
+#elif defined VMCFG_SELECTABLE_EXACT_TRACING
+        GetGCBits(realptr) |= GetGC(realptr)->runtimeSelectableExactnessFlag; // 0 or kVirtualGCTrace
+#else
+        (void)realptr;
+#endif
     }
 
     /*static*/

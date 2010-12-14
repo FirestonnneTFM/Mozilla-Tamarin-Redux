@@ -169,7 +169,7 @@ namespace avmshell
     {
         MMgc::GCConfig gcconfig;
         gcconfig.collectionThreshold = settings.gcthreshold;
-
+        gcconfig.exactTracing = settings.exactgc;
         MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode(), &gcconfig) );
         {
             MMGC_GCENTER(gc);
@@ -414,6 +414,7 @@ namespace avmshell
 
         MMgc::GCConfig gcconfig;
         gcconfig.collectionThreshold = settings.gcthreshold;
+        gcconfig.exactTracing = settings.exactgc;
 
         // Going multi-threaded.
 
@@ -731,6 +732,11 @@ namespace avmshell
                     else if (!VMPI_strcmp(arg+2, "noincgc")) {
                         settings.incremental = false;
                     }
+#ifdef VMCFG_SELECTABLE_EXACT_TRACING
+                    else if (!VMPI_strcmp(arg+2, "noexactgc")) {
+                        settings.exactgc = false;
+                    }
+#endif
                     else if (!VMPI_strcmp(arg+2, "nofixedcheck")) {
                         settings.fixedcheck = false;
                     }
@@ -1155,6 +1161,9 @@ namespace avmshell
         AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
         AvmLog("          [-Dgreedy]    collect before every allocation\n");
         AvmLog("          [-Dnogc]      don't collect\n");
+#ifdef VMCFG_SELECTABLE_EXACT_TRACING
+        AvmLog("          [-Dnoexactgc] disable exact tracing\n");
+#endif
         AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
         AvmLog("          [-Dnodebugger] do not initialize the debugger (in DEBUGGER builds)\n");
         AvmLog("          [-Dgcthreshold N] lower bound on allocation budget, in blocks, between collection completions\n");

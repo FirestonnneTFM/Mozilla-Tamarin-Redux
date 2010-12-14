@@ -72,6 +72,7 @@ namespace avmshell
         bool greedy;                    // copy to each GC
         bool nogc;                      // copy to each GC
         bool incremental;               // copy to each GC
+        bool exactgc;                   // copy to each GC
         bool fixedcheck;                // copy to each GC
         int gcthreshold;                // copy to each GC
         int langID;                     // copy to ShellCore?

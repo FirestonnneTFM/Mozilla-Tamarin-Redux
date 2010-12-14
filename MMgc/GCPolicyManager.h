@@ -55,6 +55,12 @@ namespace MMgc
          */
         uint32_t collectionThreshold;
 
+        /* Defaults to true.  Set it to false to disable exact tracing.
+         * The GC ignores this flag unless AVMTWEAK_SELECTABLE_EXACT_TRACING 
+         * has been enabled.
+         */
+        bool exactTracing;
+
         /* selects defaults for all configuration parameters. */
         GCConfig();
     private: // unimplemented ctors/methods.
