@@ -355,6 +355,7 @@ namespace avmplus
 #include "avmplusList-inlines.h"
 #include "ClassClosure-inlines.h"
 #include "Coder-inlines.h"
+#include "E4XNode-inlines.h"
 #include "exec-inlines.h"
 #include "FrameState-inlines.h"
 #include "instr-inlines.h"
