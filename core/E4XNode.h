@@ -422,13 +422,13 @@ namespace avmplus
 
         int getClass() const { return kElement; }
 
-        uint32_t numAttributes() const { return (m_attributes ? m_attributes->list.length() : 0); }
-        HeapE4XNodeList* getAttributes() const { return m_attributes; }
-        E4XNode *getAttribute(uint32_t index) const { return m_attributes->list.get(index); }
+        uint32_t numAttributes() const;
+        HeapE4XNodeList* getAttributes() const;
+        E4XNode *getAttribute(uint32_t index) const;
         void addAttribute (E4XNode *x);
 
-        uint32_t numNamespaces() const { return (m_namespaces ? m_namespaces->list.length() : 0); }
-        HeapNamespaceList* getNamespaces() const { return m_namespaces; }
+        uint32_t numNamespaces() const;
+        HeapNamespaceList* getNamespaces() const;
 
         uint32_t numChildren()   const;
 
