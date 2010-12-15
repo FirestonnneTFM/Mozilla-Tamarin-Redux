@@ -37,13 +37,107 @@
  * ***** END LICENSE BLOCK ***** */
 -->
 <html>
+
 <head>
 <title>Manual for Exact GC</title>
 </head>
-<body>
-<h1><center>Manual for Exact GC</center></h1>
 
-Coming soon!
+<body>
+<h1><center>Partly Exact GC Support in MMgc
+<br>
+<em>and</em>
+<br>
+All There Is to Know About Writing Annotations</center></h1>
+
+<center>(This is work in progress, not complete.)</center>
+
+<h2>Introduction</h2>
+
+<P>MMgc provides a facility that allows classes to opt-in to "exact
+tracing" during garbage collection.  "Exact tracing" means that
+information added to the class by the programmer is used by the
+garbage collector to find members of the class that may contain
+GC-pointers (pointers to GC-allocated objects), and to understand how
+those members should be interpreted.  Regions of the object that
+cannot contain GC-pointers are ignored by the garbage collector.
+
+<P>This document explains the rules for exact tracers and covers
+architecture, generated tracers, manually written tracers, and some
+peripheral matters.
+
+<P>There is also a <a href="exactgc-cookbook.html">cookbook</a> that
+covers many simple situations with a minimum of fuss.
+
+
+<a name="rules"></a>
+<h2>The Rules</h2>
+
+<P>When a class opts into exact tracing it discloses the fields
+containing GC-pointers to the garbage collector.  GC-pointers can be
+tagged - not just with Atom tags - and GC-pointers can be located in
+member structures, but two rules must be followed:
+
+<ul>
+<li> The class *must* disclose *all* its GC-pointer fields to the
+    garbage collector, including fields in member structures.
+
+<li> A GC-pointer field's value, after tag stripping, *must* be either
+    NULL or a pointer to the beginning of a *live* GC-allocated
+    object.
+</ul>
+
+<P>Usually it's not hard to follow the rules, but there are some tricky
+cases:
+
+<ul>
+<li> Where there is a union of GC-pointer and non-GC-pointer data.
+
+<li> Where a GC-pointer field can also store non-GC-pointer values,
+    effectively a disguised union.
+
+<li> Where GC-allocated objects are deleted explicitly through the
+    delete operator or GC::Free, leaving dangling pointers (notice the
+    second rule says the objects have to be "live").
+</ul>
+
+<P> Unions can be handled by disclosing them specially, as can dangling
+pointers, but the special handling comes at a cost.
+
+<P> Overall you'll be best off if you opt-in to exact tracing only for
+data types that use clean DWB, DRCWB, and GCMember fields for its
+GC-pointers and whose instances are always deleted by the garbage
+collector or reference counter.
+
+
+<h2>Class hierarchy</h2>
+
+<P>There are two rules about the class hierarchy too:
+
+<ul>
+<li> An exactly traced class *must* derive from GCTraceableObject,
+    GCFinalizedObject, or RCObject.  It *must not* derive from
+    GCObject, or from no GC class at all.
+
+<li> A class can be exactly traced only if its base classes are exactly
+    traced.  (Multiple inheritance works but requires tracers to be
+    written manually.)
+</ul>
+
+<P> Exact tracing is built on virtual methods and GCTraceableObject adds a
+vtable, where GCObject has none.
+
+<P> For some classes that are particularly small and whose instances are
+exceptionally numerous, the overhead of the vtable will not be
+affordable.  Means may still exist for tracing the instances exactly;
+please contact the VM team.
+
+<P> Object types (especially array-like types) that are allocated using
+GC::Alloc() and GC::Calloc() are treated as if they implicitly derive
+from GCObject.  To make such type exactly traced you can instead
+implement them as sybtypes of the ExactHeapList generic type, see the
+file core/avmplusList.h.  There is a small amount of overhead to that.
+If that overhead is unaffordable then manual tracers may be written
+for the objects (see a later section).
 
 </body>
 </html>
