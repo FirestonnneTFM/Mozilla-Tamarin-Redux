@@ -4554,7 +4554,7 @@ return the result of the comparison ToPrimitive(x) == y.
                     rcptr->IncrementRef();
                 // fall through to InlineWriteBarrierTrap()
             }
-            if (gc->IncrementalMarking())
+            if (gc->BarrierActive())
                 gc->InlineWriteBarrierTrap(container);
         }
     }

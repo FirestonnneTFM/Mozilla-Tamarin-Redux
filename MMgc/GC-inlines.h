@@ -438,6 +438,13 @@ namespace MMgc
         return marking;
     }
 
+    REALLY_INLINE bool GC::BarrierActive()
+    {
+        // Note, this will not always have the same value as IncrementalMarking
+        // in the future.
+        return marking;
+    }
+    
     REALLY_INLINE bool GC::Collecting()
     {
         return collecting;
