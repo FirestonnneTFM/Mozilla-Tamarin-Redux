@@ -700,8 +700,6 @@ namespace avmplus
         DataList<T>* m_list;
 
     private:
-        DataListAccessor<T>& operator=(const DataListAccessor<T>& other);   // unimplemented
-        explicit DataListAccessor(const DataListAccessor<T>& other);        // unimplemented
         void* operator new(size_t size);                                    // unimplemented
     };
 
