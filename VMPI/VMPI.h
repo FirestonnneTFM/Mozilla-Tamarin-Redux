@@ -74,9 +74,6 @@
 
 #include "avmfeatures.h"
 
-// used by platform headers below
-typedef void * vmpi_thread_t;
-
 #if AVMSYSTEM_WIN32
   #include "win32/win32-platform.h"
 #elif AVMSYSTEM_UNIX

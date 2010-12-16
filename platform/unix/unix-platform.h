@@ -127,6 +127,8 @@
 #include <pthread.h>
 #include <signal.h>
 
+typedef pthread_t vmpi_thread_t;
+
 #ifdef ANDROID
 #define USE_CUTILS_ATOMICS FALSE
 #if USE_CUTILS_ATOMICS

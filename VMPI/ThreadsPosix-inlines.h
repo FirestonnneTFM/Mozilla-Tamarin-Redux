@@ -89,7 +89,7 @@ REALLY_INLINE bool VMPI_condVarDestroy(vmpi_condvar_t* condvar)
 
 REALLY_INLINE vmpi_thread_t VMPI_currentThread()
 {
-    return (void*)pthread_self();
+    return pthread_self();
 }
 
 // This is clearly very slow, and should only be used for testing purposes.
