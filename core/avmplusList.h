@@ -288,6 +288,7 @@ namespace avmplus
     class ListImpl
     {
         template<class TLIST> friend class VectorAccessor;
+        template<class T2> friend class DataListAccessor;
 
     public:
         typedef T TYPE;
@@ -673,6 +674,35 @@ namespace avmplus
         DataList<T>& operator=(const DataList<T>& other);       // unimplemented
         explicit DataList(const DataList<T>& other);            // unimplemented
         void* operator new(size_t size);                        // unimplemented, use HeapList instead
+    };
+
+    // ----------------------------
+
+    // Some code internal to Flash/AIR needs to directly get/set the contents of DataLists;
+    // this class provides an implicit lock/unlock mechanism. We guarantee that 
+    // the value returned by addr() is valid for reading/writing for the lifespan of
+    // the DataListAccessor (but only for entries 0...get_length()-1, of course).
+    // length() is identical to DataList::length() but is provided here for symmetry.
+    // This should obviously only be used in cases where performance is critical, or
+    // other circumstances requires it (eg, to pass an array of numbers to a GPU
+    // without intermediate copying). Note that it is explicitly legal to pass
+    // a NULL DataList to the ctor (which will cause addr() to also return NULL
+    // and length() to return 0). This class must be used only on the stack.
+    template<class T>
+    class DataListAccessor
+    {
+    public:
+        explicit DataListAccessor(DataList<T>* v);
+        T* addr();
+        uint32_t length();
+
+    private:
+        DataList<T>* m_list;
+
+    private:
+        DataListAccessor<T>& operator=(const DataListAccessor<T>& other);   // unimplemented
+        explicit DataListAccessor(const DataListAccessor<T>& other);        // unimplemented
+        void* operator new(size_t size);                                    // unimplemented
     };
 
     // ----------------------------

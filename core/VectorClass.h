@@ -382,7 +382,7 @@ namespace avmplus
     // other circumstances requires it (eg, to pass an array of numbers to a GPU
     // without intermediate copying). Note that it is explicitly legal to pass
     // a NULL VectorObject to the ctor (which will cause addr() to also return NULL
-    // and length() to return 0).
+    // and length() to return 0). This class must be used only on the stack.
     template<class TLIST>
     class VectorAccessor
     {
@@ -393,6 +393,11 @@ namespace avmplus
 
     private:
         TypedVectorObject<TLIST>* m_vector;
+
+    private:
+        VectorAccessor<TLIST>& operator=(const VectorAccessor<TLIST>& other);   // unimplemented
+        explicit VectorAccessor(const VectorAccessor<TLIST>& other);            // unimplemented
+        void* operator new(size_t size);                                        // unimplemented
     };
 
     // ----------------------------

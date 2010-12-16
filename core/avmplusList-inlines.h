@@ -1286,6 +1286,24 @@ namespace avmplus
                            TypeSniffer<T>::isGCTraceableObject::value == false);
     }
 
+    // ----------------------------
+
+    template<class T>
+    REALLY_INLINE DataListAccessor<T>::DataListAccessor(DataList<T>* v) : m_list(v) 
+    { 
+    }
+    
+    template<class T>
+    REALLY_INLINE T* DataListAccessor<T>::addr() 
+    { 
+        return (m_list != NULL) ? m_list->m_data->entries : (T*)NULL; 
+    }
+
+    template<class T>
+    REALLY_INLINE uint32_t DataListAccessor<T>::length() 
+    { 
+        return (m_list != NULL) ? m_list->length() : 0; 
+    }
     
     // ----------------------------
 
