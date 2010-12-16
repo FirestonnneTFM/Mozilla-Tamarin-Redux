@@ -71,7 +71,7 @@ bool VMPI_threadCreate(vmpi_thread_t* thread, vmpi_thread_attr_t* attr, vmpi_thr
     SIZE_T stackSize = attr == NULL || attr->stackSize == VMPI_threadAttrDefaultStackSize() ? 0 : attr->stackSize;
     HANDLE threadHandle = CreateThread(NULL, stackSize, start_fn, arg, 0, &id);
     if (threadHandle) {
-        *thread = (vmpi_thread_t)id;
+        *thread = id;
         CloseHandle(threadHandle);
         if (attr != NULL && attr->priority != THREAD_PRIORITY_NORMAL) {
             SetThreadPriority(threadHandle, attr->priority);
@@ -136,7 +136,7 @@ void VMPI_condVarSignal(vmpi_condvar_t* condvar)
 
 void VMPI_threadJoin(vmpi_thread_t thread)
 {
-    HANDLE threadHandle = OpenThread(STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3FF, false, (DWORD)thread);
+    HANDLE threadHandle = OpenThread(STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3FF, false, thread);
     if (threadHandle) {
         WaitForSingleObject(threadHandle, INFINITE);
         CloseHandle(threadHandle);
