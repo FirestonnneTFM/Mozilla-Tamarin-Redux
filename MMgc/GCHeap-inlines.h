@@ -393,7 +393,7 @@ namespace MMgc
 
     REALLY_INLINE bool GCHeap::statusNotificationBeingSent()
     {
-        return m_notificationThread != NULL;
+        return m_notificationThread != (vmpi_thread_t)NULL;
     }
 
     REALLY_INLINE bool GCHeap::statusNotNormalOrAbort()
