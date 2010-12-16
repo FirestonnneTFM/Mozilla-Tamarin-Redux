@@ -366,6 +366,7 @@ struct vmpi_condvar_t {
     WaitingThread* tail;
 };
 
+typedef DWORD                  vmpi_thread_t;
 typedef CRITICAL_SECTION       vmpi_mutex_t;
 typedef LPVOID                 vmpi_thread_arg_t; // Argument type for thread start function
 typedef DWORD                  vmpi_thread_rtn_t; // Return type for thread start function

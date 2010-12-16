@@ -124,6 +124,8 @@
     #define AVMPLUS_ALIGN16(type) type
 #endif
 
+typedef pthread_t vmpi_thread_t;
+
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()

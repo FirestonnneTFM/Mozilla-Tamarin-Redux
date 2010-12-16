@@ -125,6 +125,7 @@
 #endif
 
 typedef void *maddr_ptr;
+typedef pthread_t vmpi_thread_t;
 
 #ifdef AVMPLUS_MAC_CARBON
     /**
