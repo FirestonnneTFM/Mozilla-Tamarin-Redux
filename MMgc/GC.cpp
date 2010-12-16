@@ -149,8 +149,7 @@ namespace MMgc
         sweeps(0),
         sweepStart(0),
         emptyWeakRef(0),
-
-        m_gcThread(NULL),
+        m_gcThread(0),
         destroying(false),
         marking(false),
         collecting(false),
@@ -3475,7 +3474,7 @@ namespace MMgc
 #ifdef DEBUG
     void GC::ShouldBeInactive()
     {
-        GCAssert(m_gcThread == NULL);
+        GCAssert(m_gcThread == 0);
         GCAssert(stackEnter == NULL);
         GCAssert(top_segment != NULL && top_segment->prev == NULL && top_segment->start == stacktop);
         GCAssert(VMPI_lockTestAndAcquire(&m_gcLock) && VMPI_lockRelease(&m_gcLock));
