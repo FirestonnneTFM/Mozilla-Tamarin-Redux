@@ -406,7 +406,7 @@ namespace avmplus
         lastAllocSample = currentSample;
         writeRawSample(NEW_AUX_SAMPLE);
         uint64_t uid = allocId++;
-        uids.add(item, (void*)uid);
+        uids.add(item, uid);
         write(currentSample, uid);
         write(currentSample, item);
         write(currentSample, sotEmpty());
@@ -476,7 +476,7 @@ namespace avmplus
         AvmAssert(item != 0);
         // recordDeallocationSample doesn't honor the samplingNow flag
         // this is to avoid dropping deleted object samples when sampling is paused.
-        uint64_t uid = (uint64_t)uids.get(item);
+        uint64_t uid = uids.get(item);
         // If we didn't find a UID then this wasn't memory that the sampler knew was allocated
         if(uid && sampleSpaceCheck(false)) {
 
