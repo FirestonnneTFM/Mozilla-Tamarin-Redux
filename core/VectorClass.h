@@ -395,8 +395,6 @@ namespace avmplus
         TypedVectorObject<TLIST>* m_vector;
 
     private:
-        VectorAccessor<TLIST>& operator=(const VectorAccessor<TLIST>& other);   // unimplemented
-        explicit VectorAccessor(const VectorAccessor<TLIST>& other);            // unimplemented
         void* operator new(size_t size);                                        // unimplemented
     };
 
