@@ -191,7 +191,7 @@ namespace MMgc
           gcheapCodeMemory(0),
           externalCodeMemory(0),
           externalPressure(0),
-          m_notificationThread(NULL),
+          m_notificationThread(0),
           config(c),
           status(kMemNormal),
           enterCount(0),
