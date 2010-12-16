@@ -865,6 +865,11 @@ namespace MMgc
          */
         bool IncrementalMarking();
 
+        /**
+         * Is the write barrier active?  This is not necessarily the same as IncrementalMarking().
+         */
+        bool BarrierActive();
+        
     private:
         void AbortFree(const void* item);
 

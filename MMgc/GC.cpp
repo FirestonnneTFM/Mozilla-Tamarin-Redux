@@ -2780,7 +2780,7 @@ namespace MMgc
 
     void GC::WriteBarrierTrap(const void *container)
     {
-        if (marking)
+        if (BarrierActive())
             InlineWriteBarrierTrap(container);
     }
 
@@ -2823,7 +2823,7 @@ namespace MMgc
 
     void GC::privateConservativeWriteBarrierNoSubstitute(const void *address)
     {
-        GCAssert(marking);
+        GCAssert(BarrierActive());
         if(IsPointerToGCPage(address))
            InlineWriteBarrierTrap(FindBeginningFast(address));
     }
@@ -2835,7 +2835,7 @@ namespace MMgc
         GCAssert(container != NULL);
         GCAssert(IsPointerToGCPage(container));
         GCAssert(FindBeginningGuarded(container) == container);
-        if (marking)
+        if (BarrierActive())
             InlineWriteBarrierTrap(container);
     }
 
@@ -2880,7 +2880,7 @@ namespace MMgc
 
     void GC::movePointers(void* dstObject, void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers)
     {
-        if(marking && GetMark(dstObject) && ContainsPointers(dstObject) &&
+        if(BarrierActive() && GetMark(dstObject) && ContainsPointers(dstObject) &&
            // don't push small items that are moving pointers inside the same array
            (dstArray != srcArray || Size(dstObject) > kMarkItemSplitThreshold)) {
             // this could be optimized to just re-scan the dirty region
@@ -2894,7 +2894,7 @@ namespace MMgc
         if (srcOffsetInBytes == dstOffsetInBytes || numPointers == 0)
             return;
        
-        if (marking && 
+        if (BarrierActive() && 
             GetMark(array) && 
             ContainsPointers(array) &&
             // don't push small items that are moving pointers inside the same array
@@ -2931,7 +2931,7 @@ namespace MMgc
         if (mem == NULL || numPointers <= 1)
             return;
        
-        if (marking && 
+        if (BarrierActive() && 
             GetMark(mem) && 
             ContainsPointers(mem) &&
             // don't push small items that are moving pointers inside the same mem
@@ -3487,7 +3487,7 @@ namespace MMgc
         policy.SignalImminentAbort();
         zct.SignalImminentAbort();
 
-        if (collecting || marking)
+        if (collecting || marking || BarrierActive())
         {
             ClearMarkStack();
             m_barrierWork.Clear();

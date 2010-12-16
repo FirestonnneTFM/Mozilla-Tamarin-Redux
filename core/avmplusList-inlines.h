@@ -281,7 +281,7 @@ namespace avmplus
         // the tradition of AvmCore::atomWriteBarrier_ctor...
         if (value)
         {
-            if (data->gc->IncrementalMarking())
+            if (data->gc->BarrierActive())
                 data->gc->InlineWriteBarrierTrap(data);
             value->IncrementRef();
             data->entries[index] = value;

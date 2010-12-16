@@ -142,7 +142,7 @@ namespace MMgc
  
     REALLY_INLINE void GC::InlineWriteBarrierGuardedTrap(const void *address)
     {
-        if (marking) {
+        if (BarrierActive()) {
             const void* container = FindBeginningFast(address);
 
             GCAssert(IsPointerToGCPage(container));
@@ -156,18 +156,12 @@ namespace MMgc
     /*private*/
     REALLY_INLINE void GC::InlineWriteBarrierTrap(const void *container)
     {
-        GCAssert(marking);
+        GCAssert(BarrierActive());
         GCAssert(IsPointerToGCPage(container));
 
         POLICY_PROFILING_ONLY(int stage=0;)
         // If the object is black then it needs to be gray, because we just stored
         // something into it.
-        //
-        // It's good to check 'marking' because it provides a performance boost if it is
-        // true less than maybe 2/3 of the time - it avoids more expensive computation.
-        // We don't check 'collecting' because that's much less often true; it's checked
-        // inside WriteBarrierHit.  We make it a precondition for this function because
-        // some computations can be elided if it is checked earlier.
         //
         // Testing shows that it's /sometimes/ useful to check the right hand side of the
         // assignment for NULL, but this depends on the program and for the time being
@@ -188,7 +182,7 @@ namespace MMgc
         GCAssert(address >= container);
         GCAssert(address < (char*)container + Size(container));
 
-        if (marking)
+        if (BarrierActive())
             InlineWriteBarrierTrap(container);
         WriteFieldNonRC(address, value);
     }
@@ -200,7 +194,7 @@ namespace MMgc
         GCAssert(address >= container);
         GCAssert(address < (char*)container + Size(container));
 
-        if (marking)
+        if (BarrierActive())
             InlineWriteBarrierTrap(container);
         WriteFieldRC(address, value);
     }
@@ -221,7 +215,7 @@ namespace MMgc
     {
         (void)value;  // Can't get rid of this parameter now; part of an existing API
 
-        if (marking)
+        if (BarrierActive())
             privateConservativeWriteBarrierNoSubstitute(address);
     }
 
