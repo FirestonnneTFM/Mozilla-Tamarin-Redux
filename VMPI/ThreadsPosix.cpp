@@ -76,12 +76,12 @@ void* VMPI_tlsGetValue(uintptr_t tlsId)
 
 bool VMPI_threadCreate(vmpi_thread_t* thread, vmpi_thread_attr_t* attr, vmpi_thread_start_t start_fn, vmpi_thread_arg_t arg)
 {
-    return pthread_create(reinterpret_cast<pthread_t*>(thread), attr, start_fn, arg) == 0;
+    return pthread_create(thread, attr, start_fn, arg) == 0;
 }
 
 bool VMPI_threadDetach(vmpi_thread_t thread)
 {
-    return pthread_detach(reinterpret_cast<pthread_t>(thread)) == 0;
+    return pthread_detach(thread) == 0;
 }
 
 void VMPI_threadSleep(int32_t timeout_millis)
@@ -102,7 +102,7 @@ void VMPI_threadSleep(int32_t timeout_millis)
 void VMPI_threadJoin(vmpi_thread_t thread)
 {
     void* value;
-    pthread_join(reinterpret_cast<pthread_t>(thread), &value);
+    pthread_join(thread, &value);
 }
 
 void VMPI_condVarWait(vmpi_condvar_t* condvar, vmpi_mutex_t* mutex)
