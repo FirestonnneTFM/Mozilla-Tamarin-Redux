@@ -174,6 +174,9 @@ namespace avmplus
             const Multiname* _mn;
         };
 //#endif
+    private:
+        // This isn't implemented which prevents new of any form (new (gc) etc).
+        void *operator new(size_t size);
     };
 
     PrintWriter& operator<<(PrintWriter& prw, const Multiname::Format& mnf);
