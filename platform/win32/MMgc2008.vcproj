@@ -30,7 +30,7 @@
 			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -103,7 +103,7 @@
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -178,7 +178,7 @@
 			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -253,7 +253,7 @@
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -330,7 +330,7 @@
 			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -400,7 +400,7 @@
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -469,7 +469,7 @@
 			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -542,7 +542,7 @@
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;$(SolutionDir)warnings.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
