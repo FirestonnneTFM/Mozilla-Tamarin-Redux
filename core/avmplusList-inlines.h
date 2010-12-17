@@ -142,13 +142,8 @@ namespace avmplus
     template<class T>
     REALLY_INLINE /*static*/ void DataListHelper<T>::gcTrace(MMgc::GC* gc, LISTDATA** loc)
     {
-        // EXACTGC OPTIMIZEME - the check is not ideal, the information is technically
-        // available statically.  But DataList<> allocates with FixedMalloc so our choice
-        // here is either checking that the memory is GC memory, or tracing it
-        // conservatively.  Generally the check + precise trace is expected to be more
-        // performant.  The difference is small.
-        if (gc->IsPointerToGCPage(*loc))
-            gc->TraceLocation(loc);
+        AvmAssert(!gc->IsPointerToGCPage(*loc));
+        (void)gc; (void)loc;
     }
 
     // ----------------------------
