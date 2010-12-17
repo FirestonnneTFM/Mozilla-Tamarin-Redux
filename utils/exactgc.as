@@ -431,6 +431,16 @@ class GCNoData extends GCDataSection { function GCNoData(tag, attr) { super(tag,
 // The cls attribute is implicitly present in the C++ source code and
 // is inserted at the beginning of the attribute array by the code
 // that constructs GCField instances.
+//
+// Any condition on the field is considered part of the field's name,
+// to support typical cases like these:
+//
+// #ifdef BLAH
+//   Bletch* GC_POINTER_IFDEF(p, BLAH)
+// #else
+//   Blotch* GC_POINTER_IFNDEF(p, BLAH)
+// #endif
+
 class GCField 
 {
     function GCField(tag, attr) {
@@ -1021,6 +1031,10 @@ function collectFields()
         if (!cppClassMap.hasOwnProperty(s.cls))
             fail("Bad field annotation - unknown class: " + s.cls + " in " + s);
         var c = cppClassMap[s.cls];
+        var fieldname = s.name;
+        if (s.if_) fieldname += "!if!" + s.if_;
+        if (s.ifdef) fieldname += "!ifdef!" + s.ifdef;
+        if (s.ifndef) fieldname += "!ifndef!" + s.ifndef;
         if (isVariableLength(s)) {
             // FIXME: It would be good to loosen the following restriction up; it 
             // would be sufficient to decree that only one of the arrays can be 
@@ -1030,14 +1044,14 @@ function collectFields()
             // were to have a trailing array as well then we'd run into this restriction.
             if (c.variable_length_field != null)
                 fail("Arbitrary restriction: More than one variable length field on " + c);
-            if (c.fieldMap.hasOwnProperty(s.name))
-                fail("Duplicate field name: " + s.name);
+            if (c.fieldMap.hasOwnProperty(fieldname))
+                fail("Duplicate field name: " + s.name + "; canonically " + fieldname);
             c.variable_length_field = s;
         }
         else {
-            if (c.fieldMap.hasOwnProperty(s.name) || (c.variable_length_field != null && c.variable_length_field.name == s.name))
-                fail("Duplicate field name: " + s.name);
-            c.fieldMap[s.name] = s;
+            if (c.fieldMap.hasOwnProperty(fieldname) || (c.variable_length_field != null && c.variable_length_field.name == fieldname))
+                fail("Duplicate field name: " + s.name + "; canonically " + fieldname);
+            c.fieldMap[fieldname] = s;
             c.fieldList.push(s);
         }
     }
