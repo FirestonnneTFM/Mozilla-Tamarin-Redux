@@ -494,7 +494,7 @@ class sandbox:
                 },
                 description='starting Release_sh4-linux build...',
                 descriptionDone='finished Release_sh4-linux build.',
-                name="Release_sh4-linux",
+                name="Debug_sh4-linux",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
     
