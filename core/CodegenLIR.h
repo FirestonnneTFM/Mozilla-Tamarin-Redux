@@ -494,7 +494,6 @@ namespace avmplus
         void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
         LIns* branchJovToLabel(LOpcode op, LIns *a, LIns *b, CodegenLabel& label);
         void branchToAbcPos(LOpcode op, LIns *cond, const uint8_t* target);
-        LIns* retIns(LIns *val);
         LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
         LIns* loadEnvScope();
         LIns* loadEnvVTable();
