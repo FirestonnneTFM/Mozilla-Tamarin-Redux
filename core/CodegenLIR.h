@@ -529,9 +529,6 @@ namespace avmplus
                 nanojit::BitSet& taglivein, LabelBitSet& taglabels);
         void copyParam(int i, int &offset);
 
-        // on successful jit, allocate memory for BindingCache instances, if necessary
-        void initBindingCache();
-
         LIns* loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet, LoadQual loadQual=LOAD_NORMAL);
         LIns* storeIns(LOpcode op, LIns* val, int32_t disp, LIns *base, AccSet accSet);
         LIns* Ins(LOpcode op);
