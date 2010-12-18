@@ -478,8 +478,8 @@ namespace avmplus
     template<class T, class ListHelper>
     REALLY_INLINE uint32_t ListImpl<T,ListHelper>::capacity() const
     {
-        return (ListHelper::getSize(m_data->gc(), m_data) - offsetof(typename ListHelper::LISTDATA, entries)) / 
-                sizeof(typename ListHelper::STORAGE);
+        return uint32_t((ListHelper::getSize(m_data->gc(), m_data) - offsetof(typename ListHelper::LISTDATA, entries)) / 
+                sizeof(typename ListHelper::STORAGE));
     }
 
     template<class T, class ListHelper>
