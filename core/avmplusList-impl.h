@@ -71,7 +71,7 @@ namespace avmplus
         {
             if (m_data->len > 0)
                 ListHelper::clearRange(m_data, 0, m_data->len);
-            ListHelper::free(m_data->gc, m_data);
+            ListHelper::free(m_data->gc(), m_data);
             m_data = NULL;
         }
     }
@@ -106,9 +106,9 @@ namespace avmplus
         AvmAssert(cap <= kListMaxLength);
         if (cap < kListMinCapacity)
             cap = kListMinCapacity;
-        if (m_data->cap != cap)
+        if (capacity() != cap)
         {
-            MMgc::GC* const gc = m_data->gc;
+            MMgc::GC* const gc = m_data->gc();
             AvmAssert(cap > kListMinCapacity);
             uint32_t len = m_data->len;
             // keep existing length if possible (but don't let it exceed cap)
@@ -128,7 +128,7 @@ namespace avmplus
     void ListImpl<T,ListHelper>::add(T value)
     {
         // OPTIMIZEME, this method may be worth inlining
-        AvmAssert(m_data->len <= m_data->cap);
+        AvmAssert(m_data->len <= capacity());
         ensureCapacityExtra(m_data->len, 1);
         ListHelper::storeInEmpty(m_data, m_data->len++, value);
     }
@@ -146,7 +146,7 @@ namespace avmplus
     template<class T, class ListHelper>
     void ListImpl<T,ListHelper>::insert(uint32_t index, T value)
     {
-        AvmAssert(m_data->len <= m_data->cap);
+        AvmAssert(m_data->len <= capacity());
         ensureCapacityExtra(m_data->len, 1);
         if (index < m_data->len)
             ListHelper::moveRange(m_data, index, index + 1, m_data->len - index);
@@ -165,12 +165,11 @@ namespace avmplus
             ListHelper::clearRange(m_data, 0, m_data->len);
             m_data->len = 0;
         }
-        if (m_data->cap > kListMinCapacity)
+        if (capacity() > kListMinCapacity)
         {
-            MMgc::GC* const gc = m_data->gc;
+            MMgc::GC* const gc = m_data->gc();
             typename ListHelper::LISTDATA* newData = allocData(gc, kListMinCapacity);
             newData->len = 0;
-            newData->cap = kListMinCapacity;
             ListHelper::free(gc, m_data);
             ListHelper::wbData(this, &m_data, newData);
         }
@@ -218,8 +217,8 @@ namespace avmplus
             MMgc::GCHeap::SignalObjectTooLarge();
         
         AvmAssert(m_data != NULL);
-        AvmAssert(m_data->cap >= kListMinCapacity);
-        AvmAssert(cap > m_data->cap);
+        AvmAssert(capacity() >= kListMinCapacity);
+        AvmAssert(cap > capacity());
         AvmAssert(cap <= kListMaxLength);
 
         // OPTIMIZEME: this is the growth algorithm used by the old AtomArray... 
@@ -230,7 +229,7 @@ namespace avmplus
         MMGC_STATIC_ASSERT(uint64_t(kListMaxLength) + uint64_t(kListMaxLength/4) <= uint64_t(0xFFFFFFFF));
         cap += (cap/4);
         AvmAssert(cap > kListMinCapacity);
-        MMgc::GC* const gc = m_data->gc;
+        MMgc::GC* const gc = m_data->gc();
         typename ListHelper::LISTDATA* newData = allocData(gc, cap);
 
         VMPI_memcpy(newData->entries, m_data->entries, m_data->len * sizeof(typename ListHelper::STORAGE));
@@ -328,12 +327,13 @@ namespace avmplus
         uint32_t const len = m_data->len;
         if (len > 1)
         {
-            if (sizeof(m_data->entries[0]) == sizeof(void*) && m_data->gc->IsPointerToGCObject(m_data))
+            MMgc::GC* const gc = m_data->gc();
+            if (sizeof(m_data->entries[0]) == sizeof(void*) && gc->IsPointerToGCObject(m_data))
             {
                 // It's really only necessary to do this for things that
                 // might be GC pointers, but it doesn't really hurt to do
                 // for other things that just happen to be the same size.
-                m_data->gc->reversePointersWithinBlock(m_data, offsetof(typename ListHelper::LISTDATA, entries), len);
+                gc->reversePointersWithinBlock(m_data, offsetof(typename ListHelper::LISTDATA, entries), len);
             }
             else
             {

@@ -109,13 +109,15 @@ namespace avmplus
     template<class STORAGE>
     struct ListData 
     {
-        MMgc::GC*   gc;
         uint32_t    len;
-        uint32_t    cap;
+        MMgc::GC*   _gc;
         STORAGE     entries[1];   // lying, really [cap]
         
         // add an empty, inlined ctor to avoid spurious warnings in MSVC2008
         REALLY_INLINE explicit ListData() {}
+
+        REALLY_INLINE MMgc::GC* gc() { return _gc; }
+        REALLY_INLINE void set_gc(MMgc::GC* g) { _gc = g; }
     };
 
     // Do not subclass this without considering the exact-tracing
@@ -124,15 +126,16 @@ namespace avmplus
     template<class STORAGE>
     struct TracedListData : public MMgc::GCTraceableObject
     {
-        MMgc::GC*   gc;
         uint32_t    len;
-        uint32_t    cap;
         STORAGE     entries[1];   // lying, really [cap]
         
         TracedListData() { MMgc::setExact(this); }
 
         virtual void gcTrace(MMgc::GC* gc);
         virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        
+        REALLY_INLINE MMgc::GC* gc() { return MMgc::GC::GetGC(this); }
+        REALLY_INLINE void set_gc(MMgc::GC* _gc) { AvmAssert(_gc == gc()); (void)_gc; }
     };
     
     // ----------------------------
