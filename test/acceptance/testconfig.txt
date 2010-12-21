@@ -250,15 +250,15 @@ as3/Definitions/Function/ArgumentsOptimization,  ^((?!(interp|(debugger(?!.*Dnod
 ####################
 # skip slow tests in test phase, -Dgreedy passes
 ####################
-ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-ecma3/Unicode/u5000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-ecma3/Unicode/u6000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-ecma3/Unicode/u7000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-ecma3/Unicode/u9000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-ecma3/Unicode/u9000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-ecma3/Unicode/uE000_PrivateUseArea, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-ecma3/Unicode/uAC00_HangulSyllables, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
-mops/mops, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/uE000_PrivateUseArea, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+ecma3/Unicode/uAC00_HangulSyllables, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
+mops/mops, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger).*|.*-Dgreedy), skip, bug 499685 skip slow tests
 regress/bug_483783, .*, skip, skip slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
 misc/catchableTimeout, .*, skip, skip slow tests
 misc/doubleTimeout, .*, skip, skip slow tests
