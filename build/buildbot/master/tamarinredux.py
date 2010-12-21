@@ -178,12 +178,14 @@ class tamarinredux:
                                     "windows64-deep",
                                     "linux-deep",
                                     "linux-arm-deep",
+                                    "linux-arm2-deep",
                                     "winmobile-emulator-deep",
                                     "linux-mips-deep",
                                                                     ],
                     builderDependencies=[
                                   ["linux-deep", "linux-test"],
                                   ["linux-arm-deep", "linux-arm-test"],
+                                  ["linux-arm2-deep", "linux-arm-test"],
                                   ["windows-deep", "windows-test"],
                                   ["windows-p3-deep", "windows-test"],
                                   ["windows-frr", "windows-test"], 
@@ -1949,6 +1951,8 @@ class tamarinredux:
     windows_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     windows_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    windows_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    windows_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     windows_deep_factory.addStep(BuildShellCommand(
                 command=['./build-vtune.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -1998,6 +2002,10 @@ class tamarinredux:
     mac_deep_factory.addStep(test_generic(name="Release64-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger64_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger64_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    mac_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_deep_factory.addStep(test_generic(name="Release64-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_deep_factory.addStep(test_generic(name="DebugDebugger64-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(TestSuiteShellCommand(
                      command=['./run-brightspot.sh', WithProperties('%s','revision')],
                      env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
@@ -2122,6 +2130,10 @@ class tamarinredux:
     mac_ppc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_ppc", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    mac_ppc_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_ppc_deep_factory.addStep(test_generic(name="Release64-GCthreshold", shellname="avmshell_64_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger64-GCthreshold", shellname="avmshell_sd_64_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_ppc_deep_factory.addStep(util_process_clean)
     mac_ppc_deep_factory.addStep(util_clean_buildsdir)
     mac_ppc_deep_factory.addStep(sync_clean)
@@ -2185,6 +2197,8 @@ class tamarinredux:
     windows_64_deep_factory.addStep(deep_release_esc)
     windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-Dverifyall", shellname="avmshell_s_64", vmargs="-Dverifyall", config="", scriptargs=""))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-Dverifyall", shellname="avmshell_sd_64", vmargs="-Dverifyall", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     windows_64_deep_factory.addStep( TestSuiteShellCommand(
                 command=['../all/run-acceptance-avmdiff-3264.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -2261,6 +2275,8 @@ class tamarinredux:
     linux_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    linux_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    linux_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     linux_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     linux_deep_factory.addStep(deep_codecoverage_process)
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
@@ -2302,6 +2318,29 @@ class tamarinredux:
                 'slavename': "linux-arm-deep",
                 'factory': linux_arm_deep_factory,
                 'builddir': './linux-arm-deep',
+    }
+
+
+    #######################################
+    #### builder for linux-arm2-deep   ####
+    #######################################
+    linux_arm2_deep_factory = factory.BuildFactory()
+    linux_arm2_deep_factory.addStep(sync_clean)
+    linux_arm2_deep_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm2_deep_factory.addStep(sync_update)
+    linux_arm2_deep_factory.addStep(bb_slaveupdate(slave="linux-arm-deep"))
+    linux_arm2_deep_factory.addStep(download_testmedia)
+    linux_arm2_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    linux_arm2_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp -Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    linux_arm2_deep_factory.addStep(util_process_clean)
+    linux_arm2_deep_factory.addStep(util_clean_buildsdir)
+    linux_arm2_deep_factory.addStep(sync_clean)
+
+    linux_arm2_deep_builder = {
+                'name': "linux-arm2-deep",
+                'slavename': "linux-arm2-deep",
+                'factory': linux_arm2_deep_factory,
+                'builddir': './linux-arm2-deep',
     }
 
 
@@ -2450,6 +2489,7 @@ class tamarinredux:
                 winmobile_emulator_deep_builder,
                 linux_deep_builder,
                 linux_arm_deep_builder,
+                linux_arm2_deep_builder,
                 linux_mips_deep_builder,
                 windows_frr_builder,
                 
