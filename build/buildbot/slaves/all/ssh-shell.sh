@@ -66,10 +66,15 @@ function try_command () {
         # is the only form that will work with quoted arguments containing spaces
         # see http://www.tldp.org/LDP/abs/html/internalvariables.html#APPREF2
         # for details
-        "$@"
+        "$@" 2> ./stderr
         ec=$?
         if [ "$ec" -eq "$expectedExitCode" ]; then
-            # command ran with no errors
+            # command executed with expected exit code
+            # Put captured stderr back into stderr so that it is handled properly by the test runner
+            if [ -s ./stderr ]; then
+                echo "`cat ./stderr`" >&2
+                rm -f ./stderr
+            fi
             return 0
         else
             echo "Command Failed: $*"
@@ -81,6 +86,11 @@ function try_command () {
     done
     # command failed SSH_RETRIES times, report failure and exit
     echo "Reached max tries, exiting with exit code $ec ..."
+    # Put captured stderr back into stderr so that it is handled properly by the test runner
+    if [ -s ./stderr ]; then
+        echo "`cat ./stderr`" >&2
+        rm -f ./stderr
+    fi
     exit $ec
 }
 
