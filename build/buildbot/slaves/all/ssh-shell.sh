@@ -51,11 +51,45 @@ then
     exit 1
 fi
 
+
+
+MAX_RETRIES=5
 filelist=""
 flatfilelist=""
+expectedExitCode=0
+
+function try_command () {
+    count=1
+    while [ $count -le $MAX_RETRIES ]
+    do
+        # run the passed in command - not that "$@" (quoted) is used since that
+        # is the only form that will work with quoted arguments containing spaces
+        # see http://www.tldp.org/LDP/abs/html/internalvariables.html#APPREF2
+        # for details
+        "$@"
+        ec=$?
+        if [ "$ec" -eq "$expectedExitCode" ]; then
+            # command ran with no errors
+            return 0
+        else
+            echo "Command Failed: $*"
+            echo "Exit Code: $ec"
+            echo "Try $count of $MAX_RETRIES"
+            sleep 3
+        fi
+        ((count++))
+    done
+    # command failed SSH_RETRIES times, report failure and exit
+    echo "Reached max tries, exiting with exit code $ec ..."
+    exit $ec
+}
+
+
 if [ "$1" = "" ]
 then
-    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./avmshell"
+    # running the shell with no args prints the help and exits with exitcode 1
+    expectedExitCode=1
+    try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./avmshell"
 else
     # Note that testfiles are copied to the SSH_SHELL_REMOTE_DIR directly and
     # run one at a time.  No dir structure is preserved when copying the files.
@@ -76,7 +110,7 @@ else
                 # flatfile is not in filelist; add it
                 filelist="$filelist $flatfile"
                 # copy file to device
-                scp $file $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/$flatfile > /dev/null
+                try_command scp $file $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/$flatfile > /dev/null
             fi
             # even if flatfile is already in filelist, add to args
             args="$args $flatfile"      
@@ -85,12 +119,12 @@ else
         fi
     done
     # workaround for not returning exit code, run a shell script and print exit code to stdout
-    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./ssh-shell-runner.sh $args" > ./stdout
+    try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./ssh-shell-runner.sh $args" > ./stdout
     ret=`cat ./stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     # clean up copied over files
     for a in $filelist
     do
-        ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm $a"
+        try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm $a"
     done
     # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
     cat ./stdout | sed 's/^EXITCODE=[0-9][0-9]*$//g' > ./stdout_clean
