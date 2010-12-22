@@ -3215,7 +3215,7 @@ namespace avmplus
                 return coerceToString(index);
             } else {
                  // explicitly convert to string
-                return emitStringCall (index, FUNCTIONID(string), preserveNull);
+                return emitStringCall(index, FUNCTIONID(string), preserveNull);
             }
         }
 
@@ -3917,13 +3917,13 @@ namespace avmplus
                 }
                 case avmplus::NativeID::String_AS3_charCodeAt: {
                     if (argc == 1) {
-                        return specializeOneArgFunction (result, FUNCTIONID(String_charCodeAtFI), FUNCTIONID(String_charCodeAtFU), FUNCTIONID(String_charCodeAtFF));
+                        return specializeOneArgFunction(result, FUNCTIONID(String_charCodeAtFI), FUNCTIONID(String_charCodeAtFU), FUNCTIONID(String_charCodeAtFF));
                     }
                     break;
                 }
                 case avmplus::NativeID::String_AS3_charAt: {
                     if (argc == 1) {
-                        return specializeOneArgFunction (result, FUNCTIONID(String_charAtI), FUNCTIONID(String_charAtU), FUNCTIONID(String_charAtF));
+                        return specializeOneArgFunction(result, FUNCTIONID(String_charAtI), FUNCTIONID(String_charAtU), FUNCTIONID(String_charAtF));
                     }
                     break;
                 }
@@ -6038,7 +6038,7 @@ namespace avmplus
     // set cc's for < operator
     LIns* CodegenLIR::cmpLt(int lhsi, int rhsi)
     {
-        LIns *result = cmpOptimization (lhsi, rhsi, LIR_lti, LIR_ltui, LIR_ltd);
+        LIns *result = cmpOptimization(lhsi, rhsi, LIR_lti, LIR_ltui, LIR_ltd);
         if (result)
             return result;
 
@@ -6062,7 +6062,7 @@ namespace avmplus
 
     LIns* CodegenLIR::cmpLe(int lhsi, int rhsi)
     {
-        LIns *result = cmpOptimization (lhsi, rhsi, LIR_lei, LIR_leui, LIR_led);
+        LIns *result = cmpOptimization(lhsi, rhsi, LIR_lei, LIR_leui, LIR_led);
         if (result)
             return result;
 
@@ -6084,7 +6084,7 @@ namespace avmplus
 
     LIns* CodegenLIR::cmpEq(const CallInfo *fid, int lhsi, int rhsi)
     {
-        LIns *result = cmpOptimization (lhsi, rhsi, LIR_eqi, LIR_eqi, LIR_eqd);
+        LIns *result = cmpOptimization(lhsi, rhsi, LIR_eqi, LIR_eqi, LIR_eqd);
         if (result) {
             return result;
         }

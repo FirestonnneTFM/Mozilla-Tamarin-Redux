@@ -600,7 +600,7 @@ namespace avmplus
 
         bool inlineBuiltinFunction(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi);
         LIns* optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
-        LIns* optimizeStringCmpWithStringCall (int callIndex, int otherIndex, LOpcode icmp, bool swap);
+        LIns* optimizeStringCmpWithStringCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
         bool specializeOneArgFunction(Traits *result, const CallInfo *ciInt, const CallInfo *ciUint, const CallInfo *ciNumber);
 
         void suspendCSE();
