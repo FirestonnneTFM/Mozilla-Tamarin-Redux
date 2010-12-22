@@ -378,6 +378,8 @@
 		7E87D10F122C5B980005FEAF /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		8133F064128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */; };
 		8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */; };
+		81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
+		81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
 		D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
 		D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
 		D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D944CADA123EF76600EA0342 /* avmplusList.cpp */; };
@@ -896,6 +898,9 @@
 		81B69B1E123848B200B9DF4F /* vmbase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vmbase.h; path = ../../../vmbase/vmbase.h; sourceTree = SOURCE_ROOT; };
 		81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmAssert.cpp; path = ../../../vmbase/AvmAssert.cpp; sourceTree = SOURCE_ROOT; };
 		81B69B2912384D1D00B9DF4F /* AvmAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmAssert.h; path = ../../../vmbase/AvmAssert.h; sourceTree = SOURCE_ROOT; };
+		81EB4AFD129A55C100D1B0BB /* VMThread-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VMThread-inlines.h"; path = "../../../vmbase/VMThread-inlines.h"; sourceTree = SOURCE_ROOT; };
+		81EB4AFE129A55C200D1B0BB /* VMThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VMThread.cpp; path = ../../../vmbase/VMThread.cpp; sourceTree = SOURCE_ROOT; };
+		81EB4AFF129A55C200D1B0BB /* VMThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VMThread.h; path = ../../../vmbase/VMThread.h; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsPosix.cpp; path = ../../../VMPI/SpyUtilsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
@@ -1675,6 +1680,9 @@
 				81B69B2912384D1D00B9DF4F /* AvmAssert.h */,
 				07D95ABB1254C05500DD872D /* vmbase-inlines.h */,
 				81B69B1E123848B200B9DF4F /* vmbase.h */,
+				81EB4AFD129A55C100D1B0BB /* VMThread-inlines.h */,
+				81EB4AFE129A55C200D1B0BB /* VMThread.cpp */,
+				81EB4AFF129A55C200D1B0BB /* VMThread.h */,
 			);
 			name = vmbase;
 			sourceTree = "<group>";
@@ -1956,6 +1964,7 @@
 				D939B114126E358400522895 /* DataIO.cpp in Sources */,
 				19F9614F1277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
 				8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
+				81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2149,6 +2158,7 @@
 				D939B112126E358400522895 /* DataIO.cpp in Sources */,
 				19F961501277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
 				8133F064128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
+				81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
