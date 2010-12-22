@@ -69,7 +69,7 @@ if [[ -d "$change-$changeid" ]]; then
     scp -r $change-$changeid $scp_mozilla/$branch/
 else
     echo "Revision to promote: $change-$changeid NOT FOUND in builds/tamarin-redux"
-    exit(1)
+    exit 1
 fi
 
 
