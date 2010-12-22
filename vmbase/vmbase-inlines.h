@@ -41,5 +41,6 @@
 #define __vmbase_inlines__
 
 #include "atom-inlines.h"
+#include "VMThread-inlines.h"
 
 #endif // __vmbase_atom__

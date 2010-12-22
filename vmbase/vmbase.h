@@ -48,5 +48,8 @@
 
 #include "AvmAssert.h"
 #include "atom.h"
+#include "VMThread.h"
+
+#include "vmbase-inlines.h"
 
 #endif /* __vmbase__ */
