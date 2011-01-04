@@ -268,6 +268,17 @@ namespace avmplus
         }
     }
 
+    void ScriptObject::throwWriteSealedError(const Multiname& name)
+    {
+        toplevel()->throwReferenceError(kWriteSealedError, name, traits());
+    }
+
+    void ScriptObject::throwWriteSealedError(Atom name)
+    {
+        AvmCore* core = this->core();
+        throwWriteSealedError(Multiname(core->getAnyPublicNamespace(), core->intern(name)));
+    }
+
     void ScriptObject::setAtomProperty(Atom name, Atom value)
     {
         if (traits()->needsHashtable())
@@ -286,11 +297,7 @@ namespace avmplus
         }
         else
         {
-            // NOTE use default public since name is not used
-            Multiname multiname(core()->getAnyPublicNamespace(), AvmCore::atomToString(name));
-
-            // cannot create properties on a sealed object.
-            toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
+            throwWriteSealedError(name);
         }
     }
 
@@ -302,8 +309,7 @@ namespace avmplus
         }
         else
         {
-            // cannot create properties on a sealed object.
-            toplevel()->throwReferenceError(kWriteSealedError, name, traits());
+            throwWriteSealedError(*name);
         }
     }
 
@@ -344,9 +350,7 @@ namespace avmplus
         }
         else
         {
-            // cannot create properties on a sealed object. just use any public
-            Multiname multiname(core()->getAnyPublicNamespace(), AvmCore::atomToString(name));
-            toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
+            throwWriteSealedError(name);
         }
     }
 
@@ -452,11 +456,7 @@ namespace avmplus
             }
             else
             {
-                // NOTE use default public since name is not used
-                Multiname multiname(core->getAnyPublicNamespace(), core->internUint32(i));
-
-                // cannot create properties on a sealed object.
-                toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
+                throwWriteSealedError(core->internUint32(i)->atom());
             }
         }
         else
@@ -937,4 +937,23 @@ namespace avmplus
         Stringp s = core->concatStrings(core->newConstantStringLatin1("[object "), t->name());
         return core->concatStrings(s, core->newConstantStringLatin1("]"));
     }
+
+    uint32_t ScriptObject::getLengthProperty()
+    {
+        Toplevel* toplevel = this->toplevel();
+        AvmCore* core = toplevel->core();
+        Multiname mname(core->getAnyPublicNamespace(), core->klength);
+        Atom lenAtm = toplevel->getproperty(this->atom(), &mname, this->vtable);
+        return AvmCore::toUInt32(lenAtm);
+    }
+
+    void ScriptObject::setLengthProperty(uint32_t newLen)
+    {
+        Toplevel* toplevel = this->toplevel();
+        AvmCore* core = toplevel->core();
+        Multiname mname(core->getAnyPublicNamespace(), core->klength);
+        Atom lenAtm = core->uintToAtom(newLen);
+        toplevel->setproperty(this->atom(), &mname, lenAtm, this->vtable);
+    }
+
 }

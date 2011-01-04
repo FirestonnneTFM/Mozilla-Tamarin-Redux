@@ -144,16 +144,17 @@ namespace avmplus
     }
 
     template<class T, class ListHelper>
-    void ListImpl<T,ListHelper>::insert(uint32_t index, T value)
+    void ListImpl<T,ListHelper>::insert(uint32_t index, T value, uint32_t count)
     {
         AvmAssert(m_data->len <= capacity());
-        ensureCapacityExtra(m_data->len, 1);
+        ensureCapacityExtra(m_data->len, count);
         if (index < m_data->len)
-            ListHelper::moveRange(m_data, index, index + 1, m_data->len - index);
+            ListHelper::moveRange(m_data, index, index + count, m_data->len - index);
         else
             index = m_data->len;
-        ListHelper::storeInEmpty(m_data, index, value);
-        m_data->len++;
+        for (uint32_t i = 0; i < count; ++i)
+            ListHelper::store(m_data, index + i, value);
+        m_data->len += count;
     }
 
     template<class T, class ListHelper>
@@ -196,17 +197,33 @@ namespace avmplus
     template<class T, class ListHelper>
     T ListImpl<T,ListHelper>::removeAt(uint32_t index)
     {
-        AvmAssert(index < m_data->len);
+        AvmAssert(!isEmpty());
+        uint32_t const len_minus_1 = m_data->len - 1;
+        AvmAssert(index <= len_minus_1);
         T const old = ListHelper::load(m_data, index);
-        if (index < m_data->len-1)
+        if (index < len_minus_1)
         {
-            ListHelper::moveRange(m_data, index+1, index, m_data->len-index-1);
+            ListHelper::moveRange(m_data, index+1, index, len_minus_1 - index);
         }
         else
         {
             ListHelper::clearRange(m_data, index, 1);
         }
-        m_data->len--;
+        m_data->len = len_minus_1;
+        return old;
+    }
+
+    // Benchmarking shows it's worth specializing this,
+    // rather than using removeAt(len-1), as it's used
+    // in Array.pop, which can be fairly hot.
+    template<class T, class ListHelper>
+    T ListImpl<T,ListHelper>::removeLast()
+    {
+        AvmAssert(!isEmpty());
+        uint32_t const index = m_data->len - 1;
+        T const old = ListHelper::load(m_data, index);
+        ListHelper::clearRange(m_data, index, 1);
+        m_data->len = index;
         return old;
     }
 

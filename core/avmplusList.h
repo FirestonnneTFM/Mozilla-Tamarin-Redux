@@ -353,14 +353,23 @@ namespace avmplus
         // is >= the old length()
         void set(uint32_t index, T value);
         
+        // Replace the item at the given index with the new value. 
+        // This call *will not* expand the List if necessary; if you specify a value >= length()
+        // we will assert, and cause unpredictable behavior in release builds. This is an unsafe
+        // call that should be used *only* when the caller has already verified that the index is
+        // valid; it's only provided for some superhot code paths where this is the case 
+        // (e.g., inside the Array implementation). Most code should never use this call;
+        // instead, use set(), which is safer and only slightly slower.
+        void replace(uint32_t index, T value);
+
         // Append the value to the end of the ListImpl, growing the ListImpl if necessary.
         void add(T value);
         
         // Append the given ListImpl to the end of this ListImpl, growing if necessary.
         void add(const ListImpl<T,ListHelper>& that);
 
-        // Insert the given item at index. The item previously at index will then be at index+1.
-        void insert(uint32_t index, T value);
+        // Insert "count" of the the given value at index. The item previously at index will then be at index+count.
+        void insert(uint32_t index, T value, uint32_t count = 1);
 
         // Insert the given items at index, shifting entries up.
         // (aka "Array.unshift()" if index == 0, "Array.push()" if index >= len)
@@ -463,9 +472,10 @@ namespace avmplus
         TYPE first() const;
         TYPE last() const;
         void set(uint32_t index, TYPE value);
+        void replace(uint32_t index, TYPE value);
         void add(TYPE value);
         void add(const GCList<T>& that);
-        void insert(uint32_t index, TYPE value);
+        void insert(uint32_t index, TYPE value, uint32_t count = 1);
         void insert(uint32_t index, const TYPE* args, uint32_t argc);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const GCList<T>& args, uint32_t argsOffset);
@@ -514,9 +524,10 @@ namespace avmplus
         TYPE first() const;
         TYPE last() const;
         void set(uint32_t index, TYPE value);
+        void replace(uint32_t index, TYPE value);
         void add(TYPE value);
         void add(const RCList<T>& that);
-        void insert(uint32_t index, TYPE value);
+        void insert(uint32_t index, TYPE value, uint32_t count = 1);
         void insert(uint32_t index, const TYPE* args, uint32_t argc);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const RCList<T>& args, uint32_t argsOffset);
@@ -572,9 +583,10 @@ namespace avmplus
         T first() const;
         T last() const;
         void set(uint32_t index, T value);
+        void replace(uint32_t index, T value);
         void add(T value);
         void add(const UnmanagedPointerList<T>& that);
-        void insert(uint32_t index, T value);
+        void insert(uint32_t index, T value, uint32_t count = 1);
         void insert(uint32_t index, const T* args, uint32_t argc);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const T* args);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const UnmanagedPointerList<T>& args, uint32_t argsOffset);
@@ -622,9 +634,10 @@ namespace avmplus
         TYPE first() const;
         TYPE last() const;
         void set(uint32_t index, TYPE value);
+        void replace(uint32_t index, TYPE value);
         void add(TYPE value);
         void add(const WeakRefList<T>& that);
-        void insert(uint32_t index, TYPE value);
+        void insert(uint32_t index, TYPE value, uint32_t count = 1);
         void insert(uint32_t index, const TYPE* args, uint32_t argc);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const TYPE* args);
         void splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const WeakRefList<T>& args, uint32_t argsOffset);

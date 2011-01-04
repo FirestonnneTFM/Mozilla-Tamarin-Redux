@@ -160,6 +160,13 @@ namespace avmplus
         const unsigned kAtomTypeSize = 3;   // width of type tag
         /*@}*/
 
+        // This is a special value used internally by some VM code to mean
+        // "no such value" in situations where "undefinedAtom" can be a valid
+        // value; it is technically not a legal Atom and can only be
+        // used in some well-defined cases. It should *never* be used outside of the VM;
+        // the VM will *never* return this value to calling code; the VM *may or may not*
+        // accept this value as a valid Atom if it is passed in from calling code. Caveat emptor.
+        const Atom atomNotFound = Atom(0);
     }
 
     // atomMinIntValue is the smallest negative (most negative) integer value representable
