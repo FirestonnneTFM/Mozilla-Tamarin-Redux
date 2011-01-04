@@ -55,8 +55,8 @@
 				RuntimeLibrary="1"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
@@ -140,8 +140,8 @@
 				RuntimeLibrary="1"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
@@ -227,8 +227,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -314,8 +314,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -402,8 +402,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -488,8 +488,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -573,8 +573,8 @@
 				RuntimeLibrary="1"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
@@ -658,8 +658,8 @@
 				RuntimeLibrary="1"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
@@ -745,8 +745,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -833,8 +833,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -922,8 +922,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -1009,8 +1009,8 @@
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmshell.h"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -1595,12 +1595,64 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\vmbase\AvmAssert.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\shell\avmshell.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\shell\avmshellWin.cpp"
@@ -1612,10 +1664,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\DebugCLI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\DictionaryGlue.cpp"
 				>
 			</File>
 			<File
@@ -1632,10 +1680,6 @@
 			</File>
 			<File
 				RelativePath="..\..\extensions\JavaGlue.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\SamplerScript.cpp"
 				>
 			</File>
 			<File
@@ -1710,68 +1754,12 @@
 				RelativePath="..\..\shell\SystemClass.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\vmbase\VMThread.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\vprof\vprof.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Vtune.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\platform\win32\win32cpuid.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\VMPI\WinDebugUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\shell\WinFile.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\VMPI\WinPortUtils.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\vmbase\AvmAssert.h"
-				>
-			</File>
 			<File
 				RelativePath="..\..\shell\avmshell.h"
 				>
@@ -1782,10 +1770,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\DebugCLI.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\extensions\DictionaryGlue.h"
 				>
 			</File>
 			<File
@@ -1813,10 +1797,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\extensions\SamplerScript.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\extensions\Selftest.h"
 				>
 			</File>
@@ -1834,14 +1814,6 @@
 			</File>
 			<File
 				RelativePath="..\..\vmbase\vmbase.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\vmbase\VMThread-inlines.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\vmbase\VMThread.h"
 				>
 			</File>
 			<File
@@ -1895,6 +1867,1178 @@
 			<File
 				RelativePath="..\..\shell\UShortArray.as"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files - not shell, no .pch"
+			>
+			<File
+				RelativePath="..\..\vmbase\AvmAssert.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\extensions\DictionaryGlue.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\extensions\SamplerScript.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\vmbase\VMThread-inlines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\vmbase\VMThread.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Source Files - not shell, no .pch"
+			>
+			<File
+				RelativePath="..\..\vmbase\AvmAssert.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\extensions\DictionaryGlue.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\extensions\SamplerScript.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\vmbase\VMThread.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\vprof\vprof.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Vtune.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\platform\win32\win32cpuid.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\VMPI\WinDebugUtils.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\shell\WinFile.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\VMPI\WinPortUtils.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
