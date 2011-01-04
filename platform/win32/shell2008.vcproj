@@ -1711,6 +1711,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\vmbase\VMThread.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\vprof\vprof.cpp"
 				>
 			</File>
@@ -1830,6 +1834,14 @@
 			</File>
 			<File
 				RelativePath="..\..\vmbase\vmbase.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\vmbase\VMThread-inlines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\vmbase\VMThread.h"
 				>
 			</File>
 			<File
