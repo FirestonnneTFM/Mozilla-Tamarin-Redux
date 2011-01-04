@@ -1016,8 +1016,7 @@ namespace MMgc
 
         presweeping = true;
         // invoke presweep on all callbacks
-        for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
-            cb->presweep();
+        DoPreSweepCallbacks();
         presweeping = false;
 
         SAMPLE_CHECK();
@@ -1108,8 +1107,7 @@ namespace MMgc
         zct.EndCollecting();
 
         // invoke postsweep callback
-        for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
-            cb->postsweep();
+        DoPostSweepCallbacks();
 
         SAMPLE_CHECK();
 
