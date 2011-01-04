@@ -122,7 +122,7 @@ namespace avmplus
     object is implementation-dependent.
     */
 
-    /*static*/ void ArrayClass::array_concat(Toplevel* toplevel, ArrayObject* a, ArrayObject* b)
+    /*static*/ void ArrayClass::array_concat(Toplevel* /*toplevel*/, ArrayObject* a, ArrayObject* b)
     {
         if (!a->try_concat(b))
         {
@@ -177,7 +177,7 @@ namespace avmplus
      * Array.prototype.pop()
      * TRANSFERABLE: Needs to support generic objects as well as Array objects
      */
-    /*static*/ Atom ArrayClass::generic_pop(Toplevel* toplevel, Atom thisAtom)
+    /*static*/ Atom ArrayClass::generic_pop(Toplevel* /*toplevel*/, Atom thisAtom)
     {
         ArrayObject* a = toArray(thisAtom);
 
@@ -208,7 +208,7 @@ namespace avmplus
      * Array.prototype.reverse()
      * TRANSFERABLE: Needs to support generic objects as well as Array objects
      */
-    /*static*/ Atom ArrayClass::generic_reverse(Toplevel* toplevel, Atom thisAtom)
+    /*static*/ Atom ArrayClass::generic_reverse(Toplevel* /*toplevel*/, Atom thisAtom)
     {
         ArrayObject* a = toArray(thisAtom);
         if (a && a->try_reverse())
@@ -242,7 +242,7 @@ namespace avmplus
      * Array.prototype.shift()
      * TRANSFERABLE: Needs to support generic objects as well as Array objects
      */
-    /*static*/ Atom ArrayClass::generic_shift(Toplevel* toplevel, Atom thisAtom)
+    /*static*/ Atom ArrayClass::generic_shift(Toplevel* /*toplevel*/, Atom thisAtom)
     {
         ArrayObject* a = toArray(thisAtom);
 
@@ -1528,7 +1528,7 @@ namespace avmplus
         return r;
     }
 
-    /* static */ uint32_t ArrayClass::generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args)
+    /* static */ uint32_t ArrayClass::generic_unshift(Toplevel* /*toplevel*/, Atom thisAtom, ArrayObject* args)
     {
         ArrayObject* a = toArray(thisAtom);
         if (!a || !a->try_unshift(args))
