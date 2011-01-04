@@ -125,12 +125,8 @@ namespace avmplus
         static ArrayObject* generic_map(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject);
         static uint32_t generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args);
 
-        static uint32_t getLengthHelper(Toplevel* toplevel, ScriptObject* d);
-
     private:
-        static void setLengthHelper(Toplevel* toplevel, ScriptObject *d, uint32_t newLen);
-
-        static ArrayObject* isArray(Toplevel* toplevel, Atom instance);
+        static void array_concat(Toplevel* toplevel, ArrayObject* a, ArrayObject* b);
 
     // ------------------------ DATA SECTION BEGIN
     private:

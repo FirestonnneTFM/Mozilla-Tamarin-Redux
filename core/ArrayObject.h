@@ -43,6 +43,11 @@
 
 namespace avmplus
 {
+    // When DEBUG_ARRAY_VERIFY is defined, we do extra verification that is very
+    // slow, even in debug builds; thus normally this is disabled unless you
+    // are running tests for Array-specific changes.
+    #define NO_DEBUG_ARRAY_VERIFY 
+
     /**
      * an instance of class Array.  constructed with "new Array" or
      * an array literal [...].   We need this class to support Array's
@@ -73,9 +78,7 @@ namespace avmplus
         
         ~ArrayObject();
 
-        bool hasDense() const;
-        bool isSimpleDense() const;
-        uint32_t getDenseLength() const;
+        virtual ArrayObject* toArrayObject() { return this; }
 
         // Non-virtual members for ActionScript method implementation
         uint32_t get_length() const;
@@ -84,6 +87,12 @@ namespace avmplus
         // Virtual members so Array subclasses can treat length differently (in both C++ and AS3)
         virtual uint32_t getLength() const;
         virtual void setLength(uint32_t newLength);
+        
+        // Virtual methods used (primarily) by ArrayClass generic methods;
+        // the default implementations are adequate but we can improve speed by
+        // overriding.
+        virtual uint32_t getLengthProperty();
+        virtual void setLengthProperty(uint32_t newLen);
 
         virtual Atom getAtomProperty(Atom name) const;
         virtual void setAtomProperty(Atom name, Atom value);
@@ -114,15 +123,12 @@ namespace avmplus
 
         // native methods
         Atom AS3_pop(); // pop(...rest)
-        uint32_t AS3_push(Atom *args, int argc); // push(...args):uint
-        uint32_t AS3_unshift(Atom *args, int argc); // unshift(...args):
+        uint32_t AS3_push(Atom* args, int argc); // push(...args):uint
+        uint32_t AS3_unshift(Atom* args, int argc); // unshift(...args):
 
         Atom pop();
         uint32_t push(Atom *args, int argc);
         uint32_t unshift(Atom *args, int argc);
-
-        void updateToSucceedingLowHtEntry();
-        void checkForSparseToDenseConversion();
 
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
@@ -134,19 +140,54 @@ namespace avmplus
 #endif
 
     private:
-        // We can NOT use 0xFFFFFFFF for this since x[0xFFFFFFFE] is a valid prop
-        // which would make our length 0xFFFFFFFF
-        static const uint32_t NO_LOW_HTENTRY  = 0;
+        Atom indexToName(uint32_t index) const;
 
+        void convertToSparse();
+
+        bool delDenseUintProperty(uint32_t index);
+
+        void verify() const;
+
+        uint32_t calcDenseUsed() const;
+
+    private:
+        // Helper methods used only by ArrayClass, as special-case
+        // optimizations for various "generic" optimizations that
+        // can be done on dense arrays. These optimizations used
+        // to be done in ArrayClass directly, but have been moved
+        // into ArrayObject so that all "special knowledge" about
+        // how dense arrays are implemented can be concentrated here
+        // rather than bleeding into other classes (even one as
+        // friendly to us as our class).
+        friend class ArrayClass;
+        
+        bool try_concat(ArrayObject* that);
+        bool try_reverse();
+        bool try_shift(Atom& result);
+        ArrayObject* try_splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ArrayObject* that, uint32_t that_skip);
+        bool try_unshift(ArrayObject* that);
+
+    private:
+        
+        // These values are chosen such that (index - denseStart)
+        // is always >= m_denseArray.length(), obviating the need
+        // to have a separate runtime check for "is-dense" or not.
+        static const uint32_t IS_SEALED = 0xfffffffe;
+        static const uint32_t IS_SPARSE = 0xffffffff;
+        bool isSparse() const;
+        bool isDense() const;
+        bool isDynamic() const;
+
+    private:
+        
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(ArrayObject)
 
-    public: // Used by ArrayClass
-        AtomList GC_STRUCTURE(m_denseArr);
-        
-        uint32_t m_lowHTentry; // lowest numeric entry in our hash table
-        uint32_t m_length;
-        
+        AtomList GC_STRUCTURE(m_denseArray);
+        uint32_t              m_denseStart;
+        uint32_t              m_denseUsed;
+        uint32_t              m_length;
+
         GC_DATA_END(ArrayObject)
 
     private:

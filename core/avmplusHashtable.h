@@ -194,7 +194,7 @@ namespace avmplus
          * since identifiers are always interned strings, they can't be 0,
          * so we can use 0 as the empty value.
          */
-        static const Atom EMPTY = 0;
+        static const Atom EMPTY = atomNotFound;
 
         /** DELETED is stored as the key for deleted items */
         static const Atom DELETED = undefinedAtom;

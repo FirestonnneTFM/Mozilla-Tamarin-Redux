@@ -105,11 +105,16 @@ package LengthSpoofing
       ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
       foo.toString()
       );
+
+    foo = new LengthSpoofing.SpoofingArray();
+    foo.push(1);
+    foo.push(2);
+    foo.push(3);
     foo.Spoofing = false;
     foo.shift();
     AddTestCase(
       "test shift spoofing=false",
-      "",
+      "2,3",
       foo.toString()
       );
 
