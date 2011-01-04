@@ -341,20 +341,6 @@ class AcceptanceRuntest(RuntestBase):
             self.allskips += 1
             return False
         return True
-    
-    def compile_support_files(self, support_dir, outputCalls):
-        for p, dirs, files in walk(support_dir):
-            for f in files:
-                if f.endswith(self.sourceExt):
-                    f = join(p,f)
-                    binFile = splitext(f)[0]+'.abc'
-                    if exists(binFile) and (self.forcerebuild or (self.timestampcheck and getmtime(f)>getmtime(binFile))):
-                        os.unlink(binFile)
-                    if not isfile(binFile):
-                        compileOutput = self.compile_test(f, outputCalls=outputCalls)
-                        if not isfile(binFile):
-                            outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
-                            outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
 
     def process_avm_args_line(self, line, dir):
         abcargs = ''
