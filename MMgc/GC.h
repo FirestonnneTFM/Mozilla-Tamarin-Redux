@@ -81,13 +81,23 @@
 // class.
 #define GC_AS3_EXACT(cls, basecls)  cls : public basecls
 #define GC_AS3_EXACT_IFDEF(cls, basecls, ifdef)  cls : public basecls
+#define GC_AS3_EXACT_IFNDEF(cls, basecls, ifdef)  cls : public basecls
+#define GC_AS3_EXACT_IF(cls, basecls, ifdef)  cls : public basecls
 #define GC_AS3_EXACT_WITH_HOOK(cls, basecls)  cls : public basecls
+#define GC_AS3_EXACT_WITH_HOOK_IFDEF(cls, basecls)  cls : public basecls
+#define GC_AS3_EXACT_WITH_HOOK_IFNDEF(cls, basecls)  cls : public basecls
+#define GC_AS3_EXACT_WITH_HOOK_IF(cls, basecls)  cls : public basecls
 
 // Class is internal to the runtime or host software, not exposed to
 // AS3: Use this to declare the class.
 #define GC_CPP_EXACT(cls, basecls)  cls : public basecls
 #define GC_CPP_EXACT_IFDEF(cls, basecls, ifdef)  cls : public basecls
+#define GC_CPP_EXACT_IFNDEF(cls, basecls, ifdef)  cls : public basecls
+#define GC_CPP_EXACT_IF(cls, basecls, ifdef)  cls : public basecls
 #define GC_CPP_EXACT_WITH_HOOK(cls, basecls)  cls : public basecls
+#define GC_CPP_EXACT_WITH_HOOK_IFDEF(cls, basecls)  cls : public basecls
+#define GC_CPP_EXACT_WITH_HOOK_IFNDEF(cls, basecls)  cls : public basecls
+#define GC_CPP_EXACT_WITH_HOOK_IF(cls, basecls)  cls : public basecls
 
 // Before the first data member in a class
 #define GC_DATA_BEGIN(cls)  GC_DECLARE_EXACT_METHODS

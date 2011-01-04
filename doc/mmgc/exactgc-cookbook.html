@@ -128,7 +128,8 @@ to one of these:
   class GC_<b>CPP</b>_EXACT(Derived, Base) ...   // Does not have an AS3 counterpart
 </pre>
 
-<p>For classes defined within an #ifdef use the _IFDEF variants:
+<p>For classes defined within an #ifdef use the _IFDEF variants (ditto
+#if with _IF and #ifndef with _IFNDEF):
 <pre>
   #ifdef <b>DEBUGGER</b>
     class GC_CPP_EXACT_<b>IFDEF</b>(Derived, Base, <b>DEBUGGER</b>) ...

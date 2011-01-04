@@ -105,8 +105,14 @@
 //       class GC_AS3_EXACT_IFDEF(ArrayClass, MMgc::ClassClosure, DEBUGGER) { ... }
 //       class GC_CPP_EXACT_IFDEF(Domain, MMgc::GCTraceableObjectWithTrace, FEATURE_NANOJIT) { ... }
 //
+//   and
+//
+//       class GC_AS3_EXACT_WITH_HOOK_IFDEF(ArrayClass, MMgc::ClassClosure, DEBUGGER) { ... }
+//       class GC_CPP_EXACT_WITH_HOOK_IFDEF(Domain, MMgc::GCTraceableObjectWithTrace, FEATURE_NANOJIT) { ... }
+//
 //   You would use an _IFDEF variant if the class definition is within
-//   an #ifdef block in the source file alread.
+//   an #ifdef block in the source file alread.  (There are also _IF and
+//   _IFNDEF variants of all these.)
 //
 // - The program region of a class that holds traceable members must
 //   be wrapped in GC_DATA_BEGIN and GC_DATA_END annotations:
@@ -380,7 +386,10 @@ class AS3Class
 
 
 // For GC_AS3_EXACT and GC_CPP_EXACT annotations on C++ class
-// definitions, also for the _WITH_HOOK variants.
+// definitions, also for the _WITH_HOOK variants.  Note
+// _WITH_HOOK_{IF,IFDEF,IFNDEF} means we can have both hooks
+// and conditional compilation.
+
 class GCClass
 {
     function GCClass(tag, attr) {
@@ -388,6 +397,8 @@ class GCClass
         base = getAttr(attr, 1);
         hook = tag.match("_WITH_HOOK") != null;
         ifdef = tag.match("_IFDEF") != null ? getAttr(attr,2) : false;
+        ifndef = tag.match("_IFNDEF") != null ? getAttr(attr,2) : false;
+        if_ = !ifdef && !ifndef && tag.match("_IF") != null ? getAttr(attr,2) : false;
     }
 
     public function toString() { return printProps(this, ["cls","base","hook","ifdef"]) }
@@ -396,6 +407,8 @@ class GCClass
     const base;
     const hook;
     const ifdef;
+    const ifndef;
+    const if_;
 
     var out = new Printer(1);
     var next = null;
@@ -566,9 +579,15 @@ const constructors =
 { "GC_CPP_EXACT":           GCCppExact,
   "GC_CPP_EXACT_IFDEF":     GCCppExact,
   "GC_CPP_EXACT_WITH_HOOK": GCCppExact,
+  "GC_CPP_EXACT_WITH_HOOK_IFDEF": GCCppExact,
+  "GC_CPP_EXACT_WITH_HOOK_IFNDEF": GCCppExact,
+  "GC_CPP_EXACT_WITH_HOOK_IF": GCCppExact,
   "GC_AS3_EXACT":           GCAS3Exact,
   "GC_AS3_EXACT_IFDEF":     GCAS3Exact,
   "GC_AS3_EXACT_WITH_HOOK": GCAS3Exact,
+  "GC_AS3_EXACT_WITH_HOOK_IFDEF": GCAS3Exact,
+  "GC_AS3_EXACT_WITH_HOOK_IFNDEF": GCAS3Exact,
+  "GC_AS3_EXACT_WITH_HOOK_IF": GCAS3Exact,
   "GC_DATA_BEGIN":          GCDataBegin,
   "GC_DATA_END":            GCDataEnd,
   "GC_NO_DATA":             GCNoData,
@@ -857,14 +876,73 @@ function readFiles(files)
         return cppDataStack[cppDataStack.length-1];
     }
 
+    // Does not match the trailing right paren.  $1 is the tag, $2 the
+    // rest of the text starting just right of the left paren for the
+    // argument list.
+
+    const cppMetaTag = 
+        "(" +
+        ["GC_CPP_EXACT_WITH_HOOK_IFDEF",
+         "GC_CPP_EXACT_WITH_HOOK_IFNDEF",
+         "GC_CPP_EXACT_WITH_HOOK_IF",
+         "GC_CPP_EXACT_WITH_HOOK",
+         "GC_CPP_EXACT_WITH_HOOK",
+         "GC_CPP_EXACT_WITH_HOOK",
+         "GC_CPP_EXACT_IFDEF",
+         "GC_CPP_EXACT_IFNDEF",
+         "GC_CPP_EXACT_IF",
+         "GC_CPP_EXACT",
+         "GC_AS3_EXACT_WITH_HOOK_IFDEF",
+         "GC_AS3_EXACT_WITH_HOOK_IFNDEF",
+         "GC_AS3_EXACT_WITH_HOOK_IF",
+         "GC_AS3_EXACT_WITH_HOOK",
+         "GC_AS3_EXACT_WITH_HOOK",
+         "GC_AS3_EXACT_WITH_HOOK",
+         "GC_AS3_EXACT_IFDEF",
+         "GC_AS3_EXACT_IFNDEF",
+         "GC_AS3_EXACT_IF",
+         "GC_AS3_EXACT",
+         "GC_NO_DATA",
+         "GC_DATA_BEGIN",
+         "GC_DATA_END"].join("|") +
+        ")\\s*\\((.*)";
+
     function matchCppMetaTag(line) {
-        // Does not match the trailing right paren
-        return (/(GC_(?:CPP_EXACT_WITH_HOOK|CPP_EXACT_IFDEF|CPP_EXACT|AS3_EXACT_WITH_HOOK|AS3_EXACT_IFDEF|AS3_EXACT|NO_DATA|DATA_BEGIN|DATA_END))\s*\((.*)/).exec(line);
+        return (new RegExp(cppMetaTag)).exec(line);
     }
 
+    // Does not match the trailing right paren.  $1 is the tag, $2 the
+    // rest of the text starting just right of the left paren for the
+    // argument list.
+
+    const cppFieldTag = 
+        "(" +
+        ["GC_POINTERS",
+         "GC_POINTERS_SMALL",
+         "GC_STRUCTURES",
+         "GC_STRUCTURES_SMALL",
+         "GC_ATOMS",
+         "GC_ATOMS_SMALL",
+         "GC_STRUCTURE",
+         "GC_STRUCTURE_IFDEF",
+         "GC_STRUCTURE_IFNDEF",
+         "GC_STRUCTURE_IF",
+         "GC_POINTER",
+         "GC_POINTER_IFDEF",
+         "GC_POINTER_IFNDEF",
+         "GC_POINTER_IF",
+         "GC_ATOM",
+         "GC_ATOM_IFDEF",
+         "GC_ATOM_IFNDEF",
+         "GC_ATOM_IF",
+         "GC_CONSERVATIVE",
+         "GC_CONSERVATIVE_IFDEF",
+         "GC_CONSERVATIVE_IFNDEF",
+         "GC_CONSERVATIVE_IF"].join("|") +
+        ")\\s*\\((.*)";
+
     function matchCppFieldTag(line) {
-        // Does not match the trailing right paren
-        return (/(GC_(?:POINTERS|POINTERS_SMALL|STRUCTURES|STRUCTURES_SMALL|ATOMS|ATOMS_SMALL|STRUCTURE|STRUCTURE_IFDEF|STRUCTURE_IFNDEF|STRUCTURE_IF|POINTER|POINTER_IFDEF|POINTER_IFNDEF|POINTER_IF|ATOM|ATOM_IFDEF|ATOM_IFNDEF|ATOM_IF|CONSERVATIVE|CONSERVATIVE_IFDEF|CONSERVATIVE_IFNDEF|CONSERVATIVE_IF))\s*\((.*)/).exec(line);
+        return (new RegExp(cppFieldTag)).exec(line);
     }
 
     // FIXME: Additional error checking we could add here:
@@ -1277,6 +1355,14 @@ function constructAndPrintTracers()
                 output.
                     PR("#ifdef " + c.ifdef).
                     NL();
+            else if (c.ifndef)
+                output.
+                    PR("#ifndef " + c.ifndef).
+                    NL();
+            else if (c.if_)
+                output.
+                    PR("#if " + c.if_).
+                    NL();
             if (c.probablyLarge) {
                 output.
                     PR("bool " + c.cls + "::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)").
@@ -1333,9 +1419,9 @@ function constructAndPrintTracers()
                     PR("}").
                     NL();
             }
-            if (c.ifdef) 
+            if (c.ifdef || c.ifndef || c.if_) 
                 output.
-                    PR("#endif // " + c.ifdef).
+                    PR("#endif // " + (c.ifdef || c.ifndef || c.if_)).
                     NL();
         }
     }
