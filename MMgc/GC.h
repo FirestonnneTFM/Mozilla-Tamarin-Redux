@@ -1580,6 +1580,13 @@ namespace MMgc
         REALLY_INLINE void RemoveFromZCT(RCObject *obj);
 #endif
 
+    private:
+        void DoPreSweepCallbacks();
+        void DoPostSweepCallbacks();
+        void DoPreReapCallbacks();
+        void DoPreReapCallbacks(void* rcObject);
+        void DoPostReapCallbacks();
+
     public:
         // PreventImmediateReaping is used by Flash Player for older content: it means to flag
         // the object so that it won't be reaped until it goes through a 1 -> 0 reference count

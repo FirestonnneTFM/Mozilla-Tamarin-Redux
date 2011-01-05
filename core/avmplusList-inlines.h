@@ -490,6 +490,13 @@ namespace avmplus
     }
 
     template<class T, class ListHelper>
+    REALLY_INLINE void ListImpl<T,ListHelper>::replace(uint32_t index, T value)
+    {
+        AvmAssert(index < m_data->len);
+        ListHelper::store(m_data, index, value);
+    }
+
+    template<class T, class ListHelper>
     REALLY_INLINE void ListImpl<T,ListHelper>::set(uint32_t index, T value)
     {
         // Yes, this is worth inlining, according to performance testing.
@@ -519,14 +526,7 @@ namespace avmplus
     REALLY_INLINE T ListImpl<T,ListHelper>::removeFirst()
     {
         AvmAssert(!isEmpty());
-        return isEmpty() ? (T)0 : removeAt(0);
-    }
-
-    template<class T, class ListHelper>
-    REALLY_INLINE T ListImpl<T,ListHelper>::removeLast()
-    {
-        AvmAssert(!isEmpty());
-        return isEmpty() ? (T)0 : removeAt(m_data->len-1);
+        return removeAt(0);
     }
 
     template<class T, class ListHelper>
@@ -649,6 +649,12 @@ namespace avmplus
     }
 
     template<class T>
+    REALLY_INLINE void GCList<T>::replace(uint32_t index, TYPE value)
+    {
+        m_list.replace(index, reinterpret_cast<MMgc::GCObject*>(value));
+    }
+
+    template<class T>
     REALLY_INLINE void GCList<T>::set(uint32_t index, TYPE value)
     {
         m_list.set(index, reinterpret_cast<MMgc::GCObject*>(value));
@@ -667,9 +673,9 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void GCList<T>::insert(uint32_t index, TYPE value)
+    REALLY_INLINE void GCList<T>::insert(uint32_t index, TYPE value, uint32_t count)
     {
-        m_list.insert(index, reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.insert(index, reinterpret_cast<MMgc::GCObject*>(value), count);
     }
 
     template<class T>
@@ -809,6 +815,12 @@ namespace avmplus
     }
 
     template<class T>
+    REALLY_INLINE void RCList<T>::replace(uint32_t index, TYPE value)
+    {
+        m_list.replace(index, value);
+    }
+
+    template<class T>
     REALLY_INLINE void RCList<T>::set(uint32_t index, TYPE value)
     {
         m_list.set(index, value);
@@ -827,9 +839,9 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void RCList<T>::insert(uint32_t index, TYPE value)
+    REALLY_INLINE void RCList<T>::insert(uint32_t index, TYPE value, uint32_t count)
     {
-        m_list.insert(index, value);
+        m_list.insert(index, value, count);
     }
 
     template<class T>
@@ -976,6 +988,12 @@ namespace avmplus
     }
 
     template<class T>
+    REALLY_INLINE void UnmanagedPointerList<T>::replace(uint32_t index, T value)
+    {
+        m_list.replace(index, (UnmanagedPointer)value);
+    }
+
+    template<class T>
     REALLY_INLINE void UnmanagedPointerList<T>::set(uint32_t index, T value)
     {
         m_list.set(index, (UnmanagedPointer)value);
@@ -994,9 +1012,9 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void UnmanagedPointerList<T>::insert(uint32_t index, T value)
+    REALLY_INLINE void UnmanagedPointerList<T>::insert(uint32_t index, T value, uint32_t count)
     {
-        m_list.insert(index, (UnmanagedPointer)value);
+        m_list.insert(index, (UnmanagedPointer)value, count);
     }
 
     template<class T>
@@ -1139,6 +1157,12 @@ namespace avmplus
     }
 
     template<class T>
+    REALLY_INLINE void WeakRefList<T>::replace(uint32_t index, TYPE value)
+    {
+        m_list.replace(index, to_gc(value));
+    }
+
+    template<class T>
     REALLY_INLINE void WeakRefList<T>::set(uint32_t index, TYPE value)
     {
         m_list.set(index, reinterpret_cast<MMgc::GCObject*>(value));
@@ -1157,9 +1181,9 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void WeakRefList<T>::insert(uint32_t index, TYPE value)
+    REALLY_INLINE void WeakRefList<T>::insert(uint32_t index, TYPE value, uint32_t count)
     {
-        m_list.insert(index, reinterpret_cast<MMgc::GCObject*>(value));
+        m_list.insert(index, reinterpret_cast<MMgc::GCObject*>(value), count);
     }
 
     template<class T>

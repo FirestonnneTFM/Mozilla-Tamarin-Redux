@@ -251,6 +251,19 @@ namespace avmplus
         static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable);
         static ScriptObject* slowCreateInstance(ClassClosure* cls, VTable* ivtable);
 
+        // This is a fast way to implement "istype(ARRAY)"; it return non-null if
+        // this is an ArrayObject (or subclass thereof)
+        virtual ArrayObject* toArrayObject() { return NULL; }
+
+        // This gets the property named "length" (if any) on the object, coerces it to a uint,
+        // and returns the value. (Since uint(undefined) == 0, undefined length is zero.)
+        virtual uint32_t getLengthProperty();
+
+        // This sets the property named "length" to the given uint value. If this
+        // is a nondynamic object, or there is a read-only length property, or uint
+        // can't be coerced to the type of "length", an exception will be thrown. 
+        virtual void setLengthProperty(uint32_t newLen);
+
 #ifdef AVMPLUS_VERBOSE
     public:
         virtual PrintWriter& print(PrintWriter& prw) const;
@@ -264,6 +277,12 @@ namespace avmplus
     public:
         virtual MethodEnv* getCallMethodEnv() { return NULL; }
 #endif
+
+    protected:
+        
+        void throwWriteSealedError(Atom name);
+        void throwWriteSealedError(const Multiname& name);
+
 
     private:
         void initHashtable(int capacity = InlineHashtable::kDefaultCapacity);

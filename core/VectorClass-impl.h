@@ -61,7 +61,7 @@ namespace avmplus
             toplevel->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(argv[1]), core->toErrorString(itraits));
 
         ScriptObject* so_args = AvmCore::atomToScriptObject(argv[1]);
-        uint32_t len = ArrayClass::getLengthHelper(toplevel, so_args);
+        uint32_t len = so_args->getLengthProperty();
         return createAndInitVectorFromObject(so_args, len);
     }
 

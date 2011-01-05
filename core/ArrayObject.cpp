@@ -42,217 +42,244 @@
 
 namespace avmplus
 {
-    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, uint32_t capacity)
-        : ScriptObject(vtable, proto, 0),
-        m_denseArr(vtable->core()->GetGC(), capacity)
+    /*
+        A dense array is faster and more efficient than a sparse array. Also, most
+        Arrays are (mostly) dense in actual usage. Thus we now start with the assumption
+        that all Arrays are dense until proven otherwise. The heuristics are largely based
+        on SpiderMonkey.
+        
+        Array objects begin as "dense" arrays, optimized for numeric-only property
+        access over a vector of slots (m_denseArray) with high load factor.  Array
+        methods optimize for denseness by testing that the object's class is
+        Array, and can then directly manipulate the slots for efficiency.
+
+        When an Array is "dense", all properties are stored
+        in the dense array, either explicitly or implicitly (see below). Note that
+        only dynamic Arrays can be dense. (By definition, a dense array can only
+        contain properties with uint keys.)
+        
+        When an Array is not dense, m_denseArray is unused and all properties
+        are stored in the hashtable (as with any other ScriptObject). 
+        
+        In dense mode, the Array has a (possibly zero-length) AtomList (m_denseArray) containing
+        all its values; the first item in m_denseArray corresponds to index m_denseStart.
+        There can be "holes" in m_denseArray; these are set to the special value atomNotFound
+        and indicate an entry that has never been set.
+        
+        All properties that are less than the dense area start, or greater than the dense area end,
+        are implicitly considered to be atomNotFound.
+        
+        It's perfectly legal (and not unusual) for a dense array to have storage for only the "middle"
+        portion of itself; consider a code fragment like
+        
+            var a = new Array(1000);
+            a[123] = 4;
+            a[125] = 99;
+            a[128] = 8;
+        
+        In the above case, we'd expect to have a dense Array with 
+
+            m_denseStart = 123      (first entry in denseArr)
+            m_denseUsed = 3
+            m_denseArray.length = 6   
+            m_denseArray contents = [ 4, HOLE, 99, HOLE, HOLE, 8 ]
+            m_length = 1000
+
+        Note that everything less than m_denseStart, and everything between 
+        (m_denseStart+m_denseArray.length) and m_length, are implicitly considered "atomNotFound".
+        
+        Arrays are converted to sparse (m_denseArray = 0, all properties in the ht area)
+        when any of these conditions are met:
+         - the load factor (m_denseUsed / m_denseArray.length()) is less than 0.25, and there are
+           more than MIN_SPARSE_INDEX slots total
+         - a property is set that is non-numeric (and not "length"); or
+         - a hole is filled below m_denseArray.length() (possibly implicitly through methods like
+           |reverse| or |splice|).
+           
+        We currently never attempt to reconvert a sparse Array to a dense Array, except in the
+        degenerate case of every property of the Array being removed (in which case it 
+        becomes a "dense" but empty Array).
+
+        Note that, as before, we do not preserve enumeration-in-insertion-order
+        for either dense or sparse arrays.
+    */
+
+    // Arrays <= this in length are always dense, regardless of how many slots are used
+    static const uint32_t MIN_SPARSE_INDEX = 32;
+
+    /*static*/ REALLY_INLINE bool shouldBeSparse(const uint32_t denseLen, const uint32_t denseUsed)
+    {
+        // We don't allow dense indices to be negative when interpreted as a signed int32,
+        // so let's constrain denseLen to <= 0x7FFFFFFF to ensure that.
+        return (denseLen > MIN_SPARSE_INDEX && denseLen > ((denseUsed+1)<<2)) ||
+                int32_t(denseLen) < 0;
+    }
+
+    REALLY_INLINE uint32_t umin(uint32_t a, uint32_t b) { return a < b ? a : b; }
+    REALLY_INLINE uint32_t umax(uint32_t a, uint32_t b) { return a > b ? a : b; }
+
+    Atom ArrayObject::indexToName(uint32_t index) const
+    {
+        // This is carefully designed to replicate the logic in ScriptObject::getUintProperty;
+        // in particular, we must ensure that we create kIntptrType Atoms for indices 
+        // less than MAX_INTEGER_MASK (rather than interned Strings)
+        return (!(index & MAX_INTEGER_MASK)) ?
+                atomFromIntptrValue_u(index) : 
+                core()->internUint32(index)->atom();
+    }
+
+    uint32_t ArrayObject::calcDenseUsed() const
+    {
+        AvmAssert(isDense());
+        uint32_t used = 0;
+        for (uint32_t u = 0, n = m_denseArray.length(); u < n; u++)
+        {
+            if (m_denseArray.get(u) != atomNotFound) 
+                ++used;
+        }
+        return used;
+    }
+
+#ifdef DEBUG_ARRAY_VERIFY   
+    void ArrayObject::verify() const
+    {
+        if (m_denseStart == IS_SPARSE)
+        {
+            AvmAssert(m_denseUsed == 0);
+            AvmAssert(m_denseArray.length() == 0);
+
+            uint32_t calc_len = 0;
+            InlineHashtable* ht = this->getTable();
+            for (int i = ht->next(0); i != 0; i = ht->next(i)) 
+            {
+                Atom k = ht->keyAt(i);
+                uint32_t index;
+                if (AvmCore::getIndexFromAtom(k, &index) && index >= calc_len)
+                {
+                    calc_len = index + 1;
+                }
+            }
+            AvmAssert(m_length >= calc_len);
+        }
+        else if (m_denseStart == IS_SEALED)
+        {
+            AvmAssert(m_denseUsed == 0);
+            AvmAssert(m_denseArray.length() == 0);
+            AvmAssert(m_length == 0);
+        }
+        else // isDense
+        {
+            AvmAssert(int32_t(m_denseStart) >= 0);
+            
+            // can't use getTable()->getSize() == 0 because getSize()
+            // includes deleted items. 
+            InlineHashtable* ht = this->getTable();
+            for (int i = ht->next(0); i != 0; i = ht->next(i))
+            {
+                Atom k = ht->keyAt(i);
+                uint32_t index;
+                AvmAssert(!AvmCore::getIndexFromAtom(k, &index));
+            }
+            AvmAssert(m_length >= m_denseStart + m_denseArray.length());
+            AvmAssert(m_denseUsed <= m_denseArray.length());
+            AvmAssert(m_denseArray.length() <= 0x7fffffff);
+            AvmAssert(m_denseUsed == calcDenseUsed());
+            if (m_denseArray.length() == 0)
+            {
+                AvmAssert(m_denseStart == 0);
+                AvmAssert(m_denseUsed == 0);
+            }
+            AvmAssert(!shouldBeSparse(m_denseArray.length(), m_denseUsed));
+        }
+    }
+#endif
+
+    void ArrayObject::convertToSparse()
+    {
+        AvmAssert(isDense());
+        
+        verify();
+
+        for (uint32_t index = 0, n = m_denseArray.length(); index < n; index++)
+        {
+            Atom value = m_denseArray.get(index);
+            if (value != atomNotFound)
+            {
+                getTable()->add(indexToName(index + m_denseStart), value);
+            }
+        }
+
+        m_denseArray.clear();
+        m_denseStart = IS_SPARSE;
+        m_denseUsed = 0;
+
+        verify();
+    }
+
+    // ----------------- ctors, dtors
+
+    ArrayObject::ArrayObject(VTable* vtable, ScriptObject* proto, uint32_t capacity)
+        : ScriptObject(vtable, proto, 0)
+        , m_denseArray(vtable->core()->GetGC(), capacity)
+        , m_denseStart(traits()->needsHashtable() ? 0 : IS_SEALED)
+        , m_denseUsed(0)
+        , m_length(0)
     {
         SAMPLE_FRAME("Array", core());
         AvmAssert(traits()->getSizeOfInstance() >= sizeof(ArrayObject));
-        m_length = 0;
-        m_lowHTentry = NO_LOW_HTENTRY;
+    }
+
+    ArrayObject::ArrayObject(VTable* vtable, ScriptObject* proto, Atom* argv, int argc)
+        : ScriptObject(vtable, proto, 0)
+        , m_denseArray(vtable->core()->GetGC(), argc, argv)
+        , m_denseStart(traits()->needsHashtable() ? 0 : IS_SEALED)
+        , m_denseUsed(argc)
+        , m_length(argc)
+    {
     }
 
     ArrayObject::~ArrayObject()
     {
-        m_lowHTentry = 0;
+        m_denseStart = 0;
+        m_denseUsed = 0;
         m_length = 0;
     }
 
-    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, Atom *argv, int argc)
-        : ScriptObject(vtable, proto, 0),
-          m_denseArr(vtable->core()->GetGC(), argc, argv),
-          m_length(argc)
-    {
-    }
-
-#if 0 // Test code to determine if our array is a pure dense array
-    bool ArrayObject::getDense()
-    {
-        // If are dense part equals are length and we have no
-        // atoms in our HT, we are a pure dense array.  We can't
-        // call getTable()->GetSize() since we might have deleted
-        // atoms in our HT and size would be non-zero.
-        return (isSimpleDense() && !ScriptObject::nextNameIndex(0));
-    }
-#endif
-
-    // Find next appropriate value for m_lowHTentry; assumes we just
-    // deleted property at m_lowHTentry.  (See bug 559565.)
-    void ArrayObject::updateToSucceedingLowHtEntry()
-    {
-        // If our low entry happened to match our length, we're out of HT entries
-        // and we can just quit.
-        if ((m_lowHTentry + 1) == m_length)
-        {
-            m_lowHTentry = NO_LOW_HTENTRY;
-        }
-        else
-        {
-            // Find the next integer HT prop and update m_lowHTentry
-            // This is tricky.  Our HT section could be huge but very sparse
-            // Do we want to linearly walk from index+1 to m_length or do
-            // we want to walk the entire HT looking for a low integer value?
-
-            if (ScriptObject::hasUintProperty (m_lowHTentry + 1))
-            {
-                m_lowHTentry++;
-            }
-            else
-            {
-                // assume we don't find an entry
-                m_lowHTentry = NO_LOW_HTENTRY;
-                int index = ScriptObject::nextNameIndex(0);
-                while (index)
-                {
-                    Atom name = ScriptObject::nextName (index);
-                    uint32_t nameIndex;
-                    if (AvmCore::getIndexFromAtom(name, &nameIndex))
-                    {
-                        if ((m_lowHTentry == NO_LOW_HTENTRY) || (nameIndex < m_lowHTentry))
-                        {
-                            m_lowHTentry = nameIndex;
-                        }
-                    }
-
-                    index = ScriptObject::nextNameIndex(index);
-                }
-            }
-        }
-    }
-
-    // This routine checks to see if our dense portion is directly next
-    // to any entries in our HT.  If so, the HT entries are deleted and added
-    // to the dense portion.  If the HT is completely emptied, it is cleared.
-    void ArrayObject::checkForSparseToDenseConversion()
-    {
-        // check for lowHTentry being consumed
-        if (m_lowHTentry == NO_LOW_HTENTRY)
-            return;
-
-        if (getDenseLength() != m_lowHTentry)
-            return;
-
-        while (getDenseLength() == m_lowHTentry)
-        {
-            AvmAssert (ScriptObject::hasUintProperty (m_lowHTentry));
-
-            // Move prop from HT to dense Array. No need to update m_length
-            Atom lowHT = ScriptObject::getUintProperty (m_lowHTentry);
-            this->m_denseArr.add(lowHT);
-
-            // Delete prop from HT
-            ScriptObject::delUintProperty (m_lowHTentry);
-
-            updateToSucceedingLowHtEntry();
-        }
-
-        // We're done moving our sparse entries over to our dense part of our array.
-        // This may have left a large HT that is now completely empty.  If ScriptObject::nextNameIndex(0)
-        // returns 0, we know we have no atoms in our HT and we can clear it.
-        if (ScriptObject::nextNameIndex (0) == 0)
-            getTable()->reset();
-    }
-
-    void ArrayObject::setAtomProperty(Atom name, Atom value)
-    {
-        if (traits()->needsHashtable())
-        {
-            AvmCore *core = this->core();
-            // Update the array length.
-            uint32_t index;
-            if (AvmCore::getIndexFromAtom(name, &index))
-            {
-                return _setUintProperty (index, value);
-            }
-
-            if (name == core->klength->atom())
-                return setLength(AvmCore::toUInt32(value));
-        }
-
-        ScriptObject::setAtomProperty(name, value);
-    }
-
-    void ArrayObject::_setUintProperty(uint32_t index, Atom value)
-    {
-        if (traits()->needsHashtable())
-        {
-            if (hasDense())
-            {
-                if (index == getDenseLength())
-                {
-                    this->m_denseArr.add(value);
-                    if (m_length < getDenseLength())
-                        m_length = getDenseLength();
-
-                    checkForSparseToDenseConversion ();
-                    return;
-                }
-                else if (index < getDenseLength())
-                {
-                    this->m_denseArr.set(index, value);
-                    return;
-                }
-                else
-                {
-                    // fall through and put the new property into our HT
-                }
-            }
-            // If we're NOT dense yet and setting first element, we can create a dense array
-            else if (index == 0)
-            {
-                m_denseArr.add(value);
-                if (!m_length)
-                    m_length = 1;
-                else
-                    checkForSparseToDenseConversion ();
-                return;
-            }
-
-            if (index >= m_length) {
-                m_length = index+1;
-            }
-
-            if ((m_lowHTentry == NO_LOW_HTENTRY) || (index < m_lowHTentry))
-                m_lowHTentry = index;
-        }
-        // end if (dynamic)
-
-        // If our index value is going to overflow our int atom storage and be
-        // converted to a string, do that here instead of calling the
-        // SciptObject::setUintProperty which will call ArrayObject::setAtomProperty
-        // which will call back into this routine in an infinite loop.
-        if (index & ScriptObject::MAX_INTEGER_MASK)
-            ScriptObject::setAtomProperty(core()->internUint32(index)->atom(), value);
-        else
-            ScriptObject::setUintProperty(index, value);
-    }
+    // ----------------- "get" methods
 
     Atom ArrayObject::getAtomProperty(Atom name) const
     {
-        if (traits()->needsHashtable())
+        uint32_t index;
+        if (AvmCore::getIndexFromAtom(name, &index))
         {
-            AvmCore *core = this->core();
-            if (hasDense())
+            uint32_t const denseIdx = index - m_denseStart;
+            if (denseIdx < m_denseArray.length())
             {
-                uint32_t index;
-                if (AvmCore::getIndexFromAtom(name, &index))
-                {
-                    // if we get here, we have a valid integer index.
-                    if ((index < getDenseLength()))
-                        return m_denseArr.get(index);
-                }
+                Atom result = m_denseArray.get(denseIdx);
+                if (result != atomNotFound)
+                    return result;
             }
-
-            if (name == core->klength->atom())
-                return core->intToAtom (getLength());
+            // else, outside dense area, or a hole in the dense area: 
+            // must fall thru and search the proto chain
+        }
+        else if (isDynamic() && name == core()->klength->atom())
+        {
+            return core()->intToAtom(getLength());
         }
 
         return ScriptObject::getAtomProperty(name);
     }
 
-    Atom ArrayObject::_getUintProperty(uint32_t index) const
+    bool ArrayObject::getAtomPropertyIsEnumerable(Atom name) const
     {
-        return getUintPropertyImpl(index);
+        if (isDense())
+        {
+            // {DontEnum} is not supported on the dense portion
+            // of an array.  Those properties are always enumerable.
+            uint32_t index;
+            return AvmCore::getIndexFromAtom(name, &index) && index < getLength();
+        }
+        return ScriptObject::getAtomPropertyIsEnumerable(name);
     }
 
     Atom ArrayObject::_getIntProperty(int32_t index) const
@@ -265,149 +292,327 @@ namespace avmplus
             return getStringProperty(core()->internInt(index));
     }
 
+    Atom ArrayObject::_getUintProperty(uint32_t index) const
+    {
+        return getUintPropertyImpl(index);
+    }
+
+    // ----------------- "set" methods
+
+    void ArrayObject::setAtomProperty(Atom name, Atom value)
+    {
+        AvmAssert(value != atomNotFound);
+        
+        verify();
+
+        if (isDynamic())
+        {
+            uint32_t index;
+            if (AvmCore::getIndexFromAtom(name, &index)) 
+            {
+                _setUintProperty(index, value);
+                verify();
+                return;
+            }
+
+            if (name == core()->klength->atom())
+            {
+                setLength(AvmCore::toUInt32(value));
+                verify();
+                return;
+            }
+        }
+
+        // else fall thru and set in dynamic area
+        ScriptObject::setAtomProperty(name, value);
+
+        verify();
+    }
+
+    void ArrayObject::_setUintProperty(uint32_t index, Atom value)
+    {
+        AvmAssert(value != atomNotFound);
+
+        verify();
+        
+        // The most common case is setting a value in the dense area.
+        uint32_t const denseIdx = index - m_denseStart;
+        uint32_t const denseLen = m_denseArray.length();
+        if (denseIdx < denseLen)
+        {
+            // This is by far the most common case in typical code.
+            // Note that we don't have to adjust m_length; we know it will be unchanged.
+            AvmAssert(index >= m_denseStart && index < m_denseStart + m_denseArray.length());
+            AvmAssert(index < m_length);
+            // It's worth checking to avoid the read.
+            if (m_denseUsed < denseLen)
+                m_denseUsed += (m_denseArray.get(denseIdx) == atomNotFound);
+            // Since we've already verified index, we can use replace() rather than set()...
+            // it's minor but will show up on microbenchmarks.
+            m_denseArray.replace(denseIdx, value);
+        }
+        else if (int32_t(index) >= 0 && int32_t(m_denseStart) >= 0) // denseIdx >= denseLen and possibly-dense index
+        {
+            if (index >= m_length)
+            {
+                // This is unnecessary if we are sealed, 
+                // but it's cheaper to do it all cases, 
+                // and harmless if we are in fact sealed.
+                m_length = index + 1;
+            }
+
+            if (denseIdx == denseLen)
+            {
+                AvmAssert(!isSparse());
+
+                // Adding at the end of a nonempty Array.
+                m_denseUsed++;
+                m_denseArray.add(value);
+                // Array was empty.
+                if (denseLen == 0)
+                    m_denseStart = index;
+            }
+            else if (denseLen == 0)
+            {
+                AvmAssert(!isSparse());
+
+                // Adding to an empty Array.
+                m_denseStart = index;
+                m_denseUsed++;
+                m_denseArray.add(value);
+            }
+            else if (index >= m_denseStart)
+            {
+                AvmAssert(!isSparse());
+
+                // Adding past the end of a nonempty Array.
+                uint32_t const insertCount = denseIdx - denseLen + 1;
+                if (shouldBeSparse(denseLen + insertCount, m_denseUsed + 1))
+                {
+                    goto convert_and_set_sparse;
+                }
+                else
+                {
+                    m_denseUsed++;
+                    m_denseArray.insert(denseLen, atomNotFound, insertCount);
+                    // denseIdx calculated above might be wrong; recalculate it.
+                    AvmAssert(index >= m_denseStart);
+                    uint32_t const denseIdx = index - m_denseStart;
+                    m_denseArray.replace(denseIdx, value);
+                }
+            }
+            else if (int32_t(index) < int32_t(m_denseStart))
+            {
+                AvmAssert(!isSparse());
+
+                // Adding before the beginning of a nonempty Array.
+                uint32_t const insertCount = m_denseStart - index;
+                if (shouldBeSparse(denseLen + insertCount, m_denseUsed + 1))
+                {
+                    goto convert_and_set_sparse;
+                }
+                else
+                {
+
+                    // If we're inserting before the first element, we are probably
+                    // growing downward; let's shift over as much as we can within the new
+                    // capacity so we can avoid redundant memcpys as we insert downward.
+                    m_denseArray.ensureCapacity(denseLen + insertCount);
+                    // Actual capacity might be more than we asked for.
+                    uint32_t const denseCap = m_denseArray.capacity();
+                    // Shift all content over to the "right edge" of the allocated
+                    // space, on the assumption that future insertions are
+                    // also likely to be at the start rather than the end.
+                    // Note that this call should never increase the capacity;
+                    // it just shifts entries over in the existing space.
+                    uint32_t const shiftAmt = umin(m_denseStart, denseCap - denseLen);
+                    m_denseArray.insert(0, atomNotFound, shiftAmt);
+                    AvmAssert(denseCap == m_denseArray.capacity());
+
+                    m_denseStart -= shiftAmt;
+                    m_denseUsed++;
+                    // denseIdx calculated above is probably wrong; recalculate it.
+                    AvmAssert(index >= m_denseStart);
+                    uint32_t const denseIdx = index - m_denseStart;
+                    m_denseArray.replace(denseIdx, value);
+                }
+            }
+            else 
+            {
+                goto sparse_or_sealed;
+            }
+        }
+        else
+        {
+            // Indices > 0x7fffffff aren't candidates for dense arrays; in that case we 
+            // always revert to sparse. (Note that per ES3 spec, 0xffffffff is not a legal 
+            // array index, so doesn't affect length, but does get stored as a dynamic prop)
+
+            if (index != 0xffffffff && index >= m_length)
+            {
+                m_length = index + 1;
+            }
+
+sparse_or_sealed:
+            if (!isDynamic())
+                throwWriteSealedError(indexToName(index));
+
+            if (isDense())
+            {
+convert_and_set_sparse:
+                convertToSparse();
+            }
+            
+            getTable()->add(indexToName(index), value);
+        }
+
+        verify();
+    }
+
     void ArrayObject::_setIntProperty(int32_t index, Atom value)
     {
+        AvmAssert(value != atomNotFound);
+
         if (index >= 0)
             _setUintProperty(index, value);
         else // integer is negative - we must intern it
             setStringProperty(core()->internInt(index), value);
     }
 
-    // This does NOT affect the length of the array
-    bool ArrayObject::deleteAtomProperty(Atom name)
-    {
-        uint32_t index; // well-defined only if is_index true
-        bool is_index = AvmCore::getIndexFromAtom(name, &index);
+    // ----------------- "del" methods
 
-        if (traits()->needsHashtable())
+    bool ArrayObject::delDenseUintProperty(uint32_t index)
+    {
+        verify();
+
+        AvmAssert(isDense());
+           
+		uint32_t const denseIdx = index - m_denseStart;
+        AvmAssert(denseIdx < m_denseArray.length());
+
+        // Note that delUintProperty does not affect m_length!
+        if (m_denseArray.get(denseIdx) != atomNotFound)
         {
-            if (hasDense())
+            m_denseArray.replace(denseIdx, atomNotFound);
+            m_denseUsed--;
+            
+            // If deleting the last dense item, revert to like-new.
+            if (m_denseUsed == 0)
             {
-                if (is_index && index < getDenseLength())
-                {
-                    return delUintProperty(index);
-                }
+                // Use set_length(0) rather than clear(), so that
+                // we don't discard allocated capacity.
+                m_denseArray.set_length(0);
+                m_denseStart = 0;
             }
         }
 
-        bool retval = ScriptObject::deleteAtomProperty(name);
+        verify();
 
-        if (is_index && index == m_lowHTentry)
+        if (shouldBeSparse(m_denseArray.length(), m_denseUsed))
         {
-            AvmAssert(retval); // all numeric properties are deletable.
-            updateToSucceedingLowHtEntry();
+            convertToSparse();
         }
-
-        return retval;
+        
+        return true;
     }
 
     bool ArrayObject::delUintProperty(uint32_t index)
     {
-        // if we get here, we have a valid integer index.
-        if (traits()->needsHashtable())
+        bool result;
+        
+        verify();
+        
+		uint32_t const denseIdx = index - m_denseStart;
+        if (denseIdx < m_denseArray.length())
         {
-            if ((index < getDenseLength()))
-            {
-                if (index == (getDenseLength() - 1))
-                {
-                    m_denseArr.removeLast();
-                }
-                // We're deleting an element in the middle of our array.  The lower
-                // part can be left in the dense array but the upper part needs to
-                // get moved to the HT.
-                else
-                {
-                    for (uint32_t i = index + 1; i < getDenseLength(); i++)
-                    {
-                        ScriptObject::setUintProperty(i, m_denseArr.get(i));
-                    }
-                    m_denseArr.splice (index, 0, (getDenseLength() - index), 0);
-                }
-
-                if (index == m_lowHTentry)
-                    updateToSucceedingLowHtEntry();
-
-                return true;
-            }
+            delDenseUintProperty(index);
+            result = true;
+        }
+        else 
+        {
+            result = ScriptObject::delUintProperty(index);
         }
 
-        bool retval = ScriptObject::delUintProperty(index);
-
-        if (index == m_lowHTentry)
-        {
-            AvmAssert(retval); // all numeric properties are deletable
-            updateToSucceedingLowHtEntry();
-        }
-
-        return retval;
+        verify();
+        
+        return result;
     }
 
-    bool ArrayObject::getAtomPropertyIsEnumerable(Atom name) const
+    bool ArrayObject::deleteAtomProperty(Atom name)
     {
-        if (traits()->needsHashtable())
+        bool result;
+        
+        verify();
+        
+        uint32_t index, denseIdx;
+        if (AvmCore::getIndexFromAtom(name, &index) && 
+            (denseIdx = index - m_denseStart) < m_denseArray.length())
         {
-            if (hasDense())
-            {
-                uint32_t index;
-                if (AvmCore::getIndexFromAtom(name, &index))
-                {
-                    // {DontEnum} is not supported on the dense portion
-                    // of an array.  Those properties are always enumerable.
-                    if (index < getDenseLength())
-                        return true;
-                }
-            }
+            delDenseUintProperty(index);
+            result = true;
+        }
+        else
+        {
+            result = ScriptObject::deleteAtomProperty(name);
         }
 
-        return ScriptObject::getAtomPropertyIsEnumerable(name);
+        verify();
+        
+        return result;
+    }
+
+    // ----------------- "has" methods
+
+    bool ArrayObject::hasUintProperty(uint32_t index) const
+    {
+        uint32_t const denseIdx = index - m_denseStart;
+        if (denseIdx < m_denseArray.length())
+        {
+            return m_denseArray.get(denseIdx) != atomNotFound;
+        }
+        else 
+        {
+            return ScriptObject::hasUintProperty(index);
+        }
     }
 
     bool ArrayObject::hasAtomProperty(Atom name) const
     {
-        if (traits()->needsHashtable())
+        bool result;
+        
+        verify();
+        
+        uint32_t index, denseIdx;
+        if (AvmCore::getIndexFromAtom(name, &index) && 
+            (denseIdx = index - m_denseStart) < m_denseArray.length())
         {
-            if (hasDense())
-            {
-                uint32_t index;
-                if (AvmCore::getIndexFromAtom(name, &index))
-                {
-                    if (index < getDenseLength())
-                        return true;
-                }
-            }
+            result = m_denseArray.get(denseIdx) != atomNotFound;
+        }
+        else
+        {
+            result = ScriptObject::hasAtomProperty(name);
         }
 
-        return ScriptObject::hasAtomProperty(name);
+        verify();
+        
+        return result;
     }
 
-    bool ArrayObject::hasUintProperty(uint32_t index) const
-    {
-        if (traits()->needsHashtable())
-        {
-            if (hasDense())
-            {
-                if (index < getDenseLength())
-                    return true;
-            }
-        }
+    // ----------------- "next" methods
 
-        return ScriptObject::hasUintProperty (index);
-    }
-
-    // Iterator support - for in, for each
     Atom ArrayObject::nextName(int index)
     {
         AvmAssert(index > 0);
 
-        int denseLength = (int)getDenseLength();
+        int denseLength = (int)m_denseArray.length();
         if (index <= denseLength)
         {
-            AvmCore *core = this->core();
-            return core->intToAtom(index-1);
+            AvmAssert(isDense());
+            return core()->intToAtom(index-1);
         }
         else
         {
-            return ScriptObject::nextName (index - denseLength);
+            return ScriptObject::nextName(index - denseLength);
         }
     }
 
@@ -415,31 +620,34 @@ namespace avmplus
     {
         AvmAssert(index > 0);
 
-        int denseLength = (int) getDenseLength();
+        int denseLength = (int)m_denseArray.length();
         if (index <= denseLength)
         {
-            return m_denseArr.get(index-1);
+            AvmAssert(isDense());
+            return m_denseArray.get(index-1);
         }
         else
         {
-            return ScriptObject::nextValue (index - denseLength);
+            return ScriptObject::nextValue(index - denseLength);
         }
     }
 
     int ArrayObject::nextNameIndex(int index)
     {
-        int denseLength = (int) getDenseLength();
-        if (index < denseLength)
+        int denseLength = (int)m_denseArray.length();
+        while (index < denseLength)
         {
-            return index + 1;
+            if (m_denseArray.get(index) != atomNotFound)
+            {
+                return index+1;
+            }
+            ++index;
         }
-        else
-        {
-            index = ScriptObject::nextNameIndex (index - denseLength);
-            if (!index)
-                return index;
-            return denseLength + index;
-        }
+
+        index = ScriptObject::nextNameIndex(index - denseLength);
+        if (!index)
+            return index;
+        return denseLength + index;
     }
 
 #ifdef AVMPLUS_VERBOSE
@@ -452,25 +660,71 @@ namespace avmplus
 
     /*virtual*/ void ArrayObject::setLength(uint32_t newLength)
     {
-        if (traits()->needsHashtable())
+        verify();
+        
+        if (isDynamic())
         {
-            // Delete all items between size and newLength
             uint32_t oldLength = getLength();
-            if (newLength < oldLength)
-            {
-                uint32_t denseLength = getDenseLength();
-                if (newLength < denseLength)
-                {
-                    this->m_denseArr.splice(newLength, 0, (denseLength - newLength), 0);
-                }
+            m_length = newLength;
 
-                // everything remaining must be in the NON-dense portion, ie, in our hashtable.
+            // Delete all items between size and newLength
+            if (isDense())
+            {
+                if (m_denseArray.length() == 0 && oldLength == 0)
+                {
+                    // We are "dense" but actually empty; we usually get
+                    // here when constructing a new array with an initial length.
+                    // Don't pre-allocate a dense size, since we don't know
+                    // if the Array will end up being dense or not, and requests
+                    // to pre-allocate large arrays might waste memory.
+                    //
+                    // OPTIMIZEME: might make sense to preallocate sizes that are
+                    // larger than MIN_SPARSE_INDEX but still "small", on the assumption
+                    // that most arrays are dense?
+                }
+                else if (newLength < oldLength)
+                {
+                    if (newLength > m_denseStart)
+                    {
+                        m_denseArray.set_length(newLength - m_denseStart);
+                        m_denseUsed = calcDenseUsed();
+                        // Shouldn't need to check for sparseness if we are reducing length.
+                        AvmAssert(!shouldBeSparse(newLength - m_denseStart, m_denseUsed));
+                    }
+                    else
+                    {
+                        // use set_length(0) rather than clear(), so that
+                        // we don't discard allocated capacity
+                        m_denseArray.set_length(0);
+                        m_denseStart = 0;
+                        m_denseUsed = 0;
+                    }
+                }
+                else if (newLength > oldLength)
+                {
+                    // Check for sparseness before set_length, so giant requests don't trigger OOM
+                    if (shouldBeSparse(newLength - m_denseStart, m_denseUsed))
+                    {
+                        convertToSparse();
+                    }
+                    else
+                    {
+                        m_denseArray.set_length(newLength - m_denseStart);
+                        for (uint32_t i = oldLength - m_denseStart, n = m_denseArray.length(); i < n; ++i)
+                            m_denseArray.replace(i, atomNotFound);
+                    }
+                }
+            }
+            else if (isSparse())
+            {
+                // All entries are in the hashtable.
                 // in theory we need to call delUintProperty on every one of these, but in practice,
                 // user AS3 code can't override delUintProperty, and no existing VM/Flash/AIR classes subclass ArrayObject,
                 // so we can (and should) short-circuit this and just process the items actually present.
                 // (this is MUCH faster if the sole item was at index 0xfffffff0...)
                 InlineHashtable* ht = this->getTable();
-                for (int i = ht->next(0); i != 0; i = ht->next(i)) {
+                for (int i = ht->next(0); i != 0; i = ht->next(i)) 
+                {
                     Atom k = ht->keyAt(i);
                     uint32_t index;
                     if (AvmCore::getIndexFromAtom(k, &index) && index >= newLength)
@@ -479,85 +733,292 @@ namespace avmplus
                     }
                 }
             }
-            m_length = newLength;
         }
-        // else, if !dynamic ignore set.
+
+        verify();
     }
 
     // public native function pop(...rest):Object
     Atom ArrayObject::AS3_pop()
     {
-        if (isSimpleDense())
+        verify();
+        Atom result = undefinedAtom;
+        uint32_t len = getLength();
+        if (len != 0)
         {
-            if (!m_length)
-                return undefinedAtom;
-
-            m_length--;
-            return m_denseArr.removeLast();
+            if (isDense())
+            {
+                // Yes, we can have isDense=true but m_denseArray empty.
+                result = !m_denseArray.isEmpty() ? m_denseArray.removeLast() : undefinedAtom;
+                if (result == atomNotFound)
+                    result = undefinedAtom;
+                else
+                    m_denseUsed--;
+                m_length--;
+            }
+            else
+            {
+                result = _getUintProperty(len-1);
+                setLength(len-1);
+            }
         }
-
-        if (getLength() != 0)
-        {
-            Atom outAtom = _getUintProperty(getLength()-1);
-            setLength(getLength()-1);
-            return outAtom;
-        }
-        else
-        {
-            return undefinedAtom;
-        }
+        verify();
+        return result;
     }
 
     uint32_t ArrayObject::AS3_push(Atom* argv, int argc)
     {
-        if (isSimpleDense())
+        verify();
+        if (argc > 0)
         {
-            m_denseArr.insert(m_denseArr.length(), argv, argc);
-            m_length += argc;
-        }
-        else
-        {
-            for (int i=0; i < argc; i++) {
-                _setUintProperty(getLength(), argv[i]);
-            }
-        }
-        return m_length;
-    }
-
-    uint32_t ArrayObject::AS3_unshift(Atom* argv, int argc)
-    {
-        if (argc != 0)
-        {
-            if (isSimpleDense())
+            if (isDense())
             {
-                m_denseArr.insert(0, argv, argc);
+                // We don't need to check for sparseness, since we aren't inserting any holes.
+                m_denseArray.insert(m_denseArray.length(), argv, argc);
+                m_denseUsed += argc;
                 m_length += argc;
             }
             else
             {
-                uint32_t i;
-                // First, move all the elements up
-                uint32_t len = getLength();
-                for (i=len; i > 0; ) {  // note: i is unsigned, can't check if --i >=0.
-                    i--;
-                    _setUintProperty(i+argc, _getUintProperty(i));
+                for (int i=0; i < argc; i++) 
+                {
+                    _setUintProperty(getLength(), argv[i]);
+                }
+            }
+        }
+        verify();
+        return getLength();
+    }
+
+    uint32_t ArrayObject::AS3_unshift(Atom* argv, int argc)
+    {
+        verify();
+        if (argc > 0)
+        {
+            if (isDense())
+            {
+                if (m_denseStart > 0)
+                {
+                    // We only need to check for sparseness if we are inserting holes;
+                    // inserting non-holes can't make us any "less dense".
+                    if (shouldBeSparse(m_denseArray.length() + m_denseStart + argc, m_denseUsed + argc))
+                    {
+                        convertToSparse();
+                        goto unshift_sparse;
+                    }
+                    m_denseArray.insert(0, atomNotFound, m_denseStart);
                 }
 
-                for (i=0; i < ((uint32_t)argc); i++) {
+                m_denseArray.insert(0, argv, argc);
+                m_denseUsed += argc;
+                m_length += argc;
+            }
+            else
+            {
+unshift_sparse:
+                // First, move all the elements up
+                uint32_t len = getLength();
+                for (uint32_t i = len; i > 0; --i) 
+                {
+                    _setUintProperty(i-1+argc, _getUintProperty(i-1));
+                }
+
+                for (uint32_t i = 0; i < (uint32_t)argc; i++) 
+                {
                     _setUintProperty(i, argv[i]);
                 }
 
-                setLength(len+argc);
+                setLength(len +argc);
             }
         }
-
+        verify();
         return getLength();
     }
 
 #ifdef DEBUGGER
     uint64_t ArrayObject::bytesUsed() const
     {
-        return ScriptObject::bytesUsed() + m_denseArr.bytesUsed();
+        return ScriptObject::bytesUsed() + m_denseArray.bytesUsed();
     }
 #endif
+
+    bool ArrayObject::try_concat(ArrayObject* that)
+    {
+        verify();
+        that->verify();
+        if (this->isDense() &&
+            that->isDense() &&
+            this->m_length == this->getLengthProperty() &&
+            that->m_length == that->getLengthProperty())
+        {
+            // Adding denseUsed can't overflow a uint32, since each is <= 0x7fffffff,
+            // but m_length could, since they could be arbitrary large, so check for overflow.
+            uint64_t const totLen = uint64_t(this->m_length) + uint64_t(that->m_length);
+            if (totLen != uint32_t(totLen) ||
+                shouldBeSparse(uint32_t(totLen), this->m_denseUsed + that->m_denseUsed))
+            {
+                convertToSparse();
+                return false;
+            }
+
+            uint32_t extraHoles = that->m_denseStart;
+            uint32_t this_denseEnd = this->m_denseStart + this->m_denseArray.length();
+            if (this_denseEnd < this->m_length)
+                extraHoles += (this->m_length - this_denseEnd);
+            if (extraHoles > 0)
+                this->m_denseArray.insert(this->m_denseArray.length(), atomNotFound, extraHoles);
+            this->m_denseArray.add(that->m_denseArray);
+            this->m_denseUsed += that->m_denseUsed;
+            this->m_length += that->m_length;
+
+            AvmAssert(!shouldBeSparse(m_denseArray.length(), m_denseUsed));
+            verify();
+            return true;
+        }
+        return false;
+    }
+
+    bool ArrayObject::try_reverse()
+    {
+        if (isDense())
+        {
+            verify();
+            m_denseArray.reverse();
+            m_denseStart = 0;
+            verify();
+            return true;
+        }
+        return false;
+    }
+
+    bool ArrayObject::try_shift(Atom& result)
+    {
+        verify();
+        if (isDense() && m_length > 0 && m_length == getLengthProperty())
+        {
+            if (m_denseStart > 0)
+            {
+                --m_denseStart;
+                result = undefinedAtom;
+            }
+            else if (m_denseArray.length() > 0)
+            {
+                // m_length>0 does not imply m_denseArray.length()>0;
+                // we could have set the length on a new array to something
+                // large, and not yet populated the storage.
+                result = m_denseArray.removeFirst();
+                --m_denseUsed;
+            }
+            --m_length;
+
+            verify();
+            return true;
+        }
+        
+        return false;
+    }
+
+    ArrayObject* ArrayObject::try_splice(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, const ArrayObject* that, uint32_t that_skip)
+    {
+        verify();
+
+// OPTIMIZEME, probably other dense cases could be handled too
+        if (this->isDense() &&
+            that != NULL && 
+            that->isDense() &&
+            insertPoint >= this->m_denseStart &&
+            insertPoint <= this->m_denseStart + this->m_denseArray.length() &&
+            that->m_denseStart == 0)
+        {
+            insertPoint -= this->m_denseStart;
+
+            ArrayObject* deletedItems = toplevel()->arrayClass->newArray(0);
+            deletedItems->m_denseArray.splice(0, deleteCount, 0, this->m_denseArray, insertPoint);
+            deletedItems->m_denseStart = 0;
+            deletedItems->m_denseUsed = deleteCount;
+            deletedItems->m_length = deleteCount;
+            
+            uint32_t that_len = that->m_denseArray.length();
+            if (insertCount > that_len - that_skip)
+                insertCount = that_len - that_skip;
+
+            this->m_denseArray.splice(insertPoint, insertCount, deleteCount, that->m_denseArray, that_skip);
+            this->m_denseStart = 0;
+            this->m_denseUsed = this->calcDenseUsed();
+            this->m_length = this->m_length + insertCount - deleteCount;
+            
+            verify();
+            deletedItems->verify();
+            return deletedItems;
+        }
+
+        return NULL;
+    }
+
+    bool ArrayObject::try_unshift(ArrayObject* that)
+    {
+        verify();
+        if (this->isDense() &&
+            that->isDense() &&
+            this->m_length == this->getLengthProperty() &&
+            that->m_length == that->getLengthProperty())
+        {
+            uint32_t const that_length = that->getLengthProperty();
+            uint32_t thisExtraHolesFront = this->m_denseStart;
+            uint32_t thatExtraHolesBack = that_length - (that->m_denseStart + that->m_denseArray.length()); 
+            uint32_t extraHoles = thisExtraHolesFront + thatExtraHolesBack;
+            if (extraHoles > 0)
+            {
+                // We only need to check for sparseness if we are inserting holes;
+                // inserting non-holes can't make us any "less dense".
+                if (shouldBeSparse(this->m_denseArray.length() + extraHoles, this->m_denseUsed + that->m_denseUsed))
+                {
+                    convertToSparse();
+                    verify();
+                    return false;
+                }
+            }
+
+            // OPTIMIZEME, there's a way to add a list to the end of another,
+            // but not to insert at an arbitrary spot.
+            m_denseArray.insert(0, atomNotFound, that->m_denseArray.length() + extraHoles);
+            for (uint32_t i = 0, n = that->m_denseArray.length(); i < n; ++i)
+                this->m_denseArray.replace(i, that->m_denseArray.get(i));
+            this->m_denseStart = that->m_denseStart;
+            this->m_denseUsed += that->m_denseUsed;
+            this->m_length += that_length;
+            verify();
+            return true;
+        }
+        return false;
+    }
+
+    uint32_t ArrayObject::getLengthProperty()
+    {
+        // If we are an Array object (and NOT a subclass thereof)
+        // then we can take this shortcut.
+        if (this->traits() == core()->traits.array_itraits)
+        {
+            return get_length();
+        }
+        else
+        {
+            return ScriptObject::getLengthProperty();
+        }
+    }
+
+    void ArrayObject::setLengthProperty(uint32_t newLen)
+    {
+        // If we are an Array object (and NOT a subclass thereof)
+        // then we can take this shortcut.
+        if (this->traits() == core()->traits.array_itraits)
+        {
+            set_length(newLen);
+        }
+        else
+        {
+            ScriptObject::setLengthProperty(newLen);
+        }
+    }
+
 }

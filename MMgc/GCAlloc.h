@@ -44,8 +44,13 @@
 namespace MMgc
 {
     class GCAllocBase {
+
+    friend class GC;
+
     public:
         virtual ~GCAllocBase();
+
+    private:
         virtual void Free(const void* item) = 0;
     };
 
@@ -232,34 +237,54 @@ namespace MMgc
         void *m_qList;              // Linked list of some free objects for this allocator
         int   m_qBudget;            // Number of items we can yet free before obtaining a larger budget
         int   m_qBudgetObtained;    // Quick list budget actually obtained from the GC for this allocator
+        const uint32_t    m_itemSize;
+        const int    m_itemsPerBlock;
+#ifdef MMGC_FASTBITS
+        // Right shift for lower 12 bits of a pointer into the block to obtain
+        // the gcbits_t item for that pointer.  Is copied into the block header.
 
-        int    m_itemsPerBlock;
-        uint32_t    m_itemSize;
-        int m_numBitmapBytes;
-        int m_sizeClassIndex;
+        // The idea here is that the byte table may have some unused entries and that
+        // that allows a unique byte index for an object to be computed with a simple
+        // mask and shift off the object pointer (the mask is constant, the shift is
+        // variable).  That benefits the write barrier, the marker (especially precise
+        // marking), and other hot code.  Code that walks the byte map (eg the sweeper)
+        // should do so by stepping through objects one by one and computing the byte
+        // index for each (this is cheap) rather than examining bytes in the byte map
+        // in sequence.
+        //
+        // The number of bytes required for objects of size n is the same as for
+        // objects of size m where m is the next lower power-of-two object size
+        // below n.  The shift for n is then the same as the shift for m: log2(m).
+        //
+        // The key is that a unique byte index will be assigned to each object position
+        // in the block even for non-power-of-two object sizes.  I don't have a mathematical
+        // proof for this, but it's easy to test it exhaustively (and I've done so).
+        //
+        // The amount of waste in the byte map is at most 50%, but average waste for
+        // object sizes up to 256 is 26%.  Waste is a little higher than that, because
+        // the bitmap is sized to cover the block, including the block header - that
+        // too removes instructions from the hot path later.
+        const uint32_t m_bitsShift;
+#endif
+        const int m_numBitmapBytes;
+        const int m_sizeClassIndex;
 
 #ifdef MMGC_MEMORY_PROFILER
         size_t m_totalAskSize;
 #endif
 
-        bool m_bitsInPage;
+        const bool m_bitsInPage;
 
         int    m_maxAlloc;
         int    m_numAlloc;
         int    m_numBlocks;
 
-#ifdef MMGC_FASTBITS
-        // Right shift for lower 12 bits of a pointer into the block to obtain
-        // the gcbits_t item for that pointer.  Is copied into the block header.
-        uint32_t m_bitsShift;
-#endif
-
         // fast divide numbers for GetObjectIndex
-        uint16_t multiple;
-        uint16_t shift;
+        const uint16_t multiple;
+        const uint16_t shift;
 
-        bool containsPointers;
-        bool containsRCObjects;
+        const bool containsPointers;
+        const bool containsRCObjects;
         bool m_finalized;
 
 #ifdef _DEBUG
@@ -327,12 +352,13 @@ namespace MMgc
         // not a hot method
         static void ClearQueued(const void *userptr);
 
-        void ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft);
+        static uint16_t ComputeMultiply(uint16_t d);
+        static uint16_t ComputeShift(uint16_t d);
 
-    protected:
-        GC *m_gc;
+    private:
+        GC* const m_gc;
 
-    public:
+    private:
         static GCBlock* Next(GCBlock* b);
     };
 

@@ -420,8 +420,6 @@ regress/bug_555612,				.*AOT.*	, skip, AOT catches Verify errors at compile time
 # Investigating these failures
 spidermonkey/js1_2/regexp/special_characters:'xa\\f\\n\\r\\t\\vbz'.*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551718
 
-spidermonkey/js1_5/Array/regress-345961:Array.prototype.shift should preserve holes after shift, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=345961
-
 spidermonkey/js1_5/Array/regress-364104:\[2\]\.lastIndexOf\(2. -5\).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=364104
 spidermonkey/js1_5/Array/regress-364104:\[2\]\.lastIndexOf\(2. -2\).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=364104
 spidermonkey/js1_5/Array/regress-364104:\[2. 3\]\.lastIndexOf\(2. -3\).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=364104
