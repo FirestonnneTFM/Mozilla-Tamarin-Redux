@@ -780,6 +780,8 @@ namespace MMgc
         // in the mark item at all as it will only be needed for conservatively
         // traced objects and for very accurate accounting.
         GCAssert(workItemType != GCWorkItem::kGCObject || s == 0);
+        GCAssert(((uintptr_t)p & 3) == 0);
+        GCAssert(s != kSentinel1Size && s != kSentinel2Size);
 #ifdef _DEBUG
         if (IsGCItem()) {
             GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
@@ -790,12 +792,16 @@ namespace MMgc
     REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel1ItemType type)
         : iptr(uintptr_t(p) | type),
           _size(kSentinel1Size)
-    {}
+    {
+        GCAssert(((uintptr_t)p & 3) == 0);
+    }
 
     REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel2ItemType type)
         : iptr(uintptr_t(p) | type),
           _size(kSentinel2Size)
-    {}
+    {
+        GCAssert(((uintptr_t)p & 3) == 0);
+    }
 
     REALLY_INLINE void GCWorkItem::Clear()
     {

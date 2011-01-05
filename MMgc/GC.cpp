@@ -431,26 +431,26 @@ namespace MMgc
 #ifdef _DEBUG
     void GC::WorkItemInvariants(GCWorkItem item)
     {
-        GCAssert(item.ptr != NULL);
+        GCAssert(!item.IsNull());
         if (item.IsGCItem())
         {
-            GCAssert(IsPointerToGCObject(GetRealPointer(item.ptr)));
-            GCAssert(ContainsPointers(item.ptr));
-            GCAssert(!IsRCObject(item.ptr) || ((RCObject*)item.ptr)->composite != 0);
-            GCAssert((GetGCBits(GetRealPointer(item.ptr)) & (kQueued|kMark)) == kQueued);
+            GCAssert(IsPointerToGCObject(GetRealPointer(item.Ptr())));
+            GCAssert(ContainsPointers(item.Ptr()));
+            GCAssert(!IsRCObject(item.Ptr()) || ((RCObject*)item.Ptr())->composite != 0);
+            GCAssert((GetGCBits(GetRealPointer(item.Ptr())) & (kQueued|kMark)) == kQueued);
         }
         else
         {
             // Some roots are on GC pages - a little unclear why, as of yet.  So for
             // now just require non-GCItems not to point to GC objects.
-            GCAssert(!IsPointerToGCPage(GetRealPointer(item.ptr)) || !IsPointerToGCObject(GetRealPointer(item.ptr)));
+            GCAssert(!IsPointerToGCPage(GetRealPointer(item.Ptr())) || !IsPointerToGCObject(GetRealPointer(item.Ptr())));
         }
     }
 #endif
     
     void GC::PushWorkItem_MayFail(GCWorkItem &item)
     {
-        if (item.ptr)
+        if (item.Ptr())
             PushWorkItem(item);
     }
 
@@ -1339,7 +1339,7 @@ namespace MMgc
             // markStackItem can be NULL if the sentinel was on the top of the stack.
             // Its also possible we popped the last fragment and haven't popped the sentinel yet,
             // check that the markStackItem is for this root before clearing.
-            if(markStackItem && markStackItem->iptr + markStackItem->GetSize() == uintptr_t(End())) {
+            if(markStackItem && markStackItem->GetEnd() == End()) {
                 markStackItem->Clear();
             }
             markStackSentinel->Clear();
@@ -1877,7 +1877,7 @@ namespace MMgc
         GCRoot *r = m_roots;
         while(r) {
             GCWorkItem item = r->GetWorkItem();
-            if(item.ptr) {
+            if(item.Ptr()) {
                 // If this root will be split push a sentinel item and store
                 // a pointer to it in the root.   This will allow us to clean
                 // the stack if the root is deleted.  See GCRoot::Destroy and
@@ -1997,9 +1997,9 @@ namespace MMgc
 
     void GC::SignalMarkStackOverflow(GCWorkItem& item)
     {
-        GCAssert(item.ptr != NULL);
+        GCAssert(!item.IsNull());
         if (item.IsGCItem())
-            ClearQueued(item.ptr);
+            ClearQueued(item.Ptr());
         m_markStackOverflow = true;
     }
 
@@ -2107,18 +2107,18 @@ namespace MMgc
         if (wi.IsGCItem())
         {
             // An ounce of prevention...
-            GCAssert(ContainsPointers(wi.ptr));
+            GCAssert(ContainsPointers(wi.Ptr()));
 
             // Need to protect it against 'Free': push a magic item representing this object
             // that will prevent this split item from being freed, see comment block above.
 
-            GCLargeAlloc::ProtectAgainstFree(wi.ptr);
-            PushWorkItem(GCWorkItem(wi.ptr, GCWorkItem::kGCLargeAlloc));
+            GCLargeAlloc::ProtectAgainstFree(wi.Ptr());
+            PushWorkItem(GCWorkItem(wi.Ptr(), GCWorkItem::kGCLargeAlloc));
 
             // Is it a large, exactly traced item?
 
-            void *userptr = (void*)wi.ptr;
-            void *realptr = GetRealPointer(userptr);
+            const void *userptr = wi.Ptr();
+            const void *realptr = GetRealPointer(userptr);
 
             gcbits_t& bits = GetGCBits(realptr);
 
@@ -2137,7 +2137,7 @@ namespace MMgc
                 // which is possible in the presence of mark stack overflows.
 
                 // Set up large exactly traced object.  The cursor is zero and already set.
-                exactlyTraced = (GCTraceableBase*)wi.ptr;
+                exactlyTraced = (GCTraceableBase*)wi.Ptr();
 
                 // Mark the object though it remains on the queue, this means it may also
                 // end up on the barrier stack while still on the mark stack but that's
@@ -2148,7 +2148,7 @@ namespace MMgc
                 
                 // Save the state: cursor underneath and object on top.
                 PushWorkItem(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
-                PushWorkItem(GCWorkItem(wi.ptr, GCWorkItem::kLargeExactlyTracedTail));
+                PushWorkItem(GCWorkItem(wi.Ptr(), GCWorkItem::kLargeExactlyTracedTail));
             }
         }
         else if (wi.IsSentinel2Item())
@@ -2166,7 +2166,7 @@ namespace MMgc
 
                 // Save the new state.
                 PushWorkItem(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
-                PushWorkItem(GCWorkItem(wi.ptr, GCWorkItem::kLargeExactlyTracedTail));
+                PushWorkItem(GCWorkItem(wi.GetSentinelPointer(), GCWorkItem::kLargeExactlyTracedTail));
             }
             else if (wi.GetSentinel2Type() == GCWorkItem::kInertPayload) {
                 // Discard it - we're seeing this because of some arbitrary popping during
@@ -2190,7 +2190,7 @@ namespace MMgc
             return true;    // Do not fall through to conservative tracing in MarkItem
         }
 
-        PushWorkItem(GCWorkItem((void*)(wi.iptr + kLargestAlloc),
+        PushWorkItem(GCWorkItem((void*)((uintptr_t)wi.Ptr() + kLargestAlloc),
                                 uint32_t(size - kLargestAlloc),
                                 wi.HasInteriorPtrs() ? GCWorkItem::kStackMemory : GCWorkItem::kNonGCObject));
         
@@ -2235,8 +2235,8 @@ namespace MMgc
 
         if (wi.IsGCItem())
         {
-            void *userptr = (void*)wi.ptr;
-            void *realptr = GetRealPointer(userptr);
+            const void *userptr = wi.Ptr();
+            const void *realptr = GetRealPointer(userptr);
             GCAssert(GetGC(realptr) == this);
             GCAssert(IsPointerToGCObject(realptr));
 
@@ -2277,7 +2277,7 @@ namespace MMgc
         
         if(wi.IsGCItem())
         {
-            SetMark(wi.ptr);
+            SetMark(wi.Ptr());
         }
 
         policy.signalConservativeMarkWork(size);
@@ -2311,7 +2311,7 @@ namespace MMgc
         }
 #endif
         
-        uintptr_t *p = (uintptr_t*) wi.ptr;
+        uintptr_t *p = (uintptr_t*) wi.Ptr();
         uintptr_t *end = p + (size / sizeof(void*));
         while(p < end)
         {

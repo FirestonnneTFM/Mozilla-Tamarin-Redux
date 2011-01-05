@@ -277,7 +277,7 @@ delete gc;
                 if(sentinel) {
                     %%verify sentinel->GetSentinelPointer() == fauxRoot
                     GCWorkItem *tail = testGC->m_incrementalWork.GetItemAbove(sentinel);
-                    %%verify tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End()
+                    %%verify tail->GetEnd() == fauxRoot->End()
                     %%verify sentinel != NULL
                 }
                 delete [] (char*)fauxRoot->Get();

@@ -379,7 +379,7 @@ void ST_mmgc_basics::test14() {
 verifyPass(sentinel->GetSentinelPointer() == fauxRoot, "sentinel->GetSentinelPointer() == fauxRoot", __FILE__, __LINE__);
                     GCWorkItem *tail = testGC->m_incrementalWork.GetItemAbove(sentinel);
 #line 280 "ST_mmgc_basics.st"
-verifyPass(tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End(), "tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End()", __FILE__, __LINE__);
+verifyPass(tail->GetEnd() == fauxRoot->End(), "tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End()", __FILE__, __LINE__);
 #line 281 "ST_mmgc_basics.st"
 verifyPass(sentinel != NULL, "sentinel != NULL", __FILE__, __LINE__);
                 }
