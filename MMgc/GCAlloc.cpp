@@ -158,86 +158,45 @@ namespace MMgc
     }
 
     GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, int _sizeClassIndex) :
+        m_firstBlock(NULL),
+        m_lastBlock(NULL),
+        m_firstFree(NULL),
+        m_needsSweeping(NULL),
+        m_qList(NULL),
+        m_qBudget(0),
+        m_qBudgetObtained(0),
+        m_itemSize((_itemSize+7)&~7), // Round itemSize to the nearest boundary of 8
+        m_itemsPerBlock((kBlockSize - sizeof(GCBlock)) / m_itemSize),
+    #ifdef MMGC_FASTBITS
+        m_bitsShift(log2(m_itemSize)),
+        m_numBitmapBytes(kBlockSize / (1 << m_bitsShift)),
+    #else
+        m_numBitmapBytes(((m_itemsPerBlock * sizeof(gcbits_t))+3)&~3), // round up to 4 bytes so we can go through the bits several items at a time
+    #endif
         m_sizeClassIndex(_sizeClassIndex),
+    #ifdef MMGC_MEMORY_PROFILER
+        m_totalAskSize(0),
+    #endif
+        m_bitsInPage(_containsPointers && kBlockSize - int(m_itemsPerBlock * m_itemSize + sizeof(GCBlock)) >= m_numBitmapBytes),
+        m_maxAlloc(0),
+        m_numAlloc(0),
+        m_numBlocks(0),
+        multiple(ComputeMultiply((uint16_t)m_itemSize)),
+        shift(ComputeShift((uint16_t)m_itemSize)),
         containsPointers(_containsPointers),
         containsRCObjects(_isRC),
+        m_finalized(false),
         m_gc(_gc)
     {
-        GCAssert((unsigned)kBlockSize == GCHeap::kBlockSize);
-
-        // Round itemSize to the nearest boundary of 8
-        _itemSize = (_itemSize+7)&~7;
-
-        m_firstBlock    = NULL;
-        m_lastBlock     = NULL;
-        m_firstFree     = NULL;
-        m_needsSweeping = NULL;
-        m_qList         = NULL;
-        m_qBudget       = 0;
-        m_qBudgetObtained = 0;
-        m_numAlloc      = 0;
-        m_maxAlloc      = 0;
-        m_itemSize      = _itemSize;
-        m_numBlocks = 0;
-        m_finalized = false;
-
-#ifdef MMGC_MEMORY_PROFILER
-        m_totalAskSize = 0;
-#endif
-
-        // The number of items per block is kBlockSize minus
-        // the # of pointers at the base of each page.
-
-        m_itemsPerBlock = (kBlockSize - sizeof(GCBlock)) / m_itemSize;
-
-        m_gc->ObtainQuickListBudget(m_itemSize*m_itemsPerBlock);
-        m_qBudget = m_qBudgetObtained = m_itemsPerBlock;
-
-#ifdef MMGC_FASTBITS
-        // The idea here is that the byte table may have some unused entries and that
-        // that allows a unique byte index for an object to be computed with a simple
-        // mask and shift off the object pointer (the mask is constant, the shift is
-        // variable).  That benefits the write barrier, the marker (especially precise
-        // marking), and other hot code.  Code that walks the byte map (eg the sweeper)
-        // should do so by stepping through objects one by one and computing the byte
-        // index for each (this is cheap) rather than examining bytes in the byte map
-        // in sequence.
-        //
-        // The number of bytes required for objects of size n is the same as for
-        // objects of size m where m is the next lower power-of-two object size
-        // below n.  The shift for n is then the same as the shift for m: log2(m).
-        //
-        // The key is that a unique byte index will be assigned to each object position
-        // in the block even for non-power-of-two object sizes.  I don't have a mathematical
-        // proof for this, but it's easy to test it exhaustively (and I've done so).
-        //
-        // The amount of waste in the byte map is at most 50%, but average waste for
-        // object sizes up to 256 is 26%.  Waste is a little higher than that, because
-        // the bitmap is sized to cover the block, including the block header - that
-        // too removes instructions from the hot path later.
-        
-        m_bitsShift = log2(m_itemSize);
-        m_numBitmapBytes = kBlockSize / (1 << m_bitsShift);
-#else
-        m_numBitmapBytes = m_itemsPerBlock * sizeof(gcbits_t);
-#endif
-        // round up to 4 bytes so we can go through the bits several items at a time
-        m_numBitmapBytes = (m_numBitmapBytes+3)&~3;
-
+#ifdef DEBUG
         int usedSpace = m_itemsPerBlock * m_itemSize + sizeof(GCBlock);
+#endif
+        GCAssert((unsigned)kBlockSize == GCHeap::kBlockSize);
         GCAssert(usedSpace <= kBlockSize);
         GCAssert(kBlockSize - usedSpace < (int)m_itemSize);
-
-        // never store the bits in the page for !containsPointers b/c we don't want
-        // to force pages into memory for bit marking purposes when we don't need
-        // to bring them in for scanning purposes
-        // ISSUE: is this bitsInPage stuff really worth it?  Maybe simplicity and
-        // locality suggest otherwise?
-        m_bitsInPage = containsPointers && kBlockSize - usedSpace >= m_numBitmapBytes;
-
-        // compute values that let us avoid division
         GCAssert(m_itemSize < GCHeap::kBlockSize);
-        ComputeMultiplyShift((uint16_t)m_itemSize, multiple, shift);
+        m_gc->ObtainQuickListBudget(m_itemSize*m_itemsPerBlock);
+        m_qBudget = m_qBudgetObtained = m_itemsPerBlock;
     }
 
     GCAlloc::~GCAlloc()
@@ -1106,7 +1065,7 @@ namespace MMgc
 #endif // _DEBUG
 
     // allows us to avoid division in GetItemIndex, kudos to Tinic
-    void GCAlloc::ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft)
+    static void ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft)
     {
         uint32_t s = 0;
         uint32_t n = 0;
@@ -1117,6 +1076,20 @@ namespace MMgc
         }
         shft = (uint16_t) s - 1;
         muli = (uint16_t) m;
+    }
+
+    uint16_t GCAlloc::ComputeMultiply(uint16_t d)
+    {
+        uint16_t m, s;
+        ComputeMultiplyShift(d, m, s);
+        return m;
+    }
+
+    uint16_t GCAlloc::ComputeShift(uint16_t d)
+    {
+        uint16_t m, s;
+        ComputeMultiplyShift(d, m, s);
+        return s;
     }
 
     REALLY_INLINE void GCAlloc::GCBlock::FreeSweptItem(const void *item, int bitsindex)

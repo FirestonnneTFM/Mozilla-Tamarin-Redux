@@ -51,14 +51,14 @@
 
 import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, shutil
 import subprocess, random
-from os.path import abspath, basename, dirname, exists, isdir, isfile, split, splitext
+from os.path import abspath, basename, dirname, exists, isdir, isfile, split, splitext, getmtime
 from os import getcwd,environ
 from datetime import datetime
 from glob import glob
 from sys import argv, exit
 from getopt import getopt
 from itertools import count
-from time import time,sleep
+from time import time, sleep
 import shutil
 import traceback
 from . import which
@@ -139,6 +139,7 @@ class RuntestBase:
     executableExtensions = ()    # file extentions for tests that do not get compiled
     otherTestExtensions = ()     # other file extensions that are valid tests
     longOptions = []
+    support_dirs = []   # list of support directories used when running --rebuildtests
     tests = []
     winceProcesses = []
 
@@ -302,6 +303,7 @@ class RuntestBase:
                 self.debug = True
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
+                self.forcerebuild = True
                 self.ascversion = self.getAscVersion(self.asc)
                 if not pexpect:
                     print('To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net')
@@ -650,12 +652,14 @@ class RuntestBase:
                 # 2. directory with the same name as the test + _support (string is defined in self.supportFolderExt):
                 #    all files in that dir are compiled, but not run - these files are
                 #    normally passed in as args to the test itself
-                utilDirs = [d for d in dirs if (d+self.sourceExt in files) or
-                         (d.endswith(self.supportFolderExt) and
-                          d[:-len(self.supportFolderExt)]+self.sourceExt in files)
+                utilDirs = [ud for ud in dirs if (ud+self.sourceExt in files) or
+                         (ud.endswith(self.supportFolderExt) and
+                          ud[:-len(self.supportFolderExt)]+self.sourceExt in files)
                          ]
                 for x in [x for x in self.exclude+utilDirs if x in dirs]:
                     dirs.remove(x)
+                    if x.endswith(self.supportFolderExt):
+                        self.support_dirs.append(join(d, x))
         
         def checkTestList(testlist):
             if len(testlist) == 0:
@@ -1084,6 +1088,20 @@ class RuntestBase:
                     #print("%d remaining, %s" % (total,cmd))
         end_time = datetime.today()
 
+    def compile_support_files(self, support_dir, outputCalls = []):
+        for p, dirs, files in walk(support_dir):
+            for f in files:
+                if f.endswith(self.sourceExt):
+                    f = join(p,f)
+                    binFile = splitext(f)[0]+'.abc'
+                    if exists(binFile) and (self.forcerebuild or (self.timestampcheck and getmtime(f)>getmtime(binFile))):
+                        os.unlink(binFile)
+                    if not isfile(binFile):
+                        compileOutput = self.compile_test(f, outputCalls=outputCalls)
+                        if not isfile(binFile):
+                            outputCalls.append((self.js_print,('  Error compiling support file: %s' % f,)))
+                            outputCalls.append((self.verbose_print, ('   compile output: %s' % compileOutput,)))
+
     def skipAtsTest(self, file, settings):
         '''Check testconfig if we should skip the given file.  Returns a boolean'''
         if '.*' in settings:
@@ -1161,6 +1179,13 @@ class RuntestBase:
         if self.genAtsSwfs:
             if not exists(self.atsDir):
                 os.mkdir(self.atsDir)
+
+        # compile any support dir files first
+        if self.support_dirs:
+            output_calls = []
+            for sd in self.support_dirs:
+                self.compile_support_files(sd, output_calls)
+            self.printOutput(None, output_calls)
 
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
             self.compileWithAsh(self.tests)

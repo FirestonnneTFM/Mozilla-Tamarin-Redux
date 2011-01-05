@@ -338,8 +338,7 @@ namespace MMgc
         PinRootSegments();
 
         // Invoke prereap on all callbacks
-        for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
-            cb->prereap();
+        gc->DoPreReapCallbacks();
 
 #ifdef _DEBUG
         if (gc->validateDefRef)
@@ -396,8 +395,7 @@ namespace MMgc
         UsePinningMemory();
 
         // Invoke postreap on all callbacks
-        for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
-            cb->postreap();
+        gc->DoPostReapCallbacks();
 
         if(gc->heap->Config().gcstats && objects_reaped > 0) {
             size_t blocks_after = gc->GetNumBlocks();
@@ -540,8 +538,7 @@ namespace MMgc
 #endif
         // Invoke prereap on all callbacks.
         // FIXME: This is fairly wasteful and it would be good to be rid of it.
-        for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
-            cb->prereap(obj);
+        gc->DoPreReapCallbacks(obj);
 
         GCAssert(*(intptr_t*)obj != 0);         // That's the vtable normally
         GCAssert(gc->IsFinalized(obj));

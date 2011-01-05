@@ -92,7 +92,7 @@ void ArrayObject::gcTrace(MMgc::GC* gc)
 #endif
     ScriptObject::gcTrace(gc);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
-    m_denseArr.gcTrace(gc);
+    m_denseArray.gcTrace(gc);
 }
 
 bool ArrayObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)

@@ -666,6 +666,41 @@ namespace MMgc
         largeEmptyPageList = lb;
     }
 
+    REALLY_INLINE void GC::DoPreSweepCallbacks()
+    {
+        for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB ) {
+            cb->presweep();
+        }
+    }
+
+    REALLY_INLINE void GC::DoPostSweepCallbacks()
+    {
+        for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB ) {
+            cb->postsweep();
+        }
+    }
+
+    REALLY_INLINE void GC::DoPreReapCallbacks()
+    {
+        for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB ) {
+            cb->prereap();
+        }
+    }
+
+    REALLY_INLINE void GC::DoPreReapCallbacks(void* rcObject)
+    {
+        for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB ) {
+            cb->prereap(rcObject);
+        }
+    }
+
+    REALLY_INLINE void GC::DoPostReapCallbacks()
+    {
+        for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB ) {
+            cb->postreap();
+        }
+    }
+
 #ifdef MMGC_REFCOUNT_PROFILING
     REALLY_INLINE void GC::AddToZCT(RCObject *obj, bool initial=false)
     {

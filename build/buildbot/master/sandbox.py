@@ -1510,7 +1510,6 @@ class sandbox:
     sb_solaris_sparc_test_factory = factory.BuildFactory()
     sb_solaris_sparc_test_factory.addStep(test_commandline)
     sb_solaris_sparc_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
-    sb_solaris_sparc_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     sb_solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     sb_solaris_sparc_test_factory.addStep(util_process_clean)
     sb_solaris_sparc_test_factory.addStep(util_clean_buildsdir)

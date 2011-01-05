@@ -42,21 +42,30 @@
 
 namespace avmplus
 {
-    REALLY_INLINE bool ArrayObject::hasDense() const
-    {
-        return (m_denseArr.length() != 0);
+    REALLY_INLINE bool ArrayObject::isSparse() const 
+    { 
+        return m_denseStart == IS_SPARSE; 
+    }
+    
+    REALLY_INLINE bool ArrayObject::isDense() const  
+    { 
+        return int32_t(m_denseStart) >= 0; 
+    }
+    
+    REALLY_INLINE bool ArrayObject::isDynamic() const  
+    { 
+         return int32_t(m_denseStart) >= -1; 
     }
 
-    REALLY_INLINE bool ArrayObject::isSimpleDense() const
-    {
-        return (m_denseArr.length() == m_length);
-    }
-
-    REALLY_INLINE uint32_t ArrayObject::getDenseLength() const
-    {
-        return m_denseArr.length();
-    }
-
+#ifdef DEBUG_ARRAY_VERIFY	
+    // declared out-of-line
+#else
+	REALLY_INLINE void ArrayObject::verify() const
+	{
+        // nothing
+	}
+#endif
+	
     REALLY_INLINE Atom ArrayObject::pop()
     {
         return AS3_pop();
@@ -74,20 +83,25 @@ namespace avmplus
 
     // Performance on some benchmarks (eg Euler.as) is highly sensitive to
     // ArrayObject::getUintProperty being fast; this exists in order to ensure
-    // that the implementations of getUintProperty and _getUintProperty/_getIntPropert
+    // that the implementations of getUintProperty and _getUintProperty/_getIntProperty
     // (used by the JIT) contain inlined code rather than a tail-call.
     REALLY_INLINE Atom ArrayObject::getUintPropertyImpl(uint32_t index) const
     {
-        if (traits()->needsHashtable())
+        // NB: we constrain the dense area to indices <= 0x7FFFFFFF,
+        // so this test will always fail if the we are sealed or sparse,
+        // due to IS_SEALED and IS_SPARSE being carefully chosen values.
+		uint32_t const denseIdx = index - m_denseStart;
+        if (denseIdx < m_denseArray.length())
         {
-            if (hasDense())
-            {
-                if ((index < getDenseLength()))
-                    return m_denseArr.get(index);
-            }
+            Atom result = m_denseArray.get(denseIdx);
+            if (result != atomNotFound)
+                return result;
+            // else, a hole in the dense area, must fall thru and search the hashtable/proto chain
         }
 
-        return ScriptObject::getUintProperty (index);
+        Atom result = ScriptObject::getUintProperty(index);
+        AvmAssert(result != atomNotFound);
+        return result;
     }
 
     /*virtual*/
