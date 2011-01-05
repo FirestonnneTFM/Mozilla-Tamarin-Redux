@@ -80,7 +80,10 @@ namespace MMgc
             kLargeExactlyTracedTail=1,
             kInertPayload=2,
         };
-        
+
+        static const uint32_t kSentinel1Size = ~0U - 3; // low two bits
+        static const uint32_t kSentinel2Size = ~0U - 7; //    must be zero
+
         // FIXME? The initialization is redundant for most locals and for the mark stack we
         // don't want to have to init all the elements in the array as it makes allocating a mark
         // stack segment expensive.  I believe we could safely get rid of the two initializing
@@ -91,8 +94,11 @@ namespace MMgc
         GCWorkItem(const void *p, GCSentinel2ItemType type);
 
         uint32_t GetSize() const;
+        const void* Ptr() const { return ptr; }
+        void* GetEnd() const { return (void*)(iptr + GetSize()); }
         uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
         uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
+        bool IsNull() const { return ptr == NULL; }
         bool IsSentinel1Item() const { return (_size & ~3) == kSentinel1Size; }
         bool IsSentinel2Item() const { return (_size & ~3) == kSentinel2Size; }
         GCSentinel1ItemType GetSentinel1Type() const { return (GCSentinel1ItemType)(iptr & 3); }
@@ -100,13 +106,10 @@ namespace MMgc
         void *GetSentinelPointer() const { return (void*) (iptr & ~3); }
 
         // Cancel item by clearing its pointer, setting sentinel to
-        // kDeadItem, and setting size to kSentinelSize.  See MarkItem
-        // and HandleLargeMarkItem.
+        // kDeadItem, and setting size to kSentinelSize.
         void Clear();
 
-        static const uint32_t kSentinel1Size = ~0U - 3; // low two bits
-        static const uint32_t kSentinel2Size = ~0U - 7; //    must be zero
-
+    private:
         // If a WI is a GC item, `ptr` is the UserPointer; it must not
         // be the RealPointer nor an interior pointer.  When _size
         // is kSentinelSize the lower 2 bits of ptr contain the sentinel
@@ -245,7 +248,7 @@ namespace MMgc
 
     REALLY_INLINE bool GCMarkStack::Push(GCWorkItem item)
     {
-        GCAssert(item.ptr != NULL);
+        GCAssert(!item.IsNull());
         if (m_top == m_limit)
             if (!PushSegment())
                 return false;
@@ -264,7 +267,7 @@ namespace MMgc
     {
         GCAssert(m_top > m_base);
         GCWorkItem t = *--m_top;
-        GCAssert(t.ptr != NULL);
+        GCAssert(!t.IsNull());
 #ifdef _DEBUG
         VMPI_memset(m_top, 0, sizeof(GCWorkItem));
 #endif
