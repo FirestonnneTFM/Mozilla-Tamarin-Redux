@@ -74,6 +74,11 @@ namespace avmplus
          * called as constructor, as in new C().  for user classes this
          * invokes the implicit constructor followed by the user's constructor
          * if any.
+         *
+         * NOTE: The contents of the given argument list can be modified during 
+         *       invocation of the constructor without further warning.
+         *       Do not reuse an argument list AS-IS for multiple constructor calls, 
+         *       unless you make sure to reinitialize the contents of the argument list after each call.
          */
         virtual Atom construct(int argc, Atom* argv);
 
@@ -83,6 +88,11 @@ namespace avmplus
          * called as function, as in C().  For user classes, this is the
          * the explicit coersion function.  For user functions, we
          * invoke m_call.
+         *
+         * NOTE: The contents of the given argument list can be modified during 
+         *       invocation of the function without further warning.
+         *       Do not reuse an argument list AS-IS for multiple function calls, 
+         *       unless you make sure to reinitialize the contents of the argument list after each call.
          */
         virtual Atom call(int argc, Atom* argv);
 
