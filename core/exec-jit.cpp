@@ -183,9 +183,10 @@ double BaseExecMgr::interpFPR(MethodEnv* env, int argc, uint32_t * ap)
 void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
 {
     m->_implGPR = p;
-    m->_invoker = invokeGeneric;
-    if (InvokerCompiler::canCompileInvoker(m))
+    if (isJitEnabled() && InvokerCompiler::canCompileInvoker(m))
         m->_invoker = jitInvokerNext;
+    else 
+        m->_invoker = invokeGeneric;
 #ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy))
         core->console<< "execpolicy native " << m << "\n";
