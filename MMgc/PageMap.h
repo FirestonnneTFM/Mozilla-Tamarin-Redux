@@ -119,15 +119,6 @@ namespace MMgc
             using PageMapBase::MemEnd;
             using PageMapBase::AddrIsMappable;
 
-            /** @return lower bound (inclusive) of page map address range. */
-            uintptr_t MemStart() const;
-
-            /** @return upper bound (exclusive) in page map address range. */
-            uintptr_t MemEnd() const;
-
-            /** @return true iff addr is in domain of page map. */
-            bool AddrIsMappable(uintptr_t addr) const;
-
             /**
              * Destroy method.  Must invoke before destruction.
              * @param heap that was used for allocation via ExpandSetAll.
