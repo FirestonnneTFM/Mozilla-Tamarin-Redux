@@ -20,8 +20,8 @@
 		/>
 	</Platforms>
 	<ToolFiles>
-		<DefaultToolFile
-			FileName="armasm.rules"
+		<ToolFile
+			RelativePath="armasm.rules"
 		/>
 	</ToolFiles>
 	<Configurations>
