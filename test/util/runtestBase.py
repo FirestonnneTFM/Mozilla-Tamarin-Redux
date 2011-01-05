@@ -141,6 +141,7 @@ class RuntestBase:
     longOptions = []
     support_dirs = []   # list of support directories used when running --rebuildtests
     tests = []
+    verified_executables = set([])
     winceProcesses = []
 
     csv = False
@@ -562,14 +563,20 @@ class RuntestBase:
                 files.append(util.replace("$", "\$"))
         return files
 
-    def checkExecutable(self,exe, msg):
+    def checkExecutable(self, exe, msg):
         if exe:
             exe = exe.split()[0]    # only check first arg if there are more than one
+        # check to see if we've already checked this
+        if exe in self.verified_executables:
+            return
+        
+        original_exe = exe
         if not isfile(exe):
             # exe might be in path - check there
             try:
                 if not which.which(exe):
                     exit('ERROR: cannot find %s, %s' % (exe, msg))
+                exe = which.which(exe)
             except which.WhichError:
                 exit('ERROR: cannot find %s, %s' % (exe, msg))
         if not os.access(exe, os.X_OK):
@@ -583,6 +590,8 @@ class RuntestBase:
                         exit('ERROR: cannot execute %s, check the executable flag' % exe)
             except which.WhichError:
                 exit('ERROR: cannot execute %s, check the executable flag' % exe)
+        # add to verified_executables
+        self.verified_executables.add(original_exe)
 
     def checkPath(self,additionalVars=[]):
         '''Check to see if running using windows python and if so, convert any cygwin paths to win paths
@@ -881,6 +890,8 @@ class RuntestBase:
                 self.js_print('AOT compilation of %s FAILED' % (abcfile))
 
     def compile_test(self, as_file, extraArgs=[], outputCalls = None):
+        self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
+
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
         # if there is a .build file available (which is an executable script)
         # run that file instead of compiling with asc
@@ -1014,7 +1025,7 @@ class RuntestBase:
                     if test.endswith(self.abcasmExt):
                         extrabcs = [self.abcasmShell+'.abc']
                         if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
-                            self.run_pipe('java -jar %s %s' % (self.asc, self.abcasmShell+'.as'))
+                            self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
                     self.compile_aot(testdir+".abc", extrabcs)
                 total -= 1;
         else:  #pexpect available
