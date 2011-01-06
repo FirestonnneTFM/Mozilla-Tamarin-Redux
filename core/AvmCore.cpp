@@ -217,15 +217,17 @@ namespace avmplus
 #ifdef VMCFG_NANOJIT
             else if (substrMatches("jit", p, e))
                  r |= VB_jit | LC_AfterDCE | LC_Native;
-             else if (substrMatches("opt", p, e))
-                 r |= VB_jit | LC_AfterDCE | LC_Native | LC_Liveness | LC_ReadLIR | LC_AfterSF;
-             else if (substrMatches("regs", p, e))
-                 r |= VB_jit | LC_AfterDCE | LC_Native | LC_Activation | LC_RegAlloc;
-             else if (substrMatches("raw", p, e))
-                 r |= VB_raw;
+            else if (substrMatches("opt", p, e))
+                r |= VB_jit | LC_Liveness | LC_ReadLIR | LC_AfterSF;
+            else if (substrMatches("regs", p, e))
+                r |= VB_jit | LC_Activation | LC_RegAlloc;
+            else if (substrMatches("raw", p, e))
+                r |= VB_raw;
+            else if (substrMatches("bytes", p, e))
+                r |= VB_jit | LC_Native | LC_Bytes;
 #endif /* VMCFG_NANOJIT */
-             else
-                 badFlag = (char*)p;
+            else
+                badFlag = (char*)p;
             if (*e < 32)
                 break;
             p = e+1;
@@ -324,7 +326,7 @@ namespace avmplus
         builtinPool                 = NULL;
         builtinDomain               = NULL;
         builtinBugCompatibility     = NULL;
-        
+
         m_versionedURIs = HeapHashtable::create(gc);
 #ifdef DEBUG_API_VERSIONING
         m_unversionedURIs = HeapHashtable::create(gc);
@@ -449,7 +451,7 @@ namespace avmplus
 
         this->largest_api = 0x1 << (kApiVersion_count-1);
         this->active_api_flags = 0;
-        
+
         // the public namespace (empty uri) is always versioned.
         this->m_versionedURIs->get_ht()->add(kEmptyString->atom(), trueAtom);
 
@@ -4943,7 +4945,7 @@ return the result of the comparison ToPrimitive(x) == y.
         badFlag = true;
         return kApiVersion_default;
     }
-    
+
     BugCompatibility::BugCompatibility(BugCompatibility::Version v)
     {
         // We rely on the fact that we are allocated pre-zeroed by MMgc,
