@@ -28,7 +28,7 @@ pushbyte = 36 (0x24)
 
 \subsection description Description
 
-byte_value is an unsigned byte. The byte_value is promoted to an int, and the 
+byte_value is an signed byte. The byte_value is sign extended to an int, and the 
 result is pushed onto the stack.
 
 \subsection rt_execeptions Runtime exceptions
