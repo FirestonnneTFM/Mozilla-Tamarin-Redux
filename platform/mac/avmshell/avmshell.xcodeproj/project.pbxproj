@@ -507,6 +507,15 @@
 		075CBECC1074ACB7009E599C /* GCAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCAlloc-inlines.h"; path = "../../../MMgc/GCAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBF191074B252009E599C /* GCLargeAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCLargeAlloc-inlines.h"; path = "../../../MMgc/GCLargeAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075EB7B011009E3B002F92B5 /* ClassClosure-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ClassClosure-inlines.h"; path = "../../../core/ClassClosure-inlines.h"; sourceTree = SOURCE_ROOT; };
+		0766795012D4A9380026CAF1 /* avmshell-as3-gc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmshell-as3-gc.h"; path = "../../../shell/avmshell-as3-gc.h"; sourceTree = SOURCE_ROOT; };
+		0766795112D4A9380026CAF1 /* avmshell-cpp-gc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmshell-cpp-gc.h"; path = "../../../shell/avmshell-cpp-gc.h"; sourceTree = SOURCE_ROOT; };
+		0766795212D4A9380026CAF1 /* avmshell-gc-interlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmshell-gc-interlock.h"; path = "../../../shell/avmshell-gc-interlock.h"; sourceTree = SOURCE_ROOT; };
+		0766795312D4A9380026CAF1 /* extensions-as3-gc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "extensions-as3-gc.h"; path = "../../../shell/extensions-as3-gc.h"; sourceTree = SOURCE_ROOT; };
+		0766795412D4A9380026CAF1 /* extensions-cpp-gc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "extensions-cpp-gc.h"; path = "../../../shell/extensions-cpp-gc.h"; sourceTree = SOURCE_ROOT; };
+		0766795512D4A9380026CAF1 /* extensions-gc-interlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "extensions-gc-interlock.h"; path = "../../../shell/extensions-gc-interlock.h"; sourceTree = SOURCE_ROOT; };
+		0766795712D4A9640026CAF1 /* avmplus-as3-gc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplus-as3-gc.h"; path = "../../../core/avmplus-as3-gc.h"; sourceTree = SOURCE_ROOT; };
+		0766795812D4A9640026CAF1 /* avmplus-cpp-gc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplus-cpp-gc.h"; path = "../../../core/avmplus-cpp-gc.h"; sourceTree = SOURCE_ROOT; };
+		0766795912D4A9640026CAF1 /* avmplus-gc-interlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplus-gc-interlock.h"; path = "../../../core/avmplus-gc-interlock.h"; sourceTree = SOURCE_ROOT; };
 		076899071019D3AC00BC72AA /* ZCT-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ZCT-inlines.h"; path = "../../../MMgc/ZCT-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07689A9E101DC28000BC72AA /* ZCT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZCT.cpp; path = ../../../MMgc/ZCT.cpp; sourceTree = SOURCE_ROOT; };
 		07689A9F101DC28000BC72AA /* ZCT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZCT.h; path = ../../../MMgc/ZCT.h; sourceTree = SOURCE_ROOT; };
@@ -754,7 +763,6 @@
 		079DF9890F3A89E60031D1B4 /* Endian.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Endian.as; path = ../../../shell/Endian.as; sourceTree = SOURCE_ROOT; };
 		079DF98A0F3A89E60031D1B4 /* Java.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
 		079DF98B0F3A89E60031D1B4 /* shell_toplevel.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = shell_toplevel.as; path = ../../../shell/shell_toplevel.as; sourceTree = SOURCE_ROOT; };
-		079DF98C0F3A89FD0031D1B4 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Profiler.h; path = ../../../shell/Profiler.h; sourceTree = SOURCE_ROOT; };
 		079DF98D0F3A8A320031D1B4 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
 		079DF98E0F3A8A320031D1B4 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		079DF98F0F3A8A320031D1B4 /* JavaGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavaGlue.cpp; path = ../../../extensions/JavaGlue.cpp; sourceTree = SOURCE_ROOT; };
@@ -1107,6 +1115,9 @@
 				3FDDC5410F60A07400E29821 /* AvmLog.h */,
 				079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */,
 				079DF7CB0F3A882D0031D1B4 /* avmplus.h */,
+				0766795712D4A9640026CAF1 /* avmplus-as3-gc.h */,
+				0766795812D4A9640026CAF1 /* avmplus-cpp-gc.h */,
+				0766795912D4A9640026CAF1 /* avmplus-gc-interlock.h */,
 				07FBECBD1291529500F51879 /* avmplusContainer.h */,
 				079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */,
 				079DF7CE0F3A882D0031D1B4 /* avmplusDebugger.h */,
@@ -1350,6 +1361,9 @@
 			children = (
 				0709B6550F9733B7001A6E61 /* Non-Mac */,
 				0709B6490F9733B0001A6E61 /* avmshell-features.h */,
+				0766795012D4A9380026CAF1 /* avmshell-as3-gc.h */,
+				0766795112D4A9380026CAF1 /* avmshell-cpp-gc.h */,
+				0766795212D4A9380026CAF1 /* avmshell-gc-interlock.h */,
 				0709B64C0F9733B0001A6E61 /* File.h */,
 				19BB299F0F8119E100C5F1F7 /* swf.cpp */,
 				3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */,
@@ -1359,6 +1373,9 @@
 				079DF95F0F3A898A0031D1B4 /* ConsoleOutputStream.h */,
 				079DF9620F3A898A0031D1B4 /* DebugCLI.cpp */,
 				079DF9630F3A898A0031D1B4 /* DebugCLI.h */,
+				0766795312D4A9380026CAF1 /* extensions-as3-gc.h */,
+				0766795412D4A9380026CAF1 /* extensions-cpp-gc.h */,
+				0766795512D4A9380026CAF1 /* extensions-gc-interlock.h */,
 				079DF9640F3A898A0031D1B4 /* FileInputStream.cpp */,
 				079DF9650F3A898A0031D1B4 /* FileInputStream.h */,
 				3F5B2BC70F54B223009A93FE /* Platform.h */,
@@ -1366,7 +1383,6 @@
 				3F5B2BC90F54B223009A93FE /* PosixFile.h */,
 				3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */,
 				3F5B2BCB0F54B223009A93FE /* PosixPartialPlatform.h */,
-				079DF98C0F3A89FD0031D1B4 /* Profiler.h */,
 				079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */,
 				079DF9920F3A8A320031D1B4 /* SamplerScript.h */,
 				078F53690FA473C50064216F /* ShellCore.cpp */,
