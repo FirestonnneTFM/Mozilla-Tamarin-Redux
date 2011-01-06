@@ -1176,7 +1176,7 @@ namespace avmshell
 #ifdef AVMPLUS_VERBOSE
         AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,minaddr,memstats,sweep,occupancy,execpolicy"
 #  ifdef VMCFG_NANOJIT
-               ",jit,opt,regs,raw"
+               ",jit,opt,regs,raw,bytes"
 #  endif
                "]]\n");
         AvmLog("                        With no options, enables extreme! output mode.  Otherwise the\n");
@@ -1191,6 +1191,7 @@ namespace avmshell
         AvmLog("                           opt - [jit] show details about each optimization pass\n");
         AvmLog("                           regs - [jit] show register allocation state after each assembly instruction\n");
         AvmLog("                           raw - [jit] assembly code is displayed in raw (i.e unbuffered bottom-up) fashion. \n");
+        AvmLog("                           bytes - [jit] display the byte values of the assembly code. \n");
 #  endif
 
         AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
