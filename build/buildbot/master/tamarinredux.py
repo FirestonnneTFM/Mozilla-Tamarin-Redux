@@ -58,9 +58,6 @@ class tamarinredux:
     compile = Scheduler(name="compile", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile, properties={'silent':'false'},
                      builderNames=["windows-compile", "windows64-compile",
                                    "mac-intel-10.4-compile", "mac-intel-10.5-compile", "mac64-intel-compile",
-                                   "mac-ppc-10.4a-compile", "mac-ppc-10.4b-compile", 
-                                   "mac-ppc-10.5a-compile", "mac-ppc-10.5b-compile", 
-                                   "mac64-ppc-compile", "mac64b-ppc-compile",
                                    "linux-compile", "linux2-compile",
                                    "linux64-compile",
                                    "winmobile-emulator-compile",
@@ -73,9 +70,6 @@ class tamarinredux:
     smoke = BuilderDependent(name="smoke",upstream=compile, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-smoke", "windows64-smoke",
                                    "mac-intel-10.4-smoke", "mac-intel-10.5-smoke", "mac64-intel-smoke",
-                                   "mac-ppc-10.4a-smoke", "mac-ppc-10.4b-smoke", 
-                                   "mac-ppc-10.5a-smoke", "mac-ppc-10.5b-smoke", 
-                                   "mac64-ppc-smoke", "mac64b-ppc-smoke",
                                    "linux-smoke", "linux2-smoke",
                                    "linux64-smoke",
                                    "winmobile-emulator-smoke",
@@ -90,12 +84,6 @@ class tamarinredux:
                                   ["mac-intel-10.4-smoke", "mac-intel-10.4-compile"], 
                                   ["mac-intel-10.5-smoke", "mac-intel-10.5-compile"],
                                   ["mac64-intel-smoke", "mac64-intel-compile"],
-                                  ["mac-ppc-10.4a-smoke", "mac-intel-10.4-compile"],
-                                  ["mac-ppc-10.4b-smoke", "mac-intel-10.4-compile"],
-                                  ["mac-ppc-10.5a-smoke", "mac-intel-10.5-compile"],
-                                  ["mac-ppc-10.5b-smoke", "mac-intel-10.5-compile"],
-                                  ["mac64-ppc-smoke", "mac64-intel-compile"],
-                                  ["mac64b-ppc-smoke", "mac64-intel-compile"],
                                   ["linux-smoke", "linux-compile"],
                                   ["linux2-smoke", "linux2-compile"],
                                   ["linux64-smoke", "linux64-compile"],
@@ -112,9 +100,6 @@ class tamarinredux:
     test = BuilderDependent(name="test",upstream=smoke, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-test", "windows64-test",
                                    "mac-intel-10.4-test", "mac-intel-10.5-test", "mac64-intel-test",
-                                   "mac-ppc-10.4a-test", "mac-ppc-10.4b-test", 
-                                   "mac-ppc-10.5a-test", "mac-ppc-10.5b-test", 
-                                   "mac64-ppc-test", "mac64b-ppc-test",
                                    "linux-test", "linux2-test",
                                    "linux64-test",
                                    "winmobile-emulator-test",
@@ -129,12 +114,6 @@ class tamarinredux:
                                   ["mac-intel-10.4-test", "mac-intel-10.4-smoke"], 
                                   ["mac-intel-10.5-test", "mac-intel-10.5-smoke"],
                                   ["mac64-intel-test", "mac64-intel-smoke"],
-                                  ["mac-ppc-10.4a-test", "mac-ppc-10.4a-smoke"],
-                                  ["mac-ppc-10.4b-test", "mac-ppc-10.4b-smoke"],
-                                  ["mac-ppc-10.5a-test", "mac-ppc-10.5a-smoke"],
-                                  ["mac-ppc-10.5b-test", "mac-ppc-10.5b-smoke"],
-                                  ["mac64-ppc-test", "mac64-ppc-smoke"],
-                                  ["mac64b-ppc-test", "mac64b-ppc-smoke"],
                                   ["linux-test", "linux-smoke"],
                                   ["linux2-test", "linux2-smoke"],
                                   ["linux64-test", "linux64-smoke"],
@@ -152,7 +131,6 @@ class tamarinredux:
                     fileIsImportant=startPerformanceRun, priority=2, changeDir="changes/perf/processed",
                     builderNames=["windows-performance",
                                    "mac-performance", "mac64-performance",
-                                   "mac-ppc-performance",
                                    "linux-performance",
                                    "winmobile-performance",
                                    "android-performance"],
@@ -160,7 +138,6 @@ class tamarinredux:
                                   ["windows-performance", "windows-test"], 
                                   ["mac-performance", "mac-intel-10.5-test"],
                                   ["mac64-performance", "mac64-intel-test"],
-                                  ["mac-ppc-performance", "mac-ppc-10.5a-test"],
                                   ["linux-performance", "linux-test"],
                                   ["winmobile-performance", "winmobile-emulator-test"],
                                   ["android-performance","android-test"],
@@ -174,6 +151,9 @@ class tamarinredux:
                                     "windows-frr",
                                     "mac-deep",
                                     "mac-ppc-deep",
+                                    "mac-ppc-10.4a-deep", "mac-ppc-10.4b-deep",
+                                    "mac-ppc-10.5a-deep", "mac-ppc-10.5b-deep",
+                                    "mac64a-ppc-deep", "mac64b-ppc-deep",
                                     "solaris-sparc-deep",
                                     "windows64-deep",
                                     "linux-deep",
@@ -190,8 +170,14 @@ class tamarinredux:
                                   ["windows-p3-deep", "windows-test"],
                                   ["windows-frr", "windows-test"], 
                                   ["mac-deep","mac-intel-10.5-test"],
-                                  ["mac-ppc-deep", "mac-ppc-10.5a-test"], 
-                                  ["solaris-sparc-deep", "solaris-sparc-test"], 
+                                  ["mac-ppc-deep", "mac-intel-10.5-test"],
+                                  ["mac-ppc-10.4a-deep", "mac-intel-10.4-test"],
+                                  ["mac-ppc-10.4b-deep", "mac-intel-10.4-test"],
+                                  ["mac-ppc-10.5a-deep", "mac-intel-10.5-test"],
+                                  ["mac-ppc-10.5b-deep", "mac-intel-10.5-test"],
+                                  ["mac-ppc-64a-deep", "mac64-intel-test"],
+                                  ["mac-ppc-64b-deep", "mac64-intel-test"],
+                                  ["solaris-sparc-deep", "solaris-sparc-test"],
                                   ["windows64-deep", "windows64-test"], 
                                   ["winmobile-emulator-deep", "winmobile-emulator-test"],
                                   ["linux-mips-deep", "linux-mips-test"],
@@ -291,13 +277,8 @@ class tamarinredux:
     mac_intel_104_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_104", args="--enable-shell --enable-debug --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_104", args="--enable-shell --enable-debugger --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_104", args="--enable-shell --enable-debug --enable-debugger --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_104_ppc", args="--enable-shell --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_104_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_WORDCODE_INTERP"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_104_ppc", args="--enable-shell --enable-debug --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="ReleaseDebugger_PPC", shellname="avmshell_s_104_ppc", args="--enable-shell --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_104_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
-    mac_intel_104_compile_factory.addStep(compile_buildcheck_local)
-    mac_intel_104_compile_factory.addStep(util_upload_asteam_local)
+    mac_intel_104_compile_factory.addStep(compile_buildcheck)
+    mac_intel_104_compile_factory.addStep(util_upload_asteam)
 
     mac_intel_104_compile_builder = {
                 'name': "mac-intel-10.4-compile",
@@ -322,13 +303,8 @@ class tamarinredux:
     mac_intel_105_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_ppc", args="--enable-shell --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_WORDCODE_INTERP"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_ppc", args="--enable-shell --enable-debug --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger_PPC", shellname="avmshell_s_ppc", args="--enable-shell --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
-    mac_intel_105_compile_factory.addStep(compile_buildcheck_local)
-    mac_intel_105_compile_factory.addStep(util_upload_asteam_local)
+    mac_intel_105_compile_factory.addStep(compile_buildcheck)
+    mac_intel_105_compile_factory.addStep(util_upload_asteam)
 
     mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile",
@@ -352,13 +328,8 @@ class tamarinredux:
     mac_intel_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-shell --enable-debug --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
     mac_intel_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-shell --enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
     mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-shell --enable-debug --enable-debugger --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
-    mac_intel_64_compile_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_64_ppc", args="--enable-shell --target=ppc64-darwin --mac-sdk=105", upload="false"))
-    mac_intel_64_compile_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_64_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc64-darwin --mac-sdk=105", upload="false"))
-    mac_intel_64_compile_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_64_ppc", args="--enable-shell --enable-debug --target=ppc64-darwin --mac-sdk=105", upload="false"))
-    mac_intel_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger_PPC", shellname="avmshell_s_64_ppc", args="--enable-shell --enable-debugger --target=ppc64-darwin --mac-sdk=105", upload="false"))
-    mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_64_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc64-darwin --mac-sdk=105", upload="false"))
-    mac_intel_64_compile_factory.addStep(compile_buildcheck_local)
-    mac_intel_64_compile_factory.addStep(util_upload_asteam_local)
+    mac_intel_64_compile_factory.addStep(compile_buildcheck)
+    mac_intel_64_compile_factory.addStep(util_upload_asteam)
 
     mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile",
@@ -366,109 +337,6 @@ class tamarinredux:
                 'factory': mac_intel_64_compile_factory,
                 'builddir': './mac64-intel-compile',
     }
-
-
-    ############################################
-    #### builder for mac-ppc-10_4a-compile ####
-    ############################################
-    mac_ppc_104a_compile_factory = factory.BuildFactory()
-    mac_ppc_104a_compile_factory.addStep(sync_clean)
-    mac_ppc_104a_compile_factory.addStep(sync_clone(url=HG_URL))
-    mac_ppc_104a_compile_factory.addStep(sync_update)
-    mac_ppc_104a_compile_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_4"))
-
-    mac_ppc_104a_compile_builder = {
-                'name': "mac-ppc-10.4a-compile",
-                'slavename': "mac-ppc-10_4a",
-                'factory': mac_ppc_104a_compile_factory,
-                'builddir': './mac-ppc-10_4a-compile',
-    }
-
-
-    ###########################################
-    #### builder for mac-ppc-10_4b-compile ####
-    ###########################################
-    mac_ppc_104b_compile_factory = factory.BuildFactory()
-    mac_ppc_104b_compile_factory.addStep(sync_clean)
-    mac_ppc_104b_compile_factory.addStep(sync_clone(url=HG_URL))
-    mac_ppc_104b_compile_factory.addStep(sync_update)
-    mac_ppc_104b_compile_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_4"))
-
-    mac_ppc_104b_compile_builder = {
-                'name': "mac-ppc-10.4b-compile",
-                'slavename': "mac-ppc-10_4b",
-                'factory': mac_ppc_104b_compile_factory,
-                'builddir': './mac-ppc-10_4b-compile',
-    }
-
-
-
-    ###########################################
-    #### builder for mac-ppc-10_5a-compile ####
-    ###########################################
-    mac_ppc_105a_compile_factory = factory.BuildFactory()
-    mac_ppc_105a_compile_factory.addStep(sync_clean)
-    mac_ppc_105a_compile_factory.addStep(sync_clone(url=HG_URL))
-    mac_ppc_105a_compile_factory.addStep(sync_update)
-    mac_ppc_105a_compile_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_5"))
-
-    mac_ppc_105a_compile_builder = {
-                'name': "mac-ppc-10.5a-compile",
-                'slavename': "mac-ppc-10_5a",
-                'factory': mac_ppc_105a_compile_factory,
-                'builddir': './mac-ppc-10_5a-compile',
-    }
-
-    ###########################################
-    #### builder for mac-ppc-10_5b-compile ####
-    ###########################################
-    mac_ppc_105b_compile_factory = factory.BuildFactory()
-    mac_ppc_105b_compile_factory.addStep(sync_clean)
-    mac_ppc_105b_compile_factory.addStep(sync_clone(url=HG_URL))
-    mac_ppc_105b_compile_factory.addStep(sync_update)
-    mac_ppc_105b_compile_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_5"))
-
-    mac_ppc_105b_compile_builder = {
-                'name': "mac-ppc-10.5b-compile",
-                'slavename': "mac-ppc-10_5b",
-                'factory': mac_ppc_105b_compile_factory,
-                'builddir': './mac-ppc-10_5b-compile',
-    }
-
-
-    ########################################
-    #### builder for mac-ppc-64-compile ####
-    ########################################
-    mac_ppc_64_compile_factory = factory.BuildFactory()
-    mac_ppc_64_compile_factory.addStep(sync_clean)
-    mac_ppc_64_compile_factory.addStep(sync_clone(url=HG_URL))
-    mac_ppc_64_compile_factory.addStep(sync_update)
-    mac_ppc_64_compile_factory.addStep(bb_slaveupdate(slave="mac64-ppc"))
-
-    mac_ppc_64_compile_builder = {
-                'name': "mac64-ppc-compile",
-                'slavename': "mac64a-ppc",
-                'factory': mac_ppc_64_compile_factory,
-                'builddir': './mac64-ppc-compile',
-    }
-
-
-    #########################################
-    #### builder for mac-ppc-64b-compile ####
-    #########################################
-    mac_ppc_64b_compile_factory = factory.BuildFactory()
-    mac_ppc_64b_compile_factory.addStep(sync_clean)
-    mac_ppc_64b_compile_factory.addStep(sync_clone(url=HG_URL))
-    mac_ppc_64b_compile_factory.addStep(sync_update)
-    mac_ppc_64b_compile_factory.addStep(bb_slaveupdate(slave="mac64-ppc"))
-
-    mac_ppc_64b_compile_builder = {
-                'name': "mac64b-ppc-compile",
-                'slavename': "mac64b-ppc",
-                'factory': mac_ppc_64b_compile_factory,
-                'builddir': './mac64b-ppc-compile',
-    }
-
 
 
     ###################################
@@ -936,99 +804,6 @@ class tamarinredux:
                 'builddir': './mac64-intel-smoke',
     }
 
-    #########################################
-    #### builder for mac-ppc-10_4a-smoke ####
-    #########################################
-    mac_ppc_104a_smoke_factory = factory.BuildFactory()
-    mac_ppc_104a_smoke_factory.addStep(download_testmedia)
-    mac_ppc_104a_smoke_factory.addStep(test_smoke)
-    mac_ppc_104a_smoke_factory.addStep(util_process_clean)
-
-    mac_ppc_104a_smoke_builder = {
-                'name': "mac-ppc-10.4a-smoke",
-                'slavename': "mac-ppc-10_4a",
-                'factory': mac_ppc_104a_smoke_factory,
-                'builddir': './mac-ppc-10_4a-smoke',
-    }
-
-
-    #########################################
-    #### builder for mac-ppc-10_4b-smoke ####
-    #########################################
-    mac_ppc_104b_smoke_factory = factory.BuildFactory()
-    mac_ppc_104b_smoke_factory.addStep(download_testmedia)
-    mac_ppc_104b_smoke_factory.addStep(test_smoke)
-    mac_ppc_104b_smoke_factory.addStep(util_process_clean)
-
-    mac_ppc_104b_smoke_builder = {
-                'name': "mac-ppc-10.4b-smoke",
-                'slavename': "mac-ppc-10_4b",
-                'factory': mac_ppc_104b_smoke_factory,
-                'builddir': './mac-ppc-10_4b-smoke',
-    }
-
-
-    #########################################
-    #### builder for mac-ppc-10_5a-smoke ####
-    #########################################
-    mac_ppc_105a_smoke_factory = factory.BuildFactory()
-    mac_ppc_105a_smoke_factory.addStep(download_testmedia)
-    mac_ppc_105a_smoke_factory.addStep(test_smoke)
-    mac_ppc_105a_smoke_factory.addStep(util_process_clean)
-
-    mac_ppc_105a_smoke_builder = {
-                'name': "mac-ppc-10.5a-smoke",
-                'slavename': "mac-ppc-10_5a",
-                'factory': mac_ppc_105a_smoke_factory,
-                'builddir': './mac-ppc-10_5a-smoke',
-    }
-
-    #########################################
-    #### builder for mac-ppc-10_5b-smoke ####
-    #########################################
-    mac_ppc_105b_smoke_factory = factory.BuildFactory()
-    mac_ppc_105b_smoke_factory.addStep(download_testmedia)
-    mac_ppc_105b_smoke_factory.addStep(test_smoke)
-    mac_ppc_105b_smoke_factory.addStep(util_process_clean)
-
-    mac_ppc_105b_smoke_builder = {
-                'name': "mac-ppc-10.5b-smoke",
-                'slavename': "mac-ppc-10_5b",
-                'factory': mac_ppc_105b_smoke_factory,
-                'builddir': './mac-ppc-10_5b-smoke',
-    }
-
-
-    #####################################
-    #### builder for mac64-ppc-smoke ####
-    #####################################
-    mac_ppc_64_smoke_factory = factory.BuildFactory()
-    mac_ppc_64_smoke_factory.addStep(download_testmedia)
-    mac_ppc_64_smoke_factory.addStep(test_smoke)
-    mac_ppc_64_smoke_factory.addStep(util_process_clean)
-
-    mac_ppc_64_smoke_builder = {
-                'name': "mac64-ppc-smoke",
-                'slavename': "mac64a-ppc",
-                'factory': mac_ppc_64_smoke_factory,
-                'builddir': './mac64-ppc-smoke',
-    }
-
-
-    ######################################
-    #### builder for mac64b-ppc-smoke ####
-    ######################################
-    mac_ppc_64b_smoke_factory = factory.BuildFactory()
-    mac_ppc_64b_smoke_factory.addStep(download_testmedia)
-    mac_ppc_64b_smoke_factory.addStep(test_smoke)
-    mac_ppc_64b_smoke_factory.addStep(util_process_clean)
-
-    mac_ppc_64b_smoke_builder = {
-                'name': "mac64b-ppc-smoke",
-                'slavename': "mac64b-ppc",
-                'factory': mac_ppc_64b_smoke_factory,
-                'builddir': './mac64b-ppc-smoke',
-    }
 
 
     #################################
@@ -1363,128 +1138,6 @@ class tamarinredux:
                 'builddir': './mac64-intel-test',
     }
 
-    ########################################
-    #### builder for mac-ppc-10_4a-test ####
-    ########################################
-    mac_ppc_104a_test_factory = factory.BuildFactory()
-    mac_ppc_104a_test_factory.addStep(test_commandline)
-    mac_ppc_104a_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_104_ppc"))
-    mac_ppc_104a_test_factory.addStep(test_generic(name="Release", shellname="avmshell_104_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_104a_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_104_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_104a_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_104_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_104a_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_104_ppc", vmargs="-Ojit", config="", scriptargs=""))
-    mac_ppc_104a_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_104_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_104a_test_factory.addStep(util_process_clean)
-    mac_ppc_104a_test_factory.addStep(util_clean_buildsdir)
-    mac_ppc_104a_test_factory.addStep(sync_clean)
-
-    mac_ppc_104a_test_builder = {
-                'name': "mac-ppc-10.4a-test",
-                'slavename': "mac-ppc-10_4a",
-                'factory': mac_ppc_104a_test_factory,
-                'builddir': './mac-ppc-10_4a-test',
-    }
-
-
-    ########################################
-    #### builder for mac-ppc-10_4b-test ####
-    ########################################
-    mac_ppc_104b_test_factory = factory.BuildFactory()
-    mac_ppc_104b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_104_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_104b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_104_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_104b_test_factory.addStep(util_process_clean)
-    mac_ppc_104b_test_factory.addStep(util_clean_buildsdir)
-    mac_ppc_104b_test_factory.addStep(sync_clean)
-
-    mac_ppc_104b_test_builder = {
-                'name': "mac-ppc-10.4b-test",
-                'slavename': "mac-ppc-10_4b",
-                'factory': mac_ppc_104b_test_factory,
-                'builddir': './mac-ppc-10_4b-test',
-    }
-
-
-    ########################################
-    #### builder for mac-ppc-10_5a-test ####
-    ########################################
-    mac_ppc_105a_test_factory = factory.BuildFactory()
-    mac_ppc_105a_test_factory.addStep(test_commandline)
-    mac_ppc_105a_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_ppc"))
-    mac_ppc_105a_test_factory.addStep(test_generic(name="Release", shellname="avmshell_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_105a_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_105a_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_105a_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_ppc", vmargs="-Ojit", config="", scriptargs=""))
-    mac_ppc_105a_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_105a_test_factory.addStep(util_process_clean)
-    mac_ppc_105a_test_factory.addStep(util_clean_buildsdir)
-    mac_ppc_105a_test_factory.addStep(sync_clean)
-
-    mac_ppc_105a_test_builder = {
-                'name': "mac-ppc-10.5a-test",
-                'slavename': "mac-ppc-10_5a",
-                'factory': mac_ppc_105a_test_factory,
-                'builddir': './mac-ppc-10_5a-test',
-    }
-
-
-    ########################################
-    #### builder for mac-ppc-10_5b-test ####
-    ########################################
-    mac_ppc_105b_test_factory = factory.BuildFactory()
-    mac_ppc_105b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_105b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_105b_test_factory.addStep(util_process_clean)
-    mac_ppc_105b_test_factory.addStep(util_clean_buildsdir)
-    mac_ppc_105b_test_factory.addStep(sync_clean)
-
-    mac_ppc_105b_test_builder = {
-                'name': "mac-ppc-10.5b-test",
-                'slavename': "mac-ppc-10_5b",
-                'factory': mac_ppc_105b_test_factory,
-                'builddir': './mac-ppc-10_5b-test',
-    }
-
-
-    ####################################
-    #### builder for mac64-ppc-test ####
-    ####################################
-    mac_ppc_64_test_factory = factory.BuildFactory()
-    mac_ppc_64_test_factory.addStep(test_commandline)
-    mac_ppc_64_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_64_ppc"))
-    mac_ppc_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_64_ppc", vmargs="-Ojit", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_64_test_factory.addStep(util_process_clean)
-    mac_ppc_64_test_factory.addStep(util_clean_buildsdir)
-    mac_ppc_64_test_factory.addStep(sync_clean)
-
-    mac_ppc_64_test_builder = {
-                'name': "mac64-ppc-test",
-                'slavename': "mac64a-ppc",
-                'factory': mac_ppc_64_test_factory,
-                'builddir': './mac64-ppc-test',
-    }
-
-
-    #####################################
-    #### builder for mac64b-ppc-test ####
-    #####################################
-    mac_ppc_64b_test_factory = factory.BuildFactory()
-    mac_ppc_64b_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_ppc_64b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_64b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_64b_test_factory.addStep(util_process_clean)
-    mac_ppc_64b_test_factory.addStep(util_clean_buildsdir)
-    mac_ppc_64b_test_factory.addStep(sync_clean)
-
-    mac_ppc_64b_test_builder = {
-                'name': "mac64b-ppc-test",
-                'slavename': "mac64b-ppc",
-                'factory': mac_ppc_64b_test_factory,
-                'builddir': './mac64b-ppc-test',
-    }
-
 
     ################################
     #### builder for linux-test ####
@@ -1795,33 +1448,6 @@ class tamarinredux:
     }
 
 
-    #########################################
-    #### builder for mac-ppc-performance ####
-    #########################################
-    mac_ppc_performance_factory = factory.BuildFactory()
-    mac_ppc_performance_factory.addStep(sync_clean)
-    mac_ppc_performance_factory.addStep(sync_clone(url=HG_URL))
-    mac_ppc_performance_factory.addStep(sync_update)
-    mac_ppc_performance_factory.addStep(bb_slaveupdate(slave="mac-ppc-performance"))
-    mac_ppc_performance_factory.addStep(bb_lockacquire)
-    mac_ppc_performance_factory.addStep(perf_prepare)
-    mac_ppc_performance_factory.addStep(perf_release)
-    mac_ppc_performance_factory.addStep(perf_release_interp)
-    mac_ppc_performance_factory.addStep(perf_release_jit)
-    mac_ppc_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell_ppc"))
-    mac_ppc_performance_factory.addStep(util_process_clean)
-    mac_ppc_performance_factory.addStep(util_clean_buildsdir)
-    mac_ppc_performance_factory.addStep(bb_lockrelease)
-    mac_ppc_performance_factory.addStep(sync_clean)
-
-    mac_ppc_performance_builder = {
-                'name': "mac-ppc-performance",
-                'slavename': "mac-ppc-performance",
-                'factory': mac_ppc_performance_factory,
-                'builddir': './mac-ppc-performance',
-    }
-
-
     #######################################
     #### builder for linux-performance ####
     #######################################
@@ -2112,27 +1738,8 @@ class tamarinredux:
     mac_ppc_deep_factory.addStep(sync_update)
     mac_ppc_deep_factory.addStep(bb_slaveupdate(slave="mac-ppc-deep"))
     mac_ppc_deep_factory.addStep(download_testmedia)
-    mac_ppc_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d_ppc"))
-    mac_ppc_deep_factory.addStep(test_selftest(name="Debug64", shellname="avmshell_d_64_ppc"))
-    mac_ppc_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s_ppc"))
-    mac_ppc_deep_factory.addStep(test_selftest(name="ReleaseDebugger64", shellname="avmshell_s_64_ppc"))
-    mac_ppc_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd_ppc"))
-    mac_ppc_deep_factory.addStep(test_selftest(name="DebugDebugger64", shellname="avmshell_sd_64_ppc"))
-    mac_ppc_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_ppc", vmargs="", config="ppc-mac-tvm-debug-deep", scriptargs=""))
-    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_ppc", vmargs="", config="ppc-mac-tvm-debugdebugger-deep", scriptargs=""))
-    mac_ppc_deep_factory.addStep(test_generic(name="Debug64", shellname="avmshell_d_64_ppc", vmargs="", config="ppc-mac-tvm-debug-deep", scriptargs=""))
-    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger64", shellname="avmshell_sd_64_ppc", vmargs="", config="ppc-mac-tvm-debugdebugger-deep", scriptargs=""))
-    mac_ppc_deep_factory.addStep(deep_release_esc)
-    mac_ppc_deep_factory.addStep(test_misc)
     mac_ppc_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air_ppc", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER +AVMFEATURE_OVERRIDE_GLOBAL_NEW +AVMFEATURE_USE_SYSTEM_MALLOC"))
     mac_ppc_deep_factory.addStep(test_generic(name="ReleasDebugger-air", shellname="avmshell_air_ppc", vmargs="", config="", scriptargs=""))
-    mac_ppc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_ppc", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
-    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
-    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
-    mac_ppc_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    mac_ppc_deep_factory.addStep(test_generic(name="Release64-GCthreshold", shellname="avmshell_64_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger64-GCthreshold", shellname="avmshell_sd_64_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_ppc_deep_factory.addStep(util_process_clean)
     mac_ppc_deep_factory.addStep(util_clean_buildsdir)
     mac_ppc_deep_factory.addStep(sync_clean)
@@ -2143,6 +1750,208 @@ class tamarinredux:
                 'factory': mac_ppc_deep_factory,
                 'builddir': './mac-ppc-deep',
     }
+
+
+    ########################################
+    #### builder for mac-ppc-10_4a-deep ####
+    ########################################
+    mac_ppc_104a_deep_factory = factory.BuildFactory()
+    mac_ppc_104a_deep_factory.addStep(sync_clean)
+    mac_ppc_104a_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_104a_deep_factory.addStep(sync_update)
+    mac_ppc_104a_deep_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_4"))
+
+    mac_ppc_104a_deep_factory.addStep(compile_builtin)
+    mac_ppc_104a_deep_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_104_ppc", args="--enable-shell --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
+    mac_ppc_104a_deep_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_104_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_WORDCODE_INTERP"))
+    mac_ppc_104a_deep_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_104_ppc", args="--enable-shell --enable-debug --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
+
+    mac_ppc_104a_deep_factory.addStep(download_testmedia)
+    mac_ppc_104a_deep_factory.addStep(test_selftest(name="Release", shellname="avmshell_104_ppc"))
+    mac_ppc_104a_deep_factory.addStep(test_generic(name="Release", shellname="avmshell_104_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_104a_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_104_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_104a_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_104_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_104a_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_104_ppc", vmargs="-Ojit", config="", scriptargs=""))
+    mac_ppc_104a_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_104_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_104a_deep_factory.addStep(util_process_clean)
+    mac_ppc_104a_deep_factory.addStep(util_clean_buildsdir)
+    mac_ppc_104a_deep_factory.addStep(sync_clean)
+
+    mac_ppc_104a_deep_builder = {
+                'name': "mac-ppc-10.4a-deep",
+                'slavename': "mac-ppc-10_4a-deep",
+                'factory': mac_ppc_104a_deep_factory,
+                'builddir': './mac-ppc-10_4a-deep',
+    }
+
+
+    ########################################
+    #### builder for mac-ppc-10_4b-deep ####
+    ########################################
+    mac_ppc_104b_deep_factory = factory.BuildFactory()
+    mac_ppc_104b_deep_factory.addStep(sync_clean)
+    mac_ppc_104b_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_104b_deep_factory.addStep(sync_update)
+    mac_ppc_104b_deep_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_4"))
+
+    mac_ppc_104b_deep_factory.addStep(compile_builtin)
+    mac_ppc_104b_deep_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_104_ppc", args="--enable-shell --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
+    mac_ppc_104b_deep_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_104_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
+
+    mac_ppc_104b_deep_factory.addStep(download_testmedia)
+    mac_ppc_104b_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_104_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_104b_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_104_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_104b_deep_factory.addStep(util_process_clean)
+    mac_ppc_104b_deep_factory.addStep(util_clean_buildsdir)
+    mac_ppc_104b_deep_factory.addStep(sync_clean)
+
+    mac_ppc_104b_deep_builder = {
+                'name': "mac-ppc-10.4b-deep",
+                'slavename': "mac-ppc-10_4b-deep",
+                'factory': mac_ppc_104b_deep_factory,
+                'builddir': './mac-ppc-10_4b-deep',
+    }
+
+
+    ########################################
+    #### builder for mac-ppc-10_5a-deep ####
+    ########################################
+    mac_ppc_105a_deep_factory = factory.BuildFactory()
+    mac_ppc_105a_deep_factory.addStep(sync_clean)
+    mac_ppc_105a_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_105a_deep_factory.addStep(sync_update)
+    mac_ppc_105a_deep_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_5"))
+
+    mac_ppc_105a_deep_factory.addStep(compile_builtin)
+    mac_ppc_105a_deep_factory.addStep(compile_generic(name="Release", shellname="avmshell_ppc", args="--enable-shell --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
+    mac_ppc_105a_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_WORDCODE_INTERP"))
+    mac_ppc_105a_deep_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_ppc", args="--enable-shell --enable-debug --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC"))
+
+    mac_ppc_105a_deep_factory.addStep(download_testmedia)
+    mac_ppc_105a_deep_factory.addStep(test_selftest(name="Release", shellname="avmshell_ppc"))
+    mac_ppc_105a_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d_ppc"))
+    mac_ppc_105a_deep_factory.addStep(deep_release_esc)
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Release", shellname="avmshell_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_ppc", vmargs="-Ojit", config="", scriptargs=""))
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_ppc", vmargs="", config="ppc-mac-tvm-debug-deep", scriptargs=""))
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_ppc", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
+    mac_ppc_105a_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_ppc_105a_deep_factory.addStep(util_process_clean)
+    mac_ppc_105a_deep_factory.addStep(util_clean_buildsdir)
+    mac_ppc_105a_deep_factory.addStep(sync_clean)
+
+    mac_ppc_105a_deep_builder = {
+                'name': "mac-ppc-10.5a-deep",
+                'slavename': "mac-ppc-10_5a-deep",
+                'factory': mac_ppc_105a_test_factory,
+                'builddir': './mac-ppc-10_5a-test',
+    }
+
+
+    ########################################
+    #### builder for mac-ppc-10_5b-deep ####
+    ########################################
+    mac_ppc_105b_deep_factory = factory.BuildFactory()
+    mac_ppc_105b_deep_factory.addStep(sync_clean)
+    mac_ppc_105b_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_105b_deep_factory.addStep(sync_update)
+    mac_ppc_105b_deep_factory.addStep(bb_slaveupdate(slave="mac-ppc-10_5"))
+
+    mac_ppc_105b_deep_factory.addStep(compile_builtin)
+    mac_ppc_105b_deep_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_ppc", args="--enable-shell --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
+    mac_ppc_105b_deep_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin --mac-sdk=104u", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_PPC +AVMFEATURE_DEBUGGER"))
+
+    mac_ppc_105b_deep_factory.addStep(download_testmedia)
+    mac_ppc_105b_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s_ppc"))
+    mac_ppc_105b_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd_ppc"))
+    mac_ppc_105b_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_105b_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_105b_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_ppc", vmargs="", config="ppc-mac-tvm-debugdebugger-deep", scriptargs=""))
+    mac_ppc_105b_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    mac_ppc_105b_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    mac_ppc_105b_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_ppc_105b_deep_factory.addStep(util_process_clean)
+    mac_ppc_105b_deep_factory.addStep(util_clean_buildsdir)
+    mac_ppc_105b_deep_factory.addStep(sync_clean)
+
+    mac_ppc_105b_deep_builder = {
+                'name': "mac-ppc-10.5b-deep",
+                'slavename': "mac-ppc-10_5b-deep",
+                'factory': mac_ppc_105b_deep_factory,
+                'builddir': './mac-ppc-10_5b-deep',
+    }
+
+
+    #####################################
+    #### builder for mac-ppc-64-deep ####
+    #####################################
+    mac_ppc_64a_deep_factory = factory.BuildFactory()
+    mac_ppc_64a_deep_factory.addStep(sync_clean)
+    mac_ppc_64a_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_64a_deep_factory.addStep(sync_update)
+    mac_ppc_64a_deep_factory.addStep(bb_slaveupdate(slave="mac64-ppc"))
+
+    mac_ppc_64a_deep_factory.addStep(compile_builtin)
+    mac_ppc_64a_deep_factory.addStep(compile_generic(name="Release", shellname="avmshell_64_ppc", args="--enable-shell --target=ppc64-darwin --mac-sdk=105", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_PPC +AVMSYSTEM_BIG_ENDIAN"))
+    mac_ppc_64a_deep_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64_ppc", args="--enable-shell --enable-debug --target=ppc64-darwin --mac-sdk=105", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_PPC +AVMSYSTEM_BIG_ENDIAN"))
+
+    mac_ppc_64a_deep_factory.addStep(download_testmedia)
+    mac_ppc_64a_deep_factory.addStep(test_selftest(name="Release", shellname="avmshell_64_ppc"))
+    mac_ppc_64a_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d_64_ppc"))
+    mac_ppc_64a_deep_factory.addStep(test_generic(name="Release", shellname="avmshell_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64a_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_64a_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_64_ppc", vmargs="-Ojit", config="", scriptargs=""))
+    mac_ppc_64a_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64a_deep_factory.addStep(test_generic(name="DebugDeep", shellname="avmshell_d_64_ppc", vmargs="", config="ppc-mac-tvm-debug-deep", scriptargs=""))
+    mac_ppc_64a_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_64_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_ppc_64a_deep_factory.addStep(util_process_clean)
+    mac_ppc_64a_deep_factory.addStep(util_clean_buildsdir)
+    mac_ppc_64a_deep_factory.addStep(sync_clean)
+
+    mac_ppc_64a_deep_builder = {
+                'name': "mac64a-ppc-deep",
+                'slavename': "mac64a-ppc-deep",
+                'factory': mac_ppc_64a_deep_factory,
+                'builddir': './mac64a-ppc-deep',
+    }
+
+
+    ######################################
+    #### builder for mac-ppc-64b-deep ####
+    ######################################
+    mac_ppc_64b_deep_factory = factory.BuildFactory()
+    mac_ppc_64b_deep_factory.addStep(sync_clean)
+    mac_ppc_64b_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac_ppc_64b_deep_factory.addStep(sync_update)
+    mac_ppc_64b_deep_factory.addStep(bb_slaveupdate(slave="mac64-ppc"))
+
+    mac_ppc_64b_deep_factory.addStep(compile_builtin)
+    mac_ppc_64b_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc64-darwin --mac-sdk=105", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_PPC +AVMSYSTEM_BIG_ENDIAN +AVMFEATURE_WORDCODE_INTERP"))
+    mac_ppc_64b_deep_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", args="--enable-shell --enable-debugger --target=ppc64-darwin --mac-sdk=105", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_PPC +AVMSYSTEM_BIG_ENDIAN +AVMFEATURE_DEBUGGER"))
+    mac_ppc_64b_deep_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc64-darwin --mac-sdk=105", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_PPC +AVMSYSTEM_BIG_ENDIAN +AVMFEATURE_DEBUGGER"))
+
+    mac_ppc_64b_deep_factory.addStep(download_testmedia)
+    mac_ppc_64b_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s_64_ppc"))
+    mac_ppc_64b_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd_64_ppc"))
+    mac_ppc_64b_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
+    mac_ppc_64b_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64b_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
+    mac_ppc_64b_deep_factory.addStep(test_generic(name="DebugDebuggerDeep", shellname="avmshell_sd_64_ppc", vmargs="", config="ppc-mac-tvm-debugdebugger-deep", scriptargs=""))
+    mac_ppc_64b_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_64_ppc", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac_ppc_64b_deep_factory.addStep(util_process_clean)
+    mac_ppc_64b_deep_factory.addStep(util_clean_buildsdir)
+    mac_ppc_64b_deep_factory.addStep(sync_clean)
+
+    mac_ppc_64b_deep_factory = {
+                'name': "mac64b-ppc-deep",
+                'slavename': "mac64b-ppc-deep",
+                'factory': mac_ppc_64b_deep_factory,
+                'builddir': './mac64b-ppc-deep',
+    }
+
 
     ########################################
     #### builder for solaris-sparc-deep ####
@@ -2408,12 +2217,6 @@ class tamarinredux:
                 mac_intel_104_compile_builder,
                 mac_intel_105_compile_builder,
                 mac_intel_64_compile_builder,
-                mac_ppc_104a_compile_builder,
-                mac_ppc_104b_compile_builder,
-                mac_ppc_105a_compile_builder,
-                mac_ppc_105b_compile_builder,
-                mac_ppc_64_compile_builder,
-                mac_ppc_64b_compile_builder,
                 linux_compile_builder,
                 linux2_compile_builder,
                 linux_64_compile_builder,
@@ -2431,12 +2234,6 @@ class tamarinredux:
                 mac_intel_104_smoke_builder,
                 mac_intel_105_smoke_builder,
                 mac_intel_64_smoke_builder,
-                mac_ppc_104a_smoke_builder,
-                mac_ppc_104b_smoke_builder,
-                mac_ppc_105a_smoke_builder,
-                mac_ppc_105b_smoke_builder,
-                mac_ppc_64_smoke_builder,
-                mac_ppc_64b_smoke_builder,
                 linux_smoke_builder,
                 linux2_smoke_builder,
                 linux_64_smoke_builder,
@@ -2454,12 +2251,6 @@ class tamarinredux:
                 mac_intel_104_test_builder,
                 mac_intel_105_test_builder,
                 mac_intel_64_test_builder,
-                mac_ppc_104a_test_builder,
-                mac_ppc_104b_test_builder,
-                mac_ppc_105a_test_builder,
-                mac_ppc_105b_test_builder,
-                mac_ppc_64_test_builder,
-                mac_ppc_64b_test_builder,
                 linux_test_builder,
                 linux2_test_builder,
                 linux_64_test_builder,
@@ -2475,7 +2266,6 @@ class tamarinredux:
                 windows_performance_builder,
                 mac_performance_builder,
                 mac_64_performance_builder,
-                mac_ppc_performance_builder,
                 linux_performance_builder,
                 winmobile_performance_builder,
                 android_performance_builder,
@@ -2484,6 +2274,12 @@ class tamarinredux:
                 windows_p3_deep_builder,
                 mac_deep_builder,
                 mac_ppc_deep_builder,
+                mac_ppc_104a_deep_builder,
+                mac_ppc_104b_deep_builder,
+                mac_ppc_105a_deep_builder,
+                mac_ppc_105b_deep_builder,
+                mac_ppc_64a_deep_builder,
+                mac_ppc_64b_deep_builder,
                 windows_64_deep_builder,
                 solaris_sparc_deep_builder,
                 winmobile_emulator_deep_builder,
