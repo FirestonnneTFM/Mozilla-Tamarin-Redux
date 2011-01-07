@@ -51,9 +51,7 @@ export platform=linux
 
 
 ## Used by make in the build scripts
-export make_opt="-j2"
+export make_opt="-j8"
 
-# required to force compiler to generate 32bit binaries
-export CXX="g++ -m32"
-export CC="gcc -m32"
+
 
