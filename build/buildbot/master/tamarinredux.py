@@ -60,7 +60,6 @@ class tamarinredux:
                                    "mac-intel-10.4-compile", "mac-intel-10.5-compile", "mac64-intel-compile",
                                    "linux-compile", "linux2-compile",
                                    "linux64-compile",
-                                   "winmobile-emulator-compile",
                                    "solaris-sparc-compile", "solaris-sparc2-compile",
                                    "android-compile",
                                    "linux-arm-compile", "linux-arm2-compile", 
@@ -72,7 +71,6 @@ class tamarinredux:
                                    "mac-intel-10.4-smoke", "mac-intel-10.5-smoke", "mac64-intel-smoke",
                                    "linux-smoke", "linux2-smoke",
                                    "linux64-smoke",
-                                   "winmobile-emulator-smoke",
                                    "solaris-sparc-smoke", "solaris-sparc2-smoke",
                                    "android-smoke",
                                    "linux-arm-smoke", "linux-arm2-smoke",
@@ -87,7 +85,6 @@ class tamarinredux:
                                   ["linux-smoke", "linux-compile"],
                                   ["linux2-smoke", "linux2-compile"],
                                   ["linux64-smoke", "linux64-compile"],
-                                  ["winmobile-emulator-smoke", "winmobile-emulator-compile"],
                                   ["solaris-sparc-smoke", "solaris-sparc-compile"],
                                   ["solaris-sparc2-smoke", "solaris-sparc-compile"],
                                   ["android-smoke","android-compile"],
@@ -102,7 +99,6 @@ class tamarinredux:
                                    "mac-intel-10.4-test", "mac-intel-10.5-test", "mac64-intel-test",
                                    "linux-test", "linux2-test",
                                    "linux64-test",
-                                   "winmobile-emulator-test",
                                    "solaris-sparc-test", "solaris-sparc2-test",
                                    "android-test",
                                    "linux-arm-test", "linux-arm2-test",
@@ -117,7 +113,6 @@ class tamarinredux:
                                   ["linux-test", "linux-smoke"],
                                   ["linux2-test", "linux2-smoke"],
                                   ["linux64-test", "linux64-smoke"],
-                                  ["winmobile-emulator-test", "winmobile-emulator-smoke"],
                                   ["solaris-sparc-test", "solaris-sparc-smoke"],
                                   ["solaris-sparc2-test", "solaris-sparc2-smoke"],
                                   ["android-test", "android-smoke"],
@@ -158,7 +153,6 @@ class tamarinredux:
                                     "linux-deep",
                                     "linux-arm-deep",
                                     "linux-arm2-deep",
-                                    "winmobile-emulator-deep",
                                     "linux-mips-deep",
                                                                     ],
                     builderDependencies=[
@@ -178,7 +172,6 @@ class tamarinredux:
                                   ["mac-ppc-64b-deep", "mac64-intel-test"],
                                   ["solaris-sparc-deep", "solaris-sparc-test"],
                                   ["windows64-deep", "windows64-test"], 
-                                  ["winmobile-emulator-deep", "winmobile-emulator-test"],
                                   ["linux-mips-deep", "linux-mips-test"],
                                  ])
     
@@ -253,6 +246,14 @@ class tamarinredux:
     windows_64_compile_factory.addStep(sync_clone(url=HG_URL))
     windows_64_compile_factory.addStep(sync_update)
     windows_64_compile_factory.addStep(bb_slaveupdate(slave="windows64"))
+    windows_64_compile_factory.addStep(compile_builtin)
+    windows_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args="--enable-shell --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
+    windows_64_compile_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-shell --enable-wordcode-interp --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
+    windows_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-shell --enable-debug --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
+    windows_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-shell --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
+    windows_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-shell --enable-debug --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
+    windows_64_compile_factory.addStep(compile_buildcheck)
+    windows_64_compile_factory.addStep(util_upload_asteam)
 
     windows_64_compile_builder = {
                 'name': "windows64-compile",
@@ -459,95 +460,6 @@ class tamarinredux:
                 'slavename': "linux64",
                 'factory': linux_64_compile_factory,
                 'builddir': './linux64-compile',
-    }
-
-
-
-    ################################################
-    #### builder for winmobile-emulator-compile ####
-    ################################################
-    winmobile_emulator_compile_factory = factory.BuildFactory()
-    winmobile_emulator_compile_factory.addStep(sync_clean)
-    winmobile_emulator_compile_factory.addStep(sync_clone(url=HG_URL))
-    winmobile_emulator_compile_factory.addStep(sync_update)
-    winmobile_emulator_compile_factory.addStep(bb_slaveupdate(slave="winmobile-emulator"))
-    winmobile_emulator_compile_factory.addStep(compile_builtin)
-    winmobile_emulator_compile_factory.addStep(compile_generic(name="ReleaseARM", shellname="avmshell_arm", args="--enable-shell --arm-arch=arch5 --target=arm-windows", upload="false"))
-    winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --arm-arch=arch5 --target=arm-windows", upload="false"))
-    winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-fpu-ARM", shellname="avmshell_fpu_arm", args="--enable-shell --enable-arm-fpu --arm-arch=arch6 --target=arm-windows", upload="false"))
-    winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --arm-arch=arch5 --target=arm-windows", upload="false"))
-    winmobile_emulator_compile_factory.addStep(compile_generic(name="Debug-fpu-ARM", shellname="avmshell_fpu_arm_d", args="--enable-shell --enable-debug --enable-arm-fpu --arm-arch=arch6 --target=arm-windows", upload="false"))
-    winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=x86_64-win', 'avmshell_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'compile64':'true'
-                },
-                description='starting Release64 build...',
-                descriptionDone='finished Release64 build.',
-                name="Release64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-wordcode-interp --target=x86_64-win', 'avmshell_wordcode_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'compile64':'true'
-                },
-                description='starting Release-wordcode64 build...',
-                descriptionDone='finished Release-wordcode64 build.',
-                name="Release-wordcode64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=x86_64-win', 'avmshell_d_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'compile64':'true'
-                },
-                description='starting Debug64 build...',
-                descriptionDone='finished Debug64 build.',
-                name="Debug64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debugger --target=x86_64-win', 'avmshell_s_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'compile64':'true'
-                },
-                description='starting ReleaseDebugger64 build...',
-                descriptionDone='finished ReleaseDebugger64 build.',
-                name="ReleaseDebugger64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-debugger --target=x86_64-win', 'avmshell_sd_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'compile64':'true'
-                },
-                description='starting DebugDebugger64 build...',
-                descriptionDone='finished DebugDebugger64 build.',
-                name="DebugDebugger64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    winmobile_emulator_compile_factory.addStep(compile_buildcheck_local)
-    winmobile_emulator_compile_factory.addStep(util_upload_asteam_local)
-    winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['./build-release-mobile-pocketpc-arm-sizereport.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run sizereport...',
-                descriptionDone='finished sizereport.',
-                name="Build_Release_sizereport",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-
-    winmobile_emulator_compile_builder = {
-                'name': "winmobile-emulator-compile",
-                'slavename': "winmobile-emulator",
-                'factory': winmobile_emulator_compile_factory,
-                'builddir': './winmobile-emulator-compile',
     }
 
 
@@ -850,22 +762,6 @@ class tamarinredux:
                 'slavename': "linux64",
                 'factory': linux_64_smoke_factory,
                 'builddir': './linux64-smoke',
-    }
-
-
-    ##############################################
-    #### builder for winmobile-emulator-smoke ####
-    ##############################################
-    winmobile_emulator_smoke_factory = factory.BuildFactory()
-    winmobile_emulator_smoke_factory.addStep(download_testmedia)
-    #winmobile_emulator_smoke_factory.addStep(test_emulator_smoke_mobile)
-    winmobile_emulator_smoke_factory.addStep(util_process_clean)
-
-    winmobile_emulator_smoke_builder = {
-                'name': "winmobile-emulator-smoke",
-                'slavename': "winmobile-emulator",
-                'factory': winmobile_emulator_smoke_factory,
-                'builddir': './winmobile-emulator-smoke',
     }
 
 
@@ -1206,26 +1102,6 @@ class tamarinredux:
     }
 
 
-    #############################################
-    #### builder for winmobile-emulator-test ####
-    #############################################
-    winmobile_emulator_test_factory = factory.BuildFactory()
-    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
-    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    #winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
-    winmobile_emulator_test_factory.addStep(util_process_clean)
-    winmobile_emulator_test_factory.addStep(util_clean_buildsdir)
-    winmobile_emulator_test_factory.addStep(sync_clean)
-
-    winmobile_emulator_test_builder = {
-                'name': "winmobile-emulator-test",
-                'slavename': "winmobile-emulator",
-                'factory': winmobile_emulator_test_factory,
-                'builddir': './winmobile-emulator-test',
-    }
-
-
     ########################################
     #### builder for solaris-sparc-test ####
     ########################################
@@ -1560,6 +1436,61 @@ class tamarinredux:
                 description='starting VTune build...',
                 descriptionDone='finished VTune build.',
                 name="VTune",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --arm-arch=arch5 --target=arm-windows', 'avmshell_arm', 'true', ''],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'compileWinMo':'true'
+                },
+                description='starting ReleaseARM build...',
+                descriptionDone='finished ReleaseARM build.',
+                name="ReleaseARM",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-wordcode-interp --arm-arch=arch5 --target=arm-windows', 'avmshell_wordcode_arm', 'true', ''],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'compileWinMo':'true'
+                },
+                description='starting Release-wordcode-ARM build...',
+                descriptionDone='finished Release-wordcode-ARM build.',
+                name="Release-wordcode-ARM",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-fpu --arm-arch=arch6 --target=arm-windows', 'avmshell_fpu_arm', 'true', ''],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'compileWinMo':'true'
+                },
+                description='starting Release-fpu-ARM build...',
+                descriptionDone='finished Release-fpu-ARM build.',
+                name="Release-fpu-ARM",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --arm-arch=arch5 --target=arm-windows', 'avmshell_arm_d', 'true', ''],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'compileWinMo':'true'
+                },
+                description='starting DebugARM build...',
+                descriptionDone='finished DebugARM build.',
+                name="DebugARM",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    windows_deep_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-arm-fpu --arm-arch=arch6 --target=arm-windows', 'avmshell_fpu_arm_d', 'true', ''],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'compileWinMo':'true'
+                },
+                description='starting Debug-fpu-ARM build...',
+                descriptionDone='finished Debug-fpu-ARM build.',
+                name="Debug-fpu-ARM",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
@@ -2013,29 +1944,6 @@ class tamarinredux:
                 'builddir': './windows64-deep',
     }
 
-    ##################################
-    #### builder for winmobile-emulator-deep ####
-    ##################################
-    winmobile_emulator_deep_factory = factory.BuildFactory()
-    winmobile_emulator_deep_factory.addStep(sync_clean)
-    winmobile_emulator_deep_factory.addStep(sync_clone(url=HG_URL))
-    winmobile_emulator_deep_factory.addStep(sync_update)
-    winmobile_emulator_deep_factory.addStep(bb_slaveupdate(slave="winmobile-emulator-deep"))
-    winmobile_emulator_deep_factory.addStep(download_testmedia)
-    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="arm-winmobile-emulator-tvm-release-deep", scriptargs=""))
-    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="arm-winmobile-emulator-tvm-release-Dinterp-deep", scriptargs=""))
-    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="arm-winmobile-emulator-tvm-release-Dinterp-deep", scriptargs=""))
-    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="arm-winmobile-emulator-tvm-release-Ojit-deep", scriptargs=""))
-    winmobile_emulator_deep_factory.addStep(util_process_clean)
-    winmobile_emulator_deep_factory.addStep(util_clean_buildsdir)
-    winmobile_emulator_deep_factory.addStep(sync_clean)
-
-    winmobile_emulator_deep_builder = {
-                'name': "winmobile-emulator-deep",
-                'slavename': "winmobile-emulator-deep",
-                'factory': winmobile_emulator_deep_factory,
-                'builddir': './winmobile-emulator-deep',
-    }
 
     ##################################
     #### builder for linux-deep   ####
@@ -2196,7 +2104,6 @@ class tamarinredux:
                 linux_compile_builder,
                 linux2_compile_builder,
                 linux_64_compile_builder,
-                winmobile_emulator_compile_builder,
                 solaris_sparc_compile_builder,
                 solaris_sparc2_compile_builder,
                 android_compile_builder,
@@ -2213,7 +2120,6 @@ class tamarinredux:
                 linux_smoke_builder,
                 linux2_smoke_builder,
                 linux_64_smoke_builder,
-                winmobile_emulator_smoke_builder,
                 solaris_sparc_smoke_builder,
                 solaris_sparc2_smoke_builder,
                 android_smoke_builder,
@@ -2230,7 +2136,6 @@ class tamarinredux:
                 linux_test_builder,
                 linux2_test_builder,
                 linux_64_test_builder,
-                winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
                 solaris_sparc2_test_builder,
                 android_test_builder,
@@ -2257,7 +2162,6 @@ class tamarinredux:
                 mac_ppc_64b_deep_builder,
                 windows_64_deep_builder,
                 solaris_sparc_deep_builder,
-                winmobile_emulator_deep_builder,
                 linux_deep_builder,
                 linux_arm_deep_builder,
                 linux_arm2_deep_builder,

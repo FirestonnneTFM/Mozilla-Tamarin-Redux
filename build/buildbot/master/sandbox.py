@@ -60,7 +60,6 @@ class sandbox:
                                    "mac-intel-10.4-compile-sandbox", "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
                                    "linux-compile-sandbox", "linux2-compile-sandbox",
                                    "linux64-compile-sandbox",
-                                   "winmobile-emulator-compile-sandbox",
                                    "solaris-sparc-compile-sandbox", "solaris-sparc2-compile-sandbox",
                                    "android-compile-sandbox",
                                    "linux-arm-compile-sandbox", "linux-arm2-compile-sandbox",
@@ -73,7 +72,6 @@ class sandbox:
                                    "mac-intel-10.4-smoke-sandbox", "mac-intel-10.5-smoke-sandbox", "mac64-intel-smoke-sandbox",
                                    "linux-smoke-sandbox", "linux2-smoke-sandbox",
                                    "linux64-smoke-sandbox",
-                                   "winmobile-emulator-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox", "solaris-sparc2-smoke-sandbox",
                                    "android-smoke-sandbox",
                                    "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox",
@@ -88,7 +86,6 @@ class sandbox:
                                   ["linux-smoke-sandbox", "linux-compile-sandbox"],
                                   ["linux2-smoke-sandbox", "linux2-compile-sandbox"],
                                   ["linux64-smoke-sandbox", "linux64-compile-sandbox"],
-                                  ["winmobile-emulator-smoke-sandbox", "winmobile-emulator-compile-sandbox"],
                                   ["solaris-sparc-smoke-sandbox", "solaris-sparc-compile-sandbox"],
                                   ["solaris-sparc2-smoke-sandbox", "solaris-sparc-compile-sandbox"],
                                   ["android-smoke-sandbox","android-compile-sandbox"],
@@ -103,7 +100,6 @@ class sandbox:
                                    "mac-intel-10.4-test-sandbox", "mac-intel-10.5-test-sandbox", "mac64-intel-test-sandbox",
                                    "linux-test-sandbox", "linux2-test-sandbox",
                                    "linux64-test-sandbox",
-                                   "winmobile-emulator-test-sandbox",
                                    "solaris-sparc-test-sandbox", "solaris-sparc2-test-sandbox",
                                    "android-test-sandbox",
                                    "linux-arm-test-sandbox", "linux-arm2-test-sandbox",
@@ -118,7 +114,6 @@ class sandbox:
                                   ["linux-test-sandbox", "linux-smoke-sandbox"],
                                   ["linux2-test-sandbox", "linux2-smoke-sandbox"],
                                   ["linux64-test-sandbox", "linux64-smoke-sandbox"],
-                                  ["winmobile-emulator-test-sandbox", "winmobile-emulator-smoke-sandbox"],
                                   ["solaris-sparc-test-sandbox", "solaris-sparc-smoke-sandbox"],
                                   ["solaris-sparc2-test-sandbox", "solaris-sparc2-smoke-sandbox"],
                                   ["android-test-sandbox", "android-smoke-sandbox"],
@@ -181,6 +176,14 @@ class sandbox:
     sb_windows_64_compile_factory.addStep(sync_clone_sandbox)
     sb_windows_64_compile_factory.addStep(sync_update)
     sb_windows_64_compile_factory.addStep(bb_slaveupdate(slave="windows64"))
+    sb_windows_64_compile_factory.addStep(compile_builtin)
+    sb_windows_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args="--enable-shell --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
+    sb_windows_64_compile_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-shell --enable-wordcode-interp --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
+    sb_windows_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-shell --enable-debug --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
+    sb_windows_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-shell --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
+    sb_windows_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-shell --enable-debug --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
+    sb_windows_64_compile_factory.addStep(compile_buildcheck)
+    sb_windows_64_compile_factory.addStep(util_upload_asteam)
 
     sb_windows_64_compile_builder = {
                 'name': "windows64-compile-sandbox",
@@ -390,91 +393,6 @@ class sandbox:
                 'slavename': "linux64",
                 'factory': sb_linux_64_compile_factory,
                 'builddir': './sandbox-linux64-compile',
-    }
-
-
-    ########################################################
-    #### builder for winmobile-emulator-compile-sandbox ####
-    ########################################################
-    sb_winmobile_emulator_compile_factory = factory.BuildFactory()
-    sb_winmobile_emulator_compile_factory.addStep(sync_clean)
-    sb_winmobile_emulator_compile_factory.addStep(sync_clone_sandbox)
-    sb_winmobile_emulator_compile_factory.addStep(sync_update)
-    sb_winmobile_emulator_compile_factory.addStep(bb_slaveupdate(slave="winmobile-emulator"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_builtin)
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="ReleaseARM", shellname="avmshell_arm", args="--enable-shell --arm-arch=arch5 --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --arm-arch=arch5 --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-fpu-ARM", shellname="avmshell_fpu_arm", args="--enable-shell --enable-arm-fpu --arm-arch=arch6 --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --arm-arch=arch5 --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Debug-fpu-ARM", shellname="avmshell_fpu_arm_d", args="--enable-shell --enable-debug --enable-arm-fpu --arm-arch=arch6 --target=arm-windows", upload="false"))
-    sb_winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=x86_64-win', 'avmshell_64', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'compile64':'true',
-                },
-                description='starting Release64 build...',
-                descriptionDone='finished Release64 build.',
-                name="Release64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-wordcode-interp --target=x86_64-win', 'avmshell_wordcode_64', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'compile64':'true'
-                },
-                description='starting Release-wordcode64 build...',
-                descriptionDone='finished Release-wordcode64 build.',
-                name="Release-wordcode64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=x86_64-win', 'avmshell_d_64', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'compile64':'true'
-                },
-                description='starting Debug64 build...',
-                descriptionDone='finished Debug64 build.',
-                name="Debug64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debugger --target=x86_64-win', 'avmshell_s_64', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'compile64':'true'
-                },
-                description='starting ReleaseDebugger64 build...',
-                descriptionDone='finished ReleaseDebugger64 build.',
-                name="ReleaseDebugger64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-debugger --target=x86_64-win', 'avmshell_sd_64', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'compile64':'true'
-                },
-                description='starting DebugDebugger64 build...',
-                descriptionDone='finished DebugDebugger64 build.',
-                name="DebugDebugger64",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_winmobile_emulator_compile_factory.addStep(compile_buildcheck_local)
-    sb_winmobile_emulator_compile_factory.addStep(util_upload_asteam_local)
-
-    sb_winmobile_emulator_compile_builder = {
-                'name': "winmobile-emulator-compile-sandbox",
-                'slavename': "winmobile-emulator",
-                'factory': sb_winmobile_emulator_compile_factory,
-                'builddir': './sandbox-winmobile-emulator-compile',
     }
 
 
@@ -781,21 +699,6 @@ class sandbox:
                 'builddir': './sandbox-linux64-smoke',
     }
 
-
-    ######################################################
-    #### builder for winmobile-emulator-smoke-sandbox ####
-    ######################################################
-    sb_winmobile_emulator_smoke_factory = factory.BuildFactory()
-    sb_winmobile_emulator_smoke_factory.addStep(download_testmedia)
-    #sb_winmobile_emulator_smoke_factory.addStep(test_emulator_smoke_mobile)
-    sb_winmobile_emulator_smoke_factory.addStep(util_process_clean)
-
-    sb_winmobile_emulator_smoke_builder = {
-                'name': "winmobile-emulator-smoke-sandbox",
-                'slavename': "winmobile-emulator",
-                'factory': sb_winmobile_emulator_smoke_factory,
-                'builddir': './sandbox-winmobile-emulator-smoke',
-    }
 
     #################################################
     #### builder for solaris-sparc-smoke-sandbox ####
@@ -1129,25 +1032,6 @@ class sandbox:
                 'builddir': './sandbox-linux64-test',
     }
 
-    #####################################################
-    #### builder for winmobile-emulator-test-sandbox ####
-    #####################################################
-    sb_winmobile_emulator_test_factory = factory.BuildFactory()
-    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
-    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    #sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
-    sb_winmobile_emulator_test_factory.addStep(util_process_clean)
-    sb_winmobile_emulator_test_factory.addStep(util_clean_buildsdir)
-    sb_winmobile_emulator_test_factory.addStep(sync_clean)
-
-    sb_winmobile_emulator_test_builder = {
-                'name': "winmobile-emulator-test-sandbox",
-                'slavename': "winmobile-emulator",
-                'factory': sb_winmobile_emulator_test_factory,
-                'builddir': './sandbox-winmobile-emulator-test',
-    }
-
 
     ########################################
     #### builder for solaris-sparc-test ####
@@ -1286,7 +1170,6 @@ class sandbox:
                 sb_linux_compile_builder,
                 sb_linux2_compile_builder,
                 sb_linux_64_compile_builder,
-                sb_winmobile_emulator_compile_builder,
                 sb_solaris_sparc_compile_builder,
                 sb_solaris_sparc2_compile_builder,
                 sb_android_compile_builder,
@@ -1303,7 +1186,6 @@ class sandbox:
                 sb_linux_smoke_builder,
                 sb_linux2_smoke_builder,
                 sb_linux_64_smoke_builder,
-                sb_winmobile_emulator_smoke_builder,
                 sb_solaris_sparc_smoke_builder,
                 sb_solaris_sparc2_smoke_builder,
                 sb_android_smoke_builder,
@@ -1320,7 +1202,6 @@ class sandbox:
                 sb_linux_test_builder,
                 sb_linux2_test_builder,
                 sb_linux_64_test_builder,
-                sb_winmobile_emulator_test_builder,
                 sb_solaris_sparc_test_builder,
                 sb_solaris_sparc2_test_builder,
                 sb_android_test_builder,
