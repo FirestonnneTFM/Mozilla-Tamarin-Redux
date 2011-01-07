@@ -235,14 +235,6 @@ class sandbox:
     sb_windows_64_compile_factory.addStep(sync_clone_sandbox)
     sb_windows_64_compile_factory.addStep(sync_update)
     sb_windows_64_compile_factory.addStep(bb_slaveupdate(slave="windows64"))
-    sb_windows_64_compile_factory.addStep(compile_builtin)
-    sb_windows_64_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_64", args="--enable-shell --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
-    sb_windows_64_compile_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-shell --enable-wordcode-interp --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
-    sb_windows_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-shell --enable-debug --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64"))
-    sb_windows_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-shell --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
-    sb_windows_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-shell --enable-debug --enable-debugger --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
-    sb_windows_64_compile_factory.addStep(compile_buildcheck)
-    sb_windows_64_compile_factory.addStep(util_upload_asteam)
 
     sb_windows_64_compile_builder = {
                 'name': "windows64-compile-sandbox",
