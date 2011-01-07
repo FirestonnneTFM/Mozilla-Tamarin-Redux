@@ -139,7 +139,6 @@ class tamarinredux:
                                   ["mac-performance", "mac-intel-10.5-test"],
                                   ["mac64-performance", "mac64-intel-test"],
                                   ["linux-performance", "linux-test"],
-                                  ["winmobile-performance", "winmobile-emulator-test"],
                                   ["android-performance","android-test"],
                                  ])
 
@@ -1524,29 +1523,6 @@ class tamarinredux:
                 'builddir': './android-performance',
     }
 
-    ###########################################
-    #### builder for winmobile-performance ####
-    ###########################################
-    winmobile_performance_factory = factory.BuildFactory()
-    winmobile_performance_factory.addStep(sync_clean)
-    winmobile_performance_factory.addStep(sync_clone(url=HG_URL))
-    winmobile_performance_factory.addStep(sync_update)
-    winmobile_performance_factory.addStep(bb_slaveupdate(slave="winmobile-performance"))
-    winmobile_performance_factory.addStep(bb_lockacquire)
-    winmobile_performance_factory.addStep(perf_prepare)
-    #winmobile_performance_factory.addStep(perf_release_arm)
-    #winmobile_performance_factory.addStep(perf_release_arm_interp)
-    #winmobile_performance_factory.addStep(perf_release_arm_jit)
-    winmobile_performance_factory.addStep(util_clean_buildsdir)
-    winmobile_performance_factory.addStep(bb_lockrelease)
-    winmobile_performance_factory.addStep(sync_clean)
-
-    winmobile_performance_builder = {
-                'name': "winmobile-performance",
-                'slavename': "winmobile-performance",
-                'factory': winmobile_performance_factory,
-                'builddir': './winmobile-performance',
-    }
 
     ################################################################################
     ################################################################################
@@ -2267,7 +2243,6 @@ class tamarinredux:
                 mac_performance_builder,
                 mac_64_performance_builder,
                 linux_performance_builder,
-                winmobile_performance_builder,
                 android_performance_builder,
 
                 windows_deep_builder,
