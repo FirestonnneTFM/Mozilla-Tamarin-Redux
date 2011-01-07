@@ -127,7 +127,6 @@ class tamarinredux:
                     builderNames=["windows-performance",
                                    "mac-performance", "mac64-performance",
                                    "linux-performance",
-                                   "winmobile-performance",
                                    "android-performance"],
                     builderDependencies=[
                                   ["windows-performance", "windows-test"], 
@@ -1753,8 +1752,8 @@ class tamarinredux:
     mac_ppc_105a_deep_builder = {
                 'name': "mac-ppc-10.5a-deep",
                 'slavename': "mac-ppc-10_5a-deep",
-                'factory': mac_ppc_105a_test_factory,
-                'builddir': './mac-ppc-10_5a-test',
+                'factory': mac_ppc_105a_deep_factory,
+                'builddir': './mac-ppc-10_5a-deep',
     }
 
 
@@ -1852,7 +1851,7 @@ class tamarinredux:
     mac_ppc_64b_deep_factory.addStep(util_clean_buildsdir)
     mac_ppc_64b_deep_factory.addStep(sync_clean)
 
-    mac_ppc_64b_deep_factory = {
+    mac_ppc_64b_deep_builder = {
                 'name': "mac64b-ppc-deep",
                 'slavename': "mac64b-ppc-deep",
                 'factory': mac_ppc_64b_deep_factory,
