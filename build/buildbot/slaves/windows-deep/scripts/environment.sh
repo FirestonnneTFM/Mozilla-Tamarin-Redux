@@ -74,6 +74,12 @@ export INCLUDE="c:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC
 export LIB="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;C:\Program Files\Intel\VTune\Analyzer\Lib;"
 export LIBPATH="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;C:\Program Files\Intel\VTune\Analyzer\Lib;"
 
+# If we are being asked to compile the windows-mobile shells then bring in the windows mobile environment
+# this will reset the PATH, INCLUDE and LIB to point to the correct winmo locations
+if [ "$compileWinMo" == "true" ]; then
+    . ../winmobile-emulator/scripts/environment.sh
+fi
+
 ## Used by make in the build scripts
 export make_opt="-j3"
 
