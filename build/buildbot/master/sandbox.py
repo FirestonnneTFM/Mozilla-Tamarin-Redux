@@ -149,6 +149,68 @@ class sandbox:
     sb_windows_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     sb_windows_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     sb_windows_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=x86_64-win', 'avmshell_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
+                    'compile64':'true',
+                },
+                description='starting Release64 build...',
+                descriptionDone='finished Release64 build.',
+                name="Release64",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_windows_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-wordcode-interp --target=x86_64-win', 'avmshell_wordcode_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
+                    'compile64':'true'
+                },
+                description='starting Release-wordcode64 build...',
+                descriptionDone='finished Release-wordcode64 build.',
+                name="Release-wordcode64",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_windows_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=x86_64-win', 'avmshell_d_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
+                    'compile64':'true'
+                },
+                description='starting Debug64 build...',
+                descriptionDone='finished Debug64 build.',
+                name="Debug64",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_windows_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debugger --target=x86_64-win', 'avmshell_s_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
+                    'compile64':'true'
+                },
+                description='starting ReleaseDebugger64 build...',
+                descriptionDone='finished ReleaseDebugger64 build.',
+                name="ReleaseDebugger64",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_windows_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-debugger --target=x86_64-win', 'avmshell_sd_64', 'false', '+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
+                    'compile64':'true'
+                },
+                description='starting DebugDebugger64 build...',
+                descriptionDone='finished DebugDebugger64 build.',
+                name="DebugDebugger64",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_windows_compile_factory.addStep(compile_buildcheck_local)
+    sb_windows_compile_factory.addStep(util_upload_asteam_local)
+    sb_windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
                 env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='running file-check against source...',
@@ -156,9 +218,6 @@ class sandbox:
                 name="FileCheck",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
-    sb_windows_compile_factory.addStep(compile_buildcheck)
-    sb_windows_compile_factory.addStep(util_upload_asteam)
-
 
     sb_windows_compile_builder = {
                 'name': "windows-compile-sandbox",
