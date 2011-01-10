@@ -62,7 +62,7 @@ abcfile = "../utils/exactgc.abc"
 print("Compiling exactgc script...")
 if os.path.exists(abcfile):
     os.remove(abcfile)
-os.system("java -jar " + classpath + " -import ../core/builtin.abc -import ../shell/shell_toplevel.abc -debug " + asfile)
+os.system("java -jar " + classpath + " -AS3 -import ../core/builtin.abc -import ../shell/shell_toplevel.abc -debug " + asfile)
 
 # TODO: Would be useful to overwrite the output file only if the
 # output file does not exist or if it has not changed.

@@ -363,6 +363,22 @@
 //    -b filename    Emit tracers for GC_AS3_EXACT ("builtins") to this file
 //    -i filename    Emit interlock definitons to this file
 //    -ns namespace  The C++ namespace to wrap around the output, default "avmplus"
+//
+//
+// Performance notes.
+//
+// The script has been tuned quite a bit, and there's a built-in profiling option
+// to help us tune more (search for 'var profiling' below).  Even so, about
+// 90% of the time is still spent in reading input and extracting annotations, so
+// obvious things to do if further performance improvements are needed would be:
+//
+//   - cache intermediate data (eg, save extracted lines + file's path and mtime)
+//   - don't split the file into individual lines (splitting takes some time).
+//
+// The design is currently line-based because I would like to expand it later to
+// include various kinds of error checking that goes hand-in-hand with SafeGC, eg,
+// if GCMember appears on a line then there should be a GC annotation too.  So
+// it would be good to try caching first.
 
 import avmplus.*;
 
@@ -617,6 +633,7 @@ const constructors =
 
 // Configuration etc
 var debug = false;               // print useful debugging info
+var profiling = false;           // profile at a function level for selected functions
 var errorContext = "top level";  // for error messages, updated as we go
 const largeObjectCutoff = 2000;  // more arbitrary than not, "close" to large object limit in MMgc
 
@@ -717,8 +734,24 @@ function strcmp(a,b)
     return 0;
 }
 
+// The following function is about 20x faster than the obvious one-liner
+//    return File.read(filename).split(/\r\n|\r|\n/);
+//
+// Using single regular expressions in place of the disjunction gave us
+// a factor of five; switching to strings for the splitting another
+// factor of four.  (Reorganizing the code further, to use knowledge
+// of the absence of \r to avoid scanning for \r\n, say, has yielded 
+// nothing.)
+
 function readLines(filename) {
-    return File.read(filename).split(/\r\n|\r|\n/);
+    var text = File.read(filename);
+    if (text.indexOf("\r\n") != -1)
+        return text.split("\r\n");
+
+    if (text.indexOf("\r") != -1)
+        return text.split("\r");
+
+    return text.split("\n");
 }
 
 // Look for and record any options, return array of file names.  Skip
@@ -783,17 +816,25 @@ function processOptionsAndFindFiles(args)
 
 function readFiles(files)
 {
+    // For profiling
+    var readingTime = 0;
+    var processingTime = 0;
+    var splittingTime = 0;
+
     var cppClassStack = [];       // tracks GC_CPP_EXACT, etc
     var cppDataStack = [];        // tracks GC_DATA_BEGIN / GC_DATA_END
 
-    // TODO: factor regular expressions to improve readability and 
-    // avoid duplication.
+    // TODO: factor regular expressions to avoid duplication?
+
+    const attrStringRegex:RegExp = /^\s*\"([^\"]*)\"\s*$/;
+    const attrMiscRegex:RegExp =   /^\s*((?:<\s+|\s+>|[a-zA-Z0-9_:<>])+)\s*$/;
+    const attrNumberRegex:RegExp = /^\s*([0-9]+(?:\.[0-9]+)?)\s*$/;
 
     function parseAttrValue(s) {
         var result;
-        if ((result = (/^\s*\"([^\"]*)\"\s*$/).exec(s)) != null ||
-            (result = (/^\s*((?:<\s+|\s+>|[a-zA-Z0-9_:<>])+)\s*$/).exec(s)) != null ||
-            (result = (/^\s*([0-9]+(?:\.[0-9]+)?)\s*$/).exec(s)) != null) {
+        if ((result = attrStringRegex.exec(s)) != null ||
+            (result = attrMiscRegex.exec(s)) != null ||
+            (result = attrNumberRegex.exec(s)) != null) {
             return result[1];
         }
         else
@@ -804,14 +845,21 @@ function readFiles(files)
     // contain a comma, for example, in "count" attributes the
     // expression frequently uses offsetof(a,b).
 
+    const spacesStartRegex:RegExp =      /^(\s+)/;
+    const spacesEndRegex:RegExp =        /(\s+)$/;
+    const commaSpacesStartRegex:RegExp = /^(,\s*)/;
+    const nameValuePairRegex:RegExp =    /^([a-zA-Z0-9_]+)\s*=\s*(\"[^\"]*\"|true|false)/;
+    const valueRegex:RegExp =            /^\"[^\"]*\"|(?:[0-9]+(?:\.[0-9]+)?)|(?:<\s+|\s+>|[a-zA-Z0-9_:<>])+/;
+
     function splitAttrs(s, paren=null) {
+        var then = new Date();
         var xs = [];
         var result;
         for (;;) {
             // strip leading and trailing spaces
-            if ((result = (/^(\s+)/).exec(s)) != null)
+            if ((result = spacesStartRegex.exec(s)) != null)
                 s = s.substring(result[1].length);
-            if ((result = (/(\s+)$/).exec(s)) != null)
+            if ((result = spacesEndRegex.exec(s)) != null)
                 s = s.substring(0,s.length-result[1].length);
 
             if (paren != null) {
@@ -825,16 +873,16 @@ function readFiles(files)
 
             // strip leading comma and any spaces following it
             if (xs.length > 0) {
-                if ((result = (/^(,\s*)/).exec(s)) == null)
+                if ((result = commaSpacesStartRegex.exec(s)) == null)
                     fail("Incorrect attribute string: missing comma in " + s);
                 s = s.substring(result[1].length);
             }
             if (s == "")
                 break;
             // simple-identifier=(string|boolean), string, number, qualified-identifier
-            if ((result = (/^([a-zA-Z0-9_]+)\s*=\s*(\"[^\"]*\"|true|false)/).exec(s)) != null)
+            if ((result = nameValuePairRegex.exec(s)) != null)
                 xs.push([result[1], parseAttrValue(result[2])]);
-            else if ((result = (/^\"[^\"]*\"|(?:[0-9]+(?:\.[0-9]+)?)|(?:<\s+|\s+>|[a-zA-Z0-9_:<>])+/).exec(s)) != null)
+            else if ((result = valueRegex.exec(s)) != null)
                 xs.push(parseAttrValue(result[0]));
             else 
                 fail("Incorrect attribute string: bad value or name/value pair: " + s);
@@ -842,6 +890,7 @@ function readFiles(files)
         }
         if (debug)
             print(xs);
+        splittingTime += (new Date() - then);
         return xs;
     }
 
@@ -881,34 +930,34 @@ function readFiles(files)
     // argument list.
 
     const cppMetaTag = 
-        "(" +
-        ["GC_CPP_EXACT_WITH_HOOK_IFDEF",
-         "GC_CPP_EXACT_WITH_HOOK_IFNDEF",
-         "GC_CPP_EXACT_WITH_HOOK_IF",
-         "GC_CPP_EXACT_WITH_HOOK",
-         "GC_CPP_EXACT_WITH_HOOK",
-         "GC_CPP_EXACT_WITH_HOOK",
-         "GC_CPP_EXACT_IFDEF",
-         "GC_CPP_EXACT_IFNDEF",
-         "GC_CPP_EXACT_IF",
-         "GC_CPP_EXACT",
-         "GC_AS3_EXACT_WITH_HOOK_IFDEF",
-         "GC_AS3_EXACT_WITH_HOOK_IFNDEF",
-         "GC_AS3_EXACT_WITH_HOOK_IF",
-         "GC_AS3_EXACT_WITH_HOOK",
-         "GC_AS3_EXACT_WITH_HOOK",
-         "GC_AS3_EXACT_WITH_HOOK",
-         "GC_AS3_EXACT_IFDEF",
-         "GC_AS3_EXACT_IFNDEF",
-         "GC_AS3_EXACT_IF",
-         "GC_AS3_EXACT",
-         "GC_NO_DATA",
-         "GC_DATA_BEGIN",
-         "GC_DATA_END"].join("|") +
-        ")\\s*\\((.*)";
+        new RegExp("^(" +
+                   ["GC_CPP_EXACT_WITH_HOOK_IFDEF",
+                    "GC_CPP_EXACT_WITH_HOOK_IFNDEF",
+                    "GC_CPP_EXACT_WITH_HOOK_IF",
+                    "GC_CPP_EXACT_WITH_HOOK",
+                    "GC_CPP_EXACT_WITH_HOOK",
+                    "GC_CPP_EXACT_WITH_HOOK",
+                    "GC_CPP_EXACT_IFDEF",
+                    "GC_CPP_EXACT_IFNDEF",
+                    "GC_CPP_EXACT_IF",
+                    "GC_CPP_EXACT",
+                    "GC_AS3_EXACT_WITH_HOOK_IFDEF",
+                    "GC_AS3_EXACT_WITH_HOOK_IFNDEF",
+                    "GC_AS3_EXACT_WITH_HOOK_IF",
+                    "GC_AS3_EXACT_WITH_HOOK",
+                    "GC_AS3_EXACT_WITH_HOOK",
+                    "GC_AS3_EXACT_WITH_HOOK",
+                    "GC_AS3_EXACT_IFDEF",
+                    "GC_AS3_EXACT_IFNDEF",
+                    "GC_AS3_EXACT_IF",
+                    "GC_AS3_EXACT",
+                    "GC_NO_DATA",
+                    "GC_DATA_BEGIN",
+                    "GC_DATA_END"].join("|") +
+                   ")\\s*\\((.*)");
 
-    function matchCppMetaTag(line) {
-        return (new RegExp(cppMetaTag)).exec(line);
+    function matchCppMetaTag(line, where) {
+        return cppMetaTag.exec(line.substring(where));
     }
 
     // Does not match the trailing right paren.  $1 is the tag, $2 the
@@ -916,34 +965,36 @@ function readFiles(files)
     // argument list.
 
     const cppFieldTag = 
-        "(" +
-        ["GC_POINTERS",
-         "GC_POINTERS_SMALL",
-         "GC_STRUCTURES",
-         "GC_STRUCTURES_SMALL",
-         "GC_ATOMS",
-         "GC_ATOMS_SMALL",
-         "GC_STRUCTURE",
-         "GC_STRUCTURE_IFDEF",
-         "GC_STRUCTURE_IFNDEF",
-         "GC_STRUCTURE_IF",
-         "GC_POINTER",
-         "GC_POINTER_IFDEF",
-         "GC_POINTER_IFNDEF",
-         "GC_POINTER_IF",
-         "GC_ATOM",
-         "GC_ATOM_IFDEF",
-         "GC_ATOM_IFNDEF",
-         "GC_ATOM_IF",
-         "GC_CONSERVATIVE",
-         "GC_CONSERVATIVE_IFDEF",
-         "GC_CONSERVATIVE_IFNDEF",
-         "GC_CONSERVATIVE_IF"].join("|") +
-        ")\\s*\\((.*)";
+        new RegExp("^(" +
+                   ["GC_POINTERS",
+                    "GC_POINTERS_SMALL",
+                    "GC_STRUCTURES",
+                    "GC_STRUCTURES_SMALL",
+                    "GC_ATOMS",
+                    "GC_ATOMS_SMALL",
+                    "GC_STRUCTURE",
+                    "GC_STRUCTURE_IFDEF",
+                    "GC_STRUCTURE_IFNDEF",
+                    "GC_STRUCTURE_IF",
+                    "GC_POINTER",
+                    "GC_POINTER_IFDEF",
+                    "GC_POINTER_IFNDEF",
+                    "GC_POINTER_IF",
+                    "GC_ATOM",
+                    "GC_ATOM_IFDEF",
+                    "GC_ATOM_IFNDEF",
+                    "GC_ATOM_IF",
+                    "GC_CONSERVATIVE",
+                    "GC_CONSERVATIVE_IFDEF",
+                    "GC_CONSERVATIVE_IFNDEF",
+                    "GC_CONSERVATIVE_IF"].join("|") +
+                   ")\\s*\\((.*)");
 
-    function matchCppFieldTag(line) {
-        return (new RegExp(cppFieldTag)).exec(line);
+    function matchCppFieldTag(line, where) {
+        return cppFieldTag.exec(line.substring(where));
     }
+
+    const nativeAnnotationRegex:RegExp = /^\[native\s*\((.*)\)\s*\]/;
 
     // FIXME: Additional error checking we could add here:
     //  - only one data section per class, globally
@@ -952,61 +1003,92 @@ function readFiles(files)
         cppDataStack.length = 0;
         cppClassStack.length = 0;
 
-        var text = readLines(filename);
+        const beforeReadLines = new Date();
+        const text = readLines(filename);
+        const afterReadLines = new Date();
+
+        const beforeProcessing = new Date();
+        const cppfile = Boolean(filename.match(/\.(h|cpp)$/));
+        const as3file = Boolean(filename.match(/\.as$/));
         var lineno = 0;
+
         for ( var i=0 ; i < text.length ; i++ ) {
             var line = text[i];
             var result;
 
             lineno++;
+
+            // Quick precomputation to filter out lines that we don't
+            // need to examine any further with regular expressions.  The
+            // regex search will start at the known good location.
+
+            var gcIndex = -1;
+            var nativeIndex = -1;
+            if (!as3file)
+                gcIndex = line.indexOf("GC_");
+            if (!cppfile)
+                nativeIndex = line.indexOf("[native");
+            if (gcIndex == -1 && nativeIndex == -1)
+                continue;
+
             errorContext = "On " + filename + " line " + lineno;
 
-            // C++ annotations.
+            // For line matching we match only at the start of the
+            // line after taking the substring starting at the
+            // known-good index.  This yields the same performance as
+            // using a global regex and setting lastIndex to indicate
+            // where we want to start matching.
 
-            if ((result = matchCppMetaTag(line)) != null) {
-                reportMatch(line);
-                var v = positionalAttrs(result[1], result[2], ")", null);
-                if (v is GCDataBegin || v is GCNoData) {
-                    if (cppClassStack.length == 0 || cppClassStack[cppClassStack.length-1] != v.cls)
-                        fail("Mismatched " + result[1] + " here: " + v.cls);
-                    cppDataStack.push(v.cls);
+            if (gcIndex >= 0) {
+                // C++ annotations.
+
+                if ((result = matchCppMetaTag(line, gcIndex)) != null) {
+                    reportMatch(line);
+                    var v = positionalAttrs(result[1], result[2], ")", null);
+                    if (v is GCDataBegin || v is GCNoData) {
+                        if (cppClassStack.length == 0 || cppClassStack[cppClassStack.length-1] != v.cls)
+                            fail("Mismatched " + result[1] + " here: " + v.cls);
+                        cppDataStack.push(v.cls);
+                    }
+                    if (v is GCDataEnd || v is GCNoData) {
+                        var top = currentClassName();
+                        if (v.cls != top)
+                            fail(result[1] + " for " + v.cls + " but " + top + " is on the stack top");
+                        cppDataStack.pop();
+                        cppClassStack.pop();
+                    }
+                    if (!(v is GCDataSection)) {
+                        if (v is GCClass)
+                            cppClassStack.push(v.cls);
+                        specs.push(v);
+                    }
                 }
-                if (v is GCDataEnd || v is GCNoData) {
-                    var top = currentClassName();
-                    if (v.cls != top)
-                        fail(result[1] + " for " + v.cls + " but " + top + " is on the stack top");
-                    cppDataStack.pop();
-                    cppClassStack.pop();
-                }
-                if (!(v is GCDataSection)) {
-                    if (v is GCClass)
-                        cppClassStack.push(v.cls);
+                else if ((result = matchCppFieldTag(line, gcIndex)) != null) {
+                    reportMatch(line);
+                    var v = positionalAttrs(result[1], result[2], ")", currentClassName());
                     specs.push(v);
                 }
             }
-            else if ((result = matchCppFieldTag(line)) != null) {
-                reportMatch(line);
-                var v = positionalAttrs(result[1], result[2], ")", currentClassName());
-                specs.push(v);
-            }
 
-            // AS3 annotations.
-            //
-            // For AS3 annotations we collect C++ class names if the [native] spec says
-            // that the C++ class should be exactly traced.
+            if (nativeIndex >= 0) {
+                // AS3 annotations.
+                //
+                // For AS3 annotations we collect C++ class names if the [native] spec says
+                // that the C++ class should be exactly traced.
 
-            if ((result = (/^\s*\[native\s*\((.*)\)\s*\]/).exec(line)) != null) {
-                reportMatch(line);
-                var attr = parseNamedAttrs(result[1]);
-                var flags = {};
-                for ( var j=0 ; j < attr.length ; j++ ) {
-                    if (attr[j] is Array)
-                        flags[attr[j][0]] = attr[j][1];
+                if ((result = nativeAnnotationRegex.exec(line.substring(nativeIndex))) != null) {
+                    reportMatch(line);
+                    var attr = parseNamedAttrs(result[1]);
+                    var flags = {};
+                    for ( var j=0 ; j < attr.length ; j++ ) {
+                        if (attr[j] is Array)
+                            flags[attr[j][0]] = attr[j][1];
+                    }
+                    if ("cls" in flags && ("classgc" in flags || "gc" in flags))
+                        specs.push(new AS3Class(cppNamespace, flags["cls"]));
+                    if ("instance" in flags && ("instancegc" in flags || "gc" in flags))
+                        specs.push(new AS3Class(cppNamespace, flags["instance"]));
                 }
-                if ("cls" in flags && ("classgc" in flags || "gc" in flags))
-                    specs.push(new AS3Class(cppNamespace, flags["cls"]));
-                if ("instance" in flags && ("instancegc" in flags || "gc" in flags))
-                    specs.push(new AS3Class(cppNamespace, flags["instance"]));
             }
         }
 
@@ -1015,10 +1097,21 @@ function readFiles(files)
 
         if (cppClassStack.length != 0)
             fail("Missing GC_DATA_BEGIN/GC_DATA_END for these: " + cppClassStack);
+
+        const afterProcessing = new Date();
+
+        readingTime += (afterReadLines - beforeReadLines);
+        processingTime += (afterProcessing - beforeProcessing);
     }
-    
+
     for ( var i=0 ; i < files.length ; i++ )
         processFile(files[i]);
+
+    if (profiling) {
+        print("  reading time = " + readingTime/1000 + "s");
+        print("  processing time = " + processingTime/1000 + "s");
+        print("    splitting time = " + splittingTime/1000 + "s");
+    }
 }
 
 function isVariableLength(t) {
@@ -1470,15 +1563,25 @@ function constructAndPrintTracers()
                      interlocks.get() + "\n"));
 }
 
-function main()
+function profile(what, thunk)
 {
-    readFiles(processOptionsAndFindFiles(System.argv));
-    collectClasses();
-    checkClasses();
-    collectFields();
-    computeLargeOrSmall();
-    constructTracerBodies();
-    constructAndPrintTracers();
+    var then = new Date();
+    var result = thunk();
+    var now = new Date();
+    if (profiling)
+        print(what + ": " + (now - then)/1000 + "s");
+    return result;
 }
 
-main();
+function main()
+{
+    profile("readFiles", function() { readFiles(processOptionsAndFindFiles(System.argv)) });
+    profile("collectClasses", collectClasses);
+    profile("checkClasses", checkClasses);
+    profile("collectFields", collectFields);
+    profile("computeLargeOrSmall", computeLargeOrSmall);
+    profile("constructTracerBodies",constructTracerBodies);
+    profile("constructAndPrintTracers",constructAndPrintTracers);
+}
+
+profile("main", main);
