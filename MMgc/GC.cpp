@@ -443,6 +443,7 @@ namespace MMgc
         {
             // Some roots are on GC pages - a little unclear why, as of yet.  So for
             // now just require non-GCItems not to point to GC objects.
+            GCAssert(item.GetSize() != GCWorkItem::kSentinel1Size && item.GetSize() != GCWorkItem::kSentinel2Size);
             GCAssert(!IsPointerToGCPage(GetRealPointer(item.Ptr())) || !IsPointerToGCObject(GetRealPointer(item.Ptr())));
         }
     }
@@ -1881,7 +1882,7 @@ namespace MMgc
                 // the stack if the root is deleted.  See GCRoot::Destroy and
                 // GC::HandleLargeMarkItem
                 if(item.GetSize() > kMarkItemSplitThreshold) {
-                    PushWorkItem(GCWorkItem(r, GCWorkItem::kGCRoot));
+                    PushWorkItem_Unsafe(GCWorkItem(r, GCWorkItem::kGCRoot));
                     GCWorkItem *item = m_incrementalWork.Peek();
                     // test for mark stack overflow
                     if(item->GetSentinelPointer() == r)
@@ -2111,7 +2112,7 @@ namespace MMgc
             // that will prevent this split item from being freed, see comment block above.
 
             GCLargeAlloc::ProtectAgainstFree(wi.Ptr());
-            PushWorkItem(GCWorkItem(wi.Ptr(), GCWorkItem::kGCLargeAlloc));
+            PushWorkItem_Unsafe(GCWorkItem(wi.Ptr(), GCWorkItem::kGCLargeAlloc));
 
             // Is it a large, exactly traced item?
 
@@ -2145,8 +2146,8 @@ namespace MMgc
                 policy.signalExactMarkWork(size);
                 
                 // Save the state: cursor underneath and object on top.
-                PushWorkItem(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
-                PushWorkItem(GCWorkItem(wi.Ptr(), GCWorkItem::kLargeExactlyTracedTail));
+                PushWorkItem_Unsafe(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
+                PushWorkItem_Unsafe(GCWorkItem(wi.Ptr(), GCWorkItem::kLargeExactlyTracedTail));
             }
         }
         else if (wi.IsSentinel2Item())
@@ -2163,8 +2164,8 @@ namespace MMgc
                 cursor = (size_t)payload.GetSentinelPointer();
 
                 // Save the new state.
-                PushWorkItem(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
-                PushWorkItem(GCWorkItem(wi.GetSentinelPointer(), GCWorkItem::kLargeExactlyTracedTail));
+                PushWorkItem_Unsafe(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
+                PushWorkItem_Unsafe(GCWorkItem(wi.GetSentinelPointer(), GCWorkItem::kLargeExactlyTracedTail));
             }
             else if (wi.GetSentinel2Type() == GCWorkItem::kInertPayload) {
                 // Discard it - we're seeing this because of some arbitrary popping during
@@ -2770,7 +2771,9 @@ namespace MMgc
             GCWorkItem item = m_barrierWork.Pop();
             // The general invariants may be violated here - see comment block at the
             // beginning of MarkItem() for how deleted objects can foul up the works.
-            // So use the invariant-unaware API.
+            // So use the invariant-unaware API.  But check for sentinels - would be bad
+            // to find them here.
+            GCAssert(item.GetSize() != GCWorkItem::kSentinel1Size && item.GetSize() != GCWorkItem::kSentinel2Size);
             PushWorkItem_Unsafe(item);
         }
     }
