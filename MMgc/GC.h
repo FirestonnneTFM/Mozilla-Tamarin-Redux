@@ -80,24 +80,24 @@
 // Class is C++ implementation of AS3 class: Use this to declare the
 // class.
 #define GC_AS3_EXACT(cls, basecls)  cls : public basecls
-#define GC_AS3_EXACT_IFDEF(cls, basecls, ifdef)  cls : public basecls
-#define GC_AS3_EXACT_IFNDEF(cls, basecls, ifdef)  cls : public basecls
-#define GC_AS3_EXACT_IF(cls, basecls, ifdef)  cls : public basecls
+#define GC_AS3_EXACT_IFDEF(cls, basecls, cond)  cls : public basecls
+#define GC_AS3_EXACT_IFNDEF(cls, basecls, cond)  cls : public basecls
+#define GC_AS3_EXACT_IF(cls, basecls, cond)  cls : public basecls
 #define GC_AS3_EXACT_WITH_HOOK(cls, basecls)  cls : public basecls
-#define GC_AS3_EXACT_WITH_HOOK_IFDEF(cls, basecls)  cls : public basecls
-#define GC_AS3_EXACT_WITH_HOOK_IFNDEF(cls, basecls)  cls : public basecls
-#define GC_AS3_EXACT_WITH_HOOK_IF(cls, basecls)  cls : public basecls
+#define GC_AS3_EXACT_WITH_HOOK_IFDEF(cls, basecls, cond)  cls : public basecls
+#define GC_AS3_EXACT_WITH_HOOK_IFNDEF(cls, basecls, cond)  cls : public basecls
+#define GC_AS3_EXACT_WITH_HOOK_IF(cls, basecls, cond)  cls : public basecls
 
 // Class is internal to the runtime or host software, not exposed to
 // AS3: Use this to declare the class.
 #define GC_CPP_EXACT(cls, basecls)  cls : public basecls
-#define GC_CPP_EXACT_IFDEF(cls, basecls, ifdef)  cls : public basecls
-#define GC_CPP_EXACT_IFNDEF(cls, basecls, ifdef)  cls : public basecls
-#define GC_CPP_EXACT_IF(cls, basecls, ifdef)  cls : public basecls
+#define GC_CPP_EXACT_IFDEF(cls, basecls, cond)  cls : public basecls
+#define GC_CPP_EXACT_IFNDEF(cls, basecls, cond)  cls : public basecls
+#define GC_CPP_EXACT_IF(cls, basecls, cond)  cls : public basecls
 #define GC_CPP_EXACT_WITH_HOOK(cls, basecls)  cls : public basecls
-#define GC_CPP_EXACT_WITH_HOOK_IFDEF(cls, basecls)  cls : public basecls
-#define GC_CPP_EXACT_WITH_HOOK_IFNDEF(cls, basecls)  cls : public basecls
-#define GC_CPP_EXACT_WITH_HOOK_IF(cls, basecls)  cls : public basecls
+#define GC_CPP_EXACT_WITH_HOOK_IFDEF(cls, basecls, cond)  cls : public basecls
+#define GC_CPP_EXACT_WITH_HOOK_IFNDEF(cls, basecls, cond)  cls : public basecls
+#define GC_CPP_EXACT_WITH_HOOK_IF(cls, basecls, cond)  cls : public basecls
 
 // Before the first data member in a class
 #define GC_DATA_BEGIN(cls)  GC_DECLARE_EXACT_METHODS
@@ -113,29 +113,29 @@
 
 // Atom field
 #define GC_ATOM(field) field
-#define GC_ATOM_IFDEF(field,ifdef) field
-#define GC_ATOM_IFNDEF(field,ifdef) field
-#define GC_ATOM_IF(field,if_) field
+#define GC_ATOM_IFDEF(field,cond) field
+#define GC_ATOM_IFNDEF(field,cond) field
+#define GC_ATOM_IF(field,cond) field
 
 // Exact pointer field
 #define GC_POINTER(field) field
-#define GC_POINTER_IFDEF(field,ifdef) field
-#define GC_POINTER_IFNDEF(field,ifdef) field
-#define GC_POINTER_IF(field,if_) field
+#define GC_POINTER_IFDEF(field,cond) field
+#define GC_POINTER_IFNDEF(field,cond) field
+#define GC_POINTER_IF(field,cond) field
 
 // Conservative pointer field
 #define GC_CONSERVATIVE(field) field
-#define GC_CONSERVATIVE_IFDEF(field,ifdef) field
-#define GC_CONSERVATIVE_IFNDEF(field,ifdef) field
-#define GC_CONSERVATIVE_IF(field,if_) field
+#define GC_CONSERVATIVE_IFDEF(field,cond) field
+#define GC_CONSERVATIVE_IFNDEF(field,cond) field
+#define GC_CONSERVATIVE_IF(field,cond) field
 
 // Substructure fields: the field must provide a method 'void gcTrace(MMgc::GC* gc)' 
 // that is typically inline.  All List<> fields are substructure fields, and the
 // List<> templates provide the tracing functions.
 #define GC_STRUCTURE(field) field
-#define GC_STRUCTURE_IFDEF(field,ifdef) field
-#define GC_STRUCTURE_IFNDEF(field,ifdef) field
-#define GC_STRUCTURE_IF(field,ifdef) field
+#define GC_STRUCTURE_IFDEF(field,cond) field
+#define GC_STRUCTURE_IFNDEF(field,cond) field
+#define GC_STRUCTURE_IF(field,cond) field
 
 // Trailing pointer array fields: The 'k' is used to declare an array,
 // it is almost always 1 (and may be redundant here - don't know yet).
