@@ -83,7 +83,7 @@ namespace avmplus
         const int32_t       fullsize;
     private:
         Traits* const       GC_POINTER(_traits);
-        uintptr_t           GC_POINTERS_SMALL(_scopes, 1, fullsize); // Tagged pointers to Traits objects.
+        uintptr_t           GC_POINTERS_SMALL(_scopes[1], fullsize); // Tagged pointers to Traits objects.
 
         GC_DATA_END(ScopeTypeChain)
     // ------------------------ DATA SECTION END
@@ -130,7 +130,7 @@ namespace avmplus
         AbcEnv* const                   GC_POINTER(_abcEnv);
         const ScopeTypeChain* const     GC_POINTER(_scopeTraits);
         DRCWB(Namespacep) const         GC_POINTER(_defaultXmlNamespace);
-        Atom                            GC_ATOMS_SMALL(_scopes, 1, "getSize()");
+        Atom                            GC_ATOMS_SMALL(_scopes[1], "getSize()");
 
     GC_DATA_END(ScopeChain)
     // ------------------------ DATA SECTION END

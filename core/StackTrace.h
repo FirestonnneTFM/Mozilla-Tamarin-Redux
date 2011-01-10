@@ -307,7 +307,7 @@ namespace avmplus
         
         const int       depth;
         DRCWB(Stringp)  GC_POINTER(stringRep);
-        Element         GC_STRUCTURES(elements, 1, depth);
+        Element         GC_STRUCTURES(elements[1], depth);
         
         GC_DATA_END(StackTrace)
         // ------------------------ DATA SECTION END

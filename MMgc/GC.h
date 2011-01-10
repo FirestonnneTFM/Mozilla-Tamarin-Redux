@@ -65,17 +65,11 @@
 #  define VMPI_alloca_gc(gc, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
 #endif
 
-// Used by the GC annotation macros, can also be used manually in a pinch.
-
-#define GC_DECLARE_EXACT_METHODS \
-    public: \
-        virtual void gcTrace(MMgc::GC* gc); \
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
-
-// Annotations for exact GC.  These are not merely macros, they are
-// also processed by a script that generates tracing code.  See the
-// comment block in utils/exactgc.as for full documentation.  See
-// core/Domain.h for a simple example of how to use them.
+// Exact garbage collection (opt-in) macros.  These are not merely macros,
+// they are also processed by a script that generates tracing code.
+//
+// doc/mmgc/exactgc-cookbook.html is a gentle user's guide, while the
+// comment block in utils/exactgc.as is not gentle at all.
 
 // Class is C++ implementation of AS3 class: Use this to declare the
 // class.
@@ -111,7 +105,7 @@
     GC_DATA_BEGIN(cls) \
     GC_DATA_END(cls)
 
-// Atom field
+// Exact atom field
 #define GC_ATOM(field) field
 #define GC_ATOM_IFDEF(field,cond) field
 #define GC_ATOM_IFNDEF(field,cond) field
@@ -137,19 +131,29 @@
 #define GC_STRUCTURE_IFNDEF(field,cond) field
 #define GC_STRUCTURE_IF(field,cond) field
 
-// Trailing pointer array fields: The 'k' is used to declare an array,
-// it is almost always 1 (and may be redundant here - don't know yet).
-// The 'count' is an efficient expression that yields the allocated
-// size of the array; if it contains commas or parentheses it /must/
-// be enclosed in double quotes.
-#define GC_POINTERS(field,k,count) field[k]
-#define GC_POINTERS_SMALL(field,k,count) field[k] // note, this is a hint
+// Pointer, atom, and structure array fields: The field_and_size are used
+// to declare the array, the form must be fieldname[constantExpr] and there
+// can be no commas in it (it can't be quoted).  The 'count' is an efficient
+// expression that yields the allocated size of the array; if it contains
+// commas or parentheses it /must/ be enclosed in double quotes.
 
-#define GC_ATOMS(field,k,count) field[k]
-#define GC_ATOMS_SMALL(field,k,count) field[k] // note, this is a hint
+#define GC_POINTERS(field_and_size,count) field_and_size
+#define GC_POINTERS_SMALL(field_and_size,count) field_and_size // note, this is a hint
 
-#define GC_STRUCTURES(field,k,count) field[k]
-#define GC_STRUCTURES_SMALL(field,k,count) field[k]
+#define GC_ATOMS(field_and_size,count) field_and_size
+#define GC_ATOMS_SMALL(field_and_size,count) field_and_size // note, this is a hint
+
+#define GC_STRUCTURES(field_and_size,count) field_and_size
+#define GC_STRUCTURES_SMALL(field_and_size,count) field_and_size
+
+// Used by the GC annotation macros, can also be used manually
+// in a pinch but normally you can ignore this.
+
+#define GC_DECLARE_EXACT_METHODS \
+    public: \
+        virtual void gcTrace(MMgc::GC* gc); \
+        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+
 
 namespace avmplus
 {

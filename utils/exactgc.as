@@ -168,25 +168,25 @@
 //   * Trailing pointer arrays, used in non-AS3-exposed classes, as
 //     well as in-line pointer arrays, are annotated with GC_POINTERS:
 //
-//       Domain* GC_POINTERS( m_bases, 1, m_baseCount );
+//       Domain* GC_POINTERS( m_bases[1], m_baseCount );
 //     
-//     The first argument is the field name, the second is the value
-//     to use for declaring the field as an array field, and the third
-//     is an expression that is used by the tracer to obtain the
-//     length of the array.  For example, the above turns into:
+//     The first argument is the field name and the value to use for
+//     declaring the field as an array field (no commas allowed!) and
+//     the second is an expression that is used by the tracer to
+//     obtain the length of the array.  For example, the above turns
+//     into:
 //
 //       Domain* m_bases[1];
 //
 //     and the tracer will take the number of fields to be
-//     m_baseCount.  If the length expression has commas or
-//     parentheses it /must/ be encoded as a string - enclosed in
-//     double quotes.
+//     m_baseCount.  If the second argument has commas or parentheses
+//     it /must/ be encoded as a string - enclosed in double quotes.
 //
 //     If the pointer array is expected to be short (say, less than
 //     200 elements) then there may be a small efficiency win in using
 //     a hinting version of GC_POINTERS, namely GC_POINTERS_SMALL:
 //
-//       Domain* GC_POINTERS_SMALL( m_bases, 1, m_baseCount );
+//       Domain* GC_POINTERS_SMALL( m_bases[1], m_baseCount );
 //
 //     Using the hint when inappropriate can affect the incrementality
 //     properties of the GC; not using it when it is appropriate
@@ -196,8 +196,8 @@
 //  * Trailing atom arrays, used in non-AS3-exposed classes, are
 //    annotated with GC_ATOMS and GC_ATOMS_SMALL:
 //
-//        Atom GC_ATOMS(_scopes, 1, "getSize()");
-//        Atom GC_ATOMS_SMALL(_scopes, 1, "getSize()");
+//        Atom GC_ATOMS(_scopes[1], "getSize()");
+//        Atom GC_ATOMS_SMALL(_scopes[1], "getSize()");
 //
 // In the simple annotation cases there are secondary _IFDEF variants
 // that cater to the case where the fields are conditionally defined:
@@ -497,6 +497,7 @@ class GCConservative extends GCField { function GCConservative(tag, attr) { supe
 class GCPointers extends GCField
 {
     function GCPointers(tag, attr) {
+        splitFieldAndSize(attr, 1);
         super(tag,attr);
         declCount = getAttr(attr, 2);
         count = getAttr(attr, 3);
@@ -513,6 +514,7 @@ class GCPointers extends GCField
 class GCAtoms extends GCField
 {
     function GCAtoms(tag, attr) {
+        splitFieldAndSize(attr, 1);
         super(tag,attr);
         declCount = getAttr(attr, 2);
         count = getAttr(attr, 3);
@@ -529,6 +531,7 @@ class GCAtoms extends GCField
 class GCStructures extends GCField
 {
     function GCStructures(tag, attr) {
+        splitFieldAndSize(attr, 1);
         super(tag,attr);
         declCount = getAttr(attr, 2);
         count = getAttr(attr, 3);
@@ -720,6 +723,24 @@ function getAttr(attr, n)
     return attr[n];
 }
 
+// attr[n] has text of the form "<something1>[<something2>]" with no embedded commas.
+// Break them apart, and leave <something1> in position n and insert <something2> in
+// position n+1.
+
+function splitFieldAndSize(attr, n)
+{
+    if (n >= attr.length)
+        fail("Out-of-range attribute reference: " + attr + " " + n);
+    var v = attr[n];
+    var result = (/^\s*([^\]]*)\s*\[([^\]]*)\]\s*$/).exec(v);
+    if (result == null || result.length != 3)
+        fail("Incorrect format for array field, expected name[size]: " + n);
+    for ( var k=attr.length ; k > n+1 ; k-- )
+        attr[k] = attr[k-1];
+    attr[n] = result[1];
+    attr[n+1] = result[2];
+}
+
 // Fail with an error message, never return
 function fail(s) 
 {
@@ -829,12 +850,14 @@ function readFiles(files)
     const attrStringRegex:RegExp = /^\s*\"([^\"]*)\"\s*$/;
     const attrMiscRegex:RegExp =   /^\s*((?:<\s+|\s+>|[a-zA-Z0-9_:<>])+)\s*$/;
     const attrNumberRegex:RegExp = /^\s*([0-9]+(?:\.[0-9]+)?)\s*$/;
+    const attrArraydefRegex:RegExp = /^\s*([a-zA-Z0-9_]+\[[^\]]*\])\s*$/;
 
     function parseAttrValue(s) {
         var result;
         if ((result = attrStringRegex.exec(s)) != null ||
             (result = attrMiscRegex.exec(s)) != null ||
-            (result = attrNumberRegex.exec(s)) != null) {
+            (result = attrNumberRegex.exec(s)) != null ||
+            (result = attrArraydefRegex.exec(s)) != null) {
             return result[1];
         }
         else
@@ -849,7 +872,7 @@ function readFiles(files)
     const spacesEndRegex:RegExp =        /(\s+)$/;
     const commaSpacesStartRegex:RegExp = /^(,\s*)/;
     const nameValuePairRegex:RegExp =    /^([a-zA-Z0-9_]+)\s*=\s*(\"[^\"]*\"|true|false)/;
-    const valueRegex:RegExp =            /^\"[^\"]*\"|(?:[0-9]+(?:\.[0-9]+)?)|(?:<\s+|\s+>|[a-zA-Z0-9_:<>])+/;
+    const valueRegex:RegExp =            /^\"[^\"]*\"|[a-zA-Z0-9_]+\[[^\]]*\]|(?:[0-9]+(?:\.[0-9]+)?)|(?:<\s+|\s+>|[a-zA-Z0-9_:<>])+/;
 
     function splitAttrs(s, paren=null) {
         var then = new Date();
