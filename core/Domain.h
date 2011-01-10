@@ -70,7 +70,7 @@ namespace avmplus
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.
         uint32_t const                  m_baseCount; // number of entries in m_bases
-        Domain*                         GC_POINTERS_SMALL(m_bases, 1, m_baseCount);
+        Domain*                         GC_POINTERS_SMALL(m_bases[1], m_baseCount);
 
     GC_DATA_END(Domain)
     };

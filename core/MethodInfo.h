@@ -83,7 +83,7 @@ namespace avmplus
         uint32_t                codeSize;           // abc size pre-jit, native size post jit
         const int32_t           local_count;        // FIXME: merge with localCount above; this one may be visible to a debugger?
         const int32_t           max_scopes;         // FIXME: merge with maxScopeDepth above; this one is not used by the VM but may be visible to a debugger?
-        Stringp                 GC_POINTERS_SMALL(localNames, 1, local_count);      // array of names for args and locals in framep order, written with explicit WBRC (actually local_count)
+        Stringp                 GC_POINTERS_SMALL(localNames[1], local_count);      // array of names for args and locals in framep order, written with explicit WBRC (actually local_count)
         
         GC_DATA_END(DebuggerMethodInfo)
     };

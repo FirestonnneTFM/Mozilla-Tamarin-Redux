@@ -70,7 +70,7 @@ namespace avmplus
         // hi 31 bits: count
         // lo bit: containsAnyPublic flag
         uint32_t _countAndFlags;
-        Namespacep GC_POINTERS_SMALL(_namespaces, 1, "count()");
+        Namespacep GC_POINTERS_SMALL(_namespaces[1], "count()");
 
         GC_DATA_END(NamespaceSet)
         

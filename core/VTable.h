@@ -105,7 +105,7 @@ namespace avmplus
         // object is zeroed on allocation, and that saves one word of
         // storage.  However, there's some space in VTable and we
         // could keep a 16-bit count, probably, if we're really worried.
-        MethodEnv*      GC_POINTERS(methods, 1, "(MMgc::GC::Size(this) - offsetof(VTable, methods)) / sizeof(MethodEnv*)");
+        MethodEnv*      GC_POINTERS(methods[1], "(MMgc::GC::Size(this) - offsetof(VTable, methods)) / sizeof(MethodEnv*)");
 
     GC_DATA_END(VTable)
     // ------------------------ DATA SECTION END

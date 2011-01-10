@@ -87,7 +87,7 @@ namespace avmplus
         DWB(uint64_t*)              GC_POINTER_IFDEF( m_invocationCounts, DEBUGGER );    // actual size will hold pool->methodCount methods, only allocated if debugger exists
 #endif
         AvmCore* const              m_core;
-        MethodEnv*                  GC_POINTERS(m_methods, 1, "m_pool->methodCount()");  // actual size will hold pool->methodCount methods
+        MethodEnv*                  GC_POINTERS(m_methods[1], "m_pool->methodCount()");  // actual size will hold pool->methodCount methods
         
     GC_DATA_END(AbcEnv)
     // ------------------------ DATA SECTION END

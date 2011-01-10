@@ -141,7 +141,7 @@ namespace avmplus
         
     public:
         int32_t exception_count;
-        ExceptionHandler GC_STRUCTURES(exceptions, 1, exception_count);
+        ExceptionHandler GC_STRUCTURES(exceptions[1], exception_count);
 
         GC_DATA_END(ExceptionHandlerTable)
     // ------------------------ DATA SECTION END

@@ -586,7 +586,7 @@ namespace avmplus
     private:    DWB(Traits*)            GC_POINTER(m_supertype_cache);  // 1-entry cache for subtypeof=true
     private:    MMgc::GCHiddenPointer<Traits*>
                                         m_supertype_neg_cache;          // 1-entry cache for subtypeof=false (hidden to avoid pinning)
-    private:    Traits*                 GC_POINTERS_SMALL(m_primary_supertypes, MAX_PRIMARY_SUPERTYPE, MAX_PRIMARY_SUPERTYPE);
+    private:    Traits*                 GC_POINTERS_SMALL(m_primary_supertypes[MAX_PRIMARY_SUPERTYPE], MAX_PRIMARY_SUPERTYPE);
                                                                         // m_primary_supertypes contains the first several base classes, written with explicit WB's
     private:    DWB(Traits**)           GC_POINTER(m_secondary_supertypes);
     public:     PoolObject* const       GC_POINTER(pool);               // The constant pool owning this definition. never null.
