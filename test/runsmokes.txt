@@ -53,12 +53,6 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
-# https://bugzilla.mozilla.org/show_bug.cgi?id=555760
-cd cmdline;${py} ./testVMPIThreadsSelfTest.py
-
-# https://bugzilla.mozilla.org/show_bug.cgi?id=555765
-cd cmdline;${py} ./testVMbaseConcurrencySelfTest.py
-
 # mops.abc_ is crashing at end with exitcode 138: https://bugzilla.mozilla.org/show_bug.cgi?id=521550
 cd acceptance;${py} ./runtests.py ${RTARGS}  --notimecheck --avm=${avmrd} --vmargs="-Dnogc" mops/mops.abc_
 
