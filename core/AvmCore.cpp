@@ -728,15 +728,14 @@ namespace avmplus
         return result;
     }
 
-    Toplevel* AvmCore::initToplevel()
+    Toplevel* AvmCore::initToplevel(ICodeContextCreator& codeContextCreator)
     {
         DomainEnv* builtinDomainEnv = DomainEnv::newDomainEnv(this, builtinDomain, NULL);
 
-        // note that this is the one-and-only place that a naked CodeContext
-        // should ever be constructed (ie, when initializing the VM's own builtins);
-        // this is because it is also the one-and-only place where we can be certain
-        // that no native code will be expecting a subclass of CodeContext.
-        CodeContext* builtinCodeContext = new (GetGC()) CodeContext(builtinDomainEnv, builtinBugCompatibility);
+        // Use codeContextCreator so that subclasses can construct a variant if appropriate;
+        // if they are, we can't use a "naked" CodeContext anywhere, as debugger code might walk
+        // thru it and all CodeContexts that it finds are the subclass.
+        CodeContext* builtinCodeContext = codeContextCreator.create(builtinDomainEnv, builtinBugCompatibility);
 
         AvmAssert(builtinPool != NULL);
         AvmAssert(builtinPool->scriptCount() != 0);

@@ -981,15 +981,24 @@ const int kBufferPadding = 16;
 #else
         void initBuiltinPool();
 #endif
+        
+        class ICodeContextCreator
+        {
+        public:
+            virtual ~ICodeContextCreator() {}
+            virtual CodeContext* create(DomainEnv* domainEnv, const BugCompatibility* bugCompatibility) = 0;
+        };
 
         /**
          * Initializes the specified Toplevel object by running
-         * builtin.abc
+         * builtin.abc. codeContextCreator will be used to create the
+         * CodeContext (so clients that subclass CodeContext can create one
+         * as appropriate).
          */
-        Toplevel* initToplevel();
+        Toplevel* initToplevel(ICodeContextCreator& codeContextCreator);
 
         /**
-         * If a client need to subclass Toplevel, it should override this
+         * If a client needs to subclass Toplevel, it should override this
          * method to create the proper subclass. (AvmCore will never create a
          * a Toplevel directly, it will use this as a factory method.)
          */

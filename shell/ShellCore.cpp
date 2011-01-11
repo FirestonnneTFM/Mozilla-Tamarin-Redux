@@ -172,9 +172,25 @@ namespace avmshell
 
     ShellToplevel* ShellCore::createShellToplevel()
     {
+        class CodeContextCreator : public AvmCore::ICodeContextCreator
+        {
+        public:
+            MMgc::GC* gc;
+            
+            explicit CodeContextCreator(MMgc::GC* _gc) : gc(_gc)
+            {
+            }
+            
+            virtual CodeContext* create(DomainEnv* domainEnv, const BugCompatibility* bugCompatibility)
+            {
+                return new (gc) ShellCodeContext(domainEnv, bugCompatibility);
+            }
+        };
+
         // Initialize a new Toplevel.  This will also create a new
         // DomainEnv based on the builtinDomain.
-        ShellToplevel* shell_toplevel = (ShellToplevel*)initToplevel();
+        CodeContextCreator ccc(GetGC());
+        ShellToplevel* shell_toplevel = (ShellToplevel*)initToplevel(ccc);
 
         DomainEnv* builtinDomainEnv = shell_toplevel->domainEnv();
         AvmAssert(builtinDomainEnv->domain() == builtinDomain);
