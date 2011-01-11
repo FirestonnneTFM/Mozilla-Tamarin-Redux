@@ -70,12 +70,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
   fail=1
 }
 
-# Debug
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug || {
-  echo "message: Debug Failed"
-  fail=1
-}
-
 #Debug_Debugger
 test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
   echo "message: Debug_Debugger Failed"

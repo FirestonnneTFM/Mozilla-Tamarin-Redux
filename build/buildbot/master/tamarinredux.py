@@ -474,8 +474,8 @@ class tamarinredux:
                     'LD' : 'sh4-linux-ld',
                     'AR' : 'sh4-linux-ar',
                 },
-                description='starting Release_sh4-linux build...',
-                descriptionDone='finished Release_sh4-linux build.',
+                description='starting Debug_sh4-linux build...',
+                descriptionDone='finished Debug_sh4-linux build.',
                 name="Debug_sh4-linux",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
@@ -525,7 +525,6 @@ class tamarinredux:
     solaris_sparc_compile_factory.addStep(compile_builtin)
     solaris_sparc_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--enable-shell", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
     solaris_sparc_compile_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-shell --enable-wordcode-interp", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))
-    solaris_sparc_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
     solaris_sparc_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_DEBUGGER"))
     solaris_sparc_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_DEBUGGER"))
     solaris_sparc_compile_factory.addStep(compile_buildcheck_local)
@@ -1919,6 +1918,8 @@ class tamarinredux:
     solaris_sparc_deep_factory.addStep(sync_clone(url=HG_URL))
     solaris_sparc_deep_factory.addStep(sync_update)
     solaris_sparc_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
+    solaris_sparc_deep_factory.addStep(compile_builtin)
+    solaris_sparc_deep_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
     solaris_sparc_deep_factory.addStep(download_testmedia)
     solaris_sparc_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
     solaris_sparc_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
