@@ -176,6 +176,33 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_VALGRIND
     "AVMFEATURE_VALGRIND;"
   #endif
+  #if AVMFEATURE_SWF12
+    "AVMFEATURE_SWF12;"
+  #endif
+  #if AVMFEATURE_SWF13
+    "AVMFEATURE_SWF13;"
+  #endif
+  #if AVMFEATURE_SWF14
+    "AVMFEATURE_SWF14;"
+  #endif
+  #if AVMFEATURE_SWF15
+    "AVMFEATURE_SWF15;"
+  #endif
+  #if AVMFEATURE_SWF16
+    "AVMFEATURE_SWF16;"
+  #endif
+  #if AVMFEATURE_SWF17
+    "AVMFEATURE_SWF17;"
+  #endif
+  #if AVMFEATURE_SWF18
+    "AVMFEATURE_SWF18;"
+  #endif
+  #if AVMFEATURE_SWF19
+    "AVMFEATURE_SWF19;"
+  #endif
+  #if AVMFEATURE_SWF20
+    "AVMFEATURE_SWF20;"
+  #endif
   #if AVMTWEAK_SIN_COS_NONFINITE
     "AVMTWEAK_SIN_COS_NONFINITE;"
   #endif
