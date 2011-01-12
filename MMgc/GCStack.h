@@ -43,7 +43,29 @@
 namespace MMgc
 {
     /**
-     * Conservative collector unit of work
+     * A GCWorkItem represents a pointer that the collector must examine, and
+     * information about the pointer.
+     *
+     * There are two fields, 'ptr' and 'size'.  Both are split into a n-2 bit
+     * payload part (actual pointer value, actual size value) and a 2-bit
+     * information part.
+     *
+     * The low two bits of the 'size' field encode the type of the work item:
+     * whether it's a GC object or not (low bit), and whether we should scan
+     * the pointed-to object for pointers into other objects.
+     *
+     * The high bits of the 'size' field are zero if the item is a GC item; in
+     * this case the size is computed by the collector when the work item is
+     * processed.
+     *
+     * For 'normal' work items the two low bits of the pointer field are zero.
+     *
+     * If the low bits of 'size' are zero and the rest of the size field carries
+     * a special large value denoting a sentinel work item then the low bits of
+     * the pointer carry additional information.  The additional information
+     * depends on the sentinel type, and the pointer value may or may not
+     * represent a pointer.  There are several sentinel values, each imposes 
+     * each own interpretation of the two bits and the pointer value.
      */
     class GCWorkItem
     {
