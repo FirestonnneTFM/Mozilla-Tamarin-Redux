@@ -644,62 +644,6 @@ var FEATURES =
     <defines> MMGC_VALGRIND </defines>
   </feature>
 
-  <feature>
-    <desc> Enabling this will support SWF12 </desc>
-    <name> AVMFEATURE_SWF12 </name>
-    <defines> VMCFG_SWF12 </defines>
-    <defines> VMCFG_FLOAT </defines> <!-- tentative -->
-    <defines> VMCFG_FLOAT4 </defines> <!-- tentative -->
-  </feature>
-  
-  <feature>
-    <desc> Enabling this will support SWF13 </desc>
-    <name> AVMFEATURE_SWF13 </name>
-    <defines> VMCFG_SWF13 </defines>
-  </feature>
-
-  <feature>
-    <desc> Enabling this will support SWF14 </desc>
-    <name> AVMFEATURE_SWF14 </name>
-    <defines> VMCFG_SWF14 </defines>
-  </feature>
-
-  <feature>
-    <desc> Enabling this will support SWF15 </desc>
-    <name> AVMFEATURE_SWF15 </name>
-    <defines> VMCFG_SWF15 </defines>
-  </feature>
-
-  <feature>
-    <desc> Enabling this will support SWF16 </desc>
-    <name> AVMFEATURE_SWF16 </name>
-    <defines> VMCFG_SWF16 </defines>
-  </feature>
-
-  <feature>
-    <desc> Enabling this will support SWF17 </desc>
-    <name> AVMFEATURE_SWF17 </name>
-    <defines> VMCFG_SWF17 </defines>
-  </feature>
-
-  <feature>
-    <desc> Enabling this will support SWF18 </desc>
-    <name> AVMFEATURE_SWF18 </name>
-    <defines> VMCFG_SWF18 </defines>
-  </feature>
-
-  <feature>
-    <desc> Enabling this will support SWF19 </desc>
-    <name> AVMFEATURE_SWF19 </name>
-    <defines> VMCFG_SWF19 </defines>
-  </feature>
-
-  <feature>
-    <desc> Enabling this will support SWF20 </desc>
-    <name> AVMFEATURE_SWF20 </name>
-    <defines> VMCFG_SWF20 </defines>
-  </feature>
-
   <!-- VM adjustments for various oddities: AVMTWEAK_* -->
 
   <tweak>

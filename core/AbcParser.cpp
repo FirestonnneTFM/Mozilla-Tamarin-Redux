@@ -196,11 +196,8 @@ namespace avmplus
 #ifdef VMCFG_AOT
             case 0: // just a "reference" to an AOT-ed ABC!
 #endif
-            case (46<<16|16):   // Original ABC version number
-#ifdef VMCFG_SWF12
-            case (47<<16|12):   // Flash player TBD "Serrano"
+            case (46<<16|16):
                 return 0;
-#endif
             default:
                 return kInvalidMagicError;
         }
@@ -226,25 +223,6 @@ namespace avmplus
         abcEnd = &code[(int)code.getSize()];
 
         classCount = 0;
-
-        // Default flag settings go here
-#ifdef VMCFG_FLOAT
-        floatSupport = 0;
-#endif
-#ifdef VMCFG_FLOAT4
-        float4Support = 0;
-#endif
-
-        // Flag overrides based on version go here
-        if (this->version >= (47<<16|12)) {
-            // Flash Player TBD "Serrano"
-#ifdef VMCFG_FLOAT
-            floatSupport = 1;
-#endif
-#ifdef VMCFG_FLOAT4
-            float4Support = 1;
-#endif
-        }
     }
 
     REALLY_INLINE void AbcParser::computeInstanceSizeAndSlotsOffset(int class_id,

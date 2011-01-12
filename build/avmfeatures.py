@@ -153,51 +153,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_VALGRIND=1 "
     if (arg == False):
         args += "-DAVMFEATURE_VALGRIND=0 "
-    arg = o.getBoolArg("swf12")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF12=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF12=0 "
-    arg = o.getBoolArg("swf13")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF13=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF13=0 "
-    arg = o.getBoolArg("swf14")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF14=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF14=0 "
-    arg = o.getBoolArg("swf15")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF15=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF15=0 "
-    arg = o.getBoolArg("swf16")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF16=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF16=0 "
-    arg = o.getBoolArg("swf17")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF17=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF17=0 "
-    arg = o.getBoolArg("swf18")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF18=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF18=0 "
-    arg = o.getBoolArg("swf19")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF19=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF19=0 "
-    arg = o.getBoolArg("swf20")
-    if (arg == True):
-        args += "-DAVMFEATURE_SWF20=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_SWF20=0 "
     arg = o.getBoolArg("sin-cos-nonfinite")
     if (arg == True):
         args += "-DAVMTWEAK_SIN_COS_NONFINITE=1 "
