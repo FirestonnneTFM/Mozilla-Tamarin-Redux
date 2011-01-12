@@ -718,15 +718,24 @@ class RuntestBase(object):
             for custom_directive in self.custom_directives:
                 if custom_directive in self.directives:
                     custom_directives_re.extend(self.directives[custom_directive])
+
+            tests_to_remove = [] # Need to track tests to remove since if the test is removed
+                                 # while iterating, there is no guarantee that all items will
+                                 # be properly iterated if it is modified.
             for test in tests:
-                for test_to_remove_re in custom_directives_re \
-                    + self.tests_no_run_re:
+                for test_to_remove_re in custom_directives_re + self.tests_no_run_re:
                     if re.search(test_to_remove_re, test):
                         try:
-                            tests.remove(test)
+                            tests_to_remove.append(test)
                         except ValueError:
                             pass # test already removed
-        
+
+            for test in tests_to_remove:
+                try:
+                    tests.remove(test)
+                except ValueError:
+                    pass # test already removed
+
         # We still use the include directive in performance tests
         if str(self) == 'PerformanceRuntest' and 'include' in self.directives:
             tests = filter_test_list('include')
