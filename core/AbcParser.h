@@ -45,26 +45,6 @@ namespace avmplus
 {
     /**
      * Parser for reading .abc (Actionscript Byte Code) files.
-     *
-     * ABC content is versioned.  The ABC header stores a version number,
-     * the meaning of which is as follows:
-     *
-     *  46<<16|16   Content recognized by Flash Player "Spicy" and earlier (SWF <= 11)
-     *  47<<16|12   Content recognized by Flash Player "Serrano" and earlier (SWF <= 12)
-     *
-     * Starting with Flash Player "Serrano", the highest minor ABC version
-     * supported always corresponds to the highest SWF version of that player.
-     * Thus every time a Player is shipped we provide the ability to make
-     * changes to ABC format and semantics.
-     *
-     * A number of flags in the AbcParser structure instance are set based
-     * on the version number of the content.  These flags must be checked
-     * by the parser and/or verifier and/or interpreter and/or code generator
-     * when examining ABC content.  (As a general rule it's expensive to change
-     * instruction semantics through versioning, and easier to introduce new
-     * instructions, but in principle everything is up for grabs.)
-     *
-     * See bugzilla 587977 and dependent/blocking bugs for more information.
      */
     class AbcParser
     {
@@ -96,27 +76,6 @@ namespace avmplus
         static void addAOTDebugInfo(PoolObject *pool);
 #endif
 
-#ifdef VMCFG_FLOAT
-        // If floatSupport is set (introduced in SWF12) then:
-        //
-        //  - The ABC contains a pool of float values
-        //  - OP_pushfloat is an instruction
-        //  - OP_coerce_f is an instruction
-        //  - The type of OP_add is (Number|String|float) while the type
-        //    of OP_subtract, OP_multiply, OP_divide, OP_modulo, OP_negate,
-        //    OP_increment, OP_inclocal, OP_decrement, and OP_declocal is
-        //    (Number|float).  In older content they were (Number|String)
-        //    and (Number) respectively.
-
-        /*const*/ unsigned floatSupport:1;
-#endif
-#ifdef VMCFG_FLOAT4
-        // If float4Support is set (introduced in SWF12) then:
-        //
-        // - TBD
-        /*const*/ unsigned float4Support:1;
-#endif
-        
     protected:
         PoolObject* parse(API api);
         MethodInfo* resolveMethodInfo(uint32_t index) const;
