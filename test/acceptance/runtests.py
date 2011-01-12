@@ -459,7 +459,7 @@ class AcceptanceRuntest(RuntestBase):
             outputLines = []
             if isfile(root+'.out'):
                 lpass, lfail, lexpfail, lunpass = self.check_out_file(
-                                            root, f+err, settings, outputCalls)
+                                            root, testName, f+err, settings, outputCalls)
             else:
                 for line in f+err:
                     outputLines.append(line)
@@ -535,7 +535,7 @@ class AcceptanceRuntest(RuntestBase):
 
         return outputCalls
 
-    def check_out_file(self, root, output, settings, outputCalls):
+    def check_out_file(self, root, testName, output, settings, outputCalls):
         # override standard runtests behavior, just compare the .out file with stdout+stderr
         lpass, lfail, lexpfail, lunpass = 0, 0, 0, 0
         actual = [line.strip() for line in output if line.strip()]

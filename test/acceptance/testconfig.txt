@@ -179,6 +179,7 @@ spidermonkey/js1_6/extensions/regress-456826, .*,, deep, skip slow tests
 # phase, all other platforms run it in the first phase
 # Update: Do not run test on arm-linx due to bug 604547
 misc/testJitordieSwitch, .*, arm-(winmobile|lnx), deep, include slow tests in deep phase
+misc/testJitordieSwitch, arm-(winmobile|lnx), , skip, include slow tests in deep phase
 
 # skip slow tests when running in -Dgreedy mode
 ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, Dgreedy,, skip, skip slow test in -Dgreedy mode
