@@ -1882,9 +1882,12 @@ namespace MMgc
                 // the stack if the root is deleted.  See GCRoot::Destroy and
                 // GC::HandleLargeMarkItem
                 if(item.GetSize() > kMarkItemSplitThreshold) {
+                    // Push a sentinel item
                     PushWorkItem_Unsafe(GCWorkItem(r, GCWorkItem::kGCRoot));
+
+                    // Test if the push succeeded; register the location of the sentinel
+                    // item on the mark stack with the root if it did succeed. 
                     GCWorkItem *item = m_incrementalWork.Peek();
-                    // test for mark stack overflow
                     if(item->GetSentinelPointer() == r)
                         r->SetMarkStackSentinelPointer(item);
                 }
@@ -2179,11 +2182,24 @@ namespace MMgc
 
         if (exactlyTraced != NULL)
         {
+#ifdef _DEBUG
+            GCWorkItem* tos = m_incrementalWork.Peek();
+#endif
             if (!exactlyTraced->gcTraceLarge(this, cursor>>2))
             {
                 // No items were pushed, so clean up.
+#ifdef _DEBUG
+                GCAssert(tos == m_incrementalWork.Peek());      // Stack had better look the same as when we pushed the state
+                GCWorkItem e1 = m_incrementalWork.Pop();        // Object
+                GCWorkItem e2 = m_incrementalWork.Pop();        // cursor
+                GCAssert(e1.IsSentinel2Item());
+                GCAssert(e1.GetSentinel2Type() == GCWorkItem::kLargeExactlyTracedTail);
+                GCAssert(e2.IsSentinel2Item());
+                GCAssert(e2.GetSentinel2Type() == GCWorkItem::kInertPayload);
+#else
                 m_incrementalWork.Pop();        // Object
                 m_incrementalWork.Pop();        // cursor
+#endif
             }
 
             return true;    // Do not fall through to conservative tracing in MarkItem
