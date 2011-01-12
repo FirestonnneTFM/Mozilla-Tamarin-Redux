@@ -13,7 +13,6 @@ stale.xml
 *~
 *.mode1*
 *.mode2*
-*.pbxuser
 *.ncb
 *.suo
 *.pdb
