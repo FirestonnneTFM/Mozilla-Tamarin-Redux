@@ -485,7 +485,7 @@ class AcceptanceRuntest(RuntestBase):
                     if 'FAILED!' in line:
                         res=dict_match(settings,testcase,'expectedfail')
                         if res:
-                            outputCalls.append((self.fail,(testName, 'expected failure: ' + line.strip() + ' reason: '+res, self.expfailmsgs)))
+                            outputCalls.append((self.fail,(testName, 'expected failure: ' + line.strip().replace('FAILED','failed') + ' reason: '+res, self.expfailmsgs)))
                             lexpfail += 1
                         else:
                             lfail += 1

@@ -1419,7 +1419,7 @@ class RuntestBase(object):
             self.js_print('avm version: %s' % self.avmversion)
         if self.ascversion:
             self.js_print('asc version: %s' % self.ascversion)
-
+        self.js_print('thread count: %d' % self.threads)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True)
 
     def runTests(self, testList):
@@ -1498,25 +1498,29 @@ class RuntestBase(object):
         if self.quiet and not self.summaryonly:
             self.quiet = False
 
-        if self.failmsgs:
-            self.js_print('\nFAILURES:', '', '<br/>')
-            for m in self.failmsgs:
-                self.js_print('  %s' % m, '', '<br/>')
-
         if self.expfailmsgs:
             self.js_print('\nEXPECTED FAILURES:', '', '<br/>')
             for m in self.expfailmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
+            self.js_print('END EXPECTED FAILURES', '', '<br/>')
 
         if self.unpassmsgs:
             self.js_print('\nUNEXPECTED PASSES:', '', '<br/>')
             for m in self.unpassmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
+            self.js_print('END UNEXPECTED PASSES', '', '<br/>')
 
         if self.assertmsgs:
             self.js_print('\nASSERTIONS:', '', '<br/>')
             for m in self.assertmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
+            self.js_print('END ASSERTIONS', '', '<br/>')
+
+        if self.failmsgs:
+            self.js_print('\nFAILURES:', '', '<br/>')
+            for m in self.failmsgs:
+                self.js_print('  %s' % m, '', '<br/>')
+            self.js_print('END FAILURES', '', '<br/>')
 
 
         if self.quiet and self.summaryonly:
