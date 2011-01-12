@@ -42,6 +42,10 @@ derivative documents are created - THERE IS ONE FILE PER ABC VERSION NUMBER.
 This document pertains to major version 46, minor version 16, the initial version.
 
 
+NOTE, it is believed that this file does not capture all the details of the ABC format
+as of 12 January, 2011.
+
+
 U30 - This is a 30 bit integer value encoded with a variable number of bytes to save space.
 All U30's are encoded as 1-5 bytes depending on the value (larger values need more space).  
 The encoding method is if the hi bit in the current byte is set, then the next byte is also
