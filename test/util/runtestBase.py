@@ -712,20 +712,21 @@ class RuntestBase(object):
             if custom_directive in self.config:
                 tests = filter_test_list(custom_directive)
                 break
-        else:   # else clause only runs if we don't break from the for loop
+        else:   # not running in any custom directive mode
             # remove any custom_directives from current run
-            custom_directives_re_list = []
+            custom_directives_re = []
             for custom_directive in self.custom_directives:
                 if custom_directive in self.directives:
-                    custom_directives_re_list.extend(self.directives[custom_directive])
+                    custom_directives_re.extend(self.directives[custom_directive])
             for test in tests:
-                for test_to_remove_re in custom_directives_re_list + self.tests_no_run_re:
+                for test_to_remove_re in custom_directives_re \
+                    + self.tests_no_run_re:
                     if re.search(test_to_remove_re, test):
                         try:
                             tests.remove(test)
                         except ValueError:
                             pass # test already removed
-                    
+        
         # We still use the include directive in performance tests
         if str(self) == 'PerformanceRuntest' and 'include' in self.directives:
             tests = filter_test_list('include')
@@ -830,18 +831,19 @@ class RuntestBase(object):
             except re.error:
                 print_parse_error('ERROR', config_file, line_num,
                                   '  regex is malformed: %s' % sys.exc_info()[1])
-            if include_match and not exclude_match:
+            if directive == 'performance' \
+                and 'performance' not in self.config:
+                # performance tests only run in performance mode
+                if test not in self.tests_no_run_re:
+                    self.tests_no_run_re.append(test)
+            elif include_match and not exclude_match:
+                # test config matches self.config
                 settings.setdefault(test, {}).setdefault(testcase,{})
                 settings[test][testcase][directive] = comment
                 # also store test-level settings by directive
                 if testcase == '.*':
                     directives.setdefault(directive, []).append(test)
-            else:
-                # test should not be run, track tests so we remove from
-                # testlist in getTestsList.
-                if test not in self.tests_no_run_re:
-                    self.tests_no_run_re.append(test)
-        
+            
         return settings, directives
         
 
