@@ -121,6 +121,7 @@ namespace MMgc
         uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
         uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
         bool IsNull() const { return ptr == NULL; }
+        bool IsClear() const { return iptr == kDeadItem; }
         bool IsSentinel1Item() const { return (_size & ~3) == kSentinel1Size; }
         bool IsSentinel2Item() const { return (_size & ~3) == kSentinel2Size; }
         GCSentinel1ItemType GetSentinel1Type() const { return (GCSentinel1ItemType)(iptr & 3); }

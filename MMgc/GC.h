@@ -151,8 +151,7 @@
 
 #define GC_DECLARE_EXACT_METHODS \
     public: \
-        virtual void gcTrace(MMgc::GC* gc); \
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
 
 namespace avmplus
@@ -815,9 +814,8 @@ namespace MMgc
         static void SetHasWeakRef(const void *userptr, bool flag);
 
         /**
-         * Mark the object as having a virtual gcTrace/gcTraceLarge pair.  If the
-         * object is subsequently reached by the marker it will be marked using
-         * those methods.
+         * Mark the object as having a virtual gcTrace method.  If the object is
+         * subsequently reached by the marker it will be marked using that method.
          *
          * EXACTGC INVESTIGATE: what happens if the object is subsequently split 
          * on the mark stack?  The scenario is this: the object is not marked for exact
@@ -1521,6 +1519,7 @@ namespace MMgc
         void MarkItem(GCWorkItem &wi);
 #endif
         bool HandleLargeMarkItem(GCWorkItem &wi, size_t &size);
+        void HandleContinuedMarkingOfExactGCItem(GCWorkItem &wi);
         void EstablishSweepInvariants();
         void ClearMarkStack();
 

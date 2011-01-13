@@ -756,9 +756,9 @@ namespace MMgc
             ClearWeakRef(item);
         
         // This is necessary if the destructor has been run because the destructor snaps
-        // the vtable back to GCTraceableBase, which has illegal-to-call base methods for
-        // gcTrace and gcTraceLarge.  Those base methods are there to ensure that we
-        // do not try to exactly trace destructed objects.
+        // the vtable back to GCTraceableBase, which has an illegal-to-call base method for
+        // gcTrace.  That base method is there to ensure that we do not try to exactly
+        // trace destructed objects.
         if(IsExactlyTraced(item))
             ClearExactlyTraced(item);
     }
@@ -2065,8 +2065,7 @@ namespace MMgc
     // non-gcobject regardless of whether the head is a gcobject.
     //
     // Exactly marked objects are not split per se, but state is kept on
-    // the mark stack to allow the gcTraceLarge method to be called
-    // repeatedly.
+    // the mark stack to allow the gcTrace method to be called repeatedly.
     //
     // When a large object is first encountered it is marked as visited, and
     // that's necessary for the write barrier.  However, it remains on the queue
@@ -2086,7 +2085,6 @@ namespace MMgc
 
     bool GC::HandleLargeMarkItem(GCWorkItem &wi, size_t& size)
     {
-        GCTraceableBase* exactlyTraced = NULL;
         size_t cursor = 0;
 
         if (wi.IsSentinel1Item())
@@ -2108,50 +2106,19 @@ namespace MMgc
 
         if (wi.IsGCItem())
         {
+            const void *userptr = wi.Ptr();
+            
             // An ounce of prevention...
-            GCAssert(ContainsPointers(wi.Ptr()));
+            GCAssert(ContainsPointers(userptr));
+
+            // Exactly traced GCItems should have been handled inside MarkItem
+            GCAssert(!(GetGCBits(GetRealPointer(userptr)) & kVirtualGCTrace));
 
             // Need to protect it against 'Free': push a magic item representing this object
             // that will prevent this split item from being freed, see comment block above.
 
-            GCLargeAlloc::ProtectAgainstFree(wi.Ptr());
-            PushWorkItem_Unsafe(GCWorkItem(wi.Ptr(), GCWorkItem::kGCLargeAlloc));
-
-            // Is it a large, exactly traced item?
-
-            const void *userptr = wi.Ptr();
-            const void *realptr = GetRealPointer(userptr);
-
-            gcbits_t& bits = GetGCBits(realptr);
-
-            if ((bits & kVirtualGCTrace) == kVirtualGCTrace)
-            {
-                // Create a mark state for the large, exactly traced object.
-                //
-                // We have two words of information to store: the pointer to the object
-                // (which we need in order to get the vtable) and the cursor value.  The
-                // cursor value is not really very well bounded, and we don't want the
-                // sentinel value to have too many insignificant low-order bits, so we
-                // need to use two items here.
-                //
-                // It's important that the top item triggers action in the marker and that
-                // the bottom item is inert and is just discarded if it appears by itself,
-                // which is possible in the presence of mark stack overflows.
-
-                // Set up large exactly traced object.  The cursor is zero and already set.
-                exactlyTraced = (GCTraceableBase*)wi.Ptr();
-
-                // Mark the object though it remains on the queue, this means it may also
-                // end up on the barrier stack while still on the mark stack but that's
-                // fine, and inevitable.
-                SetMark(exactlyTraced);
-
-                policy.signalExactMarkWork(size);
-                
-                // Save the state: cursor underneath and object on top.
-                PushWorkItem_Unsafe(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
-                PushWorkItem_Unsafe(GCWorkItem(wi.Ptr(), GCWorkItem::kLargeExactlyTracedTail));
-            }
+            GCLargeAlloc::ProtectAgainstFree(userptr);
+            PushWorkItem_Unsafe(GCWorkItem(userptr, GCWorkItem::kGCLargeAlloc));
         }
         else if (wi.IsSentinel2Item())
         {
@@ -2163,12 +2130,24 @@ namespace MMgc
                 GCAssert(payload.GetSentinel2Type() == GCWorkItem::kInertPayload);
                 
                 // Set up for some more tracing.
-                exactlyTraced = (GCTraceableBase*)wi.GetSentinelPointer();
+                GCTraceableBase* exactlyTraced = (GCTraceableBase*)wi.GetSentinelPointer();
                 cursor = (size_t)payload.GetSentinelPointer();
 
                 // Save the new state.
                 PushWorkItem_Unsafe(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
+                GCWorkItem* e1 = m_incrementalWork.Peek();
+
                 PushWorkItem_Unsafe(GCWorkItem(wi.GetSentinelPointer(), GCWorkItem::kLargeExactlyTracedTail));
+                GCWorkItem* e2 = m_incrementalWork.Peek();
+
+                if (!exactlyTraced->gcTrace(this, cursor>>2))
+                {
+                    // No more mark work, so clean up the mark state.
+                    e1->Clear();        // Cursor
+                    e2->Clear();        // Object
+                }
+                
+                return true;    // Do not fall through to conservative tracing in MarkItem
             }
             else if (wi.GetSentinel2Type() == GCWorkItem::kInertPayload) {
                 // Discard it - we're seeing this because of some arbitrary popping during
@@ -2180,37 +2159,82 @@ namespace MMgc
             }
         }
 
-        if (exactlyTraced != NULL)
-        {
-#ifdef _DEBUG
-            GCWorkItem* tos = m_incrementalWork.Peek();
-#endif
-            if (!exactlyTraced->gcTraceLarge(this, cursor>>2))
-            {
-                // No items were pushed, so clean up.
-#ifdef _DEBUG
-                GCAssert(tos == m_incrementalWork.Peek());      // Stack had better look the same as when we pushed the state
-                GCWorkItem e1 = m_incrementalWork.Pop();        // Object
-                GCWorkItem e2 = m_incrementalWork.Pop();        // cursor
-                GCAssert(e1.IsSentinel2Item());
-                GCAssert(e1.GetSentinel2Type() == GCWorkItem::kLargeExactlyTracedTail);
-                GCAssert(e2.IsSentinel2Item());
-                GCAssert(e2.GetSentinel2Type() == GCWorkItem::kInertPayload);
-#else
-                m_incrementalWork.Pop();        // Object
-                m_incrementalWork.Pop();        // cursor
-#endif
-            }
-
-            return true;    // Do not fall through to conservative tracing in MarkItem
-        }
-
         PushWorkItem(GCWorkItem((void*)((uintptr_t)wi.Ptr() + kLargestAlloc),
                                 uint32_t(size - kLargestAlloc),
                                 wi.HasInteriorPtrs() ? GCWorkItem::kStackMemory : GCWorkItem::kNonGCObject));
         
         size = kMarkItemSplitThreshold;
         return false;
+    }
+
+    // The mark has been set on the object, and the mark work for the entire object
+    // has been (or is about to be) signaled to the policy manager.  The object's
+    // gcTrace method has been called with cursor==0, and it returned 'true' indicating
+    // that more marking is required.
+    //
+    // We keep the object marked though it remains on the queue, this means it may also
+    // end up on the barrier stack while still on the mark stack but that's fine, and 
+    // inevitable.
+    //
+    // Here we set up for further marking by creating a mark state for a large object.
+    // (If the object is not large we mark it synchronously in-line and just return.)
+    //
+    // The state consists of three entries: an item that protects the object against
+    // deletion (because the object state is marked-not-queued it's not enough to look
+    // at the queued bit in GC::Free), and two items that contain the cursor into the object.
+    //
+    // The large-object deletion protection item needs to be further down the stack than
+    // the other two.
+    //
+    // In priniciple the entire state should go below the items that were pushed by the first
+    // invocation of gcTrace() on the object, but that's only required to control mark stack
+    // growth.  It's OK to push them on top of the items already pushed; doing so
+    // means the mark stack may be up to twice as large as it would have been had the
+    // state been pushed below, but that's it.  It is possible to push the state underneath,
+    // but (a) it adds some code on the fast path of MarkItem (not too bad) and (b) it
+    // introduces some complexity in the code below, as the stack has to be rearranged to
+    // allow elements to be inserted like that.
+    
+    void GC::HandleContinuedMarkingOfExactGCItem(GCWorkItem &wi)
+    {
+        const void *userptr = wi.Ptr();
+
+        GCAssert(wi.IsGCItem());
+        GCAssert((GetGCBits(GetRealPointer(userptr)) & (kVirtualGCTrace|kMark)) == (kVirtualGCTrace|kMark));
+
+        // If it's not a large object then mark it until we're done.
+        
+        if (!GCLargeAlloc::IsLargeBlock(userptr))
+        {
+            size_t cursor = 1;
+            while (((GCTraceableBase*)userptr)->gcTrace(this, cursor++))
+                ;
+            return;
+        }
+
+        // We have a bona fide large object.
+
+        // Need to protect it against 'Free': push a magic item representing this object
+        // that will prevent this split item from being freed, see comment block above.
+
+        GCLargeAlloc::ProtectAgainstFree(userptr);
+        PushWorkItem(GCWorkItem(userptr, GCWorkItem::kGCLargeAlloc));
+
+        // Create a mark state for the large, exactly traced object.
+        //
+        // We have two words of information to store: the pointer to the object
+        // (which we need in order to get the vtable) and the cursor value.  The
+        // cursor value is not really very well bounded, and we don't want the
+        // sentinel value to have too many insignificant low-order bits, so we
+        // need to use two items here.
+        //
+        // It's important that the top item triggers action in the marker and that
+        // the bottom item is inert and is just discarded if it appears by itself,
+        // which is possible in the presence of mark stack overflows.
+        
+        // Save the state: cursor underneath and object on top.
+        PushWorkItem(GCWorkItem((void*)(1 << 2), GCWorkItem::kInertPayload));
+        PushWorkItem(GCWorkItem(userptr, GCWorkItem::kLargeExactlyTracedTail));
     }
 
     // This will mark the item whether the item was previously marked or not.
@@ -2241,8 +2265,9 @@ namespace MMgc
 
         size_t size = wi.GetSize();
         
-        // The common case is a small and exactly traced gc item.
-        
+        // The common case is an exactly traced gc item (and an important subcase is
+        // an item that can be traced exactly by a single call to gcTrace).
+
         // EXACTGC OPTIMIZEME: It's doubtful that it's cost-effective to have the
         // IsGCItem test on the hot path if we could instead have two mark stacks 
         // or a split mark stack.  That way the test could be lifted out into the
@@ -2257,25 +2282,30 @@ namespace MMgc
 
             gcbits_t& bits = GetGCBits(realptr);
 
-            if ((bits & (kVirtualGCTrace|kLargeObject)) == kVirtualGCTrace)
+            if (bits & kVirtualGCTrace)
             {
                 // Inlined and merged SetMark, since we have the bits anyway. 
                 bits = (bits & ~kQueued) | kMark;
-                ((GCTraceableBase*)userptr)->gcTrace(this);
+
+                if (((GCTraceableBase*)userptr)->gcTrace(this, 0))
+                    HandleContinuedMarkingOfExactGCItem(wi);
+
+                // EXACTGC INVESTIGATEME - Not clear if this could be done before marking.
+                // EXACTGC INVESTIGATEME - We're signaling the mark work for the entire
+                // object here, even if that object is being split.  Can that go wrong somehow,
+                // eg, will it upset the computation of the mark rate?
                 policy.signalExactMarkWork(size);
                 return;
             }
         }
 
-        // Control mark stack growth and ensure incrementality:
+        // Conservative tracing.
+
+        // First we consider whether to split the object into multiple pieces.
         //
-        // Here we consider whether to split the object into multiple pieces.
-        // A cutoff of kLargestAlloc is imposed on us by external factors, see
-        // discussion below.  Ideally we'd choose a limit that isn't "too small"
-        // A cutoff of kLargestAlloc is imposed on us by external factors.  
-        // Ideally we'd choose a limit that isn't "too small"
-        // because then we'll split too many objects, and isn't "too large"
-        // because then the mark stack growth won't be throttled properly.
+        // Ideally we'd choose a limit that isn't "too small" because then we'll
+        // split too many objects, and isn't "too large" because then the mark
+        // stack growth won't be throttled properly.
         //
         // See bugzilla #495049 for a discussion of this problem.
         //
@@ -2287,9 +2317,7 @@ namespace MMgc
             if(HandleLargeMarkItem(wi, size))
                 return;
         }
-        
-        // Conservative tracing - what we know & love.
-        
+
         if(wi.IsGCItem())
         {
             SetMark(wi.Ptr());
