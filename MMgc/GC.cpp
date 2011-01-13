@@ -2218,7 +2218,7 @@ namespace MMgc
         // that will prevent this split item from being freed, see comment block above.
 
         GCLargeAlloc::ProtectAgainstFree(userptr);
-        PushWorkItem(GCWorkItem(userptr, GCWorkItem::kGCLargeAlloc));
+        PushWorkItem_Unsafe(GCWorkItem(userptr, GCWorkItem::kGCLargeAlloc));
 
         // Create a mark state for the large, exactly traced object.
         //
@@ -2233,8 +2233,8 @@ namespace MMgc
         // which is possible in the presence of mark stack overflows.
         
         // Save the state: cursor underneath and object on top.
-        PushWorkItem(GCWorkItem((void*)(1 << 2), GCWorkItem::kInertPayload));
-        PushWorkItem(GCWorkItem(userptr, GCWorkItem::kLargeExactlyTracedTail));
+        PushWorkItem_Unsafe(GCWorkItem((void*)(1 << 2), GCWorkItem::kInertPayload));
+        PushWorkItem_Unsafe(GCWorkItem(userptr, GCWorkItem::kLargeExactlyTracedTail));
     }
 
     // This will mark the item whether the item was previously marked or not.
