@@ -152,6 +152,9 @@ namespace MMgc
 
     bool GCMarkStack::TransferOneFullSegmentFrom(GCMarkStack& other)
     {
+        // Unchecked invariant: 'other' has no multi-item stack entries,
+        // like sentinels.
+
         GCAssert(other.EntirelyFullSegments() > 0);
         GCStackSegment* seg;
 
@@ -180,9 +183,16 @@ namespace MMgc
             other.m_hiddenCount -= kMarkStackItems;
         }
 
-        // Insert it below our top segment
-        seg->m_prev = m_topSegment->m_prev;
-        m_topSegment->m_prev = seg;
+        // Insert it at the bottom of our stack.  That is the easiest way to avoid
+        // splitting multi-item entries on the stack, see eg Bugzilla 622834.
+        // It's OK to cdr down the list to find the last one, block transfer is not
+        // a hot operation.
+
+        GCStackSegment* first = m_topSegment;
+        while (first->m_prev != NULL)
+            first = first->m_prev;
+        first->m_prev = seg;
+        seg->m_prev = NULL;
         m_hiddenCount += kMarkStackItems;
 
         // Special case that occurs if a segment was inserted into an empty stack.
