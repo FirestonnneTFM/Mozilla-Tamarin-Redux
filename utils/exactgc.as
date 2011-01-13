@@ -1347,15 +1347,19 @@ function constructTracerBodies()
             PR("const size_t _xact_work_count = " + c.variable_length_field.count + ";").
             PR("if (_xact_cursor * _xact_work_increment >= _xact_work_count)").
             IN().
-            PR("return (_xact_cursor == 0);").
+            PR("return false;").
             OUT().
             PR("size_t _xact_work = _xact_work_increment;").
+            PR("bool _xact_more = true;").
             PR("if ((_xact_cursor + 1) * _xact_work_increment >= _xact_work_count)").
+            PR("{").
             IN().
             PR("_xact_work = _xact_work_count - (_xact_cursor * _xact_work_increment);").
-            OUT();
+            PR("_xact_more = false;").
+            OUT().
+            PR("}");
         emitChunk(c.out, c.variable_length_field, "(_xact_cursor * _xact_work_increment)", "_xact_work");
-        c.out.PR("return true;");
+        c.out.PR("return _xact_more;");
     }
 
     function emitArrayUnchunked(c) {
@@ -1410,7 +1414,7 @@ function constructTracerBodies()
         // traced class has an exactly traced base class.
 
         if (c.base != null && !noUsefulTracer(c.base)) {
-            c.out.PR(c.base + "::gcTrace(gc);");
+            c.out.PR(c.base + "::gcTrace(gc, 0);");
             if (interlockOutputFile != null)
                 c.out.PR("(void)(" + cleanupNs(c.base) + "_isExactInterlock != 0);");
         }
@@ -1481,7 +1485,7 @@ function constructAndPrintTracers()
                     NL();
             if (c.probablyLarge) {
                 output.
-                    PR("bool " + c.cls + "::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)").
+                    PR("bool " + c.cls + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").
                     PR("{").
                     DO(function (output) {
                             if (output === builtins) {
@@ -1500,21 +1504,15 @@ function constructAndPrintTracers()
                         }).
                     PR(c.out.get()).
                     PR("}").
-                    NL().
-                    PR("void " + c.cls + "::gcTrace(MMgc::GC* gc)").
-                    PR("{").
-                    IN().
-                    PR("gcTraceSmallAsLarge(gc);").
-                    OUT().
-                    PR("}").
                     NL();
             }
             else {
                 output.
-                    PR("void " + c.cls + "::gcTrace(MMgc::GC* gc)").
+                    PR("bool " + c.cls + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").
                     PR("{").
                     IN().
                     PR("(void)gc;").
+                    PR("(void)_xact_cursor;").
                     DO(function (output) {
                             if (output === builtins) {
                                 output.
@@ -1525,12 +1523,8 @@ function constructAndPrintTracers()
                         }).
                     OUT().
                     PR(c.out.get()).
-                    PR("}").
-                    NL().
-                    PR("bool " + c.cls + "::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)").
-                    PR("{").
                     IN().
-                    PR("return gcTraceLargeAsSmall(gc, _xact_cursor);").
+                    PR("return false;").
                     OUT().
                     PR("}").
                     NL();
