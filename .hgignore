@@ -32,6 +32,7 @@ stale.xml
 *.class
 *.rej
 *.kpf
+*.pbxuser
 CVS/**
 extensions/Sampler*
 classicprefix_*.pch++
