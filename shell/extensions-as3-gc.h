@@ -39,66 +39,54 @@
 
 namespace avmplus
 {
-void DictionaryClass::gcTrace(MMgc::GC* gc)
+bool DictionaryClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DictionaryClass
     m_slots_DictionaryClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool DictionaryClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DictionaryObject::gcTrace(MMgc::GC* gc)
+bool DictionaryObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DictionaryObject
     m_slots_DictionaryObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    return false;
 }
 
-bool DictionaryObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DomainClass::gcTrace(MMgc::GC* gc)
+bool DomainClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DomainClass
     m_slots_DomainClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool DomainClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DomainObject::gcTrace(MMgc::GC* gc)
+bool DomainObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DomainObject
     m_slots_DomainObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     gc->TraceLocation(&domainEnv);
     gc->TraceLocation(&domainToplevel);
-}
-
-bool DomainObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 }

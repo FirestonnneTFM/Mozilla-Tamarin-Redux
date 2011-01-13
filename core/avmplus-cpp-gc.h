@@ -39,7 +39,7 @@
 
 namespace avmplus
 {
-bool AbcEnv::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+bool AbcEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     if (_xact_cursor == 0) {
         gc->TraceLocation(&m_codeContext);
@@ -53,253 +53,207 @@ bool AbcEnv::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
     const size_t _xact_work_increment = 2000/sizeof(void*);
     const size_t _xact_work_count = m_pool->methodCount();
     if (_xact_cursor * _xact_work_increment >= _xact_work_count)
-        return (_xact_cursor == 0);
+        return false;
     size_t _xact_work = _xact_work_increment;
+    bool _xact_more = true;
     if ((_xact_cursor + 1) * _xact_work_increment >= _xact_work_count)
+    {
         _xact_work = _xact_work_count - (_xact_cursor * _xact_work_increment);
+        _xact_more = false;
+    }
     gc->TraceLocations((m_methods+(_xact_cursor * _xact_work_increment)), _xact_work);
-    return true;
-}
-
-void AbcEnv::gcTrace(MMgc::GC* gc)
-{
-    gcTraceSmallAsLarge(gc);
+    return _xact_more;
 }
 
 #ifdef DEBUGGER
 
-void AbcFile::gcTrace(MMgc::GC* gc)
+bool AbcFile::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    AbcInfo::gcTrace(gc);
+    (void)_xact_cursor;
+    AbcInfo::gcTrace(gc, 0);
     (void)(avmplus_AbcInfo_isExactInterlock != 0);
     source.gcTrace(gc);
     gc->TraceLocation(&sourcemap);
-}
-
-bool AbcFile::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
 
-void AbcInfo::gcTrace(MMgc::GC* gc)
+bool AbcInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 
-}
-
-bool AbcInfo::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #endif // DEBUGGER
 
-void AttributeE4XNode::gcTrace(MMgc::GC* gc)
+bool AttributeE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    E4XNode::gcTrace(gc);
+    (void)_xact_cursor;
+    E4XNode::gcTrace(gc, 0);
     (void)(avmplus_E4XNode_isExactInterlock != 0);
     gc->TraceLocation(&m_value);
+    return false;
 }
 
-bool AttributeE4XNode::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void CDATAE4XNode::gcTrace(MMgc::GC* gc)
+bool CDATAE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    E4XNode::gcTrace(gc);
+    (void)_xact_cursor;
+    E4XNode::gcTrace(gc, 0);
     (void)(avmplus_E4XNode_isExactInterlock != 0);
     gc->TraceLocation(&m_value);
+    return false;
 }
 
-bool CDATAE4XNode::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void CommentE4XNode::gcTrace(MMgc::GC* gc)
+bool CommentE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    E4XNode::gcTrace(gc);
+    (void)_xact_cursor;
+    E4XNode::gcTrace(gc, 0);
     (void)(avmplus_E4XNode_isExactInterlock != 0);
     gc->TraceLocation(&m_value);
-}
-
-bool CommentE4XNode::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #ifdef DEBUGGER
 
-void Debugger::gcTrace(MMgc::GC* gc)
+bool Debugger::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     abcList.gcTrace(gc);
     gc->TraceLocation(&trace_callback);
-}
-
-bool Debugger::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
 
-void DebuggerMethodInfo::gcTrace(MMgc::GC* gc)
+bool DebuggerMethodInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&file);
     gc->TraceLocations((localNames+0), local_count);
-}
-
-bool DebuggerMethodInfo::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #endif // DEBUGGER
 
-void Domain::gcTrace(MMgc::GC* gc)
+bool Domain::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     m_namedScriptsList.gcTrace(gc);
     gc->TraceLocation(&m_namedScriptsMap);
     gc->TraceLocation(&m_namedTraits);
     gc->TraceLocation(&m_parameterizedTypes);
     gc->TraceLocations((m_bases+0), m_baseCount);
+    return false;
 }
 
-bool Domain::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DomainEnv::gcTrace(MMgc::GC* gc)
+bool DomainEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    GlobalMemorySubscriber::gcTrace(gc);
+    (void)_xact_cursor;
+    GlobalMemorySubscriber::gcTrace(gc, 0);
     (void)(avmplus_GlobalMemorySubscriber_isExactInterlock != 0);
     gc->TraceLocation(&m_domain);
     gc->TraceLocation(&m_globalMemoryProviderObject);
     m_namedScriptEnvsList.gcTrace(gc);
     gc->TraceLocation(&m_toplevel);
     gc->TraceLocations((m_bases+0), m_baseCount);
+    return false;
 }
 
-bool DomainEnv::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void E4XNode::gcTrace(MMgc::GC* gc)
+bool E4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&m_nameOrAux);
     gc->TraceLocation(&m_parent);
+    return false;
 }
 
-bool E4XNode::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void E4XNodeAux::gcTrace(MMgc::GC* gc)
+bool E4XNodeAux::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&m_name);
     gc->TraceLocation(&m_notification);
     gc->TraceLocation(&m_ns);
+    return false;
 }
 
-bool E4XNodeAux::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ElementE4XNode::gcTrace(MMgc::GC* gc)
+bool ElementE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    E4XNode::gcTrace(gc);
+    (void)_xact_cursor;
+    E4XNode::gcTrace(gc, 0);
     (void)(avmplus_E4XNode_isExactInterlock != 0);
     gc->TraceLocation(&m_attributes);
     gc->TraceLocation(&m_children);
     gc->TraceLocation(&m_namespaces);
+    return false;
 }
 
-bool ElementE4XNode::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-bool ExceptionHandlerTable::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+bool ExceptionHandlerTable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     const size_t _xact_work_increment = 2000/sizeof(void*);
     const size_t _xact_work_count = exception_count;
     if (_xact_cursor * _xact_work_increment >= _xact_work_count)
-        return (_xact_cursor == 0);
+        return false;
     size_t _xact_work = _xact_work_increment;
+    bool _xact_more = true;
     if ((_xact_cursor + 1) * _xact_work_increment >= _xact_work_count)
+    {
         _xact_work = _xact_work_count - (_xact_cursor * _xact_work_increment);
+        _xact_more = false;
+    }
     for ( size_t _xact_iter=0 ; _xact_iter < _xact_work; _xact_iter++ )
         exceptions[+_xact_iter+(_xact_cursor * _xact_work_increment)].gcTrace(gc);
-    return true;
+    return _xact_more;
 }
 
-void ExceptionHandlerTable::gcTrace(MMgc::GC* gc)
-{
-    gcTraceSmallAsLarge(gc);
-}
-
-void FunctionEnv::gcTrace(MMgc::GC* gc)
+bool FunctionEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    MethodEnv::gcTrace(gc);
+    (void)_xact_cursor;
+    MethodEnv::gcTrace(gc, 0);
     (void)(avmplus_MethodEnv_isExactInterlock != 0);
     gc->TraceLocation(&closure);
+    return false;
 }
 
-bool FunctionEnv::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void GlobalMemorySubscriber::gcTrace(MMgc::GC* gc)
+bool GlobalMemorySubscriber::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 
+    return false;
 }
 
-bool GlobalMemorySubscriber::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void HeapHashtable::gcTrace(MMgc::GC* gc)
+bool HeapHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     ht.gcTrace(gc);
+    return false;
 }
 
-bool HeapHashtable::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MethodEnv::gcTrace(MMgc::GC* gc)
+bool MethodEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    MethodEnvProcHolder::gcTrace(gc);
+    (void)_xact_cursor;
+    MethodEnvProcHolder::gcTrace(gc, 0);
     (void)(avmplus_MethodEnvProcHolder_isExactInterlock != 0);
     gc->TraceLocation(&_scope);
     gc->TraceConservativeLocation(&activationOrMCTable);
@@ -307,28 +261,22 @@ void MethodEnv::gcTrace(MMgc::GC* gc)
     gc->TraceLocation(&lookup_cache);
 #endif
     gc->TraceLocation(&method);
+    return false;
 }
 
-bool MethodEnv::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MethodEnvProcHolder::gcTrace(MMgc::GC* gc)
+bool MethodEnvProcHolder::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 
+    return false;
 }
 
-bool MethodEnvProcHolder::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MethodInfo::gcTrace(MMgc::GC* gc)
+bool MethodInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    MethodInfoProcHolder::gcTrace(gc);
+    (void)_xact_cursor;
+    MethodInfoProcHolder::gcTrace(gc, 0);
     (void)(avmplus_MethodInfoProcHolder_isExactInterlock != 0);
     gcTraceHook_MethodInfo(gc);
     _activation.gcTrace(gc);
@@ -338,77 +286,59 @@ void MethodInfo::gcTrace(MMgc::GC* gc)
 #endif
     gc->TraceLocation(&_msref);
     gc->TraceLocation(&_pool);
+    return false;
 }
 
-bool MethodInfo::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MethodInfoProcHolder::gcTrace(MMgc::GC* gc)
+bool MethodInfoProcHolder::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 
+    return false;
 }
 
-bool MethodInfoProcHolder::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MethodSignature::gcTrace(MMgc::GC* gc)
+bool MethodSignature::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    QCachedItem::gcTrace(gc);
+    (void)_xact_cursor;
+    QCachedItem::gcTrace(gc, 0);
     (void)(avmplus_QCachedItem_isExactInterlock != 0);
     gcTraceHook_MethodSignature(gc);
     gc->TraceLocation(&_returnTraits);
+    return false;
 }
 
-bool MethodSignature::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void NamespaceSet::gcTrace(MMgc::GC* gc)
+bool NamespaceSet::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocations((_namespaces+0), count());
+    return false;
 }
 
-bool NamespaceSet::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void NativeErrorClass::gcTrace(MMgc::GC* gc)
+bool NativeErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    ClassClosure::gcTrace(gc);
+    (void)_xact_cursor;
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool NativeErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void PIE4XNode::gcTrace(MMgc::GC* gc)
+bool PIE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    E4XNode::gcTrace(gc);
+    (void)_xact_cursor;
+    E4XNode::gcTrace(gc, 0);
     (void)(avmplus_E4XNode_isExactInterlock != 0);
     gc->TraceLocation(&m_value);
+    return false;
 }
 
-bool PIE4XNode::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void PoolObject::gcTrace(MMgc::GC* gc)
+bool PoolObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gcTraceHook_PoolObject(gc);
     gc->TraceLocation(&_abcStrings);
     _classes.gcTrace(gc);
@@ -437,111 +367,86 @@ void PoolObject::gcTrace(MMgc::GC* gc)
     gc->TraceLocation(&m_namedTraits);
     metadata_infos.gcTrace(gc);
     gc->TraceLocation(&precompNames);
+    return false;
 }
 
-bool PoolObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void QCache::gcTrace(MMgc::GC* gc)
+bool QCache::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&m_head);
+    return false;
 }
 
-bool QCache::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void QCachedItem::gcTrace(MMgc::GC* gc)
+bool QCachedItem::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&next);
+    return false;
 }
 
-bool QCachedItem::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ScopeChain::gcTrace(MMgc::GC* gc)
+bool ScopeChain::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&_abcEnv);
     gc->TraceLocation(&_defaultXmlNamespace);
     gc->TraceLocation(&_scopeTraits);
     gc->TraceLocation(&_vtable);
     gc->TraceAtoms((_scopes+0), getSize());
+    return false;
 }
 
-bool ScopeChain::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ScopeTypeChain::gcTrace(MMgc::GC* gc)
+bool ScopeTypeChain::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&_traits);
     gc->TraceLocations((_scopes+0), fullsize);
+    return false;
 }
 
-bool ScopeTypeChain::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ScriptEnv::gcTrace(MMgc::GC* gc)
+bool ScriptEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    MethodEnv::gcTrace(gc);
+    (void)_xact_cursor;
+    MethodEnv::gcTrace(gc, 0);
     (void)(avmplus_MethodEnv_isExactInterlock != 0);
     gc->TraceLocation(&global);
-}
-
-bool ScriptEnv::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #ifdef DEBUGGER
 
-void SourceFile::gcTrace(MMgc::GC* gc)
+bool SourceFile::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    SourceInfo::gcTrace(gc);
+    (void)_xact_cursor;
+    SourceInfo::gcTrace(gc, 0);
     (void)(avmplus_SourceInfo_isExactInterlock != 0);
     functions.gcTrace(gc);
     gc->TraceLocation(&named);
-}
-
-bool SourceFile::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
 
-void SourceInfo::gcTrace(MMgc::GC* gc)
+bool SourceInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 
-}
-
-bool SourceInfo::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
 
-bool StackTrace::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+bool StackTrace::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     if (_xact_cursor == 0) {
         gc->TraceLocation(&stringRep);
@@ -549,38 +454,35 @@ bool StackTrace::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
     const size_t _xact_work_increment = 2000/sizeof(void*);
     const size_t _xact_work_count = depth;
     if (_xact_cursor * _xact_work_increment >= _xact_work_count)
-        return (_xact_cursor == 0);
+        return false;
     size_t _xact_work = _xact_work_increment;
+    bool _xact_more = true;
     if ((_xact_cursor + 1) * _xact_work_increment >= _xact_work_count)
+    {
         _xact_work = _xact_work_count - (_xact_cursor * _xact_work_increment);
+        _xact_more = false;
+    }
     for ( size_t _xact_iter=0 ; _xact_iter < _xact_work; _xact_iter++ )
         elements[+_xact_iter+(_xact_cursor * _xact_work_increment)].gcTrace(gc);
-    return true;
-}
-
-void StackTrace::gcTrace(MMgc::GC* gc)
-{
-    gcTraceSmallAsLarge(gc);
+    return _xact_more;
 }
 
 #endif // DEBUGGER
 
-void TextE4XNode::gcTrace(MMgc::GC* gc)
+bool TextE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    E4XNode::gcTrace(gc);
+    (void)_xact_cursor;
+    E4XNode::gcTrace(gc, 0);
     (void)(avmplus_E4XNode_isExactInterlock != 0);
     gc->TraceLocation(&m_value);
+    return false;
 }
 
-bool TextE4XNode::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void Toplevel::gcTrace(MMgc::GC* gc)
+bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
     gc->TraceLocation(&_abcEnv);
     gc->TraceLocation(&_builtinClasses);
     gc->TraceLocation(&_mainEntryPoint);
@@ -605,16 +507,13 @@ void Toplevel::gcTrace(MMgc::GC* gc)
     gc->TraceLocation(&vectorClass);
     gc->TraceLocation(&vectorobj_cscope);
     gc->TraceLocation(&vectorobj_iscope);
+    return false;
 }
 
-bool Toplevel::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void Traits::gcTrace(MMgc::GC* gc)
+bool Traits::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifdef VMCFG_CACHE_GQCN
     gc->TraceLocation(&_fullname);
 #endif
@@ -632,57 +531,44 @@ void Traits::gcTrace(MMgc::GC* gc)
     gc->TraceLocation(&pool);
     gc->TraceLocation(&protectedNamespace);
     gc->TraceLocations((m_primary_supertypes+0), MAX_PRIMARY_SUPERTYPE);
+    return false;
 }
 
-bool Traits::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void TraitsBindings::gcTrace(MMgc::GC* gc)
+bool TraitsBindings::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    QCachedItem::gcTrace(gc);
+    (void)_xact_cursor;
+    QCachedItem::gcTrace(gc, 0);
     (void)(avmplus_QCachedItem_isExactInterlock != 0);
     gcTraceHook_TraitsBindings(gc);
     gc->TraceLocation(&base);
     gc->TraceLocation(&m_bindings);
     gc->TraceLocation(&owner);
+    return false;
 }
 
-bool TraitsBindings::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void TraitsMetadata::gcTrace(MMgc::GC* gc)
+bool TraitsMetadata::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    QCachedItem::gcTrace(gc);
+    (void)_xact_cursor;
+    QCachedItem::gcTrace(gc, 0);
     (void)(avmplus_QCachedItem_isExactInterlock != 0);
     gc->TraceLocation(&base);
     gc->TraceLocation(&residingPool);
+    return false;
 }
 
-bool TraitsMetadata::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void TypedVectorClassBase::gcTrace(MMgc::GC* gc)
+bool TypedVectorClassBase::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    ClassClosure::gcTrace(gc);
+    (void)_xact_cursor;
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
     gc->TraceLocation(&m_typeTraits);
+    return false;
 }
 
-bool TypedVectorClassBase::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-bool VTable::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
+bool VTable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     if (_xact_cursor == 0) {
         gc->TraceLocation(&_toplevel);
@@ -697,30 +583,26 @@ bool VTable::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
     const size_t _xact_work_increment = 2000/sizeof(void*);
     const size_t _xact_work_count = (MMgc::GC::Size(this) - offsetof(VTable, methods)) / sizeof(MethodEnv*);
     if (_xact_cursor * _xact_work_increment >= _xact_work_count)
-        return (_xact_cursor == 0);
+        return false;
     size_t _xact_work = _xact_work_increment;
+    bool _xact_more = true;
     if ((_xact_cursor + 1) * _xact_work_increment >= _xact_work_count)
+    {
         _xact_work = _xact_work_count - (_xact_cursor * _xact_work_increment);
+        _xact_more = false;
+    }
     gc->TraceLocations((methods+(_xact_cursor * _xact_work_increment)), _xact_work);
-    return true;
+    return _xact_more;
 }
 
-void VTable::gcTrace(MMgc::GC* gc)
-{
-    gcTraceSmallAsLarge(gc);
-}
-
-void VectorBaseObject::gcTrace(MMgc::GC* gc)
+bool VectorBaseObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    ScriptObject::gcTrace(gc);
+    (void)_xact_cursor;
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     gc->TraceLocation(&m_vecClass);
-}
-
-bool VectorBaseObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 }

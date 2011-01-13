@@ -39,935 +39,752 @@
 
 namespace avmplus
 {
-void ArgumentErrorClass::gcTrace(MMgc::GC* gc)
+bool ArgumentErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ArgumentErrorClass
     m_slots_ArgumentErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool ArgumentErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ArgumentErrorObject::gcTrace(MMgc::GC* gc)
+bool ArgumentErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ArgumentErrorObject
     m_slots_ArgumentErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool ArgumentErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ArrayClass::gcTrace(MMgc::GC* gc)
+bool ArrayClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ArrayClass
     m_slots_ArrayClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool ArrayClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ArrayObject::gcTrace(MMgc::GC* gc)
+bool ArrayObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ArrayObject
     m_slots_ArrayObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     m_denseArray.gcTrace(gc);
+    return false;
 }
 
-bool ArrayObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void BooleanClass::gcTrace(MMgc::GC* gc)
+bool BooleanClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_BooleanClass
     m_slots_BooleanClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool BooleanClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ByteArrayClass::gcTrace(MMgc::GC* gc)
+bool ByteArrayClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ByteArrayClass
     m_slots_ByteArrayClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool ByteArrayClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ByteArrayObject::gcTrace(MMgc::GC* gc)
+bool ByteArrayObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ByteArrayObject
     m_slots_ByteArrayObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     m_byteArray.gcTrace(gc);
+    return false;
 }
 
-bool ByteArrayObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ClassClass::gcTrace(MMgc::GC* gc)
+bool ClassClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ClassClass
     m_slots_ClassClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool ClassClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ClassClosure::gcTrace(MMgc::GC* gc)
+bool ClassClosure::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ClassClosure
     m_slots_ClassClosure.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     gc->TraceLocation(&m_prototype);
+    return false;
 }
 
-bool ClassClosure::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DateClass::gcTrace(MMgc::GC* gc)
+bool DateClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DateClass
     m_slots_DateClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool DateClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DateObject::gcTrace(MMgc::GC* gc)
+bool DateObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DateObject
     m_slots_DateObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    return false;
 }
 
-bool DateObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DefinitionErrorClass::gcTrace(MMgc::GC* gc)
+bool DefinitionErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DefinitionErrorClass
     m_slots_DefinitionErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool DefinitionErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DefinitionErrorObject::gcTrace(MMgc::GC* gc)
+bool DefinitionErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DefinitionErrorObject
     m_slots_DefinitionErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool DefinitionErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DoubleVectorClass::gcTrace(MMgc::GC* gc)
+bool DoubleVectorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DoubleVectorClass
     m_slots_DoubleVectorClass.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorClass<DoubleVectorObject>::gcTrace(gc);
+    TypedVectorClass<DoubleVectorObject>::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorClassXDoubleVectorObjectX_isExactInterlock != 0);
+    return false;
 }
 
-bool DoubleVectorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void DoubleVectorObject::gcTrace(MMgc::GC* gc)
+bool DoubleVectorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_DoubleVectorObject
     m_slots_DoubleVectorObject.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorObject< DataList<double> >::gcTrace(gc);
+    TypedVectorObject< DataList<double> >::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorObjectXDataListXdoubleXX_isExactInterlock != 0);
+    return false;
 }
 
-bool DoubleVectorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ErrorClass::gcTrace(MMgc::GC* gc)
+bool ErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ErrorClass
     m_slots_ErrorClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool ErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ErrorObject::gcTrace(MMgc::GC* gc)
+bool ErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ErrorObject
     m_slots_ErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
 #ifdef DEBUGGER
     gc->TraceLocation(&stackTrace);
 #endif
+    return false;
 }
 
-bool ErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void EvalErrorClass::gcTrace(MMgc::GC* gc)
+bool EvalErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_EvalErrorClass
     m_slots_EvalErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool EvalErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void EvalErrorObject::gcTrace(MMgc::GC* gc)
+bool EvalErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_EvalErrorObject
     m_slots_EvalErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool EvalErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void FunctionClass::gcTrace(MMgc::GC* gc)
+bool FunctionClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_FunctionClass
     m_slots_FunctionClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool FunctionClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void FunctionObject::gcTrace(MMgc::GC* gc)
+bool FunctionObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_FunctionObject
     m_slots_FunctionObject.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
     gc->TraceLocation(&_call);
+    return false;
 }
 
-bool FunctionObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void IntClass::gcTrace(MMgc::GC* gc)
+bool IntClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_IntClass
     m_slots_IntClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool IntClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void IntVectorClass::gcTrace(MMgc::GC* gc)
+bool IntVectorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_IntVectorClass
     m_slots_IntVectorClass.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorClass<IntVectorObject>::gcTrace(gc);
+    TypedVectorClass<IntVectorObject>::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorClassXIntVectorObjectX_isExactInterlock != 0);
+    return false;
 }
 
-bool IntVectorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void IntVectorObject::gcTrace(MMgc::GC* gc)
+bool IntVectorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_IntVectorObject
     m_slots_IntVectorObject.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorObject< DataList<int32_t> >::gcTrace(gc);
+    TypedVectorObject< DataList<int32_t> >::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorObjectXDataListXint32_tXX_isExactInterlock != 0);
+    return false;
 }
 
-bool IntVectorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MathClass::gcTrace(MMgc::GC* gc)
+bool MathClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_MathClass
     m_slots_MathClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool MathClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MethodClosure::gcTrace(MMgc::GC* gc)
+bool MethodClosure::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_MethodClosure
     m_slots_MethodClosure.gcTracePrivateProperties(gc);
 #endif
-    FunctionObject::gcTrace(gc);
+    FunctionObject::gcTrace(gc, 0);
     (void)(avmplus_FunctionObject_isExactInterlock != 0);
     gc->TraceAtom(&_savedThis);
+    return false;
 }
 
-bool MethodClosure::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void MethodClosureClass::gcTrace(MMgc::GC* gc)
+bool MethodClosureClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_MethodClosureClass
     m_slots_MethodClosureClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool MethodClosureClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void NamespaceClass::gcTrace(MMgc::GC* gc)
+bool NamespaceClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_NamespaceClass
     m_slots_NamespaceClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool NamespaceClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void NumberClass::gcTrace(MMgc::GC* gc)
+bool NumberClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_NumberClass
     m_slots_NumberClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool NumberClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ObjectClass::gcTrace(MMgc::GC* gc)
+bool ObjectClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ObjectClass
     m_slots_ObjectClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool ObjectClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ObjectVectorClass::gcTrace(MMgc::GC* gc)
+bool ObjectVectorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ObjectVectorClass
     m_slots_ObjectVectorClass.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorClass<ObjectVectorObject>::gcTrace(gc);
+    TypedVectorClass<ObjectVectorObject>::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorClassXObjectVectorObjectX_isExactInterlock != 0);
+    return false;
 }
 
-bool ObjectVectorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ObjectVectorObject::gcTrace(MMgc::GC* gc)
+bool ObjectVectorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ObjectVectorObject
     m_slots_ObjectVectorObject.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorObject< AtomList >::gcTrace(gc);
+    TypedVectorObject< AtomList >::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorObjectXAtomListX_isExactInterlock != 0);
+    return false;
 }
 
-bool ObjectVectorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void QNameClass::gcTrace(MMgc::GC* gc)
+bool QNameClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_QNameClass
     m_slots_QNameClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool QNameClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void QNameObject::gcTrace(MMgc::GC* gc)
+bool QNameObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_QNameObject
     m_slots_QNameObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     m_mn.gcTrace(gc);
+    return false;
 }
 
-bool QNameObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void RangeErrorClass::gcTrace(MMgc::GC* gc)
+bool RangeErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_RangeErrorClass
     m_slots_RangeErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool RangeErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void RangeErrorObject::gcTrace(MMgc::GC* gc)
+bool RangeErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_RangeErrorObject
     m_slots_RangeErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool RangeErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ReferenceErrorClass::gcTrace(MMgc::GC* gc)
+bool ReferenceErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ReferenceErrorClass
     m_slots_ReferenceErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool ReferenceErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void ReferenceErrorObject::gcTrace(MMgc::GC* gc)
+bool ReferenceErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_ReferenceErrorObject
     m_slots_ReferenceErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool ReferenceErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void RegExpClass::gcTrace(MMgc::GC* gc)
+bool RegExpClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_RegExpClass
     m_slots_RegExpClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool RegExpClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void RegExpObject::gcTrace(MMgc::GC* gc)
+bool RegExpObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_RegExpObject
     m_slots_RegExpObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     gc->TraceLocation(&m_pcreInst);
     gc->TraceLocation(&m_source);
+    return false;
 }
 
-bool RegExpObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void SecurityErrorClass::gcTrace(MMgc::GC* gc)
+bool SecurityErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_SecurityErrorClass
     m_slots_SecurityErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool SecurityErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void SecurityErrorObject::gcTrace(MMgc::GC* gc)
+bool SecurityErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_SecurityErrorObject
     m_slots_SecurityErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool SecurityErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void StringClass::gcTrace(MMgc::GC* gc)
+bool StringClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_StringClass
     m_slots_StringClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool StringClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void SyntaxErrorClass::gcTrace(MMgc::GC* gc)
+bool SyntaxErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_SyntaxErrorClass
     m_slots_SyntaxErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool SyntaxErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void SyntaxErrorObject::gcTrace(MMgc::GC* gc)
+bool SyntaxErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_SyntaxErrorObject
     m_slots_SyntaxErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool SyntaxErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void TypeErrorClass::gcTrace(MMgc::GC* gc)
+bool TypeErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_TypeErrorClass
     m_slots_TypeErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool TypeErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void TypeErrorObject::gcTrace(MMgc::GC* gc)
+bool TypeErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_TypeErrorObject
     m_slots_TypeErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool TypeErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void UIntClass::gcTrace(MMgc::GC* gc)
+bool UIntClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_UIntClass
     m_slots_UIntClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool UIntClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void UIntVectorClass::gcTrace(MMgc::GC* gc)
+bool UIntVectorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_UIntVectorClass
     m_slots_UIntVectorClass.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorClass<UIntVectorObject>::gcTrace(gc);
+    TypedVectorClass<UIntVectorObject>::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorClassXUIntVectorObjectX_isExactInterlock != 0);
+    return false;
 }
 
-bool UIntVectorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void UIntVectorObject::gcTrace(MMgc::GC* gc)
+bool UIntVectorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_UIntVectorObject
     m_slots_UIntVectorObject.gcTracePrivateProperties(gc);
 #endif
-    TypedVectorObject< DataList<uint32_t> >::gcTrace(gc);
+    TypedVectorObject< DataList<uint32_t> >::gcTrace(gc, 0);
     (void)(avmplus_TypedVectorObjectXDataListXuint32_tXX_isExactInterlock != 0);
+    return false;
 }
 
-bool UIntVectorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void URIErrorClass::gcTrace(MMgc::GC* gc)
+bool URIErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_URIErrorClass
     m_slots_URIErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool URIErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void URIErrorObject::gcTrace(MMgc::GC* gc)
+bool URIErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_URIErrorObject
     m_slots_URIErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool URIErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void UninitializedErrorClass::gcTrace(MMgc::GC* gc)
+bool UninitializedErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_UninitializedErrorClass
     m_slots_UninitializedErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool UninitializedErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void UninitializedErrorObject::gcTrace(MMgc::GC* gc)
+bool UninitializedErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_UninitializedErrorObject
     m_slots_UninitializedErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool UninitializedErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void VectorClass::gcTrace(MMgc::GC* gc)
+bool VectorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_VectorClass
     m_slots_VectorClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool VectorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void VerifyErrorClass::gcTrace(MMgc::GC* gc)
+bool VerifyErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_VerifyErrorClass
     m_slots_VerifyErrorClass.gcTracePrivateProperties(gc);
 #endif
-    NativeErrorClass::gcTrace(gc);
+    NativeErrorClass::gcTrace(gc, 0);
     (void)(avmplus_NativeErrorClass_isExactInterlock != 0);
+    return false;
 }
 
-bool VerifyErrorClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void VerifyErrorObject::gcTrace(MMgc::GC* gc)
+bool VerifyErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_VerifyErrorObject
     m_slots_VerifyErrorObject.gcTracePrivateProperties(gc);
 #endif
-    ErrorObject::gcTrace(gc);
+    ErrorObject::gcTrace(gc, 0);
     (void)(avmplus_ErrorObject_isExactInterlock != 0);
+    return false;
 }
 
-bool VerifyErrorObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void XMLClass::gcTrace(MMgc::GC* gc)
+bool XMLClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_XMLClass
     m_slots_XMLClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool XMLClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void XMLListClass::gcTrace(MMgc::GC* gc)
+bool XMLListClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_XMLListClass
     m_slots_XMLListClass.gcTracePrivateProperties(gc);
 #endif
-    ClassClosure::gcTrace(gc);
+    ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
 }
 
-bool XMLListClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void XMLListObject::gcTrace(MMgc::GC* gc)
+bool XMLListObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_XMLListObject
     m_slots_XMLListObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     m_children.gcTrace(gc);
     gc->TraceAtom(&m_targetObject);
     m_targetProperty.gcTrace(gc);
+    return false;
 }
 
-bool XMLListObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
-}
-
-void XMLObject::gcTrace(MMgc::GC* gc)
+bool XMLObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_XMLObject
     m_slots_XMLObject.gcTracePrivateProperties(gc);
 #endif
-    ScriptObject::gcTrace(gc);
+    ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
     gc->TraceLocation(&m_node);
     gc->TraceLocation(&publicNS);
-}
-
-bool XMLObject::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 }
