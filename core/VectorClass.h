@@ -124,9 +124,9 @@ namespace avmplus
 
         OBJ* newVector(uint32_t length = 0);
 
-        virtual void gcTrace(MMgc::GC* gc)
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor)
         {
-            TypedVectorClassBase::gcTrace(gc);
+            return TypedVectorClassBase::gcTrace(gc, cursor);
         }
 
     protected:
@@ -363,10 +363,12 @@ namespace avmplus
         void _spliceHelper_so(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, ScriptObject* so_args, uint32_t offset);
 
     public:
-        virtual void gcTrace(MMgc::GC* gc)
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor)
         {
-            VectorBaseObject::gcTrace(gc);
+            (void)cursor;
+            VectorBaseObject::gcTrace(gc, 0);
             m_list.gcTrace(gc);
+            return false;
         }
 
     private:

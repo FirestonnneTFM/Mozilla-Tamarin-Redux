@@ -623,8 +623,9 @@ namespace avmplus
     }
 
     /*virtual*/
-    void String::gcTrace(GC* gc)
+    bool String::gcTrace(GC* gc, size_t cursor)
     {
+        (void)cursor;
         switch (getType())
         {
             case kDynamic:
@@ -634,6 +635,7 @@ namespace avmplus
                 gc->TraceLocation(&m_extra.master);
                 break;
         }
+        return false;
     }
 
     /////////////////////////////// Conversions ////////////////////////////////

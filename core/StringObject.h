@@ -147,7 +147,7 @@ namespace avmplus
 
         virtual                     ~String();
 
-        virtual void                gcTrace(MMgc::GC* gc);
+        virtual bool                gcTrace(MMgc::GC* gc, size_t cursor);
 
         /**
         Create a string with a given width out of this string. If the width is equal to the current

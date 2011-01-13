@@ -164,8 +164,7 @@ namespace avmplus
                 return MMgc::setExact(new (gc, ivtable->getExtraSize()) obj(ivtable, delegate)); \
             }                                                                                   \
         private:                                                                                \
-            virtual void gcTrace(MMgc::GC* gc); \
-            virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor); \
+            virtual bool gcTrace(MMgc::GC* gc, size_t cursor); \
             DECLARE_SLOTS_##obj;                                                                \
         };                                                                                      \
                                                                                                 \
@@ -183,8 +182,7 @@ namespace avmplus
             {                                                                                   \
                 return obj::create(ivtable->gc(), ivtable, delegate);                           \
             }                                                                                   \
-            virtual void gcTrace(MMgc::GC* gc); \
-            virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor); \
+            virtual bool gcTrace(MMgc::GC* gc, size_t cursor); \
             DECLARE_SLOTS_##cls;                                                                \
         };
 

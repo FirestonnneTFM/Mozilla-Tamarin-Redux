@@ -269,8 +269,7 @@ private:
     ImtThunkEnv(VTable*);
     ImtThunkEnv(uint32_t imtMapCount);
 public:
-    virtual void gcTrace(MMgc::GC* gc);
-    virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+    virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
     static ImtThunkEnv* create(MMgc::GC* gc, VTable* v);
     static ImtThunkEnv* create(MMgc::GC* gc, uint32_t imtMapCount);
@@ -309,12 +308,10 @@ REALLY_INLINE struct ImtThunkEntry* ImtThunkEnv::entries() const
     return (struct ImtThunkEntry*)(this+1);
 }
 
-void ImtThunkEnv::gcTrace(MMgc::GC* gc) {
+bool ImtThunkEnv::gcTrace(MMgc::GC* gc, size_t cursor) {
+    (void)cursor;
     gc->TraceConservativeLocation((uintptr_t*)&vtable);
-}
-
-bool ImtThunkEnv::gcTraceLarge(MMgc::GC* gc, size_t cursor) {
-    return gcTraceLargeAsSmall(gc, cursor);
+    return false;
 }
 
 // Build the initial IMT for this vtable, if JIT is enabled.

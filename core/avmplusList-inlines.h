@@ -43,29 +43,45 @@
 namespace avmplus
 {
     template<>
-    REALLY_INLINE void TracedListData<Atom>::gcTrace(MMgc::GC* gc)
+    REALLY_INLINE bool TracedListData<Atom>::gcTrace(MMgc::GC* gc, size_t cursor)
     {
-        gc->TraceAtoms(entries, len);
+        const size_t work_increment = 2000/sizeof(void*);
+        const size_t work_count = len;
+        if (cursor * work_increment >= work_count)
+            return false;
+
+        size_t work = work_increment;
+        bool more = true;
+        if ((cursor + 1) * work_increment >= work_count)
+        {
+            work = work_count - (cursor * work_increment);
+            more = false;
+        }
+
+        gc->TraceAtoms(entries + (cursor*work_increment), work);
+        return more;
     }
 
-    template<>
-    REALLY_INLINE bool TracedListData<Atom>::gcTraceLarge(MMgc::GC* gc, size_t cursor)
-    {
-        return gcTraceLargeAsSmall(gc, cursor);
-    }
-    
     template<class T>
-    inline void TracedListData<T>::gcTrace(MMgc::GC* gc)
+    inline bool TracedListData<T>::gcTrace(MMgc::GC* gc, size_t cursor)
     {
-        gc->TraceLocations(entries, len);
+        const size_t work_increment = 2000/sizeof(void*);
+        const size_t work_count = len;
+        if (cursor * work_increment >= work_count)
+            return false;
+        
+        size_t work = work_increment;
+        bool more = true;
+        if ((cursor + 1) * work_increment >= work_count)
+        {
+            work = work_count - (cursor * work_increment);
+            more = false;
+        }
+
+        gc->TraceLocations(entries + (cursor*work_increment), work);
+        return more;
     }
 
-    template<class T>
-    inline bool TracedListData<T>::gcTraceLarge(MMgc::GC* gc, size_t cursor)
-    {
-        return gcTraceLargeAsSmall(gc, cursor);
-    }
-    
     // ----------------------------
 
     template<class T>
