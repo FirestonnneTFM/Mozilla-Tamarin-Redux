@@ -100,8 +100,7 @@ namespace avmplus
     public:
         static QuadContainer<VALUE_TYPE>* create(MMgc::GC* gc, uint32_t capacity);
 
-        virtual void gcTrace(MMgc::GC* gc);
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
         const uint32_t capacity;
 #ifdef AVMPLUS_64BIT
@@ -166,8 +165,7 @@ namespace avmplus
 
         ~MultinameHashtable();
 
-        virtual void gcTrace(MMgc::GC* gc);
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
         bool isFull() const;
 

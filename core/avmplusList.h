@@ -131,8 +131,7 @@ namespace avmplus
         
         TracedListData() { MMgc::setExact(this); }
 
-        virtual void gcTrace(MMgc::GC* gc);
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
         
         REALLY_INLINE MMgc::GC* gc() { return MMgc::GC::GetGC(this); }
         REALLY_INLINE void set_gc(MMgc::GC* _gc) { AvmAssert(_gc == gc()); (void)_gc; }
@@ -757,9 +756,11 @@ namespace avmplus
             return MMgc::setExact(new (gc) ExactHeapList(gc, capacity, args));
         }
         
-        virtual void gcTrace(MMgc::GC* gc)
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor)
         {
+            (void)cursor;
             this->list.gcTrace(gc);
+            return false;
         }
     };
     

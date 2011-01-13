@@ -68,8 +68,7 @@ namespace avmplus
 
         ~ScriptObject();
 
-        virtual void gcTrace(MMgc::GC* gc);
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
         ScriptObject* getDelegate() const { return delegate; }
         void setDelegate(ScriptObject *d) { delegate = d; }

@@ -45,15 +45,11 @@ using namespace MMgc;
 namespace avmplus
 {
     template <class VALUE_TYPE, class VALUE_WRITER>
-    void MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::gcTrace(MMgc::GC *gc)
+    bool MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::gcTrace(MMgc::GC *gc, size_t cursor)
     {
+        (void)cursor;
         gc->TraceLocation(&m_quads);
-    }
-    
-    template <class VALUE_TYPE, class VALUE_WRITER>
-    bool MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::gcTraceLarge(MMgc::GC *gc, size_t cursor)
-    {
-        return gcTraceLargeAsSmall(gc, cursor);
+        return false;
     }
     
     template <class VALUE_TYPE, class VALUE_WRITER>
@@ -187,22 +183,18 @@ namespace avmplus
     }
     
     template <class VALUE_TYPE>
-    void QuadContainer<VALUE_TYPE>::gcTrace(MMgc::GC* gc)
+    bool QuadContainer<VALUE_TYPE>::gcTrace(MMgc::GC* gc, size_t cursor)
     {
+        (void)cursor;
         for ( uint32_t i=0 ; i < capacity ; i++ ) {
             Quad<VALUE_TYPE>& q = quads[i];
             gc->TraceLocation(&q.name);
             gc->TraceLocation(&q.ns);
             gc->TraceConservativeLocation((uintptr_t*)&q.value);
         }
+        return false;
     }
 
-    template <class VALUE_TYPE>
-    bool QuadContainer<VALUE_TYPE>::gcTraceLarge(MMgc::GC* gc, size_t cursor)
-    {
-        return gcTraceLargeAsSmall(gc, cursor);
-    }
-    
     /**
      * since identifiers are always interned strings, they can't be 0,
      * so we can use 0 as the empty value.

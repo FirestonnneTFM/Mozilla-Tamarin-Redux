@@ -68,10 +68,12 @@ namespace avmplus
         setAPI(0);
     }
 
-    void Namespace::gcTrace(MMgc::GC* gc)
+    bool Namespace::gcTrace(MMgc::GC* gc, size_t cursor)
     {
+        (void)cursor;
         gc->TraceAtom(&m_prefix);
         gc->TraceLocation(&m_uri);
+        return false;
     }
     
     void Namespace::setUri(Stringp uri, NamespaceType flags)

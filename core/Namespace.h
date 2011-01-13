@@ -74,7 +74,7 @@ namespace avmplus
         Namespace(Atom prefix, Stringp uri, NamespaceType type);
         ~Namespace();
 
-        virtual void gcTrace(MMgc::GC* gc);
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
         inline Atom getPrefix() const { return get_prefix(); }
         Stringp getURI() const;

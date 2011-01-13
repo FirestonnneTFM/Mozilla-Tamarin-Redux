@@ -103,8 +103,9 @@ namespace avmplus
      *
      * The InlineHashtable always stores Atoms.
      */
-    void ScriptObject::gcTrace(MMgc::GC* gc)
+    bool ScriptObject::gcTrace(MMgc::GC* gc, size_t cursor)
     {
+        (void)cursor;
         gc->TraceLocation(&vtable);
         gc->TraceLocation(&delegate);
         traits()->traceSlots(gc, this);
@@ -125,11 +126,7 @@ namespace avmplus
                 gc->TraceLocation(hht);
             }
         }
-    }
-
-    bool ScriptObject::gcTraceLarge(MMgc::GC* gc, size_t cursor)
-    {
-        return gcTraceLargeAsSmall(gc, cursor);
+        return false;
     }
 
     void ScriptObject::initHashtable(int capacity /*=InlineHashtable::kDefaultCapacity*/)

@@ -81,8 +81,7 @@ namespace avmplus
             return MMgc::setExact(new (gc, extra) ConstantStringContainer(pool));
         }
 
-        virtual void gcTrace(MMgc::GC* gc);
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor);
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
         
         PoolObject* const pool;
         

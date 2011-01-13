@@ -76,24 +76,21 @@ namespace avmplus
             return get(index);
         }
 
-        virtual void gcTrace(MMgc::GC* gc)
-        {
-            for ( uint32_t i=0, cap=capacity() ; i < cap ; i++ )
-                elements[i].gcTrace(gc);
-        }
-        
-        virtual bool gcTraceLarge(MMgc::GC* gc, size_t cursor)
+        virtual bool gcTrace(MMgc::GC* gc, size_t cursor)
         {
             uint32_t cap = capacity();
             const uint32_t work_increment = 2000/sizeof(void*);
             if (work_increment * cursor >= cap)
                 return false;
             size_t work = work_increment;
-            if (work_increment * (cursor + 1) >= cap)
+            bool more = true;
+            if (work_increment * (cursor + 1) >= cap) {
                 work = cap - (work_increment * cursor);
+                more = false;
+            }
             for ( size_t i=0 ; i < work ; i++ )
                 elements[(work_increment * cursor) + i].gcTrace(gc);
-            return true;
+            return more;
         }
         
     private:

@@ -153,12 +153,7 @@ namespace avmplus
 
     ////////////////////////////////////////////////////////////////////
 
-    void ConstantStringContainer::gcTrace(MMgc::GC* gc)
-    {
-        gcTraceSmallAsLarge(gc);
-    }
-    
-    bool ConstantStringContainer::gcTraceLarge(MMgc::GC* gc, size_t cursor)
+    bool ConstantStringContainer::gcTrace(MMgc::GC* gc, size_t cursor)
     {
         size_t cap = pool->constantStringCount;
         const uint32_t work_increment = 2000/sizeof(void*);
@@ -166,9 +161,12 @@ namespace avmplus
             return false;
 
         size_t work = work_increment;
-        if (work_increment * (cursor + 1) >= cap)
+        bool more = true;
+        if (work_increment * (cursor + 1) >= cap) {
             work = cap - (work_increment * cursor);
-        
+            more = false;
+        }
+
         const uint8_t *start = pool->_abcStringStart;
         const uint8_t *end = pool->_abcStringEnd;
 
@@ -179,8 +177,7 @@ namespace avmplus
                 continue;
             gc->TraceLocation(&item.str);
         }
-        return true;
-        
+        return more;
     }
 
     void PoolObject::setupConstantStrings(uint32_t count)
