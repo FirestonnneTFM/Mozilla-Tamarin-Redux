@@ -90,8 +90,8 @@ namespace MMgc
         kQueued=2,              // object is on the mark or barrier queues
         kFinalizable=4,         // object's destructor must be called when the object is destroyed
         kHasWeakRef=8,          // there's an entry for the object in the weakRefs table
-        kLargeObject=16,        // object is managed by the large-object allocator
-        kVirtualGCTrace = 32    // object derived from GCTraceableBase and has gcTrace override(s), see GCObject.h
+        kVirtualGCTrace = 16    // object derived from GCTraceableBase and has gcTrace override(s), see GCObject.h
+        // free: 32
         // free: 64
         // free: 128
     };

@@ -127,76 +127,46 @@ namespace MMgc
     };
 
     // GCTraceableBase is internal to MMgc.
-    //
-    // Observe that clients of GCTraceableObject and GCFinalizedObject can
-    // implement one or the other gcTrace method, if the object is known always
-    // to be large or small.  In practice, variable-length objects
-    // must implement both methods, though often the "small" method can delegate
-    // to the "large" method.  Utility functions are provided to make this
-    // delegation easy.
-    //
-    // NOTE: Given the differences in object size between 32-bit and 64-bit systems
-    // it can be dangerous to make assumptions close to the cutoff.
-    //
-    // NOTE: We will almost certainly consolidate the two tracing methods into
-    // a single tracing method, to make the system simpler to use.
 
     class GCTraceableBase
     {
     public:
         virtual ~GCTraceableBase() { /* must be empty */ }
-        
-        // This is for small objects (no larger than kLargestAlloc).  The
-        // method must trace all pointers in the object.
-        //
-        // The base version of this method aborts the process - you must
-        // override if there's a chance that it can be called, and you
-        // must never delegate to the base method.
 
-        virtual void gcTrace(GC* gc);
-        
-        // This is for large objects (larger than kLargestAlloc).  This method
-        // may be called multiple times on a single object.  On the first call
-        // 'cursor' will be 0, and it will increment after that.  Any value
-        // must be accepted for 'cursor' but unless it is 0 then it will be
-        // one greater than it was on the last invocation for the same object.
-        // On each invocation the method should attempt to do marking work
-        // corresponding roughly to kLargestAlloc/sizeof(void*) words.  If
-        // any marking work was done then true /must/ be returned.  If no
-        // marking work was done the false should be returned as the object will
-        // be re-visited until that happens.
+        // The gcTrace method will be called to exactly mark the object.  It must trace
+        // all locations in the object that may contain pointers to managed objects.
+        //
+        // The gcTrace method may be called multiple times on a single object,
+        // in order to allow a large object to be marked piecemeal.  On the
+        // first call 'cursor' will be 0, on the next it will be 1, and so on.
+        // Any value must be accepted for 'cursor' but unless it is 0 then it
+        // will be one greater than it was on the last invocation for the same
+        // object.  On each invocation the method should attempt to do marking
+        // work corresponding roughly to kLargestAlloc/sizeof(void*) words.
+        //
+        // The method must return 'true' if there is more marking work to be done,
+        // otherwise 'false'.  If 'true' is returned then the object will be re-visited
+        // with cursor incremented.
         //
         // Note that marking may start over without first reaching the end
-        // of the object, as a result of updates interleaved with marking.  A
-        // restarted marking is indicated by a cursor == 0.
+        // of the object, as a result of updates interleaved with marking or
+        // mark stack overflow.  A restarted marking is indicated by a cursor == 0.
         //
         // The base version of this method aborts the process - you must
         // override if there's a chance that it can be called, and you
         // must never delegate to the base method.
-        
-        virtual bool gcTraceLarge(GC* gc, size_t cursor);
 
+        virtual bool gcTrace(GC* gc, size_t cursor);
+        
         // The class must have an empty operator 'delete' to prevent the C++
         // compiler from inserting a call to the system's delete operator into
         // the base class destructor.
         static void operator delete(void *) { /* must be empty */ }
-
-        // For quick-and-dirty implementation of gcTraceLarge when there's a useful
-        // gcTrace: this delegates to gcTrace by calling gcTrace and returning true
-        // when cursor is zero, then returning false for any other value of cursor.
-
-        bool gcTraceLargeAsSmall(GC* gc, size_t cursor);
-
-        // For quick-and-dirty implementation of gcTrace when there's a useful gcTraceLarge:
-        // this delegates to gcTraceLarge by calling gcTraceLarge repeatedly with increasing
-        // cursor values until it returns false.
-
-        void gcTraceSmallAsLarge(GC* gc);
     };
 
     /**
      * Base class for GC-managed objects that are not finalizable but have
-     * virtual gcTrace methods.  This must be used as the most base class
+     * a virtual gcTrace method.  This must be used as the most base class
      * instead of GCObject, it can't be mixed in later.
      *
      * Note that subtypes that want to be traced exactly still have to set
@@ -309,13 +279,6 @@ namespace MMgc
     REALLY_INLINE GCWeakRef* GCObject::GetWeakRef() const
     {
         return GC::GetWeakRef(this);
-    }
-
-    REALLY_INLINE void GCTraceableBase::gcTraceSmallAsLarge(GC* gc)
-    {
-        size_t cursor = 0;
-        while (gcTraceLarge(gc, cursor++))
-            ;
     }
 
     REALLY_INLINE void *GCTraceableObject::operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw())

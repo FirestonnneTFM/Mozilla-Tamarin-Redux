@@ -48,8 +48,8 @@ namespace MMgc
 {
     // Top level
 
-    // Set the bit on the object that flags it as having a virtual gcTrace/gcTraceLarge
-    // pair of methods.  Return the object.
+    // Set the bit on the object that flags it as having a virtual gcTrace method.
+    // Return the object.
     template<class T>
     REALLY_INLINE T* setExact(T* value)
     {
