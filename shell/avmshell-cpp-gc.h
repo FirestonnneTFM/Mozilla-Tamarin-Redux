@@ -41,35 +41,29 @@ namespace avmshell
 {
 #ifdef DEBUGGER
 
-void DebugCLI::gcTrace(MMgc::GC* gc)
+bool DebugCLI::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    avmplus::Debugger::gcTrace(gc);
+    (void)_xact_cursor;
+    avmplus::Debugger::gcTrace(gc, 0);
     (void)(avmplus_Debugger_isExactInterlock != 0);
     gc->TraceLocation(&currentFile);
     gc->TraceLocation(&firstBreakAction);
     gc->TraceLocation(&lastBreakAction);
-}
-
-bool DebugCLI::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 #endif // DEBUGGER
 
-void ShellToplevel::gcTrace(MMgc::GC* gc)
+bool ShellToplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
-    avmplus::Toplevel::gcTrace(gc);
+    (void)_xact_cursor;
+    avmplus::Toplevel::gcTrace(gc, 0);
     (void)(avmplus_Toplevel_isExactInterlock != 0);
     gc->TraceLocation(&shellClasses);
     gc->TraceLocation(&shellEntryPoint);
-}
-
-bool ShellToplevel::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 }

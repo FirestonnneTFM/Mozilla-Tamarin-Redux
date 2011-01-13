@@ -39,19 +39,16 @@
 
 namespace avmshell
 {
-void SystemClass::gcTrace(MMgc::GC* gc)
+bool SystemClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
+    (void)_xact_cursor;
 #ifndef GC_TRIVIAL_TRACER_SystemClass
     m_slots_SystemClass.gcTracePrivateProperties(gc);
 #endif
-    avmplus::ClassClosure::gcTrace(gc);
+    avmplus::ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
-}
-
-bool SystemClass::gcTraceLarge(MMgc::GC* gc, size_t _xact_cursor)
-{
-    return gcTraceLargeAsSmall(gc, _xact_cursor);
+    return false;
 }
 
 }
