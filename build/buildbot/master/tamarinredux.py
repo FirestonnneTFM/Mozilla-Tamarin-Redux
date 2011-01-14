@@ -60,7 +60,7 @@ class tamarinredux:
                                    "mac-intel-10.4-compile", "mac-intel-10.5-compile", "mac64-intel-compile",
                                    "linux-compile", "linux2-compile",
                                    "linux64-compile",
-                                   "solaris-sparc-compile", "solaris-sparc2-compile",
+                                   "solaris-sparc-compile",
                                    "android-compile",
                                    "linux-arm-compile", "linux-arm2-compile", 
                                    "linux-mips-compile",
@@ -71,7 +71,7 @@ class tamarinredux:
                                    "mac-intel-10.4-smoke", "mac-intel-10.5-smoke", "mac64-intel-smoke",
                                    "linux-smoke", "linux2-smoke",
                                    "linux64-smoke",
-                                   "solaris-sparc-smoke", "solaris-sparc2-smoke",
+                                   "solaris-sparc-smoke",
                                    "android-smoke",
                                    "linux-arm-smoke", "linux-arm2-smoke",
                                    "linux-mips-smoke",
@@ -86,7 +86,6 @@ class tamarinredux:
                                   ["linux2-smoke", "linux2-compile"],
                                   ["linux64-smoke", "linux64-compile"],
                                   ["solaris-sparc-smoke", "solaris-sparc-compile"],
-                                  ["solaris-sparc2-smoke", "solaris-sparc-compile"],
                                   ["android-smoke","android-compile"],
                                   ["linux-arm-smoke","linux-compile"],
                                   ["linux-arm2-smoke","linux-compile"],
@@ -99,7 +98,7 @@ class tamarinredux:
                                    "mac-intel-10.4-test", "mac-intel-10.5-test", "mac64-intel-test",
                                    "linux-test", "linux2-test",
                                    "linux64-test",
-                                   "solaris-sparc-test", "solaris-sparc2-test",
+                                   "solaris-sparc-test",
                                    "android-test",
                                    "linux-arm-test", "linux-arm2-test",
                                    "linux-mips-test",
@@ -114,7 +113,6 @@ class tamarinredux:
                                   ["linux2-test", "linux2-smoke"],
                                   ["linux64-test", "linux64-smoke"],
                                   ["solaris-sparc-test", "solaris-sparc-smoke"],
-                                  ["solaris-sparc2-test", "solaris-sparc2-smoke"],
                                   ["android-test", "android-smoke"],
                                   ["linux-arm-test", "linux-arm-smoke"],
                                   ["linux-arm2-test", "linux-arm2-smoke"],
@@ -147,7 +145,7 @@ class tamarinredux:
                                     "mac-ppc-10.4a-deep", "mac-ppc-10.4b-deep",
                                     "mac-ppc-10.5a-deep", "mac-ppc-10.5b-deep",
                                     "mac64a-ppc-deep", "mac64b-ppc-deep",
-                                    "solaris-sparc-deep",
+                                    "solaris-sparc-deep", "solaris-sparc2-deep"
                                     "windows64-deep",
                                     "linux-deep",
                                     "linux-arm-deep",
@@ -170,6 +168,7 @@ class tamarinredux:
                                   ["mac64a-ppc-deep", "mac64-intel-test"],
                                   ["mac64b-ppc-deep", "mac64-intel-test"],
                                   ["solaris-sparc-deep", "solaris-sparc-test"],
+                                  ["solaris-sparc2-deep", "solaris-sparc-test"],
                                   ["windows64-deep", "windows64-test"], 
                                   ["linux-mips-deep", "linux-mips-test"],
                                  ])
@@ -517,23 +516,7 @@ class tamarinredux:
                 'factory': solaris_sparc_compile_factory,
                 'builddir': './solaris-sparc-compile',
     }
-    
-    
-    ############################################
-    #### builder for solaris-sparc2-compile ####
-    ############################################
-    solaris_sparc2_compile_factory = factory.BuildFactory()
-    solaris_sparc2_compile_factory.addStep(sync_clean)
-    solaris_sparc2_compile_factory.addStep(sync_clone(url=HG_URL))
-    solaris_sparc2_compile_factory.addStep(sync_update)
-    solaris_sparc2_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
-    
-    solaris_sparc2_compile_builder = {
-                'name': "solaris-sparc2-compile",
-                'slavename': "solaris-sparc2",
-                'factory': solaris_sparc2_compile_factory,
-                'builddir': './solaris-sparc2-compile',
-    }
+
 
     ###########################################
     #### builder for android on mac        ####
@@ -810,22 +793,7 @@ class tamarinredux:
                 'factory': solaris_sparc_smoke_factory,
                 'builddir': './solaris-sparc-smoke',
     }
-    
-    
-    ##########################################
-    #### builder for solaris-sparc2-smoke ####
-    ##########################################
-    solaris_sparc2_smoke_factory = factory.BuildFactory()
-    solaris_sparc2_smoke_factory.addStep(download_testmedia)
-    solaris_sparc2_smoke_factory.addStep(test_smoke)
-    solaris_sparc2_smoke_factory.addStep(util_process_clean)
 
-    solaris_sparc2_smoke_builder = {
-                'name': "solaris-sparc2-smoke",
-                'slavename': "solaris-sparc2",
-                'factory': solaris_sparc2_smoke_factory,
-                'builddir': './solaris-sparc2-smoke',
-    }
 
     #########################################
     #### builder for android-smoke       ####
@@ -1132,7 +1100,11 @@ class tamarinredux:
     solaris_sparc_test_factory = factory.BuildFactory()
     solaris_sparc_test_factory.addStep(test_commandline)
     solaris_sparc_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
-    solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
+    solaris_sparc_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs="--random --timeout=480"))
+    solaris_sparc_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs="--random --timeout=480"))
+    solaris_sparc_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs="--random --timeout=480"))
+    solaris_sparc_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs="--random --timeout=480"))
+    solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs="--random --timeout=480"))
     solaris_sparc_test_factory.addStep(util_process_clean)
     solaris_sparc_test_factory.addStep(util_clean_buildsdir)
     solaris_sparc_test_factory.addStep(sync_clean)
@@ -1143,26 +1115,7 @@ class tamarinredux:
                 'factory': solaris_sparc_test_factory,
                 'builddir': './solaris-sparc-test',
     }
-    
-    
-    #########################################
-    #### builder for solaris-sparc2-test ####
-    #########################################
-    solaris_sparc2_test_factory = factory.BuildFactory()
-    solaris_sparc2_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc2_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
-    solaris_sparc2_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_test_factory.addStep(util_process_clean)
-    solaris_sparc2_test_factory.addStep(util_clean_buildsdir)
-    solaris_sparc2_test_factory.addStep(sync_clean)
 
-    solaris_sparc2_test_builder = {
-                'name': "solaris-sparc2-test",
-                'slavename': "solaris-sparc2",
-                'factory': solaris_sparc2_test_factory,
-                'builddir': './solaris-sparc2-test',
-    }
 
     ########################################
     #### builder for android-test       ####
@@ -1929,6 +1882,32 @@ class tamarinredux:
                 'builddir': './solaris-sparc-deep',
     }
 
+
+    ########################################
+    #### builder for solaris-sparc-deep ####
+    ########################################
+    solaris_sparc2_deep_factory = factory.BuildFactory()
+    solaris_sparc2_deep_factory.addStep(sync_clean)
+    solaris_sparc2_deep_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc2_deep_factory.addStep(sync_update)
+    solaris_sparc2_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
+    solaris_sparc2_deep_factory.addStep(download_testmedia)
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
+    solaris_sparc_deep_factory.addStep(util_process_clean)
+    solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
+    solaris_sparc_deep_factory.addStep(sync_clean)
+
+    solaris_sparc_deep_builder = {
+                'name': "solaris-sparc2-deep",
+                'slavename': "solaris-sparc2-deep",
+                'factory': solaris_sparc2_deep_factory,
+                'builddir': './solaris-sparc2-deep',
+    }
+
     ##################################
     #### builder for windows64-deep ####
     ##################################
@@ -2146,7 +2125,6 @@ class tamarinredux:
                 linux2_compile_builder,
                 linux_64_compile_builder,
                 solaris_sparc_compile_builder,
-                solaris_sparc2_compile_builder,
                 android_compile_builder,
                 linux_arm_compile_builder,
                 linux_arm2_compile_builder,
@@ -2162,7 +2140,6 @@ class tamarinredux:
                 linux2_smoke_builder,
                 linux_64_smoke_builder,
                 solaris_sparc_smoke_builder,
-                solaris_sparc2_smoke_builder,
                 android_smoke_builder,
                 linux_arm_smoke_builder,
                 linux_arm2_smoke_builder,
@@ -2178,7 +2155,6 @@ class tamarinredux:
                 linux2_test_builder,
                 linux_64_test_builder,
                 solaris_sparc_test_builder,
-                solaris_sparc2_test_builder,
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_arm2_test_builder,
@@ -2203,6 +2179,7 @@ class tamarinredux:
                 mac_ppc_64b_deep_builder,
                 windows_64_deep_builder,
                 solaris_sparc_deep_builder,
+                solaris_sparc2_deep_factory
                 linux_deep_builder,
                 linux_arm_deep_builder,
                 linux_arm2_deep_builder,
