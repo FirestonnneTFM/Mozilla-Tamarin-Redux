@@ -1090,7 +1090,6 @@ class sandbox:
     #### builder for linux-arm2-test      ####
     ##########################################
     sb_linux_arm2_test_factory = factory.BuildFactory()
-    sb_linux_arm2_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     sb_linux_arm2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
     sb_linux_arm2_test_factory.addStep(util_process_clean)
     sb_linux_arm2_test_factory.addStep(util_clean_buildsdir)
