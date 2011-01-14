@@ -62,7 +62,7 @@ class tamarinredux:
                                    "linux64-compile",
                                    "solaris-sparc-compile",
                                    "android-compile",
-                                   "linux-arm-compile", "linux-arm2-compile", 
+                                   "linux-arm-compile", "linux-arm2-compile", "linux-arm3-compile",
                                    "linux-mips-compile",
                                    "linux-sh4-compile"])
 
@@ -73,7 +73,7 @@ class tamarinredux:
                                    "linux64-smoke",
                                    "solaris-sparc-smoke",
                                    "android-smoke",
-                                   "linux-arm-smoke", "linux-arm2-smoke",
+                                   "linux-arm-smoke", "linux-arm2-smoke", "linux-arm3-smoke",
                                    "linux-mips-smoke",
                                    "linux-sh4-smoke"],
                     builderDependencies=[
@@ -89,6 +89,7 @@ class tamarinredux:
                                   ["android-smoke","android-compile"],
                                   ["linux-arm-smoke","linux-compile"],
                                   ["linux-arm2-smoke","linux-compile"],
+                                  ["linux-arm3-smoke","linux-compile"],
                                   ["linux-mips-smoke","linux-mips-compile"],
                                   ["linux-sh4-smoke","linux2-compile"],
                                  ])
@@ -100,7 +101,7 @@ class tamarinredux:
                                    "linux64-test",
                                    "solaris-sparc-test",
                                    "android-test",
-                                   "linux-arm-test", "linux-arm2-test",
+                                   "linux-arm-test", "linux-arm2-test", "linux-arm3-test",
                                    "linux-mips-test",
                                    "linux-sh4-test"],
                     builderDependencies=[
@@ -116,6 +117,7 @@ class tamarinredux:
                                   ["android-test", "android-smoke"],
                                   ["linux-arm-test", "linux-arm-smoke"],
                                   ["linux-arm2-test", "linux-arm2-smoke"],
+                                  ["linux-arm3-test", "linux-arm3-smoke"],
                                   ["linux-mips-test", "linux-mips-smoke"],
                                   ["linux-sh4-test", "linux-sh4-smoke"],
                                  ])
@@ -145,7 +147,7 @@ class tamarinredux:
                                     "mac-ppc-10.4a-deep", "mac-ppc-10.4b-deep",
                                     "mac-ppc-10.5a-deep", "mac-ppc-10.5b-deep",
                                     "mac64a-ppc-deep", "mac64b-ppc-deep",
-                                    "solaris-sparc-deep", "solaris-sparc2-deep"
+                                    "solaris-sparc-deep", "solaris-sparc2-deep",
                                     "windows64-deep",
                                     "linux-deep",
                                     "linux-arm-deep",
@@ -572,8 +574,25 @@ class tamarinredux:
                 'factory': linux_arm2_compile_factory,
                 'builddir': './linux-arm2-compile',
     }
-    
-    
+
+
+    ################################
+    #### builder for linux-arm3 ####
+    ################################
+    linux_arm3_compile_factory = factory.BuildFactory()
+    linux_arm3_compile_factory.addStep(sync_clean)
+    linux_arm3_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm3_compile_factory.addStep(sync_update)
+    linux_arm3_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+
+    linux_arm3_compile_builder = {
+                'name': "linux-arm3-compile",
+                'slavename': "linux-arm3",
+                'factory': linux_arm3_compile_factory,
+                'builddir': './linux-arm3-compile',
+    }
+
+
     ################################
     #### builder for linux-mips ####
     ################################
@@ -834,7 +853,7 @@ class tamarinredux:
     
     
     ###########################################
-    #### builder for linxu-arm2smoke      ####
+    #### builder for linux-arm2-smoke      ####
     ###########################################
     linux_arm2_smoke_factory = factory.BuildFactory()
     linux_arm2_smoke_factory.addStep(download_testmedia)
@@ -854,8 +873,31 @@ class tamarinredux:
                 'factory': linux_arm2_smoke_factory,
                 'builddir': './linux-arm2-smoke',
     }
-    
-    
+
+
+    ###########################################
+    #### builder for linux-arm3-smoke      ####
+    ###########################################
+    linux_arm3_smoke_factory = factory.BuildFactory()
+    linux_arm3_smoke_factory.addStep(download_testmedia)
+    linux_arm3_smoke_factory.addStep(TestSuiteShellCommand(
+                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    linux_arm3_smoke_factory.addStep(util_process_clean)
+
+    linux_arm3_smoke_builder = {
+                'name': "linux-arm3-smoke",
+                'slavename': "linux-arm3",
+                'factory': linux_arm3_smoke_factory,
+                'builddir': './linux-arm3-smoke',
+    }
+
+
     #########################################
     #### builder for linux-mips-smoke    ####
     #########################################
@@ -1143,7 +1185,6 @@ class tamarinredux:
     linux_arm_test_factory = factory.BuildFactory()
     linux_arm_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_neon_arm"))
     linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
-    linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
     linux_arm_test_factory.addStep(util_process_clean)
     linux_arm_test_factory.addStep(util_clean_buildsdir)
     linux_arm_test_factory.addStep(sync_clean)
@@ -1171,8 +1212,25 @@ class tamarinredux:
                 'factory': linux_arm2_test_factory,
                 'builddir': './linux-arm2-test',
     }
-    
-    
+
+
+    ###########################################
+    #### builder for linux-arm3-test       ####
+    ###########################################
+    linux_arm3_test_factory = factory.BuildFactory()
+    linux_arm3_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
+    linux_arm3_test_factory.addStep(util_process_clean)
+    linux_arm3_test_factory.addStep(util_clean_buildsdir)
+    linux_arm3_test_factory.addStep(sync_clean)
+
+    linux_arm3_test_builder = {
+                'name': "linux-arm3-test",
+                'slavename': "linux-arm3",
+                'factory': linux_arm3_test_factory,
+                'builddir': './linux-arm3-test',
+    }
+
+
     ##########################################
     #### builder for linux-mips-test      ####
     ##########################################
@@ -1882,9 +1940,9 @@ class tamarinredux:
     }
 
 
-    ########################################
-    #### builder for solaris-sparc-deep ####
-    ########################################
+    #########################################
+    #### builder for solaris-sparc2-deep ####
+    #########################################
     solaris_sparc2_deep_factory = factory.BuildFactory()
     solaris_sparc2_deep_factory.addStep(sync_clean)
     solaris_sparc2_deep_factory.addStep(sync_clone(url=HG_URL))
@@ -1896,11 +1954,11 @@ class tamarinredux:
     solaris_sparc2_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
     solaris_sparc2_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
     solaris_sparc2_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
-    solaris_sparc_deep_factory.addStep(util_process_clean)
-    solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
-    solaris_sparc_deep_factory.addStep(sync_clean)
+    solaris_sparc2_deep_factory.addStep(util_process_clean)
+    solaris_sparc2_deep_factory.addStep(util_clean_buildsdir)
+    solaris_sparc2_deep_factory.addStep(sync_clean)
 
-    solaris_sparc_deep_builder = {
+    solaris_sparc2_deep_builder = {
                 'name': "solaris-sparc2-deep",
                 'slavename': "solaris-sparc2-deep",
                 'factory': solaris_sparc2_deep_factory,
@@ -2128,6 +2186,7 @@ class tamarinredux:
                 android_compile_builder,
                 linux_arm_compile_builder,
                 linux_arm2_compile_builder,
+                linux_arm3_compile_builder,
                 linux_mips_compile_builder,
                 linux_sh4_compile_builder,
                 
@@ -2143,6 +2202,7 @@ class tamarinredux:
                 android_smoke_builder,
                 linux_arm_smoke_builder,
                 linux_arm2_smoke_builder,
+                linux_arm3_smoke_builder,
                 linux_mips_smoke_builder,
                 linux_sh4_smoke_builder,
                 
@@ -2158,6 +2218,7 @@ class tamarinredux:
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_arm2_test_builder,
+                linux_arm3_test_builder,
                 linux_mips_test_builder,
                 linux_sh4_test_builder,
 
@@ -2179,7 +2240,7 @@ class tamarinredux:
                 mac_ppc_64b_deep_builder,
                 windows_64_deep_builder,
                 solaris_sparc_deep_builder,
-                solaris_sparc2_deep_factory
+                solaris_sparc2_deep_builder,
                 linux_deep_builder,
                 linux_arm_deep_builder,
                 linux_arm2_deep_builder,
