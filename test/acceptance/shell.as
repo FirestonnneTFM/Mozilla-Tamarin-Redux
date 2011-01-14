@@ -593,10 +593,16 @@ function DaylightSavingTA( t ) {
 	var dst_start;
 	var dst_end;
     // Windows fix for 2007 DST change made all previous years follow new DST rules
-    // check to see if 3/13/2006 12pm getHours is 12 or 13
-    var dstPrev:Boolean=(new Date(1142269200000).getHours()==13);
+    // create a date pre-2007 when DST is enabled according to 2007 rules
+    var pre_2007:Date = new Date("Mar 20 2006");
+    // create a date post-2007
+    var post_2007:Date = new Date("Mar 20 2008");
+    // if the two dates timezoneoffset match, then this must be a windows box applying
+    // post-2007 DST rules to earlier dates.
+    var win_machine:Boolean = pre_2007.timezoneOffset == post_2007.timezoneOffset
+
 	if (TZ_DIFF<=-4 && TZ_DIFF>=-8) {
-        if (dstPrev || YearFromTime(t)>=2007) {
+        if (win_machine || YearFromTime(t)>=2007) {
    	        dst_start = GetSecondSundayInMarch(t) + 2*msPerHour;
             dst_end = GetFirstSundayInNovember(t) + 2*msPerHour;
         } else {
