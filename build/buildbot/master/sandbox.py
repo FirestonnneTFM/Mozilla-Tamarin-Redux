@@ -60,7 +60,7 @@ class sandbox:
                                    "mac-intel-10.4-compile-sandbox", "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
                                    "linux-compile-sandbox", "linux2-compile-sandbox",
                                    "linux64-compile-sandbox",
-                                   "solaris-sparc-compile-sandbox", "solaris-sparc2-compile-sandbox",
+                                   "solaris-sparc-compile-sandbox",
                                    "android-compile-sandbox",
                                    "linux-arm-compile-sandbox", "linux-arm2-compile-sandbox",
                                    "linux-mips-compile-sandbox",
@@ -72,7 +72,7 @@ class sandbox:
                                    "mac-intel-10.4-smoke-sandbox", "mac-intel-10.5-smoke-sandbox", "mac64-intel-smoke-sandbox",
                                    "linux-smoke-sandbox", "linux2-smoke-sandbox",
                                    "linux64-smoke-sandbox",
-                                   "solaris-sparc-smoke-sandbox", "solaris-sparc2-smoke-sandbox",
+                                   "solaris-sparc-smoke-sandbox",
                                    "android-smoke-sandbox",
                                    "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox",
                                    "linux-mips-smoke-sandbox",
@@ -87,7 +87,6 @@ class sandbox:
                                   ["linux2-smoke-sandbox", "linux2-compile-sandbox"],
                                   ["linux64-smoke-sandbox", "linux64-compile-sandbox"],
                                   ["solaris-sparc-smoke-sandbox", "solaris-sparc-compile-sandbox"],
-                                  ["solaris-sparc2-smoke-sandbox", "solaris-sparc-compile-sandbox"],
                                   ["android-smoke-sandbox","android-compile-sandbox"],
                                   ["linux-arm-smoke-sandbox","linux-compile-sandbox"],
                                   ["linux-arm2-smoke-sandbox","linux-compile-sandbox"],
@@ -100,7 +99,7 @@ class sandbox:
                                    "mac-intel-10.4-test-sandbox", "mac-intel-10.5-test-sandbox", "mac64-intel-test-sandbox",
                                    "linux-test-sandbox", "linux2-test-sandbox",
                                    "linux64-test-sandbox",
-                                   "solaris-sparc-test-sandbox", "solaris-sparc2-test-sandbox",
+                                   "solaris-sparc-test-sandbox",
                                    "android-test-sandbox",
                                    "linux-arm-test-sandbox", "linux-arm2-test-sandbox",
                                    "linux-mips-test-sandbox",
@@ -115,7 +114,6 @@ class sandbox:
                                   ["linux2-test-sandbox", "linux2-smoke-sandbox"],
                                   ["linux64-test-sandbox", "linux64-smoke-sandbox"],
                                   ["solaris-sparc-test-sandbox", "solaris-sparc-smoke-sandbox"],
-                                  ["solaris-sparc2-test-sandbox", "solaris-sparc2-smoke-sandbox"],
                                   ["android-test-sandbox", "android-smoke-sandbox"],
                                   ["linux-arm-test-sandbox", "linux-arm-smoke-sandbox"],
                                   ["linux-arm2-test-sandbox", "linux-arm2-smoke-sandbox"],
@@ -450,23 +448,7 @@ class sandbox:
                 'factory': sb_solaris_sparc_compile_factory,
                 'builddir': './sandbox-solaris-sparc-compile',
     }
-    
-    
-    ############################################
-    #### builder for solaris-sparc2-compile ####
-    ############################################
-    sb_solaris_sparc2_compile_factory = factory.BuildFactory()
-    sb_solaris_sparc2_compile_factory.addStep(sync_clean)
-    sb_solaris_sparc2_compile_factory.addStep(sync_clone_sandbox)
-    sb_solaris_sparc2_compile_factory.addStep(sync_update)
-    sb_solaris_sparc2_compile_factory.addStep(bb_slaveupdate(slave="solaris-sparc"))
-    
-    sb_solaris_sparc2_compile_builder = {
-                'name': "solaris-sparc2-compile-sandbox",
-                'slavename': "solaris-sparc2",
-                'factory': sb_solaris_sparc2_compile_factory,
-                'builddir': './sandbox-solaris-sparc2-compile',
-    }
+
 
     ###########################################
     #### builder for android on mac        ####
@@ -745,22 +727,8 @@ class sandbox:
                 'factory': sb_solaris_sparc_smoke_factory,
                 'builddir': './sandbox-solaris-sparc-smoke',
     }
-    
-    ##########################################
-    #### builder for solaris-sparc2-smoke ####
-    ##########################################
-    sb_solaris_sparc2_smoke_factory = factory.BuildFactory()
-    sb_solaris_sparc2_smoke_factory.addStep(download_testmedia)
-    sb_solaris_sparc2_smoke_factory.addStep(test_smoke)
-    sb_solaris_sparc2_smoke_factory.addStep(util_process_clean)
 
-    sb_solaris_sparc2_smoke_builder = {
-                'name': "solaris-sparc2-smoke-sandbox",
-                'slavename': "solaris-sparc2",
-                'factory': sb_solaris_sparc2_smoke_factory,
-                'builddir': './sandbox-solaris-sparc2-smoke',
-    }
-    
+
     #########################################
     #### builder for android-smoke       ####
     #########################################
@@ -1063,7 +1031,11 @@ class sandbox:
     sb_solaris_sparc_test_factory = factory.BuildFactory()
     sb_solaris_sparc_test_factory.addStep(test_commandline)
     sb_solaris_sparc_test_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
-    sb_solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
+    sb_solaris_sparc_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs="--random --timeout=480"))
+    sb_solaris_sparc_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs="--random --timeout=480"))
+    sb_solaris_sparc_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs="--random --timeout=480"))
+    sb_solaris_sparc_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs="--random --timeout=480"))
+    sb_solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs="--random --timeout=480"))
     sb_solaris_sparc_test_factory.addStep(util_process_clean)
     sb_solaris_sparc_test_factory.addStep(util_clean_buildsdir)
     sb_solaris_sparc_test_factory.addStep(sync_clean)
@@ -1074,27 +1046,8 @@ class sandbox:
                 'factory': sb_solaris_sparc_test_factory,
                 'builddir': './sandbox-solaris-sparc-test',
     }
-    
-    
-    #########################################
-    #### builder for solaris-sparc2-test ####
-    #########################################
-    sb_solaris_sparc2_test_factory = factory.BuildFactory()
-    sb_solaris_sparc2_test_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
-    sb_solaris_sparc2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
-    sb_solaris_sparc2_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
-    sb_solaris_sparc2_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
-    sb_solaris_sparc2_test_factory.addStep(util_process_clean)
-    sb_solaris_sparc2_test_factory.addStep(util_clean_buildsdir)
-    sb_solaris_sparc2_test_factory.addStep(sync_clean)
 
-    sb_solaris_sparc2_test_builder = {
-                'name': "solaris-sparc2-test-sandbox",
-                'slavename': "solaris-sparc2",
-                'factory': sb_solaris_sparc2_test_factory,
-                'builddir': './sandbox-solaris-sparc2-test',
-    }
-    
+
     ########################################
     #### builder for android-test       ####
     ########################################
@@ -1194,7 +1147,6 @@ class sandbox:
                 sb_linux2_compile_builder,
                 sb_linux_64_compile_builder,
                 sb_solaris_sparc_compile_builder,
-                sb_solaris_sparc2_compile_builder,
                 sb_android_compile_builder,
                 sb_linux_arm_compile_builder,
                 sb_linux_arm2_compile_builder,
@@ -1210,7 +1162,6 @@ class sandbox:
                 sb_linux2_smoke_builder,
                 sb_linux_64_smoke_builder,
                 sb_solaris_sparc_smoke_builder,
-                sb_solaris_sparc2_smoke_builder,
                 sb_android_smoke_builder,
                 sb_linux_arm_smoke_builder,
                 sb_linux_arm2_smoke_builder,
@@ -1226,7 +1177,6 @@ class sandbox:
                 sb_linux2_test_builder,
                 sb_linux_64_test_builder,
                 sb_solaris_sparc_test_builder,
-                sb_solaris_sparc2_test_builder,
                 sb_android_test_builder,
                 sb_linux_arm_test_builder,
                 sb_linux_arm2_test_builder,
