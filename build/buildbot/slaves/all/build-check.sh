@@ -58,12 +58,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   fail=1
 }
 
-# Release-wordcode
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
-  echo "message: ReleaseWordCode Failed"
-  fail=1
-}
-
 # Release_Debugger
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
   echo "message: Release_Debugger Failed"
