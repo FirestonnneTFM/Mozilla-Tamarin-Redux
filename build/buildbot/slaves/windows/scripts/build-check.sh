@@ -58,12 +58,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   fail=1
 }
 
-# Release
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
-  echo "message: Release-wordcode Failed"
-  fail=1
-}
-
 # Release_Debugger
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
   echo "message: Release_Debugger Failed"
@@ -103,12 +97,6 @@ fi
 # Release
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   echo "message: Release64 Failed"
-  fail=1
-}
-
-# Release-wordcode
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
-  echo "message: ReleaseWordCode64 Failed"
   fail=1
 }
 

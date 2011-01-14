@@ -62,14 +62,6 @@ if [ "$ret" != "0" ]; then
     exit 1
 fi
 
-# Release-wordcode
-../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode
-ret=$?
-if [ "$ret" != "0" ]; then
-    echo "Uploading of $platform/$shell_release_wordcode failed"
-    exit 1
-fi
-
 # Release_Debugger
 ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
 ret=$?
