@@ -62,7 +62,7 @@ class sandbox:
                                    "linux64-compile-sandbox",
                                    "solaris-sparc-compile-sandbox",
                                    "android-compile-sandbox",
-                                   "linux-arm-compile-sandbox", "linux-arm2-compile-sandbox",
+                                   "linux-arm-compile-sandbox", "linux-arm2-compile-sandbox", "linux-arm3-compile-sandbox",
                                    "linux-mips-compile-sandbox",
                                    "linux-sh4-compile-sandbox"
                                    ])
@@ -74,7 +74,7 @@ class sandbox:
                                    "linux64-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox",
                                    "android-smoke-sandbox",
-                                   "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox",
+                                   "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox", "linux-arm3-smoke-sandbox",
                                    "linux-mips-smoke-sandbox",
                                    "linux-sh4-smoke-sandbox"],
                     builderDependencies=[
@@ -90,6 +90,7 @@ class sandbox:
                                   ["android-smoke-sandbox","android-compile-sandbox"],
                                   ["linux-arm-smoke-sandbox","linux-compile-sandbox"],
                                   ["linux-arm2-smoke-sandbox","linux-compile-sandbox"],
+                                  ["linux-arm3-smoke-sandbox","linux-compile-sandbox"],
                                   ["linux-mips-smoke-sandbox","linux-mips-compile-sandbox"],
                                   ["linux-sh4-smoke-sandbox","linux2-compile-sandbox"],
                                  ])
@@ -101,7 +102,7 @@ class sandbox:
                                    "linux64-test-sandbox",
                                    "solaris-sparc-test-sandbox",
                                    "android-test-sandbox",
-                                   "linux-arm-test-sandbox", "linux-arm2-test-sandbox",
+                                   "linux-arm-test-sandbox", "linux-arm2-test-sandbox", "linux-arm3-test-sandbox",
                                    "linux-mips-test-sandbox",
                                    "linux-sh4-test-sandbox"],
                     builderDependencies=[
@@ -117,6 +118,7 @@ class sandbox:
                                   ["android-test-sandbox", "android-smoke-sandbox"],
                                   ["linux-arm-test-sandbox", "linux-arm-smoke-sandbox"],
                                   ["linux-arm2-test-sandbox", "linux-arm2-smoke-sandbox"],
+                                  ["linux-arm3-test-sandbox", "linux-arm3-smoke-sandbox"],
                                   ["linux-mips-test-sandbox", "linux-mips-smoke-sandbox"],
                                   ["linux-sh4-test-sandbox", "linux-sh4-smoke-sandbox"],
                                  ])
@@ -504,8 +506,25 @@ class sandbox:
                 'factory': sb_linux_arm2_compile_factory,
                 'builddir': './sandbox-linux-arm2-compile',
     }
-    
-    
+
+
+    ################################
+    #### builder for linux-arm3 ####
+    ################################
+    sb_linux_arm3_compile_factory = factory.BuildFactory()
+    sb_linux_arm3_compile_factory.addStep(sync_clean)
+    sb_linux_arm3_compile_factory.addStep(sync_clone_sandbox)
+    sb_linux_arm3_compile_factory.addStep(sync_update)
+    sb_linux_arm3_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+
+    sb_linux_arm3_compile_builder = {
+                'name': "linux-arm3-compile-sandbox",
+                'slavename': "linux-arm3",
+                'factory': sb_linux_arm3_compile_factory,
+                'builddir': './sandbox-linux-arm3-compile',
+    }
+
+
     ################################
     #### builder for linux-mips ####
     ################################
@@ -788,7 +807,31 @@ class sandbox:
                 'factory': sb_linux_arm2_smoke_factory,
                 'builddir': './sandbox-linux-arm2-smoke',
     }
-    
+
+
+    ###########################################
+    #### builder for linxu-arm3-smoke      ####
+    ###########################################
+    sb_linux_arm3_smoke_factory = factory.BuildFactory()
+    sb_linux_arm3_smoke_factory.addStep(download_testmedia)
+    sb_linux_arm3_smoke_factory.addStep(TestSuiteShellCommand(
+                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_linux_arm3_smoke_factory.addStep(util_process_clean)
+
+    sb_linux_arm3_smoke_builder = {
+                'name': "linux-arm3-smoke-sandbox",
+                'slavename': "linux-arm3",
+                'factory': sb_linux_arm3_smoke_factory,
+                'builddir': './sandbox-linux-arm3-smoke',
+    }
+
+
     #########################################
     #### builder for linux-mips-smoke    ####
     #########################################
@@ -1073,7 +1116,6 @@ class sandbox:
     sb_linux_arm_test_factory = factory.BuildFactory()
     sb_linux_arm_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_neon_arm"))
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
-    sb_linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(util_process_clean)
     sb_linux_arm_test_factory.addStep(util_clean_buildsdir)
     sb_linux_arm_test_factory.addStep(sync_clean)
@@ -1101,7 +1143,25 @@ class sandbox:
                 'factory': sb_linux_arm2_test_factory,
                 'builddir': './sandbox-linux-arm2-test',
     }
-    
+
+
+    ###########################################
+    #### builder for linux-arm3-test       ####
+    ###########################################
+    sb_linux_arm3_test_factory = factory.BuildFactory()
+    sb_linux_arm3_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
+    sb_linux_arm3_test_factory.addStep(util_process_clean)
+    sb_linux_arm3_test_factory.addStep(util_clean_buildsdir)
+    sb_linux_arm3_test_factory.addStep(sync_clean)
+
+    sb_linux_arm3_test_builder = {
+                'name': "linux-arm3-test-sandbox",
+                'slavename': "linux-arm3",
+                'factory': sb_linux_arm3_test_factory,
+                'builddir': './sandbox-linux-arm3-test',
+    }
+
+
     ##########################################
     #### builder for linux-mips-test      ####
     ##########################################
@@ -1149,6 +1209,7 @@ class sandbox:
                 sb_android_compile_builder,
                 sb_linux_arm_compile_builder,
                 sb_linux_arm2_compile_builder,
+                sb_linux_arm3_compile_builder,
                 sb_linux_mips_compile_builder,
                 sb_linux_sh4_compile_builder,
                 
@@ -1164,6 +1225,7 @@ class sandbox:
                 sb_android_smoke_builder,
                 sb_linux_arm_smoke_builder,
                 sb_linux_arm2_smoke_builder,
+                sb_linux_arm3_smoke_builder,
                 sb_linux_mips_smoke_builder,
                 sb_linux_sh4_smoke_builder,
                 
@@ -1179,6 +1241,7 @@ class sandbox:
                 sb_android_test_builder,
                 sb_linux_arm_test_builder,
                 sb_linux_arm2_test_builder,
+                sb_linux_arm3_test_builder,
                 sb_linux_mips_test_builder,
                 sb_linux_sh4_test_builder,
 
