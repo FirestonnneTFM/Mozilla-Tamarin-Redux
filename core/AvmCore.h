@@ -791,6 +791,17 @@ const int kBufferPadding = 16;
         virtual String* readFileForEval(String* referencingFilename, String* filename) = 0;
 #endif // VMCFG_EVAL
 
+        /**
+         * When ABC is unloaded, we might not be able to free all associated 
+         * data structures immediately without some help: the VM caches some 
+         * information (eg TraitsBindings) that might prevent a timely collection.
+         * Calling this is a hint from the client that cached information should
+         * be flushed more aggressively to encourage faster collection of the discarded
+         * ABC. Note that it is safe to call this "too often", but doing so will hurt
+         * performance; you need call it only once per ABC unloading event.
+         */
+        void handleAbcUnloaded();
+
         /** Implementation of OP_equals */
         Atom equals(Atom lhs, Atom rhs);
 

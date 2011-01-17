@@ -162,6 +162,13 @@ namespace avmplus
         m_msCache->resize(cs.methods);
     }
 
+    void AvmCore::handleAbcUnloaded()
+    {
+        m_tbCache->flush();
+        m_tmCache->flush();
+        m_msCache->flush();
+    }
+
     const uint32_t AvmCore::verbose_default = 0; // all off
     const bool AvmCore::methodNames_default = true;
     const bool AvmCore::oldVectorMethodNames_default = true;
