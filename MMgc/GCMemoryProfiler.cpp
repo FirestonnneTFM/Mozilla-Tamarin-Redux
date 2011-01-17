@@ -906,7 +906,7 @@ namespace MMgc
         {
             size_t size = GC::Size(obj);
             PopulationNode* l = list;
-            int stop;
+            int stop = 0;
             while (l != NULL)
             {
                 if (equalStackTraces(l->trace, trace, stop))
