@@ -169,6 +169,7 @@ AVMPLUS_SRCS := \
     eval-lex.cpp \
     eval-lex-xml.cpp \
     eval-parse.cpp \
+    eval-parse-config.cpp \
     eval-parse-expr.cpp \
     eval-parse-stmt.cpp \
     eval-parse-xml.cpp \

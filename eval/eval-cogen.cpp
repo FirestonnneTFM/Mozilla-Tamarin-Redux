@@ -86,8 +86,7 @@ namespace avmplus
         {0, OP_equals},         // OPR_equal,
         {1, OP_equals},         // OPR_notEqual,
         {0, OP_strictequals},   // OPR_strictEqual,
-        {1, OP_strictequals},   // OPR_strictNotEqual,
-        {0, OP_coerce},         // OPR_to
+        {1, OP_strictequals},   // OPR_strictNotEqual
         };
 
         Cogen::Cogen(Compiler *compiler, ABCFile* abc, ABCTraitsTable* traits, ABCMethodBodyInfo* body, uint32_t first_temp) 

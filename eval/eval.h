@@ -63,7 +63,7 @@
 //    has minimal allocation cost, very low fragmentation, and which can be
 //    freed in bulk very quickly.  See eval-util.h.
 //
-//  - I've strived to make the code independent of avmplus, so that it can be
+//  - The code is almost entirely independent of avmplus, so that it can be
 //    easily incorporated into a standalone compiler.  As a consequence, there
 //    is no use of String, AvmCore, GC, or other central data structures of
 //    avmplus; the necessary functionality (not much) is implemented inside
@@ -78,8 +78,6 @@
 //     - ActionBlockConstants data, both opcode definitions and the instruction
 //       attribute table
 //
-//     - MethodInfo, because eval uses the attribute bits defined therein
-//
 //     - MathUtils, for isNaN (in one case, can be factored into HostContext)
 //
 //     - AvmAssert (can be mapped trivially to ISO C "assert")
@@ -87,7 +85,8 @@
 //     - wchar (can be mapped trivially to uint16_t)
 //
 //    A prototype standalone compiler exists in utils/avmc and demonstrates that
-//    the independence works pretty well in practice.
+//    the independence works pretty well in practice; all the dependencies are
+//    resolved by implementations in that shell code.
 
 #ifdef VMCFG_EVAL
 
@@ -233,7 +232,7 @@ namespace avmplus
         enum SyntaxError {
             SYNTAXERR_EOT_IN_REGEXP = 0,
             SYNTAXERR_NEWLINE_IN_REGEXP = 1,
-            SYNTAXERR_UNEXPECTED_TOKEN_XML = 2,
+            SYNTAXERR_XML_UNEXPECTED_TOKEN = 2,
             SYNTAXERR_NATIVE_NOT_SUPPORTED = 3,
             SYNTAXERR_DEFAULT_NOT_EXPECTED = 4,
             SYNTAXERR_ILLEGAL_QNAME = 5,
@@ -258,7 +257,7 @@ namespace avmplus
             SYNTAXERR_DUPLICATE_DEFAULT = 24,
             SYNTAXERR_EXPECT_CASE_OR_DEFAULT = 25,
             SYNTAXERR_CLASS_NOT_ALLOWED = 26,
-            SYNTAXERR_unused2 = 27,
+            SYNTAXERR_XML_ILLEGAL_CHARS = 27,
             SYNTAXERR_INTERFACE_NOT_ALLOWED = 28,
             SYNTAXERR_PROPERTY_OPERATOR_REQUIRED = 29,
             SYNTAXERR_STMT_IN_INTERFACE = 30,
@@ -281,9 +280,9 @@ namespace avmplus
             SYNTAXERR_ILLEGALCHAR = 47,
             SYNTAXERR_UNTERMINATED_STRING = 48,
             SYNTAXERR_EOI_IN_ESC = 49,
-            SYNTAXERR_UNTERMINATED_XML = 50,
-            SYNTAXERR_INVALID_SLASH = 51,
-            SYNTAXERR_INVALID_LEFTBANG = 52,
+            SYNTAXERR_XML_UNTERMINATED = 50,
+            SYNTAXERR_XML_INVALID_SLASH = 51,
+            SYNTAXERR_XML_INVALID_LEFTBANG = 52,
             SYNTAXERR_IDENT_IS_KWD = 53,
             SYNTAXERR_EOL_IN_ESC = 54,
             SYNTAXERR_INVALID_VAR_ESC = 55,
@@ -291,6 +290,21 @@ namespace avmplus
             SYNTAXERR_BREAK_LABEL_UNDEF = 57,
             SYNTAXERR_ILLEGAL_CONTINUE = 58,
             SYNTAXERR_CONTINUE_LABEL_UNDEF = 59,
+            SYNTAXERR_XML_EOI_IN_MARKUP = 60,
+            SYNTAXERR_UNBOUND_CONST_NAME = 61,
+            SYNTAXERR_ILLEGAL_OP_IN_CONSTEXPR = 62,
+            SYNTAXERR_CONFIG_NAMESPACE_SHADOWING = 63,
+            SYNTAXERR_ILLEGAL_METADATA = 64,
+            SYNTAXERR_KWD_NAMESPACE_REQUIRED = 65,
+            SYNTAXERR_CONFIG_NAMESPACE_NOT_ALLOWED = 66,
+            SYNTAXERR_CONFIG_NAMESPACE_MUST_BE_UNQUALIFIED = 67,
+            SYNTAXERR_DUPLICATE_CONFIG = 68,
+            SYNTAXERR_DIRECTIVE_REQUIRED = 69,
+            SYNTAXERR_METADATA_NOT_ALLOWED = 70,
+            SYNTAXERR_NEWLINE_NOT_ALLOWED = 71,
+            SYNTAXERR_DUPLICATE_QUALIFIER = 72,
+            SYNTAXERR_CONFIG_REQUIRED = 73,
+            SYNTAXERR_CONFIG_PROHIBITED = 74,
         };
         
         // The HostContext must be implemented by the embedder of eval.  'wchar' is a 16-bit unsigned value always.
@@ -299,10 +313,13 @@ namespace avmplus
         public:
 #ifndef AVMC_STANDALONE
             // AvmCore is used for VMPI_alloca.
-            HostContext(AvmCore* core) : core(core) {}
+            HostContext(AvmCore* core) : core(core), stopAfterParse(false) {}
             AvmCore * const core;
+#else
+            HostContext() : stopAfterParse(false) {}
 #endif
-            
+            bool stopAfterParse;
+
             virtual ~HostContext() {};
             virtual uint8_t* obtainStorageForResult(uint32_t nbytes) = 0;
             virtual const wchar* readFileForEval(const wchar* basename, const wchar* filename, uint32_t* inputlen) = 0;

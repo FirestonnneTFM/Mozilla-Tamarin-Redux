@@ -92,25 +92,17 @@ namespace avmplus
             AvmAssert(*limit == 0);
         }
         
-        /* Read slash-delimited string plus following compiler-> return as one string
-         * Initial '/' has been consumed
-         * Must handle unescaped / inside character sets
-         * Must strip \<newline>
-         * Must strip blanks from /x expressions
-         * Character sets are always flat
+        /* Read slash-delimited string plus following flags; return as one string.
+         * The initial '/' has been consumed.
          *
-         * The regex engine should evolve to handle \<newline> and blank
-         * stripping as that provides better debuggability.
+         * IMPLEMENTME: Must strip blanks from /x expressions in non-standard mode,
+         * and it probably easiest for it to happen here.
+         *
+         * The AVM+ regex engine should evolve to handle \<newline> and blank
+         * stripping directly, as that provides better debuggability.
          */
         Token Lexer::regexpImpl() 
         {
-            // Performance is not critical here - regular expression
-            // literals are not hugely common - so use the AVM+ string
-            // type for a buffer in which to accumulate the literal.
-            //
-            // MSIE compatible, an unescaped '/' can appear in a character
-            // set.
-            
             AvmAssert(last_token == T_BreakSlash);
 
             StringBuilder s(compiler);
@@ -145,10 +137,14 @@ namespace avmplus
                             case '\r':
                                 if (*idx == '\n')
                                     idx++;
+                                if (compiler->standard_regex)
+                                    compiler->syntaxError(lineno, SYNTAXERR_NEWLINE_IN_REGEXP);
                                 continue;
                             case '\n':
                             case UNICHAR_LS:
                             case UNICHAR_PS:
+                                if (compiler->standard_regex)
+                                    compiler->syntaxError(lineno, SYNTAXERR_NEWLINE_IN_REGEXP);
                                 continue;
                             case 'u':
                                 // PCRE does not understand \u sequences, so expand legal ones here.
@@ -235,6 +231,27 @@ namespace avmplus
                     return T_GreaterThan;
             }
         }
+
+        Token Lexer::leftShiftOrRelationalOperatorImpl()
+        {
+            AvmAssert(last_token == T_BreakLeftAngle);
+            switch (*idx) {
+                case '=':
+                    idx++;
+                    return T_LessThanOrEqual;
+                    
+                case '<':
+                    idx++;
+                    if (*idx == '=') {
+                        idx++;
+                        return T_LeftShiftAssign;
+                    }
+                    return T_LeftShift;
+                    
+                default:
+                    return T_LessThan;
+            }
+        }
         
         /* Get the next token.
          *
@@ -311,14 +328,13 @@ namespace avmplus
                                 idx++;
                                 lineComment();
                                 continue;
-                                
+
                             case '*':
                                 idx++;
                                 blockComment();
                                 continue;
                                 
                             default:
-                                mark = idx-1;
                                 DEBUG_ONLY(last_token = T_BreakSlash);
                                 return T_BreakSlash;
                         }
@@ -460,35 +476,10 @@ namespace avmplus
                             default:
                                 return T_Plus;
                         }
-                        
+                      
                     case '<':
-                        switch (*idx) {
-                            case '=':
-                                idx++;
-                                return T_LessThanOrEqual;
-                                
-                            case '<':
-                                idx++;
-                                if (*idx == '=') {
-                                    idx++;
-                                    return T_LeftShiftAssign;
-                                }
-                                return T_LeftShift;
-                                
-                            case '?':
-                                idx--;  // [sic]
-                                return T_BreakXml;
-                                
-                            case '!':
-                                if (idx[1] == '-' && idx[2] == '-') {
-                                    idx--;  // [sic]
-                                    return T_BreakXml;
-                                }
-                                return T_LessThan;
-                                
-                            default:
-                                return T_LessThan;
-                        }
+                        DEBUG_ONLY(last_token = T_BreakLeftAngle);
+                        return T_BreakLeftAngle;
                         
                     case '=':
                         if (*idx == '=') {
@@ -507,6 +498,9 @@ namespace avmplus
                         
                     case '@':
                         return T_AtSign;
+                        
+                    case '`':
+                        return identifier();
                         
                         // Begin generated code
                     case 'a': 
@@ -637,30 +631,14 @@ namespace avmplus
                                 goto bigswitch_end;
                         }
                     case 'e': 
-                        switch(idx[0]) {
-                            case 'l': 
-                                if (idx[1] == 's' &&
-                                    idx[2] == 'e' &&
-                                    notPartOfIdent(idx[3])) {
-                                    idx += 3;
-                                    return T_Else;
-                                }
-                                goto bigswitch_end;
-                            case 'x': 
-                                if (idx[1] == 't' &&
-                                    idx[2] == 'e' &&
-                                    idx[3] == 'n' &&
-                                    idx[4] == 'd' &&
-                                    idx[5] == 's' &&
-                                    !compiler->es3_keywords &&
-                                    notPartOfIdent(idx[6])) {
-                                    idx += 6;
-                                    return T_Extends;
-                                }
-                                goto bigswitch_end;
-                            default:
-                                goto bigswitch_end;
+                        if (idx[0] == 'l' &&
+                            idx[1] == 's' &&
+                            idx[2] == 'e' &&
+                            notPartOfIdent(idx[3])) {
+                            idx += 3;
+                            return T_Else;
                         }
+                        goto bigswitch_end;
                     case 'f': 
                         switch(idx[0]) {
                             case 'a': 
@@ -673,16 +651,32 @@ namespace avmplus
                                 }
                                 goto bigswitch_end;
                             case 'i': 
-                                if (idx[1] == 'n' &&
-                                    idx[2] == 'a' &&
-                                    idx[3] == 'l' &&
-                                    idx[4] == 'l' &&
-                                    idx[5] == 'y' &&
-                                    notPartOfIdent(idx[6])) {
-                                    idx += 6;
-                                    return T_Finally;
+                                switch(idx[1]) {
+                                    case 'n': 
+                                        switch(idx[2]) {
+                                            case 'a': 
+                                                switch(idx[3]) {
+                                                    case 'l': 
+                                                        if (idx[4] == 'l' &&
+                                                            idx[5] == 'y' &&
+                                                            !compiler->es3_keywords &&
+                                                            notPartOfIdent(idx[6])) {
+                                                            idx += 6;
+                                                            return T_Finally;
+                                                        }
+                                                        if (!compiler->es3_keywords && !notPartOfIdent(idx[4])) 
+                                                            goto bigswitch_end;
+                                                        idx += 4;
+                                                        return T_Final;
+                                                    default:
+                                                        goto bigswitch_end;
+                                                }
+                                            default:
+                                                goto bigswitch_end;
+                                        }
+                                    default:
+                                        goto bigswitch_end;
                                 }
-                                goto bigswitch_end;
                             case 'o': 
                                 if (idx[1] == 'r' &&
                                     notPartOfIdent(idx[2])) {
@@ -713,39 +707,29 @@ namespace avmplus
                                 idx += 1;
                                 return T_If;
                             case 'm': 
-                                switch(idx[1]) {
-                                    case 'p': 
-                                        switch(idx[2]) {
-                                            case 'l': 
-                                                if (idx[3] == 'e' &&
-                                                    idx[4] == 'm' &&
-                                                    idx[5] == 'e' &&
-                                                    idx[6] == 'n' &&
-                                                    idx[7] == 't' &&
-                                                    idx[8] == 's' &&
-                                                    !compiler->es3_keywords &&
-                                                    notPartOfIdent(idx[9])) {
-                                                    idx += 9;
-                                                    return T_Implements;
-                                                }
-                                                goto bigswitch_end;
-                                            case 'o': 
-                                                if (idx[3] == 'r' &&
-                                                    idx[4] == 't' &&
-                                                    !compiler->es3_keywords &&
-                                                    notPartOfIdent(idx[5])) {
-                                                    idx += 5;
-                                                    return T_Import;
-                                                }
-                                                goto bigswitch_end;
-                                            default:
-                                                goto bigswitch_end;
-                                        }
-                                    default:
-                                        goto bigswitch_end;
+                                if (idx[1] == 'p' &&
+                                    idx[2] == 'o' &&
+                                    idx[3] == 'r' &&
+                                    idx[4] == 't' &&
+                                    !compiler->es3_keywords &&
+                                    notPartOfIdent(idx[5])) {
+                                    idx += 5;
+                                    return T_Import;
                                 }
+                                goto bigswitch_end;
                             case 'n': 
                                 switch(idx[1]) {
+                                    case 'c': 
+                                        if (idx[2] == 'l' &&
+                                            idx[3] == 'u' &&
+                                            idx[4] == 'd' &&
+                                            idx[5] == 'e' &&
+                                            !compiler->es3_keywords &&
+                                            notPartOfIdent(idx[6])) {
+                                            idx += 6;
+                                            return T_Include;
+                                        }
+                                        goto bigswitch_end;
                                     case 's': 
                                         if (idx[2] == 't' &&
                                             idx[3] == 'a' &&
@@ -810,16 +794,33 @@ namespace avmplus
                     case 'n': 
                         switch(idx[0]) {
                             case 'a': 
-                                if (idx[1] == 't' &&
-                                    idx[2] == 'i' &&
-                                    idx[3] == 'v' &&
-                                    idx[4] == 'e' &&
-                                    !compiler->es3_keywords &&
-                                    notPartOfIdent(idx[5])) {
-                                    idx += 5;
-                                    return T_Native;
+                                switch(idx[1]) {
+                                    case 'm': 
+                                        if (idx[2] == 'e' &&
+                                            idx[3] == 's' &&
+                                            idx[4] == 'p' &&
+                                            idx[5] == 'a' &&
+                                            idx[6] == 'c' &&
+                                            idx[7] == 'e' &&
+                                            !compiler->es3_keywords &&
+                                            notPartOfIdent(idx[8])) {
+                                            idx += 8;
+                                            return T_Namespace;
+                                        }
+                                        goto bigswitch_end;
+                                    case 't': 
+                                        if (idx[2] == 'i' &&
+                                            idx[3] == 'v' &&
+                                            idx[4] == 'e' &&
+                                            !compiler->es3_keywords &&
+                                            notPartOfIdent(idx[5])) {
+                                            idx += 5;
+                                            return T_Native;
+                                        }
+                                        goto bigswitch_end;
+                                    default:
+                                        goto bigswitch_end;
                                 }
-                                goto bigswitch_end;
                             case 'e': 
                                 if (idx[1] == 'w' &&
                                     notPartOfIdent(idx[2])) {
@@ -922,6 +923,17 @@ namespace avmplus
                         goto bigswitch_end;
                     case 's': 
                         switch(idx[0]) {
+                            case 't': 
+                                if (idx[1] == 'a' &&
+                                    idx[2] == 't' &&
+                                    idx[3] == 'i' &&
+                                    idx[4] == 'c' &&
+                                    !compiler->es3_keywords &&
+                                    notPartOfIdent(idx[5])) {
+                                    idx += 5;
+                                    return T_Static;
+                                }
+                                goto bigswitch_end;
                             case 'u': 
                                 if (idx[1] == 'p' &&
                                     idx[2] == 'e' &&
@@ -1105,8 +1117,7 @@ namespace avmplus
                                 case UNICHAR_Zs14:
                                 case UNICHAR_Zs15:
                                 case UNICHAR_Zs16:
-                                case UNICHAR_BOM1:
-                                case UNICHAR_BOM2:
+                                case UNICHAR_BOM:
                                     continue;
                                 case UNICHAR_LS:
                                 case UNICHAR_PS:
@@ -1227,15 +1238,19 @@ namespace avmplus
             DEBUG_ONLY(last_token = T_DoubleLiteral);
             return T_DoubleLiteral;
         }
-        
+
         Token Lexer::floatingLiteral() 
         {
             checkNextCharForNumber();
-            val.d = parseFloat();
+            val.d = parseDouble();
             DEBUG_ONLY(last_token = T_DoubleLiteral);
             return T_DoubleLiteral;
         }
-        
+
+        // Check that the next character allows a number to end at the current
+        // location.  Note that the identifierStart condition also handles
+        // hexadecimal digits properly.
+
         void Lexer::checkNextCharForNumber() 
         {
             int c = *idx;
@@ -1463,8 +1478,7 @@ namespace avmplus
                        c != '\r' &&
                        c != UNICHAR_LS &&
                        c != UNICHAR_PS &&
-                       c != UNICHAR_BOM1 &&
-                       c != UNICHAR_BOM2)
+                       c != UNICHAR_BOM)
                     idx++;
                 s.append(start, idx);
                 
@@ -1502,8 +1516,7 @@ namespace avmplus
                                 continue;
                         }
                         
-                    case UNICHAR_BOM1:
-                    case UNICHAR_BOM2:
+                    case UNICHAR_BOM:
                         s.append(' ');
                         idx++;
                         continue;
@@ -1536,7 +1549,7 @@ namespace avmplus
                     
                 case 'x':
                     idx++;
-                    // Compatibility fallback, handle \x<whatever> as "x" followed by <whatever>
+                    // Note, handle \x<whatever> as "x" followed by <whatever> when <whatever> is not two hex digits
                     mark = idx;
                     if (hexDigits(2)) {
                         idx = mark;
@@ -1547,7 +1560,7 @@ namespace avmplus
                     
                 case 'u':
                     idx++;
-                    // Compatibility fallback, handle \u<whatever> as "u" followed by <whatever>
+                    // Note, handle \u<whatever> as "u" followed by <whatever> when <whatever> is not two four digits
                     mark = idx;
                     if (hexDigits(4)) {
                         idx = mark;
@@ -1705,7 +1718,7 @@ namespace avmplus
                     goto bits_and_scale;
                     
                 case 10:
-                    return parseFloat();
+                    return parseDouble();
 
                 default:
                     compiler->internalError(lineno, "Unknown base in parseInt");
@@ -1733,7 +1746,7 @@ namespace avmplus
             scale--;
             
             // Round to even
-            // FIME: it would seem necessary to re-normalize following rounding.
+            // FIXME: it would seem necessary to re-normalize following rounding.
             if (lost > 0x800)
                 bits += 1;
             else if (lost == 0x800) {
@@ -1748,8 +1761,8 @@ namespace avmplus
             double_overlay d(bits);
             return d.value;
         }
-        
-        double Lexer::parseFloat()
+
+        double Lexer::parseDouble()
         {
             // NOTE: Though convertStringToDouble takes a 'len' parameter, it does *not* check this
             // parameter to determine whether it should stop parsing!  We are saved here only because
@@ -1768,7 +1781,7 @@ namespace avmplus
             AvmAssert(flag);
             return n;
         }
-        
+
         bool Lexer::isUnicodeIdentifierStart(int c)
         {
             if (c < 128)
@@ -1776,7 +1789,7 @@ namespace avmplus
             else
                 return isNonASCIIIdentifierStart((wchar)c);
         }
-        
+
         bool Lexer::isUnicodeIdentifierPart(int c)
         {
             if (c < 128)

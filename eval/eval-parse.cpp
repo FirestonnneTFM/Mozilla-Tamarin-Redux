@@ -103,7 +103,6 @@ namespace avmplus
         { 1, 0, 0, 0, 0, 0, 0,              OPR_rightShift },   // T_RightShiftAssign,
         { 0, 0, 0, 0, 1, 0, 0,              OPR_strictEqual },  // T_StrictEqual,
         { 0, 0, 0, 0, 1, 0, 0,              OPR_strictNotEqual }, // T_StrictNotEqual,
-        { 0, 0, 0, 0, 0, 0, 0,              OPR_to },           // T_To
         { 0, 0, 0, 0, 0, 0, OPR_typeof,     0 },                // T_TypeOf,
         { 0, 0, 0, 0, 1, 0, 0,              OPR_rightShiftUnsigned }, // T_UnsignedRightShift,
         { 1, 0, 0, 0, 0, 0, 0,              OPR_rightShiftUnsigned }, // T_UnsignedRightShiftAssign,
@@ -131,6 +130,8 @@ namespace avmplus
             , allocator(compiler->allocator)
             , line_offset(first_line-1)
             , topRib(NULL)
+            , configNamespaces(NULL)
+            , configBindings(NULL)
             , lexerStack(NULL)
             , lexer(lexer)
             , T0(T_LAST)
@@ -153,6 +154,7 @@ namespace avmplus
          */
         Program* Parser::program()
         {
+            addConfigNamespace(compiler->SYM_CONFIG);
             pushBindingRib(RIB_Program);
             addNamespaceBinding(compiler->SYM_AS3, ALLOC(LiteralString, (compiler->intern("http://adobe.com/AS3/2006/builtin"), 0)));
             while (hd() == T_Package) 
@@ -181,237 +183,424 @@ namespace avmplus
             eat(T_RightBrace);
         }
         
-        // This checks that a directive is only used where allowed.
-        //
-        // This also checks constraints between qualifier and directive: no "native class",
-        // "native interface", and so on.  It avoids redundant checks with namespaceQualifier(),
-        // so does not check for "prototype class", which cannot occur (prototype is only
-        // recognized inside a class, but "class" is not allowed there).
-        //
-        // There is a language absurdity here; since "prototype" is a syntactic identifier
-        // it may be defined as the name of a namespace, and that namespace may possibly be
-        // used to qualify a definition that will look like, but not be, a prototype
-        // property.
-        
         Seq<Stmt*>* Parser::directives(int flags, Seq<Stmt*>** out_instance_init)
         {
-            (void)out_instance_init;
-            SeqBuilder<Stmt*> stmts(allocator);     // In a class body, this is also the class_init
-            Qualifier qual;                         // ns / native / static / prototype / dynamic / override
-            while (hd() != T_RightBrace && hd() != T_EOS) {
-                switch (hd())
-                {
-                    case T_Native:
-                    case T_Private:
-                    case T_Protected:
-                    case T_Public:
-                    case T_Internal:
-                    case T_Dynamic:
-                    case T_Override:
-                    case T_Identifier:
-                        if (flags & SFLAG_Interface)
-                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-                        if (namespaceQualifier(flags, &qual))
-                            continue;
+            (void)out_instance_init;                // Accumulator of statement directives for instance initializer.
+            SeqBuilder<Stmt*> stmts(allocator);     // Accumulator of statement directives.  In a class body, this is also the class_init.
 
-                        AvmAssert(hd() == T_Identifier);
+            // Directive parser machine state.
 
-                        if (identValue() == compiler->SYM_include && hd2() == T_StringLiteral && L0 == L1) {
-                            if (qual.tag != QUAL_none || qual.is_native || qual.is_static || qual.is_prototype)
-                                compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_INCLUDE);
-                            includeDirective();
-                            break;
-                        }
-                        if (hd() == T_Identifier && identValue() == compiler->SYM_namespace) {
-                            if (qual.is_native || qual.is_static || qual.is_prototype)
-                                compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_NAMESPACE);
-                            namespaceDefinition(flags, &qual);
-                            break;
-                        }
-                        goto default_case;
-                        
-                    case T_Const:
-                    case T_Var:
-                        if (flags & SFLAG_Interface)
-                            compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_IN_INTERFACE);
-                        if (qual.is_native || 
-                            qual.is_prototype ||
-                            qual.is_dynamic ||
-                            qual.is_override ||
-                            (qual.is_static && !(flags & SFLAG_Class)) ||
-                            (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
-                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-                        if (flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)) {
-                            // FIXME: if inside a class, the statement goes into the instance initializer ... except if static...
-                            stmts.addAtEnd(variableDefinition(&qual));
-                            break;
-                        }
-                        goto default_case;
-                        
-                    case T_Function:
-                        if (qual.is_native ||
-                            qual.is_dynamic ||
-                            ((qual.is_static || qual.is_override || qual.is_prototype) && !(flags & SFLAG_Class)) ||
-                            (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
-                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-                        // FIXME: if inside a class or interface, we want to pick up the methods.
-                        // FIXME: if inside a class, it goes into the instance... except if static...
-                        functionDefinition(&qual, (flags & SFLAG_Class) != 0, (flags & SFLAG_Interface) == 0);
-                        break;
+            SeqBuilder<Expr*> metadatas(allocator); // Metadata expressions, in order
+            QualifiedName* configname;              // Non-NULL if we have a config name, will also appear in metadatas
+            Qualifier qual;                         // ns / native / static / prototype / dynamic / override / committed metadata
+            bool metadata;                          // We're still looking at metadata and have not moved to qualifiers
+            bool committed;                         // We're committed to parsing a directive
 
-                    case T_Class:
-                        if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
-                            compiler->syntaxError(position(), SYNTAXERR_CLASS_NOT_ALLOWED);
-                        if (qual.is_native ||
-                            qual.is_prototype ||
-                            qual.is_override ||
-                            qual.is_static)
-                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-                        classDefinition(flags, &qual);
-                        break;
-                        
-                    case T_Interface:
-                        if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
-                            compiler->syntaxError(position(), SYNTAXERR_INTERFACE_NOT_ALLOWED);
-                        if (qual.is_native ||
-                            qual.is_prototype ||
-                            qual.is_dynamic ||
-                            qual.is_override ||
-                            (qual.tag != QUAL_none && qual.tag != QUAL_public))
-                            compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
-                        interfaceDefinition(flags, &qual);
-                        break;
-                        
-                    default:
-                    default_case:
-                        if (flags & SFLAG_Interface)
-                            compiler->syntaxError(position(), SYNTAXERR_STMT_IN_INTERFACE);
-                        if (qual.tag != QUAL_none || 
-                            qual.is_static ||
-                            qual.is_override ||
-                            qual.is_prototype ||
-                            qual.is_dynamic ||
-                            qual.is_native)
-                            compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_STMT);
-                        stmts.addAtEnd(statement());
+            // Working storage
+
+            Expr* e;                                // Pending expression on entry to expr_statement
+
+        next_directive:
+            metadatas.clear();
+            configname = NULL;
+            qual = Qualifier();
+            metadata = true;
+            committed = false;
+            e = NULL;
+
+            switch (hd()) {
+                //case T_Import:     goto import_directive;
+                case T_Include:    goto include_directive;
+                //case T_Use:        goto use_directive;
+                //case T_Package:    goto package_directive;
+                case T_Identifier: {
+                    if (identValue() == compiler->SYM_config && hd2() == T_Namespace && L0 == L1)
+                        goto config_namespace_directive;
+                    goto continue_directive;
+                }
+                default:           goto continue_directive;
+            }
+
+        continue_directive:
+            if (hd() == T_RightBrace || hd() == T_EOS) {
+                if (committed) 
+                    compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
+                addExprStatements(&stmts, metadatas.get());
+                goto finish;
+            }
+
+            switch (hd())
+            {
+                case T_LeftBracket:    goto array_metadata;
+                case T_BreakLeftAngle: goto xml_metadata;
+                case T_Private:        goto special_namespace_qualifier;
+                case T_Protected:      goto special_namespace_qualifier;
+                case T_Public:         goto special_namespace_qualifier;
+                case T_Internal:       goto special_namespace_qualifier;
+                case T_Dynamic:        goto dynamic_qualifier;
+                case T_Final:          goto final_qualifier;
+                case T_Native:         goto native_qualifier;
+                case T_Override:       goto override_qualifier;
+                case T_Static:         goto static_qualifier;
+                case T_Namespace:      goto namespace_directive;
+                case T_Const:          goto const_or_var_directive;
+                case T_Var:            goto const_or_var_directive;
+                case T_Function:       goto function_directive;
+                case T_Class:          goto class_directive;
+                case T_Interface:      goto interface_directive;
+                case T_Identifier:     goto configname_or_namespacename_or_statement;
+                default:               goto statement;
+            }
+            
+        xml_metadata: {
+            // Could be xml-literal metadata or expression statement.
+            //
+            // Must parse full expression here in case it's not metadata, eg,
+            //   <foo></foo> + "bar"
+            // is a valid statement.
+            if (!metadata)
+                compiler->syntaxError(position(), SYNTAXERR_METADATA_NOT_ALLOWED);
+            e = commaExpression(0);
+            if (e->tag() == TAG_literalXml) {
+                committed = true;
+                metadatas.addAtEnd(e);
+                e = NULL;
+                goto continue_directive;
+            }
+
+            // Not metadata after all
+            goto expr_statement;
+        }
+
+        array_metadata: {
+            // Could be array-literal metadata or expression statement.
+            //
+            // Must parse full expression here in case it's not metadata, eg, 
+            //   [native(a,b,c)] + " = " + x
+            // or
+            //   [a,b,c] = 10
+            // are valid statements (or will be).
+            if (!metadata)
+                compiler->syntaxError(position(), SYNTAXERR_METADATA_NOT_ALLOWED);
+            e = commaExpression(0);
+            if (e->tag() == TAG_literalArray) {
+                committed = true;
+                metadatas.addAtEnd(e);
+                e = NULL;
+                goto continue_directive;
+            }
+
+            // Not metadata after all
+            goto expr_statement;
+        }
+
+        configname_or_namespacename_or_statement: {
+            // Here we're looking at some identifier.  It can be the start of: a config name
+            // reference (always of the form NS::v), a namespace reference (anything from a
+            // simple unqualified name through a string of namespace qualifiers and finally a
+            // name), a labeled statement, or an expression statement.  The special names
+            // private, public, protected, and internal do not appear.
+            //
+            // If it's followed by a colon then it's a label.  Otherwise we must parse it as
+            // a full comma expression and then start disambiguating.
+            //
+            // In the AST, a simple unqualified name is a QualifiedName with a NULL qualifier
+            // and a SimpleName for a name.
+            
+            if (hd2() == T_Colon)
+                goto statement; // labeled statement
+            e = commaExpression(0);
+            if (e->tag() != TAG_qualifiedName)
+                goto expr_statement;
+            if (newline())
+                goto configname_or_statement;
+            if (isConfigReference(e))
+                goto configname;
+            goto namespace_or_statement;
+
+        configname_or_statement:
+            if (!isConfigReference(e))
+                goto expr_statement;
+            goto configname;
+
+        configname:
+            if (!metadata)
+                compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
+            if (configname != NULL) {
+                // Flush up to and including previous configname
+                while (!metadatas.isEmpty()) {
+                    Expr* p = metadatas.dequeue();
+                    if (p == NULL)
+                        break;  // Oops - really an error
+                    stmts.addAtEnd(ALLOC(ExprStmt, (e->pos, e)));
+                    if (e == configname)
                         break;
                 }
-                qual = Qualifier();
             }
+            configname = (QualifiedName*)e;
+            metadatas.addAtEnd(e);
+            e = NULL;
+            if (!newline())
+                committed = true;
+            goto continue_directive;
+
+        expr_statement:
+            // When we get here there must be an expr in e that is
+            // an expression statement.  We must not be committed,
+            // but there can be metadatas - those are also expression
+            // statements that were newline-terminated.  We have not
+            // consumed any semicolon at the end of the current
+            // expression statement.
+            AvmAssert(e != NULL);
+            if (committed)
+                compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
+            semicolon();
+            metadatas.addAtEnd(e);
+            addExprStatements(&stmts, metadatas.get());
+            goto next_directive;
+
+        namespace_or_statement:
+            AvmAssert(!newline());
+            if (!isNamespaceReference(e))
+                goto expr_statement;
+            if (qual.tag != QUAL_none)
+                compiler->syntaxError(position(), SYNTAXERR_DUPLICATE_QUALIFIER);
+            qual.tag = QUAL_name;
+            qual.name = (QualifiedName*)e;
+            committed = true;
+            metadata = false;
+            e = NULL;
+            goto continue_directive;
+        }
+
+        special_namespace_qualifier: {
+            // The namespace qualifiers public, private, protected, and internal can be used
+            // either by themselves as qualifiers or as part of a qualified name, eg,
+            // 'internal::foo'.  In the latter case, we also risk looking at an expression
+            // statement, eg, 'internal::foo() + fnord'.  However, the namespace qualifiers
+            // are not themselves valid expressions, so we can't blithely parse an expression
+            // here.  We must instead look ahead: if we're seeing '::' next then we can parse
+            // an expression and then disambiguate between a qualified namespace name or
+            // an expression statement, otherwise we take the keyword to be a qualifier.
+            //
+            // Configuration names do not appear here because private, public, protected, and
+            // internal never denote a configuration namespace.
+            
+            Token tok = hd();
+            QualifierTag t = QUAL_none;
+            if (hd2() != T_DoubleColon) {
+                next();
+                switch (tok) {
+                    case T_Private:   t = QUAL_private; break;
+                    case T_Public:    t = QUAL_public; break;
+                    case T_Protected: t = QUAL_protected; break;
+                    case T_Internal:  t = QUAL_internal; break;
+                }
+                goto consumed_special_namespace_qualifier;
+            }
+
+            {
+                Expr* e = commaExpression(0);
+                if (e->tag() != TAG_qualifiedName || newline()) {
+                    if (committed)
+                        compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
+                    // Expression statement
+                    semicolon();
+                    metadatas.addAtEnd(e);
+                    addExprStatements(&stmts, metadatas.get());
+                    goto next_directive;
+                }                    
+
+                t = QUAL_name;
+                qual.name = (QualifiedName*)e;
+                goto consumed_special_namespace_qualifier;
+            }
+
+        consumed_special_namespace_qualifier:
+            if (qual.tag != QUAL_none)
+                compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "private");
+            qual.tag = t;
+            committed = true;
+            metadata = false;
+            goto continue_directive;
+        }
+
+        dynamic_qualifier: {
+            qual.is_dynamic++;
+            goto consume_simple_qualifier;
+        }
+
+        final_qualifier: {
+            qual.is_final++;
+            goto consume_simple_qualifier;
+        }
+
+        native_qualifier: {
+            qual.is_native++;
+            goto consume_simple_qualifier;
+        }
+            
+        override_qualifier: {
+            qual.is_override++;
+            goto consume_simple_qualifier;
+        }
+
+        static_qualifier: {
+            qual.is_static++;
+            goto consume_simple_qualifier;
+        }
+
+        consume_simple_qualifier: {
+            next();
+            committed = true;
+            metadata = false;
+            goto continue_directive;
+        }
+
+        config_namespace_directive: {
+            // No attributes or metadata will have been parsed
+            eat(T_Identifier);
+            eat(T_Namespace);
+            if (!(flags & SFLAG_Toplevel))
+                compiler->syntaxError(position(), SYNTAXERR_CONFIG_NAMESPACE_NOT_ALLOWED);
+            configNamespaceDefinition(flags, evaluateConfigReference(configname));
+            goto next_directive;
+        }
+            
+        include_directive: {
+            // No attributes or metadata will have been parsed
+            includeDirective();
+            goto next_directive;
+        }
+            
+        namespace_directive: {
+            checkSimpleAttributes(&qual);
+            if (!(flags & (SFLAG_Function|SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)))
+                compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_NAMESPACE);
+            if (qual.is_dynamic || qual.is_final || qual.is_native || qual.is_override || qual.is_static)
+                compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_NAMESPACE);
+            namespaceDefinition(evaluateConfigReference(configname), flags, &qual);
+            goto next_directive;
+        }
+
+        const_or_var_directive: {
+            checkSimpleAttributes(&qual);
+            if (flags & SFLAG_Interface)
+                compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_IN_INTERFACE);
+            if (qual.is_dynamic || qual.is_final || qual.is_native || qual.is_override ||
+                (qual.is_static && !(flags & SFLAG_Class)) ||
+                (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
+                compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
+            // FIXME: if inside a class, the statement goes into the instance initializer ... except if static...
+            // FIXME: if const, and at the top level, and the namespace is a config namespace, evaluate and define a config const
+            stmts.addAtEnd(variableDefinition(evaluateConfigReference(configname), &qual));
+            goto next_directive;
+        }
+
+        function_directive: {
+            checkSimpleAttributes(&qual);
+            if (qual.is_dynamic ||
+                ((qual.is_final || qual.is_override || qual.is_static) && !(flags & SFLAG_Class)) ||
+                (qual.tag != QUAL_none && !(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class))))
+                compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
+            // FIXME: if inside a class or interface, we want to pick up the methods.
+            // FIXME: if inside a class, it goes into the instance... except if static...
+            functionDefinition(evaluateConfigReference(configname), &qual, (flags & SFLAG_Class) != 0, (flags & SFLAG_Interface) == 0);
+            goto next_directive;
+        }
+
+        class_directive: {
+            checkSimpleAttributes(&qual);
+            if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
+                compiler->syntaxError(position(), SYNTAXERR_CLASS_NOT_ALLOWED);
+            if (qual.is_native || qual.is_override || qual.is_static)
+                compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
+            classDefinition(evaluateConfigReference(configname), flags, &qual);
+            goto next_directive;
+        }
+
+        interface_directive: {
+            checkSimpleAttributes(&qual);
+            if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
+                compiler->syntaxError(position(), SYNTAXERR_INTERFACE_NOT_ALLOWED);
+            if (qual.is_dynamic || qual.is_final || qual.is_native || qual.is_override || qual.is_static ||
+                (qual.tag != QUAL_none && qual.tag != QUAL_public))
+                compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
+            interfaceDefinition(evaluateConfigReference(configname), flags, &qual);
+            goto next_directive;
+        }
+
+        statement: {
+            AvmAssert(e == NULL);
+            if (committed)
+                compiler->syntaxError(position(), SYNTAXERR_DIRECTIVE_REQUIRED);
+            addExprStatements(&stmts, metadatas.get());
+            if (flags & SFLAG_Interface)
+                compiler->syntaxError(position(), SYNTAXERR_STMT_IN_INTERFACE);
+            // FIXME: is this test right?
+            if (qual.tag != QUAL_none)
+                compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_STMT);
+            if (configname != NULL && hd() != T_LeftBrace)
+                compiler->syntaxError(position(), SYNTAXERR_CONFIG_PROHIBITED);
+            stmts.addAtEnd(statement(evaluateConfigReference(configname)));
+            goto next_directive;
+        }
+
+        finish:
             return stmts.get();
         }
-        
-        // Handles 'static' and 'prototype' and 'dynamic' and 'override' too.
-        // Returns true if we took it, false to go to the default case (for identifier).
-        //
-        // This checks constraints among qualifiers: that there are no duplicates, that
-        // they are internally consistent (no "native prototype", no "<ns> prototype",
-        // no "static prototype").
-        //
-        // However, this does not check whether keyworded qualifiers are only used where
-        // they make sense; that is delegated to directives().
 
-        bool Parser::namespaceQualifier(int flags, Qualifier* qual)
+        void Parser::checkSimpleAttributes(Qualifier* qual)
         {
-            switch (hd()) {
-                case T_Native:
-                    if (!(flags & (SFLAG_Class|SFLAG_Package|SFLAG_Toplevel)) || qual->is_native || qual->is_prototype)
-                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "native");
-                    eat(T_Native);
-                    qual->is_native = true;
-                    return true;
-                case T_Private:
-                    if (!(flags & SFLAG_Class) || qual->tag != QUAL_none || qual->is_prototype)
-                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "private");
-                    eat(T_Private);
-                    qual->tag = QUAL_private;
-                    return true;
-                case T_Protected:
-                    if (!(flags & SFLAG_Class) || qual->tag != QUAL_none || qual->is_prototype)
-                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "protected");
-                    eat(T_Protected);
-                    qual->tag = QUAL_protected;
-                    return true;
-                case T_Public:
-                    if (!(flags & (SFLAG_Class|SFLAG_Package)) || qual->tag != QUAL_none || qual->is_prototype)
-                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "public");
-                    eat(T_Public);
-                    qual->tag = QUAL_public;
-                    return true;
-                case T_Internal:
-                    if (!(flags & (SFLAG_Class|SFLAG_Package)) || qual->tag != QUAL_none || qual->is_prototype)
-                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "internal");
-                    eat(T_Internal);
-                    qual->tag = QUAL_internal;
-                    return true;
-                case T_Dynamic:
-                    if (!(flags & (SFLAG_Toplevel|SFLAG_Package)) || qual->is_dynamic)
-                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "dynamic");
-                    eat(T_Dynamic);
-                    qual->is_dynamic = true;
-                    return true;
-                case T_Override:
-                    if (!(flags & SFLAG_Class) || qual->is_override)
-                        compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "override");
-                    eat(T_Override);
-                    qual->is_override = true;
-                    return true;
-                case T_Identifier:
-                    if (identValue() == compiler->SYM_namespace)
-                        return false;
-                    if ((flags & SFLAG_Class) && identValue() == compiler->SYM_static) {
-                        if (qual->is_static || qual->is_prototype)
-                            compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "static");
-                        next();
-                        qual->is_static = true;
-                        return true;
-                    }
-                    if ((flags & SFLAG_Class) && identValue() == compiler->SYM_prototype) {
-                        if (qual->is_static || qual->is_prototype || qual->is_native || qual->tag != QUAL_none)
-                            compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "prototype");
-                        next();
-                        qual->is_prototype = true;
-                        return true;
-                    }
-                    if (qual->tag != QUAL_none)
-                        return false;
-                    if (qual->is_native)
-                        goto consume;
-                    switch (hd2()) {
-                        case T_Function:
-                        case T_Var:
-                        case T_Const:
-                        case T_Class:
-                        case T_Interface:
-                            goto consume;
-                        default:
-                            return false;
-                    }
-                consume:
-                    qual->tag = QUAL_name;
-                    qual->name = identValue();
-                    eat(T_Identifier);
-                    return true;
-                default:
-                    compiler->internalError(position(), "Unexpected namespace qualifier");
-                    /*NOTREACHED*/
-                    return false;
-            }
+            // FIXME: if the defining keyword is not const, and a namespace is present,
+            // then that namespace must not be a config namespace.
+            if ((qual->is_dynamic > 1 || qual->is_final > 1 || qual->is_native > 1 || qual->is_override > 1 || qual->is_static > 1) ||
+                (qual->is_static + qual->is_final > 1) ||
+                (qual->is_static + qual->is_override > 1) ||
+                (qual->is_static + qual->is_dynamic > 1))
+                compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
         }
         
-        // Qualifiers are known to be appropriate for 'class'
-        void Parser::classDefinition(int /*flags*/, Qualifier* qual)
+        // FIXME: This is incorrect because QualifiedName currently does not admit a::b::c
+        bool Parser::isNamespaceReference(Expr* e)
         {
+            if (e->tag() != TAG_qualifiedName)
+                return false;
+            QualifiedName* qn = (QualifiedName*)e;
+            if (qn->name->tag() != TAG_simpleName)
+                return false;
+            if (qn->qualifier != NULL && qn->qualifier->tag() != TAG_simpleName)
+                return false;
+            return true;
+        }
+
+        void Parser::addExprStatements(SeqBuilder<Stmt*>* stmts, Seq<Expr*>* exprs)
+        {
+            while (exprs != NULL) {
+                Expr* e = exprs->hd;
+                exprs = exprs->tl;
+                stmts->addAtEnd(ALLOC(ExprStmt, (e->pos, e)));
+            }
+        }
+
+        // Qualifiers are known to be appropriate for 'class'
+        void Parser::classDefinition(bool config, int /*flags*/, Qualifier* qual)
+        {
+			(void)config;
             // FIXME: pick up the methods plus all other flags somehow, these are available from the binding ribs
             // Maybe time to package them up conveniently (FunctionDefinition needs it too).
             eat(T_Class);
+            uint32_t pos = position();
             Str* name = identifier();
+            checkNoShadowingOfConfigNamespaces(pos, name);
             Str* extends = NULL;
             SeqBuilder<Str*> implements(allocator);
-            if (match(T_Extends)) {
+            if (hd() == T_Identifier && identValue() == compiler->SYM_extends) {
+                next();
                 extends = identifier();
             }
-            if (match(T_Implements)) {
+            if (hd() == T_Identifier && identValue() == compiler->SYM_implements) {
+                next();
                 do {
                     implements.addAtEnd(identifier());
                 } while (match(T_Comma));
@@ -427,13 +616,16 @@ namespace avmplus
             addClass(ALLOC(ClassDefn, (qual, name, extends, implements.get(), class_init, instance_init)));
         }
         
-        void Parser::interfaceDefinition(int /*flags*/, Qualifier* qual)
+        void Parser::interfaceDefinition(bool config, int /*flags*/, Qualifier* qual)
         {
+			(void)config;
             // FIXME: pick up the methods somehow, these are available from the binding ribs
             eat(T_Interface);
+            uint32_t pos = position();
             Str* name = identifier();
+            checkNoShadowingOfConfigNamespaces(pos, name);
             SeqBuilder<Str*> extends(allocator);
-            if (match(T_Extends)) {
+            if (hd() == T_Identifier && identValue() == compiler->SYM_extends) {
                 do {
                     extends.addAtEnd(identifier());
                 } while (match(T_Comma));
@@ -451,29 +643,36 @@ namespace avmplus
         //  - allowed in functions and blocks
         //  - hoisted to the function level and scoped to the entire function
         //  - initialized on entry to the function (so defining them in blocks is pretty silly)
-        
+        //
         // FIXME: don't discard the qualifier in namespace definitions
-        void Parser::namespaceDefinition(int flags, Qualifier* /*qual*/)
+
+        void Parser::namespaceDefinition(bool config, int flags, Qualifier* /*qual*/)
         {
+			(void)flags;
             uint32_t pos = position();
-            if (!(flags & (SFLAG_Function|SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)))
-                compiler->syntaxError(pos, SYNTAXERR_KWD_NOT_ALLOWED, "namespace");
-            eat(T_Identifier);
-            Str * name = identifier();
+            eat(T_Namespace);
+            Str* name = identifier();
+            checkNoShadowingOfConfigNamespaces(pos, name);
+            Expr* value = NULL;
             if (match(T_Assign)) {
-                if (hd() == T_Identifier || hd() == T_StringLiteral)
-                    addNamespaceBinding(name, primaryExpression());
-                else
+                if (hd() != T_Identifier && hd() != T_StringLiteral) 
                     compiler->syntaxError(pos, SYNTAXERR_ILLEGAL_NAMESPACE);
+                value = primaryExpression();
             }
-            else
-                addNamespaceBinding(name, NULL);
             semicolon();
+            if (config)
+                addNamespaceBinding(name, value);
+        }
+
+        void Parser::configNamespaceDefinition(int flags, bool config)
+        {
+			(void)flags;
+			(void)config;
         }
 
         void Parser::includeDirective()
         {
-            eat(T_Identifier);
+            eat(T_Include);
             Str* newFile = stringValue();
             uint32_t pos = position();
             eat(T_StringLiteral);
@@ -685,9 +884,12 @@ namespace avmplus
             topRib->uses_catch = true;
         }
 
-        void Parser::functionDefinition(Qualifier* qual, bool getters_and_setters, bool require_body)
+        void Parser::functionDefinition(bool config, Qualifier* qual, bool getters_and_setters, bool require_body)
         {
+			(void)config;
+            uint32_t pos = position();
             FunctionDefn* fn = functionGuts(qual, true, getters_and_setters, require_body);
+            checkNoShadowingOfConfigNamespaces(pos, fn->name);
             if (topRib->tag == RIB_Instance) {
                 // class or interface
                 if (qual->is_static) {
@@ -701,11 +903,13 @@ namespace avmplus
                 addFunctionBinding(fn);
         }
         
-        Stmt* Parser::variableDefinition(Qualifier* qual)
+        Stmt* Parser::variableDefinition(bool config, Qualifier* qual)
         {
+            // FIXME: do not ignore the config value
+            // FIXME: check that the name we're defining is not shadowing a config NS
             (void)qual;
             // FIXME: discards qualifiers on variable definitions!
-            return statement();
+            return statement(config);
         }
 
         FunctionDefn* Parser::functionGuts(Qualifier* qual, bool require_name, bool getters_and_setters, bool require_body)
@@ -869,6 +1073,13 @@ namespace avmplus
             return hd();
         }
         
+        Token Parser::leftShiftOrRelationalOperator() 
+        {
+            AvmAssert( T0 == T_BreakLeftAngle && T1 == T_LAST );
+            T0 = lexer->leftShiftOrRelationalOperator(&L0);
+            return hd();
+        }
+        
         Token Parser::rightShiftOrRelationalOperator() 
         {
             AvmAssert( T0 == T_BreakRightAngle && T1 == T_LAST );
@@ -938,6 +1149,17 @@ namespace avmplus
             return compiler->intern(buf);
         }
         
+        // FIXME: this duplicates Lexer::parseDouble()
+        double Parser::strToDouble(Str* s)
+        {
+            double n;
+            StringBuilder sb(compiler);
+            sb.append(s);
+            DEBUG_ONLY(bool flag =) compiler->context->stringToDouble(sb.chardata(), &n);
+            AvmAssert(flag);
+            return n;
+        }
+
         CodeBlock::~CodeBlock()
         {
         }

@@ -45,6 +45,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/eval-lex.cpp \
   $(curdir)/eval-lex-xml.cpp \
   $(curdir)/eval-parse.cpp \
+  $(curdir)/eval-parse-config.cpp \
   $(curdir)/eval-parse-expr.cpp \
   $(curdir)/eval-parse-stmt.cpp \
   $(curdir)/eval-parse-xml.cpp \

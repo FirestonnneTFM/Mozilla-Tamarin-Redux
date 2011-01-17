@@ -39,9 +39,14 @@
 #include "avmplus.h"
 #include "eval.h"
 
+#include <math.h>
+
 // avmc - ahead-of-time ActionScript compiler based on the eval code in Tamarin.
 //
-// usage: avmc <actionscript source file> ...
+// usage: avmc [option ...] <actionscript source file> ...
+//
+// options:
+//   --parse   Only run the parser, do not generate code
 
 class AvmcHostContext : public avmplus::RTC::HostContext {
 public:
@@ -64,8 +69,17 @@ int main (int argc, char** argv)
 	argc > 1 || fail("Usage: avmc <actionscript source file> ...");
 
 	AvmcHostContext context;
+    bool options = true;
 	for ( int i=1 ; i < argc ; i++ )
 	{
+        if (options) {
+            if (strcmp(argv[i], "--parse") == 0) {
+                context.stopAfterParse = true;
+                continue;
+            }
+            options = false;
+        }
+
 		char* filename = argv[i];
 		FILE *fp = fopen(filename, "r");
 		fp != NULL || fail("Could not open file for input: %s", filename);
@@ -92,16 +106,18 @@ int main (int argc, char** argv)
 		avmplus::RTC::Compiler compiler(&context, wfilename, text, len+1);
 		compiler.compile();
 		delete [] text;
-		char *dotpos = strrchr(filename, '.');
-		if (dotpos && strcmp(dotpos, ".as") == 0)
-			*dotpos = 0;
-		char outfn[FILENAME_MAX];
-		snprintf(outfn, sizeof(outfn), "%s.abc", filename);
-		outfn[sizeof(outfn)-1] = 0;
-		fp = fopen(outfn, "wb");
-		fp != NULL || fail("Could not open file for output: %s\n", outfn);
-		fwrite(context.result, 1, context.result_size, fp) == context.result_size || fail("Could not write to output: %s\n", outfn);
-		fclose(fp);
+        if (!context.stopAfterParse) {
+            char *dotpos = strrchr(filename, '.');
+            if (dotpos && strcmp(dotpos, ".as") == 0)
+                *dotpos = 0;
+            char outfn[FILENAME_MAX];
+            snprintf(outfn, sizeof(outfn), "%s.abc", filename);
+            outfn[sizeof(outfn)-1] = 0;
+            fp = fopen(outfn, "wb");
+            fp != NULL || fail("Could not open file for output: %s\n", outfn);
+            fwrite(context.result, 1, context.result_size, fp) == context.result_size || fail("Could not write to output: %s\n", outfn);
+            fclose(fp);
+        }
 		delete [] context.result;
 		context.result = NULL;
 	}
@@ -121,9 +137,16 @@ int fail(const char* fmt, ...)
     return 0;
 }
 
+const double MathUtils::kNaN = nan("");
+
 bool MathUtils::isNaN(double d)
 {
-	return d != d;
+	return isnan(d);
+}
+
+bool MathUtils::isInfinite(double d)
+{
+    return isinf(d);
 }
 
 uint8_t* AvmcHostContext::obtainStorageForResult(uint32_t nbytes)

@@ -116,14 +116,13 @@ namespace avmplus
         
         Expr* Parser::xmlInitializer()
         {
-            AvmAssert( (T0 == T_BreakXml || T0 == T_LessThan) && T1 == T_LAST );
+            AvmAssert( T0 == T_BreakLeftAngle && T1 == T_LAST );
 
             XmlContext ctx(compiler);
             bool is_list = false;
             uint32_t pos = position();
 
-            if (T0 == T_LessThan)
-                xmlPushback('<');
+            xmlPushback('<');
             xmlAtom();
             switch (T0) {
                 case T_XmlComment:
@@ -247,7 +246,7 @@ namespace avmplus
                     case T_XmlComment:
                     case T_XmlCDATA:
                     case T_XmlName:
-                    case T_XmlWhitespaces:
+                    case T_XmlWhitespace:
                     case T_XmlText:
                     case T_XmlString:
                     case T_XmlRightBrace:
@@ -343,14 +342,14 @@ namespace avmplus
         void Parser::xmlAssert(XmlContext* ctx, Token t, Escapement esc)
         {
             if (T0 != t)
-                compiler->syntaxError(position(), SYNTAXERR_UNEXPECTED_TOKEN_XML);
+                compiler->syntaxError(position(), SYNTAXERR_XML_UNEXPECTED_TOKEN);
             switch (t) {
                 case T_XmlProcessingInstruction:
                 case T_XmlComment:
                 case T_XmlCDATA:
                 case T_XmlLeftBrace:
                 case T_XmlName:
-                case T_XmlWhitespaces:
+                case T_XmlWhitespace:
                 case T_XmlText:
                     ctx->addText(V0.s);
                     break;
@@ -397,7 +396,7 @@ namespace avmplus
         {
             do {
                 xmlAtom();
-            } while (T0 == T_XmlWhitespaces);
+            } while (T0 == T_XmlWhitespace);
         }
     }
 }

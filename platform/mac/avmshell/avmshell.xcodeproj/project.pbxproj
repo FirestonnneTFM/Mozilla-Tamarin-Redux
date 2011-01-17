@@ -180,6 +180,8 @@
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
+		07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
+		07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
 		1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
 		1969AE2C1250E706002F7F01 /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
@@ -869,6 +871,7 @@
 		07E65EE510BC19A7000D1EB6 /* ScopeChain-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ScopeChain-inlines.h"; path = "../../../core/ScopeChain-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07E65EE610BC19A7000D1EB6 /* Verifier-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Verifier-inlines.h"; path = "../../../core/Verifier-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07ED27EF0FBD78C4007E3950 /* GCStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCStack.cpp; path = ../../../MMgc/GCStack.cpp; sourceTree = SOURCE_ROOT; };
+		07F01C5012E1AD880002760B /* eval-parse-config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-parse-config.cpp"; path = "../../../eval/eval-parse-config.cpp"; sourceTree = SOURCE_ROOT; };
 		07FBECBD1291529500F51879 /* avmplusContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusContainer.h; path = ../../../core/avmplusContainer.h; sourceTree = SOURCE_ROOT; };
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
@@ -1034,6 +1037,7 @@
 				072EA0DC0F4C1CE9009F11E6 /* eval-lex-xml.cpp */,
 				072EA0E40F4C1CE9009F11E6 /* eval-parse.h */,
 				072EA0E30F4C1CE9009F11E6 /* eval-parse.cpp */,
+				07F01C5012E1AD880002760B /* eval-parse-config.cpp */,
 				072EA0DF0F4C1CE9009F11E6 /* eval-parse-expr.cpp */,
 				072EA0E00F4C1CE9009F11E6 /* eval-parse-inlines.h */,
 				072EA0E10F4C1CE9009F11E6 /* eval-parse-stmt.cpp */,
@@ -1994,6 +1998,7 @@
 				8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */,
 				815846DE129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
+				07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2189,6 +2194,7 @@
 				8133F064128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */,
 				815846DD129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
+				07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
