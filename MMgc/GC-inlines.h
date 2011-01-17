@@ -256,6 +256,9 @@ namespace MMgc
     {
         GCAssert(item != NULL);
         GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
+#ifdef MMGC_DELETION_PROFILER
+        ProfileExplicitDeletion(item);
+#endif
         GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
     }
     

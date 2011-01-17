@@ -136,6 +136,15 @@
     // and that confuses the statistics.  Instead of freeing the object the VM will
     // zero it.
     //#define MMGC_CONSERVATIVE_PROFILER
+
+    // Internal: profile uses of explicit deletion
+    //
+    // When MMGC_DELETION_PROFILER is enabled and MMGC_PROFILE=1 is defined in the
+    // environment the VM will record all uses of explicit deletion of managed storage,
+    // and dump a profile on shutdown.  These profiles are useful because we want to
+    // reduce the frequency of those deletions, and tightly control the ones that
+    // continue to exist.
+    //#define MMGC_DELETION_PROFILER
 #endif
 
 #ifdef MMGC_REFCOUNT_PROFILING

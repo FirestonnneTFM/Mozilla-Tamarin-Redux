@@ -57,7 +57,7 @@ namespace MMgc
 
     void SetMemTag(const char *memtag);
     void SetMemType(const void *memtype);
-    void PrintStackTrace(StackTrace *trace);
+    void PrintStackTrace(StackTrace *trace, int limit=INT_MAX);
 
     class GCStackTraceHashtableKeyHandler
     {
@@ -89,21 +89,50 @@ namespace MMgc
             BY_COUNT
         };
 
-        ObjectPopulationProfiler(GC* gc, const char* profileName);
-        ~ObjectPopulationProfiler();
+        // If 'roots' is true then root info is collected and printed, otherwise accountForRoot()
+        // should not be called.  Ditto for 'stacks' and accountForStack().
+        ObjectPopulationProfiler(GC* gc, const char* profileName, bool roots=true, bool stacks=true);
+        virtual ~ObjectPopulationProfiler();
 
         void accountForObject(const void* obj);
         void accountForRoot(size_t size);
         void accountForStack(size_t size);
 
         void dumpTopBacktraces(int howmany, DumpMode mode=BY_VOLUME);
-        
-    private:
 
+    protected:
+        // Obtain the stack trace we're interested in for this object.  It will
+        // be called by accountForObject.
+        //
+        // For the ObjectPopulationProfiler it's the allocation stack, but for
+        // derived profilers it may be something else.
+        virtual StackTrace* obtainStackTrace(const void* obj);
+
+        // Return true if the two traces are to be considered equal, false otherwise.
+        // If true, then stop has the number of elements considered significant for the comparison.
+        //
+        // For the ObjectPopulationProfiler we currently compare all addresses in the traces,
+        // and the traces are equal only if all addresses are pairwise equal.
+        virtual bool equalStackTraces(StackTrace* a, StackTrace* b, int& stop);
+        
+        // Print a single informational line describing the activity we're profiling.
+        //
+        // For the ObjectPopulationProfiler it's the number of bytes and objects scanned.
+        virtual void dumpObjectInfo(unsigned long long numbytes, unsigned numobjects);
+        
+        // Query whether this address at the bottom of the trace should be skipped during
+        // trace printing (it may follow other skipped addresses).  This is useful for
+        // filtering out info about MMgc, for example.
+        //
+        // For the ObjectPopulationProfiler it always returns false - everything's printed.
+        virtual bool skipThisAddress(uintptr_t ip);
+
+    protected:
         GC* gc;
         GCHeap* heap;
         const char* profileName;
         
+    private:
         // Roots and stacks
         struct Summary
         {
@@ -123,6 +152,43 @@ namespace MMgc
 
         PopulationNode *list;
         uint32_t length;
+        const bool root_info;
+        const bool stack_info;
+    };
+
+    class DeletionProfiler : public ObjectPopulationProfiler
+    {
+    public:
+        DeletionProfiler(GC* gc, const char* profileName);
+
+    protected:
+        // For the DeletionProfiler we want the stack at the point of
+        // deletion, and we get that by overriding obtainStackTrace and
+        // relying on accountForObject being called when the object
+        // is deleted.
+        virtual StackTrace* obtainStackTrace(const void* obj);
+        
+        // For the DeletionProfiler two stacks are equal if their prefixes
+        // (starting with the innermost frame) are equal and the frame they
+        // stop being equal on is neither inside MMgc nor a destructor.
+        virtual bool equalStackTraces(StackTrace* a, StackTrace* b, int& stop);
+        
+        // For the DeletionProfiler it's the number of bytes and objects deleted
+        // from a particular locus.
+        virtual void dumpObjectInfo(unsigned long long numbytes, unsigned numobjects);
+        
+        // For the DeletionProfiler we filter out all MMgc addresses.
+        virtual bool skipThisAddress(uintptr_t ip);
+
+    private:
+        uintptr_t mmgc_addresses[213];          // direct-mapped cache for MMgc addresses
+        uintptr_t destructor_addresses[213];    // direct-mapped cache for destructor addresses
+        uintptr_t last_ip;                      // ip last used to look up a name (or 0)
+        char      last_buf[256];                //   and the name for non-zero ip
+
+        bool knownMMgcAddress(uintptr_t ip);
+        bool knownDestructorAddress(uintptr_t ip);
+        bool lookupFunctionName(uintptr_t ip);
     };
 
     class MemoryProfiler : public GCAllocObject

@@ -1618,13 +1618,19 @@ namespace MMgc
 
         static const void *Pointer(const void *p);
 
-public:
+    public:
         void DumpMemoryInfo();
 #ifdef MMGC_MEMORY_PROFILER
         void DumpPauseInfo();
 #endif
 #ifdef MMGC_CONSERVATIVE_PROFILER
         ObjectPopulationProfiler* demos;
+#endif
+
+    private:
+#ifdef MMGC_DELETION_PROFILER
+        DeletionProfiler* deletos;
+        void ProfileExplicitDeletion(const void* item);
 #endif
 
 private:
