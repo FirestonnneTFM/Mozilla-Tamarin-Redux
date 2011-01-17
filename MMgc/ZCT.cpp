@@ -543,7 +543,7 @@ namespace MMgc
         GCAssert(*(intptr_t*)obj != 0);         // That's the vtable normally
         GCAssert(gc->IsFinalized(obj));
         ((GCFinalizedObject*)obj)->~GCFinalizedObject();
-        gc->FreeNotNull(obj);
+        gc->FreeFromGCNotNull(obj);
 
         GCAssert(gc->weakRefs.get(obj) == NULL);
     }
