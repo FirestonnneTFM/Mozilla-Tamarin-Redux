@@ -61,10 +61,9 @@ namespace avmplus
     {
     }
 
-
-    REALLY_INLINE Atom TypedVectorClassBase::checkType(Atom a)
+    REALLY_INLINE Traits* TypedVectorClassBase::getTypeTraits() const
     {
-        return avmplus::coerce(toplevel(), a, m_typeTraits);
+        return m_typeTraits;
     }
 
     // ----------------------------
@@ -109,9 +108,9 @@ namespace avmplus
             throwFixedError();
     }
 
-    REALLY_INLINE ClassClosure* VectorBaseObject::getType() const
+    REALLY_INLINE Traits* VectorBaseObject::getTypeTraits() const
     {
-        return m_vecClass;
+        return m_vecClass->getTypeTraits();
     }
 
     REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, int32_t& value)
@@ -147,7 +146,7 @@ namespace avmplus
     REALLY_INLINE void VectorBaseObject::atomToValue(Atom atom, OpaqueAtom& value)
     {
         AvmAssert(m_vecClass != NULL);
-        atom = m_vecClass->checkType(atom);
+        atom = avmplus::coerce(toplevel(), atom, m_vecClass->getTypeTraits());
         value = (OpaqueAtom)atom;
     }
     
