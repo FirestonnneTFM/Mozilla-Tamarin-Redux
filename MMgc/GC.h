@@ -748,12 +748,14 @@ namespace MMgc
         void *Calloc(size_t num, size_t elsize, int flags=0);
 
         /**
-         * One can free a GC allocated pointer.  The pointer may be NULL.
+         * Free a GC allocated object.  The pointer may be NULL.
+         * The object must not be finalizable - the finalizer will not be called.
          */
         void Free(const void *ptr);
 
         /**
-         * One can free a GC allocated pointer.  The pointer must not be NULL.
+         * Free a GC allocated object.  The pointer must not be NULL.
+         * The object must not be finalizable - the finalizer will not be called.
          */
         void FreeNotNull(const void *ptr);
 
@@ -882,7 +884,25 @@ namespace MMgc
          */
         bool BarrierActive();
         
+        // The following APIs are really private and are shared only with specific code
+        // that's not in the GC class.  Alas C++ does not provide a good solution for
+        // expressing that, so they're public.
+        //
+        // *** DO NOT USE THESE APIs EXCEPT AS ANNOTATED ***
+
+    public:
+        // *** PRIVATE TO MMGC ***
+        //
+        // To be called from delete operators in GCObject / GCFinalizedObject / etc.  Does not
+        // check that the object is not finalizable.  Separate from FreeFromGCNotNull to allow
+        // profiling / diagnosis of explicit deletion.
+
+        void FreeFromDeleteNotNull(const void *ptr);
+
     private:
+        // To be called from the GC/ZCT.  Does not check that the object is not finalizable.
+        void FreeFromGCNotNull(const void *ptr);
+        
         void AbortFree(const void* item);
 
         //////////////////////////////////////////////////////////////////////////
@@ -1598,13 +1618,19 @@ namespace MMgc
 
         static const void *Pointer(const void *p);
 
-public:
+    public:
         void DumpMemoryInfo();
 #ifdef MMGC_MEMORY_PROFILER
         void DumpPauseInfo();
 #endif
 #ifdef MMGC_CONSERVATIVE_PROFILER
         ObjectPopulationProfiler* demos;
+#endif
+
+    private:
+#ifdef MMGC_DELETION_PROFILER
+        DeletionProfiler* deletos;
+        void ProfileExplicitDeletion(const void* item);
 #endif
 
 private:

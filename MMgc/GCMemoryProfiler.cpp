@@ -758,12 +758,14 @@ namespace MMgc
         }
     }
 
-    void DumpStackTraceHelper(uintptr_t *trace)
+    void DumpStackTraceHelper(uintptr_t *trace, int limit=INT_MAX)
     {
         char out[2048];         // This should be at least 3 times as large as 'buff', below
         char *tp = out;
         *tp++ = '\n';
         for(int i=0; trace[i] != 0; i++) {
+            if (i == limit)
+                break;
             char buff[256];     // 'out', above, should be at least 3 times as large as this
             if( !simpleDump )
             {
@@ -809,9 +811,9 @@ namespace MMgc
         GCLog(out);
     }
 
-    void PrintStackTrace(StackTrace *trace)
+    void PrintStackTrace(StackTrace *trace, int limit)
     {
-        DumpStackTraceHelper(&trace->ips[trace->skip]);
+        DumpStackTraceHelper(&trace->ips[trace->skip], limit);
     }
 
     void PrintAllocStackTrace(const void *item)
@@ -841,20 +843,30 @@ namespace MMgc
 
     struct ObjectPopulationProfiler::PopulationNode : public GCAllocObject
     {
-        PopulationNode(StackTrace* trace) : trace(trace), numobjects(0), numbytes(0), next(NULL) {}
-        
+        PopulationNode(StackTrace* trace)
+            : trace(trace)
+            , numobjects(0)
+            , numbytes(0)
+            , significant(kMaxStackTrace)
+            , next(NULL)
+        {
+        }
+
         StackTrace* trace;
         size_t numobjects;
         uint64_t numbytes;
+        int significant;
         PopulationNode* next;
     };
     
-    ObjectPopulationProfiler::ObjectPopulationProfiler(GC* gc, const char* profileName)
+    ObjectPopulationProfiler::ObjectPopulationProfiler(GC* gc, const char* profileName, bool roots, bool stacks)
         : gc(gc)
         , heap(gc->GetGCHeap())
         , profileName(profileName)
         , list(NULL)
         , length(0)
+        , root_info(roots)
+        , stack_info(stacks)
     {
     }
 
@@ -868,19 +880,36 @@ namespace MMgc
         }
     }
 
+    StackTrace* ObjectPopulationProfiler::obtainStackTrace(const void* obj)
+    {
+        return heap->GetProfiler()->GetAllocationTrace(obj);
+    }
+
+    bool ObjectPopulationProfiler::equalStackTraces(StackTrace* a, StackTrace* b, int& stop)
+    {
+        int i;
+        for ( i=0; i < kMaxStackTrace && a->ips[i] == b->ips[i] ; i++ )
+            ;
+
+        if (i == kMaxStackTrace)
+        {
+            stop = i;
+            return true;
+        }
+        return false;
+    }
+    
     void ObjectPopulationProfiler::accountForObject(const void* obj)
     {
-        StackTrace* trace = heap->GetProfiler()->GetAllocationTrace(obj);
+        StackTrace* trace = obtainStackTrace(obj);
         if (trace != NULL)
         {
             size_t size = GC::Size(obj);
             PopulationNode* l = list;
+            int stop = 0;
             while (l != NULL)
             {
-                int i;
-                for ( i=0; i < kMaxStackTrace && l->trace->ips[i] == trace->ips[i] ; i++ )
-                    ;
-                if (i == kMaxStackTrace)
+                if (equalStackTraces(l->trace, trace, stop))
                     break;
                 l = l->next;
             }
@@ -892,10 +921,12 @@ namespace MMgc
                 pn->next = list;
                 list = pn;
                 l = pn;
+                stop = kMaxStackTrace;
             }
             
             l->numobjects++;
             l->numbytes += size;
+            l->significant = stop < l->significant ? stop : l->significant;
         }
     }
 
@@ -911,6 +942,7 @@ namespace MMgc
 
     void ObjectPopulationProfiler::accountForRoot(size_t size)
     {
+        GCAssert(root_info);
         roots.numobjects++;
         roots.numbytes += size;
         uint32_t slot = log2(uint32_t(size));
@@ -920,6 +952,7 @@ namespace MMgc
 
     void ObjectPopulationProfiler::accountForStack(size_t size)
     {
+        GCAssert(stack_info);
         stacks.numobjects++;
         stacks.numbytes += size;
         uint32_t slot = log2(uint32_t(size));
@@ -964,33 +997,152 @@ namespace MMgc
 
         GCLog("Object population profile: %s\n", profileName);
         GCLog("Nodes: %u\n", (unsigned)length);
-        GCLog("Roots:  %llu bytes scanned  - %u objs scanned\n", (unsigned long long)roots.numbytes, (unsigned)roots.numobjects);
-        for ( size_t i=0 ; i < ARRAY_SIZE(rootHistogram) ; i++ )
+        if (root_info)
         {
-            if (rootHistogram[i].numobjects > 0)
-                GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
-                      (1 << i),
-                      (1 << (i+1))-1,
-                      (unsigned long long)rootHistogram[i].numbytes, (unsigned)rootHistogram[i].numobjects);
+            GCLog("Roots:  %llu bytes scanned  - %u objs scanned\n", (unsigned long long)roots.numbytes, (unsigned)roots.numobjects);
+            for ( size_t i=0 ; i < ARRAY_SIZE(rootHistogram) ; i++ )
+            {
+                if (rootHistogram[i].numobjects > 0)
+                    GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
+                          (1 << i),
+                          (1 << (i+1))-1,
+                          (unsigned long long)rootHistogram[i].numbytes, (unsigned)rootHistogram[i].numobjects);
+            }
         }
-        GCLog("Stacks: %llu bytes scanned  - %u objs scanned\n", (unsigned long long)stacks.numbytes, (unsigned)stacks.numobjects);
-        for ( size_t i=0 ; i < ARRAY_SIZE(stackHistogram) ; i++ )
+        if (stack_info)
         {
-            if (stackHistogram[i].numobjects > 0)
-                GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
-                      (1 << i),
-                      (1 << (i+1))-1,
-                      (unsigned long long)stackHistogram[i].numbytes, (unsigned)stackHistogram[i].numobjects);
+            GCLog("Stacks: %llu bytes scanned  - %u objs scanned\n", (unsigned long long)stacks.numbytes, (unsigned)stacks.numobjects);
+            for ( size_t i=0 ; i < ARRAY_SIZE(stackHistogram) ; i++ )
+            {
+                if (stackHistogram[i].numobjects > 0)
+                    GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
+                          (1 << i),
+                          (1 << (i+1))-1,
+                          (unsigned long long)stackHistogram[i].numbytes, (unsigned)stackHistogram[i].numobjects);
+            }
         }
         GCLog("Objects:\n");
         for ( int i=0 ; i < live ; i++ )
         {
-            GCLog("  %llu bytes scanned - %u objs scanned", (unsigned long long)xs[i]->numbytes, (unsigned)xs[i]->numobjects);
-            PrintStackTrace(xs[i]->trace);
+            dumpObjectInfo((unsigned long long)xs[i]->numbytes, (unsigned)xs[i]->numobjects);
+
+            StackTrace* trace = xs[i]->trace;
+            int limit = xs[i]->significant;
+            int skip = 0;
+            while (skip < limit && skipThisAddress(trace->ips[skip]))
+                skip++;
+            DumpStackTraceHelper(trace->ips + skip, limit - skip);
             GCLog("\n");
         }
     }
+
+    bool ObjectPopulationProfiler::skipThisAddress(uintptr_t ip)
+    {
+        (void)ip;
+        return false;
+    }
+
+    void ObjectPopulationProfiler::dumpObjectInfo(unsigned long long numbytes, unsigned numobjects)
+    {
+        GCLog("  %llu bytes scanned - %u objs scanned", numbytes, (unsigned)numobjects);
+    }
+                           
+    DeletionProfiler::DeletionProfiler(GC* gc, const char* profileName)
+        : ObjectPopulationProfiler(gc, profileName, false, false)
+    {
+        VMPI_memset(mmgc_addresses, 0, sizeof(mmgc_addresses));
+        VMPI_memset(destructor_addresses, 0, sizeof(destructor_addresses));
+        last_ip = 0;
+    }
     
+    StackTrace* DeletionProfiler::obtainStackTrace(const void* obj)
+    {
+        (void)obj;
+        return heap->GetProfiler()->GetStackTrace();
+    }
+
+    void DeletionProfiler::dumpObjectInfo(unsigned long long numbytes, unsigned numobjects)
+    {
+        (void)numbytes;
+        if (numobjects == 1)
+            GCLog("  1 object deleted");
+        else
+            GCLog("  %u objects deleted", numobjects);
+    }
+
+    // Experimental
+    bool DeletionProfiler::equalStackTraces(StackTrace* a, StackTrace* b, int& stop)
+    {
+        int i;
+        for ( i=0; i < kMaxStackTrace && a->ips[i] == b->ips[i] ; i++ )
+            ;
+
+        if (i == kMaxStackTrace) {
+            stop = i;
+            return true;
+        }
+        
+        // We stopped too soon, but maybe it's OK to stop here?  Our criterion is
+        // that the ones we stopped at are not in MMgc and are not destructors.
+
+        if (knownMMgcAddress(a->ips[i]) || knownDestructorAddress(a->ips[i]) || 
+            knownMMgcAddress(b->ips[i]) || knownDestructorAddress(b->ips[i]))
+            return false;
+
+        // Name resolution disabled?
+
+        if (last_ip == 0)
+            return false;
+
+        stop = i;
+        return true;
+    }
+
+    bool DeletionProfiler::skipThisAddress(uintptr_t ip)
+    {
+        return knownMMgcAddress(ip);
+    }
+
+    bool DeletionProfiler::knownMMgcAddress(uintptr_t ip)
+    {
+        if (mmgc_addresses[(ip >> 3) % ARRAY_SIZE(mmgc_addresses)] == ip)
+            return true;
+
+        if (lookupFunctionName(ip)) {
+            if (VMPI_strncmp(last_buf, "MMgc::", 6) == 0) {
+                mmgc_addresses[(ip >> 3) % ARRAY_SIZE(mmgc_addresses)] = ip;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    bool DeletionProfiler::knownDestructorAddress(uintptr_t ip)
+    {
+        if (destructor_addresses[(ip >> 3) % ARRAY_SIZE(destructor_addresses)] == ip)
+            return true;
+        
+        if (lookupFunctionName(ip)) {
+            if (VMPI_strchr(last_buf, '~') != NULL) {
+                destructor_addresses[(ip >> 3) % ARRAY_SIZE(destructor_addresses)] = ip;
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    bool DeletionProfiler::lookupFunctionName(uintptr_t ip)
+    {
+        if (last_ip == ip)
+            return true;
+        last_ip = 0;
+        if (!VMPI_getFunctionNameFromPC(ip, last_buf, sizeof(last_buf)))
+            return false;
+        last_ip = ip;
+        return true;
+    }
 #else
 
     void PrintAllocStackTrace(const void *) {}
