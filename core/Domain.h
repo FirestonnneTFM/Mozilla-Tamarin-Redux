@@ -65,7 +65,7 @@ namespace avmplus
         DWB(MultinameTraitsHashtable*)  GC_POINTER(m_namedTraits);
         DWB(MultinameBindingHashtable*) GC_POINTER(m_namedScriptsMap);
         GCList<MethodInfo>              GC_STRUCTURE(m_namedScriptsList);        // list of MethodInfo* for the scripts
-        DWB(HeapHashtable*)             GC_POINTER(m_parameterizedTypes);
+        DWB(WeakKeyHashtable*)          GC_POINTER(m_parameterizedTypes);
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.
