@@ -71,8 +71,9 @@ namespace avmplus
             uint32_t nsingletons;
             uint16_t const * singletons;
         };
-        
-        static const Range identifier_start_ranges[] = {
+
+        // UnicodeLetter (Lu Ll Lt Lm Lo Nl)
+        static const Range unicodeLetter_ranges[] = {
         {0x0041, 0x005A},
         {0x0061, 0x007A},
         {0x00C0, 0x00D6},
@@ -338,7 +339,7 @@ namespace avmplus
         {0xFFDA, 0xFFDC},
         };
         
-        static const uint16_t identifier_start_singletons[] = {
+        static const uint16_t unicodeLetter_singletons[] = {
         0x00AA,
         0x00B5,
         0x00BA,
@@ -412,13 +413,16 @@ namespace avmplus
         0xFB3E,
         };
         
-        static const UnicodeTable identifier_start = {
+        static const UnicodeTable unicodeLetter = {
             263,
-            identifier_start_ranges,
+            unicodeLetter_ranges,
             71,
-            identifier_start_singletons
+            unicodeLetter_singletons
         };
 
+        // UnicodeCombiningMark (Mn, Mc)
+        // UnicodeDigit (Nd)
+        // UnicodeConnectorPunctuation (Pc)
         static const Range identifier_subsequent_ranges[] = {
         {0x0030, 0x0039},
         {0x0300, 0x036F},
@@ -617,7 +621,7 @@ namespace avmplus
             identifier_subsequent_singletons
         };
         
-        static bool testNonASCIICharacter(const UnicodeTable* tbl, wchar c)
+        static bool unicodeLookup(const UnicodeTable* tbl, wchar c)
         {
             int32_t lo = 0;
             int32_t hi = tbl->nranges-1;
@@ -646,16 +650,27 @@ namespace avmplus
             
             return false;
         }
-        
+
         bool isNonASCIIIdentifierStart(wchar c) 
         {
-            return testNonASCIICharacter(&identifier_start, c);
+            return unicodeLookup(&unicodeLetter, c);
         }
-        
+
         bool isNonASCIIIdentifierSubsequent(wchar c)
         {
-            return testNonASCIICharacter(&identifier_start, c) ||
-                   testNonASCIICharacter(&identifier_subsequent, c);
+            return unicodeLookup(&unicodeLetter, c) ||
+                   unicodeLookup(&identifier_subsequent, c);
+        }
+
+        bool isUnicodeLetter(wchar c) 
+        {
+            return unicodeLookup(&unicodeLetter, c);
+        }
+        
+        bool isUnicodeDigit(wchar c)
+        {
+            // FIXME: not quite right, we want a proper lookup table for unicodeDigit
+            return c >= '0' && c <= '9';
         }
     }
 }

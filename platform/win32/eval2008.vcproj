@@ -1556,6 +1556,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\eval\eval-parse-config.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\eval\eval-parse-expr.cpp"
 				>
 			</File>

@@ -76,12 +76,12 @@ int next_exception = 0;
 void enter(int lo, int hi)
 {
     if (lo < hi) {
-    ranges[next_range].lo = lo;
-    ranges[next_range].hi = hi;
-    next_range++;
+        ranges[next_range].lo = lo;
+        ranges[next_range].hi = hi;
+        next_range++;
     }
     else
-    singletons[next_singleton++] = lo;
+        singletons[next_singleton++] = lo;
 }
 
 /* This analysis tries to merge ranges that are close together by
@@ -94,15 +94,15 @@ void merge()
 {
     int i=0, j=0, k;
     while (j < next_range) {
-    if (ranges[j].lo - ranges[i].hi <= 3) {
-        for ( k=ranges[i].hi+1 ; k <= ranges[j].lo-1 ; k++ )
-        exceptions[next_exception++] = k;
-        ranges[i].hi = ranges[j].hi;
-        ranges[j].lo = ranges[j].hi = -2;
-        j++;
-    }
-    else
-        i = ++j;
+        if (ranges[j].lo - ranges[i].hi <= 3) {
+            for ( k=ranges[i].hi+1 ; k <= ranges[j].lo-1 ; k++ )
+                exceptions[next_exception++] = k;
+            ranges[i].hi = ranges[j].hi;
+            ranges[j].lo = ranges[j].hi = -2;
+            j++;
+        }
+        else
+            i = ++j;
     }
 }
 */
@@ -112,15 +112,15 @@ void analyze()
     int i, j;
     int wide = 0;
     int wide_gap = 0;
-
+    
     for ( i=0 ; i < next_range ; i++ )
-    if (ranges[i].hi - ranges[i].lo > 254)
-        wide++;
+        if (ranges[i].hi - ranges[i].lo > 254)
+            wide++;
     printf("Narrow ranges: %d\n", next_range - wide);
     printf("Wide ranges: %d\n", wide);
     for ( i=1 ; i < next_range ; i++ )
-    if (ranges[i-1].hi - ranges[i].lo > 255)
-        wide_gap++;
+        if (ranges[i-1].hi - ranges[i].lo > 255)
+            wide_gap++;
     printf("Narrow gaps: %d\n", (next_range - 1) - wide_gap);
     printf("Wide gaps: %d\n", wide_gap);
 }
@@ -128,22 +128,22 @@ void analyze()
 void print(const char* prefix)
 {
     int i, numranges=0;
-
+    
     for ( i=0 ; i < next_range ; i++ )
-    if (ranges[i].lo != -2)
-        ++numranges;
-
+        if (ranges[i].lo != -2)
+            ++numranges;
+    
     printf("static const uint16_t %s_ranges[][2] = {\n", prefix);
     for ( i=0 ; i < next_range ; i++ )
-    if (ranges[i].lo != -2)
-        printf("{0x%04X, 0x%04X},\n", ranges[i].lo, ranges[i].hi);
+        if (ranges[i].lo != -2)
+            printf("{0x%04X, 0x%04X},\n", ranges[i].lo, ranges[i].hi);
     printf("};\n\n");
-
+    
     printf("static const uint16_t %s_singletons[] = {\n", prefix);
     for ( i=0 ; i < next_singleton; i++ )
-    printf("0x%04X,\n", singletons[i]);
+        printf("0x%04X,\n", singletons[i]);
     printf("};\n\n");
-
+    
     printf("static const unicode_table_t %s = {\n", prefix);
     printf("    %d,\n", numranges);
     printf("    %s_ranges,\n", prefix);
@@ -155,45 +155,45 @@ void print(const char* prefix)
 int main(int argc, char** argv)
 {
     char buf[500];
-
+    
     if (argc != 3)
-    goto fail;
-
+        goto fail;
+    
     FILE *fp = fopen(argv[1], "r");
     if (fp == NULL)
-    goto fail;
-
+        goto fail;
+    
     int lo, hi;
     hi = -2;
     while (fgets(buf, sizeof(buf), fp) != NULL) {
-    int n;
-    buf[sizeof(buf)-1] = 0;
-    if (strlen(buf) == sizeof(buf)-1)
-        goto fail;
-    if (sscanf(buf, "%x;", &n) != 1)
-        goto fail;
-    if (n > 0xFFFF)
-        break;
-    if (n == hi+1)
-        hi = n;
-    else {
-        if (hi != -2) 
-        enter(lo, hi);
-        lo=hi=n;
-    }
+        int n;
+        buf[sizeof(buf)-1] = 0;
+        if (strlen(buf) == sizeof(buf)-1)
+            goto fail;
+        if (sscanf(buf, "%x;", &n) != 1)
+            goto fail;
+        if (n > 0xFFFF)
+            break;
+        if (n == hi+1)
+            hi = n;
+        else {
+            if (hi != -2) 
+                enter(lo, hi);
+            lo=hi=n;
+        }
     }
     if (hi != -2)
-    enter(lo, hi);
-
+        enter(lo, hi);
+    
     fclose(fp);
-
+    
     //merge();
     //analyze();
     print(argv[2]);
-
+    
     return 0;
-
- fail:
+    
+fail:
     printf("Failure.\n");
     return 1;
 }

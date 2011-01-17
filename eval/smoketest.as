@@ -37,34 +37,328 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-print(eval("print('hello, nested world'); 37"))
+// Smoketest for eval - at least one positive instance of every form
+// in the language.  The results are not checked, but the test must
+// run to completion and should print SMOKETEST DONE! at the end.
+
+// Expression statement, global variable reference, string literal
+
 print("hello, world");
-print(9 % 4);
+
+// Other literal expressions
+
+print(37);
+print(31.4159e-1);
+print(true);
+print(false);
+print(null);
 print({ "foo": 10, bar: 20 });
+print(["a","b",,"c",,]);
+print(/a*b/g);
+print(<!-- nothing to see -->);
+print(<? nothing to see here either ?>);
+print(<![CDATA[ and still nothing! ]]>);
+print(<hello>xml world</hello>);
+
+// Basic object references (more later)
+
 print({ "foo": 10, bar: 20 }.foo);
 print({ "foo": 10, bar: 20 }.bar);
 print(["a","b",,"c",,].length); // should be 5
-print(["a","b",,"c",,]);
-print(/a*b/g);
+print(["a","b",,"c",,][0]); // should be "a"
+
+// Binary operators (though not assignment operators)
+
+print(9 && 4);
+print(9 || 4);
+print(9 ^ 4);
+print(9 & 4);
+print(9 | 4);
+print(9 << 4);
+print(9 >> 4);
+print(9 >>> 4);
+print({} instanceof Object);
+print(9 is Number);
+print(9 as Number);
+print("toString" in Object);
+print(9 == 4);
+print(9 === 4);
+print(9 != 4);
+print(9 !== 4);
+print(9 < 4);
+print(9 <= 4);
+print(9 > 4);
+print(9 >= 4);
+print(9 + 4);
+print(9 - 4);
+print(9 * 4);
+print(9 % 4);
+print(9 / 4);
+
+// Conditional operator
+
+print(37 ? "yes!" : "no");
+
+// Comma expression, paren expression
+
+print((37, 42));
+
+// Global variable definition; global variable reference
+
 var v = "v!";
 print(v);
+var vi:int = 37;
+print(vi);
+
+// Global const definition
+
+const cnst = "cnst!";
+print(cnst);
+const cnstN: Number = 37.5;
+print(cnstN);
+
+// Assignment operators
+
 var x = 10;
 print(x++);
 print(++x);
+print(x--);
+print(--x);
+x = 10;
+x += 1;
+x -= 1;
+x *= 1;
+x /= 1;
+x %= 1;
+x ^= 1;
+x &= 1;
+x |= 1;
+x <<= 1;
+x >>= 1;
+x >>>= 1;
+/* FIXME - incorrect code is generated for these
+x &&= 1;
+x ||= 1;
+*/
+print(x);
+
+// Other prefix (really an AS3 language bug that this is not simply unary)
+
+var x;
+print(delete x);
+
+// Unary
+
+print(!!!x);
+print(~~~x);
+print(- - -x);
+print(+ + +x);
+print(void void void x);
+print(typeof typeof typeof x);
+
+// Object construction, trickier initializer
+
+print(new String("fnord"));
+// FIXME: does not work
+//print(new <int>[1,2,3]);
+
+// FIXME - non-basic "property references" and qualifiers
+//
+// x..y
+// ns::x
+// ns::*
+// *::x
+// *::*
+// x.@n
+// x.@[e]
+// x.*
+// x.(e)
+// Vector.<T>
+
+x1 = 
+<alpha attr1="value1" attr2="value2">
+    <bravo>
+        one
+        <charlie>two</charlie>
+    </bravo>
+</alpha>;
+
+print(x1..*);
+
+// Global function definition; if statement; return statement.
+
+function fib(n) {
+    if (n < 2)
+        return n;
+    else
+        return fib(n-1) + fib(n-2);
+}
+print(fib(7));
+
+// 'this' expression
+
+function f_this() { print(this); }
+f_this();
+
+// Various kinds of argument lists
+
+function f1(a,b,c,d) { 
+    return a+b+c+d
+}
+print(f1(1,2,3,4));
+
+function f1_typed(a:int,b:Number,c:Number,d:uint):Number { 
+    return a+b+c+d
+}
+print(f1_typed(1,2,3,4));
+
+function f2(x, ...rest) {
+   print(x);
+   print(rest);
+}
+f2(1,2,3,4);
+
+function f2_typed(x:Number, ...rest:Array) {
+   print(x);
+   print(rest);
+}
+f2_typed(1,2,3,4);
+
+// Nested function definitions
+
 function f() { 
      function g() { print("holy smokes, batman!"); }
      g();
      return "zappa";
 }
 print(f());
-var x = 10;
-if (x < 5)
-   print("true");
-else
-   print("false");
-for ( var i=0 ; i < 10 ; i++ )
+
+// for statement
+
+for ( var i=0 ; i < 3 ; i++ )
     print(i);
-print("done");
+
+var j=3;
+for ( ; j > 0 ; )
+    print(j--);
+
+// for-in statement
+
+for ( var i in [1,2,3])
+    print(i);
+for ( i in [37,42,60])
+    print(i);
+
+// for-each-in statement
+
+for each ( var i in [1,2,3])
+    print(i);
+for each ( i in [37,42,60])
+    print(i);
+
+// do statement; block statement
+
+var j=0;
+do {
+    print(j);
+} while(++j < 3);
+
+// while statement
+
+var j=0;
+while (j < 3) {
+    print(j);
+    j++;
+}
+
+// empty statement
+
+var j=0;
+while (j++ < 3)
+    ;
+
+// switch statement
+
+var j=0;
+switch (j) {
+case 0: print("yes"); break;
+case 1: print("no"); break;
+default: print("maybe"); break;
+}
+
+// try-catch statement; throw statement
+
+function thrower() { throw "Error"; }
+try {
+    thrower();
+}
+catch (e) {
+    print("Caught: " + e);
+}
+finally {
+    print("Done");
+}
+
+// break statement; labeled statement
+
+var j=0;
+while (true) {
+    if (j > 3)
+        break;
+    j++;
+}
+
+var j=0;
+w1loop:
+while (true) {
+    if (j > 3)
+        break w1loop;
+    j++;
+}
+
+// continue statement; labeled statement
+
+var j=0;
+w2loop:
+while (true) {
+    j++;
+    if (j <= 3)
+        continue w2loop;
+    break;
+}
+
+// with statement
+
+var x=5;
+with ({x: 10})
+    print(x);
+
+// FIXME: super expression
+// FIXME: super statement
+
+// FIXME: import directive
+// FIXME: use directive
+
+// FIXME: include directive
+
+//include "smoketest2.as";
+//include "smoketest2.as"
+
+// attributed definitions
+//
+// FIXME: namespace definition
+// FIXME: class definition
+// FIXME: interface definition
+// FIXME: default xml namespace directive
+
+/* FIXME: does not work
+package p.q.r {
+    internal function f() {}
+    public function get x() { return 37 }
+    public function set x(_x) {}
+}
+*/
+
 print(w);
 var w = "outer";
 function g() { var w = "inner"; }
@@ -151,9 +445,6 @@ abba(1,2,3,4)
 for each ( var i in [1,2,3])
     print(i);
 
-include "smoketest2.as";
-include "smoketest2.as"
-
 function typed1(x: int): void { 
     var v : String = "foo";
     return;
@@ -203,12 +494,14 @@ function p() {
          return o == this
       }
 print(p())
+/*
 try {
     print(eval("function () { broken broken broken"));
 }
 catch (e) {
     print(e);
 }
+*/
 print(parseInt(341, 8).toString(16));
 var f = function (x) { print(arguments); return arguments.callee; }
 print(f(10));
@@ -220,11 +513,6 @@ function container() {
 }
 container();
 
-function rest(x, ...rest) {
-   print(x);
-   print(rest);
-}
-rest(1,2,3,4);
 
 order = 
 <order>
@@ -256,18 +544,6 @@ correct = <employee id="0"><fname>John</fname><age>20</age></employee>;
 john = e.employee.(fname == "John");
 
 print(john);
-
-x1 = 
-<alpha attr1="value1" attr2="value2">
-    <bravo>
-        one
-        <charlie>two</charlie>
-    </bravo>
-</alpha>;
-
-print("---");
-print(x1..*);
-print("---");
 
 // fast switches - this code triggers fast switch generation on 2009-03-03, at least.
 // would be good to verify that it continues to do so...

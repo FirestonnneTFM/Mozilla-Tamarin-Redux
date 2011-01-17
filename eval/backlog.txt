@@ -24,6 +24,10 @@ Lexer:
 Parser:
 
   P3:
+  - 'config namespace'
+  - program configuration scope, checking
+  - program configuration attributes on blocks, expressions in array / object (but not vector) literals
+  - program configuration attributes on definitions
   - 'package', 'class', and 'interface' are parsed but mainly superficially, see FIXMEs
   - 'public', 'private', 'protected', 'native', 'static', 'prototype', and named NS are parsed but not really used anywhere
   - lots of places that parse by 'identifier()' should parse by something that handles both id and id::id

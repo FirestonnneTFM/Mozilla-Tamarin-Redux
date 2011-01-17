@@ -47,8 +47,9 @@ namespace avmplus
 {
     namespace RTC
     {
-        Stmt* Parser::statement() 
+        Stmt* Parser::statement(bool config) 
         {
+            AvmAssert(config == true || hd() == T_LeftBrace);
             switch (hd()) {
                 case T_Semicolon: {
                     Stmt* stmt = ALLOC(EmptyStmt, ());
@@ -57,7 +58,7 @@ namespace avmplus
                 }
                     
                 case T_LeftBrace:
-                    return ALLOC(BlockStmt, (statementBlock()));
+                    return ALLOC(BlockStmt, (statementBlock(config)));
                     
                 case T_Break: {
                     Stmt* stmt = breakStatement();
@@ -204,12 +205,12 @@ namespace avmplus
             }
         }
         
-        Seq<Stmt*>* Parser::statementBlock()
+        Seq<Stmt*>* Parser::statementBlock(bool config)
         {
             SeqBuilder<Stmt*> stmts(allocator);
             eat (T_LeftBrace);
             while (hd() != T_RightBrace)
-                stmts.addAtEnd(statement());
+                stmts.addAtEnd(statement(config));
             eat (T_RightBrace);
             return stmts.get();
         }
@@ -279,9 +280,8 @@ namespace avmplus
         {
             uint32_t pos = position();
             eat(T_Use);
-            if (!(hd() == T_Identifier && identValue() == compiler->SYM_namespace))
+            if (!match(T_Namespace))
                 compiler->syntaxError(pos, SYNTAXERR_ILLEGAL_USE);
-            eat(T_Identifier);
             Str* ns = identifier();
             addOpenNamespace(ALLOC(NamespaceRef, (ns)));
             return ALLOC(EmptyStmt, ());
@@ -381,9 +381,9 @@ namespace avmplus
             if(hd() != T_Identifier || identValue() != compiler->SYM_xml)
                 goto failure;
             eat(T_Identifier);
-            if(hd() != T_Identifier || identValue() != compiler->SYM_namespace)
+            if(hd() != T_Namespace)
                 goto failure;
-            eat(T_Identifier);
+            eat(T_Namespace);
             eat(T_Assign);
             setUsesDefaultXmlNamespace();
             return ALLOC(DefaultXmlNamespaceStmt, (pos, commaExpression(0)));

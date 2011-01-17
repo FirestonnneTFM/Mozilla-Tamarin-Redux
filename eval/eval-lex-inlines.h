@@ -108,6 +108,20 @@ inline Token Lexer::rightAngle(uint32_t* linep)
     return t;
 }
 
+inline Token Lexer::leftShiftOrRelationalOperator(uint32_t* linep)
+{
+    Token t = leftShiftOrRelationalOperatorImpl();
+    *linep = lineno;
+#ifdef DEBUG
+    if (traceflag) {
+        TokenValue garbage;
+        garbage.i = 0;
+        print(t, *linep, garbage);
+    }
+#endif
+    return t;
+}
+
 inline Token Lexer::rightShiftOrRelationalOperator(uint32_t* linep)
 {
     Token t = rightShiftOrRelationalOperatorImpl();

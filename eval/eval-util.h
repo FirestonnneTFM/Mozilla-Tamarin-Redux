@@ -55,6 +55,11 @@ public:
     uint32_t    ident;      // ~0 or the index in the string pool
     Str*        next;       // next in hashtable bucket
     wchar       s[1];       // actually longer
+    
+    // Returns < 0 if this < other, 0 if this == other, > 0 if this > other.
+    // Don't use this for comparing for equality, just use == instead: a Str
+    // is always interned.
+    int compareTo(Str* other);
 };
 
 uint32_t hashString(const wchar* chars, uint32_t nchars);
@@ -219,7 +224,7 @@ private:
 
 // This is useful if an allocator is in scope with the name "allocator"
 #define ALLOC(type, args)           \
-    new (allocator->alloc(sizeof(type))) type args
+    ::new (allocator->alloc(sizeof(type))) type args
 
 template<class T> class Seq {
 public:
@@ -232,9 +237,12 @@ template<class T> class SeqBuilder {
 public:
     SeqBuilder(Allocator* allocator) : allocator(allocator), items(NULL), last(NULL) {}
     
-    void addAtEnd(T item);
-    Seq<T>* get() const;
-    
+    void addAtEnd(T item);  // enqueue
+    T dequeue();            // drop and return the first element; queue must not be empty
+    bool isEmpty();         // true iff queue is empty
+    Seq<T>* get() const;    // return the elements in the queue, do not clear the queue
+    void clear();           // reset the queue
+
 private:
     Allocator* allocator;
     Seq<T>* items;

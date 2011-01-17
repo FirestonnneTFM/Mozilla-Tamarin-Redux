@@ -40,12 +40,8 @@
 //
 // You also need to define a couple of things on your command line or in your project file:
 //
-//  __avmplus__        (to prevent core/ActionBlockConstants.cpp from picking up the wrong file)
-//  AVMC_STANDALONE    (to make core/ActionBlockConstants.cpp pick up the right file)
+//  AVMC_STANDALONE    (to tweak the evaluator in a couple of places)
 //  VMCFG_EVAL         (to enable the evaluator)
-//
-// We can clean this up by and by by factoring ActionBlockConstants.cpp so that code needed
-// by multiple products are included into product-specific files.
 
 #include <assert.h>
 #include <stdlib.h>
@@ -61,14 +57,48 @@
 
 typedef uint16_t wchar;
 
-#define AvmAssert assert
+#ifdef DEBUG
+    #define AvmAssert assert
+#else
+    #define AvmAssert(x) (void)(0)
+#endif
 
-#include "../../core/ActionBlockConstants.h"
+#define MMGC_STATIC_ASSERT(x) enum {}
+
+#define VMPI_sprintf sprintf
+#define VMPI_snprintf snprintf
+#define VMPI_vsnprintf vsnprintf
+#define VMPI_strcpy strcpy
+#define VMPI_strlen strlen
+#define VMPI_memcmp memcmp
+#define VMPI_memcpy memcpy
+
+#include "ActionBlockConstants.h"
+
+inline void *operator new(size_t size, void* p) { return p; }
+
+union double_overlay
+{
+    double_overlay() {}
+    double_overlay(double d) { value=d; }
+    double_overlay(uint64_t v) { bits64=v; }
+    
+    double value;
+#if defined VMCFG_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
+    struct { uint32_t msw, lsw; } words;
+#else
+    struct { uint32_t lsw, msw; } words;
+#endif
+    uint32_t bits32[2];
+    uint64_t bits64;
+};
 
 class MathUtils
 {
 public:
     static bool isNaN(double x);
+    static bool isInfinite(double x);
+    static const double kNaN;
 };
 
 class MethodInfo

@@ -50,12 +50,12 @@ namespace avmplus
         // Syntax error strings.  When these include formats they are to be interpreted as printf style
         // formats for now, notably %s means utf8 or latin1 string.  Note that a string may be used
         // more than one place, so if you add or remove or change a format be sure to look for all
-        // occurences of the string.  Note also that order matters crucially, see the enum in eval.h.
+        // occurrences of the string.  Note also that order matters crucially, see the enum in eval.h.
         
         static const char* const syntax_errors[] = {
         /* SYNTAXERR_EOT_IN_REGEXP */        "Unexpected end of program in regexp literal",
         /* SYNTAXERR_NEWLINE_IN_REGEXP */    "Illegal newline in regexp literal",
-        /* SYNTAXERR_UNEXPECTED_TOKEN_XML */ "Unexpected token in XML parsing",
+        /* SYNTAXERR_XML_UNEXPECTED_TOKEN */ "Unexpected token in XML parsing",
         /* SYNTAXERR_NATIVE_NOT_SUPPORTED */ "'native' functions are not supported",
         /* SYNTAXERR_DEFAULT_NOT_EXPECTED */ "'default' not expected here",
         /* SYNTAXERR_ILLEGAL_QNAME */        "Illegal qualified name",
@@ -82,7 +82,7 @@ namespace avmplus
         /* SYNTAXERR_CLASS_NOT_ALLOWED */    "Class not allowed here",
         /* SYNTAXERR_PROPERTY_OPERATOR_REQUIRED */ "Property operator required",
         /* SYNTAXERR_INTERFACE_NOT_ALLOWED */"Interface not allowed here",
-        /* SYNTAXERR_unused3 */              "Unused 3",
+        /* SYNTAXERR_XML_ILLEGAL_CHARS */    "Illegal embedded characters in XML literal",
         /* SYNTAXERR_STMT_IN_INTERFACE */    "Statements not allowed in interface",
         /* SYNTAXERR_ILLEGAL_STMT */         "Illegal statement",
         /* SYNTAXERR_KWD_NOT_ALLOWED */      "'%s' not allowed here",
@@ -107,9 +107,9 @@ namespace avmplus
         /* SYNTAXERR_ILLEGALCHAR */          "Illegal character in input: %c",
         /* SYNTAXERR_UNTERMINATED_STRING */  "Unterminated string literal (newline or end of input)",
         /* SYNTAXERR_EOI_IN_ESC */           "End of input in escape sequence",
-        /* SYNTAXERR_UNTERMINATED_XML */     "Unterminated XML token",
-        /* SYNTAXERR_INVALID_SLASH */        "Invalid sequence starting with '/'",
-        /* SYNTAXERR_INVALID_LEFTBANG */     "Invalid sequence starting with '<!'",
+        /* SYNTAXERR_XML_UNTERMINATED */     "Unterminated XML token",
+        /* SYNTAXERR_XML_INVALID_SLASH */    "Invalid sequence starting with '/'",
+        /* SYNTAXERR_XML_INVALID_LEFTBANG */ "Invalid sequence starting with '<!'",
         /* SYNTAXERR_IDENT_IS_KWD */         "Illegal identifier: escape sequence makes it look like a keyword",
         /* SYNTAXERR_EOL_IN_ESC */           "Illegal line terminator in escape sequence",
         /* SYNTAXERR_INVALID_VAR_ESC */      "Invalid variable-length unicode escape",
@@ -117,6 +117,21 @@ namespace avmplus
         /* SYNTAXERR_BREAK_LABEL_UNDEF */    "'break' to undefined label",
         /* SYNTAXERR_ILLEGAL_CONTINUE */     "No 'continue' allowed here", 
         /* SYNTAXERR_CONTINUE_LABEL_UNDEF */ "'continue' to undefined label",
+        /* SYNTAXERR_XML_EOI_IN_MARKUP */    "End of input in XML markup",
+        /* SYNTAXERR_UNBOUND_CONST_NAME */   "Unbound name in constant expression",
+        /* SYNTAXERR_ILLEGAL_OP_IN_CONSTEXPR */ "Illegal operator in constant expression",
+        /* SYNTAXERR_CONFIG_NAMESPACE_SHADOWING */ "Definition shadows a configuration namespace",
+        /* SYNTAXERR_ILLEGAL_METADATA */     "Bad or redundant metadata",
+        /* SYNTAXERR_KWD_NAMESPACE_REQUIRED */ "'namespace' is required here",
+        /* SYNTAXERR_CONFIG_NAMESPACE_NOT_ALLOWED */ "A 'config' namespace may not be defined here",
+        /* SYNTAXERR_CONFIG_NAMESPACE_MUST_BE_UNQUALIFIED */ "'config namespace' must not have a qualifier",
+        /* SYNTAXERR_DUPLICATE_CONFIG */     "Redundant program configuration expression",
+        /* SYNTAXERR_DIRECTIVE_REQUIRED */   "Directive required",
+        /* SYNTAXERR_METADATA_NOT_ALLOWED */ "Metadata not allowed",
+        /* SYNTAXERR_NEWLINE_NOT_ALLOWED */  "Newline not allowed",
+        /* SYNTAXERR_DUPLICATE_QUALIFIER */  "Duplicated qualifier",
+        /* SYNTAXERR_CONFIG_REQUIRED */      "Configuration name reference required",
+        /* SYNTAXERR_CONFIG_PROHIBITED */    "Configuration name reference prohibited",
         };
         
         // Assume that the number of unique identifiers in a program is roughly the square root
@@ -142,10 +157,11 @@ namespace avmplus
             , allocator(new Allocator(this))
             , filename(filename != NULL ? filename : default_filename)
             , tableSize(uint32_t(sqrt((double)srclen)))
-            , es3_keywords(false)       // ActionScript: false
-            , liberal_idents(true)      // ActionScript: true
-            , local_functions(true)     // ActionScript: true
-            , octal_literals(false)     // ActionScript: false
+            , es3_keywords(false)       // ActionScript 3: false
+            , standard_regex(false)     // ActionScript 3: false
+            , liberal_idents(true)      // ActionScript 3: true
+            , local_functions(true)     // ActionScript 3: true
+            , octal_literals(false)     // ActionScript 3: false
             , origin_is_file(filename != NULL)
             , debugging(true)
             , namespace_counter(1)
@@ -156,6 +172,7 @@ namespace avmplus
             , SYM_(intern(""))
             , SYM_AS3(intern("AS3"))
             , SYM_Array(intern("Array"))
+            , SYM_CONFIG(intern("CONFIG"))
             , SYM_Namespace(intern("Namespace"))
             , SYM_Number(intern("Number"))
             , SYM_Object(intern("Object"))
@@ -165,19 +182,18 @@ namespace avmplus
             , SYM_anonymous(intern("anonymous"))
             , SYM_arguments(intern("arguments"))
             , SYM_children(intern("children"))
+            , SYM_config(intern("config"))
             , SYM_each(intern("each"))
+            , SYM_extends(intern("extends"))
             , SYM_get(intern("get"))
-            , SYM_include(intern("include"))
+            , SYM_implements(intern("implements"))
             , SYM_int(intern("int"))
             , SYM_length(intern("length"))
             , SYM_namespace(intern("namespace"))
 #ifdef DEBUG
             , SYM_print(intern("print"))
 #endif
-            , SYM_prototype(intern("prototype"))
             , SYM_set(intern("set"))
-            , SYM_static(intern("static"))
-            , SYM_to(intern("to"))
             , SYM_use(intern("use"))
             , SYM_xml(intern("xml"))
             , str_filename(intern(this->filename, 0))
@@ -212,6 +228,9 @@ namespace avmplus
             lexer.trace();
 #endif
             Program* program = parser.parse();
+
+            if (context->stopAfterParse)
+                return;
 
             ABCTraitsTable* global_traits = ALLOC(ABCTraitsTable, (this));
             ABCMethodInfo* global_info = ALLOC(ABCMethodInfo, (this, abc.addString("script$init"), 0, NULL, 0, NULL, 0));

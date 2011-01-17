@@ -38,7 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 /* Generate a mega-switch for keyword recognition.
- * Approximately right for AS3 (this is a prototype)
+ * This is according to the AS3 spec.
  *
  * Run this script, capture the output, remove the last two lines of
  * the captured output (which should be "default:" and "goto bigswitch_end;").
@@ -59,19 +59,20 @@ var keywords = [[ "as", "T_As", "!compiler->es3_keywords"],
                 [ "do", "T_Do"],
                 [ "dynamic", "T_Dynamic", "!compiler->es3_keywords"],
                 [ "else", "T_Else"],
-                [ "extends", "T_Extends", "!compiler->es3_keywords"],
                 [ "false", "T_False"],
-                [ "finally", "T_Finally"],
+                [ "final", "T_Final", "!compiler->es3_keywords"],
+                [ "finally", "T_Finally", "!compiler->es3_keywords"],
                 [ "for", "T_For"],
                 [ "function", "T_Function"],
                 [ "if", "T_If"],
-                [ "implements", "T_Implements", "!compiler->es3_keywords"],
                 [ "import", "T_Import", "!compiler->es3_keywords"],
                 [ "in", "T_In"],
+                [ "include", "T_Include", "!compiler->es3_keywords"],
                 [ "instanceof", "T_InstanceOf"],
                 [ "interface", "T_Interface", "!compiler->es3_keywords"],
                 [ "internal", "T_Internal", "!compiler->es3_keywords"],
                 [ "is", "T_Is", "!compiler->es3_keywords"],
+                [ "namespace", "T_Namespace", "!compiler->es3_keywords"],
                 [ "native", "T_Native", "!compiler->es3_keywords"],
                 [ "new", "T_New"],
                 [ "null", "T_Null"],
@@ -81,6 +82,7 @@ var keywords = [[ "as", "T_As", "!compiler->es3_keywords"],
                 [ "protected", "T_Protected", "!compiler->es3_keywords"],
                 [ "public", "T_Public", "!compiler->es3_keywords"],
                 [ "return", "T_Return"],
+                [ "static", "T_Static", "!compiler->es3_keywords"],
                 [ "super", "T_Super", "!compiler->es3_keywords"],
                 [ "switch", "T_Switch"],
                 [ "this", "T_This"],

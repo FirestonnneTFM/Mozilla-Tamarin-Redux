@@ -51,6 +51,8 @@ namespace avmplus
         {
             mark=idx;
             switch (idx[0]) {
+                case 0:
+                    compiler->syntaxError(lineno, SYNTAXERR_XML_EOI_IN_MARKUP);
                 case '<':
                     switch (idx[1]) {
                         case '!':
@@ -62,17 +64,17 @@ namespace avmplus
                                 idx[7] == 'A' && 
                                 idx[8] == '[') {
                                 idx += 9;
-                                return xmlMarkup(T_XmlCDATA, "]]>");
+                                return xmlMarkup(T_XmlCDATA);
                             }
                             if (idx[2] == '-' && idx[3] == '-') {
                                 idx += 4;
-                                return xmlMarkup(T_XmlComment, "-->");
+                                return xmlMarkup(T_XmlComment);
                             }
-                            compiler->syntaxError(lineno, SYNTAXERR_INVALID_LEFTBANG);
+                            compiler->syntaxError(lineno, SYNTAXERR_XML_INVALID_LEFTBANG);
                             
                         case '?':
                             idx += 2;
-                            return xmlMarkup(T_XmlProcessingInstruction, "?>");
+                            return xmlMarkup(T_XmlProcessingInstruction);
                             
                         case '/':
                             idx += 2;
@@ -88,7 +90,7 @@ namespace avmplus
                         idx += 2;
                         return T_XmlSlashRightAngle;
                     }
-                    compiler->syntaxError(lineno, SYNTAXERR_INVALID_SLASH);
+                    compiler->syntaxError(lineno, SYNTAXERR_XML_INVALID_SLASH);
                     
                 case '>':
                     idx += 1;
@@ -110,7 +112,7 @@ namespace avmplus
                 case '\t':
                 case '\r':
                 case '\n':
-                    return xmlWhitespaces();
+                    return xmlWhitespace();
                     
                 case '"':
                 case '\'':
@@ -124,13 +126,54 @@ namespace avmplus
             }
         }
 
-        // mark has been set at the beginning of the starting punctuation,
-        // we wish to capture the ending punctuation as well.
+        // Capture everything from the starting through the ending punctuation.
 
-        Token Lexer::xmlMarkup(Token token, const char* terminator)
+        Token Lexer::xmlMarkup(Token token)
         {
             uint32_t l = lineno;
-            while (idx < limit && !(idx[0] == terminator[0] && idx[1] == terminator[1] && (terminator[2] == 0 || idx[2] == terminator[2]))) {
+            switch (token) {
+                case T_XmlComment:
+                    mark = idx-4; // "<!--"
+                    break;
+                case T_XmlCDATA:
+                    mark = idx-9; // "<![CDATA["
+                    break;
+                case T_XmlProcessingInstruction:
+                    mark = idx-2; // "<?"
+                    break;
+                default:
+                    AvmAssert(!"Inconsistent internal state");
+            }
+
+            while (idx < limit) {
+                if (idx[0] == '-' || idx[0] == '?' || idx[0] == ']') {
+                    switch (token) {
+                        case T_XmlComment:
+                            if (idx[0] == '-' && idx[1] == '-') {
+                                // Done; we require > to follow but it's not part of the stop condition.
+                                if (idx[2] != '>')
+                                    compiler->syntaxError(lineno, SYNTAXERR_XML_ILLEGAL_CHARS);
+                                idx += 3;
+                                goto endloop;
+                            }
+                            break;
+                        case T_XmlCDATA:
+                            if (idx[0] == ']' && idx[1] == ']' && idx[2] == '>') {
+                                // Done.
+                                idx += 3;
+                                goto endloop;
+                            }
+                            break;
+                        case T_XmlProcessingInstruction:
+                            if (idx[0] == '?' && idx[1] == '>') {
+                                // Done.
+                                idx += 2;
+                                goto endloop;
+                            }
+                            break;
+                    }
+                }
+
                 switch (idx[0]) {
                     case '\n':
                         lineno++;
@@ -139,17 +182,21 @@ namespace avmplus
                         lineno++;
                         if (idx[1] == '\n')
                             idx++;
+                        break;
+                    default:
+                        idx++;
+                        break;
                 }
-                idx++;
             }
+            
+        endloop:
             if (idx == limit)
-                compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
-            idx += VMPI_strlen(terminator);
+                compiler->syntaxError(l, SYNTAXERR_XML_UNTERMINATED);
             val.s = compiler->intern(mark, uint32_t(idx-mark));
             return token;
         }
 
-        Token Lexer::xmlWhitespaces()
+        Token Lexer::xmlWhitespace()
         {
             mark = idx;
             while (idx < limit) {
@@ -172,7 +219,7 @@ namespace avmplus
             }
         end_loop:
             val.s = compiler->intern(mark, uint32_t(idx-mark));
-            return T_XmlWhitespaces;
+            return T_XmlWhitespace;
         }
 
         Token Lexer::xmlName()
@@ -192,17 +239,33 @@ namespace avmplus
         {
             wchar terminator = *idx;
             uint32_t l = lineno;
+
             idx++;
-            // FIXME: account for line breaks inside xml string
-            while (idx < limit && *idx != terminator)
-                idx++;
+            while (idx < limit && *idx != terminator) {
+                if (*idx == '\r') {
+                    idx++;
+                    if (*idx == '\n')
+                        idx++;
+                    lineno++;
+                }
+                else if (*idx == '\n') {
+                    idx++;
+                    lineno++;
+                }
+                else
+                    idx++;
+            }
+
             if (idx == limit)
-                compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
+                compiler->syntaxError(l, SYNTAXERR_XML_UNTERMINATED);
+
             idx++;
             val.s = compiler->intern(mark, uint32_t(idx-mark));
             return T_XmlString;
         }
-        
+
+        // FIXME: E4X says to stop only at "{" and "<".
+
         Token Lexer::xmlText()
         {
             mark = idx;
@@ -232,14 +295,12 @@ namespace avmplus
 
         bool Lexer::isXmlNameStart(wchar c) 
         {
-            // FIXME: isXmlNameStart is not quite right
-            return isUnicodeIdentifierStart(c) || c == ':';
+            return isUnicodeLetter(c) || c == ':' || c == '_';
         }
         
         bool Lexer::isXmlNameSubsequent(wchar c)
         {
-            // FIXME: isXmlNameSubsequent is not quite right
-            return isUnicodeIdentifierPart(c) || c == ':' || c == '.' || c == '-';
+            return isUnicodeLetter(c) || isUnicodeDigit(c) || c == '_' || c == ':' || c == '.' || c == '-';
         }
         
     }

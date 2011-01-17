@@ -107,14 +107,25 @@ enum QualifierTag {
 
 class Qualifier {
 public:
-    Qualifier() : tag(QUAL_none), is_native(false), is_static(false), is_prototype(false), is_dynamic(false), is_override(false), name(NULL) {}
+    Qualifier() 
+        : tag(QUAL_none)
+        , is_dynamic(0)
+        , is_final(0)
+        , is_native(0)
+        , is_override(0)
+        , is_static(0)
+        , name(NULL)
+        , metadata(NULL)
+    {
+    }
     QualifierTag tag;
-    bool is_native;
-    bool is_static;
-    bool is_prototype;
-    bool is_dynamic;
-    bool is_override;
-    Str* name;
+    uint32_t is_dynamic;
+    uint32_t is_final;
+    uint32_t is_native;
+    uint32_t is_override;
+    uint32_t is_static;
+    QualifiedName* name;
+    Seq<Expr*>* metadata;
 };
 
 class Binding {
@@ -179,7 +190,7 @@ class ClassDefn {
 public:
     ClassDefn(Qualifier* qual, Str* name, Str* extends, Seq<Str*>* implements, Seq<Stmt*>* class_init, Seq<Stmt*>* instance_init)
     {
-        // FIXME: elaborate
+        // FIXME: elaborate ClassDefn
         (void)qual;
         (void)name;
         (void)extends;
@@ -193,7 +204,7 @@ class InterfaceDefn {
 public:
     InterfaceDefn(Qualifier* qual, Str* name, Seq<Str*>* extends)
     {
-        // FIXME: elaborate
+        // FIXME: elaborate InterfaceDefn
         (void)qual;
         (void)name;
         (void)extends;
@@ -269,7 +280,13 @@ enum Tag {
     TAG_literalRegExp,
     TAG_literalFunction,
     TAG_commonNamespace,
-    TAG_namespaceRef
+    TAG_namespaceRef,
+    TAG_literalArray,
+    TAG_literalObject,
+    TAG_literalXml,
+    TAG_binaryExpr,
+    TAG_unaryExpr,
+    TAG_conditionalExpr
 };
 
 // Tags returned from NameComponent::tag()
@@ -317,8 +334,7 @@ enum Binop {
     OPR_equal,
     OPR_notEqual,
     OPR_strictEqual,
-    OPR_strictNotEqual,
-    OPR_to
+    OPR_strictNotEqual
 };
 
 enum Unop {
@@ -356,6 +372,7 @@ public:
     LiteralObject(Seq<LiteralField*>* fields, uint32_t pos) : Expr(pos), fields(fields) {}
     virtual void cogen(Cogen* cogen, Ctx* ctx);
     Seq<LiteralField*>* const fields;
+    virtual Tag tag() const { return TAG_literalObject; }
 };
 
 class LiteralField {
@@ -370,6 +387,7 @@ public:
     LiteralArray(Seq<Expr*>* elements, uint32_t pos) : Expr(pos), elements(elements) {}
     virtual void cogen(Cogen* cogen, Ctx* ctx);
     Seq<Expr*>* const elements;
+    virtual Tag tag() const { return TAG_literalArray; }
 };
 
 class LiteralUndefined : public Expr {
@@ -451,6 +469,7 @@ public:
     {
     }
     virtual void cogen(Cogen* cogen, Ctx* ctx);
+    virtual Tag tag() const { return TAG_literalXml; }
     Seq<Expr*>* const exprs;
     const bool is_list;
 };
@@ -487,6 +506,7 @@ class ConditionalExpr : public Expr {
 public:
     ConditionalExpr(Expr* e1, Expr* e2, Expr* e3) : e1(e1), e2(e2), e3(e3) {}
     virtual void cogen(Cogen* cogen, Ctx* ctx);
+    virtual Tag tag() const { return TAG_conditionalExpr; }
     Expr* const e1;
     Expr* const e2;
     Expr* const e3;
@@ -505,6 +525,7 @@ class BinaryExpr : public Expr {
 public:
     BinaryExpr(Binop op, Expr* lhs, Expr* rhs) : op(op), lhs(lhs), rhs(rhs) {}
     virtual void cogen(Cogen* cogen, Ctx* ctx);
+    virtual Tag tag() const { return TAG_binaryExpr; }
     const Binop op;
     Expr* const lhs;
     Expr* const rhs;
@@ -514,6 +535,7 @@ class UnaryExpr : public Expr {
 public:
     UnaryExpr(Unop op, Expr* expr) : op(op), expr(expr) {}
     virtual void cogen(Cogen* cogen, Ctx* ctx);
+    virtual Tag tag() const { return TAG_unaryExpr; }
     void incdec(Cogen* cogen, Ctx* ctx, bool pre, bool inc);
     Unop const op;
     Expr* const expr;
@@ -910,16 +932,17 @@ private:
     // are returned through the result parameter out_instance_init.
     Seq<Stmt*>* directives(int flags, Seq<Stmt*>** out_instance_init=NULL);
     void includeDirective();
-    void classDefinition(int flags, Qualifier* qual);
-    void interfaceDefinition(int flags, Qualifier* qual);
-    void namespaceDefinition(int flags, Qualifier* qualifier);
-    void functionDefinition(Qualifier* qualifier, bool getters_and_setters, bool require_body);
-    Stmt* variableDefinition(Qualifier* qualifier);
+    void classDefinition(bool config, int flags, Qualifier* qual);
+    void interfaceDefinition(bool config, int flags, Qualifier* qual);
+    void namespaceDefinition(bool config, int flags, Qualifier* qualifier);
+    void configNamespaceDefinition(int flags, bool config);
+    void functionDefinition(bool config, Qualifier* qualifier, bool getters_and_setters, bool require_body);
+    Stmt* variableDefinition(bool config, Qualifier* qualifier);
     FunctionDefn* functionGuts(Qualifier* qual, bool require_name, bool getters_and_setters, bool require_body);
     Expr* varBindings(uint32_t* pos, bool is_const=false, int flags=0, uint32_t* numbindings=NULL, Expr** firstName=NULL);
-    bool namespaceQualifier(int flags, Qualifier* qualifier);
-    
-    Seq<Stmt*>* statementBlock();
+    void checkSimpleAttributes(Qualifier* qual);
+
+    Seq<Stmt*>* statementBlock(bool config=true);
     
     // Expression parser
     //
@@ -969,7 +992,7 @@ private:
     
     // Statement parser
     
-    Stmt* statement();
+    Stmt* statement(bool config=true);
     Stmt* labeledStatement();
     Stmt* returnStatement();
     Stmt* breakStatement();
@@ -1028,7 +1051,10 @@ private:
     Unop tokenToUnaryOperator(Token t);
     Binop tokenToBinaryOperator(Token t);
     Str* doubleToStr(double d);
-    
+    double strToDouble(Str* s);
+    bool isNamespaceReference(Expr* e);
+    void addExprStatements(SeqBuilder<Stmt*>* stmts, Seq<Expr*>* exprs);
+
     // Binding management
     
     enum RibType {
@@ -1076,6 +1102,50 @@ private:
     void setUsesArguments();
     void setUsesDefaultXmlNamespace();
 
+    // Program configuration management
+
+    class ConfigBinding {
+    public:
+        ConfigBinding(Str* ns, Str* name, Expr* value);
+        Str* ns;        // Will be found among the configNamespaces
+        Str* name;      // Unique within ns
+        Expr* value;    // LiteralUndefined, LiteralNull, LiteralBoolean, LiteralString, LiteralInt, LiteralUInt, LiteralDouble
+    };
+    
+    Seq<Str*>* configNamespaces;
+    Seq<ConfigBinding*>* configBindings;
+    
+    void addConfigNamespace(Str* ns);
+    void checkNoShadowingOfConfigNamespaces(uint32_t pos, Str* s);
+    void addConfigBinding(Str* ns, Str* name, Expr* value);
+    bool isConfigReference(Expr* e);        // e is a QualifiedName with non-NULL SimpleName parts, and the ns names a known config ns
+    bool findConfigNamespace(Str* ns);
+    Expr* findConfigBinding(Str* ns, Str* name);
+    bool evaluateConfigReference(QualifiedName* e);
+    
+    // Constant evaluator, used by program configuration management.
+    // Could fairly easily be generalized into its own class, parameterized
+    // by an environment abstraction.
+
+    Expr* evaluateConfigDefinition(Str* ns, Expr* e);
+    uint32_t evaluateToUInt32(Expr* e);
+    int32_t evaluateToInt32(Expr* e);
+    double evaluateToNumber(Expr* e);
+    bool evaluateToBoolean(Expr* e);
+    Str* evaluateToString(Expr* e);
+    int evaluateRelational(Expr* lhs, Expr* rhs);
+    void failNonConstant(Expr* e);
+
+    // Utilities used by constant evaluator, pretty general but not used elsewhere.
+
+    Expr* boxDouble(double n);
+    Expr* boxUInt(uint32_t n);
+    Expr* boxInt(int32_t n);
+    Expr* boxBoolean(bool b);
+    Expr* boxString(const char* s);
+    Expr* boxString(Str* s);
+    Expr* boxUndefined();
+
     // Lexer can be updated by "include" processing, suspended lexers are
     // pushed onto the lexerStack.
     
@@ -1110,6 +1180,7 @@ private:
     Token regexp();
     Token rightAngle();
     Token rightShiftOrRelationalOperator();
+    Token leftShiftOrRelationalOperator();
     Token hd();
     Token hd2();
     void next();

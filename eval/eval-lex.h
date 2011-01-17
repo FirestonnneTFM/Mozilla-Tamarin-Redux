@@ -93,7 +93,6 @@ enum Token {
     T_RightShiftAssign,
     T_StrictEqual,
     T_StrictNotEqual,
-    T_To,
     T_TypeOf,
     T_UnsignedRightShift,
     T_UnsignedRightShiftAssign,
@@ -127,7 +126,7 @@ enum Token {
     T_XmlLeftAngleSlash,
     T_XmlSlashRightAngle,
     
-    // Reserved words that are not operators.  Commented-out entries are operators, above.
+    // Keywords.  Commented-out entries are operators, above.
     
     /*T_As,*/
     T_Break = 200,
@@ -141,19 +140,20 @@ enum Token {
     T_Do,
     T_Dynamic,
     T_Else,
-    T_Extends,
     T_False,
+    T_Final,
     T_Finally,
     T_For,
     T_Function,
     T_If,
-    T_Implements,
     T_Import,
     /*T_In,*/
+    T_Include,
     /*T_InstanceOf,*/
     T_Interface,
     T_Internal,
     /*T_Is,*/
+    T_Namespace,
     T_Native,
     T_New,
     T_Null,
@@ -163,11 +163,11 @@ enum Token {
     T_Protected,
     T_Public,
     T_Return,
+    T_Static,
     T_Super,
     T_Switch,
     T_This,
     T_Throw,
-    /*T_To,*/
     T_True,
     T_Try,
     /*T_TypeOf,*/
@@ -177,7 +177,7 @@ enum Token {
     T_While,
     T_With,
     
-    // sundry
+    // Sundry other tokens.
     
     T_Identifier = 300,
     T_IntLiteral,
@@ -190,16 +190,16 @@ enum Token {
     T_XmlProcessingInstruction, //  "<? ... ?>
     T_XmlString,                //  '...' or "..."  
     T_XmlName,                  //  string of XMLName characters
-    T_XmlWhitespaces,           //  string of XMLWhitespace characters
+    T_XmlWhitespace,            //  string of XMLWhitespace characters
     T_XmlText,                  //  string of characters that are not XMLName or XMLWhitespace
 
-    // meta
+    // Meta-tokens.
     
     T_EOS = 400,
-    T_BreakSlash,
-    T_BreakXml,                 // <?, <!-- seen but not consumed
-    T_BreakRightAngle,
-    
+    T_BreakSlash,               // "/" seen and consumed
+    T_BreakRightAngle,          // ">" seen and consumed
+    T_BreakLeftAngle,           // "<" seen and consumed
+
     // LAST also serves double duty as NONE
     
     T_LAST = 500
@@ -250,12 +250,13 @@ public:
      */
     Lexer(Compiler* compiler, const wchar* src, uint32_t srclen, bool keyword_or_ident=false);
 
-    Token lex(uint32_t* linep, TokenValue* valuep);     // Lex a token
-    Token regexp(uint32_t* linep, TokenValue* valuep);  // Following T_BreakSlash, to lex a regex literal
-    Token divideOperator(uint32_t* linep);              // Following T_BreakSlash, to lex a division operator
-    Token rightAngle(uint32_t* linep);                  // Following T_BreakRightAngle, to lex '>' at the end of a type instantiator
+    Token lex(uint32_t* linep, TokenValue* valuep);         // Lex a token
+    Token regexp(uint32_t* linep, TokenValue* valuep);      // Following T_BreakSlash, to lex a regex literal
+    Token divideOperator(uint32_t* linep);                  // Following T_BreakSlash, to lex a division operator
+    Token rightAngle(uint32_t* linep);                      // Following T_BreakRightAngle, to lex '>' at the end of a type instantiator
     Token rightShiftOrRelationalOperator(uint32_t* linep);  // Following T_BreakRightAngle, to lex a shift or relational operator
-
+    Token leftShiftOrRelationalOperator(uint32_t* linep);   // Following T_BreakLeftAngle, to lex a shift or relational operator
+    
     /**
      *  Last consumed character must have been c; back up once
      */
@@ -269,7 +270,7 @@ public:
      *   XmlCDATA
      *   XmlProcessingInstruction
      *   XmlName
-     *   XmlWhitespaces
+     *   XmlWhitespace
      *   XmlText
      *   XmlString
      *   XmlLeftBrace
@@ -280,7 +281,7 @@ public:
      *   XmlLeftAngleSlash
      *   XmlSlashRightAngle
      *
-     * For XmlComment, XmlCDATA, XmlProcessingInstruction, XmlName, XmlWhitespaces, XmlText,
+     * For XmlComment, XmlCDATA, XmlProcessingInstruction, XmlName, XmlWhitespace, XmlText,
      * and XmlString, valuep->s is set to the actual text.
      */
     Token xmlAtom(uint32_t* linep, TokenValue* valuep);
@@ -314,13 +315,12 @@ private:
         UNICHAR_Zs15 = 0x205F,
         UNICHAR_Zs16 = 0x3000,
         
-        // Byte-order marks that act like spaces when not at the beginning of the input
-        UNICHAR_BOM1 = 0xFFFE,
-        UNICHAR_BOM2 = 0xFEFF,
+        // Byte-order mark - we treat it like a space
+        UNICHAR_BOM = 0xFEFF,
     };
     
     enum {
-        // The character among the LS/PS, BOM1/BOM2, and Zs* with the lowest value
+        // The character among the LS/PS, BOM, and Zs* with the lowest value
         UNICHAR_LOWEST_ODDSPACE = 0x1680
     };
     
@@ -342,10 +342,11 @@ private:
     Token divideOperatorImpl();
     Token rightAngleImpl();
     Token rightShiftOrRelationalOperatorImpl();
+    Token leftShiftOrRelationalOperatorImpl();
     
     Token xmlAtomImpl();
-    Token xmlMarkup(Token t, const char* terminator);
-    Token xmlWhitespaces();
+    Token xmlMarkup(Token t);
+    Token xmlWhitespace();
     Token xmlName();
     Token xmlString();
     Token xmlText();
@@ -376,7 +377,7 @@ private:
     bool decimalDigits(int k);
     bool hexDigits(int k);
     bool digits(int k, int mask);
-    double parseFloat();
+    double parseDouble();
     double parseInt(int base);
     
     bool notPartOfIdent(int c);
@@ -393,12 +394,14 @@ private:
     const wchar*        mark;       // a remembered position, typically the start of a lexeme (not always valid)
     uint32_t            lineno;     // line number of last char of last token returned
     const bool          keyword_or_ident;
+                                    // true if this lexer instance is just used for checking whether an 
+                                    // identifier that contains a backslash sequence looks like a keyword
 #ifdef DEBUG
     Token               last_token; // last token returned
     bool                traceflag;  // true iff we're tracing
 #endif
     TokenValue          val;        // temporary slot
-
+    
     // Character attributes for the ASCII range, bit vectors of the CHAR_ATTR_ values above.
     static const uint8_t char_attrs[128];
 };

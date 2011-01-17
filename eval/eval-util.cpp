@@ -47,6 +47,25 @@ namespace avmplus
 {
     namespace RTC
     {
+        int Str::compareTo(Str* other)
+        {
+            uint32_t llen = this->length;
+            uint32_t rlen = other->length;
+            uint32_t len = llen < rlen ? llen : rlen;
+            wchar* s = this->s;
+            wchar* t = other->s;
+            wchar* limit = s + len;
+            while (s < limit && *s == *t)
+                s++, t++;
+            if (s < limit)
+                return int(*s) - int(*t);
+            if (llen < rlen)
+                return -1;
+            if (llen > rlen)
+                return 1;
+            return 0;
+        }
+        
         Allocator::Allocator(Compiler* compiler)
             : compiler(compiler)
             , free_sbchunks(NULL)
@@ -102,6 +121,16 @@ namespace avmplus
             else
                 last->tl = e;
             last = e;
+        }
+
+        template<class T> T SeqBuilder<T>::dequeue()
+        {
+            AvmAssert(items != NULL);
+            T v = items->hd;
+            items = items->tl;
+            if (items == NULL)
+                last = NULL;
+            return v;
         }
         
         // At least Xcode requires explicit instantiation.

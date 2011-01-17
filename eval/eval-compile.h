@@ -71,8 +71,9 @@ public:
     // language accepted.
 
     const bool es3_keywords;    // True iff we should only recognize ECMAScript 3.0 keywords
+    const bool standard_regex;  // True iff we should only recognize standard regex syntax, not \<newline> nor the "x" flag
     const bool liberal_idents;  // True iff we allow the use of \u to create identifers that look like keywords, or non-E262-sanctioned characters in identifiers
-    const bool local_functions; // True iff we allow block-local function definitions with SpiderMonkey semantics (hoist name, init when reached)
+    const bool local_functions; // True iff we allow block-local function definitions (hoist name, init when reached)
     const bool octal_literals;  // True iff we should recognize 0[0-7]+ as octal (not in AS3)
     const bool origin_is_file;  // True iff input came from file, so "include" should be allowed
     const bool debugging;       // True iff we should generate debug information
@@ -94,6 +95,7 @@ public:
     Str * const SYM_;           // ""
     Str * const SYM_AS3;
     Str * const SYM_Array;
+    Str * const SYM_CONFIG;
     Str * const SYM_Namespace;
     Str * const SYM_Number;
     Str * const SYM_Object;
@@ -103,19 +105,18 @@ public:
     Str * const SYM_anonymous;
     Str * const SYM_arguments;
     Str * const SYM_children;
+    Str * const SYM_config;
     Str * const SYM_each;
+    Str * const SYM_extends;
     Str * const SYM_get;
-    Str * const SYM_include;
+    Str * const SYM_implements;
     Str * const SYM_int;
     Str * const SYM_length;
     Str * const SYM_namespace;
 #ifdef DEBUG
     Str * const SYM_print;
 #endif
-    Str * const SYM_prototype;
     Str * const SYM_set;
-    Str * const SYM_static;
-    Str * const SYM_to;
     Str * const SYM_use;
     Str * const SYM_xml;
 

@@ -75,6 +75,16 @@ template<class T> inline Seq<T>* SeqBuilder<T>::get() const
     return items;
 }
 
+template<class T> inline void SeqBuilder<T>::clear()
+{
+    items = last = NULL;
+}
+
+template<class T> inline bool SeqBuilder<T>::isEmpty()
+{
+    return items == NULL;
+}
+    
 inline uint32_t ByteBuffer::size() const
 {
     return last == NULL ? 0 : (uint32_t)(size_rest + (out - last->start));

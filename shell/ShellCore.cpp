@@ -229,6 +229,8 @@ namespace avmshell
     //
     //  - May incur copying because the terminating NUL is not accounted for in the original
     //    creation
+    //
+    // Much useful guidance is found at http://www.unicode.org/faq/utf_bom.html.
 
     String* ShellCore::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
     {

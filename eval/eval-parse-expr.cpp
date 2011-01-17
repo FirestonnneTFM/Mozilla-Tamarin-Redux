@@ -124,7 +124,9 @@ namespace avmplus
             SeqBuilder<LiteralField*> fields(allocator);
             if (hd () != T_RightBrace) {
                 do {
-                    fields.addAtEnd(literalField());
+                    LiteralField* f = literalField();
+                    if (f != NULL)
+                        fields.addAtEnd(f);
                 } while (match(T_Comma));
             }
             return fields.get();
@@ -133,6 +135,8 @@ namespace avmplus
         LiteralField* Parser::literalField() 
         {
             Str* name = NULL;
+            QualifiedName* config = NULL;
+        again:
             switch (hd ()) {
                 case T_StringLiteral:
                     name = stringValue();
@@ -150,10 +154,21 @@ namespace avmplus
                     name = doubleToStr(doubleValue());
                     break;
                     
-                case T_Identifier:
-                    name = identValue();
-                    break;
-                    
+                case T_Identifier: {
+                    if (hd2() != T_DoubleColon) {
+                        name = identValue();
+                        break;
+                    }
+                    // This must be a program configuration expression
+                    if (config != NULL)
+                        compiler->syntaxError(position(), SYNTAXERR_DUPLICATE_CONFIG);
+                    Expr* e = assignmentExpression(0);
+                    if (!isConfigReference(e))
+                        compiler->syntaxError(position(), SYNTAXERR_CONFIG_REQUIRED);
+                    config = (QualifiedName*)e;
+                    goto again;
+                }
+
                 default:
                     compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_FIELDNAME);
                     break;
@@ -161,7 +176,9 @@ namespace avmplus
             next();
             match(T_Colon);
             Expr* expr = assignmentExpression(0);
-            return ALLOC(LiteralField, (name, expr));
+            if (config == NULL || evaluateConfigReference(config))
+                return ALLOC(LiteralField, (name, expr));
+            return NULL;
         }
         
         Expr* Parser::arrayInitializer ()
@@ -196,6 +213,15 @@ namespace avmplus
                         if (elt != NULL)
                             eat(T_Comma);
                         elt = assignmentExpression(0);
+                        if (hd() != T_RightBracket && hd() != T_Comma) {
+                            // This must be a program configuration expression
+                            if (!isConfigReference(elt))
+                                compiler->syntaxError(position(), SYNTAXERR_CONFIG_REQUIRED);
+                            bool result = evaluateConfigReference((QualifiedName*)elt);
+                            elt = assignmentExpression(0);
+                            if (!result)
+                                elt = NULL;
+                        }
                         break;
                 }
             }
@@ -279,8 +305,7 @@ namespace avmplus
                 case T_Function:
                     return functionExpression ();
                     
-                case T_LessThan:
-                case T_BreakXml:
+                case T_BreakLeftAngle:
                     return xmlInitializer();
                     
                 case T_AtSign:
@@ -330,6 +355,14 @@ namespace avmplus
                         return ALLOC(FilterExpr, (obj, parenExpression(), pos));
                     if (hd() == T_AtSign)
                         return ALLOC(ObjectRef, (obj, attributeIdentifier(), pos));
+                    // Begin keyword hacks
+                    // FIXME
+                    // Allow 'namespace' to be used as a property name
+                    if (hd() == T_Namespace) {
+                        eat(T_Namespace);
+                        return ALLOC(ObjectRef, (obj, ALLOC(QualifiedName, (NULL, ALLOC(SimpleName, (compiler->SYM_namespace)), false, pos)), pos));
+                    }
+                    // End keyword hacks
                     return ALLOC(ObjectRef, (obj, nameExpression(), pos));
                 }
                 case T_DoubleDot: {
@@ -370,7 +403,7 @@ namespace avmplus
             switch (hd ()) {
                 case T_New: {
                     next();
-                    if (hd() == T_LessThan) {
+                    if (hd() == T_BreakLeftAngle) {
                         // vector initializer
                         compiler->internalError(position(), "Unimplemented: Cannot parse vector initializer");
                     }
@@ -562,8 +595,13 @@ namespace avmplus
             Expr* expr = additiveExpression();
             Token t;
             
-            while (isShift(t = hd()) || t == T_BreakRightAngle) {
-                if (t == T_BreakRightAngle) {
+            while (isShift(t = hd()) || t == T_BreakLeftAngle || t == T_BreakRightAngle) {
+                if (t == T_BreakLeftAngle) {
+                    leftShiftOrRelationalOperator();
+                    if (!isShift(t = hd()))
+                        break;
+                }
+                else if (t == T_BreakRightAngle) {
                     rightShiftOrRelationalOperator();
                     if (!isShift(t = hd()))
                         break;
@@ -582,11 +620,14 @@ namespace avmplus
             bool allowIn = !(flags & EFLAG_NoIn);
 
             for (;;) {
-                if (hd() == T_Identifier && identValue() == compiler->SYM_to && !compiler->es3_keywords)
-                    T0 = T_To;
-                if (!(isRelational(t = hd(), allowIn) || t == T_BreakRightAngle))
+                if (!(isRelational(t = hd(), allowIn) || t == T_BreakLeftAngle || t == T_BreakRightAngle))
                     break;
-                if (t == T_BreakRightAngle) {
+                if (t == T_BreakLeftAngle) {
+                    leftShiftOrRelationalOperator();
+                    if (!isRelational(t = hd(), allowIn))
+                        break;
+                }
+                else if (t == T_BreakRightAngle) {
                     rightShiftOrRelationalOperator();
                     if (!isRelational(t = hd(), allowIn))
                         break;
@@ -679,10 +720,15 @@ namespace avmplus
             Expr* lhs = conditionalExpression(flags);
             Token t;
             
-            if (!((t = hd()) == T_Assign || isOpAssign(t) || t == T_BreakRightAngle))
+            if (!((t = hd()) == T_Assign || isOpAssign(t) || t == T_BreakLeftAngle || t == T_BreakRightAngle))
                 return lhs;
 
-            if (t == T_BreakRightAngle) {
+            if (t == T_BreakLeftAngle) {
+                leftShiftOrRelationalOperator();
+                if (!isOpAssign(t = hd()))
+                    return lhs;
+            }
+            else if (t == T_BreakRightAngle) {
                 rightShiftOrRelationalOperator();
                 if (!isOpAssign(t = hd()))
                     return lhs;
