@@ -135,6 +135,11 @@
     // being conservatively traced (its kVirtualGCTrace bit is disabled by AbortFree)
     // and that confuses the statistics.  Instead of freeing the object the VM will
     // zero it.
+    //
+    // You need source information (VMPI_getFunctionNameFromPC, VMPI_getFileAndLineInfoFromPC)
+    // for this to be useful.  On Mac, make sure that the call to startATOSProcess() is
+    // not commented out in VMPI_setupPCResolution in MMgcPortMac.cpp.
+
     //#define MMGC_CONSERVATIVE_PROFILER
 
     // Internal: profile uses of explicit deletion
@@ -144,6 +149,11 @@
     // and dump a profile on shutdown.  These profiles are useful because we want to
     // reduce the frequency of those deletions, and tightly control the ones that
     // continue to exist.
+    //
+    // You need source information (VMPI_getFunctionNameFromPC, VMPI_getFileAndLineInfoFromPC)
+    // for this to be useful.  On Mac, make sure that the call to startATOSProcess() is
+    // not commented out in VMPI_setupPCResolution in MMgcPortMac.cpp.
+
     //#define MMGC_DELETION_PROFILER
 #endif
 
