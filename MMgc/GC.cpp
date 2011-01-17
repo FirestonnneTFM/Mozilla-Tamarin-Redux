@@ -179,6 +179,9 @@ namespace MMgc
 #ifdef MMGC_CONSERVATIVE_PROFILER
         , demos(0)
 #endif
+#ifdef MMGC_DELETION_PROFILER
+        , deletos(0)
+#endif
 #ifdef DEBUGGER
         , m_sampler(NULL)
 #endif
@@ -275,7 +278,10 @@ namespace MMgc
         if (demos == NULL && heap->profiler != NULL)
             demos = new ObjectPopulationProfiler(this, "Conservative scanning volume incurred by allocation site");
 #endif
-
+#ifdef MMGC_DELETION_PROFILER
+        if (deletos == NULL && heap->profiler != NULL)
+            deletos = new DeletionProfiler(this, "Explicit deletion of managed storage");
+#endif
         gcheap->AddGC(this);
         gcheap->AddOOMCallback(this);
 
@@ -293,6 +299,14 @@ namespace MMgc
             demos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
             delete demos;
             demos = NULL;
+        }
+#endif
+#ifdef MMGC_DELETION_PROFILER
+        if (deletos != NULL)
+        {
+            deletos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
+            delete deletos;
+            deletos = NULL;
         }
 #endif
         policy.shutdown();
@@ -3703,5 +3717,12 @@ namespace MMgc
         }
     }
 #endif
+    
+#ifdef MMGC_DELETION_PROFILER
+    void GC::ProfileExplicitDeletion(const void* item)
+    {
+        if (deletos != NULL)
+            deletos->accountForObject(item);
+    }
+#endif
 }
-
