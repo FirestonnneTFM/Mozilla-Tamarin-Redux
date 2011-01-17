@@ -1066,13 +1066,13 @@ namespace avmplus
     template<class T>
     REALLY_INLINE int32_t UnmanagedPointerList<T>::indexOf(T value) const
     {
-        return m_list.indexOf(value);
+        return m_list.indexOf((UnmanagedPointer)value);
     }
 
     template<class T>
     REALLY_INLINE int32_t UnmanagedPointerList<T>::lastIndexOf(T value) const
     {
-        return m_list.lastIndexOf(value);
+        return m_list.lastIndexOf((UnmanagedPointer)value);
     }
 
     template<class T>
