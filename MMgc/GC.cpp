@@ -742,23 +742,32 @@ namespace MMgc
         // reachable from the stack or from other objects (dangling pointers
         // caused by improper use of Free(), or non-pointers interpreted
         // as pointers by the conservative scanner).
+
         Zero(item);
 
-        // FIXME - https://bugzilla.mozilla.org/show_bug.cgi?id=589102.
-        // The following actions presume we got here via delete, but that may not
-        // always be true, and if we didn't then it isn't right to clear the
-        // finalized bit, the weak ref bit, and possibly not the exactly traced bit.
-        
-        // Perform all cleanup actions
-        if(IsFinalized(item))
-            ClearFinalized(item);
+        // It would not be right to clear the finalized bit if we could get here other
+        // than via operator delete, but there's code in the GC interface to ensure
+        // that GC::Free and FreeNotNull are not invoked on finalized objects.  Thus
+        // we're OK clearing the finalized bit here without worrying about whether the
+        // destructor needs to be run.
+        //
+        // Weakly held or exactly traced objects do not have similar correctness issues.
+        //
+        // See Bugzilla 589102 for more information.
+
+        ClearFinalized(item);
         if(HasWeakRef(item))
             ClearWeakRef(item);
-        
+
         // This is necessary if the destructor has been run because the destructor snaps
         // the vtable back to GCTraceableBase, which has an illegal-to-call base method for
         // gcTrace.  That base method is there to ensure that we do not try to exactly
         // trace destructed objects.
+        //
+        // If the destructor has not been run then this simply reverts the object back to
+        // conservative tracing, which is suboptimal but OK since the object has been zeroed
+        // and conservative tracing will find nothing.
+
         if(IsExactlyTraced(item))
             ClearExactlyTraced(item);
     }

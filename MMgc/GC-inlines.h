@@ -230,7 +230,6 @@ namespace MMgc
 
 #undef SIZEARG
 
-    // Implementations of operator delete call FreeNotNull directly.
     REALLY_INLINE void GC::Free(const void *item)
     {
         if(item == NULL)
@@ -242,9 +241,24 @@ namespace MMgc
     {
         GCAssert(item != NULL);
         GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
+        GCAssertMsg(!IsFinalized(item), "Finalizable storage must not be deleted with GC::Free; the destructor will not be called.");
         GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
     }
 
+    REALLY_INLINE void GC::FreeFromGCNotNull(const void *item)
+    {
+        GCAssert(item != NULL);
+        GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
+        GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
+    }
+    
+    REALLY_INLINE void GC::FreeFromDeleteNotNull(const void *item)
+    {
+        GCAssert(item != NULL);
+        GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
+        GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
+    }
+    
     REALLY_INLINE void GC::AddRCRootSegment(RCRootSegment *segment)
     {
         segment->next = rcRootSegments;
