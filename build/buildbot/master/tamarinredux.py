@@ -2028,7 +2028,7 @@ class tamarinredux:
     linux_deep_factory.addStep(sync_update)
     linux_deep_factory.addStep(bb_slaveupdate(slave="linux-deep"))
     linux_deep_factory.addStep(compile_builtin)
-    linux_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-shell --enable-wordcode-interp --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_WORDCODE_INTERP"))
+    linux_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-shell --enable-wordcode-interp --target=i686-linux", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
     linux_deep_factory.addStep(download_testmedia)
     linux_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
     linux_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
