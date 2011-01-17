@@ -1,0 +1,74 @@
+<!--
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+-->
+<html>
+
+<head>
+<title>GC Blacklist Tutorial</title>
+</head>
+
+<body>
+<h1><center>GC Blacklist Tutorial</h1>
+
+<h2>Introduction</h2>
+
+<P>The blacklist feature attempts to answer the question "Why isn't
+the GC collecting my object?".  It does this by allowing objects to be
+registered with the GC and then printing the "back pointer chain" of
+those objects after a GC collection.<P>
+
+<P>A back pointer chain is the list of objects that connect the object
+in question to a GC root.  There may be many paths from the roots to
+this object, we just print out the one the GC actually traversed. <P>
+
+<h2>Setup</h2>
+
+<UL>
+<LI>Enable MMGC_HEAP_GRAPH in MMgc.h</LI>
+<LI>Make sure you are on a mac or windows machine and your build has debugging symbols</LI>
+<LI>Set the MMGC_PROFILE=1 env var to 1 when launching the process</LI>
+<LI>Add calls to GC::addToBlacklist in your program for the objects in question</LI>
+</UL>
+
+
+<h2>Example</h2>
+
+TBD
+
+</body>
+</html>
