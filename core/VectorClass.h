@@ -86,7 +86,7 @@ namespace avmplus
         explicit TypedVectorClassBase(VTable* vtable);
 
     public:
-        Atom checkType(Atom a);
+        Traits* getTypeTraits() const;
 
         // ClassClosure overrides
         virtual Atom call(int argc, Atom* argv);
@@ -235,8 +235,10 @@ namespace avmplus
         bool get_fixed() const;
         void set_fixed(bool fixed);
 
-        // used by Flash code for AMF3
-        ClassClosure* getType() const;
+        // used by Flash code for AMF3 -- note that this is
+        // the type that the Vector contains, not the Vector itself
+        // (ie, "int" rather than "Vector<int>")
+        Traits* getTypeTraits() const;
 
         // AIR needs to be able to get/set the length of an arbitrary
         // Vector without knowing its subclass; these simply forward into the
