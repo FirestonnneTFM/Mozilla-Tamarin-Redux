@@ -54,8 +54,8 @@ VS_HOME="c:\Program Files (x86)\Microsoft Visual Studio 9.0"
 
 export PATH="$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
 export INCLUDE="c:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
-export LIB="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib"
-export LIBPATH="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;"
+export LIB="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;c:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib"
+export LIBPATH="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;c:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;"
 
 # If we are being asked to compile the windows-mobile shells then bring in the windows mobile environment
 # this will reset the PATH, INCLUDE and LIB to point to the correct winmo locations
