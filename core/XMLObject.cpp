@@ -1453,7 +1453,7 @@ namespace avmplus
 
             // Our __toXMLString call might have added new namespace onto our list.  We don't want to
             // save these new namespaces so clear them out here.
-            while (namespaceLength > newNamespaceArray.length())
+            while (newNamespaceArray.length() > namespaceLength)
                 newNamespaceArray.removeLast();
         }
 
