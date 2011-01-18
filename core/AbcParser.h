@@ -45,6 +45,35 @@ namespace avmplus
 {
     /**
      * Parser for reading .abc (Actionscript Byte Code) files.
+     *
+     * ABC content is versioned.  The ABC header stores a version number,
+     * the meaning of which is as follows:
+     *
+     *  46<<16|16   Content recognized by Flash Player "Spicy" and earlier (SWF <= 11)
+     *  47<<16|12   Content recognized by Flash Player "Serrano" and earlier (SWF <= 12)
+     *  47<<16|13   Content recognized by Flash Player TBD and earlier (SWF <= 13)
+     *  ...
+     *
+     * Starting with Flash Player "Serrano", the highest minor ABC version
+     * supported always corresponds to the highest SWF version of that player.
+     * Thus every time a Player is shipped we provide the ability to make
+     * changes to ABC format and semantics.
+     *
+     * There is a separate avmfeature for each SWF version starting with SWF12.
+     * The feature has to be enabled at build time for that SWF version to be
+     * recognized.  The mechanism serves as a check on accidental shipments of
+     * code or format changes.
+     *
+     * A number of flags in the AbcParser structure instance are set based
+     * on the version number of the content.  These flags must be checked
+     * by the parser and/or verifier and/or interpreter and/or code generator
+     * when examining ABC content.  (As a general rule it's expensive to change
+     * instruction semantics through versioning, and easier to introduce new
+     * instructions, but in principle everything is up for grabs.)  It is *not*
+     * appropriate to check the VMCFG_SWFnn flag in general, one should always
+     * check the feature flags, which will always be available once introduced.
+     *
+     * See bugzilla 587977 and dependent/blocking bugs for more information.
      */
     class AbcParser
     {
@@ -76,6 +105,27 @@ namespace avmplus
         static void addAOTDebugInfo(PoolObject *pool);
 #endif
 
+        // If floatSupport is set (introduced in SWF12) then:
+        //
+        //  - The ABC contains a pool of float values
+        //  - OP_pushfloat is an instruction
+        //  - OP_coerce_f is an instruction
+        //  - The type of OP_add is (Number|String|float) while the type
+        //    of OP_subtract, OP_multiply, OP_divide, OP_modulo, OP_negate,
+        //    OP_increment, OP_inclocal, OP_decrement, and OP_declocal is
+        //    (Number|float).  In older content they were (Number|String)
+        //    and (Number) respectively.
+        //
+        // (Subject to revision)
+
+        /*const*/ unsigned floatSupport:1;
+
+        // If float4Support is set (introduced in SWF12) then:
+        //
+        // - TBD
+
+        /*const*/ unsigned float4Support:1;
+        
     protected:
         PoolObject* parse(API api);
         MethodInfo* resolveMethodInfo(uint32_t index) const;

@@ -89,7 +89,7 @@
        abused because it's convenient to introduce default values then
        the default value facility will be removed).
 
-       No two FEATUREs may name the same feature.
+       No two FEATUREs or TWEAKSs may name the same feature.
 
        Feature names named by PRECLUDES, REQUIRES, AT-LEAST-ONE, and
        AT-MOST-ONE clauses must be defined by some FEATURE.
@@ -102,7 +102,7 @@
        required feature must be turned on if the feature defined by
        the present FEATURE is turned on.
 
-       A DEFINES clause in an FEATURE names a preprocessor macro that is
+       A DEFINES clause in a FEATURE names a preprocessor macro that is
        defined (with a simple "#define X") if the FEATURE is turned on.
        This seems redundant until you consider that a FEATURE can define
        multiple macros; this allows discrimination internally in the
@@ -116,7 +116,8 @@
        features has been turned on.  (The same can be expressed by
        PRECLUDES clauses but that would be more error-prone.)
 
-       EXACTLY-ONE is an abbreviation for AT-LEAST-ONE and AT-MOST-ONE.
+       EXACTLY-ONE is an abbreviation for the combination of AT-LEAST-ONE
+       and AT-MOST-ONE.
 
    This program processes the feature definition below to check static
    constraints and produce the C++ header file core/avmfeatures.h; that
@@ -642,6 +643,70 @@ var FEATURES =
       </desc>
     <name> AVMFEATURE_VALGRIND </name>
     <defines> MMGC_VALGRIND </defines>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF12 / ABC version 47.12 </desc>
+    <name> AVMFEATURE_SWF12 </name>
+    <defines> VMCFG_SWF12 </defines>
+    <defines> VMCFG_FLOAT </defines> <!-- Tentative! Intended for use *outside* the VM only, to see if the feature is present -->
+    <defines> VMCFG_FLOAT4 </defines> <!-- Tentative!  Intended for use *outside* the VM only, to see if the feature is present -->
+  </feature>
+  
+  <feature>
+    <desc> Enabling this will support SWF13 / ABC version 47.13 </desc>
+    <name> AVMFEATURE_SWF13 </name>
+    <defines> VMCFG_SWF13 </defines>
+    <requires> AVMFEATURE_SWF12 </requires>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF14 / ABC version 47.14 </desc>
+    <name> AVMFEATURE_SWF14 </name>
+    <defines> VMCFG_SWF14 </defines>
+    <requires> AVMFEATURE_SWF13 </requires>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF15 / ABC version 47.15 </desc>
+    <name> AVMFEATURE_SWF15 </name>
+    <defines> VMCFG_SWF15 </defines>
+    <requires> AVMFEATURE_SWF14 </requires>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF16 / ABC version 47.16 </desc>
+    <name> AVMFEATURE_SWF16 </name>
+    <defines> VMCFG_SWF16 </defines>
+    <requires> AVMFEATURE_SWF15 </requires>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF17 / ABC version 47.17 </desc>
+    <name> AVMFEATURE_SWF17 </name>
+    <defines> VMCFG_SWF17 </defines>
+    <requires> AVMFEATURE_SWF16 </requires>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF18 / ABC version 47.18 </desc>
+    <name> AVMFEATURE_SWF18 </name>
+    <defines> VMCFG_SWF18 </defines>
+    <requires> AVMFEATURE_SWF17 </requires>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF19 / ABC version 47.19 </desc>
+    <name> AVMFEATURE_SWF19 </name>
+    <defines> VMCFG_SWF19 </defines>
+    <requires> AVMFEATURE_SWF18 </requires>
+  </feature>
+
+  <feature>
+    <desc> Enabling this will support SWF20 / ABC version 47.20 </desc>
+    <name> AVMFEATURE_SWF20 </name>
+    <defines> VMCFG_SWF20 </defines>
+    <requires> AVMFEATURE_SWF19 </requires>
   </feature>
 
   <!-- VM adjustments for various oddities: AVMTWEAK_* -->

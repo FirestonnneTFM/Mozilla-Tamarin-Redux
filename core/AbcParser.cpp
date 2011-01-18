@@ -196,8 +196,43 @@ namespace avmplus
 #ifdef VMCFG_AOT
             case 0: // just a "reference" to an AOT-ed ABC!
 #endif
-            case (46<<16|16):
+            case (46<<16|16):   // Original ABC version number
+#ifdef VMCFG_SWF12
+            case (47<<16|12):   // Flash player TBD "Serrano"
                 return 0;
+#endif
+#ifdef VMCFG_SWF13
+            case (47<<16|13):   // Flash player TBD
+                return 0;
+#endif
+#ifdef VMCFG_SWF14
+            case (47<<16|14):   // Flash player TBD
+                return 0;
+#endif
+#ifdef VMCFG_SWF15
+            case (47<<16|15):   // Flash player TBD
+                return 0;
+#endif
+#ifdef VMCFG_SWF16
+            case (47<<16|16):   // Flash player TBD
+                return 0;
+#endif
+#ifdef VMCFG_SWF17
+            case (47<<16|17):   // Flash player TBD
+                return 0;
+#endif
+#ifdef VMCFG_SWF18
+            case (47<<16|18):   // Flash player TBD
+                return 0;
+#endif
+#ifdef VMCFG_SWF19
+            case (47<<16|19):   // Flash player TBD
+                return 0;
+#endif
+#ifdef VMCFG_SWF20
+            case (47<<16|20):   // Flash player TBD
+                return 0;
+#endif
             default:
                 return kInvalidMagicError;
         }
@@ -223,6 +258,46 @@ namespace avmplus
         abcEnd = &code[(int)code.getSize()];
 
         classCount = 0;
+
+        // Default flag settings go here
+        floatSupport = 0;
+        float4Support = 0;
+
+        // Flag overrides based on version go here
+
+        if (this->version >= (47<<16|12)) {
+            // Flash Player TBD "Serrano"
+#ifdef VMCFG_FLOAT
+            floatSupport = 1;
+#endif
+#ifdef VMCFG_FLOAT4
+            float4Support = 1;
+#endif
+        }
+        if (this->version >= (47<<16|13)) {
+            // Flash Player TBD
+        }
+        if (this->version >= (47<<16|14)) {
+            // Flash Player TBD
+        }
+        if (this->version >= (47<<16|15)) {
+            // Flash Player TBD
+        }
+        if (this->version >= (47<<16|16)) {
+            // Flash Player TBD
+        }
+        if (this->version >= (47<<16|17)) {
+            // Flash Player TBD
+        }
+        if (this->version >= (47<<16|18)) {
+            // Flash Player TBD
+        }
+        if (this->version >= (47<<16|19)) {
+            // Flash Player TBD
+        }
+        if (this->version >= (47<<16|20)) {
+            // Flash Player TBD
+        }
     }
 
     REALLY_INLINE void AbcParser::computeInstanceSizeAndSlotsOffset(int class_id,

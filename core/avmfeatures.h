@@ -112,6 +112,17 @@
 #undef MMGC_MEMORY_PROFILER
 #undef VMCFG_CACHE_GQCN
 #undef MMGC_VALGRIND
+#undef VMCFG_SWF12
+#undef VMCFG_FLOAT
+#undef VMCFG_FLOAT4
+#undef VMCFG_SWF13
+#undef VMCFG_SWF14
+#undef VMCFG_SWF15
+#undef VMCFG_SWF16
+#undef VMCFG_SWF17
+#undef VMCFG_SWF18
+#undef VMCFG_SWF19
+#undef VMCFG_SWF20
 
 #undef VMCFG_TWEAK_SIN_COS_NONFINITE
 #undef VMCFG_EPOC_EMULATOR
@@ -587,6 +598,87 @@
 #endif
 
 
+/* AVMFEATURE_SWF12
+ *
+ * Enabling this will support SWF12 / ABC version 47.12
+ */
+#if !defined AVMFEATURE_SWF12 || AVMFEATURE_SWF12 != 0 && AVMFEATURE_SWF12 != 1
+#  error "AVMFEATURE_SWF12 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF13
+ *
+ * Enabling this will support SWF13 / ABC version 47.13
+ */
+#if !defined AVMFEATURE_SWF13 || AVMFEATURE_SWF13 != 0 && AVMFEATURE_SWF13 != 1
+#  error "AVMFEATURE_SWF13 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF14
+ *
+ * Enabling this will support SWF14 / ABC version 47.14
+ */
+#if !defined AVMFEATURE_SWF14 || AVMFEATURE_SWF14 != 0 && AVMFEATURE_SWF14 != 1
+#  error "AVMFEATURE_SWF14 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF15
+ *
+ * Enabling this will support SWF15 / ABC version 47.15
+ */
+#if !defined AVMFEATURE_SWF15 || AVMFEATURE_SWF15 != 0 && AVMFEATURE_SWF15 != 1
+#  error "AVMFEATURE_SWF15 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF16
+ *
+ * Enabling this will support SWF16 / ABC version 47.16
+ */
+#if !defined AVMFEATURE_SWF16 || AVMFEATURE_SWF16 != 0 && AVMFEATURE_SWF16 != 1
+#  error "AVMFEATURE_SWF16 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF17
+ *
+ * Enabling this will support SWF17 / ABC version 47.17
+ */
+#if !defined AVMFEATURE_SWF17 || AVMFEATURE_SWF17 != 0 && AVMFEATURE_SWF17 != 1
+#  error "AVMFEATURE_SWF17 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF18
+ *
+ * Enabling this will support SWF18 / ABC version 47.18
+ */
+#if !defined AVMFEATURE_SWF18 || AVMFEATURE_SWF18 != 0 && AVMFEATURE_SWF18 != 1
+#  error "AVMFEATURE_SWF18 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF19
+ *
+ * Enabling this will support SWF19 / ABC version 47.19
+ */
+#if !defined AVMFEATURE_SWF19 || AVMFEATURE_SWF19 != 0 && AVMFEATURE_SWF19 != 1
+#  error "AVMFEATURE_SWF19 must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SWF20
+ *
+ * Enabling this will support SWF20 / ABC version 47.20
+ */
+#if !defined AVMFEATURE_SWF20 || AVMFEATURE_SWF20 != 0 && AVMFEATURE_SWF20 != 1
+#  error "AVMFEATURE_SWF20 must be defined and 0 or 1 (only)."
+#endif
+
+
 
 /* AVMTWEAK_SIN_COS_NONFINITE
  *
@@ -744,6 +836,47 @@
 
 
 
+
+#if AVMFEATURE_SWF13
+#  if !AVMFEATURE_SWF12
+#    error "AVMFEATURE_SWF12 is required for AVMFEATURE_SWF13"
+#  endif
+#endif
+#if AVMFEATURE_SWF14
+#  if !AVMFEATURE_SWF13
+#    error "AVMFEATURE_SWF13 is required for AVMFEATURE_SWF14"
+#  endif
+#endif
+#if AVMFEATURE_SWF15
+#  if !AVMFEATURE_SWF14
+#    error "AVMFEATURE_SWF14 is required for AVMFEATURE_SWF15"
+#  endif
+#endif
+#if AVMFEATURE_SWF16
+#  if !AVMFEATURE_SWF15
+#    error "AVMFEATURE_SWF15 is required for AVMFEATURE_SWF16"
+#  endif
+#endif
+#if AVMFEATURE_SWF17
+#  if !AVMFEATURE_SWF16
+#    error "AVMFEATURE_SWF16 is required for AVMFEATURE_SWF17"
+#  endif
+#endif
+#if AVMFEATURE_SWF18
+#  if !AVMFEATURE_SWF17
+#    error "AVMFEATURE_SWF17 is required for AVMFEATURE_SWF18"
+#  endif
+#endif
+#if AVMFEATURE_SWF19
+#  if !AVMFEATURE_SWF18
+#    error "AVMFEATURE_SWF18 is required for AVMFEATURE_SWF19"
+#  endif
+#endif
+#if AVMFEATURE_SWF20
+#  if !AVMFEATURE_SWF19
+#    error "AVMFEATURE_SWF19 is required for AVMFEATURE_SWF20"
+#  endif
+#endif
 
 
 
@@ -986,6 +1119,39 @@
 #endif
 #if AVMFEATURE_VALGRIND
 #  define MMGC_VALGRIND
+#endif
+#if AVMFEATURE_SWF12
+#  define VMCFG_SWF12
+#endif
+#if AVMFEATURE_SWF12
+#  define VMCFG_FLOAT
+#endif
+#if AVMFEATURE_SWF12
+#  define VMCFG_FLOAT4
+#endif
+#if AVMFEATURE_SWF13
+#  define VMCFG_SWF13
+#endif
+#if AVMFEATURE_SWF14
+#  define VMCFG_SWF14
+#endif
+#if AVMFEATURE_SWF15
+#  define VMCFG_SWF15
+#endif
+#if AVMFEATURE_SWF16
+#  define VMCFG_SWF16
+#endif
+#if AVMFEATURE_SWF17
+#  define VMCFG_SWF17
+#endif
+#if AVMFEATURE_SWF18
+#  define VMCFG_SWF18
+#endif
+#if AVMFEATURE_SWF19
+#  define VMCFG_SWF19
+#endif
+#if AVMFEATURE_SWF20
+#  define VMCFG_SWF20
 #endif
 
 #if AVMTWEAK_SIN_COS_NONFINITE
