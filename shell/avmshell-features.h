@@ -225,4 +225,40 @@
   #define AVMFEATURE_VALGRIND 0
 #endif
 
+#ifndef AVMFEATURE_SWF12
+  #define AVMFEATURE_SWF12 1
+#endif
+
+#ifndef AVMFEATURE_SWF13
+  #define AVMFEATURE_SWF13 0
+#endif
+
+#ifndef AVMFEATURE_SWF14
+  #define AVMFEATURE_SWF14 0
+#endif
+
+#ifndef AVMFEATURE_SWF15
+  #define AVMFEATURE_SWF15 0
+#endif
+
+#ifndef AVMFEATURE_SWF16
+  #define AVMFEATURE_SWF16 0
+#endif
+
+#ifndef AVMFEATURE_SWF17
+  #define AVMFEATURE_SWF17 0
+#endif
+
+#ifndef AVMFEATURE_SWF18
+  #define AVMFEATURE_SWF18 0
+#endif
+
+#ifndef AVMFEATURE_SWF19
+  #define AVMFEATURE_SWF19 0
+#endif
+
+#ifndef AVMFEATURE_SWF20
+  #define AVMFEATURE_SWF20 0
+#endif
+
 #endif // __avmshell_features__
