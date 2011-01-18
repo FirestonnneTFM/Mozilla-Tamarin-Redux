@@ -50,13 +50,13 @@ namespace avmplus
      * the meaning of which is as follows:
      *
      *  46<<16|16   Content recognized by Flash Player "Spicy" and earlier (SWF <= 11)
-     *  47<<16|12   Content recognized by Flash Player "Serrano" and earlier (SWF <= 12)
+     *  47<<16|12   Content recognized by Flash Player TBD and earlier (SWF <= 12)
      *  47<<16|13   Content recognized by Flash Player TBD and earlier (SWF <= 13)
      *  ...
      *
-     * Starting with Flash Player "Serrano", the highest minor ABC version
-     * supported always corresponds to the highest SWF version of that player.
-     * Thus every time a Player is shipped we provide the ability to make
+     * Starting with the Flash Player after "Spicy", the highest minor ABC version
+     * supported always corresponds to the highest SWF version of that 
+     * player.  Thus every time a Player is shipped we provide the ability to make
      * changes to ABC format and semantics.
      *
      * There is a separate avmfeature for each SWF version starting with SWF12.

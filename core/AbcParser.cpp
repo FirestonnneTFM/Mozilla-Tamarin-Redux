@@ -198,7 +198,7 @@ namespace avmplus
 #endif
             case (46<<16|16):   // Original ABC version number
 #ifdef VMCFG_SWF12
-            case (47<<16|12):   // Flash player TBD "Serrano"
+            case (47<<16|12):   // Flash player TBD
                 return 0;
 #endif
 #ifdef VMCFG_SWF13
@@ -266,7 +266,7 @@ namespace avmplus
         // Flag overrides based on version go here
 
         if (this->version >= (47<<16|12)) {
-            // Flash Player TBD "Serrano"
+            // Flash Player TBD
 #ifdef VMCFG_FLOAT
             floatSupport = 1;
 #endif
