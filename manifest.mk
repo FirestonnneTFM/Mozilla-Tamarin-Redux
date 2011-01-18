@@ -48,6 +48,7 @@ INCLUDES += \
   -I$(topsrcdir)/shell \
   -I$(topsrcdir)/VMPI \
   -I$(topsrcdir)/vmbase \
+  -I$(topsrcdir)/generated \
   $(NULL)
 
 $(call RECURSE_DIRS,other-licenses/zlib)

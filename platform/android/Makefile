@@ -316,7 +316,7 @@ endif
 # end make.common
 
 # Modify variables set by make.common before including other makefiles:
-INC := -I. -I.. -I../.. -I../../shell -I../../core -I../../eval -I../../MMgc -I../../pcre -I../../extensions -I../../VMPI -I../../vmbase -I../../other-licenses/zlib  -I../../other-licenses $(INC)
+INC := -I. -I.. -I../.. -I../../shell -I../../core -I../../eval -I../../MMgc -I../../pcre -I../../extensions -I../../VMPI -I../../vmbase -I../../generated -I../../other-licenses/zlib  -I../../other-licenses $(INC)
 
 AVMSHELL_DEFS := -DUNIX -Dlinux -DUSE_PTHREAD_MUTEX -DNO_SYS_SIGNAL -DHAVE_STDARG -DNO_CONSOLE_FWRITE -DAVMPLUS_ARM -DAVMPLUS_UNIX -DAVMSHELL_BUILD 
 
