@@ -163,6 +163,8 @@ namespace avmplus
         typedef WeakRefList<GlobalMemorySubscriber> WeakSubscriberList;
 
     private:
+        void _Clear();
+
         void NotifySubscribers();
         
         void TellGcNewBufferMemory(const uint8_t* buf, uint32_t numberOfBytes);

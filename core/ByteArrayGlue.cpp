@@ -66,8 +66,9 @@ namespace avmplus
 
     ByteArray::~ByteArray()
     {
-        m_subscribers.clear();
-        Clear();
+        // no: this can reallocate memory, which is bad to do in a dtor
+        // m_subscribers.clear();
+        _Clear();
     }
 
     void ByteArray::Clear()
@@ -77,6 +78,11 @@ namespace avmplus
             AvmAssert(false); // shouldn't get here?
             m_toplevel->throwRangeError(kInvalidRangeError);
         }
+        _Clear();
+    }
+    
+    void ByteArray::_Clear()
+    {
         if (m_array && !IsCopyOnWrite())
         {
             TellGcDeleteBufferMemory(m_array, m_length);
