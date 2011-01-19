@@ -98,6 +98,9 @@ namespace MMgc
     REALLY_INLINE void GCAlloc::RemoveFromFreeList(GCBlock *b)
     {
         GCAssert(m_firstFree == b || b->prevFree != NULL);
+        GCAssert(b->prevFree == NULL || b->prevFree->nextFree == b);
+        GCAssert(b->nextFree == NULL || b->nextFree->prevFree == b);
+
         if ( m_firstFree == b )
             m_firstFree = b->nextFree;
         else
