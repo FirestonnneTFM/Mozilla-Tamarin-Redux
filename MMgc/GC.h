@@ -356,7 +356,7 @@ namespace MMgc
     private:
         // private to prevent its use and someone adding it, GCC creates
         // WriteBarrier's on the stack with it
-        GCHiddenPointer(const GCHiddenPointer<T>& toCopy) { GCAssert(false); }
+        GCHiddenPointer(const GCHiddenPointer<T>&) { GCAssert(false); }
 
         void set(T obj)
         {
