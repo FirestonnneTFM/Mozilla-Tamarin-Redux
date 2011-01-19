@@ -67,7 +67,7 @@ namespace MMgc
     protected:
         
         //  In order to keep the usage syntax uniform as "GCMember",
-        //  Protect the constructors so that only "GCMeberRef" subclasses are allowed to use this object.
+        //  Protect the constructors so that only "GCMember" subclasses are allowed to use this object.
         explicit REALLY_INLINE GCMemberBase()
         : GCRef<T>()
         {
