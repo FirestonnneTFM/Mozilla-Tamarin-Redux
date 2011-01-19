@@ -99,10 +99,8 @@ namespace MMgc
             {
                 GCMemberBase<T>::operator=(valuePtr);
             }
-        private:
-                
-            //  Avoid accidental copies by privatizing the copy constructor.
-            GCMember(const GCMember &other);
+            
+            explicit REALLY_INLINE GCMember(const GCMember &other): GCMemberBase<T>(other) {}
         };
         
         // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
