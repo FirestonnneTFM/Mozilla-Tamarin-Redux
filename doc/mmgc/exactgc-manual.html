@@ -145,5 +145,87 @@ for the objects (see a later section).
 <li> Need to discuss multiple inheritance.
 </ul>
 
+<!-- The following was taken off the zerowing page and needs to be folded in -->
+<!--
+h1. Exact Tracing Architecture
+
+(This is obsolete and will soon go away, to be replaced by something that is not obsolete.)
+
+The following technologies come together to provide relatively convenient opt-in exact tracing:
+
+* A virtual method gcTrace() on some GC-managed objects; for each type, this method knows how to find and trace pointer fields efficiently in instances of that type
+* A flag on the object header of objects that are exactly traced tells the GC to invoke gcTrace() to trace it 
+* A convenient means of setting that flag
+* A set of utility classes that provide exact tracing for array-like objects
+* An annotation system expressed as C++ macros on classes that provide exact tracing and on the fields of those classes that must be seen by the exact tracer
+* A script that processes the annotations and generates the gcTrace() methods for the annotated types
+
+As a result, a programmer wishing to provide exact tracing for a class generally needs to do three things:
+
+* Write the annotations on the class
+* Ensure that the object header flag is set on the instance when the class is instantiated
+* Re-run the generator script whenever changes have been made to class definitions that impact exact tracing (adding pointer fields t, for example)
+
+h3. Writing annotations
+
+The documentation at the beginning of utils/exactgc.as describes the annotation system and how to use it.  However, in the simple case - you have an class that's derived from another GC'd class that's also exactly traced and all the traceable pointers in the class are declared as pointer fields directly in the class, not in member structures - then it usually looks like this:
+
+{code}
+  class GC_CPP_EXACT(MyClass, MyParentClass) {
+    ...
+
+    GC_DATA_BEGIN(MyClass)
+
+    DRCWB(SomeOtherClass*) GC_POINTER(myField);
+
+    GC_DATA_END(MyClass)    
+  }
+{code}
+
+That is:
+
+* You annotate the class header
+* You bracket all fields in the class that need an annotation with GC_DATA_BEGIN and GC_DATA_END
+* You wrap every field name that is a pointer in GC_POINTER
+
+h3. Setting the exact tracing flag
+
+The template function T* MMgc::setExact(T*) accepts any pointer type, sets the flag on the object, and returns the pointer.  Wrapped around a use of the 'new' operator it requires no further changes to the program.  This phrase:
+
+{code}
+  v = new (gc, AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext);
+{code}
+
+becomes this phrase:
+
+{code}
+  v = MMgc::setExact(new (gc, AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext));
+{code}
+
+While it is not incorrect if the exact tracing flag is not set on some instances of a class - the object will just be traced conservatively - it is undesirable.  The best way I've found to avoid the problem is to enforce the use of a factory method for all classes that are exactly traced.  The factory method invokes 'new' and also sets the exact tracing flag.  For example, for {html}AbcEnv{html} we have this method in the header file:
+
+{code}
+  REALLY_INLINE AbcEnv* AbcEnv::create(MMgc::GC* gc, PoolObject* builtinPool, CodeContext* builtinCodeContext)
+  {
+      return MMgc::setExact(new (gc, AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext));
+  }
+{code}
+
+All sites that previously constructed an {html}AbcEnv{html} by means of the 'new' operator now call the factory method instead.  In order to force the use of the factory method the {html}AbcEnv{html} constructor must be 'private' (or at most 'protected').
+
+Observe that the setting of the bit from the factory method allows us to designate a type as exactly traced independently of its subclasses.  Were we to set the exact tracing flag in the object's constructor instead that would not be the case - that would force all subclasses to be exactly traced.  In general that's not a desirable situation, not the least because it's hard to catch mistakes statically.
+
+h3. Running the exactgc generator script
+
+For the time being, the script utils/exactgc.as is run as part of rebuilding the builtins (a consequence of a shortcoming in some of the internal data structures in the VM that record the layout of slots in the object).  Thus to rebuild the necessary files in the core and shell directories, run these commands (if your asc.jar is in your private lib directory and you have an avmshell in your path):
+
+{code}
+  ( cd core ; ASC=~/lib/asc.jar AVM=avmshell ./builtin.py )
+  ( cd shell ; ASC=~/lib/asc.jar AVM=avmshell ./shell_toplevel.py )
+{code}
+
+At this time the script must be compiled to ABC.  Long term the aim is to get away from that.
+-->
+
 </body>
 </html>
