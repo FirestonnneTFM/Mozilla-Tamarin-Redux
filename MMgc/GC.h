@@ -219,12 +219,15 @@ namespace MMgc
                 }
                 this->t = tNew;
             }
-            
-            // Don't allow members to be copied, don't think we'll need it.
-            GCMember<T>(const GCMember<T> &other);
-            
+
         public:
             GCMember() : GCRef<T>(){}
+
+            explicit REALLY_INLINE GCMember(const GCMember &other)
+                : GCRef<T>()
+            {
+                set(ProtectedGetOtherRawPtr(other));
+            }
 
             //  This constructor takes any other GCRef<T2>
 
