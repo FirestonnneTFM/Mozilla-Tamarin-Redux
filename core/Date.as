@@ -40,7 +40,7 @@
 package
 {
     [native(cls="DateClass", gc="exact", instance="DateObject", methods="auto", customconstruct=true)]
-    public final dynamic class Date
+    public dynamic class Date
     {
         // Date.length = 7 per ES3
         // E262 {ReadOnly, DontDelete, DontEnum }

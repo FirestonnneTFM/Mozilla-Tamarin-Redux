@@ -541,7 +541,6 @@ Atom* FASTCALL BaseExecMgr::coerceUnbox1(MethodEnv* env, Atom atom, Traits* t, A
             atom = 0;
             break;
 
-        case BUILTIN_date:
         case BUILTIN_math:
         case BUILTIN_methodClosure:
         case BUILTIN_qName:
@@ -570,6 +569,7 @@ Atom* FASTCALL BaseExecMgr::coerceUnbox1(MethodEnv* env, Atom atom, Traits* t, A
             // Didn't break? that's a failure.
             goto failure;
 
+        case BUILTIN_date:
         case BUILTIN_array:
         case BUILTIN_class:
         case BUILTIN_error:
