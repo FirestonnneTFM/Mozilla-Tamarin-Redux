@@ -238,6 +238,11 @@ namespace MMgc
                 set(ProtectedGetOtherRawPtr(other));
             }
             
+            REALLY_INLINE GCMember(T* valuePtr)
+            {
+                set(valuePtr);
+            }
+            
             //  Make sure to decrement the refcount on RCObjects when this GCMember is destroyed
             ~GCMember()
             {
