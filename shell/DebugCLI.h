@@ -49,7 +49,7 @@ namespace avmshell
     class BreakAction : public MMgc::GCObject
     {
     public:
-        DWB(BreakAction*) prev;
+        GCMember<BreakAction> prev;
         DWB(BreakAction*) next;
         DWB(SourceFile*) sourceFile;
         int id;
