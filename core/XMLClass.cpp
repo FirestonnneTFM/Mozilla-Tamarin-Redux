@@ -221,7 +221,7 @@ namespace avmplus
         }
     }
 
-    void XMLClass::set_ignoreComments(uint32_t ignoreFlag)
+    void XMLClass::set_ignoreComments(bool32 ignoreFlag)
     {
         if (ignoreFlag)
             m_flags |= kFlagIgnoreComments;
@@ -229,12 +229,12 @@ namespace avmplus
             m_flags &= ~kFlagIgnoreComments;
     }
 
-    uint32_t XMLClass::get_ignoreComments()
+    bool XMLClass::get_ignoreComments()
     {
         return ((m_flags & kFlagIgnoreComments) != 0);
     }
 
-    void XMLClass::set_ignoreProcessingInstructions(uint32_t ignoreFlag)
+    void XMLClass::set_ignoreProcessingInstructions(bool32 ignoreFlag)
     {
         if (ignoreFlag)
             m_flags |= kFlagIgnoreProcessingInstructions;
@@ -242,12 +242,12 @@ namespace avmplus
             m_flags &= ~kFlagIgnoreProcessingInstructions;
     }
 
-    uint32_t XMLClass::get_ignoreProcessingInstructions()
+    bool XMLClass::get_ignoreProcessingInstructions()
     {
         return ((m_flags & kFlagIgnoreProcessingInstructions) != 0);
     }
 
-    void XMLClass::set_ignoreWhitespace(uint32_t ignoreFlag)
+    void XMLClass::set_ignoreWhitespace(bool32 ignoreFlag)
     {
         if (ignoreFlag)
             m_flags |= kFlagIgnoreWhitespace;
@@ -255,12 +255,12 @@ namespace avmplus
             m_flags &= ~kFlagIgnoreWhitespace;
     }
 
-    uint32_t XMLClass::get_ignoreWhitespace()
+    bool XMLClass::get_ignoreWhitespace()
     {
         return ((m_flags & kFlagIgnoreWhitespace) != 0);
     }
 
-    void XMLClass::set_prettyPrinting(uint32_t prettyFlag)
+    void XMLClass::set_prettyPrinting(bool32 prettyFlag)
     {
         if (prettyFlag)
             m_flags |= kFlagPrettyPrinting;
@@ -268,7 +268,7 @@ namespace avmplus
             m_flags &= ~kFlagPrettyPrinting;
     }
 
-    uint32_t XMLClass::get_prettyPrinting()
+    bool XMLClass::get_prettyPrinting()
     {
         return ((m_flags & kFlagPrettyPrinting) != 0);
     }
