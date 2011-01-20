@@ -228,15 +228,16 @@ class Error(Exception):
         return self.nm
 
 TMAP = {
-    CTYPE_OBJECT:       ("o", "AvmObject"),
-    CTYPE_ATOM:         ("a", "AvmBox"),
-    CTYPE_VOID:         ("v", "void"),
-    CTYPE_BOOLEAN:      ("b", "AvmBool32"),
-    CTYPE_INT:          ("i", "int32_t"),
-    CTYPE_UINT:         ("u", "uint32_t"),
-    CTYPE_DOUBLE:       ("d", "double"),
-    CTYPE_STRING:       ("s", "AvmString"),
-    CTYPE_NAMESPACE:    ("n", "AvmNamespace")
+    # map ctype -> sigchar, in-arg-type, ret-arg-type, base-type
+    CTYPE_OBJECT:       ("o", "ScriptObject*", "ScriptObject*", "ScriptObject"),
+    CTYPE_ATOM:         ("a", "Atom", "Atom", "#error"),
+    CTYPE_VOID:         ("v", "void", "void", "#error"),
+    CTYPE_BOOLEAN:      ("b", "bool32", "bool", "#error"),
+    CTYPE_INT:          ("i", "int32_t", "int32_t", "#error"),
+    CTYPE_UINT:         ("u", "uint32_t", "uint32_t", "#error"),
+    CTYPE_DOUBLE:       ("d", "double", "double", "#error"),
+    CTYPE_STRING:       ("s", "String*", "String*", "String"),
+    CTYPE_NAMESPACE:    ("n", "Namespace*", "Namespace*", "String")
 };
 
 def uint(i):
@@ -255,8 +256,16 @@ def ctype_from_enum(ct, allowObject):
         ct = CTYPE_ATOM
     return TMAP[ct][1]
 
+def c_rettype_from_enum(ct, allowObject):
+    if ct == CTYPE_OBJECT and not allowObject:
+        ct = CTYPE_ATOM
+    return TMAP[ct][2]
+
 def ctype_from_traits(t, allowObject):
     return ctype_from_enum(t.ctype, allowObject)
+
+def c_rettype_from_traits(t, allowObject):
+    return c_rettype_from_enum(t.ctype, allowObject)
 
 def to_cname(nm):
     nm = str(nm)
@@ -712,17 +721,17 @@ class Abc:
             ct = deftable[1]
         else:
             assert(kind == 0 and index == 0)
-            val = "kAvmThunkUndefined"
+            val = "undefinedAtom"
             ct = CTYPE_ATOM # yes, not void
         rawval = val
         if ct == CTYPE_DOUBLE:
             # Python apparently doesn't have isNaN, isInf
             if is_nan(val):
-                val = "kAvmThunkNaN"
+                val = "MathUtils::kNaN"
             elif is_neg_inf(val):
-                val = "kAvmThunkNegInfinity"
+                val = "MathUtils::kNegInfinity"
             elif is_pos_inf(val):
-                val = "kAvmThunkInfinity"
+                val = "MathUtils::kInfinity"
             elif float(val) >= -2147483648.0 and float(val) <= 2147483647.0 and float(val) == floor(float(val)):
                 ct = CTYPE_INT
                 val = "%.0f" % float(val)
@@ -732,7 +741,7 @@ class Abc:
         elif ct == CTYPE_STRING:
             for i in range(0, len(self.strings)):
                 if (self.strings[i] == str(val)):
-                    val = "AvmThunkConstant_AvmString("+str(i)+")/* \""+self.strings[i]+"\" */";
+                    val = "AvmThunkGetConstantString(%d)/* \"%s\" */" % (i, self.strings[i])
                     break
         elif ct == CTYPE_BOOLEAN:
             assert(str(val) == "False" or str(val) == "True")
@@ -741,7 +750,7 @@ class Abc:
             else:
                 val = "true"
         if str(val) == "None":
-            val = "kAvmThunkNull"
+            val = "nullObjectAtom"
         return ct,val,rawval
 
     def parseCpool(self):
@@ -1484,7 +1493,7 @@ class AbcThunkGen:
         out_c.println(' '.join(('}',) * len(nativeIDNamespaces)))
 
     def forwardDeclareGlueClasses(self, out_h):
-        #find all the native glue classes and write forward declarations for them
+        # find all the native glue classes and write forward declarations for them
         cppNamespaceToGlueClasses = {}
         traitsSet = set()
         for i in range(0, len(self.abc.classes)):
@@ -1512,7 +1521,7 @@ class AbcThunkGen:
                         glueClassToTraits[key] = []
                     glueClassToTraits[key].append(t)
         for (nsStr, glueClasses) in sorted(cppNamespaceToGlueClasses.iteritems()):
-            #turn list of namespaces [foo, bar, baz] into "namespace foo { namespace bar { namespace baz{"
+            # turn list of namespaces [foo, bar, baz] into "namespace foo { namespace bar { namespace baz{"
             nsList = self.__parseCPPNamespaceStr(nsStr)
             out_h.println(' '.join(map(lambda ns: u'namespace %s {' % ns, nsList)))
             out_h.indent += 1
@@ -1823,28 +1832,33 @@ class AbcThunkGen:
             argtraits.append(self.lookupTraits(m.paramTypes[i]))
         return argtraits
 
-    def thunkDecl(self, name, ret):
-        assert(ret != "AvmObject")
-        if ret != "double":
-            ret = "AvmBox"
-        decl = ret+" "+name+"_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)"
-        return decl
-
-    def emitThunkProto(self, name, receiver, m):
-        ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
+    def thunkDecl(self, name, m):
+        ret_traits = self.lookupTraits(m.returnType)
+        ret_ctype = ret_traits.ctype
         # see note in thunkSig() about setter return types
         if m.kind == TRAIT_Setter:
-            ret = "void"
-        decl = self.thunkDecl(name, ret)
+            ret_ctype = CTYPE_VOID
+
+        # for return types of thunks, everything but double maps to Atom
+        if ret_ctype != CTYPE_DOUBLE:
+            thunk_ret_typedef = TMAP[CTYPE_ATOM][2]
+        else:
+            thunk_ret_typedef = TMAP[ret_ctype][2]
+
+        ret_typedef = TMAP[ret_ctype][2]
+        if ret_ctype == CTYPE_OBJECT and ret_traits.niname != None:
+            ret_typedef = ret_traits.niname + "*"
+
+        decl = "%s %s_thunk(MethodEnv* env, uint32_t argc, Atom* argv)" % (thunk_ret_typedef, name)
+
+        return decl,ret_ctype,ret_typedef
+
+    def emitThunkProto(self, name, receiver, m):
+        decl,ret_ctype,ret_typedef = self.thunkDecl(name, m)
         self.out_h.println('extern '+decl+";");
 
     def emitThunkBody(self, name, receiver, m, directcall):
-        rettraits = self.lookupTraits(m.returnType)
-        ret = ctype_from_traits(rettraits, False);
-        # see note in thunkSig() about setter return types
-        if m.kind == TRAIT_Setter:
-            ret = "void"
-        decl = self.thunkDecl(name, ret)
+        decl,ret_ctype,ret_typedef = self.thunkDecl(name, m)
 
         unbox_receiver = self.calc_unbox_this(m)
 
@@ -1868,8 +1882,8 @@ class AbcThunkGen:
             if i == 0:
                 self.out_c.println("argoff0 = 0");
             else:
-                self.out_c.println(", argoff"+str(i)+" = argoff"+str(i-1)+" + "+argszprev+"");
-            argszprev = "AvmThunkArgSize_"+cts;
+                self.out_c.println(", argoff%d = argoff%d + %s" % (i, i-1, argszprev));
+            argszprev = "AvmThunkArgSize_%s" % (cts.rstrip('*'));
         self.out_c.indent -= 1;
         self.out_c.println("};");
 
@@ -1878,34 +1892,37 @@ class AbcThunkGen:
 
         args = []
 
-        cts = ctype_from_traits(argtraits[0], True)
-        assert(cts in ["AvmObject","AvmString","AvmNamespace"])
+        arg0_ctype = argtraits[0].ctype
+        arg0_typedef = TMAP[arg0_ctype][1]
+        arg0_basetype = TMAP[arg0_ctype][3]
+        assert(argtraits[0].ctype in [CTYPE_OBJECT,CTYPE_STRING,CTYPE_NAMESPACE])
         if unbox_receiver:
-            val = "AvmThunkUnbox_AvmAtomReceiver("+cts+", argv[argoff0])";
+            val = "AvmThunkUnbox_AvmAtomReceiver("+arg0_typedef+", argv[argoff0])";
         else:
-            val = "AvmThunkUnbox_AvmReceiver("+cts+", argv[argoff0])";
+            val = "AvmThunkUnbox_AvmReceiver("+arg0_typedef+", argv[argoff0])";
         if directcall and argtraits[0].niname != None:
             val = "(%s*)%s" % (argtraits[0].niname, val)
-        args.append((val, cts))
+        args.append((val, arg0_typedef))
 
         for i in range(1, len(argtraits)):
-            cts = ctype_from_traits(argtraits[i], True)
-            val = "AvmThunkUnbox_"+cts+"(argv[argoff" + str(i) + "])";
-            if directcall and cts == "AvmObject" and argtraits[i].niname != None:
+            arg_ctype = argtraits[i].ctype
+            arg_typedef = TMAP[arg_ctype][1]
+            val = "AvmThunkUnbox_%s(argv[argoff%d])" % (arg_typedef.rstrip('*'), i)
+            if directcall and arg_ctype == CTYPE_OBJECT and argtraits[i].niname != None:
                 val = "(%s*)%s" % (argtraits[i].niname, val)
             # argtraits includes receiver at 0, optionalValues does not
             if i > param_count - optional_count:
                 dct,defval,defvalraw = self.abc.default_ctype_and_value(m.optionalValues[i-1]);
                 dts = ctype_from_enum(dct, True)
-                if dts != cts:
-                    defval = "AvmThunkCoerce_"+dts+"_"+cts+"("+defval+")";
+                if dts != arg_typedef:
+                    defval = "AvmThunkCoerce_%s_%s(%s)" % (dts.rstrip('*'), arg_typedef.rstrip('*'), defval)
                 val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
-                if directcall and cts == "AvmObject" and argtraits[i].niname != None:
+                if directcall and arg_ctype == CTYPE_OBJECT and argtraits[i].niname != None:
                     val = "(%s*)%s" % (argtraits[i].niname, val)
-            args.append((val, cts))
+            args.append((val, arg_typedef))
 
         if m.needRest():
-            args.append(("(argc <= "+str(param_count)+" ? NULL : argv + argoffV)", "AvmBox*"))
+            args.append(("(argc <= "+str(param_count)+" ? NULL : argv + argoffV)", "Atom*"))
             args.append(("(argc <= "+str(param_count)+" ? 0 : argc - "+str(param_count)+")", "uint32_t"))
 
         if not m.hasOptional() and not m.needRest():
@@ -1918,14 +1935,10 @@ class AbcThunkGen:
             else:
                 recname = m.receiver.niname
             self.out_c.println("%s* const obj = %s;" % (recname, args[0][0]))
-            if ret != "void":
-                if rettraits.ctype == CTYPE_OBJECT:
-                    if rettraits.niname == None:
-                        self.out_c.prnt("%s const ret = " % ("AvmObject"))
-                    else:
-                        self.out_c.prnt("%s* const ret = " % (rettraits.niname))
-                else:
-                    self.out_c.prnt("%s const ret = " % (ret))
+
+            if ret_ctype != CTYPE_VOID:
+                self.out_c.prnt("%s const ret = " % (ret_typedef))
+
             if m.receiver == None:
                 self.out_c.prnt("%s(obj" % m.native_method_name)
                 need_comma = True
@@ -1935,6 +1948,7 @@ class AbcThunkGen:
                     native_method_name = m.receiver.ni.method_map_name + "::" + m.native_method_name
                 self.out_c.prnt("obj->%s(" % native_method_name)
                 need_comma = False
+
             if len(args) > 1:
                 self.out_c.println("")
                 self.out_c.indent += 1
@@ -1945,23 +1959,23 @@ class AbcThunkGen:
                     need_comma = True
                 self.out_c.indent -= 1
             self.out_c.println(");")
-            if ret != "void":
-                if ret == "double":
-                    self.out_c.println("return ret;")
-                else:
-                    self.out_c.println("return (AvmBox) ret;")
+
+            if ret_ctype == CTYPE_DOUBLE:
+                self.out_c.println("return ret;")
+            elif ret_ctype != CTYPE_VOID:
+                self.out_c.println("return (Atom) ret;")
+
         else:
             if m.receiver == None:
-                self.out_c.prnt("typedef AvmRetType_%s (*FuncType)(AvmObject" % (ret))
+                self.out_c.prnt("typedef %s (*FuncType)(%s" % (ret_typedef, TMAP[CTYPE_OBJECT][1]))
                 for i in range(1, len(args)):
                     self.out_c.prnt(", " + args[i][1]);
                 self.out_c.println(");");
                 self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));")
-                if ret != "void":
-                    if ret == "double":
-                        self.out_c.prnt("return ")
-                    else:
-                        self.out_c.prnt("return (AvmBox)")
+                if ret_ctype == CTYPE_DOUBLE:
+                    self.out_c.prnt("return ")
+                elif ret_ctype != CTYPE_VOID:
+                    self.out_c.prnt("return (Atom)")
                 self.out_c.println("(*func)(%s" % (args[0][0]))
                 self.out_c.indent += 1
                 for i in range(1, len(args)):
@@ -1969,18 +1983,17 @@ class AbcThunkGen:
                 self.out_c.indent -= 1
                 self.out_c.println(");")
             else:
-                self.out_c.prnt("typedef AvmRetType_%s (%sT::*FuncType)(" % (ret, args[0][1]))
+                self.out_c.prnt("typedef %s (%s::*FuncType)(" % (ret_typedef, arg0_basetype))
                 for i in range(1, len(args)):
                     if i > 1:
                         self.out_c.prnt(", ")
                     self.out_c.prnt(args[i][1]);
                 self.out_c.println(");");
                 self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));")
-                if ret != "void":
-                    if ret == "double":
-                        self.out_c.prnt("return ")
-                    else:
-                        self.out_c.prnt("return (AvmBox)")
+                if ret_ctype == CTYPE_DOUBLE:
+                    self.out_c.prnt("return ")
+                elif ret_ctype != CTYPE_VOID:
+                    self.out_c.prnt("return (Atom)")
                 self.out_c.println("(*(%s).*(func))(" % (args[0][0]))
                 self.out_c.indent += 1
                 for i in range(1, len(args)):
@@ -1990,8 +2003,8 @@ class AbcThunkGen:
                 self.out_c.indent -= 1
                 self.out_c.println(");")
 
-        if ret == "void":
-            self.out_c.println("return kAvmThunkUndefined;")
+        if ret_ctype == CTYPE_VOID:
+            self.out_c.println("return undefinedAtom;")
         self.out_c.indent -= 1
         self.out_c.println("}")
 

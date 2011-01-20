@@ -500,359 +500,360 @@ const uint32_t flash_utils_ByteArray_endian_get = 938;
 const uint32_t flash_utils_ByteArray_endian_set = 939;
 const uint32_t flash_utils_ByteArray_clear = 940;
 
-extern double Math_private__min_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_private__max_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_abs_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_acos_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_asin_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_atan_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_ceil_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_cos_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_exp_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_floor_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_log_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_round_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_sin_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_sqrt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_tan_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_atan2_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_pow_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_max_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_min_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Math_random_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Error_getErrorMessage_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Error_getStackTrace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_parse_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_UTC_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_valueOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Date_private__toString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setTime_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCFullYear_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCMonth_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCDate_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCDay_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCHours_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCMinutes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCSeconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getUTCMilliseconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getFullYear_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getMonth_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getDate_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getDay_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getHours_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getMinutes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getSeconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getMilliseconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getTimezoneOffset_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_AS3_getTime_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setFullYear_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setMonth_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setDate_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setHours_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setMinutes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setSeconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setMilliseconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setUTCFullYear_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setUTCMonth_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setUTCDate_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setUTCHours_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setUTCMinutes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setUTCSeconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Date_private__setUTCMilliseconds_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_source_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_global_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_ignoreCase_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_multiline_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_lastIndex_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_lastIndex_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_dotall_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_extended_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox RegExp_AS3_exec_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_ignoreComments_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_ignoreComments_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_ignoreProcessingInstructions_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_ignoreProcessingInstructions_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_ignoreWhitespace_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_ignoreWhitespace_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_prettyPrinting_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_prettyPrinting_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_prettyIndent_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_prettyIndent_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_toString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_hasOwnProperty_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_propertyIsEnumerable_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_addNamespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_appendChild_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_attribute_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_attributes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_child_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_childIndex_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_children_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_comments_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_contains_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_copy_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_descendants_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_elements_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_hasComplexContent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_hasSimpleContent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_inScopeNamespaces_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_insertChildAfter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_insertChildBefore_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_localName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_name_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_private__namespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_namespaceDeclarations_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_nodeKind_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_normalize_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_parent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_processingInstructions_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_prependChild_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_removeNamespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_replace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_setChildren_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_setLocalName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_setName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_setNamespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_text_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_toXMLString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_notification_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XML_AS3_setNotification_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_toString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_hasOwnProperty_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_propertyIsEnumerable_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_attribute_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_attributes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_child_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_children_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_comments_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_contains_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_copy_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_descendants_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_elements_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_hasComplexContent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_hasSimpleContent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_length_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_name_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_normalize_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_parent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_processingInstructions_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_text_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_toXMLString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_addNamespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_appendChild_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_childIndex_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_inScopeNamespaces_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_insertChildAfter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_insertChildBefore_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_nodeKind_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_private__namespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_localName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_namespaceDeclarations_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_prependChild_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_removeNamespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_replace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_setChildren_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_setLocalName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_setName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox XMLList_AS3_setNamespace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox QName_localName_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox QName_uri_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_defaultObjectEncoding_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_defaultObjectEncoding_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeBoolean_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeUnsignedInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeFloat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeDouble_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeMultiByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeUTF_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeUTFBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readBoolean_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readUnsignedByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readUnsignedShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readUnsignedInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double flash_utils_ByteArray_readFloat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double flash_utils_ByteArray_readDouble_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readMultiByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readUTF_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readUTFBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_writeObject_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_readObject_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_private__compress_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_private__uncompress_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_private__toString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_bytesAvailable_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_position_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_position_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_objectEncoding_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_objectEncoding_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_endian_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_endian_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox flash_utils_ByteArray_clear_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Object_private__hasOwnProperty_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Object_private__propertyIsEnumerable_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Object_protected__setPropertyIsEnumerable_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Object_private__isPrototypeOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Object_private__toString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Class_prototype_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Function_prototype_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Function_prototype_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Function_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Function_AS3_call_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Function_AS3_apply_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Namespace_prefix_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Namespace_uri_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Number_private__numberToString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Number_private__convert_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double Number_private__minValue_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_fromCharCode_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__match_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__replace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__search_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__split_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__indexOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_indexOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__lastIndexOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_lastIndexOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_charAt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double String_AS3_charCodeAt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_localeCompare_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__slice_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_slice_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__substring_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_substring_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_private__substr_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_substr_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_toLowerCase_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox String_AS3_toUpperCase_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__pop_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__reverse_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__concat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__shift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__slice_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__unshift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__splice_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__sort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__sortOn_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__indexOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__lastIndexOf_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__every_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__filter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__forEach_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__map_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_private__some_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_AS3_pop_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_AS3_push_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox Array_AS3_unshift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_bugzilla_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_decodeURI_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_decodeURIComponent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_encodeURI_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_encodeURIComponent_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_isNaN_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_isFinite_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double native_script_function_parseInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double native_script_function_parseFloat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_escape_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_unescape_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_isXMLName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__every_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__forEach_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__some_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__sort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private_newThisType_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_fixed_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_fixed_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_AS3_push_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__reverse_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__spliceHelper_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_AS3_unshift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__filter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_private__map_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_AS3_pop_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_object_AS3_shift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__every_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__forEach_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__some_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__sort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private_newThisType_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_fixed_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_fixed_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_AS3_push_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__reverse_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__spliceHelper_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_AS3_unshift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__filter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_private__map_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_AS3_pop_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_int_AS3_shift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__every_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__forEach_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__some_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__sort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private_newThisType_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_fixed_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_fixed_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_AS3_push_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__reverse_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__spliceHelper_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_AS3_unshift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__filter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_private__map_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_AS3_pop_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_uint_AS3_shift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__every_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__forEach_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__some_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__sort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private_newThisType_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_fixed_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_fixed_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_AS3_push_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__reverse_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__spliceHelper_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_AS3_unshift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__filter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox __AS3___vec_Vector_double_private__map_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double __AS3___vec_Vector_double_AS3_pop_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern double __AS3___vec_Vector_double_AS3_shift_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_avmplus_describeTypeJSON_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_avmplus_getQualifiedClassName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-extern AvmBox native_script_function_avmplus_getQualifiedSuperclassName_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double Math_private__min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_private__max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_acos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_asin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_atan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_ceil_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_cos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_exp_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_floor_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_log_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_round_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_sin_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_tan_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_atan2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_pow_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Math_random_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Error_getErrorMessage_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Error_getStackTrace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_parse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_UTC_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_valueOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Date_private__toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setTime_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCDay_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getUTCMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getDay_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getTimezoneOffset_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_AS3_getTime_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setUTCFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setUTCMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setUTCDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setUTCHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setUTCMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setUTCSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Date_private__setUTCMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_source_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_global_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_ignoreCase_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_multiline_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_lastIndex_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_lastIndex_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_dotall_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_extended_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom RegExp_AS3_exec_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_ignoreComments_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_ignoreComments_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_ignoreProcessingInstructions_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_ignoreProcessingInstructions_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_ignoreWhitespace_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_ignoreWhitespace_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_prettyPrinting_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_prettyPrinting_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_prettyIndent_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_prettyIndent_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_hasOwnProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_propertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_addNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_appendChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_attribute_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_attributes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_child_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_childIndex_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_children_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_comments_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_contains_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_copy_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_descendants_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_elements_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_hasComplexContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_hasSimpleContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_inScopeNamespaces_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_insertChildAfter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_insertChildBefore_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_localName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_name_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_private__namespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_namespaceDeclarations_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_nodeKind_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_parent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_processingInstructions_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_prependChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_removeNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_replace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_setChildren_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_setLocalName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_setName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_setNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_text_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_toXMLString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_notification_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XML_AS3_setNotification_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_hasOwnProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_propertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_attribute_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_attributes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_child_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_children_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_comments_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_contains_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_copy_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_descendants_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_elements_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_hasComplexContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_hasSimpleContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_length_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_name_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_parent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_processingInstructions_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_text_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_toXMLString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_addNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_appendChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_childIndex_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_inScopeNamespaces_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_insertChildAfter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_insertChildBefore_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_nodeKind_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_private__namespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_localName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_namespaceDeclarations_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_prependChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_removeNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_replace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_setChildren_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_setLocalName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_setName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom XMLList_AS3_setNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom QName_localName_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom QName_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_defaultObjectEncoding_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_defaultObjectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeBoolean_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeUnsignedInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeFloat_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeDouble_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeMultiByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeUTF_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeUTFBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readBoolean_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readUnsignedByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readUnsignedShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readUnsignedInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double flash_utils_ByteArray_readFloat_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double flash_utils_ByteArray_readDouble_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readMultiByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readUTF_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readUTFBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_writeObject_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_readObject_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_private__compress_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_private__uncompress_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_private__toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_bytesAvailable_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_position_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_position_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_objectEncoding_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_objectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_endian_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_endian_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom flash_utils_ByteArray_clear_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Object_private__hasOwnProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Object_private__propertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Object_protected__setPropertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Object_private__isPrototypeOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Object_private__toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Class_prototype_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Function_prototype_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Function_prototype_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Function_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Function_AS3_call_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Function_AS3_apply_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Namespace_prefix_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Namespace_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Number_private__numberToString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Number_private__convert_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double Number_private__minValue_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_fromCharCode_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__match_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__replace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__search_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__split_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__indexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_indexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__lastIndexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_lastIndexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_charAt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double String_AS3_charCodeAt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_localeCompare_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__slice_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_slice_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__substring_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_substring_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_private__substr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_substr_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_toLowerCase_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom String_AS3_toUpperCase_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__concat_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__slice_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__splice_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__sortOn_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__indexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__lastIndexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_private__some_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom Array_AS3_unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_bugzilla_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_decodeURI_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_decodeURIComponent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_encodeURI_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_encodeURIComponent_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_isNaN_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_isFinite_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_parseInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double native_script_function_parseFloat_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_escape_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_unescape_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_isXMLName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__some_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_fixed_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_fixed_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__spliceHelper_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_AS3_unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_object_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__some_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_fixed_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_fixed_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__spliceHelper_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_AS3_unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_int_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__some_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_fixed_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_fixed_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__spliceHelper_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_AS3_unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_uint_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__some_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_fixed_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_fixed_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__spliceHelper_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_AS3_unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom __AS3___vec_Vector_double_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double __AS3___vec_Vector_double_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern double __AS3___vec_Vector_double_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_avmplus_describeTypeJSON_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_avmplus_getQualifiedClassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern Atom native_script_function_avmplus_getQualifiedSuperclassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 
-extern AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_os_optsAvmThunkGetConstantString_0__________thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define RegExp_AS3_exec_thunk  builtin_a2a_os_optsAvmThunkGetConstantString_0__________thunk
+
+extern Atom builtin_a2a_oaoa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__filter_thunk  builtin_a2a_oaoa_thunk
 #define Array_private__map_thunk  builtin_a2a_oaoa_thunk
 
-extern AvmBox builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_slice_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
-#define String_AS3_substr_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
-#define String_AS3_substring_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
+extern Atom builtin_i2a_ssd_optsAvmThunkGetConstantString_58_____undefined_____opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_AS3_indexOf_thunk  builtin_i2a_ssd_optsAvmThunkGetConstantString_58_____undefined_____opti0_thunk
 
-extern double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Date_AS3_getDate_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getDay_thunk  builtin_d2d_o_thunk
 #define Date_AS3_getFullYear_thunk  builtin_d2d_o_thunk
@@ -879,36 +880,48 @@ extern double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define flash_utils_ByteArray_readDouble_thunk  builtin_d2d_o_thunk
 #define flash_utils_ByteArray_readFloat_thunk  builtin_d2d_o_thunk
 
-extern AvmBox builtin_b2a_oa_optakAvmThunkUndefined_u_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
-#define XMLList_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
-#define XML_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
-#define XML_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_u_thunk
+extern Atom builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
 
-extern AvmBox builtin_v2a_oouu_opti0_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_i2a_ssi_opti2147483647_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
+
+extern Atom builtin_v2a_oouu_opti0_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_utils_ByteArray_readBytes_thunk  builtin_v2a_oouu_opti0_opti0_thunk
 #define flash_utils_ByteArray_writeBytes_thunk  builtin_v2a_oouu_opti0_opti0_thunk
 
-extern AvmBox builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_osa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_private__match_thunk  builtin_a2a_osa_thunk
 
-extern AvmBox builtin_func_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_func_d2d_osi_optsAvmThunkGetConstantString_60_____NaN_____opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define native_script_function_parseInt_thunk  builtin_func_d2d_osi_optsAvmThunkGetConstantString_60_____NaN_____opti0_thunk
+
+extern Atom builtin_func_b2a_od_optaundefinedAtom_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define native_script_function_isFinite_thunk  builtin_func_b2a_od_optaundefinedAtom_thunk
+#define native_script_function_isNaN_thunk  builtin_func_b2a_od_optaundefinedAtom_thunk
+
+extern Atom builtin_func_s2a_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_avmplus_getQualifiedClassName_thunk  builtin_func_s2a_oa_thunk
 #define native_script_function_avmplus_getQualifiedSuperclassName_thunk  builtin_func_s2a_oa_thunk
 
-extern AvmBox builtin_func_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_isXMLName_thunk  builtin_func_b2a_oa_optakAvmThunkUndefined_thunk
+extern Atom builtin_func_b2a_oa_optaundefinedAtom_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define native_script_function_isXMLName_thunk  builtin_func_b2a_oa_optaundefinedAtom_thunk
 
-extern AvmBox builtin_s2a_ous_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define flash_utils_ByteArray_readMultiByte_thunk  builtin_s2a_ous_thunk
+extern Atom builtin_u2a_oao_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define Array_private__unshift_thunk  builtin_u2a_oao_thunk
 
-extern AvmBox builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define XML_AS3_setNotification_thunk  builtin_a2a_oo_thunk
 
-extern AvmBox builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_n_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Namespace_uri_get_thunk  builtin_s2a_n_thunk
 
-extern AvmBox builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Error_getStackTrace_thunk  builtin_s2a_o_thunk
 #define QName_localName_get_thunk  builtin_s2a_o_thunk
 #define RegExp_source_get_thunk  builtin_s2a_o_thunk
@@ -922,13 +935,10 @@ extern AvmBox builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define flash_utils_ByteArray_private__toString_thunk  builtin_s2a_o_thunk
 #define flash_utils_ByteArray_readUTF_thunk  builtin_s2a_o_thunk
 
-extern AvmBox builtin_s2a_odi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_odi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Number_private__numberToString_thunk  builtin_s2a_odi_thunk
 
-extern double builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Math_max_thunk  builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk
-
-extern AvmBox builtin_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_ou_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_length_set_thunk  builtin_v2a_ou_thunk
 #define __AS3___vec_Vector_double_length_set_thunk  builtin_v2a_ou_thunk
 #define __AS3___vec_Vector_int_length_set_thunk  builtin_v2a_ou_thunk
@@ -940,7 +950,7 @@ extern AvmBox builtin_v2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define flash_utils_ByteArray_position_set_thunk  builtin_v2a_ou_thunk
 #define flash_utils_ByteArray_writeUnsignedInt_thunk  builtin_v2a_ou_thunk
 
-extern AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__pop_thunk  builtin_a2a_oa_thunk
 #define Array_private__reverse_thunk  builtin_a2a_oa_thunk
 #define Array_private__shift_thunk  builtin_a2a_oa_thunk
@@ -959,16 +969,16 @@ extern AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define XML_AS3_removeNamespace_thunk  builtin_a2a_oa_thunk
 #define XML_AS3_setChildren_thunk  builtin_a2a_oa_thunk
 
-extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_indexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti0_thunk
+extern Atom builtin_func_a2a_oau_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define native_script_function_avmplus_describeTypeJSON_thunk  builtin_func_a2a_oau_thunk
 
-extern AvmBox builtin_v2a_ouuuau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_ouuuau_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define __AS3___vec_Vector_double_private__spliceHelper_thunk  builtin_v2a_ouuuau_thunk
 #define __AS3___vec_Vector_int_private__spliceHelper_thunk  builtin_v2a_ouuuau_thunk
 #define __AS3___vec_Vector_object_private__spliceHelper_thunk  builtin_v2a_ouuuau_thunk
 #define __AS3___vec_Vector_uint_private__spliceHelper_thunk  builtin_v2a_ouuuau_thunk
 
-extern double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_o_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Date_private__setDate_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setFullYear_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setHours_thunk  builtin_d2d_o_rest_thunk
@@ -984,32 +994,25 @@ extern double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* 
 #define Date_private__setUTCMonth_thunk  builtin_d2d_o_rest_thunk
 #define Date_private__setUTCSeconds_thunk  builtin_d2d_o_rest_thunk
 
-extern AvmBox builtin_func_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_isFinite_thunk  builtin_func_b2a_od_optakAvmThunkUndefined_thunk
-#define native_script_function_isNaN_thunk  builtin_func_b2a_od_optakAvmThunkUndefined_thunk
-
-extern AvmBox builtin_v2a_oss_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_oss_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_utils_ByteArray_writeMultiByte_thunk  builtin_v2a_oss_thunk
 
-extern double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Date_UTC_thunk  builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk
 
-extern AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_i2a_s_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_length_get_thunk  builtin_i2a_s_thunk
 
-extern AvmBox builtin_i2a_sa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_localeCompare_thunk  builtin_i2a_sa_optakAvmThunkUndefined_thunk
+extern double builtin_d2d_odd_optdMathUtils_kInfinity_optdMathUtils_kInfinity_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define Math_min_thunk  builtin_d2d_odd_optdMathUtils_kInfinity_optdMathUtils_kInfinity_rest_thunk
 
-extern double builtin_func_d2d_os_optsAvmThunkConstant_AvmString_60_____NaN_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_parseFloat_thunk  builtin_func_d2d_os_optsAvmThunkConstant_AvmString_60_____NaN_____thunk
-
-extern AvmBox builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_b2a_oaa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Object_private__isPrototypeOf_thunk  builtin_b2a_oaa_thunk
 
-extern AvmBox builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_oaaa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__sortOn_thunk  builtin_a2a_oaaa_thunk
 
-extern AvmBox builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_u2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_length_get_thunk  builtin_u2a_o_thunk
 #define __AS3___vec_Vector_double_length_get_thunk  builtin_u2a_o_thunk
 #define __AS3___vec_Vector_int_length_get_thunk  builtin_u2a_o_thunk
@@ -1026,28 +1029,25 @@ extern AvmBox builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define flash_utils_ByteArray_readUnsignedInt_thunk  builtin_u2a_o_thunk
 #define flash_utils_ByteArray_readUnsignedShort_thunk  builtin_u2a_o_thunk
 
-extern AvmBox builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_private__slice_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
-#define String_private__substr_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
-#define String_private__substring_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
+extern Atom builtin_i2a_ssd_optsAvmThunkGetConstantString_58_____undefined_____opti2147483647_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_AS3_lastIndexOf_thunk  builtin_i2a_ssd_optsAvmThunkGetConstantString_58_____undefined_____opti2147483647_thunk
 
-extern AvmBox builtin_func_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_avmplus_describeTypeJSON_thunk  builtin_func_a2a_oau_thunk
+extern Atom builtin_func_s2a_os_optsAvmThunkGetConstantString_58_____undefined_____thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define native_script_function_decodeURI_thunk  builtin_func_s2a_os_optsAvmThunkGetConstantString_58_____undefined_____thunk
+#define native_script_function_decodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkGetConstantString_58_____undefined_____thunk
+#define native_script_function_encodeURI_thunk  builtin_func_s2a_os_optsAvmThunkGetConstantString_58_____undefined_____thunk
+#define native_script_function_encodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkGetConstantString_58_____undefined_____thunk
+#define native_script_function_escape_thunk  builtin_func_s2a_os_optsAvmThunkGetConstantString_58_____undefined_____thunk
+#define native_script_function_unescape_thunk  builtin_func_s2a_os_optsAvmThunkGetConstantString_58_____undefined_____thunk
 
-extern AvmBox builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Function_AS3_call_thunk  builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk
-
-extern AvmBox builtin_u2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_private__unshift_thunk  builtin_u2a_oao_thunk
-
-extern AvmBox builtin_s2a_osaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_osaa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_private__replace_thunk  builtin_s2a_osaa_thunk
 
-extern AvmBox builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_b2a_oas_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Object_private__hasOwnProperty_thunk  builtin_b2a_oas_thunk
 #define Object_private__propertyIsEnumerable_thunk  builtin_b2a_oas_thunk
 
-extern AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_i2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Function_length_get_thunk  builtin_i2a_o_thunk
 #define RegExp_lastIndex_get_thunk  builtin_i2a_o_thunk
 #define XMLList_AS3_childIndex_thunk  builtin_i2a_o_thunk
@@ -1060,23 +1060,16 @@ extern AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define flash_utils_ByteArray_readInt_thunk  builtin_i2a_o_thunk
 #define flash_utils_ByteArray_readShort_thunk  builtin_i2a_o_thunk
 
-extern AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
-#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
+extern double builtin_func_d2d_os_optsAvmThunkGetConstantString_60_____NaN_____thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define native_script_function_parseFloat_thunk  builtin_func_d2d_os_optsAvmThunkGetConstantString_60_____NaN_____thunk
 
-extern double builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_sd_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_AS3_charCodeAt_thunk  builtin_d2d_sd_opti0_thunk
 
-extern AvmBox builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Object_private__toString_thunk  builtin_s2a_oa_thunk
 
-extern AvmBox builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_b2a_oaoa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__every_thunk  builtin_b2a_oaoa_thunk
 #define Array_private__some_thunk  builtin_b2a_oaoa_thunk
 #define __AS3___vec_Vector_double_private__every_thunk  builtin_b2a_oaoa_thunk
@@ -1088,58 +1081,74 @@ extern AvmBox builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 #define __AS3___vec_Vector_uint_private__every_thunk  builtin_b2a_oaoa_thunk
 #define __AS3___vec_Vector_uint_private__some_thunk  builtin_b2a_oaoa_thunk
 
-extern AvmBox builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define __AS3___vec_Vector_double_private__reverse_thunk  builtin_v2a_o_thunk
 #define __AS3___vec_Vector_int_private__reverse_thunk  builtin_v2a_o_thunk
 #define __AS3___vec_Vector_object_private__reverse_thunk  builtin_v2a_o_thunk
 #define __AS3___vec_Vector_uint_private__reverse_thunk  builtin_v2a_o_thunk
 #define flash_utils_ByteArray_clear_thunk  builtin_v2a_o_thunk
 
-extern AvmBox builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_b2a_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define XMLList_AS3_contains_thunk  builtin_b2a_oa_thunk
 #define XML_AS3_contains_thunk  builtin_b2a_oa_thunk
 
-extern AvmBox builtin_s2a_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_sd_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_AS3_charAt_thunk  builtin_s2a_sd_opti0_thunk
 
-extern AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_oaoa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__forEach_thunk  builtin_v2a_oaoa_thunk
 #define __AS3___vec_Vector_double_private__forEach_thunk  builtin_v2a_oaoa_thunk
 #define __AS3___vec_Vector_int_private__forEach_thunk  builtin_v2a_oaoa_thunk
 #define __AS3___vec_Vector_object_private__forEach_thunk  builtin_v2a_oaoa_thunk
 #define __AS3___vec_Vector_uint_private__forEach_thunk  builtin_v2a_oaoa_thunk
 
-extern AvmBox builtin_s2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_ou_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_utils_ByteArray_readUTFBytes_thunk  builtin_s2a_ou_thunk
 
-extern AvmBox builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
+extern Atom builtin_a2a_ooa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
+#define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
 
-extern AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_decodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_decodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_encodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_encodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_escape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
-#define native_script_function_unescape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_58_____undefined_____thunk
+extern Atom builtin_a2a_oa_optaundefinedAtom_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define Function_AS3_call_thunk  builtin_a2a_oa_optaundefinedAtom_rest_thunk
 
-extern AvmBox builtin_s2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_u2a_o_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
+#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+
+extern Atom builtin_s2a_s_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_AS3_toLowerCase_thunk  builtin_s2a_s_thunk
 #define String_AS3_toUpperCase_thunk  builtin_s2a_s_thunk
 
-extern AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_lastIndexOf_thunk  builtin_i2a_ssd_optsAvmThunkConstant_AvmString_58_____undefined_____opti2147483647_thunk
+extern Atom builtin_s2a_sdd_opti0_opti2147483647_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_AS3_slice_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
+#define String_AS3_substr_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
+#define String_AS3_substring_thunk  builtin_s2a_sdd_opti0_opti2147483647_thunk
 
-extern double builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_odd_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Math_atan2_thunk  builtin_d2d_odd_thunk
 #define Math_pow_thunk  builtin_d2d_odd_thunk
 #define Math_private__max_thunk  builtin_d2d_odd_thunk
 #define Math_private__min_thunk  builtin_d2d_odd_thunk
 
-extern AvmBox builtin_a2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_n_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Namespace_prefix_get_thunk  builtin_a2a_n_thunk
 
-extern AvmBox builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_AS3_pop_thunk  builtin_a2a_o_thunk
 #define Class_prototype_get_thunk  builtin_a2a_o_thunk
 #define Function_prototype_get_thunk  builtin_a2a_o_thunk
@@ -1175,41 +1184,36 @@ extern AvmBox builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define __AS3___vec_Vector_uint_private_newThisType_thunk  builtin_a2a_o_thunk
 #define flash_utils_ByteArray_readObject_thunk  builtin_a2a_o_thunk
 
-extern AvmBox builtin_a2a_osau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_private__split_thunk  builtin_a2a_osau_thunk
+extern Atom builtin_i2a_sa_optaundefinedAtom_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_AS3_localeCompare_thunk  builtin_i2a_sa_optaundefinedAtom_thunk
 
-extern AvmBox builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_oasb_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Object_protected__setPropertyIsEnumerable_thunk  builtin_v2a_oasb_thunk
 
-extern AvmBox builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define RegExp_AS3_exec_thunk  builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk
+extern Atom builtin_a2a_oaa_optaundefinedAtom_optaundefinedAtom_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define Function_AS3_apply_thunk  builtin_a2a_oaa_optaundefinedAtom_optaundefinedAtom_thunk
 
-extern AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
-#define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
+extern Atom builtin_a2a_osau_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_private__split_thunk  builtin_a2a_osau_thunk
 
-extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_oai_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define XMLList_private__namespace_thunk  builtin_a2a_oai_thunk
+#define XML_private__namespace_thunk  builtin_a2a_oai_thunk
+
+extern Atom builtin_s2a_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Date_private__toString_thunk  builtin_s2a_oi_thunk
 #define Error_getErrorMessage_thunk  builtin_s2a_oi_thunk
 
-extern AvmBox builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_i2a_ssi_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_private__indexOf_thunk  builtin_i2a_ssi_opti0_thunk
 
-extern AvmBox builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Function_AS3_apply_thunk  builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk
+extern Atom builtin_s2a_o_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_AS3_fromCharCode_thunk  builtin_s2a_o_rest_thunk
 
-extern AvmBox builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_i2a_oaai_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__lastIndexOf_thunk  builtin_i2a_oaai_opti0_thunk
 
-extern double builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_od_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Date_private__setTime_thunk  builtin_d2d_od_thunk
 #define Math_abs_thunk  builtin_d2d_od_thunk
 #define Math_acos_thunk  builtin_d2d_od_thunk
@@ -1225,19 +1229,16 @@ extern double builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define Math_sqrt_thunk  builtin_d2d_od_thunk
 #define Math_tan_thunk  builtin_d2d_od_thunk
 
-extern AvmBox builtin_v2a_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_od_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_utils_ByteArray_writeDouble_thunk  builtin_v2a_od_thunk
 #define flash_utils_ByteArray_writeFloat_thunk  builtin_v2a_od_thunk
 
-extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_516___________thunk
+extern Atom builtin_s2a_sii_opti0_opti2147483647_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_private__slice_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
+#define String_private__substr_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
+#define String_private__substring_thunk  builtin_s2a_sii_opti0_opti2147483647_thunk
 
-extern AvmBox builtin_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_ob_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define XML_ignoreComments_set_thunk  builtin_v2a_ob_thunk
 #define XML_ignoreProcessingInstructions_set_thunk  builtin_v2a_ob_thunk
 #define XML_ignoreWhitespace_set_thunk  builtin_v2a_ob_thunk
@@ -1248,7 +1249,7 @@ extern AvmBox builtin_v2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define __AS3___vec_Vector_uint_fixed_set_thunk  builtin_v2a_ob_thunk
 #define flash_utils_ByteArray_writeBoolean_thunk  builtin_v2a_ob_thunk
 
-extern AvmBox builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Function_prototype_set_thunk  builtin_v2a_oa_thunk
 #define XMLList_AS3_setLocalName_thunk  builtin_v2a_oa_thunk
 #define XMLList_AS3_setName_thunk  builtin_v2a_oa_thunk
@@ -1258,26 +1259,23 @@ extern AvmBox builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define XML_AS3_setNamespace_thunk  builtin_v2a_oa_thunk
 #define flash_utils_ByteArray_writeObject_thunk  builtin_v2a_oa_thunk
 
-extern double builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Date_parse_thunk  builtin_d2d_oa_thunk
 
-extern AvmBox builtin_func_b2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_func_b2a_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_bugzilla_thunk  builtin_func_b2a_oi_thunk
 
-extern AvmBox builtin_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define RegExp_lastIndex_set_thunk  builtin_v2a_oi_thunk
 #define XML_prettyIndent_set_thunk  builtin_v2a_oi_thunk
 #define flash_utils_ByteArray_writeByte_thunk  builtin_v2a_oi_thunk
 #define flash_utils_ByteArray_writeInt_thunk  builtin_v2a_oi_thunk
 #define flash_utils_ByteArray_writeShort_thunk  builtin_v2a_oi_thunk
 
-extern double builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern double builtin_d2d_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Date_private__get_thunk  builtin_d2d_oi_thunk
 
-extern double builtin_func_d2d_osi_optsAvmThunkConstant_AvmString_60_____NaN_____opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_parseInt_thunk  builtin_func_d2d_osi_optsAvmThunkConstant_AvmString_60_____NaN_____opti0_thunk
-
-extern AvmBox builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_oaa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define XMLList_AS3_insertChildAfter_thunk  builtin_a2a_oaa_thunk
 #define XMLList_AS3_insertChildBefore_thunk  builtin_a2a_oaa_thunk
 #define XMLList_AS3_replace_thunk  builtin_a2a_oaa_thunk
@@ -1285,7 +1283,7 @@ extern AvmBox builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* arg
 #define XML_AS3_insertChildBefore_thunk  builtin_a2a_oaa_thunk
 #define XML_AS3_replace_thunk  builtin_a2a_oaa_thunk
 
-extern AvmBox builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_b2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define RegExp_dotall_get_thunk  builtin_b2a_o_thunk
 #define RegExp_extended_get_thunk  builtin_b2a_o_thunk
 #define RegExp_global_get_thunk  builtin_b2a_o_thunk
@@ -1305,36 +1303,38 @@ extern AvmBox builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 #define __AS3___vec_Vector_uint_fixed_get_thunk  builtin_b2a_o_thunk
 #define flash_utils_ByteArray_readBoolean_thunk  builtin_b2a_o_thunk
 
-extern AvmBox builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_i2a_osa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_private__search_thunk  builtin_i2a_osa_thunk
 
-extern AvmBox builtin_v2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_v2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_utils_ByteArray_endian_set_thunk  builtin_v2a_os_thunk
 #define flash_utils_ByteArray_private__compress_thunk  builtin_v2a_os_thunk
 #define flash_utils_ByteArray_private__uncompress_thunk  builtin_v2a_os_thunk
 #define flash_utils_ByteArray_writeUTF_thunk  builtin_v2a_os_thunk
 #define flash_utils_ByteArray_writeUTFBytes_thunk  builtin_v2a_os_thunk
 
-extern AvmBox builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_oadd_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__slice_thunk  builtin_a2a_oadd_thunk
 
-extern AvmBox builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define String_AS3_fromCharCode_thunk  builtin_s2a_o_rest_thunk
+extern Atom builtin_b2a_oa_optaundefinedAtom_u_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optaundefinedAtom_u_thunk
+#define XMLList_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optaundefinedAtom_u_thunk
+#define XML_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optaundefinedAtom_u_thunk
+#define XML_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optaundefinedAtom_u_thunk
 
-extern AvmBox builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_private__namespace_thunk  builtin_a2a_oai_thunk
-#define XML_private__namespace_thunk  builtin_a2a_oai_thunk
+extern double builtin_d2d_odd_optdMathUtils_kNegInfinity_optdMathUtils_kNegInfinity_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define Math_max_thunk  builtin_d2d_odd_optdMathUtils_kNegInfinity_optdMathUtils_kNegInfinity_rest_thunk
 
-extern AvmBox builtin_i2a_oaai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_i2a_oaai_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__indexOf_thunk  builtin_i2a_oaai_thunk
 
-extern AvmBox builtin_s2a_odii_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_s2a_odii_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Number_private__convert_thunk  builtin_s2a_odii_thunk
 
-extern double builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Math_min_thunk  builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk
+extern Atom builtin_s2a_ous_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define flash_utils_ByteArray_readMultiByte_thunk  builtin_s2a_ous_thunk
 
-extern AvmBox builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern Atom builtin_a2a_oao_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__concat_thunk  builtin_a2a_oao_thunk
 #define Array_private__sort_thunk  builtin_a2a_oao_thunk
 #define Array_private__splice_thunk  builtin_a2a_oao_thunk
@@ -1442,7 +1442,7 @@ class NamespaceClassSlots
 {
     friend class SlotOffsetsAndAsserts;
 public:
-    REALLY_INLINE AvmBox get_length() const { return m_length; }
+    REALLY_INLINE Atom get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
 public:
@@ -1455,7 +1455,7 @@ public:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
-        REALLY_INLINE AvmBox get_length() const { return m_slots_NamespaceClass.get_length(); } \
+        REALLY_INLINE Atom get_length() const { return m_slots_NamespaceClass.get_length(); } \
     private: \
         avmplus::NativeID::NamespaceClassSlots m_slots_NamespaceClass
 //-----------------------------------------------------------
@@ -1883,10 +1883,10 @@ class ErrorObjectSlots
 public:
     REALLY_INLINE int32_t get_private__errorID() const { return m_private__errorID; }
     REALLY_INLINE void set_private__errorID(int32_t newVal) { m_private__errorID = newVal; }
-    REALLY_INLINE AvmBox get_message() const { return m_message; }
-    REALLY_INLINE void set_message(AvmBox newVal) { m_message = newVal; }
-    REALLY_INLINE AvmBox get_name() const { return m_name; }
-    REALLY_INLINE void set_name(AvmBox newVal) { m_name = newVal; }
+    REALLY_INLINE Atom get_message() const { return m_message; }
+    REALLY_INLINE void set_message(Atom newVal) { m_message = newVal; }
+    REALLY_INLINE Atom get_name() const { return m_name; }
+    REALLY_INLINE void set_name(Atom newVal) { m_name = newVal; }
 private:
     int32_t m_private__errorID;
     ATOM_WB m_message;
@@ -1904,10 +1904,10 @@ public:
     protected: \
         REALLY_INLINE int32_t get_private__errorID() const { return m_slots_ErrorObject.get_private__errorID(); } \
         REALLY_INLINE void set_private__errorID(int32_t newVal) { m_slots_ErrorObject.set_private__errorID(newVal); } \
-        REALLY_INLINE AvmBox get_message() const { return m_slots_ErrorObject.get_message(); } \
-        REALLY_INLINE void set_message(AvmBox newVal) { m_slots_ErrorObject.set_message(newVal); } \
-        REALLY_INLINE AvmBox get_name() const { return m_slots_ErrorObject.get_name(); } \
-        REALLY_INLINE void set_name(AvmBox newVal) { m_slots_ErrorObject.set_name(newVal); } \
+        REALLY_INLINE Atom get_message() const { return m_slots_ErrorObject.get_message(); } \
+        REALLY_INLINE void set_message(Atom newVal) { m_slots_ErrorObject.set_message(newVal); } \
+        REALLY_INLINE Atom get_name() const { return m_slots_ErrorObject.get_name(); } \
+        REALLY_INLINE void set_name(Atom newVal) { m_slots_ErrorObject.set_name(newVal); } \
     private: \
         avmplus::NativeID::ErrorObjectSlots m_slots_ErrorObject
 //-----------------------------------------------------------
@@ -2373,7 +2373,7 @@ class XMLClassSlots
 {
     friend class SlotOffsetsAndAsserts;
 public:
-    REALLY_INLINE AvmBox get_length() const { return m_length; }
+    REALLY_INLINE Atom get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
 public:
@@ -2386,7 +2386,7 @@ public:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
-        REALLY_INLINE AvmBox get_length() const { return m_slots_XMLClass.get_length(); } \
+        REALLY_INLINE Atom get_length() const { return m_slots_XMLClass.get_length(); } \
     private: \
         avmplus::NativeID::XMLClassSlots m_slots_XMLClass
 //-----------------------------------------------------------
@@ -2412,7 +2412,7 @@ class XMLListClassSlots
 {
     friend class SlotOffsetsAndAsserts;
 public:
-    REALLY_INLINE AvmBox get_length() const { return m_length; }
+    REALLY_INLINE Atom get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
 public:
@@ -2425,7 +2425,7 @@ public:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
-        REALLY_INLINE AvmBox get_length() const { return m_slots_XMLListClass.get_length(); } \
+        REALLY_INLINE Atom get_length() const { return m_slots_XMLListClass.get_length(); } \
     private: \
         avmplus::NativeID::XMLListClassSlots m_slots_XMLListClass
 //-----------------------------------------------------------
@@ -2451,7 +2451,7 @@ class QNameClassSlots
 {
     friend class SlotOffsetsAndAsserts;
 public:
-    REALLY_INLINE AvmBox get_length() const { return m_length; }
+    REALLY_INLINE Atom get_length() const { return m_length; }
 private:
     ATOM_WB m_length;
 public:
@@ -2464,7 +2464,7 @@ public:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
-        REALLY_INLINE AvmBox get_length() const { return m_slots_QNameClass.get_length(); } \
+        REALLY_INLINE Atom get_length() const { return m_slots_QNameClass.get_length(); } \
     private: \
         avmplus::NativeID::QNameClassSlots m_slots_QNameClass
 //-----------------------------------------------------------

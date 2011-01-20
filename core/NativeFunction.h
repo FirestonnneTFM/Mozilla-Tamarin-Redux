@@ -48,34 +48,12 @@ struct AOTInfo;
 
 namespace avmplus
 {
-    typedef avmplus::AbcEnv* AvmInstance;
-    typedef avmplus::ScriptObject* AvmObject;
-    typedef avmplus::String* AvmString;
-    typedef avmplus::Namespace* AvmNamespace;
-    typedef avmplus::Atom AvmBox;
-    typedef avmplus::MethodEnv* AvmMethodEnv;
-    typedef int32_t AvmBool32;
-
-    #define kAvmThunkNull       nullObjectAtom
-    #define kAvmThunkUndefined  undefinedAtom
-
-    #define kAvmThunkInfinity       (MathUtils::kInfinity)
-    #define kAvmThunkNegInfinity    (MathUtils::kNegInfinity)
-    #define kAvmThunkNaN            (MathUtils::kNaN)
-
-    typedef AvmObject       AvmRetType_AvmObject;
-    typedef bool            AvmRetType_AvmBool32;   // bools are passed in as int32_t, but returned as bool, for historic reasons
-    typedef int32_t         AvmRetType_int32_t;
-    typedef uint32_t        AvmRetType_uint32_t;
-    typedef AvmNamespace    AvmRetType_AvmNamespace;
-    typedef AvmBox          AvmRetType_AvmBox;
-    typedef AvmString       AvmRetType_AvmString;
-    typedef void            AvmRetType_void;
-    typedef double          AvmRetType_double;
-
-    typedef avmplus::ScriptObject AvmObjectT;
-    typedef avmplus::String AvmStringT;
-    typedef avmplus::Namespace AvmNamespaceT;
+    // Historically, bools are passed in as int32_t, as some calling conventions
+    // would only use a single byte and leave the remainder of the argument word
+    // as trash; this was used to ensure it was well-defined. (It's not clear to
+    // me if this is still an issue, but easier to maintain the convention than
+    // change now.)
+    typedef int32_t bool32;
 
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
     typedef void (AvmPlusScriptableObject::*AvmThunkNativeMethodHandler)();
@@ -86,7 +64,7 @@ namespace avmplus
 #ifdef _DEBUG
     extern void FASTCALL check_unbox(MethodEnv* env, bool u);
 
-    inline uintptr_t _AvmThunkUnbox_AvmReceiver(AvmMethodEnv env, uintptr_t r)
+    REALLY_INLINE uintptr_t _AvmThunkUnbox_AvmReceiver(MethodEnv* env, uintptr_t r)
     {
         check_unbox(env, false);
         AvmAssert((r & ~kUnboxMask) == 0);
@@ -94,7 +72,7 @@ namespace avmplus
     }
     #define AvmThunkUnbox_AvmReceiver(t,r)      ((t)(_AvmThunkUnbox_AvmReceiver(env, uintptr_t(r))))
 
-    inline uintptr_t _AvmThunkUnbox_AvmAtomReceiver(AvmMethodEnv env, uintptr_t r)
+    REALLY_INLINE uintptr_t _AvmThunkUnbox_AvmAtomReceiver(MethodEnv* env, uintptr_t r)
     {
         check_unbox(env, true);
         return r & kUnboxMask;
@@ -105,23 +83,23 @@ namespace avmplus
     #define AvmThunkUnbox_AvmAtomReceiver(t,r)  ((t)(uintptr_t(r) & kUnboxMask))
 #endif
 
-    #define AvmThunkUnbox_AvmObject(r)      ((ScriptObject*)(r))
-    #define AvmThunkUnbox_AvmBool32(r)      ((r) != 0)
+    #define AvmThunkUnbox_ScriptObject(r)   ((ScriptObject*)(r))
+    #define AvmThunkUnbox_bool32(r)         ((r) != 0)
     #define AvmThunkUnbox_int32_t(r)        int32_t(r)
     #define AvmThunkUnbox_uint32_t(r)       uint32_t(r)
-    #define AvmThunkUnbox_AvmNamespace(r)   ((Namespace*)(r))
-    #define AvmThunkUnbox_AvmBox(r)         (r)
-    #define AvmThunkUnbox_AvmString(r)      ((String*)(r))
+    #define AvmThunkUnbox_Namespace(r)      ((Namespace*)(r))
+    #define AvmThunkUnbox_Atom(r)           (r)
+    #define AvmThunkUnbox_String(r)         ((String*)(r))
     #define AvmThunkUnbox_void(r)           (error ??? illegal)
     #define AvmThunkUnbox_double(r)         AvmThunkUnbox_double_impl(&(r))
 
-    #define AvmThunkArgSize_AvmObject       1
-    #define AvmThunkArgSize_AvmBool32       1
+    #define AvmThunkArgSize_ScriptObject    1
+    #define AvmThunkArgSize_bool32          1
     #define AvmThunkArgSize_int32_t         1
     #define AvmThunkArgSize_uint32_t        1
-    #define AvmThunkArgSize_AvmNamespace    1
-    #define AvmThunkArgSize_AvmBox          1
-    #define AvmThunkArgSize_AvmString       1
+    #define AvmThunkArgSize_Namespace       1
+    #define AvmThunkArgSize_Atom            1
+    #define AvmThunkArgSize_String          1
     #define AvmThunkArgSize_void            (error ??? illegal)
 #ifdef AVMPLUS_64BIT
     #define AvmThunkArgSize_double          1
@@ -129,16 +107,16 @@ namespace avmplus
     #define AvmThunkArgSize_double          2
 #endif
 
-    inline double AvmThunkUnbox_double_impl(const AvmBox* b)
+    REALLY_INLINE double AvmThunkUnbox_double_impl(const Atom* b)
     {
     #if defined(AVMPLUS_64BIT)
-        AvmAssert(sizeof(AvmBox) == sizeof(double));
+        MMGC_STATIC_ASSERT(sizeof(Atom) == sizeof(double));
         return *(const double*)b;
     #elif defined(VMCFG_UNALIGNED_FP_ACCESS)
-        AvmAssert(sizeof(AvmBox)*2 == sizeof(double));
+        MMGC_STATIC_ASSERT(sizeof(Atom)*2 == sizeof(double));
         return *(const double*)b;
     #else
-        AvmAssert(sizeof(AvmBox)*2 == sizeof(double));
+        MMGC_STATIC_ASSERT(sizeof(Atom)*2 == sizeof(double));
         double_overlay u;
         u.bits32[0] = b[0];
         u.bits32[1] = b[1];
@@ -156,27 +134,27 @@ namespace avmplus
     // args are compile-time constants.
     #define AvmThunkCoerce_int32_t_double(v)    double(v)
     #define AvmThunkCoerce_int32_t_uint32_t(v)  uint32_t(v)
-    #define AvmThunkCoerce_int32_t_AvmBox(v)    (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
+    #define AvmThunkCoerce_int32_t_Atom(v)      (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
 
     #define AvmThunkCoerce_uint32_t_double(v)   double(v)
     #define AvmThunkCoerce_uint32_t_int32_t(v)  int32_t(v)
-    #define AvmThunkCoerce_uint32_t_AvmBox(v)   (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
+    #define AvmThunkCoerce_uint32_t_Atom(v)     (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
 
-    #define AvmThunkCoerce_AvmBool32_AvmBox(v)  ((v) ? trueAtom : falseAtom)
+    #define AvmThunkCoerce_bool32_Atom(v)       ((v) ? trueAtom : falseAtom)
 
 #ifdef _DEBUG
-    inline double AvmThunkCoerce_AvmBox_double(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined); (void)v; return kAvmThunkNaN; }
-    inline AvmString AvmThunkCoerce_AvmBox_AvmString(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined || (v) == kAvmThunkNull); (void)v; return NULL; }
-    inline AvmObject AvmThunkCoerce_AvmBox_AvmObject(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined || (v) == kAvmThunkNull); (void)v; return NULL; }
+    REALLY_INLINE double AvmThunkCoerce_Atom_double(Atom v) { AvmAssert((v) == undefinedAtom); (void)v; return MathUtils::kNaN; }
+    REALLY_INLINE String* AvmThunkCoerce_Atom_String(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
+    REALLY_INLINE ScriptObject* AvmThunkCoerce_Atom_ScriptObject(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
 #else
-    #define AvmThunkCoerce_AvmBox_double(v)     (kAvmThunkNaN)
-    #define AvmThunkCoerce_AvmBox_AvmString(v)  (NULL)
-    #define AvmThunkCoerce_AvmBox_AvmObject(v)  (NULL)
+    #define AvmThunkCoerce_Atom_double(v)       (MathUtils::kNaN)
+    #define AvmThunkCoerce_Atom_String(v)       (NULL)
+    #define AvmThunkCoerce_Atom_ScriptObject(v) (NULL)
 #endif
 
-    #define AvmThunkCoerce_AvmString_AvmBox(v)  ((v) ? (v)->atom() : nullStringAtom)
+    #define AvmThunkCoerce_String_Atom(v)       ((v) ? (v)->atom() : nullStringAtom)
 
-    #define AvmThunkConstant_AvmString(v)       (env->method->pool()->getString(v))
+    #define AvmThunkGetConstantString(v)        (env->method->pool()->getString(v))
 
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
     #define AVMTHUNK_GET_METHOD_HANDLER(env)    ((env)->method->handler_method())
@@ -250,28 +228,28 @@ namespace avmplus
             void fillInMethods(const NativeMethodInfo* methodEntry);
             void fillInClasses(const NativeClassInfo* classEntry);
             #ifdef VMCFG_AOT
-                inline const NativeClassInfo* get_class(uint32_t i) const
+                REALLY_INLINE const NativeClassInfo* get_class(uint32_t i) const
                 {
                     return i < classCount ? classes[i] : 0;
                 }
             #else
-                inline const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return classes[i]; }
+                REALLY_INLINE const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return classes[i]; }
             #endif
         #else
             typedef void (*FillInProc)(NativeMethodInfo* m, NativeClassInfo* c);
             void fillIn(FillInProc p);
-            inline const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return &classes[i]; }
+            REALLY_INLINE const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return &classes[i]; }
         #endif
 
     private:
         #ifdef AVMPLUS_STATIC_POINTERS
             typedef const NativeMethodInfo* MethodType;
             typedef const NativeClassInfo* ClassType;
-            inline const NativeMethodInfo* get_method(uint32_t i) const { AvmAssert(i < methodCount); return methods[i]; }
+            REALLY_INLINE const NativeMethodInfo* get_method(uint32_t i) const { AvmAssert(i < methodCount); return methods[i]; }
         #else
             typedef NativeMethodInfo MethodType;
             typedef NativeClassInfo ClassType;
-            inline const NativeMethodInfo* get_method(uint32_t i) const { AvmAssert(i < methodCount); return &methods[i]; }
+            REALLY_INLINE const NativeMethodInfo* get_method(uint32_t i) const { AvmAssert(i < methodCount); return &methods[i]; }
         #endif
 
     private:
@@ -372,7 +350,7 @@ namespace avmplus
     // C++ won't let us auto-init a union to a field other than the first one, nor will it
     // allow us to reliably cast between a pointer-to-function and pointer-to-member-function,
     // thus this inline function to massage the few places that need it.
-    inline AvmThunkNativeMethodHandler _to_method_handler(AvmThunkNativeFunctionHandler function)
+    REALLY_INLINE AvmThunkNativeMethodHandler _to_method_handler(AvmThunkNativeFunctionHandler function)
     {
         AvmThunkNativeHandler handler;
         // FIXME: this fixes bug 596608 (see also 599931)
