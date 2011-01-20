@@ -365,6 +365,7 @@ class sandbox:
     sb_linux2_compile_factory.addStep(sync_clone_sandbox)
     sb_linux2_compile_factory.addStep(sync_update)
     sb_linux2_compile_factory.addStep(bb_slaveupdate(slave="linux"))
+    sb_linux2_compile_factory.addStep(compile_builtin)
     sb_linux2_compile_factory.addStep(BuildShellCommand(
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=sh4-linux', 'avmshell_sh4', 'true'],
                 env={
