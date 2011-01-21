@@ -34,20 +34,56 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-var CODE = 1115; //	_ is not a constructor.
+
+import avmplus.System;
+
+var CODE_OLD = 1115; // _ is not a constructor.
+var CODE_NEW = 1007; // Instantiation attempted on a non-constructor.
+
+var CODE;
+
+if (System.swfVersion >= 11) {
+     CODE = CODE_NEW;
+} else {
+    if (System.getRunmode().indexOf('jit') != -1) {
+        CODE = CODE_NEW;
+    } else {
+        CODE = CODE_OLD;
+    }
+}
 
 //-----------------------------------------------------------
 startTest();
 //-----------------------------------------------------------
 
 try {
-	var z = "no error";
-	var OBJECT = new Object();
-	var o = new OBJECT();
+        var z = "no error";
+        var OBJECT = new Object();
+        var o = new OBJECT();
 } catch (err) {
-	z = err.toString();
+        z = err.toString();
 } finally {
-	AddTestCase("Runtime Error", "TypeError: Error #" + CODE, typeError(z));
+        AddTestCase("[Object] Runtime Error", "TypeError: Error #" + CODE, typeError(z));
+}
+
+try {
+        var z = "no error";
+        var OBJECT = null;
+        var o = new OBJECT();
+} catch (err) {
+        z = err.toString();
+} finally {
+        AddTestCase("[null] Runtime Error", "TypeError: Error #" + CODE, typeError(z));
+}
+
+try {
+        var z = "no error";
+        var OBJECT;
+        var o = new OBJECT();
+} catch (err) {
+        z = err.toString();
+} finally {
+        AddTestCase("[undefined] Runtime Error", "TypeError: Error #" + CODE, typeError(z));
 }
 
 //-----------------------------------------------------------

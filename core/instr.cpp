@@ -228,10 +228,26 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
     case BKIND_CONST:
     {
         ScriptObject* ctor = AvmCore::atomToScriptObject(obj)->getSlotObject(AvmCore::bindingToSlotId(b));
+        // This code is a bit subtle.  Note that ScriptObject::getSlotObject() will return NULL if the
+        // slot is an SST_scriptobject and is NULL, or an SST_atom that is null, undefined, or not
+        // an object.  These subsume the test isObject(ctor) in op_construct(), which is inlined here.
+        // We once included an extra check, resulting in throwing a different exception when taking this
+        // path in interpreted code.  We must emulate this old behavior for backward compatibility.
+        // It is unfortunate that CLASS_TYPE and FUNCTION_TYPE expand into references to 'core', otherwise
+        // we could push the next line down into the exceptional path.
         AvmCore* core = toplevel->core();
-        if (!ctor ||
-            (!ctor->traits()->subtypeof(CLASS_TYPE) && !ctor->traits()->subtypeof(FUNCTION_TYPE)))
-            toplevel->throwTypeError(kNotConstructorError, core->toErrorString(multiname));
+        if (!ctor || (!ctor->traits()->subtypeof(CLASS_TYPE) && !ctor->traits()->subtypeof(FUNCTION_TYPE))) {
+            // We know that an exception will be thrown eventually, so now do the version check.
+            if (core->currentBugCompatibility()->bugzilla456852) {
+                // Correct behavior is to throw kConstructOfNonFunctionError as op_construct would do.
+                if (!ctor) {
+                    toplevel->throwTypeError(kConstructOfNonFunctionError);
+                }
+            } else {
+                // Stay compatible with old behavior.
+                toplevel->throwTypeError(kNotConstructorError, core->toErrorString(multiname));
+            }
+        }
         // inlined equivalent of op_construct
         return ctor->construct(argc, atomv);
     }

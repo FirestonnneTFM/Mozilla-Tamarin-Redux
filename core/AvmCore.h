@@ -330,6 +330,7 @@ const int kBufferPadding = 16;
         // ever use this antipattern for new bugs.
         unsigned bugzilla444630:1;
 
+        unsigned bugzilla456852:1;      // Different runtime errors when -Ojit set in acceptance test run
         unsigned bugzilla504525:1;      // Vector.concat processes arguments in reverse order
         unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
         unsigned bugzilla524122:1;      // Incorrect optimization for integers in numeric sort
