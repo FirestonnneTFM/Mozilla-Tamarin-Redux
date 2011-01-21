@@ -63,9 +63,9 @@ class RunSmokes():
     envsubs=[]
 
     def usage(self):
-        print 'usage: %s [options]' % os.path.basename(sys.argv[0])
-        print '-t --time       time in seconds to run,  tests will keep running until the time has been exceeded'
-        print '-f --testfile   file containing commands to run'
+        print('usage: %s [options]' % os.path.basename(sys.argv[0]))
+        print('-t --time       time in seconds to run,  tests will keep running until the time has been exceeded')
+        print('-f --testfile   file containing commands to run')
 
     def setoptions(self):
         options = 't:f:hv'
@@ -91,17 +91,17 @@ class RunSmokes():
         self.setoptions()
 
     def run(self):
-        print "starting smoke tests"
-        print "    test file is %s" % self.testfile
+        print("starting smoke tests")
+        print("    test file is %s" % self.testfile)
         if self.timeout > 0:
-            print "    will run tests until timeout of %ds is exceeded" % self.timeout
+            print("    will run tests until timeout of %ds is exceeded" % self.timeout)
         else:
-            print "    will run tests until all tests are complete, no timeout"
-        print
+            print("    will run tests until all tests are complete, no timeout")
+        print('')
         try:
             infile=open(self.testfile,'r')
         except:
-            print "ERROR reading file %s" % testfile
+            print("ERROR reading file %s" % testfile)
             sys.exit(1)
         for test in infile:
             test=test.strip()
@@ -113,30 +113,30 @@ class RunSmokes():
             self.runtest(test)
         if self.timeout > 0:
             if time.time()-self.startTime<self.timeout:
-                print '\ntests finished after %d seconds, did not exceed timeout of %d seconds' % (time.time()-self.startTime,self.timeout)
+                print('\ntests finished after %d seconds, did not exceed timeout of %d seconds' % (time.time()-self.startTime,self.timeout))
             else:
-                print '\nexceeded timeout of %d seconds, actual time %d seconds' % (self.timeout,time.time()-self.startTime)
+                print('\nexceeded timeout of %d seconds, actual time %d seconds' % (self.timeout,time.time()-self.startTime))
         else:
-            print '\ntests finished after %d seconds' % (time.time()-self.startTime)
+            print('\ntests finished after %d seconds' % (time.time()-self.startTime))
         infile.close()
 
     def showstats(self):
-        print "\nenvironment variables:"
+        print("\nenvironment variables:")
         for env in self.envsubs:
-            print "    %s = %s" % (env,os.environ[env])
-        print "\npasses             : %d" % self.allpasses
-        print "failures           : %d" % self.allfails
+            print("    %s = %s" % (env,os.environ[env]))
+        print("\npasses             : %d" % self.allpasses)
+        print("failures           : %d" % self.allfails)
         if self.allfails>0:
-            print "\nlist of test failures:\n%s" % self.failures
+            print("\nlist of test failures:\n%s" % self.failures)
 
     def replaceEnv(self,line):
         envs=re.findall('\$\{[A-Za-z0-9_\-]+\}',line)    
         for env in envs:
             env=env[2:-1]
             val = ''
-            if os.environ.has_key(env)==False:
+            if not (env in os.environ):
                 if env != 'RTARGS':
-                    print "ERROR: environment variable '%s' is not defined, exiting" % env
+                    print("ERROR: environment variable '%s' is not defined, exiting" % env)
                     sys.exit(1)
             else:
                 val=os.environ[env]
@@ -161,6 +161,9 @@ class RunSmokes():
         try:
             process=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             (out,err)=process.communicate()
+            # convert to string from byte for py3 compatibility
+            out = out.decode('utf-8')
+            err = err.decode('utf-8')
             exitcode=process.returncode
         except:
             detail="ERROR: running test"
@@ -177,10 +180,10 @@ class RunSmokes():
         if exitcode!=0:
             detail+=" exitcode=%d" % exitcode
         if self.verbose:
-            print "[OUTPUT %s]" % command
+            print("[OUTPUT %s]" % command)
             out=self.scrub(out)
-            print out
-            print "[ENDOUTPUT %s]" % command
+            print(out)
+            print("[ENDOUTPUT %s]" % command)
         for line in out.splitlines():
             line=line.strip()
             if re.search('time$',line):
@@ -225,7 +228,7 @@ class RunSmokes():
             self.failures+="%s\n%s\n[OUTPUT]\n%s%s\n[END OUTPUT]\n" % (rawcommand,command,out,err)
         else:
             status="passed"
-        print "%s %ds %s %s" % (status,tm,rawcommand,detail)
+        print("%s %ds %s %s" % (status,tm,rawcommand,detail))
         sys.stdout.flush()
         if fails>0:
             self.allfails+=1
