@@ -301,14 +301,6 @@ namespace MMgc
             demos = NULL;
         }
 #endif
-#ifdef MMGC_DELETION_PROFILER
-        if (deletos != NULL)
-        {
-            deletos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
-            delete deletos;
-            deletos = NULL;
-        }
-#endif
         policy.shutdown();
         allocaShutdown();
 
@@ -379,6 +371,17 @@ namespace MMgc
 
         zct.Destroy();
 
+#ifdef MMGC_DELETION_PROFILER
+        /* 'deletos' should only be deleted after ForceSweepAtShutdown()
+         * as that can lead to ProfileExplicitDeletion() calls
+         */  
+        if (deletos != NULL) 
+        {
+            deletos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
+            delete deletos;
+            deletos = NULL;
+        }
+#endif
         GCAssertMsg(GetNumBlocks() == 0, "GC accounting off");
 
         GCAssertMsg(enterCount == 0, "GC enter/exit paths broken");
