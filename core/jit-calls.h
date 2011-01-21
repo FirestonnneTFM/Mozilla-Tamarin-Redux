@@ -807,11 +807,13 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
                 c.slot_offset = uintptr_t(slot_ptr) - uintptr_t(obj_ptr);
                 if (sst == SST_atom) {
                     // slot type is * or Object, handlers want gc ptr instead of traits ptr
-                    c.gc = actual_type->core->gc;
                     if (c.slot_type == NULL) {
                         // slot type is *
                         c.set_handler = setprop_slot_any;
                     }
+                    // This line must come after the test of c.slot_type above, as c.gc overlays it!
+                    // See the union in class SetCache.
+                    c.gc = actual_type->core->gc;
                 }
             } else {
                 // non-var handler, including const slots (setting them is an error)
