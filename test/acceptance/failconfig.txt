@@ -63,7 +63,6 @@ mmgc/outofmemory, .* , , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=5413
 ####################
 # force JIT -Ojit
 ####################
-as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*(-Ojit|-Djitordie).* , , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*          , .*((-Ojit|-Djitordie).*),  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 ####################
@@ -143,7 +142,6 @@ spidermonkey/js1_5/Array/regress-157652, arm-lnx.*deep,, expectedfail, https://b
 ####################
 # Windows Mobile Emulator
 ####################
-as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  ,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  ,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 regress/bug_555568, arm-winmobile-emulator.*,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335
 regress/bug_558442a, arm-winmobile-emulator.*,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335

@@ -4969,6 +4969,7 @@ return the result of the comparison ToPrimitive(x) == y.
         if (v >= kSWF11)
         {
             bugzilla444630 = 1;     // Entities are not escaped when appending String content to XML
+            bugzilla456852 = 1;     // Different runtime errors when -Ojit set in acceptance test run
             bugzilla504525 = 1;     // Vector.concat processes arguments in reverse order
             bugzilla513018 = 1;     // parseFloat accepts illegal number syntax
             bugzilla524122 = 1;     // Incorrect optimization for integers in numeric sort

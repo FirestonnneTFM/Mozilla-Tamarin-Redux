@@ -4268,6 +4268,9 @@ namespace avmplus
             // one that should occur in the class's script-init.
             // If it's already resolved then we're good to go.
             if (itraits->init && itraits->init->isResolved() && itraits->init->getMethodSignature()->argcOk(argc)) {
+                // The explicit null check will throw a different exception than
+                // the generic call to op_construct below, or to similar paths through
+                // interpreted code!
                 emitCheckNull(ctor, ctraits);
                 emitConstructCall(0, argc, ctor, ctraits);
                 return;
