@@ -65,19 +65,9 @@ namespace avmplus
         return atomKind(atom) == kIntptrType;
     }
 
-    REALLY_INLINE bool atomIsString(Atom atom)
-    {
-        return atomKind(atom) == kStringType;
-    }
-
     REALLY_INLINE bool atomIsBothIntptr(Atom a, Atom b)
     {
         return ((((uintptr_t(a) ^ kIntptrType) | (uintptr_t(b) ^ kIntptrType)) & 7) == 0);
-    }
-
-    REALLY_INLINE bool atomIsBothString(Atom a, Atom b)
-    {
-        return ((((uintptr_t(a) ^ kStringType) | (uintptr_t(b) ^ kStringType)) & 7) == 0);
     }
 
     REALLY_INLINE bool atomCanBeInt32(Atom atom)
