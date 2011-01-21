@@ -530,12 +530,14 @@ Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
         }
     }
 
-    if (atomIsString(lhs))
+    if (AvmCore::isString(lhs))
     {
-        if (atomIsString(rhs))
+        if (AvmCore::isString(rhs))
         {
-            return core->concatStrings(AvmCore::atomToString(lhs),
-                                       AvmCore::atomToString(rhs))->atom();
+            // AvmCore::concatStrings() coerces a null argument to the string "null".
+            // Here, we know that neither lhs nor rhs are null, so we can concatenate w/o the coercion.
+            return String::concatStrings(AvmCore::atomToString(lhs),
+                                         AvmCore::atomToString(rhs))->atom();
         }
         else
         {
@@ -558,7 +560,7 @@ Atom op_add_a_aa(AvmCore* core, Atom lhs, Atom rhs)
     lhs = AvmCore::primitive(lhs);
     rhs = AvmCore::primitive(rhs);
 
-    if (!(atomIsString(lhs) || atomIsString(rhs)))
+    if (!(AvmCore::isString(lhs) || AvmCore::isString(rhs)))
     {
         return core->doubleToAtom(AvmCore::number(lhs) + AvmCore::number(rhs));
     }
@@ -607,11 +609,11 @@ Atom op_add_a_ai(AvmCore* core, Atom lhs, int32_t rhs)
         return core->doubleToAtom(AvmCore::atomToDouble(lhs) + double(rhs));
     }
 
-    if (atomIsString(lhs) || AvmCore::isDate(lhs)) goto concat_strings;
+    if (AvmCore::isString(lhs) || AvmCore::isDate(lhs)) goto concat_strings;
 
     lhs = AvmCore::primitive(lhs);
 
-    if (!atomIsString(lhs))
+    if (!AvmCore::isString(lhs))
     {
         return core->doubleToAtom(AvmCore::number(lhs) + double(rhs));
     }
@@ -662,11 +664,11 @@ Atom op_add_a_ia(AvmCore* core, int32_t lhs, Atom rhs)
         return core->doubleToAtom(double(lhs) + AvmCore::atomToDouble(rhs));
     }
 
-    if (atomIsString(rhs) || AvmCore::isDate(rhs)) goto concat_strings;
+    if (AvmCore::isString(rhs) || AvmCore::isDate(rhs)) goto concat_strings;
 
     rhs = AvmCore::primitive(rhs);
 
-    if (!atomIsString(rhs))
+    if (!AvmCore::isString(rhs))
     {
         return core->doubleToAtom(double(lhs) + AvmCore::number(rhs));
     }
@@ -689,11 +691,11 @@ Atom op_add_a_ad(AvmCore* core, Atom lhs, double rhs)
         return core->doubleToAtom(double(atomGetIntptr(lhs)) + rhs);
     }
 
-    if (atomIsString(lhs) || AvmCore::isDate(lhs)) goto concat_strings;
+    if (AvmCore::isString(lhs) || AvmCore::isDate(lhs)) goto concat_strings;
 
     lhs = AvmCore::primitive(lhs);
 
-    if (!atomIsString(lhs))
+    if (!AvmCore::isString(lhs))
     {
         return core->doubleToAtom(AvmCore::number(lhs) + rhs);
     }
@@ -716,11 +718,11 @@ Atom op_add_a_da(AvmCore* core, double lhs, Atom rhs)
         return core->doubleToAtom(lhs + double(atomGetIntptr(rhs)));
     }
 
-    if (atomIsString(rhs) || AvmCore::isDate(rhs)) goto concat_strings;
+    if (AvmCore::isString(rhs) || AvmCore::isDate(rhs)) goto concat_strings;
 
     rhs = AvmCore::primitive(rhs);
 
-    if (!atomIsString(rhs))
+    if (!AvmCore::isString(rhs))
     {
         return core->doubleToAtom(lhs + AvmCore::number(rhs));
     }
