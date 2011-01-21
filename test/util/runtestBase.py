@@ -64,24 +64,30 @@ import traceback
 from . import which
 from . import threadpool
 
+# runtestUtils must be imported after "from os.path import *" as walk is overridden
+from . import runtestUtils
+from .runtestUtils import walk,parseArgStringToList,TimeOutException,join, \
+convertToCsv,detectCPUs,dict_match,formatMemoryList,formatMemory,list_match, \
+parseArgStringToList,pPrint,splitList,genAtsArgs,moveAtsSwf,conf95,mean, \
+rel_std_dev,standard_deviation,tDist,variance,getSignalName,signalNames
+
 # For Python 2.6 and above, use native subprocess.Popen
-if sys.version_info[0] >= 3 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6):
+if sys.version_info[0] >= 3 \
+    or (sys.version_info[0] == 2 and sys.version_info[1] >= 6):
     from subprocess import Popen
 else:
     from killableprocess import Popen
 
-
-# runtestUtils must be imported after "from os.path import *" as walk is overridden
-from . import runtestUtils
-from .runtestUtils import walk,parseArgStringToList,TimeOutException,join,convertToCsv,detectCPUs,dict_match,formatMemoryList,formatMemory,list_match,parseArgStringToList,pPrint,splitList,genAtsArgs,moveAtsSwf,conf95,mean,rel_std_dev,standard_deviation,tDist,variance,getSignalName,signalNames
-
-pexpect_module_present = False
-if sys.version_info[0] < 3:
-    try:
-        import pexpect
-        pexpect_module_present = True
-    except ImportError:
-        pass
+if platform.system() == 'Windows':
+    # pexpect only works on *nix systems
+    pexpect_module_present = False
+else:
+    if sys.version_info[0] >= 3 \
+        or (sys.version_info[0] == 2 and sys.version_info[1] >= 6):
+        from . import pexpect
+    else:
+        import pexpect25 as pexpect
+    pexpect_module_present = True
 
 
 class RuntestBase(object):
@@ -329,8 +335,6 @@ class RuntestBase(object):
                 self.rebuildtests = True
                 self.forcerebuild = True
                 self.ascversion = self.getAscVersion(self.asc)
-                if not pexpect_module_present:
-                    print('To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net')
             elif o in ('-q', '--quiet'):
                 self.quiet = True
             elif o in ('--summaryonly',):
@@ -1072,6 +1076,12 @@ class RuntestBase(object):
             raise
     
     def compileWithAsh(self, tests):
+        self.checkExecutable(self.java, 'java must be on system path or --java must be set to java executable')
+        if not isfile(self.asc):
+            exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
+        if not isfile(self.builtinabc):
+            exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
+
         start_time = datetime.today()
         #print("starting compile of %d tests at %s" % (len(tests),start_time))
         total=len(tests)
@@ -1183,6 +1193,7 @@ class RuntestBase(object):
 
                     #print("%d remaining, %s" % (total,cmd))
         end_time = datetime.today()
+
 
     def compile_support_files(self, support_dir, outputCalls = []):
         for p, dirs, files in walk(support_dir):

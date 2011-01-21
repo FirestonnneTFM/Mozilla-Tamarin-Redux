@@ -140,7 +140,7 @@ def pythonVersion26():
 
 def splitList(_list, _groups):
     groups = []
-    groupSize = len(_list) / _groups
+    groupSize = int(len(_list) / _groups)
     startIndex = 0
     for i in range(1, _groups): 
         groups.append(_list[startIndex:i*groupSize])

@@ -101,6 +101,8 @@
 .*/test/performance/mmgc/gcbench\.as
 .*/test/util/__init__\.py
 .*/test/util/killableprocess\.py
+.*/test/util/pexpect\.py
+.*/test/util/pexpect25\.py
 .*/test/util/subProcess\.py
 .*/test/util/threadpool\.py
 .*/test/util/which\.py
