@@ -65,12 +65,13 @@ print("Building shell_toplevel...")
 configs = ""
 
 # compile builtins
-os.system(asc+" -abcfuture -import ../core/builtin.abc -builtin "+configs+"-apiversioning -out shell_toplevel shell_toplevel.as Domain.as ../extensions/Sampler.as ../extensions/Trace.as ../extensions/Dictionary.as Endian.as Java.as")
+os.system(asc+" -abcfuture -import ../generated/builtin.abc -builtin "+configs+"-apiversioning -out shell_toplevel shell_toplevel.as Domain.as ../extensions/Sampler.as ../extensions/Trace.as ../extensions/Dictionary.as Endian.as Java.as")
+
+rm("shell_toplevel.h")
+rm("shell_toplevel.cpp")
+mv("shell_toplevel.abc", "../generated/shell_toplevel.abc")
 
 print("Generating native thunks...")
-os.system("python ../utils/nativegen.py ../core/builtin.abc shell_toplevel.abc")
-
-mv("shell_toplevel.cpp2", "shell_toplevel.cpp")
-mv("shell_toplevel.h2", "shell_toplevel.h")
+os.system("python ../utils/nativegen.py ../generated/builtin.abc ../generated/shell_toplevel.abc")
 
 print("Done.")

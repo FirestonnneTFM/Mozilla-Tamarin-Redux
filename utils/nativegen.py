@@ -2132,8 +2132,8 @@ if abcGenFor:
     hf = None
     hc = None
     try:
-        hf = open(abcGenName+".h2","w")
-        hc = open(abcGenName+".cpp2","w")
+        hf = open(abcGenName+".h","w")
+        hc = open(abcGenName+".cpp","w")
         h = IndentingPrintWriter(hf)
         c = IndentingPrintWriter(hc)
         ngen.emit(abcGenFor, abcScriptName, h, c);

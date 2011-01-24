@@ -74,6 +74,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.66600657" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>
@@ -1601,6 +1602,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1525017962" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>
@@ -3127,6 +3129,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1707481863" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>
@@ -4650,6 +4653,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.309395281" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>
@@ -6171,6 +6175,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1700641262" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>
@@ -7694,6 +7699,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.2003832593" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>
@@ -9216,6 +9222,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.999593738" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>
@@ -10744,6 +10751,7 @@
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/shell&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/VMPI&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/vmbase&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/generated&quot;"/>
 </option>
 <option id="gnu.cpp.compiler.option.preprocessor.def.2001721393" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="AVMSHELL_BUILD"/>

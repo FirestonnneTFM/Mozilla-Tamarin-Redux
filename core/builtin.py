@@ -68,10 +68,11 @@ configs += " -config CONFIG::BYTEARRAY_API_AIR=false "
 
 os.system(asc+" -builtin "+configs+" -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as IDataInput.as IDataOutput.as ByteArray.as ")
 
-print("Generating native thunks...")
-os.system("python ../utils/nativegen.py builtin.abc")
+rm("builtin.h")
+rm("builtin.cpp")
+mv("builtin.abc", "../generated/builtin.abc")
 
-mv("builtin.cpp2", "builtin.cpp")
-mv("builtin.h2", "builtin.h")
+print("Generating native thunks...")
+os.system("python ../utils/nativegen.py ../generated/builtin.abc")
 
 print("Done.")
