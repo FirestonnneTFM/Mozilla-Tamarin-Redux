@@ -42,7 +42,7 @@ GCC_PREFIX_HEADER = ../../../core/avmplus.h
 GCC_PRECOMPILE_PREFIX_HEADER = YES
 
 // shell is included in this search path only for avmshell-features.h, included from platform/VMPI.h
-HEADER_SEARCH_PATHS=../../../VMPI ../../../vmbase ../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../.. ../../../shell ../../../other-licenses
+HEADER_SEARCH_PATHS=../../../VMPI ../../../vmbase ../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../.. ../../../shell ../../../other-licenses ../../../generated
 
 // The following line should define all controlling cpp macros except DEBUG, _DEBUG, and DEBUGGER
 //

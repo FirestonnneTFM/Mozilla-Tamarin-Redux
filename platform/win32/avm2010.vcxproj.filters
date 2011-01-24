@@ -90,9 +90,6 @@
     <ClCompile Include="..\..\core\BooleanClass.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\core\builtin.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\core\BuiltinTraits.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -591,9 +588,6 @@
     <ClCompile Include="..\..\shell\FileInputStream.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\shell\shell_toplevel.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\shell\ShellCore.cpp">
       <Filter>shell</Filter>
     </ClCompile>
@@ -751,9 +745,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\BooleanClass.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\builtin.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\BuiltinNatives.h">
@@ -1321,9 +1312,6 @@
       <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="..\..\shell\Profiler.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\shell\shell_toplevel.h">
       <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="..\..\shell\ShellCore.h">
