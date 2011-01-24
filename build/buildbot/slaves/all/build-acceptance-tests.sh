@@ -54,13 +54,9 @@ download_asc
 
 echo ""
 echo "Building ABC files using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
-
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 
 cd $basedir/test/acceptance
 echo "Removing old *.abc files"

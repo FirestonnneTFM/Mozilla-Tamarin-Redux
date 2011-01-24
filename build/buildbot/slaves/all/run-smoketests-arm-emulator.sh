@@ -68,16 +68,13 @@ download_asc
 
 echo ""
 echo "Building ABC files using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
 
 
 export CERUNNER=$basedir/build/buildbot/slaves/all/tools/wmrunner.exe
 export AVM=$buildsdir/$change-${changeid}/$platform/$shell_release_arm
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 
 
 ##

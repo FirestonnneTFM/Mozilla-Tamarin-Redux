@@ -57,9 +57,6 @@ fi
 export branch=`echo $branch | sed 's/-deep//' | sed 's/-performance//'`
 echo branch [after]: $branch
 
-export shellABC=shell_toplevel.abc
-export builtinABC=builtin.abc
-
 
 workdir=`pwd`
 
@@ -75,6 +72,12 @@ else
     export basedir=`cd ${workdir}/../../../..; pwd`
     export buildsdir=`cd ${basedir}/../builds; pwd`
 fi
+
+export shellABC=shell_toplevel.abc
+export builtinABC=builtin.abc
+export ASC=$basedir/utils/asc.jar
+export BUILTINABC=$basedir/generated/$builtinABC
+export SHELLABC=$basedir/generated/$shellABC
 
 # builds for windows mobile (used by emulator)
 export shell_release_arm=avmshell_arm$shell_extension
@@ -189,13 +192,13 @@ function endSilent () {
 # Download the latest asc.jar if it does not exist
 ##
 function download_asc () {
-    if [ ! -e "$basedir/utils/asc.jar" ]; then
+    if [ ! -e "$ASC" ]; then
         echo "Download asc.jar"
-        ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
+        ../all/util-download.sh $ascbuilds/asc.jar $ASC
         ret=$?
         test "$ret" = "0" || {
             echo "Downloading of asc.jar failed"
-            rm -f $basedir/utils/asc.jar
+            rm -f $ASC
             # call endSilent regardless of where this script is called from
             # as the endSilent function does the test of whether or not to execute
             endSilent

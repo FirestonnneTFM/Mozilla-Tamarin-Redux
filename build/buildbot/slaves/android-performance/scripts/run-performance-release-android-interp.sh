@@ -83,16 +83,13 @@ adb push $buildsdir/$change-${changeid}/$platform/$shell_release /data/app
 
 echo ""
 echo "Building ABC files using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
 
 
 
 export AVM=$basedir/platform/android/android_shell.sh
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 
 
 

@@ -76,20 +76,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
   fail=1
 }
 
-# builtin.abc
-test -f $basedir/core/$builtinABC || {
-  echo "message: builtin.abc Failed"
-  fail=1
-}
-
-# toplevel.abc
-test -f $basedir/shell/$shellABC || {
-  echo "message: toplevel.abc Failed"
-  fail=1
-}
-
-
-
 if test "${fail}" = 1; then
    echo Failing the build
    exit 1

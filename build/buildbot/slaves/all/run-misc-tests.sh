@@ -74,13 +74,10 @@ download_shell $shell_debug_debugger
 # Download the latest asc.jar if it does not exist
 ##
 download_asc
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 
 echo ""
 echo "Missing media will be compiled using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
 # set variables for full path to builds

@@ -1841,7 +1841,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\shell_toplevel.h"
+				RelativePath="..\..\generated\shell_toplevel.h"
 				>
 			</File>
 			<File

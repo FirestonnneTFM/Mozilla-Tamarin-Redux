@@ -53,7 +53,6 @@ download_shell $shell_debug_debugger
 ##
 download_asc
 
-export ASC=$basedir/utils/asc.jar
 echo ASC=$ASC
 export AVM=$buildsdir/$change-${changeid}/$platform/$shell_release
 export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_release_debugger
@@ -61,9 +60,7 @@ export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_release_debugger
 
 echo AVM=$AVM
 echo AVMRD=$AVMRD
-export BUILTINABC=$basedir/core/$builtinABC
 echo BUILTINABC=$BUILTINABC
-export SHELLABC=$basedir/shell/$shellABC
 echo SHELLABC=$SHELLABC
 
 

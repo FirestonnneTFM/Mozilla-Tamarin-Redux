@@ -54,7 +54,8 @@ def mv(oldfile, newfile):
     os.remove(oldfile)
 
 def rm(file):
-    os.remove(file)
+    if os.access(file, os.F_OK) == True:
+        os.remove(file)
 
 javacmd = "java -ea -DAS3 -DAVMPLUS -classpath "+classpath
 asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "

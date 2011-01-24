@@ -1764,7 +1764,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\builtin.h"
+				RelativePath="..\..\generated\builtin.h"
 				>
 			</File>
 			<File

@@ -74,16 +74,13 @@ echo "Setting up the device with build #$change"
 
 echo ""
 echo "Building ABC files using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
 
 
 
 export AVM=$basedir/build/buildbot/slaves/all/tools/ceremoteshell.exe
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 
 
 
