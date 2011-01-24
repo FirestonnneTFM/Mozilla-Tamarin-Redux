@@ -283,8 +283,8 @@ class CodeCoverageRunner:
             print "running performance"
             env["AVM"]="%s/%s" % (self.builds_dir, shellname)
             env["ASC"]="%s/utils/asc.jar" % (self.root_dir)
-            env["BUILTINABC"]="%s/core/builtin.abc" % (self.root_dir)
-            env["SHELLABC"]="%s/shell/shell_toplevel.abc" % (self.root_dir)
+            env["BUILTINABC"]="%s/generated/builtin.abc" % (self.root_dir)
+            env["SHELLABC"]="%s/generated/shell_toplevel.abc" % (self.root_dir)
             cmd="python runtests.py %s" % script_args
             stdout,exit = self.run_pipe(cmd=cmd, env=env, cwd="%s/test/performance"%self.root_dir)
             for line in stdout:
@@ -306,8 +306,8 @@ class CodeCoverageRunner:
 
             env["AVM"]="%s/%s" % (self.builds_dir, shellname)
             env["ASC"]="%s/utils/asc.jar" % (self.root_dir)
-            env["BUILTINABC"]="%s/core/builtin.abc" % (self.root_dir)
-            env["SHELLABC"]="%s/shell/shell_toplevel.abc" % (self.root_dir)
+            env["BUILTINABC"]="%s/generated/builtin.abc" % (self.root_dir)
+            env["SHELLABC"]="%s/generated/shell_toplevel.abc" % (self.root_dir)
             # Determine if the shell contains a debugger
             debugger=False
             cmd="%s/%s -Dversion" % (self.builds_dir, shellname)

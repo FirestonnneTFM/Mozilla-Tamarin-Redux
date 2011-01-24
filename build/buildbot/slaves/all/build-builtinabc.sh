@@ -62,7 +62,7 @@ download_asc
 
 echo ""
 echo "Building builtin.abc file using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
 
@@ -70,21 +70,21 @@ echo ""
 ##
 # Remove the old builtin.abc
 ##
-cd $basedir/core
-test -f ./$builtinABC && {
-    rm $builtinABC
+test -f $BUILTINABC && {
+    rm $BUILTINABC
 }
 
 ##
 # Build the builtin.abc
 ##
 echo "building builtin.abc"
-export ASC=$basedir/utils/asc.jar
+cd $basedir/core
 python ./builtin.py
 ret=$?
 test "$ret" = "0" || {
     echo "builtin.py failed"
-    hg revert builtin*.cpp builtin*.h
+    cd $basedir
+    hg revert generated/builtin*.cpp generated/builtin*.h generated/builtin*.abc
     endSilent
     exit 1
 }
@@ -99,8 +99,8 @@ hg status
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
-hg diff core/builtin.cpp
-hg diff core/builtin.cpp > $basedir/build/buildbot/slaves/scripts/builtin.diff
+hg diff generated/builtin.cpp
+hg diff generated/builtin.cpp > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
 
@@ -108,27 +108,20 @@ cd $basedir
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
-hg diff core/builtin.h
-hg diff core/builtin.h > $basedir/build/buildbot/slaves/scripts/builtin.diff
+hg diff generated/builtin.h
+hg diff generated/builtin.h > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
 
 cd $basedir
-hg revert core/builtin.cpp core/builtin.h
-
-
-mkdir -p $buildsdir/${change}-${changeid}
-cp $basedir/core/$builtinABC $buildsdir/${change}-${changeid}/$builtinABC
-chmod 777 $buildsdir/${change}-${changeid}/$builtinABC
-
+hg revert generated/builtin.cpp generated/builtin.h generated/builtin.abc
 
 
 ##
 # Remove the old shell_toplevel.abc
 ##
-cd $basedir/shell
-test -f ./$shellABC && {
-    rm $shellABC
+test -f $SHELLABC && {
+    rm $SHELLABC
 }
 
 ##
@@ -136,11 +129,13 @@ test -f ./$shellABC && {
 ##
 
 echo "building shell_toplevel.abc"
-export ASC=$basedir/utils/asc.jar
+cd $basedir/shell
 python ./shell_toplevel.py
 ret=$?
 test "$ret" = "0" || {
     echo "shell_toplevel failed"
+    cd $basedir
+    hg revert generated/shell_toplevel*.cpp generated/shell_toplevel*.h generated/shell_toplevel*.abc
     endSilent
     exit 1
 }
@@ -154,22 +149,18 @@ hg status
 test -f $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff && {
     rm $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
 }
-hg diff shell/shell_toplevel.cpp
-hg diff shell/shell_toplevel.cpp > $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
+hg diff generated/shell_toplevel.cpp
+hg diff generated/shell_toplevel.cpp > $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
 
 cd $basedir
 test -f $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff && {
     rm $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 }
-hg diff shell/shell_toplevel.h
-hg diff shell/shell_toplevel.h > $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
+hg diff generated/shell_toplevel.h
+hg diff generated/shell_toplevel.h > $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 
 cd $basedir
-hg revert shell/shell_toplevel.cpp shell/shell_toplevel.h
-
-mkdir -p $buildsdir/${change}-${changeid}
-cp $basedir/shell/$shellABC $buildsdir/${change}-${changeid}/$shellABC
-chmod 777 $buildsdir/${change}-${changeid}/$shellABC
+hg revert generated/shell_toplevel.cpp generated/shell_toplevel.h generated/shell_toplevel.abc
 
 hg status
 

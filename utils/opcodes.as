@@ -37,7 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 // Compile command:
-// java -jar utils/asc.jar -d -m -i -AS3 -strict -import core/builtin.abc -import shell/shell_toplevel.abc utils/opcodes.as 
+// java -jar utils/asc.jar -d -m -i -AS3 -strict -import generated/builtin.abc -import generated/shell_toplevel.abc utils/opcodes.as 
  
  
 package {

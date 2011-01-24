@@ -48,7 +48,8 @@ def mv(oldfile, newfile):
     os.remove(oldfile)
 
 def rm(file):
-    os.remove(file)
+    if os.access(file, os.F_OK) == True:
+        os.remove(file)
 
 classpath = os.environ.get('ASC')
 if classpath == None:

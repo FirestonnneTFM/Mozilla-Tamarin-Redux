@@ -62,12 +62,9 @@ download_asc
 
 echo ""
 echo "Missing media will be compiled using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 ## HACK, use the release and debug variables for the 32 and 64 bit shells
 export shell_release=$buildsdir/$change-${changeid}/$platform/$shell_release_32
 export shell_debug=$buildsdir/$change-${changeid}/$platform/$shell_release_64

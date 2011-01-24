@@ -85,9 +85,6 @@ download_asc
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean.sh
 
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 
 export AVM=$buildsdir/$change-${changeid}/$platform/$shell
 echo AVM=$AVM

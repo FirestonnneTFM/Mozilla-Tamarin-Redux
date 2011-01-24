@@ -97,7 +97,7 @@ download_asc
 
 echo ""
 echo "Missing media will be compiled using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
 echo "setup $branch/${change}-${changeid}"
@@ -108,9 +108,6 @@ test "$res" = "0" || {
     exit 1
 }
 
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 export AVM=$basedir/build/buildbot/slaves/all/ssh-shell.sh
 
 echo AVM=$AVM

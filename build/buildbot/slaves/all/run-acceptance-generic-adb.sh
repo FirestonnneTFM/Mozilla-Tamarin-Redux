@@ -96,7 +96,7 @@ download_asc
 
 echo ""
 echo "Missing media will be compiled using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
 
 ##
@@ -121,9 +121,6 @@ test "$res" = "0" || {
     exit 1
 }
 
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 export AVM=$basedir/platform/android/android_shell.py
 # If available, use windows python (instead of cygwin python)
 # Threading only works with windows python, $PYTHONWIN env variable must point to windows install

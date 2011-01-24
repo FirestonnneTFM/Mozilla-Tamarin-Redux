@@ -70,11 +70,3 @@ echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changei
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_debug_debugger
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_debug_debugger $shell_debug_debugger"
 
-# builtin.abc
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$builtinABC $scp_mozilla/$branch/$change-${changeid}/$builtinABC
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$builtinABC $builtinABC"
-
-# toplevel.abc
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$shellABC $scp_mozilla/$branch/$change-${changeid}/$shellABC
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$shellABC $shellABC"
-

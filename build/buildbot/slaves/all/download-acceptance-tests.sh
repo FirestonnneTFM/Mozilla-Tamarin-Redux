@@ -67,25 +67,14 @@ else
 echo "download acceptance-tests-abcs.zip failed, rebuilding tests" 
 
 ##
-# Download the latest asc.jar
+# Download the latest asc.jar if it does not exist
 ##
-echo "Download asc.jar"
-$basedir/build/buildbot/slaves/all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
-ret=$?
-test "$ret" = "0" || {
-    echo "Downloading of asc.jar failed"
-    exit 1
-}
+download_asc
 
 echo ""
 echo "Building ABC files using the following ASC version:"
-echo "`java -jar $basedir/utils/asc.jar`"
+echo "`java -jar $ASC`"
 echo ""
-
-
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 
 echo "Rebuilding ABC test media"
 

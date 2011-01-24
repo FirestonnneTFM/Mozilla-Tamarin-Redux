@@ -77,9 +77,6 @@ test "$res" = "0" || {
 }
 
 download_asc
-export ASC=$basedir/utils/asc.jar
-export BUILTINABC=$basedir/core/$builtinABC
-export SHELLABC=$basedir/shell/$shellABC
 # If available, use windows python (instead of cygwin python)
 # Threading only works with windows python, $PYTHONWIN env variable must point to windows install
 # $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe

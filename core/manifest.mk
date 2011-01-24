@@ -126,9 +126,9 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 
 #  $(curdir)/avmplus.cpp \
 
-$(avmplus_CXXSRCS): $(curdir)/builtin.h
+$(avmplus_CXXSRCS): $(curdir)/../generated/builtin.h
 
-$(curdir)/builtin.h $(curdir)/builtin.cpp: $(curdir)/builtin.as
+$(curdir)../generated/builtin.h $(curdir)/../generated/builtin.cpp: $(curdir)/builtin.as
 	cd $(topsrcdir)/core; python builtin.py
 
-$(curdir)/AbcData.cpp: $(curdir)/builtin.cpp
+$(curdir)/AbcData.cpp: $(curdir)/../generated/builtin.cpp

@@ -83,20 +83,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_fpu_arm || {
 }
 
 
-
-# builtin.abc
-test -f $basedir/core/$builtinABC || {
-  echo "message: builtin.abc Failed"
-  fail=1
-}
-
-# toplevel.abc
-test -f $basedir/shell/$shellABC || {
-  echo "message: toplevel.abc Failed"
-  fail=1
-}
-
-
 # bring in the win64 environment this will reset the shell names so that the x64 shells are checked
 . ../windows64/scripts/environment.sh
 # Release
