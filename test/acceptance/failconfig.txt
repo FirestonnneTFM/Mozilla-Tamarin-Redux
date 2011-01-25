@@ -81,7 +81,6 @@ as3/Vector/nonindexproperty , .*3264-diff ,, skip , bug https://bugzilla.mozilla
 ecma3/Math/e15_8_2_16 , .*3264-diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_18 , .*3264-diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_7 , .*3264-diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
-spidermonkey/js1_5/Regress/regress-329383 , .*3264-diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 as3/Math/MathUtils , linux-diff ,, skip , \
     Investigating why linux debug and release builds generate diff results for Number with 308 decimal places
 
@@ -237,12 +236,6 @@ spidermonkey/js1_5/Regress/regress-261887, diff,, skip, skip in diff testing as 
 spidermonkey/js1_5/Scope/regress-185485:Section (2|5), .*, diff, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4026
 spidermonkey/js1_5/Scope/scope-004:Section (6|7).*, .*, diff, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4027
 
-# spidermonkey wordcode issues
-spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, (wordcode|Ojit|jitordie),, \
-    expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
-spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, (wordcode|Ojit|jitordie),, expectedfail, \
-    https://bugzilla.mozilla.org/show_bug.cgi?id=551587
-
 spidermonkey/js1_5/Array/regress-157652, (arm|mips|sh4),, skip, test runs out of memory on devices
 spidermonkey/js1_5/Function/regress-338121-.*, (arm|mips|sh4),, skip, test runs out of memory on devices
 spidermonkey/js1_5/Function/regress-338001, (arm|mips|sh4),, skip, test runs out of memory on devices
@@ -286,14 +279,10 @@ ecma3/Expressions/e11_5_2, x86-mac.*valgrind.*,, skip, https://bugzilla.mozilla.
 ecma3/Expressions/e11_5_3, x86-mac.*valgrind.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
 as3/Definitions/Function/functionReturnTypes.*,, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
 
-as3/Math/e15_8_2_12_rest:Math\.min\(-0\.0. 0\.0\) ,  (^((?!(Dinterp|diff)).)*$|.*wordcode.*),, \
-    expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
-
 # This testcase also needs to be marked as an expectedfail when running the 32bit vs 64bit differential testing.
 # This is because the testing diffs the out between 32 and 64bit plus -Ojit vs -Dinterp, and since the avmdiff
 # script does not return PASS/FAIL for each testcase but instead just a single PASS/FAIL then we need to expect
 # the entire abc to fail and not just an individual test.
-as3/Math/e15_8_2_12_rest ,  .*3264-diff.* ,, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 as3/Math/e15_1_2_2:radix 32, .*, diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=602912 
 
 as3/RegExp/replace, .* ,, skip , Do not run testcase until it passes cleanly through sandbox there are failures in interp mode
