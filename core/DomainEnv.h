@@ -43,27 +43,8 @@
 
 namespace avmplus
 {
-    // needs to be a subclass of GCObject so we can convert to/from a WeakRef...
-    // DomainEnv wants to be a finalized object anyway so let's use GCFinalizedObject
-    class GC_CPP_EXACT(GlobalMemorySubscriber, MMgc::GCFinalizedObject)
-    {
-    public:
-        virtual void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize) = 0;
-        
-        GC_DATA_BEGIN(GlobalMemorySubscriber)
-        GC_DATA_END(GlobalMemorySubscriber)
-    };
-
     // an ABC
-    class GlobalMemoryProvider
-    {
-    public:
-        virtual ~GlobalMemoryProvider() {}
-        virtual bool addSubscriber(GlobalMemorySubscriber* subscriber) = 0;
-        virtual bool removeSubscriber(GlobalMemorySubscriber* subscriber) = 0;
-    };
-
-    class GC_CPP_EXACT(DomainEnv, GlobalMemorySubscriber)
+    class GC_CPP_EXACT(DomainEnv, MMgc::GCFinalizedObject)
     {
         friend class DomainMgr;
         friend class MopsRangeCheckFilter;
@@ -92,21 +73,18 @@ namespace avmplus
         REALLY_INLINE uint8_t* globalMemoryBase() const { return m_globalMemoryBase; }
         REALLY_INLINE uint32_t globalMemorySize() const { return m_globalMemorySize; }
 
-        // global memory object accessor (will always be a ByteArray but
-        // ByteArray isn't part of AVMPlus proper so plumbing is a little
-        // weird...)
-        ScriptObject* get_globalMemory() const { return m_globalMemoryProviderObject; }
-        bool set_globalMemory(ScriptObject* providerObject);
+        // global memory object accessor
+        ByteArrayObject* get_globalMemory() const { return m_globalMemoryProviderObject; }
+        bool set_globalMemory(ByteArrayObject* providerObject);
 
-        // from GlobalMemorySubscriber
-        /*virtual*/ void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize);
+        void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize);
 
     private:
         // subscribes to the memory object "mem" such that "mem" will call our
         // notifyGlobalMemoryChanged when it moves
-        bool globalMemorySubscribe(ScriptObject* providerObject);
+        bool globalMemorySubscribe(ByteArrayObject* providerObject);
         // stops "mem" from notifying us if it moves
-        bool globalMemoryUnsubscribe(ScriptObject* providerObject);
+        bool globalMemoryUnsubscribe(ByteArrayObject* providerObject);
 
     private:
 
@@ -130,7 +108,7 @@ namespace avmplus
         uint8_t*                        m_globalMemoryBase;
         uint32_t                        m_globalMemorySize;
         // the actual memory object (can be NULL)
-        DRCWB(ScriptObject*)            GC_POINTER(  m_globalMemoryProviderObject);
+        DRCWB(ByteArrayObject*)         GC_POINTER(  m_globalMemoryProviderObject);
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.

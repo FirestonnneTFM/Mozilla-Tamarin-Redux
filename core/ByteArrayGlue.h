@@ -43,8 +43,7 @@
 
 namespace avmplus
 {
-    class ByteArray : public GlobalMemoryProvider,
-                      public DataInput,
+    class ByteArray : public DataInput,
                       public DataOutput
     {
     public:
@@ -115,9 +114,8 @@ namespace avmplus
         // overrides from DataOutput
         /*virtual*/ void Write(const void* buffer, uint32_t count);
              
-        // overrides from GlobalMemoryProvider
-        /*virtual*/ bool addSubscriber(GlobalMemorySubscriber* subscriber);
-        /*virtual*/ bool removeSubscriber(GlobalMemorySubscriber* subscriber);
+        bool addSubscriber(DomainEnv* subscriber);
+        bool removeSubscriber(DomainEnv* subscriber);
 
         // compression / decompression
         enum CompressionAlgorithm 
@@ -160,7 +158,7 @@ namespace avmplus
     private:
         enum { kGrowthIncr = 4096 };
 
-        typedef WeakRefList<GlobalMemorySubscriber> WeakSubscriberList;
+        typedef WeakRefList<DomainEnv> WeakSubscriberList;
 
     private:
         void _Clear();
@@ -180,7 +178,6 @@ namespace avmplus
         void gcTrace(MMgc::GC* gc)
         {
             // This tracer assumes the following (true as of 2010-12-08):
-            //  - GlobalMemoryProvider has no fields
             //  - m_array is allocated with FixedMalloc
             gc->TraceLocation(&m_toplevel);
             gc->TraceLocation(&m_copyOnWriteOwner);
@@ -288,8 +285,6 @@ namespace avmplus
         void set_endian(Stringp value);
 
         void clear();
-
-        /*virtual*/ GlobalMemoryProvider* getGlobalMemoryProvider() { return &m_byteArray; }
 
 #ifdef DEBUGGER
     public:

@@ -100,9 +100,9 @@ namespace avmplus
         return NULL;
     }
 
-    bool DomainEnv::set_globalMemory(ScriptObject* providerObject)
+    bool DomainEnv::set_globalMemory(ByteArrayObject* providerObject)
     {
-        if (!providerObject || !providerObject->getGlobalMemoryProvider())
+        if (!providerObject)
         {
             // null obj -- use scratch
             if (m_globalMemoryProviderObject) // unsubscribe from current if any
@@ -140,16 +140,14 @@ namespace avmplus
         m_globalMemorySize = newSize;
     }
 
-    bool DomainEnv::globalMemorySubscribe(ScriptObject* providerObject)
+    bool DomainEnv::globalMemorySubscribe(ByteArrayObject* providerObject)
     {
-        GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();
-        return provider ? provider->addSubscriber(this) : false;
+        return providerObject->GetByteArray().addSubscriber(this);
     }
 
-    bool DomainEnv::globalMemoryUnsubscribe(ScriptObject* providerObject)
+    bool DomainEnv::globalMemoryUnsubscribe(ByteArrayObject* providerObject)
     {
-        GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();
-        return provider ? provider->removeSubscriber(this) : false;
+        return providerObject->GetByteArray().removeSubscriber(this);
     }
 }
 
