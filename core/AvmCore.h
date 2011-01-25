@@ -335,6 +335,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
         unsigned bugzilla524122:1;      // Incorrect optimization for integers in numeric sort
         unsigned bugzilla526662:1;      // XMLParser stops at NUL char
+        unsigned bugzilla551587:1;      // MathClass:_min() does not correctly handle -0
         unsigned bugzilla558863:1;      // in operator on bytearray throws exception for non-natural number
         unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
         unsigned bugzilla609416:1;      // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs

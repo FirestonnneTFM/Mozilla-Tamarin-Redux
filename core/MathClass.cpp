@@ -188,7 +188,7 @@ namespace avmplus
             if (y == x)
                 if (y == 0.0)
                     if (1.0/y > 0.0)
-                        x = y;  // -0
+                        x = y;  // +0
         }
         for (uint32_t i=0; i < argc; i++)
         {
@@ -244,11 +244,28 @@ namespace avmplus
 
     double MathClass::_min(double x, double y)
     {
-        return (x < y || MathUtils::isNaN(x)) ? x : y;
+        if (MathUtils::isNaN(x))
+            return x;
+        if (MathUtils::isNaN(y))
+            return y;
+        if (x < y)
+            return x;
+        if (x == y && x == 0.0 && 1.0/x < 0.0 && core()->currentBugCompatibility()->bugzilla551587 == 1)
+            return x;  // -0
+        return y;
     }
 
     double MathClass::_max(double x, double y)
     {
-        return (x > y || MathUtils::isNaN(x)) ? x : y;
+        if (MathUtils::isNaN(x))
+            return x;
+        if (MathUtils::isNaN(y))
+            return y;
+        if (x > y)
+            return x;
+        if (x == y && x == 0.0 && 1.0/x > 0.0 && core()->currentBugCompatibility()->bugzilla551587 == 1)
+            return x; // +0
+        return y;
     }
+
 }
