@@ -164,8 +164,6 @@ bool DomainEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
     (void)_xact_cursor;
-    GlobalMemorySubscriber::gcTrace(gc, 0);
-    (void)(avmplus_GlobalMemorySubscriber_isExactInterlock != 0);
     gc->TraceLocation(&m_domain);
     gc->TraceLocation(&m_globalMemoryProviderObject);
     m_namedScriptEnvsList.gcTrace(gc);
@@ -230,14 +228,6 @@ bool FunctionEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     MethodEnv::gcTrace(gc, 0);
     (void)(avmplus_MethodEnv_isExactInterlock != 0);
     gc->TraceLocation(&closure);
-    return false;
-}
-
-bool GlobalMemorySubscriber::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
-{
-    (void)gc;
-    (void)_xact_cursor;
-
     return false;
 }
 

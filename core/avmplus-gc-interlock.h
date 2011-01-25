@@ -73,7 +73,6 @@
 #define avmplus_FunctionClass_isExactInterlock 1
 #define avmplus_FunctionEnv_isExactInterlock 1
 #define avmplus_FunctionObject_isExactInterlock 1
-#define avmplus_GlobalMemorySubscriber_isExactInterlock 1
 #define avmplus_HeapHashtable_isExactInterlock 1
 #define avmplus_IntClass_isExactInterlock 1
 #define avmplus_IntVectorClass_isExactInterlock 1

@@ -241,11 +241,6 @@ namespace avmplus
         // by rooting this method here than by fixing AIR at this time.
         virtual CodeContext* getFunctionCodeContext() const { AvmAssert(0); return NULL; }
 
-        // this really shouldn't exist here, but is the simplest solution to the divergent
-        // versions of ByteArray between Tamarin and Flash/AIR. When we someday unify them,
-        // this should be able to go away.
-        virtual GlobalMemoryProvider* getGlobalMemoryProvider() { AvmAssert(0); return NULL; }
-
         static ScriptObject* genericCreateInstance(ClassClosure* cls, VTable* ivtable);
         static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable);
         static ScriptObject* slowCreateInstance(ClassClosure* cls, VTable* ivtable);

@@ -49,7 +49,6 @@ namespace avmplus
     
     ByteArray::ByteArray(Toplevel* toplevel)
         : DataIOBase()
-        , GlobalMemoryProvider()
         , DataInput()
         , DataOutput()
         , m_toplevel(toplevel)
@@ -263,7 +262,7 @@ namespace avmplus
         {
             AvmAssert(m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE);
  
-            GlobalMemorySubscriber* subscriber = m_subscribers.get(i);
+            DomainEnv* subscriber = m_subscribers.get(i);
             if (subscriber)
             {
                 subscriber->notifyGlobalMemoryChanged(m_array, m_length);
@@ -277,7 +276,7 @@ namespace avmplus
         }
     }
  
-    bool ByteArray::addSubscriber(GlobalMemorySubscriber* subscriber)
+    bool ByteArray::addSubscriber(DomainEnv* subscriber)
     {
         if (m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
         {
@@ -290,7 +289,7 @@ namespace avmplus
         return false;
     }
  
-    bool ByteArray::removeSubscriber(GlobalMemorySubscriber* subscriber)
+    bool ByteArray::removeSubscriber(DomainEnv* subscriber)
     {
         for (uint32_t i = 0, n = m_subscribers.length(); i < n; ++i)
         {
