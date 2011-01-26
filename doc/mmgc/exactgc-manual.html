@@ -1,0 +1,237 @@
+<!--
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+-->
+<html>
+
+<head>
+<title>Manual for Exact GC</title>
+</head>
+
+<body>
+<h1><center>Partly Exact GC Support in MMgc
+<br>
+<em>and</em>
+<br>
+All There Is to Know About Writing Annotations</center></h1>
+
+<center>(This is work in progress, not complete.)</center>
+
+<h2>Introduction</h2>
+
+<P>MMgc provides a facility that allows classes to opt-in to "exact
+tracing" during garbage collection.  "Exact tracing" means that
+information added to the class by the programmer is used by the
+garbage collector to find members of the class that may contain
+GC-pointers (pointers to GC-allocated objects), and to understand how
+those members should be interpreted.  Regions of the object that
+cannot contain GC-pointers are ignored by the garbage collector.
+
+<P>This document explains the rules for exact tracers and covers
+architecture, generated tracers, manually written tracers, and some
+peripheral matters.
+
+<P>There is also a <a href="exactgc-cookbook.html">cookbook</a> that
+covers many simple situations with a minimum of fuss.
+
+
+<a name="rules"></a>
+<h2>The Rules</h2>
+
+<P style="color: red"> This section needs to be updated.  Given that
+we've removed <tt>setExact</tt>, there are additional invariants on
+the tracer (must always be able to interpret all-zero-bit fields) and
+on the object (tags and tagged fields must be updated atomically;
+fields must never contain garbage, not even when passed to GC::Free).
+
+<P>When a class opts into exact tracing it discloses the fields
+containing GC-pointers to the garbage collector.  GC-pointers can be
+tagged - not just with Atom tags - and GC-pointers can be located in
+member structures, but two rules must be followed:
+
+<ul>
+<li> The class *must* disclose *all* its GC-pointer fields to the
+    garbage collector, including fields in member structures.
+
+<li> A GC-pointer field's value, after tag stripping, *must* be either
+    NULL or a pointer to the beginning of a *live* GC-allocated
+    object.
+</ul>
+
+<P>Usually it's not hard to follow the rules, but there are some tricky
+cases:
+
+<ul>
+<li> Where there is a union of GC-pointer and non-GC-pointer data.
+
+<li> Where a GC-pointer field can also store non-GC-pointer values,
+    effectively a disguised union.
+
+<li> Where GC-allocated objects are deleted explicitly through the
+    delete operator or GC::Free, leaving dangling pointers (notice the
+    second rule says the objects have to be "live").
+</ul>
+
+<P> Unions can be handled by disclosing them specially, as can dangling
+pointers, but the special handling comes at a cost.
+
+<P> Overall you'll be best off if you opt-in to exact tracing only for
+data types that use clean DWB, DRCWB, and GCMember fields for its
+GC-pointers and whose instances are always deleted by the garbage
+collector or reference counter.
+
+
+<h2>Class hierarchy</h2>
+
+<P>There are two rules about the class hierarchy too:
+
+<ul>
+<li> An exactly traced class *must* derive from GCTraceableObject,
+    GCFinalizedObject, or RCObject.  It *must not* derive from
+    GCObject, or from no GC class at all.
+
+<li> A class can be exactly traced only if its base classes are exactly
+    traced.  (Multiple inheritance works but requires tracers to be
+    written manually.)
+</ul>
+
+<P> Exact tracing is built on virtual methods and GCTraceableObject adds a
+vtable, where GCObject has none.
+
+<P> For some classes that are particularly small and whose instances are
+exceptionally numerous, the overhead of the vtable will not be
+affordable.  Means may still exist for tracing the instances exactly;
+please contact the VM team.
+
+<P> Object types (especially array-like types) that are allocated using
+GC::Alloc() and GC::Calloc() are treated as if they implicitly derive
+from GCObject.  To make such type exactly traced you can instead
+implement them as sybtypes of the ExactHeapList generic type, see the
+file core/avmplusList.h.  There is a small amount of overhead to that.
+If that overhead is unaffordable then manual tracers may be written
+for the objects (see a later section).
+
+<h2>Notes</h2>
+
+<ul>
+<li> Need to discuss multiple inheritance.
+</ul>
+
+<!-- The following was taken off the zerowing page and needs to be folded in -->
+<!--
+h1. Exact Tracing Architecture
+
+(This is obsolete and will soon go away, to be replaced by something that is not obsolete.)
+
+The following technologies come together to provide relatively convenient opt-in exact tracing:
+
+* A virtual method gcTrace() on some GC-managed objects; for each type, this method knows how to find and trace pointer fields efficiently in instances of that type
+* A flag on the object header of objects that are exactly traced tells the GC to invoke gcTrace() to trace it 
+* A convenient means of setting that flag
+* A set of utility classes that provide exact tracing for array-like objects
+* An annotation system expressed as C++ macros on classes that provide exact tracing and on the fields of those classes that must be seen by the exact tracer
+* A script that processes the annotations and generates the gcTrace() methods for the annotated types
+
+As a result, a programmer wishing to provide exact tracing for a class generally needs to do three things:
+
+* Write the annotations on the class
+* Ensure that the object header flag is set on the instance when the class is instantiated
+* Re-run the generator script whenever changes have been made to class definitions that impact exact tracing (adding pointer fields t, for example)
+
+h3. Writing annotations
+
+The documentation at the beginning of utils/exactgc.as describes the annotation system and how to use it.  However, in the simple case - you have an class that's derived from another GC'd class that's also exactly traced and all the traceable pointers in the class are declared as pointer fields directly in the class, not in member structures - then it usually looks like this:
+
+{code}
+  class GC_CPP_EXACT(MyClass, MyParentClass) {
+    ...
+
+    GC_DATA_BEGIN(MyClass)
+
+    DRCWB(SomeOtherClass*) GC_POINTER(myField);
+
+    GC_DATA_END(MyClass)    
+  }
+{code}
+
+That is:
+
+* You annotate the class header
+* You bracket all fields in the class that need an annotation with GC_DATA_BEGIN and GC_DATA_END
+* You wrap every field name that is a pointer in GC_POINTER
+
+h3. Setting the exact tracing flag
+
+The template function T* MMgc::setExact(T*) accepts any pointer type, sets the flag on the object, and returns the pointer.  Wrapped around a use of the 'new' operator it requires no further changes to the program.  This phrase:
+
+{code}
+  v = new (gc, AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext);
+{code}
+
+becomes this phrase:
+
+{code}
+  v = MMgc::setExact(new (gc, AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext));
+{code}
+
+While it is not incorrect if the exact tracing flag is not set on some instances of a class - the object will just be traced conservatively - it is undesirable.  The best way I've found to avoid the problem is to enforce the use of a factory method for all classes that are exactly traced.  The factory method invokes 'new' and also sets the exact tracing flag.  For example, for {html}AbcEnv{html} we have this method in the header file:
+
+{code}
+  REALLY_INLINE AbcEnv* AbcEnv::create(MMgc::GC* gc, PoolObject* builtinPool, CodeContext* builtinCodeContext)
+  {
+      return MMgc::setExact(new (gc, AbcEnv::calcExtra(builtinPool)) AbcEnv(builtinPool, builtinCodeContext));
+  }
+{code}
+
+All sites that previously constructed an {html}AbcEnv{html} by means of the 'new' operator now call the factory method instead.  In order to force the use of the factory method the {html}AbcEnv{html} constructor must be 'private' (or at most 'protected').
+
+Observe that the setting of the bit from the factory method allows us to designate a type as exactly traced independently of its subclasses.  Were we to set the exact tracing flag in the object's constructor instead that would not be the case - that would force all subclasses to be exactly traced.  In general that's not a desirable situation, not the least because it's hard to catch mistakes statically.
+
+h3. Running the exactgc generator script
+
+For the time being, the script utils/exactgc.as is run as part of rebuilding the builtins (a consequence of a shortcoming in some of the internal data structures in the VM that record the layout of slots in the object).  Thus to rebuild the necessary files in the core and shell directories, run these commands (if your asc.jar is in your private lib directory and you have an avmshell in your path):
+
+{code}
+  ( cd core ; ASC=~/lib/asc.jar AVM=avmshell ./builtin.py )
+  ( cd shell ; ASC=~/lib/asc.jar AVM=avmshell ./shell_toplevel.py )
+{code}
+
+At this time the script must be compiled to ABC.  Long term the aim is to get away from that.
+-->
+
+</body>
+</html>

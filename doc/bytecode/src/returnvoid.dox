@@ -1,0 +1,42 @@
+/*! \page returnvoid 
+
+\addindex returnvoid
+
+
+\section returnvoid returnvoid
+
+\subsection operation Operation
+
+Return from a method.
+
+\subsection format Format
+
+\code
+returnvoid
+\endcode
+
+\subsection forms Forms
+\code
+returnvoid = 71 (0x47)
+\endcode
+\subsection stack Stack
+
+\code
+... => ...
+\endcode
+
+\subsection description Description
+
+Return from the currently executing method. This returns the value undefined. If the 
+method has a return type, then undefined is coerced to that type and then returned.
+
+\subsection rt_execeptions Runtime exceptions
+
+None.
+
+\subsection notes Notes
+
+None.
+
+*/
+
