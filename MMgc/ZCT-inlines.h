@@ -48,9 +48,9 @@
 
 namespace MMgc
 {
-    REALLY_INLINE void ZCT::Add(RCObject *obj REFCOUNT_PROFILING_ARG(bool initial=false))
+    REALLY_INLINE void ZCT::Add(RCObject *obj REFCOUNT_PROFILING_ARG(bool initial))
     {
-        REFCOUNT_PROFILING_ONLY( gc->policy.signalZCTAdd(initial, count); )
+        REFCOUNT_PROFILING_ONLY( gc->policy.signalZCTAdd(initial, 0); )
 
         // Note:
         //  - If gc->collecting is true then top == limit and we'll
@@ -68,7 +68,7 @@ namespace MMgc
             AddSlow(obj);
     }
 
-    REALLY_INLINE void ZCT::Remove(RCObject *obj REFCOUNT_PROFILING_ARG(bool final=false))
+    REALLY_INLINE void ZCT::Remove(RCObject *obj REFCOUNT_PROFILING_ARG(bool final))
     {
         REFCOUNT_PROFILING_ONLY( gc->policy.signalZCTRemove(final); )
 
