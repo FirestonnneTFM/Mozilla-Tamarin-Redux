@@ -747,12 +747,12 @@ namespace MMgc
     }
 
 #ifdef MMGC_REFCOUNT_PROFILING
-    REALLY_INLINE void GC::AddToZCT(RCObject *obj, bool initial=false)
+    REALLY_INLINE void GC::AddToZCT(RCObject *obj, bool initial)
     {
         zct.Add(obj, initial);
     }
 
-    REALLY_INLINE void GC::RemoveFromZCT(RCObject *obj, bool final=false)
+    REALLY_INLINE void GC::RemoveFromZCT(RCObject *obj, bool final)
     {
         zct.Remove(obj, final);
     }
