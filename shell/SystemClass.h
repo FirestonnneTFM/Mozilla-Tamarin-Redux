@@ -95,7 +95,7 @@ namespace avmshell
     public:
         REALLY_INLINE static SystemClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) SystemClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) SystemClass(cvtable);
         }
 
         ~SystemClass();

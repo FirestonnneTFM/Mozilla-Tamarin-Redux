@@ -313,7 +313,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ScriptEnv* create(MMgc::GC* gc, MethodInfo* _method, ScopeChain* _scope)
         {
-            return MMgc::setExact(new (gc) ScriptEnv(_method, _scope));
+            return new (gc, MMgc::kExact) ScriptEnv(_method, _scope);
         }
 
         ScriptObject* initGlobal();
@@ -336,7 +336,7 @@ namespace avmplus
     public:
         REALLY_INLINE static FunctionEnv* create(MMgc::GC* gc, MethodInfo* _method, ScopeChain* _scope)
         {
-            return MMgc::setExact(new (gc) FunctionEnv(_method, _scope));
+            return new (gc, MMgc::kExact) FunctionEnv(_method, _scope);
         }
 
     // ------------------------ DATA SECTION BEGIN

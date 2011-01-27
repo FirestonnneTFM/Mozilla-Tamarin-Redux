@@ -71,7 +71,16 @@ namespace avmplus
             NS_Explicit = 4,
             NS_StaticProtected = 5
         };
+        
+    private:
         Namespace(Atom prefix, Stringp uri, NamespaceType type);
+        
+    public:
+        static REALLY_INLINE Namespace* create(MMgc::GC* gc, Atom prefix, Stringp uri, NamespaceType type)
+        {
+            return new (gc, MMgc::kExact) Namespace(prefix, uri, type);
+        }
+
         ~Namespace();
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);

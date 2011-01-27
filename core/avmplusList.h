@@ -753,7 +753,7 @@ namespace avmplus
                                                    uint32_t capacity, 
                                                    const typename T::TYPE* args = NULL)
         {
-            return MMgc::setExact(new (gc) ExactHeapList(gc, capacity, args));
+            return new (gc, MMgc::kExact) ExactHeapList(gc, capacity, args);
         }
         
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor)

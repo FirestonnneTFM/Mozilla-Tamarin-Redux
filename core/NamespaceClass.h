@@ -54,7 +54,7 @@ namespace avmplus
     public:
         REALLY_INLINE static NamespaceClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) NamespaceClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) NamespaceClass(cvtable);
         }
 
         // this = argv[0] (ignored)

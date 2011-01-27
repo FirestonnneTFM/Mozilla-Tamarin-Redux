@@ -179,7 +179,7 @@ namespace avmplus
     template <class VALUE_TYPE>
     REALLY_INLINE QuadContainer<VALUE_TYPE>* QuadContainer<VALUE_TYPE>::create(MMgc::GC* gc, uint32_t capacity)
     {
-        return MMgc::setExact(new (gc, sizeof(Quad<VALUE_TYPE>) * (capacity-1)) QuadContainer(capacity));
+        return new (gc, MMgc::kExact, sizeof(Quad<VALUE_TYPE>) * (capacity-1)) QuadContainer(capacity);
     }
     
     template <class VALUE_TYPE>

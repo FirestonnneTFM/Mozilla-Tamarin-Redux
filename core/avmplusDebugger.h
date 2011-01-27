@@ -550,7 +550,7 @@ namespace avmplus
     public:
         REALLY_INLINE static SourceFile* create(MMgc::GC* gc, Stringp name)
         {
-            return MMgc::setExact(new (gc) SourceFile(gc, name));
+            return new (gc, MMgc::kExact) SourceFile(gc, name);
         }
 
         /**
@@ -600,7 +600,7 @@ namespace avmplus
     public:
         REALLY_INLINE static AbcFile* create(MMgc::GC* gc, AvmCore* core, int size)
         {
-            return MMgc::setExact(new (gc) AbcFile(core, size));
+            return new (gc, MMgc::kExact) AbcFile(core, size);
         }
         
         /**

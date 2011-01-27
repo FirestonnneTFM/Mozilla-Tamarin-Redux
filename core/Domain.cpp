@@ -65,7 +65,7 @@ namespace avmplus
         // to get our immediate base, even if our base is NULL, thus
         // avoiding a check in the implementation of base().
         uint32_t extra = baseCount * sizeof(Domain*);
-        return MMgc::setExact(new (core->GetGC(), extra) Domain(core, base, baseCount));
+        return new (core->GetGC(), MMgc::kExact, extra) Domain(core, base, baseCount);
     }
 
     ClassClosure* Domain::getParameterizedType(ClassClosure* type)

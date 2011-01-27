@@ -49,7 +49,7 @@ namespace avmplus
         const int32_t outerSize = (outer ? outer->size : 0);
         const int32_t pad = capture + extraEntries;
         const size_t padSize = sizeof(uintptr_t) * (((pad > 0) ? (pad - 1) : 0) + outerSize);
-        ScopeTypeChain* nscope = MMgc::setExact(new(gc, padSize) ScopeTypeChain(outerSize + capture, outerSize + capture + extraEntries, traits));
+        ScopeTypeChain* nscope = new(gc, MMgc::kExact, padSize) ScopeTypeChain(outerSize + capture, outerSize + capture + extraEntries, traits);
         int32_t j = 0;
         for (int32_t i = 0; i < outerSize; i++)
         {
@@ -102,7 +102,7 @@ namespace avmplus
             return this;
 
         const size_t padSize = sizeof(uintptr_t) * (this->fullsize ? this->fullsize-1 : 0);
-        ScopeTypeChain* nscope = MMgc::setExact(new(gc, padSize) ScopeTypeChain(this->size, this->fullsize, p_traits));
+        ScopeTypeChain* nscope = new(gc, MMgc::kExact, padSize) ScopeTypeChain(this->size, this->fullsize, p_traits);
         for (int32_t i=0; i < this->fullsize; i ++)
         {
             nscope->_scopes[i] = this->_scopes[i];
@@ -152,7 +152,7 @@ namespace avmplus
         const int32_t outerSize = outer ? outer->_scopeTraits->size : 0;
         AvmAssert(scopeTraitsSize >= outerSize);
         const size_t padSize = scopeTraitsSize > 0 ? sizeof(Atom) * (scopeTraitsSize-1) : 0;
-        ScopeChain* nscope = MMgc::setExact(new(gc, padSize) ScopeChain(vtable, abcEnv, scopeTraits, dxns));
+        ScopeChain* nscope = new(gc, MMgc::kExact, padSize) ScopeChain(vtable, abcEnv, scopeTraits, dxns);
         for (int32_t i=0; i < outerSize; i ++)
         {
             nscope->setScope(gc, i, outer->_scopes[i]);
@@ -169,7 +169,7 @@ namespace avmplus
         AvmAssert(nstc->traits() == p_vtable->traits);
         const int32_t scopeTraitsSize = nstc->size;
         const size_t padSize = scopeTraitsSize > 0 ? sizeof(Atom) * (scopeTraitsSize-1) : 0;
-        ScopeChain* nscope = MMgc::setExact(new(gc, padSize) ScopeChain(p_vtable, p_abcEnv, nstc, _defaultXmlNamespace));
+        ScopeChain* nscope = new(gc, MMgc::kExact, padSize) ScopeChain(p_vtable, p_abcEnv, nstc, _defaultXmlNamespace);
         for (int32_t i=0; i < nstc->size; i ++)
         {
             nscope->setScope(gc, i, this->_scopes[i]);

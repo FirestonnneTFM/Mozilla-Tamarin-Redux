@@ -226,7 +226,7 @@ namespace avmshell
 
         REALLY_INLINE static DebugCLI* create(MMgc::GC* gc, AvmCore *core, Debugger::TraceLevel tracelevel)
         {
-            return MMgc::setExact(new (gc) DebugCLI(core, tracelevel));
+            return new (gc, MMgc::kExact) DebugCLI(core, tracelevel);
         }
 
         ~DebugCLI();

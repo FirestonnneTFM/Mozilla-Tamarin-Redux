@@ -42,7 +42,7 @@ namespace avmplus
 
 REALLY_INLINE PoolObject* PoolObject::create(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api)
 {
-    return MMgc::setExact(new (core->GetGC()) PoolObject(core, sb, startpos, api));
+    return new (core->GetGC(), MMgc::kExact) PoolObject(core, sb, startpos, api);
 }
 
 REALLY_INLINE const Multiname* PoolObject::precomputedMultiname(int32_t index)

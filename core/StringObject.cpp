@@ -337,8 +337,6 @@ namespace avmplus
     {
         AvmAssert(m_length >= 0);
         AvmAssert((uint64_t(m_length) << getWidth()) <= 0x7FFFFFFFU);
-        
-        MMgc::setExact(this);
     }
 
     // ctor for a dynamic string.
@@ -367,8 +365,6 @@ namespace avmplus
 #else
         (void)gc;
 #endif
-        
-        MMgc::setExact(this);
     }
 
     // ctor for a dependent string.
@@ -403,8 +399,6 @@ namespace avmplus
         master->IncrementRef();
         (void)gc;
 #endif
-        
-        MMgc::setExact(this);
     }
 
     // add a and b and check for overflow
@@ -458,7 +452,7 @@ namespace avmplus
         // master cannot be a dependent string
         AvmAssert(!master->isDependent());
         MMGC_MEM_TAG( "Strings" );
-        Stringp s = new(gc) String(gc, master, start, len);
+        Stringp s = new(gc, MMgc::kExact) String(gc, master, start, len);
         VERIFY_7BIT(s);
         return s;
     }
@@ -498,7 +492,7 @@ namespace avmplus
         // to a 4KB boundary; the max chars left is about 4KB.
         AvmAssert(charsLeft <= int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT));
 
-        Stringp s = new(gc) String(gc, buffer, w, len, charsLeft, is7bit);
+        Stringp s = new(gc, MMgc::kExact) String(gc, buffer, w, len, charsLeft, is7bit);
 
         if (data != NULL && len != 0)
             VMPI_memcpy(buffer, data, size_t(len << w));    // This is safe because alloc >= len and buffer size is alloc << w and that has been checked.
@@ -530,7 +524,7 @@ namespace avmplus
         // only 8-bit strings should set the 7-bit flag
         if (w != k8)
             is7bit = false;
-        Stringp s = new(gc) String(data, w, len, is7bit);
+        Stringp s = new (gc, MMgc::kExact) String(data, w, len, is7bit);
         VERIFY_7BIT(s);
         return s;
     }

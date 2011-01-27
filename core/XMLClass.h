@@ -56,7 +56,7 @@ namespace avmplus
 
         REALLY_INLINE static XMLClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) XMLClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) XMLClass(cvtable);
         }
 
         // this = argv[0]
@@ -131,7 +131,7 @@ namespace avmplus
     public:
         REALLY_INLINE static QNameClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) QNameClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) QNameClass(cvtable);
         }
 
         // this = argv[0]

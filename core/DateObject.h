@@ -75,12 +75,12 @@ namespace avmplus
     public:
         REALLY_INLINE static DateObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* prototype)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) DateObject(ivtable, prototype));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) DateObject(ivtable, prototype);
         }
 
         REALLY_INLINE static DateObject* create(MMgc::GC* gc, DateClass* type, const Date& date)
         {
-            return MMgc::setExact(new (gc, type->ivtable()->getExtraSize()) DateObject(type, date));
+            return new (gc, MMgc::kExact, type->ivtable()->getExtraSize()) DateObject(type, date);
         }
         
         // renamed to avoid hiding ScriptObject::toString

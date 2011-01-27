@@ -53,7 +53,7 @@ namespace avmplus
     public:
         REALLY_INLINE static FunctionClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) FunctionClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) FunctionClass(cvtable);
         }
 
         ClassClosure *createEmptyFunction();
@@ -90,7 +90,7 @@ namespace avmplus
     public:
         static FunctionObject* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call)
         {
-            return MMgc::setExact(new (gc, vtable->getExtraSize()) FunctionObject (vtable, call));
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) FunctionObject (vtable, call);
         }
 
         Atom AS3_call(Atom thisAtom, Atom *argv, int argc);

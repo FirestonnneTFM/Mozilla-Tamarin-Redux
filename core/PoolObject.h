@@ -78,7 +78,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ConstantStringContainer* create(MMgc::GC* gc, size_t extra, PoolObject* pool)
         {
-            return MMgc::setExact(new (gc, extra) ConstantStringContainer(pool));
+            return new (gc, MMgc::kExact, extra) ConstantStringContainer(pool);
         }
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);

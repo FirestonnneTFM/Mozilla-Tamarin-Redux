@@ -221,7 +221,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ByteArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ByteArrayObject(ivtable, delegate, defaultEncoding));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ByteArrayObject(ivtable, delegate, defaultEncoding);
         }
 
         virtual bool hasAtomProperty(Atom name) const;
@@ -320,7 +320,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ByteArrayClass* create(MMgc::GC* gc, VTable* vtable)
         {
-            return MMgc::setExact(new (gc, vtable->getExtraSize()) ByteArrayClass(vtable));
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) ByteArrayClass(vtable);
         }
 
         ~ByteArrayClass() { }

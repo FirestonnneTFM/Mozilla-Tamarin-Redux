@@ -52,7 +52,7 @@ namespace avmplus
     public:
         REALLY_INLINE static VectorClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) VectorClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) VectorClass(cvtable);
         }
 
         /**
@@ -143,7 +143,7 @@ namespace avmplus
     public:
         REALLY_INLINE static IntVectorClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) IntVectorClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) IntVectorClass(cvtable);
         }
 
         GC_NO_DATA(IntVectorClass)
@@ -160,7 +160,7 @@ namespace avmplus
     public:
         REALLY_INLINE static UIntVectorClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) UIntVectorClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) UIntVectorClass(cvtable);
         }
 
         GC_NO_DATA(UIntVectorClass)
@@ -177,7 +177,7 @@ namespace avmplus
     public:
         REALLY_INLINE static DoubleVectorClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) DoubleVectorClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) DoubleVectorClass(cvtable);
         }
 
         GC_NO_DATA(DoubleVectorClass)
@@ -194,7 +194,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ObjectVectorClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ObjectVectorClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) ObjectVectorClass(cvtable);
         }
 
         GC_NO_DATA(ObjectVectorClass)
@@ -412,7 +412,7 @@ namespace avmplus
     public:
         REALLY_INLINE static IntVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) IntVectorObject(ivtable, delegate, vecClass));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) IntVectorObject(ivtable, delegate, vecClass);
         }
 
         // AS3 native function implementations
@@ -437,7 +437,7 @@ namespace avmplus
     public:
         REALLY_INLINE static UIntVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) UIntVectorObject(ivtable, delegate, vecClass));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) UIntVectorObject(ivtable, delegate, vecClass);
         }
 
         // AS3 native function implementations
@@ -462,7 +462,7 @@ namespace avmplus
     public:
         REALLY_INLINE static DoubleVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) DoubleVectorObject(ivtable, delegate, vecClass));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) DoubleVectorObject(ivtable, delegate, vecClass);
         }
 
         // AS3 native function implementations
@@ -487,7 +487,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ObjectVectorObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ObjectVectorObject(ivtable, delegate, vecClass));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ObjectVectorObject(ivtable, delegate, vecClass);
         }
     
         // AS3 native function implementations

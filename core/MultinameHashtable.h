@@ -160,7 +160,7 @@ namespace avmplus
          */
         REALLY_INLINE static MultinameHashtable* create(MMgc::GC* gc, int capacity = kDefaultCapacity)
         {
-            return MMgc::setExact(new (gc) MultinameHashtable(capacity));
+            return new (gc, MMgc::kExact) MultinameHashtable(capacity);
         }
 
         ~MultinameHashtable();

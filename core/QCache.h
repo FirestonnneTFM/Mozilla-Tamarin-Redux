@@ -92,7 +92,7 @@ namespace avmplus
     public:
         REALLY_INLINE static QCache* create(uint32_t max, MMgc::GC* gc)
         {
-            return MMgc::setExact(new (gc) QCache(max, gc));
+            return new (gc, MMgc::kExact) QCache(max, gc);
         }
 
         ~QCache();

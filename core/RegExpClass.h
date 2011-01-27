@@ -54,7 +54,7 @@ namespace avmplus
     public:
         REALLY_INLINE static RegExpClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) RegExpClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) RegExpClass(cvtable);
         }
 
         // this = argv[0]
