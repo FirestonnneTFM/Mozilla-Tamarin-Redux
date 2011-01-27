@@ -42,19 +42,16 @@
 ##
 . ./environment.sh
 
-if [ "$SSH_SHELL_REMOTE_USER" = "" ] ||
-   [ "$SSH_SHELL_REMOTE_HOST" = "" ] ||
-   [ "$SSH_SHELL_REMOTE_DIR" = "" ];
+if [ "$threads" == "" ]
 then
-    echo "missing environment variable: "
-    echo "SSH_SHELL_REMOTE_USER" = "$SSH_SHELL_REMOTE_USER"
-    echo "SSH_SHELL_REMOTE_HOST" = "$SSH_SHELL_REMOTE_HOST"
-    echo "SSH_SHELL_REMOTE_DIR" = "$SSH_SHELL_REMOTE_DIR"
-    exit 1
+   threadcount="1"
+else
+   threadcount=$threads
 fi
 
-exitcode=0
+count="0"
 
+exitcode=0
 ##
 # Calculate the change number and change id
 ##
@@ -65,38 +62,66 @@ if [[ "$filename" = "" ]]; then
     filename=$shell_release
 fi
 
-# Deploy ssh-shell-runner.sh
-echo "Installing ssh-shell-runner.sh"
-ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm ssh-shell-runner.sh"
-scp ../all/ssh-shell-runner.sh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/ssh-shell-runner.sh
-# make sure file copied over
-if [[ "$?" -ne "0" ]]; then 
+while true
+do
+    # use indirect reference to set SSH_SHELL_REMOTE_USERn where n=$count
+    eval SSH_SHELL_REMOTE_USER=\${SSH_SHELL_REMOTE_USER$count}
+    eval SSH_SHELL_REMOTE_HOST=\${SSH_SHELL_REMOTE_HOST$count}
+    eval SSH_SHELL_REMOTE_DIR=\${SSH_SHELL_REMOTE_DIR$count}
+    
+    if [ "$SSH_SHELL_REMOTE_USER" = "" ] ||
+       [ "$SSH_SHELL_REMOTE_HOST" = "" ] ||
+       [ "$SSH_SHELL_REMOTE_DIR" = "" ];
+    then
+        echo "missing environment variable: "
+        echo "SSH_SHELL_REMOTE_USER${count}" = "$SSH_SHELL_REMOTE_USER"
+        echo "SSH_SHELL_REMOTE_HOST${count}" = "$SSH_SHELL_REMOTE_HOST"
+        echo "SSH_SHELL_REMOTE_DIR${count}" = "$SSH_SHELL_REMOTE_DIR"
+        exit 1
+    fi
+
+    echo "setting up client $count"
+    echo "SSH_SHELL_REMOTE_USER" = "$SSH_SHELL_REMOTE_USER"
+    echo "SSH_SHELL_REMOTE_HOST" = "$SSH_SHELL_REMOTE_HOST"
+    echo "SSH_SHELL_REMOTE_DIR" = "$SSH_SHELL_REMOTE_DIR"
+
+    # Deploy ssh-shell-runner.sh
+    echo "Installing ssh-shell-runner.sh on $SSH_SHELL_REMOTE_HOST to $SSH_SHELL_REMOTE_DIR"
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm ssh-shell-runner.sh"
+    scp ../all/ssh-shell-runner.sh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/ssh-shell-runner.sh
+    # make sure file copied over
+    if [[ "$?" -ne "0" ]]; then 
         echo "Error copying ssh-shell-runner.sh."
         # If there was an error copying the script abort
         exit 1
-fi
-# set executable bit for ssh-shell-runner.sh
-ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;chmod +x ssh-shell-runner.sh"
+    fi
+    # set executable bit for ssh-shell-runner.sh
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;chmod +x ssh-shell-runner.sh"
 
-echo""
-echo "Installing $filename"
+    echo""
+    echo "Installing $filename on $SSH_SHELL_REMOTE_HOST to $SSH_SHELL_REMOTE_DIR"
 
-# Clean up previous avmshell if it exists
-ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm avmshell"
+    # Clean up previous avmshell if it exists
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm avmshell"
 
-# Upload the shell, filename will ALWAYS be avmshell on the remote system
-scp $filename $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/avmshell
+    # Upload the shell, filename will ALWAYS be avmshell on the remote system
+    scp $filename $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST:$SSH_SHELL_REMOTE_DIR/avmshell
 
-# Make sure that the version running on the remote system is the expected revision
-ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;chmod +x avmshell;./avmshell" > /tmp/stdout
+    # Make sure that the version running on the remote system is the expected revision
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;chmod +x avmshell;./avmshell" > /tmp/stdout
 
-# Verify that the shell was successfully deployed
-deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $6}'`
-if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ]; 
-then
-    echo $0 FAILED!!!
-    echo requested build "$change:$changeid" is not what is deployed "${deploy_rev%:*}:${deploy_rev#*:}"
-    exitcode=1
-fi
+    # Verify that the shell was successfully deployed
+    deploy_rev=`cat /tmp/stdout | grep "avmplus shell" | awk '{print $6}'`
+    if [ "$change" != "${deploy_rev%:*}" ] || [ "$changeid" != "${deploy_rev#*:}" ]; 
+    then
+        echo $0 FAILED!!!
+        echo requested build "$change:$changeid" is not what is deployed "${deploy_rev%:*}:${deploy_rev#*:}"
+        exitcode=1
+    fi
+    count=$[count+1]
+    test "$count" == "$threadcount" && {
+        break
+    }
+done
 
 exit $exitcode

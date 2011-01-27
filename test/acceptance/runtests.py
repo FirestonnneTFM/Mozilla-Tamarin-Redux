@@ -42,7 +42,7 @@
 #
 
 import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string
-import re, platform, threading, time
+import re, platform, threading, time, copy
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -61,6 +61,7 @@ from util.runtestUtils import *
 class AcceptanceRuntest(RuntestBase):
     runESC = False
     escbin = '../../esc/bin/'
+    passthreadid = False
     androidthreads = False
     androiddevices = []
     verifyonly = False
@@ -88,6 +89,7 @@ class AcceptanceRuntest(RuntestBase):
         print('    --ats           generate ats swfs instead of running tests')
         print('    --atsdir        base output directory for ats swfs - defaults to ATS_SWFS')
         print('    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially')
+        print('    --passthreadid  set the environment variable threadid when calling the AVM script.  The threadid is an integer 0...n-1 where threads=n.')
         print('    --androidthreads    assign a thread for each android device connected.')
         print('    --verify        run a verify pass instead of running abcs')
         print('    --verifyonly    run a -Dverifyonly pass: only checks test exitcode')
@@ -98,7 +100,7 @@ class AcceptanceRuntest(RuntestBase):
     def setOptions(self):
         RuntestBase.setOptions(self)
         self.longOptions.extend(['ext=','esc','escbin=','eval','threads=','ats',
-                                 'atsdir=','verify','verifyonly','androidthreads'])
+                                 'atsdir=','verify','verifyonly','androidthreads','passthreadid'])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -111,6 +113,8 @@ class AcceptanceRuntest(RuntestBase):
                 self.escbin = v
             elif o in ('--eval',):
                 self.eval = True
+            elif o in ('--passthreadid',):
+                self.passthreadid=True
             elif o in ('--androidthreads',):
                 self.androidthreads=True
                 self.threads=1
@@ -364,6 +368,18 @@ class AcceptanceRuntest(RuntestBase):
         return line, extraVmArgs, abcargs
 
     def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
+        passByEnv=None
+        if self.passthreadid:
+            try:
+                if threading.currentThread().getName()=='MainThread':
+                    n=0
+                else:
+                    n=int(threading.currentThread().getName()[7:])-1
+                passByEnv=copy.deepcopy(os.environ)
+                passByEnv["threadid"]='%s' % n
+            except:
+                print(sys.exc_info())
+               
         if self.androidthreads:
             try:
                 if threading.currentThread().getName()=='MainThread':
@@ -418,7 +434,7 @@ class AcceptanceRuntest(RuntestBase):
             # make sure util file has been compiled
             if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
                 self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'), outputCalls=outputCalls)
-            (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, self.abcasmShell+'.abc', testName), outputCalls=outputCalls)
+            (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, self.abcasmShell+'.abc', testName), outputCalls=outputCalls, envVars=passByEnv)
         elif self.verify:
             # get the abcdump for the file
             (f,err,exitcode) = self.run_pipe('%s %s -- %s' % (self.avm, self.abcdump+'.abc', testName), outputCalls=outputCalls)
@@ -441,9 +457,9 @@ class AcceptanceRuntest(RuntestBase):
                 lpass += 1
         else:
             if abcargs:
-                (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs), outputCalls=outputCalls)
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs), outputCalls=outputCalls, envVars=passByEnv)
             else:
-                (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName), outputCalls=outputCalls)
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName), outputCalls=outputCalls, envVars=passByEnv)
 
         # Test has been run, handle output
         if self.verifyonly:

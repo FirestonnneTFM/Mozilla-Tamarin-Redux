@@ -47,7 +47,6 @@
 
 export TZ="EST5EDT,M3.2.0/02:00:00,M11.1.0/02:00:00"
 
-cd /root/app
 ./avmshell $*
 echo "EXITCODE=$?"
 
