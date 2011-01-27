@@ -68,12 +68,12 @@ namespace avmplus
     public:
         REALLY_INLINE static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, uint32_t capacity)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, capacity));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, capacity);
         }
 
         REALLY_INLINE static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, Atom *argv, int argc)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, argv, argc));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, argv, argc);
         }
         
         ~ArrayObject();

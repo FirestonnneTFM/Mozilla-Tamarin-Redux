@@ -101,7 +101,7 @@ namespace avmplus
     public:
         REALLY_INLINE static XMLListObject* create(MMgc::GC* gc, XMLListClass* cls, Atom targetObject = nullObjectAtom, const Multiname* targetProperty = 0)
         {
-            return MMgc::setExact(new (gc) XMLListObject(cls, targetObject, targetProperty));
+            return new (gc, MMgc::kExact) XMLListObject(cls, targetObject, targetProperty);
         }
         
     private:

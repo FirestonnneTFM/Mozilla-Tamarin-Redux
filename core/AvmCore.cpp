@@ -3819,7 +3819,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         const uint32_t count = traits->getTraitsBindings()->methodCount;
         size_t extraSize = sizeof(MethodEnv*)*(count > 0 ? count-1 : 0);
-        return MMgc::setExact(new (GetGC(), extraSize) VTable(traits, base, toplevel));
+        return new (GetGC(), MMgc::kExact, extraSize) VTable(traits, base, toplevel);
     }
 
     RegExpObject* AvmCore::newRegExp(RegExpClass* regexpClass,
@@ -3868,7 +3868,7 @@ return the result of the comparison ToPrimitive(x) == y.
             p = internString(string(prefix))->atom();
         }
 
-        Namespacep ns = new (GetGC()) Namespace(p, u, type);
+        Namespacep ns = Namespace::create(GetGC(), p, u, type);
         // called from AS so need to get the api version off the call stack
         if (ApiUtils::isVersionedNS(this, type, u))
             ns->setAPI(this->getAPI(NULL));
@@ -3898,7 +3898,7 @@ return the result of the comparison ToPrimitive(x) == y.
             p = u->isEmpty() ? kEmptyString->atom() : undefinedAtom;
             u = internString(u);
         }
-        Namespacep ns = new (GetGC()) Namespace(p, u, type);
+        Namespacep ns = Namespace::create(GetGC(), p, u, type);
         // called from AS so need to get the api version off the call stack
         if (ApiUtils::isVersionedNS(this, type, u))
             ns->setAPI(this->getAPI(NULL));
@@ -3908,7 +3908,7 @@ return the result of the comparison ToPrimitive(x) == y.
     Namespacep AvmCore::newNamespace(Stringp uri, Namespace::NamespaceType type, int32_t api)
     {
         Atom prefix = uri->isEmpty() ? kEmptyString->atom() : undefinedAtom;
-        Namespacep ns = new (GetGC()) Namespace(prefix, uri, type);
+        Namespacep ns = Namespace::create(GetGC(), prefix, uri, type);
         if (ApiUtils::isVersionedNS(this, type, uri))
             ns->setAPI(api);
         return ns;

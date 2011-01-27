@@ -233,7 +233,7 @@ namespace avmshell
     public:
         REALLY_INLINE static ShellToplevel* create(MMgc::GC* gc, AbcEnv* abcEnv)
         {
-            return MMgc::setExact(new (gc) ShellToplevel(abcEnv));
+            return new (gc, MMgc::kExact) ShellToplevel(abcEnv);
         }
 
         ShellCore* core() const {

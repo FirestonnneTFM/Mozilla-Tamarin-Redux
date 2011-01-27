@@ -125,7 +125,7 @@ namespace avmplus
     public:
         REALLY_INLINE static E4XNodeAux* create(MMgc::GC* gc, Stringp name, Namespace *ns, FunctionObject* notify = NULL)
         {
-            return MMgc::setExact(new (gc) E4XNodeAux (name, ns, notify));
+            return new (gc, MMgc::kExact) E4XNodeAux (name, ns, notify);
         }
 
 #ifdef DEBUGGER
@@ -288,7 +288,7 @@ namespace avmplus
     public:
         REALLY_INLINE static TextE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
         {
-            return MMgc::setExact(new (gc) TextE4XNode(parent, value));
+            return new (gc, MMgc::kExact) TextE4XNode(parent, value);
         }
 
         int getClass() const { return kText; }
@@ -311,7 +311,7 @@ namespace avmplus
     public:
         REALLY_INLINE static CommentE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
         {
-            return MMgc::setExact(new (gc) CommentE4XNode(parent, value));
+            return new (gc, MMgc::kExact) CommentE4XNode(parent, value);
         }
 
         int getClass() const { return kComment; }
@@ -335,7 +335,7 @@ namespace avmplus
     public:
         REALLY_INLINE static AttributeE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
         {
-            return MMgc::setExact(new (gc) AttributeE4XNode(parent, value));
+            return new (gc, MMgc::kExact) AttributeE4XNode(parent, value);
         }
 
         int getClass() const { return kAttribute; }
@@ -358,7 +358,7 @@ namespace avmplus
     public:
         REALLY_INLINE static CDATAE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
         {
-            return MMgc::setExact(new (gc) CDATAE4XNode(parent, value));
+            return new (gc, MMgc::kExact) CDATAE4XNode(parent, value);
         }
 
         int getClass() const { return kCDATA; }
@@ -381,7 +381,7 @@ namespace avmplus
     public:
         REALLY_INLINE static PIE4XNode* create(MMgc::GC* gc, E4XNode *parent, String *value)
         {
-            return MMgc::setExact(new (gc) PIE4XNode(parent, value));
+            return new (gc, MMgc::kExact) PIE4XNode(parent, value);
         }
 
         int getClass() const { return kProcessingInstruction; }
@@ -417,7 +417,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ElementE4XNode* create(MMgc::GC* gc, E4XNode *parent)
         {
-            return MMgc::setExact(new (gc) ElementE4XNode(parent));
+            return new (gc, MMgc::kExact) ElementE4XNode(parent);
         }
 
         int getClass() const { return kElement; }

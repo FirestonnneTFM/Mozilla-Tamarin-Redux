@@ -602,9 +602,9 @@ namespace avmplus
         /**
         Make operator new private - people should use the create functions
         */
-        REALLY_INLINE   void*       operator new(size_t size, MMgc::GC *gc)
+        REALLY_INLINE   void*       operator new(size_t size, MMgc::GC *gc, MMgc::GCExactFlag)
         {
-            return AvmPlusScriptableObject::operator new(size, gc);
+            return AvmPlusScriptableObject::operator new(size, gc, MMgc::kExact);
         }
         REALLY_INLINE   void        operator delete(void*) {}   // Strings cannot be deleted
 

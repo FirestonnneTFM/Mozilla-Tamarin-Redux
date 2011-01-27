@@ -58,8 +58,6 @@ namespace avmplus
         // ensure that if the incoming Atom is a string, that it's interned
         AvmAssert(AvmCore::isString(prefix) ? (AvmCore::atomToString(prefix))->isInterned() : 1);
         setUri(uri, flags);
-        
-        MMgc::setExact(this);
     }
 
     Namespace::~Namespace()

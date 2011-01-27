@@ -53,7 +53,7 @@ namespace avmplus
     public:
         REALLY_INLINE static NumberClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) NumberClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) NumberClass(cvtable);
         }
 
         // this = argv[0] (ignored)

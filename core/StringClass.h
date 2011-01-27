@@ -54,7 +54,7 @@ namespace avmplus
     public:
         REALLY_INLINE static StringClass* create(MMgc::GC *gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) StringClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) StringClass(cvtable);
         }
 
         // this = argv[0]

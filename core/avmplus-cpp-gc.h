@@ -51,7 +51,7 @@ bool AbcEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
         gc->TraceLocation(&m_pool);
     }
     const size_t _xact_work_increment = 2000/sizeof(void*);
-    const size_t _xact_work_count = m_pool->methodCount();
+    const size_t _xact_work_count = m_pool ? m_pool->methodCount() : 0;
     if (_xact_cursor * _xact_work_increment >= _xact_work_count)
         return false;
     size_t _xact_work = _xact_work_increment;

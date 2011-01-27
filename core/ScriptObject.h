@@ -58,12 +58,12 @@ namespace avmplus
     public:
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate)
         {
-            return MMgc::setExact(new (gc, vtable->getExtraSize()) ScriptObject(vtable, delegate));
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) ScriptObject(vtable, delegate);
         }
         
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity)
         {
-            return MMgc::setExact(new (gc, vtable->getExtraSize()) ScriptObject(vtable, delegate, htCapacity));
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) ScriptObject(vtable, delegate, htCapacity);
         }
 
         ~ScriptObject();

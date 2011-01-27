@@ -1442,7 +1442,7 @@ namespace avmplus
                 {
                     uint32_t index =  readU30(pos);
                     Stringp uri = index ? resolveUtf8(index) : (Stringp)core->kEmptyString;
-                    Namespacep ns = new (core->GetGC()) Namespace(nullStringAtom, uri, Namespace::NS_Private);
+                    Namespacep ns = Namespace::create(core->GetGC(), nullStringAtom, uri, Namespace::NS_Private);
                     cpool_ns.set(i, ns);
                     break;
                 }

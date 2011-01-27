@@ -127,12 +127,12 @@ namespace avmplus
     public:
         REALLY_INLINE static XMLObject* create(MMgc::GC* gc, XMLClass *type, Stringp s=NULL, Namespacep defaultNamespace=NULL)
         {
-            return MMgc::setExact(new (gc) XMLObject(type, s, defaultNamespace));
+            return new (gc, MMgc::kExact) XMLObject(type, s, defaultNamespace);
         }
         
         REALLY_INLINE static XMLObject* create(MMgc::GC* gc, XMLClass *type, E4XNode *node)
         {
-            return MMgc::setExact(new (gc) XMLObject(type, node));
+            return new (gc, MMgc::kExact) XMLObject(type, node);
         }
 
     private:
@@ -353,17 +353,17 @@ namespace avmplus
     public:
         REALLY_INLINE static QNameObject* create(MMgc::GC* gc, QNameClass* cls, const Multiname &mn)
         {
-            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) QNameObject(cls, mn));
+            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) QNameObject(cls, mn);
         }
         
         REALLY_INLINE static QNameObject* create(MMgc::GC* gc, QNameClass* cls, Atom attributeName, bool bAttribute=false)
         {
-            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) QNameObject(cls, attributeName, bAttribute));
+            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) QNameObject(cls, attributeName, bAttribute);
         }
         
         REALLY_INLINE static QNameObject* create(MMgc::GC* gc, QNameClass* cls, Namespace* ns, Atom attributeName, bool bAttribute=false)
         {
-            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) QNameObject(cls, ns, attributeName, bAttribute));
+            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) QNameObject(cls, ns, attributeName, bAttribute);
         }
         
     private:

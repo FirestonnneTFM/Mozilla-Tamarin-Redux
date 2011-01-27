@@ -70,22 +70,22 @@ namespace avmplus
     public:
         REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, RegExpClass* cls, ScriptObject *delegate)
         {
-            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) RegExpObject(cls, delegate));
+            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) RegExpObject(cls, delegate);
         }
         
         REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, RegExpClass* cls, RegExpObject *toCopy)
         {
-            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) RegExpObject(toCopy));
+            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) RegExpObject(toCopy);
         }
         
         REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, RegExpClass* cls, Stringp pattern, Stringp options)
         {
-            return MMgc::setExact(new (gc, cls->ivtable()->getExtraSize()) RegExpObject(cls, pattern, options));
+            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) RegExpObject(cls, pattern, options);
         }
         
         REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, VTable* vtable, RegExpClass* cls, Stringp pattern, Stringp options)
         {
-            return MMgc::setExact(new (gc, vtable->getExtraSize()) RegExpObject(cls, pattern, options));
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) RegExpObject(cls, pattern, options);
         }
 
         ~RegExpObject();

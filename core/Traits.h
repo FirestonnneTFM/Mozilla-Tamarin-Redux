@@ -219,7 +219,7 @@ namespace avmplus
 
         REALLY_INLINE static TraitsMetadata* create(MMgc::GC* gc, size_t extra, TraitsMetadatap _base, PoolObject* _residingPool, MetadataPtr _metadata_pos, uint32_t _slotCount, uint32_t _methodCount)
         {
-            return MMgc::setExact(new (gc, extra) TraitsMetadata(_base, _residingPool, _metadata_pos, _slotCount, _methodCount));
+            return new (gc, MMgc::kExact, extra) TraitsMetadata(_base, _residingPool, _metadata_pos, _slotCount, _methodCount);
         }
 
     private:

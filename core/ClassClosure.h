@@ -54,12 +54,12 @@ namespace avmplus
     public:
         REALLY_INLINE static ClassClosure* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ClassClosure(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) ClassClosure(cvtable);
         }
 
         REALLY_INLINE static ClassClosure* create(MMgc::GC* gc, size_t extraSize, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, extraSize) ClassClosure(cvtable));
+            return new (gc, MMgc::kExact, extraSize) ClassClosure(cvtable);
         }
         
         Atom get_prototype();

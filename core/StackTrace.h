@@ -221,7 +221,7 @@ namespace avmplus
         REALLY_INLINE static StackTrace* create(MMgc::GC* gc, int depth)
         {
             size_t extra = depth > 0 ? sizeof(StackTrace::Element) * (depth-1) : 0;
-            return MMgc::setExact(new (gc, extra) StackTrace(depth));
+            return new (gc, MMgc::kExact, extra) StackTrace(depth);
         }
 
         Stringp format(AvmCore* core);

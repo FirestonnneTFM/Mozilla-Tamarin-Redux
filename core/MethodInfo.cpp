@@ -244,7 +244,7 @@ namespace avmplus
         MMgc::GC* gc = core->GetGC();
         const uint32_t extra = (local_count <= 1) ? 0 : (sizeof(Stringp)*(local_count-1));
 
-        DebuggerMethodInfo* dmi = MMgc::setExact(new (gc, extra) DebuggerMethodInfo(local_count, codeSize, max_scopes));
+        DebuggerMethodInfo* dmi = new (gc, MMgc::kExact, extra) DebuggerMethodInfo(local_count, codeSize, max_scopes);
         const Stringp undef = core->kundefined;
         for (int32_t i=0; i<local_count; i++)
         {

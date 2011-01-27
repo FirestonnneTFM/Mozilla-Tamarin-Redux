@@ -54,7 +54,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ErrorClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) ErrorClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) ErrorClass(cvtable);
         }
 
         Atom call(int argc, Atom* argv)
@@ -104,7 +104,7 @@ namespace avmplus
     public:
         REALLY_INLINE static ErrorObject* create(MMgc::GC* gc, VTable *ivtable, ScriptObject *prototype)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ErrorObject(ivtable, prototype));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ErrorObject(ivtable, prototype);
         }
 
         ~ErrorObject() {
@@ -161,7 +161,7 @@ namespace avmplus
                 : ErrorObject(vtable, delegate) {}                                              \
         public:                                                                                 \
             REALLY_INLINE static obj* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate) { \
-                return MMgc::setExact(new (gc, ivtable->getExtraSize()) obj(ivtable, delegate)); \
+                return new (gc, MMgc::kExact, ivtable->getExtraSize()) obj(ivtable, delegate); \
             }                                                                                   \
         private:                                                                                \
             virtual bool gcTrace(MMgc::GC* gc, size_t cursor); \
@@ -176,7 +176,7 @@ namespace avmplus
         public:                                                                                 \
             REALLY_INLINE static cls* create(MMgc::GC* gc, VTable* cvtable)                     \
             {                                                                                   \
-                return MMgc::setExact(new (gc, cvtable->getExtraSize()) cls(cvtable));          \
+                return new (gc, MMgc::kExact, cvtable->getExtraSize()) cls(cvtable);            \
             }                                                                                   \
             ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate)               \
             {                                                                                   \

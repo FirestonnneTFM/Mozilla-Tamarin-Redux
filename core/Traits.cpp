@@ -61,7 +61,7 @@ namespace avmplus
                                 slotCount * sizeof(SlotInfo) + methodCount * sizeof(MethodInfo) :
                                 0;
 
-        TraitsBindings* tb = MMgc::setExact(new (gc, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount, typesValid));
+        TraitsBindings* tb = new (gc, MMgc::kExact, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount, typesValid);
         if (_base && typesValid)
         {
             if (_base->slotCount)
@@ -518,14 +518,14 @@ namespace avmplus
     {
         AvmAssert(posType != TRAITSTYPE_CATCH);
         AvmAssert(pool != NULL);
-        Traits* traits = MMgc::setExact(new (pool->core->GetGC()) Traits(pool, base, objectSize, offsetOfSlots, traitsPos, posType));
+        Traits* traits = new (pool->core->GetGC(), MMgc::kExact) Traits(pool, base, objectSize, offsetOfSlots, traitsPos, posType);
         return traits;
     }
 
     /*static*/ Traits* Traits::newCatchTraits(const Toplevel* toplevel, PoolObject* pool, TraitsPosPtr traitsPos, Stringp name, Namespacep ns)
     {
         AvmAssert(pool != NULL);
-        Traits* traits = MMgc::setExact(new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH));
+        Traits* traits = new (pool->core->GetGC(), MMgc::kExact) Traits(pool, NULL, sizeof(ScriptObject), sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH);
         traits->final = true;
         traits->set_names(ns, name);
         traits->verifyBindings(toplevel);

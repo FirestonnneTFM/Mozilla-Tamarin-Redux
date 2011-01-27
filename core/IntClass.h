@@ -53,7 +53,7 @@ namespace avmplus
     public:
         REALLY_INLINE static IntClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) IntClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) IntClass(cvtable);
         }
 
         // this = argv[0] (ignored)
@@ -87,7 +87,7 @@ namespace avmplus
     public:
         REALLY_INLINE static UIntClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) UIntClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) UIntClass(cvtable);
         }
         
         // this = argv[0] (ignored)

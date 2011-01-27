@@ -287,12 +287,12 @@ public:
 
 REALLY_INLINE ImtThunkEnv* ImtThunkEnv::create(MMgc::GC* gc, VTable* v)
 {
-    return MMgc::setExact(new (gc) ImtThunkEnv(v));
+    return new (gc, MMgc::kExact) ImtThunkEnv(v);
 }
 
 REALLY_INLINE ImtThunkEnv* ImtThunkEnv::create(MMgc::GC* gc, uint32_t imtMapCount)
 {
-    return MMgc::setExact(new (gc, imtMapCount * sizeof(ImtThunkEntry)) ImtThunkEnv(imtMapCount));
+    return new (gc, MMgc::kExact, imtMapCount * sizeof(ImtThunkEntry)) ImtThunkEnv(imtMapCount);
 }
     
 REALLY_INLINE ImtThunkEnv::ImtThunkEnv(VTable* v)

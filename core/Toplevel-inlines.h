@@ -42,7 +42,7 @@ namespace avmplus
 
 REALLY_INLINE Toplevel* Toplevel::create(MMgc::GC* gc, AbcEnv* abcEnv)
 {
-    return MMgc::setExact(new (gc) Toplevel(abcEnv));
+    return new (gc, MMgc::kExact) Toplevel(abcEnv);
 }
     
 REALLY_INLINE Atom Toplevel::callproperty(Atom base, const Multiname* name, int argc, Atom* atomv, VTable* vtable)

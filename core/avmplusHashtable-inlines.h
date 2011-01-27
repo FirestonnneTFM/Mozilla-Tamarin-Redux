@@ -317,7 +317,7 @@ namespace avmplus
 
     REALLY_INLINE HeapHashtable* HeapHashtable::create(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)
     {
-        return MMgc::setExact(new (gc) HeapHashtable(gc, capacity));
+        return new (gc, MMgc::kExact) HeapHashtable(gc, capacity);
     }
 
     REALLY_INLINE HeapHashtable::HeapHashtable(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)

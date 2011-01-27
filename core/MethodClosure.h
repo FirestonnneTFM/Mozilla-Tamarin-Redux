@@ -50,7 +50,7 @@ namespace avmplus
     public:
         REALLY_INLINE static MethodClosureClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) MethodClosureClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) MethodClosureClass(cvtable);
         }
 
         // Function called as constructor ... not supported from user code

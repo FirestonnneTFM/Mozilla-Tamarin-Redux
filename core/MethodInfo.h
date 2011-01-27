@@ -123,18 +123,18 @@ namespace avmplus
                                                 uint8_t abcFlags,
                                                 const NativeMethodInfo* native_info)
         {
-            return MMgc::setExact(new (gc) MethodInfo(_method_id, pool, abc_info_pos, abcFlags, native_info));
+            return new (gc, MMgc::kExact) MethodInfo(_method_id, pool, abc_info_pos, abcFlags, native_info);
         }
 
         REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits)
         {
-            return MMgc::setExact(new (gc) MethodInfo(stub, declTraits));
+            return new (gc, MMgc::kExact) MethodInfo(stub, declTraits);
         }
         
 #ifdef VMCFG_AOT
         REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits, const NativeMethodInfo* native_info)
         {
-            return MMgc::setExact(new (gc) MethodInfo(stub, declTraits, native_info));
+            return new (gc, MMgc::kExact) MethodInfo(stub, declTraits, native_info));
         }
 #endif
         
@@ -453,7 +453,7 @@ namespace avmplus
     public:
         REALLY_INLINE static MethodSignature* create(MMgc::GC* gc, size_t extra, int32_t param_count)
         {
-            return MMgc::setExact(new (gc, extra) MethodSignature(param_count));
+            return new (gc, MMgc::kExact, extra) MethodSignature(param_count);
         }
             
     private:

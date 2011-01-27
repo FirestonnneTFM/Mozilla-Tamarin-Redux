@@ -53,7 +53,7 @@ namespace avmplus
     public:
         REALLY_INLINE static XMLListClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return MMgc::setExact(new (gc, cvtable->getExtraSize()) XMLListClass(cvtable));
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) XMLListClass(cvtable);
         }
 
         // this = argv[0]
