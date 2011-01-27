@@ -61,6 +61,20 @@ export make_opt="-j2"
 # not on the host machine. Reset this to something that will never be found/killed
 export proc_names="fake_never_find_me"
 
-export SSH_SHELL_REMOTE_HOST=asteammips2
-export SSH_SHELL_REMOTE_USER=root
-export SSH_SHELL_REMOTE_DIR=/root/app
+export threads=4
+
+export SSH_SHELL_REMOTE_HOST0=10.60.182.11
+export SSH_SHELL_REMOTE_USER0=root
+export SSH_SHELL_REMOTE_DIR0=/root/app1
+
+export SSH_SHELL_REMOTE_HOST1=10.60.182.11
+export SSH_SHELL_REMOTE_USER1=root
+export SSH_SHELL_REMOTE_DIR1=/root/app2
+
+export SSH_SHELL_REMOTE_HOST2=10.60.183.66
+export SSH_SHELL_REMOTE_USER2=root
+export SSH_SHELL_REMOTE_DIR2=/root/app1
+
+export SSH_SHELL_REMOTE_HOST3=10.60.183.66
+export SSH_SHELL_REMOTE_USER3=root
+export SSH_SHELL_REMOTE_DIR3=/root/app2

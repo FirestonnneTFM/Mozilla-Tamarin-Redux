@@ -145,6 +145,10 @@ if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
     silentoptions="-l $logfile --summaryonly"
 fi
 
+# threads is set in environment.sh
+test "$threads" = "" || {
+    scriptargs="$scriptargs --passthreadid --threads=$threads"
+}
 if [ "$config" != "" ]
 then
     echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs} ${silentoptions}"

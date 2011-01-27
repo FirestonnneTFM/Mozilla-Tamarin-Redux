@@ -1344,14 +1344,14 @@ class RuntestBase(object):
         finally:
             self.lock.release()
 
-    def run_pipe(self, cmd, outputCalls=None):
+    def run_pipe(self, cmd, outputCalls=None, envVars=None):
         # run a command and return a tuple of (output, stdErr, exitCode)
         if outputCalls != None:
             outputCalls.append((self.verbose_print,(cmd,)))
         try:
             self.lock.acquire()
             try:
-                p = Popen((cmd), shell=self.useShell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p = Popen((cmd), shell=self.useShell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=envVars)
                 self.currentPids.append(p)
             finally:
                 self.lock.release()

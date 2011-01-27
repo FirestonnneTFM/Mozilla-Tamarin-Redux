@@ -40,6 +40,16 @@
 # assumes the shell is deployed to $SSH_SHELL_REMOTE_DIR/avmshell
 #
 
+if [ "$threadid" = "" ]
+then
+   id="0"
+else
+   id=$threadid
+fi
+eval SSH_SHELL_REMOTE_USER=\${SSH_SHELL_REMOTE_USER$id}
+eval SSH_SHELL_REMOTE_HOST=\${SSH_SHELL_REMOTE_HOST$id}
+eval SSH_SHELL_REMOTE_DIR=\${SSH_SHELL_REMOTE_DIR$id}
+
 if [ "$SSH_SHELL_REMOTE_USER" = "" ] ||
    [ "$SSH_SHELL_REMOTE_HOST" = "" ] ||
    [ "$SSH_SHELL_REMOTE_DIR" = "" ];
@@ -50,7 +60,6 @@ then
     echo "SSH_SHELL_REMOTE_DIR" = "$SSH_SHELL_REMOTE_DIR"
     exit 1
 fi
-
 
 
 MAX_RETRIES=5
@@ -66,14 +75,14 @@ function try_command () {
         # is the only form that will work with quoted arguments containing spaces
         # see http://www.tldp.org/LDP/abs/html/internalvariables.html#APPREF2
         # for details
-        "$@" 2> ./stderr
+        "$@" 2> ./stderr$id
         ec=$?
         if [ "$ec" -eq "$expectedExitCode" ]; then
             # command executed with expected exit code
             # Put captured stderr back into stderr so that it is handled properly by the test runner
-            if [ -s ./stderr ]; then
-                echo "`cat ./stderr`" >&2
-                rm -f ./stderr
+            if [ -s ./stderr$id ]; then
+                echo "`cat ./stderr$id`" >&2
+                rm -f ./stderr$id
             fi
             return 0
         else
@@ -87,9 +96,9 @@ function try_command () {
     # command failed SSH_RETRIES times, report failure and exit
     echo "Reached max tries, exiting with exit code $ec ..."
     # Put captured stderr back into stderr so that it is handled properly by the test runner
-    if [ -s ./stderr ]; then
-        echo "`cat ./stderr`" >&2
-        rm -f ./stderr
+    if [ -s ./stderr$id ]; then
+        echo "`cat ./stderr$id`" >&2
+        rm -f ./stderr$id
     fi
     exit $ec
 }
@@ -129,16 +138,16 @@ else
         fi
     done
     # workaround for not returning exit code, run a shell script and print exit code to stdout
-    try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./ssh-shell-runner.sh $args" > ./stdout
-    ret=`cat ./stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
+    try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;./ssh-shell-runner.sh $args" > ./stdout$id
+    ret=`cat ./stdout$id | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
     # clean up copied over files
     for a in $filelist
     do
-        try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;rm $a"
+        try_command ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR;if [ -f $a ]; then rm $a; else true; fi"
     done
     # remove the EXITCODE from the stdout before returning it so that exact output matching will be fine
-    cat ./stdout | sed 's/^EXITCODE=[0-9][0-9]*$//g' > ./stdout_clean
-    cat ./stdout_clean
-    rm -f ./stdout ./stdout_clean
+    cat ./stdout$id | sed 's/^EXITCODE=[0-9][0-9]*$//g' > ./stdout_clean$id
+    cat ./stdout_clean$id
+    rm -f ./stdout$id ./stdout_clean$id
     exit $ret
 fi
