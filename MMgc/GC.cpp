@@ -641,6 +641,7 @@ namespace MMgc
 #ifdef _DEBUG
         GCAssertMsg(size > 0, "cannot allocate a 0 sized block");
         GCAssertMsg(onThread(), "GC called from different thread!");
+        GCAssertMsg(!Destroying(), "GC allocations during shutdown are illegal.");
 
         if(!nogc && stackEnter == NULL) {
             GCAssertMsg(false, "A MMGC_GCENTER macro must exist on the stack");
