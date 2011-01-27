@@ -453,10 +453,11 @@ namespace MMgc
 
         GCAssert(!b->needsSweeping());
 
-        // Code below uses this optimization
+        // Code below uses these optimizations
         GCAssert((unsigned long)GC::kFinalize == (unsigned long)kFinalizable);
+        GCAssert((unsigned long)GC::kInternalExact == (unsigned long)kVirtualGCTrace);
 
-        b->bits[GetBitsIndex(b, item)] = (flags & GC::kFinalize);
+        b->bits[GetBitsIndex(b, item)] = (flags & (GC::kFinalize|GC::kInternalExact));
 
 #ifdef MMGC_MEMORY_INFO
         m_numAlloc++;

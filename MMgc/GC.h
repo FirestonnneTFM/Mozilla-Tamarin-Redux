@@ -167,6 +167,10 @@ namespace MMgc
 {
     class GCAutoEnter;
 
+    class   GCExactDummyClass;
+    typedef GCExactDummyClass* GCExactFlag;
+    const   GCExactFlag kExact = 0;
+    
     /**
      * GCRoot is root in the reachability graph, it contains a pointer a size
      * and will be searched for things.
@@ -554,9 +558,10 @@ namespace MMgc
         {
             kZero=1,
             kContainsPointers=2,
-            kFinalize=4,
+            kFinalize=4,            // This must match kFinalizable in GCAlloc.h
             kRCObject=8,
-            kCanFail=16
+            kInternalExact=16,      // INTERNAL USE.  This must match kVirtualGCTrace in GCAlloc.h
+            kCanFail=32
         };
 
         /**
@@ -576,9 +581,12 @@ namespace MMgc
          * The result is that most computation boils away and we're left with just a call to the
          * underlying primitive operator.
          */
-        void *AllocPtrZero(size_t size);            // Flags: GC::kContainsPointers|GC::kZero
-        void *AllocPtrZeroFinalized(size_t size);   // Flags: GC::kContainsPointers|GC::kZero|GC::kFinalize
-        void *AllocRCObject(size_t size);           // Flags: GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize
+        void *AllocPtrZero(size_t size);                 // Flags: GC::kContainsPointers|GC::kZero
+        void *AllocPtrZeroExact(size_t size);            // Flags: GC::kContainsPointers|GC::kZero|GC::kInternalExact
+        void *AllocPtrZeroFinalized(size_t size);        // Flags: GC::kContainsPointers|GC::kZero|GC::kFinalize
+        void *AllocPtrZeroFinalizedExact(size_t size);   // Flags: GC::kContainsPointers|GC::kZero|GC::kFinalize|GC::kInternalExact
+        void *AllocRCObject(size_t size);                // Flags: GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize
+        void *AllocRCObjectExact(size_t size);           // Flags: GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize|GC::kInternalExact
 
         /**
          * Like Alloc but optimized for the case of allocating one 8-byte non-pointer-containing
@@ -596,8 +604,11 @@ namespace MMgc
          * Specialized implementations of Alloc().  See above for explanations.
          */
         void *AllocExtraPtrZero(size_t size, size_t extra);             // Flags: GC::kContainsPointers|GC::kZero
+        void *AllocExtraPtrZeroExact(size_t size, size_t extra);        // Flags: GC::kContainsPointers|GC::kZero|GC::kInternalExact
         void *AllocExtraPtrZeroFinalized(size_t size, size_t extra);    // Flags: GC::kContainsPointers|GC::kZero|GC::kFinalize
+        void *AllocExtraPtrZeroFinalizedExact(size_t size, size_t extra); // Flags: GC::kContainsPointers|GC::kZero|GC::kFinalize|GC::kInternalExact
         void *AllocExtraRCObject(size_t size, size_t extra);            // Flags: GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize
+        void *AllocExtraRCObjectExact(size_t size, size_t extra);       // Flags: GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize|GC::kInternalExact
 
         /**
          * Out-of-line version of AllocExtra, used by the specialized versions
@@ -836,6 +847,8 @@ namespace MMgc
          * after we've traced the object's head.  In this case, will we reliably continue
          * to trace it conservatively?  I've yet to see why the answer would be "no",
          * but leaving this comment here for posterity.
+         *
+         * ONLY AVAILABLE TEMPORARILY TO SUPPORT THE LIST TYPES - WILL BE REMOVED SHORTLY.
          */
         static void SetHasGCTrace(const void* userptr);
         

@@ -44,10 +44,11 @@ namespace MMgc
 {
     bool GCTraceableBase::gcTrace(GC* gc, size_t cursor)
     {
+        // The most-base tracer must do nothing, because it's the tracer that gets called if
+        // the object becomes visible very early, or survives after destruction because it
+        // was referenced from the mark stack (see GC::AbortFree).
         (void)gc;
         (void)cursor;
-        GCAssert(!"Only overridden implementations of GCTraceableBase::gcTrace should ever be called");
-        GCHeap::GetGCHeap()->Abort();
         return false;
     }
     
