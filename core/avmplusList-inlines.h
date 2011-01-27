@@ -598,7 +598,7 @@ namespace avmplus
                                 1;
         typename ListHelper::LISTDATA* newData = ::new (ListHelper::calloc(gc, cap + extra, entrySize))(typename ListHelper::LISTDATA)();
         if (gc->IsPointerToGCPage(newData))
-            MMgc::setExact(newData);
+            MMgc::GC::SetHasGCTrace(newData);
         newData->len = 0;
         newData->set_gc(gc);
         return newData;

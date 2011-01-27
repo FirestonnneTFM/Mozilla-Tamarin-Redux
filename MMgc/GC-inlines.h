@@ -46,16 +46,6 @@
 
 namespace MMgc
 {
-    // Top level
-
-    // Set the bit on the object that flags it as having a virtual gcTrace method.
-    // Return the object.
-    template<class T>
-    REALLY_INLINE T* setExact(T* value)
-    {
-        GC::SetHasGCTrace(value);
-        return value;
-    }
     
     // GCRoot
 
@@ -161,6 +151,15 @@ namespace MMgc
         return Alloc(size, GC::kContainsPointers|GC::kZero);
     }
 
+    REALLY_INLINE void *GC::AllocPtrZeroExact(size_t size)
+    {
+#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
+        if (size <= kLargestAlloc)
+            return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kInternalExact));
+#endif
+        return Alloc(size, GC::kContainsPointers|GC::kZero|GC::kInternalExact);
+    }
+    
     REALLY_INLINE void *GC::AllocPtrZeroFinalized(size_t size)
     {
 #if !defined _DEBUG && !defined AVMPLUS_SAMPLER
@@ -170,6 +169,15 @@ namespace MMgc
         return Alloc(size, GC::kContainsPointers|GC::kZero|GC::kFinalize);
     }
 
+    REALLY_INLINE void *GC::AllocPtrZeroFinalizedExact(size_t size)
+    {
+#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
+        if (size <= kLargestAlloc)
+            return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kFinalize|GC::kInternalExact));
+#endif
+        return Alloc(size, GC::kContainsPointers|GC::kZero|GC::kFinalize|GC::kInternalExact);
+    }
+    
     REALLY_INLINE void *GC::AllocRCObject(size_t size)
     {
 #if !defined _DEBUG && !defined AVMPLUS_SAMPLER
@@ -179,6 +187,15 @@ namespace MMgc
         return Alloc(size, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
     }
 
+    REALLY_INLINE void *GC::AllocRCObjectExact(size_t size)
+    {
+#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
+        if (size <= kLargestAlloc)
+            return GetUserPointer(containsPointersRCAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize|GC::kInternalExact));
+#endif
+        return Alloc(size, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize|GC::kInternalExact);
+    }
+    
     REALLY_INLINE void* GC::AllocDouble()
     {
 #if !defined _DEBUG && !defined AVMPLUS_SAMPLER && !defined MMGC_MEMORY_PROFILER
@@ -206,6 +223,17 @@ namespace MMgc
         return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero);
     }
 
+    REALLY_INLINE void *GC::AllocExtraPtrZeroExact(size_t size, size_t extra)
+    {
+#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
+        if ((size|extra) <= (kLargestAlloc/2 & ~7)) {
+            size += extra;
+            return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kInternalExact));
+        }
+#endif
+        return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kInternalExact);
+    }
+    
     REALLY_INLINE void *GC::AllocExtraPtrZeroFinalized(size_t size, size_t extra)
     {
 #if !defined _DEBUG && !defined AVMPLUS_SAMPLER
@@ -217,6 +245,17 @@ namespace MMgc
         return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kFinalize);
     }
 
+    REALLY_INLINE void *GC::AllocExtraPtrZeroFinalizedExact(size_t size, size_t extra)
+    {
+#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
+        if ((size|extra) <= (kLargestAlloc/2 & ~7)) {
+            size += extra;
+            return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kFinalize|GC::kInternalExact));
+        }
+#endif
+        return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kFinalize|GC::kInternalExact);
+    }
+    
     REALLY_INLINE void *GC::AllocExtraRCObject(size_t size, size_t extra)
     {
 #if !defined _DEBUG && !defined AVMPLUS_SAMPLER
@@ -228,6 +267,17 @@ namespace MMgc
         return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
     }
 
+    REALLY_INLINE void *GC::AllocExtraRCObjectExact(size_t size, size_t extra)
+    {
+#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
+        if ((size|extra) <= kLargestAlloc/2) {
+            size += extra;
+            return GetUserPointer(containsPointersRCAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize|GC::kInternalExact));
+        }
+#endif
+        return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize|GC::kInternalExact);
+    }
+    
 #undef SIZEARG
 
     REALLY_INLINE void GC::Free(const void *item)
@@ -397,6 +447,7 @@ namespace MMgc
         return GetGCBits(realptr) & kFinalizable;
     }
 
+    // ONLY AVAILABLE TEMPORARILY TO SUPPORT THE LIST TYPES - WILL BE REMOVED SHORTLY.
     /*static*/
     REALLY_INLINE void GC::SetHasGCTrace(const void* userptr)
     {

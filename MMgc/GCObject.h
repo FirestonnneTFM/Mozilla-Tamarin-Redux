@@ -167,9 +167,34 @@ namespace MMgc
      * a virtual gcTrace method.  This must be used as the most base class
      * instead of GCObject, it can't be mixed in later.
      *
-     * Note that subtypes that want to be traced exactly still have to set
-     * the traceable bit in their constructor by calling MMgc::setExact on the
-     * object, it is not done for them here.
+     * Note that subtypes that want to be traced exactly must pass the kExact flag
+     * as the second argument to the 'new' operator.
+     *
+     * The following two invariants must hold for exactly traced objects and their
+     * tracer (see also Bugzilla 
+     *
+     *   - The tracer must always be able to interpret a pointer field that is
+     *     all-bits-zero, because the GC may see the object and call the tracer
+     *     before the constructor that initializes the field is run.
+     *
+     *   - No exactly traced field must ever contain a bogus value.  That's generally
+     *     not hard to ensure but there are two cases to watch out for:
+     *
+     *     - in a "tagged union" setting, a separate tag field directs the
+     *       interpretation of the pointer field.  The tag and the payload must
+     *       always be set together, without any chance of the GC getting to
+     *       run after one is set and before the other is set.
+     *
+     *     - in a "counted array" setting, a separate count field directs the
+     *       interpretation of an array field (frequently a trailing array).
+     *       This is like the tagged union case, but if the count is stored in
+     *       a separate object it is important that the separate object pointer
+     *       is not NULL, as the GC would not check that (in a GC_POINTERS setting,
+     *       for example).
+     *
+     * Note that the C++ constructor settings syntax can obscure what's going
+     * on, as it makes assignments and calls less visible.
+     *
      *
      * The operators and methods here are exactly like those of GCObject.
      */
@@ -178,7 +203,9 @@ namespace MMgc
     public:
         // This class can only have an empty destructor.
         
+        static void *operator new(size_t size, GC *gc, GCExactFlag flag, size_t extra) GNUC_ONLY(throw());
         static void *operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw());
+        static void *operator new(size_t size, GC *gc, GCExactFlag flag) GNUC_ONLY(throw());
         static void *operator new(size_t size, GC *gc) GNUC_ONLY(throw());
         static void operator delete(void *gcObject);
         
@@ -188,9 +215,12 @@ namespace MMgc
     /**
      * Baseclass for GC managed objects that are finalized.
      *
-     * Note that subtypes that want to be traced exactly still have to set
-     * the traceable bit in their constructor by calling MMgc::setExact(),
-     * it is not done for them here.
+     * Note that subtypes that want to be traced exactly must pass the kExact flag
+     * as the second argument to the 'new' operator.
+     *
+     * Invariants that must hold for exactly traced objects are documented above,
+     * for GCTraceableObject.
+     *
      */
     class GCFinalizedObject : public GCTraceableBase
     {
@@ -247,7 +277,9 @@ namespace MMgc
 
         GCWeakRef *GetWeakRef() const;
 
+        static void* operator new(size_t size, GC *gc, GCExactFlag flag, size_t extra);
         static void* operator new(size_t size, GC *gc, size_t extra);
+        static void* operator new(size_t size, GC *gc, GCExactFlag flag);
         static void* operator new(size_t size, GC *gc);
         static void operator delete (void *gcObject);
     };
@@ -287,6 +319,16 @@ namespace MMgc
         return gc->AllocPtrZero(size);
     }
     
+    REALLY_INLINE void *GCTraceableObject::operator new(size_t size, GC *gc, GCExactFlag, size_t extra) GNUC_ONLY(throw())
+    {
+        return gc->AllocExtraPtrZeroExact(size, extra);
+    }
+    
+    REALLY_INLINE void *GCTraceableObject::operator new(size_t size, GC *gc, GCExactFlag) GNUC_ONLY(throw())
+    {
+        return gc->AllocPtrZeroExact(size);
+    }
+    
     REALLY_INLINE void GCTraceableObject::operator delete(void *gcObject)
     {
         GC::GetGC(gcObject)->FreeFromDeleteNotNull(gcObject);
@@ -312,6 +354,16 @@ namespace MMgc
         return gc->AllocPtrZeroFinalized(size);
     }
 
+    REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, GCExactFlag, size_t extra)
+    {
+        return gc->AllocExtraPtrZeroFinalizedExact(size, extra);
+    }
+    
+    REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, GCExactFlag)
+    {
+        return gc->AllocPtrZeroFinalizedExact(size);
+    }
+    
     REALLY_INLINE void GCFinalizedObject::operator delete (void *gcObject)
     {
         GC::GetGC(gcObject)->FreeFromDeleteNotNull(gcObject);
@@ -379,6 +431,16 @@ namespace MMgc
         REALLY_INLINE static void *operator new(size_t size, GC *gc)
         {
             return gc->AllocRCObject(size);
+        }
+ 
+        REALLY_INLINE static void *operator new(size_t size, GC *gc, GCExactFlag, size_t extra)
+        {
+            return gc->AllocExtraRCObjectExact(size, extra);
+        }
+        
+        REALLY_INLINE static void *operator new(size_t size, GC *gc, GCExactFlag)
+        {
+            return gc->AllocRCObjectExact(size);
         }
     public:
 

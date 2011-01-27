@@ -83,9 +83,13 @@ namespace MMgc
 
         if (block)
         {
+            // Code below uses these optimizations
+            GCAssert((unsigned long)GC::kFinalize == (unsigned long)kFinalizable);
+            GCAssert((unsigned long)GC::kInternalExact == (unsigned long)kVirtualGCTrace);
+            
             gcbits_t flagbits0 = 0;
             gcbits_t flagbits1 = 0;
-            flagbits0 |= ((flags&GC::kFinalize) != 0) ? kFinalizable : 0;
+            flagbits0 |= (flags & (GC::kFinalize|GC::kInternalExact));
 
             VALGRIND_CREATE_MEMPOOL(block, /*rdzone*/0, (flags&GC::kZero) != 0);
             VALGRIND_MEMPOOL_ALLOC(block, block, sizeof(LargeBlock));

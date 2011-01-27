@@ -129,7 +129,7 @@ namespace avmplus
         uint32_t    len;
         STORAGE     entries[1];   // lying, really [cap]
         
-        TracedListData() { MMgc::setExact(this); }
+        TracedListData() { MMgc::GC::SetHasGCTrace(this); }
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
         
