@@ -457,7 +457,13 @@ namespace MMgc
         GCAssert((unsigned long)GC::kFinalize == (unsigned long)kFinalizable);
         GCAssert((unsigned long)GC::kInternalExact == (unsigned long)kVirtualGCTrace);
 
+#if defined VMCFG_EXACT_TRACING
         b->bits[GetBitsIndex(b, item)] = (flags & (GC::kFinalize|GC::kInternalExact));
+#elif defined VMCFG_SELECTABLE_EXACT_TRACING
+        b->bits[GetBitsIndex(b, item)] = (flags & (GC::kFinalize|m_gc->runtimeSelectableExactnessFlag));  // 0 or GC::kInternalExact
+#else
+        b->bits[GetBitsIndex(b, item)] = (flags & GC::kFinalize);
+#endif
 
 #ifdef MMGC_MEMORY_INFO
         m_numAlloc++;
