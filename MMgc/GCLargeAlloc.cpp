@@ -89,7 +89,14 @@ namespace MMgc
             
             gcbits_t flagbits0 = 0;
             gcbits_t flagbits1 = 0;
-            flagbits0 |= (flags & (GC::kFinalize|GC::kInternalExact));
+
+#if defined VMCFG_EXACT_TRACING
+            flagbits0 = (flags & (GC::kFinalize|GC::kInternalExact));
+#elif defined VMCFG_SELECTABLE_EXACT_TRACING
+            flagbits0 = (flags & (GC::kFinalize|m_gc->runtimeSelectableExactnessFlag));  // 0 or GC::kInternalExact
+#else
+            flagbits0 = (flags & GC::kFinalize);
+#endif
 
             VALGRIND_CREATE_MEMPOOL(block, /*rdzone*/0, (flags&GC::kZero) != 0);
             VALGRIND_MEMPOOL_ALLOC(block, block, sizeof(LargeBlock));
