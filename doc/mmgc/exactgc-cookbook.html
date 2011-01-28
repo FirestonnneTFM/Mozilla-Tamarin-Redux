@@ -86,6 +86,8 @@ and <a href="../../utils/nativegen.py"><tt>utils/nativegen.py</tt></a>.
 
 <li>A class can be exactly traced only if its base class is exactly
     traced.
+
+<li>Exactly traced fields <em>must never</em> contain non-pointer values.
 </ul>
 
 
@@ -198,18 +200,16 @@ corresponding annotations:
 
 <h3>Setting the bit</h3>
 
-<P> It's incorrect to turn on exact GC for an object until the
-object has been fully initialized, so that has to be done from the
-point where the object is allocated.  There is a templated utility
-function, <tt>MMgc::setExact()</tt>, that takes an object pointer and
-enables exact GC for it, and then returns the pointer.  Thus
-this:
+<P> The object is valid for exact tracing from the moment its storage
+has been zeroed (by MMgc) and the base vtable has been installed.  The
+object is designated as exactly traced by passing a flag to the <tt>new</tt>
+operator:
 <pre>
   p = new (gc, extra) Fnord(p, q);
 </pre>
 turns into this:
 <pre>
-  p = <b>MMgc::setExact</b>(new (gc, extra) Fnord(p, q));
+  p = new (gc, MMgc::kExact, extra) Fnord(p, q);
 </pre>
 
 <h3>Erecting safeguards</h3>
@@ -225,7 +225,7 @@ factory function for the type.  In the AVM+ most exactly-traced object
 types now have a creator function:
 <pre>
   REALLY_INLINE static Fnord* create(MMgc::GC* gc, size_t extra, P* p, Q* q) {
-    return MMgc::setExact(new (gc, extra) Fnord(p, q));
+    return new (gc, MMgc::kExact, extra) Fnord(p, q);
   }
 </pre>
 with allocation sites looking like this:

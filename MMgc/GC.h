@@ -835,34 +835,10 @@ namespace MMgc
         static void SetHasWeakRef(const void *userptr, bool flag);
 
         /**
-         * Mark the object as having a virtual gcTrace method.  If the object is
-         * subsequently reached by the marker it will be marked using that method.
-         *
-         * EXACTGC INVESTIGATE: what happens if the object is subsequently split 
-         * on the mark stack?  The scenario is this: the object is not marked for exact
-         * tracing and is pushed onto the mark stack.  The object is large, so it is
-         * split; there are two cases: One, the object is marked as exactly traced before it
-         * is reached, this should be no problem because we make no assumptions about
-         * the object when it is pushed.  Two, the object is marked as exactly traced
-         * after we've traced the object's head.  In this case, will we reliably continue
-         * to trace it conservatively?  I've yet to see why the answer would be "no",
-         * but leaving this comment here for posterity.
-         *
-         * ONLY AVAILABLE TEMPORARILY TO SUPPORT THE LIST TYPES - WILL BE REMOVED SHORTLY.
-         */
-        static void SetHasGCTrace(const void* userptr);
-        
-        /**
          * Query the exactly traced flag.
          */
         static int IsExactlyTraced(const void* userptr);
         
-        /**
-         * Clear the exactly traced flag.  If the object is subsequently reached
-         * by the marker it will be scanned conservatively.
-         */
-        static void ClearExactlyTraced(const void* userptr);
-
         /**
          * Used by sub-allocators to obtain memory.
          */

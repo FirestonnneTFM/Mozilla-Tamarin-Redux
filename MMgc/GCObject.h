@@ -178,7 +178,7 @@ namespace MMgc
      *     before the constructor that initializes the field is run.
      *
      *   - No exactly traced field must ever contain a bogus value.  That's generally
-     *     not hard to ensure but there are two cases to watch out for:
+     *     not hard to ensure but there are three cases to watch out for:
      *
      *     - in a "tagged union" setting, a separate tag field directs the
      *       interpretation of the pointer field.  The tag and the payload must
@@ -191,6 +191,10 @@ namespace MMgc
      *       a separate object it is important that the separate object pointer
      *       is not NULL, as the GC would not check that (in a GC_POINTERS setting,
      *       for example).
+     *
+     *     - it must be true also when the object is about to be freed, as with
+     *       a call to GC::Free, because GC::Free cannot guarantee that the object
+     *       will in fact be freed.
      *
      * Note that the C++ constructor settings syntax can obscure what's going
      * on, as it makes assignments and calls less visible.

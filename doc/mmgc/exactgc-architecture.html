@@ -366,6 +366,12 @@ same means as the tiny objects.
 <a name="construction-protocols">
 <h2> Construction protocols </h2>
 
+<P style="color: red"> This section needs to be updated.  The <tt>setExact</tt> function
+has been removed; instead, a flag is passed to the <tt>new</tt> operator to designate
+the object as exactly traced.  Several invariants are imposed on the object to make
+that work; they need to be documented here and in the manual.  The cookbook has an
+up-to-date (27 January 2011) overview of the mechanism.
+
 <P> The only special thing that has to happen at construction time for
 an exactly traced object is to designate it as exactly traced: since
 the designation is a header bit, that bit must be set.

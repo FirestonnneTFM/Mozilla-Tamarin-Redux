@@ -776,18 +776,6 @@ namespace MMgc
         ClearFinalized(item);
         if(HasWeakRef(item))
             ClearWeakRef(item);
-
-        // This is necessary if the destructor has been run because the destructor snaps
-        // the vtable back to GCTraceableBase, which has an illegal-to-call base method for
-        // gcTrace.  That base method is there to ensure that we do not try to exactly
-        // trace destructed objects.
-        //
-        // If the destructor has not been run then this simply reverts the object back to
-        // conservative tracing, which is suboptimal but OK since the object has been zeroed
-        // and conservative tracing will find nothing.
-
-        if(IsExactlyTraced(item))
-            ClearExactlyTraced(item);
     }
 
     void GC::Zero(const void* userptr)

@@ -129,13 +129,6 @@
 #ifdef MMGC_MEMORY_PROFILER
     // Internal: profile uses of the conservative marker
     //
-    // When MMGC_CONSERVATIVE_PROFILER is enabled the VM avoids explicitly freeing
-    // objects in some cases, see eg InlineHashtable and AtomList.  The reason is
-    // that freeing an object that's on the mark stack will lead to the object
-    // being conservatively traced (its kVirtualGCTrace bit is disabled by AbortFree)
-    // and that confuses the statistics.  Instead of freeing the object the VM will
-    // zero it.
-    //
     // You need source information (VMPI_getFunctionNameFromPC, VMPI_getFileAndLineInfoFromPC)
     // for this to be useful.  On Mac, make sure that the call to startATOSProcess() is
     // not commented out in VMPI_setupPCResolution in MMgcPortMac.cpp.
