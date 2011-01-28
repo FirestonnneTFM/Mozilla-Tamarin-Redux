@@ -85,30 +85,6 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE /*static*/ void* DataListHelper<T>::calloc(MMgc::GC* gc, size_t count, size_t elsize)
-    {
-        MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
-        void* mem = fm->Calloc(count, elsize, MMgc::kNone);
-        gc->SignalDependentAllocation(fm->Size(mem));
-        return mem;
-    }
-
-    template<class T>
-    REALLY_INLINE /*static*/ void DataListHelper<T>::free(MMgc::GC* gc, void* mem)
-    {
-        MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
-        gc->SignalDependentDeallocation(fm->Size(mem));
-        fm->Free(mem);
-    }
-
-    template<class T>
-    REALLY_INLINE /*static*/ size_t DataListHelper<T>::getSize(MMgc::GC* /*gc*/, void* mem)
-    {
-        MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
-        return fm->Size(mem);
-    }
-
-    template<class T>
     REALLY_INLINE /*static*/ void DataListHelper<T>::wbData(const void* /*container*/, LISTDATA** address, LISTDATA* data)
     {
         *address = data;
@@ -162,25 +138,6 @@ namespace avmplus
     }
 
     // ----------------------------
-
-    REALLY_INLINE /*static*/ void* GCListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
-    {
-        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
-    }
-
-    REALLY_INLINE /*static*/ void GCListHelper::free(MMgc::GC* gc, void* mem)
-    {
-#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
-        gc->Zero(mem);
-#else
-        gc->Free(mem);
-#endif
-    }
-
-    REALLY_INLINE /*static*/ size_t GCListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
-    {
-        return MMgc::GC::Size(mem);
-    }
 
     REALLY_INLINE /*static*/ void GCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
     {
@@ -236,25 +193,6 @@ namespace avmplus
     }
     
     // ----------------------------
-
-    REALLY_INLINE /*static*/ void* RCListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
-    {
-        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
-    }
-
-    REALLY_INLINE /*static*/ void RCListHelper::free(MMgc::GC* gc, void* mem)
-    {
-#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
-        gc->Zero(mem);
-#else
-        gc->Free(mem);
-#endif
-    }
-
-    REALLY_INLINE /*static*/ size_t RCListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
-    {
-        return MMgc::GC::Size(mem);
-    }
 
     REALLY_INLINE /*static*/ void RCListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
     {
@@ -327,25 +265,6 @@ namespace avmplus
 
     // ----------------------------
 
-    REALLY_INLINE /*static*/ void* AtomListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
-    {
-        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
-    }
-
-    REALLY_INLINE /*static*/ void AtomListHelper::free(MMgc::GC* gc, void* mem)
-    {
-#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
-        gc->Zero(mem);
-#else
-        gc->Free(mem);
-#endif
-    }
-
-    REALLY_INLINE /*static*/ size_t AtomListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
-    {
-        return MMgc::GC::Size(mem);
-    }
-
     REALLY_INLINE /*static*/ void AtomListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
     {
         MMgc::GC* const gc = data->gc();
@@ -402,25 +321,6 @@ namespace avmplus
     }
 
     // ----------------------------
-
-    REALLY_INLINE /*static*/ void* WeakRefListHelper::calloc(MMgc::GC* gc, size_t count, size_t elsize)
-    {
-        return gc->Calloc(count, elsize, (MMgc::GC::AllocFlags)(MMgc::GC::kContainsPointers | MMgc::GC::kZero));
-    }
-
-    REALLY_INLINE /*static*/ void WeakRefListHelper::free(MMgc::GC* gc, void* mem)
-    {
-#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
-        gc->Zero(mem);
-#else
-        gc->Free(mem);
-#endif
-    }
-
-    REALLY_INLINE /*static*/ size_t WeakRefListHelper::getSize(MMgc::GC* /*gc*/, void* mem)
-    {
-        return MMgc::GC::Size(mem);
-    }
 
     REALLY_INLINE /*static*/ void WeakRefListHelper::wbData(const void* container, LISTDATA** address, LISTDATA* data)
     {
@@ -494,7 +394,7 @@ namespace avmplus
     template<class T, class ListHelper>
     REALLY_INLINE uint32_t ListImpl<T,ListHelper>::capacity() const
     {
-        return uint32_t((ListHelper::getSize(m_data->gc(), m_data) - offsetof(typename ListHelper::LISTDATA, entries)) / 
+        return uint32_t((ListHelper::LISTDATA::getSize(m_data) - offsetof(typename ListHelper::LISTDATA, entries)) / 
                 sizeof(typename ListHelper::STORAGE));
     }
 
@@ -580,25 +480,14 @@ namespace avmplus
     REALLY_INLINE uint64_t ListImpl<T,ListHelper>::bytesUsed() const
     {
         AvmAssert(m_data != NULL);
-        return ListHelper::getSize(m_data->gc(), m_data);
+        return ListHelper::LISTDATA::getSize(m_data);
     }
 
     template<class T, class ListHelper>
     REALLY_INLINE /*static*/ typename ListHelper::LISTDATA* ListImpl<T,ListHelper>::allocData(MMgc::GC* gc, uint32_t cap) 
     {
         AvmAssert(cap <= kListMaxLength);
-        
-        // Simplify overflow checking by figuring out how many extra STORAGE's worth of memory
-        // we need to allocate and bumping cap by that much (thus effectively delegating overflow
-        // checking to Calloc). We won't overflow because we know cap <= kListMaxLength.
-        size_t const entrySize = sizeof(typename ListHelper::STORAGE);
-        size_t const baseSize = sizeof(typename ListHelper::LISTDATA) - entrySize;
-        size_t const extra = (baseSize >= entrySize) ?
-                                ((baseSize + entrySize - 1) / entrySize) : // add entrySize-1 so that we round up, not down
-                                1;
-        typename ListHelper::LISTDATA* newData = ::new (ListHelper::calloc(gc, cap + extra, entrySize))(typename ListHelper::LISTDATA)();
-        if (gc->IsPointerToGCPage(newData))
-            MMgc::GC::SetHasGCTrace(newData);
+        typename ListHelper::LISTDATA* newData = ListHelper::LISTDATA::create(gc, cap);
         newData->len = 0;
         newData->set_gc(gc);
         return newData;
@@ -607,7 +496,7 @@ namespace avmplus
     template<class T, class ListHelper>
     REALLY_INLINE void ListImpl<T,ListHelper>::skipDestructor()
     {
-        // Note that we explicit do not attempt to free the data here;
+        // Note that we explicitly do not attempt to free the data here;
         // this method should only be called in situations where we
         // know that MMGC has already been torn down, thus an attempt
         // to free the data would be unsafe.
