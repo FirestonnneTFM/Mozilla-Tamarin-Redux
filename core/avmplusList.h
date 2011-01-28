@@ -106,6 +106,8 @@ namespace avmplus
     // Conceptually, ListData<> is private to ListImpl<>, but we make it toplevel and public to avoid
     // friend template class declaration cruft. Since there's no way to extract a ListData from a ListImpl,
     // this is probably safe enough.
+    //
+    // ListData *always* allocates via FixedMalloc.
     template<class STORAGE>
     struct ListData 
     {
@@ -118,19 +120,61 @@ namespace avmplus
 
         REALLY_INLINE MMgc::GC* gc() { return _gc; }
         REALLY_INLINE void set_gc(MMgc::GC* g) { _gc = g; }
+
+        REALLY_INLINE static ListData<STORAGE>* create(MMgc::GC* gc, size_t totalElements)
+        {
+            using namespace MMgc;
+            
+            FixedMalloc* const fm = FixedMalloc::GetFixedMalloc();
+            void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>), 
+                                                                    GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE))),
+                                  kNone);
+            gc->SignalDependentAllocation(fm->Size(mem));
+            return ::new (mem) ListData<STORAGE>();
+        }
+        
+        REALLY_INLINE static void free(MMgc::GC* gc, void* mem)
+        {
+            MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
+            gc->SignalDependentDeallocation(fm->Size(mem));
+            fm->Free(mem);
+        }
+        
+        REALLY_INLINE static size_t getSize(void* mem)
+        {
+            MMgc::FixedMalloc* const fm = MMgc::FixedMalloc::GetFixedMalloc();
+            return fm->Size(mem);
+        }
     };
 
-    // Do not subclass this without considering the exact-tracing
-    // protocol implications: observe that setExact is called in
-    // the constructor, so every subclass must be exactly traced.
+    // TracedListData *always* allocates via GC.
     template<class STORAGE>
     struct TracedListData : public MMgc::GCTraceableObject
     {
         uint32_t    len;
         STORAGE     entries[1];   // lying, really [cap]
         
-        TracedListData() { MMgc::GC::SetHasGCTrace(this); }
+        REALLY_INLINE explicit TracedListData() { }
 
+        REALLY_INLINE static TracedListData<STORAGE>* create(MMgc::GC* gc, size_t totalElements)
+        {
+            return new (gc, MMgc::kExact, MMgc::GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE))) TracedListData<STORAGE>();
+        }
+        
+        REALLY_INLINE static void free(MMgc::GC* gc, void* mem)
+        {
+#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
+            gc->Zero(mem);
+#else
+            gc->Free(mem);
+#endif
+        }
+        
+        REALLY_INLINE static size_t getSize(void* mem)
+        {
+            return MMgc::GC::Size(mem);
+        }
+        
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
         
         REALLY_INLINE MMgc::GC* gc() { return MMgc::GC::GetGC(this); }
@@ -157,16 +201,6 @@ namespace avmplus
         
         // (syntactic sugar)
         typedef ListData<STORAGE> LISTDATA;
-
-        // Allocate memory. Note that it's not required to use gc to allocate the memory.
-        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
-
-        // Free memory allocated by calloc().
-        static void free(MMgc::GC* gc, void* mem);
-
-        // Return the amount of memory used by this block. (Might exceed the amount requested).
-        // The block must have been allocated by calloc().
-        static size_t getSize(MMgc::GC* gc, void* mem);
 
         // Store the data at the address, using WB if necessary.
         // Any pointer already stored there will be overwritten (but not freed); the caller
@@ -206,9 +240,6 @@ namespace avmplus
         typedef MMgc::GCObject* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
         
-        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
-        static void free(MMgc::GC* gc, void* mem);
-        static size_t getSize(MMgc::GC* gc, void* mem);
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
@@ -228,9 +259,6 @@ namespace avmplus
         typedef MMgc::RCObject* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
         
-        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
-        static void free(MMgc::GC* gc, void* mem);
-        static size_t getSize(MMgc::GC* gc, void* mem);
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
@@ -250,9 +278,6 @@ namespace avmplus
         typedef Atom STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
 
-        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
-        static void free(MMgc::GC* gc, void* mem);
-        static size_t getSize(MMgc::GC* gc, void* mem);
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
@@ -272,9 +297,6 @@ namespace avmplus
         typedef MMgc::GCWeakRef* STORAGE;
         typedef TracedListData<STORAGE> LISTDATA;
 
-        static void* calloc(MMgc::GC* gc, size_t count, size_t elsize);
-        static void free(MMgc::GC* gc, void* mem);
-        static size_t getSize(MMgc::GC* gc, void* mem);
         static void wbData(const void* container, LISTDATA** address, LISTDATA* data);
         static TYPE load(LISTDATA* data, uint32_t index);
         static void store(LISTDATA* data, uint32_t index, TYPE value);
