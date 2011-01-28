@@ -163,11 +163,7 @@ namespace avmplus
         
         REALLY_INLINE static void free(MMgc::GC* gc, void* mem)
         {
-#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
-            gc->Zero(mem);
-#else
             gc->Free(mem);
-#endif
         }
         
         REALLY_INLINE static size_t getSize(void* mem)

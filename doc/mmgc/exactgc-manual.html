@@ -72,6 +72,12 @@ covers many simple situations with a minimum of fuss.
 <a name="rules"></a>
 <h2>The Rules</h2>
 
+<P style="color: red"> This section needs to be updated.  Given that
+we've removed <tt>setExact</tt>, there are additional invariants on
+the tracer (must always be able to interpret all-zero-bit fields) and
+on the object (tags and tagged fields must be updated atomically;
+fields must never contain garbage, not even when passed to GC::Free).
+
 <P>When a class opts into exact tracing it discloses the fields
 containing GC-pointers to the garbage collector.  GC-pointers can be
 tagged - not just with Atom tags - and GC-pointers can be located in

@@ -447,35 +447,12 @@ namespace MMgc
         return GetGCBits(realptr) & kFinalizable;
     }
 
-    // ONLY AVAILABLE TEMPORARILY TO SUPPORT THE LIST TYPES - WILL BE REMOVED SHORTLY.
-    /*static*/
-    REALLY_INLINE void GC::SetHasGCTrace(const void* userptr)
-    {
-        const void* realptr = GetRealPointer(userptr);
-        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
-#if defined VMCFG_EXACT_TRACING
-        GetGCBits(realptr) |= kVirtualGCTrace;
-#elif defined VMCFG_SELECTABLE_EXACT_TRACING
-        GetGCBits(realptr) |= GetGC(realptr)->runtimeSelectableExactnessFlag; // 0 or kVirtualGCTrace
-#else
-        (void)realptr;
-#endif
-    }
-
     /*static*/
     REALLY_INLINE int GC::IsExactlyTraced(const void *userptr)
     {
         const void *realptr = GetRealPointer(userptr);
         GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
         return GetGCBits(realptr) & kVirtualGCTrace;
-    }
-    
-    /*static*/
-    REALLY_INLINE void GC::ClearExactlyTraced(const void *userptr)
-    {
-        const void *realptr = GetRealPointer(userptr);
-        GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
-        GetGCBits(realptr) &= ~kVirtualGCTrace;
     }
     
     /*static*/

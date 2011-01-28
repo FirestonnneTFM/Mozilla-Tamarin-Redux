@@ -163,11 +163,7 @@ namespace avmplus
         Atom* atoms = (Atom*)(m_atomsAndFlags & ~kAtomFlags);
         m_atomsAndFlags = m_atomsAndFlags & kAtomFlags;  // Must clear the pointer bits to avoid a dangling pointer
         MMgc::GC* gc = MMgc::GC::GetGC(atoms);
-#ifdef MMGC_CONSERVATIVE_PROFILER  // see comments in MMgc.h
-        gc->Zero(atoms);
-#else
         gc->Free(atoms);
-#endif
     }
 
     // @todo -- move this mess to VMPI, see https://bugzilla.mozilla.org/show_bug.cgi?id=546354
