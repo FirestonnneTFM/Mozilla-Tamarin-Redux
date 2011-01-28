@@ -62,11 +62,6 @@ namespace avmplus
         // argN = argv[argc]
         Atom call(int argc, Atom* argv);
 
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         /** @name instance methods */
         /*@{*/
         Atom get(Atom thisAtom, Atom *args, int argc, int index);

@@ -198,7 +198,24 @@ namespace avmplus
         // argv[0] = receiver
         virtual Atom call(int argc, Atom* argv);
 
-        // argv[0] = receiver(ignored)
+        /**
+         * argv[0] = receiver(ignored)
+         * arg1 = argv[1]
+         * argN = argv[argc]
+         *
+         * called as constructor, as in new C().  for user classes this
+         * invokes the implicit constructor followed by the user's constructor
+         * if any.
+         *
+         * NOTE: The contents of the given argument list can be modified during 
+         *       invocation of the constructor without further warning.
+         *       Do not reuse an argument list AS-IS for multiple constructor calls, 
+         *       unless you make sure to reinitialize the contents of the argument list after each call.
+         *
+         * NOTE: subclasses should never need to declare this method in their class;
+         *       an override declaration will be provided for them iff 
+         *       customconstruct="true" is specified in their AS3 file.
+         */
         virtual Atom construct(int argc, Atom* argv);
 
         // TODO make this const
@@ -276,7 +293,7 @@ namespace avmplus
         
         void throwWriteSealedError(Atom name);
         void throwWriteSealedError(const Multiname& name);
-
+        void throwCantInstantiateError();
 
     private:
         void initHashtable(int capacity = InlineHashtable::kDefaultCapacity);

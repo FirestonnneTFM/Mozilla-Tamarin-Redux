@@ -56,11 +56,6 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) IntClass(cvtable);
         }
 
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]
@@ -90,11 +85,6 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) UIntClass(cvtable);
         }
         
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]

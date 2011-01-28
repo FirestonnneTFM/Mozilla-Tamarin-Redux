@@ -60,7 +60,15 @@
 #   classgc         the GC method for the class object
 #   instancegc      the GC method for the instance object
 #   methods         ?
-#   customconstruct ?
+#   customconstruct one of "true", "instance", or "none"
+#                   if "true", the Class must provide an override of the construct() method.
+#                   if "instance", the Class *and* Instance must provide an override of the construct() method.
+#                   if "none", the Class cannot be constructed; we will generated a stub that throws kCantInstantiateError.
+#                   ("instance" is useful only for ClassClosure and other internal classes; classes
+#                   outside the VM should not use this value.)
+#   instancebase    if the instance inherits from a C++ class that can't be inferred from the AS3 inheritance,
+#                   it must be specified here. this is not supported for new code; it's provided for temporary support
+#                   of existing code.
 #
 # The allowable values for "gc", "classgc", and "instancegc" are "exact"
 # and "conservative"; the default is "conservative".  If the value is "exact" 
@@ -69,7 +77,7 @@
 #
 # For more information about GC see the documentation in utils/exactgc.as.
 
-import optparse, struct, os, sys
+import optparse, struct, os, sys, StringIO
 from optparse import OptionParser
 from struct import *
 from os import path
@@ -467,11 +475,12 @@ class NativeInfo:
     class_name = None
     class_gc_exact = None
     instance_name = None
+    instancebase_name = None
     instance_gc_exact = None
     gen_method_map = False
     method_map_name = None
     constSetters = False
-    customConstruct = False
+    custom_construct = False
 
     def set_class(self, name):
         if self.class_name != None:
@@ -483,10 +492,18 @@ class NativeInfo:
             raise Error("native(instance) may not be specified multiple times for the same class: %s %s" % (self.instance_name, name))
         self.instance_name = name
 
-    def set_customConstruct(self):
-        if self.customConstruct:
-            raise Error("native(customConstruct) may not be specified multiple times for the same class")
-        self.customConstruct = True
+    def set_instancebase(self, name):
+        if self.instancebase_name != None:
+            raise Error("native(instancebase) may not be specified multiple times for the same class: %s %s" % (self.instancebase_name, name))
+        self.instancebase_name = name
+
+    def set_customConstruct(self, value):
+        if self.custom_construct != False:
+            raise Error("native(customconstruct) may not be specified multiple times for the same class")
+        value = str(value).lower()
+        if not value in ["true", "instance", "none"]:
+            raise Error('native metadata specified illegal value, "%s" for customconstruct field.' % value)
+        self.custom_construct = value
 
     def set_classGC(self, gc):
         if self.class_gc_exact != None:
@@ -508,7 +525,7 @@ class NativeInfo:
         else:
             raise Error("native(instancegc) can only be specified as 'exact' or 'conservative': %s %s" % (self.instance_name, gc))
 
-    def validate(self):
+    def validate(self, t):
         if self.gen_method_map and self.class_name == None and self.instance_name == None:
             raise Error("cannot specify native(methods) without native(cls)")
         if self.class_name != None or self.instance_name != None:
@@ -517,6 +534,14 @@ class NativeInfo:
                 self.class_name = "ClassClosure"
             if self.instance_name == None:
                 self.instance_name = "ScriptObject"
+        if self.custom_construct == "true":
+            t.has_custom_construct = True
+        elif self.custom_construct == "none":
+            t.has_custom_construct = True
+            t.cant_instantiate = True
+        elif self.custom_construct == "instance":
+            t.has_custom_construct = True
+            t.itraits.has_custom_construct = True
 
 
 BMAP = {
@@ -552,6 +577,8 @@ class Traits:
     ni = None
     niname = None
     nextSlotId = 0
+    has_custom_construct = False
+    cant_instantiate = False
     def __init__(self, name):
         self.names = {}
         self.slots = []
@@ -1002,6 +1029,8 @@ class Abc:
                         ni.set_class(md.attrs["cls"])
                     if md.attrs.has_key("instance"):
                         ni.set_instance(md.attrs["instance"])
+                    if md.attrs.has_key("instancebase"):
+                        ni.set_instancebase(md.attrs["instancebase"])
                     if md.attrs.has_key("gc"):
                         ni.set_classGC(md.attrs["gc"])
                         ni.set_instanceGC(md.attrs["gc"])
@@ -1022,10 +1051,7 @@ class Abc:
                             raise Error(u'native metadata specified illegal value, "%s" for constsetters field.  Value must be "true" or "false".' % unicode(v))
                     if md.attrs.has_key("customconstruct"):
                         v = md.attrs.get("customconstruct")
-                        if (v == "true"):
-                            ni.set_customConstruct()
-                        elif (v != "false"):
-                            raise Error(u'native metadata specified illegal value, "%s" for customconstruct field.  Value must be "true" or "false".' % unicode(v))
+                        ni.set_customConstruct(v)
                     if (ni.class_name == None) and (ni.instance_name == None):
                         raise Error("native metadata must specify (cls,instance)")
 
@@ -1034,7 +1060,7 @@ class Abc:
         self.find_nativeinfo(t.metadata, ni)
         if ni.instance_name != None and t.itraits.is_interface:
             raise Error("interfaces may not specify native(instance)")
-        ni.validate()
+        ni.validate(t)
         return ni
 
     def parseClassInfos(self):
@@ -1435,7 +1461,7 @@ class AbcThunkGen:
                         offsetOfSlotsClass,\
                         c.ni.instance_name,\
                         offsetOfSlotsInstance,\
-                        str(c.ni.customConstruct).lower()))
+                        str(c.has_custom_construct).lower()))
                 else:
                     out_c.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), c.ni.class_name, c.ni.instance_name))
         out_c.indent -= 1
@@ -1484,13 +1510,19 @@ class AbcThunkGen:
         out_c.println("};");
         out_c.println('')
 
-        self.printStructInfoForClasses(out_h)
+        c_stubs = StringIO.StringIO("")
+        out_c_stubs = IndentingPrintWriter(c_stubs)
+        self.printStructInfoForClasses(out_h, out_c, out_c_stubs)
 
         if haveSecrets:
             secrets.emit(self, name, CTYPE_OBJECT)
 
         out_h.println(' '.join(('}',) * len(nativeIDNamespaces)))
         out_c.println(' '.join(('}',) * len(nativeIDNamespaces)))
+
+        # emit stubs after closing open namespaces!
+        out_c.prnt(c_stubs.getvalue())
+        c_stubs.close()
 
     def forwardDeclareGlueClasses(self, out_h):
         # find all the native glue classes and write forward declarations for them
@@ -1584,7 +1616,7 @@ class AbcThunkGen:
     def hashSlots(c):
         return False
 
-    def printStructInfoForClasses(self, out_h):
+    def printStructInfoForClasses(self, out_h, out_c, out_c_stubs):
         out_h.println(u'class SlotOffsetsAndAsserts;')
 
         visitedGlueClasses = set()
@@ -1592,13 +1624,13 @@ class AbcThunkGen:
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
             if (c.ni.class_name is not None):
-                self.printStructInfoForTraits(out_h, c, visitedGlueClasses, True)
+                self.printStructInfoForTraits(out_h, out_c, out_c_stubs, c, visitedGlueClasses, True)
                 if (self.needsInstanceSlotsStruct(c)):
-                    self.printStructInfoForTraits(out_h, c.itraits, visitedGlueClasses, False)
+                    self.printStructInfoForTraits(out_h, out_c, out_c_stubs, c.itraits, visitedGlueClasses, False)
             else:
                 assert not self.needsInstanceSlotsStruct(c)
 
-    def printStructInfoForTraits(self, out_h, t, visitedGlueClasses, isClassTraits):
+    def printStructInfoForTraits(self, out_h, out_c, out_c_stubs, t, visitedGlueClasses, isClassTraits):
         if (t.base is not None):
             baseTraits = self.lookupTraits(t.base)
             if (((isClassTraits) and (baseTraits.ni.class_name is None)) or ((not isClassTraits) and (baseTraits.ni.instance_name is None))):
@@ -1703,6 +1735,27 @@ class AbcThunkGen:
         out_h.println(u'};')
         out_h.println(u'#define DECLARE_SLOTS_' + self.__baseNINameForNIName(t.niname) + u' \\')
         out_h.indent += 1
+        selfname = self.__parseCPPClassName(t.niname)
+        basename = self.__parseCPPClassName(baseTraits.niname)
+        if not isClassTraits and t.ni.instancebase_name != None:
+            basename = self.__parseCPPClassName(t.ni.instancebase_name)
+        if t.has_custom_construct:
+            # emit the construct declaration to ensure that construct is defined for this class
+            out_h.println("public: \\")
+            out_h.indent += 1
+            out_h.println("virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \\")
+            out_h.indent -= 1
+            if t.cant_instantiate:
+                # emit a stub that throws if we attempt to construct
+                out_c_stubs.println("avmplus::Atom %s::%s::construct(int /*argc*/, avmplus::Atom* /*argv*/) { throwCantInstantiateError(); return 0; }" % (selfname[0],selfname[1]))
+        else:
+            # emit a (debug-only) stub to ensure that construct is NOT defined for this class
+            out_h.println("public: \\")
+            out_h.indent += 1
+            out_h.println("AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\\")
+            out_h.indent -= 1
+            # put in out_c_stubs so we aren't wrapped in avmplus::NativeID:: namespaces
+            out_c_stubs.println("AvmThunk_DEBUG_ONLY( avmplus::Atom %s::%s::construct(int argc, avmplus::Atom* argv) { return %s::%s::construct(argc, argv); } )" % (selfname[0],selfname[1],basename[0],basename[1]))
         out_h.println(u'private: \\')
         out_h.indent += 1
         out_h.println(u'friend class %s::SlotOffsetsAndAsserts; \\' % opts.nativeIDNS)

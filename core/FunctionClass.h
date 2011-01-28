@@ -58,12 +58,6 @@ namespace avmplus
 
         ClassClosure *createEmptyFunction();
 
-        // Function called as constructor ... not supported from user code
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         Atom call(int argc, Atom* argv)
         {
             return construct(argc,argv);
@@ -98,7 +92,6 @@ namespace avmplus
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
         virtual MethodEnv* getCallMethodEnv() { return _call; }
 #endif
-        virtual Atom construct(int argc, Atom* argv);
         virtual Atom call(int argc, Atom* argv);
         virtual CodeContext* getFunctionCodeContext() const;
         int get_length();

@@ -63,11 +63,6 @@ namespace avmplus
             seed.uSequenceLength = 0;
         }
 
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]

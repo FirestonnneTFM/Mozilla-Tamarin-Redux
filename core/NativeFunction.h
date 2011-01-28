@@ -48,6 +48,12 @@ struct AOTInfo;
 
 namespace avmplus
 {
+#ifdef _DEBUG
+    #define AvmThunk_DEBUG_ONLY(...)    __VA_ARGS__
+#else
+    #define AvmThunk_DEBUG_ONLY(...)    
+#endif /* DEBUG */
+
     // Historically, bools are passed in as int32_t, as some calling conventions
     // would only use a single byte and leave the remainder of the argument word
     // as trash; this was used to ensure it was well-defined. (It's not clear to

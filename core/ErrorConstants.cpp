@@ -242,8 +242,9 @@ namespace avmplus
             2006, 132,
             2007, 133,
             2008, 134,
-            2030, 135,
-            2058, 136
+            2012, 135,
+            2030, 136,
+            2058, 137
         };
 
         const char* errorConstants[][kNumErrorConstants] =
@@ -386,8 +387,9 @@ namespace avmplus
                 /*2006,132*/ "The supplied index is out of bounds.",
                 /*2007,133*/ "Parameter %1 must be non-null.",
                 /*2008,134*/ "Parameter %1 must be one of the accepted values.",
-                /*2030,135*/ "End of file was encountered.",
-                /*2058,136*/ "There was an error decompressing the data."
+                /*2012,135*/ "%1 class cannot be instantiated.",
+                /*2030,136*/ "End of file was encountered.",
+                /*2058,137*/ "There was an error decompressing the data."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -528,8 +530,9 @@ namespace avmplus
                 /*2006,132*/ "Poskytnutý index je mimo rozsah.",
                 /*2007,133*/ "Parametr %1 nesmí být null.",
                 /*2008,134*/ "Parametr %1 musí být jedna z akceptovaných hodnot.",
-                /*2030,135*/ "Bylo dosaženo konce souboru.",
-                /*2058,136*/ "Při dekomprimování dat došlo k chybě."
+                /*2012,135*/ "Pro třídu %1 nelze vytvořit instanci.",
+                /*2030,136*/ "Bylo dosaženo konce souboru.",
+                /*2058,137*/ "Při dekomprimování dat došlo k chybě."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_de
@@ -670,8 +673,9 @@ namespace avmplus
                 /*2006,132*/ "Der angegebene Index liegt außerhalb des zulässigen Bereichs.",
                 /*2007,133*/ "Parameter %1 darf nicht 'null' sein.",
                 /*2008,134*/ "Parameter %1 muss einen zulässigen Wert haben.",
-                /*2030,135*/ "Das Dateiende wurde erkannt.",
-                /*2058,136*/ "Fehler beim Dekomprimieren der Daten."
+                /*2012,135*/ "%1-Klasse kann nicht instanziiert werden.",
+                /*2030,136*/ "Das Dateiende wurde erkannt.",
+                /*2058,137*/ "Fehler beim Dekomprimieren der Daten."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_es
@@ -812,8 +816,9 @@ namespace avmplus
                 /*2006,132*/ "El índice proporcionado está fuera de los límites.",
                 /*2007,133*/ "El valor del parámetro %1 debe ser distinto de null.",
                 /*2008,134*/ "El parámetro %1 debe tener uno de los valores aceptados.",
-                /*2030,135*/ "Se alcanzó el final del archivo.",
-                /*2058,136*/ "Se produjo un error al descomprimir los datos."
+                /*2012,135*/ "No se puede crear una instancia de la clase %1.",
+                /*2030,136*/ "Se alcanzó el final del archivo.",
+                /*2058,137*/ "Se produjo un error al descomprimir los datos."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_fr
@@ -954,8 +959,9 @@ namespace avmplus
                 /*2006,132*/ "L'index indiqué sort des limites.",
                 /*2007,133*/ "Le paramètre %1 ne doit pas être nul.",
                 /*2008,134*/ "Le paramètre %1 doit être l'une des valeurs acceptées.",
-                /*2030,135*/ "Fin de fichier détectée.",
-                /*2058,136*/ "Une erreur s'est produite lors de la décompression des données."
+                /*2012,135*/ "Impossible d'instancier la classe %1.",
+                /*2030,136*/ "Fin de fichier détectée.",
+                /*2058,137*/ "Une erreur s'est produite lors de la décompression des données."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_it
@@ -1096,8 +1102,9 @@ namespace avmplus
                 /*2006,132*/ "L'indice fornito è fuori intervallo.",
                 /*2007,133*/ "Il valore del parametro %1 deve essere diverso da null.",
                 /*2008,134*/ "Il valore del parametro %1 deve essere uno dei valori accettati.",
-                /*2030,135*/ "È stata raggiunta la fine del file.",
-                /*2058,136*/ "Si è verificato un errore durante la decompressione dei dati."
+                /*2012,135*/ "Impossibile creare un'istanza della classe %1.",
+                /*2030,136*/ "È stata raggiunta la fine del file.",
+                /*2058,137*/ "Si è verificato un errore durante la decompressione dei dati."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ja
@@ -1238,8 +1245,9 @@ namespace avmplus
                 /*2006,132*/ "指定したインデックスが境界外です。",
                 /*2007,133*/ "パラメーター %1 は null 以外でなければなりません。",
                 /*2008,134*/ "パラメーター %1 は承認された値の 1 つでなければなりません。",
-                /*2030,135*/ "ファイルの終端 (EOF) が検出されました。",
-                /*2058,136*/ "圧縮データの解凍時にエラーが発生しました。"
+                /*2012,135*/ "%1 クラスをインスタンス化することはできません。",
+                /*2030,136*/ "ファイルの終端 (EOF) が検出されました。",
+                /*2058,137*/ "圧縮データの解凍時にエラーが発生しました。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ko
@@ -1380,8 +1388,9 @@ namespace avmplus
                 /*2006,132*/ "제공된 인덱스가 범위를 벗어났습니다.",
                 /*2007,133*/ "매개 변수 %1은(는) null이 아니어야 합니다.",
                 /*2008,134*/ "매개 변수 %1은(는) 허용된 값 중 하나여야 합니다.",
-                /*2030,135*/ "파일의 끝입니다.",
-                /*2058,136*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다."
+                /*2012,135*/ "%1 클래스를 인스턴스화할 수 없습니다.",
+                /*2030,136*/ "파일의 끝입니다.",
+                /*2058,137*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_nl
@@ -1522,8 +1531,9 @@ namespace avmplus
                 /*2006,132*/ "De opgegeven index is buiten de grenzen.",
                 /*2007,133*/ "Parameter %1 mag niet null zijn.",
                 /*2008,134*/ "Parameter %1 moet een van de toegestane waarden zijn.",
-                /*2030,135*/ "Einde van bestand is bereikt.",
-                /*2058,136*/ "Er is een fout opgetreden bij het decomprimeren van gegevens."
+                /*2012,135*/ "Klasse %1 kan niet worden geïnstantieerd.",
+                /*2030,136*/ "Einde van bestand is bereikt.",
+                /*2058,137*/ "Er is een fout opgetreden bij het decomprimeren van gegevens."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_pl
@@ -1664,8 +1674,9 @@ namespace avmplus
                 /*2006,132*/ "Określony indeks wychodzi poza zakres.",
                 /*2007,133*/ "Parametr %1 musi mieć wartość inną niż null.",
                 /*2008,134*/ "Parametr %1 musi być jedną z akceptowanych wartości.",
-                /*2030,135*/ "Napotkano koniec pliku.",
-                /*2058,136*/ "Podczas dekompresji danych wystąpił błąd."
+                /*2012,135*/ "Nie można utworzyć instancji klasy %1.",
+                /*2030,136*/ "Napotkano koniec pliku.",
+                /*2058,137*/ "Podczas dekompresji danych wystąpił błąd."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -1806,8 +1817,9 @@ namespace avmplus
                 /*2006,132*/ "O índice fornecido está fora dos limites.",
                 /*2007,133*/ "O parâmetro %1 não deve ser nulo.",
                 /*2008,134*/ "O parâmetro %1 deve ser um dos valores aceitos.",
-                /*2030,135*/ "O fim do arquivo foi encontrado.",
-                /*2058,136*/ "Erro ao descompactar os dados."
+                /*2012,135*/ "A classe %1 não pode ser instanciada.",
+                /*2030,136*/ "O fim do arquivo foi encontrado.",
+                /*2058,137*/ "Erro ao descompactar os dados."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ru
@@ -1948,8 +1960,9 @@ namespace avmplus
                 /*2006,132*/ "Предоставленный индекс выходит за допустимые пределы.",
                 /*2007,133*/ "Параметр %1 не должен быть равен нулю.",
                 /*2008,134*/ "Параметр %1 должен быть одним из принятых значений.",
-                /*2030,135*/ "Обнаружен конец файла.",
-                /*2058,136*/ "Ошибка при распаковке данных."
+                /*2012,135*/ "Класс %1 не может быть создан.",
+                /*2030,136*/ "Обнаружен конец файла.",
+                /*2058,137*/ "Ошибка при распаковке данных."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_sv
@@ -2090,8 +2103,9 @@ namespace avmplus
                 /*2006,132*/ "Det angivna indexvärdet är utanför intervallet.",
                 /*2007,133*/ "Parametern %1 får inte vara null.",
                 /*2008,134*/ "Parametern %1 måste ha ett av de godkända värdena.",
-                /*2030,135*/ "Filens slut påträffades.",
-                /*2058,136*/ "Ett fel uppstod vid dekomprimering av data."
+                /*2012,135*/ "Det går inte att skapa en förekomst av klassen %1.",
+                /*2030,136*/ "Filens slut påträffades.",
+                /*2058,137*/ "Ett fel uppstod vid dekomprimering av data."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_tr
@@ -2232,8 +2246,9 @@ namespace avmplus
                 /*2006,132*/ "Sağlanan dizin sınırların dışındadır.",
                 /*2007,133*/ "%1 parametresi boş olmamalıdır.",
                 /*2008,134*/ "%1 parametresi kabul edilen değerlerden biridir.",
-                /*2030,135*/ "Dosya sonuyla karşılaşıldı.",
-                /*2058,136*/ "Veri açılırken hata oluştu."
+                /*2012,135*/ "%1 sınıfı örneklendirilemiyor.",
+                /*2030,136*/ "Dosya sonuyla karşılaşıldı.",
+                /*2058,137*/ "Veri açılırken hata oluştu."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_CN
@@ -2374,8 +2389,9 @@ namespace avmplus
                 /*2006,132*/ "提供的索引超出范围。",
                 /*2007,133*/ "参数 %1 不能为空。",
                 /*2008,134*/ "参数 %1 必须是某个可接受的值。",
-                /*2030,135*/ "遇到文件尾。",
-                /*2058,136*/ "解压缩数据时出错。"
+                /*2012,135*/ "无法实例化 %1 类。",
+                /*2030,136*/ "遇到文件尾。",
+                /*2058,137*/ "解压缩数据时出错。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_TW
@@ -2513,11 +2529,12 @@ namespace avmplus
                 /*1507,129*/ "引數 %1 不能是 null。",
                 /*1508,130*/ "指定給引數 %1 的值無效。",
                 /*1510,131*/ "若回呼引數是 Class 的方法，選擇性的引數 'this' 必須是 null。",
-                /*2006,132*/ "提供的索引超出范围。",
+                /*2006,132*/ "提供的索引超出範圍。",
                 /*2007,133*/ "參數 %1 不能是 Null。",
                 /*2008,134*/ "參數 %1 必須是其中一個可接受值。",
-                /*2030,135*/ "到達檔案結尾。",
-                /*2058,136*/ "解壓縮資料時發生錯誤。"
+                /*2012,135*/ "無法個體化類別 %1。",
+                /*2030,136*/ "到達檔案結尾。",
+                /*2058,137*/ "解壓縮資料時發生錯誤。"
             }
         #endif
         };

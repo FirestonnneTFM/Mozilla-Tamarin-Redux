@@ -62,11 +62,6 @@ namespace avmplus
         // argN = argv[argc]
         Atom call(int argc, Atom* argv);
 
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         // native methods.  see String.as
         ArrayObject* _match(Stringp s, Atom pattern);
         Stringp _replace(Stringp in, Atom pattern, Atom replacementAtom);

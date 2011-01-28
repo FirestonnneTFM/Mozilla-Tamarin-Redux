@@ -738,56 +738,6 @@ namespace avmplus
         return c;
     }
 
-#ifdef DEBUG
-
-#if defined(__GNUC__) && !defined(VMCFG_ARM) && !defined(VMCFG_MIPS)
-    // Ensure that if a native class object overrides ClassClosure::construct(),
-    // then itraits->hasCustomConstruct must be true.  Conversely if it does not
-    // override construct(), hasCustomConstruct must be false (lest we lose out
-    // on early binding.  See CodegenLIR::emitConstruct().
-    void checkConstructOverride(ClassClosure* cc)
-    {
-        Traits* ctraits = cc->traits();
-        if (!ctraits->pool->isBuiltin || !cc->toplevel()->objectClass)
-            return;
-        static int cc_construct_index = 0;
-        static void* cc_construct_ptr = 0;
-        if (!cc_construct_index) {
-            // We use the GCC member pointer ABI specified here to discover the vtable
-            // offset for ClassClosure::construct.
-            // http://www.codesourcery.com/public/cxx-abi/abi.html#member-pointers
-            union memptr {
-                Atom (ClassClosure::*p)(int, Atom*);
-                ptrdiff_t offsets[2];
-            };
-            memptr p = { &ClassClosure::construct };
-            cc_construct_index = (p.offsets[0] - 1) / sizeof(void*);
-            // Now that we have the offset, get the pointer value for the
-            // base ClassClosure::construct method.  This is what we compare to below.
-            ClassClosure* obj_cc = ClassClosure::create(cc->gc(), sizeof(ClassClosure)+100, cc->toplevel()->objectClass->vtable);
-            void*** obj_ptr = (void***)obj_cc;
-            cc_construct_ptr = (void*) (obj_ptr[0][cc_construct_index]);
-            delete obj_cc;
-        }
-        void*** ptr = (void***)cc;
-        bool overrides_construct = (ptr[0][cc_construct_index] != cc_construct_ptr);
-        // Check that the hasCustomConstruct flag is set correctly. If this fires,
-        // You need to add or remove the customconstruct=true attribute from
-        // the [native()] metatadata on the AS3 class declaration.
-        if (overrides_construct != ctraits->hasCustomConstruct) {
-            cc->core()->console << ctraits << " error: hasCustomConstruct="
-                << (bool)ctraits->hasCustomConstruct << ", expected " << overrides_construct << "\n";
-            AvmAssert(ctraits->hasCustomConstruct == overrides_construct);
-        }
-    }
-#else
-    void checkConstructOverride(ClassClosure*)
-    {
-        // skip for other compilers.
-    }
-#endif
-#endif // DEBUG
-
     /**
      * given a classInfo, create a new ClassClosure object and return it on the stack.
      */
@@ -942,10 +892,6 @@ namespace avmplus
         if (cvtable != toplevel->objectClass->vtable)
             cvtable->init->coerceEnter(cc->atom());
 
-#ifdef DEBUG
-        // ensure hasCustomOverride is set correctly for this class
-        checkConstructOverride(cc);
-#endif
         return cc;
     }
 

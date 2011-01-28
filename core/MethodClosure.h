@@ -53,12 +53,6 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) MethodClosureClass(cvtable);
         }
 
-        // Function called as constructor ... not supported from user code
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         // overrides ClassClosure::call
         Atom call(int argc, Atom* argv);
 
@@ -88,9 +82,6 @@ namespace avmplus
         MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis);
 
     public:
-        // argc is args only, argv[0] = receiver(ignored)
-        virtual Atom construct(int argc, Atom* argv);
-
         virtual bool isMethodClosure() { return true; }
 
 #ifdef AVMPLUS_VERBOSE
