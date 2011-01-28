@@ -276,6 +276,12 @@ namespace avmplus
         throwWriteSealedError(Multiname(core->getAnyPublicNamespace(), core->intern(name)));
     }
 
+    void ScriptObject::throwCantInstantiateError()
+    {
+		Multiname qname(traits()->ns(), traits()->name());
+		toplevel()->argumentErrorClass()->throwError(kCantInstantiateError, core()->toErrorString(&qname));
+    }
+
     void ScriptObject::setAtomProperty(Atom name, Atom value)
     {
         if (traits()->needsHashtable())

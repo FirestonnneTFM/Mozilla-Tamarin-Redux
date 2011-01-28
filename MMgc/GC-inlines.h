@@ -291,7 +291,7 @@ namespace MMgc
     {
         GCAssert(item != NULL);
         GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
-        GCAssertMsg(!IsFinalized(item), "Finalizable storage must not be deleted with GC::Free; the destructor will not be called.");
+        //GCAssertMsg(!IsFinalized(item), "Finalizable storage must not be deleted with GC::Free; the destructor will not be called.");
         GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
     }
 

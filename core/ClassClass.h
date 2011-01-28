@@ -58,11 +58,6 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) ClassClass(cvtable);
         }
 
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
     // ------------------------ DATA SECTION BEGIN
         GC_NO_DATA(ClassClass)
 

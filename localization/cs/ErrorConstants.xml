@@ -670,6 +670,7 @@ class B extends A {
   <error id="2006" label="kParamRangeError">Poskytnutý index je mimo rozsah.</error>
   <error id="2007" label="kNullPointerError">Parametr %1 nesmí být null.</error>
   <error id="2008" label="kInvalidEnumError">Parametr %1 musí být jedna z akceptovaných hodnot.</error>
+  <error id="2012" label="kCantInstantiateError">Pro třídu %1 nelze vytvořit instanci.</error>
   <error id="2030" label="kEOFError">Bylo dosaženo konce souboru.</error>
   <error id="2058" label="kCompressedDataError">Při dekomprimování dat došlo k chybě.</error>
 </errors>

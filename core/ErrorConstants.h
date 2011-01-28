@@ -284,6 +284,7 @@ namespace avmplus
             kParamRangeError                                = 2006,
             kNullPointerError                               = 2007,
             kInvalidEnumError                               = 2008,
+            kCantInstantiateError                           = 2012,
             kEOFError                                       = 2030,
             kCompressedDataError                            = 2058
         };
@@ -291,7 +292,7 @@ namespace avmplus
         // Error message strings only in non-stubbed DEBUGGER builds.
         #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
         const int kLanguages = LANG_count;
-        const int kNumErrorConstants = 137;
+        const int kNumErrorConstants = 138;
         extern const char* errorConstants[kLanguages][kNumErrorConstants];
         extern int errorMappingTable[2*kNumErrorConstants];
         extern LangName languageNames[kLanguages];

@@ -41,7 +41,7 @@
 package
 {
     //pseudo-final - no user class can extend Function
-    [native(cls="FunctionClass", gc="exact", instance="FunctionObject", methods="auto", customconstruct=true)]
+    [native(cls="FunctionClass", gc="exact", instance="FunctionObject", methods="auto", customconstruct="instance")]
     dynamic public class Function
     {
         // Function.length = 1 per ES3
@@ -108,7 +108,7 @@ package
 }
 
 // not dynamic
-[native(cls="MethodClosureClass", gc="exact", instance="MethodClosure", methods="auto", customconstruct=true)]
+[native(cls="MethodClosureClass", gc="exact", instance="MethodClosure", methods="auto", customconstruct="instance")]
 final class MethodClosure extends Function
 {
     override public function get prototype()

@@ -405,6 +405,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_MIClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::_avmshell_MIClassSlots EmptySlotsStruct_MIClass
@@ -419,6 +421,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_MIObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::_avmshell_MIObjectSlots EmptySlotsStruct_MIObject
@@ -440,6 +444,8 @@ public:
     }
 };
 #define DECLARE_SLOTS_SystemClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -457,6 +463,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_FileClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::_avmshell_FileClassSlots EmptySlotsStruct_FileClass
@@ -472,6 +480,8 @@ private:
 #define GC_TRIVIAL_TRACER_DomainClass
 };
 #define DECLARE_SLOTS_DomainClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DomainClassSlots EmptySlotsStruct_DomainClass
@@ -487,6 +497,8 @@ private:
 #define GC_TRIVIAL_TRACER_DomainObject
 };
 #define DECLARE_SLOTS_DomainObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DomainObjectSlots EmptySlotsStruct_DomainObject
@@ -501,6 +513,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_StackFrameClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::StackFrameClassSlots EmptySlotsStruct_StackFrameClass
@@ -527,6 +541,8 @@ private:
     double m_scriptID;
 };
 #define DECLARE_SLOTS_StackFrameObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -551,6 +567,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_SampleClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::SampleClassSlots EmptySlotsStruct_SampleClass
@@ -571,6 +589,8 @@ private:
     double m_time;
 };
 #define DECLARE_SLOTS_SampleObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -591,6 +611,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_NewObjectSampleClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::NewObjectSampleClassSlots EmptySlotsStruct_NewObjectSampleClass
@@ -611,6 +633,8 @@ private:
     double m_id;
 };
 #define DECLARE_SLOTS_NewObjectSampleObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -631,6 +655,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_DeleteObjectSampleClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DeleteObjectSampleClassSlots EmptySlotsStruct_DeleteObjectSampleClass
@@ -651,6 +677,8 @@ private:
     double m_size;
 };
 #define DECLARE_SLOTS_DeleteObjectSampleObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -685,6 +713,8 @@ private:
     ATOM_WB m_LISTENER;
 };
 #define DECLARE_SLOTS_TraceClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -709,6 +739,8 @@ private:
 #define GC_TRIVIAL_TRACER_DictionaryClass
 };
 #define DECLARE_SLOTS_DictionaryClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DictionaryClassSlots EmptySlotsStruct_DictionaryClass
@@ -724,6 +756,8 @@ private:
 #define GC_TRIVIAL_TRACER_DictionaryObject
 };
 #define DECLARE_SLOTS_DictionaryObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DictionaryObjectSlots EmptySlotsStruct_DictionaryObject
@@ -738,6 +772,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_JObjectClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::JObjectClassSlots EmptySlotsStruct_JObjectClass
@@ -752,6 +788,8 @@ public:
 private:
 };
 #define DECLARE_SLOTS_JObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::JObjectSlots EmptySlotsStruct_JObject

@@ -759,6 +759,7 @@ class B extends A {
   <error id="2006" label="kParamRangeError">L'index indiqué sort des limites.</error>
   <error id="2007" label="kNullPointerError">Le paramètre %1 ne doit pas être nul.</error>
   <error id="2008" label="kInvalidEnumError">Le paramètre %1 doit être l'une des valeurs acceptées.</error>
+  <error id="2012" label="kCantInstantiateError">Impossible d'instancier la classe %1.</error>
   <error id="2030" label="kEOFError">Fin de fichier détectée.</error>
   <error id="2058" label="kCompressedDataError">Une erreur s'est produite lors de la décompression des données.</error>
 </errors>

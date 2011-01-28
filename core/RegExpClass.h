@@ -62,11 +62,6 @@ namespace avmplus
         // argN = argv[argc]
         Atom call(int argc, Atom* argv);
 
-        // this = argv[0] (ignored)
-        // arg1 = argv[1]
-        // argN = argv[argc]
-        Atom construct(int argc, Atom* argv);
-
         virtual ScriptObject* createInstance(VTable *ivtable, ScriptObject* prototype);
 
     // ------------------------ DATA SECTION BEGIN

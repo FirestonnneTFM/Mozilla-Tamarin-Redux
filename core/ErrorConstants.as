@@ -183,6 +183,7 @@ class Errors
         public static const kParamRangeError                  = 2006;
         public static const kNullPointerError                 = 2007;
         public static const kInvalidEnumError                 = 2008;
+        public static const kCantInstantiateError             = 2012;
         public static const kEOFError                         = 2030;
         public static const kCompressedDataError              = 2058;
 };

@@ -670,6 +670,7 @@ class B extends A {
   <error id="2006" label="kParamRangeError">De opgegeven index is buiten de grenzen.</error>
   <error id="2007" label="kNullPointerError">Parameter %1 mag niet null zijn.</error>
   <error id="2008" label="kInvalidEnumError">Parameter %1 moet een van de toegestane waarden zijn.</error>
+  <error id="2012" label="kCantInstantiateError">Klasse %1 kan niet worden geïnstantieerd.</error>
   <error id="2030" label="kEOFError">Einde van bestand is bereikt.</error>
   <error id="2058" label="kCompressedDataError">Er is een fout opgetreden bij het decomprimeren van gegevens.</error>
 </errors>
