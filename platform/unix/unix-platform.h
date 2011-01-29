@@ -141,6 +141,7 @@ typedef pthread_t vmpi_thread_t;
 #ifdef SOLARIS
  #include <alloca.h>
  #include <atomic.h>
+ #include <sched.h>
 typedef caddr_t maddr_ptr;
 #else
 typedef void *maddr_ptr;

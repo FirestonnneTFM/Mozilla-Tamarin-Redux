@@ -435,5 +435,14 @@ REALLY_INLINE void* VMPI_tlsGetValue(uintptr_t tlsId)
     return TlsGetValue((DWORD)tlsId);
 }
 
+REALLY_INLINE void VMPI_threadYield()
+{
+#ifdef UNDER_CE
+    Sleep(1);
+#else
+    SwitchToThread();
+#endif
+}
+
 #endif // __avmplus_win32_platform__
 

@@ -940,6 +940,39 @@ extern size_t VMPI_threadAttrDefaultGuardSize();
  */
 extern size_t VMPI_threadAttrDefaultStackSize();
 
-
+/**
+ * Yield the current processor to another runnable thread if available.
+ *
+ * Note: It is scheduler implementation dependent what constitutes a 'runnable'
+ *       thread, and also what penalty is imposed on the yielding thread, i.e.
+ *       when it will be rescheduled. This function should not be used as a
+ *       general synchronization mechanism, it is intended to be used only
+ *       as an optimization within busy-waiting loops (i.e. yield the processor
+ *       immediately, rather than busy-waiting until the thread is pre-empted
+ *       by the scheduler).
+ *
+ * Platform specifics:
+ *
+ * - Win32 uses SwitchToThread(). From msdn docs:
+ *
+ *   "The yield of execution is in effect for up to one thread-scheduling time
+ *    slice on the processor of the calling thread. The operating system will
+ *    not switch execution to another processor, even if that processor is idle
+ *    or is running a thread of lower priority.
+ *    After the yielding thread's time slice elapses, the operating system
+ *    reschedules execution for the yielding thread. The rescheduling is
+ *    determined by the priority of the yielding thread and the status of other
+ *    threads that are available to run.
+ *
+ * - All of the POSIX platforms (inc. OSX) use sched_yield(), which is quite
+ *   ambiguous as to what scheduling will actually occur.
+ *   From The Open Group Base Specifications Issue 6:
+ *
+ *   "The sched_yield() function shall force the running thread to relinquish
+ *    the processor until it again becomes the head of its thread list."
+ *
+ *
+ */
+extern void VMPI_threadYield();
 
 #endif /* __avmplus_VMPI__ */
