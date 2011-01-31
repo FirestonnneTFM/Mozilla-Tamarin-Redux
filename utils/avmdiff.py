@@ -86,10 +86,10 @@ def read_buildfile(filename):
             else:
                 if l == '-':
                     l = ''
-                l=re.sub('{shell_release}',avmr,l)    
-                l=re.sub('{shell_release_debugger}',avmrd,l)    
-                l=re.sub('{shell_debug}',avmd,l)    
-                l=re.sub('{shell_debug_debugger}',avmdd,l)    
+                l=re.sub('{shell_release}',avmr,l)
+                l=re.sub('{shell_release_debugger}',avmrd,l)
+                l=re.sub('{shell_debug}',avmd,l)
+                l=re.sub('{shell_debug_debugger}',avmdd,l)
                 list.append(l)
         return builds, options, combined
     finally:
@@ -102,7 +102,7 @@ def make_vmlist(buildfile):
     missing = [p for p in builds if not exists(p)]
     if len(missing) > 0:
         for p in missing:
-            print >> stderr, "no such file: ", p 
+            sys.stderr.write("no such file: %s\n" % p)
         exit(1)
     vms = []
     for build in builds:
@@ -140,7 +140,7 @@ def signame(sig):
         return "SIG%d" % sig
 
 def abcdump(filename):
-	os.system('~/hg/tamarin-redux/objdir-release/shell/avmshell ~/hg/tamarin-redux/utils/abcdump.abc -- ' + filename)
+    os.system('~/hg/tamarin-redux/objdir-release/shell/avmshell ~/hg/tamarin-redux/utils/abcdump.abc -- ' + filename)
 
 def avm(vm, avmshell_args, test_args):
     cmd = '%s %s %s 2>&1' % (vm, avmshell_args, test_args)
@@ -209,7 +209,7 @@ def verbose_print(s):
 def compare(vmlist, avmshell_args, test_args):
     results = {}
     if len(vmlist) < 2:
-        print >> stderr, "too few vms were given"
+        sys.stderr.write("too few vms were given")
         exit(1)
     for vm in vmlist:
         verbose_print('%s %s %s' % (vm, avmshell_args, test_args))
@@ -223,7 +223,7 @@ def compare(vmlist, avmshell_args, test_args):
 
 def printlines(seq):
     for l in seq:
-        print scrub_passfail(l),
+        sys.stdout.write('%s ' % scrub_passfail(l))
 
 def pick_majoirty(results):
     # pick the result with the most examples
@@ -254,7 +254,7 @@ def test(vmlist, avmshell_args, test_args):
     stat0, out0 = e0
     if len(results) != 1:
         # results not all the same.  print the outliers as diffs against the majority
-        print avmshell_args, test_args, 'FAILED! diff'
+        print(avmshell_args, test_args, 'FAILED! diff')
         for e in results:
             if e != e0:
                 out0 = out0 + (describe(e0)+'\n',)
@@ -263,7 +263,7 @@ def test(vmlist, avmshell_args, test_args):
         return 1
     elif stat0 < 0:
         # everyone crashed the same way
-        print avmshell_args, test_args, 'FAILED!', describe(e0)
+        print(avmshell_args, test_args, 'FAILED!', describe(e0))
         prinlines(out0)
         return stat0
     if quiet:
@@ -273,12 +273,12 @@ def test(vmlist, avmshell_args, test_args):
     return stat0
 
 def usage(stat):
-    print 'usage: %s [hqf]' % basename(argv[0])
-    print ' -h --help        print this message'
-    print '    --buildfile=  specify file with list of vms to compare, default is "Buildfile"'
-    print '                  MUST be defined using an equal (=) sign after --buildfile'
-    print ' -q --quiet       if vms agree, print "PASSED!" and return 0 instead of the vm output'
-    print ' -v --verbose     print extra info for diagnosing problems'
+    print('usage: %s [hqf]' % basename(argv[0]))
+    print(' -h --help        print this message')
+    print('    --buildfile=  specify file with list of vms to compare, default is "Buildfile"')
+    print('                  MUST be defined using an equal (=) sign after --buildfile')
+    print(' -q --quiet       if vms agree, print "PASSED!" and return 0 instead of the vm output')
+    print(' -v --verbose     print extra info for diagnosing problems')
     exit(stat)
 
 if __name__ == '__main__':
@@ -291,13 +291,13 @@ if __name__ == '__main__':
     avmdiff_args = []
     test_args = []  # args to be passed to the testcase using --
     
-    short = 'hqv'
-    long = ['help', 'buildfile=', 'quiet', 'verbose']
+    short_args = 'hqv'
+    long_args = ['help', 'buildfile=', 'quiet', 'verbose']
     
     # The following for loop separates out avmdiff, avmshell and test args.
     # Note that the way the code is setup places limitations on avmdiff args:
-    #   1. short arguments can NOT pass in any arguments
-    #   2. long arguments MUST be followed by an = sign
+    #   1. short_args arguments can NOT pass in any arguments
+    #   2. long_args arguments MUST be followed by an = sign
     #   3. avmdiff args can NOT be named the same as any avmshell argument
     
     for arg in sys_args:
@@ -310,12 +310,12 @@ if __name__ == '__main__':
             # extract only the arg name: remove '--' and '=.*' if present
             argname = arg[2:arg.find('=')] if '=' in arg else arg[2:]
             # compare against long list with '=' removed
-            if argname in [a.strip('=') for a in long]:
+            if argname in [a.strip('=') for a in long_args]:
                 avmdiff_args.append(arg)
             else:
                 avmshell_args.append(arg)
         elif arg.startswith('-'):
-            if arg[1] in short:
+            if arg[1] in short_args:
                 avmdiff_args.append(arg)
             else:
                 avmshell_args.append(arg)
@@ -328,7 +328,7 @@ if __name__ == '__main__':
     try:
         # any extra args have already been pushed into avmshell_args above
         # so throw_away will never be populated
-        opts, throw_away = getopt(avmdiff_args, short, long)
+        opts, throw_away = getopt(avmdiff_args, short_args, long_args)
     except:
         usage(2)
 
@@ -343,7 +343,7 @@ if __name__ == '__main__':
             verbose = True
 
     if os.path.isfile(buildfile)==False:
-        print "ERROR: Buildfile does not exist: '%s'" % buildfile
+        print("ERROR: Buildfile does not exist: '%s'" % buildfile)
         exit(1)
 
     exe=''
@@ -353,17 +353,17 @@ if __name__ == '__main__':
     avmrd=cwd+'/../objdir-releasedebugger/shell/avmshell'+exe
     avmd=cwd+'/../objdir-debug/shell/avmshell'+exe
     avmdd=cwd+'/../objdir-debugdebugger/shell/avmshell'+exe
-    if os.environ.has_key('shell_release'):
+    if 'shell_release' in os.environ:
         avmr=os.environ['shell_release']
-    if os.environ.has_key('shell_release_debugger'):
+    if 'shell_release_debugger' in os.environ:
         avmrd=os.environ['shell_release_debugger']
-    if os.environ.has_key('shell_debug'):
+    if 'shell_debug' in os.environ:
         avmd=os.environ['shell_debug']
-    if os.environ.has_key('shell_debug_debugger'):
+    if 'shell_debug_debugger' in os.environ:
         avmdd=os.environ['shell_debug_debugger']
 
     vmlist = make_vmlist(buildfile)
     stat = test(vmlist, avmshell_args, test_args)
     if stat == 0:
-        print 'PASSED! all configs match'
+        print('PASSED! all configs match')
     exit(stat)

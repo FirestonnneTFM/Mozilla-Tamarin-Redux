@@ -66,19 +66,19 @@ class RunTestLib:
                 continue
             fields=line.split(',')
             if len(fields)<3:
-                print "incorrect number of fields in line '%s'" % line
+                print("incorrect number of fields in line '%s'" % line)
                 continue
             self.testconfig[fields[0].strip()]=(fields[1].strip(),fields[2].strip())
 
     def checkenv(self,env,desc='',required=True):
         val=None
-        if os.environ.has_key(env):
+        if env in os.environ:
             val=os.environ[env]
         if val==None:
             if required:
-                print "required environment variable '%s' is not set... it is '%s'" % (env,desc)
+                print("required environment variable '%s' is not set... it is '%s'" % (env,desc))
                 sys.exit(1)
-            print "optional environment variable '%s' is not set ... it is '%s'" % (env,desc)
+            print("optional environment variable '%s' is not set ... it is '%s'" % (env,desc))
         else:
             val=val.strip()
         return val
@@ -88,9 +88,11 @@ class RunTestLib:
         if cwd==None:
             cwd=os.getcwd()
         proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE,stdin=subprocess.PIPE, shell=False,cwd=cwd)
-        if input!=None:
-            proc.stdin.write(input)
+        if input:
+            proc.stdin.write(input.encode('latin_1'))
         (stdo,stde)=proc.communicate()
+        stdo = stdo.decode('latin_1') if stdo else None
+        stde = stde.decode('latin_1') if stde else None
         return (proc.returncode,stdo,stde)
 
     def run_command_async(self,cwd=None,command=None,input=None,sleep=None):
@@ -105,7 +107,7 @@ class RunTestLib:
         return proc
 
     def compile(self,file,imports=None,args=None):
-        print "compiling %s" % file
+        print("compiling %s" % file)
         if imports==None:
             imports="-import %s -import %s" % (self.gabc,self.sabc)
         if args==None:
@@ -114,7 +116,7 @@ class RunTestLib:
         cwd=os.getcwd()
         (exitcode,stdo,stde)=self.run_command(cwd,cmd)
         if exitcode!=0:
-            print "ERROR: compile error\nstdout=%s\nstderr-%s\n" % (stdo,stde)
+            print("ERROR: compile error\nstdout=%s\nstderr-%s\n" % (stdo,stde))
             sys.exit(1)
         return (exitcode,stdo,stde)
 
@@ -178,23 +180,23 @@ class RunTestLib:
             os.remove("%s.output"%name)
     
         type='normal'
-        if self.testconfig.has_key(name):
+        if name in self.testconfig:
             (type,notes)=self.testconfig[name]
         if type=='skip':
             msg=msg + " SKIPPED, result %s" % result
-            print "%-30s SKIPPED, result %s" % (name,result)
+            print("%-30s SKIPPED, result %s" % (name,result))
         elif result and type=='normal':
             msg=msg + " PASSED"
-            print "%-30s PASSED" % name
+            print("%-30s PASSED" % name)
         elif result and type=='expectfail':
             msg=msg + " UNEXPECTED PASS : %s" % notes
-            print "%-30s UNEXPECTED PASS : %s" % (name,name)
+            print("%-30s UNEXPECTED PASS : %s" % (name,name))
         elif result==False  and type=='expectfail':
             msg=msg + " EXPECTED FAIL " + notes
-            print "%-30s EXPECTED FAIL, see %s.output" % (name,name)
+            print("%-30s EXPECTED FAIL, see %s.output" % (name,name))
         else:
             msg=msg + " FAILED"
-            print "%-30s FAILED, see %s.output" % (name,name)
+            print("%-30s FAILED, see %s.output" % (name,name))
         if result==False:
             out_file=open("%s.output"%name,"w")
             out_file.write(msg)

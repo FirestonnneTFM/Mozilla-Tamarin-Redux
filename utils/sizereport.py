@@ -53,14 +53,14 @@ globs = {'sizereport':'./sizereport', 'file': file, 'prefix':'', 'socketlog':Fal
     'product':'unknown', 'verbose':False,'version':'unknown','serverHost':'10.60.48.47','serverPort':1188 }
 
 def usage(c):
-    print "usage: %s [options]" % basename(sys.argv[0])
-    print " -m --map        specify map file to parse"
-    print " -d --socketlog  log results to socketserver"
-    print " -p --prefix     prefix for output line"
-    print " --vmversion     version of vm for socket log"
-    print " --config        configuration string for socket log"
-    print " --product       product (branch) for socket log"
-    print " --verbose       enable verbose messages"
+    print("usage: %s [options]" % basename(sys.argv[0]))
+    print(" -m --map        specify map file to parse")
+    print(" -d --socketlog  log results to socketserver")
+    print(" -p --prefix     prefix for output line")
+    print(" --vmversion     version of vm for socket log")
+    print(" --config        configuration string for socket log")
+    print(" --product       product (branch) for socket log")
+    print(" --verbose       enable verbose messages")
     exit(c)
 
 def runSizeReport():
@@ -68,18 +68,18 @@ def runSizeReport():
     (out,err)=p.communicate()
     exitcode=p.returncode
     if globs['verbose']:
-        print 'finished running sizereport exit code=%d' % exitcode
-    print 'output=%s' % out
+        print('finished running sizereport exit code=%d' % exitcode)
+    print('output=%s' % out)
     return (exitcode,out)
 
 def printResult(out):
-    print "%s SizeReport " % globs['prefix']
+    print("%s SizeReport " % globs['prefix'])
     for line in out.split('\n'):
         tokens=line.split()
         if len(tokens)>2:
-            print "%s %-7s %-10s %-5s" % (globs['prefix'],tokens[0],tokens[1],tokens[2])
+            print("%s %-7s %-10s %-5s" % (globs['prefix'],tokens[0],tokens[1],tokens[2]))
             if re.search("(\.obj|\.dll)", tokens[1]): # look for unclassified files
-                print "buildbot_status: WARNINGS" # produce a buildbot warning if any are found
+                print("buildbot_status: WARNINGS") # produce a buildbot warning if any are found
 
 def saveResult(out):
     out="version: %s\n%s" % (globs['version'],out)
@@ -91,14 +91,14 @@ def printResultDiff(out):
     for line in lastlines:
         tokens=line.split()
         if len(tokens)==2:
-            print "curr version: %s\nprev version: %s" % (globs['version'],tokens[1])
+            print("curr version: %s\nprev version: %s" % (globs['version'],tokens[1]))
         elif len(tokens)>2:
             lastdata[tokens[1]]=int(tokens[0])
-    print "%-8s %-6s %-5s %-6s" % ('name','size','chg','percent')
+    print("%-8s %-6s %-5s %-6s" % ('name','size','chg','percent'))
     for line in out.split('\n'):
         tokens=line.split()
         if len(tokens)>1:
-            if lastdata.has_key(tokens[1]):
+            if tokens[1] in lastdata:
                 diff=int(tokens[0])-lastdata[tokens[1]]
                 if diff>0:
                     res="+%s" % diff
@@ -106,9 +106,9 @@ def printResultDiff(out):
                     res="%s" % diff
             else:
                 res='n/a'
-            print "%-8s %-6s %-5s %-6s" % (tokens[1],convertK(tokens[0]),res,tokens[2])
+            print("%-8s %-6s %-5s %-6s" % (tokens[1],convertK(tokens[0]),res,tokens[2]))
             if re.search("(\.obj|\.dll)", tokens[1]): # look for unclassified files
-                print "buildbot_status: WARNINGS" # produce a buildbot warning if any are found
+                print("buildbot_status: WARNINGS") # produce a buildbot warning if any are found
 
 def printResultDiffSummary(out):                
     lastlines=open('lastsizereport.txt','r').readlines()
@@ -116,25 +116,25 @@ def printResultDiffSummary(out):
     for line in lastlines:
         tokens=line.split()
         if len(tokens)==2:
-            print "%s curr version: %s\n%s prev version: %s" % (globs['prefix'],globs['version'],globs['prefix'],tokens[1])
+            print("%s curr version: %s\n%s prev version: %s" % (globs['prefix'],globs['version'],globs['prefix'],tokens[1]))
         elif len(tokens)>2:
             lastdata[tokens[1]]=int(tokens[0])
-    print "%s %-8s %-6s %s" % (globs['prefix'],"name","size","change")
+    print("%s %-8s %-6s %s" % (globs['prefix'],"name","size","change"))
     for line in out.split('\n'):
         tokens=line.split()
         if len(tokens)>1:
-            if lastdata.has_key(tokens[1]):
+            if tokens[1] in lastdata:
                 diff=int(tokens[0])-lastdata[tokens[1]]
                 if diff==0:
-                    print "%s %-8s %-6s nochange" % (globs['prefix'],tokens[1],convertK(tokens[0]))
+                    print("%s %-8s %-6s nochange" % (globs['prefix'],tokens[1],convertK(tokens[0])))
                 else:
                     if diff>0:
                         res="+%s" % convertK(diff)
                     else:
                         res="%s" % convertK(diff)
-                    print "%s %-8s %-6s %s" % (globs['prefix'],tokens[1],convertK(tokens[0]),res)
+                    print("%s %-8s %-6s %s" % (globs['prefix'],tokens[1],convertK(tokens[0]),res))
             else:
-                print "%s %-8s %-6s" % (globs['prefix'],tokens[1],convertK(tokens[0]))
+                print("%s %-8s %-6s" % (globs['prefix'],tokens[1],convertK(tokens[0])))
 
 def convertK(val):
     if abs(int(val))>1024:
@@ -196,7 +196,7 @@ for o,v in opts:
 
 (exitcode,out)=runSizeReport()
 if exitcode!=0:
-    print "error bad exit code %d" % exitcode
+    print("error bad exit code %d" % exitcode)
     sys.exit(1)
 if exists('lastsizereport.txt'):
     printResultDiff(out)

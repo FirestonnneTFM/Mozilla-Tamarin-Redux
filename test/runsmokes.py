@@ -162,8 +162,8 @@ class RunSmokes():
             process=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             (out,err)=process.communicate()
             # convert to string from byte for py3 compatibility
-            out = out.decode('utf-8')
-            err = err.decode('utf-8')
+            out = out.decode('latin_1')
+            err = err.decode('latin_1')
             exitcode=process.returncode
         except:
             detail="ERROR: running test"
