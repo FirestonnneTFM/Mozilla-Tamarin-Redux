@@ -256,6 +256,7 @@ class RuntestBase(object):
         print('    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.')
         print('    --aotout        where the resulting binaries should be put (defaults to the location of the as file).')
         print('    --aotargs       any extra arguments to pass to compile.py.')
+        print('    --writeresult   write out the result.properties file, used when called from an ant script.')
         
 
 
@@ -269,7 +270,8 @@ class RuntestBase(object):
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
-                   'javaargs=', 'summaryonly', 'log=', 'valgrind', 'addtoconfig='
+                   'javaargs=', 'summaryonly', 'log=', 'valgrind', 'addtoconfig=',
+                   'writeresult'
                    ]
 
     def parseOptions(self):
@@ -370,6 +372,8 @@ class RuntestBase(object):
                 self.aotout = v
             elif o in ('--aotargs',):
                 self.aotextraargs = v
+            elif o in ('--writeresult',):
+                self.writeResultProperties = True
 
         return opts
 
