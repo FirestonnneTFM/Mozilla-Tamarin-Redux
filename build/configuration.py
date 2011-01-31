@@ -305,7 +305,7 @@ class Configuration:
                 'CPPFLAGS'     : '',
                 'CXXFLAGS'     : '',
                 'DLL_CFLAGS'   : '',
-                'LDFLAGS'      : '-lc -lm -lstdc++ -lssl -lgcc',
+                'LDFLAGS'      : '-lc -lm -lstdc++ -lgcc ',
                 'AR'           : 'arm-eabi-ar',
                 'AS'           : 'arm-eabi-as',
                 'MKSTATICLIB'  : '$(AR) -rcs $(1)',
