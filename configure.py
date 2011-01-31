@@ -42,12 +42,15 @@
 # testing and makefile generation.
 
 #****************************************************************************
-# If you're building android the following Android SDK commands must be run
-# before invoking configure.py and the makefile it produces:
-#        The android sdk volume should be mounted to /Volumes/android
-#        cd /Volumes/android/device
-#        run . build/envsetup.sh
-#        run choosecombo and press enter at each prompt
+# If you're building android the android public sdk/ndk must be set up on your
+# build machine. # See the wiki page here for instructions on how to create
+# the android public sdk/ndk:
+# https://zerowing.corp.adobe.com/display/FlashPlayer/android+tamarin+shell+support
+#
+# Before building edit the /android-public/android-vars.sh script
+# and check that the ANDROIDTOP variable is set correctly. Then run the script 
+# before invoking configure.py:
+#        . /android-public/android-vars.sh
 #
 #****************************************************************************
 
@@ -136,6 +139,7 @@ DEBUG_CFLAGS = ""
 DEBUG_LDFLAGS = ""
 OS_LIBS = []
 OS_LDFLAGS = ""
+LDFLAGS = config._acvars['LDFLAGS']
 MMGC_CPPFLAGS = "-DAVMSHELL_BUILD "
 AVMSHELL_CPPFLAGS = ""
 AVMSHELL_LDFLAGS = ""
@@ -143,6 +147,7 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 DISABLE_RTMPE = None
+ANDROIDPLATFORMVER = "android-8"
 
 if 'APP_CPPFLAGS' in os.environ:
     APP_CPPFLAGS += os.environ['APP_CPPFLAGS'] + " "
@@ -221,19 +226,16 @@ if config.getCompiler() == 'GCC':
         try:
             ANDROID_BUILD_TOP = os.environ['ANDROID_BUILD_TOP']
         except:
-            print('\nANDROID_BUILD_TOP not found in environment\nPlease mount android.dmg and cd to /Volumes/android/device\n' \
-                  'Run . build/envsetup.sh\nRun choosecombo and press enter at each prompt\n')
+            print('\nANDROID_BUILD_TOP not found in environment\nPlease run /android-public/android-vars.sh')
             exit(0)
 
-        ANDROID_INCLUDES = "-I$(ANDROID_BUILD_TOP)/bionic/libc/arch-arm/include "\
-                           "-I$(ANDROID_BUILD_TOP)/bionic/libc/kernel/arch-arm "\
-                           "-I$(ANDROID_BUILD_TOP)/bionic/libc/kernel/common "\
-                           "-I$(ANDROID_BUILD_TOP)/bionic/libm/include "\
-                           "-I$(ANDROID_BUILD_TOP)/bionic/libstdc++/include "\
-                           "-I$(ANDROID_BUILD_TOP)/bionic/libc/include "\
-                           "-I$(ANDROID_BUILD_TOP)/external/webkit/WebKit/android/stl "\
-                           "-I$(ANDROID_BUILD_TOP)/external/openssl/include "\
-                           "-I$(ANDROID_BUILD_TOP)/frameworks/base/opengl/include "
+        ANDROID_INCLUDES = "-I$(topsrcdir)/other-licenses/zlib "\
+                           "-I$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/include "\
+                           "-I$(ANDROID_BUILD_TOP)/android-ndk/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/bin "\
+                           "-I$(ANDROID_BUILD_TOP)/android-sdk-mac_86 "\
+                           "-I$(ANDROID_BUILD_TOP)/android-ndk/sources/cxx-stl/stlport/stlport "\
+                           "-I$(ANDROID_BUILD_TOP)/openssl/include "\
+                           "-I$(ANDROID_BUILD_TOP)/frameworks/base/opengl/include " % ANDROIDPLATFORMVER
 
         # These flags are shared with some of the other builds such as ARM, but better to keep them separate here for flexibility
         COMMON_CXX_FLAGS = "-Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof " \
@@ -249,16 +251,18 @@ if config.getCompiler() == 'GCC':
 
         # LFLAGS_HEADLESS gets picked up in configuration.py by MKPROGRAM
         LFLAGS_HEADLESS = "-nostdlib -Bdynamic -Wl,-T,"\
-                          "$(ANDROID_BUILD_TOP)/build/core/armelf.x -Wl,"\
+                          "$(ANDROID_BUILD_TOP)/android-ndk/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/arm-eabi/lib/ldscripts/armelf.x -Wl,"\
                           "-dynamic-linker,/system/bin/linker -Wl,"\
                           "-z,nocopyreloc "\
-                          "-L$(ANDROID_BUILD_TOP)/out/target/product/generic/system/lib -Wl,"\
-                          "-rpath-link=$(ANDROID_BUILD_TOP)/out/target/product/generic/system/lib "\
-                          "$(ANDROID_BUILD_TOP)/out/target/product/generic/obj/lib/crtbegin_dynamic.o "\
-                          "$(ANDROID_BUILD_TOP)/out/target/product/generic/obj/lib/crtend_android.o "
+                          "-L$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib -Wl,"\
+                          "-rpath-link=$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib "\
+                          "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtbegin_dynamic.o "\
+                          "$(ANDROID_BUILD_TOP)/android-ndk/platforms/%s/arch-arm/usr/lib/crtend_android.o " % (ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER,ANDROIDPLATFORMVER)
 
+        LDFLAGS += "$(ANDROID_BUILD_TOP)/openssl/libcrypto.a $(ANDROID_BUILD_TOP)/openssl/libssl.a"
+        
         # SEARCH_DIRS gets picked up in configuration.py by MKPROGRAM
-        SEARCH_DIRS = "-L/Volumes/Builds$(topsrcdir)/objdir-release/"
+        SEARCH_DIRS = "-L$(topsrcdir)/objdir-release/"
 
         BASE_M_FLAGS = "-mlong-calls -mthumb-interwork -mthumb"
 
@@ -447,7 +451,6 @@ elif the_os == "sunos":
                          'AVMPLUS_UNIX': None,
                          'SOLARIS': None})
     OS_LIBS.append('pthread')
-    OS_LIBS.append('rt')
     APP_CPPFLAGS += '-DAVMPLUS_CDECL '
     if config.getDebug():
         OS_LIBS.append("dl")
@@ -509,6 +512,7 @@ config.subst("AVMSHELL_LDFLAGS", AVMSHELL_LDFLAGS)
 config.subst("MMGC_DYNAMIC", MMGC_DYNAMIC and 1 or '')
 if the_os == "android":
     config.subst("LFLAGS_HEADLESS", LFLAGS_HEADLESS)
+    config.subst("LDFLAGS", LDFLAGS)    
     config.subst("SEARCH_DIRS", SEARCH_DIRS)
 
 config.generate("Makefile")
