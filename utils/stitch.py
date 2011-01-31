@@ -130,28 +130,28 @@ informative = re.compile(r"informative::([A-Za-z0-9_]+)");
 helper = re.compile(r"helper::([A-Za-z0-9_]+)");
 
 entities = { "INFINITY": "&#x221E;",
-	     "NOTE": "<p class=\"note\"><b>NOTE</b>&nbsp;&nbsp; ",
-	     "EXAMPLE": "<p class=\"note\"><b>EXAMPLE</b>&nbsp;&nbsp; ",
-	     "SPECNOTE": "<p class=\"note\"><b>SPEC NOTE</b>&nbsp;&nbsp; ",
-	     "COMP": "<p class=\"note\"><b>COMPATIBILITY NOTE</b>&nbsp;&nbsp; ",
-	     "IMPLNOTE": "<p class=\"note\"><b>IMPLEMENTATION NOTE</b>&nbsp;&nbsp; ",
-	     "FIXME": "<p class=\"fixme\"><b>FIXME</b>&nbsp;&nbsp; ",
-	     "LDOTS": "&#x0085;",
-	     "LEQ": "&#x2264;",
-	     "GEQ": "&#x2265;",
-	     "LT": "<",
-	     "GT": ">",
-	     "TIMES": "&#x00D7;",
-	     "PI": "&#x03C0;",
-	     "P": "<P><span class=\"pcounter\"></span>",
-	     "p": "<P><span class=\"pcounter\"></span>",
-	     "DESC": "<P class=\"section\"><b>Description</b> <P><span class=\"pcounter\"></span>",
-	     "RETN": "<P class=\"section\"><b>Returns</b> <P><span class=\"pcounter\"></span>",
-	     "IMPL": "<P class=\"implsection\"><b>Implementation</b> <P><span class=\"pcounter\"></span>",
-	     "SEM": "<P class=\"implsection\"><b>Semantics</b> <P><span class=\"pcounter\"></span>",
-	     "SHORTIMPL": "<P class=\"implsection\"><b>Implementation</b>",
-	     "---": "&#0151;"
-	     }
+            "NOTE": "<p class=\"note\"><b>NOTE</b>&nbsp;&nbsp; ",
+            "EXAMPLE": "<p class=\"note\"><b>EXAMPLE</b>&nbsp;&nbsp; ",
+            "SPECNOTE": "<p class=\"note\"><b>SPEC NOTE</b>&nbsp;&nbsp; ",
+            "COMP": "<p class=\"note\"><b>COMPATIBILITY NOTE</b>&nbsp;&nbsp; ",
+            "IMPLNOTE": "<p class=\"note\"><b>IMPLEMENTATION NOTE</b>&nbsp;&nbsp; ",
+            "FIXME": "<p class=\"fixme\"><b>FIXME</b>&nbsp;&nbsp; ",
+            "LDOTS": "&#x0085;",
+            "LEQ": "&#x2264;",
+            "GEQ": "&#x2265;",
+            "LT": "<",
+            "GT": ">",
+            "TIMES": "&#x00D7;",
+            "PI": "&#x03C0;",
+            "P": "<P><span class=\"pcounter\"></span>",
+            "p": "<P><span class=\"pcounter\"></span>",
+            "DESC": "<P class=\"section\"><b>Description</b> <P><span class=\"pcounter\"></span>",
+            "RETN": "<P class=\"section\"><b>Returns</b> <P><span class=\"pcounter\"></span>",
+            "IMPL": "<P class=\"implsection\"><b>Implementation</b> <P><span class=\"pcounter\"></span>",
+            "SEM": "<P class=\"implsection\"><b>Semantics</b> <P><span class=\"pcounter\"></span>",
+            "SHORTIMPL": "<P class=\"implsection\"><b>Implementation</b>",
+            "---": "&#0151;"
+         }
 
 currentlevel = 0
 
@@ -178,13 +178,13 @@ def isIdent(c):
 def unComment(s):
     i = len(s)-1
     while i > 0 and s[i] != "\"":
-	if s[i] == "/" and s[i-1] == "/":
-	    while i >= 0 and s[i] == "/":
-		i = i - 1
-	    s = s[0:i+1].rstrip()
-	    i = len(s)-1
-	else:
-	    i = i - 1
+        if s[i] == "/" and s[i-1] == "/":
+            while i >= 0 and s[i] == "/":
+                i = i - 1
+            s = s[0:i+1].rstrip()
+            i = len(s)-1
+        else:
+            i = i - 1
     return s
 
 def adHocFixFunctionType(s):
@@ -199,7 +199,7 @@ def extractES(fn, name, isSignature, isContextual):
     lastIsIdent = isIdent(name[len(name)-1])
     name = reEscape(name)
     if lastIsIdent:
-	name = name + r"(?![a-zA-Z0-9_])"
+        name = name + r"(?![a-zA-Z0-9_])"
     starting = re.compile("^( *)" + name)
     starting2 = re.compile("^( *)" + str(isContextual))
     blanks = 0
@@ -207,68 +207,68 @@ def extractES(fn, name, isSignature, isContextual):
     inContext = False
     for line in f:
         line = adHocFixFunctionType(line)
-	if outside:
-	    if isContextual and not inContext:
-		m = starting2.search(line)
-		if m:
-		    inContext = True
-		continue
-	    m = starting.search(line)
-	    if m:
-		ending = re.compile("^" + m.group(1) + r"[^\s]")
-		openbrace = re.compile(m.group(1) + r"\{")
-		closebrace = re.compile(m.group(1) + r"\}")
-		res = [line.rstrip()]
-		outside = False
-		continue
-	else:
-	    line = unComment(line.rstrip())
-	    if ending.search(line):
-		# Special case for common pattern: open brace indented like the name
-		if openbrace.search(line):
-		    res = res + [line]
-		    continue
-		if closebrace.search(line):
-		    res = res + [line]
-		    break
-		break
-	    if line == "":
-		# Count blank lines, but not if the previous line ended with {
-		if not(len(prev) > 0 and prev[len(prev)-1] == "{"):
-		    blanks = blanks+1
-	    elif res == []:
-		# Skip blanks at the beginning
-		res = res + [line]
-	    else:
-		# Add one blank line for a sequence of blanks
-		if blanks > 0:
-		    res = res + [""]
-		blanks = 0
-		res = res + [line]
-		prev = line
+        if outside:
+            if isContextual and not inContext:
+                m = starting2.search(line)
+                if m:
+                    inContext = True
+                continue
+            m = starting.search(line)
+            if m:
+                ending = re.compile("^" + m.group(1) + r"[^\s]")
+                openbrace = re.compile(m.group(1) + r"\{")
+                closebrace = re.compile(m.group(1) + r"\}")
+                res = [line.rstrip()]
+                outside = False
+                continue
+        else:
+            line = unComment(line.rstrip())
+            if ending.search(line):
+                # Special case for common pattern: open brace indented like the name
+                if openbrace.search(line):
+                    res = res + [line]
+                    continue
+                if closebrace.search(line):
+                    res = res + [line]
+                    break
+                break
+            if line == "":
+                # Count blank lines, but not if the previous line ended with {
+                if not(len(prev) > 0 and prev[len(prev)-1] == "{"):
+                    blanks = blanks+1
+            elif res == []:
+                # Skip blanks at the beginning
+                res = res + [line]
+            else:
+                # Add one blank line for a sequence of blanks
+                if blanks > 0:
+                    res = res + [""]
+                blanks = 0
+                res = res + [line]
+                prev = line
     f.close()
     if outside:
-	print fn + ": Could not find definition for " + name
-	sys.exit(1)
+        print(fn + ": Could not find definition for " + name)
+        sys.exit(1)
     undent = len(re.search(r"^(\s*)", res[0]).group(1))
     if isSignature:
-	s = res[0][undent:]
-	s = re.sub(r" native", "", s)
-	if s[len(s)-1] == "{" or s[len(s)-1] == ";":
-	    s = s[:len(s)-1].rstrip()
-	if len(s) >= LINELIM:
-	    i = len(s)-1;
-	    while i >= 0 and s[i] != ')':
-		if s[i] == ':' and (i == 0 or s[i-1] == ' ' or s[i-1] == ')'):
-		    s = s[:i] + "\n        " + s[i:]
-		    break
-		i = i - 1
-	return s + " &#x0085";
+        s = res[0][undent:]
+        s = re.sub(r" native", "", s)
+        if s[len(s)-1] == "{" or s[len(s)-1] == ";":
+            s = s[:len(s)-1].rstrip()
+        if len(s) >= LINELIM:
+            i = len(s)-1;
+            while i >= 0 and s[i] != ')':
+                if s[i] == ':' and (i == 0 or s[i-1] == ' ' or s[i-1] == ')'):
+                    s = s[:i] + "\n        " + s[i:]
+                    break
+                i = i - 1
+        return s + " &#x0085";
     else:
-	ss = "\n"
-	for s in res:
-	    ss = ss + s[undent:] + "\n"
-	return ss
+        ss = "\n"
+        for s in res:
+            ss = ss + s[undent:] + "\n"
+        return ss
 
 def extractSML(fn, name):
     f = open(os.path.normpath(sml_dir + "/" + fn), 'r')
@@ -277,7 +277,7 @@ def extractSML(fn, name):
     lastIsIdent = isIdent(name[len(name)-1])
     name = reEscape(name)
     if lastIsIdent:
-	name = name + r"(?![a-zA-Z0-9_])"
+        name = name + r"(?![a-zA-Z0-9_])"
     starting = re.compile("^( *)" + name)
     blanks = 0
     prev = ""
@@ -308,9 +308,9 @@ def extractSML(fn, name):
             continue
 
 
-	if outside:
-	    m = starting.search(line)
-	    if m:
+        if outside:
+            m = starting.search(line)
+            if m:
 
                 # format comments indicating elision and stop there
                 if ldots.search(line):
@@ -329,14 +329,14 @@ def extractSML(fn, name):
                 else:
                     ending = re.compile("^" + m.group(1) + r"[^\s]")
 
-		res = [line.rstrip()]
-		outside = False
-		continue
-	else:
-	    line = line.rstrip()
+            res = [line.rstrip()]
+            outside = False
+            continue
+        else:
+            line = line.rstrip()
 
-	    if ending.search(line):
-		break
+            if ending.search(line):
+                break
             else:
                 # format comments indicating elision and stop there
                 if ldots.search(line):
@@ -344,24 +344,24 @@ def extractSML(fn, name):
                     res = res + [line]
                     break
 
-	    if line == "":
-		# Count blank lines, but not if the previous line ended with {
-		if not(len(prev) > 0 and prev[len(prev)-1] == "{"):
-		    blanks = blanks+1
-	    elif res == []:
-		# Skip blanks at the beginning
-		res = res + [line]
-	    else:
-		# Add one blank line for a sequence of blanks
-		if blanks > 0:
-		    res = res + [""]
-		blanks = 0
-		res = res + [line]
-		prev = line
+            if line == "":
+                # Count blank lines, but not if the previous line ended with {
+                if not(len(prev) > 0 and prev[len(prev)-1] == "{"):
+                    blanks = blanks+1
+            elif res == []:
+                # Skip blanks at the beginning
+                res = res + [line]
+            else:
+                # Add one blank line for a sequence of blanks
+                if blanks > 0:
+                    res = res + [""]
+                blanks = 0
+                res = res + [line]
+                prev = line
     f.close()
     if outside:
-	print fn + ": Could not find definition for " + name
-	sys.exit(1)
+        print(fn + ": Could not find definition for " + name)
+        sys.exit(1)
     undent = len(re.search(r"^(\s*)", res[0]).group(1))
     ss = "\n"
     for s in res:
@@ -376,9 +376,9 @@ def replaceWiki(m):
 
 def headerFormat(s):
     if re.search(r"\(", s):
-	return re.sub(r"\s+", "&nbsp;", s.strip())
+        return re.sub(r"\s+", "&nbsp;", s.strip())
     else:
-	return s
+        return s
 
 def replaceHTML(m, hdrlvl):
     k = str(int(m.group(1)) + hdrlvl - 1)
@@ -404,33 +404,33 @@ def replaceInclude(m, hdrlvl, fn):
     isContextual = re.search(r"^<INCLUDECTX",m.group(0))
     ms = hdrprefix.match(m.group(0))
     if ms:
-	currentlevel = int(ms.group(1))
-	return m.group(0)
+        currentlevel = int(ms.group(1))
+        return m.group(0)
     ms = htmlInclude.match(m.group(0))
     if ms:
-	olddir = os.getcwd()
-	oldlevel = currentlevel
-	if os.path.dirname(ms.group(1)) != "":
-	    os.chdir(os.path.dirname(ms.group(1)))
-	r = process(os.path.basename(ms.group(1)), currentlevel+1)
-	currentlevel = oldlevel
-	os.chdir(olddir)
-	return r
+        olddir = os.getcwd()
+        oldlevel = currentlevel
+        if os.path.dirname(ms.group(1)) != "":
+            os.chdir(os.path.dirname(ms.group(1)))
+        r = process(os.path.basename(ms.group(1)), currentlevel+1)
+        currentlevel = oldlevel
+        os.chdir(olddir)
+        return r
     ms = smlInclude.match(m.group(0))
     if ms:
-	return "<PRE>" + reSML(extractSML(ms.group(1), ms.group(2))) + "</PRE>"
+        return "<PRE>" + reSML(extractSML(ms.group(1), ms.group(2))) + "</PRE>"
     if isContextual:
-	ms = esIncludeCtx.match(m.group(0))
+        ms = esIncludeCtx.match(m.group(0))
     else:
-	ms = esInclude.match(m.group(0))
+        ms = esInclude.match(m.group(0))
     if ms:
-	if isSignature:
-	    return htmlEscape(extractES(ms.group(1), ms.group(2), True, False))
-	else:
-	    if isContextual:
-		isContextual = ms.group(3)
-	    return "<PRE>" + nsCollapse(htmlEscape(extractES(ms.group(1), ms.group(2), False, isContextual))) + "</PRE>"
-    print fn + ": Invalid INCLUDE directive: " + m.group(0)
+        if isSignature:
+            return htmlEscape(extractES(ms.group(1), ms.group(2), True, False))
+        else:
+            if isContextual:
+                isContextual = ms.group(3)
+            return "<PRE>" + nsCollapse(htmlEscape(extractES(ms.group(1), ms.group(2), False, isContextual))) + "</PRE>"
+    print(fn + ": Invalid INCLUDE directive: " + m.group(0))
     sys.exit(1)
 
 def replaceEntity(m):
@@ -469,24 +469,24 @@ def numberPreformatted(m):
     ss = ""
     i = 0
     while lines[i] == "":
-	i = i+1
+        i = i+1
     j = len(lines)
     while lines[j-1] == "":
-	j = j-1
+        j = j-1
     if i == j:
         return ""
     k = 1
     while i < j:
-	n = str(k)
-	indent = "    "[0:5-len(n)]
-	ss = ss + n + indent + lines[i] + "\n"
-	k = k + 1
-	i = i + 1
+        n = str(k)
+        indent = "    "[0:5-len(n)]
+        ss = ss + n + indent + lines[i] + "\n"
+        k = k + 1
+        i = i + 1
     return "<PRE>" + ss + "</PRE>"
 
 def trace(s):
     if DEBUG:
-	print s
+        print(s)
 
 def process(fn, hdrlvl):
     global literals
@@ -495,10 +495,10 @@ def process(fn, hdrlvl):
     text = input.read()
     text = re.sub(htmlcomment, "", text)
     for i in range(len(text)):
-	cc = ord(text[i])
-	if cc > 127 or cc < 32 and cc != 10 and cc != 13:
-	    print fn + ": Non-ASCII character in at location " + str(i) + ": " + str(cc)
-	    sys.exit(1)
+        cc = ord(text[i])
+        if cc > 127 or cc < 32 and cc != 10 and cc != 13:
+            print(fn + ": Non-ASCII character in at location " + str(i) + ": " + str(cc))
+            sys.exit(1)
     literals = []
     # entities and signatures are replaced even in <PRE> blocks, so do that first.
     trace("entity")
@@ -545,7 +545,7 @@ def process(fn, hdrlvl):
     return text
 
 if len(sys.argv) != 3:
-    print "Usage: stitch inputfile outputfile"
+    print("Usage: stitch inputfile outputfile")
     sys.exit(2)
 
 #premerge = re.compile(r"^</PRE>\s*^<PRE>", re.M)

@@ -1359,7 +1359,7 @@ class RuntestBase(object):
             starttime=time()
             (output, err) = p.communicate()
             if output:
-                output = output.decode('utf_8','replace')
+                output = output.decode('latin_1','replace')
                 output = output.split('\n')
             else:
                 output = []
@@ -1367,7 +1367,7 @@ class RuntestBase(object):
                 output = output[:-1]
 
             if err:
-                err = err.decode('utf_8','replace')
+                err = err.decode('latin_1','replace')
                 err = err.split('\n')
             else:
                 err=[]

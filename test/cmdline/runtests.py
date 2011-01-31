@@ -42,7 +42,7 @@ from os import listdir
 import testAvmShell,testDebugger,testShellSystem
 class RunTests (RunTestLib):
     def compileAll(self):
-        print "compile all"
+        print("compile all")
         # for testShellSystem.py
         r.compile("testdata/exec.as")
         r.compile("testdata/exit.as")
@@ -63,15 +63,15 @@ class RunTests (RunTestLib):
         list=os.listdir(".")
         for f in list:
             if re.match("test.*\.py$",f):
-                if self.testconfig.has_key(f):
+                if f in self.testconfig:
                     (type,notes)=self.testconfig[f]
                     if type=='skip':
-                        print "%-30s SKIPPED, %s" % (f,notes)
+                        print("%-30s SKIPPED, %s" % (f,notes))
                         continue
                 cl=f[0:f.rindex('.')]
-                exec "import " + cl
-                print "%s.run()" % cl
-                exec cl + ".run()"
+                exec("import " + cl)
+                print("%s.run()" % cl)
+                exec(cl + ".run()")
 
 if __name__ == "__main__":
     r=RunTests()

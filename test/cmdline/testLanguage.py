@@ -47,8 +47,8 @@ import os
 def run():
     r=RunTestLib()
     if r.avmrd==None:
-        print "environment variable 'AVMRD' is not set"
-        print "SKIPPED all tests"
+        print("environment variable 'AVMRD' is not set")
+        print("SKIPPED all tests")
         return
 
     r.run_test(

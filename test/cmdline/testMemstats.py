@@ -54,7 +54,7 @@ def run():
                             ]
                )
     if os.name!='nt':
-        print "pyspy     requires windows named pipes, does not work with cygwin python or non-windows operating systems"
+        print("pyspy     requires windows named pipes, does not work with cygwin python or non-windows operating systems")
     else:
         failed=False
         try:
@@ -63,7 +63,7 @@ def run():
             import win32file
         except:
             failed=True
-            print "pyspy failed to load python win32 extension  FAILED"
+            print("pyspy failed to load python win32 extension  FAILED")
         if failed==False:
             os.putenv('MMGC_PROFILE','1')
             proc=r.run_command_async(command="%s testdata/memstats.abc" % r.avm,sleep=2)
@@ -73,7 +73,7 @@ def run():
             try:
                 h = win32event.OpenEvent(win32event.EVENT_MODIFY_STATE, False, e)
             except Exception:
-                print "Error: No registered event: %s FAILED!" % e
+                print("Error: No registered event: %s FAILED!" % e)
                 sys.exit(1)
 
             win32event.SetEvent(h)
