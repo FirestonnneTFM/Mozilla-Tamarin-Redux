@@ -44,14 +44,17 @@
 
 namespace avmplus
 {
-    VTable::VTable(Traits* traits, VTable* _base, Toplevel* toplevel) :
-        _toplevel(toplevel),
-        init(NULL),
-        base(_base),
-        ivtable(NULL),
-        traits(traits),
-        createInstance(ScriptObject::genericCreateInstance),
-        linked(false)
+    VTable::VTable(Traits* traits, VTable* _base, Toplevel* toplevel)
+        : _toplevel(toplevel)
+        , init(NULL)
+        , base(_base)
+        , ivtable(NULL)
+        , traits(traits)
+        , createInstance(ScriptObject::genericCreateInstance)
+        , linked(false)
+#ifdef VMCFG_AOT
+        , interfaceBindingFunction(traits->m_interfaceBindingFunction)
+#endif
     {
         AvmAssert(toplevel != NULL);
         AvmAssert(traits != NULL);

@@ -477,20 +477,23 @@ namespace avmplus
                    uint16_t _sizeofInstance,
                    uint16_t _offsetofSlots,
                    TraitsPosPtr traitsPos,
-                   TraitsPosType posType) :
-        core(_pool->core),
-        base(_base),
-        pool(_pool),
-        m_traitsPos(traitsPos),
-        m_tbref(_pool->core->GetGC()->emptyWeakRef),
-        m_tmref(_pool->core->GetGC()->emptyWeakRef),
-        m_sizeofInstance(_sizeofInstance),
-        m_offsetofSlots(_offsetofSlots),
-        builtinType(BUILTIN_none),
-        m_posType(uint8_t(posType)),
+                   TraitsPosType posType)
+        : core(_pool->core)
+        , base(_base)
+        , pool(_pool)
+        , m_traitsPos(traitsPos)
+        , m_tbref(_pool->core->GetGC()->emptyWeakRef)
+        , m_tmref(_pool->core->GetGC()->emptyWeakRef)
+        , m_sizeofInstance(_sizeofInstance)
+        , m_offsetofSlots(_offsetofSlots)
+        , builtinType(BUILTIN_none)
+        , m_posType(uint8_t(posType))
+#ifdef VMCFG_AOT
+        , m_interfaceBindingFunction(NULL)
+#endif
         // Assume builtins initialize this correctly.  This is verified
         // by checkCustomConstruct() in MethodEnv.cpp.
-        hasCustomConstruct(0)
+        , hasCustomConstruct(0)
     {
         AvmAssert(m_tbref->isNull());
         AvmAssert(m_tmref->isNull());
