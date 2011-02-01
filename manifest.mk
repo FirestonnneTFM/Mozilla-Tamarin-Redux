@@ -15,7 +15,7 @@
 #
 # The Initial Developer of the Original Code is
 # Adobe System Incorporated.
-# Portions created by the Initial Developer are Copyright (C) 2010
+# Portions created by the Initial Developer are Copyright (C) 2005-2006
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
@@ -34,56 +34,77 @@
 #
 # ***** END LICENSE BLOCK *****
 
-STATIC_LIBRARIES += aot
-aot_BUILD_ALL = 1
-aot_CXXSRCS := \
-  $(curdir)/AOTCompiler.cpp \
-  $(curdir)/AOTStubs.cpp \
+# shell must be included here because that's where avmshell-features.h lives,
+# and in shell builds it is included from platform/VMPI.h.  That's how it
+# is supposed to be.
+INCLUDES += \
+  -I$(topsrcdir) \
+  -I$(topsrcdir)/MMgc \
+  -I$(topsrcdir)/core \
+  -I$(topsrcdir)/pcre \
+  -I$(topsrcdir)/eval \
+  -I$(topsrcdir)/platform \
+  -I$(topsrcdir)/other-licenses/zlib \
+  -I$(topsrcdir)/shell \
+  -I$(topsrcdir)/VMPI \
+  -I$(topsrcdir)/vmbase \
+  -I$(topsrcdir)/generated \
   $(NULL)
 
-numstubs = 30
-stubcpps := $(curdir)/AOTStubs-0000.cpp \
-	$(curdir)/AOTStubs-0001.cpp \
-	$(curdir)/AOTStubs-0002.cpp \
-	$(curdir)/AOTStubs-0003.cpp \
-	$(curdir)/AOTStubs-0004.cpp \
-	$(curdir)/AOTStubs-0005.cpp \
-	$(curdir)/AOTStubs-0006.cpp \
-	$(curdir)/AOTStubs-0007.cpp \
-	$(curdir)/AOTStubs-0008.cpp \
-	$(curdir)/AOTStubs-0009.cpp \
-	$(curdir)/AOTStubs-0010.cpp \
-	$(curdir)/AOTStubs-0011.cpp \
-	$(curdir)/AOTStubs-0012.cpp \
-	$(curdir)/AOTStubs-0013.cpp \
-	$(curdir)/AOTStubs-0014.cpp \
-	$(curdir)/AOTStubs-0015.cpp \
-	$(curdir)/AOTStubs-0016.cpp \
-	$(curdir)/AOTStubs-0017.cpp \
-	$(curdir)/AOTStubs-0018.cpp \
-	$(curdir)/AOTStubs-0019.cpp \
-	$(curdir)/AOTStubs-0020.cpp \
-	$(curdir)/AOTStubs-0021.cpp \
-	$(curdir)/AOTStubs-0022.cpp \
-	$(curdir)/AOTStubs-0023.cpp \
-	$(curdir)/AOTStubs-0024.cpp \
-	$(curdir)/AOTStubs-0025.cpp \
-	$(curdir)/AOTStubs-0026.cpp \
-	$(curdir)/AOTStubs-0027.cpp \
-	$(curdir)/AOTStubs-0028.cpp \
-	$(curdir)/AOTStubs-0029.cpp \
-	$(curdir)/AOTStubs-0030.cpp \
-	$(NULL)
+$(call RECURSE_DIRS,other-licenses/zlib)
+$(call RECURSE_DIRS,VMPI)
+$(call RECURSE_DIRS,vmbase)
+$(call RECURSE_DIRS,MMgc)
 
-STATIC_LIBRARIES += aotstubs
-aotstubs_BUILD_ALL = 1
-aotstubs_CXXSRCS := $(stubcpps)
-aotstubs_EXTRA_CXXFLAGS := -Wno-sign-compare
+ifdef ENABLE_TAMARIN
+$(call RECURSE_DIRS,core pcre vprof)
+ifeq (sparc,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (i686,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (x86_64,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (arm,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (powerpc,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (ppc64,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (mips,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (sh4,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (darwin,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/mac)
+endif
+ifeq (windows,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/win32)
+endif
+ifeq (linux,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/unix)
+endif
+ifeq (android,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/unix)
+endif
+ifeq (sunos,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/unix)
+endif
+endif
 
-$(curdir)/dummy.cpp: $(topsrcdir)/aot/aotstubs.py $(topsrcdir)/aot/aotstubs.pickle
-	@echo "Generating AOT stubs..."
-	@mkdir -p aot
-	@cd aot && python $(topsrcdir)/aot/AOTStubs.py --numstubs $(numstubs) --picklefile $(topsrcdir)/aot/aotstubs.pickle
-	@touch $(curdir)/aot/dummy.cpp
+$(call RECURSE_DIRS,eval)
+$(call RECURSE_DIRS,shell)
 
-$(stubcpps): $(curdir)/dummy.cpp
+echo:
+	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
+	@echo avmplus_CXXSRCS = $(avmplus_CXXSRCS)
+	@echo avmplus_CXXOBJS = $(avmplus_CXXOBJS)
+	@echo avmplus_OBJS = $(avmplus_OBJS)
+	@echo avmplus_NAME = $(avmplus_NAME)
