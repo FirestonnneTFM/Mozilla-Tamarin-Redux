@@ -1,4 +1,4 @@
-# -*- python -*-
+<# -*- python -*-
 # ex: set syntax=python:
 #  ***** BEGIN LICENSE BLOCK *****
 #  Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -1581,15 +1581,7 @@ class tamarinredux:
     mac_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="Release64-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger64-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    mac_deep_factory.addStep(TestSuiteShellCommand(
-                     command=['./run-brightspot.sh', WithProperties('%s','revision')],
-                     env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-                     description='running brightspot tests...',
-                     descriptionDone='finished running brightspot tests.',
-                     name="RunBrightspot",
-                     workdir="../repo/build/buildbot/slaves/scripts",
-                     timeout=3600)
-    )
+    mac_deep_factory.addStep(deep_run_brightspot(name='ReleaseDebugger', shell='avmshell_s', testargs='--quiet')
     mac_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     mac_deep_factory.addStep(deep_codecoverage_process)
     mac_deep_factory.addStep(BuildShellCommand(
@@ -2055,6 +2047,7 @@ class tamarinredux:
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     linux_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    linux_deep_factory.addStep(deep_run_brightspot(name='DebugDebugger', shell='avmshell_sd', testargs='--timelimit=120 --random --quiet')
     linux_deep_factory.addStep(util_process_clean)
     linux_deep_factory.addStep(util_clean_buildsdir)
     linux_deep_factory.addStep(sync_clean)
