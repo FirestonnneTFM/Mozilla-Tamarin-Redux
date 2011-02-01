@@ -248,8 +248,8 @@ namespace avmplus
         bool                        isBuiltin;  // true if this pool is baked into the player.  used to control whether callees will set their context.
 
     #ifdef VMCFG_AOT
-    #error "If AOTInfo is a traced type then aotInfo needs a GC_POINTER_IFDEF annotation"
-        const AOTInfo* aotInfo;
+        const AOTInfo* aotInfo; // points to non-gc memory
+        MMgc::GCRoot *aotRoot;
     #endif
         
         GC_DATA_END(PoolObject)

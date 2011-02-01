@@ -315,7 +315,7 @@ namespace avmplus
 #ifdef VMCFG_AOT
     Atom *ArrayObject::getDenseCopy() const
     {
-        AvmAssert(isSimpleDense());
+        AvmAssert(m_denseArray.length() == m_length);
         uint32_t const len = m_denseArray.length();
     
         if (!len)

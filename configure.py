@@ -126,6 +126,10 @@ buildShell = o.getBoolArg("shell", False)
 if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
+buildAot = o.peekBoolArg("aot", False)
+if buildAot:
+    config.subst("ENABLE_AOT", 1)
+
 the_os, cpu = config.getTarget()
 
 APP_CPPFLAGS = "-DAVMSHELL_BUILD "

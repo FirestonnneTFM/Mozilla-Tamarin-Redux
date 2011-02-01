@@ -115,6 +115,10 @@ namespace avmplus
         // special ctor for the methodinfo generated for slot-initialization when no init method is present
         MethodInfo(InitMethodStub, Traits* declTraits);
 
+#ifdef VMCFG_AOT
+        MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t method_id);
+#endif
+
     public:
         REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, 
                                                 int32_t _method_id,
@@ -132,9 +136,9 @@ namespace avmplus
         }
         
 #ifdef VMCFG_AOT
-        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits, const NativeMethodInfo* native_info)
+        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t method_id)
         {
-            return new (gc, MMgc::kExact) MethodInfo(stub, declTraits, native_info));
+            return new (gc, MMgc::kExact) MethodInfo(stub, declTraits, native_info, method_id);
         }
 #endif
         
