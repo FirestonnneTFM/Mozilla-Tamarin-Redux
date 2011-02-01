@@ -474,5 +474,13 @@ deep_release_esc = BuildShellCommand(
             descriptionDone='finished release-esc tests.',
             name='Release-esc',
             workdir="../repo/build/buildbot/slaves/scripts")
-            
 
+def deep_run_brightspot(name,shell,testargs):
+    return TestSuiteShellCommand(
+        command=['../all/run-brightspot.sh', WithProperties('%s','revision'), shell, testargs],
+        env={'branch': WithProperties('%s','branch'), 'silent': WithProperties('%s','silent')},
+        description='running %s tests...' % name,
+        descriptionDone='finished running %s tests.' % name,
+        name='BrightSpot %s' % name,
+        workdir='../repo/build/buildbot/slaves/scripts',
+        timeout=3600)

@@ -42,14 +42,22 @@
 ##
 . ./environment.sh
 
+revision=$1
+shell=$2
+args=$3
+
+test "$shell" = "" && shell=$shell_release_debugger
+test "$args" = "" && args="--quiet"
+
+
 # calculate the revision number to test
-. ../all/util-calculate-change.sh $1
+. ../all/util-calculate-change.sh $revision
 
 # download build
-download_shell $shell_release_debugger
+download_shell $shell
 
 # set the release debugger shell
-export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_release_debugger
+export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell
 
 test "$BRIGHTSPOT" = "" && {
     echo "BRIGHTSPOT must be set to the url of brightspot"
@@ -68,5 +76,5 @@ cd $basedir/test/brightspot
 chmod +x ./runtests.py
 
 # run the testsuite
-$py ./runtests.py --quiet
+$py ./runtests.py $args
 
