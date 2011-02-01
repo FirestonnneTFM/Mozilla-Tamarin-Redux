@@ -99,6 +99,7 @@ abcasm/.*, .*diff,, skip, trim down tests
 ecma3/Exceptions/exception_011_rt , .*diff,, expectedfail, known issue: avmdiff does not handle .exitcode
 regress/bug_515935, .*diff,, skip, known issue: avmdiff does not handle .exitcode
 regress/bug_555097.*, .*diff,, skip, known issue: avmdiff does not handle .exitcode
+regress/bug_551587_2.*, .*diff,, skip, test runs different testcases based on run mode
 
 # specific skips when running differential testing between 32bit and 64bit shells
 as3/Array/regress_524122 , .*3264-diff,, skip , swf 9/10 32bit and 64bit shells return different results, so can not run diff
