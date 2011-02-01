@@ -17,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2008
+ * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -71,6 +71,9 @@ namespace avmplus
     // convert arguments to Atoms
     void argDescArgsToAtomv(Atom* args, uintptr_t argDesc, MethodEnv* env, va_list ap);
     void argDescArgsToAtomv(Atom* args, char* argDesc, MethodEnv* env, va_list ap);
+    // convert arguments to AtomList
+    void argDescArgsToAtomList(AtomList& args, uintptr_t argDesc, MethodEnv* env, va_list ap);
+    void argDescArgsToAtomList(AtomList& args, char* argDesc, MethodEnv* env, va_list ap);
 
 #ifdef VMCFG_AOT
     uintptr_t aotThunker(MethodEnv* env, int32_t argc, uint32_t* argv);
@@ -78,5 +81,5 @@ namespace avmplus
 #endif
 }
 
-#endif
+#endif // __avmplus_CdeclThunk__
 
