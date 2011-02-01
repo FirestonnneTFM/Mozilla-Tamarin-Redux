@@ -44,22 +44,19 @@
 namespace avmplus
 {
     /**
-     * API is the type of an api bitmask
-     */
-    typedef int32_t API;
-
-    /**
      * a namespace is a primitive value in the system, similar to String
      */
     class Namespace : public AvmPlusScriptableObject
     {
     private:
         friend class AvmCore;
-        friend class ApiUtils;
         template <class VALUE_TYPE, class VALUE_WRITER> friend class MultinameHashtable;
-        AtomWB          m_prefix;
-        API             m_api;
-        uintptr_t       m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
+        template <class VALUE_TYPE> friend class Quad;
+
+    private:
+        AtomWB              m_prefix;
+        uintptr_t           m_uriAndType;          // Uses 3 bits for flags, but otherwise is really a Stringp
+        ApiVersion  const   m_apiVersion;   
 
     public:
         enum NamespaceType
@@ -73,28 +70,25 @@ namespace avmplus
         };
         
     private:
-        Namespace(Atom prefix, Stringp uri, NamespaceType type);
+        Namespace(Atom prefix, Stringp uri, NamespaceType type, ApiVersion apiVersion);
         
     public:
-        static REALLY_INLINE Namespace* create(MMgc::GC* gc, Atom prefix, Stringp uri, NamespaceType type)
+        static REALLY_INLINE Namespace* create(MMgc::GC* gc, Atom prefix, Stringp uri, NamespaceType type, ApiVersion apiVersion)
         {
-            return new (gc, MMgc::kExact) Namespace(prefix, uri, type);
+            return new (gc, MMgc::kExact) Namespace(prefix, uri, type, apiVersion);
         }
 
         ~Namespace();
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
-        inline Atom getPrefix() const { return get_prefix(); }
-        Stringp getURI() const;
-        inline API getAPI() { return m_api; }
-        inline void setAPI(API api) { m_api = api; }
+        // AS3 native functions
+        REALLY_INLINE Atom get_prefix() const { return m_prefix; }
+        REALLY_INLINE Stringp get_uri() const { return (Stringp)atomPtr(m_uriAndType); }
 
-        Atom get_prefix() const { return m_prefix; }
-        Stringp get_uri() const
-        {
-            return getURI();
-        }
+        REALLY_INLINE Atom getPrefix() const { return get_prefix(); }
+        REALLY_INLINE Stringp getURI() const { return get_uri(); }
+        REALLY_INLINE ApiVersion getApiVersion() { return m_apiVersion; }
 
         Atom  atom() const { return AtomConstants::kNamespaceType | (Atom)this; }
 
@@ -109,14 +103,14 @@ namespace avmplus
 
         bool EqualTo(const Namespace* other) const;
 
-        bool isPrivate() const
+        REALLY_INLINE bool isPrivate() const
         {
             return ISNULL(m_prefix);
         }
 
-        NamespaceType getType() const
+        REALLY_INLINE NamespaceType getType() const
         {
-            return (NamespaceType)(((int32_t)m_uri)&7);
+            return (NamespaceType)(m_uriAndType & 7);
         }
 
         // Iterator support - for in, for each

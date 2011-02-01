@@ -37,47 +37,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/*
-[0,player,full]=660:FP_9_0
-[0,air,full]=661:AIR_1_0
-[1,player,full]=662:FP_10_0
-[1,air,full]=663:AIR_1_5
-[2,air,full]=664:AIR_1_5_1
-[3,player,full]=665:FP_10_0_32
-[3,air,full]=666:AIR_1_5_2
-[4,player,full]=667:FP_10_1
-[4,air,full]=668:AIR_2_0
-[5,air,full]=669:AIR_2_5
-[6,player,full]=670:FP_10_2
-[6,air,full]=671:AIR_2_6
-[7,player,full]=672:SWF_12
-[7,player,system]=674:FP_SYS
-[7,air,full]=673:AIR_2_7
-[7,air,system]=675:AIR_SYS
-*/
-
 namespace avmplus {
 
-int32_t const kApiCompat[kApiVersion_count] = {
-    0xffff, 
-    0xab5a, 
-    0xfffc, 
-    0xab58, 
-    0xab50, 
-    0xffe0, 
-    0xab40, 
-    0xff80, 
-    0xab00, 
-    0xaa00, 
-    0xfc00, 
-    0xa800, 
-    0xf000, 
-    0xa000, 
-    0xc000, 
-    0x8000
-};
 const char* const kApiVersionNames[kApiVersion_count] = {
-    "FP_9_0", 
+    "VM_ALLVERSIONS", 
     "AIR_1_0", 
     "FP_10_0", 
     "AIR_1_5", 
@@ -91,8 +54,54 @@ const char* const kApiVersionNames[kApiVersion_count] = {
     "AIR_2_6", 
     "SWF_12", 
     "AIR_2_7", 
-    "FP_SYS", 
-    "AIR_SYS"
+    "VM_INTERNAL"
+};
+
+uint32_t const kApiVersionSeriesMembership[kApiVersion_count] = {
+    (1<<kApiVersionSeries_AIR)|(1<<kApiVersionSeries_FP),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_FP),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_FP),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_FP),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_FP),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_FP),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_AIR)|(1<<kApiVersionSeries_FP)
+};
+
+// If a version is in an inactive series, what is the closest superset in the active series?
+ApiVersion const kApiVersionSeriesTransfer[kApiVersion_count][kApiVersionSeries_count] = {
+    { kApiVersion_VM_ALLVERSIONS, kApiVersion_VM_ALLVERSIONS }, // VM_ALLVERSIONS
+    { kApiVersion_AIR_1_0, kApiVersion_VM_INTERNAL }, // AIR_1_0
+    { kApiVersion_AIR_1_5, kApiVersion_FP_10_0 }, // FP_10_0
+    { kApiVersion_AIR_1_5, kApiVersion_VM_INTERNAL }, // AIR_1_5
+    { kApiVersion_AIR_1_5_1, kApiVersion_VM_INTERNAL }, // AIR_1_5_1
+    { kApiVersion_AIR_1_5_2, kApiVersion_FP_10_0_32 }, // FP_10_0_32
+    { kApiVersion_AIR_1_5_2, kApiVersion_VM_INTERNAL }, // AIR_1_5_2
+    { kApiVersion_AIR_2_0, kApiVersion_FP_10_1 }, // FP_10_1
+    { kApiVersion_AIR_2_0, kApiVersion_VM_INTERNAL }, // AIR_2_0
+    { kApiVersion_AIR_2_5, kApiVersion_VM_INTERNAL }, // AIR_2_5
+    { kApiVersion_AIR_2_6, kApiVersion_FP_10_2 }, // FP_10_2
+    { kApiVersion_AIR_2_6, kApiVersion_VM_INTERNAL }, // AIR_2_6
+    { kApiVersion_AIR_2_7, kApiVersion_SWF_12 }, // SWF_12
+    { kApiVersion_AIR_2_7, kApiVersion_VM_INTERNAL }, // AIR_2_7
+    { kApiVersion_VM_INTERNAL, kApiVersion_VM_INTERNAL } // VM_INTERNAL
+};
+
+ApiVersion const kApiVersionFirst[kApiVersionSeries_count] = {
+    kApiVersion_AIR_1_0,
+    kApiVersion_FP_10_0
+};
+
+ApiVersion const kApiVersionLatest[kApiVersionSeries_count] = {
+    kApiVersion_AIR_2_7,
+    kApiVersion_SWF_12
 };
 
 }

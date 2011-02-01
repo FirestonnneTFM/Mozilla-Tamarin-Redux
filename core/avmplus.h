@@ -261,6 +261,7 @@ namespace avmplus
 #include "SortedMap.h"
 #include "BitSet.h"
 #include "AvmPlusScriptableObject.h"
+#include "api-versions.h"
 #include "AtomWriteBarrier.h"
 #include "Namespace.h"
 #include "StringObject.h"

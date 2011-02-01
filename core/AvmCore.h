@@ -298,7 +298,7 @@ const int kBufferPadding = 16;
          *
          * The flags are made available to AS3 code through an global function,
          * 'bugzilla(n:int)', which is in an internal namespace (part of the
-         * 'AIR_SYS' API).  It returns true if the flag for the numbered bug is
+         * 'VM_INTERNAL' API).  It returns true if the flag for the numbered bug is
          * set, otherwise false.
          *
          * The flags always name a bug in Bugzilla, which means that bugs named here
@@ -355,12 +355,12 @@ const int kBufferPadding = 16;
      */
     class AvmCore : public MMgc::GCRoot
     {
-        friend class MethodFrame;
         friend class CodegenLIR;
         friend class EnterCodeContext;
         friend class EnterMethodEnv;
         friend class ExceptionFrame;
-
+        friend class MethodFrame;
+        
     public:
         /**
          * Default values for the config parameters.  These need to be visible, because
@@ -699,7 +699,7 @@ const int kBufferPadding = 16;
                                      Toplevel* toplevel,
                                      Domain* domain,
                                      const NativeInitializer* ninit,
-                                     uint32_t api);
+                                     ApiVersion apiVersion);
 
         /**
          * Execute the ABC block starting at offset start in code.
@@ -721,7 +721,7 @@ const int kBufferPadding = 16;
                                     Toplevel* toplevel,
                                     const NativeInitializer* ninit,
                                     CodeContext *codeContext,
-                                    uint32_t api);
+                                    ApiVersion apiVersion);
 
 #ifdef VMCFG_AOT
         /**
@@ -767,7 +767,7 @@ const int kBufferPadding = 16;
                                 Toplevel* toplevel,
                                 const NativeInitializer* ninit,
                                 CodeContext *codeContext,
-                                uint32_t api);
+                                ApiVersion apiVersion);
 
         /**
          * Obtain input from a file to handle ActionScript's 'include' directive.
@@ -973,7 +973,7 @@ const int kBufferPadding = 16;
         /*@}*/
 
         /** Constructor */
-        AvmCore(MMgc::GC *gc);
+        AvmCore(MMgc::GC *gc, ApiVersionSeries apiVersionSeries);
 
         /** Destructor */
         ~AvmCore();
@@ -1027,7 +1027,7 @@ const int kBufferPadding = 16;
         /**
          * Support for API versioning
          */
-
+        
         /**
          * Add to the list of URIs that must be versioned for namespaces.
          *
@@ -1035,21 +1035,25 @@ const int kBufferPadding = 16;
          */
         void addVersionedURIs(char const* const* uris);
 
-        bool isVersionedURI(Stringp uri);
-
         /**
          * Get the AVM wide default API version.
          */
-        virtual int32_t getDefaultAPI() = 0;
+        virtual ApiVersion getDefaultAPI() = 0;
 
         /**
-         * Get the current API version. Uses the given PoolObject, or otherwise
-         * walks the scope chain for the first non-builtin method info and uses
-         * it's PoolObject.
-         *
-         * @param pool The caller's pool object.
+         * Find the ApiVersion from the first non-builtin caller on the AS3 call stack.
+         * If the AS3 call stack is empty, return getDefaultAPI().
          */
-        int32_t getAPI(PoolObject* pool);
+        ApiVersion getApiVersionFromCallStack();
+
+        /**
+         * If the given Namespace has a version that allows it to be used by
+         * the ApiVersion active on the call stack, return true; otherwise return false.
+         * This is equivalent to ns->getApiVersion() <= getApiVersionFromCallStack(),
+         * but it's easy for client code to get the comparison reversed, so this is
+         * useful syntactic sugar.
+         */
+        bool isNamespaceVisibleToApiVersionFromCallStack(Namespace* ns);
 
         /**
          * Find the current public by walking the call stack
@@ -1064,28 +1068,26 @@ const int kBufferPadding = 16;
         Namespacep getPublicNamespace(PoolObject* pool);
 
         /**
-         * Get any public namespace
+         * Get a public namespace that will match with any/all ApiVersions.
          */
         Namespacep getAnyPublicNamespace();
 
         /**
-         * Get the public namespace associated with the given pool's version.
-         *
-         * @param version The version of public being requested.
+         * Get the public namespace associated with a specific ApiVersion.
          */
-        Namespacep getPublicNamespace(int32_t api);
+        Namespacep getPublicNamespace(ApiVersion apiVersion);
 
         /**
-         * Set the active api bit for the given api
+         * If the ApiVersion is valid for the current ApiVersionSeries, return true.
+         * Otherwise, return false.
          */
-        void setActiveAPI(int32_t api);
+        bool isValidApiVersion(ApiVersion apiVersion);
 
         /**
-         * Get the bits for the currently active apis
+         * If the ApiVersion is not valid for the current ApiVersionSeries, return the
+         * ApiVersion that is the smallest valid superset. (This might be VM_INTERNAL)
          */
-        int32_t getActiveAPIs();
-
-        friend class ApiUtils;
+        ApiVersion getValidApiVersion(ApiVersion apiVersion);
 
         /**
          * toUInt32 is the ToUInt32 algorithm from
@@ -1624,9 +1626,29 @@ const int kBufferPadding = 16;
 
         /** search the namespace intern table */
         int findNamespace(Namespacep ns, bool canRehash = true);
-        Namespacep gotNamespace(uintptr_t uriAndType, int32_t api);
+        
+        Namespacep gotNamespace(uintptr_t uriAndType, ApiVersion apiVersion);
+
+        enum {
+            MIN_API_MARK = 0xE294, // that's "0xE000 + 660", 660 being an odd legacy wart
+            MAX_API_MARK = 0xF8FF
+        };
 
     public:
+        /**
+         * If the uri is versioned, set apiVersion to the version and strip the uri string, and return true.
+         * If the uri is unversioned, leave uri and apiVersion unchanged and return false.
+         */
+        bool getBaseURIAndApiVersion(Stringp& uri, ApiVersion& apiVersion);
+
+        Namespacep getVersionedNamespace(Namespacep ns, ApiVersion apiVersion);
+
+        bool isVersionedURI(Stringp uri);
+
+        /**
+         * Convert a version name to a version enum
+         */
+        static bool parseApiVersion(const char* p, ApiVersion& apiVersion, ApiVersionSeries& apiVersionSeries);
 
         // String creation. If len is omitted, zero-termination is assumed.
         Stringp newStringLatin1(const char* str, int len = -1);
@@ -1706,7 +1728,11 @@ const int kBufferPadding = 16;
         FrameState* newFrameState(int frameSize, int scopeBase, int stackBase);
         Namespacep newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
         Namespacep newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
-        Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public, int32_t api = 0);
+        Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type, ApiVersion apiVersion);
+        // Like newNamespace(), but versioned such that it will match all versions of the namespace
+        // with the same uri/type. This is useful for glue code that (e.g.) needs to look up specific
+        // Bindings in the builtins. (Analogous to "getAnyPublicNamespace" for arbitrary names.)
+        Namespacep newAnyNamespace(Stringp uri, Namespace::NamespaceType type);
         Namespacep newPublicNamespace(Stringp uri);
 
         Stringp uintToString(uint32_t i);
@@ -1739,15 +1765,11 @@ const int kBufferPadding = 16;
         DRC(Namespacep) * namespaces;
 
         // API versioning state
-        int32_t           largest_api;
-        int32_t           active_api_flags;
-        HeapHashtable*    m_versionedURIs;
+        ApiVersionSeries const  m_activeApiVersionSeries; 
+        uint32_t const          m_activeApiVersionSeriesMask; 
+        HeapHashtable*          m_versionedURIs;
 #ifdef _DEBUG
-#define DEBUG_API_VERSIONING
-#endif
-
-#ifdef DEBUG_API_VERSIONING
-        HeapHashtable*    m_unversionedURIs;
+        HeapHashtable*          m_unversionedURIs;
 #endif
 
 #ifdef VMCFG_LOOKUP_CACHE
@@ -1841,88 +1863,6 @@ const int kBufferPadding = 16;
         Namespace*      dxns; // NOTE: this struct is always stack-allocated (or via VMPI_alloca, which is just as good), so no DRC needed
     };
 
-
-    /**
-     * ApiUtils provides some helper methods to friends of
-     * api versioning
-     */
-
-    class ApiUtils
-    {
-        friend class AvmCore;
-        friend class AbcParser;
-        friend class Namespace;
-        friend class NativeInitializer;
-        friend class Traits;
-        friend class QNameObject;
-        friend class TypeDescriber;
-        friend class BuiltinTraits;
-
-        /**
-         * Return true if type is Namespace::NS_Pubilc and uri is one of the versioned
-         * namespaces in the list provided by the host
-         */
-        static bool isVersionedNS(AvmCore* core, Namespace::NamespaceType type, Stringp uri);
-
-        /**
-         * Return an interned namespace that corresponds to the given a namespace
-         * and api bitmask
-         */
-        static Namespacep getVersionedNamespace(AvmCore* core, Namespacep ns, API api);
-
-        /**
-         * Map an api bitmask to its cooresponding version number
-         */
-        static ApiVersion toVersion(AvmCore* core, API api);
-
-        /**
-         * Strip the given uri of its version marker, if it has one
-         */
-        static Stringp getBaseURI(AvmCore* core, Stringp uri);
-
-        /**
-         * Return the API bitmask for the given uri, or zero if there is none
-         */
-        static API getURIAPI(AvmCore* core, Stringp uri);
-
-        /**
-         * Return true if the given uri has a version marker
-         */
-        static bool hasVersionMark(Stringp uri);
-
-        /**
-         * Return the API bitmask of all APIs compatible with the given API
-         */
-        static API getCompatibleAPIs(AvmCore* core, API api);
-
-        /**
-         * Return the API bitmask for the smallest api
-         */
-        static API getSmallestAPI();
-
-        /**
-         * Return the API bitmask for the largest api
-         */
-        static API getLargestAPI(AvmCore* core);
-
-        enum {
-            MIN_API_MARK = 0xE000,
-            MAX_API_MARK = 0xF8FF
-        };
-
-    public:
-
-        /**
-         * Convert a version number to an api bitmask
-         */
-        static API toAPI(AvmCore* core, ApiVersion v);
-
-        /**
-         * Convert a version name to a version enum
-         */
-        static ApiVersion parseApiVersion(const char* p, bool& badFlag);
-
-    };
 }
 
 #endif /* __avmplus_AvmCore__ */

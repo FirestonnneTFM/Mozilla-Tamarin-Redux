@@ -163,13 +163,13 @@ namespace avmshell
         VMPI_memcpy(&code[0], &parser.swf[parser.pos], abclen);
 
         // FIXME get api from the SWF
-        uint32_t api = core->getAPI(NULL);
+        ApiVersion apiVersion = core->getApiVersionFromCallStack();
         if (flags & kDoAbcLazyInitializeFlag) {
-            PoolObject* pool = core->parseActionBlock(code, 0, toplevel, codeContext->domainEnv()->domain(), NULL, api);
+            PoolObject* pool = core->parseActionBlock(code, 0, toplevel, codeContext->domainEnv()->domain(), NULL, apiVersion);
             deferred.add(pool);
             // defer: handleActionPool(pool/* result of parse */, domainEnv, toplevel, codeContext);
         } else {
-            core->handleActionBlock(code, 0, toplevel, NULL, codeContext, api);
+            core->handleActionBlock(code, 0, toplevel, NULL, codeContext, apiVersion);
         }
         parser.pos += abclen;
     }

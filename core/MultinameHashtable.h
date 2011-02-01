@@ -73,22 +73,25 @@ namespace avmplus
     class Quad
     {
     public:
-        Stringp    name;
-        Namespacep ns;
-        VALUE_TYPE    value;
-        uintptr_t  apisAndMultiNS;
+        Stringp     name;
+        Namespacep  ns;
+        VALUE_TYPE  value;
+        uintptr_t   apiAndMultiNS;
         
         // 'multiNs' is 1 if the given name exists elsewhere with a different namespace.
-        // 'apis' is the bit vector of API versions.
+        // 'api' is the minimum API version.
         //
         // The values share a word for space reasons.  The low bit holds 'multiNS',
-        // the word shifted right 1 holds 'apis'.
+        // the word shifted right 1 holds 'apiVersion'.
         //
         // NOTE, some code in MultinameHashtable.cpp operates directly on this
         // representation when the values are updated.
         
-        REALLY_INLINE uint32_t multiNS() const { return (uint32_t)(apisAndMultiNS & 1); }
-        REALLY_INLINE API apis() const { return (API)(apisAndMultiNS >> 1); }
+        REALLY_INLINE uint32_t multiNS() const { return (uint32_t)(apiAndMultiNS & 1); }
+        REALLY_INLINE ApiVersion apiVersion() const { return (ApiVersion)(apiAndMultiNS >> 1); }
+        
+        // return true iff a lookup with the given ns is compatible with the one in this Quad.
+        bool matchNS(Namespacep ns) const;
     };
 
     template <class VALUE_TYPE>
@@ -125,8 +128,6 @@ namespace avmplus
          * in the hash table starting at t, containing tLen
          * quads.
          */
-        // match if they are the same or if they have the same base ns and ns api is in apis
-        static bool matchNS(uintptr_t uri, API apis, Namespacep ns);
         static int find(Stringp name, Namespacep ns, const Quad<VALUE_TYPE> *t, unsigned tLen);
         void rehash(const Quad<VALUE_TYPE> *oldAtoms, int oldlen, Quad<VALUE_TYPE> *newAtoms, int newlen);
 
@@ -190,7 +191,6 @@ namespace avmplus
         Stringp keyAt(int index) const;
         Namespacep nsAt(int index) const;
         VALUE_TYPE valueAt(int index) const;
-        API apisAt(int index) const;
 
         size_t allocatedSize() const;
 
@@ -261,7 +261,7 @@ namespace avmplus
         Stringp key() const;
         Namespacep ns() const;
         Binding value() const;
-        API apis() const;
+        ApiVersion apiVersion() const;
     };
 }
 
