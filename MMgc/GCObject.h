@@ -305,7 +305,7 @@ namespace MMgc
 
     REALLY_INLINE void GCObject::operator delete(void *gcObject)
     {
-        GC::GetGC(gcObject)->FreeFromDeleteNotNull(gcObject);
+        GC::GetGC(gcObject)->FreeFromDelete(gcObject);
     }
 
     REALLY_INLINE GCWeakRef* GCObject::GetWeakRef() const
@@ -335,7 +335,7 @@ namespace MMgc
     
     REALLY_INLINE void GCTraceableObject::operator delete(void *gcObject)
     {
-        GC::GetGC(gcObject)->FreeFromDeleteNotNull(gcObject);
+        GC::GetGC(gcObject)->FreeFromDelete(gcObject);
     }
     
     REALLY_INLINE GCWeakRef* GCTraceableObject::GetWeakRef() const
@@ -370,7 +370,7 @@ namespace MMgc
     
     REALLY_INLINE void GCFinalizedObject::operator delete (void *gcObject)
     {
-        GC::GetGC(gcObject)->FreeFromDeleteNotNull(gcObject);
+        GC::GetGC(gcObject)->FreeFromDelete(gcObject);
     }
 
     /**

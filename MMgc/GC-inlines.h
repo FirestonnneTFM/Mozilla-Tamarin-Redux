@@ -302,14 +302,15 @@ namespace MMgc
         GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
     }
     
-    REALLY_INLINE void GC::FreeFromDeleteNotNull(const void *item)
+    REALLY_INLINE void GC::FreeFromDelete(const void *item)
     {
-        GCAssert(item != NULL);
-        GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
+        if(item) {
+            GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
 #ifdef MMGC_DELETION_PROFILER
-        ProfileExplicitDeletion(item);
+            ProfileExplicitDeletion(item);
 #endif
-        GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
+            GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
+        }
     }
     
     REALLY_INLINE void GC::AddRCRootSegment(RCRootSegment *segment)
