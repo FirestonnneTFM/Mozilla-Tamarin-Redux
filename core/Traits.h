@@ -629,6 +629,10 @@ namespace avmplus
     private:    uint32_t                m_bindingsVerified:1;       // set once bindings have been verified
 #endif
         
+#ifdef VMCFG_AOT
+    public:     int (*m_interfaceBindingFunction)(int);
+#endif
+
         GC_DATA_END(Traits)
     // ------------------------ DATA SECTION END
     };

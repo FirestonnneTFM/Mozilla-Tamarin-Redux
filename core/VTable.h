@@ -94,6 +94,11 @@ namespace avmplus
         ImtHolder       GC_STRUCTURE_IFDEF(imt, FEATURE_NANOJIT);
 #endif
 
+#ifdef VMCFG_AOT
+    public:
+        int (*interfaceBindingFunction)(int);
+#endif
+
     public:
         // Virtual method table.
         //
