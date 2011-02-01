@@ -189,7 +189,16 @@ namespace MMgc
             //  Allows direct deletion of GC objects.
             REALLY_INLINE void Delete()
             {
-                delete t;
+                // ExactGC does not tolerate dangling pointers so it
+                // is necessary to set the explicitly deleted GC
+                // object pointer to NULL.  It is also important to
+                // set the pointer to NULL before deleting it as
+                // deletion can cause allocator activity
+                // (eg. destructor allocates and causes GC to run).
+                
+                T* tCopy = t;
+                t = NULL;
+                delete tCopy;
             }
 
             //  Constructor defaults GC memory pointer to NULL
