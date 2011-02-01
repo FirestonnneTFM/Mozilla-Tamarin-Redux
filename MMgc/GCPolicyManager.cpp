@@ -61,6 +61,7 @@ namespace MMgc
 
     GCConfig::GCConfig()
         : collectionThreshold(0)
+        , markstackAllowance(0)
         , exactTracing(true)
     {}
 

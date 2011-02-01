@@ -90,6 +90,13 @@
     #endif
 #endif
 
+// MMGC_MARKSTACK_ALLOWANCE allows host code to limit the size of the mark stack,
+// and thus to test the overflow handling.
+
+#ifdef AVMSHELL_BUILD
+    #define MMGC_MARKSTACK_ALLOWANCE
+#endif
+
 // Policy profiler settings (for MMgc development mostly).
 //
 // On MacOS X desktop MMGC_POLICY_PROFILING incurs a 5% execution overhead on the

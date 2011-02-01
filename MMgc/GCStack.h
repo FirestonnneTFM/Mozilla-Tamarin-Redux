@@ -165,7 +165,11 @@ namespace MMgc
     class GCMarkStack
     {
     public:
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+        GCMarkStack(uint32_t allowance);    // Pass 0 for allowance to request "unlimited"
+#else
         GCMarkStack();
+#endif
         ~GCMarkStack();
 
         /**
@@ -246,6 +250,9 @@ namespace MMgc
         GCStackSegment*     m_topSegment;   // current stack segment, older segments linked through 'prev'
         uint32_t            m_hiddenCount;  // number of elements in those older segments
         GCStackSegment*     m_extraSegment; // single-element cache used to avoid hysteresis
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+        uint32_t            m_allowance;    // allowance for the number of elements
+#endif
 #ifdef MMGC_MARKSTACK_DEPTH
         uint32_t            m_maxDepth;     // max depth of mark stack
 #endif
@@ -262,6 +269,13 @@ namespace MMgc
         // The current segment is discarded and the previous segment, if any, reinstated.
         // Update all instance vars.
         void PopSegment();
+
+        // Allocate a segment, return NULL if it could not be allocated.  If mustSucceed is true
+        // then abort the program if the allocation fails.
+        void* AllocStackSegment(bool mustSucceed);
+
+        // Free a segment allocated through AllocStackSegment.
+        void FreeStackSegment(void* p);
 
 #ifdef _DEBUG
         // Check as many invariants as possible

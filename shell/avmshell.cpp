@@ -170,6 +170,7 @@ namespace avmshell
         MMgc::GCConfig gcconfig;
         gcconfig.collectionThreshold = settings.gcthreshold;
         gcconfig.exactTracing = settings.exactgc;
+        gcconfig.markstackAllowance = settings.markstackAllowance;
         MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode(), &gcconfig) );
         {
             MMGC_GCENTER(gc);
@@ -415,6 +416,7 @@ namespace avmshell
         MMgc::GCConfig gcconfig;
         gcconfig.collectionThreshold = settings.gcthreshold;
         gcconfig.exactTracing = settings.exactgc;
+        gcconfig.markstackAllowance = settings.markstackAllowance;
 
         // Going multi-threaded.
 
@@ -952,6 +954,21 @@ namespace avmshell
                         usage();
                     }
                 }
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+                else if (!VMPI_strcmp(arg, "-gcstack")) {
+                    unsigned stack;
+                    int nchar;
+                    const char* val = argv[++i];
+                    if (VMPI_sscanf(val, "%u%n", &stack, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val)) {
+                        settings.markstackAllowance = uint32_t(stack);
+                    }
+                    else
+                    {
+                        AvmLog("Bad argument to -gcstack\n");
+                        usage();
+                    }
+                }
+#endif
                 else if (!VMPI_strcmp(arg, "-log")) {
                     settings.do_log = true;
                 }
@@ -1154,6 +1171,9 @@ namespace avmshell
         AvmLog("          [-gcwork G]   Max fraction of time (default 0.25) we're willing to spend in GC\n");
         AvmLog("          [-stack N]    Stack size in bytes (will be honored approximately).\n"
                "                        Be aware of the stack margin: %u\n", avmshell::kStackMargin);
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+        AvmLog("          [-gcstack N]  Mark stack size allowance (# of segments), for testing.\n");
+#endif
         AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
         AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
         AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");

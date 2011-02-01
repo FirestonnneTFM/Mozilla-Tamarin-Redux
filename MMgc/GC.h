@@ -1421,14 +1421,14 @@ namespace MMgc
         void StartIncrementalMark();
         void FinishIncrementalMark(bool scanStack);
 
-        bool m_markStackOverflow;
-        void HandleMarkStackOverflow();
-        void SignalMarkStackOverflow(GCWorkItem& item);
-
         GCMarkStack m_barrierWork;
         void CheckBarrierWork();
         void FlushBarrierWork();
 
+        bool m_markStackOverflow;
+        void HandleMarkStackOverflow();
+        void SignalMarkStackOverflow(GCWorkItem& item);
+        
         // Set at initialization to the deepest recursion level MarkItem is allowed to
         // reach.  Managed entirely within MarkItem.
         uint32_t mark_item_recursion_control;

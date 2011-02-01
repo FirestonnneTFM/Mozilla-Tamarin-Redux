@@ -67,7 +67,7 @@ configs = ""
 configs += " -config CONFIG::BYTEARRAY_API_FLASH=true "
 configs += " -config CONFIG::BYTEARRAY_API_AIR=false "
 
-os.system(asc+" -builtin "+configs+" -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as IDataInput.as IDataOutput.as ByteArray.as ")
+os.system(asc+" -strict -builtin "+configs+" -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as IDataInput.as IDataOutput.as ByteArray.as ")
 
 rm("builtin.h")
 rm("builtin.cpp")

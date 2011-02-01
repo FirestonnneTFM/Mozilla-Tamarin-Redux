@@ -55,6 +55,13 @@ namespace MMgc
          */
         uint32_t collectionThreshold;
 
+        /* Defaults to unlimited.  Set it to limit the mark stack in terms
+         * of the number of blocks used (the smallest you can choose is 1).
+         * The GC ignores this flag unless MMGC_MARKSTACK_ALLOWANCE has been
+         * defined in MMgc.h.
+         */
+        uint32_t markstackAllowance;
+
         /* Defaults to true.  Set it to false to disable exact tracing.
          * The GC ignores this flag unless AVMTWEAK_SELECTABLE_EXACT_TRACING 
          * has been enabled.
