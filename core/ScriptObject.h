@@ -56,68 +56,23 @@ namespace avmplus
         ScriptObject(VTable* vtable, ScriptObject* delegate, int htCapacity);
 
     public:
-        REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate)
-        {
-            return new (gc, MMgc::kExact, vtable->getExtraSize()) ScriptObject(vtable, delegate);
-        }
-        
-        REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity)
-        {
-            return new (gc, MMgc::kExact, vtable->getExtraSize()) ScriptObject(vtable, delegate, htCapacity);
-        }
+        REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate);
+        REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity);
 
         ~ScriptObject();
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
-        ScriptObject* getDelegate() const { return delegate; }
-        void setDelegate(ScriptObject *d) { delegate = d; }
-
-        Atom atom() const {
-            return kObjectType|(uintptr_t)this;
-        }
-
-        virtual Atom toAtom() const {
-            return atom();
-        }
-
-        Traits* traits() const {
-            return vtable->traits;
-        }
-
-        AvmCore* core() const {
-            return vtable->traits->core;
-        }
-
-        MMgc::GC* gc() const {
-            return core()->GetGC();
-        }
-
-        Toplevel* toplevel() const {
-            return vtable->toplevel();
-        }
-
+        ScriptObject* getDelegate() const;
+        void setDelegate(ScriptObject *d);
+        Atom atom() const;
+        virtual Atom toAtom() const;
+        Traits* traits() const;
+        AvmCore* core() const;
+        MMgc::GC* gc() const;
+        Toplevel* toplevel() const;
         InlineHashtable* getTable() const;
-
-        inline InlineHashtable* getTableNoInit() const
-        {
-            union {
-                uint8_t* p;
-                InlineHashtable* iht;
-                HeapHashtable** hht;
-            };
-            p = (uint8_t*)this + vtable->traits->getHashtableOffset();
-            if(!vtable->traits->isDictionary())
-            {
-                return iht;
-            }
-            else
-            {
-                //DictionaryObjects store pointer to HeapHashtable at
-                //the hashtable offset
-                return (*hht)->get_ht();
-            }
-        }
+        InlineHashtable* getTableNoInit() const;
 
         Atom getSlotAtom(uint32_t slot);
 
@@ -160,37 +115,13 @@ namespace avmplus
 
         // convenience wrappers for passing Stringp instead of Atom
         // inline, not virtual (should never need overriding)
-        inline Atom getStringProperty(Stringp name) const
-        {
-            AvmAssert(name != NULL && name->isInterned());
-            return getAtomProperty(name->atom());
-        }
-        inline Atom getStringPropertyFromProtoChain(Stringp name, ScriptObject* protochain, Traits *origObjTraits) const
-        {
-            return getAtomPropertyFromProtoChain(name->atom(), protochain, origObjTraits);
-        }
-        inline void setStringProperty(Stringp name, Atom value)
-        {
-            setAtomProperty(name->atom(), value);
-        }
-        inline bool deleteStringProperty(Stringp name)
-        {
-            return deleteAtomProperty(name->atom());
-        }
-        inline bool hasStringProperty(Stringp name) const
-        {
-            AvmAssert(name != NULL && name->isInterned());
-            return hasAtomProperty(name->atom());
-        }
-        inline bool getStringPropertyIsEnumerable(Stringp name) const
-        {
-            AvmAssert(name != NULL && name->isInterned());
-            return getAtomPropertyIsEnumerable(name->atom());
-        }
-        inline void setStringPropertyIsEnumerable(Stringp name, bool enumerable)
-        {
-            setAtomPropertyIsEnumerable(name->atom(), enumerable);
-        }
+        Atom getStringProperty(Stringp name) const;
+        Atom getStringPropertyFromProtoChain(Stringp name, ScriptObject* protochain, Traits *origObjTraits) const;
+        void setStringProperty(Stringp name, Atom value);
+        bool deleteStringProperty(Stringp name);
+        bool hasStringProperty(Stringp name) const;
+        bool getStringPropertyIsEnumerable(Stringp name) const;
+        void setStringPropertyIsEnumerable(Stringp name, bool enumerable);
 
         virtual Atom defaultValue();        // ECMA [[DefaultValue]]
         virtual Stringp toString();
@@ -231,7 +162,7 @@ namespace avmplus
 
         // HACK; we need this so we can compare MethodClosures that
         // have the same instance and method.
-        virtual bool isMethodClosure() { return false; }
+        virtual bool isMethodClosure();
 
         // Create an instance of ScriptObject or a ScriptObject subclass.
         //
@@ -256,7 +187,7 @@ namespace avmplus
         // this really shouldn't exist here, but AIR currently plays some games with subclassing
         // "Function" that use C++ classes that don't descend from FunctionObject. Easier to fix
         // by rooting this method here than by fixing AIR at this time.
-        virtual CodeContext* getFunctionCodeContext() const { AvmAssert(0); return NULL; }
+        virtual CodeContext* getFunctionCodeContext() const;
 
         static ScriptObject* genericCreateInstance(ClassClosure* cls, VTable* ivtable);
         static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable);
@@ -264,7 +195,7 @@ namespace avmplus
 
         // This is a fast way to implement "istype(ARRAY)"; it return non-null if
         // this is an ArrayObject (or subclass thereof)
-        virtual ArrayObject* toArrayObject() { return NULL; }
+        virtual ArrayObject* toArrayObject();
 
         // This gets the property named "length" (if any) on the object, coerces it to a uint,
         // and returns the value. (Since uint(undefined) == 0, undefined length is zero.)
@@ -286,7 +217,7 @@ namespace avmplus
 #endif
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
     public:
-        virtual MethodEnv* getCallMethodEnv() { return NULL; }
+        virtual MethodEnv* getCallMethodEnv();
 #endif
 
     protected:
