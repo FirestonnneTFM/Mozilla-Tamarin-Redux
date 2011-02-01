@@ -92,7 +92,7 @@ namespace avmplus
             Toplevel* toplevel,
             Domain* domain,
             const NativeInitializer* natives,
-            API api);
+            ApiVersion apiVersion);
 
         /** return 0 iff the code starts with a known magic number,
           * otherwise an appropriate error code.
@@ -127,7 +127,7 @@ namespace avmplus
         /*const*/ unsigned float4Support:1;
         
     protected:
-        PoolObject* parse(API api);
+        PoolObject* parse(ApiVersion apiVersion);
         MethodInfo* resolveMethodInfo(uint32_t index) const;
 
         #if defined(VMCFG_AOT) || defined(AVMPLUS_VERBOSE)
@@ -145,7 +145,7 @@ namespace avmplus
         void parseClassInfos();
         bool parseScriptInfos();
         void parseMethodBodies();
-        void parseCpool(API api);
+        void parseCpool(ApiVersion apiVersion);
         Traits* parseTraits(uint16_t sizeofInstance,
                             uint16_t offsetofSlots,
                             Traits* base,

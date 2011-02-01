@@ -928,8 +928,8 @@ namespace avmplus
             NativeInitializer* nativeInitializer = NULL;    // "native" not supported for eval code
             Toplevel* toplevel = self->toplevel();
             String *newsrc = AvmCore::atomToString(input)->appendLatin1("\0", 1);
-            uint32_t api = core->getAPI(NULL);
-            return core->handleActionSource(newsrc, filename, toplevel, nativeInitializer, codeContext, api);
+            ApiVersion apiVersion = core->getApiVersionFromCallStack();
+            return core->handleActionSource(newsrc, filename, toplevel, nativeInitializer, codeContext, apiVersion);
         }
 #endif // VMCFG_EVAL
         return undefinedAtom;

@@ -85,7 +85,8 @@ namespace avmshell
         const char* st_component;
         const char* st_category;
         const char* st_name;
-        ApiVersion api;
+        ApiVersionSeries apiVersionSeries;
+        ApiVersion apiVersion;
         BugCompatibility::Version swfVersion;
 
         MMgc::GC::GCMode gcMode()
@@ -120,7 +121,7 @@ namespace avmshell
          *
          * Requires: MMGC_ENTER and MMGC_GCENTER(gc) on the stack.
          */
-        ShellCore(MMgc::GC *gc);
+        ShellCore(MMgc::GC *gc, ApiVersionSeries apiVersionSeries);
 
         /**
          * Initialize the new core from the settings.  This creates a top-level
@@ -166,7 +167,7 @@ namespace avmshell
         static bool isValidProjectorFile(const char* filename);
 #endif
 
-        inline int32_t getDefaultAPI() { return ApiUtils::toAPI(this, defaultAPIVersion); }
+        /*virtual*/ inline ApiVersion getDefaultAPI() { return this->defaultAPIVersion; }
 
         inline BugCompatibility::Version getDefaultBugCompatibilityVersion() const { return defaultBugCompatibilityVersion; }
 

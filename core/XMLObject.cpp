@@ -2871,7 +2871,7 @@ namespace avmplus
                 {
                     mn.setName(name);
                 }
-                Namespacep ns = ApiUtils::getVersionedNamespace(core, toplevel->getDefaultNamespace(), core->getAPI(NULL));
+                Namespacep ns = core->getVersionedNamespace(toplevel->getDefaultNamespace(), core->getApiVersionFromCallStack());
                 mn.setNamespace(ns);
             }
         }

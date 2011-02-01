@@ -60,99 +60,35 @@ ASC and AVM to control the visibility of names in the API.
 
 -->
 
+
 <api>
-<versions id="Flash Runtime">
-  <release id="0">
-    <product id="player">
-      <profile id="full">
-        <version id="660" alias="FP_9_0"/>
-      </profile>
-    </product>
-    <product id="air">
-      <profile id="full">
-        <version id="661" alias="AIR_1_0"/>
-      </profile>
-    </product>
-  </release>
-  <release id="1">
-    <product id="player">
-      <profile id="full">
-	      <version id="662" alias="FP_10_0"/>
-      </profile>
-    </product>
-    <product id="air">
-      <profile id="full">
-	      <version id="663" alias="AIR_1_5"/>
-      </profile>
-    </product>
-  </release>
-  <release id="2">
-    <product id="air">
-      <profile id="full">
-	      <version id="664" alias="AIR_1_5_1"/>
-      </profile>
-    </product>
-  </release>
-  <release id="3">
-    <product id="player">
-      <profile id="full">
-      	<version id="665" alias="FP_10_0_32"/>
-      </profile>
-    </product>
-    <product id="air">
-      <profile id="full">
-	      <version id="666" alias="AIR_1_5_2"/>
-      </profile>
-    </product>
-  </release>
-  <release id="4">
-    <product id="player">
-      <profile id="full">
-      	<version id="667" alias="FP_10_1"/>
-      </profile>
-    </product>
-    <product id="air">
-      <profile id="full">
-	      <version id="668" alias="AIR_2_0"/>
-      </profile>
-    </product>
-  </release>
-  <release id="5">
-    <product id="air">
-      <profile id="full">
-	      <version id="669" alias="AIR_2_5"/>
-      </profile>
-    </product>
-  </release>
-  <release id="6">
-    <product id="player">
-      <profile id="full">
-        <version id="670" alias="FP_10_2"/>
-      </profile>
-      </product>
-    <product id="air">
-      <profile id="full">
-        <version id="671" alias="AIR_2_6"/>
-      </profile>
-    </product>
-  </release>
-  <release id="7">
-	<product id="player">
-	  <profile id="full">
-		<version id="672" alias="SWF_12"/>
-	  </profile>
-	  <profile id="system">
-        <version id="674" alias="FP_SYS"/>
-      </profile>
-    </product>
-    <product id="air">
-      <profile id="full">
-        <version id="673" alias="AIR_2_7"/>
-      </profile>
-      <profile id="system">
-        <version id="675" alias="AIR_SYS"/>
-      </profile>
-    </product>
-  </release>
-</versions>
+    <series name="AIR">
+        <version name="AIR_1_0"/>
+        <version name="AIR_1_5"/>
+        <version name="AIR_1_5_1"/>
+        <version name="AIR_1_5_2"/>
+        <version name="AIR_2_0"/>
+        <version name="AIR_2_5"/>
+        <version name="AIR_2_6"/>
+        <version name="AIR_2_7"/>
+    </series>
+    <series name="FP">
+        <version name="FP_10_0"/>
+        <!-- note that nothing has ever been tagged with FP_10_0_32, but it needs to
+            remain for acceptance tests to pass -->
+        <version name="FP_10_0_32"/>
+        <!-- note that FP_10_1 is essentially equivalent to FP_10_0_32 and FP_10_0 -->
+        <version name="FP_10_1"/>
+        <version name="FP_10_2"/>
+        <version name="SWF_12"/>
+    </series>
+
+    <!-- this means "every API in sub is also in super" -->
+    <ordering>
+        <set sub="FP_10_0" super="AIR_1_5"/>
+        <set sub="FP_10_0_32" super="AIR_1_5_2"/>
+        <set sub="FP_10_1" super="AIR_2_0"/>
+        <set sub="FP_10_2" super="AIR_2_6"/>
+        <set sub="SWF_12" super="AIR_2_7"/>
+    </ordering>
 </api>

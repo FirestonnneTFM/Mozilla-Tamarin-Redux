@@ -74,7 +74,7 @@ namespace avmshell
     }
 
     ShellCoreImpl::ShellCoreImpl(MMgc::GC* gc, ShellSettings& settings, bool mainthread)
-        : ShellCore(gc)
+        : ShellCore(gc, settings.apiVersionSeries)
         , settings(settings)
         , mainthread(mainthread)
     {
@@ -1013,9 +1013,7 @@ namespace avmshell
                 }
 #endif /* DEBUGGER */
                 else if (!VMPI_strcmp(arg, "-api") && i+1 < argc) {
-                    bool badFlag;
-                    settings.api = ApiUtils::parseApiVersion(argv[i+1], badFlag);
-                    if (badFlag)
+                    if (!AvmCore::parseApiVersion(argv[i+1], settings.apiVersion, settings.apiVersionSeries))
                     {
                         AvmLog("Unknown api version'%s'\n", argv[i+1]);
                         usage();

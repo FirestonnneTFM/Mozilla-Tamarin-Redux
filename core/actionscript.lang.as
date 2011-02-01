@@ -43,9 +43,9 @@ package
     public namespace AS3 = "http://adobe.com/AS3/2006/builtin";
 
     // Query whether a particular bugfix is in effect for this object.
-    // information. Note that we use AIR_SYS to hide it from non-builtin code.
+    // information. Note that we use VM_INTERNAL to hide it from non-builtin code.
     [native("Toplevel::bugzilla")]
-    [API(CONFIG::AIR_SYS)]
+    [API(CONFIG::VM_INTERNAL)]
     public native function bugzilla(n:int):Boolean;
 
     /**
