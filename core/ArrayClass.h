@@ -70,6 +70,11 @@ namespace avmplus
 
         ArrayObject* newArray(uint32_t capacity=0);
 
+#ifdef VMCFG_AOT
+        template <typename ADT>
+        ArrayObject* newArray(MethodEnv *env, ADT argDesc, va_list ap);
+#endif
+
         // override ScriptObject::createInstance
         ArrayObject* createInstance(VTable *ivtable, ScriptObject* prototype);
 

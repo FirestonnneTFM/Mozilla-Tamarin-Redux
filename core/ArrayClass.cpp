@@ -1324,6 +1324,19 @@ namespace avmplus
         return ArrayObject::create(core()->GetGC(), ivtable(), prototypePtr(), capacity);
     }
 
+#ifdef VMCFG_AOT
+    template <typename ADT>
+    ArrayObject* ArrayClass::newArray(MethodEnv *env, ADT argDesc, va_list ap)
+    {
+        uint32_t argc = argDescArgCount(argDesc);
+        AvmAssert(argc >= 0);
+        return ArrayObject::create<ADT>(core()->GetGC(), ivtable(), prototypePtr(), env, argDesc, argc, ap);
+    }
+
+    template ArrayObject* ArrayClass::newArray(MethodEnv *env, uint32_t argDesc, va_list ap);
+    template ArrayObject* ArrayClass::newArray(MethodEnv *env, char* argDesc, va_list ap);
+#endif
+
     ArrayObject* ArrayClass::createInstance(VTable *ivtable, ScriptObject* prototype)
     {
         return ArrayObject::create(core()->GetGC(), ivtable, prototype, 0);
