@@ -268,11 +268,6 @@ REALLY_INLINE /*static*/ bool AvmCore::isNullOrUndefined(Atom atom)
     return ((uintptr_t)atom) <= (uintptr_t)kSpecialType;
 }
 
-REALLY_INLINE int32_t AvmCore::getActiveAPIs()
-{
-    return this->active_api_flags;
-}
-
 REALLY_INLINE /*static*/ uint32_t AvmCore::toUInt32(Atom atom)
 {
     return (uint32_t)integer(atom);
@@ -564,6 +559,38 @@ REALLY_INLINE void AvmCore::flushBindingCachesNextSweep()
 }
 #endif // VMCFG_NANOJIT
 
+REALLY_INLINE bool AvmCore::isValidApiVersion(ApiVersion apiVersion)
+{
+    AvmAssert((int)apiVersion >= 0 && (int)apiVersion < kApiVersion_count);
+    return (kApiVersionSeriesMembership[apiVersion] & m_activeApiVersionSeriesMask) != 0;
+}
+
+REALLY_INLINE ApiVersion AvmCore::getValidApiVersion(ApiVersion apiVersion)
+{
+    AvmAssert((int)apiVersion >= 0 && (int)apiVersion < kApiVersion_count);
+    return kApiVersionSeriesTransfer[apiVersion][m_activeApiVersionSeries];
+}
+
+REALLY_INLINE Namespacep AvmCore::getPublicNamespace(PoolObject* pool)
+{
+    AvmAssert(pool != NULL);
+    return publicNamespaces->nsAt(pool->getApiVersion());
+}
+
+REALLY_INLINE Namespacep AvmCore::getPublicNamespace(ApiVersion apiVersion)
+{
+    AvmAssert(isValidApiVersion(apiVersion));
+    return publicNamespaces->nsAt(apiVersion);
+}
+
+REALLY_INLINE Namespacep AvmCore::getAnyPublicNamespace()
+{
+    // This may seem counterintuitive, but the idea is that
+    // we want a public namespace that will match "any" "public"
+    // namespace; thus we choose INTERNAL since it always matches everything.
+    return publicNamespaces->nsAt(kApiVersion_VM_INTERNAL);
+}
+
 // NOTE, the code in enter/exit is replicated in CodegenLIR.cpp;
 // if you make changes here, you may need to make changes there as well.
 REALLY_INLINE void MethodFrame::enter(AvmCore* core, MethodEnv* e)
@@ -618,16 +645,6 @@ REALLY_INLINE void MethodFrame::setDxns(Namespace* ns)
     AvmAssert(ns != NULL);
     envOrCodeContext |= DXNS_NOT_NULL;
     dxns = ns;
-}
-
-REALLY_INLINE /*static*/ API ApiUtils::getSmallestAPI()
-{
-    return 0x1;
-}
-
-REALLY_INLINE /*static*/ API ApiUtils::getLargestAPI(AvmCore* core)
-{
-    return core->largest_api;
 }
 
 

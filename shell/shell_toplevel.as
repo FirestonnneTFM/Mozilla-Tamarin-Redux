@@ -201,16 +201,18 @@ package avmshell
     // can read them; they can't simple include api-versions.as because the CONFIG
     // namespace is special and available only to builtin code (which the acceptance
     // tests aren't).
-    public const API_FP_9_0 = CONFIG::FP_9_0;
-    public const API_AIR_1_0 = CONFIG::AIR_1_0;
-    public const API_FP_10_0 = CONFIG::FP_10_0;
-    public const API_AIR_1_5 = CONFIG::AIR_1_5;
-    public const API_AIR_1_5_1 = CONFIG::AIR_1_5_1;
-    public const API_FP_10_0_32 = CONFIG::FP_10_0_32;
-    public const API_AIR_1_5_2 = CONFIG::AIR_1_5_2;
+    // NB: 660 is a legacy wart due to existing ASC.jar expecting that as the first
+    // version. It's a bit ugly but keeping it is easier than modifying asc.jar at this point.
+    // (Since this magic value only affects builtin code we could change it in the future
+    // without affecting existing content, though.)
+    public const API_AIR_1_0 = CONFIG::AIR_1_0 - 660;
+    public const API_FP_10_0 = CONFIG::FP_10_0 - 660;
+    public const API_AIR_1_5 = CONFIG::AIR_1_5 - 660;
+    public const API_AIR_1_5_1 = CONFIG::AIR_1_5_1 - 660;
+    public const API_FP_10_0_32 = CONFIG::FP_10_0_32 - 660;
+    public const API_AIR_1_5_2 = CONFIG::AIR_1_5_2 - 660;
 
     public var public_var:Boolean = true;
-    [API(CONFIG::FP_9_0)] public var public_var_FP_9_0:Boolean = true;
     [API(CONFIG::AIR_1_0)] public var public_var_AIR_1_0:Boolean = true;
     [API(CONFIG::FP_10_0)] public var public_var_FP_10_0:Boolean = true;
     [API(CONFIG::AIR_1_5)] public var public_var_AIR_1_5:Boolean = true;
@@ -218,12 +220,10 @@ package avmshell
     [API(CONFIG::FP_10_0_32)] public var public_var_FP_10_0_32:Boolean = true;
     [API(CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_2:Boolean = true;
     [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_AIR_1_0_FP_10_0:Boolean = true;
-    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public var public_var_AIR_1_5_2_FP_9_0:Boolean = true;
     [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
-    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
+    [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_FP_10_0_32_AIR_1_0_FP_10_0:Boolean = true;
 
     public const public_const:Boolean = true;
-    [API(CONFIG::FP_9_0)] public const public_const_FP_9_0:Boolean = true;
     [API(CONFIG::AIR_1_0)] public const public_const_AIR_1_0:Boolean = true;
     [API(CONFIG::FP_10_0)] public const public_const_FP_10_0:Boolean = true;
     [API(CONFIG::AIR_1_5)] public const public_const_AIR_1_5:Boolean = true;
@@ -231,12 +231,10 @@ package avmshell
     [API(CONFIG::FP_10_0_32)] public const public_const_FP_10_0_32:Boolean = true;
     [API(CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_2:Boolean = true;
     [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_AIR_1_0_FP_10_0:Boolean = true;
-    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public const public_const_AIR_1_5_2_FP_9_0:Boolean = true;
     [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
-    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
+    [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_FP_10_0_32_AIR_1_0_FP_10_0:Boolean = true;
 
     public function public_function():Boolean { return true; }
-    [API(CONFIG::FP_9_0)] public function public_function_FP_9_0():Boolean { return true; }
     [API(CONFIG::AIR_1_0)] public function public_function_AIR_1_0():Boolean { return true; }
     [API(CONFIG::FP_10_0)] public function public_function_FP_10_0():Boolean { return true; }
     [API(CONFIG::AIR_1_5)] public function public_function_AIR_1_5():Boolean { return true; }
@@ -244,12 +242,10 @@ package avmshell
     [API(CONFIG::FP_10_0_32)] public function public_function_FP_10_0_32():Boolean { return true; }
     [API(CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_2():Boolean { return true; }
     [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_AIR_1_0_FP_10_0():Boolean { return true; }
-    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function public_function_AIR_1_5_2_FP_9_0():Boolean { return true; }
     [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
-    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
+    [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_FP_10_0_32_AIR_1_0_FP_10_0():Boolean { return true; }
 
     public function get public_getset():Boolean { return true; }
-    [API(CONFIG::FP_9_0)] public function get public_getset_FP_9_0():Boolean { return true; }
     [API(CONFIG::AIR_1_0)] public function get public_getset_AIR_1_0():Boolean { return true; }
     [API(CONFIG::FP_10_0)] public function get public_getset_FP_10_0():Boolean { return true; }
     [API(CONFIG::AIR_1_5)] public function get public_getset_AIR_1_5():Boolean { return true; }
@@ -257,12 +253,10 @@ package avmshell
     [API(CONFIG::FP_10_0_32)] public function get public_getset_FP_10_0_32():Boolean { return true; }
     [API(CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_2():Boolean { return true; }
     [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_AIR_1_0_FP_10_0():Boolean { return true; }
-    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function get public_getset_AIR_1_5_2_FP_9_0():Boolean { return true; }
     [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
-    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
+    [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_FP_10_0_32_AIR_1_0_FP_10_0():Boolean { return true; }
 
     public function set public_getset(x:*):void {  }
-    [API(CONFIG::FP_9_0)] public function set public_getset_FP_9_0(x:*):void {  }
     [API(CONFIG::AIR_1_0)] public function set public_getset_AIR_1_0(x:*):void {  }
     [API(CONFIG::FP_10_0)] public function set public_getset_FP_10_0(x:*):void {  }
     [API(CONFIG::AIR_1_5)] public function set public_getset_AIR_1_5(x:*):void {  }
@@ -270,9 +264,8 @@ package avmshell
     [API(CONFIG::FP_10_0_32)] public function set public_getset_FP_10_0_32(x:*):void {  }
     [API(CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_2(x:*):void {  }
     [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_AIR_1_0_FP_10_0(x:*):void {  }
-    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function set public_getset_AIR_1_5_2_FP_9_0(x:*):void {  }
     [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2(x:*):void {  }
-    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0(x:*):void {  }
+    [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_FP_10_0_32_AIR_1_0_FP_10_0(x:*):void {  }
 
 }
 
@@ -284,7 +277,6 @@ package avmshell
     {
 
         public var public_var:Boolean = true;
-        [API(CONFIG::FP_9_0)] public var public_var_FP_9_0:Boolean = true;
         [API(CONFIG::AIR_1_0)] public var public_var_AIR_1_0:Boolean = true;
         [API(CONFIG::FP_10_0)] public var public_var_FP_10_0:Boolean = true;
         [API(CONFIG::AIR_1_5)] public var public_var_AIR_1_5:Boolean = true;
@@ -292,12 +284,10 @@ package avmshell
         [API(CONFIG::FP_10_0_32)] public var public_var_FP_10_0_32:Boolean = true;
         [API(CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_2:Boolean = true;
         [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_AIR_1_0_FP_10_0:Boolean = true;
-        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public var public_var_AIR_1_5_2_FP_9_0:Boolean = true;
         [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public var public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
-        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
+        [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public var public_var_FP_10_0_32_AIR_1_0_FP_10_0:Boolean = true;
 
         public const public_const:Boolean = true;
-        [API(CONFIG::FP_9_0)] public const public_const_FP_9_0:Boolean = true;
         [API(CONFIG::AIR_1_0)] public const public_const_AIR_1_0:Boolean = true;
         [API(CONFIG::FP_10_0)] public const public_const_FP_10_0:Boolean = true;
         [API(CONFIG::AIR_1_5)] public const public_const_AIR_1_5:Boolean = true;
@@ -305,12 +295,10 @@ package avmshell
         [API(CONFIG::FP_10_0_32)] public const public_const_FP_10_0_32:Boolean = true;
         [API(CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_2:Boolean = true;
         [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_AIR_1_0_FP_10_0:Boolean = true;
-        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public const public_const_AIR_1_5_2_FP_9_0:Boolean = true;
         [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public const public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2:Boolean = true;
-        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0:Boolean = true;
+        [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public const public_const_FP_10_0_32_AIR_1_0_FP_10_0:Boolean = true;
 
         public function public_function():Boolean { return true; }
-        [API(CONFIG::FP_9_0)] public function public_function_FP_9_0():Boolean { return true; }
         [API(CONFIG::AIR_1_0)] public function public_function_AIR_1_0():Boolean { return true; }
         [API(CONFIG::FP_10_0)] public function public_function_FP_10_0():Boolean { return true; }
         [API(CONFIG::AIR_1_5)] public function public_function_AIR_1_5():Boolean { return true; }
@@ -318,12 +306,10 @@ package avmshell
         [API(CONFIG::FP_10_0_32)] public function public_function_FP_10_0_32():Boolean { return true; }
         [API(CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_2():Boolean { return true; }
         [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_AIR_1_0_FP_10_0():Boolean { return true; }
-        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function public_function_AIR_1_5_2_FP_9_0():Boolean { return true; }
         [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function public_function_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
-        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
+        [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function public_function_FP_10_0_32_AIR_1_0_FP_10_0():Boolean { return true; }
 
         public function get public_getset():Boolean { return true; }
-        [API(CONFIG::FP_9_0)] public function get public_getset_FP_9_0():Boolean { return true; }
         [API(CONFIG::AIR_1_0)] public function get public_getset_AIR_1_0():Boolean { return true; }
         [API(CONFIG::FP_10_0)] public function get public_getset_FP_10_0():Boolean { return true; }
         [API(CONFIG::AIR_1_5)] public function get public_getset_AIR_1_5():Boolean { return true; }
@@ -331,12 +317,10 @@ package avmshell
         [API(CONFIG::FP_10_0_32)] public function get public_getset_FP_10_0_32():Boolean { return true; }
         [API(CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_2():Boolean { return true; }
         [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_AIR_1_0_FP_10_0():Boolean { return true; }
-        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function get public_getset_AIR_1_5_2_FP_9_0():Boolean { return true; }
         [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function get public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2():Boolean { return true; }
-        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0():Boolean { return true; }
+        [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function get public_getset_FP_10_0_32_AIR_1_0_FP_10_0():Boolean { return true; }
 
         public function set public_getset(x:*):void {  }
-        [API(CONFIG::FP_9_0)] public function set public_getset_FP_9_0(x:*):void {  }
         [API(CONFIG::AIR_1_0)] public function set public_getset_AIR_1_0(x:*):void {  }
         [API(CONFIG::FP_10_0)] public function set public_getset_FP_10_0(x:*):void {  }
         [API(CONFIG::AIR_1_5)] public function set public_getset_AIR_1_5(x:*):void {  }
@@ -344,12 +328,10 @@ package avmshell
         [API(CONFIG::FP_10_0_32)] public function set public_getset_FP_10_0_32(x:*):void {  }
         [API(CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_2(x:*):void {  }
         [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_AIR_1_0_FP_10_0(x:*):void {  }
-        [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public function set public_getset_AIR_1_5_2_FP_9_0(x:*):void {  }
         [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public function set public_getset_AIR_1_5_1_FP_10_0_AIR_1_5_2(x:*):void {  }
-        [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0(x:*):void {  }
+        [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public function set public_getset_FP_10_0_32_AIR_1_0_FP_10_0(x:*):void {  }
     }
 
-    [API(CONFIG::FP_9_0)] public class  public_class_FP_9_0 {  }
     [API(CONFIG::AIR_1_0)] public class  public_class_AIR_1_0 {  }
     [API(CONFIG::FP_10_0)] public class  public_class_FP_10_0 {  }
     [API(CONFIG::AIR_1_5)] public class  public_class_AIR_1_5 {  }
@@ -357,12 +339,10 @@ package avmshell
     [API(CONFIG::FP_10_0_32)] public class  public_class_FP_10_0_32 {  }
     [API(CONFIG::AIR_1_5_2)] public class  public_class_AIR_1_5_2 {  }
     [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public class  public_class_AIR_1_0_FP_10_0 {  }
-    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public class  public_class_AIR_1_5_2_FP_9_0 {  }
     [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public class  public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2 {  }
-    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public class  public_class_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 {  }
+    [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public class  public_class_FP_10_0_32_AIR_1_0_FP_10_0 {  }
 
     public interface  public_interface {}
-    [API(CONFIG::FP_9_0)] public interface  public_interface_FP_9_0 {  }
     [API(CONFIG::AIR_1_0)] public interface  public_interface_AIR_1_0 {  }
     [API(CONFIG::FP_10_0)] public interface  public_interface_FP_10_0 {  }
     [API(CONFIG::AIR_1_5)] public interface  public_interface_AIR_1_5 {  }
@@ -370,8 +350,7 @@ package avmshell
     [API(CONFIG::FP_10_0_32)] public interface  public_interface_FP_10_0_32 {  }
     [API(CONFIG::AIR_1_5_2)] public interface  public_interface_AIR_1_5_2 {  }
     [API(CONFIG::AIR_1_0,CONFIG::FP_10_0)] public interface  public_interface_AIR_1_0_FP_10_0 {  }
-    [API(CONFIG::AIR_1_5_2,CONFIG::FP_9_0)] public interface  public_interface_AIR_1_5_2_FP_9_0 {  }
     [API(CONFIG::AIR_1_5_1,CONFIG::FP_10_0,CONFIG::AIR_1_5_2)] public interface  public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2 {  }
-    [API(CONFIG::FP_10_0_32,CONFIG::FP_9_0,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public interface  public_interface_FP_10_0_32_FP_9_0_AIR_1_0_FP_10_0 {  }
+    [API(CONFIG::FP_10_0_32,CONFIG::AIR_1_0,CONFIG::FP_10_0)] public interface  public_interface_FP_10_0_32_AIR_1_0_FP_10_0 {  }
 
 }

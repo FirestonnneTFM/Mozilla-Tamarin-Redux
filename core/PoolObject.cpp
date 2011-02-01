@@ -51,7 +51,7 @@ namespace avmplus
     // a GCObject-descended type to satisfy new constraints on List.
     MMGC_STATIC_ASSERT(sizeof(GCDouble) == sizeof(double));
 
-    PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startPos, uint32_t api) :
+    PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startPos, ApiVersion apiVersion) :
         core(core),
         cpool_int(core->GetGC(), 0),
         cpool_uint(core->GetGC(), 0),
@@ -79,14 +79,13 @@ namespace avmplus
         , _method_dmi(core->GetGC(), 0)
 #endif
         , _method_name_indices(core->GetGC(), 0)
-        , api(api)
+        , _apiVersion(apiVersion)
 #ifdef VMCFG_AOT
         , aotInfo(NULL)
 #endif
     {
         version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
         core->addLivePool(this);
-        core->setActiveAPI(api);
     }
 
     PoolObject::~PoolObject()

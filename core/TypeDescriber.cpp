@@ -172,18 +172,12 @@ namespace avmplus
         if ((flags & TypeDescriber::HIDE_OBJECT) && !tb->base && !tb->owner->isInterface()) return;
         addBindings(core, bindings, tb->base, flags);
         StTraitsBindingsIterator iter(tb);
-        uint32_t curapi = core->getAPI(NULL);
+        ApiVersion const curapi = core->getApiVersionFromCallStack();
         while (iter.next())
         {
             if (!iter.key()) continue;
-            Namespacep ns = iter.ns();
-            if (ApiUtils::isVersionedNS(core, ns->getType(), ns->getURI())) {
-                // Skip names that don't match the current version
-                API api = iter.apis();
-                if (!(curapi & api)) {
-                    continue;
-                }
-            }
+            // Only add names if they are visible to the current active API
+            if (iter.apiVersion() > curapi) continue;
             bindings->add(iter.key(), iter.ns(), iter.value());
         }
     }

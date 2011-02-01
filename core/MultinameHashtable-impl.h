@@ -108,8 +108,8 @@ namespace avmplus
         // We really want alignment and size of the Quad to be tightly controlled.
         MMGC_STATIC_ASSERT(sizeof(Quad<VALUE_TYPE>) == 4*sizeof(uintptr_t));
 
-        // Code near the end of MultinameHashtable::put assumes that API is a 32-bit type
-        MMGC_STATIC_ASSERT(sizeof(API) == 4);
+        // Code near the end of MultinameHashtable::put assumes that API will fit into 31 bits
+        MMGC_STATIC_ASSERT(kApiVersion_count <= 0x7fffffff);
 
         Init(capacity);
     }
@@ -169,7 +169,7 @@ namespace avmplus
         unsigned i = ((0x7FFFFFF8 & (uintptr_t)name) >> 3) & bitmask;
 
         Stringp k;
-        while (((k=t[i].name) != name || !(t[i].ns == ns || matchNS(t[i].ns->m_uri, t[i].apis(), ns))) && k != NULL)
+        while (((k=t[i].name) != name || !t[i].matchNS(ns)) && k != NULL)
         {
             i = (i + (n++)) & bitmask;          // quadratic probe
         }
@@ -228,15 +228,11 @@ namespace avmplus
         {
             if (atomName == mnameName)
             {
-                Namespacep probeNS = t[i].ns;
-                AvmAssert(probeNS->getURI()->isInterned());
-                API probeAPIs = t[i].apis();
-                uintptr_t probeURI = probeNS ? probeNS->m_uri : 0;
                 for (j=0; j < nsCount; j++)
                 {
                     Namespacep ns = nsset->nsAt(j);
                     AvmAssert(ns->getURI()->isInterned());
-                    if (probeNS==ns || (probeURI == ns->m_uri && (probeAPIs & ns->m_api)))
+                    if (t[i].matchNS(ns))
                     {
                         match = &t[i];
                         matchValue = match->value;
@@ -258,14 +254,11 @@ found1:
             {
                 if (atomName == mnameName)
                 {
-                    Namespacep probeNS = t[k].ns;
-                    AvmAssert(probeNS->getURI()->isInterned());
-                    API probeAPIs = t[k].apis();
-                    uintptr_t probeURI = t[k].ns->m_uri;
+                    AvmAssert(t[k].ns->getURI()->isInterned());
                     for (j=0; j < nsCount; j++)
                     {
                         Namespacep ns = nsset->nsAt(j);
-                        if ((probeNS==ns || matchNS(probeURI, probeAPIs, ns)) && matchValue != t[k].value)
+                        if (t[k].matchNS(ns) && matchValue != t[k].value)
                         {
                             return &kBindAmbiguous;
 
@@ -287,7 +280,7 @@ found1:
         if (t[i].name == name)
         {
             const Quad<VALUE_TYPE>& tf = t[i];
-            AvmAssert(tf.ns==ns || matchNS(tf.ns->m_uri, tf.apis(), ns));
+            AvmAssert(tf.matchNS(ns));
             return tf.value;
         }
         return (VALUE_TYPE)NULL;
@@ -323,7 +316,7 @@ found1:
                 newAtoms[j].name = oldName;
                 newAtoms[j].ns = oldAtoms[i].ns;
                 newAtoms[j].value = oldAtoms[i].value;
-                newAtoms[j].apisAndMultiNS = oldAtoms[i].apisAndMultiNS;
+                newAtoms[j].apiAndMultiNS = oldAtoms[i].apiAndMultiNS;
             }
         }
     }
@@ -368,7 +361,7 @@ found1:
         // case (and update as necessary) in a single pass (rather than the
         // two extra passes we used to do)... this relies on the fact that
         // the quadratic probe will walk thru every existing entry with the same
-        // same name in order to find an empty slot, thus if there are any existing
+        // name in order to find an empty slot, thus if there are any existing
         // entries with a different ns than what we are adding, all of those name
         // entries should be marked as multiNS.
         Quad<VALUE_TYPE>* cur;
@@ -390,15 +383,15 @@ found1:
                 if (probeName == name)
                 {
                     // there's at least one existing entry with this name in the MNHT.
-                    if (cur->ns == ns || matchNS(cur->ns->m_uri, cur->apis(), ns))
+                    if (cur->matchNS(ns))
                     {
                         // it's the one we're looking for, just update the value.
                         goto write_value;
                     }
                     
                     // it's not the one we're looking for, thus we are now multiNS on this name.
-                    if (cur->ns->m_uri != ns->m_uri) {
-                        cur->apisAndMultiNS |= 1;
+                    if (cur->ns->m_uriAndType != ns->m_uriAndType) {
+                        cur->apiAndMultiNS |= 1;
                         multiNS = 1;
                     }
                 }
@@ -409,21 +402,30 @@ found1:
         }
         
         AvmAssert(cur->name == NULL);
+        AvmAssert(cur->ns == NULL);
         
         // New table entry for this <name,ns> pair
         size++;
-        //quads[i].name = name;
+        // OPTIMIZEME: we know the entries are zero, so we could use WriteBarrierRC_ctor here... 
+        // except that it will call GetGC() on the address, which will be wrong for > 4k.
+        // Need a version of WriteBarrierRC_ctor that takes explicit GC*.
         WBRC(gc, m_quads, &cur->name, name);
-        //quads[i].ns = ns;
         WBRC(gc, m_quads, &cur->ns, ns);
-        cur->apisAndMultiNS = (cur->apisAndMultiNS & ~1) | multiNS;
+        // Set the "ApiVersion" section to an impossibly large value, so that we always
+        // set it to the proper value the first time through.
+        AvmAssert(cur->apiAndMultiNS == 0);
+        cur->apiAndMultiNS = (kApiVersion_count << 1) | multiNS;
         
     write_value:
-        //quads[i].value = value;
-        //WB(gc, quadbase, &cur->value, value);
         VALUE_WRITER::store(gc, m_quads, (void**)&cur->value, (void*)value);
-        AvmAssert((ns->getAPI() & 0x80000000U) == 0);
-        cur->apisAndMultiNS |= (uintptr_t)ns->getAPI() << 1;
+        uintptr_t const v = (uintptr_t)ns->getApiVersion() << 1;
+        if (v < (cur->apiAndMultiNS & ~1))
+        {
+            // Note that this assumes that both ApiVersions are in the same series;
+            // this should always be the case as we build them that way, but let's double-check.
+            cur->apiAndMultiNS = v | (cur->apiAndMultiNS & 1);
+            AvmAssert((kApiVersionSeriesMembership[ns->getApiVersion()] & kApiVersionSeriesMembership[cur->apiVersion()]) != 0);
+        }
     }
 }
 

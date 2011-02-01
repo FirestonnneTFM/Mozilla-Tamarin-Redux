@@ -45,11 +45,12 @@ using namespace MMgc;
 namespace avmplus
 {
     // See E4X 13.2.2, pg 64
-    Namespace::Namespace(Atom prefix, Stringp uri, NamespaceType flags) :
+    Namespace::Namespace(Atom prefix, Stringp uri, NamespaceType flags, ApiVersion apiVersion) :
 #ifdef DEBUGGER
         AvmPlusScriptableObject(sotNamespace()),
 #endif // DEBUGGER
-        m_prefix(prefix)
+        m_prefix(prefix),
+        m_apiVersion(apiVersion)
     {
         // verify our parameters are interned strings
         AvmAssert(uri->isInterned());
@@ -58,36 +59,37 @@ namespace avmplus
         // ensure that if the incoming Atom is a string, that it's interned
         AvmAssert(AvmCore::isString(prefix) ? (AvmCore::atomToString(prefix))->isInterned() : 1);
         setUri(uri, flags);
+        // ApiVersion should be ALLVERSIONS for all Namespaces that are nonpublic.
+        AvmAssert(flags != NS_Public ? apiVersion == kApiVersion_VM_ALLVERSIONS : true);
     }
 
     Namespace::~Namespace()
     {
         setUri(NULL, NS_Public);
-        setAPI(0);
+        *const_cast<ApiVersion*>(&m_apiVersion) = ApiVersion(0);
     }
 
     bool Namespace::gcTrace(MMgc::GC* gc, size_t cursor)
     {
         (void)cursor;
         gc->TraceAtom(&m_prefix);
-        gc->TraceLocation(&m_uri);
+        gc->TraceLocation(&m_uriAndType);
         return false;
     }
     
     void Namespace::setUri(Stringp uri, NamespaceType flags)
     {
-        WBRC(GC::GetGC(this), this, &m_uri, (int32_t)flags | (uintptr_t) uri);
+        WBRC(GC::GetGC(this), this, &m_uriAndType, (int32_t)flags | (uintptr_t) uri);
     }
 
     bool Namespace::hasPrefix() const
     {
-        return (AvmCore::isName(m_prefix) && AvmCore::atomToString(m_prefix)->length()>0);
+        return AvmCore::isName(m_prefix) && AvmCore::atomToString(m_prefix)->length() > 0;
     }
 
     bool Namespace::isPublic() const
     {
-        Stringp uri = (Stringp)(((uintptr_t)m_uri)&~7);
-        return getType() == Namespace::NS_Public && uri->isEmpty();
+        return getType() == Namespace::NS_Public && getURI()->isEmpty();
     }
 
     bool Namespace::EqualTo(const Namespace* other) const
@@ -101,7 +103,7 @@ namespace avmplus
         {
             // both are public, so compare using uri's.  they are intern'ed so we
             // can do a fast pointer compare.
-            return m_uri == other->m_uri && m_api==other->m_api;
+            return m_uriAndType == other->m_uriAndType && m_apiVersion == other->m_apiVersion;
         }
     }
 
@@ -113,9 +115,8 @@ namespace avmplus
             return core->kuri->atom();
         else if (index == 2)
             return core->kprefix->atom();
-        else        {
+        else
             return nullStringAtom;
-        }
     }
 
     Atom Namespace::nextValue(int index)
@@ -142,11 +143,6 @@ namespace avmplus
     PrintWriter& Namespace::print(PrintWriter& prw) const
     {
         return prw << getURI();
-    }
-
-    Stringp Namespace::getURI() const
-    {
-        return (Stringp)atomPtr(m_uri);
     }
 
 #ifdef DEBUGGER
