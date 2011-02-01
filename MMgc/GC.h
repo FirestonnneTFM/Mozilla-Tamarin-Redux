@@ -894,7 +894,7 @@ namespace MMgc
         // check that the object is not finalizable.  Separate from FreeFromGCNotNull to allow
         // profiling / diagnosis of explicit deletion.
 
-        void FreeFromDeleteNotNull(const void *ptr);
+        void FreeFromDelete(const void *ptr);
 
     private:
         // To be called from the GC/ZCT.  Does not check that the object is not finalizable.
