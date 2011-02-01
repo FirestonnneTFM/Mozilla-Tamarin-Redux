@@ -421,13 +421,16 @@ namespace avmplus
                                       NamespaceSetp nss,
                                       Binding binding) const
     {
-        int32_t apis = 0;
+        // find the lowest version within the active series.
+        ApiVersion apiVersion = kApiVersion_VM_INTERNAL;
         for (NamespaceSetIterator iter(nss); iter.hasNext();)
         {
             Namespacep ns = iter.next();
-             apis |= ApiUtils::getCompatibleAPIs(core, ns->getAPI());
+            ApiVersion a = core->getValidApiVersion(ns->getApiVersion());
+            if (a < apiVersion)
+                apiVersion = a;
         }
-        Namespacep ns = ApiUtils::getVersionedNamespace(core, nss->nsAt(0), apis);
+        Namespacep ns = core->getVersionedNamespace(nss->nsAt(0), apiVersion);
         bindings->add(name, ns, binding);
     }
 
@@ -1126,17 +1129,24 @@ namespace avmplus
                 case TRAIT_Method:
                 {
                     const Binding b = tb->m_bindings->get(name, ns);
-                    AvmAssert(b != BIND_NONE);
-                    const uint32_t disp_id = uint32_t(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
-                    Binding base = this->getOverride(basetb, ns, name, ne.tag, toplevel);
-                    if (AvmCore::isMethodBinding(base)
-                        || (AvmCore::hasGetterBinding(base) && (ne.kind == TRAIT_Getter))
-                        || (AvmCore::hasSetterBinding(base) && (ne.kind == TRAIT_Setter))) {
-                        ensureNonFinal(basetb->getMethod(disp_id), toplevel);
+                    if (b != BIND_NONE)
+                    {
+                        const uint32_t disp_id = uint32_t(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
+                        Binding base = this->getOverride(basetb, ns, name, ne.tag, toplevel);
+                        if (AvmCore::isMethodBinding(base)
+                            || (AvmCore::hasGetterBinding(base) && (ne.kind == TRAIT_Getter))
+                            || (AvmCore::hasSetterBinding(base) && (ne.kind == TRAIT_Setter))) {
+                            ensureNonFinal(basetb->getMethod(disp_id), toplevel);
+                        }
+                        MethodInfo* f = this->pool->getMethodInfo(ne.id);
+                        //AvmAssert(f->declaringTraits() == this);
+                        tb->setMethodInfo(disp_id, f);
                     }
-                    MethodInfo* f = this->pool->getMethodInfo(ne.id);
-                    //AvmAssert(f->declaringTraits() == this);
-                    tb->setMethodInfo(disp_id, f);
+                    else
+                    {
+                        // This should only be BIND_NONE if the attribute was elided via Api Versioning.
+                        AvmAssert(!core->isValidApiVersion(ns->getApiVersion()));
+                    }
                     break;
                 }
 

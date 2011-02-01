@@ -88,7 +88,7 @@ namespace avmplus
         VMPI_memcpy(code.getBuffer(), &b->GetByteArray()[0], len);
 
         Toplevel* toplevel = domainToplevel;
-        uint32_t api = core->getAPI(NULL);
+        ApiVersion apiVersion = core->getApiVersionFromCallStack();
 
         // parse constants and attributes.
         PoolObject* pool = core->parseActionBlock(code,
@@ -96,7 +96,7 @@ namespace avmplus
                                 toplevel,
                                 domainEnv->domain(),
                                 /*ninit*/NULL,
-                                api);
+                                apiVersion);
 
 
         // by default, use the same bugCompatibility as the builtins use
@@ -161,7 +161,7 @@ done:
         Stringp className;
         if (dot >= 0) {
             Stringp uri = core->internString(name->substring(0, dot));
-            ns = core->internNamespace(core->newNamespace(uri, Namespace::NS_Public, core->getAPI(NULL)));
+            ns = core->internNamespace(core->newNamespace(uri, Namespace::NS_Public, core->getApiVersionFromCallStack()));
             className = core->internString(name->substring(dot+1, name->length()));
         } else {
             ns = core->findPublicNamespace();

@@ -71,7 +71,8 @@ namespace avmshell
         , st_component(NULL)
         , st_category(NULL)
         , st_name(NULL)
-        , api(kApiVersion_default)
+        , apiVersionSeries(kApiVersionSeries_FP)
+        , apiVersion(kApiVersionLatest[kApiVersionSeries_FP])
         , swfVersion(BugCompatibility::kLatest)
     {
     }
@@ -83,8 +84,8 @@ namespace avmshell
             shellClasses->list.set(avmplus::NativeID::shell_toplevel_abc_class_count-1, 0);
     }
 
-    ShellCore::ShellCore(MMgc::GC* gc)
-        : AvmCore(gc)
+    ShellCore::ShellCore(MMgc::GC* gc, ApiVersionSeries apiVersionSeries)
+        : AvmCore(gc, apiVersionSeries)
     {
         systemClass = NULL;
 
@@ -280,8 +281,8 @@ namespace avmshell
             double then = 0, now = 0;
             if (record_time)
                 then = VMPI_getDate();
-            uint32_t api = this->getAPI(NULL);
-            Atom result = handleActionSource(input, /*filename*/NULL, shell_toplevel, /*ninit*/NULL, user_codeContext, api);
+            ApiVersion apiVersion = this->getApiVersionFromCallStack();
+            Atom result = handleActionSource(input, /*filename*/NULL, shell_toplevel, /*ninit*/NULL, user_codeContext, apiVersion);
             if (record_time)
                 now = VMPI_getDate();
             if (result != undefinedAtom)
@@ -374,8 +375,7 @@ namespace avmshell
 #endif
 
         // set the default api version
-        this->defaultAPIVersion = settings.api;
-        this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
+        this->defaultAPIVersion = settings.apiVersion;
 
         this->defaultBugCompatibilityVersion = settings.swfVersion;
         this->bugzilla444630 = (this->defaultBugCompatibilityVersion >= BugCompatibility::kSWF10);
@@ -532,8 +532,8 @@ namespace avmshell
                     console << "ABC " << filename << "\n";
                 #endif
 
-                uint32_t api = this->getAPI(NULL);
-                handleActionBlock(code, 0, shell_toplevel, NULL, user_codeContext, api);
+                ApiVersion apiVersion = this->getApiVersionFromCallStack();
+                handleActionBlock(code, 0, shell_toplevel, NULL, user_codeContext, apiVersion);
             }
             else if (isSwf(code)) {
                 #ifdef VMCFG_VERIFYALL
@@ -551,8 +551,8 @@ namespace avmshell
                     String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
                     ScriptBuffer empty;     // With luck: allow the
                     code = empty;           //    buffer to be garbage collected
-                    uint32_t api = this->getAPI(NULL);
-                    handleActionSource(code_string, filename_string, shell_toplevel, NULL, user_codeContext, api);
+                    ApiVersion apiVersion = this->getApiVersionFromCallStack();
+                    handleActionSource(code_string, filename_string, shell_toplevel, NULL, user_codeContext, apiVersion);
                 }
 #else
                 console << "unknown input format in file: " << filename << "\n";

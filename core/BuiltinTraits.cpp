@@ -53,7 +53,7 @@ namespace avmplus
     {
         AvmCore* core = pool->core;
 
-        Namespacep publicNS = core->getPublicNamespace(ApiUtils::getSmallestAPI());
+        Namespacep publicNS = core->getPublicNamespace(kApiVersion_VM_ALLVERSIONS);
 
         null_itraits = Traits::newTraits(pool, NULL, 0, 0, 0, TRAITSTYPE_NVA);
         null_itraits->set_names(publicNS, core->knull);

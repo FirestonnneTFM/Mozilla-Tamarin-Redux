@@ -87,7 +87,7 @@ package
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=605660 
         // Some existing Flash content happens to rely on an "init" method
-        // being present in the global namespace; hiding it via AIR_SYS breaks
+        // being present in the global namespace; hiding it via VM_INTERNAL breaks
         // the content as it causes an RTE. Let's provide a name here
         // that is harmless.
         static function init()
@@ -96,7 +96,7 @@ package
         }
 
         // delay proto functions until class Function is initialized.
-        [API(CONFIG::AIR_SYS)]
+        [API(CONFIG::VM_INTERNAL)]
         public static function _init()
         {
             prototype.hasOwnProperty =

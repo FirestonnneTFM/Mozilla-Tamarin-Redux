@@ -37,60 +37,47 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/*
-[0,player,full]=660:FP_9_0
-[0,air,full]=661:AIR_1_0
-[1,player,full]=662:FP_10_0
-[1,air,full]=663:AIR_1_5
-[2,air,full]=664:AIR_1_5_1
-[3,player,full]=665:FP_10_0_32
-[3,air,full]=666:AIR_1_5_2
-[4,player,full]=667:FP_10_1
-[4,air,full]=668:AIR_2_0
-[5,air,full]=669:AIR_2_5
-[6,player,full]=670:FP_10_2
-[6,air,full]=671:AIR_2_6
-[7,player,full]=672:SWF_12
-[7,player,system]=674:FP_SYS
-[7,air,full]=673:AIR_2_7
-[7,air,system]=675:AIR_SYS
-*/
-
 #ifndef api_versions_H_
 #define api_versions_H_
 
 namespace avmplus {
 
-enum ApiVersion {
-    kApiVersion_FP_9_0 = 660,
-    kApiVersion_AIR_1_0 = 661,
-    kApiVersion_FP_10_0 = 662,
-    kApiVersion_AIR_1_5 = 663,
-    kApiVersion_AIR_1_5_1 = 664,
-    kApiVersion_FP_10_0_32 = 665,
-    kApiVersion_AIR_1_5_2 = 666,
-    kApiVersion_FP_10_1 = 667,
-    kApiVersion_AIR_2_0 = 668,
-    kApiVersion_AIR_2_5 = 669,
-    kApiVersion_FP_10_2 = 670,
-    kApiVersion_AIR_2_6 = 671,
-    kApiVersion_SWF_12 = 672,
-    kApiVersion_AIR_2_7 = 673,
-    kApiVersion_FP_SYS = 674,
-    kApiVersion_AIR_SYS = 675,
-
-    kApiVersion_min = 660,
-    kApiVersion_max = 675,
-
-    kApiVersion_default = 673
+enum ApiVersionSeries {
+    kApiVersionSeries_AIR,
+    kApiVersionSeries_FP
 };
 
 enum {
-    kApiVersion_count = 16
+    kApiVersionSeries_count = 2
 };
 
-extern int32_t const kApiCompat[kApiVersion_count];
+enum ApiVersion {
+    kApiVersion_VM_ALLVERSIONS = 0,
+    kApiVersion_AIR_1_0 = 1,
+    kApiVersion_FP_10_0 = 2,
+    kApiVersion_AIR_1_5 = 3,
+    kApiVersion_AIR_1_5_1 = 4,
+    kApiVersion_FP_10_0_32 = 5,
+    kApiVersion_AIR_1_5_2 = 6,
+    kApiVersion_FP_10_1 = 7,
+    kApiVersion_AIR_2_0 = 8,
+    kApiVersion_AIR_2_5 = 9,
+    kApiVersion_FP_10_2 = 10,
+    kApiVersion_AIR_2_6 = 11,
+    kApiVersion_SWF_12 = 12,
+    kApiVersion_AIR_2_7 = 13,
+    kApiVersion_VM_INTERNAL = 14
+};
+
+enum {
+    kApiVersion_count = 15
+};
+
 extern const char* const kApiVersionNames[kApiVersion_count];
+extern uint32_t const kApiVersionSeriesMembership[kApiVersion_count];
+extern ApiVersion const kApiVersionSeriesTransfer[kApiVersion_count][kApiVersionSeries_count];
+extern ApiVersion const kApiVersionFirst[kApiVersionSeries_count];
+extern ApiVersion const kApiVersionLatest[kApiVersionSeries_count];
 
 }
 #endif // api_versions_H_

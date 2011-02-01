@@ -333,7 +333,7 @@ namespace avmplus
             // set this nodes prefix to undefined
         if  (!m.isAnyNamespace() && (m.getNamespace()->getPrefix() == ns->getPrefix()))
         {
-            setQName (core, m.getName(), core->newNamespace(m.getNamespace()->getURI()));
+            setQName(core, m.getName(), core->newNamespace(m.getNamespace()->getURI(), Namespace::NS_Public, kApiVersion_VM_ALLVERSIONS));
         }
 
         // step 2g
@@ -347,7 +347,7 @@ namespace avmplus
             curAttr->getQName(&ma, publicNS);
             if (!ma.isAnyNamespace() && ma.getNamespace()->getPrefix() == ns->getPrefix())
             {
-                curAttr->setQName (core, ma.getName(), core->newNamespace(ma.getNamespace()->getURI()));
+                curAttr->setQName(core, ma.getName(), core->newNamespace(ma.getNamespace()->getURI(), Namespace::NS_Public, kApiVersion_VM_ALLVERSIONS));
             }
         }
 

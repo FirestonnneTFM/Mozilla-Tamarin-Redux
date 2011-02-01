@@ -99,10 +99,10 @@ namespace avmplus
         friend class AbcParser;
         friend class ConstantStringContainer;
 
-        PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api);
+        PoolObject(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, ApiVersion apiVersion);
         
     public:
-        static PoolObject* create(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, uint32_t api);
+        static PoolObject* create(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, ApiVersion apiVersion);
 
         ~PoolObject();
 
@@ -115,6 +115,8 @@ namespace avmplus
         GC_DATA_BEGIN(PoolObject)
 
         AvmCore *core;
+
+        ApiVersion getApiVersion();
 
         /** constants */
         DataList<int32_t>       GC_STRUCTURE(cpool_int);
@@ -235,7 +237,7 @@ namespace avmplus
         // Always safe because those indices are limited to 30 bits.
         DataList<int32_t>                           GC_STRUCTURE(_method_name_indices);
                 void                                setupConstantStrings(uint32_t count);
-        uint32_t api;
+        ApiVersion const                            _apiVersion;
 
     public:
     #ifdef AVMPLUS_VERBOSE

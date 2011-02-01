@@ -37,7 +37,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-CONFIG const FP_9_0 = 660;
 CONFIG const AIR_1_0 = 661;
 CONFIG const FP_10_0 = 662;
 CONFIG const AIR_1_5 = 663;
@@ -51,5 +50,4 @@ CONFIG const FP_10_2 = 670;
 CONFIG const AIR_2_6 = 671;
 CONFIG const SWF_12 = 672;
 CONFIG const AIR_2_7 = 673;
-CONFIG const FP_SYS = 674;
-CONFIG const AIR_SYS = 675;
+CONFIG const VM_INTERNAL = 674;

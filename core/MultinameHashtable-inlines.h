@@ -39,11 +39,22 @@
 
 namespace avmplus
 {
-template <class VALUE_TYPE, class VALUE_WRITER>
-REALLY_INLINE bool MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::matchNS(uintptr_t uri, API apis, Namespacep ns)
+
+template <class VALUE_TYPE>
+REALLY_INLINE bool Quad<VALUE_TYPE>::matchNS(Namespacep ns) const
 {
     AvmAssert(ns->getURI()->isInterned());
-    return (apis & ns->m_api) && uri == ns->m_uri;
+    AvmAssert(this->ns != NULL);
+
+    // Avoid loading m_uriAndType if possible.
+    if (this->ns == ns)
+        return true;
+
+    uintptr_t const u1 = this->ns->m_uriAndType;
+    uintptr_t const u2 = ns->m_uriAndType;
+    return  u1 == u2 && 
+            (u1 & 7) == Namespace::NS_Public && // implies both are public, since u1 == u2
+            this->apiVersion() <= ns->getApiVersion();
 }
 
 template <class VALUE_TYPE, class VALUE_WRITER>
@@ -74,12 +85,6 @@ template <class VALUE_TYPE, class VALUE_WRITER>
 REALLY_INLINE VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::valueAt(int index) const
 {
     return m_quads->quads[index-1].value;
-}
-
-template <class VALUE_TYPE, class VALUE_WRITER>
-REALLY_INLINE API MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::apisAt(int index) const
-{
-    return m_quads->quads[index-1].apis();
 }
 
 template <class VALUE_TYPE, class VALUE_WRITER>
@@ -115,9 +120,9 @@ REALLY_INLINE Binding StMNHTIterator::value() const
     return m_cur->value;
 }
 
-REALLY_INLINE API StMNHTIterator::apis() const
+REALLY_INLINE ApiVersion StMNHTIterator::apiVersion() const
 {
-    return m_cur->apis();
+    return m_cur->apiVersion();
 }
 
 /*static*/
