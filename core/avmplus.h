@@ -365,6 +365,7 @@ namespace avmplus
 #include "NamespaceSet-inlines.h"
 #include "PoolObject-inlines.h"
 #include "ScopeChain-inlines.h"
+#include "ScriptObject-inlines.h"
 #include "Toplevel-inlines.h"
 #include "Traits-inlines.h"
 #include "Verifier-inlines.h"

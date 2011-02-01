@@ -962,6 +962,7 @@
 		D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
 		D9B242EC12135FE700C60D44 /* ArrayObject-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ArrayObject-inlines.h"; path = "../../../core/ArrayObject-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9B242EE12135FE700C60D44 /* MultinameHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MultinameHashtable-inlines.h"; path = "../../../core/MultinameHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
+		D9C30D8F12F77CEC0054356E /* ScriptObject-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ScriptObject-inlines.h"; path = "../../../core/ScriptObject-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_threads.cpp; path = ../../../extensions/ST_mmgc_threads.cpp; sourceTree = SOURCE_ROOT; };
 		D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_threads.st; path = ../../../extensions/ST_mmgc_threads.st; sourceTree = SOURCE_ROOT; };
 		E8B532031069A1DE00ED299A /* instr-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "instr-inlines.h"; path = "../../../core/instr-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1231,6 +1232,7 @@
 				079DF8170F3A882D0031D1B4 /* ScriptBuffer.h */,
 				079DF8180F3A882D0031D1B4 /* ScriptObject.cpp */,
 				079DF8190F3A882D0031D1B4 /* ScriptObject.h */,
+				D9C30D8F12F77CEC0054356E /* ScriptObject-inlines.h */,
 				079DF81A0F3A882D0031D1B4 /* SortedMap.h */,
 				079DF81B0F3A882D0031D1B4 /* StackTrace.cpp */,
 				079DF81C0F3A882D0031D1B4 /* StackTrace.h */,
