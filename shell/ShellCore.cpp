@@ -161,6 +161,7 @@ namespace avmshell
         shell_domain = Domain::newDomain(this, builtinDomain);
 #ifdef VMCFG_AOT
         NativeInitializer shellNInit(this,
+            avmplus::NativeID::shell_toplevel_versioned_uris,
             &shell_toplevel_aotInfo,
             avmplus::NativeID::shell_toplevel_abc_method_count,
             avmplus::NativeID::shell_toplevel_abc_class_count);

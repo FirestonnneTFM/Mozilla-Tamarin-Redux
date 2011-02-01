@@ -82,7 +82,7 @@ namespace avmplus
 #ifdef VMCFG_AOT
         template <typename ADT> static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap)
         {
-            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, env, argDesc, argc, ap));
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, env, argDesc, argc, ap);
         }
 #endif
 

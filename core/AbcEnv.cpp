@@ -50,6 +50,9 @@ namespace avmplus
 #ifdef DEBUGGER
         , m_invocationCounts(NULL)
 #endif
+#if defined(VMCFG_AOT) && defined(VMCFG_BUFFER_GUARD)
+        , m_lazyEvalGuard(this)
+#endif
         , m_core(_pool->core)
     {
 #ifdef DEBUGGER
@@ -60,10 +63,20 @@ namespace avmplus
 #endif
 
 #ifdef VMCFG_AOT
-      AvmAssert(_pool->aotInfo != NULL);
-      AvmAssert(_pool->aotInfo->abcEnv != NULL);
-      if(*(_pool->aotInfo->abcEnv) == NULL)
-          *(_pool->aotInfo->abcEnv) = this;
+        AvmAssert(_pool->aotInfo != NULL);
+        AvmAssert(_pool->aotInfo->abcEnv != NULL);
+        if(*(_pool->aotInfo->abcEnv) == NULL)
+        {
+            *(_pool->aotInfo->abcEnv) = this;
+            Multiname **multiname = _pool->aotInfo->multinames;
+            const int32_t *multinameIndex = _pool->aotInfo->multinameIndices;
+            while(*multiname)
+            {
+                _pool->parseMultiname(**multiname, (int) *multinameIndex);
+                multiname++;
+                multinameIndex++;
+            }
+        }
 #endif
     }
 

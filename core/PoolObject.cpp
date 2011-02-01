@@ -82,6 +82,7 @@ namespace avmplus
         , _apiVersion(apiVersion)
 #ifdef VMCFG_AOT
         , aotInfo(NULL)
+        , aotRoot(NULL)
 #endif
     {
         version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
@@ -90,6 +91,10 @@ namespace avmplus
 
     PoolObject::~PoolObject()
     {
+        #ifdef VMCFG_AOT
+        if (aotRoot)
+            delete aotRoot;
+        #endif
 #ifdef VMCFG_NANOJIT
         mmfx_delete( codeMgr );
 #endif

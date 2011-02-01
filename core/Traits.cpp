@@ -488,12 +488,12 @@ namespace avmplus
         , m_offsetofSlots(_offsetofSlots)
         , builtinType(BUILTIN_none)
         , m_posType(uint8_t(posType))
-#ifdef VMCFG_AOT
-        , m_interfaceBindingFunction(NULL)
-#endif
         // Assume builtins initialize this correctly.  This is verified
         // by checkCustomConstruct() in MethodEnv.cpp.
         , hasCustomConstruct(0)
+#ifdef VMCFG_AOT
+        , m_interfaceBindingFunction(NULL)
+#endif
     {
         AvmAssert(m_tbref->isNull());
         AvmAssert(m_tmref->isNull());
@@ -1678,25 +1678,23 @@ namespace avmplus
         const AOTInfo* aotInfo = m->pool()->aotInfo;
         Traits* activationTraits = m->activationTraits();
         AvmAssert(activationTraits != NULL);
-
-        AvmAssert(aotInfo->activationTraits != NULL);
         AvmAssert(m->method_id() < aotInfo->nActivationTraits);
+        AvmAssert(aotInfo->activationTraits != NULL);
         AvmAssert(aotInfo->activationTraits[m->method_id()] == activationTraits);
-
         AvmAssert(aotInfo->activationInfo != NULL);
+
         // See comment in initActivationTraits about why this can be called more than once per Traits
         if (activationTraits->init == NULL) {
             if (aotInfo->activationInfo[m->method_id()].initHandler) {
                 NativeMethodInfo compiledMethodInfo;
                 compiledMethodInfo.thunker = aotThunker;
                 compiledMethodInfo.handler.function = aotInfo->activationInfo[m->method_id()].initHandler;
-                activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[m->method_id()].initMethodId);
+                activationTraits->init = MethodInfo::create(core->GetGC(), MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[m->method_id()].initMethodId);
             }
             // The following comes from Verifier::write() TODO: refactor so we can share this code
             const ScopeTypeChain *scope = m->activationScope();
             if (scope == NULL) {
-                GC* gc = m->pool()->core->GetGC();
-                scope = m->declaringScope()->cloneWithNewTraits(gc, activationTraits);
+                scope = m->declaringScope()->cloneWithNewTraits(core->GetGC(), activationTraits);
                 activationTraits->setDeclaringScopes(scope);
                 m->init_activationScope(scope);
             }

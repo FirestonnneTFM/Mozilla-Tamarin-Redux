@@ -84,8 +84,7 @@ namespace avmplus
                     MMGC_STATIC_ASSERT(sizeof(aotInfo->origABCSHA1) == 20);
                     if(!memcmp(aotInfo->origABCSHA1, sha1, 20))
                     {
-                        ReadOnlyScriptBufferImpl scriptBufferImpl(aotInfo->abcBytes, aotInfo->nABCBytes);
-                        ScriptBuffer code(&scriptBufferImpl);
+                        ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(aotInfo->abcBytes, aotInfo->nABCBytes));
 
                         NativeInitializer ninit(core, NULL, aotInfo, 0, 0);
                         PoolObject *pool = decodeAbc(core, code, toplevel, domain, &ninit, apiVersion);

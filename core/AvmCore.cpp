@@ -565,7 +565,7 @@ namespace avmplus
         for(int i=0, size=builtinPool->scriptCount(); i<size; i++)
             builtinPool->getScriptTraits(i)->init->makeNonInterruptible();
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER) && !defined(VMCFG_AOT)
         // sampling can begin now, requires builtinPool
         if (_debugger)
         {
@@ -651,7 +651,7 @@ namespace avmplus
                 NativeMethodInfo compiledMethodInfo;
                 compiledMethodInfo.thunker = aotThunker;
                 compiledMethodInfo.handler.function = aotInfo->activationInfo[method->method_id()].initHandler;
-                activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[method->method_id()].initMethodId);
+                activationTraits->init = MethodInfo::create(core->GetGC(), MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[method->method_id()].initMethodId);
             }
             method->activationTraits()->resolveSignatures(toplevel);
         }
@@ -869,11 +869,10 @@ namespace avmplus
 
         for(uint32_t i=0; i<nAOTInfos; i++)
         {
-            ReadOnlyScriptBufferImpl scriptBufferImpl(aotInfos[i].abcBytes, aotInfos[i].nABCBytes);
-            ScriptBuffer code(&scriptBufferImpl);
+            ScriptBuffer code = ScriptBuffer(new (GetGC()) ReadOnlyScriptBufferImpl(aotInfos[i].abcBytes, aotInfos[i].nABCBytes));
             NativeInitializer ninit(this, NULL, &aotInfos[i], 0, 0);
 
-            PoolObject *userPool = parseActionBlock(code, 0, toplevel, domain, &ninit, getApiVersion());
+            PoolObject *userPool = parseActionBlock(code, 0, toplevel, domain, &ninit, getDefaultAPI());
 
             #ifdef DEBUGGER
             AbcParser::addAOTDebugInfo(userPool);

@@ -262,7 +262,9 @@ namespace avmplus
         uint64_t invocationCount() const;
 #endif
 
+#ifndef VMCFG_AOT
     protected:
+#endif
         VTable* vtable() const;
 
 #ifdef VMCFG_LOOKUP_CACHE

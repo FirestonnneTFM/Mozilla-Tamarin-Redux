@@ -40,6 +40,9 @@
 #ifndef __avmplus_AbcEnv__
 #define __avmplus_AbcEnv__
 
+#ifdef VMCFG_AOT
+#include "AOTCompiler.h"
+#endif
 
 namespace avmplus
 {
@@ -87,6 +90,9 @@ namespace avmplus
         DWB(uint64_t*)              GC_POINTER_IFDEF( m_invocationCounts, DEBUGGER );    // actual size will hold pool->methodCount methods, only allocated if debugger exists
 #endif
         AvmCore* const              m_core;
+#if defined(VMCFG_AOT) && defined(VMCFG_BUFFER_GUARD)
+        AOTLazyEvalGuard            m_lazyEvalGuard;
+#endif
         MethodEnv*                  GC_POINTERS(m_methods[1], "m_pool ? m_pool->methodCount() : 0");  // actual size will hold pool->methodCount methods.
                                                                         // Observe m_pool can be null during construction if allocation triggers GC.
 
