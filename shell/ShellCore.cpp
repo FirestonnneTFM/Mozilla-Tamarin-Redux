@@ -60,6 +60,7 @@ namespace avmshell
         , nogc(false)
         , incremental(true)
         , exactgc(true)
+        , markstackAllowance(0)
         , fixedcheck(true)
         , gcthreshold(0)
         , langID(-1)

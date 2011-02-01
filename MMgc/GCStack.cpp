@@ -39,43 +39,22 @@
 
 #include "MMgc.h"
 
-//#define TESTING_MARKSTACK
-#define MARKSTACK_ALLOWANCE  1
-
 namespace MMgc
 {
-#ifdef TESTING_MARKSTACK
-    static int markstack_allowance = 2*MARKSTACK_ALLOWANCE;     // Two stacks!
-#endif
-
-    static inline void* AllocStackSegment(bool mustSucceed)
-    {
-#ifdef TESTING_MARKSTACK
-        if (markstack_allowance == 0)
-            return NULL;
-        --markstack_allowance;
-#endif
-        if (mustSucceed)
-            return GCHeap::GetGCHeap()->Alloc(1, GCHeap::flags_Alloc);
-        else
-            return GCHeap::GetGCHeap()->AllocNoOOM(1, GCHeap::flags_Alloc | GCHeap::kCanFail);
-    }
-
-    static inline void FreeStackSegment(void* p)
-    {
-#ifdef TESTING_MARKSTACK
-        ++markstack_allowance;
-#endif
-        GCHeap::GetGCHeap()->FreeNoOOM(p);
-    }
-
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+    GCMarkStack::GCMarkStack(uint32_t allowance)
+#else
     GCMarkStack::GCMarkStack()
+#endif
         : m_base(NULL)
         , m_top(NULL)
         , m_limit(NULL)
         , m_topSegment(NULL)
         , m_hiddenCount(0)
         , m_extraSegment(NULL)
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+        , m_allowance(allowance > 0 ? allowance : ~0U)
+#endif
 #ifdef MMGC_MARKSTACK_DEPTH
         , m_maxDepth(0)
 #endif
@@ -226,6 +205,31 @@ namespace MMgc
         return NULL;
     }
 
+    inline void* GCMarkStack::AllocStackSegment(bool mustSucceed)
+    {
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+        if (m_allowance == 0) {
+            // This is fine, mustSucceed is only used for the first segment in
+            // a stack, and the allowance is per-stack.
+            GCAssert(!mustSucceed);
+            return NULL;
+        }
+        --m_allowance;
+#endif
+        if (mustSucceed)
+            return GCHeap::GetGCHeap()->Alloc(1, GCHeap::flags_Alloc);
+        else
+            return GCHeap::GetGCHeap()->AllocNoOOM(1, GCHeap::flags_Alloc | GCHeap::kCanFail);
+    }
+
+    inline void GCMarkStack::FreeStackSegment(void* p)
+    {
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+        ++m_allowance;
+#endif
+        GCHeap::GetGCHeap()->FreeNoOOM(p);
+    }
+    
 #ifdef _DEBUG
     bool GCMarkStack::Invariants()
     {

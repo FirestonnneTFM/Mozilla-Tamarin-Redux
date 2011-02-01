@@ -73,6 +73,7 @@ namespace avmshell
         bool nogc;                      // copy to each GC
         bool incremental;               // copy to each GC
         bool exactgc;                   // copy to each GC
+        uint32_t markstackAllowance;    // copy to each GC;
         bool fixedcheck;                // copy to each GC
         int gcthreshold;                // copy to each GC
         int langID;                     // copy to ShellCore?
