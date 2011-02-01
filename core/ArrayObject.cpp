@@ -245,6 +245,21 @@ namespace avmplus
         m_length = 0;
     }
 
+#ifdef VMCFG_AOT
+    template <typename ADT>
+    ArrayObject::ArrayObject(VTable *vtable, ScriptObject* proto, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap)
+        : ScriptObject(vtable, proto, 0),
+          m_denseArray(vtable->core()->GetGC(), argc),
+          m_length(argc)
+    {
+        if (m_length > 0)
+            argDescArgsToAtomList(m_denseArray, argDesc, env, ap);
+    }
+
+    template ArrayObject::ArrayObject(VTable*, ScriptObject*, MethodEnv*, uint32_t, uint32_t, va_list);
+    template ArrayObject::ArrayObject(VTable*, ScriptObject*, MethodEnv*, char*, uint32_t, va_list);
+#endif // VMCFG_AOT
+
     // ----------------- "get" methods
 
     Atom ArrayObject::getAtomProperty(Atom name) const
@@ -296,6 +311,30 @@ namespace avmplus
     {
         return getUintPropertyImpl(index);
     }
+
+#ifdef VMCFG_AOT
+    Atom *ArrayObject::getDenseCopy() const
+    {
+        AvmAssert(isSimpleDense());
+        uint32_t const len = m_denseArray.length();
+    
+        if (!len)
+            return NULL;
+      
+        AvmCore *core = this->core();
+        MMgc::GC *gc = core->GetGC();
+        Atom *result = (Atom *)gc->Calloc(len, sizeof(Atom), MMgc::GC::kContainsPointers);
+        for (uint32_t n = 0; n < len; n++)
+            AvmCore::atomWriteBarrier_ctor(gc, result, result + n, m_denseArray.get(n));
+    
+        return result;
+    }
+
+    uint32_t ArrayObject:: getDenseLength() const
+    {
+        return m_denseArray.length();
+    }
+#endif // VMCFG_AOT
 
     // ----------------- "set" methods
 

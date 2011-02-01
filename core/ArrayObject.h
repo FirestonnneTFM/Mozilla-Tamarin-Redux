@@ -64,6 +64,9 @@ namespace avmplus
     protected:
         ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity);
         ArrayObject(VTable* ivtable, ScriptObject *delegate, Atom *argv, int argc);
+#ifdef VMCFG_AOT
+        template <typename ADT> ArrayObject(VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap);
+#endif
 
     public:
         REALLY_INLINE static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, uint32_t capacity)
@@ -75,7 +78,14 @@ namespace avmplus
         {
             return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, argv, argc);
         }
-        
+
+#ifdef VMCFG_AOT
+        template <typename ADT> static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap)
+        {
+            return MMgc::setExact(new (gc, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, env, argDesc, argc, ap));
+        }
+#endif
+
         ~ArrayObject();
 
         virtual ArrayObject* toArrayObject() { return this; }
@@ -115,6 +125,11 @@ namespace avmplus
         void _setUintProperty(uint32_t index, Atom value);
         Atom _getIntProperty(int32_t index) const;
         void _setIntProperty(int32_t index, Atom value);
+        
+#ifdef VMCFG_AOT
+        Atom *getDenseCopy() const;
+        uint32_t getDenseLength() const;
+#endif
 
         // Iterator support - for in, for each
         virtual Atom nextName(int index);

@@ -144,7 +144,7 @@ namespace avmplus
           source(core->GetGC(), kListInitialCapacity),
           byteCount(size)
     {
-        sourcemap = new (core->GetGC()) HeapHashtable(core->GetGC());
+        sourcemap = HeapHashtable::create(core->GetGC());
     }
 
     int AbcFile::sourceCount() const
