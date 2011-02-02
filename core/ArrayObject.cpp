@@ -812,13 +812,39 @@ convert_and_set_sparse:
         {
             if (isDense())
             {
-                // We don't need to check for sparseness, since we aren't inserting any holes.
-                m_denseArray.insert(m_denseArray.length(), argv, argc);
+                uint32_t const curDenseEnd = m_denseStart + m_denseArray.length();
+                if (m_length == curDenseEnd)
+                {
+                    // By far the most common case.
+                    // We don't need to check for sparseness, since we aren't inserting any holes.
+                    m_denseArray.insert(m_denseArray.length(), argv, argc);
+                }
+                else
+                {
+                    AvmAssert(m_length > curDenseEnd);
+                    
+                    // push() always inserts at m_length, which might be larger than
+                    // curDenseEnd. In that case, we might need to become sparse
+                    // (or at least insert "holes").
+                    uint32_t const newDenseLen = (m_length - m_denseStart) + argc;
+                    uint32_t const newDenseUsed = m_denseUsed + argc;
+                    if (shouldBeSparse(newDenseLen, newDenseUsed))
+                    {
+                        convertToSparse();
+                        goto push_sparse;
+                    }
+                    
+                    m_denseArray.ensureCapacity(newDenseLen);
+                    m_denseArray.insert(m_denseArray.length(), atomNotFound, m_length - curDenseEnd);
+                    m_denseArray.insert(m_denseArray.length(), argv, argc);
+                    AvmAssert(m_denseArray.length() == newDenseLen);
+                }
                 m_denseUsed += argc;
                 m_length += argc;
             }
             else
             {
+push_sparse:
                 for (int i=0; i < argc; i++) 
                 {
                     _setUintProperty(getLength(), argv[i]);
