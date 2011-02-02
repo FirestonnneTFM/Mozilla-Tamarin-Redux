@@ -42,6 +42,7 @@
 import os
 import shutil
 import sys
+import filecmp
 
 avm = os.environ.get('AVM')
 if avm == None:
