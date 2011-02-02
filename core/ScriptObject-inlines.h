@@ -50,7 +50,7 @@ REALLY_INLINE /*static*/ ScriptObject* ScriptObject::create(MMgc::GC* gc, VTable
 
 REALLY_INLINE /*static*/ ScriptObject* ScriptObject::create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity)
 {
-    return new (gc, MMgc::kExact, vtable->getExtraSize()) ScriptObject(vtable, delegate);
+    return new (gc, MMgc::kExact, vtable->getExtraSize()) ScriptObject(vtable, delegate, htCapacity);
 }
 
 REALLY_INLINE ScriptObject* ScriptObject::getDelegate() const 
