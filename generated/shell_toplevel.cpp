@@ -2590,6 +2590,51 @@ const char* const shell_toplevel_versioned_uris[] = {
     NULL
 };
 
+#ifdef VMCFG_AOT
+extern "C" const struct {
+    const char* const n_0; ::avmshell::FileClass* const m_0;
+    const char* const n_1; ::avmshell::MIClass* const m_1;
+    const char* const n_2; ::avmshell::MIObject* const m_2;
+    const char* const n_3; ::avmshell::SystemClass* const m_3;
+    const char* const n_4; DeleteObjectSampleClass* const m_4;
+    const char* const n_5; DeleteObjectSampleObject* const m_5;
+    const char* const n_6; DictionaryClass* const m_6;
+    const char* const n_7; DictionaryObject* const m_7;
+    const char* const n_8; DomainClass* const m_8;
+    const char* const n_9; DomainObject* const m_9;
+    const char* const n_10; JObject* const m_10;
+    const char* const n_11; JObjectClass* const m_11;
+    const char* const n_12; NewObjectSampleClass* const m_12;
+    const char* const n_13; NewObjectSampleObject* const m_13;
+    const char* const n_14; SampleClass* const m_14;
+    const char* const n_15; SampleObject* const m_15;
+    const char* const n_16; ScriptObject* const m_16;
+    const char* const n_17; StackFrameClass* const m_17;
+    const char* const n_18; StackFrameObject* const m_18;
+    const char* const n_19; TraceClass* const m_19;
+} aotABCTypes_shell_toplevel = {
+    "::avmshell::FileClass", 0,
+    "::avmshell::MIClass", 0,
+    "::avmshell::MIObject", 0,
+    "::avmshell::SystemClass", 0,
+    "DeleteObjectSampleClass", 0,
+    "DeleteObjectSampleObject", 0,
+    "DictionaryClass", 0,
+    "DictionaryObject", 0,
+    "DomainClass", 0,
+    "DomainObject", 0,
+    "JObject", 0,
+    "JObjectClass", 0,
+    "NewObjectSampleClass", 0,
+    "NewObjectSampleObject", 0,
+    "SampleClass", 0,
+    "SampleObject", 0,
+    "ScriptObject", 0,
+    "StackFrameClass", 0,
+    "StackFrameObject", 0,
+    "TraceClass", 0,
+};
+#endif
 } }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::MIClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::MIObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
