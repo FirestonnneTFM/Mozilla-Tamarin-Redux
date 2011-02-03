@@ -768,6 +768,10 @@ namespace avmplus
 
         SlotIdCalcer sic(baseSlotCount, this->allowEarlyBinding());
 
+#ifdef _DEBUG
+        uint32_t pointerSlots = 0;
+#endif
+
         NameEntry ne;
         const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
         for (uint32_t i = 0; i < nameCount; i++)
@@ -850,7 +854,9 @@ namespace avmplus
                         }
                         else
                         {
-                            slotSizeInfo->pointerSlotCount += 1;
+#ifdef _DEBUG
+                            pointerSlots += 1;
+#endif
                         }
                     }
                     break;
@@ -924,18 +930,13 @@ namespace avmplus
         if (slotSizeInfo)
         {
             uint32_t const c = slotSizeInfo->nonPointer32BitSlotCount + slotSizeInfo->nonPointer64BitSlotCount + baseSlotCount;
-            // if pointerSlotCount doesn't match slotCount-c, we probably have a fuzzed file that 
-            // re-uses the same slot-id. this will be caught later on, but detecting it here
-            // avoids assertions in finishSlotsAndMethods.
-            if (c > slotCount || slotSizeInfo->pointerSlotCount != (slotCount - c))
-            {
-                // This can happen for fuzzed files that duplicate slots in certain orders; we'd detect these later
-                // on, in finishSlotsAndMethods, but not before we fired an assert. This just detects the obvious naughtiness
-                // earlier.
-                if (toplevel)
-                    toplevel->throwVerifyError(kCorruptABCError);
-                AvmAssert(!"unhandled verify error");
-            }
+            // We calculate this at the end because we might have a sparse slot table...
+            // the unused slots will be, well, unused, but we still have to reserve space
+            // for them to guard against pathological code.
+            slotSizeInfo->pointerSlotCount = slotCount - c;
+            // Don't do this assertion: if this situation occurs, we'll catch it (and throw
+            // a VerifyError) in finishSlotsAndMethods; asserting here will just spoil acceptance test runs.
+            // AvmAssert(slotSizeInfo->pointerSlotCount >= pointerSlots);
         }
     }
 
@@ -1179,11 +1180,18 @@ namespace avmplus
             AvmAssert(slotOffset >= sizeof(ScriptObject));
             tb->setSlotInfo(i, slotType, SST_atom, slotOffset);
         }
-
-        AvmAssert(next32BitSlotOffset == endOf32BitSlots);
-        AvmAssert(nextPointerSlotOffset == endOfPointerSlots);
-        AvmAssert(next64BitSlotOffset == endOf64BitSlots);
-        AvmAssert(endOf64BitSlots >= slotAreaStart);
+        if (!(next32BitSlotOffset == endOf32BitSlots &&
+                nextPointerSlotOffset == endOfPointerSlots &&
+                next64BitSlotOffset == endOf64BitSlots &&
+                endOf64BitSlots >= slotAreaStart))
+        {
+            // Verify that we used exactly the space we predicted; if not, we may
+            // have a fuzzed file that duplicate slots in certain orders. This is unacceptable,
+            // as it may allow access to the same memory location with different type expectations.
+            if (toplevel)
+                toplevel->throwVerifyError(kCorruptABCError);
+            AvmAssert(!"unhandled verify error");
+        }
         return endOf64BitSlots - slotAreaStart;
     }
 
