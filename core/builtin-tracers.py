@@ -42,6 +42,7 @@
 import os
 import shutil
 import sys
+import filecmp
 
 avm = os.environ.get('AVM')
 if avm == None:
@@ -50,26 +51,25 @@ if avm == None:
 
 classpath = os.environ.get('ASC')
 if classpath == None:
-    classpath = "../utils/asc.jar"
+    print "ERROR: ASC environment variable must point to asc.jar"
+    exit(1)
 
 asfile = "../utils/exactgc.as"
 abcfile = "../utils/exactgc.abc"
 
-# TODO: Would be useful to conditionally compile here, if the abc does
-# not exist or if the source is newer than the abc.  os.path.exists()
-# and os.path.getmtime() can handle that.
-
-print("Compiling exactgc script...")
-if os.path.exists(abcfile):
-    os.remove(abcfile)
-os.system("java -jar " + classpath + " -AS3 -import ../generated/builtin.abc -import ../generated/shell_toplevel.abc -debug " + asfile)
-
-# TODO: Would be useful to overwrite the output file only if the
-# output file does not exist or if it has not changed.
-# os.path.exists(), shutil.move(), os.remove(), and filecmp.cmp() will
-# be handy.
+if not os.path.exists(abcfile) or os.path.getmtime(abcfile) < os.path.getmtime(asfile):
+    print("Compiling exactgc script...")
+    os.system("java -jar " + classpath + " -AS3 -import ../generated/builtin.abc -import ../generated/shell_toplevel.abc -debug " + asfile)
 
 print("Generating gcTrace methods...")
 os.system(avm+" "+abcfile+" -- -b avmplus-as3-gc.h -n avmplus-cpp-gc.h -i avmplus-gc-interlock.h *.h *.as")
+
+# copy changed headers stuff to generated dir
+for src in ['avmplus-as3-gc.h', 'avmplus-cpp-gc.h', 'avmplus-gc-interlock.h']:
+    target = "../generated/"+src
+    if not os.path.exists(target) or not filecmp.cmp(target,src):
+        shutil.move(src,target)
+    else:
+        os.remove(src)
 
 print("Done.")
