@@ -64,9 +64,10 @@ namespace avmplus
 #endif
         cpool_mn_offsets(core->GetGC(), 0),
         metadata_infos(core->GetGC(), 0),
-        m_namedTraits(MultinameTraitsHashtable::create(core->GetGC())),
-        m_namedScriptsMap(MultinameBindingHashtable::create(core->GetGC())),
-        m_namedScriptsList(core->GetGC(), 0),
+        m_loadedTraits(MultinameTraitsHashtable::create(core->GetGC())),
+        m_cachedTraits(MultinameTraitsHashtable::create(core->GetGC())),
+        m_loadedScripts(MultinameMethodInfoHashtable::create(core->GetGC())),
+        m_cachedScripts(MultinameMethodInfoHashtable::create(core->GetGC())),
         _code(sb.getImpl()),
         _abcStart(startPos),
         _abcStringStart(NULL),

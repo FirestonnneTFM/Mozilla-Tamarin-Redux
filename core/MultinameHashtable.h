@@ -120,7 +120,11 @@ namespace avmplus
     template <class VALUE_TYPE, class VALUE_WRITER>
     class MultinameHashtable : public MMgc::GCTraceableObject
     {
+        template<class MNHT>
         friend class StMNHTIterator;
+
+    public:
+        typedef VALUE_TYPE TYPE; // for StMNHTIterator
 
     private:
         /**
@@ -176,7 +180,9 @@ namespace avmplus
         /*@{*/
         VALUE_TYPE get(Stringp name, Namespacep ns) const;
         VALUE_TYPE get(Stringp name, NamespaceSetp nsset) const;
-        VALUE_TYPE getName(Stringp name) const;
+        // if nsFoundOut is not NULL, then it is set to the Namespace where
+        // we found the matching name (or NULL if no matching name was found).
+        VALUE_TYPE getName(Stringp name, Namespacep* nsFoundOut = NULL) const;
         VALUE_TYPE getMulti(const Multiname* name) const;
         VALUE_TYPE getMulti(const Multiname& name) const;
 
@@ -231,7 +237,7 @@ namespace avmplus
 
     typedef MultinameHashtable<Binding, BindingType> MultinameBindingHashtable;
     typedef MultinameHashtable<Traitsp, GCObjectType> MultinameTraitsHashtable;
-
+    typedef MultinameHashtable<MethodInfo*, GCObjectType> MultinameMethodInfoHashtable;
 
     // Note: unlike MNHT::next(), StMNHTIterator::next()
     // doesn't advance past empty entries. it's the caller's
@@ -247,22 +253,27 @@ namespace avmplus
     //          .. rest of loop ..
     //      }
     //
+    template<class MNHT>
     class StMNHTIterator
     {
     private:
 
-        MultinameBindingHashtable* const volatile m_mnht; // kept just to ensure it doesn't get collected -- must be volatile!
-        const Quad<Binding>* m_cur;
-        const Quad<Binding>* const m_end; // one past the end
+        MNHT* const volatile m_mnht; // kept just to ensure it doesn't get collected -- must be volatile!
+        const Quad<typename MNHT::TYPE>* m_cur;
+        const Quad<typename MNHT::TYPE>* const m_end; // one past the end
 
     public:
-        StMNHTIterator(MultinameBindingHashtable* mnht);
+        StMNHTIterator(MNHT* mnht);
         bool next();
         Stringp key() const;
         Namespacep ns() const;
-        Binding value() const;
+        typename MNHT::TYPE value() const;
         ApiVersion apiVersion() const;
     };
+
+    typedef StMNHTIterator<MultinameBindingHashtable> StMNHTBindingIterator;
+    typedef StMNHTIterator<MultinameTraitsHashtable> StMNHTTraitsIterator;
+    typedef StMNHTIterator<MultinameMethodInfoHashtable> StMNHTMethodInfoIterator;
 }
 
 #endif /* __avmplus_MultinameHashtable__ */

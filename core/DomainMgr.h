@@ -72,17 +72,21 @@ public:
 #endif
 
 private:
-    Traits* findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns);
-    Traits* findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns);
-    MethodInfo* findScriptInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns);
-    MethodInfo* findScriptInDomainByMultinameImpl(Domain* domain, const Multiname& multiname);
-    MethodInfo* findScriptInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns);
+    Traits* findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns, bool cacheIfFound);
+    Traits* findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns, bool cacheIfFound);
+    MethodInfo* findScriptInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns, bool cacheIfFound);
+    MethodInfo* findScriptInDomainByMultinameImpl(Domain* domain, const Multiname& multiname, Namespace*& nsFound);
+    MethodInfo* findScriptInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns, bool cacheIfFound);
     ScriptEnv* findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* domainEnv, const Multiname& multiname);
 #ifdef DEBUGGER
     ScriptEnv* findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* domainEnv, Stringp name);
 #endif
-#ifdef _DEBUG
-    static void verifyMatchingLookup(Binding b, const GCList<MethodInfo>& listMI, const GCList<ScriptEnv>& listSE);
+
+    ScriptEnv* mapScriptToScriptEnv(DomainEnv* domainEnv, MethodInfo* mi);
+    MethodInfo* findScriptInPoolByMultinameImpl(PoolObject* pool, const Multiname& multiname);
+#ifdef DEBUGGER
+    MethodInfo* findScriptInDomainByNameOnlyImpl(Domain* domain, Stringp name, Namespace*& nsFound);
+    MethodInfo* findScriptInPoolByNameOnlyImpl(PoolObject* pool, Stringp name);
 #endif
 
 private:

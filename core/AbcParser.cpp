@@ -1612,6 +1612,9 @@ namespace avmplus
         }
 
         {
+            // Note that BitSet uses mmfx memory, not gc memory, so we must not
+            // throw an exception while it's alive, lest the memory leak. Hence
+            // the gyration with "goto corrupted" below.
             BitSet seen(mn_count);
 
             // verify that parameterized types have no cycles.

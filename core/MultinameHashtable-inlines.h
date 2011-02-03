@@ -93,34 +93,40 @@ REALLY_INLINE size_t MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::allocatedSize
     return numQuads * sizeof(Quad<VALUE_TYPE>);
 }
 
-REALLY_INLINE StMNHTIterator::StMNHTIterator(MultinameBindingHashtable* mnht) :
+template<class MNHT>
+REALLY_INLINE StMNHTIterator<MNHT>::StMNHTIterator(MNHT* mnht) :
     m_mnht(mnht),
     m_cur(mnht->m_quads->quads - 1),
     m_end(mnht->m_quads->quads + mnht->numQuads)
 { }
 
-REALLY_INLINE bool StMNHTIterator::next()
+template<class MNHT>
+REALLY_INLINE bool StMNHTIterator<MNHT>::next()
 {
     return ++m_cur < m_end;
 }
 
-REALLY_INLINE Stringp StMNHTIterator::key() const
+template<class MNHT>
+REALLY_INLINE Stringp StMNHTIterator<MNHT>::key() const
 {
     AvmAssert(m_cur < m_end);
     return m_cur->name;
 }
 
-REALLY_INLINE Namespacep StMNHTIterator::ns() const
+template<class MNHT>
+REALLY_INLINE Namespacep StMNHTIterator<MNHT>::ns() const
 {
     return m_cur->ns;
 }
 
-REALLY_INLINE Binding StMNHTIterator::value() const
+template<class MNHT>
+REALLY_INLINE typename MNHT::TYPE StMNHTIterator<MNHT>::value() const
 {
     return m_cur->value;
 }
 
-REALLY_INLINE ApiVersion StMNHTIterator::apiVersion() const
+template<class MNHT>
+REALLY_INLINE ApiVersion StMNHTIterator<MNHT>::apiVersion() const
 {
     return m_cur->apiVersion();
 }

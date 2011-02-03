@@ -79,9 +79,7 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     GC_DATA_BEGIN(AbcEnv)
-        
-    private:
-        GCList<ScriptEnv>           GC_STRUCTURE( m_namedScriptEnvsList ); // list of ScriptEnvs, corresponds to pool->m_namedScriptsList
+
     private:
         PoolObject* const           GC_POINTER( m_pool );
         DomainEnv* const            GC_POINTER( m_domainEnv );           // Same as m_codeContext->domainEnv(); replicated here solely for efficiency in jitted code

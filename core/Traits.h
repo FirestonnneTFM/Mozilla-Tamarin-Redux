@@ -202,7 +202,7 @@ namespace avmplus
     //          .. rest of loop ..
     //      }
     //
-    class StTraitsBindingsIterator : public StMNHTIterator
+    class StTraitsBindingsIterator : public StMNHTBindingIterator
     {
     private:
         TraitsBindingsp const volatile _tb; // kept just to ensure it doesn't get collected -- must be volatile!

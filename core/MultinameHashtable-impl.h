@@ -287,7 +287,7 @@ found1:
     }
 
     template <class VALUE_TYPE, class VALUE_WRITER>
-    VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::getName(Stringp name) const
+    VALUE_TYPE MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::getName(Stringp name, Namespacep* nsFoundOut) const
     {
         const Quad<VALUE_TYPE>* t = m_quads->quads;
         for (int i=0, n=numQuads; i < n; i++)
@@ -295,10 +295,13 @@ found1:
             if (t[i].name == name)
             {
                 const Quad<VALUE_TYPE>& tf = t[i];
-
+                if (nsFoundOut)
+                    *nsFoundOut = tf.ns;
                 return tf.value;
             }
         }
+        if (nsFoundOut) 
+            *nsFoundOut = NULL;
         return (VALUE_TYPE)NULL;
     }
 
