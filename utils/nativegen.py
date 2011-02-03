@@ -86,13 +86,6 @@ from sys import stderr
 
 import sys
 
-haveSecrets = False
-try:
-    import nativegen_secret as secrets
-    haveSecrets = True
-except ImportError:
-    pass
-
 parser = OptionParser(usage="usage: %prog [importfile [, importfile]...] file...")
 parser.add_option("-n", "--nativemapname", help="no longer supported")
 parser.add_option("-v", "--thunkvprof", action="store_true", default=False)
@@ -1279,6 +1272,32 @@ class AbcThunkGen:
         if (len(fullyQualifiedNameComponents) < 2):
             fullyQualifiedNameComponents = (u'', fullyQualifiedNameComponents)
         return ('::'.join(filter(lambda ns: len(ns) > 0, fullyQualifiedNameComponents[:-1])), fullyQualifiedNameComponents[-1])
+        
+    def emitAOT(self, name, ctypeObject):
+        self.out_c.println(u'#ifdef VMCFG_AOT')
+        
+        traits = filter(lambda t: (t.niname is not None) and (t.niname != "double") and ((t.ctype == ctypeObject) or (t.niname == "ScriptObject") or (t.niname == "ClassClosure")), self.abc.classes + self.abc.instances)
+        glueClasses = sorted(set(map(lambda t: t.niname, traits)))
+        
+        self.out_c.println(u'extern "C" const struct {')
+        self.out_c.indent += 1
+        
+        i = 0
+        for i in range(0, len(glueClasses)):
+            self.out_c.println(u'const char* const n_%(count)u; %(glueClass)s* const m_%(count)u;' % { 'count' : i, 'glueClass': glueClasses[i]})
+        
+        self.out_c.indent -= 1
+        self.out_c.println(u'} aotABCTypes_%s = {' % name)
+        self.out_c.indent += 1
+        
+        i = 0
+        for i in range(0, len(glueClasses)):
+            self.out_c.println(u'"%(glueClass)s", 0,' % { 'count' : i, 'glueClass': glueClasses[i]})
+        
+        self.out_c.indent -= 1
+        self.out_c.println(u'};')
+        
+        self.out_c.println(u'#endif')
 
     def emit(self, abc, name, out_h, out_c):
         self.abc = abc;
@@ -1514,8 +1533,7 @@ class AbcThunkGen:
         out_c_stubs = IndentingPrintWriter(c_stubs)
         self.printStructInfoForClasses(out_h, out_c, out_c_stubs)
 
-        if haveSecrets:
-            secrets.emit(self, name, CTYPE_OBJECT)
+        self.emitAOT(name, CTYPE_OBJECT)
 
         out_h.println(' '.join(('}',) * len(nativeIDNamespaces)))
         out_c.println(' '.join(('}',) * len(nativeIDNamespaces)))

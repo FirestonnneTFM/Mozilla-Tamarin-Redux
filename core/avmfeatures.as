@@ -416,7 +416,7 @@ var FEATURES =
   <feature>
     <desc>Enables the ahead-of-time compiler.</desc>
 
-    <name> AVMFEATURE_AOT  </name>
+    <name> AVMFEATURE_AOT </name>
     <requires>
      <exactly-one>
       <name> AVMSYSTEM_IA32 </name>
@@ -427,6 +427,20 @@ var FEATURES =
     <defines> VMCFG_AOTSHELL </defines>
     <defines> VMCFG_CDECL </defines>
     <defines> VMCFG_METHODENV_IMPL32 </defines>
+  </feature>
+
+  <feature>
+    <desc>Enables the exception based caching code, right now this is used
+           exclusively by AOT.</desc>
+
+    <name> AVMFEATURE_BUFFER_GUARD </name>
+    <requires>
+     <exactly-one>
+      <name> AVMFEATURE_AOT </name>
+     </exactly-one>
+    </requires>
+    <defines> VMCFG_BUFFER_GUARD </defines>
+    <defines> VMCFG_MACH_EXCEPTIONS </defines>
   </feature>
 
   <feature>

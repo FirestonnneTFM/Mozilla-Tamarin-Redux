@@ -69,6 +69,11 @@ def featureSettings(o):
         args += "-DAVMFEATURE_JIT=1 -DAVMFEATURE_WORDCODE_INTERP=0 -DAVMFEATURE_AOT=0 "
     if o.getBoolArg("aot"):
         args += "-DAVMFEATURE_AOT=1 -DAVMFEATURE_JIT=0 -DAVMFEATURE_ABC_INTERP=0 -DAVMFEATURE_WORDCODE_INTERP=0 "
+    arg = o.getBoolArg("buffer-guard")
+    if (arg == True):
+        args += "-DAVMFEATURE_BUFFER_GUARD=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_BUFFER_GUARD=0 "
     if o.getBoolArg("abc-interp"):
         args += "-DAVMFEATURE_ABC_INTERP=1 -DAVMFEATURE_WORDCODE_INTERP=0 -DAVMFEATURE_AOT=0 "
     if o.getBoolArg("wordcode-interp"):

@@ -90,6 +90,8 @@
 #undef VMCFG_AOTSHELL
 #undef VMCFG_CDECL
 #undef VMCFG_METHODENV_IMPL32
+#undef VMCFG_BUFFER_GUARD
+#undef VMCFG_MACH_EXCEPTIONS
 #undef VMCFG_INTERPRETER
 #undef VMCFG_INTERPRETER
 #undef VMCFG_WORDCODE
@@ -380,6 +382,16 @@
  */
 #if !defined AVMFEATURE_AOT || AVMFEATURE_AOT != 0 && AVMFEATURE_AOT != 1
 #  error "AVMFEATURE_AOT must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_BUFFER_GUARD
+ *
+ * Enables the exception based caching code, right now this is used
+ * exclusively by AOT.
+ */
+#if !defined AVMFEATURE_BUFFER_GUARD || AVMFEATURE_BUFFER_GUARD != 0 && AVMFEATURE_BUFFER_GUARD != 1
+#  error "AVMFEATURE_BUFFER_GUARD must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -814,6 +826,12 @@
 #endif
 
 #endif
+#if AVMFEATURE_BUFFER_GUARD
+#if AVMFEATURE_AOT != 1
+#  error "Exactly one of AVMFEATURE_AOT must be defined."
+#endif
+
+#endif
 
 
 #if AVMFEATURE_THREADED_INTERP
@@ -1053,6 +1071,12 @@
 #endif
 #if AVMFEATURE_AOT
 #  define VMCFG_METHODENV_IMPL32
+#endif
+#if AVMFEATURE_BUFFER_GUARD
+#  define VMCFG_BUFFER_GUARD
+#endif
+#if AVMFEATURE_BUFFER_GUARD
+#  define VMCFG_MACH_EXCEPTIONS
 #endif
 #if AVMFEATURE_ABC_INTERP
 #  define VMCFG_INTERPRETER
