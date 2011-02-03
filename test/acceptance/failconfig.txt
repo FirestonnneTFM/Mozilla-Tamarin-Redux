@@ -148,8 +148,6 @@ regress/bug_558442a, arm-winmobile-emulator.*,, skip , https://bugzilla.mozilla.
 ####################
 # verifier
 ####################
-ecma3/Statements/eforin_001_500476, -Dverifyall,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
-as3/Statements/for-each-in/eforeachin_001_500476, -Dverifyall,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
 regress/bug_498979, -Dverifyall,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=498979
 
 ####################
