@@ -47,7 +47,7 @@ import random, os, time, signal, getopt, sys, subprocess, difflib, re, platform
 from getopt import getopt
 from sys import argv, exit, stderr
 from os.path import basename, exists, join, dirname
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 from difflib import unified_diff
 
 topdir = ""
@@ -143,11 +143,12 @@ def abcdump(filename):
     os.system('~/hg/tamarin-redux/objdir-release/shell/avmshell ~/hg/tamarin-redux/utils/abcdump.abc -- ' + filename)
 
 def avm(vm, avmshell_args, test_args):
-    cmd = '%s %s %s 2>&1' % (vm, avmshell_args, test_args)
-    p = Popen(cmd, shell=True, stdout=PIPE)
+    cmd = '%s %s %s' % (vm, avmshell_args, test_args)
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
     output = ()
     try:
         for line in p.stdout:
+            line = line.decode('latin-1')
             line=scrub_errors(line.strip())
             if len(line)>0:
                 output = output + (line,)
