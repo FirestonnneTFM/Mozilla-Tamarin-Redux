@@ -65,6 +65,7 @@ namespace avmshell
         , gcthreshold(0)
         , langID(-1)
         , jitordie(AvmCore::jitordie_default)
+        , do_testSWFHasAS3(false)
         , runmode(AvmCore::runmode_default)
 #ifdef VMCFG_NANOJIT
         , njconfig()
@@ -335,7 +336,8 @@ namespace avmshell
         file.seek(file.length() - 8 - abcLength);
         file.read(code.getBuffer(), abcLength);
 
-        return handleArbitraryExecutableContent(code, executablePath);
+        ShellCoreSettings settings;
+        return handleArbitraryExecutableContent(settings, code, executablePath);
     }
 
     /* static */
@@ -514,15 +516,17 @@ namespace avmshell
         (void)settings.enter_debugger_on_launch;
 #endif
 
-        return handleArbitraryExecutableContent(code, filename);
+        return handleArbitraryExecutableContent(settings, code, filename);
     }
 
-    int ShellCore::handleArbitraryExecutableContent(ScriptBuffer& code, const char * filename)
+    int ShellCore::handleArbitraryExecutableContent(ShellCoreSettings& settings, ScriptBuffer& code, const char * filename)
     {
         setStackLimit();
 
         TRY(this, kCatchAction_ReportAsError)
         {
+            if (settings.do_testSWFHasAS3 && !isSwf(code))
+                return 1;
 #ifdef VMCFG_AOT
             if (filename == NULL) {
                 handleAOT(shell_toplevel, user_codeContext);
@@ -542,7 +546,9 @@ namespace avmshell
                 if (config.verbose_vb & VB_verify)
                     console << "SWF " << filename << "\n";
                 #endif
-                handleSwf(filename, code, shell_toplevel, user_codeContext);
+                bool result = handleSwf(filename, code, shell_toplevel, user_codeContext, settings.do_testSWFHasAS3);
+                if (settings.do_testSWFHasAS3)
+                    return int(!result); // "no abc" is "false" but translates to "1" for the exit code, and "true" becomes "0"
             }
             else {
 #ifdef VMCFG_EVAL

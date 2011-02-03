@@ -210,6 +210,10 @@ namespace avmshell
         return;
 #endif
 
+        // For -testswf we must have exactly one file
+        if (settings.do_testSWFHasAS3 && settings.numfiles != 1)
+            Platform::GetInstance()->exit(1);
+
         // execute each abc file
         for (int i=0 ; i < settings.numfiles ; i++ ) {
             int exitCode = shell->evaluateFile(settings, settings.filenames[i]);
@@ -829,6 +833,9 @@ namespace avmshell
                 else if (!VMPI_strcmp(arg, "-cache_methods") && i+1 < argc ) {
                     settings.cacheSizes.methods = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
                 }
+                else if (!VMPI_strcmp(arg, "-swfHasAS3")) {
+                    settings.do_testSWFHasAS3 = true;
+                }
 #ifdef VMCFG_NANOJIT
                 else if (!VMPI_strcmp(arg, "-jitharden")) {
                     settings.njconfig.harden_nop_insertion = true;
@@ -1259,6 +1266,8 @@ namespace avmshell
         AvmLog("                        workers than threads, and at least two threads.\n");
         AvmLog("                        If R > 0 is provided then it is the number of times the list of files is repeated.\n");
 #endif
+        AvmLog("          [-swfHasAS3]  Exit with code 0 if the single file argument is a swf that contains a DoABC or DoABC2 tag,\n");
+        AvmLog("                        otherwise exit with code 1.  Do not execute or verify anything.\n");
         AvmLog("          [-swfversion version]\n");
         AvmLog("                        Run with a given bug-compatibility version in use by default.\n");
         AvmLog("                        (This can be overridden on a per-ABC basis by embedded metadata.)\n");
