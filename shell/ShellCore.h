@@ -78,6 +78,7 @@ namespace avmshell
         int gcthreshold;                // copy to each GC
         int langID;                     // copy to ShellCore?
         bool jitordie;                  // copy to config
+        bool do_testSWFHasAS3;
         Runmode runmode;                // copy to config
 #ifdef VMCFG_NANOJIT
         nanojit::Config njconfig;       // copy to config
@@ -197,7 +198,7 @@ namespace avmshell
         void stackOverflow(Toplevel *toplevel);
         void setEnv(Toplevel *toplevel, int argc, char *argv[]);
         void initShellPool();
-        int handleArbitraryExecutableContent(ScriptBuffer& code, const char * filename);
+        int handleArbitraryExecutableContent(ShellCoreSettings& settings, ScriptBuffer& code, const char * filename);
 #ifdef VMCFG_EVAL
         String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
 #endif // VMCFG_EVAL

@@ -182,9 +182,11 @@ namespace avmshell
      * else
      *   run it via handleActionBlock() just as if it were on the commandline
      */
-    void handleSwf(const char *filename, ScriptBuffer swf,
-              Toplevel* toplevel, CodeContext* codeContext)
+    bool handleSwf(const char *filename, ScriptBuffer swf,
+                   Toplevel* toplevel, CodeContext* codeContext,
+                   bool test_only)
     {
+        bool has_abc = false;
         SwfParser parser(swf);
         parser.pos = 4; // skip magic #
         uint32_t swflen = parser.readU32();
@@ -197,33 +199,47 @@ namespace avmshell
             uLongf dlen = swflen;
             int e = uncompress((Bytef*)&newswf[0], &dlen, (Bytef*)&swf[8], (uLongf)swf.getSize()-8);
             if (e != Z_OK) {
-                core->console << filename << ": error decompressing body: " << e << "\n";
-                return;
+                if (!test_only)
+                    core->console << filename << ": error decompressing body: " << e << "\n";
+                return false;
             }
             swf = newswf;
             parser = SwfParser(newswf);
             parser.pos = 0;
         }
         if (swflen != swf.getSize()) {
-            core->console << filename <<
-                ": incorrect size: " << (uint32_t)swf.getSize() <<
-                " should be " << swflen << "\n";
-            return;
+            if (!test_only)
+                core->console << filename <<
+                    ": incorrect size: " << (uint32_t)swf.getSize() <<
+                    " should be " << swflen << "\n";
+            return false;
         }
         parser.skipHeader();
+        uint32_t oldpos = parser.pos;
         while (parser.pos < swflen) {
             int tag = parser.readU16();
             int type = tag >> 6;
             uint32_t taglen = (tag & 63);
             if (taglen == 63)
                 taglen = parser.readU32();
-            if (type == stagDoABC || type == stagDoABC2)
-                handleDoABC(type, parser, taglen, toplevel, codeContext, deferred);
+            if (type == stagDoABC || type == stagDoABC2) {
+                has_abc = true;
+                if (!test_only)
+                    handleDoABC(type, parser, taglen, toplevel, codeContext, deferred);
+            }
             else
                 parser.pos += taglen;
+            if (parser.pos <= oldpos) {
+                has_abc = false;    // broken file or broken parser, but either way we can't process it
+                break;
+            }
+            oldpos = parser.pos;
         }
-        for (int i = 0, n = deferred.length(); i < n; i++) {
-            core->handleActionPool(deferred[i], toplevel, codeContext);
+        if (!test_only) {
+            for (int i = 0, n = deferred.length(); i < n; i++) {
+                core->handleActionPool(deferred[i], toplevel, codeContext);
+            }
         }
+        return has_abc;
     }
 }
