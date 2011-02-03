@@ -47,7 +47,6 @@ bool AbcEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #ifdef DEBUGGER
         gc->TraceLocation(&m_invocationCounts);
 #endif
-        m_namedScriptEnvsList.gcTrace(gc);
         gc->TraceLocation(&m_pool);
     }
     const size_t _xact_work_increment = 2000/sizeof(void*);
@@ -152,9 +151,10 @@ bool Domain::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
     (void)_xact_cursor;
-    m_namedScriptsList.gcTrace(gc);
-    gc->TraceLocation(&m_namedScriptsMap);
-    gc->TraceLocation(&m_namedTraits);
+    gc->TraceLocation(&m_cachedScripts);
+    gc->TraceLocation(&m_cachedTraits);
+    gc->TraceLocation(&m_loadedScripts);
+    gc->TraceLocation(&m_loadedTraits);
     gc->TraceLocation(&m_parameterizedTypes);
     gc->TraceLocations((m_bases+0), m_baseCount);
     return false;
@@ -166,7 +166,7 @@ bool DomainEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)_xact_cursor;
     gc->TraceLocation(&m_domain);
     gc->TraceLocation(&m_globalMemoryProviderObject);
-    m_namedScriptEnvsList.gcTrace(gc);
+    gc->TraceLocation(&m_scriptEnvMap);
     gc->TraceLocation(&m_toplevel);
     gc->TraceLocations((m_bases+0), m_baseCount);
     return false;
@@ -352,9 +352,10 @@ bool PoolObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     cpool_uint_atoms.gcTrace(gc);
 #endif
     gc->TraceLocation(&domain);
-    m_namedScriptsList.gcTrace(gc);
-    gc->TraceLocation(&m_namedScriptsMap);
-    gc->TraceLocation(&m_namedTraits);
+    gc->TraceLocation(&m_cachedScripts);
+    gc->TraceLocation(&m_cachedTraits);
+    gc->TraceLocation(&m_loadedScripts);
+    gc->TraceLocation(&m_loadedTraits);
     metadata_infos.gcTrace(gc);
     gc->TraceLocation(&precompNames);
     return false;
@@ -404,6 +405,14 @@ bool ScriptEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     MethodEnv::gcTrace(gc, 0);
     (void)(avmplus_MethodEnv_isExactInterlock != 0);
     gc->TraceLocation(&global);
+    return false;
+}
+
+bool ScriptEnvMap::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    ht.gcTrace(gc);
     return false;
 }
 

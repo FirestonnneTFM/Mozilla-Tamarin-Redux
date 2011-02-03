@@ -43,7 +43,7 @@
 namespace avmplus
 {
     DomainEnv::DomainEnv(AvmCore* core, Domain* domain, DomainEnv* base, uint32_t baseCount)
-        : m_namedScriptEnvsList(core->GetGC(), 0)
+        : m_scriptEnvMap(ScriptEnvMap::create(core->GetGC()))
         , m_domain(domain)
         , m_globalMemoryScratch(mmfx_new0(Scratch))
         , m_globalMemoryBase(m_globalMemoryScratch->scratch)

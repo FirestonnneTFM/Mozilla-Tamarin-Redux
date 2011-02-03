@@ -62,15 +62,22 @@ namespace avmplus
     GC_DATA_BEGIN(Domain)
 
     private:
-        DWB(MultinameTraitsHashtable*)  GC_POINTER(m_namedTraits);
-        DWB(MultinameBindingHashtable*) GC_POINTER(m_namedScriptsMap);
-        GCList<MethodInfo>              GC_STRUCTURE(m_namedScriptsList);        // list of MethodInfo* for the scripts
-        DWB(WeakKeyHashtable*)          GC_POINTER(m_parameterizedTypes);
+        // "loaded" Traits/Scripts are the Traits/ScriptEnvs that are actually
+        // defined in this Domain. "cached" Traits/Scripts are the ones that 
+        // actually should be used for a given name lookup; the cached versions
+        // take precedence over the loaded ones (on a freeze-on-first-use basis)
+        // to ensure that the types associated with a name can't change as new
+        // Domains are loaded. See DomainMgr for more info.
+        DWB(MultinameTraitsHashtable*)      GC_POINTER(m_loadedTraits);
+        DWB(MultinameTraitsHashtable*)      GC_POINTER(m_cachedTraits);
+        DWB(MultinameMethodInfoHashtable*)  GC_POINTER(m_loadedScripts);
+        DWB(MultinameMethodInfoHashtable*)  GC_POINTER(m_cachedScripts);
+        DWB(WeakKeyHashtable*)              GC_POINTER(m_parameterizedTypes);
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.
-        uint32_t const                  m_baseCount; // number of entries in m_bases
-        Domain*                         GC_POINTERS_SMALL(m_bases[1], m_baseCount);
+        uint32_t const                      m_baseCount; // number of entries in m_bases
+        Domain*                             GC_POINTERS_SMALL(m_bases[1], m_baseCount);
 
     GC_DATA_END(Domain)
     };

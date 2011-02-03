@@ -107,6 +107,7 @@
 #define avmplus_ScopeChain_isExactInterlock 1
 #define avmplus_ScopeTypeChain_isExactInterlock 1
 #define avmplus_ScriptEnv_isExactInterlock 1
+#define avmplus_ScriptEnvMap_isExactInterlock 1
 #define avmplus_SecurityErrorClass_isExactInterlock 1
 #define avmplus_SecurityErrorObject_isExactInterlock 1
 #define avmplus_SourceFile_isExactInterlock 1

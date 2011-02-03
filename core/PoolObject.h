@@ -213,9 +213,16 @@ namespace avmplus
 
     private:
         friend class DomainMgr;
-        DWB(MultinameTraitsHashtable*)              GC_POINTER(m_namedTraits);
-        DWB(MultinameBindingHashtable*)             GC_POINTER(m_namedScriptsMap);
-        GCList<MethodInfo>                          GC_STRUCTURE(m_namedScriptsList); // list of MethodInfo* for the scripts
+        // "loaded" Traits/Scripts are the Traits/ScriptEnvs that are actually
+        // defined in this Domain. "cached" Traits/Scripts are the ones that 
+        // actually should be used for a given name lookup; the cached versions
+        // take precedence over the loaded ones (on a freeze-on-first-use basis)
+        // to ensure that the types associated with a name can't change as new
+        // Domains are loaded. See DomainMgr for more info.
+        DWB(MultinameTraitsHashtable*)              GC_POINTER(m_loadedTraits);
+        DWB(MultinameTraitsHashtable*)              GC_POINTER(m_cachedTraits);
+        DWB(MultinameMethodInfoHashtable*)          GC_POINTER(m_loadedScripts);
+        DWB(MultinameMethodInfoHashtable*)          GC_POINTER(m_cachedScripts);
 
     private:
         DWB(ScriptBufferImpl*)                      GC_POINTER(_code);

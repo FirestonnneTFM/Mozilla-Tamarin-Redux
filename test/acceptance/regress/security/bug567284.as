@@ -1,5 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,13 +35,44 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
+package {
+    import avmplus.Domain
+    import avmplus.System
 
-#include "MultinameHashtable-impl.h"
+    var SECTION = "Domain";
+    var VERSION = "Domain";
+    startTest();
+    var TITLE   = "Bug 567284";
 
-namespace avmplus
-{
-    template class MultinameHashtable<Binding, BindingType>;
-    template class MultinameHashtable<Traitsp, GCObjectType>;
-    template class MultinameHashtable<MethodInfo*, GCObjectType>;
+    writeHeaderToLog( SECTION + " "+ TITLE );
+
+    var support_path:String = System.argv[0];
+
+    var parentDomain:Domain = Domain.currentDomain;
+    var childDomain:Domain = new Domain(parentDomain);
+
+    childDomain.load(support_path + "DupExaminer.abc");
+    childDomain.load(support_path + "Dup1.abc");
+
+    var cls:Class = childDomain.getClass("DupExaminer");
+    var examiner = new cls();
+    var value = examiner.examine();
+
+    AddTestCase("Test for non-crash in child Domain",
+      "Dup1",
+      String(value));
+
+    parentDomain.load(support_path + "Dup2.abc")
+
+    value = examiner.examine();
+
+    // Note that we still expect "Dup1" as the first version of "Dup"
+    // loaded should still take precedence, even though "Dup2" is higher
+    // in the Domain chain, due to freeze-on-first-use
+    AddTestCase("Test for non-crash in parent Domain",
+      "Dup1",
+      String(value));
+
+    test();
+
 }

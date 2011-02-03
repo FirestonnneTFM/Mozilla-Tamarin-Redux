@@ -165,7 +165,7 @@ REALLY_INLINE void TraitsBindings::setMethodInfo(uint32_t i, MethodInfo* f)
 }
 
 REALLY_INLINE StTraitsBindingsIterator::StTraitsBindingsIterator(TraitsBindingsp tb)
-    : StMNHTIterator(tb->m_bindings), _tb(tb)
+    : StMNHTBindingIterator(tb->m_bindings), _tb(tb)
 { }
 
 REALLY_INLINE TraitsMetadata::TraitsMetadata(TraitsMetadatap _base, PoolObject* _residingPool, MetadataPtr _metadata_pos, uint32_t _slotCount, uint32_t _methodCount)

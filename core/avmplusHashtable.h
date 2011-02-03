@@ -70,6 +70,7 @@ namespace avmplus
         friend class HeapHashtableRC;
         friend class WeakKeyHashtable;
         friend class WeakValueHashtable;
+        friend class ScriptEnvMap;
 
     public:
         /** kDefaultCapacity must be a power of 2 */

@@ -1,5 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -37,13 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
-
-#include "MultinameHashtable-impl.h"
-
-namespace avmplus
-{
-    template class MultinameHashtable<Binding, BindingType>;
-    template class MultinameHashtable<Traitsp, GCObjectType>;
-    template class MultinameHashtable<MethodInfo*, GCObjectType>;
-}
+package {
+   public class DupExaminer { 
+      function examine() { return new Dup().a; } 
+   }
+};

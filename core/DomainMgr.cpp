@@ -42,74 +42,168 @@
 namespace avmplus
 {
 
+/*
+    Theory of Operation
+
+    Definitions:
+    ------------
+    parent - reference to parent Domain. Will be null in the "root" (system) domain
+
+    loaded - a map from class names to Classdef objects. (Classdef objects represent ready-to-use
+    class definitions.) This map is populated with classes loaded from SWFs via the load method.
+    
+    cache - another map from class names to Classdef objects. The cache is populated as classes
+    are found during lookups via the find method.
+
+    There are two general classes of operations: 
+    
+    "add" :     these methods are used when we load a chunk of ABC bytecode; they populate the "loaded"
+                maps, and simply indicate what name is associated with what Traits/Script definition
+                at a given Domain level. 
+                
+                Note that, as an optimization, these methods check for reachability; attempting to
+                add a name that is already defined at the current level will simply be ignored. This
+                includes names that are "shadowed" by a name definition from a parent domain, and is the 
+                source of the "cacheIfFound" flag seen on various "find" methods: when adding new
+                definitions, we want to examine any already-cached items (to exclude shadowed names),
+                but we don't want to add to the cache prematurely (we want to defer that until
+                we know a definition is likely to be used, via the "find" methods).
+
+    "find" :    look up a Traits/Script definition by name. This is the analog in our scheme of Java’s
+                ClassLoader.loadClass method, and implements the same lookup algorithm, which is:
+                
+                - look in our cache for an already-resolved class by this name
+                - if none is found, immediately call find in the parent domain
+                - if this doesn’t find a class, look in our currently loaded classes
+                - if a class has been found, add it to our cache
+                - return the resolved class, or null.
+
+                Important properties of this algorithm:
+                
+                1. Because of the immediate recursive call to the parent domain, the "topmost" class resident in
+                memory at the time of the lookup will be found. Here "topmost" means the class closest to the
+                root domain, along the path from the root to the domain in which find is called. (Note
+                that our actual implementation is iterative, not recursive.)
+                
+                2. Because of caching, once a given class has been returned from a find request in a given
+                domain, that class will always be returned from subsequent calls to find in that domain. (This
+                guarantees the binding stability property that we want.)
+                
+                3. When a class is requested from a "descendant" domain, and found in an "ancestor" domain,
+                the found class will be added to the cache of both the descendent and ancestor domains.
+                (It is not necessary to add to any Domains that may be in between the descendant and ancestor,
+                as any lookups to intermediate domains would find the cached value in the ancestor as well,
+                thus lazily getting the same effect.)
+
+*/
+
 DomainMgr::DomainMgr(AvmCore* _core) : core(_core)
 {
 }
 
 void DomainMgr::addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* traits)
 {
-    // look for class in VM-wide type table, *without* recursion
-    // (don't look for traits in pool, ever.)
-    Traits* t = (Traits*)pool->domain->m_namedTraits->get(name, ns);
-
-    if (t == NULL)
+    // if we can find an existing trait by this name, the one we're adding
+    // if unreachable -- don't bother adding it. (Note that this examines
+    // only the Domain's table, not the Pool's) 
+    // Note: It's important not to cache on find here; see earlier comments for details.
+    if (findTraitsInDomainByNameAndNSImpl(pool->domain, name, ns, /*cacheIfFound*/false) == NULL)
     {
-        pool->domain->m_namedTraits->add(name, ns, traits);
+        pool->domain->m_loadedTraits->add(name, ns, traits);
     }
 }
 
 void DomainMgr::addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* itraits)
 {
-    // look for class in VM-wide type table, *without* recursion
-    Traits* t = (Traits*)pool->domain->m_namedTraits->get(name, ns);
-
-    // look for class in current pool
-    if (t == NULL)
+    // if we can find an existing trait by this name, the one we're adding
+    // if unreachable -- don't bother adding it. 
+    // Note: It's important not to cache on find here; see earlier comments for details.
+    if (findTraitsInPoolByNameAndNSImpl(pool, name, ns, /*cacheIfFound*/false) == NULL)
     {
-        t = (Traits*)pool->m_namedTraits->get(name, ns);
-    }
-
-    if (t == NULL)
-    {
-        pool->m_namedTraits->add(name, ns, itraits);
+        pool->m_loadedTraits->add(name, ns, itraits);
     }
 }
 
 Traits* DomainMgr::findBuiltinTraitsByName(PoolObject* pool, Stringp name)
 {
-    return (Traits*)pool->m_namedTraits->getName(name);
+    return pool->m_loadedTraits->getName(name);
 }
 
-Traits* DomainMgr::findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns)
+Traits* DomainMgr::findTraitsInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns, bool cacheIfFound)
 {
     Traits* traits = NULL;
+    
+    // First, look bottom-up to find the first cached instance.
+    for (uint32_t i = 0, n = domain->m_baseCount; i < n; ++i)
+    {
+        Domain* d = domain->m_bases[i];
+        if ((traits = (Traits*)d->m_cachedTraits->get(name, ns)) != NULL)
+        {
+            if (cacheIfFound)
+            {
+                if (i > 0)
+                {
+                    // If cacheIfFound is true, we need to ensure the result
+                    // is cached in both the "d" and "domain". But we know
+                    // it's already in "d", so we only need to do anything
+                    // if d != domain (which is true iff i > 0, since base[0] == domain)
+                    AvmAssert(d != domain);
+                    domain->m_cachedTraits->add(name, ns, traits);
+                }
+            }
+            return traits;
+        }
+    }
+
+    // No instance ever cached, so look top-down to find the first loaded instance.
+    // Note that this goes from N...1 (rather than N-1...0) so we can re-use the same unsigned var.
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
     {
         Domain* d = domain->m_bases[i-1];
-        traits = (Traits*)d->m_namedTraits->get(name, ns);
-        if (traits != NULL)
-            break;
+        if ((traits = (Traits*)d->m_loadedTraits->get(name, ns)) != NULL)
+        {
+            if (cacheIfFound)
+            {
+                // If cacheIfFound is true, we need to ensure the result
+                // is cached in both the "d" and "domain". But we know
+                // it's already in "d", so we only need to do anything
+                // if d != domain (which is true iff i > 1, since base[1-1] == domain)
+                if (i > 1)
+                {
+                    AvmAssert(d != domain);
+                    d->m_cachedTraits->add(name, ns, traits);
+                }
+                domain->m_cachedTraits->add(name, ns, traits);
+            }
+            return traits;
+        }
+    }
+
+    return NULL;
+}
+
+Traits* DomainMgr::findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns, bool cacheIfFound)
+{
+    Traits* traits = (Traits*)pool->m_cachedTraits->get(name, ns);
+    if (traits == NULL)
+    {
+        traits = findTraitsInDomainByNameAndNSImpl(pool->domain, name, ns, cacheIfFound);
+        if (traits == NULL)
+        {
+            traits = (Traits*)pool->m_loadedTraits->get(name, ns);
+        }
+
+        if (cacheIfFound && traits != NULL)
+        {
+            pool->m_cachedTraits->add(name, ns, traits);
+        }
     }
     return traits;
 }
 
-Traits* DomainMgr::findTraitsInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns)
-{
-    // look for class in VM-wide type table
-    Traits* t = findTraitsInDomainByNameAndNSImpl(pool->domain, name, ns);
-
-    // look for class in current ABC file
-    if (t == NULL)
-    {
-        t = (Traits*)pool->m_namedTraits->get(name, ns);
-    }
-
-    return t;
-}
-
 Traits* DomainMgr::findTraitsInPoolByNameAndNS(PoolObject* pool, Stringp name, Namespacep ns)
 {
-    return findTraitsInPoolByNameAndNSImpl(pool, name, ns);
+    return findTraitsInPoolByNameAndNSImpl(pool, name, ns, /*cacheIfFound*/true);
 }
 
 Traits* DomainMgr::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname& multiname)
@@ -122,7 +216,7 @@ Traits* DomainMgr::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname
         // multiname must not be an attr name, have wildcards, or have runtime parts.
         for (int32_t i=0, n=multiname.namespaceCount(); i < n; i++)
         {
-            Traits* t = findTraitsInPoolByNameAndNSImpl(pool, multiname.getName(), multiname.getNamespace(i));
+            Traits* t = findTraitsInPoolByNameAndNSImpl(pool, multiname.getName(), multiname.getNamespace(i), /*cacheIfFound*/true);
             if (t != NULL)
             {
                 if (found == NULL)
@@ -140,137 +234,177 @@ Traits* DomainMgr::findTraitsInPoolByMultiname(PoolObject* pool, const Multiname
     return found;
 }
 
-static void addScript(Stringp name, Namespacep ns, MethodInfo* script, GCList<MethodInfo>& scriptList, MultinameBindingHashtable* scriptMap)
-{
-    scriptList.add(script);
-    // note that this is idx+1 -- can't use idx=0 since that's BIND_NONE
-    uint32_t idx = scriptList.length();
-    scriptMap->add(name, ns, Binding(idx));
-}
-
 void DomainMgr::addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, MethodInfo* script)
 {
+    // if we can find an existing trait by this name, the one we're adding
+    // if unreachable -- don't bother adding it. (Note that this examines
+    // only the Domain's table, not the Pool's) 
+    // Note: It's important not to cache on find here; see earlier comments for details.
     if (ns->isPrivate())
     {
-        addScript(name, ns, script, pool->m_namedScriptsList, pool->m_namedScriptsMap);
+        if (findScriptInPoolByNameAndNSImpl(pool, name, ns, /*cacheIfFound*/false) == NULL)
+            pool->m_loadedScripts->add(name, ns, script);
     }
     else
     {
-        Domain* domain = pool->domain;
-        MethodInfo* s = findScriptInDomainByNameAndNSImpl(domain, name, ns);
-        if (s == NULL)
-        {
-            addScript(name, ns, script, domain->m_namedScriptsList, domain->m_namedScriptsMap);
-        }
+        if (findScriptInDomainByNameAndNSImpl(pool->domain, name, ns, /*cacheIfFound*/false) == NULL)
+            pool->domain->m_loadedScripts->add(name, ns, script);
     }
 }
 
-MethodInfo* DomainMgr::findScriptInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns)
+MethodInfo* DomainMgr::findScriptInDomainByNameAndNSImpl(Domain* domain, Stringp name, Namespacep ns, bool cacheIfFound)
 {
+    MethodInfo* mi = NULL;
+    
+    // First, look bottom-up to find the first cached instance.
+    for (uint32_t i = 0, n = domain->m_baseCount; i < n; ++i)
+    {
+        Domain* d = domain->m_bases[i];
+        if ((mi = (MethodInfo*)d->m_cachedScripts->get(name, ns)) != NULL)
+        {
+            if (cacheIfFound)
+            {
+                if (i > 0)
+                {
+                    AvmAssert(d != domain);
+                    domain->m_cachedScripts->add(name, ns, mi);
+                }
+            }
+            return mi;
+        }
+    }
+
+    // No instance ever cached, so look top-down to find the first loaded instance.
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
     {
         Domain* d = domain->m_bases[i-1];
-        Binding b = d->m_namedScriptsMap->get(name, ns);
-        if (b != BIND_NONE)
+        if ((mi = (MethodInfo*)d->m_loadedScripts->get(name, ns)) != NULL)
         {
-            // BIND_AMBIGUOUS not possible here
-            return d->m_namedScriptsList.get(uint32_t(uintptr_t(b))-1);
+            if (cacheIfFound)
+            {
+                if (i > 1)
+                {
+                    AvmAssert(d != domain);
+                    d->m_cachedScripts->add(name, ns, mi);
+                }
+                domain->m_cachedScripts->add(name, ns, mi);
+            }
+            return mi;
         }
     }
+
     return NULL;
 }
 
-MethodInfo* DomainMgr::findScriptInDomainByMultinameImpl(Domain* domain, const Multiname& multiname)
+MethodInfo* DomainMgr::findScriptInDomainByMultinameImpl(Domain* domain, const Multiname& multiname, Namespace*& nsFound)
 {
+    MethodInfo* mi = NULL;
+    
+    // First, look bottom-up to find the first cached instance.
+    for (uint32_t i = 0, n = domain->m_baseCount; i < n; ++i)
+    {
+        Domain* d = domain->m_bases[i];
+        if ((mi = (MethodInfo*)d->m_cachedScripts->getMulti(multiname, /*out*/nsFound)) != NULL)
+        {
+            // if (cacheIfFound) -- always true here
+            {
+                if (i > 0)
+                {
+                    AvmAssert(d != domain);
+                    domain->m_cachedScripts->add(multiname.getName(), nsFound, mi);
+                }
+            }
+            return mi;
+        }
+    }
+
+    // No instance ever cached, so look top-down to find the first loaded instance.
     for (uint32_t i = domain->m_baseCount; i > 0; --i)
     {
         Domain* d = domain->m_bases[i-1];
-        Binding b = d->m_namedScriptsMap->getMulti(multiname);
-        if (b != BIND_NONE)
+        if ((mi = (MethodInfo*)d->m_loadedScripts->getMulti(multiname, /*out*/nsFound)) != NULL)
         {
-            return (b == BIND_AMBIGUOUS) ?
-                    (MethodInfo*)BIND_AMBIGUOUS :
-                    d->m_namedScriptsList.get(uint32_t(uintptr_t(b))-1);
+            // if (cacheIfFound) -- always true here
+            {
+                if (i > 1)
+                {
+                    AvmAssert(d != domain);
+                    d->m_cachedScripts->add(multiname.getName(), nsFound, mi);
+                }
+                domain->m_cachedScripts->add(multiname.getName(), nsFound, mi);
+            }
+            return mi;
         }
     }
+
     return NULL;
 }
 
-MethodInfo* DomainMgr::findScriptInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns)
+MethodInfo* DomainMgr::findScriptInPoolByNameAndNSImpl(PoolObject* pool, Stringp name, Namespacep ns, bool cacheIfFound)
 {
-    MethodInfo* f = findScriptInDomainByNameAndNSImpl(pool->domain, name, ns);
-    if (f == NULL)
+    MethodInfo* mi = (MethodInfo*)pool->m_cachedScripts->getName(name);
+    if (mi == NULL)
     {
-        Binding b = pool->m_namedScriptsMap->get(name, ns);
-        if (b != BIND_NONE)
+        mi = findScriptInDomainByNameAndNSImpl(pool->domain, name, ns, cacheIfFound);
+        if (mi == NULL)
         {
-            // BIND_AMBIGUOUS not possible here
-            f = pool->m_namedScriptsList.get(uint32_t(uintptr_t(b))-1);
+            mi = (MethodInfo*)pool->m_loadedScripts->get(name, ns);
+        }
+        
+        if (cacheIfFound && mi != NULL)
+        {
+            pool->m_cachedScripts->add(name, ns, mi);
         }
     }
-    return f;
+    return mi;
 }
 
 MethodInfo* DomainMgr::findScriptInPoolByMultiname(PoolObject* pool, const Multiname& multiname)
 {
-    MethodInfo* f = findScriptInDomainByMultinameImpl(pool->domain, multiname);
-    if (f == NULL)
-    {
-        Binding b = pool->m_namedScriptsMap->getMulti(multiname);
-        if (b != BIND_NONE)
-        {
-            f = (b == BIND_AMBIGUOUS) ?
-                    (MethodInfo*)BIND_AMBIGUOUS :
-                    pool->m_namedScriptsList.get(uint32_t(uintptr_t(b))-1);
-        }
-    }
-    return f;
+    return findScriptInPoolByMultinameImpl(pool, multiname);
 }
 
 void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv>& envs)
 {
+    // If the MethodInfo for this ScriptEnv isn't in the Domain's or Pool's
+    // map, then we must have filtered it out as unreachable: don't
+    // bother adding the ScriptEnv, as we'll never need to look it up.
+    // (Note that we don't need to bother checking the parent Domains
+    // for this, since we want to check loaded, not cached.) We can't rely
+    // on looking up by name, since scripts all tend to be named "global",
+    // so instead we make a temporary map of all the entries in the relevant
+    // Pool and Domain.
+
+    PoolObject* pool = abcEnv->pool();
+    DomainEnv* domainEnv = abcEnv->domainEnv();
+    Domain* domain = domainEnv->domain();
+
+    // we have no generic "set" type, so let's use a hashtable for the same purpose
+    // (a bit more mem, but short-lived and better average lookup time than using List<>)
     HeapHashtable* ht = HeapHashtable::create(core->GetGC());
+    for (StMNHTMethodInfoIterator iter(pool->m_loadedScripts); iter.next(); )
+    {
+        if (!iter.key()) continue;
+        Atom const a = AvmCore::genericObjectToAtom(iter.value());
+        ht->add(a, a);
+    }
+    for (StMNHTMethodInfoIterator iter(domain->m_loadedScripts); iter.next(); )
+    {
+        if (!iter.key()) continue;
+        Atom const a = AvmCore::genericObjectToAtom(iter.value());
+        ht->add(a, a);
+    }
+
     for (uint32_t i = 0, n = envs.length(); i < n; ++i)
     {
         ScriptEnv* se = envs[i];
         AvmAssert(se->abcEnv() == abcEnv);
         MethodInfo* mi = se->method;
-        ht->add((Atom)mi, (Atom)se);
-    }
-
-    AvmAssert(abcEnv->m_namedScriptEnvsList.length() == 0);
-    PoolObject* pool = abcEnv->pool();
-    abcEnv->m_namedScriptEnvsList.ensureCapacity(pool->m_namedScriptsList.length());
-    for (uint32_t i = 0, n = pool->m_namedScriptsList.length(); i < n; ++i)
-    {
-        MethodInfo* mi = pool->m_namedScriptsList[i];
-        AvmAssert(mi->pool() == abcEnv->pool());
-        ScriptEnv* se = (ScriptEnv*)ht->get((Atom)mi);
-        AvmAssert(se != (ScriptEnv*)undefinedAtom);
-        abcEnv->m_namedScriptEnvsList.set(i, se);
-    }
-
-    // since a DomainEnv can be shared among several AbcEnv's,
-    // its list might not be empty.
-    Domain* domain = pool->domain;
-    DomainEnv* domainEnv = abcEnv->domainEnv();
-    domainEnv->m_namedScriptEnvsList.ensureCapacity(domainEnv->m_namedScriptEnvsList.length() + domain->m_namedScriptsList.length());
-    for (uint32_t i = 0, n = domain->m_namedScriptsList.length(); i < n; ++i)
-    {
-        MethodInfo* mi = domain->m_namedScriptsList[i];
-        if (mi->pool() != abcEnv->pool())
+        AvmAssert(domainEnv->m_scriptEnvMap->get(mi) == NULL);
+        if (ht->get(AvmCore::genericObjectToAtom(mi)) == undefinedAtom)
             continue;
-        ScriptEnv* se = (ScriptEnv*)ht->get((Atom)mi);
-        AvmAssert(se != (ScriptEnv*)undefinedAtom);
-        AvmAssert(i >= domainEnv->m_namedScriptEnvsList.length() || domainEnv->m_namedScriptEnvsList.get(i) == 0);
-        domainEnv->m_namedScriptEnvsList.set(i, se);
+        domainEnv->m_scriptEnvMap->add(mi, se);
     }
-
-    // It may be tempting to check that domainEnv->m_namedScriptEnvsList matches domain->m_namedScriptsList here;
-    // do not do this, for if we are lazily initializing pools, the Domain/DomainEnv lists
-    // can be temporarily out of sync. Instead, defer the check until the first time we
-    // actually do a DomainEnv-based lookup, which is the first time they really do need to
-    // be in sync.
 
     delete ht;
 
@@ -280,41 +414,136 @@ void DomainMgr::addNamedScriptEnvs(AbcEnv* abcEnv, const GCList<ScriptEnv>& envs
 #endif
 }
 
-#ifdef _DEBUG
-/*static*/ void DomainMgr::verifyMatchingLookup(Binding b, const GCList<MethodInfo>& listMI, const GCList<ScriptEnv>& listSE)
+ScriptEnv* DomainMgr::mapScriptToScriptEnv(DomainEnv* domainEnv, MethodInfo* mi)
 {
-    // Note that when code is lazily inited, these lists might not be identical.
-    // So we only verify that the part we need to look up matches properly.
-    uint32_t const i = uint32_t(uintptr_t(b))-1;
-    AvmAssert(i < listMI.length());
-    AvmAssert(i < listSE.length());
-    MethodInfo* mi = listMI[i];
-    ScriptEnv* se = listSE[i];
-    AvmAssert((mi != NULL) == (se != NULL));
-    if (se != NULL)
+    ScriptEnv* se = NULL;
+    if (mi != NULL)
     {
+        se = domainEnv->m_scriptEnvMap->get(mi);
+        if (se == NULL)
+        {
+            // This is an item from a parent domain that's not in the MI->SE map yet.
+            // walk up the parent chain and find it. This can happen if
+            // we find a (cached) entry from a parent Domain; since addNamedScriptEnvs()
+            // only added mappings for the MI/SE's in this Domain/DomainEnv pair,
+            // we won't have the proper mapping. However, we know it must be in
+            // a parent (which is why we start at 1, not 0: no point in looking
+            // in our own map again), so lazily find it.
+            for (uint32_t i = 1, n = domainEnv->m_baseCount; i < n; ++i)
+            {
+                DomainEnv* de = domainEnv->m_bases[i];
+                if (mi->pool()->domain == de->domain())
+                {
+                    se = de->m_scriptEnvMap->get(mi);
+                    AvmAssert(se != NULL);
+                    domainEnv->m_scriptEnvMap->add(mi, se);
+                    break;
+                }
+            }
+        }
+        AvmAssert(se != NULL);
         AvmAssert(se->method == mi);
     }
+    return se;
 }
-#endif
+
+MethodInfo* DomainMgr::findScriptInPoolByMultinameImpl(PoolObject* pool, const Multiname& multiname)
+{
+    MethodInfo* mi = (MethodInfo*)pool->m_cachedScripts->getMulti(multiname);
+    if (mi == NULL)
+    {
+        Namespacep nsFound;
+        mi = findScriptInDomainByMultinameImpl(pool->domain, multiname, /*out*/nsFound);
+        if (mi == NULL)
+        {
+            mi = (MethodInfo*)pool->m_loadedScripts->getMulti(multiname, /*out*/nsFound);
+        }
+        
+        if (mi != NULL)
+        {
+            AvmAssert(nsFound != NULL);
+            pool->m_cachedScripts->add(multiname.getName(), nsFound, mi);
+        }
+    }
+    return mi;
+}
+
+#ifdef DEBUGGER
+
+MethodInfo* DomainMgr::findScriptInDomainByNameOnlyImpl(Domain* domain, Stringp name, Namespace*& nsFound)
+{
+    MethodInfo* mi = NULL;
+    
+    // First, look bottom-up to find the first cached instance.
+    for (uint32_t i = 0, n = domain->m_baseCount; i < n; ++i)
+    {
+        Domain* d = domain->m_bases[i];
+        if ((mi = (MethodInfo*)d->m_cachedScripts->getName(name, &nsFound)) != NULL)
+        {
+            // if (cacheIfFound) -- always true here
+            {
+                if (i > 0)
+                {
+                    AvmAssert(d != domain);
+                    domain->m_cachedScripts->add(name, nsFound, mi);
+                }
+            }
+            return mi;
+        }
+    }
+
+    // No instance ever cached, so look top-down to find the first loaded instance.
+    for (uint32_t i = domain->m_baseCount; i > 0; --i)
+    {
+        Domain* d = domain->m_bases[i-1];
+        if ((mi = (MethodInfo*)d->m_loadedScripts->getName(name, &nsFound)) != NULL)
+        {
+            // if (cacheIfFound) -- always true here
+            {
+                if (i > 1)
+                {
+                    AvmAssert(d != domain);
+                    d->m_cachedScripts->add(name, nsFound, mi);
+                }
+                domain->m_cachedScripts->add(name, nsFound, mi);
+            }
+            return mi;
+        }
+    }
+
+    return NULL;
+}
+
+MethodInfo* DomainMgr::findScriptInPoolByNameOnlyImpl(PoolObject* pool, Stringp name)
+{
+    MethodInfo* mi = (MethodInfo*)pool->m_cachedScripts->getName(name);
+    if (mi == NULL)
+    {
+        Namespacep nsFound = NULL;
+        mi = findScriptInDomainByNameOnlyImpl(pool->domain, name, /*out*/nsFound);
+        if (mi == NULL)
+        {
+            mi = (MethodInfo*)pool->m_loadedScripts->getName(name, /*out*/&nsFound);
+        }
+        
+        if (mi != NULL)
+        {
+            AvmAssert(nsFound != NULL);
+            pool->m_cachedScripts->add(name, nsFound, mi);
+        }
+    }
+    return mi;
+}
+
+#endif // DEBUGGER
+
 
 ScriptEnv* DomainMgr::findScriptEnvInDomainEnvByMultinameImpl(DomainEnv* domainEnv, const Multiname& multiname)
 {
-    for (uint32_t i = domainEnv->m_baseCount; i > 0; --i)
-    {
-        DomainEnv* d = domainEnv->m_bases[i-1];
-        Binding b = d->domain()->m_namedScriptsMap->getMulti(multiname);
-        if (b != BIND_NONE)
-        {
-            #ifdef _DEBUG
-            verifyMatchingLookup(b, d->domain()->m_namedScriptsList, d->m_namedScriptEnvsList);
-            #endif
-            return (b == BIND_AMBIGUOUS) ?
-                    (ScriptEnv*)BIND_AMBIGUOUS :
-                    d->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
-        }
-    }
-    return NULL;
+    Namespacep nsFound = NULL;
+    MethodInfo* mi = findScriptInDomainByMultinameImpl(domainEnv->domain(), multiname, /*out*/nsFound);
+    ScriptEnv* se = mapScriptToScriptEnv(domainEnv, mi);
+    return se;
 }
 
 ScriptEnv* DomainMgr::findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, const Multiname& multiname)
@@ -324,21 +553,8 @@ ScriptEnv* DomainMgr::findScriptEnvInDomainEnvByMultiname(DomainEnv* domainEnv, 
 
 ScriptEnv* DomainMgr::findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Multiname& multiname)
 {
-    // note, lookup order must match findNamedScript!
-    ScriptEnv* se = findScriptEnvInDomainEnvByMultinameImpl(abcEnv->domainEnv(), multiname);
-    if (se == NULL)
-    {
-        Binding b = abcEnv->pool()->m_namedScriptsMap->getMulti(multiname);
-        if (b != BIND_NONE)
-        {
-            #ifdef _DEBUG
-            verifyMatchingLookup(b, abcEnv->pool()->m_namedScriptsList, abcEnv->m_namedScriptEnvsList);
-            #endif
-            se = (b == BIND_AMBIGUOUS) ?
-                    (ScriptEnv*)BIND_AMBIGUOUS :
-                    abcEnv->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
-        }
-    }
+    MethodInfo* mi = findScriptInPoolByMultinameImpl(abcEnv->pool(), multiname);
+    ScriptEnv* se = mapScriptToScriptEnv(abcEnv->domainEnv(), mi);
     return se;
 }
 
@@ -346,36 +562,16 @@ ScriptEnv* DomainMgr::findScriptEnvInAbcEnvByMultiname(AbcEnv* abcEnv, const Mul
 
 ScriptEnv* DomainMgr::findScriptEnvInDomainEnvByNameOnlyImpl(DomainEnv* domainEnv, Stringp name)
 {
-    for (uint32_t i = domainEnv->m_baseCount; i > 0; --i)
-    {
-        DomainEnv* d = domainEnv->m_bases[i-1];
-        Binding b = d->domain()->m_namedScriptsMap->getName(name);
-        if (b != BIND_NONE)
-        {
-            #ifdef _DEBUG
-            verifyMatchingLookup(b, d->domain()->m_namedScriptsList, d->m_namedScriptEnvsList);
-            #endif
-            ScriptEnv* f = (ScriptEnv*)d->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
-            return f;
-        }
-    }
-    return NULL;
+    Namespacep nsFound = NULL;
+    MethodInfo* mi = findScriptInDomainByNameOnlyImpl(domainEnv->domain(), name, /*out*/nsFound);
+    ScriptEnv* se = mapScriptToScriptEnv(domainEnv, mi);
+    return se;
 }
 
 ScriptEnv* DomainMgr::findScriptEnvInAbcEnvByNameOnly(AbcEnv* abcEnv, Stringp name)
 {
-    ScriptEnv* se = findScriptEnvInDomainEnvByNameOnlyImpl(abcEnv->domainEnv(), name);
-    if (se == NULL)
-    {
-        Binding b = abcEnv->pool()->m_namedScriptsMap->getName(name);
-        if (b != BIND_NONE)
-        {
-            #ifdef _DEBUG
-            verifyMatchingLookup(b, abcEnv->pool()->m_namedScriptsList, abcEnv->m_namedScriptEnvsList);
-            #endif
-            se = abcEnv->m_namedScriptEnvsList.get(uint32_t(uintptr_t(b))-1);
-        }
-    }
+    MethodInfo* mi = findScriptInPoolByNameOnlyImpl(abcEnv->pool(), name);
+    ScriptEnv* se = mapScriptToScriptEnv(abcEnv->domainEnv(), mi);
     return se;
 }
 

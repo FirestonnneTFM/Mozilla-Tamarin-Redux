@@ -285,7 +285,7 @@ namespace avmplus
                 }
             }
 
-            StMNHTIterator iter(mybind);
+            StMNHTBindingIterator iter(mybind);
             while (iter.next())
             {
                 if (!iter.key()) continue;

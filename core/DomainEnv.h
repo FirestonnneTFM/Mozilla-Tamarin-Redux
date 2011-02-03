@@ -43,6 +43,42 @@
 
 namespace avmplus
 {
+
+    // ScriptEnvMap is just syntactic sugar (on top of Hashtable) to simplify
+    // code in DomainMgr. If/when we add a true generic Map/Hashtable type,
+    // this can be replaced; for now, it serves simply to ensure that the
+    // proper Atom<->GenericObject transmutation is in place for this map.
+    class GC_CPP_EXACT(ScriptEnvMap, MMgc::GCFinalizedObject)
+    {
+    private:
+        REALLY_INLINE ScriptEnvMap(MMgc::GC* gc)
+        {
+            ht.initialize(gc);
+        }
+    
+    public:
+        REALLY_INLINE static ScriptEnvMap* create(MMgc::GC* gc)
+        {
+            return new (gc, MMgc::kExact) ScriptEnvMap(gc);
+        }
+
+        REALLY_INLINE void add(MethodInfo* mi, ScriptEnv* se) 
+        { 
+            ht.add(AvmCore::genericObjectToAtom(mi), AvmCore::genericObjectToAtom(se));
+        }
+        
+        REALLY_INLINE ScriptEnv* get(MethodInfo* mi)
+        {
+            return (ScriptEnv*)AvmCore::atomToGenericObject(ht.get(AvmCore::genericObjectToAtom(mi)));
+        }
+
+    GC_DATA_BEGIN(ScriptEnvMap)
+    protected:
+        InlineHashtable GC_STRUCTURE(ht);
+    GC_DATA_END(ScriptEnvMap)
+
+    };
+
     // an ABC
     class GC_CPP_EXACT(DomainEnv, MMgc::GCFinalizedObject)
     {
@@ -98,7 +134,9 @@ namespace avmplus
         GC_DATA_BEGIN(DomainEnv)
 
     private:
-        GCList<ScriptEnv>               GC_STRUCTURE(m_namedScriptEnvsList); // list of ScriptEnv, corresponds to domain->m_namedScriptsList
+        // This is used by DomainMgr to simplify lookups of ScriptEnv definitions
+        // by name. See DomainMgr for more info.
+        DWB(ScriptEnvMap*)              GC_POINTER(m_scriptEnvMap);
         DWB(Domain*)                    GC_POINTER(  m_domain);       // Domain associated with this DomainEnv
         DWB(Toplevel*)                  GC_POINTER(  m_toplevel);
         // scratch memory to use if the memory object is NULL...
