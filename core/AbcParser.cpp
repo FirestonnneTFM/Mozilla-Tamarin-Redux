@@ -1329,11 +1329,13 @@ namespace avmplus
             (++dataP)->abcPtr = pos;
             // number of characters
             // todo - is compiler emitting no. of chars or no. of bytes?
-            int len = readU30(pos);
+            
+            // don't call readU30(), as it can throw. call readU32 and sanity-check ourself here.
+            uint32_t len = AvmCore::readU32(pos);
 
             // check to see if we are trying to read past the file end or the beginning.
             // FIXME: bug #545652, should check if UTF8 is valid, skipping for compatibility.
-            if (pos < abcStart || pos+len >= abcEnd)
+            if ((len & 0xc0000000) || pos < abcStart || pos+len >= abcEnd)
             {
                 // if we throw a verify error here, _abcStringEnd will never be set, and _abcStrings
                 // will be left in an inconsistent state. having _abcStringStart set but not _abcStringEnd
