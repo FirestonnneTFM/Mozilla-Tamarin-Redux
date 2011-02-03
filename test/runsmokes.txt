@@ -53,6 +53,9 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
+# Bug 456852 - Different runtime errors when -Ojit set in acceptance test run
+cd acceptance;${py} ./runtests.py ${RTARGS}  --notimecheck --avm=${avmr} as3/RuntimeErrors/Error1115NotAConstructor.as
+
 # mops.abc_ is crashing at end with exitcode 138: https://bugzilla.mozilla.org/show_bug.cgi?id=521550
 cd acceptance;${py} ./runtests.py ${RTARGS}  --notimecheck --avm=${avmrd} --vmargs="-Dnogc" mops/mops.abc_
 
