@@ -129,7 +129,7 @@ namespace avmplus
             if(methodDebugInfos != NULL)
             {
                 // create the structure representing the ABC
-                AbcFile* abc = new (core->GetGC()) AbcFile(core, 0);
+                AbcFile* abc = AbcFile::create(core->GetGC(), core, 0);
 
                 for(int n = 0; n < aotInfo->nABCMethods; n++)
                 {
@@ -152,7 +152,7 @@ namespace avmplus
                         src = abc->sourceNamed(fileName);
                         if(!src)
                         {
-                            src = new (core->GetGC()) SourceFile(core->GetGC(), fileName);
+                            src = SourceFile::create(core->GetGC(), fileName);
                             abc->sourceAdd(src);
                         }
                     }

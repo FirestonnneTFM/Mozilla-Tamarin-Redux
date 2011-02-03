@@ -1145,6 +1145,7 @@ VTable *abcOP_toVTable(MethodEnv *env, objt objp)
         Atom rcv = (Atom)abcOP_box<LLVMAtom, objt>(env, objp);
         vtable = env->toplevel()->toVTable(rcv); // does nullcheck
     }
+    AvmAssert(vtable != NULL);
     return vtable;
 }
 
@@ -1689,6 +1690,7 @@ rt abcOP_throwCallOfNonFunctionError(MethodEnv* env) /* __attribute__((noreturn)
 template <typename objt>
 int32_t *abcOP_handlerFromMethodEnv(MethodEnv *env, objt objp)
 {
+    AvmAssert(env != NULL);
     union
     {
         AvmThunkNativeMethodHandler method;
@@ -1727,13 +1729,17 @@ template <typename objt>
 MethodEnv *abcOP_methodEnvFromDispId(MethodEnv *env, objt objp, int32_t methodindex)
 {
     VTable *vtable = abcOP_toVTable<true, objt>(env, objp);
-    return vtable->methods[methodindex-1];
+    MethodEnv *e = vtable->methods[methodindex-1];
+    AvmAssert(e != NULL);
+    return e;
 }
 
 template <typename objt>
 MethodEnv *abcOP_methodEnvFromBaseDispId(MethodEnv *env, objt, int32_t methodindex) // TODO remove objt
 {
-    return env->vtable()->base->methods[methodindex-1];
+    MethodEnv *e = env->vtable()->base->methods[methodindex-1];
+    AvmAssert(e != NULL);
+    return e;
 }
 
 template<typename rt, typename objt, typename adt>
