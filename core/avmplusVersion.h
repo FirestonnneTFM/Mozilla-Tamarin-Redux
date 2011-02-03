@@ -45,7 +45,7 @@
 //
 // This string is used by QE, the build system replaces the string in this header file
 // with the correct value before compilation.  Do not change this.
-#define AVMPLUS_BUILD_CODE          "cyclone"
+#define AVMPLUS_BUILD_CODE          "5881:09dc3e5508d2"
 
 #ifdef DEBUGGER
 #define AVMPLUS_BIN_DEBUGGER_TAG "-debugger"

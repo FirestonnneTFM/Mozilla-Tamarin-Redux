@@ -4895,6 +4895,7 @@ return the result of the comparison ToPrimitive(x) == y.
         9,
         10,
         11,
-        12
+        12,
+        13
     };
 }

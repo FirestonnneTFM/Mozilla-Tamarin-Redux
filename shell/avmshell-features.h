@@ -234,7 +234,7 @@
 #endif
 
 #ifndef AVMFEATURE_SWF13
-  #define AVMFEATURE_SWF13 0
+  #define AVMFEATURE_SWF13 1
 #endif
 
 #ifndef AVMFEATURE_SWF14
