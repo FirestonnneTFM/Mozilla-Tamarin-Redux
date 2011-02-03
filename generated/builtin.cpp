@@ -7241,8 +7241,8 @@ const uint8_t builtin_abc_data[48039] = {
   15,  95, 104,  97, 115,  79, 119, 110,  80, 114, 111, 112, 101, 114, 116, 121,
   21,  95, 112, 114, 111, 112, 101, 114, 116, 121,  73, 115,  69, 110, 117, 109,
  101, 114,  97,  98, 108, 101,   3, 238, 138, 148,   4, 105, 110, 105, 116,   3,
- 238, 138, 162,   5,  95, 105, 110, 105, 116,   3,  65,  80,  73,   3,  54,  55,
-  52,   5,  67, 108,  97, 115, 115,   8,  70, 117, 110,  99, 116, 105, 111, 110,
+ 238, 138, 164,   5,  95, 105, 110, 105, 116,   3,  65,  80,  73,   3,  54,  55,
+  54,   5,  67, 108,  97, 115, 115,   8,  70, 117, 110,  99, 116, 105, 111, 110,
    4,  99,  97, 108, 108,   5,  97, 112, 112, 108, 121,  22, 102, 117, 110,  99,
  116, 105, 111, 110,  32,  70, 117, 110,  99, 116, 105, 111, 110,  40,  41,  32,
  123, 125,   9, 101, 109, 112, 116, 121,  67, 116, 111, 114,   9,  78,  97, 109,
@@ -10195,6 +10195,135 @@ const char* const builtin_versioned_uris[] = {
     NULL
 };
 
+#ifdef VMCFG_AOT
+extern "C" const struct {
+    const char* const n_0; ArgumentErrorClass* const m_0;
+    const char* const n_1; ArgumentErrorObject* const m_1;
+    const char* const n_2; ArrayClass* const m_2;
+    const char* const n_3; ArrayObject* const m_3;
+    const char* const n_4; BooleanClass* const m_4;
+    const char* const n_5; ByteArrayClass* const m_5;
+    const char* const n_6; ByteArrayObject* const m_6;
+    const char* const n_7; ClassClass* const m_7;
+    const char* const n_8; ClassClosure* const m_8;
+    const char* const n_9; DateClass* const m_9;
+    const char* const n_10; DateObject* const m_10;
+    const char* const n_11; DefinitionErrorClass* const m_11;
+    const char* const n_12; DefinitionErrorObject* const m_12;
+    const char* const n_13; DoubleVectorClass* const m_13;
+    const char* const n_14; DoubleVectorObject* const m_14;
+    const char* const n_15; ErrorClass* const m_15;
+    const char* const n_16; ErrorObject* const m_16;
+    const char* const n_17; EvalErrorClass* const m_17;
+    const char* const n_18; EvalErrorObject* const m_18;
+    const char* const n_19; FunctionClass* const m_19;
+    const char* const n_20; FunctionObject* const m_20;
+    const char* const n_21; IntClass* const m_21;
+    const char* const n_22; IntVectorClass* const m_22;
+    const char* const n_23; IntVectorObject* const m_23;
+    const char* const n_24; MathClass* const m_24;
+    const char* const n_25; MethodClosure* const m_25;
+    const char* const n_26; MethodClosureClass* const m_26;
+    const char* const n_27; NamespaceClass* const m_27;
+    const char* const n_28; NumberClass* const m_28;
+    const char* const n_29; ObjectClass* const m_29;
+    const char* const n_30; ObjectVectorClass* const m_30;
+    const char* const n_31; ObjectVectorObject* const m_31;
+    const char* const n_32; QNameClass* const m_32;
+    const char* const n_33; QNameObject* const m_33;
+    const char* const n_34; RangeErrorClass* const m_34;
+    const char* const n_35; RangeErrorObject* const m_35;
+    const char* const n_36; ReferenceErrorClass* const m_36;
+    const char* const n_37; ReferenceErrorObject* const m_37;
+    const char* const n_38; RegExpClass* const m_38;
+    const char* const n_39; RegExpObject* const m_39;
+    const char* const n_40; ScriptObject* const m_40;
+    const char* const n_41; SecurityErrorClass* const m_41;
+    const char* const n_42; SecurityErrorObject* const m_42;
+    const char* const n_43; StringClass* const m_43;
+    const char* const n_44; SyntaxErrorClass* const m_44;
+    const char* const n_45; SyntaxErrorObject* const m_45;
+    const char* const n_46; TypeErrorClass* const m_46;
+    const char* const n_47; TypeErrorObject* const m_47;
+    const char* const n_48; UIntClass* const m_48;
+    const char* const n_49; UIntVectorClass* const m_49;
+    const char* const n_50; UIntVectorObject* const m_50;
+    const char* const n_51; URIErrorClass* const m_51;
+    const char* const n_52; URIErrorObject* const m_52;
+    const char* const n_53; UninitializedErrorClass* const m_53;
+    const char* const n_54; UninitializedErrorObject* const m_54;
+    const char* const n_55; VectorClass* const m_55;
+    const char* const n_56; VerifyErrorClass* const m_56;
+    const char* const n_57; VerifyErrorObject* const m_57;
+    const char* const n_58; XMLClass* const m_58;
+    const char* const n_59; XMLListClass* const m_59;
+    const char* const n_60; XMLListObject* const m_60;
+    const char* const n_61; XMLObject* const m_61;
+} aotABCTypes_builtin = {
+    "ArgumentErrorClass", 0,
+    "ArgumentErrorObject", 0,
+    "ArrayClass", 0,
+    "ArrayObject", 0,
+    "BooleanClass", 0,
+    "ByteArrayClass", 0,
+    "ByteArrayObject", 0,
+    "ClassClass", 0,
+    "ClassClosure", 0,
+    "DateClass", 0,
+    "DateObject", 0,
+    "DefinitionErrorClass", 0,
+    "DefinitionErrorObject", 0,
+    "DoubleVectorClass", 0,
+    "DoubleVectorObject", 0,
+    "ErrorClass", 0,
+    "ErrorObject", 0,
+    "EvalErrorClass", 0,
+    "EvalErrorObject", 0,
+    "FunctionClass", 0,
+    "FunctionObject", 0,
+    "IntClass", 0,
+    "IntVectorClass", 0,
+    "IntVectorObject", 0,
+    "MathClass", 0,
+    "MethodClosure", 0,
+    "MethodClosureClass", 0,
+    "NamespaceClass", 0,
+    "NumberClass", 0,
+    "ObjectClass", 0,
+    "ObjectVectorClass", 0,
+    "ObjectVectorObject", 0,
+    "QNameClass", 0,
+    "QNameObject", 0,
+    "RangeErrorClass", 0,
+    "RangeErrorObject", 0,
+    "ReferenceErrorClass", 0,
+    "ReferenceErrorObject", 0,
+    "RegExpClass", 0,
+    "RegExpObject", 0,
+    "ScriptObject", 0,
+    "SecurityErrorClass", 0,
+    "SecurityErrorObject", 0,
+    "StringClass", 0,
+    "SyntaxErrorClass", 0,
+    "SyntaxErrorObject", 0,
+    "TypeErrorClass", 0,
+    "TypeErrorObject", 0,
+    "UIntClass", 0,
+    "UIntVectorClass", 0,
+    "UIntVectorObject", 0,
+    "URIErrorClass", 0,
+    "URIErrorObject", 0,
+    "UninitializedErrorClass", 0,
+    "UninitializedErrorObject", 0,
+    "VectorClass", 0,
+    "VerifyErrorClass", 0,
+    "VerifyErrorObject", 0,
+    "XMLClass", 0,
+    "XMLListClass", 0,
+    "XMLListObject", 0,
+    "XMLObject", 0,
+};
+#endif
 } }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArrayClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArrayObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
