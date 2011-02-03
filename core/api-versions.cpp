@@ -54,6 +54,8 @@ const char* const kApiVersionNames[kApiVersion_count] = {
     "AIR_2_6", 
     "SWF_12", 
     "AIR_2_7", 
+    "SWF_13", 
+    "AIR_2_8", 
     "VM_INTERNAL"
 };
 
@@ -67,6 +69,8 @@ uint32_t const kApiVersionSeriesMembership[kApiVersion_count] = {
     (1<<kApiVersionSeries_AIR),
     (1<<kApiVersionSeries_FP),
     (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_AIR),
+    (1<<kApiVersionSeries_FP),
     (1<<kApiVersionSeries_AIR),
     (1<<kApiVersionSeries_FP),
     (1<<kApiVersionSeries_AIR),
@@ -91,6 +95,8 @@ ApiVersion const kApiVersionSeriesTransfer[kApiVersion_count][kApiVersionSeries_
     { kApiVersion_AIR_2_6, kApiVersion_VM_INTERNAL }, // AIR_2_6
     { kApiVersion_AIR_2_7, kApiVersion_SWF_12 }, // SWF_12
     { kApiVersion_AIR_2_7, kApiVersion_VM_INTERNAL }, // AIR_2_7
+    { kApiVersion_AIR_2_8, kApiVersion_SWF_13 }, // SWF_13
+    { kApiVersion_AIR_2_8, kApiVersion_VM_INTERNAL }, // AIR_2_8
     { kApiVersion_VM_INTERNAL, kApiVersion_VM_INTERNAL } // VM_INTERNAL
 };
 
@@ -100,8 +106,8 @@ ApiVersion const kApiVersionFirst[kApiVersionSeries_count] = {
 };
 
 ApiVersion const kApiVersionLatest[kApiVersionSeries_count] = {
-    kApiVersion_AIR_2_7,
-    kApiVersion_SWF_12
+    kApiVersion_AIR_2_8,
+    kApiVersion_SWF_13
 };
 
 }
