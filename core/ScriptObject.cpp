@@ -194,6 +194,9 @@ namespace avmplus
             const ScriptObject *o = this;
             do
             {
+                // ensure prototype is dynamic
+                if (!o->vtable->traits->getHashtableOffset())
+                    continue;
                 Atom const value = o->getTable()->getNonEmpty(name);
                 if (!InlineHashtable::isEmpty(value))
                     return value;
@@ -218,6 +221,9 @@ namespace avmplus
             }
             do
             {
+                // ensure prototype is dynamic
+                if (!o->vtable->traits->getHashtableOffset())
+                    continue;
                 Atom const value = o->getTable()->getNonEmpty(searchname);
                 if (!InlineHashtable::isEmpty(value))
                     return value;
@@ -421,6 +427,9 @@ namespace avmplus
                 const ScriptObject *o = this;
                 do
                 {
+                    // ensure prototype is dynamic
+                    if (!o->vtable->traits->getHashtableOffset())
+                        continue;
                     Atom const value = o->getTable()->getNonEmpty(name);
                     if (!InlineHashtable::isEmpty(value))
                         return value;
