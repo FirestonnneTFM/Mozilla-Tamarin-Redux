@@ -40,22 +40,22 @@
 namespace avmplus {
 
 const char* const kApiVersionNames[kApiVersion_count] = {
-    "VM_ALLVERSIONS", 
-    "AIR_1_0", 
-    "FP_10_0", 
-    "AIR_1_5", 
-    "AIR_1_5_1", 
-    "FP_10_0_32", 
-    "AIR_1_5_2", 
-    "FP_10_1", 
-    "AIR_2_0", 
-    "AIR_2_5", 
-    "FP_10_2", 
-    "AIR_2_6", 
-    "SWF_12", 
-    "AIR_2_7", 
-    "SWF_13", 
-    "AIR_2_8", 
+    "VM_ALLVERSIONS",
+    "AIR_1_0",
+    "FP_10_0",
+    "AIR_1_5",
+    "AIR_1_5_1",
+    "FP_10_0_32",
+    "AIR_1_5_2",
+    "FP_10_1",
+    "AIR_2_0",
+    "AIR_2_5",
+    "FP_10_2",
+    "AIR_2_6",
+    "SWF_12",
+    "AIR_2_7",
+    "SWF_13",
+    "AIR_2_8",
     "VM_INTERNAL"
 };
 

@@ -70,7 +70,7 @@ namespace avmplus
         double _minValue();
 
     // ------------------------ DATA SECTION BEGIN
-    private:    
+    private:
         GC_NO_DATA(NumberClass)
 
         DECLARE_SLOTS_NumberClass;

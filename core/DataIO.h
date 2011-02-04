@@ -55,10 +55,10 @@ namespace avmplus
         kLittleEndian = 1
     };
 
-    REALLY_INLINE void byteSwapU16(uint16_t& a) 
-    { 
+    REALLY_INLINE void byteSwapU16(uint16_t& a)
+    {
 #if defined(_MSC_VER)
-        a = _byteswap_ushort(a); 
+        a = _byteswap_ushort(a);
 #else
         // OPTIMIZEME: GCC 4.3+ have intrinsics we should use
         a = ((a & 0x00ffU)<<8)|
@@ -66,10 +66,10 @@ namespace avmplus
 #endif
     }
 
-    REALLY_INLINE void byteSwapU32(uint32_t& a) 
-    { 
+    REALLY_INLINE void byteSwapU32(uint32_t& a)
+    {
 #if defined(_MSC_VER)
-        a = _byteswap_ulong(a); 
+        a = _byteswap_ulong(a);
 #else
         // OPTIMIZEME: GCC 4.3+ have intrinsics we should use
         a = ((a & 0x000000ffUL)<<24)|
@@ -79,10 +79,10 @@ namespace avmplus
 #endif
     }
 
-    REALLY_INLINE void byteSwapU64(uint64_t& a) 
-    { 
+    REALLY_INLINE void byteSwapU64(uint64_t& a)
+    {
 #if defined(_MSC_VER)
-        a = _byteswap_uint64(a); 
+        a = _byteswap_uint64(a);
 #else
         // OPTIMIZEME: GCC 4.3+ have intrinsics we should use
         a = ((a & 0x00000000000000ffULL)<<56)|

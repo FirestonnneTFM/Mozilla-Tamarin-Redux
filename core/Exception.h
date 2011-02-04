@@ -128,7 +128,7 @@ namespace avmplus
     {
     public:
         static ExceptionHandlerTable* create(MMgc::GC* gc, int exception_count)
-        { 
+        {
             size_t extra = exception_count == 0 ? 0 : sizeof(ExceptionHandler)*(exception_count-1);
             return new (gc, MMgc::kExact, extra) ExceptionHandlerTable(exception_count);
         }

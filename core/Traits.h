@@ -462,7 +462,7 @@ namespace avmplus
         // jitted tracer won't have to interpret any layout data structure at
         // run time.
         
-        // Trace slot storage from a bitmap; useful for pointer-dense objects.  
+        // Trace slot storage from a bitmap; useful for pointer-dense objects.
         // 'traceInfo' marks the locations to care about (one bit per 32-bit word,
         // even on 64-bit systems).  'bitsUsed' is the number of bits to examine
         // in traceInfo, starting with bit 1.

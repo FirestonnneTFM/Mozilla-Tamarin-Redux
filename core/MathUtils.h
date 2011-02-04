@@ -105,7 +105,7 @@ namespace avmplus
         /// Return 1 if value is +Infinity, -1 if -Infinity, 0 otherwise.
         static int32_t isInfinite(double value);
         REALLY_INLINE static bool isNaNInline(double value); // only for time critical routines
-        static bool isNaN(double value); 
+        static bool isNaN(double value);
         static bool isNegZero(double x);
         static double log(double value);
         REALLY_INLINE static double max(double x, double y);

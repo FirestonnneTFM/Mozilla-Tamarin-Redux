@@ -52,7 +52,7 @@ REALLY_INLINE bool Quad<VALUE_TYPE>::matchNS(Namespacep ns) const
 
     uintptr_t const u1 = this->ns->m_uriAndType;
     uintptr_t const u2 = ns->m_uriAndType;
-    return  u1 == u2 && 
+    return  u1 == u2 &&
             (u1 & 7) == Namespace::NS_Public && // implies both are public, since u1 == u2
             this->apiVersion() <= ns->getApiVersion();
 }

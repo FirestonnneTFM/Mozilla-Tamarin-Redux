@@ -46,7 +46,7 @@
 namespace avmplus
 {
     // Force explicit instantiations for various non-inlined methods;
-    // some compilers don't need this, but some do. 
+    // some compilers don't need this, but some do.
 
     template class TypedVectorClass<IntVectorObject>;
     template class TypedVectorClass<UIntVectorObject>;
@@ -201,7 +201,7 @@ namespace avmplus
     }
     // ----------------------------
 
-    IntVectorClass::IntVectorClass(VTable* vtable) 
+    IntVectorClass::IntVectorClass(VTable* vtable)
         : TypedVectorClass<IntVectorObject>(vtable)
     {
         if (!toplevel()->intVectorClass)
@@ -211,7 +211,7 @@ namespace avmplus
 
     // ----------------------------
 
-    UIntVectorClass::UIntVectorClass(VTable* vtable) 
+    UIntVectorClass::UIntVectorClass(VTable* vtable)
         : TypedVectorClass<UIntVectorObject>(vtable)
     {
         if (!toplevel()->uintVectorClass)
@@ -221,7 +221,7 @@ namespace avmplus
 
     // ----------------------------
 
-    DoubleVectorClass::DoubleVectorClass(VTable* vtable) 
+    DoubleVectorClass::DoubleVectorClass(VTable* vtable)
         : TypedVectorClass<DoubleVectorObject>(vtable)
     {
         if (!toplevel()->doubleVectorClass)
@@ -231,7 +231,7 @@ namespace avmplus
 
     // ----------------------------
 
-    ObjectVectorClass::ObjectVectorClass(VTable* vtable) 
+    ObjectVectorClass::ObjectVectorClass(VTable* vtable)
         : TypedVectorClass<ObjectVectorObject>(vtable)
     {
         if (!toplevel()->objectVectorClass)
@@ -247,8 +247,8 @@ namespace avmplus
     }
 
     IntVectorObject* IntVectorObject::newThisType()
-    { 
-        return (IntVectorObject*)_newVector(); 
+    {
+        return (IntVectorObject*)_newVector();
     }
 
     // ----------------------------
@@ -259,8 +259,8 @@ namespace avmplus
     }
 
     UIntVectorObject* UIntVectorObject::newThisType()
-    { 
-        return (UIntVectorObject*)_newVector(); 
+    {
+        return (UIntVectorObject*)_newVector();
     }
 
     // ----------------------------
@@ -271,8 +271,8 @@ namespace avmplus
     }
 
     DoubleVectorObject* DoubleVectorObject::newThisType()
-    { 
-        return (DoubleVectorObject*)_newVector(); 
+    {
+        return (DoubleVectorObject*)_newVector();
     }
 
     // ----------------------------
@@ -283,7 +283,7 @@ namespace avmplus
     }
 
     ObjectVectorObject* ObjectVectorObject::newThisType()
-    { 
-        return (ObjectVectorObject*)_newVector(); 
+    {
+        return (ObjectVectorObject*)_newVector();
     }
 }

@@ -420,7 +420,7 @@ namespace avmplus
         }
     };
 
-    // read types out of an unsigned char*  
+    // read types out of an unsigned char*
     class PtrArgDescIter
     {
     protected:
@@ -855,7 +855,7 @@ namespace avmplus
         // something => something
         Atom returnCoercer32Impl(Atom a, Traits* retTraits, MethodEnv* env)
         {
-            Traits* calleeRT = env->method->getMethodSignature()->returnTraits();   
+            Traits* calleeRT = env->method->getMethodSignature()->returnTraits();
             AvmValue v;
 
             v.set(a, calleeRT);
@@ -1250,7 +1250,7 @@ namespace avmplus
         (void)callerAp;
         (void)l;
 
-        // pass MethodEnv at the end 
+        // pass MethodEnv at the end
         *l.ptrArg() = env;
     }
 
@@ -1419,7 +1419,7 @@ namespace avmplus
         double result = coerceNCdeclShim(
                 (void*)info->handler_function(), argDescSize(info), apArgDescCoercer, env, NUMBER_TYPE, (uintptr_t)argc , (void*)ap);
         return result;
-    }   
+    }
 
     // calculate size needed for ap style argument block
     int32_t argDescApSize(uintptr_t argDesc, MethodEnv* env)

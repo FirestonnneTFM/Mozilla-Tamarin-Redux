@@ -143,7 +143,7 @@ REALLY_INLINE Atom MethodEnv::coerceEnter(Atom thisArg)
 * General case for method calls
 * @param argc The number of arguments that are contained in the argument list (excluding the "thisAtom" element)
 * @param args The argument list that shall be passed to the invoked method (thisAtom, arg1 ... argN)
-* 
+*
 * NOTE: The contents of the given argument list can be modified during invocation of the MethodEnv without further warning.
 *       Do not reuse an argument list AS-IS for multiple method calls, unless you make sure to reinitialize the contents of
 *       the argument list after each call.

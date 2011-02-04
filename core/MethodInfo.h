@@ -120,7 +120,7 @@ namespace avmplus
 #endif
 
     public:
-        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, 
+        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc,
                                                 int32_t _method_id,
                                                 PoolObject* pool,
                                                 const uint8_t* abc_info_pos,

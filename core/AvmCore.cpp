@@ -463,7 +463,7 @@ namespace avmplus
         // cache public namespaces. (This creates namespaces that aren't in the active
         // series, but that's ok.)
         this->publicNamespaces = NamespaceSet::_create(GetGC(), kApiVersion_count);
-        for (int i = 0; i < kApiVersion_count; ++i) 
+        for (int i = 0; i < kApiVersion_count; ++i)
         {
             Namespacep ns = this->internNamespace(this->newNamespace(kEmptyString, Namespace::NS_Public, ApiVersion(i)));
             publicNamespaces->_initNsAt(i, ns);
@@ -4800,8 +4800,8 @@ return the result of the comparison ToPrimitive(x) == y.
             int const idx = uri->length() - 1;
             int const mark = uri->charAt(idx);
             // if mark is not recognized as a valid version marker, then ignore it
-            if (mark >= AvmCore::MIN_API_MARK && 
-                mark < AvmCore::MIN_API_MARK + kApiVersion_count) 
+            if (mark >= AvmCore::MIN_API_MARK &&
+                mark < AvmCore::MIN_API_MARK + kApiVersion_count)
             {
                 apiVersion = ApiVersion(mark - AvmCore::MIN_API_MARK);
                 uri = (idx > 0) ? internSubstring(uri, 0, idx) : Stringp(kEmptyString);
@@ -4820,7 +4820,7 @@ return the result of the comparison ToPrimitive(x) == y.
             return ns;
 
         Namespacep ns2 = gotNamespace(ns->m_uriAndType, apiVersion);
-        if (ns2 == NULL) 
+        if (ns2 == NULL)
         {
             ns2 = internNamespace(newNamespace(ns->getURI(), ns->getType(), apiVersion));
         }

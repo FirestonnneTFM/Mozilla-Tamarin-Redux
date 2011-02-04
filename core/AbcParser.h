@@ -55,7 +55,7 @@ namespace avmplus
      *  ...
      *
      * Starting with the Flash Player after "Spicy", the highest minor ABC version
-     * supported always corresponds to the highest SWF version of that 
+     * supported always corresponds to the highest SWF version of that
      * player.  Thus every time a Player is shipped we provide the ability to make
      * changes to ABC format and semantics.
      *

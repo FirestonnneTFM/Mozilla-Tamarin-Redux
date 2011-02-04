@@ -214,7 +214,7 @@ namespace avmplus
     private:
         friend class DomainMgr;
         // "loaded" Traits/Scripts are the Traits/ScriptEnvs that are actually
-        // defined in this Domain. "cached" Traits/Scripts are the ones that 
+        // defined in this Domain. "cached" Traits/Scripts are the ones that
         // actually should be used for a given name lookup; the cached versions
         // take precedence over the loaded ones (on a freeze-on-first-use basis)
         // to ensure that the types associated with a name can't change as new
@@ -239,8 +239,8 @@ namespace avmplus
         GCList<DebuggerMethodInfo>                  GC_STRUCTURE_IFDEF(_method_dmi, DEBUGGER);
 #endif
         // Only allocated & populated if core->config.methodName is true.
-        // Indexed by MethodInfo::_method_id, if the value is positive, it's an index into cpool_string; 
-        // if negative, an index into cpool_mn. 
+        // Indexed by MethodInfo::_method_id, if the value is positive, it's an index into cpool_string;
+        // if negative, an index into cpool_mn.
         // Always safe because those indices are limited to 30 bits.
         DataList<int32_t>                           GC_STRUCTURE(_method_name_indices);
                 void                                setupConstantStrings(uint32_t count);

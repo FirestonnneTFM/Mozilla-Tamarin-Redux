@@ -300,7 +300,7 @@ found1:
                 return tf.value;
             }
         }
-        if (nsFoundOut) 
+        if (nsFoundOut)
             *nsFoundOut = NULL;
         return (VALUE_TYPE)NULL;
     }
@@ -409,7 +409,7 @@ found1:
         
         // New table entry for this <name,ns> pair
         size++;
-        // OPTIMIZEME: we know the entries are zero, so we could use WriteBarrierRC_ctor here... 
+        // OPTIMIZEME: we know the entries are zero, so we could use WriteBarrierRC_ctor here...
         // except that it will call GetGC() on the address, which will be wrong for > 4k.
         // Need a version of WriteBarrierRC_ctor that takes explicit GC*.
         WBRC(gc, m_quads, &cur->name, name);

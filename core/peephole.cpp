@@ -149,50 +149,50 @@ const WordcodeEmitter::peep_transition_t WordcodeEmitter::transitions[] = {
 };
 
 const uint16_t WordcodeEmitter::toplevel[] = {
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    nop                  throw                getsuper             setsuper             dxns                 dxnslate            
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    ifnlt                ifnle                ifngt                ifnge               
-0, 0, 0, 0, 0, 0, 0, 0, // jump                 iftrue               iffalse              ifeq                 ifne                 iflt                 ifle                 ifgt                
-0, 0, 0, 0, 0, 0, 0, 0, // ifge                 ifstricteq           ifstrictne           lookupswitch         pushwith             popscope             nextname             hasnext             
-0, 0, 0, 0, 0, 0, 0, 0, // pushnull             pushundefined        -                    nextvalue            -                    -                    pushtrue             pushfalse           
-0, 0, 0, 50, 0, 0, 0, 0, // pushnan              pop                  dup                  swap                 pushstring           -                    -                    pushdouble          
-0, 0, 0, 0, 0, 0, 0, 0, // pushscope            pushnamespace        hasnext2             -                    -                    li8                  li16                 li32                
-0, 0, 0, 0, 0, 0, 0, 0, // lf32                 lf64                 si8                  si16                 si32                 sf32                 sf64                 -                   
-0, 0, 0, 0, 0, 0, 0, 0, // newfunction          call                 construct            callmethod           callstatic           callsuper            callproperty         returnvoid          
-0, 0, 0, 0, 0, 0, 0, 0, // returnvalue          constructsuper       constructprop        -                    callproplex          -                    callsupervoid        callpropvoid        
-0, 0, 0, 0, 0, 0, 0, 0, // sxi1                 sxi8                 sxi16                applytype            -                    newobject            newarray             newactivation       
-0, 0, 0, 0, 0, 0, 0, 0, // newclass             getdescendants       newcatch             -                    -                    findpropstrict       findproperty         finddef             
-0, 0, 46, 48, 0, 0, 0, 0, // getlex               setproperty          getlocal             setlocal             getglobalscope       getscopeobject       getproperty          getouterscope       
-0, 0, 0, 0, 0, 0, 0, 0, // initproperty         -                    deleteproperty       -                    getslot              setslot              getglobalslot        setglobalslot       
-0, 0, 0, 0, 0, 0, 0, 0, // convert_s            esc_xelem            esc_xattr            convert_i            convert_u            convert_d            convert_b            convert_o           
-0, 0, 0, 0, 0, 0, 0, 0, // checkfilter          -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // coerce               coerce_b             coerce_a             coerce_i             coerce_d             coerce_s             astype               astypelate          
-0, 0, 0, 0, 0, 0, 0, 0, // coerce_u             coerce_o             -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // negate               increment            inclocal             decrement            declocal             typeof               not                  bitnot              
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // add                  subtract             multiply             divide               modulo               lshift               rshift               urshift             
-0, 0, 0, 0, 0, 0, 0, 0, // bitand               bitor                bitxor               equals               strictequals         lessthan             lessequals           greaterthan         
-0, 0, 0, 0, 0, 0, 0, 0, // greaterequals        instanceof           istype               istypelate           in                   -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // increment_i          decrement_i          inclocal_i           declocal_i           negate_i             add_i                subtract_i           multiply_i          
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // getlocal0            getlocal1            getlocal2            getlocal3            setlocal0            setlocal1            setlocal2            setlocal3           
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    debug               
-0, 0, 0, 0, 0, 0, 0, 0, // debugline            debugfile            -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    pushbits             push_doublebits      get2locals           get3locals           get4locals           get5locals           storelocal          
-0, 0, 0, 0, 0, 0, 0, 0, // add_ll               add_set_lll          subtract_ll          multiply_ll          divide_ll            modulo_ll            bitand_ll            bitor_ll            
-0, 0, 0, 0, 0, 0, 0, 0, // bitxor_ll            add_lb               subtract_lb          multiply_lb          divide_lb            bitand_lb            bitor_lb             bitxor_lb           
-0, 0, 0, 0, 0, 0, 0, 0, // iflt_ll              ifnlt_ll             ifle_ll              ifnle_ll             ifgt_ll              ifngt_ll             ifge_ll              ifnge_ll            
-0, 0, 0, 0, 0, 0, 0, 0, // ifeq_ll              ifne_ll              ifstricteq_ll        ifstrictne_ll        iflt_lb              ifnlt_lb             ifle_lb              ifnle_lb            
-0, 0, 0, 0, 0, 0, 0, 0, // ifgt_lb              ifngt_lb             ifge_lb              ifnge_lb             ifeq_lb              ifne_lb              ifstricteq_lb        ifstrictne_lb       
-0, 0, 0, 0, 0, 0, 0, 0, // swap_pop             findpropglobal       findpropglobalstrict -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -                   
-0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                   
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    nop                  throw                getsuper             setsuper             dxns                 dxnslate
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    ifnlt                ifnle                ifngt                ifnge
+0, 0, 0, 0, 0, 0, 0, 0, // jump                 iftrue               iffalse              ifeq                 ifne                 iflt                 ifle                 ifgt
+0, 0, 0, 0, 0, 0, 0, 0, // ifge                 ifstricteq           ifstrictne           lookupswitch         pushwith             popscope             nextname             hasnext
+0, 0, 0, 0, 0, 0, 0, 0, // pushnull             pushundefined        -                    nextvalue            -                    -                    pushtrue             pushfalse
+0, 0, 0, 50, 0, 0, 0, 0, // pushnan              pop                  dup                  swap                 pushstring           -                    -                    pushdouble
+0, 0, 0, 0, 0, 0, 0, 0, // pushscope            pushnamespace        hasnext2             -                    -                    li8                  li16                 li32
+0, 0, 0, 0, 0, 0, 0, 0, // lf32                 lf64                 si8                  si16                 si32                 sf32                 sf64                 -
+0, 0, 0, 0, 0, 0, 0, 0, // newfunction          call                 construct            callmethod           callstatic           callsuper            callproperty         returnvoid
+0, 0, 0, 0, 0, 0, 0, 0, // returnvalue          constructsuper       constructprop        -                    callproplex          -                    callsupervoid        callpropvoid
+0, 0, 0, 0, 0, 0, 0, 0, // sxi1                 sxi8                 sxi16                applytype            -                    newobject            newarray             newactivation
+0, 0, 0, 0, 0, 0, 0, 0, // newclass             getdescendants       newcatch             -                    -                    findpropstrict       findproperty         finddef
+0, 0, 46, 48, 0, 0, 0, 0, // getlex               setproperty          getlocal             setlocal             getglobalscope       getscopeobject       getproperty          getouterscope
+0, 0, 0, 0, 0, 0, 0, 0, // initproperty         -                    deleteproperty       -                    getslot              setslot              getglobalslot        setglobalslot
+0, 0, 0, 0, 0, 0, 0, 0, // convert_s            esc_xelem            esc_xattr            convert_i            convert_u            convert_d            convert_b            convert_o
+0, 0, 0, 0, 0, 0, 0, 0, // checkfilter          -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // coerce               coerce_b             coerce_a             coerce_i             coerce_d             coerce_s             astype               astypelate
+0, 0, 0, 0, 0, 0, 0, 0, // coerce_u             coerce_o             -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // negate               increment            inclocal             decrement            declocal             typeof               not                  bitnot
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // add                  subtract             multiply             divide               modulo               lshift               rshift               urshift
+0, 0, 0, 0, 0, 0, 0, 0, // bitand               bitor                bitxor               equals               strictequals         lessthan             lessequals           greaterthan
+0, 0, 0, 0, 0, 0, 0, 0, // greaterequals        instanceof           istype               istypelate           in                   -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // increment_i          decrement_i          inclocal_i           declocal_i           negate_i             add_i                subtract_i           multiply_i
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // getlocal0            getlocal1            getlocal2            getlocal3            setlocal0            setlocal1            setlocal2            setlocal3
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    debug
+0, 0, 0, 0, 0, 0, 0, 0, // debugline            debugfile            -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    pushbits             push_doublebits      get2locals           get3locals           get4locals           get5locals           storelocal
+0, 0, 0, 0, 0, 0, 0, 0, // add_ll               add_set_lll          subtract_ll          multiply_ll          divide_ll            modulo_ll            bitand_ll            bitor_ll
+0, 0, 0, 0, 0, 0, 0, 0, // bitxor_ll            add_lb               subtract_lb          multiply_lb          divide_lb            bitand_lb            bitor_lb             bitxor_lb
+0, 0, 0, 0, 0, 0, 0, 0, // iflt_ll              ifnlt_ll             ifle_ll              ifnle_ll             ifgt_ll              ifngt_ll             ifge_ll              ifnge_ll
+0, 0, 0, 0, 0, 0, 0, 0, // ifeq_ll              ifne_ll              ifstricteq_ll        ifstrictne_ll        iflt_lb              ifnlt_lb             ifle_lb              ifnle_lb
+0, 0, 0, 0, 0, 0, 0, 0, // ifgt_lb              ifngt_lb             ifge_lb              ifnge_lb             ifeq_lb              ifne_lb              ifstricteq_lb        ifstrictne_lb
+0, 0, 0, 0, 0, 0, 0, 0, // swap_pop             findpropglobal       findpropglobalstrict -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                    -                    -
+0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -
 };
 
 bool WordcodeEmitter::commit(uint32_t action)

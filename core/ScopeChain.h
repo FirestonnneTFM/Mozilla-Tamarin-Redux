@@ -93,7 +93,7 @@ namespace avmplus
     * a captured scope chain
     */
     class GC_CPP_EXACT(ScopeChain, MMgc::GCTraceableObject)
-    {        
+    {
 #ifdef VMCFG_NANOJIT
         friend class CodegenLIR;
         friend class MopsRangeCheckFilter;

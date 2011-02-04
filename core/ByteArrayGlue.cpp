@@ -126,10 +126,10 @@ namespace avmplus
 
         if (minimumCapacity > m_owner->m_capacity || m_owner->IsCopyOnWrite())
         {
-            uint32_t newCapacity = m_owner->m_capacity << 1;          
+            uint32_t newCapacity = m_owner->m_capacity << 1;
             if (newCapacity < minimumCapacity)
                 newCapacity = uint32_t(minimumCapacity);
-            if (newCapacity < kGrowthIncr) 
+            if (newCapacity < kGrowthIncr)
                 newCapacity = kGrowthIncr;
 
             m_oldArray = m_owner->m_array;
@@ -163,7 +163,7 @@ namespace avmplus
             occurs, you must not discard the old buffer until copying takes place.
         (2) It avoid redundant calls to NotifySubscribers(); previously we'd call
             once when a reallocation occurred, then again when the length field
-            changed. 
+            changed.
         (3) It streamlines copy-on-write handling; formerly we either did
             redundant CopyOnWrite alloc-and-copy followed by a Grow alloc-and-copy,
             or an if-else clause with redundant alloc-and-copy.
@@ -174,23 +174,23 @@ namespace avmplus
     */
     ByteArray::Grower::~Grower()
     {
-        if (m_oldArray != m_owner->m_array || m_oldLength != m_owner->m_length) 
+        if (m_oldArray != m_owner->m_array || m_oldLength != m_owner->m_length)
         {
             m_owner->NotifySubscribers();
         }
         // m_oldArray could be NULL if we grew a copy-on-write ByteArray.
-        if (m_oldArray != NULL && m_oldArray != m_owner->m_array) 
+        if (m_oldArray != NULL && m_oldArray != m_owner->m_array)
         {
             m_owner->TellGcDeleteBufferMemory(m_oldArray, m_oldLength);
             mmfx_delete_array(m_oldArray);
         }
     }
 
-    uint8_t* FASTCALL ByteArray::GetWritableBuffer() 
-    { 
+    uint8_t* FASTCALL ByteArray::GetWritableBuffer()
+    {
         Grower grower(this);
         grower.EnsureWritableCapacity(m_capacity);
-        return m_array; 
+        return m_array;
     }
 
     uint8_t& ByteArray::operator[](uint32_t index)
@@ -211,7 +211,7 @@ namespace avmplus
             grower.EnsureWritableCapacity(newLength);
         }
         m_length = newLength;
-        if (m_position > newLength) 
+        if (m_position > newLength)
             m_position = newLength;
     }
 
@@ -220,11 +220,11 @@ namespace avmplus
     /*static*/
     REALLY_INLINE void move_or_copy(void* dst, const void* src, uint32_t count)
     {
-        if ((uintptr_t(dst) - uintptr_t(src)) >= uintptr_t(count)) 
+        if ((uintptr_t(dst) - uintptr_t(src)) >= uintptr_t(count))
         {
             VMPI_memcpy(dst, src, count);
-        } 
-        else 
+        }
+        else
         {
             VMPI_memmove(dst, src, count);
         }
@@ -246,7 +246,7 @@ namespace avmplus
         
         move_or_copy(m_array + m_position, buffer, count);
         m_position += count;
-        if (m_length < m_position) 
+        if (m_length < m_position)
             m_length = m_position;
     }
 
@@ -338,7 +338,7 @@ namespace avmplus
         uint32_t origLen                        = m_length;
         MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
         if (!origLen) // empty buffer should give empty result
-            return; 
+            return;
 
         m_array             = NULL;
         m_length            = 0;
@@ -358,11 +358,11 @@ namespace avmplus
 
         z_stream stream;
         VMPI_memset(&stream, 0, sizeof(stream));
-        error = deflateInit2(&stream, 
+        error = deflateInit2(&stream,
                                 Z_BEST_COMPRESSION,
-                                Z_DEFLATED, 
-                                algorithm == k_zlib ? MAX_WBITS : MAX_WINDOW_RAW_DEFLATE, 
-                                DEFAULT_MEMORY_USE, 
+                                Z_DEFLATED,
+                                algorithm == k_zlib ? MAX_WBITS : MAX_WINDOW_RAW_DEFLATE,
+                                DEFAULT_MEMORY_USE,
                                 Z_DEFAULT_STRATEGY);
         AvmAssert(error == Z_OK);
 
@@ -407,7 +407,7 @@ namespace avmplus
         uint32_t origPos                        = m_position;
         MMgc::GCObject* origCopyOnWriteOwner    = m_copyOnWriteOwner;
         if (!origLen) // empty buffer should give empty result
-            return; 
+            return;
 
         m_array             = NULL;
         m_length            = 0;
@@ -484,12 +484,12 @@ namespace avmplus
 
     Atom ByteArrayObject::getUintProperty(uint32_t i) const
     {
-        if (i < m_byteArray.GetLength()) 
+        if (i < m_byteArray.GetLength())
         {
             intptr_t const b = m_byteArray[i];
             return atomFromIntptrValue(b);
-        } 
-        else 
+        }
+        else
         {
             return undefinedAtom;
         }
@@ -508,7 +508,7 @@ namespace avmplus
     Atom ByteArrayObject::getAtomProperty(Atom name) const
     {
         uint32_t index;
-        if (AvmCore::getIndexFromAtom(name, &index)) 
+        if (AvmCore::getIndexFromAtom(name, &index))
         {
             return getUintProperty(index);
         }
@@ -519,11 +519,11 @@ namespace avmplus
     void ByteArrayObject::setAtomProperty(Atom name, Atom value)
     {
         uint32_t index;
-        if (AvmCore::getIndexFromAtom(name, &index)) 
+        if (AvmCore::getIndexFromAtom(name, &index))
         {
             setUintProperty(index, value);
-        } 
-        else 
+        }
+        else
         {
             ScriptObject::setAtomProperty(name, value);
         }
@@ -531,10 +531,10 @@ namespace avmplus
     
     bool ByteArrayObject::hasAtomProperty(Atom name) const
     {
-        if (core()->currentBugCompatibility()->bugzilla558863) 
+        if (core()->currentBugCompatibility()->bugzilla558863)
         {
             uint32_t index;
-            if (AvmCore::getIndexFromAtom(name, &index)) 
+            if (AvmCore::getIndexFromAtom(name, &index))
             {
                 return index < m_byteArray.GetLength();
             }
@@ -551,7 +551,7 @@ namespace avmplus
     Atom ByteArrayObject::getMultinameProperty(const Multiname* name) const
     {
         uint32_t index;
-        if (name->getName()->parseIndex(index)) 
+        if (name->getName()->parseIndex(index))
         {
             return getUintProperty(index);
         }
@@ -562,7 +562,7 @@ namespace avmplus
     void ByteArrayObject::setMultinameProperty(const Multiname* name, Atom value)
     {
         uint32_t index;
-        if (name->getName()->parseIndex(index)) 
+        if (name->getName()->parseIndex(index))
         {
             setUintProperty(index, value);
         }
@@ -575,7 +575,7 @@ namespace avmplus
     bool ByteArrayObject::hasMultinameProperty(const Multiname* name) const
     {
         uint32_t index;
-        if (name->getName()->parseIndex(index)) 
+        if (name->getName()->parseIndex(index))
         {
             return index < m_byteArray.GetLength();
         }
@@ -655,12 +655,12 @@ namespace avmplus
 
     int ByteArrayObject::readInt()
     {
-        return (int32_t)m_byteArray.ReadU32();      
+        return (int32_t)m_byteArray.ReadU32();
     }
 
     uint32_t ByteArrayObject::readUnsignedInt()
     {
-        return m_byteArray.ReadU32();       
+        return m_byteArray.ReadU32();
     }
     
     double ByteArrayObject::readFloat()

@@ -53,42 +53,42 @@ REALLY_INLINE /*static*/ ScriptObject* ScriptObject::create(MMgc::GC* gc, VTable
     return new (gc, MMgc::kExact, vtable->getExtraSize()) ScriptObject(vtable, delegate, htCapacity);
 }
 
-REALLY_INLINE ScriptObject* ScriptObject::getDelegate() const 
-{ 
-    return delegate; 
+REALLY_INLINE ScriptObject* ScriptObject::getDelegate() const
+{
+    return delegate;
 }
 
-REALLY_INLINE void ScriptObject::setDelegate(ScriptObject *d) 
-{ 
-    delegate = d; 
+REALLY_INLINE void ScriptObject::setDelegate(ScriptObject *d)
+{
+    delegate = d;
 }
 
-REALLY_INLINE Atom ScriptObject::atom() const 
+REALLY_INLINE Atom ScriptObject::atom() const
 {
     return kObjectType|(uintptr_t)this;
 }
 
-REALLY_INLINE /*virtual*/ Atom ScriptObject::toAtom() const 
+REALLY_INLINE /*virtual*/ Atom ScriptObject::toAtom() const
 {
     return atom();
 }
 
-REALLY_INLINE Traits* ScriptObject::traits() const 
+REALLY_INLINE Traits* ScriptObject::traits() const
 {
     return vtable->traits;
 }
 
-REALLY_INLINE AvmCore* ScriptObject::core() const 
+REALLY_INLINE AvmCore* ScriptObject::core() const
 {
     return vtable->traits->core;
 }
 
-REALLY_INLINE MMgc::GC* ScriptObject::gc() const 
+REALLY_INLINE MMgc::GC* ScriptObject::gc() const
 {
     return core()->GetGC();
 }
 
-REALLY_INLINE Toplevel* ScriptObject::toplevel() const 
+REALLY_INLINE Toplevel* ScriptObject::toplevel() const
 {
     return vtable->toplevel();
 }
@@ -151,15 +151,15 @@ REALLY_INLINE void ScriptObject::setStringPropertyIsEnumerable(Stringp name, boo
     setAtomPropertyIsEnumerable(name->atom(), enumerable);
 }
 
-REALLY_INLINE /*virtual*/ bool ScriptObject::isMethodClosure() 
-{ 
+REALLY_INLINE /*virtual*/ bool ScriptObject::isMethodClosure()
+{
     return false;
 }
 
-REALLY_INLINE /*virtual*/ CodeContext* ScriptObject::getFunctionCodeContext() const 
-{ 
-    AvmAssert(0); 
-    return NULL; 
+REALLY_INLINE /*virtual*/ CodeContext* ScriptObject::getFunctionCodeContext() const
+{
+    AvmAssert(0);
+    return NULL;
 }
 
 REALLY_INLINE /*virtual*/ ArrayObject* ScriptObject::toArrayObject()

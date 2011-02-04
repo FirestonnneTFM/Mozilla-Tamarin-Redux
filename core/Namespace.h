@@ -56,7 +56,7 @@ namespace avmplus
     private:
         AtomWB              m_prefix;
         uintptr_t           m_uriAndType;          // Uses 3 bits for flags, but otherwise is really a Stringp
-        ApiVersion  const   m_apiVersion;   
+        ApiVersion  const   m_apiVersion;
 
     public:
         enum NamespaceType

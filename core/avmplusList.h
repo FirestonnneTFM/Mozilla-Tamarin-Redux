@@ -49,7 +49,7 @@ namespace avmplus
      *
      * The List variants can be instantiated on the stack or embedded as a field in another class.
      * However, they cannot be allocated dynamically (operator new is private/unimplemented):
-     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject. 
+     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject.
      * If you need to dynamically allocate a list, use HeapList to wrap an instance.
      *
      * Also, keep in mind that since some variants allocate using nonGC memory, one MUST
@@ -109,7 +109,7 @@ namespace avmplus
     //
     // ListData *always* allocates via FixedMalloc.
     template<class STORAGE>
-    struct ListData 
+    struct ListData
     {
         uint32_t    len;
         MMgc::GC*   _gc;
@@ -126,7 +126,7 @@ namespace avmplus
             using namespace MMgc;
             
             FixedMalloc* const fm = FixedMalloc::GetFixedMalloc();
-            void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>), 
+            void* mem = fm->Alloc(GCHeap::CheckForAllocSizeOverflow(sizeof(ListData<STORAGE>),
                                                                     GCHeap::CheckForCallocSizeOverflow(totalElements-1, sizeof(STORAGE))),
                                   kNone);
             gc->SignalDependentAllocation(fm->Size(mem));
@@ -316,14 +316,14 @@ namespace avmplus
         
     public:
         // capacity is the initial capacity to preallocate for the List.
-        // 
+        //
         // If args is NULL, the new list will have the given capacity, and a length of zero.
         //
         // If args is non-NULL, it is expected to point to an arrray of 'capacity'
         // entries, which will be used to initialize the list. The new list will
         // have length equal to capacity.
         //
-        explicit ListImpl(MMgc::GC* gc, 
+        explicit ListImpl(MMgc::GC* gc,
                           uint32_t capacity,
                           const T* args = NULL);
 
@@ -340,7 +340,7 @@ namespace avmplus
         // If growth is necessary, a List-dependent empty value will be stored in the
         // newly expanded area (typically 0 / null). Note that setting the
         // length to a smaller value will not necessarily reduce the capacity() value.
-        // Most code should never need to use this method; it's provided mainly for 
+        // Most code should never need to use this method; it's provided mainly for
         // Array / Vector code that needs this level of control.
         void set_length(uint32_t len);
 
@@ -351,7 +351,7 @@ namespace avmplus
         // Explicitly set the capacity of the ListImpl, growing or contracting as necessary.
         // If the new capacity is <= length(), the length will be reduced. (length will never
         // increase from this call, however.) Most code should never need to use this method,
-        // as the standard growth algorithm is smart enough for typical use; it's provided mainly for 
+        // as the standard growth algorithm is smart enough for typical use; it's provided mainly for
         // Array / Vector code that needs this level of control.
         void set_capacity(uint32_t cap);
         
@@ -365,16 +365,16 @@ namespace avmplus
         // Equivalent to get(length()-1).
         T last() const;
 
-        // Replace the item at the given index with the new value. 
+        // Replace the item at the given index with the new value.
         // This call will expand the List if necessary, and adjust length() if the new index
         // is >= the old length()
         void set(uint32_t index, T value);
         
-        // Replace the item at the given index with the new value. 
+        // Replace the item at the given index with the new value.
         // This call *will not* expand the List if necessary; if you specify a value >= length()
         // we will assert, and cause unpredictable behavior in release builds. This is an unsafe
         // call that should be used *only* when the caller has already verified that the index is
-        // valid; it's only provided for some superhot code paths where this is the case 
+        // valid; it's only provided for some superhot code paths where this is the case
         // (e.g., inside the Array implementation). Most code should never use this call;
         // instead, use set(), which is safer and only slightly slower.
         void replace(uint32_t index, T value);
@@ -400,7 +400,7 @@ namespace avmplus
         // Reverse the ListImpl in place.
         void reverse();
 
-        // Remove all items from the ListImpl and minimize capacity; 
+        // Remove all items from the ListImpl and minimize capacity;
         // after this call, isEmpty() == true, length() == 0, capacity() == kListMinCapacity.
         void clear();
 
@@ -425,24 +425,24 @@ namespace avmplus
         // Equivalent to get(index).
         T operator[](uint32_t index) const;
         
-        // Ensure that the ListImpl can hold at least cap elements. This does not affect length(); 
+        // Ensure that the ListImpl can hold at least cap elements. This does not affect length();
         // it's primarily useful to reduce redundant allocations when filling in a list.
         void ensureCapacity(uint32_t cap);
 
         // Return the number of bytes used for the ListImpl's dynamically-allocated storage.
-        uint64_t bytesUsed() const; 
+        uint64_t bytesUsed() const;
 
         // Zero out the data field; this is necessary in unusual situations where the List's dtor
         // can be run after MMGC is torn down (which would result in using a stale pointer).
         // *** DANGER*** Most code should never need (or want) to use this call;
         // it renders the list unsafe to use, and calling *any* method on the list afterwards
-        // (other than the dtor) will result in a crash. 
+        // (other than the dtor) will result in a crash.
         void skipDestructor();
 
         // Trace GC pointers in the owned data, if appropriate for the data type.
         void gcTrace(MMgc::GC* gc);
 
-        // This removes all items from the list that have have a value of null/0. 
+        // This removes all items from the list that have have a value of null/0.
         // This is currently used only to implement WeakRefList::removeCollectedItems,
         // and is not exposed via other lists.
         // Return the number of items removed.
@@ -478,7 +478,7 @@ namespace avmplus
         typedef T* TYPE;
         
     public:
-        explicit GCList(MMgc::GC* gc, 
+        explicit GCList(MMgc::GC* gc,
                         uint32_t capacity,
                         const TYPE* args = NULL);
 
@@ -505,7 +505,7 @@ namespace avmplus
         TYPE removeLast();
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
-        uint64_t bytesUsed() const; 
+        uint64_t bytesUsed() const;
         void skipDestructor();
         void gcTrace(MMgc::GC* gc);
 
@@ -530,7 +530,7 @@ namespace avmplus
         typedef T* TYPE;
         
     public:
-        explicit RCList(MMgc::GC* gc, 
+        explicit RCList(MMgc::GC* gc,
                         uint32_t capacity,
                         const TYPE* args = NULL);
 
@@ -557,7 +557,7 @@ namespace avmplus
         TYPE removeLast();
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
-        uint64_t bytesUsed() const; 
+        uint64_t bytesUsed() const;
         void skipDestructor();
         void gcTrace(MMgc::GC* gc);
 
@@ -589,7 +589,7 @@ namespace avmplus
         typedef T TYPE;
         
     public:
-        explicit UnmanagedPointerList(MMgc::GC* gc, 
+        explicit UnmanagedPointerList(MMgc::GC* gc,
                                       uint32_t capacity,
                                       const T* args = NULL);
 
@@ -616,7 +616,7 @@ namespace avmplus
         T removeLast();
         T operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
-        uint64_t bytesUsed() const; 
+        uint64_t bytesUsed() const;
         void skipDestructor();
         void gcTrace(MMgc::GC* gc);
 
@@ -640,7 +640,7 @@ namespace avmplus
         typedef T* TYPE;
         
     public:
-        explicit WeakRefList(MMgc::GC* gc, 
+        explicit WeakRefList(MMgc::GC* gc,
                              uint32_t capacity,
                              const TYPE* args = NULL);
 
@@ -667,11 +667,11 @@ namespace avmplus
         TYPE removeLast();
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
-        uint64_t bytesUsed() const; 
+        uint64_t bytesUsed() const;
         void skipDestructor();
         void gcTrace(MMgc::GC* gc);
 
-        // This removes all items from the list that have been collected. 
+        // This removes all items from the list that have been collected.
         // Return the number of items removed.
         uint32_t removeCollectedItems();
 
@@ -699,7 +699,7 @@ namespace avmplus
         typedef T TYPE;
         
     public:
-        explicit DataList(MMgc::GC* gc, 
+        explicit DataList(MMgc::GC* gc,
                           uint32_t capacity,
                           const T* args = NULL);
 
@@ -712,7 +712,7 @@ namespace avmplus
     // ----------------------------
 
     // Some code internal to Flash/AIR needs to directly get/set the contents of DataLists;
-    // this class provides an implicit lock/unlock mechanism. We guarantee that 
+    // this class provides an implicit lock/unlock mechanism. We guarantee that
     // the value returned by addr() is valid for reading/writing for the lifespan of
     // the DataListAccessor (but only for entries 0...get_length()-1, of course).
     // length() is identical to DataList::length() but is provided here for symmetry.
@@ -746,7 +746,7 @@ namespace avmplus
     public:
         T list;
     public:
-        explicit HeapList(MMgc::GC* gc, 
+        explicit HeapList(MMgc::GC* gc,
                           uint32_t capacity,
                           const typename T::TYPE* args = NULL);
     };
@@ -759,7 +759,7 @@ namespace avmplus
     class ExactHeapList : public HeapList<T>
     {
     private:
-        explicit ExactHeapList(MMgc::GC* gc, 
+        explicit ExactHeapList(MMgc::GC* gc,
                                uint32_t capacity,
                                const typename T::TYPE* args = NULL)
             : HeapList<T>(gc, capacity, args)
@@ -767,8 +767,8 @@ namespace avmplus
         }
             
     public:
-        REALLY_INLINE static ExactHeapList* create(MMgc::GC* gc, 
-                                                   uint32_t capacity, 
+        REALLY_INLINE static ExactHeapList* create(MMgc::GC* gc,
+                                                   uint32_t capacity,
                                                    const typename T::TYPE* args = NULL)
         {
             return new (gc, MMgc::kExact) ExactHeapList(gc, capacity, args);

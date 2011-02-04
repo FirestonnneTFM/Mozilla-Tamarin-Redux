@@ -65,24 +65,24 @@ namespace avmplus
         return createAndInitVectorFromObject(so_args, len);
     }
 
-    void TypedVectorClassBase::_forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) 
-    { 
-        return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); 
+    void TypedVectorClassBase::_forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject)
+    {
+        return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject);
     }
     
-    bool TypedVectorClassBase::_every(Atom thisAtom, ScriptObject* callback, Atom thisObject) 
-    { 
-        return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); 
+    bool TypedVectorClassBase::_every(Atom thisAtom, ScriptObject* callback, Atom thisObject)
+    {
+        return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject);
     }
     
-    bool TypedVectorClassBase::_some(Atom thisAtom, ScriptObject* callback, Atom thisObject) 
-    { 
-        return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); 
+    bool TypedVectorClassBase::_some(Atom thisAtom, ScriptObject* callback, Atom thisObject)
+    {
+        return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject);
     }
     
-    Atom TypedVectorClassBase::_sort(Atom thisAtom, ArrayObject* args) 
-    { 
-        return ArrayClass::generic_sort(toplevel(), thisAtom, args); 
+    Atom TypedVectorClassBase::_sort(Atom thisAtom, ArrayObject* args)
+    {
+        return ArrayClass::generic_sort(toplevel(), thisAtom, args);
     }
 
     // ----------------------------
@@ -270,7 +270,7 @@ namespace avmplus
         // this is what the old code did, so we'll do it too: set the capacity explicitly if we grow
         if (newLength > m_list.capacity())
         {
-            m_list.set_capacity(newLength); 
+            m_list.set_capacity(newLength);
         }
         m_list.set_length(newLength);
     }
@@ -397,7 +397,7 @@ namespace avmplus
     typename TLIST::TYPE TypedVectorObject<TLIST>::AS3_pop()
     {
         checkFixed();
-        return m_list.isEmpty() ? 
+        return m_list.isEmpty() ?
                 (typename TLIST::TYPE)TypedVectorConstants<typename TLIST::OPAQUE_TYPE>::undefinedValue() :
                 m_list.removeLast();
     }
@@ -406,7 +406,7 @@ namespace avmplus
     typename TLIST::TYPE TypedVectorObject<TLIST>::AS3_shift()
     {
         checkFixed();
-        return m_list.isEmpty() ? 
+        return m_list.isEmpty() ?
                 (typename TLIST::TYPE)TypedVectorConstants<typename TLIST::OPAQUE_TYPE>::undefinedValue() :
                 m_list.removeFirst();
     }

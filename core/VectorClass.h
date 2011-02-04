@@ -95,7 +95,7 @@ namespace avmplus
         void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject);
         bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject);
         bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject);
-        Atom _sort(Atom thisAtom, ArrayObject* args); 
+        Atom _sort(Atom thisAtom, ArrayObject* args);
 
     protected:
         virtual Atom createAndInitVectorFromObject(ScriptObject* so, uint32_t len) = 0;
@@ -226,8 +226,8 @@ namespace avmplus
     class GC_CPP_EXACT(VectorBaseObject, ScriptObject)
     {
     protected:
-        explicit VectorBaseObject(VTable* ivtable, 
-                                  ScriptObject* delegate, 
+        explicit VectorBaseObject(VTable* ivtable,
+                                  ScriptObject* delegate,
                                   TypedVectorClassBase* vecClass);
 
     public:
@@ -249,7 +249,7 @@ namespace avmplus
     protected:
         
         Atom _mapImpl(ScriptObject* callback, Atom thisObject, VectorBaseObject* r, uint32_t len);
-        Atom _filterImpl(ScriptObject* callback, Atom thisObject, VectorBaseObject* r, uint32_t len); 
+        Atom _filterImpl(ScriptObject* callback, Atom thisObject, VectorBaseObject* r, uint32_t len);
 
         VectorBaseObject* _newVector();
 
@@ -291,13 +291,13 @@ namespace avmplus
         typedef TLIST LIST;
 
     protected:
-        explicit TypedVectorObject(VTable* ivtable, 
-                                   ScriptObject* delegate, 
-                                   MMgc::GC* gc, 
+        explicit TypedVectorObject(VTable* ivtable,
+                                   ScriptObject* delegate,
+                                   MMgc::GC* gc,
                                    TypedVectorClassBase* vecClass);
 
     public:
-        // overrides 
+        // overrides
         virtual uint32_t getLength() const;
         virtual void setLength(uint32_t length);
 
@@ -307,7 +307,7 @@ namespace avmplus
 
         // AS3 native function implementations
         Atom _map(ScriptObject* callback, Atom thisObject);
-        Atom _filter(ScriptObject* callback, Atom thisObject); 
+        Atom _filter(ScriptObject* callback, Atom thisObject);
         void _reverse();
         void _spliceHelper(uint32_t insertPoint, uint32_t insertCount, uint32_t deleteCount, Atom args, uint32_t offset);
         uint32_t AS3_push(Atom* argv, int argc);
@@ -378,7 +378,7 @@ namespace avmplus
     };
 
     // Some code internal to Flash/AIR needs to directly get/set the contents of Vectors;
-    // this class provides an implicit lock/unlock mechanism. We guarantee that 
+    // this class provides an implicit lock/unlock mechanism. We guarantee that
     // the value returned by addr() is valid for reading/writing for the lifespan of
     // the VectorAccessor (but only for entries 0...get_length()-1, of course).
     // length() is identical to VectorObject::get_length() but is provided here for symmetry.
@@ -500,8 +500,8 @@ namespace avmplus
         DECLARE_SLOTS_ObjectVectorObject;
     // ------------------------ DATA SECTION END
     };
-    // This is explicitly NOT provided, as 
-    // (1) there's currently no need for it, and 
+    // This is explicitly NOT provided, as
+    // (1) there's currently no need for it, and
     // (2) it would require WB hackery on the part of the user, which is error-prone
     //typedef VectorAccessor<Atom> ObjectVectorAccessor;
 

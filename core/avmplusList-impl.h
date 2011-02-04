@@ -64,7 +64,7 @@ namespace avmplus
     template<class T, class ListHelper>
     ListImpl<T,ListHelper>::~ListImpl()
     {
-        // Normally, m_data can't be null, but a call to neuter() can 
+        // Normally, m_data can't be null, but a call to neuter() can
         // cause this to happen. This is necessary for certain shutdown
         // conditions in Flash/AIR.
         if (m_data != NULL)
@@ -89,7 +89,7 @@ namespace avmplus
                 start = len;
                 count = oldlen - len;
             }
-            else 
+            else
             {
                 start = oldlen;
                 count = len - oldlen;
@@ -238,10 +238,10 @@ namespace avmplus
         AvmAssert(cap > capacity());
         AvmAssert(cap <= kListMaxLength);
 
-        // OPTIMIZEME: this is the growth algorithm used by the old AtomArray... 
-        // is this the best algorithm? Not sure, but it's definitely better 
+        // OPTIMIZEME: this is the growth algorithm used by the old AtomArray...
+        // is this the best algorithm? Not sure, but it's definitely better
         // in our perf tests than the one used by the old List<> implementation.
-        // Note that if you change it, you will probably need to add overflow detection; 
+        // Note that if you change it, you will probably need to add overflow detection;
         // this relies on the fact that kListMaxLength+(kListMaxLength/4) <= 0xffffffff.
         MMGC_STATIC_ASSERT(uint64_t(kListMaxLength) + uint64_t(kListMaxLength/4) <= uint64_t(0xFFFFFFFF));
         cap += (cap/4);

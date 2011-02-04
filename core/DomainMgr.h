@@ -45,7 +45,7 @@ namespace avmplus
 
 /**
  *  The Domain manager implementation
- *  is responsible for all aspects of 
+ *  is responsible for all aspects of
  *  finding names in a given Domain stack.
  */
 class DomainMgr : public MMgc::GCObject

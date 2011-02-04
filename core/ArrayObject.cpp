@@ -59,7 +59,7 @@ namespace avmplus
         contain properties with uint keys.)
         
         When an Array is not dense, m_denseArray is unused and all properties
-        are stored in the hashtable (as with any other ScriptObject). 
+        are stored in the hashtable (as with any other ScriptObject).
         
         In dense mode, the Array has a (possibly zero-length) AtomList (m_denseArray) containing
         all its values; the first item in m_denseArray corresponds to index m_denseStart.
@@ -77,15 +77,15 @@ namespace avmplus
             a[125] = 99;
             a[128] = 8;
         
-        In the above case, we'd expect to have a dense Array with 
+        In the above case, we'd expect to have a dense Array with
 
             m_denseStart = 123      (first entry in denseArr)
             m_denseUsed = 3
-            m_denseArray.length = 6   
+            m_denseArray.length = 6
             m_denseArray contents = [ 4, HOLE, 99, HOLE, HOLE, 8 ]
             m_length = 1000
 
-        Note that everything less than m_denseStart, and everything between 
+        Note that everything less than m_denseStart, and everything between
         (m_denseStart+m_denseArray.length) and m_length, are implicitly considered "atomNotFound".
         
         Arrays are converted to sparse (m_denseArray = 0, all properties in the ht area)
@@ -97,7 +97,7 @@ namespace avmplus
            |reverse| or |splice|).
            
         We currently never attempt to reconvert a sparse Array to a dense Array, except in the
-        degenerate case of every property of the Array being removed (in which case it 
+        degenerate case of every property of the Array being removed (in which case it
         becomes a "dense" but empty Array).
 
         Note that, as before, we do not preserve enumeration-in-insertion-order
@@ -121,10 +121,10 @@ namespace avmplus
     Atom ArrayObject::indexToName(uint32_t index) const
     {
         // This is carefully designed to replicate the logic in ScriptObject::getUintProperty;
-        // in particular, we must ensure that we create kIntptrType Atoms for indices 
+        // in particular, we must ensure that we create kIntptrType Atoms for indices
         // less than MAX_INTEGER_MASK (rather than interned Strings)
         return (!(index & MAX_INTEGER_MASK)) ?
-                atomFromIntptrValue_u(index) : 
+                atomFromIntptrValue_u(index) :
                 core()->internUint32(index)->atom();
     }
 
@@ -134,13 +134,13 @@ namespace avmplus
         uint32_t used = 0;
         for (uint32_t u = 0, n = m_denseArray.length(); u < n; u++)
         {
-            if (m_denseArray.get(u) != atomNotFound) 
+            if (m_denseArray.get(u) != atomNotFound)
                 ++used;
         }
         return used;
     }
 
-#ifdef DEBUG_ARRAY_VERIFY   
+#ifdef DEBUG_ARRAY_VERIFY
     void ArrayObject::verify() const
     {
         if (m_denseStart == IS_SPARSE)
@@ -150,7 +150,7 @@ namespace avmplus
 
             uint32_t calc_len = 0;
             InlineHashtable* ht = this->getTable();
-            for (int i = ht->next(0); i != 0; i = ht->next(i)) 
+            for (int i = ht->next(0); i != 0; i = ht->next(i))
             {
                 Atom k = ht->keyAt(i);
                 uint32_t index;
@@ -172,7 +172,7 @@ namespace avmplus
             AvmAssert(int32_t(m_denseStart) >= 0);
             
             // can't use getTable()->getSize() == 0 because getSize()
-            // includes deleted items. 
+            // includes deleted items.
             InlineHashtable* ht = this->getTable();
             for (int i = ht->next(0); i != 0; i = ht->next(i))
             {
@@ -274,7 +274,7 @@ namespace avmplus
                 if (result != atomNotFound)
                     return result;
             }
-            // else, outside dense area, or a hole in the dense area: 
+            // else, outside dense area, or a hole in the dense area:
             // must fall thru and search the proto chain
         }
         else if (isDynamic() && name == core()->klength->atom())
@@ -347,7 +347,7 @@ namespace avmplus
         if (isDynamic())
         {
             uint32_t index;
-            if (AvmCore::getIndexFromAtom(name, &index)) 
+            if (AvmCore::getIndexFromAtom(name, &index))
             {
                 _setUintProperty(index, value);
                 verify();
@@ -394,8 +394,8 @@ namespace avmplus
         {
             if (index >= m_length)
             {
-                // This is unnecessary if we are sealed, 
-                // but it's cheaper to do it all cases, 
+                // This is unnecessary if we are sealed,
+                // but it's cheaper to do it all cases,
                 // and harmless if we are in fact sealed.
                 m_length = index + 1;
             }
@@ -476,15 +476,15 @@ namespace avmplus
                     m_denseArray.replace(denseIdx, value);
                 }
             }
-            else 
+            else
             {
                 goto sparse_or_sealed;
             }
         }
         else
         {
-            // Indices > 0x7fffffff aren't candidates for dense arrays; in that case we 
-            // always revert to sparse. (Note that per ES3 spec, 0xffffffff is not a legal 
+            // Indices > 0x7fffffff aren't candidates for dense arrays; in that case we
+            // always revert to sparse. (Note that per ES3 spec, 0xffffffff is not a legal
             // array index, so doesn't affect length, but does get stored as a dynamic prop)
 
             if (index != 0xffffffff && index >= m_length)
@@ -526,7 +526,7 @@ convert_and_set_sparse:
 
         AvmAssert(isDense());
            
-		uint32_t const denseIdx = index - m_denseStart;
+        uint32_t const denseIdx = index - m_denseStart;
         AvmAssert(denseIdx < m_denseArray.length());
 
         // Note that delUintProperty does not affect m_length!
@@ -561,13 +561,13 @@ convert_and_set_sparse:
         
         verify();
         
-		uint32_t const denseIdx = index - m_denseStart;
+        uint32_t const denseIdx = index - m_denseStart;
         if (denseIdx < m_denseArray.length())
         {
             delDenseUintProperty(index);
             result = true;
         }
-        else 
+        else
         {
             result = ScriptObject::delUintProperty(index);
         }
@@ -584,7 +584,7 @@ convert_and_set_sparse:
         verify();
         
         uint32_t index, denseIdx;
-        if (AvmCore::getIndexFromAtom(name, &index) && 
+        if (AvmCore::getIndexFromAtom(name, &index) &&
             (denseIdx = index - m_denseStart) < m_denseArray.length())
         {
             delDenseUintProperty(index);
@@ -609,7 +609,7 @@ convert_and_set_sparse:
         {
             return m_denseArray.get(denseIdx) != atomNotFound;
         }
-        else 
+        else
         {
             return ScriptObject::hasUintProperty(index);
         }
@@ -622,7 +622,7 @@ convert_and_set_sparse:
         verify();
         
         uint32_t index, denseIdx;
-        if (AvmCore::getIndexFromAtom(name, &index) && 
+        if (AvmCore::getIndexFromAtom(name, &index) &&
             (denseIdx = index - m_denseStart) < m_denseArray.length())
         {
             result = m_denseArray.get(denseIdx) != atomNotFound;
@@ -762,7 +762,7 @@ convert_and_set_sparse:
                 // so we can (and should) short-circuit this and just process the items actually present.
                 // (this is MUCH faster if the sole item was at index 0xfffffff0...)
                 InlineHashtable* ht = this->getTable();
-                for (int i = ht->next(0); i != 0; i = ht->next(i)) 
+                for (int i = ht->next(0); i != 0; i = ht->next(i))
                 {
                     Atom k = ht->keyAt(i);
                     uint32_t index;
@@ -845,7 +845,7 @@ convert_and_set_sparse:
             else
             {
 push_sparse:
-                for (int i=0; i < argc; i++) 
+                for (int i=0; i < argc; i++)
                 {
                     _setUintProperty(getLength(), argv[i]);
                 }
@@ -883,12 +883,12 @@ push_sparse:
 unshift_sparse:
                 // First, move all the elements up
                 uint32_t len = getLength();
-                for (uint32_t i = len; i > 0; --i) 
+                for (uint32_t i = len; i > 0; --i)
                 {
                     _setUintProperty(i-1+argc, _getUintProperty(i-1));
                 }
 
-                for (uint32_t i = 0; i < (uint32_t)argc; i++) 
+                for (uint32_t i = 0; i < (uint32_t)argc; i++)
                 {
                     _setUintProperty(i, argv[i]);
                 }
@@ -989,7 +989,7 @@ unshift_sparse:
 
 // OPTIMIZEME, probably other dense cases could be handled too
         if (this->isDense() &&
-            that != NULL && 
+            that != NULL &&
             that->isDense() &&
             insertPoint >= this->m_denseStart &&
             insertPoint <= this->m_denseStart + this->m_denseArray.length() &&
@@ -1030,7 +1030,7 @@ unshift_sparse:
         {
             uint32_t const that_length = that->getLengthProperty();
             uint32_t thisExtraHolesFront = this->m_denseStart;
-            uint32_t thatExtraHolesBack = that_length - (that->m_denseStart + that->m_denseArray.length()); 
+            uint32_t thatExtraHolesBack = that_length - (that->m_denseStart + that->m_denseArray.length());
             uint32_t extraHoles = thisExtraHolesFront + thatExtraHolesBack;
             if (extraHoles > 0)
             {

@@ -42,30 +42,30 @@
 
 namespace avmplus
 {
-    REALLY_INLINE bool ArrayObject::isSparse() const 
-    { 
-        return m_denseStart == IS_SPARSE; 
+    REALLY_INLINE bool ArrayObject::isSparse() const
+    {
+        return m_denseStart == IS_SPARSE;
     }
     
-    REALLY_INLINE bool ArrayObject::isDense() const  
-    { 
-        return int32_t(m_denseStart) >= 0; 
+    REALLY_INLINE bool ArrayObject::isDense() const
+    {
+        return int32_t(m_denseStart) >= 0;
     }
     
-    REALLY_INLINE bool ArrayObject::isDynamic() const  
-    { 
-         return int32_t(m_denseStart) >= -1; 
+    REALLY_INLINE bool ArrayObject::isDynamic() const
+    {
+         return int32_t(m_denseStart) >= -1;
     }
 
-#ifdef DEBUG_ARRAY_VERIFY	
+#ifdef DEBUG_ARRAY_VERIFY
     // declared out-of-line
 #else
-	REALLY_INLINE void ArrayObject::verify() const
-	{
+    REALLY_INLINE void ArrayObject::verify() const
+    {
         // nothing
-	}
+    }
 #endif
-	
+    
     REALLY_INLINE Atom ArrayObject::pop()
     {
         return AS3_pop();
@@ -90,7 +90,7 @@ namespace avmplus
         // NB: we constrain the dense area to indices <= 0x7FFFFFFF,
         // so this test will always fail if the we are sealed or sparse,
         // due to IS_SEALED and IS_SPARSE being carefully chosen values.
-		uint32_t const denseIdx = index - m_denseStart;
+        uint32_t const denseIdx = index - m_denseStart;
         if (denseIdx < m_denseArray.length())
         {
             Atom result = m_denseArray.get(denseIdx);
