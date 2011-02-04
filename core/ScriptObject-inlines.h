@@ -151,9 +151,14 @@ REALLY_INLINE void ScriptObject::setStringPropertyIsEnumerable(Stringp name, boo
     setAtomPropertyIsEnumerable(name->atom(), enumerable);
 }
 
-REALLY_INLINE /*virtual*/ bool ScriptObject::isMethodClosure()
+REALLY_INLINE /*virtual*/ MethodClosure* ScriptObject::toMethodClosure() const
 {
-    return false;
+    return NULL;
+}
+
+REALLY_INLINE bool ScriptObject::isMethodClosure() const
+{
+    return toMethodClosure() != NULL;
 }
 
 REALLY_INLINE /*virtual*/ CodeContext* ScriptObject::getFunctionCodeContext() const

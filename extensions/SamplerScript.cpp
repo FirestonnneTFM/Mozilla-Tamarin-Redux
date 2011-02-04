@@ -867,8 +867,9 @@ namespace avmplus
         if (!s || !trusted(self))
             return undefinedAtom;
 
-        if(method != NULL && Traits::getBuiltinType(method->vtable->traits) == BUILTIN_methodClosure)
-            return ((MethodClosure*)method)->peek_savedThis();
+        MethodClosure* mc;
+        if (method != NULL && ((mc = method->toMethodClosure()) != NULL))
+            return mc->get_savedThis();
         else
             return undefinedAtom;
 #else

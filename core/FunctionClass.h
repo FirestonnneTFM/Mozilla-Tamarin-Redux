@@ -56,7 +56,7 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) FunctionClass(cvtable);
         }
 
-        ClassClosure *createEmptyFunction();
+        ClassClosure* createEmptyFunction();
 
         Atom call(int argc, Atom* argv)
         {
@@ -74,36 +74,39 @@ namespace avmplus
     class GC_AS3_EXACT(FunctionObject, ClassClosure)
     {
     protected:
-        FunctionObject(VTable* cvtable, MethodEnv* call)
+        REALLY_INLINE FunctionObject(VTable* cvtable, MethodEnv* call)
             : ClassClosure(cvtable)
-            , _call(call)
+            , m_callEnv(call)
         {
-            AvmAssert(_call != NULL);
+            AvmAssert(m_callEnv != NULL);
         }
 
     public:
-        static FunctionObject* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call)
+        REALLY_INLINE static FunctionObject* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call)
         {
-            return new (gc, MMgc::kExact, vtable->getExtraSize()) FunctionObject (vtable, call);
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) FunctionObject(vtable, call);
         }
 
+        // AS3 native methods
+        int32_t get_length();
         Atom AS3_call(Atom thisAtom, Atom *argv, int argc);
         Atom AS3_apply(Atom thisAtom, Atom argArray);
+
+        // ScriptObject method overrides
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
-        virtual MethodEnv* getCallMethodEnv() { return _call; }
+        virtual MethodEnv* getCallMethodEnv();
 #endif
         virtual Atom call(int argc, Atom* argv);
         virtual CodeContext* getFunctionCodeContext() const;
-        int get_length();
         virtual Stringp implToString() const;
     protected:
-        virtual Atom get_coerced_receiver(Atom a);
+        virtual Atom get_coerced_receiver(Atom a) const;
 
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(FunctionObject)
 
     protected:
-        DWB(MethodEnv*) GC_POINTER(_call);
+        DWB(MethodEnv*) GC_POINTER(m_callEnv);
 
         GC_DATA_END(FunctionObject)
 

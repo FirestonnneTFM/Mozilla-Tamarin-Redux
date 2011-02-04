@@ -294,7 +294,7 @@ bool FunctionObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     ClassClosure::gcTrace(gc, 0);
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
-    gc->TraceLocation(&_call);
+    gc->TraceLocation(&m_callEnv);
     return false;
 }
 
@@ -355,7 +355,7 @@ bool MethodClosure::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     FunctionObject::gcTrace(gc, 0);
     (void)(avmplus_FunctionObject_isExactInterlock != 0);
-    gc->TraceAtom(&_savedThis);
+    gc->TraceAtom(&m_savedThis);
     return false;
 }
 

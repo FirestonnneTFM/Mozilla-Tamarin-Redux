@@ -160,9 +160,10 @@ namespace avmplus
 
         virtual Atom applyTypeArgs(int argc, Atom* argv);
 
-        // HACK; we need this so we can compare MethodClosures that
-        // have the same instance and method.
-        virtual bool isMethodClosure();
+        // This is a fast way to implement "istype(MethodClosure)"; it returns non-null if
+        // this is an MethodClosure (or subclass thereof)
+        virtual MethodClosure* toMethodClosure() const;
+        bool isMethodClosure() const;
 
         // Create an instance of ScriptObject or a ScriptObject subclass.
         //
@@ -193,7 +194,7 @@ namespace avmplus
         static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable);
         static ScriptObject* slowCreateInstance(ClassClosure* cls, VTable* ivtable);
 
-        // This is a fast way to implement "istype(ARRAY)"; it return non-null if
+        // This is a fast way to implement "istype(ARRAY)"; it returns non-null if
         // this is an ArrayObject (or subclass thereof)
         virtual ArrayObject* toArrayObject();
 

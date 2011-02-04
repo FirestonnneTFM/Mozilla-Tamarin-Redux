@@ -43,6 +43,8 @@
 
 namespace avmplus
 {
+    // ---------------------------
+    
     FunctionClass::FunctionClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
@@ -98,13 +100,18 @@ namespace avmplus
         return (ClassClosure*)AvmCore::atomToScriptObject(f->coerceEnter(this->atom()));
     }
 
+    int32_t FunctionObject::get_length()
+    {
+        return m_callEnv->method->getMethodSignature()->param_count();
+    }
+
     /**
      * Function.prototype.call()
      */
     Atom FunctionObject::AS3_call(Atom thisArg, Atom *argv, int argc)
     {
         thisArg = get_coerced_receiver(thisArg);
-        return core()->exec->call(_call, thisArg, argc, argv);
+        return core()->exec->call(m_callEnv, thisArg, argc, argv);
     }
 
     /**
@@ -125,11 +132,11 @@ namespace avmplus
             if (!AvmCore::istype(argArray, ARRAY_TYPE))
                 toplevel()->throwTypeError(kApplyError);
 
-            return core->exec->apply(_call, thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
+            return core->exec->apply(m_callEnv, thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
         }
         else
         {
-            return _call->coerceEnter(thisArg);
+            return m_callEnv->coerceEnter(thisArg);
         }
     }
 
@@ -144,7 +151,7 @@ namespace avmplus
 
         // this is a function
         argv[0] = obj->atom(); // new object is receiver
-        Atom result = _call->coerceEnter(argc, argv);
+        Atom result = m_callEnv->coerceEnter(argc, argv);
 
         // for E3 13.2.2 compliance, check result and return it if (Type(result) is Object)
 
@@ -158,39 +165,41 @@ namespace avmplus
         return AvmCore::isNull(result) || AvmCore::isObject(result) ? result : obj->atom();
     }
 
-    Atom FunctionObject::call(int argc, Atom* argv)
+#if defined(DEBUGGER) || defined(VMCFG_AOT)
+    /*virtual*/ MethodEnv* FunctionObject::getCallMethodEnv()
+    {
+        return m_callEnv;
+    }
+#endif
+
+    /*virtual*/ Atom FunctionObject::call(int argc, Atom* argv)
     {
         argv[0] = get_coerced_receiver(argv[0]);
-        return _call->coerceEnter(argc, argv);
+        return m_callEnv->coerceEnter(argc, argv);
     }
 
-    CodeContext* FunctionObject::getFunctionCodeContext() const
+    /*virtual*/ CodeContext* FunctionObject::getFunctionCodeContext() const
     {
-        return _call->scope()->abcEnv()->codeContext();
+        return m_callEnv->scope()->abcEnv()->codeContext();
     }
 
-    int FunctionObject::get_length()
-    {
-        MethodSignaturep ms = _call->method->getMethodSignature();
-        return ms->param_count();
-    }
-
-    Atom FunctionObject::get_coerced_receiver(Atom a)
+    /*virtual*/ Atom FunctionObject::get_coerced_receiver(Atom a) const
     {
         if (AvmCore::isNullOrUndefined(a))
         {
             // use callee's global object as this.
             // see E3 15.3.4.4
-            a = _call->scope()->getScope(0);
+            a = m_callEnv->scope()->getScope(0);
         }
-        MethodSignaturep ms = _call->method->getMethodSignature();
+        MethodSignaturep ms = m_callEnv->method->getMethodSignature();
         return toplevel()->coerce(a, ms->paramTraits(0));
     }
 
-    Stringp FunctionObject::implToString() const
+    /*virtual*/ Stringp FunctionObject::implToString() const
     {
         AvmCore* core = this->core();
-        Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(_call->method->method_id()));
+        Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(m_callEnv->method->method_id()));
         return core->concatStrings(s, core->newConstantStringLatin1("]"));
     }
+
 }

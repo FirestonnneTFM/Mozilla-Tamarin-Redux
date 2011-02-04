@@ -136,6 +136,7 @@
 #define avmplus_VectorClass_isExactInterlock 1
 #define avmplus_VerifyErrorClass_isExactInterlock 1
 #define avmplus_VerifyErrorObject_isExactInterlock 1
+#define avmplus_WeakMethodClosure_isExactInterlock 1
 #define avmplus_XMLClass_isExactInterlock 1
 #define avmplus_XMLListClass_isExactInterlock 1
 #define avmplus_XMLListObject_isExactInterlock 1
