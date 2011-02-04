@@ -224,7 +224,8 @@ def compare(vmlist, avmshell_args, test_args):
 
 def printlines(seq):
     for l in seq:
-        sys.stdout.write('%s ' % scrub_passfail(l))
+        l = l.encode('latin-1')
+        print('%s ' % scrub_passfail(l))
 
 def pick_majoirty(results):
     # pick the result with the most examples
