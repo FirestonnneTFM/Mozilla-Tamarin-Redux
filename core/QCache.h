@@ -87,7 +87,7 @@ namespace avmplus
 
     class GC_CPP_EXACT(QCache, MMgc::GCFinalizedObject)
     {
-    private:        
+    private:
         QCache(uint32_t _max, MMgc::GC* _gc);
     public:
         REALLY_INLINE static QCache* create(uint32_t max, MMgc::GC* gc)

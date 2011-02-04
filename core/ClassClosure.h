@@ -77,9 +77,9 @@ namespace avmplus
          * the explicit coersion function.  For user functions, we
          * invoke m_call.
          *
-         * NOTE: The contents of the given argument list can be modified during 
+         * NOTE: The contents of the given argument list can be modified during
          *       invocation of the function without further warning.
-         *       Do not reuse an argument list AS-IS for multiple function calls, 
+         *       Do not reuse an argument list AS-IS for multiple function calls,
          *       unless you make sure to reinitialize the contents of the argument list after each call.
          */
         virtual Atom call(int argc, Atom* argv);
@@ -99,7 +99,7 @@ namespace avmplus
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(ClassClosure)
 
-    private: 
+    private:
         DRCWB(ScriptObject*)  GC_POINTER(m_prototype);
 
         GC_DATA_END(ClassClosure)

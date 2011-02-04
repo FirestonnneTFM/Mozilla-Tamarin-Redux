@@ -1432,7 +1432,7 @@ namespace avmplus
                             // even if the uri has a version mark (which shouldn't happen
                             // with standard tools, but a deliberately constructed ABC
                             // chunk could attempt to do so in order to access otherwise
-                            // unavailable API). (But only for 
+                            // unavailable API). (But only for
                             if (type == Namespace::NS_Public)
                                 apiVersion = pool->getApiVersion();
                         }

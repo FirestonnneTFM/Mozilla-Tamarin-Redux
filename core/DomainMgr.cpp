@@ -55,15 +55,15 @@ namespace avmplus
     cache - another map from class names to Classdef objects. The cache is populated as classes
     are found during lookups via the find method.
 
-    There are two general classes of operations: 
+    There are two general classes of operations:
     
     "add" :     these methods are used when we load a chunk of ABC bytecode; they populate the "loaded"
                 maps, and simply indicate what name is associated with what Traits/Script definition
-                at a given Domain level. 
+                at a given Domain level.
                 
                 Note that, as an optimization, these methods check for reachability; attempting to
                 add a name that is already defined at the current level will simply be ignored. This
-                includes names that are "shadowed" by a name definition from a parent domain, and is the 
+                includes names that are "shadowed" by a name definition from a parent domain, and is the
                 source of the "cacheIfFound" flag seen on various "find" methods: when adding new
                 definitions, we want to examine any already-cached items (to exclude shadowed names),
                 but we don't want to add to the cache prematurely (we want to defer that until
@@ -105,7 +105,7 @@ void DomainMgr::addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Tr
 {
     // if we can find an existing trait by this name, the one we're adding
     // if unreachable -- don't bother adding it. (Note that this examines
-    // only the Domain's table, not the Pool's) 
+    // only the Domain's table, not the Pool's)
     // Note: It's important not to cache on find here; see earlier comments for details.
     if (findTraitsInDomainByNameAndNSImpl(pool->domain, name, ns, /*cacheIfFound*/false) == NULL)
     {
@@ -116,7 +116,7 @@ void DomainMgr::addNamedTraits(PoolObject* pool, Stringp name, Namespacep ns, Tr
 void DomainMgr::addNamedInstanceTraits(PoolObject* pool, Stringp name, Namespacep ns, Traits* itraits)
 {
     // if we can find an existing trait by this name, the one we're adding
-    // if unreachable -- don't bother adding it. 
+    // if unreachable -- don't bother adding it.
     // Note: It's important not to cache on find here; see earlier comments for details.
     if (findTraitsInPoolByNameAndNSImpl(pool, name, ns, /*cacheIfFound*/false) == NULL)
     {
@@ -238,7 +238,7 @@ void DomainMgr::addNamedScript(PoolObject* pool, Stringp name, Namespacep ns, Me
 {
     // if we can find an existing trait by this name, the one we're adding
     // if unreachable -- don't bother adding it. (Note that this examines
-    // only the Domain's table, not the Pool's) 
+    // only the Domain's table, not the Pool's)
     // Note: It's important not to cache on find here; see earlier comments for details.
     if (ns->isPrivate())
     {

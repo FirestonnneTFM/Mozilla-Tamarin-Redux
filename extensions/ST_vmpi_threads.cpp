@@ -317,7 +317,7 @@ using namespace MMgc;
                         ++counter;
                         if((counter & 63) == 0) {
                             VMPI_threadSleep(1);
-                        } 
+                        }
                     }
                     sharedCounter++;
                     VMPI_recursiveMutexUnlock(&m_mutex);

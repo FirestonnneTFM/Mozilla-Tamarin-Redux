@@ -265,7 +265,7 @@ const int kBufferPadding = 16;
             kSWF10,             // SWF10 (Flash Player 10.0 & 10.1)
             kSWF11,             // SWF11 (Flash Player 10.2 Spicy)
             kSWF12,             // SWF12 (Flash Player TBD Wasabi)
-			kSWF13,             // SWF13 (Flash Player TBD Serrano)
+            kSWF13,             // SWF13 (Flash Player TBD Serrano)
 
             VersionCount,
 
@@ -795,8 +795,8 @@ const int kBufferPadding = 16;
 #endif // VMCFG_EVAL
 
         /**
-         * When ABC is unloaded, we might not be able to free all associated 
-         * data structures immediately without some help: the VM caches some 
+         * When ABC is unloaded, we might not be able to free all associated
+         * data structures immediately without some help: the VM caches some
          * information (eg TraitsBindings) that might prevent a timely collection.
          * Calling this is a hint from the client that cached information should
          * be flushed more aggressively to encourage faster collection of the discarded
@@ -1766,8 +1766,8 @@ const int kBufferPadding = 16;
         DRC(Namespacep) * namespaces;
 
         // API versioning state
-        ApiVersionSeries const  m_activeApiVersionSeries; 
-        uint32_t const          m_activeApiVersionSeriesMask; 
+        ApiVersionSeries const  m_activeApiVersionSeries;
+        uint32_t const          m_activeApiVersionSeriesMask;
         HeapHashtable*          m_versionedURIs;
 #ifdef _DEBUG
         HeapHashtable*          m_unversionedURIs;

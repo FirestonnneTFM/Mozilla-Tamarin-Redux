@@ -99,9 +99,9 @@ REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
     return const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
 }
 
-REALLY_INLINE ErrorClass* Toplevel::getErrorClass(int class_id) const 
-{ 
-    return (ErrorClass*)getBuiltinClass(class_id); 
+REALLY_INLINE ErrorClass* Toplevel::getErrorClass(int class_id) const
+{
+    return (ErrorClass*)getBuiltinClass(class_id);
 }
 
 // static

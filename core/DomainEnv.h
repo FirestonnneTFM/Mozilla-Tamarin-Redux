@@ -62,8 +62,8 @@ namespace avmplus
             return new (gc, MMgc::kExact) ScriptEnvMap(gc);
         }
 
-        REALLY_INLINE void add(MethodInfo* mi, ScriptEnv* se) 
-        { 
+        REALLY_INLINE void add(MethodInfo* mi, ScriptEnv* se)
+        {
             ht.add(AvmCore::genericObjectToAtom(mi), AvmCore::genericObjectToAtom(se));
         }
         

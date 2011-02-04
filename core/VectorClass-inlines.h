@@ -230,20 +230,20 @@ namespace avmplus
     // ----------------------------
 
     template<class TLIST>
-    REALLY_INLINE VectorAccessor<TLIST>::VectorAccessor(TypedVectorObject<TLIST>* v) : m_vector(v) 
-    { 
+    REALLY_INLINE VectorAccessor<TLIST>::VectorAccessor(TypedVectorObject<TLIST>* v) : m_vector(v)
+    {
     }
     
     template<class TLIST>
-    REALLY_INLINE typename TLIST::TYPE* VectorAccessor<TLIST>::addr() 
-    { 
-        return (m_vector != NULL) ? m_vector->m_list.m_data->entries : (typename TLIST::TYPE*)NULL; 
+    REALLY_INLINE typename TLIST::TYPE* VectorAccessor<TLIST>::addr()
+    {
+        return (m_vector != NULL) ? m_vector->m_list.m_data->entries : (typename TLIST::TYPE*)NULL;
     }
 
     template<class TLIST>
-    REALLY_INLINE uint32_t VectorAccessor<TLIST>::length() 
-    { 
-        return (m_vector != NULL) ? m_vector->m_list.length() : 0; 
+    REALLY_INLINE uint32_t VectorAccessor<TLIST>::length()
+    {
+        return (m_vector != NULL) ? m_vector->m_list.length() : 0;
     }
 }
 

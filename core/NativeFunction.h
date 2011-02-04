@@ -51,7 +51,7 @@ namespace avmplus
 #ifdef _DEBUG
     #define AvmThunk_DEBUG_ONLY(...)    __VA_ARGS__
 #else
-    #define AvmThunk_DEBUG_ONLY(...)    
+    #define AvmThunk_DEBUG_ONLY(...)
 #endif /* DEBUG */
 
     // Historically, bools are passed in as int32_t, as some calling conventions

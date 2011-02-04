@@ -108,7 +108,7 @@ namespace avmplus
     REALLY_INLINE /*static*/ void DataListHelper<T>::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
-        // This is commented out because it's not necessary for safety of a DataList, 
+        // This is commented out because it's not necessary for safety of a DataList,
         // and it can generate an assert in List::insert(), which uses storeInEmpty() for efficiency;
         // since DataListHelper::moveRange doesn't zero out the cleared space we could get this
         // assertion firing. Better to neuter this assertion than add a unnecessary zeroing-out
@@ -293,7 +293,7 @@ namespace avmplus
     REALLY_INLINE /*static*/ void AtomListHelper::storeInEmpty(LISTDATA* data, uint32_t index, TYPE value)
     {
         AvmAssert(data != NULL);
-        // newly-allocated space clears to 0; clearRange() clears to nullObjectAtom. 
+        // newly-allocated space clears to 0; clearRange() clears to nullObjectAtom.
         // Both are "empty" as far as AtomList is concerned.
         AvmAssert(data->entries[index] == 0 || data->entries[index] == nullObjectAtom);
         AvmCore::atomWriteBarrier_ctor(data->gc(), data, &data->entries[index], value);
@@ -394,7 +394,7 @@ namespace avmplus
     template<class T, class ListHelper>
     REALLY_INLINE uint32_t ListImpl<T,ListHelper>::capacity() const
     {
-        return uint32_t((ListHelper::LISTDATA::getSize(m_data) - offsetof(typename ListHelper::LISTDATA, entries)) / 
+        return uint32_t((ListHelper::LISTDATA::getSize(m_data) - offsetof(typename ListHelper::LISTDATA, entries)) /
                 sizeof(typename ListHelper::STORAGE));
     }
 
@@ -458,7 +458,7 @@ namespace avmplus
         MMGC_STATIC_ASSERT(0xFFFFFFFF > kListMaxLength);
         uint32_t const ncap = (cap > 0xFFFFFFFF - extra) ?  // if true, cap + extra will overflow a uint32_t...
                               0xFFFFFFFF :                  // ...in that case, choose a size that will definitely fail in ensureCapacityImpl.
-                              (cap + extra);                
+                              (cap + extra);
         
         if (ncap > capacity())
         {
@@ -484,7 +484,7 @@ namespace avmplus
     }
 
     template<class T, class ListHelper>
-    REALLY_INLINE /*static*/ typename ListHelper::LISTDATA* ListImpl<T,ListHelper>::allocData(MMgc::GC* gc, uint32_t cap) 
+    REALLY_INLINE /*static*/ typename ListHelper::LISTDATA* ListImpl<T,ListHelper>::allocData(MMgc::GC* gc, uint32_t cap)
     {
         AvmAssert(cap <= kListMaxLength);
         typename ListHelper::LISTDATA* newData = ListHelper::LISTDATA::create(gc, cap);
@@ -510,7 +510,7 @@ namespace avmplus
     REALLY_INLINE GCList<T>::GCList(MMgc::GC* gc, uint32_t capacity, const TYPE* args)
         : m_list(gc, capacity, (MMgc::GCObject* const*)args)
     {
-        MMGC_STATIC_ASSERT((TypeSniffer<T>::isGCObject::value == true || 
+        MMGC_STATIC_ASSERT((TypeSniffer<T>::isGCObject::value == true ||
                             TypeSniffer<T>::isGCFinalizedObject::value == true ||
                             TypeSniffer<T>::isGCTraceableObject::value == true) &&
                             TypeSniffer<T>::isRCObject::value == false);
@@ -1020,7 +1020,7 @@ namespace avmplus
     {
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isGCObject::value ||
                             TypeSniffer<T>::isGCFinalizedObject::value ||
-                            TypeSniffer<T>::isRCObject::value || 
+                            TypeSniffer<T>::isRCObject::value ||
                             TypeSniffer<T>::isGCTraceableObject::value);
         MMGC_STATIC_ASSERT(TypeSniffer<T>::isNonPointer::value == true);
     }
@@ -1208,20 +1208,20 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    REALLY_INLINE DataListAccessor<T>::DataListAccessor(DataList<T>* v) : m_list(v) 
-    { 
+    REALLY_INLINE DataListAccessor<T>::DataListAccessor(DataList<T>* v) : m_list(v)
+    {
     }
     
     template<class T>
-    REALLY_INLINE T* DataListAccessor<T>::addr() 
-    { 
-        return (m_list != NULL) ? m_list->m_data->entries : (T*)NULL; 
+    REALLY_INLINE T* DataListAccessor<T>::addr()
+    {
+        return (m_list != NULL) ? m_list->m_data->entries : (T*)NULL;
     }
 
     template<class T>
-    REALLY_INLINE uint32_t DataListAccessor<T>::length() 
-    { 
-        return (m_list != NULL) ? m_list->length() : 0; 
+    REALLY_INLINE uint32_t DataListAccessor<T>::length()
+    {
+        return (m_list != NULL) ? m_list->length() : 0;
     }
     
     // ----------------------------

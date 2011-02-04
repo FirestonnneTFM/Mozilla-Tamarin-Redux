@@ -136,7 +136,7 @@ namespace avmplus
     class SampleIterator : public ScriptObject
     {
     public:
-        SampleIterator(ScriptObject* script, VTable *vt) : 
+        SampleIterator(ScriptObject* script, VTable *vt) :
             ScriptObject(vt, NULL),
             script(script)
         {
@@ -155,8 +155,8 @@ namespace avmplus
             Sampler* const sampler = script->core()->get_sampler();
             if (sampler == NULL || sampleBufferId != sampler->getSampleBufferId())
             {
-                // If the sampler is stopped 
-                // while we are iterating on items 
+                // If the sampler is stopped
+                // while we are iterating on items
                 // the iterator should be invalidated
                 // because the Sampler::sampleBufferId is incremented
                 // each time the sample buffer is cleared.
@@ -175,7 +175,7 @@ namespace avmplus
             }
 
             Sampler * const sampler = script->core()->get_sampler();
-            if (sampler == NULL || sampleBufferId != sampler->getSampleBufferId()) 
+            if (sampler == NULL || sampleBufferId != sampler->getSampleBufferId())
             {
                 count = 0;
                 return undefinedAtom;
@@ -273,7 +273,7 @@ namespace avmplus
 
         if (s->sampleIteratorVTable == NULL)
             s->sampleIteratorVTable = _newVT(self->toplevel(), self->traits()->pool, sizeof(SampleIterator));
-		ScriptObject *iter = new (self->gc()) SampleIterator(self, s->sampleIteratorVTable);
+        ScriptObject *iter = new (self->gc()) SampleIterator(self, s->sampleIteratorVTable);
         return iter->atom();
 #else
         (void)self;

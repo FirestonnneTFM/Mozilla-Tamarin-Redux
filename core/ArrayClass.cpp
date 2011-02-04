@@ -519,7 +519,7 @@ namespace avmplus
             int opt = fields[0].options;
 
             if (opt & ArraySort::kNumeric) {
-                this->cmpFunc = core->currentBugCompatibility()->bugzilla524122 ? 
+                this->cmpFunc = core->currentBugCompatibility()->bugzilla524122 ?
                                     ArraySort::NumericCompareFuncCorrect :
                                     ArraySort::NumericCompareFuncCompatible;
             } else if (opt & ArraySort::kCaseInsensitive) {
@@ -535,7 +535,7 @@ namespace avmplus
         }
         else
         {
-            bool isNumericCompare = (cmpFunc == ArraySort::NumericCompareFuncCompatible) || 
+            bool isNumericCompare = (cmpFunc == ArraySort::NumericCompareFuncCompatible) ||
                                     (altCmpFunc == ArraySort::NumericCompareFuncCompatible) ||
                                     (cmpFunc == ArraySort::NumericCompareFuncCorrect) ||
                                     (altCmpFunc == ArraySort::NumericCompareFuncCorrect);
@@ -1133,8 +1133,8 @@ namespace avmplus
         if (cmp == undefinedAtom)
         {
             if (opt & ArraySort::kNumeric) {
-                compare = core->currentBugCompatibility()->bugzilla524122 ? 
-                                ArraySort::NumericCompareFuncCorrect : 
+                compare = core->currentBugCompatibility()->bugzilla524122 ?
+                                ArraySort::NumericCompareFuncCorrect :
                                 ArraySort::NumericCompareFuncCompatible;
             } else if (opt & ArraySort::kCaseInsensitive) {
                 compare = ArraySort::CaseInsensitiveStringCompareFunc;
@@ -1546,7 +1546,7 @@ namespace avmplus
         ArrayObject* a = toArray(thisAtom);
         if (!a || !a->try_unshift(args))
         {
-            for (uint32_t i = args->getLength() ; i > 0; i--) 
+            for (uint32_t i = args->getLength() ; i > 0; i--)
             {
                 Atom atom = args->getUintProperty(i - 1);
                 a->unshift(&atom, 1);

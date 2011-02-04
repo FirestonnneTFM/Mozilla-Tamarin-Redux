@@ -63,7 +63,7 @@ namespace avmplus
 
     private:
         // "loaded" Traits/Scripts are the Traits/ScriptEnvs that are actually
-        // defined in this Domain. "cached" Traits/Scripts are the ones that 
+        // defined in this Domain. "cached" Traits/Scripts are the ones that
         // actually should be used for a given name lookup; the cached versions
         // take precedence over the loaded ones (on a freeze-on-first-use basis)
         // to ensure that the types associated with a name can't change as new

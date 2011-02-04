@@ -59,7 +59,7 @@ namespace avmplus
      *
      * SortedMap can be instantiated on the stack or embedded as a field in another class.
      * However, it cannot be allocated dynamically (operator new is private/unimplemented):
-     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject. 
+     * some variants use non-GC memory, and none have a vtable compatible with GCFinalizedObject.
      * If you need to dynamically allocate one, use HeapSortedMap to wrap an instance.
      *
      * Also, keep in mind that since some variants allocate using nonGC memory, one MUST
@@ -226,7 +226,7 @@ namespace avmplus
     public:
         MapType map;
     public:
-        explicit HeapSortedMap(MMgc::GC* gc, 
+        explicit HeapSortedMap(MMgc::GC* gc,
                                 int _capacity = MapType::kInitialCapacity)
           : map(gc, _capacity)
         {

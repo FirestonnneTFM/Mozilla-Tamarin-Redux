@@ -185,7 +185,7 @@ void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
     m->_implGPR = p;
     if (isJitEnabled() && InvokerCompiler::canCompileInvoker(m))
         m->_invoker = jitInvokerNext;
-    else 
+    else
         m->_invoker = invokeGeneric;
 #ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy))

@@ -77,9 +77,9 @@ namespace avmplus
         }
     }
 
-    REALLY_INLINE AtomWB::operator const Atom&() const 
-    { 
-        return m_atom; 
+    REALLY_INLINE AtomWB::operator const Atom&() const
+    {
+        return m_atom;
     }
     
     REALLY_INLINE Atom AtomWB::set(Atom atomNew)

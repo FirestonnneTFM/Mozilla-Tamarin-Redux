@@ -138,13 +138,13 @@ namespace avmplus
          * invokes the implicit constructor followed by the user's constructor
          * if any.
          *
-         * NOTE: The contents of the given argument list can be modified during 
+         * NOTE: The contents of the given argument list can be modified during
          *       invocation of the constructor without further warning.
-         *       Do not reuse an argument list AS-IS for multiple constructor calls, 
+         *       Do not reuse an argument list AS-IS for multiple constructor calls,
          *       unless you make sure to reinitialize the contents of the argument list after each call.
          *
          * NOTE: subclasses should never need to declare this method in their class;
-         *       an override declaration will be provided for them iff 
+         *       an override declaration will be provided for them iff
          *       customconstruct="true" is specified in their AS3 file.
          */
         virtual Atom construct(int argc, Atom* argv);
@@ -203,7 +203,7 @@ namespace avmplus
 
         // This sets the property named "length" to the given uint value. If this
         // is a nondynamic object, or there is a read-only length property, or uint
-        // can't be coerced to the type of "length", an exception will be thrown. 
+        // can't be coerced to the type of "length", an exception will be thrown.
         virtual void setLengthProperty(uint32_t newLen);
 
 #ifdef AVMPLUS_VERBOSE

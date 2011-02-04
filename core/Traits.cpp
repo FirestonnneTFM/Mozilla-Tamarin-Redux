@@ -1977,7 +1977,7 @@ namespace avmplus
     
     void Traits::traceSlotsFromBitmap(MMgc::GC* gc, uint32_t* p, const FixedBitSet& traceInfo, uint32_t bitsUsed) const
     {
-        for (uint32_t bit = 1; bit <= bitsUsed; bit++) 
+        for (uint32_t bit = 1; bit <= bitsUsed; bit++)
         {
             if (traceInfo.test(bit))
             {

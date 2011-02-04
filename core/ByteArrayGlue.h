@@ -62,14 +62,14 @@ namespace avmplus
         // and set position = min(GetPosition(), newLength)
         //
         // Note that SetLength(0) empties the (logical) contents of the ByteArray,
-        // but doesn't reduce the underlying capacity allocated. 
+        // but doesn't reduce the underlying capacity allocated.
         // Use Clear() to eliminate existing memory allocations.
         void FASTCALL SetLength(uint32_t newLength);
 
         // You can use this call to get a READ_ONLY pointer into the ByteArray.
         // The pointer starts at offset zero (regardless of the value of GetPosition())
-        // and the data is guaranteed to be valid for GetLength() bytes. 
-        // 
+        // and the data is guaranteed to be valid for GetLength() bytes.
+        //
         // *** USE THIS METHOD WITH EXTREME CAUTION, AND ONLY WHEN ABSOLUTELY NECESSARY ***
         //
         // In particular, you must not use this method and const_cast the result, as
@@ -84,8 +84,8 @@ namespace avmplus
 
         // You can use this call to get a WRITABLE pointer into the ByteArray.
         // The pointer starts at offset zero (regardless of the value of GetPosition())
-        // and the data is guaranteed to be valid for GetLength() bytes. 
-        // 
+        // and the data is guaranteed to be valid for GetLength() bytes.
+        //
         // *** USE THIS METHOD WITH EXTREME CAUTION, AND ONLY WHEN ABSOLUTELY NECESSARY ***
         //
         // You normally should use Write() rather than this method,
@@ -118,7 +118,7 @@ namespace avmplus
         bool removeSubscriber(DomainEnv* subscriber);
 
         // compression / decompression
-        enum CompressionAlgorithm 
+        enum CompressionAlgorithm
         {
             k_zlib,
             k_deflate
@@ -198,7 +198,7 @@ namespace avmplus
         // currently requires the object to be GCObject or GCFinalizedObject, not RCObject;
         // that's fine for all extant use cases.) (Note that the pointer is written with explicit WB calls.)
         //
-        // Note that (under the covers) we use GC::emptyWeakRef as a sentinel to mean 
+        // Note that (under the covers) we use GC::emptyWeakRef as a sentinel to mean
         // "I am copy on write but there is no GCObject controlling my lifespan"; this
         // can be the case if (e.g.) the data is compile-time-constant data we are just
         // wrapping. Using GC::emptyWeakRef here is, admittedly, an ugly hack, but doing so
@@ -206,7 +206,7 @@ namespace avmplus
         // and avoids adding a "bool" field which would expand this struct by an average of 7 bytes
         // due to MMgc alignment rules.
         //
-        MMgc::GCObject*         m_copyOnWriteOwner; 
+        MMgc::GCObject*         m_copyOnWriteOwner;
         uint8_t*                m_array;
         uint32_t                m_capacity;
         uint32_t                m_length;

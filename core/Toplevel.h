@@ -352,10 +352,10 @@ namespace avmplus
         //
         virtual uint32_t charsetToCodepage(String* charset);
 
-        // 
+        //
         // Read length bytes from the DataInput and convert it to a String
         // under the assumption it is formatted in the given codepage.
-        // and return it as a String. 
+        // and return it as a String.
         //
         // codepage can be assumed to be a value returned by the charsetToCodepage() method.
         //
@@ -369,7 +369,7 @@ namespace avmplus
         //
         virtual String* readMultiByte(uint32_t codepage, uint32_t length, DataInput* input);
 
-        // 
+        //
         // Convert the given (Unicode) String into the given codepage and write it to the given DataOutput.
         //
         // codepage can be assumed to be a value returned by the charsetToCodepage() method.
@@ -386,7 +386,7 @@ namespace avmplus
 
         //  -------------------------------------------------------
 
-        // 
+        //
         // If a ByteArray doesn't begin with a BOM, Flash may want ByteArray.toString()
         // to attempt a conversion from the system's default codepage as though the data
         // is MBCS. If such a conversion is desirable and possible, you should return the
@@ -409,7 +409,7 @@ namespace avmplus
 
         //
         // Serialize the given Atom value into the output using the specified encoding.
-        // If the encoding is not valid, throw an error. 
+        // If the encoding is not valid, throw an error.
         //
         // Note that the implementation is not allowed to call DataOutput::WriteObject.
         //
@@ -420,7 +420,7 @@ namespace avmplus
 
         //  -------------------------------------------------------
 
-        // 
+        //
         // This is called anytime a ByteArrayObject (or subclass thereof) is created;
         // it allows the ByteArray to be pre-initialized (eg via SetCopyOnWriteData),
         // most typically if it is a subclass that is bound to a particular data set.
