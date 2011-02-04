@@ -81,6 +81,27 @@
 
 namespace avmplus
 {
+    enum { NODE_NAME_START = 1 }; // skip the slash
+
+    typedef bool (*MissingEndTagProc)(String* parentName, String* tagText, Namespace* ns, Namespace* defaultNS);
+
+   // We're trying to support paired nodes where the first node gets a namespace
+   // from the default namespace.
+
+    // used when bugzilla598683 == false
+    static bool missingEndTagOld(String* parentName, String* tagText, Namespace* ns, Namespace* defaultNS)
+    {
+        return parentName->Compare(*tagText, NODE_NAME_START, tagText->length() - NODE_NAME_START) != 0 &&
+                ns->getURI() == defaultNS->getURI();
+    }
+
+    // used when bugzilla598683 == true
+    static bool missingEndTagNew(String* parentName, String* tagText, Namespace* ns, Namespace* defaultNS)
+    {
+        return !(parentName->Compare(*tagText, NODE_NAME_START, tagText->length() - NODE_NAME_START) == 0 &&
+                ns->getURI() == defaultNS->getURI());
+    }
+
     XMLObject::XMLObject(XMLClass *type, E4XNode *node)
         : ScriptObject(type->ivtable(), type->prototypePtr())
         , m_node(node)
@@ -148,7 +169,10 @@ namespace avmplus
         }
 
         int m_status;
-
+		
+		bool const bugzilla598683 = core->currentBugCompatibility()->bugzilla598683;
+        MissingEndTagProc missingEndTag = bugzilla598683 ? missingEndTagNew : missingEndTagOld;
+		
         while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
         {
 
@@ -170,8 +194,6 @@ namespace avmplus
                     // A closing tag
                     if (tag.text->charAt(0) == '/')
                     {
-                        const int32_t nodeNameStart = 1; // skip the slash
-
                         Multiname m;
                         p->getQName(&m, publicNS);
                         Namespace* ns = m.getNamespace();
@@ -179,11 +201,10 @@ namespace avmplus
                         // Get our parent's qualified name string here
                         Stringp parentName = m.getName();
 
-                        if (!NodeNameEquals(tag.text, nodeNameStart, parentName, ns) &&
-                            // We're trying to support paired nodes where the first node gets a namespace
-                            // from the default namespace.
-                            !(parentName->Compare(*tag.text, nodeNameStart, tag.text->length()-nodeNameStart) == 0 &&
-                            ns->getURI() == toplevel->getDefaultNamespace()->getURI()))
+                        // OPTIMIZEME: can toplevel->getDefaultNamespace() ever change during this call? 
+                        // If not, extract at top of loop.
+                        if (!NodeNameEquals(tag.text, parentName, ns) &&
+                            missingEndTag(parentName, tag.text, ns, toplevel->getDefaultNamespace()))
                         {
                             // If p == m_node, we are at the top of our tree and we're parsing the fake "parent"
                             // wrapper tags around our actual XML text.  Instead of warning about a missing "</parent>"
@@ -376,34 +397,31 @@ namespace avmplus
 
     }
 
-    bool XMLObject::NodeNameEquals(Stringp nodeName, int32_t nodeNameStart, Stringp parentName, Namespace * parentNs)
+    bool XMLObject::NodeNameEquals(Stringp nodeName, Stringp parentName, Namespace * parentNs)
     {
-        int32_t const nodeNameLength = nodeName->length() - nodeNameStart;
+        int32_t const nodeNameLength = nodeName->length() - NODE_NAME_START;
+        int32_t prefixLen = 0;
         if (parentNs && parentNs->hasPrefix())
         {
             AvmCore *core = this->core();
             Stringp parentNSName = core->string(parentNs->getPrefix());
-            int prefixLen = parentNSName->length();
+            prefixLen = parentNSName->length();
 
             // Does nodeName == parentNS:parentName
             int totalLen = prefixLen + 1 + parentName->length(); // + 1 for ':' separator
             if (totalLen != nodeNameLength)
                 return false;
 
-            if (parentNSName->Compare(*nodeName, nodeNameStart, prefixLen) != 0)
+            if (parentNSName->Compare(*nodeName, NODE_NAME_START, prefixLen) != 0)
                 return false;
 
-            if (nodeName->charAt(nodeNameStart + prefixLen) != ':')
+            if (nodeName->charAt(NODE_NAME_START + prefixLen) != ':')
                 return false;
 
             // -1 for ':'
             prefixLen++;
-            return (parentName->Compare(*nodeName, nodeNameStart + prefixLen, nodeNameLength - prefixLen) == 0);
         }
-        else
-        {
-            return parentName->Compare(*nodeName, nodeNameStart, nodeNameLength) == 0;
-        }
+        return parentName->Compare(*nodeName, NODE_NAME_START + prefixLen, nodeNameLength - prefixLen) == 0;
     }
 
     //////////////////////////////////////////////////////////////////////

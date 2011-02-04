@@ -4886,6 +4886,7 @@ return the result of the comparison ToPrimitive(x) == y.
             bugzilla551587 = 1;     // MathClass:_min() does not correctly handle -0
             bugzilla558863 = 1;     // in operator on bytearray throws exception for non-natural number
             bugzilla585791 = 1;     // String.localeCompare with a null String object returns 0
+			bugzilla598683 = 1;     // Bad XML with unterminated node with namespace not throwing correctly
             bugzilla609416 = 1;     // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs
         }
     }
