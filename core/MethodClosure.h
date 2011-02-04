@@ -58,9 +58,12 @@ namespace avmplus
 
         MethodClosure* create(MethodEnv* env, Atom savedThis);
         
+    // ------------------------ DATA SECTION BEGIN
+    private:
         GC_NO_DATA(MethodClosureClass)
 
         DECLARE_SLOTS_MethodClosureClass;
+    // ------------------------ DATA SECTION END
     };
 
     /**
@@ -78,31 +81,97 @@ namespace avmplus
      */
     class GC_AS3_EXACT(MethodClosure, FunctionObject)
     {
-        friend class MethodClosureClass;
-        MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis);
+    protected:
+        REALLY_INLINE MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis)
+            : FunctionObject(cvtable, call), m_savedThis(savedThis)
+        {
+            AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
+            // This is legal: our subclass can hand us nullAtom
+            // AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
+        }
 
     public:
-        virtual bool isMethodClosure() { return true; }
+        REALLY_INLINE static MethodClosure* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call, Atom savedThis)
+        {
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) MethodClosure(vtable, call, savedThis);
+        }
 
+        // ScriptObject method overrides
+        virtual MethodClosure* toMethodClosure() const;
 #ifdef AVMPLUS_VERBOSE
-        PrintWriter& print(PrintWriter& prw) const;
+        virtual PrintWriter& print(PrintWriter& prw) const;
 #endif
 
-        // Flash needs to peek at these for WeakMethodClosure, alas
-        inline MethodEnv* peek_call() { return _call; }
-        inline Atom peek_savedThis() { return _savedThis; }
+        // MethodClosure-specific methods
+#ifdef _DEBUG
+        virtual bool isWeak() const;
+#endif
+        virtual bool isValid() const;
+        virtual MethodClosure* weaken() const;
+        virtual Atom get_savedThis() const;
+
+        bool equals(const MethodClosure* that) const;
+        uintptr_t hashKey() const;
 
     protected:
-        virtual Atom get_coerced_receiver(Atom a);
+        virtual Atom get_coerced_receiver(Atom a) const;
 
     protected:
         GC_DATA_BEGIN(MethodClosure)
         
-        ATOM_WB GC_ATOM(_savedThis);
+        // Note: this field is not used by the Weak subclass
+        ATOM_WB GC_ATOM(m_savedThis);
         
         GC_DATA_END(MethodClosure)
 
         DECLARE_SLOTS_MethodClosure;
+    };
+
+    // Note that this class doesn't have an AS3 declaration; from AS3 it is indistinguishable
+    // from a normal MethodClosure. (In fact, this is currently never even exposed to AS3
+    // code; it's used internally.) The only way to obtain one is to call weaken() on a normal
+    // MethodClosure.
+    class GC_CPP_EXACT(WeakMethodClosure, MethodClosure)
+    {
+        friend class MethodClosure;
+    protected:
+        REALLY_INLINE WeakMethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis)
+            : MethodClosure(cvtable, call, nullObjectAtom) // do NOT pass savedThis to the superclass ctor!
+            , m_weakSavedThis(AvmCore::atomToScriptObject(savedThis)->GetWeakRef())
+        {
+            AvmAssert(m_weakSavedThis != NULL);
+        }
+ 
+        REALLY_INLINE static WeakMethodClosure* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call, Atom savedThis)
+        {
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) WeakMethodClosure(vtable, call, savedThis);
+        }
+
+    public:
+        // MethodClosure-specific methods
+#ifdef _DEBUG
+        virtual bool isWeak() const;
+#endif
+        virtual bool isValid() const;
+        virtual MethodClosure* weaken() const;
+        virtual Atom get_savedThis() const;
+ 
+     protected:
+        virtual Atom get_coerced_receiver(Atom a) const;
+    
+    private:
+        Atom _get_savedThis() const;
+
+    // ------------------------ DATA SECTION BEGIN
+        GC_DATA_BEGIN(WeakMethodClosure)
+
+    private:
+        DWB(MMgc::GCWeakRef*) GC_POINTER(m_weakSavedThis);  // WeakRef to a ScriptObject*
+
+        GC_DATA_END(WeakMethodClosure)
+
+    private:
+    // ------------------------ DATA SECTION END
     };
 }
 

@@ -146,6 +146,7 @@ namespace avmplus
     class ExceptionHandlerTable;
     class FixedBitSet;
     class FrameState;
+    class FunctionObject;
     class HeapHashtable;
     class HeapMultiname;
     class InlineHashtable;
@@ -201,6 +202,7 @@ namespace avmplus
     class Verifier;
     class VTable;
     class VoidClass;
+    class WeakMethodClosure;
     class XMLClass;
     class XMLListClass;
     class XMLObject;

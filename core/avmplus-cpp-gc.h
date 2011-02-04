@@ -604,4 +604,14 @@ bool VectorBaseObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
+bool WeakMethodClosure::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    MethodClosure::gcTrace(gc, 0);
+    (void)(avmplus_MethodClosure_isExactInterlock != 0);
+    gc->TraceLocation(&m_weakSavedThis);
+    return false;
+}
+
 }
