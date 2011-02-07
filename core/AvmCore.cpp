@@ -4805,7 +4805,24 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 apiVersion = ApiVersion(mark - AvmCore::MIN_API_MARK);
                 uri = (idx > 0) ? internSubstring(uri, 0, idx) : Stringp(kEmptyString);
+#ifdef VMCFG_VERIFYALL
+                // You can use -Dverifyonly to simply verify a SWF, but not execute any code;
+                // as part of this you have to also specify avmglue.abc, eg
+                //
+                //      avm -Dverifyonly avmglue.abc something.swf
+                //
+                // The problem is that avmglue.abc contains version-marked URIs,
+                // but avmshell doesn't know which of those are "supposed" to be versioned
+                // (e.g., flash.debugger). For -Dverifyonly, however, it doesn't really
+                // matter much, so rather than jump thru hoops to figure out the proper
+                // URIs for this, just skip the assert.
+                if (!config.verifyonly)
+                {
+                    AvmAssert(isVersionedURI(uri));
+                }
+#else
                 AvmAssert(isVersionedURI(uri));
+#endif
                 return true;
             }
             // this is not the case: we can legitimately see unmarked URIs for "versioned uris".
