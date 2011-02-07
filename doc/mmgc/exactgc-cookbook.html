@@ -45,49 +45,55 @@
 <br>
 (Cookbook)</center></h1>
 
-<p>MMgc provides opt-in "exact GC" of classes, which means that the GC will:
+<P> <center>(Updated 2011-02-07)</center>
+
+<p> MMgc provides opt-in "exact GC" of C++ and AS3 classes.  When
+operating on instances of classes designated as "exact" the GC will:
+
 <ul>
-<li> only examine those field of the exactly traced instances that are designated as
+<li><P> only examine those members of the instances that are designated as
 "pointer-containing", and
-<li> expect the instances, the pointer fields, and the code that
+
+<li><P> expect the instances, the pointer members, and the code that
 manipulates them to obey certain rules.
 </ul>
 
-<P><u>The benefit of exact GC</u> is less time spent in GC, and
+<P> <u>The benefit of exact GC</u> is less time spent in GC, and
 less misidentification of garbage as live storage.  <u>The cost of
 exact GC</u> is that the class definitions must be annotated, and
-the code must follow the rules.
+the code and data must follow the rules.
 
-<p>This document tells you what you need to do to opt-in to exact
-GC for a class.  Some complicated cases are not covered here:  
-This is a brief version of the full writeup
-(<a href="exactgc-manual.html">exactgc-manual.html</a>), and there
-is exhaustive documentation about annotations at the top
-of <a href="../../utils/exactgc.as"><tt>utils/exactgc.as</tt></a>
-and <a href="../../utils/nativegen.py"><tt>utils/nativegen.py</tt></a>.
+<p> This document tells you what you need to do to opt-in to exact GC
+for a class.  Some complicated cases are not covered here: The
+cookbook is a brief version of the full writeup
+(<a href="exactgc-manual.html">exactgc-manual.html</a>).
 
 
-<h2>Remember "the Rules"</h2>
+<h2>Remember the Object Invariants</h2>
 
-<p><a href="exactgc-manual.html#rules">Recall the rules</a> for a class opting into being exactly traced:
+<p><a href="exactgc-manual.html#rules">Recall the object
+invariants</a> for instances of class opting into being exactly GC'd:
 
 <ul>
-<li>The class <em>must</em> disclose (by means of
-    annotations) <em>all</em> its GC-pointer fields to the garbage
-    collector, including fields in member structures.
 
-<li>A GC-pointer field's value, after tag stripping, <em>must</em> be either
-    <tt>NULL</tt> or a pointer to the beginning of a <em>live</em> GC-allocated
-    object.
-
-<li>An exactly traced class <em>must</em> derive from GCTraceableObject,
+<li><P> An exactly GC'd class <em>must</em> derive from GCTraceableObject,
     GCFinalizedObject, or RCObject.  It <em>must not</em> derive from
     GCObject, or from no GC class at all.
 
-<li>A class can be exactly traced only if its base class is exactly
-    traced.
+<li><P> A class can be exactly GC'd only if its base class is exactly GC'd.
 
-<li>Exactly traced fields <em>must never</em> contain non-pointer values.
+<li><P> The class <em>must</em> disclose <em>all</em> its GC-pointer
+     fields to the garbage collector, including fields in member
+     structures.  For this it can use a combination of annotations and
+     hand-written code.
+
+<li> <P> A GC-pointer member's value, after tag stripping, <em>must</em> be
+    either <tt>NULL</tt> or a pointer to the beginning of
+    a <em>live</em> GC-allocated object.  The member <em>must
+    never</em> contain other values, not even at the moment when the
+    object is passed to GC::Free.
+
+<li> <P> The tracer must always be able to deal with all-bits-zero values.
 </ul>
 
 
@@ -97,21 +103,27 @@ and <a href="../../utils/nativegen.py"><tt>utils/nativegen.py</tt></a>.
 
 <ul>
 
-<li>You must annotate the C++ class whose instances are to be exactly
-traced.  (This is the bulk of the work.)
+<li><P> You must annotate the C++ class whose instances are to be exactly
+GC'd.  (This is the bulk of the work.)
 
-<li>If the C++ class is the implementation for an AS3 native class
+<li><P> If the C++ class is the implementation for an AS3 native class
 then you must annotate the AS3 class too by changing its "native"
 metadata.
 
-<li>You must turn on exact GC for all instances of the type
-as you allocate them.
+<li><P> You must turn on exact GC for all instances of the type as you
+allocate them.
 
-<li>You must regenerate the "tracing methods" by running a script.
-(We will make that part of the build process).
+<li><P> You must regenerate the "tracing methods" by running a script.
 
-<li>If you changed any AS3 classes you also must rebuild the builtins.
-(That's already part of the build process in the Flash Player.)
+<P><em>TODO.</em>  We will make that part of the build process, so this
+step will go away.
+
+<li><P> If you changed any AS3 classes you also must rebuild the builtins.
+(That's already part of the build process in the Flash
+Player.)
+
+<P><em>TODO.</em>  This is about to become part of the build
+process for AVM+, so this step will go away.)
 
 </ul>
 
@@ -120,7 +132,7 @@ as you allocate them.
 
 <h3>Changing the C++ class head</h3>
 
-<p>To make the class exactly traced change this:
+<p>To make the class exactly GC'd change this:
 <pre>
   class Derived : public Base ...
 </pre>
@@ -130,11 +142,11 @@ to one of these:
   class GC_<b>CPP</b>_EXACT(Derived, Base) ...   // Does not have an AS3 counterpart
 </pre>
 
-<p>For classes defined within an #ifdef use the _IFDEF variants (ditto
-#if with _IF and #ifndef with _IFNDEF):
+<p>For classes defined within an <tt>#ifdef</tt> use the <tt>_IFDEF</tt> variants (ditto
+<tt>#if</tt> with <tt>_IF</tt> and <tt>#ifndef</tt> with <tt>_IFNDEF</tt>):
 <pre>
   #ifdef <b>DEBUGGER</b>
-    class GC_CPP_EXACT_<b>IFDEF</b>(Derived, Base, <b>DEBUGGER</b>) ...
+      class GC_CPP_EXACT_<b>IFDEF</b>(Derived, Base, <b>DEBUGGER</b>) ...
   #endif
 </pre>
 
@@ -149,11 +161,11 @@ to change the AS3 class's metadata by inserting a GC argument:
 </pre>
 
 <P>You can choose to make only the C++ class object (<tt>classgc="exact"</tt>)
-or instance object (<tt>instancegc="exact"</tt>) exactly traced; typically
+or instance object (<tt>instancegc="exact"</tt>) exactly GC'd; typically
 you do both, as in the example above (<tt>gc="exact"</tt>).
 
 
-<h3>Annotating C++ data fields</h3>
+<h3>Annotating C++ data members</h3>
 
 <p>To delimit the data section in the C++ class, add these macros around
 the member data definitions of Derived:
@@ -170,31 +182,37 @@ checking and allows for nested classes.
 <P>Annotate each pointer member in the data section by making each thing
 on the left in the table below turn into the thing on the right:
 <pre>
-  DRCWB(ClassClosure*) p;  |  DRCWB(ClassClosure*) GC_POINTER(p); // untagged pointer
-  ATOM_WB a;               |  ATOM_WB GC_ATOM(a);                 // AVM+ atom
-  uintptr_t p;             |  uintptr_t GC_POINTER(p);            // tagged pointer with manual barrier
-  uintptr_t p;             |  uintptr_t GC_CONSERVATIVE(p);       // maybe pointer, maybe not
+  DRCWB(ClassClosure*) p;  |  DRCWB(ClassClosure*) <b>GC_POINTER</b>(p); // untagged pointer
+  ATOM_WB a;               |  ATOM_WB <b>GC_ATOM</b>(a);                 // AVM+ atom
+  uintptr_t p;             |  uintptr_t <b>GC_POINTER</b>(p);            // tagged pointer with manual barrier
+  uintptr_t p;             |  uintptr_t <b>GC_CONSERVATIVE</b>(p);       // maybe pointer, maybe not
 </pre>
 
+<P> Notice how <tt>GC_CONSERVATIVE</tt> can be used in the (hopefully
+rare!) case when it's hard to know whether a field will hold a valid
+pointer or not.
+
+<a name="structure-usecase">
 <P>If the thing on the left is not a pointer, but a structure containing
 pointers, you do the same thing:
 <pre>
-  GCList&lt;Atom> atoms;      |  GCList&lt;Atom> GC_STRUCTURE(p);       // substructure
+  GCList&lt;Atom> atoms;      |  GCList&lt;Atom> <b>GC_STRUCTURE</b>(p);       // substructure
 </pre>
 
 <P>The structure type must implement the exact GC protocol.  All the
 predefined "List" types in the AVM+ do; if you need to implement it
-for your own type then look below.
+for your own type then look <a href="#structure-members">below</a>.
 
 
-<P>If the field is inside an #if or #ifdef or #ifndef block you must use
-corresponding annotations:
+<P>If the member is inside an <tt>#if</tt> or <tt>#ifdef</tt>
+or <tt>#ifndef</tt> block you must use corresponding annotations:
 <pre>
   #ifdef <b>DEBUGGER</b>
-    DRCWB(ClassClosure*) GC_POINTER_<b>IFDEF</b>(p, <b>DEBUGGER</b>);
+      DRCWB(ClassClosure*) GC_POINTER_<b>IFDEF</b>(p, <b>DEBUGGER</b>);
   #endif
 </pre>
 
+<P> <em>TODO.</em>  We need at least one example about GCMember above.
 
 <h2>Turning on exact GC during instantiation</h2>
 
@@ -205,32 +223,33 @@ has been zeroed (by MMgc) and the base vtable has been installed.  The
 object is designated as exactly traced by passing a flag to the <tt>new</tt>
 operator:
 <pre>
-  p = new (gc, extra) Fnord(p, q);
+  p = new (gc, extra) Derived(p, q);
 </pre>
 turns into this:
 <pre>
-  p = new (gc, MMgc::kExact, extra) Fnord(p, q);
+  p = new (gc, <b>MMgc::kExact,</b> extra) Derived(p, q);
 </pre>
 
 <h3>Erecting safeguards</h3>
 
-<P> However, it is <em>strongly encouraged</em> to take this one step
-further and ensure that there is exactly one allocation site per
-exactly traced object type.  Otherwise, it's far to easy to have some sites that
-set the exactly-traced bit and some that don't; while that will work, it's not what you want.
+<P> We <em>strongly encourage you</em> to take this one step further
+and ensure that there is exactly one allocation site per exactly GC'd
+object type.  Otherwise, it's far to easy to have some sites that set
+the exactly-GC'd bit and some that don't; while that will work, it's
+not what you want.
 
 <p> To ensure that there is only one allocation site, make the type's
 constructor <tt>protected</tt> or <tt>private</tt>, and create a
-factory function for the type.  In the AVM+ most exactly-traced object
+factory function for the type.  In the AVM+ most exactly-GC'd object
 types now have a creator function:
 <pre>
-  REALLY_INLINE static Fnord* create(MMgc::GC* gc, size_t extra, P* p, Q* q) {
-    return new (gc, MMgc::kExact, extra) Fnord(p, q);
+  REALLY_INLINE static Derived* create(MMgc::GC* gc, size_t extra, P* p, Q* q) {
+      return new (gc, MMgc::kExact, extra) Derived(p, q);
   }
 </pre>
 with allocation sites looking like this:
 <pre>
-  p = Fnord::create(gc, extra, p, q);
+  p = Derived::create(gc, extra, p, q);
 </pre>
 
 <P>Frequently, the "extra" argument is derived from one of the other
@@ -241,7 +260,13 @@ arguments and that computation can be moved into the creator function.
 
 <h3>Regenerating tracers</h3>
 
-<p>The tracers for the AVM+ core, the AVM+ shell, and AVM+ used in the
+<P> The task of inspecting an object for pointers to other objects is
+known as "tracing the object's pointers", and the virtual method that
+performs the tracing for a given object type is known as the object's
+"tracer".  (The name of this method is <tt>gcTrace</tt>.)  The
+annotations on a class are used to generate the tracer for the class.
+
+<p> The tracers for the AVM+ core, the AVM+ shell, and AVM+ used in the
 Flash Player are generated by separate scripts.
 
 <p>If you're building the avmshell:
@@ -257,11 +282,11 @@ Flash Player are generated by separate scripts.
   # ... maybe more here, as tracers are written for non-avmglue classes ...
 </pre>
 
-<p><u>Note, there are probably some snags with building the AVM+ tracers
+<p> <em>TODO.</em>  There are probably some snags with building the AVM+ tracers
 for the Flash Player right now because the Flash Player build
 process moves <tt>builtin.abc</tt> away from the <tt>avmplus</tt> directory, yet the
 script needs that file; that problem will be resolved in the near
-future.</u>
+future.
 
 
 <h3>Regenerating builtins</h3>
@@ -273,36 +298,51 @@ automatically; in the avmshell you have to do it manually:
   # ( cd shell ; AVMSHELL=... ./shell_toplevel.py )
 </pre>
 
+<P> <em>TODO.</em>  In the avmshell this too will happen manually, soon.
 
+
+<a name="structure-members">
 <h2>Implementing the GC protocol for structure members</h2>
 
-<P>You must implement a method on the structure called "gcTrace", it
-takes a <tt>MMgc::GC*</tt> and returns nothing, and informs the GC of the pointer
-fields in the structure.  Currently there's no annotation system for
-that.
+<P> <a href="#structure-usecase">Earlier you saw how to annotate
+member that is a class or structure with <tt>GC_STRUCTURE</tt>.</a>
+However, at this time there is no annotation system for structure
+members, and unless the structure has already been set up to handle
+exact GC you must implement the exact GC protocol on the structure
+manually.
 
-<p>Suppose the structure (it can be a class, too) looks like this:
+<P> Specifically, you must implement the following method on the structure:
+<pre>
+  void gcTrace(MMgc::GC*gc)
+</pre>
+The new method will perform the tracing of the structure, ie, inform the GC of the
+pointer members in the structure.
+
+<p>Suppose the structure (or class) looks like this:
 <pre>
   struct S {
-    int x;
-    DRCWB(ScriptObject*) p;  // untagged pointer
-    ATOM_WB a;               // AVM+ atom
-    uintptr_t q;             // tagged pointer with manual barrier
-    uintptr_t w;             // maybe pointer, maybe not
-    GCList&lt;Atom> atoms;      // substructure
+      int x;
+      DRCWB(ScriptObject*) p;  // untagged pointer
+      ATOM_WB a;               // AVM+ atom
+      uintptr_t q;             // tagged pointer with manual barrier
+      uintptr_t w;             // maybe pointer, maybe not
+      GCList&lt;Atom> atoms;      // substructure
   }
 </pre>
 
 <P>Then you would add this method to its body:
 <pre>
     inline void gcTrace(MMgc::GC* gc) {
-      gc->TraceAtom(&a);
-      gc->TraceLocation(&p);
-      gc->TraceLocation(&q);
-      gc->TraceConservativeLocation(&w);
-      atoms.gcTrace(gc);
+        gc->TraceAtom(&a);
+        gc->TraceLocation(&p);
+        gc->TraceLocation(&q);
+        gc->TraceConservativeLocation(&w);
+        atoms.gcTrace(gc);
     }
 </pre>
+
+<P> (Frequently a structure is used few places and it makes sense to
+make the tracer "inline".)
 
 <h2>Troubleshooting</h2>
 
@@ -316,13 +356,14 @@ some pitfalls for the foreseeable future.
 compile-time errors if:
 
 <ul>
-<li>You forget to annotate a field in an exactly traced class.
-<li>You forget to run the tracer generation script after adding an annotation.
+<li><P> You forget to annotate a member in an exactly GC'd class.
+
+<li><P> You forget to run the tracer generation script after adding an annotation.
 </ul>
 
 <p> Missing annotations are particularly easy to acquire during
 merges, if the author of the merged-in code is unaware that somebody
-has transformed the merged-into class to become exactly traced.
+has changed the merged-into class to be exactly GC'd.
 
 </body>
 </html>
