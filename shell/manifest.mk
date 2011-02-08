@@ -118,9 +118,18 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(NULL)
 endif
 
-$(shell_CXXSRCS): $(curdir)/../generated/shell_toplevel.h
+# See manifest.mk in root directory for this dependency.
+#$(shell_CXXSRCS): $(topsrcdir)/generated/shell_toplevel.h
 
-$(curdir)/../generated/shell_toplevel.h $(curdir)/../generated/shell_toplevel.cpp: $(curdir)/shell_toplevel.as
+# Use of '%' [to force a pattern-rule] instead of '$(curdir)/..' or
+# '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
+# (ie "deliberate", ie "hack"); see Bug 632086
+%/generated/shell_toplevel.h %/generated/shell_toplevel.cpp: $(topsrcdir)/shell/shell_toplevel.as
 	cd $(topsrcdir)/shell; python shell_toplevel.py
 
-$(curdir)/ShellCore.cpp: $(curdir)/../generated/shell_toplevel.cpp
+# Use of '$(topsrcdir)/generated' rather than '$(curdir)/..'  is
+# deliberate; the root manifest.mk needs to use it (because it needs a
+# context-independent path to builtin.cpp), and since make will not
+# canonicalize the paths, it is best to use the same path everywhere.
+# See Bug 632086.
+$(curdir)/ShellCore.cpp: $(topsrcdir)/generated/shell_toplevel.cpp
