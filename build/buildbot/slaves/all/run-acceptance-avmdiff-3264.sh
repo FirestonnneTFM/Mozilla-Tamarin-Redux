@@ -82,6 +82,9 @@ cd $basedir/test/acceptance
 
 avmdiff=$basedir/utils/avmdiff.py
 avmdiffcfg=$basedir/build/buildbot/slaves/all/avmdiff_32-64.cfg
+if [ "$OSTYPE" == "cygwin" ]; then
+    avmdiff=`cygpath -w $basedir/utils/avmdiff.py`
+fi
 export AVM="$PYTHON_RUNTESTS $avmdiff --buildfile=${avmdiffcfg}"
 echo "`$AVM`"
 echo; echo "AVM built with the following options:"
