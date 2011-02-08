@@ -151,11 +151,11 @@ test "$threads" = "" || {
 }
 if [ "$config" != "" ]
 then
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs} ${silentoptions}"
-    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs} ${silentoptions}
+    echo "message: $PYTHON_RUNTESTS ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs} ${silentoptions}"
+    $PYTHON_RUNTESTS ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs} ${silentoptions}
 else
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs} ${silentoptions}" 
-    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs} ${silentoptions}
+    echo "message: $PYTHON_RUNTESTS ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs} ${silentoptions}"
+    $PYTHON_RUNTESTS ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs} ${silentoptions}
 fi
 
 if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then

@@ -65,15 +65,6 @@ test "$res" = "0" || {
 }
 
 download_asc
-# If available, use windows python (instead of cygwin python)
-# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
-# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
-if [ -z "$PYTHONWIN" ]
-then
-    export py=python
-else
-    export py=$PYTHONWIN
-fi
 
 export AVM=$basedir/build/buildbot/slaves/all/ssh-shell.sh
 export avmr=$AVM
@@ -86,7 +77,7 @@ logfile=smokes-mips.log
 beginSilent
 
 cd $basedir/test
-$py ./runsmokes.py --testfile=./runsmokes-arm-mips.txt --time=120
+$PYTHON_RUNTESTS ./runsmokes.py --testfile=./runsmokes-arm-mips.txt --time=120
 ret=$?
 
 exitcode=0

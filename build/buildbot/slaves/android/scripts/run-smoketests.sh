@@ -77,15 +77,6 @@ test "$res" = "0" || {
 }
 
 download_asc
-# If available, use windows python (instead of cygwin python)
-# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
-# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
-if [ -z "$PYTHONWIN" ]
-then
-    export py=python
-else
-    export py=$PYTHONWIN
-fi
 
 export AVM=$basedir/platform/android/android_shell.py
 export avmr=$AVM
@@ -112,7 +103,7 @@ echo "**************************************************************************
 echo ""
 
 cd $basedir/test
-$py ./runsmokes.py --testfile=./runsmokes-arm-android.txt --time=120
+$PYTHON_RUNTESTS ./runsmokes.py --testfile=./runsmokes-arm-android.txt --time=120
 ret=$?
 
 exitcode=0

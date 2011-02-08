@@ -76,5 +76,5 @@ cd $basedir/test/brightspot
 chmod +x ./runtests.py
 
 # run the testsuite
-$py ./runtests.py $args
+$PYTHON_RUNTESTS ./runtests.py $args
 

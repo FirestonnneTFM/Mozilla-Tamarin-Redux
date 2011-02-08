@@ -106,16 +106,8 @@ fi
 cd $basedir/test/cmdline
 echo "starting cmdline testsuite..."
 
-# If available, use windows python (instead of cygwin python)
-# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
-# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
-if [ -z "$PYTHONWIN" ]
-then
-    py=python
-else
-    py=$PYTHONWIN
-fi
-$py ./runtests.py > cmdline.txt 2>&1
+
+$PYTHON_RUNTESTS ./runtests.py > cmdline.txt 2>&1
 ret=$?
 echo "ret=$ret"
 
