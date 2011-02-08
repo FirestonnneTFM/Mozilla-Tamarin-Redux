@@ -231,4 +231,7 @@ endif
 
 endef
 
+# Delete target files if their recipe had an error exit-status code.
+.DELETE_ON_ERROR:
+
 .PHONY: all FORCE
