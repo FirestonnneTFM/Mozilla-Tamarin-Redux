@@ -95,18 +95,8 @@ export AVMRD=$avmrd
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean.sh
 
-# If available, use windows python (instead of cygwin python)
-# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
-# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
-if [ -z "$PYTHONWIN" ]
-then
-    export py=python
-else
-    export py=$PYTHONWIN
-fi
-
 cd $basedir/test
-$py ./runsmokes.py --testfile=./misc_bug_testing.txt --time=0
+$PYTHON_RUNTESTS ./runsmokes.py --testfile=./misc_bug_testing.txt --time=0
 ret=$?
 
 exitcode=0

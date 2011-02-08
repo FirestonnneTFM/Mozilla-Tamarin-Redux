@@ -80,38 +80,16 @@ cd $basedir/build/buildbot/slaves/scripts
 
 cd $basedir/test/acceptance
 
-# If available, use windows python (instead of cygwin python)
-# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
-# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
-if [ -z "$PYTHONWIN" ]
-then
-    py=python
-    export AVM="$basedir/utils/avmdiff.py"
-    test -f $AVM || {
-        echo "ERROR: $AVM not found"
-        exit 1
-    }
-    chmod +x $AVM
-    export AVM="$basedir/utils/avmdiff.py --buildfile=$basedir/build/buildbot/slaves/all/avmdiff_32-64.cfg"
-    echo "`$AVM`"
-    echo; echo "AVM built with the following options:"
-    echo "`$AVM -Dversion`"
-else
-    py=$PYTHONWIN
-    pywin=`cygpath -w $PYTHONWIN`
-    avmdiff=`cygpath -w $basedir/utils/avmdiff.py`
-    avmdiffcfg=`cygpath -w $basedir/build/buildbot/slaves/all/avmdiff_32-64.cfg`
-    test -f $basedir/utils/avmdiff.py || {
-        echo "ERROR: $basedir/utils/avmdiff.py not found"
-        exit 1
-    }
-    export AVM="$py $avmdiff --buildfile=${avmdiffcfg}"
-    echo "`$py $avmdiff`"
-fi
+avmdiff=$basedir/utils/avmdiff.py
+avmdiffcfg=$basedir/build/buildbot/slaves/all/avmdiff_32-64.cfg
+export AVM="$PYTHON_RUNTESTS $avmdiff --buildfile=${avmdiffcfg}"
+echo "`$AVM`"
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
 
 
-echo "message: $py ./runtests.py --config=${platform}-3264-diff   --notimecheck"
-$py ./runtests.py --config=${platform}-3264-diff --notimecheck
+echo "message: $PYTHON_RUNTESTS ./runtests.py --config=${platform}-3264-diff   --notimecheck"
+$PYTHON_RUNTESTS ./runtests.py --config=${platform}-3264-diff --notimecheck
 
 ##
 # Ensure that the system is torn down and clean

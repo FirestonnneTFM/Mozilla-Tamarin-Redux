@@ -119,15 +119,7 @@ cd $basedir/build/buildbot/slaves/scripts
 
 cd $basedir/test/acceptance
 
-# If available, use windows python (instead of cygwin python)
-# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
-# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
-if [ -z "$PYTHONWIN" ]
-then
-    py=python
-else
-    py=$PYTHONWIN
-fi
+
 
 if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
     logfile=`echo acceptance-$shell$vmargs.log | sed 's/ //g' | sed 's/\.exe//g'`
@@ -136,11 +128,11 @@ fi
 
 if [ "$config" != "" ]
 then
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs} ${silentoptions}"
-    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs} ${silentoptions}
+    echo "message: $PYTHON_RUNTESTS ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs} ${silentoptions}"
+    $PYTHON_RUNTESTS ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs} ${silentoptions}
 else
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs} ${silentoptions}" 
-    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs} ${silentoptions}
+    echo "message: $PYTHON_RUNTESTS ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs} ${silentoptions}"
+    $PYTHON_RUNTESTS ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs} ${silentoptions}
 fi
 
 if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then

@@ -144,6 +144,18 @@ configInterp=${interp}
 # the process without the extension. Used in all/util-process-clean.sh
 export proc_names="avmshell ceremote"
 
+# If available, use the python version specified in PYTHON_RUNTESTS instead of
+# python that is in the path. There are a couple of reasons to do this:
+# 1) Threading will not work with python 2.6 that is included with cygwin,
+#    instead need to use python from python.org or ActiveState.
+# 2) Python3 has better performance handling threads, but is not fully supported
+#    in the build system, so only use to run acceptance suite.
+if [ -z "$PYTHON_RUNTESTS" ]
+then # Not set, just use python that is in the path
+    export PYTHON_RUNTESTS=python
+fi
+
+
 # Helper functions to supress output
 function beginSilent () {
     test "$silent" = "true" && {
