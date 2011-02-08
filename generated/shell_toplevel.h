@@ -182,79 +182,79 @@ const uint32_t avmplus_JObject_constructorSignature = 212;
 const uint32_t avmplus_JObject_methodSignature = 213;
 const uint32_t avmplus_JObject_fieldSignature = 214;
 
-extern Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_Domain_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_Domain_loadBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_Domain_getClass_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_Domain_domainMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_Domain_domainMemory_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom flash_sampler_NewObjectSample_object_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_loadBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_getClass_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_domainMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_Domain_domainMemory_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_sampler_NewObjectSample_object_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double flash_sampler_NewObjectSample_size_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_clearSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_startSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_stopSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_pauseSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler__setSamplerCallback_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_clearSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_startSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_stopSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_pauseSampling_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double native_script_function_flash_sampler_getSize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_getSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double native_script_function_flash_sampler_getSampleCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double native_script_function_flash_sampler__getInvocationCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_getLexicalScopes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_getSavedThis_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom native_script_function_flash_sampler_getMasterString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom flash_utils_Dictionary_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_JObject_create_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_JObject_createArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_JObject_toArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_JObject_constructorSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_JObject_methodSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_JObject_fieldSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getSavedThis_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler_getMasterString_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom flash_utils_Dictionary_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_JObject_create_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_JObject_createArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_JObject_toArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_JObject_constructorSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_JObject_methodSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_JObject_fieldSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_getAvmplusVersion_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_getFeatures_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_getRunmode_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_trace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_debugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_isDebugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_getTimer_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_private_getArgv_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_readLine_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getAvmplusVersion_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getFeatures_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getRunmode_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_trace_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_debugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isDebugger_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_getTimer_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_private_getArgv_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_readLine_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double avmplus_System_totalMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double avmplus_System_freeMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double avmplus_System_privateMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_forceFullCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_queueCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_ns_example_nstest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_isGlobal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_swfVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_apiVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_System_disposeXML_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_File_exists_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_File_read_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_forceFullCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_queueCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_ns_example_nstest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_isGlobal_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_swfVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_apiVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_System_disposeXML_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_exists_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_read_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 
 #ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 
-extern Atom shell_toplevel_s2a_oos_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_s2a_oos_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_JObject_methodSignature_thunk  shell_toplevel_s2a_oos_rest_thunk
 
-extern Atom shell_toplevel_func_s2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_s2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_getMasterString_thunk  shell_toplevel_func_s2a_os_thunk
 
-extern Atom shell_toplevel_func_v2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_v2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler__setSamplerCallback_thunk  shell_toplevel_func_v2a_oo_thunk
 
 extern double shell_toplevel_d2d_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -263,91 +263,91 @@ extern double shell_toplevel_d2d_o_thunk(MethodEnv* env, uint32_t argc, Atom* ar
 #define avmplus_System_totalMemory_get_thunk  shell_toplevel_d2d_o_thunk
 #define flash_sampler_NewObjectSample_size_get_thunk  shell_toplevel_d2d_o_thunk
 
-extern Atom shell_toplevel_a2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_a2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_Domain_getClass_thunk  shell_toplevel_a2a_os_thunk
 #define avmplus_File_readByteArray_thunk  shell_toplevel_a2a_os_thunk
 
-extern Atom shell_toplevel_func_b2a_oao_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_b2a_oao_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_isGetterSetter_thunk  shell_toplevel_func_b2a_oao_thunk
 
-extern Atom shell_toplevel_a2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_a2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_JObject_toArray_thunk  shell_toplevel_a2a_oo_thunk
 #define flash_trace_Trace_setListener_thunk  shell_toplevel_a2a_oo_thunk
 
-extern Atom shell_toplevel_s2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_s2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_getAvmplusVersion_thunk  shell_toplevel_s2a_o_thunk
 #define avmplus_System_getFeatures_thunk  shell_toplevel_s2a_o_thunk
 #define avmplus_System_getRunmode_thunk  shell_toplevel_s2a_o_thunk
 #define avmplus_System_readLine_thunk  shell_toplevel_s2a_o_thunk
 
-extern Atom shell_toplevel_func_v2a_ob_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_v2a_ob_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_sampleInternalAllocs_thunk  shell_toplevel_func_v2a_ob_thunk
 
-extern Atom shell_toplevel_v2a_oss_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_v2a_oss_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_File_write_thunk  shell_toplevel_v2a_oss_thunk
 
 extern double shell_toplevel_func_d2d_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_getSize_thunk  shell_toplevel_func_d2d_oa_thunk
 
-extern Atom shell_toplevel_func_v2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_v2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_clearSamples_thunk  shell_toplevel_func_v2a_o_thunk
 #define native_script_function_flash_sampler_pauseSampling_thunk  shell_toplevel_func_v2a_o_thunk
 #define native_script_function_flash_sampler_startSampling_thunk  shell_toplevel_func_v2a_o_thunk
 #define native_script_function_flash_sampler_stopSampling_thunk  shell_toplevel_func_v2a_o_thunk
 
-extern Atom shell_toplevel_u2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_u2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk  shell_toplevel_u2a_o_thunk
 #define avmplus_System_getTimer_thunk  shell_toplevel_u2a_o_thunk
 
-extern Atom shell_toplevel_s2a_os_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_s2a_os_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_JObject_constructorSignature_thunk  shell_toplevel_s2a_os_rest_thunk
 
 extern double shell_toplevel_func_d2d_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_getSampleCount_thunk  shell_toplevel_func_d2d_o_thunk
 
-extern Atom shell_toplevel_i2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_i2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_apiVersion_get_thunk  shell_toplevel_i2a_o_thunk
 #define avmplus_System_swfVersion_get_thunk  shell_toplevel_i2a_o_thunk
 
-extern Atom shell_toplevel_s2a_oos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_s2a_oos_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_JObject_fieldSignature_thunk  shell_toplevel_s2a_oos_thunk
 
-extern Atom shell_toplevel_i2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_i2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_exec_thunk  shell_toplevel_i2a_os_thunk
 
-extern Atom shell_toplevel_b2a_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_b2a_oa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_isGlobal_thunk  shell_toplevel_b2a_oa_thunk
 
-extern Atom shell_toplevel_s2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_s2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_File_read_thunk  shell_toplevel_s2a_os_thunk
 
-extern Atom shell_toplevel_func_a2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_a2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_getSamples_thunk  shell_toplevel_func_a2a_o_thunk
 
-extern Atom shell_toplevel_a2a_os_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_a2a_os_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_JObject_create_thunk  shell_toplevel_a2a_os_rest_thunk
 
-extern Atom shell_toplevel_a2a_ooio_optanullObjectAtom_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_a2a_ooio_optanullObjectAtom_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_JObject_createArray_thunk  shell_toplevel_a2a_ooio_optanullObjectAtom_thunk
 
-extern Atom shell_toplevel_func_a2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_a2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_getLexicalScopes_thunk  shell_toplevel_func_a2a_oo_thunk
 #define native_script_function_flash_sampler_getSavedThis_thunk  shell_toplevel_func_a2a_oo_thunk
 
-extern Atom shell_toplevel_b2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_b2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_File_exists_thunk  shell_toplevel_b2a_os_thunk
 
-extern Atom shell_toplevel_a2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_a2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_Domain_currentDomain_get_thunk  shell_toplevel_a2a_o_thunk
 #define avmplus_Domain_domainMemory_get_thunk  shell_toplevel_a2a_o_thunk
 #define avmplus_System_private_getArgv_thunk  shell_toplevel_a2a_o_thunk
 #define flash_sampler_NewObjectSample_object_get_thunk  shell_toplevel_a2a_o_thunk
 #define flash_trace_Trace_getListener_thunk  shell_toplevel_a2a_o_thunk
 
-extern Atom shell_toplevel_a2a_oou_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_a2a_oou_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_Domain_loadBytes_thunk  shell_toplevel_a2a_oou_opti0_thunk
 
-extern Atom shell_toplevel_v2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_v2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_debugger_thunk  shell_toplevel_v2a_o_thunk
 #define avmplus_System_forceFullCollection_thunk  shell_toplevel_v2a_o_thunk
 #define avmplus_System_ns_example_nstest_thunk  shell_toplevel_v2a_o_thunk
@@ -356,37 +356,37 @@ extern Atom shell_toplevel_v2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv
 extern double shell_toplevel_d2d_od_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_MI_plus_thunk  shell_toplevel_d2d_od_thunk
 
-extern Atom shell_toplevel_v2a_ob_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_v2a_ob_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_utils_Dictionary_private_init_thunk  shell_toplevel_v2a_ob_thunk
 
-extern Atom shell_toplevel_i2a_oi_opti2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_i2a_oi_opti2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_trace_Trace_getLevel_thunk  shell_toplevel_i2a_oi_opti2_thunk
 
-extern Atom shell_toplevel_a2a_oii_opti2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_a2a_oii_opti2_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_trace_Trace_setLevel_thunk  shell_toplevel_a2a_oii_opti2_thunk
 
-extern Atom shell_toplevel_b2a_oso_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_b2a_oso_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_File_writeByteArray_thunk  shell_toplevel_b2a_oso_thunk
 
-extern Atom shell_toplevel_v2a_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_v2a_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_exit_thunk  shell_toplevel_v2a_oi_thunk
 
-extern Atom shell_toplevel_v2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_v2a_oo_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_Domain_domainMemory_set_thunk  shell_toplevel_v2a_oo_thunk
 #define avmplus_Domain_private_init_thunk  shell_toplevel_v2a_oo_thunk
 #define avmplus_System_disposeXML_thunk  shell_toplevel_v2a_oo_thunk
 #define avmplus_System_trace_thunk  shell_toplevel_v2a_oo_thunk
 
-extern Atom shell_toplevel_b2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_b2a_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_isDebugger_thunk  shell_toplevel_b2a_o_thunk
 
-extern Atom shell_toplevel_v2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_v2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define avmplus_System_write_thunk  shell_toplevel_v2a_os_thunk
 
 extern double shell_toplevel_func_d2d_oaou_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler__getInvocationCount_thunk  shell_toplevel_func_d2d_oaou_thunk
 
-extern Atom shell_toplevel_func_a2a_oab_optbfalse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom shell_toplevel_func_a2a_oab_optbfalse_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define native_script_function_flash_sampler_getMemberNames_thunk  shell_toplevel_func_a2a_oab_optbfalse_thunk
 
 #endif // VMCFG_INDIRECT_NATIVE_THUNKS
@@ -524,16 +524,16 @@ class StackFrameObjectSlots
 public:
     REALLY_INLINE uint32_t get_line() const { return m_line; }
     REALLY_INLINE void set_line(uint32_t newVal) { m_line = newVal; }
-    REALLY_INLINE String* get_name() const { return m_name; }
-    REALLY_INLINE void set_name(String* newVal) { m_name = newVal; }
-    REALLY_INLINE String* get_file() const { return m_file; }
-    REALLY_INLINE void set_file(String* newVal) { m_file = newVal; }
+    REALLY_INLINE avmplus::String* get_name() const { return m_name; }
+    REALLY_INLINE void set_name(avmplus::String* newVal) { m_name = newVal; }
+    REALLY_INLINE avmplus::String* get_file() const { return m_file; }
+    REALLY_INLINE void set_file(avmplus::String* newVal) { m_file = newVal; }
     REALLY_INLINE double get_scriptID() const { return m_scriptID; }
     REALLY_INLINE void set_scriptID(double newVal) { m_scriptID = newVal; }
 private:
     uint32_t m_line;
-    DRCWB(String*) m_name;
-    DRCWB(String*) m_file;
+    DRCWB(avmplus::String*) m_name;
+    DRCWB(avmplus::String*) m_file;
     double m_scriptID;
 };
 #define DECLARE_SLOTS_StackFrameObject \
@@ -544,10 +544,10 @@ private:
     protected: \
         REALLY_INLINE uint32_t get_line() const { return m_slots_StackFrameObject.get_line(); } \
         REALLY_INLINE void set_line(uint32_t newVal) { m_slots_StackFrameObject.set_line(newVal); } \
-        REALLY_INLINE String* get_name() const { return m_slots_StackFrameObject.get_name(); } \
-        REALLY_INLINE void set_name(String* newVal) { m_slots_StackFrameObject.set_name(newVal); } \
-        REALLY_INLINE String* get_file() const { return m_slots_StackFrameObject.get_file(); } \
-        REALLY_INLINE void set_file(String* newVal) { m_slots_StackFrameObject.set_file(newVal); } \
+        REALLY_INLINE avmplus::String* get_name() const { return m_slots_StackFrameObject.get_name(); } \
+        REALLY_INLINE void set_name(avmplus::String* newVal) { m_slots_StackFrameObject.set_name(newVal); } \
+        REALLY_INLINE avmplus::String* get_file() const { return m_slots_StackFrameObject.get_file(); } \
+        REALLY_INLINE void set_file(avmplus::String* newVal) { m_slots_StackFrameObject.set_file(newVal); } \
         REALLY_INLINE double get_scriptID() const { return m_slots_StackFrameObject.get_scriptID(); } \
         REALLY_INLINE void set_scriptID(double newVal) { m_slots_StackFrameObject.set_scriptID(newVal); } \
     private: \
@@ -697,8 +697,8 @@ public:
     REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_METHODS_WITH_ARGS; }
     REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_METHODS_AND_LINES; }
     REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_METHODS_AND_LINES_WITH_ARGS; }
-    REALLY_INLINE Atom get_FILE() const { return m_FILE; }
-    REALLY_INLINE Atom get_LISTENER() const { return m_LISTENER; }
+    REALLY_INLINE avmplus::Atom get_FILE() const { return m_FILE; }
+    REALLY_INLINE avmplus::Atom get_LISTENER() const { return m_LISTENER; }
 private:
     int32_t m_OFF;
     int32_t m_METHODS;
@@ -719,8 +719,8 @@ private:
         REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_WITH_ARGS(); } \
         REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_slots_TraceClass.get_METHODS_AND_LINES(); } \
         REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_AND_LINES_WITH_ARGS(); } \
-        REALLY_INLINE Atom get_FILE() const { return m_slots_TraceClass.get_FILE(); } \
-        REALLY_INLINE Atom get_LISTENER() const { return m_slots_TraceClass.get_LISTENER(); } \
+        REALLY_INLINE avmplus::Atom get_FILE() const { return m_slots_TraceClass.get_FILE(); } \
+        REALLY_INLINE avmplus::Atom get_LISTENER() const { return m_slots_TraceClass.get_LISTENER(); } \
     private: \
         avmplus::NativeID::TraceClassSlots m_slots_TraceClass
 //-----------------------------------------------------------

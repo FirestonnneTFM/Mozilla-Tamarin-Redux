@@ -230,15 +230,15 @@ class Error(Exception):
 
 TMAP = {
     # map ctype -> sigchar, in-arg-type, ret-arg-type, base-type
-    CTYPE_OBJECT:       ("o", "ScriptObject*", "ScriptObject*", "ScriptObject"),
-    CTYPE_ATOM:         ("a", "Atom", "Atom", "#error"),
+    CTYPE_OBJECT:       ("o", "avmplus::ScriptObject*", "avmplus::ScriptObject*", "avmplus::ScriptObject"),
+    CTYPE_ATOM:         ("a", "avmplus::Atom", "avmplus::Atom", "#error"),
     CTYPE_VOID:         ("v", "void", "void", "#error"),
-    CTYPE_BOOLEAN:      ("b", "bool32", "bool", "#error"),
+    CTYPE_BOOLEAN:      ("b", "avmplus::bool32", "bool", "#error"),
     CTYPE_INT:          ("i", "int32_t", "int32_t", "#error"),
     CTYPE_UINT:         ("u", "uint32_t", "uint32_t", "#error"),
     CTYPE_DOUBLE:       ("d", "double", "double", "#error"),
-    CTYPE_STRING:       ("s", "String*", "String*", "String"),
-    CTYPE_NAMESPACE:    ("n", "Namespace*", "Namespace*", "String")
+    CTYPE_STRING:       ("s", "avmplus::String*", "avmplus::String*", "avmplus::String"),
+    CTYPE_NAMESPACE:    ("n", "avmplus::Namespace*", "avmplus::Namespace*", "avmplus::Namespace")
 };
 
 def uint(i):
@@ -1954,7 +1954,7 @@ class AbcThunkGen:
                 self.out_c.println("argoff0 = 0");
             else:
                 self.out_c.println(", argoff%d = argoff%d + %s" % (i, i-1, argszprev));
-            argszprev = "AvmThunkArgSize_%s" % (cts.rstrip('*'));
+            argszprev = "AvmThunkArgSize_%s" % (to_cname(cts));
         self.out_c.indent -= 1;
         self.out_c.println("};");
 
@@ -1978,7 +1978,7 @@ class AbcThunkGen:
         for i in range(1, len(argtraits)):
             arg_ctype = argtraits[i].ctype
             arg_typedef = TMAP[arg_ctype][1]
-            val = "AvmThunkUnbox_%s(argv[argoff%d])" % (arg_typedef.rstrip('*'), i)
+            val = "AvmThunkUnbox_%s(argv[argoff%d])" % (to_cname(arg_typedef), i)
             if directcall and arg_ctype == CTYPE_OBJECT and argtraits[i].niname != None:
                 val = "(%s*)%s" % (argtraits[i].niname, val)
             # argtraits includes receiver at 0, optionalValues does not
@@ -1986,7 +1986,7 @@ class AbcThunkGen:
                 dct,defval,defvalraw = self.abc.default_ctype_and_value(m.optionalValues[i-1]);
                 dts = ctype_from_enum(dct, True)
                 if dts != arg_typedef:
-                    defval = "AvmThunkCoerce_%s_%s(%s)" % (dts.rstrip('*'), arg_typedef.rstrip('*'), defval)
+                    defval = "AvmThunkCoerce_%s_%s(%s)" % (to_cname(dts), to_cname(arg_typedef), defval)
                 val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
                 if directcall and arg_ctype == CTYPE_OBJECT and argtraits[i].niname != None:
                     val = "(%s*)%s" % (argtraits[i].niname, val)

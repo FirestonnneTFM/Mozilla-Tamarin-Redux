@@ -89,28 +89,28 @@ namespace avmplus
     #define AvmThunkUnbox_AvmAtomReceiver(t,r)  ((t)(uintptr_t(r) & kUnboxMask))
 #endif
 
-    #define AvmThunkUnbox_ScriptObject(r)   ((ScriptObject*)(r))
-    #define AvmThunkUnbox_bool32(r)         ((r) != 0)
-    #define AvmThunkUnbox_int32_t(r)        int32_t(r)
-    #define AvmThunkUnbox_uint32_t(r)       uint32_t(r)
-    #define AvmThunkUnbox_Namespace(r)      ((Namespace*)(r))
-    #define AvmThunkUnbox_Atom(r)           (r)
-    #define AvmThunkUnbox_String(r)         ((String*)(r))
-    #define AvmThunkUnbox_void(r)           (error ??? illegal)
-    #define AvmThunkUnbox_double(r)         AvmThunkUnbox_double_impl(&(r))
+    #define AvmThunkUnbox_avmplus_ScriptObject_(r)      ((ScriptObject*)(r))
+    #define AvmThunkUnbox_avmplus_bool32(r)             ((r) != 0)
+    #define AvmThunkUnbox_int32_t(r)                    int32_t(r)
+    #define AvmThunkUnbox_uint32_t(r)                   uint32_t(r)
+    #define AvmThunkUnbox_avmplus_Namespace_(r)         ((Namespace*)(r))
+    #define AvmThunkUnbox_avmplus_Atom(r)               (r)
+    #define AvmThunkUnbox_avmplus_String_(r)            ((String*)(r))
+    #define AvmThunkUnbox_void(r)                       (error ??? illegal)
+    #define AvmThunkUnbox_double(r)                     AvmThunkUnbox_double_impl(&(r))
 
-    #define AvmThunkArgSize_ScriptObject    1
-    #define AvmThunkArgSize_bool32          1
-    #define AvmThunkArgSize_int32_t         1
-    #define AvmThunkArgSize_uint32_t        1
-    #define AvmThunkArgSize_Namespace       1
-    #define AvmThunkArgSize_Atom            1
-    #define AvmThunkArgSize_String          1
-    #define AvmThunkArgSize_void            (error ??? illegal)
+    #define AvmThunkArgSize_avmplus_ScriptObject_       1
+    #define AvmThunkArgSize_avmplus_bool32              1
+    #define AvmThunkArgSize_int32_t                     1
+    #define AvmThunkArgSize_uint32_t                    1
+    #define AvmThunkArgSize_avmplus_Namespace_          1
+    #define AvmThunkArgSize_avmplus_Atom                1
+    #define AvmThunkArgSize_avmplus_String_             1
+    #define AvmThunkArgSize_void                        (error ??? illegal)
 #ifdef AVMPLUS_64BIT
-    #define AvmThunkArgSize_double          1
+    #define AvmThunkArgSize_double                      1
 #else
-    #define AvmThunkArgSize_double          2
+    #define AvmThunkArgSize_double                      2
 #endif
 
     REALLY_INLINE double AvmThunkUnbox_double_impl(const Atom* b)
@@ -138,27 +138,27 @@ namespace avmplus
     // note, this isn't complete -- only the ones currently needed are defined.
     // expand as necessary. macros to take advantage of the fact that most
     // args are compile-time constants.
-    #define AvmThunkCoerce_int32_t_double(v)    double(v)
-    #define AvmThunkCoerce_int32_t_uint32_t(v)  uint32_t(v)
-    #define AvmThunkCoerce_int32_t_Atom(v)      (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
+    #define AvmThunkCoerce_int32_t_double(v)            double(v)
+    #define AvmThunkCoerce_int32_t_uint32_t(v)          uint32_t(v)
+    #define AvmThunkCoerce_int32_t_avmplus_Atom(v)      (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
 
-    #define AvmThunkCoerce_uint32_t_double(v)   double(v)
-    #define AvmThunkCoerce_uint32_t_int32_t(v)  int32_t(v)
-    #define AvmThunkCoerce_uint32_t_Atom(v)     (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
+    #define AvmThunkCoerce_uint32_t_double(v)           double(v)
+    #define AvmThunkCoerce_uint32_t_int32_t(v)          int32_t(v)
+    #define AvmThunkCoerce_uint32_t_avmplus_Atom(v)     (AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
 
-    #define AvmThunkCoerce_bool32_Atom(v)       ((v) ? trueAtom : falseAtom)
+    #define AvmThunkCoerce_avmplus_bool32_avmplus_Atom(v)       ((v) ? trueAtom : falseAtom)
 
 #ifdef _DEBUG
-    REALLY_INLINE double AvmThunkCoerce_Atom_double(Atom v) { AvmAssert((v) == undefinedAtom); (void)v; return MathUtils::kNaN; }
-    REALLY_INLINE String* AvmThunkCoerce_Atom_String(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
-    REALLY_INLINE ScriptObject* AvmThunkCoerce_Atom_ScriptObject(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
+    REALLY_INLINE double AvmThunkCoerce_avmplus_Atom_double(Atom v) { AvmAssert((v) == undefinedAtom); (void)v; return MathUtils::kNaN; }
+    REALLY_INLINE String* AvmThunkCoerce_avmplus_Atom_avmplus_String_(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
+    REALLY_INLINE ScriptObject* AvmThunkCoerce_avmplus_Atom_avmplus_ScriptObject_(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
 #else
-    #define AvmThunkCoerce_Atom_double(v)       (MathUtils::kNaN)
-    #define AvmThunkCoerce_Atom_String(v)       (NULL)
-    #define AvmThunkCoerce_Atom_ScriptObject(v) (NULL)
+    #define AvmThunkCoerce_avmplus_Atom_double(v)                   (MathUtils::kNaN)
+    #define AvmThunkCoerce_avmplus_Atom_avmplus_String_(v)          (NULL)
+    #define AvmThunkCoerce_avmplus_Atom_avmplus_ScriptObject_(v)    (NULL)
 #endif
 
-    #define AvmThunkCoerce_String_Atom(v)       ((v) ? (v)->atom() : nullStringAtom)
+    #define AvmThunkCoerce_avmplus_String__avmplus_Atom(v)          ((v) ? (v)->atom() : nullStringAtom)
 
     #define AvmThunkGetConstantString(v)        (env->method->pool()->getString(v))
 
