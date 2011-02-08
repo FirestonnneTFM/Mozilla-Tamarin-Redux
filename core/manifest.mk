@@ -127,9 +127,18 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 
 #  $(curdir)/avmplus.cpp \
 
-$(avmplus_CXXSRCS): $(curdir)/../generated/builtin.h
+# See manifest.mk in root directory for this dependency.
+#$(avmplus_CXXSRCS): $(topsrcdir)/generated/builtin.h
 
-$(curdir)../generated/builtin.h $(curdir)/../generated/builtin.cpp: $(curdir)/builtin.as
+# Use of '%' [to force a pattern-rule] instead of '$(curdir)/..' or
+# '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
+# (ie "deliberate", ie "hack"); see Bug 632086
+%/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/builtin.as
 	cd $(topsrcdir)/core; python builtin.py
 
-$(curdir)/AbcData.cpp: $(curdir)/../generated/builtin.cpp
+# Use of '$(topsrcdir)/generated' rather than '$(curdir)/..'  is
+# deliberate; the root manifest.mk needs to use it (because it needs a
+# context-independent path to builtin.cpp), and since make will not
+# canonicalize the paths, it is best to use the same path everywhere.
+# See Bug 632086.
+$(curdir)/AbcData.cpp: $(topsrcdir)/generated/builtin.cpp

@@ -102,6 +102,11 @@ endif
 $(call RECURSE_DIRS,eval)
 $(call RECURSE_DIRS,shell)
 
+$(avmplus_CXXSRCS) $(vmbase_CXXSRCS): $(topsrcdir)/generated/builtin.h
+
+$(shell_CXXSRCS): $(topsrcdir)/generated/builtin.h \
+ $(topsrcdir)/generated/shell_toplevel.h
+
 echo:
 	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
 	@echo avmplus_CXXSRCS = $(avmplus_CXXSRCS)
