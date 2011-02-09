@@ -70,8 +70,8 @@ namespace MMgc
     class GCWorkItem
     {
     public:
-        // It's possible to 'or' kIsGCItem and kHasInteriorPtrs together, and when
-        // MMGC_INTERIOR_PTRS is defined this happens automatically in the GCWorkItem
+        // It's possible to 'or' kGCObject/kNonGCObject and kHasInteriorPtrs together, and
+        // when MMGC_INTERIOR_PTRS is defined this happens automatically in the GCWorkItem
         // constructor.
 
         // We only have two bits here because GCRoot items can be a multiple of 4 bytes.
@@ -97,6 +97,7 @@ namespace MMgc
         };
 
         // More sentinel tags (they use a different pseudo-size value).
+
         enum GCSentinel2ItemType
         {
             kLargeExactlyTracedTail=1,
@@ -110,23 +111,53 @@ namespace MMgc
         // don't want to have to init all the elements in the array as it makes allocating a mark
         // stack segment expensive.  I believe we could safely get rid of the two initializing
         // clauses here.  --lars
+
         GCWorkItem() : ptr(NULL), _size(0) { }
+
         GCWorkItem(const void *p, uint32_t s, GCWorkItemType itemType);
         GCWorkItem(const void *p, GCSentinel1ItemType type);
         GCWorkItem(const void *p, GCSentinel2ItemType type);
 
+        // Return non-zero if the item represents a GC item (a subtype of GCObject
+        // or GCTraceableBase).
+        uint32_t IsGCItem() const;
+
+        // Return non-zero if the item holds an object that should be scanned
+        // such that any pointers from the object into other objects should be
+        // treated as pointers to the start of the latter objects.
+        uint32_t HasInteriorPtrs() const;
+        
+        // Return true if the ptr is NULL.
+        bool IsNull() const;
+        
+        // Return true if the item is no longer active because it has been cleared.
+        bool IsClear() const;
+        
+        // Return true if the item is a sentinel of type 1.
+        bool IsSentinel1Item() const;
+        
+        // Return true if the item is a sentinel of type 2.
+        bool IsSentinel2Item() const;
+
+        // Retrieve the size field.  Will compute the actual object size if the size
+        // is not present in the mark item.
         uint32_t GetSize() const;
-        const void* Ptr() const { return ptr; }
-        void* GetEnd() const { return (void*)(iptr + GetSize()); }
-        uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
-        uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
-        bool IsNull() const { return ptr == NULL; }
-        bool IsClear() const { return iptr == kDeadItem; }
-        bool IsSentinel1Item() const { return (_size & ~3) == kSentinel1Size; }
-        bool IsSentinel2Item() const { return (_size & ~3) == kSentinel2Size; }
-        GCSentinel1ItemType GetSentinel1Type() const { return (GCSentinel1ItemType)(iptr & 3); }
-        GCSentinel2ItemType GetSentinel2Type() const { return (GCSentinel2ItemType)(iptr & 3); }
-        void *GetSentinelPointer() const { return (void*) (iptr & ~3); }
+        
+        // Retrieve the pointer value.
+        const void* Ptr() const;
+
+        // Compute the end of the object.
+        void* GetEnd() const;
+
+        // The item must be a sentinel of type 1.  Return its subtype.
+        GCSentinel1ItemType GetSentinel1Type() const;
+        
+        // The item must be a sentinel of type 2.  Return its subtype.
+        GCSentinel2ItemType GetSentinel2Type() const;
+        
+        // The item must be a sentinel of either type.  Return the pointer stored in
+        // the sentinel.
+        void *GetSentinelPointer() const;
 
         // Cancel item by clearing its pointer, setting sentinel to
         // kDeadItem, and setting size to kSentinelSize.
@@ -282,73 +313,6 @@ namespace MMgc
         bool Invariants();
 #endif
     };
-
-    REALLY_INLINE bool GCMarkStack::Push(GCWorkItem item)
-    {
-        GCAssert(!item.IsNull());
-        if (m_top == m_limit)
-            if (!PushSegment())
-                return false;
-        GCAssert(m_top < m_limit);
-        *m_top++ = item;
-#ifdef MMGC_MARKSTACK_DEPTH
-        uint32_t depth = Count();
-        if (depth > m_maxDepth)
-            m_maxDepth = depth;
-#endif
-        GCAssert(Invariants());
-        return true;
-    }
-
-    REALLY_INLINE GCWorkItem GCMarkStack::Pop()
-    {
-        GCAssert(m_top > m_base);
-        GCWorkItem t = *--m_top;
-        GCAssert(!t.IsNull());
-#ifdef _DEBUG
-        VMPI_memset(m_top, 0, sizeof(GCWorkItem));
-#endif
-        if (m_top == m_base)
-            if (m_topSegment->m_prev != NULL)
-                PopSegment();
-        GCAssert(Invariants());
-        return t;
-    }
-
-    REALLY_INLINE GCWorkItem *GCMarkStack::Peek()
-    {
-        GCAssert(m_top > m_base);
-        return m_top-1;
-    }
-
-    REALLY_INLINE bool GCMarkStack::IsEmpty()
-    {
-        // See Invariants(): m_top == m_base only when there is no older segment
-        // and the current segment is empty.
-        return m_top == m_base;
-    }
-
-    REALLY_INLINE uint32_t GCMarkStack::Count()
-    {
-        return uint32_t(m_top - m_base) + m_hiddenCount;
-    }
-
-    REALLY_INLINE uint32_t GCMarkStack::ElementsPerSegment()
-    {
-        return kMarkStackItems;
-    }
-
-    REALLY_INLINE uint32_t GCMarkStack::EntirelyFullSegments()
-    {
-        return Count() / kMarkStackItems;
-    }
-
-#ifdef MMGC_MARKSTACK_DEPTH
-    REALLY_INLINE uint32_t GCMarkStack::MaxCount()
-    {
-        return m_maxDepth;
-    }
-#endif
 }
 
 #endif /* __GCStack__ */

@@ -847,55 +847,6 @@ namespace MMgc
         this->size = _size;
     }
 
-    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, uint32_t s, GCWorkItemType workItemType)
-        : ptr(p)
-#ifdef MMGC_INTERIOR_PTRS
-        , _size(s | uint32_t(kHasInteriorPtrs) | uint32_t(workItemType))
-#else
-        , _size(s | uint32_t(workItemType))
-#endif
-    {
-        GCAssert((s & 3) == 0);
-        // The size is computed on demand for GC objects by GCWorkItem::GetSize(), so
-        // should always be passed as zero here.  Long term the size may not be stored
-        // in the mark item at all as it will only be needed for conservatively
-        // traced objects and for very accurate accounting.
-        GCAssert(workItemType != GCWorkItem::kGCObject || s == 0);
-        GCAssert(((uintptr_t)p & 3) == 0);
-        GCAssert(s != kSentinel1Size && s != kSentinel2Size);
-#ifdef _DEBUG
-        if (IsGCItem()) {
-            GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
-        }
-#endif
-    }
-
-    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel1ItemType type)
-        : iptr(uintptr_t(p) | type),
-          _size(kSentinel1Size)
-    {
-        GCAssert(((uintptr_t)p & 3) == 0);
-    }
-
-    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel2ItemType type)
-        : iptr(uintptr_t(p) | type),
-          _size(kSentinel2Size)
-    {
-        GCAssert(((uintptr_t)p & 3) == 0);
-    }
-
-    REALLY_INLINE void GCWorkItem::Clear()
-    {
-        iptr = kDeadItem;
-        // use sentinel so we're skipped off the fast path in MarkItem
-        _size = kSentinel1Size;
-    }
-
-    REALLY_INLINE uint32_t GCWorkItem::GetSize() const
-    {
-        return uint32_t(IsGCItem() ? GC::Size(ptr) : _size & ~3);
-    }
-    
     REALLY_INLINE bool GCAutoEnter::Entered()
     {
         return m_gc != NULL;

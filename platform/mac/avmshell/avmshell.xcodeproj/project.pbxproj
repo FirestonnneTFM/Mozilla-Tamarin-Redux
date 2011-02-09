@@ -545,6 +545,7 @@
 		0774945B0F8C9DA600230F6D /* avmfeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmfeatures.h; path = ../../../core/avmfeatures.h; sourceTree = SOURCE_ROOT; };
 		077494B70F8E2DBA00230F6D /* win32-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "win32-platform.h"; path = "../../win32/win32-platform.h"; sourceTree = SOURCE_ROOT; };
 		077494B80F8E2DC900230F6D /* unix-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "unix-platform.h"; path = "../../unix/unix-platform.h"; sourceTree = SOURCE_ROOT; };
+		0777C6DF1301C5840027C858 /* GCStack-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCStack-inlines.h"; path = "../../../MMgc/GCStack-inlines.h"; sourceTree = SOURCE_ROOT; };
 		078F53690FA473C50064216F /* ShellCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShellCore.cpp; path = ../../../shell/ShellCore.cpp; sourceTree = SOURCE_ROOT; };
 		078F536A0FA473C50064216F /* ShellCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShellCore.h; path = ../../../shell/ShellCore.h; sourceTree = SOURCE_ROOT; };
 		079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmfeatures.cpp; path = ../../../core/avmfeatures.cpp; sourceTree = SOURCE_ROOT; };
@@ -1570,6 +1571,7 @@
 				3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */,
 				07ED27EF0FBD78C4007E3950 /* GCStack.cpp */,
 				079DFAA20F3A96BE0031D1B4 /* GCStack.h */,
+				0777C6DF1301C5840027C858 /* GCStack-inlines.h */,
 				079DFAA30F3A96BE0031D1B4 /* GCTests.cpp */,
 				079DFAA40F3A96BE0031D1B4 /* GCTests.h */,
 				079DFAA50F3A96BE0031D1B4 /* GCThreadLocal.h */,
