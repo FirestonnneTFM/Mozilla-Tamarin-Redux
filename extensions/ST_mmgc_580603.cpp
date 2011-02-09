@@ -41,7 +41,7 @@
 
 // Bugzilla 580603 - adversarial mmgc: dispersive w.r.t. address space
 // Bugzilla 445780 - Page map needs to be sparse
-//
+// 
 // Tommy: "problems in 64-bit linux b/c VMPI_allocateAlignedMemory provides
 // memory from low 32 bit-addresses, and mmap is giving us addresses from
 // 0x7fxxxxxxxxxxxxxx so we need a 4 GB page map."
