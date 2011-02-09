@@ -333,11 +333,13 @@ elif config.getCompiler() == 'VS':
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
         APP_CFLAGS = "-W4 -WX -wd4291 -GF -GS- -Zc:wchar_t- "
-    if cpu == 'x86_64':
-        pass # 64 bit VC does NaN comparisons incorrectly with fp:fast
-    else:
-        APP_CXXFLAGS += "-fp:fast "
-        APP_CFLAGS += "-fp:fast "
+
+        if cpu == 'x86_64':
+            pass # 64 bit VC does NaN comparisons incorrectly with fp:fast
+        else:
+            APP_CXXFLAGS += "-fp:fast "
+            APP_CFLAGS += "-fp:fast "
+
         OS_LDFLAGS += "-MAP "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
@@ -345,8 +347,10 @@ elif config.getCompiler() == 'VS':
         else:
             OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
             OPT_CFLAGS = "-O2 -Ob1 -GR- "
+
         if memoryProfiler:
-            OPT_CXXFLAGS += "-Oy- -Zi "
+        OPT_CXXFLAGS += "-Oy- -Zi "
+
     DEBUG_CXXFLAGS += "-Zi "
     DEBUG_CFLAGS += "-Zi "
     DEBUG_LDFLAGS += "-DEBUG "
