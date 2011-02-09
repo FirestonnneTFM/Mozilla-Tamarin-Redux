@@ -349,7 +349,7 @@ elif config.getCompiler() == 'VS':
             OPT_CFLAGS = "-O2 -Ob1 -GR- "
 
         if memoryProfiler:
-        OPT_CXXFLAGS += "-Oy- -Zi "
+            OPT_CXXFLAGS += "-Oy- -Zi "
 
     DEBUG_CXXFLAGS += "-Zi "
     DEBUG_CFLAGS += "-Zi "
