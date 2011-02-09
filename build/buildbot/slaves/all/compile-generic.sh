@@ -204,6 +204,8 @@ if [ "$res" == "0" ]; then
 	echo "message: feature check FAILED"
 	cd $basedir/core
 	hg revert avmplusVersion.h
+	# Remove the binary since we have determined that it is NOT valid
+	rm $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
 	endSilent
 	exit 1
     fi
