@@ -1592,6 +1592,8 @@ class tamarinredux:
                 name="Doxygen",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
+    mac_deep_factory.addStep(compile_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind", args="--enable-shell --enable-debugger --enable-valgrind", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
+    mac_deep_factory.addStep(test_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind", vmargs="", config="", scriptargs="--valgrind"))
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     mac_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
@@ -2042,6 +2044,8 @@ class tamarinredux:
     linux_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     linux_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     linux_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    linux_deep_factory.addStep(compile_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", args="--enable-shell --enable-debugger --enable-valgrind", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER"))
+    linux_deep_factory.addStep(test_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", vmargs="", config="", scriptargs="--valgrind"))
     linux_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     linux_deep_factory.addStep(deep_codecoverage_process)
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
