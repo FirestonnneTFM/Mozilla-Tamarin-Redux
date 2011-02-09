@@ -71,9 +71,16 @@ namespace avmplus
         {
             if (m_data->len > 0)
                 ListHelper::clearRange(m_data, 0, m_data->len);
-            ListHelper::LISTDATA::free(m_data->gc(), m_data);
-            m_data = NULL;
+            freeData(m_data->gc());
         }
+    }
+
+    template<class T, class ListHelper>
+    void ListImpl<T,ListHelper>::freeData(MMgc::GC* gc)
+    {
+        typename ListHelper::LISTDATA* data = m_data;
+        m_data = NULL;
+        ListHelper::LISTDATA::free(gc, data);
     }
 
     template<class T, class ListHelper>
@@ -119,7 +126,7 @@ namespace avmplus
                 VMPI_memcpy(newData->entries, m_data->entries, len * sizeof(typename ListHelper::STORAGE));
             newData->len = len;
             // don't call ListHelper::clearRange here; we want the refCounts to be transferred
-            ListHelper::LISTDATA::free(gc, m_data);
+            freeData(gc);  
             ListHelper::wbData(this, &m_data, newData);
         }
     }
@@ -171,7 +178,7 @@ namespace avmplus
             MMgc::GC* const gc = m_data->gc();
             typename ListHelper::LISTDATA* newData = allocData(gc, kListMinCapacity);
             newData->len = 0;
-            ListHelper::LISTDATA::free(gc, m_data);
+            freeData(gc);
             ListHelper::wbData(this, &m_data, newData);
         }
     }
@@ -252,7 +259,7 @@ namespace avmplus
         VMPI_memcpy(newData->entries, m_data->entries, m_data->len * sizeof(typename ListHelper::STORAGE));
         newData->len = m_data->len;
         // don't call ListHelper::clearRange here; we want the refCounts to be transferred
-        ListHelper::LISTDATA::free(gc, m_data);
+        freeData(gc);
         ListHelper::wbData(this, &m_data, newData);
     }
 
