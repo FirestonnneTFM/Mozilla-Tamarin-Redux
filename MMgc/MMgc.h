@@ -278,6 +278,7 @@ namespace MMgc
 #include "ZCT-inlines.h"
 #include "GCPolicyManager-inlines.h"
 #include "GC-inlines.h"
+#include "GCStack-inlines.h"
 #include "WriteBarrier-inlines.h"
 
 // remove these when the player stops using them

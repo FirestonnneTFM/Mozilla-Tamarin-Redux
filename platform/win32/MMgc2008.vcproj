@@ -21,7 +21,7 @@
 	</Platforms>
 	<ToolFiles>
 		<ToolFile
-			RelativePath="armasm.rules"
+			RelativePath=".\armasm.rules"
 		/>
 	</ToolFiles>
 	<Configurations>
@@ -1639,6 +1639,10 @@
 			</File>
 			<File
 				RelativePath="..\..\MMgc\GCSpinLock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\MMgc\GCStack-inlines.h"
 				>
 			</File>
 			<File
