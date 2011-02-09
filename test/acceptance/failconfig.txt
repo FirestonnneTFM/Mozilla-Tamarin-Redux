@@ -278,6 +278,11 @@ ecma3/Expressions/e11_5_2, x86-mac.*valgrind.*,, skip, https://bugzilla.mozilla.
 ecma3/Expressions/e11_5_3, x86-mac.*valgrind.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
 as3/Definitions/Function/functionReturnTypes.*,, x86-mac.*valgrind.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=590550
 
+# Bug 632402
+as3/Definitions/FunctionAccessors/InfRec , x86-.*valgrind.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=632402
+spidermonkey/js1_5/Exceptions/regress-121658 , x86-.*valgrind.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=632402
+spidermonkey/js1_5/Regress/regress-234389 , x86-.*valgrind.*,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=632402
+
 # This testcase also needs to be marked as an expectedfail when running the 32bit vs 64bit differential testing.
 # This is because the testing diffs the out between 32 and 64bit plus -Ojit vs -Dinterp, and since the avmdiff
 # script does not return PASS/FAIL for each testcase but instead just a single PASS/FAIL then we need to expect
