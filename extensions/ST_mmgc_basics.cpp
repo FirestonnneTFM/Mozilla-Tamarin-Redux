@@ -263,7 +263,7 @@ verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize(
 #line 179 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetTotalHeapSize()>startfreeheap, "(int)gh->GetTotalHeapSize()>startfreeheap", __FILE__, __LINE__);
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-       gh->FreeNoProfile(data);
+	   gh->FreeNoProfile(data);
        
 }
 void ST_mmgc_basics::test8() {
@@ -279,7 +279,7 @@ void ST_mmgc_basics::test8() {
     for ( unsigned i=0 ; i < ARRAY_SIZE(d) ; i++ )
         gh->Free(d[i]);
 
-    //
+    // 
     for ( size_t k=2 ; k <= 256 ; k *= 2 ) {
         void *data = gh->Alloc(10,MMgc::GCHeap::flags_Alloc, k);
 #line 199 "ST_mmgc_basics.st"
@@ -379,7 +379,7 @@ void ST_mmgc_basics::test14() {
 verifyPass(sentinel->GetSentinelPointer() == fauxRoot, "sentinel->GetSentinelPointer() == fauxRoot", __FILE__, __LINE__);
                     GCWorkItem *tail = testGC->m_incrementalWork.GetItemAbove(sentinel);
 #line 280 "ST_mmgc_basics.st"
-verifyPass(tail->GetEnd() == fauxRoot->End(), "tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End()", __FILE__, __LINE__);
+verifyPass(tail->GetEnd() == fauxRoot->End(), "tail->GetEnd() == fauxRoot->End()", __FILE__, __LINE__);
 #line 281 "ST_mmgc_basics.st"
 verifyPass(sentinel != NULL, "sentinel != NULL", __FILE__, __LINE__);
                 }

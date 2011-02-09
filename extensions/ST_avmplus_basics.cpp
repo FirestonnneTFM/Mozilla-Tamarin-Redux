@@ -163,7 +163,7 @@ void ST_avmplus_basics::test8() {
     core->GetGC()->Collect(/*scanStack*/false);
     int removed = list.removeCollectedItems();
     int count = list.length();
-#line 111 "ST_avmplus_basics.st"
+#line 114 "ST_avmplus_basics.st"
 verifyPass(removed == 1 && count == 0, "removed == 1 && count == 0", __FILE__, __LINE__);
 
 
