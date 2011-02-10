@@ -47,7 +47,7 @@
 #
 # [hooks]
 # pretxncommit.master = python:/path/to/tamarin-commit-hook.py:master_hook
-
+# preoutgoing.checklog = python:/path/to/tamarin-commit-hook.py:preoutgoing_hook
 
 import sys, re, os
 from mercurial import hg, ui, commands, cmdutil, patch
@@ -76,6 +76,80 @@ def master_hook(ui, repo, **kwargs):
             ui.warn('Error writing .hg/commit.save file')
 
     return error
+
+def preoutgoing_hook(ui, repo, **kwargs):
+    ui.debug('running tamarin preoutgoing_hook\n')
+    ui.debug('kwargs: %s\n' % kwargs)
+    operation = kwargs['source']
+
+    # Like master_hook, return code False implies No Error, allow push.
+    error = False
+    error = error or heuristic_log_check(ui, repo, operation, **kwargs)
+
+    return error
+
+def heuristic_log_check(ui, repo, operation, **kwargs):
+    # Bug 630416: Unlike master_hook, the hg preoutgoing hook (as of
+    # Mercurial version 1.7) has very little to work with: no
+    # reference to targeted repo, no description of changesets being
+    # gathered to propagate, etc.
+    #
+    # We just want to catch log entry oversights before pushing to
+    # other repositories.  As a heuristic, assume tip changeset is the
+    # (only) revision being pushed; heuristic can misfire, but should
+    # catch the common cases (a more formal guard would belong
+    # server-side anyway).
+    #
+    # If future Mercurial versions address this problem with
+    # preoutgoing, then could drop heuristic and apply description
+    # check across all outgoing changesets; then we should print all
+    # warnings in one pass and prompt for confirmation at most once.
+
+    tip_id = repo.changelog.tip()
+    tip_changeset = repo[tip_id]
+    return check_desc_for_bugnum_and_reviews(ui, tip_changeset, operation)
+
+def prompt_yesno(ui, operation):
+    return ui.promptchoice(('Continue %s (n)o, (y)es? [n]' % operation),
+                           (('&No'),('&Yes')), 0)
+
+def has_bugzilla_reference(line):
+    # Match bug number of >= 6 digits and prefixed by "Bug" or "For"
+    return re.match(r'.*(Bug|For)\s*[0-9]{6,}', line, re.IGNORECASE)
+
+def has_reviewer_notes(line):
+    # Match "r=<name>" or "r+<name>"; assumes names are alphanumeric.
+    return re.match(r'.*r(=|\+)[a-zA-Z0-9]+', line)
+
+def check_desc_for_bugnum_and_reviews(ui, changeset, operation):
+    # Check first line of log of tip changeset; if it appears questionable,
+    # prompt the user to confirm that they want to continue the operation.
+    desc = changeset.description()
+    lines = desc.split('\n')
+    first_line = lines[0]
+    has_bug_num = has_bugzilla_reference(first_line)
+    has_review = has_reviewer_notes(first_line)
+
+    if not has_bug_num or not has_review:
+        ui.warn('\nQuestionable log for changeset %s:\n  %s\n'
+                % (changeset,first_line))
+
+    if not has_bug_num:
+        ui.warn('Missing bug number, e.g. "Bug NNNNNN: ..."\n')
+        response = prompt_yesno(ui, operation)
+        if response == 0:
+            ui.warn('Aborting %s due to missing bug number.\n' % operation)
+            return True
+
+    if not has_review:
+        ui.warn('Missing review notes, e.g. "... (r=<name>,sr=<name>)"\n')
+        response = prompt_yesno(ui, operation)
+        if response == 0:
+            ui.warn('Aborting %s due to missing review notes.\n' % operation)
+            return True
+
+    return False;
+
 
 def diff_check(ui, repo, **kwargs):
     ui.debug('running diff_check\n')
