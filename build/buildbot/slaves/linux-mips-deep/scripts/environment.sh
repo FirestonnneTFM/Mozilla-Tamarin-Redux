@@ -61,20 +61,38 @@ export make_opt="-j2"
 # not on the host machine. Reset this to something that will never be found/killed
 export proc_names="fake_never_find_me"
 
-export threads=4
+export PYTHON_RUNTESTS=python3
 
-export SSH_SHELL_REMOTE_HOST0=10.60.182.11
+export threads=8
+
+export SSH_SHELL_REMOTE_HOST0=asteammips7
 export SSH_SHELL_REMOTE_USER0=root
 export SSH_SHELL_REMOTE_DIR0=/root/app1
 
-export SSH_SHELL_REMOTE_HOST1=10.60.182.11
+export SSH_SHELL_REMOTE_HOST1=asteammips7
 export SSH_SHELL_REMOTE_USER1=root
 export SSH_SHELL_REMOTE_DIR1=/root/app2
 
-export SSH_SHELL_REMOTE_HOST2=10.60.183.66
+export SSH_SHELL_REMOTE_HOST2=asteammips8
 export SSH_SHELL_REMOTE_USER2=root
 export SSH_SHELL_REMOTE_DIR2=/root/app1
 
-export SSH_SHELL_REMOTE_HOST3=10.60.183.66
+export SSH_SHELL_REMOTE_HOST3=asteammips8
 export SSH_SHELL_REMOTE_USER3=root
 export SSH_SHELL_REMOTE_DIR3=/root/app2
+
+export SSH_SHELL_REMOTE_HOST4=asteammips2
+export SSH_SHELL_REMOTE_USER4=root
+export SSH_SHELL_REMOTE_DIR4=/root/app1
+
+export SSH_SHELL_REMOTE_HOST5=asteammips2
+export SSH_SHELL_REMOTE_USER5=root
+export SSH_SHELL_REMOTE_DIR5=/root/app2
+
+export SSH_SHELL_REMOTE_HOST6=asteammips4
+export SSH_SHELL_REMOTE_USER6=root
+export SSH_SHELL_REMOTE_DIR6=/root/app1
+
+export SSH_SHELL_REMOTE_HOST7=asteammips4
+export SSH_SHELL_REMOTE_USER7=root
+export SSH_SHELL_REMOTE_DIR7=/root/app2
