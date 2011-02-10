@@ -204,6 +204,7 @@ class CodeCoverageRunner:
                 continue
             if line.startswith("CONFIGURE_ARGS="):
                 env["CONFIGURE_ARGS"]=line[len("CONFIGURE_ARGS="):]
+                print("configure_args: %s %s" % (configure_args, env["CONFIGURE_ARGS"]))
                 continue
             
             pattern = re.compile(r'^.*\=')
