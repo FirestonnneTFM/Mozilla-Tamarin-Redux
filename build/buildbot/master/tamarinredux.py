@@ -1534,6 +1534,7 @@ class tamarinredux:
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     windows_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    windows_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
     windows_deep_factory.addStep(util_process_clean)
     windows_deep_factory.addStep(util_clean_buildsdir)
     windows_deep_factory.addStep(sync_clean)
@@ -1584,6 +1585,7 @@ class tamarinredux:
     mac_deep_factory.addStep(deep_run_brightspot(name='ReleaseDebugger', shell='avmshell_s', testargs='--quiet'))
     mac_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     mac_deep_factory.addStep(deep_codecoverage_process)
+    mac_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run in code coverage
     mac_deep_factory.addStep(BuildShellCommand(
                 command=['../all/build-doxygen.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
@@ -1597,6 +1599,7 @@ class tamarinredux:
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     mac_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    mac_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
     mac_deep_factory.addStep(util_process_clean)
     mac_deep_factory.addStep(util_clean_buildsdir)
     mac_deep_factory.addStep(sync_clean)
@@ -1920,6 +1923,7 @@ class tamarinredux:
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     solaris_sparc_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    solaris_sparc_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
     solaris_sparc_deep_factory.addStep(util_process_clean)
     solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
     solaris_sparc_deep_factory.addStep(sync_clean)
@@ -2001,9 +2005,11 @@ class tamarinredux:
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     windows_64_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     windows_64_deep_factory.addStep(deep_codecoverage_process)
+    windows_64_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run in code coverage
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     windows_64_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    windows_64_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
     windows_64_deep_factory.addStep(util_process_clean)
     windows_64_deep_factory.addStep(util_clean_buildsdir)
     windows_64_deep_factory.addStep(sync_clean)
@@ -2048,9 +2054,11 @@ class tamarinredux:
     linux_deep_factory.addStep(test_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", vmargs="", config="", scriptargs="--valgrind"))
     linux_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     linux_deep_factory.addStep(deep_codecoverage_process)
+    linux_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run in code coverage
     # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
     linux_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
                                               scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    linux_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
     linux_deep_factory.addStep(deep_run_brightspot(name='DebugDebugger', shell='avmshell_sd', testargs='--timelimit=120 --random --quiet'))
     linux_deep_factory.addStep(util_process_clean)
     linux_deep_factory.addStep(util_clean_buildsdir)
