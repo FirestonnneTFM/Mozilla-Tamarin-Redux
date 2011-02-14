@@ -86,6 +86,7 @@
 
 #include "vmbase.h"
 
+#include "avmplus-tracers.h"
 #include "GCTypes.h"
 #include "avmplusVersion.h"
 #include "AvmLog.h"
