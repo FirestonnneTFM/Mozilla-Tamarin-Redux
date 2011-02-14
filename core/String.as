@@ -42,7 +42,7 @@ package
 {
     // instancegc protocol is custom (primitive value).
 
-    [native(cls="StringClass", classgc="exact", instance="String", methods="auto", customconstruct=true)]
+    [native(cls="StringClass", classgc="exact", instance="String", methods="auto", construct="override")]
     public final class String extends Object
     {
         // String.length = 1 per ES3

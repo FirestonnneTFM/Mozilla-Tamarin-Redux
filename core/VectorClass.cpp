@@ -145,6 +145,7 @@ namespace avmplus
 
                 VTable* vt = this->vtable->newParameterizedVTable(typeTraits, fullname);
 
+                vt->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;	
                 ObjectVectorClass* parameterizedVector = ObjectVectorClass::create(vt->gc(), vt);
                 parameterizedVector->m_typeTraits = typeClass ? typeClass->traits()->itraits : NULL;
                 parameterizedVector->setDelegate(toplevel->classClass->prototypePtr());
@@ -186,19 +187,21 @@ namespace avmplus
         return getTypedVectorClass(typeClass)->atom();
     }
 
-    ScriptObject* VectorClass::createInstance(VTable * /*ivtable*/, ScriptObject * /*prototype*/)
+    Atom VectorClass::construct(int /*argc*/, Atom* /*argv*/)
     {
         toplevel()->throwTypeError(kConstructOfNonFunctionError);
-        return NULL;
+        return undefinedAtom;
     }
 
+    // FIXME: this could return a non-ObjectVectorObject, so we should really
+    // return VectorBaseObject instead.
     ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32_t length)
     {
         ClassClosure* vc = getTypedVectorClass(type);
-        ObjectVectorObject* v = (ObjectVectorObject*)vc->createInstance(vc->ivtable(), vc->prototypePtr());
-        v->set_length(length);
-        return v;
+        Atom args[2] = { nullObjectAtom, core()->uintToAtom(length) };
+        return (ObjectVectorObject*)AvmCore::atomToScriptObject(vc->construct(1, args));
     }
+
     // ----------------------------
 
     IntVectorClass::IntVectorClass(VTable* vtable)
@@ -207,6 +210,11 @@ namespace avmplus
         if (!toplevel()->intVectorClass)
             toplevel()->intVectorClass = this;
         this->m_typeTraits = toplevel()->intClass->traits()->itraits;
+    }
+
+    Atom IntVectorClass::construct(int argc, Atom* argv)
+    {
+        return constructImpl(argc, argv);
     }
 
     // ----------------------------
@@ -219,6 +227,11 @@ namespace avmplus
         this->m_typeTraits = toplevel()->uintClass->traits()->itraits;
     }
 
+    Atom UIntVectorClass::construct(int argc, Atom* argv)
+    {
+        return constructImpl(argc, argv);
+    }
+
     // ----------------------------
 
     DoubleVectorClass::DoubleVectorClass(VTable* vtable)
@@ -227,6 +240,11 @@ namespace avmplus
         if (!toplevel()->doubleVectorClass)
             toplevel()->doubleVectorClass = this;
         this->m_typeTraits = toplevel()->numberClass->traits()->itraits;
+    }
+
+    Atom DoubleVectorClass::construct(int argc, Atom* argv)
+    {
+        return constructImpl(argc, argv);
     }
 
     // ----------------------------
@@ -239,10 +257,15 @@ namespace avmplus
         this->m_typeTraits = toplevel()->objectClass->traits()->itraits;
     }
 
+    Atom ObjectVectorClass::construct(int argc, Atom* argv)
+    {
+        return constructImpl(argc, argv);
+    }
+
     // ----------------------------
 
-    IntVectorObject::IntVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
-        : TypedVectorObject< DataList<int32_t> >(ivtable, delegate, MMgc::GC::GetGC(ivtable), vecClass)
+    IntVectorObject::IntVectorObject(VTable* ivtable, ScriptObject* delegate)
+        : TypedVectorObject< DataList<int32_t> >(ivtable, delegate)
     {
     }
 
@@ -253,8 +276,8 @@ namespace avmplus
 
     // ----------------------------
 
-    UIntVectorObject::UIntVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
-        : TypedVectorObject< DataList<uint32_t> >(ivtable, delegate, MMgc::GC::GetGC(ivtable), vecClass)
+    UIntVectorObject::UIntVectorObject(VTable* ivtable, ScriptObject* delegate)
+        : TypedVectorObject< DataList<uint32_t> >(ivtable, delegate)
     {
     }
 
@@ -265,8 +288,8 @@ namespace avmplus
 
     // ----------------------------
 
-    DoubleVectorObject::DoubleVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
-        : TypedVectorObject< DataList<double> >(ivtable, delegate, MMgc::GC::GetGC(ivtable), vecClass)
+    DoubleVectorObject::DoubleVectorObject(VTable* ivtable, ScriptObject* delegate)
+        : TypedVectorObject< DataList<double> >(ivtable, delegate)
     {
     }
 
@@ -277,8 +300,8 @@ namespace avmplus
 
     // ----------------------------
 
-    ObjectVectorObject::ObjectVectorObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
-        : TypedVectorObject< AtomList >(ivtable, delegate, MMgc::GC::GetGC(ivtable), vecClass)
+    ObjectVectorObject::ObjectVectorObject(VTable* ivtable, ScriptObject* delegate)
+        : TypedVectorObject< AtomList >(ivtable, delegate)
     {
     }
 

@@ -50,7 +50,7 @@ namespace avmplus
         , base(_base)
         , ivtable(NULL)
         , traits(traits)
-        , createInstance(ScriptObject::genericCreateInstance)
+        , createInstanceProc(_base ? _base->createInstanceProc : ClassClosure::impossibleCreateInstanceProc)
         , linked(false)
 #ifdef VMCFG_AOT
         , interfaceBindingFunction(traits->m_interfaceBindingFunction)

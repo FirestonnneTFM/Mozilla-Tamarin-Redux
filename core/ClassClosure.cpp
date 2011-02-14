@@ -42,21 +42,113 @@
 
 namespace avmplus
 {
-    ClassClosure::ClassClosure(VTable *cvtable)
+
+    /*static*/ CreateInstanceProc ClassClosure::calcCreateInstanceProc(VTable* cvtable)
+    {
+        VTable* ivtable = cvtable->ivtable;
+        if (ivtable && ivtable->base) 
+        {
+            ScopeChain* scope = cvtable->init->scope();
+            if (scope->getSize())
+            {
+                Atom baseAtom = scope->getScope(scope->getSize()-1);
+                if (!AvmCore::isObject(baseAtom))
+                    cvtable->toplevel()->throwVerifyError(kCorruptABCError);
+
+                ScriptObject* base = AvmCore::atomToScriptObject(baseAtom);
+                // make sure scope object is base type's class object
+                AvmAssert(base->traits()->itraits == cvtable->traits->itraits->base);
+                ClassClosure* base_cc = base->toClassClosure();
+                AvmAssert(base_cc != NULL);
+                CreateInstanceProc p = base_cc->m_createInstanceProc;
+                if (p == ClassClosure::abstractBaseClassCreateInstanceProc)
+                {
+                    // If we get here, it means that we descend from an abstract base class,
+                    // but don't have a native createInstanceProc of our own; in that case, we
+                    // should just create a plain old ScriptObject. (Note that this can
+                    // happen for abstract and abstract-restricted; for the latter, we will do
+                    // a second check in checkForRestrictedInheritance() and may reject it anyway.)
+                    goto create_normal;
+                }
+                // ...otherwise, we're done.
+                return p;
+            }
+        }
+
+create_normal:
+        return ClassClosure::createScriptObjectProc;
+    }
+
+    /*static*/ CreateInstanceProc FASTCALL ClassClosure::checkForRestrictedInheritance(VTable* ivtable, CreateInstanceProc p)
+    {
+        if (ivtable)
+        {
+            // Someone in our inheritance chain is "restricted" inheritance; we must walk 
+            // the whole chain until we find them, and see if we're defined
+            // in the same pool. If not, we aren't constructable.
+            Traits* itraits = ivtable->traits;
+            Traits* base = itraits->base;
+            if (base != NULL && base->isRestrictedInheritance && base->pool != itraits->pool)
+            {
+                return ClassClosure::cantInstantiateCreateInstanceProc;
+            }
+        }
+        return p;
+    }
+
+    ClassClosure::ClassClosure(VTable* cvtable)
         : ScriptObject(cvtable, NULL)
+        , m_createInstanceProc(checkForRestrictedInheritance(cvtable->ivtable, cvtable->ivtable->createInstanceProc))
+        // NB: prototype is null right now, but we expect our subclass to 
+        // initialize it in their ctor (or, at a minimum, before it attempts
+        // to create any instances).
     {
         AvmAssert(traits()->getSizeOfInstance() >= sizeof(ClassClosure));
 
-        // prototype will be set by caller
+        // All callers of this ctor must have a non-null ivtable.
+        AvmAssert(cvtable->ivtable != NULL);
+        cvtable->ivtable->createInstanceProc = ClassClosure::reinitNullPrototypeCreateInstanceProc;
+        AvmAssert(m_createInstanceProc != reinitNullPrototypeCreateInstanceProc);
+        
+        // don't assert here any more: MethodClosure descends
+        //AvmAssert(cvtable->traits->itraits != NULL);
+        //AvmAssert(ivtable() != NULL);
+    }
+
+    ClassClosure::ClassClosure(VTable* cvtable, CreateInstanceProc createInstanceProc)
+        : ScriptObject(cvtable, NULL)
+        , m_createInstanceProc(checkForRestrictedInheritance(cvtable->ivtable, createInstanceProc))
+        // NB: prototype is null right now, but we expect our subclass to 
+        // initialize it in their ctor (or, at a minimum, before it attempts
+        // to create any instances).
+    {
+        AvmAssert(traits()->getSizeOfInstance() >= sizeof(ClassClosure));
+
+        // FunctionObject can legally have a null ivtable, and uses this ctor, so check.
+        VTable* const ivtable = cvtable->ivtable;
+        if (ivtable != NULL)
+        {
+            ivtable->createInstanceProc = ClassClosure::reinitNullPrototypeCreateInstanceProc;
+        }
+        AvmAssert(m_createInstanceProc != reinitNullPrototypeCreateInstanceProc);
 
         // don't assert here any more: MethodClosure descends
         //AvmAssert(cvtable->traits->itraits != NULL);
         //AvmAssert(ivtable() != NULL);
     }
 
+    /*static*/ ClassClosure* FASTCALL ClassClosure::createClassClosure(VTable* cvtable)
+    {
+        ClassClosure* cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) ClassClosure(cvtable, calcCreateInstanceProc(cvtable));
+        AvmAssert(cc->prototypePtr() == NULL);
+        cc->createVanillaPrototype();
+        return cc;
+    }
+    
     void ClassClosure::createVanillaPrototype()
     {
         m_prototype = toplevel()->objectClass->construct();
+        AvmAssert(m_prototype != NULL);
     }
 
     Atom ClassClosure::get_prototype()
@@ -86,11 +178,17 @@ namespace avmplus
         }
     }
 
-    void ClassClosure::setPrototypePtr(ScriptObject* p)
+    void FASTCALL ClassClosure::setPrototypePtr(ScriptObject* p)
     {
         m_prototype = p;
         if (p == NULL)
-            this->ivtable()->createInstance = ScriptObject::genericCreateInstance;
+        {
+            VTable* const ivtable = this->vtable->ivtable;
+            if (ivtable != NULL)
+            {
+                ivtable->createInstanceProc = ClassClosure::reinitNullPrototypeCreateInstanceProc;
+            }
+        }
     }
 
     // this = argv[0] (ignored)
@@ -149,5 +247,52 @@ namespace avmplus
         Traits* t = this->traits()->itraits;
         Stringp s = core->concatStrings(core->newConstantStringLatin1("[class "), t->name());
         return core->concatStrings(s, core->newConstantStringLatin1("]"));
+    }
+
+    /*static*/
+    ScriptObject* FASTCALL ClassClosure::reinitNullPrototypeCreateInstanceProc(ClassClosure* cls)
+    {
+        if (cls->m_prototype == NULL)
+        {
+            // ES3 spec, 13.2.2 (we've already ensured prototype is either an Object or null)
+            ScriptObject* prototype = AvmCore::atomToScriptObject(cls->toplevel()->objectClass->get_prototype());
+            cls->m_prototype = prototype;
+        }
+        VTable* const ivtable = cls->vtable->ivtable;
+        AvmAssert(ivtable != NULL);
+        CreateInstanceProc p = cls->m_createInstanceProc;
+        AvmAssert(p != NULL);
+        AvmAssert(p != impossibleCreateInstanceProc);
+        AvmAssert(p != reinitNullPrototypeCreateInstanceProc);
+        ivtable->createInstanceProc = p;
+        return p(cls);
+    }
+
+    ScriptObject* FASTCALL ClassClosure::createScriptObjectProc(ClassClosure* cls)
+    {
+        return ScriptObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
+    }
+
+    // The implementation is identical to cantInstantiateCreateInstanceProc, but it exists
+    // as a separate function so that calcCreateInstanceProc can differentiate whether to
+    // propagate it up the inheritance chain or not.
+    ScriptObject* FASTCALL ClassClosure::abstractBaseClassCreateInstanceProc(ClassClosure* cls)
+    {
+        cls->throwCantInstantiateError();
+        return NULL;
+    }
+
+    ScriptObject* FASTCALL ClassClosure::cantInstantiateCreateInstanceProc(ClassClosure* cls)
+    {
+        cls->throwCantInstantiateError();
+        return NULL;
+    }
+
+    ScriptObject* FASTCALL ClassClosure::impossibleCreateInstanceProc(ClassClosure* cls)
+    {
+        // should not be possible to call directly
+        AvmAssert(!"Should not be invoked");
+        cls->toplevel()->throwTypeError(kCorruptABCError);
+        return NULL;
     }
 }

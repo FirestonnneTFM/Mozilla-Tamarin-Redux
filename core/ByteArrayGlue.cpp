@@ -473,12 +473,13 @@ namespace avmplus
     // ByteArrayObject
     //
     
-    ByteArrayObject::ByteArrayObject(VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding)
+    ByteArrayObject::ByteArrayObject(VTable* ivtable, ScriptObject* delegate)
         : ScriptObject(ivtable, delegate)
         , m_byteArray(toplevel())
     {
         c.set(&m_byteArray, sizeof(ByteArray));
-        m_byteArray.SetObjectEncoding(defaultEncoding);
+        ByteArrayClass* cls = toplevel()->byteArrayClass();
+        m_byteArray.SetObjectEncoding((ObjectEncoding)cls->get_defaultObjectEncoding());
         toplevel()->byteArrayCreated(this);
     }
 
@@ -876,11 +877,6 @@ namespace avmplus
     {
         setPrototypePtr(toplevel()->objectClass->construct());
         set_defaultObjectEncoding(kEncodeDefault);
-    }
-
-    ScriptObject* ByteArrayClass::createInstance(VTable* ivtable, ScriptObject* prototype)
-    {
-        return ByteArrayObject::create(ivtable->gc(), ivtable, prototype, (ObjectEncoding)get_defaultObjectEncoding());
     }
 
     ByteArrayObject* ByteArrayClass::constructByteArray()

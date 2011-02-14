@@ -42,7 +42,7 @@ package
 {
     // No instancegc, value is primitive.
 
-    [native(cls="BooleanClass", classgc="exact", instance="bool", methods="auto", customconstruct=true)]
+    [native(cls="BooleanClass", classgc="exact", instance="bool", methods="auto", construct="override")]
     public final class Boolean extends Object
     {
         // Boolean.length = 1 per ES3

@@ -58,12 +58,6 @@ namespace avmplus
         vtable->traits->itraits->set_isDictionary();
     }
 
-    ScriptObject *DictionaryClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
-    {
-        GCAssert(ivtable->traits->isDictionary());
-        return DictionaryObject::create(core()->GetGC(), ivtable, prototypePtr());
-    }
-
     DictionaryObject::DictionaryObject(VTable *vtable, ScriptObject *delegate)
         : ScriptObject(vtable, delegate)
     {

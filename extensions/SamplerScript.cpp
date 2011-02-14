@@ -398,7 +398,7 @@ namespace avmplus
             StackTrace::Element* e = (StackTrace::Element*)sample.stack.trace;
             for(uint32_t i=0; i < sample.stack.depth; i++, e++)
             {
-                StackFrameObject* sf = (StackFrameObject*)sfcc->createInstance(sfcc->ivtable(), NULL);
+                StackFrameObject* sf = (StackFrameObject*)sfcc->newInstance();
 
                 // at every allocation the sample buffer could overflow and the samples could be deleted
                 // the StackTrace::Element pointer is a raw pointer into that buffer so we need to check
@@ -424,7 +424,7 @@ namespace avmplus
     {
         Toplevel* toplevel = self->toplevel();
         ClassClosure* cc = toplevel->getBuiltinExtensionClass(clsid);
-        SampleObject* sam = (SampleObject*)cc->createInstance(cc->ivtable(), NULL);
+        SampleObject* sam = (SampleObject*)cc->newInstance();
         sam->set_time(static_cast<double>(sample.micros));
         return sam;
     }
@@ -809,33 +809,13 @@ namespace avmplus
         createVanillaPrototype();
     }
 
-    ScriptObject *SampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
-    {
-        return new (core()->gc, ivtable->getExtraSize()) SampleObject(ivtable, prototypePtr());
-    }
-
     NewObjectSampleClass::NewObjectSampleClass(VTable *vtable)
         : SampleClass(vtable)
     {
     }
 
-    ScriptObject *NewObjectSampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
-    {
-        return new (core()->gc, ivtable->getExtraSize()) NewObjectSampleObject(ivtable, prototypePtr());
-    }
-
     DeleteObjectSampleClass::DeleteObjectSampleClass(VTable* vtable) : SampleClass(vtable)
     {
-    }
-
-    ScriptObject* DeleteObjectSampleClass::createInstance(VTable* ivtable, ScriptObject* /*delegate*/)
-    {
-        return new (core()->gc, ivtable->getExtraSize()) DeleteObjectSampleObject(ivtable, prototypePtr());
-    }
-
-    ScriptObject* StackFrameClass::createInstance(VTable* ivtable, ScriptObject* /*delegate*/)
-    {
-        return new (core()->gc, ivtable->getExtraSize()) StackFrameObject(ivtable, prototypePtr());
     }
 
     /*static*/

@@ -62,8 +62,6 @@ namespace avmplus
         // argN = argv[argc]
         Atom call(int argc, Atom* argv);
 
-        virtual ScriptObject* createInstance(VTable *ivtable, ScriptObject* prototype);
-
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_NO_DATA(RegExpClass)

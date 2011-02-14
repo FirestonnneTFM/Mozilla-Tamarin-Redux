@@ -95,42 +95,59 @@ namespace avmplus
     }
 
     template<class OBJ>
-    ScriptObject* TypedVectorClass<OBJ>::createInstance(VTable* ivtable, ScriptObject* prototype)
+    OBJ* TypedVectorClass<OBJ>::newVector(uint32_t length, bool fixed)
     {
-        return OBJ::create(core()->GetGC(), ivtable, prototype, this);
-    }
-
-    template<class OBJ>
-    OBJ* TypedVectorClass<OBJ>::newVector(uint32_t length)
-    {
-        OBJ* v = OBJ::create(core()->GetGC(), ivtable(), prototypePtr(), this);
+        OBJ* v = (OBJ*)OBJ::create(gc(), ivtable(), prototypePtr());
+        v->m_vecClass = this;
         if (length > 0)
             v->set_length(length);
+        v->m_fixed = fixed;
         return v;
     }
 
     template<class OBJ>
     Atom TypedVectorClass<OBJ>::createAndInitVectorFromObject(ScriptObject* so_args, uint32_t len)
     {
-        OBJ* v = OBJ::create(core()->GetGC(), ivtable(), prototypePtr(), this);
+        OBJ* v = newVector();
         v->_spliceHelper_so(0, len, 0, so_args, 0);
+        return v->atom();
+    }
+
+    template<class OBJ>
+    Atom TypedVectorClass<OBJ>::constructImpl(int argc, Atom* argv)
+    {
+        uint32_t len = 0;
+        bool fixed = false;
+        if (argc > 0)
+        {
+            len = AvmCore::toUInt32(argv[1]);
+            if (argc > 1)
+            {
+                fixed = AvmCore::boolean(argv[2]) != 0;
+                if (argc > 2)
+                {
+                    vtable->init->argcError(argc);
+                }
+            }
+        }
+        OBJ* v = newVector(len, fixed);
         return v->atom();
     }
 
     // ----------------------------
 
-    VectorBaseObject::VectorBaseObject(VTable* ivtable, ScriptObject* delegate, TypedVectorClassBase* vecClass)
+    VectorBaseObject::VectorBaseObject(VTable* ivtable, ScriptObject* delegate)
         : ScriptObject(ivtable, delegate)
-        , m_vecClass(vecClass)
+        , m_vecClass(NULL)
         , m_fixed(false)
     {
     }
 
     VectorBaseObject* VectorBaseObject::_newVector()
     {
-        VectorBaseObject* v = (VectorBaseObject*)m_vecClass->createInstance(m_vecClass->ivtable(), m_vecClass->prototypePtr());
-        v->m_vecClass = this->m_vecClass;
-        return v;
+        AvmAssert(m_vecClass != NULL);
+        Atom args[1] = { nullObjectAtom };
+        return (VectorBaseObject*)AvmCore::atomToScriptObject(m_vecClass->construct(0, args));
     }
 
     void FASTCALL VectorBaseObject::throwFixedError() const
@@ -189,9 +206,9 @@ namespace avmplus
     // ----------------------------
 
     template<class TLIST>
-    TypedVectorObject<TLIST>::TypedVectorObject(VTable* ivtable, ScriptObject* delegate, MMgc::GC* gc, TypedVectorClassBase* vecClass)
-        : VectorBaseObject(ivtable, delegate, vecClass)
-        , m_list(gc, 0)
+    TypedVectorObject<TLIST>::TypedVectorObject(VTable* ivtable, ScriptObject* delegate)
+        : VectorBaseObject(ivtable, delegate)
+        , m_list(ivtable->gc(), 0)
     {
     }
 

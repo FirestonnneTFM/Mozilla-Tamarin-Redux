@@ -274,4 +274,12 @@ namespace avmshell
         if(xmlObject)
             xmlObject->dispose();
     }
+    
+    /*static*/ void FASTCALL CheckBaseClass::preCreateInstanceCheck(ClassClosure* cls)
+    {
+        Multiname qname(cls->traits()->ns(), cls->traits()->name());
+        // Deliberately throw a weird, non-sequitur error here so that we
+        // can distinguish this from construct="none" in the acceptance tests.
+        cls->toplevel()->argumentErrorClass()->throwError(kNotImplementedError, cls->core()->toErrorString(&qname));
+    }
 }

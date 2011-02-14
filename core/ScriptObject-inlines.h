@@ -179,6 +179,11 @@ REALLY_INLINE /*virtual*/ MethodEnv* ScriptObject::getCallMethodEnv()
 }
 #endif
 
+REALLY_INLINE /*virtual*/ ClassClosure* ScriptObject::toClassClosure()
+{
+    return NULL;
+}
+
 }
 
 #endif /* __avmplus_ScriptObject_inlines__ */

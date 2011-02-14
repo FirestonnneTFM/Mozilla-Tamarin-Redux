@@ -99,7 +99,6 @@ namespace avmplus
     {
     public:
         SampleClass(VTable *vtable);
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
         DECLARE_SLOTS_SampleClass;
     };
@@ -133,7 +132,6 @@ namespace avmplus
     {
     public:
         NewObjectSampleClass(VTable *vtable);
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
         DECLARE_SLOTS_NewObjectSampleClass;
     };
@@ -151,7 +149,6 @@ namespace avmplus
     {
     public:
         DeleteObjectSampleClass(VTable *vtable);
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
         DECLARE_SLOTS_DeleteObjectSampleClass;
     };
@@ -168,8 +165,7 @@ namespace avmplus
     class StackFrameClass : public ClassClosure
     {
     public:
-        StackFrameClass(VTable *vtable) : ClassClosure(vtable) { }
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+        StackFrameClass(VTable *vtable) : ClassClosure(vtable) { createVanillaPrototype(); }
 
         DECLARE_SLOTS_StackFrameClass;
     };

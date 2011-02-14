@@ -49,7 +49,7 @@ package
     we represent these types more compactly than with ScriptObject.
     */
     // instancegc is handled by a custom protocol
-    [native(cls="ObjectClass", classgc="exact", methods="auto", customconstruct=true)]
+    [native(cls="ObjectClass", classgc="exact", methods="auto", construct="override")]
     public dynamic class Object
     {
         // Object.length = 1 per ES3

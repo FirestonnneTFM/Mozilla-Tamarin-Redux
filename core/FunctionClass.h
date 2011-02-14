@@ -74,12 +74,7 @@ namespace avmplus
     class GC_AS3_EXACT(FunctionObject, ClassClosure)
     {
     protected:
-        REALLY_INLINE FunctionObject(VTable* cvtable, MethodEnv* call)
-            : ClassClosure(cvtable)
-            , m_callEnv(call)
-        {
-            AvmAssert(m_callEnv != NULL);
-        }
+        FunctionObject(VTable* cvtable, MethodEnv* call);
 
     public:
         REALLY_INLINE static FunctionObject* create(MMgc::GC* gc, VTable* vtable, MethodEnv* call)

@@ -41,7 +41,7 @@
 package
 {
     //pseudo-final - no user class can extend Class
-    [native(cls="ClassClass", gc="exact", instance="ClassClosure", methods="auto", customconstruct="instance")]
+    [native(cls="ClassClass", gc="exact", instance="ClassClosure", methods="auto", construct="instance")]
     public dynamic class Class
     {
         // {DontEnum,DontDelete,ReadOnly}

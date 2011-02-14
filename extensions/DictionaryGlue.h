@@ -95,8 +95,6 @@ namespace avmplus
             return new (gc, cvtable->getExtraSize()) DictionaryClass(cvtable);
         }
 
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-
     // ------------------------ DATA SECTION BEGIN
         GC_NO_DATA(DictionaryClass)
 

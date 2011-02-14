@@ -63,7 +63,7 @@ package avmplus
         public native function plus(i:Number):Number;
     }
 
-    [native(cls="::avmshell::SystemClass", classgc="exact", methods="auto")]
+    [native(cls="::avmshell::SystemClass", classgc="exact", methods="auto", construct="none")]
     public class System
     {
         // this metadata exists solely so that nativegen.py will encounter it during shell building,
@@ -118,7 +118,7 @@ package avmplus
         public native static function disposeXML(xml:XML):void;
     }
 
-    [native(cls="::avmshell::FileClass", methods="auto")]
+    [native(cls="::avmshell::FileClass", methods="auto", construct="none")]
     public class File
     {
         public native static function exists(filename:String):Boolean;
@@ -132,6 +132,66 @@ package avmplus
     public function debugger()
     {
         System.debugger()
+    }
+}
+
+package avmshell 
+{
+    // this class exists solely to test construct="abstract"
+    [native(cls="::avmshell::AbstractBaseClass", instance="::avmshell::AbstractBaseObject", methods="auto", construct="abstract")]
+    public class AbstractBase
+    {
+    }
+
+    // this class exists solely to test construct="abstract"
+    [native(cls="::avmshell::NativeSubclassOfAbstractBaseClass", instance="::avmshell::NativeSubclassOfAbstractBaseObject", methods="auto")]
+    public class NativeSubclassOfAbstractBase extends AbstractBase
+    {
+    }
+
+    // this class exists solely to test construct="abstract"
+    public class SubclassOfAbstractBase extends AbstractBase
+    {
+    }
+
+    // this class exists solely to test construct="restricted"
+    [native(cls="::avmshell::RestrictedBaseClass", instance="::avmshell::RestrictedBaseObject", methods="auto", construct="restricted")]
+    public class RestrictedBase
+    {
+    }
+
+    // this class exists solely to test construct="restricted"
+    [native(cls="::avmshell::NativeSubclassOfRestrictedBaseClass", instance="::avmshell::NativeSubclassOfRestrictedBaseObject", methods="auto")]
+    public class NativeSubclassOfRestrictedBase extends RestrictedBase
+    {
+    }
+
+    // this class exists solely to test construct="restricted"
+    public class SubclassOfRestrictedBase extends RestrictedBase
+    {
+    }
+
+    // this class exists solely to test construct="abstract-restricted"
+    [native(cls="::avmshell::AbstractRestrictedBaseClass", instance="::avmshell::AbstractRestrictedBaseObject", methods="auto", construct="abstract-restricted")]
+    public class AbstractRestrictedBase
+    {
+    }
+
+    // this class exists solely to test construct="abstract-restricted"
+    [native(cls="::avmshell::NativeSubclassOfAbstractRestrictedBaseClass", instance="::avmshell::NativeSubclassOfAbstractRestrictedBaseObject", methods="auto")]
+    public class NativeSubclassOfAbstractRestrictedBase extends AbstractRestrictedBase
+    {
+    }
+
+    // this class exists solely to test construct="abstract-restricted"
+    public class SubclassOfAbstractRestrictedBase extends AbstractRestrictedBase
+    {
+    }
+
+    // this class exists solely to test construct="check"
+    [native(cls="::avmshell::CheckBaseClass", instance="::avmshell::CheckBaseObject", methods="auto", construct="check")]
+    public class CheckBase
+    {
     }
 }
 
