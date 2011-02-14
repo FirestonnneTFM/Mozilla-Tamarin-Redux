@@ -96,7 +96,6 @@ namespace avmplus
         // common set/set/has/delete/etc virtual methods renamed to explicitly name the expected arg types,
         // to avoid potentially hidden virtual functions
         virtual Atom getAtomProperty(Atom name) const;
-        virtual Atom getAtomPropertyFromProtoChain(Atom name, ScriptObject* protochain, Traits *origObjTraits) const;
         virtual void setAtomProperty(Atom name, Atom value);
         virtual bool deleteAtomProperty(Atom name);
         virtual bool hasAtomProperty(Atom name) const;
@@ -223,6 +222,7 @@ namespace avmplus
 
     protected:
         
+        Atom getAtomPropertyFromProtoChain(Atom name, ScriptObject* protochain, Traits *origObjTraits) const;
         void throwWriteSealedError(Atom name);
         void throwWriteSealedError(const Multiname& name);
         void throwCantInstantiateError();
