@@ -238,6 +238,10 @@ namespace MMgc
 
     void FixedAlloc::FreeChunk(FixedBlock* b)
     {
+        if ( ((b->prevFree && (b->prevFree->nextFree!=b))) ||
+            ((b->nextFree && (b->nextFree->prevFree!=b))) )
+            VMPI_abort();
+
         m_numBlocks--;
 
         // Unlink the block from the list

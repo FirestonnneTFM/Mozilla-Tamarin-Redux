@@ -347,6 +347,10 @@ namespace MMgc
     void GCAlloc::UnlinkChunk(GCBlock *b)
     {
         GCAssert(!b->needsSweeping());
+        if ( ((b->prevFree && (b->prevFree->nextFree!=b))) ||
+            ((b->nextFree && (b->nextFree->prevFree!=b))) )
+            VMPI_abort();
+
         m_maxAlloc -= m_itemsPerBlock;
         m_numBlocks--;
 
