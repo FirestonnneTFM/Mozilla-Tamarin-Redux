@@ -139,6 +139,11 @@ namespace avmplus
     {
         return m_savedThis;
     }
+
+    /*virtual*/ Atom MethodClosure::get_savedThisOrNull() const
+    {
+        return m_savedThis;
+    }
     
     /*virtual*/ MethodClosure* MethodClosure::weaken() const
     {
@@ -150,16 +155,20 @@ namespace avmplus
     
     bool MethodClosure::equals(const MethodClosure* that) const
     {
-        AvmAssert(that != NULL && that->isValid());
+        // Don't assert: the pre-existing code in Flash didn't do so.
+        // Instead, allow two "invalid" MC's to equal each other.
+        // AvmAssert(this->isValid());
+        // AvmAssert(that != NULL && that->isValid());
         return that != NULL &&
                 this->m_callEnv == that->m_callEnv &&
-                this->get_savedThis() == that->get_savedThis();
+                this->get_savedThisOrNull() == that->get_savedThisOrNull();
     }
 
     uintptr_t MethodClosure::hashKey() const
     {
-        AvmAssert(isValid());
-        return ((uintptr_t(m_callEnv.value()) << 8) | (uintptr_t(get_savedThis()) >> 3));
+        // Don't assert: just use the null result to form the hashKey.
+        // AvmAssert(isValid());
+        return ((uintptr_t(m_callEnv.value()) << 8) | (uintptr_t(get_savedThisOrNull()) >> 3));
     }
 
     // this = argv[0] (ignored)
@@ -210,6 +219,13 @@ namespace avmplus
     /*virtual*/ Atom WeakMethodClosure::get_savedThis() const
     {
         return _get_savedThis();
+    }
+
+    /*virtual*/ Atom WeakMethodClosure::get_savedThisOrNull() const
+    {
+        ScriptObject* const savedThis = (ScriptObject*)(m_weakSavedThis->get());
+        // Don't assert, just return nullObjectAtom.
+        return savedThis ? savedThis->atom() : nullObjectAtom;
     }
 
     /*virtual*/ Atom WeakMethodClosure::get_coerced_receiver(Atom /*a*/) const
