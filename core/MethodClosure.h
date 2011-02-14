@@ -109,6 +109,7 @@ namespace avmplus
         virtual bool isValid() const;
         virtual MethodClosure* weaken() const;
         virtual Atom get_savedThis() const;
+        virtual Atom get_savedThisOrNull() const; // returns nullAtom if invalid, no assert
 
         bool equals(const MethodClosure* that) const;
         uintptr_t hashKey() const;
@@ -155,6 +156,7 @@ namespace avmplus
         virtual bool isValid() const;
         virtual MethodClosure* weaken() const;
         virtual Atom get_savedThis() const;
+        virtual Atom get_savedThisOrNull() const; // returns nullAtom if invalid, no assert
  
      protected:
         virtual Atom get_coerced_receiver(Atom a) const;
