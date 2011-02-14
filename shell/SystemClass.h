@@ -43,6 +43,102 @@
 
 namespace avmshell
 {
+    class AbstractBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        AbstractBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_AbstractBaseClass;
+    };
+
+    class AbstractBaseObject : public avmplus::ScriptObject
+    {
+    public:
+        AbstractBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_AbstractBaseObject;
+    };
+
+    class NativeSubclassOfAbstractBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        NativeSubclassOfAbstractBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_NativeSubclassOfAbstractBaseClass;
+    };
+
+    class NativeSubclassOfAbstractBaseObject : public AbstractBaseObject
+    {
+    public:
+        NativeSubclassOfAbstractBaseObject(VTable* vtable, ScriptObject* prototype) : AbstractBaseObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_NativeSubclassOfAbstractBaseObject;
+    };
+
+    class RestrictedBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        RestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_RestrictedBaseClass;
+    };
+
+    class RestrictedBaseObject : public avmplus::ScriptObject
+    {
+    public:
+        RestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_RestrictedBaseObject;
+    };
+
+    class NativeSubclassOfRestrictedBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        NativeSubclassOfRestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_NativeSubclassOfRestrictedBaseClass;
+    };
+
+    class NativeSubclassOfRestrictedBaseObject : public RestrictedBaseObject
+    {
+    public:
+        NativeSubclassOfRestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : RestrictedBaseObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_NativeSubclassOfRestrictedBaseObject;
+    };
+
+    class AbstractRestrictedBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        AbstractRestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_AbstractRestrictedBaseClass;
+    };
+
+    class AbstractRestrictedBaseObject : public avmplus::ScriptObject
+    {
+    public:
+        AbstractRestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_AbstractRestrictedBaseObject;
+    };
+
+    class NativeSubclassOfAbstractRestrictedBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        NativeSubclassOfAbstractRestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseClass;
+    };
+
+    class NativeSubclassOfAbstractRestrictedBaseObject : public AbstractRestrictedBaseObject
+    {
+    public:
+        NativeSubclassOfAbstractRestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : AbstractRestrictedBaseObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseObject;
+    };
+
     // this class exists solely to test native classes that use MI.
     class MIClass : public avmplus::ClassClosure
     {
@@ -70,6 +166,22 @@ namespace avmshell
         const double amount;
         MIObjectImpl(VTable* vtable, ScriptObject* prototype, double a) : ScriptObject(vtable, prototype), amount(a) {}
         double plus(double v) { return v + amount; }
+    };
+
+    class CheckBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        CheckBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_CheckBaseClass;
+    };
+
+    class CheckBaseObject : public avmplus::ScriptObject
+    {
+    public:
+        CheckBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_CheckBaseObject;
     };
 
     // this class exists solely to test native classes that use MI.

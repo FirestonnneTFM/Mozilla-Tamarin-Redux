@@ -58,34 +58,27 @@ namespace avmplus
     class GC_AS3_EXACT(RegExpObject, ScriptObject)
     {
     protected:
-        /** This variant is used to create RegExp.prototype */
-        RegExpObject(RegExpClass *arrayClass, ScriptObject *delegate);
-
-        RegExpObject(RegExpClass *type, Stringp pattern, Stringp options);
+        RegExpObject(VTable* ivtable, ScriptObject* delegate);
+        RegExpObject(VTable* ivtable, ScriptObject* delegate, Stringp pattern, Stringp options);
 
     private:
         /* Copy constructor */
         RegExpObject(RegExpObject *toCopy);
 
     public:
-        REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, RegExpClass* cls, ScriptObject *delegate)
-        {
-            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) RegExpObject(cls, delegate);
-        }
-        
         REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, RegExpClass* cls, RegExpObject *toCopy)
         {
             return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) RegExpObject(toCopy);
         }
         
-        REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, RegExpClass* cls, Stringp pattern, Stringp options)
+        REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
         {
-            return new (gc, MMgc::kExact, cls->ivtable()->getExtraSize()) RegExpObject(cls, pattern, options);
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) RegExpObject(ivtable, delegate);
         }
-        
-        REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, VTable* vtable, RegExpClass* cls, Stringp pattern, Stringp options)
+
+        REALLY_INLINE static RegExpObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, Stringp pattern, Stringp options)
         {
-            return new (gc, MMgc::kExact, vtable->getExtraSize()) RegExpObject(cls, pattern, options);
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) RegExpObject(ivtable, delegate, pattern, options);
         }
 
         ~RegExpObject();

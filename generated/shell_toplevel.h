@@ -64,9 +64,23 @@ namespace avmplus {
 }
 
 namespace avmshell {
+    class AbstractBaseClass; // avmshell::AbstractBase$
+    class AbstractBaseObject; // avmshell::AbstractBase
+    class AbstractRestrictedBaseClass; // avmshell::AbstractRestrictedBase$
+    class AbstractRestrictedBaseObject; // avmshell::AbstractRestrictedBase
+    class CheckBaseClass; // avmshell::CheckBase$
+    class CheckBaseObject; // avmshell::CheckBase
     class FileClass; // avmplus::File$
     class MIClass; // avmplus::MI$
     class MIObject; // avmplus::MI
+    class NativeSubclassOfAbstractBaseClass; // avmshell::NativeSubclassOfAbstractBase$
+    class NativeSubclassOfAbstractBaseObject; // avmshell::NativeSubclassOfAbstractBase
+    class NativeSubclassOfAbstractRestrictedBaseClass; // avmshell::NativeSubclassOfAbstractRestrictedBase$
+    class NativeSubclassOfAbstractRestrictedBaseObject; // avmshell::NativeSubclassOfAbstractRestrictedBase
+    class NativeSubclassOfRestrictedBaseClass; // avmshell::NativeSubclassOfRestrictedBase$
+    class NativeSubclassOfRestrictedBaseObject; // avmshell::NativeSubclassOfRestrictedBase
+    class RestrictedBaseClass; // avmshell::RestrictedBase$
+    class RestrictedBaseObject; // avmshell::RestrictedBase
     class SystemClass; // avmplus::System$
 }
 
@@ -86,36 +100,46 @@ const uint32_t abcclass_avmplus_CTest = 1;
 const uint32_t abcclass_avmplus_MI = 2;
 const uint32_t abcclass_avmplus_System = 3;
 const uint32_t abcclass_avmplus_File = 4;
-const uint32_t abcclass_flash_system_Capabilities = 5;
-const uint32_t abcclass_avmshell_public_class = 6;
-const uint32_t abcclass_avmshell_public_class_AIR_1_0 = 7;
-const uint32_t abcclass_avmshell_public_class_FP_10_0 = 8;
-const uint32_t abcclass_avmshell_public_class_AIR_1_5 = 9;
-const uint32_t abcclass_avmshell_public_class_AIR_1_5_1 = 10;
-const uint32_t abcclass_avmshell_public_class_FP_10_0_32 = 11;
-const uint32_t abcclass_avmshell_public_class_AIR_1_5_2 = 12;
-const uint32_t abcclass_avmshell_public_class_AIR_1_0_FP_10_0 = 13;
-const uint32_t abcclass_avmshell_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2 = 14;
-const uint32_t abcclass_avmshell_public_class_FP_10_0_32_AIR_1_0_FP_10_0 = 15;
-const uint32_t abcclass_avmshell_public_interface = 16;
-const uint32_t abcclass_avmshell_public_interface_AIR_1_0 = 17;
-const uint32_t abcclass_avmshell_public_interface_FP_10_0 = 18;
-const uint32_t abcclass_avmshell_public_interface_AIR_1_5 = 19;
-const uint32_t abcclass_avmshell_public_interface_AIR_1_5_1 = 20;
-const uint32_t abcclass_avmshell_public_interface_FP_10_0_32 = 21;
-const uint32_t abcclass_avmshell_public_interface_AIR_1_5_2 = 22;
-const uint32_t abcclass_avmshell_public_interface_AIR_1_0_FP_10_0 = 23;
-const uint32_t abcclass_avmshell_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2 = 24;
-const uint32_t abcclass_avmshell_public_interface_FP_10_0_32_AIR_1_0_FP_10_0 = 25;
-const uint32_t abcclass_avmplus_Domain = 26;
-const uint32_t abcclass_flash_sampler_StackFrame = 27;
-const uint32_t abcclass_flash_sampler_Sample = 28;
-const uint32_t abcclass_flash_sampler_NewObjectSample = 29;
-const uint32_t abcclass_flash_sampler_DeleteObjectSample = 30;
-const uint32_t abcclass_flash_trace_Trace = 31;
-const uint32_t abcclass_flash_utils_Dictionary = 32;
-const uint32_t abcclass_flash_utils_Endian = 33;
-const uint32_t abcclass_avmplus_JObject = 34;
+const uint32_t abcclass_avmshell_AbstractBase = 5;
+const uint32_t abcclass_avmshell_RestrictedBase = 6;
+const uint32_t abcclass_avmshell_AbstractRestrictedBase = 7;
+const uint32_t abcclass_avmshell_CheckBase = 8;
+const uint32_t abcclass_flash_system_Capabilities = 9;
+const uint32_t abcclass_avmshell_public_class = 10;
+const uint32_t abcclass_avmshell_public_class_AIR_1_0 = 11;
+const uint32_t abcclass_avmshell_public_class_FP_10_0 = 12;
+const uint32_t abcclass_avmshell_public_class_AIR_1_5 = 13;
+const uint32_t abcclass_avmshell_public_class_AIR_1_5_1 = 14;
+const uint32_t abcclass_avmshell_public_class_FP_10_0_32 = 15;
+const uint32_t abcclass_avmshell_public_class_AIR_1_5_2 = 16;
+const uint32_t abcclass_avmshell_public_class_AIR_1_0_FP_10_0 = 17;
+const uint32_t abcclass_avmshell_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2 = 18;
+const uint32_t abcclass_avmshell_public_class_FP_10_0_32_AIR_1_0_FP_10_0 = 19;
+const uint32_t abcclass_avmshell_public_interface = 20;
+const uint32_t abcclass_avmshell_public_interface_AIR_1_0 = 21;
+const uint32_t abcclass_avmshell_public_interface_FP_10_0 = 22;
+const uint32_t abcclass_avmshell_public_interface_AIR_1_5 = 23;
+const uint32_t abcclass_avmshell_public_interface_AIR_1_5_1 = 24;
+const uint32_t abcclass_avmshell_public_interface_FP_10_0_32 = 25;
+const uint32_t abcclass_avmshell_public_interface_AIR_1_5_2 = 26;
+const uint32_t abcclass_avmshell_public_interface_AIR_1_0_FP_10_0 = 27;
+const uint32_t abcclass_avmshell_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2 = 28;
+const uint32_t abcclass_avmshell_public_interface_FP_10_0_32_AIR_1_0_FP_10_0 = 29;
+const uint32_t abcclass_avmshell_NativeSubclassOfAbstractBase = 30;
+const uint32_t abcclass_avmshell_SubclassOfAbstractBase = 31;
+const uint32_t abcclass_avmshell_NativeSubclassOfRestrictedBase = 32;
+const uint32_t abcclass_avmshell_SubclassOfRestrictedBase = 33;
+const uint32_t abcclass_avmshell_NativeSubclassOfAbstractRestrictedBase = 34;
+const uint32_t abcclass_avmshell_SubclassOfAbstractRestrictedBase = 35;
+const uint32_t abcclass_avmplus_Domain = 36;
+const uint32_t abcclass_flash_sampler_StackFrame = 37;
+const uint32_t abcclass_flash_sampler_Sample = 38;
+const uint32_t abcclass_flash_sampler_NewObjectSample = 39;
+const uint32_t abcclass_flash_sampler_DeleteObjectSample = 40;
+const uint32_t abcclass_flash_trace_Trace = 41;
+const uint32_t abcclass_flash_utils_Dictionary = 42;
+const uint32_t abcclass_flash_utils_Endian = 43;
+const uint32_t abcclass_avmplus_JObject = 44;
 
 /* methods */
 const uint32_t avmplus_MI_plus = 43;
@@ -146,41 +170,41 @@ const uint32_t avmplus_File_read = 71;
 const uint32_t avmplus_File_write = 72;
 const uint32_t avmplus_File_readByteArray = 73;
 const uint32_t avmplus_File_writeByteArray = 74;
-const uint32_t avmplus_Domain_currentDomain_get = 152;
-const uint32_t avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get = 153;
-const uint32_t avmplus_Domain_private_init = 154;
-const uint32_t avmplus_Domain_loadBytes = 156;
-const uint32_t avmplus_Domain_getClass = 157;
-const uint32_t avmplus_Domain_domainMemory_get = 159;
-const uint32_t avmplus_Domain_domainMemory_set = 160;
-const uint32_t native_script_function_flash_sampler_getMasterString = 162;
-const uint32_t native_script_function_flash_sampler_getSavedThis = 163;
-const uint32_t native_script_function_flash_sampler_getLexicalScopes = 164;
-const uint32_t native_script_function_flash_sampler_isGetterSetter = 165;
-const uint32_t native_script_function_flash_sampler__getInvocationCount = 166;
-const uint32_t native_script_function_flash_sampler_getSampleCount = 170;
-const uint32_t native_script_function_flash_sampler_getSamples = 171;
-const uint32_t native_script_function_flash_sampler_getMemberNames = 172;
-const uint32_t native_script_function_flash_sampler_getSize = 173;
-const uint32_t native_script_function_flash_sampler__setSamplerCallback = 174;
-const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 177;
-const uint32_t native_script_function_flash_sampler_pauseSampling = 178;
-const uint32_t native_script_function_flash_sampler_stopSampling = 179;
-const uint32_t native_script_function_flash_sampler_startSampling = 180;
-const uint32_t native_script_function_flash_sampler_clearSamples = 181;
-const uint32_t flash_sampler_NewObjectSample_object_get = 188;
-const uint32_t flash_sampler_NewObjectSample_size_get = 189;
-const uint32_t flash_trace_Trace_setLevel = 195;
-const uint32_t flash_trace_Trace_getLevel = 196;
-const uint32_t flash_trace_Trace_setListener = 197;
-const uint32_t flash_trace_Trace_getListener = 198;
-const uint32_t flash_utils_Dictionary_private_init = 202;
-const uint32_t avmplus_JObject_create = 209;
-const uint32_t avmplus_JObject_createArray = 210;
-const uint32_t avmplus_JObject_toArray = 211;
-const uint32_t avmplus_JObject_constructorSignature = 212;
-const uint32_t avmplus_JObject_methodSignature = 213;
-const uint32_t avmplus_JObject_fieldSignature = 214;
+const uint32_t avmplus_Domain_currentDomain_get = 172;
+const uint32_t avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get = 173;
+const uint32_t avmplus_Domain_private_init = 174;
+const uint32_t avmplus_Domain_loadBytes = 176;
+const uint32_t avmplus_Domain_getClass = 177;
+const uint32_t avmplus_Domain_domainMemory_get = 179;
+const uint32_t avmplus_Domain_domainMemory_set = 180;
+const uint32_t native_script_function_flash_sampler_getMasterString = 182;
+const uint32_t native_script_function_flash_sampler_getSavedThis = 183;
+const uint32_t native_script_function_flash_sampler_getLexicalScopes = 184;
+const uint32_t native_script_function_flash_sampler_isGetterSetter = 185;
+const uint32_t native_script_function_flash_sampler__getInvocationCount = 186;
+const uint32_t native_script_function_flash_sampler_getSampleCount = 190;
+const uint32_t native_script_function_flash_sampler_getSamples = 191;
+const uint32_t native_script_function_flash_sampler_getMemberNames = 192;
+const uint32_t native_script_function_flash_sampler_getSize = 193;
+const uint32_t native_script_function_flash_sampler__setSamplerCallback = 194;
+const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 197;
+const uint32_t native_script_function_flash_sampler_pauseSampling = 198;
+const uint32_t native_script_function_flash_sampler_stopSampling = 199;
+const uint32_t native_script_function_flash_sampler_startSampling = 200;
+const uint32_t native_script_function_flash_sampler_clearSamples = 201;
+const uint32_t flash_sampler_NewObjectSample_object_get = 208;
+const uint32_t flash_sampler_NewObjectSample_size_get = 209;
+const uint32_t flash_trace_Trace_setLevel = 215;
+const uint32_t flash_trace_Trace_getLevel = 216;
+const uint32_t flash_trace_Trace_setListener = 217;
+const uint32_t flash_trace_Trace_getListener = 218;
+const uint32_t flash_utils_Dictionary_private_init = 222;
+const uint32_t avmplus_JObject_create = 229;
+const uint32_t avmplus_JObject_createArray = 230;
+const uint32_t avmplus_JObject_toArray = 231;
+const uint32_t avmplus_JObject_constructorSignature = 232;
+const uint32_t avmplus_JObject_methodSignature = 233;
+const uint32_t avmplus_JObject_fieldSignature = 234;
 
 extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -403,6 +427,10 @@ private:
 #define DECLARE_SLOTS_MIClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::_avmshell_MIClassSlots EmptySlotsStruct_MIClass
@@ -419,6 +447,8 @@ private:
 #define DECLARE_SLOTS_MIObject \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::_avmshell_MIObjectSlots EmptySlotsStruct_MIObject
@@ -443,6 +473,8 @@ public:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE ArrayObject* get_argv() const { return m_slots_SystemClass.get_argv(); } \
@@ -462,8 +494,273 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::_avmshell_FileClassSlots EmptySlotsStruct_FileClass
+//-----------------------------------------------------------
+
+// avmshell::AbstractBase$
+//-----------------------------------------------------------
+class _avmshell_AbstractBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_AbstractBaseClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_AbstractBaseClassSlots EmptySlotsStruct_AbstractBaseClass
+//-----------------------------------------------------------
+
+// avmshell::AbstractBase
+//-----------------------------------------------------------
+class _avmshell_AbstractBaseObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_AbstractBaseObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_AbstractBaseObjectSlots EmptySlotsStruct_AbstractBaseObject
+//-----------------------------------------------------------
+
+// avmshell::RestrictedBase$
+//-----------------------------------------------------------
+class _avmshell_RestrictedBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_RestrictedBaseClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_RestrictedBaseClassSlots EmptySlotsStruct_RestrictedBaseClass
+//-----------------------------------------------------------
+
+// avmshell::RestrictedBase
+//-----------------------------------------------------------
+class _avmshell_RestrictedBaseObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_RestrictedBaseObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_RestrictedBaseObjectSlots EmptySlotsStruct_RestrictedBaseObject
+//-----------------------------------------------------------
+
+// avmshell::AbstractRestrictedBase$
+//-----------------------------------------------------------
+class _avmshell_AbstractRestrictedBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_AbstractRestrictedBaseClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_AbstractRestrictedBaseClassSlots EmptySlotsStruct_AbstractRestrictedBaseClass
+//-----------------------------------------------------------
+
+// avmshell::AbstractRestrictedBase
+//-----------------------------------------------------------
+class _avmshell_AbstractRestrictedBaseObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_AbstractRestrictedBaseObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_AbstractRestrictedBaseObjectSlots EmptySlotsStruct_AbstractRestrictedBaseObject
+//-----------------------------------------------------------
+
+// avmshell::CheckBase$
+//-----------------------------------------------------------
+class _avmshell_CheckBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_CheckBaseClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static void FASTCALL preCreateInstanceCheck(avmplus::ClassClosure*); \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_CheckBaseClassSlots EmptySlotsStruct_CheckBaseClass
+//-----------------------------------------------------------
+
+// avmshell::CheckBase
+//-----------------------------------------------------------
+class _avmshell_CheckBaseObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_CheckBaseObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_CheckBaseObjectSlots EmptySlotsStruct_CheckBaseObject
+//-----------------------------------------------------------
+
+// avmshell::NativeSubclassOfAbstractBase$
+//-----------------------------------------------------------
+class _avmshell_NativeSubclassOfAbstractBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_NativeSubclassOfAbstractBaseClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_NativeSubclassOfAbstractBaseClassSlots EmptySlotsStruct_NativeSubclassOfAbstractBaseClass
+//-----------------------------------------------------------
+
+// avmshell::NativeSubclassOfAbstractBase
+//-----------------------------------------------------------
+class _avmshell_NativeSubclassOfAbstractBaseObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_NativeSubclassOfAbstractBaseObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_NativeSubclassOfAbstractBaseObjectSlots EmptySlotsStruct_NativeSubclassOfAbstractBaseObject
+//-----------------------------------------------------------
+
+// avmshell::NativeSubclassOfRestrictedBase$
+//-----------------------------------------------------------
+class _avmshell_NativeSubclassOfRestrictedBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_NativeSubclassOfRestrictedBaseClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_NativeSubclassOfRestrictedBaseClassSlots EmptySlotsStruct_NativeSubclassOfRestrictedBaseClass
+//-----------------------------------------------------------
+
+// avmshell::NativeSubclassOfRestrictedBase
+//-----------------------------------------------------------
+class _avmshell_NativeSubclassOfRestrictedBaseObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_NativeSubclassOfRestrictedBaseObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_NativeSubclassOfRestrictedBaseObjectSlots EmptySlotsStruct_NativeSubclassOfRestrictedBaseObject
+//-----------------------------------------------------------
+
+// avmshell::NativeSubclassOfAbstractRestrictedBase$
+//-----------------------------------------------------------
+class _avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseClass \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots EmptySlotsStruct_NativeSubclassOfAbstractRestrictedBaseClass
+//-----------------------------------------------------------
+
+// avmshell::NativeSubclassOfAbstractRestrictedBase
+//-----------------------------------------------------------
+class _avmshell_NativeSubclassOfAbstractRestrictedBaseObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseObject \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_NativeSubclassOfAbstractRestrictedBaseObjectSlots EmptySlotsStruct_NativeSubclassOfAbstractRestrictedBaseObject
 //-----------------------------------------------------------
 
 // avmplus::Domain$
@@ -478,6 +775,10 @@ private:
 #define DECLARE_SLOTS_DomainClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DomainClassSlots EmptySlotsStruct_DomainClass
@@ -496,6 +797,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DomainObjectSlots EmptySlotsStruct_DomainObject
 //-----------------------------------------------------------
@@ -511,6 +814,10 @@ private:
 #define DECLARE_SLOTS_StackFrameClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::StackFrameClassSlots EmptySlotsStruct_StackFrameClass
@@ -540,6 +847,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE uint32_t get_line() const { return m_slots_StackFrameObject.get_line(); } \
@@ -565,6 +874,10 @@ private:
 #define DECLARE_SLOTS_SampleClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::SampleClassSlots EmptySlotsStruct_SampleClass
@@ -588,6 +901,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE ArrayObject* get_stack() const { return m_slots_SampleObject.get_stack(); } \
@@ -609,6 +924,10 @@ private:
 #define DECLARE_SLOTS_NewObjectSampleClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::NewObjectSampleClassSlots EmptySlotsStruct_NewObjectSampleClass
@@ -632,6 +951,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE ClassClosure* get_type() const { return m_slots_NewObjectSampleObject.get_type(); } \
@@ -653,6 +974,10 @@ private:
 #define DECLARE_SLOTS_DeleteObjectSampleClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DeleteObjectSampleClassSlots EmptySlotsStruct_DeleteObjectSampleClass
@@ -675,6 +1000,8 @@ private:
 #define DECLARE_SLOTS_DeleteObjectSampleObject \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -712,6 +1039,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE int32_t get_OFF() const { return m_slots_TraceClass.get_OFF(); } \
@@ -737,6 +1066,10 @@ private:
 #define DECLARE_SLOTS_DictionaryClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DictionaryClassSlots EmptySlotsStruct_DictionaryClass
@@ -755,6 +1088,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DictionaryObjectSlots EmptySlotsStruct_DictionaryObject
 //-----------------------------------------------------------
@@ -770,6 +1105,10 @@ private:
 #define DECLARE_SLOTS_JObjectClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::JObjectClassSlots EmptySlotsStruct_JObjectClass
@@ -786,6 +1125,8 @@ private:
 #define DECLARE_SLOTS_JObject \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::JObjectSlots EmptySlotsStruct_JObject

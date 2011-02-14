@@ -1337,11 +1337,6 @@ namespace avmplus
     template ArrayObject* ArrayClass::newArray(MethodEnv *env, char* argDesc, va_list ap);
 #endif
 
-    ArrayObject* ArrayClass::createInstance(VTable *ivtable, ScriptObject* prototype)
-    {
-        return ArrayObject::create(core()->GetGC(), ivtable, prototype, 0);
-    }
-
     /*static*/ int ArrayClass::generic_indexOf(Toplevel* toplevel, Atom thisAtom, Atom searchElement, int startIndex)
     {
         if (!AvmCore::isObject(thisAtom))

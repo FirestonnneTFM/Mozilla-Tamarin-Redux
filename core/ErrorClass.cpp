@@ -48,7 +48,12 @@ namespace avmplus
     {
         AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
 
-        setPrototypePtr(createInstance(ivtable(), toplevel()->objectClass->prototypePtr()));
+        // trick: set our prototype to objectClass->prototypePtr for now...
+        setPrototypePtr(toplevel()->objectClass->prototypePtr());
+        // now we can create a proper proto, using this->ivtable() and object->proto
+        ScriptObject* proto = newInstance();
+        // and replace the one we had before.
+        setPrototypePtr(proto);
     }
 
     /**
@@ -99,12 +104,6 @@ namespace avmplus
     Stringp ErrorClass::getErrorMessage(int errorID) const
     {
         return this->core()->getErrorMessage(errorID);
-    }
-
-    ScriptObject* ErrorClass::createInstance(VTable *ivtable,
-                                             ScriptObject *prototype)
-    {
-        return ErrorObject::create(ivtable->gc(), ivtable, prototype);
     }
 
     /**

@@ -50,10 +50,8 @@ namespace avmplus
     
     DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
         : ScriptObject(vtable, delegate)
-    {
-    }
-
-    DomainObject::~DomainObject()
+        , domainEnv(delegate->core()->codeContext()->domainEnv())
+        , domainToplevel(delegate->toplevel())
     {
     }
 
@@ -190,21 +188,9 @@ done:
         createVanillaPrototype();
     }
 
-    ScriptObject* DomainClass::createInstance(VTable *ivtable,
-                                              ScriptObject *prototype)
-    {
-        return DomainObject::create(core()->GetGC(), ivtable, prototype);
-    }
-
     DomainObject* DomainClass::get_currentDomain()
     {
-        CodeContext* codeContext = core()->codeContext();
-
-        DomainObject* domainObject = (DomainObject*) createInstance(ivtable(), prototypePtr());
-        domainObject->domainEnv = codeContext->domainEnv();
-        domainObject->domainToplevel = toplevel();
-
-        return domainObject;
+        return (DomainObject*) newInstance();
     }
 
     int DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH()

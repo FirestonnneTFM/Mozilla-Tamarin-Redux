@@ -42,6 +42,8 @@
 
 namespace avmplus
 {
+    typedef ScriptObject* (* FASTCALL CreateInstanceProc)(ClassClosure* cls);
+
     class GC_CPP_EXACT(VTable, MMgc::GCTraceableObject)
     {
         friend class CodegenLIR;
@@ -84,8 +86,7 @@ namespace avmplus
         DWB(VTable*)    GC_POINTER(base);
         DWB(VTable*)    GC_POINTER(ivtable);
         Traits* const   GC_POINTER(traits);
-        ScriptObject* (*createInstance)(ClassClosure* cls, VTable* ivtable);
-        bool basecase;
+        CreateInstanceProc  createInstanceProc;
         bool linked;    // @todo -- surely there's a spare bit we can use for this.
         bool pad[2];
 

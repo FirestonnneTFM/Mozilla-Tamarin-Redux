@@ -853,17 +853,8 @@ namespace avmplus
         }
 
         CreateClassClosureProc createClassClosure = cvtable->traits->getCreateClassClosureProc();
-        ClassClosure *cc;
-        if (createClassClosure != NULL)
-        {
-            cc = (*createClassClosure)(cvtable);
-        }
-        else
-        {
-            cc = ClassClosure::create(core->GetGC(), cvtable);
-            AvmAssert(cc->prototypePtr() == NULL);
-            cc->createVanillaPrototype();
-        }
+        AvmAssert(createClassClosure != NULL);
+        ClassClosure* cc = (*createClassClosure)(cvtable);
 
         if (cc->prototypePtr())
         {

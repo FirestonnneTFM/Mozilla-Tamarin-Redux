@@ -48,25 +48,27 @@ namespace avmplus
      */
     class GC_AS3_EXACT(ClassClosure, ScriptObject)
     {
+        friend class FunctionObject;
+        friend class VTable;
+
+    private:
+        // This ctor is for use only by FunctionObject + MethodClosure
+        // (and createClassClosure)
+        ClassClosure(VTable* cvtable, CreateInstanceProc createInstanceProc);
+
     protected:
-        ClassClosure(VTable *cvtable);
+        // This ctor is used by all other (normal) subclasses 
+        ClassClosure(VTable* cvtable);
 
     public:
-        REALLY_INLINE static ClassClosure* create(MMgc::GC* gc, VTable* cvtable)
-        {
-            return new (gc, MMgc::kExact, cvtable->getExtraSize()) ClassClosure(cvtable);
-        }
 
-        REALLY_INLINE static ClassClosure* create(MMgc::GC* gc, size_t extraSize, VTable* cvtable)
-        {
-            return new (gc, MMgc::kExact, extraSize) ClassClosure(cvtable);
-        }
+        static ClassClosure* FASTCALL createClassClosure(VTable* cvtable);
         
         Atom get_prototype();
         void set_prototype(Atom p);
 
         ScriptObject* prototypePtr();
-        void setPrototypePtr(ScriptObject* p);
+        void FASTCALL setPrototypePtr(ScriptObject* p);
 
         void createVanillaPrototype();
 
@@ -92,6 +94,25 @@ namespace avmplus
 
         virtual Stringp implToString() const;
 
+        virtual ClassClosure* toClassClosure() { return this; }
+
+        size_t getExtraSize() const;
+
+    private:
+        static CreateInstanceProc FASTCALL checkForRestrictedInheritance(VTable* ivtable, CreateInstanceProc p);
+
+    protected:
+        static CreateInstanceProc FASTCALL calcCreateInstanceProc(VTable* cvtable);
+
+    public:
+        static ScriptObject* FASTCALL createScriptObjectProc(ClassClosure* cls);
+        static ScriptObject* FASTCALL abstractBaseClassCreateInstanceProc(ClassClosure* cls);
+        static ScriptObject* FASTCALL cantInstantiateCreateInstanceProc(ClassClosure* cls);
+        static ScriptObject* FASTCALL impossibleCreateInstanceProc(ClassClosure* cls);
+
+    private:
+        static ScriptObject* FASTCALL reinitNullPrototypeCreateInstanceProc(ClassClosure* cls);
+
 #ifdef AVMPLUS_VERBOSE
     public:
         PrintWriter& print(PrintWriter& prw) const;
@@ -100,7 +121,8 @@ namespace avmplus
         GC_DATA_BEGIN(ClassClosure)
 
     private:
-        DRCWB(ScriptObject*)  GC_POINTER(m_prototype);
+        DRCWB(ScriptObject*)        GC_POINTER(m_prototype);
+        CreateInstanceProc const    m_createInstanceProc;   // not GC memory
 
         GC_DATA_END(ClassClosure)
 

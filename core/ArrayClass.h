@@ -75,9 +75,6 @@ namespace avmplus
         ArrayObject* newArray(MethodEnv *env, ADT argDesc, va_list ap);
 #endif
 
-        // override ScriptObject::createInstance
-        ArrayObject* createInstance(VTable *ivtable, ScriptObject* prototype);
-
         // AS3 glue code methods (not inlined, just declared here for convenience)
         ArrayObject* _concat(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_concat(toplevel(), thisAtom, args); }
         Atom _pop(Atom thisAtom) { return ArrayClass::generic_pop(toplevel(), thisAtom); }

@@ -51,15 +51,9 @@ namespace avmplus
         AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpClass));
 
         AvmCore* core = this->core();
-
         ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
-        setPrototypePtr(RegExpObject::create(core->GetGC(), this, object_prototype));
-    }
-
-    ScriptObject* RegExpClass::createInstance(VTable *ivtable, ScriptObject* /*prototype*/)
-    {
-        AvmCore* core = this->core();
-        return RegExpObject::create(core->GetGC(), ivtable, this, core->kEmptyString, core->kEmptyString);
+        String* pattern = core->newConstantStringLatin1("(?:)");
+        setPrototypePtr(RegExpObject::create(core->GetGC(), cvtable->ivtable, object_prototype, pattern, core->kEmptyString));
     }
 
     // this = argv[0] (ignored)
@@ -114,7 +108,7 @@ namespace avmplus
             options = core->string(optionsAtom);
         }
 
-        RegExpObject* inst = RegExpObject::create(core->GetGC(), this, pattern, options);
+        RegExpObject* inst = RegExpObject::create(core->GetGC(), this->ivtable(), this->prototypePtr(), pattern, options);
         return inst->atom();
     }
 }

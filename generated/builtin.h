@@ -880,14 +880,6 @@ extern double builtin_d2d_o_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define flash_utils_ByteArray_readDouble_thunk  builtin_d2d_o_thunk
 #define flash_utils_ByteArray_readFloat_thunk  builtin_d2d_o_thunk
 
-extern avmplus::Atom builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_516___________thunk
-
 extern avmplus::Atom builtin_i2a_ssi_opti2147483647_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_private__lastIndexOf_thunk  builtin_i2a_ssi_opti2147483647_thunk
 
@@ -1207,8 +1199,8 @@ extern avmplus::Atom builtin_s2a_oi_thunk(MethodEnv* env, uint32_t argc, Atom* a
 extern avmplus::Atom builtin_i2a_ssi_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define String_private__indexOf_thunk  builtin_i2a_ssi_opti0_thunk
 
-extern avmplus::Atom builtin_s2a_o_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-#define String_AS3_fromCharCode_thunk  builtin_s2a_o_rest_thunk
+extern double builtin_d2d_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define Date_private__get_thunk  builtin_d2d_oi_thunk
 
 extern avmplus::Atom builtin_i2a_oaai_opti0_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__lastIndexOf_thunk  builtin_i2a_oaai_opti0_thunk
@@ -1272,8 +1264,13 @@ extern avmplus::Atom builtin_v2a_oi_thunk(MethodEnv* env, uint32_t argc, Atom* a
 #define flash_utils_ByteArray_writeInt_thunk  builtin_v2a_oi_thunk
 #define flash_utils_ByteArray_writeShort_thunk  builtin_v2a_oi_thunk
 
-extern double builtin_d2d_oi_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-#define Date_private__get_thunk  builtin_d2d_oi_thunk
+extern avmplus::Atom builtin_a2a_oa_optsAvmThunkGetConstantString_517___________thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_517___________thunk
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_517___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_517___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_517___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_517___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkGetConstantString_517___________thunk
 
 extern avmplus::Atom builtin_a2a_oaa_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define XMLList_AS3_insertChildAfter_thunk  builtin_a2a_oaa_thunk
@@ -1315,6 +1312,9 @@ extern avmplus::Atom builtin_v2a_os_thunk(MethodEnv* env, uint32_t argc, Atom* a
 
 extern avmplus::Atom builtin_a2a_oadd_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define Array_private__slice_thunk  builtin_a2a_oadd_thunk
+
+extern avmplus::Atom builtin_s2a_o_rest_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+#define String_AS3_fromCharCode_thunk  builtin_s2a_o_rest_thunk
 
 extern avmplus::Atom builtin_b2a_oa_optaundefinedAtom_u_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 #define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optaundefinedAtom_u_thunk
@@ -1361,6 +1361,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ObjectClass.get_length(); } \
@@ -1383,6 +1385,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ClassClass.get_length(); } \
@@ -1403,6 +1407,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::ClassClosureSlots EmptySlotsStruct_ClassClosure
 //-----------------------------------------------------------
@@ -1421,6 +1427,8 @@ private:
 #define DECLARE_SLOTS_FunctionClass \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1441,6 +1449,8 @@ private:
 #define DECLARE_SLOTS_FunctionObject \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::FunctionObjectSlots EmptySlotsStruct_FunctionObject
@@ -1465,6 +1475,8 @@ public:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_NamespaceClass.get_length(); } \
@@ -1486,6 +1498,8 @@ private:
 #define DECLARE_SLOTS_BooleanClass \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1525,6 +1539,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE int32_t get_length() const { return m_slots_NumberClass.get_length(); } \
@@ -1559,6 +1575,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE int32_t get_MIN_VALUE() const { return m_slots_IntClass.get_MIN_VALUE(); } \
@@ -1587,6 +1605,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE uint32_t get_MIN_VALUE() const { return m_slots_UIntClass.get_MIN_VALUE(); } \
@@ -1610,6 +1630,8 @@ private:
 #define DECLARE_SLOTS_StringClass \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1642,6 +1664,10 @@ private:
 #define DECLARE_SLOTS_ArrayClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1668,6 +1694,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::ArrayObjectSlots EmptySlotsStruct_ArrayObject
 //-----------------------------------------------------------
@@ -1683,7 +1711,9 @@ private:
 };
 #define DECLARE_SLOTS_VectorClass \
     public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::VectorClassSlots EmptySlotsStruct_VectorClass
@@ -1702,6 +1732,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::ObjectVectorObjectSlots EmptySlotsStruct_ObjectVectorObject
 //-----------------------------------------------------------
@@ -1717,7 +1749,9 @@ private:
 };
 #define DECLARE_SLOTS_ObjectVectorClass \
     public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::ObjectVectorClassSlots EmptySlotsStruct_ObjectVectorClass
@@ -1734,7 +1768,9 @@ private:
 };
 #define DECLARE_SLOTS_IntVectorClass \
     public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::IntVectorClassSlots EmptySlotsStruct_IntVectorClass
@@ -1753,6 +1789,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::IntVectorObjectSlots EmptySlotsStruct_IntVectorObject
 //-----------------------------------------------------------
@@ -1768,7 +1806,9 @@ private:
 };
 #define DECLARE_SLOTS_UIntVectorClass \
     public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::UIntVectorClassSlots EmptySlotsStruct_UIntVectorClass
@@ -1787,6 +1827,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::UIntVectorObjectSlots EmptySlotsStruct_UIntVectorObject
 //-----------------------------------------------------------
@@ -1802,7 +1844,9 @@ private:
 };
 #define DECLARE_SLOTS_DoubleVectorClass \
     public: \
-        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+        virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DoubleVectorClassSlots EmptySlotsStruct_DoubleVectorClass
@@ -1821,6 +1865,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DoubleVectorObjectSlots EmptySlotsStruct_DoubleVectorObject
 //-----------------------------------------------------------
@@ -1838,6 +1884,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::MethodClosureClassSlots EmptySlotsStruct_MethodClosureClass
 //-----------------------------------------------------------
@@ -1854,6 +1902,8 @@ private:
 #define DECLARE_SLOTS_MethodClosure \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::MethodClosureSlots EmptySlotsStruct_MethodClosure
@@ -1890,6 +1940,8 @@ private:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE double get_E() const { return m_slots_MathClass.get_E(); } \
@@ -1919,6 +1971,10 @@ private:
 #define DECLARE_SLOTS_ErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1954,6 +2010,8 @@ public:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE int32_t get_private__errorID() const { return m_slots_ErrorObject.get_private__errorID(); } \
@@ -1980,6 +2038,10 @@ private:
 #define DECLARE_SLOTS_DefinitionErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2001,6 +2063,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DefinitionErrorObjectSlots EmptySlotsStruct_DefinitionErrorObject
 //-----------------------------------------------------------
@@ -2019,6 +2083,10 @@ private:
 #define DECLARE_SLOTS_EvalErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2040,6 +2108,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::EvalErrorObjectSlots EmptySlotsStruct_EvalErrorObject
 //-----------------------------------------------------------
@@ -2058,6 +2128,10 @@ private:
 #define DECLARE_SLOTS_RangeErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2079,6 +2153,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::RangeErrorObjectSlots EmptySlotsStruct_RangeErrorObject
 //-----------------------------------------------------------
@@ -2097,6 +2173,10 @@ private:
 #define DECLARE_SLOTS_ReferenceErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2118,6 +2198,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::ReferenceErrorObjectSlots EmptySlotsStruct_ReferenceErrorObject
 //-----------------------------------------------------------
@@ -2136,6 +2218,10 @@ private:
 #define DECLARE_SLOTS_SecurityErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2157,6 +2243,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::SecurityErrorObjectSlots EmptySlotsStruct_SecurityErrorObject
 //-----------------------------------------------------------
@@ -2175,6 +2263,10 @@ private:
 #define DECLARE_SLOTS_SyntaxErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2196,6 +2288,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::SyntaxErrorObjectSlots EmptySlotsStruct_SyntaxErrorObject
 //-----------------------------------------------------------
@@ -2214,6 +2308,10 @@ private:
 #define DECLARE_SLOTS_TypeErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2235,6 +2333,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::TypeErrorObjectSlots EmptySlotsStruct_TypeErrorObject
 //-----------------------------------------------------------
@@ -2253,6 +2353,10 @@ private:
 #define DECLARE_SLOTS_URIErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2274,6 +2378,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::URIErrorObjectSlots EmptySlotsStruct_URIErrorObject
 //-----------------------------------------------------------
@@ -2292,6 +2398,10 @@ private:
 #define DECLARE_SLOTS_VerifyErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2313,6 +2423,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::VerifyErrorObjectSlots EmptySlotsStruct_VerifyErrorObject
 //-----------------------------------------------------------
@@ -2331,6 +2443,10 @@ private:
 #define DECLARE_SLOTS_UninitializedErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2352,6 +2468,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::UninitializedErrorObjectSlots EmptySlotsStruct_UninitializedErrorObject
 //-----------------------------------------------------------
@@ -2370,6 +2488,10 @@ private:
 #define DECLARE_SLOTS_ArgumentErrorClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2391,6 +2513,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::ArgumentErrorObjectSlots EmptySlotsStruct_ArgumentErrorObject
 //-----------------------------------------------------------
@@ -2409,6 +2533,8 @@ private:
 #define DECLARE_SLOTS_DateClass \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2430,6 +2556,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::DateObjectSlots EmptySlotsStruct_DateObject
 //-----------------------------------------------------------
@@ -2448,6 +2576,8 @@ private:
 #define DECLARE_SLOTS_RegExpClass \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2468,6 +2598,8 @@ private:
 #define DECLARE_SLOTS_RegExpObject \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::RegExpObjectSlots EmptySlotsStruct_RegExpObject
@@ -2492,6 +2624,8 @@ public:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_XMLClass.get_length(); } \
@@ -2511,6 +2645,8 @@ private:
 #define DECLARE_SLOTS_XMLObject \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::XMLObjectSlots EmptySlotsStruct_XMLObject
@@ -2535,6 +2671,8 @@ public:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_XMLListClass.get_length(); } \
@@ -2554,6 +2692,8 @@ private:
 #define DECLARE_SLOTS_XMLListObject \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::XMLListObjectSlots EmptySlotsStruct_XMLListObject
@@ -2578,6 +2718,8 @@ public:
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_QNameClass.get_length(); } \
@@ -2598,6 +2740,8 @@ private:
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
     private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
+    private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::QNameObjectSlots EmptySlotsStruct_QNameObject
 //-----------------------------------------------------------
@@ -2617,6 +2761,10 @@ private:
 #define DECLARE_SLOTS_ByteArrayClass \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    public: \
+        static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2638,6 +2786,8 @@ private:
 #define DECLARE_SLOTS_ByteArrayObject \
     public: \
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
         typedef avmplus::NativeID::ByteArrayObjectSlots EmptySlotsStruct_ByteArrayObject

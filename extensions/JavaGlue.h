@@ -75,7 +75,6 @@ namespace avmplus
         static JObjectClass* cc; //@todo hack to remove
 
         JObjectClass(VTable *cvtable);
-        ScriptObject* createInstance(VTable *ivtable, ScriptObject *prototype);
 
         /**
          * Implementations of AS JObject.xxx() methods
@@ -107,8 +106,6 @@ namespace avmplus
     public:
         JObject(VTable *vtable, ScriptObject *proto);
         ~JObject();
-
-        ScriptObject* createInstance(VTable *ivtable, ScriptObject *prototype);
 
         Atom getAtomProperty(Atom name) const;
         bool hasMultinameProperty(const Multiname* name) const;

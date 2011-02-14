@@ -62,8 +62,6 @@ namespace avmplus
             return construct(argc, argv);
         }
 
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-
         /**
          * throwError is a convenience function for throwing
          * an exception with a formatted error message,
@@ -177,10 +175,6 @@ namespace avmplus
             REALLY_INLINE static cls* create(MMgc::GC* gc, VTable* cvtable)                     \
             {                                                                                   \
                 return new (gc, MMgc::kExact, cvtable->getExtraSize()) cls(cvtable);            \
-            }                                                                                   \
-            ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate)               \
-            {                                                                                   \
-                return obj::create(ivtable->gc(), ivtable, delegate);                           \
             }                                                                                   \
             virtual bool gcTrace(MMgc::GC* gc, size_t cursor); \
             DECLARE_SLOTS_##cls;                                                                \

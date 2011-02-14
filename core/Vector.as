@@ -39,18 +39,17 @@
 
 package __AS3__.vec
 {
-    [native(cls="VectorClass", gc="exact", instance="ObjectVectorObject", methods="auto")]
+    [native(cls="VectorClass", gc="exact", instance="ObjectVectorObject", methods="auto", construct="override")]
     dynamic final public class Vector
     {
     }
 
-    [native(cls="ObjectVectorClass", gc="exact", instance="ObjectVectorObject", methods="auto")]
+    [native(cls="ObjectVectorClass", gc="exact", instance="ObjectVectorObject", methods="auto", construct="override")]
     dynamic final class Vector$object
     {
+        // Dummy constructor -- actual code is in construct()
         public function Vector$object(length:uint=0, fixed:Boolean=false)
         {
-            this.length = length;
-            this.fixed = fixed;
         }
 
         // Private helper methods.  These allow most of the implementation to be abstracted into
@@ -118,14 +117,13 @@ package __AS3__.vec
 
     }
 
-    [native(cls="IntVectorClass", gc="exact", instance="IntVectorObject", methods="auto")]
+    [native(cls="IntVectorClass", gc="exact", instance="IntVectorObject", methods="auto", construct="override")]
     dynamic final class Vector$int
     {
 
+        // Dummy constructor -- actual code is in construct()
         public function Vector$int(length:uint=0, fixed:Boolean=false)
         {
-            this.length = length;
-            this.fixed = fixed;
         }
 
         // Private helper methods.  These allow most of the implementation to be abstracted into
@@ -193,13 +191,12 @@ package __AS3__.vec
     }
 
 
-    [native(cls="UIntVectorClass", gc="exact", instance="UIntVectorObject", methods="auto")]
+    [native(cls="UIntVectorClass", gc="exact", instance="UIntVectorObject", methods="auto", construct="override")]
     dynamic final class Vector$uint
     {
+        // Dummy constructor -- actual code is in construct()
         public function Vector$uint(length:uint=0, fixed:Boolean=false)
         {
-            this.length = length;
-            this.fixed = fixed;
         }
 
         // Private helper methods.  These allow most of the implementation to be abstracted into
@@ -267,13 +264,12 @@ package __AS3__.vec
 
     }
 
-    [native(cls="DoubleVectorClass", gc="exact", instance="DoubleVectorObject", methods="auto")]
+    [native(cls="DoubleVectorClass", gc="exact", instance="DoubleVectorObject", methods="auto", construct="override")]
     dynamic final class Vector$double
     {
+        // Dummy constructor -- actual code is in construct()
         public function Vector$double(length:uint=0, fixed:Boolean=false)
         {
-            this.length = length;
-            this.fixed = fixed;
         }
 
         // Private helper methods.  These allow most of the implementation to be abstracted into

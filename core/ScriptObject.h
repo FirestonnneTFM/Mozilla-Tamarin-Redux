@@ -144,7 +144,7 @@ namespace avmplus
          *
          * NOTE: subclasses should never need to declare this method in their class;
          *       an override declaration will be provided for them iff
-         *       customconstruct="true" is specified in their AS3 file.
+         *       customconstruct="some-value" is specified in the AS3 file.
          */
         virtual Atom construct(int argc, Atom* argv);
 
@@ -164,16 +164,6 @@ namespace avmplus
         virtual MethodClosure* toMethodClosure() const;
         bool isMethodClosure() const;
 
-        // Create an instance of ScriptObject or a ScriptObject subclass.
-        //
-        // If createInstance is overridden in a subclass then the overriding method must
-        // either /always/ return a new object of the subclass without reaching the base case
-        // (where ScriptObject::createInstance calls newObject) or it must /always/
-        // reach the base case.  The reason for this restriction is that createInstance
-        // custom creation functions are computed based on whether createInstance is
-        // overridden or not; see ScriptObject.cpp.
-        virtual ScriptObject* createInstance(VTable* ivtable, ScriptObject* prototype);
-
         // The maximum integer key we can use with our ScriptObject
         // HashTable must fit within 28 bits.  Any integer larger
         // than 28 bits will use a string key.
@@ -189,10 +179,6 @@ namespace avmplus
         // by rooting this method here than by fixing AIR at this time.
         virtual CodeContext* getFunctionCodeContext() const;
 
-        static ScriptObject* genericCreateInstance(ClassClosure* cls, VTable* ivtable);
-        static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable);
-        static ScriptObject* slowCreateInstance(ClassClosure* cls, VTable* ivtable);
-
         // This is a fast way to implement "istype(ARRAY)"; it returns non-null if
         // this is an ArrayObject (or subclass thereof)
         virtual ArrayObject* toArrayObject();
@@ -205,6 +191,8 @@ namespace avmplus
         // is a nondynamic object, or there is a read-only length property, or uint
         // can't be coerced to the type of "length", an exception will be thrown.
         virtual void setLengthProperty(uint32_t newLen);
+
+        virtual ClassClosure* toClassClosure();
 
 #ifdef AVMPLUS_VERBOSE
     public:
@@ -225,6 +213,8 @@ namespace avmplus
         Atom getAtomPropertyFromProtoChain(Atom name, ScriptObject* protochain, Traits *origObjTraits) const;
         void throwWriteSealedError(Atom name);
         void throwWriteSealedError(const Multiname& name);
+    
+    public:
         void throwCantInstantiateError();
 
     private:

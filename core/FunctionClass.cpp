@@ -105,6 +105,16 @@ namespace avmplus
         return m_callEnv->method->getMethodSignature()->param_count();
     }
 
+    FunctionObject::FunctionObject(VTable* cvtable, MethodEnv* call)
+        : ClassClosure(cvtable, ClassClosure::createScriptObjectProc)
+        , m_callEnv(call)
+    {
+        AvmAssert(m_callEnv != NULL);
+        // Since FunctionObject is (pseudo)final, we shouldn't need to calculate this every time,
+        // but let's reality-check here just in case.
+        AvmAssert(calcCreateInstanceProc(cvtable) == ClassClosure::createScriptObjectProc);
+    }
+
     /**
      * Function.prototype.call()
      */

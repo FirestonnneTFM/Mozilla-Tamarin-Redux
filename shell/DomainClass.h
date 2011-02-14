@@ -56,8 +56,6 @@ namespace avmplus
             return new (gc, ivtable->getExtraSize()) DomainObject(ivtable, delegate);
         }
 
-        ~DomainObject();
-
         void init(DomainObject *base);
         Atom loadBytes(ByteArrayObject* bytes, uint32_t swfVersion);
         ClassClosure* getClass(Stringp name);
@@ -92,8 +90,6 @@ namespace avmplus
         {
             return new (gc, cvtable->getExtraSize()) DomainClass(cvtable);
         }
-
-        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
         DomainObject* get_currentDomain();
         int get_MIN_DOMAIN_MEMORY_LENGTH();

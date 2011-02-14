@@ -60,12 +60,42 @@
 #   classgc         the GC method for the class object
 #   instancegc      the GC method for the instance object
 #   methods         ?
-#   customconstruct one of "true", "instance", or "none"
-#                   if "true", the Class must provide an override of the construct() method.
-#                   if "instance", the Class *and* Instance must provide an override of the construct() method.
-#                   if "none", the Class cannot be constructed; we will generated a stub that throws kCantInstantiateError.
-#                   ("instance" is useful only for ClassClosure and other internal classes; classes
-#                   outside the VM should not use this value.)
+#   construct       indicates that the class has a nonstandard construction pipeline:
+#
+#                   "none": the class cannot be instantiated, nor can subclasses; we will generate a stub
+#                       that throws kCantInstantiateError. (Typically used for classes that provide only 
+#                       static members and/or static methods.)
+#
+#                   "check": the class is expected to provide a function of the form
+#
+#                           static void FASTCALL preCreateInstanceCheck(ClassClosure* cls)
+#
+#                       which will be called prior to creation of an instance; this function is
+#                       allowed to throw an exception to prevent object creation. (Throwing
+#                       an exception in the C++ ctor is discouraged, as our current longjmp implementation
+#                       of exception handling can result in a half-constructed object, which could cause
+#                       issues at object destruction time.)
+#
+#                   "restricted": subclasses must be defined in the same ABC chunk as the baseclass (otherwise they will 
+#                       throw kCantInstantiateError). This is an odd beast, used by Flash for classes 
+#                       which can't be subclassed by user code (only by builtin code.)
+#
+#                   "restricted-check": Like restricted, but with a preCreateInstanceCheck function required as well.
+#
+#                   "abstract": the class cannot be instantiated, but its subclasses can (ie, an Abstract Base Class);
+#                       we will generate a stub that throws kCantInstantiateError when appropriate.
+#
+#                   "abstract-restricted": is the union of of abstract+restricted: the class can't be instantiated,
+#                       and subclasses can only from from the same ABC chunk.
+#
+#                   * THE FOLLOWING VALUES FOR construct ARE ONLY LEGAL FOR USE IN THE BASE VM BUILTINS * 
+#
+#                   "override": the Class must provide an override of the ScriptObject::construct() method.
+#                       (We will autogenerate a createInstanceProc stub that asserts if called.) 
+#
+#                   "instance": the Class *and* Instance must provide an override of the ScriptObject::construct() method.
+#                       (We will autogenerate a createInstanceProc stub that asserts if called.) 
+#
 #   instancebase    if the instance inherits from a C++ class that can't be inferred from the AS3 inheritance,
 #                   it must be specified here. this is not supported for new code; it's provided for temporary support
 #                   of existing code.
@@ -228,9 +258,12 @@ class Error(Exception):
     def __str__(self):
         return self.nm
 
+BASE_CLASS_NAME = "::avmplus::ClassClosure"
+BASE_INSTANCE_NAME = "::avmplus::ScriptObject"
+
 TMAP = {
     # map ctype -> sigchar, in-arg-type, ret-arg-type, base-type
-    CTYPE_OBJECT:       ("o", "avmplus::ScriptObject*", "avmplus::ScriptObject*", "avmplus::ScriptObject"),
+    CTYPE_OBJECT:       ("o", BASE_INSTANCE_NAME+"*", BASE_INSTANCE_NAME+"*", BASE_INSTANCE_NAME),
     CTYPE_ATOM:         ("a", "avmplus::Atom", "avmplus::Atom", "#error"),
     CTYPE_VOID:         ("v", "void", "void", "#error"),
     CTYPE_BOOLEAN:      ("b", "avmplus::bool32", "bool", "#error"),
@@ -289,6 +322,22 @@ def to_cname(nm):
     nm = nm.replace(":", "_");
     nm = nm.replace("/", "_");
     return nm
+
+
+def parseCPPClassName(className):
+    prependRootNS = (len(opts.rootImplNS) > 0)
+    if (className.startswith('::')):
+        prependRootNS = False
+    fullyQualifiedName = (opts.rootImplNS + '::' + className) if prependRootNS else className
+    fullyQualifiedNameComponents = fullyQualifiedName.split('::')
+    if (len(fullyQualifiedNameComponents) < 2):
+        fullyQualifiedNameComponents = (u'', fullyQualifiedNameComponents)
+    return ('::'.join(filter(lambda ns: len(ns) > 0, fullyQualifiedNameComponents[:-1])), fullyQualifiedNameComponents[-1])
+    
+def fullyQualifiedCPPClassName(className):
+    r = parseCPPClassName(className)
+    return "%s::%s" % (r[0], r[1])
+
 
 def ns_prefix(ns, iscls):
     if not ns.isPublic() and not ns.isInternal():
@@ -473,8 +522,44 @@ class NativeInfo:
     gen_method_map = False
     method_map_name = None
     constSetters = False
-    custom_construct = False
+    construct = None
+    createInstanceProcName = None
 
+    def fill_in_nativeinfo(self, attrs, is_vm_builtin):
+        for k in attrs.keys():
+            v = attrs[k]
+            if (k == "script"):
+                raise Error("native scripts are no longer supported; please use a native class instead and wrap with AS3 code as necessary.")
+
+            elif (k == "cls"):
+                self.set_class(v)
+            elif (k == "instance"):
+                self.set_instance(v)
+            elif (k == "instancebase"):
+                self.set_instancebase(v)
+            elif (k == "gc"):
+                self.set_classGC(v)
+                self.set_instanceGC(v)
+            elif (k == "classgc"):
+                self.set_classGC(v)
+            elif (k == "instancegc"):
+                self.set_instanceGC(v)
+            elif (k == "methods"):
+                self.gen_method_map = True
+                if v != "auto":
+                    self.method_map_name = v
+            elif (k == "constsetters"):
+                if (v == "true"):
+                    self.constSetters = True
+                elif (v != "false"):
+                    raise Error(u'native metadata specified illegal value, "%s" for constsetters field.  Value must be "true" or "false".' % unicode(v))
+            elif (k == "construct"):
+                self.set_construct(v, is_vm_builtin)
+            else:
+                raise Error("unknown attribute native(%s)" % k)
+        if (self.class_name == None) and (self.instance_name == None):
+            raise Error("native metadata must specify (cls,instance)")
+  
     def set_class(self, name):
         if self.class_name != None:
             raise Error("native(cls) may not be specified multiple times for the same class: %s %s" % (self.class_name, name))
@@ -483,6 +568,8 @@ class NativeInfo:
     def set_instance(self, name):
         if self.instance_name != None:
             raise Error("native(instance) may not be specified multiple times for the same class: %s %s" % (self.instance_name, name))
+        if name == "ScriptObject" or name == BASE_INSTANCE_NAME:
+            raise Error("native(instance='ScriptObject') is no longer supported:")
         self.instance_name = name
 
     def set_instancebase(self, name):
@@ -490,14 +577,18 @@ class NativeInfo:
             raise Error("native(instancebase) may not be specified multiple times for the same class: %s %s" % (self.instancebase_name, name))
         self.instancebase_name = name
 
-    def set_customConstruct(self, value):
-        if self.custom_construct != False:
-            raise Error("native(customconstruct) may not be specified multiple times for the same class")
-        value = str(value).lower()
-        if not value in ["true", "instance", "none"]:
-            raise Error('native metadata specified illegal value, "%s" for customconstruct field.' % value)
-        self.custom_construct = value
-
+    def set_construct(self, value, is_vm_builtin):
+        if self.construct != None:
+            raise Error("native(construct) may not be specified multiple times for the same class")
+        if value in ["override", "instance"]:
+            if not is_vm_builtin:
+                raise Error('construct=%s may only be specified for the VM builtins' % value)
+            self.construct = value
+        elif value in ["none", "abstract", "abstract-restricted", "restricted", "check", "restricted-check"]:
+            self.construct = value
+        else:
+            raise Error('native metadata specified illegal value, "%s" for construct field.' % value)
+   
     def set_classGC(self, gc):
         if self.class_gc_exact != None:
             raise Error("native(classgc) may not be specified multiple times for the same class: %s %s" % (self.class_name, gc))
@@ -521,20 +612,44 @@ class NativeInfo:
     def validate(self, t):
         if self.gen_method_map and self.class_name == None and self.instance_name == None:
             raise Error("cannot specify native(methods) without native(cls)")
+
+        no_native_instance_specified = (self.construct == None and self.instance_name == None)
+        
+        # if either is specified, make sure both are
         if self.class_name != None or self.instance_name != None:
-            # if nothing specified, use ClassClosure/ScriptObject.
             if self.class_name == None:
-                self.class_name = "ClassClosure"
+                self.class_name = BASE_CLASS_NAME
             if self.instance_name == None:
-                self.instance_name = "ScriptObject"
-        if self.custom_construct == "true":
-            t.has_custom_construct = True
-        elif self.custom_construct == "none":
-            t.has_custom_construct = True
-            t.cant_instantiate = True
-        elif self.custom_construct == "instance":
-            t.has_custom_construct = True
-            t.itraits.has_custom_construct = True
+                self.instance_name = BASE_INSTANCE_NAME
+
+        if self.construct != None:
+            t.construct = self.construct
+            if t.construct in ["override", "instance"]:
+                t.has_construct_method_override = True
+            if t.construct in ["abstract-restricted", "restricted", "restricted-check"]:
+                t.is_restricted_inheritance = True
+            if t.construct in ["check", "restricted-check"]:
+                t.has_pre_create_check = True
+            if self.construct == "instance":
+                t.itraits.construct = "override"
+                t.itraits.has_construct_method_override = True
+
+        if str(t.name) == "Object$" or no_native_instance_specified:
+            # "Object" is special-cased.
+            self.createInstanceProcName = "ClassClosure::createScriptObjectProc"
+
+        elif t.construct == "none":
+            self.createInstanceProcName = "ClassClosure::cantInstantiateCreateInstanceProc"
+
+        elif t.construct in ["abstract", "abstract-restricted"]:
+            self.createInstanceProcName = "ClassClosure::abstractBaseClassCreateInstanceProc"
+
+        elif t.construct in ["override", "instance"] or t.itraits.ctype != CTYPE_OBJECT:
+            self.createInstanceProcName = "ClassClosure::impossibleCreateInstanceProc"
+
+        elif self.class_name != None:
+            self.createInstanceProcName = "%s::createInstanceProc" % fullyQualifiedCPPClassName(self.class_name)
+            t.has_custom_createInstanceProc = True
 
 
 BMAP = {
@@ -558,6 +673,8 @@ class Traits:
     base = None
     flags = 0
     protectedNs = 0
+    is_sealed = False
+    is_final = False
     is_interface = False
     interfaces = None
     names = None
@@ -570,8 +687,13 @@ class Traits:
     ni = None
     niname = None
     nextSlotId = 0
-    has_custom_construct = False
-    cant_instantiate = False
+    construct = None
+    # some values for "construct" imply an override to the ScriptObject::construct method,
+    # some don't. this simplifies things.
+    has_construct_method_override = False
+    has_custom_createInstanceProc = False
+    is_restricted_inheritance = False
+    has_pre_create_check = False
     def __init__(self, name):
         self.names = {}
         self.slots = []
@@ -655,6 +777,7 @@ class Abc:
     publicNs = Namespace("", CONSTANT_Namespace)
     anyNs = Namespace("*", CONSTANT_Namespace)
     versioned_uris = {}
+    is_vm_builtin = False
 
     magic = 0
 
@@ -920,6 +1043,10 @@ class Abc:
             instancesDict[id(tname)] = t
             t.base = self.names[self.data.readU30()]
             t.flags = self.data.readU8()
+            if (t.flags & 1) != 0:
+                t.is_sealed = True
+            if (t.flags & 2) != 0:
+                t.is_final = True
             if (t.flags & 4) != 0:
                 t.is_interface = True
             if (t.flags & 8) != 0:
@@ -1016,37 +1143,7 @@ class Abc:
         if m != None:
             for md in m:
                 if md.name == "native":
-                    if md.attrs.has_key("script"):
-                        raise Error("native scripts are no longer supported; please use a native class instead and wrap with AS3 code as necessary.")
-                    if md.attrs.has_key("cls"):
-                        ni.set_class(md.attrs["cls"])
-                    if md.attrs.has_key("instance"):
-                        ni.set_instance(md.attrs["instance"])
-                    if md.attrs.has_key("instancebase"):
-                        ni.set_instancebase(md.attrs["instancebase"])
-                    if md.attrs.has_key("gc"):
-                        ni.set_classGC(md.attrs["gc"])
-                        ni.set_instanceGC(md.attrs["gc"])
-                    if md.attrs.has_key("classgc"):
-                        ni.set_classGC(md.attrs["classgc"])
-                    if md.attrs.has_key("instancegc"):
-                        ni.set_instanceGC(md.attrs["instancegc"])
-                    if md.attrs.has_key("methods"):
-                        v = md.attrs["methods"]
-                        ni.gen_method_map = True
-                        if v != "auto":
-                            ni.method_map_name = v
-                    if md.attrs.has_key("constsetters"):
-                        v = md.attrs.get("constsetters")
-                        if (v == "true"):
-                            ni.constSetters = True
-                        elif (v != "false"):
-                            raise Error(u'native metadata specified illegal value, "%s" for constsetters field.  Value must be "true" or "false".' % unicode(v))
-                    if md.attrs.has_key("customconstruct"):
-                        v = md.attrs.get("customconstruct")
-                        ni.set_customConstruct(v)
-                    if (ni.class_name == None) and (ni.instance_name == None):
-                        raise Error("native metadata must specify (cls,instance)")
+                    ni.fill_in_nativeinfo(md.attrs, self.is_vm_builtin)
 
     def find_class_nativeinfo(self, t):
         ni = NativeInfo()
@@ -1062,6 +1159,8 @@ class Abc:
         for i in range(0, count):
             itraits = self.instances[i]
             tname = QName(itraits.name.ns, (str(itraits.name.name) + "$"))
+            if str(tname) == "Object$":
+                self.is_vm_builtin = True
             t = Traits(tname)
             self.classes[i] = t
             t.init = self.methods[self.data.readU30()]
@@ -1262,21 +1361,10 @@ class AbcThunkGen:
     def __parseCPPNamespaceStr(nsStr):
         return nsStr.split(u'::')
 
-    @staticmethod
-    def __parseCPPClassName(className):
-        prependRootNS = (len(opts.rootImplNS) > 0)
-        if (className.startswith('::')):
-            prependRootNS = False
-        fullyQualifiedName = (opts.rootImplNS + '::' + className) if prependRootNS else className
-        fullyQualifiedNameComponents = fullyQualifiedName.split('::')
-        if (len(fullyQualifiedNameComponents) < 2):
-            fullyQualifiedNameComponents = (u'', fullyQualifiedNameComponents)
-        return ('::'.join(filter(lambda ns: len(ns) > 0, fullyQualifiedNameComponents[:-1])), fullyQualifiedNameComponents[-1])
-        
     def emitAOT(self, name, ctypeObject):
         self.out_c.println(u'#ifdef VMCFG_AOT')
         
-        traits = filter(lambda t: (t.niname is not None) and (t.niname != "double") and ((t.ctype == ctypeObject) or (t.niname == "ScriptObject") or (t.niname == "ClassClosure")), self.abc.classes + self.abc.instances)
+        traits = filter(lambda t: (t.niname is not None) and (t.niname != "double") and ((t.ctype == ctypeObject) or (t.niname == BASE_INSTANCE_NAME) or (t.niname == BASE_CLASS_NAME)), self.abc.classes + self.abc.instances)
         glueClasses = sorted(set(map(lambda t: t.niname, traits)))
         
         self.out_c.println(u'extern "C" const struct {')
@@ -1428,11 +1516,11 @@ class AbcThunkGen:
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]
             if c.ni.gen_method_map:
-                formatDict = { u'nativeClass' : c.ni.class_name, u'nativeClassBaseName' : self.__baseNINameForNIName(c.ni.class_name) }
+                basename = self.__baseNINameForNIName(c.ni.class_name)
                 if c.ni.class_gc_exact:
-                    out_c.println("AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(%(nativeClassBaseName)s, %(nativeClass)s, SlotOffsetsAndAsserts::do%(nativeClassBaseName)sAsserts)" % formatDict)
+                    out_c.println("AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(%s, %s, %s, SlotOffsetsAndAsserts::do%sAsserts)" % (basename, c.ni.class_name, c.ni.createInstanceProcName, basename))
                 else:
-                    out_c.println("AVMTHUNK_NATIVE_CLASS_GLUE(%(nativeClassBaseName)s, %(nativeClass)s, SlotOffsetsAndAsserts::do%(nativeClassBaseName)sAsserts)" % formatDict)
+                    out_c.println("AVMTHUNK_NATIVE_CLASS_GLUE(%s, %s, %s, SlotOffsetsAndAsserts::do%sAsserts)" % (basename, c.ni.class_name, c.ni.createInstanceProcName, basename))
 
         out_c.println("");
         out_c.println("AVMTHUNK_BEGIN_NATIVE_TABLES(%s)" % self.abc.scriptName)
@@ -1473,14 +1561,15 @@ class AbcThunkGen:
                 if c.ni.gen_method_map:
                     offsetOfSlotsClass = "SlotOffsetsAndAsserts::s_slotsOffset%s" % self.__baseNINameForNIName(c.ni.class_name)
                     offsetOfSlotsInstance = "SlotOffsetsAndAsserts::s_slotsOffset%s" % self.__baseNINameForNIName(c.ni.instance_name)
-                    out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s)" %\
+                    out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s, %s)" %\
                         (self.class_id_name(c),\
                         self.__baseNINameForNIName(c.ni.class_name),\
                         c.ni.class_name,\
                         offsetOfSlotsClass,\
                         c.ni.instance_name,\
                         offsetOfSlotsInstance,\
-                        str(c.has_custom_construct).lower()))
+                        str(c.has_construct_method_override).lower(),
+                        str(c.is_restricted_inheritance).lower()))
                 else:
                     out_c.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), c.ni.class_name, c.ni.instance_name))
         out_c.indent -= 1
@@ -1562,7 +1651,7 @@ class AbcThunkGen:
         glueClassToTraits = {}
         for t in sorted(traitsSet):
             if ((t.niname is not None) and (CTYPE_TO_NEED_FORWARD_DECL[ctype_from_traits(t, True)])):
-                (classNS, glueClassName) = self.__parseCPPClassName(t.niname)
+                (classNS, glueClassName) = parseCPPClassName(t.niname)
                 # special hack because the meta data for the class Math says its instance data is of type double
                 if (CTYPE_TO_NEED_FORWARD_DECL.get(glueClassName, True)):
                     cppNamespaceToGlueClasses.setdefault(classNS, set()).add(glueClassName)
@@ -1620,7 +1709,7 @@ class AbcThunkGen:
 
     @staticmethod
     def __baseNINameForNIName(niname):
-        return AbcThunkGen.__parseCPPClassName(niname)[1]
+        return parseCPPClassName(niname)[1]
 
     @staticmethod
     def slotsInstanceNameForTraits(t, isClassTraits):
@@ -1628,7 +1717,7 @@ class AbcThunkGen:
 
     @staticmethod
     def needsInstanceSlotsStruct(c):
-        return (c.ni.instance_name is not None) and (c.ni.instance_name != "ScriptObject")
+        return (c.ni.instance_name is not None) and (c.ni.instance_name != BASE_INSTANCE_NAME)
 
     @staticmethod
     def hashSlots(c):
@@ -1753,19 +1842,16 @@ class AbcThunkGen:
         out_h.println(u'};')
         out_h.println(u'#define DECLARE_SLOTS_' + self.__baseNINameForNIName(t.niname) + u' \\')
         out_h.indent += 1
-        selfname = self.__parseCPPClassName(t.niname)
-        basename = self.__parseCPPClassName(baseTraits.niname)
+        selfname = fullyQualifiedCPPClassName(t.niname)
+        basename = fullyQualifiedCPPClassName(baseTraits.niname)
         if not isClassTraits and t.ni.instancebase_name != None:
-            basename = self.__parseCPPClassName(t.ni.instancebase_name)
-        if t.has_custom_construct:
+            basename = fullyQualifiedCPPClassName(t.ni.instancebase_name)
+        if t.has_construct_method_override:
             # emit the construct declaration to ensure that construct is defined for this class
             out_h.println("public: \\")
             out_h.indent += 1
             out_h.println("virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \\")
             out_h.indent -= 1
-            if t.cant_instantiate:
-                # emit a stub that throws if we attempt to construct
-                out_c_stubs.println("avmplus::Atom %s::%s::construct(int /*argc*/, avmplus::Atom* /*argv*/) { throwCantInstantiateError(); return 0; }" % (selfname[0],selfname[1]))
         else:
             # emit a (debug-only) stub to ensure that construct is NOT defined for this class
             out_h.println("public: \\")
@@ -1773,7 +1859,34 @@ class AbcThunkGen:
             out_h.println("AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )\\")
             out_h.indent -= 1
             # put in out_c_stubs so we aren't wrapped in avmplus::NativeID:: namespaces
-            out_c_stubs.println("AvmThunk_DEBUG_ONLY( avmplus::Atom %s::%s::construct(int argc, avmplus::Atom* argv) { return %s::%s::construct(argc, argv); } )" % (selfname[0],selfname[1],basename[0],basename[1]))
+            out_c_stubs.println("AvmThunk_DEBUG_ONLY( avmplus::Atom %s::construct(int argc, avmplus::Atom* argv) { return %s::construct(argc, argv); } )" % (selfname,basename))
+
+        if isClassTraits and t.has_custom_createInstanceProc: 
+            out_h.println("public: \\") 
+            out_h.indent += 1
+            if t.has_pre_create_check: 
+                out_h.println("static void FASTCALL preCreateInstanceCheck(avmplus::ClassClosure*); \\");
+            out_h.println("static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \\")
+            out_h.indent -= 1
+            out_c_stubs.println("/*static*/ avmplus::ScriptObject* FASTCALL %s::createInstanceProc(avmplus::ClassClosure* cls)" % (selfname));
+            out_c_stubs.println("{");
+            out_c_stubs.indent += 1
+            instancename = fullyQualifiedCPPClassName(t.ni.instance_name)
+            if t.has_pre_create_check: 
+                out_c_stubs.println("%s::preCreateInstanceCheck(cls);" % (selfname));
+            if t.ni.instance_gc_exact: 
+                out_c_stubs.println("return %s::create(cls->gc(), cls->ivtable(), cls->prototypePtr());" % (instancename));
+            else:
+                out_c_stubs.println("return new(cls->gc(), cls->getExtraSize()) %s(cls->ivtable(), cls->prototypePtr());" % (instancename));
+            out_c_stubs.indent -= 1
+            out_c_stubs.println("}");
+            
+        # createInstance() is no longer supported; emit a (debug-only) stub to generate compile errors for any dangling usages
+        out_h.println("private: \\")
+        out_h.indent += 1
+        out_h.println("AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )\\")
+        out_h.indent -= 1
+
         out_h.println(u'private: \\')
         out_h.indent += 1
         out_h.println(u'friend class %s::SlotOffsetsAndAsserts; \\' % opts.nativeIDNS)
@@ -2002,7 +2115,7 @@ class AbcThunkGen:
         if directcall:
             self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
             if m.receiver == None:
-                recname = "ScriptObject"
+                recname = BASE_INSTANCE_NAME
             else:
                 recname = m.receiver.niname
             self.out_c.println("%s* const obj = %s;" % (recname, args[0][0]))

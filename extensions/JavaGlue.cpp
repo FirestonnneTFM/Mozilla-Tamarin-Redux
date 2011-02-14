@@ -67,11 +67,6 @@ namespace avmplus
         cc = this;
     }
 
-    ScriptObject* JObjectClass::createInstance(VTable *ivtable, ScriptObject *prototype)
-    {
-        return new (core()->GetGC(), ivtable->getExtraSize()) JObject(ivtable, prototype);
-    }
-
     String* JObjectClass::constructorSignature(String* name, Atom* argv, int argc)
     {
         AvmCore* core = this->core();
@@ -293,11 +288,6 @@ namespace avmplus
     }
 
     JObject::~JObject() {}
-
-    ScriptObject* JObject::createInstance(VTable *ivtable, ScriptObject *prototype)
-    {
-        return new (core()->GetGC(), ivtable->getExtraSize()) JObject(ivtable, prototype);
-    }
 
 // for property assignment
 //  void ScriptObject::setMultinameProperty(Multiname* name, Atom value)

@@ -69,7 +69,7 @@ namespace avmplus
 #endif
 
     public:
-        REALLY_INLINE static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, uint32_t capacity)
+        REALLY_INLINE static ArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, uint32_t capacity = 0)
         {
             return new (gc, MMgc::kExact, ivtable->getExtraSize()) ArrayObject(ivtable, delegate, capacity);
         }

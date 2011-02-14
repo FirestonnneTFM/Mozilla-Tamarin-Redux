@@ -70,11 +70,9 @@ namespace avmplus
         regex = NULL;
     }
 
-    // This variant is only used for creating the prototype - we create an empty regex.
-
-    RegExpObject::RegExpObject(RegExpClass *regExpClass, ScriptObject *objectPrototype)
-        : ScriptObject(regExpClass->ivtable(), objectPrototype)
-        , m_source(core()->newConstantStringLatin1("(?:)"))
+    RegExpObject::RegExpObject(VTable* ivtable, ScriptObject *objectPrototype)
+        : ScriptObject(ivtable, objectPrototype)
+        , m_source(core()->kEmptyString)
         , m_lastIndex(0)
         , m_optionFlags(PCRE_UTF8)
         , m_global(false)
@@ -100,8 +98,8 @@ namespace avmplus
     // This variant is used for "new RegExp(s)" and "new RegExp(s,f)" where s is not
     // a RegExp object.  In the one-argument case "s" may have a trailing flags string.
 
-    RegExpObject::RegExpObject(RegExpClass *type, Stringp pattern, Stringp options)
-        : ScriptObject(type->ivtable(), type->prototypePtr())
+    RegExpObject::RegExpObject(VTable* ivtable, ScriptObject* delegate, Stringp pattern, Stringp options)
+        : ScriptObject(ivtable, delegate)
         , m_source(pattern)
         , m_lastIndex(0)
         , m_optionFlags(PCRE_UTF8)

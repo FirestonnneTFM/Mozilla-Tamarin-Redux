@@ -53,11 +53,18 @@ REALLY_INLINE VTable* ClassClosure::ivtable() const
     return vtable->ivtable;
 }
 
-// Called from C++ to alloc a new instance.  Generated code calls createInstance directly.
+// Called from C++ to alloc a new instance.  Generated code calls createInstanceProc directly.
 REALLY_INLINE ScriptObject* ClassClosure::newInstance()
 {
-    VTable* ivtable = this->ivtable();
-    return ivtable->createInstance(this, ivtable);
+    VTable* const ivtable = this->vtable->ivtable;
+    return ivtable->createInstanceProc(this);
+}
+
+REALLY_INLINE size_t ClassClosure::getExtraSize() const
+{
+    VTable* const ivtable = this->vtable->ivtable;
+    AvmAssert(ivtable != NULL);
+    return ivtable->getExtraSize();
 }
 
 }

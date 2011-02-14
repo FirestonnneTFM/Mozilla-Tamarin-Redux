@@ -89,7 +89,7 @@ namespace avmplus
     #define AvmThunkUnbox_AvmAtomReceiver(t,r)  ((t)(uintptr_t(r) & kUnboxMask))
 #endif
 
-    #define AvmThunkUnbox_avmplus_ScriptObject_(r)      ((ScriptObject*)(r))
+    #define AvmThunkUnbox__avmplus_ScriptObject_(r)     ((ScriptObject*)(r))
     #define AvmThunkUnbox_avmplus_bool32(r)             ((r) != 0)
     #define AvmThunkUnbox_int32_t(r)                    int32_t(r)
     #define AvmThunkUnbox_uint32_t(r)                   uint32_t(r)
@@ -99,7 +99,7 @@ namespace avmplus
     #define AvmThunkUnbox_void(r)                       (error ??? illegal)
     #define AvmThunkUnbox_double(r)                     AvmThunkUnbox_double_impl(&(r))
 
-    #define AvmThunkArgSize_avmplus_ScriptObject_       1
+    #define AvmThunkArgSize__avmplus_ScriptObject_      1
     #define AvmThunkArgSize_avmplus_bool32              1
     #define AvmThunkArgSize_int32_t                     1
     #define AvmThunkArgSize_uint32_t                    1
@@ -151,11 +151,11 @@ namespace avmplus
 #ifdef _DEBUG
     REALLY_INLINE double AvmThunkCoerce_avmplus_Atom_double(Atom v) { AvmAssert((v) == undefinedAtom); (void)v; return MathUtils::kNaN; }
     REALLY_INLINE String* AvmThunkCoerce_avmplus_Atom_avmplus_String_(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
-    REALLY_INLINE ScriptObject* AvmThunkCoerce_avmplus_Atom_avmplus_ScriptObject_(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
+    REALLY_INLINE ScriptObject* AvmThunkCoerce_avmplus_Atom__avmplus_ScriptObject_(Atom v) { AvmAssert((v) == undefinedAtom || (v) == nullObjectAtom); (void)v; return NULL; }
 #else
     #define AvmThunkCoerce_avmplus_Atom_double(v)                   (MathUtils::kNaN)
     #define AvmThunkCoerce_avmplus_Atom_avmplus_String_(v)          (NULL)
-    #define AvmThunkCoerce_avmplus_Atom_avmplus_ScriptObject_(v)    (NULL)
+    #define AvmThunkCoerce_avmplus_Atom__avmplus_ScriptObject_(v)    (NULL)
 #endif
 
     #define AvmThunkCoerce_avmplus_String__avmplus_Atom(v)          ((v) ? (v)->atom() : nullStringAtom)
@@ -199,6 +199,7 @@ namespace avmplus
         uint16_t sizeofInstance;
         uint16_t offsetofSlotsInstance;
         bool hasCustomConstruct;
+        bool isRestrictedInheritance;
     };
 
 
@@ -280,27 +281,37 @@ namespace avmplus
 #endif
 
 #ifdef _DEBUG
-    #define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, ASSERT_FUNC) \
-        static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
+    #define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, CREATE_FUNC, ASSERT_FUNC) \
+        static ClassClosure* FASTCALL CLS##_createClassClosure(VTable* cvtable) \
         { \
+            cvtable->ivtable->createInstanceProc = CREATE_FUNC; \
             FQCLS* cc = new (cvtable->gc(), cvtable->getExtraSize()) FQCLS(cvtable); \
             ASSERT_FUNC(cc->traits(), cc->traits()->itraits); \
             return cc; \
         }
-    #define AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(CLS, FQCLS, ASSERT_FUNC) \
-        static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
+    #define AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(CLS, FQCLS, CREATE_FUNC, ASSERT_FUNC) \
+        static ClassClosure* FASTCALL CLS##_createClassClosure(VTable* cvtable) \
         { \
+            cvtable->ivtable->createInstanceProc = CREATE_FUNC; \
             FQCLS* cc = FQCLS::create(cvtable->gc(), cvtable); \
             ASSERT_FUNC(cc->traits(), cc->traits()->itraits); \
             return cc; \
         }
 #else
-    #define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, ASSERT_FUNC) \
-        static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
-        { return new (cvtable->gc(), cvtable->getExtraSize()) FQCLS(cvtable); }
-    #define AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(CLS, FQCLS, ASSERT_FUNC) \
-        static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
-        { return FQCLS::create(cvtable->gc(), cvtable); }
+    #define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, CREATE_FUNC, ASSERT_FUNC) \
+        static ClassClosure* FASTCALL CLS##_createClassClosure(VTable* cvtable) \
+        { \
+            cvtable->ivtable->createInstanceProc = CREATE_FUNC; \
+            FQCLS* cc = new (cvtable->gc(), cvtable->getExtraSize()) FQCLS(cvtable); \
+            return cc; \
+        }
+    #define AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(CLS, FQCLS, CREATE_FUNC, ASSERT_FUNC) \
+        static ClassClosure* FASTCALL CLS##_createClassClosure(VTable* cvtable) \
+        { \
+            cvtable->ivtable->createInstanceProc = CREATE_FUNC; \
+            FQCLS* cc = FQCLS::create(cvtable->gc(), cvtable); \
+            return cc; \
+        }
 #endif
 
 #ifdef VMCFG_AOT
@@ -386,18 +397,19 @@ namespace avmplus
     #define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
         const NativeClassInfo NAME##_classEntries[] = {
 
-    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT) \
-        { (CreateClassClosureProc)CLS##_createClassClosure,\
+    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT, RESTRICTEDINHERITANCE) \
+        { CLS##_createClassClosure,\
           avmplus::NativeID::CLSID,\
           sizeof(FQCLS),\
           OFFSETOFSLOTSCLS,\
           sizeof(INST),\
           OFFSETOFSLOTSINST,\
-          CUSTOMCONSTRUCT\
+          CUSTOMCONSTRUCT,\
+          RESTRICTEDINHERITANCE\
         },
 
     #define AVMTHUNK_END_NATIVE_CLASSES() \
-        { NULL, -1, 0, 0, 0, 0, false } };
+        { NULL, -1, 0, 0, 0, 0, false, false } };
 
 #ifdef VMCFG_AOT
     #define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME)
@@ -460,12 +472,14 @@ namespace avmplus
 
     #define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME)
 
-    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST) \
-        c[CLSID].createClassClosure = (CreateClassClosureProc)CLS##_createClassClosure; \
+    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT, RESTRICTEDINHERITANCE) \
+        c[CLSID].createClassClosure = CLS##_createClassClosure; \
         c[CLSID].sizeofClass = sizeof(FQCLS); \
         c[CLSID].offsetofSlotsClass = OFFSETOFSLOTSCLS; \
         c[CLSID].sizeofInstance = sizeof(INST); \
-        c[CLSID].offsetofSlotsInstance = OFFSETOFSLOTSINST;
+        c[CLSID].offsetofSlotsInstance = OFFSETOFSLOTSINST;\
+        c[CLSID].hasCustomConstruct = CUSTOMCONSTRUCT;\
+        c[CLSID].isRestrictedInheritance = RESTRICTEDINHERITANCE;
 
     #define AVMTHUNK_END_NATIVE_CLASSES()
 

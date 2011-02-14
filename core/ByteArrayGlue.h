@@ -213,15 +213,44 @@ namespace avmplus
         uint32_t                m_position;
     };
 
+    //
+    // ByteArrayClass
+    //
+
+    class GC_AS3_EXACT(ByteArrayClass, ClassClosure)
+    {
+    protected:
+        ByteArrayClass(VTable *vtable);
+
+    public:
+        REALLY_INLINE static ByteArrayClass* create(MMgc::GC* gc, VTable* vtable)
+        {
+            return new (gc, MMgc::kExact, vtable->getExtraSize()) ByteArrayClass(vtable);
+        }
+
+        ~ByteArrayClass() { }
+
+        ByteArrayObject* constructByteArray();
+
+        uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }
+        void set_defaultObjectEncoding(uint32_t version) { set_private__defaultObjectEncoding(version); }
+        
+    // ------------------------ DATA SECTION BEGIN
+        GC_NO_DATA(ByteArrayClass)
+
+        DECLARE_SLOTS_ByteArrayClass;
+    // ------------------------ DATA SECTION END
+    };
+
     class GC_AS3_EXACT(ByteArrayObject, ScriptObject)
     {
     protected:
-        ByteArrayObject(VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding);
+        ByteArrayObject(VTable* ivtable, ScriptObject* delegate);
 
     public:
-        REALLY_INLINE static ByteArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate, ObjectEncoding defaultEncoding)
+        REALLY_INLINE static ByteArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
         {
-            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ByteArrayObject(ivtable, delegate, defaultEncoding);
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ByteArrayObject(ivtable, delegate);
         }
 
         virtual bool hasAtomProperty(Atom name) const;
@@ -308,36 +337,6 @@ namespace avmplus
     // ------------------------ DATA SECTION END
     };
 
-    //
-    // ByteArrayClass
-    //
-
-    class GC_AS3_EXACT(ByteArrayClass, ClassClosure)
-    {
-    protected:
-        ByteArrayClass(VTable *vtable);
-
-    public:
-        REALLY_INLINE static ByteArrayClass* create(MMgc::GC* gc, VTable* vtable)
-        {
-            return new (gc, MMgc::kExact, vtable->getExtraSize()) ByteArrayClass(vtable);
-        }
-
-        ~ByteArrayClass() { }
-
-        ByteArrayObject* constructByteArray();
-
-        ScriptObject* createInstance(VTable* ivtable, ScriptObject* delegate);
-
-        uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }
-        void set_defaultObjectEncoding(uint32_t version) { set_private__defaultObjectEncoding(version); }
-        
-    // ------------------------ DATA SECTION BEGIN
-        GC_NO_DATA(ByteArrayClass)
-
-        DECLARE_SLOTS_ByteArrayClass;
-    // ------------------------ DATA SECTION END
-    };
 }
 
 #endif /* BYTEARRAYGLUE_INCLUDED */

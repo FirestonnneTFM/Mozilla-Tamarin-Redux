@@ -3863,8 +3863,8 @@ namespace avmplus
             livep(alloc);
     }
 
-    // This is for VTable->createInstance which is called by OP_construct
-    FUNCTION(CALL_INDIRECT, SIG3(P,P,P,P), createInstance)
+    // This is for VTable->createInstanceProc which is called by OP_construct
+    FASTFUNCTION(CALL_INDIRECT, SIG2(P,P,P), createInstanceProc)
 
     bool CodegenLIR::specializeOneArgFunction(Traits *result, const CallInfo *ciInt, const CallInfo *ciUint, const CallInfo *ciNumber)
     {
@@ -4041,8 +4041,8 @@ namespace avmplus
             LIns* vtable = loadVTable(obj, objType);
             LIns* ivtable = loadIns(LIR_ldp, offsetof(VTable, ivtable), vtable, ACCSET_OTHER, LOAD_CONST);
             method = loadIns(LIR_ldp, offsetof(VTable, init), ivtable, ACCSET_OTHER, LOAD_CONST);
-            LIns* createInstance = loadIns(LIR_ldp, offsetof(VTable, createInstance), ivtable, ACCSET_OTHER);
-            obj = callIns(FUNCTIONID(createInstance), 3, createInstance, obj, ivtable);
+            LIns* createInstanceProc = loadIns(LIR_ldp, offsetof(VTable, createInstanceProc), ivtable, ACCSET_OTHER);
+            obj = callIns(FUNCTIONID(createInstanceProc), 2, createInstanceProc, obj);
             objType = result;
             // the call below to the init function is void; the expression result we want
             // is the new object, not the result from the init function.  save it now.
