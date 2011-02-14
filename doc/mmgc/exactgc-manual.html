@@ -744,8 +744,11 @@ about it.
 
 <P> However, if something is up with this script, start looking in
 core/builtin-tracers.py and shell_toplevel/shell_toplevel-tracers.py
-in the AVM+ source, and in flash/utils/exactgc/exact-tracers.py in the
-Flash Player source code.
+in the AVM+ source.
+
+<P> For the Flash Player source code the tracers are built by the 
+flash/avmglue/generate.py script and this is done automatically when
+the native glue is built.
 
 <P> Also note that if you modify the AS3 files you must rerun the
 nativegen builders, because they emit C++ code that interact with the
