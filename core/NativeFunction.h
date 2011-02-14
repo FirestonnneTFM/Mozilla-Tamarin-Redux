@@ -411,7 +411,7 @@ namespace avmplus
         },
 
     #define AVMTHUNK_END_NATIVE_CLASSES() \
-        { NULL, -1, 0, 0, 0, 0, false, false } };
+        { NULL, -1, 0, 0, 0, 0, false, false, false } };
 
 #ifdef VMCFG_AOT
     #define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME)
