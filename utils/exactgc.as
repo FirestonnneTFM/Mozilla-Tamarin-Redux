@@ -1270,9 +1270,10 @@ function constructAndPrintTracers()
                      doNotEdit +
                      "namespace " + cppNamespace +"\n{\n" +
                      builtins.get() + 
+                     (nativeOutputFile == builtinOutputFile ? natives.get() : "") +
                      "}\n"));
 
-    if (nativeOutputFile)
+    if (nativeOutputFile && nativeOutputFile != builtinOutputFile)
         printToFile(nativeOutputFile,
                     (LICENSE + 
                      doNotEdit +

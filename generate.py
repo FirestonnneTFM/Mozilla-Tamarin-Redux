@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# -*- Mode: Python; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+# -*- Mode: Python; indent-tabs-mode: nil -*-
 # vi: set ts=4 sw=4 expandtab:
-
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -15,15 +14,14 @@
 # for the specific language governing rights and limitations under the
 # License.
 #
-# The Original Code is [Open Source Virtual Machine.].
+# The Original Code is [Open Source Virtual Machine].
 #
 # The Initial Developer of the Original Code is
 # Adobe System Incorporated.
-# Portions created by the Initial Developer are Copyright (C) 2004-2006
+# Portions created by the Initial Developer are Copyright (C) 2005-2006
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
-#   Adobe AS3 Team
 #
 # Alternatively, the contents of this file may be used under the terms of
 # either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,10 +37,12 @@
 #
 # ***** END LICENSE BLOCK *****
 
+# generate.py - generate all exactgc tracers
 import sys,os
-thisdir = os.path.dirname(__file__)
-rootdir = thisdir + "/.."
+rootdir = os.path.dirname(__file__)
 sys.path.append(rootdir)
 import utils.exactgc
 
 utils.exactgc.gen_builtins(rootdir + '/generated')
+utils.exactgc.gen_shell(rootdir + '/generated')
+

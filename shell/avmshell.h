@@ -42,6 +42,9 @@
 
 #include "avmplus.h"
 
+#include "../generated/extensions-tracers.h"
+#include "../generated/avmshell-tracers.h"
+
 #if defined AVMPLUS_MAC || defined AVMPLUS_UNIX
   // Support for the -workers switch and distributing files across
   // multiple AvmCores on multiple threads.  Only the code in the

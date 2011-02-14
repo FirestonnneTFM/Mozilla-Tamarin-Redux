@@ -39,41 +39,12 @@
 #
 # ***** END LICENSE BLOCK *****
 
-import os
-import shutil
-import sys
-import filecmp
+import sys,os
+thisdir = os.path.dirname(__file__)
+rootdir = thisdir + "/.."
+sys.path.append(rootdir)
+import utils.exactgc
 
-avm = os.environ.get('AVM')
-if avm == None:
-    print "ERROR: AVM environment variable must point to avm executable"
-    exit(1)
+utils.exactgc.gen_shell(rootdir + '/generated')
 
-classpath = os.environ.get('ASC')
-if classpath == None:
-    classpath = "../utils/asc.jar"
 
-asfile = "../utils/exactgc.as"
-abcfile = "../utils/exactgc.abc"
-
-# TODO: Would be useful to conditionally compile here, if the abc does
-# not exist or if the source is newer than the abc.  os.path.exists()
-# and os.path.getmtime() can handle that.
-
-print("Compiling exactgc script...")
-if os.path.exists(abcfile):
-    os.remove(abcfile)
-os.system("java -jar " + classpath + " -AS3 -import ../generated/builtin.abc -import ../generated/shell_toplevel.abc -debug " + asfile)
-
-# TODO: Would be useful to overwrite the output file only if the
-# output file does not exist or if it has not changed.
-# os.path.exists(), shutil.move(), os.remove(), and filecmp.cmp() will
-# be handy.
-
-# This is a mess, since DomainClass.{cpp,h} is in the avmplus namespace but the
-# files reside with avmshell files.
-print("Generating gcTrace methods...")
-os.system(avm+" "+abcfile+" -- -ns avmshell -b avmshell-as3-gc.h -n avmshell-cpp-gc.h -i avmshell-gc-interlock.h shell_toplevel.as DebugCLI.h ShellCore.h SystemClass.h")
-os.system(avm+" "+abcfile+" -- -b extensions-as3-gc.h -n extensions-cpp-gc.h -i extensions-gc-interlock.h DomainClass.h Domain.as ../extensions/*.h ../extensions/*.as")
-
-print("Done.")
