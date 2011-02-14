@@ -2046,6 +2046,7 @@ namespace avmplus
             {
                 ctraits->hasCustomConstruct = nativeEntry->hasCustomConstruct;
                 itraits->isRestrictedInheritance = nativeEntry->isRestrictedInheritance;
+                itraits->isAbstractBase = nativeEntry->isAbstractBase;
             }
             ctraits->setCreateClassClosureProc(haveClassNativeInfo ? nativeEntry->createClassClosure : ClassClosure::createClassClosure);
 

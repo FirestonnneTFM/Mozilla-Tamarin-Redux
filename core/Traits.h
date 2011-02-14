@@ -615,7 +615,7 @@ namespace avmplus
     private:    const uint8_t           m_posType;                  // TraitsPosType enumeration -- only need 3 bits but stored in uint8_t for faster access
     private:    uint8_t                 m_bindingCapLog2;           // if nonzero, log2 of the cap needed for bindings
     private:    uint8_t                 m_supertype_offset;         // if this traits is primary, == offset in primary_supertypes array; otherwise == offset of supertype_cache
-    // 8 bits follow (9 in debug)
+    // 9 bits follow (10 in debug)
     private:    uint32_t                m_needsHashtable:1;         // If true, the class needs a hash table. Typically true for dynamic classes, but will be false for XML
     private:    uint32_t                m_resolved:1;               // set once signature types have been resolved
     public:     uint32_t                final:1;                    // set when the class cannot be extended
@@ -626,6 +626,7 @@ namespace avmplus
                             // If the traits are for a type that implements its own construct method, m_immplementsNewInterfaces must be set to true.
     private:    uint32_t                m_implementsNewInterfaces:1; // does this type implement interfaces not implemented by its base?
     public:     uint32_t                isRestrictedInheritance:1;      // this type is "restricted" inheritance (direct subclasses must live in same ABC)
+    public:     uint32_t                isAbstractBase:1;               // this type is an abstract base class and cannot be instantiated
 #ifdef _DEBUG
     private:    uint32_t                m_bindingsVerified:1;       // set once bindings have been verified
 #endif

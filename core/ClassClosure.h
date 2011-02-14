@@ -106,7 +106,6 @@ namespace avmplus
 
     public:
         static ScriptObject* FASTCALL createScriptObjectProc(ClassClosure* cls);
-        static ScriptObject* FASTCALL abstractBaseClassCreateInstanceProc(ClassClosure* cls);
         static ScriptObject* FASTCALL cantInstantiateCreateInstanceProc(ClassClosure* cls);
         static ScriptObject* FASTCALL impossibleCreateInstanceProc(ClassClosure* cls);
 

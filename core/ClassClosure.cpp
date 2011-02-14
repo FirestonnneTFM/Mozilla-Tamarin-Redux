@@ -58,10 +58,7 @@ namespace avmplus
                 ScriptObject* base = AvmCore::atomToScriptObject(baseAtom);
                 // make sure scope object is base type's class object
                 AvmAssert(base->traits()->itraits == cvtable->traits->itraits->base);
-                ClassClosure* base_cc = base->toClassClosure();
-                AvmAssert(base_cc != NULL);
-                CreateInstanceProc p = base_cc->m_createInstanceProc;
-                if (p == ClassClosure::abstractBaseClassCreateInstanceProc)
+                if (base->traits()->itraits->isAbstractBase)
                 {
                     // If we get here, it means that we descend from an abstract base class,
                     // but don't have a native createInstanceProc of our own; in that case, we
@@ -71,7 +68,9 @@ namespace avmplus
                     goto create_normal;
                 }
                 // ...otherwise, we're done.
-                return p;
+                ClassClosure* base_cc = base->toClassClosure();
+                AvmAssert(base_cc != NULL);
+                return base_cc->m_createInstanceProc;
             }
         }
 
@@ -83,9 +82,6 @@ create_normal:
     {
         if (ivtable)
         {
-            // Someone in our inheritance chain is "restricted" inheritance; we must walk 
-            // the whole chain until we find them, and see if we're defined
-            // in the same pool. If not, we aren't constructable.
             Traits* itraits = ivtable->traits;
             Traits* base = itraits->base;
             if (base != NULL && base->isRestrictedInheritance && base->pool != itraits->pool)
@@ -271,15 +267,6 @@ create_normal:
     ScriptObject* FASTCALL ClassClosure::createScriptObjectProc(ClassClosure* cls)
     {
         return ScriptObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
-    }
-
-    // The implementation is identical to cantInstantiateCreateInstanceProc, but it exists
-    // as a separate function so that calcCreateInstanceProc can differentiate whether to
-    // propagate it up the inheritance chain or not.
-    ScriptObject* FASTCALL ClassClosure::abstractBaseClassCreateInstanceProc(ClassClosure* cls)
-    {
-        cls->throwCantInstantiateError();
-        return NULL;
     }
 
     ScriptObject* FASTCALL ClassClosure::cantInstantiateCreateInstanceProc(ClassClosure* cls)
