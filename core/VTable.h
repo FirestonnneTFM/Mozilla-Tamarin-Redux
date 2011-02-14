@@ -42,7 +42,7 @@
 
 namespace avmplus
 {
-    typedef ScriptObject* (* FASTCALL CreateInstanceProc)(ClassClosure* cls);
+    typedef ScriptObject* (FASTCALL *CreateInstanceProc)(ClassClosure* cls);
 
     class GC_CPP_EXACT(VTable, MMgc::GCTraceableObject)
     {
