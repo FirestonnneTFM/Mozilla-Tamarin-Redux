@@ -247,7 +247,7 @@ namespace avmplus
     // ------------------------ DATA SECTION END
     };
 
-    typedef ClassClosure* (* FASTCALL CreateClassClosureProc)(VTable*);
+    typedef ClassClosure* (FASTCALL *CreateClassClosureProc)(VTable*);
 
     // Interface for default-value-initializer visitors.  Invoked by Triats.visitInitBody().
     class InitVisitor
