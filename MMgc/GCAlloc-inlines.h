@@ -100,6 +100,9 @@ namespace MMgc
         GCAssert(m_firstFree == b || b->prevFree != NULL);
         GCAssert(b->prevFree == NULL || b->prevFree->nextFree == b);
         GCAssert(b->nextFree == NULL || b->nextFree->prevFree == b);
+        if ( ((b->prevFree && (b->prevFree->nextFree!=b))) ||
+            ((b->nextFree && (b->nextFree->prevFree!=b))) )
+            VMPI_abort();
 
         if ( m_firstFree == b )
             m_firstFree = b->nextFree;
@@ -127,6 +130,10 @@ namespace MMgc
     REALLY_INLINE void GCAlloc::RemoveFromSweepList(GCBlock *b)
     {
         GCAssert(m_needsSweeping == b || b->prevFree != NULL);
+        if ( ((b->prevFree && (b->prevFree->nextFree!=b))) ||
+            ((b->nextFree && (b->nextFree->prevFree!=b))) )
+            VMPI_abort();
+
         if ( m_needsSweeping == b )
             m_needsSweeping = b->nextFree;
         else
