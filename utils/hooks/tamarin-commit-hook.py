@@ -105,6 +105,10 @@ def heuristic_log_check(ui, repo, operation, **kwargs):
     # check across all outgoing changesets; then we should print all
     # warnings in one pass and prompt for confirmation at most once.
 
+    # Don't do format-check on hg-strip
+    if (operation in ["strip"]):
+        return False
+
     tip_id = repo.changelog.tip()
     tip_changeset = repo[tip_id]
     return check_desc_for_bugnum_and_reviews(ui, tip_changeset, operation)
