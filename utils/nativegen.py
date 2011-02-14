@@ -628,6 +628,8 @@ class NativeInfo:
                 t.has_construct_method_override = True
             if t.construct in ["abstract-restricted", "restricted", "restricted-check"]:
                 t.is_restricted_inheritance = True
+            if t.construct in ["abstract", "abstract-restricted"]:
+                t.is_abstract_base = True
             if t.construct in ["check", "restricted-check"]:
                 t.has_pre_create_check = True
             if self.construct == "instance":
@@ -638,11 +640,8 @@ class NativeInfo:
             # "Object" is special-cased.
             self.createInstanceProcName = "ClassClosure::createScriptObjectProc"
 
-        elif t.construct == "none":
+        elif t.construct in ["none", "abstract", "abstract-restricted"]:
             self.createInstanceProcName = "ClassClosure::cantInstantiateCreateInstanceProc"
-
-        elif t.construct in ["abstract", "abstract-restricted"]:
-            self.createInstanceProcName = "ClassClosure::abstractBaseClassCreateInstanceProc"
 
         elif t.construct in ["override", "instance"] or t.itraits.ctype != CTYPE_OBJECT:
             self.createInstanceProcName = "ClassClosure::impossibleCreateInstanceProc"
@@ -693,6 +692,7 @@ class Traits:
     has_construct_method_override = False
     has_custom_createInstanceProc = False
     is_restricted_inheritance = False
+    is_abstract_base = False
     has_pre_create_check = False
     def __init__(self, name):
         self.names = {}
@@ -1561,7 +1561,7 @@ class AbcThunkGen:
                 if c.ni.gen_method_map:
                     offsetOfSlotsClass = "SlotOffsetsAndAsserts::s_slotsOffset%s" % self.__baseNINameForNIName(c.ni.class_name)
                     offsetOfSlotsInstance = "SlotOffsetsAndAsserts::s_slotsOffset%s" % self.__baseNINameForNIName(c.ni.instance_name)
-                    out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s, %s)" %\
+                    out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s, %s, %s)" %\
                         (self.class_id_name(c),\
                         self.__baseNINameForNIName(c.ni.class_name),\
                         c.ni.class_name,\
@@ -1569,7 +1569,8 @@ class AbcThunkGen:
                         c.ni.instance_name,\
                         offsetOfSlotsInstance,\
                         str(c.has_construct_method_override).lower(),
-                        str(c.is_restricted_inheritance).lower()))
+                        str(c.is_restricted_inheritance).lower(),
+                        str(c.is_abstract_base).lower()))
                 else:
                     out_c.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), c.ni.class_name, c.ni.instance_name))
         out_c.indent -= 1

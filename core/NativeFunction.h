@@ -200,6 +200,7 @@ namespace avmplus
         uint16_t offsetofSlotsInstance;
         bool hasCustomConstruct;
         bool isRestrictedInheritance;
+        bool isAbstractBase;
     };
 
 
@@ -397,7 +398,7 @@ namespace avmplus
     #define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
         const NativeClassInfo NAME##_classEntries[] = {
 
-    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT, RESTRICTEDINHERITANCE) \
+    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT, RESTRICTEDINHERITANCE, ABSTRACTBASE) \
         { CLS##_createClassClosure,\
           avmplus::NativeID::CLSID,\
           sizeof(FQCLS),\
@@ -405,7 +406,8 @@ namespace avmplus
           sizeof(INST),\
           OFFSETOFSLOTSINST,\
           CUSTOMCONSTRUCT,\
-          RESTRICTEDINHERITANCE\
+          RESTRICTEDINHERITANCE,\
+          ABSTRACTBASE\
         },
 
     #define AVMTHUNK_END_NATIVE_CLASSES() \
@@ -472,14 +474,15 @@ namespace avmplus
 
     #define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME)
 
-    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT, RESTRICTEDINHERITANCE) \
+    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT, RESTRICTEDINHERITANCE, ABSTRACTBASE) \
         c[CLSID].createClassClosure = CLS##_createClassClosure; \
         c[CLSID].sizeofClass = sizeof(FQCLS); \
         c[CLSID].offsetofSlotsClass = OFFSETOFSLOTSCLS; \
         c[CLSID].sizeofInstance = sizeof(INST); \
         c[CLSID].offsetofSlotsInstance = OFFSETOFSLOTSINST;\
         c[CLSID].hasCustomConstruct = CUSTOMCONSTRUCT;\
-        c[CLSID].isRestrictedInheritance = RESTRICTEDINHERITANCE;
+        c[CLSID].isRestrictedInheritance = RESTRICTEDINHERITANCE;\
+        c[CLSID].isAbstractBase = ABSTRACTBASE;
 
     #define AVMTHUNK_END_NATIVE_CLASSES()
 
