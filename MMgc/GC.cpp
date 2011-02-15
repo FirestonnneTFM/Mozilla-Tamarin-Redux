@@ -276,8 +276,6 @@ namespace MMgc
         MMGC_GCENTER(this);
         emptyWeakRef = new (this) GCWeakRef(NULL);
 
-        Alloc(2048);
-
 #ifdef MMGC_CONSERVATIVE_PROFILER
         if (demos == NULL && heap->profiler != NULL)
             demos = new ObjectPopulationProfiler(this, "Conservative scanning volume incurred by allocation site");
