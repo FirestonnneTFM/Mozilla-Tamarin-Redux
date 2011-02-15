@@ -456,7 +456,7 @@ namespace avmplus
         void ensureCapacityExtra(uint32_t cap, uint32_t extra);
         
         // null the m_data pointer and free the storage
-        void freeData(MMgc::GC* gc);       
+        void freeData(MMgc::GC* gc);
  
         // This function shouldn't be called directly; it's intended to be called
         // only by ensureCapacity(), which does an inline capacity check

@@ -46,7 +46,7 @@ namespace avmplus
     /*static*/ CreateInstanceProc ClassClosure::calcCreateInstanceProc(VTable* cvtable)
     {
         VTable* ivtable = cvtable->ivtable;
-        if (ivtable && ivtable->base) 
+        if (ivtable && ivtable->base)
         {
             ScopeChain* scope = cvtable->init->scope();
             if (scope->getSize())
@@ -95,7 +95,7 @@ create_normal:
     ClassClosure::ClassClosure(VTable* cvtable)
         : ScriptObject(cvtable, NULL)
         , m_createInstanceProc(checkForRestrictedInheritance(cvtable->ivtable, cvtable->ivtable->createInstanceProc))
-        // NB: prototype is null right now, but we expect our subclass to 
+        // NB: prototype is null right now, but we expect our subclass to
         // initialize it in their ctor (or, at a minimum, before it attempts
         // to create any instances).
     {
@@ -114,7 +114,7 @@ create_normal:
     ClassClosure::ClassClosure(VTable* cvtable, CreateInstanceProc createInstanceProc)
         : ScriptObject(cvtable, NULL)
         , m_createInstanceProc(checkForRestrictedInheritance(cvtable->ivtable, createInstanceProc))
-        // NB: prototype is null right now, but we expect our subclass to 
+        // NB: prototype is null right now, but we expect our subclass to
         // initialize it in their ctor (or, at a minimum, before it attempts
         // to create any instances).
     {

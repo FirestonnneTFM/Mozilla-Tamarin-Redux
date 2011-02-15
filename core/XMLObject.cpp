@@ -169,10 +169,10 @@ namespace avmplus
         }
 
         int m_status;
-		
-		bool const bugzilla598683 = core->currentBugCompatibility()->bugzilla598683;
+        
+        bool const bugzilla598683 = core->currentBugCompatibility()->bugzilla598683;
         MissingEndTagProc missingEndTag = bugzilla598683 ? missingEndTagNew : missingEndTagOld;
-		
+        
         while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
         {
 
@@ -201,7 +201,7 @@ namespace avmplus
                         // Get our parent's qualified name string here
                         Stringp parentName = m.getName();
 
-                        // OPTIMIZEME: can toplevel->getDefaultNamespace() ever change during this call? 
+                        // OPTIMIZEME: can toplevel->getDefaultNamespace() ever change during this call?
                         // If not, extract at top of loop.
                         if (!NodeNameEquals(tag.text, parentName, ns) &&
                             missingEndTag(parentName, tag.text, ns, toplevel->getDefaultNamespace()))

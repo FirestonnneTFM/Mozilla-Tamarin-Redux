@@ -145,7 +145,7 @@ namespace avmplus
 
                 VTable* vt = this->vtable->newParameterizedVTable(typeTraits, fullname);
 
-                vt->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;	
+                vt->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
                 ObjectVectorClass* parameterizedVector = ObjectVectorClass::create(vt->gc(), vt);
                 parameterizedVector->m_typeTraits = typeClass ? typeClass->traits()->itraits : NULL;
                 parameterizedVector->setDelegate(toplevel->classClass->prototypePtr());

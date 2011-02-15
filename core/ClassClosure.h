@@ -57,7 +57,7 @@ namespace avmplus
         ClassClosure(VTable* cvtable, CreateInstanceProc createInstanceProc);
 
     protected:
-        // This ctor is used by all other (normal) subclasses 
+        // This ctor is used by all other (normal) subclasses
         ClassClosure(VTable* cvtable);
 
     public:
