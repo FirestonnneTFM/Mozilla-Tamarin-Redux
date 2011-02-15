@@ -59,7 +59,7 @@ namespace avmplus
             m_gc->Free(buffer);
         }
         m_gc = 0;
-        m_buffer = 0;   // might have already been cleared above, but that's ok 
+        m_buffer = 0;   // might have already been cleared above, but that's ok
         m_length = 0;
     }
 

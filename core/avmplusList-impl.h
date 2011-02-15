@@ -126,7 +126,7 @@ namespace avmplus
                 VMPI_memcpy(newData->entries, m_data->entries, len * sizeof(typename ListHelper::STORAGE));
             newData->len = len;
             // don't call ListHelper::clearRange here; we want the refCounts to be transferred
-            freeData(gc);  
+            freeData(gc);
             ListHelper::wbData(this, &m_data, newData);
         }
     }
