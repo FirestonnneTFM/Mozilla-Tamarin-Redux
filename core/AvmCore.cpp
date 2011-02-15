@@ -3906,7 +3906,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         apiVersion = getValidApiVersion(apiVersion);
         Atom prefix = uri->isEmpty() ? kEmptyString->atom() : undefinedAtom;
-        Namespacep ns = new (GetGC()) Namespace(prefix, uri, type, apiVersion);
+        Namespacep ns = Namespace::create(GetGC(), prefix, uri, type, apiVersion);
         return ns;
     }
 
