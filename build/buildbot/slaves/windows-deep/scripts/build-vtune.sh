@@ -83,7 +83,7 @@ test "$res" = "0" || {
 test -f obj_9/shell/VTune/avm.exe || {
     echo "avm is missing, build failed"
     cd $basedir/core
-    hg revert avmplusVersion.h
+    mv avmplusVersion.h.orig avmplusVersion.h
     exit 1
 }
 
@@ -105,7 +105,7 @@ echo "**************************************************************************
 
 
 cd $basedir/core
-hg revert avmplusVersion.h
+mv avmplusVersion.h.orig avmplusVersion.h
 
 echo "build succeeded"
 rm -rf $basedir/platform/win32/obj_9
