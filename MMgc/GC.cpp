@@ -2355,8 +2355,8 @@ namespace MMgc
 
             if (wi.IsGCItem())
             {
-                GCAssert(!(GetGCBits(GetRealPointer(wi.ptr)) & kVirtualGCTrace));
-                demos->accountForObject(wi.ptr);
+                GCAssert(!(GetGCBits(GetRealPointer(wi.Ptr())) & kVirtualGCTrace));
+                demos->accountForObject(wi.Ptr());
             }
             else if (wi.HasInteriorPtrs())
                 demos->accountForStack(size);
