@@ -182,18 +182,14 @@ namespace avmplus
         AvmThunkNativeHandler handler;
 #endif
         GprMethodProc thunker;
-#ifdef AVMPLUS_STATIC_POINTERS
         int32_t method_id;
-#endif
     };
 
     struct NativeClassInfo
     {
     public:
         CreateClassClosureProc createClassClosure;
-#ifdef AVMPLUS_STATIC_POINTERS
         int32_t class_id;
-#endif
         uint16_t sizeofClass;
         uint16_t offsetofSlotsClass;
         uint16_t sizeofInstance;
@@ -232,7 +228,6 @@ namespace avmplus
             const AOTInfo* get_aotInfo() const { return aotInfo; }
         #endif
 
-        #ifdef AVMPLUS_STATIC_POINTERS
             void fillInMethods(const NativeMethodInfo* methodEntry);
             void fillInClasses(const NativeClassInfo* classEntry);
             #ifdef VMCFG_AOT
@@ -243,22 +238,11 @@ namespace avmplus
             #else
                 REALLY_INLINE const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return classes[i]; }
             #endif
-        #else
-            typedef void (*FillInProc)(NativeMethodInfo* m, NativeClassInfo* c);
-            void fillIn(FillInProc p);
-            REALLY_INLINE const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return &classes[i]; }
-        #endif
 
     private:
-        #ifdef AVMPLUS_STATIC_POINTERS
             typedef const NativeMethodInfo* MethodType;
             typedef const NativeClassInfo* ClassType;
             REALLY_INLINE const NativeMethodInfo* get_method(uint32_t i) const { AvmAssert(i < methodCount); return methods[i]; }
-        #else
-            typedef NativeMethodInfo MethodType;
-            typedef NativeClassInfo ClassType;
-            REALLY_INLINE const NativeMethodInfo* get_method(uint32_t i) const { AvmAssert(i < methodCount); return &methods[i]; }
-        #endif
 
     private:
         AvmCore* const                          core;
@@ -324,8 +308,6 @@ namespace avmplus
     #define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME) \
         extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain);
 #endif
-
-#ifdef AVMPLUS_STATIC_POINTERS
 
     #define AVMTHUNK_BEGIN_NATIVE_TABLES(NAME)
     #define AVMTHUNK_END_NATIVE_TABLES()
@@ -429,76 +411,6 @@ namespace avmplus
             return ninit.parseBuiltinABC(domain); \
         }
 #endif
-#else
-
-    #define AVMTHUNK_BEGIN_NATIVE_TABLES(NAME) \
-        static void fillIn_##NAME(NativeMethodInfo* m, NativeClassInfo* c) {
-
-    #define AVMTHUNK_END_NATIVE_TABLES() \
-        }
-
-    // ---------------
-
-    #define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME)
-
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-        m[METHID].handler.method = _NATIVE_METHOD_CAST_PTR(CLS, &IMPL); \
-        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
-#else
-    #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
-#endif
-
-    #define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
-        _AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
-
-    #define AVMTHUNK_NATIVE_METHOD_STRING(METHID, IMPL) \
-        _AVMTHUNK_NATIVE_METHOD(avmplus::String, METHID, IMPL)
-
-    #define AVMTHUNK_NATIVE_METHOD_NAMESPACE(METHID, IMPL) \
-        _AVMTHUNK_NATIVE_METHOD(avmplus::Namespace, METHID, IMPL)
-
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        m[METHID].handler.function = reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL); \
-        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
-#else
-    #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        m[METHID].thunker = (GprMethodProc)avmplus::NativeID::METHID##_thunk;
-#endif
-
-    #define AVMTHUNK_END_NATIVE_METHODS()
-
-    // ---------------
-
-    #define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME)
-
-    #define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST, CUSTOMCONSTRUCT, RESTRICTEDINHERITANCE, ABSTRACTBASE) \
-        c[CLSID].createClassClosure = CLS##_createClassClosure; \
-        c[CLSID].sizeofClass = sizeof(FQCLS); \
-        c[CLSID].offsetofSlotsClass = OFFSETOFSLOTSCLS; \
-        c[CLSID].sizeofInstance = sizeof(INST); \
-        c[CLSID].offsetofSlotsInstance = OFFSETOFSLOTSINST;\
-        c[CLSID].hasCustomConstruct = CUSTOMCONSTRUCT;\
-        c[CLSID].isRestrictedInheritance = RESTRICTEDINHERITANCE;\
-        c[CLSID].isAbstractBase = ABSTRACTBASE;
-
-    #define AVMTHUNK_END_NATIVE_CLASSES()
-
-    #define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
-        PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain) { \
-            NativeInitializer ninit(core, \
-                avmplus::NativeID::NAME##_versioned_uris, \
-                avmplus::NativeID::NAME##_abc_data, \
-                avmplus::NativeID::NAME##_abc_length, \
-                avmplus::NativeID::NAME##_abc_method_count, \
-                avmplus::NativeID::NAME##_abc_class_count); \
-            ninit.fillIn(fillIn_##NAME); \
-            return ninit.parseBuiltinABC(domain); \
-        }
-
-#endif // AVMPLUS_STATIC_POINTERS
 
     #define AVM_INIT_BUILTIN_ABC_IN_DOMAIN(MAPNAME, CORE, DOMAIN) \
         avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (DOMAIN))

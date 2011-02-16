@@ -108,7 +108,6 @@
 #undef MMGC_INTERIOR_PTRS
 #undef AVMPLUS_WITH_JNI
 #undef AVMPLUS_HEAP_ALLOCA
-#undef AVMPLUS_STATIC_POINTERS
 #undef VMCFG_INDIRECT_NATIVE_THUNKS
 #undef MMGC_OVERRIDE_GLOBAL_NEW
 #undef MMGC_MEMORY_PROFILER
@@ -544,19 +543,6 @@
 #endif
 
 
-/* AVMFEATURE_STATIC_FUNCTION_PTRS
- *
- * Enable this if you are building on a system that allows static
- * initialization of global constant function pointers (almost all systems
- * except some mobile-phone and other embedded operating systems).
- *
- * Disabling this will increase code size slightly.
- */
-#if !defined AVMFEATURE_STATIC_FUNCTION_PTRS || AVMFEATURE_STATIC_FUNCTION_PTRS != 0 && AVMFEATURE_STATIC_FUNCTION_PTRS != 1
-#  error "AVMFEATURE_STATIC_FUNCTION_PTRS must be defined and 0 or 1 (only)."
-#endif
-
-
 /* AVMFEATURE_INDIRECT_NATIVE_THUNKS
  *
  * Enabling this will recycle native thunks with similar signatures.
@@ -854,7 +840,6 @@
 
 
 
-
 #if AVMFEATURE_SWF13
 #  if !AVMFEATURE_SWF12
 #    error "AVMFEATURE_SWF12 is required for AVMFEATURE_SWF13"
@@ -1125,9 +1110,6 @@
 #endif
 #if AVMFEATURE_HEAP_ALLOCA
 #  define AVMPLUS_HEAP_ALLOCA
-#endif
-#if AVMFEATURE_STATIC_FUNCTION_PTRS
-#  define AVMPLUS_STATIC_POINTERS
 #endif
 #if AVMFEATURE_INDIRECT_NATIVE_THUNKS
 #  define VMCFG_INDIRECT_NATIVE_THUNKS
