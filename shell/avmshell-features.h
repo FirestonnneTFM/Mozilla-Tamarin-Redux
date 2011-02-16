@@ -162,10 +162,6 @@
     #endif
 #endif
 
-#ifndef AVMFEATURE_STATIC_FUNCTION_PTRS
-  #define AVMFEATURE_STATIC_FUNCTION_PTRS 1
-#endif
-
 #ifndef AVMFEATURE_INDIRECT_NATIVE_THUNKS
   // if not specified, default to direct thunks in DEBUGGER builds
   #if AVMFEATURE_DEBUGGER
@@ -209,8 +205,6 @@
     #endif // AVMSYSTEM_ARM
     #undef      AVMFEATURE_HEAP_ALLOCA
     #define     AVMFEATURE_HEAP_ALLOCA 1
-    #undef      AVMFEATURE_STATIC_FUNCTION_PTRS
-    #define     AVMFEATURE_STATIC_FUNCTION_PTRS 0 // Very important on Symbian
     #undef      AVMFEATURE_OVERRIDE_GLOBAL_NEW
     #define     AVMFEATURE_OVERRIDE_GLOBAL_NEW 0
     #undef      AVMFEATURE_EVAL // Don't compile in this feature yet.

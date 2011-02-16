@@ -608,16 +608,6 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc> Enable this if you are building on a system that allows static
-           initialization of global constant function pointers (almost all systems
-           except some mobile-phone and other embedded operating systems).
-
-           Disabling this will increase code size slightly. </desc>
-    <name> AVMFEATURE_STATIC_FUNCTION_PTRS </name>
-    <defines> AVMPLUS_STATIC_POINTERS </defines>
-  </feature>
-
-  <feature>
     <desc> Enabling this will recycle native thunks with similar signatures.
             This decreases code size at the expense of slightly slower thunks
             and an extra field in NativeMethodInfo. </desc>

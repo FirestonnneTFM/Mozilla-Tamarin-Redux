@@ -91,7 +91,6 @@ namespace avmplus
 #endif
 
 
-#ifdef AVMPLUS_STATIC_POINTERS
     void NativeInitializer::fillInMethods(const NativeMethodInfo* _methodEntry)
     {
         while (_methodEntry->method_id != -1)
@@ -113,12 +112,6 @@ namespace avmplus
             _classEntry++;
         }
     }
-#else
-    void NativeInitializer::fillIn(NativeInitializer::FillInProc p)
-    {
-        (*p)(methods, classes);
-    }
-#endif // AVMPLUS_STATIC_POINTERS
 
     PoolObject* NativeInitializer::parseBuiltinABC(Domain* domain)
     {
