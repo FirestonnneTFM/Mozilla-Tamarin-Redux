@@ -68,11 +68,15 @@ echo ""
 
 
 ##
-# Remove the old builtin.abc
+# Backup the generated files
 ##
-test -f $BUILTINABC && {
-    rm $BUILTINABC
-}
+cd $basedir/generated
+mv builtin.abc builtin.abc.orig
+mv builtin.cpp builtin.cpp.orig
+mv builtin.h builtin.h.orig
+mv shell_toplevel.abc shell_toplevel.abc.orig
+mv shell_toplevel.cpp shell_toplevel.cpp.orig
+mv shell_toplevel.h shell_toplevel.h.orig
 
 ##
 # Build the builtin.abc
@@ -83,14 +87,15 @@ python ./builtin.py
 ret=$?
 test "$ret" = "0" || {
     echo "builtin.py failed"
-    cd $basedir
-    hg revert generated/builtin*.cpp generated/builtin*.h generated/builtin*.abc
+    cd $basedir/generated
+    mv builtin.abc.orig builtin.abc
+    mv builtin.cpp.orig builtin.cpp
+    mv builtin.h.orig builtin.h
     endSilent
     exit 1
 }
 
 cd $basedir
-hg status
 
 ##
 # Diff the builtin.cpp and builtin.h files
@@ -99,8 +104,8 @@ hg status
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
-hg diff generated/builtin.cpp
-hg diff generated/builtin.cpp > $basedir/build/buildbot/slaves/scripts/builtin.diff
+diff generated/builtin.cpp generated/builtin.cpp.orig
+diff generated/builtin.cpp generated/builtin.cpp.orig > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
 
@@ -108,21 +113,16 @@ cd $basedir
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
-hg diff generated/builtin.h
-hg diff generated/builtin.h > $basedir/build/buildbot/slaves/scripts/builtin.diff
+diff generated/builtin.h generated/builtin.h.orig
+diff generated/builtin.h generated/builtin.h.orig > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
 
-cd $basedir
-hg revert generated/builtin.cpp generated/builtin.h generated/builtin.abc
-
-
-##
-# Remove the old shell_toplevel.abc
-##
-test -f $SHELLABC && {
-    rm $SHELLABC
-}
+cd $basedir/generated
+# revert files
+mv builtin.abc.orig builtin.abc
+mv builtin.cpp.orig builtin.cpp
+mv builtin.h.orig builtin.h
 
 ##
 # Build the shell_toplevel.abc
@@ -134,14 +134,15 @@ python ./shell_toplevel.py
 ret=$?
 test "$ret" = "0" || {
     echo "shell_toplevel failed"
-    cd $basedir
-    hg revert generated/shell_toplevel*.cpp generated/shell_toplevel*.h generated/shell_toplevel*.abc
+    cd $basedir/generated
+    mv shell_toplevel.abc.orig shell_toplevel.abc
+    mv shell_toplevel.cpp.orig shell_toplevel.cpp
+    mv shell_toplevel.h.orig shell_toplevel.h
     endSilent
     exit 1
 }
 
 cd $basedir
-hg status
 
 ##
 # Diff the shell_toplevel.cpp and shell_toplevel.h files
@@ -149,20 +150,21 @@ hg status
 test -f $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff && {
     rm $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
 }
-hg diff generated/shell_toplevel.cpp
-hg diff generated/shell_toplevel.cpp > $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
+diff generated/shell_toplevel.cpp generated/shell_toplevel.cpp.orig
+diff generated/shell_toplevel.cpp generated/shell_toplevel.cpp.orig > $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
 
 cd $basedir
 test -f $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff && {
     rm $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 }
-hg diff generated/shell_toplevel.h
-hg diff generated/shell_toplevel.h > $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
+diff generated/shell_toplevel.h generated/shell_toplevel.h.orig
+diff generated/shell_toplevel.h generated/shell_toplevel.h.orig > $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 
-cd $basedir
-hg revert generated/shell_toplevel.cpp generated/shell_toplevel.h generated/shell_toplevel.abc
-
-hg status
+cd $basedir/generated
+# revert files
+mv shell_toplevel.abc.orig shell_toplevel.abc
+mv shell_toplevel.cpp.orig shell_toplevel.cpp
+mv shell_toplevel.h.orig shell_toplevel.h
 
 endSilent
 

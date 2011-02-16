@@ -140,7 +140,7 @@ test "$res" = "0" || {
 test -f shell/$shell || {
     echo "avmshell is missing, build failed"
     cd $basedir/core
-    hg revert avmplusVersion.h
+    mv avmplusVersion.h.orig avmplusVersion.h
     endSilent
     exit 1
 }
@@ -203,7 +203,7 @@ if [ "$res" == "0" ]; then
     if [ $failbuild == 1 ]; then
 	echo "message: feature check FAILED"
 	cd $basedir/core
-	hg revert avmplusVersion.h
+	mv avmplusVersion.h.orig avmplusVersion.h
 	# Remove the binary since we have determined that it is NOT valid
 	rm $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
 	endSilent
@@ -213,7 +213,7 @@ if [ "$res" == "0" ]; then
 fi # end feature check
 
 cd $basedir/core
-hg revert avmplusVersion.h
+mv avmplusVersion.h.orig avmplusVersion.h
 
 
 
