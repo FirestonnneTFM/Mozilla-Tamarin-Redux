@@ -74,6 +74,7 @@ namespace vmbase {
 
     VMThread::VMThread()
         : m_state(NOT_STARTED)
+        , m_joinerQty(0)
     {
         m_runnable = this;
         int suffix = m_nextNameSuffix.incAndGet();
