@@ -236,10 +236,6 @@ namespace avmplus
     public:
 
         PoolObject* pool() const;
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-        AvmThunkNativeMethodHandler handler_method() const;
-        AvmThunkNativeFunctionHandler handler_function() const;
-#endif
 
         const uint8_t* abc_body_pos() const;
         void set_abc_body_pos(const uint8_t* p);
@@ -301,9 +297,6 @@ namespace avmplus
         struct NativeInfo
         {
             GprMethodProc thunker;
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-            AvmThunkNativeHandler handler;
-#endif
         };
 
         struct AbcInfo

@@ -128,11 +128,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_HEAP_ALLOCA=1 "
     if (arg == False):
         args += "-DAVMFEATURE_HEAP_ALLOCA=0 "
-    arg = o.getBoolArg("indirect-native-thunks")
-    if (arg == True):
-        args += "-DAVMFEATURE_INDIRECT_NATIVE_THUNKS=1 "
-    if (arg == False):
-        args += "-DAVMFEATURE_INDIRECT_NATIVE_THUNKS=0 "
     arg = o.getBoolArg("override-global-new")
     if (arg == True):
         args += "-DAVMFEATURE_OVERRIDE_GLOBAL_NEW=1 "

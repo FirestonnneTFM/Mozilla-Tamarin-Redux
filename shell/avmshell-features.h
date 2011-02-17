@@ -162,15 +162,6 @@
     #endif
 #endif
 
-#ifndef AVMFEATURE_INDIRECT_NATIVE_THUNKS
-  // if not specified, default to direct thunks in DEBUGGER builds
-  #if AVMFEATURE_DEBUGGER
-    #define AVMFEATURE_INDIRECT_NATIVE_THUNKS 0
-  #else
-    #define AVMFEATURE_INDIRECT_NATIVE_THUNKS 1
-  #endif
-#endif
-
 #ifndef AVMFEATURE_OVERRIDE_GLOBAL_NEW
   #define AVMFEATURE_OVERRIDE_GLOBAL_NEW 0
 #endif

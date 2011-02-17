@@ -608,14 +608,6 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc> Enabling this will recycle native thunks with similar signatures.
-            This decreases code size at the expense of slightly slower thunks
-            and an extra field in NativeMethodInfo. </desc>
-    <name> AVMFEATURE_INDIRECT_NATIVE_THUNKS </name>
-    <defines> VMCFG_INDIRECT_NATIVE_THUNKS </defines>
-  </feature>
-
-  <feature>
     <desc> Enabling this will cause the mmfx_* memory macros to use global new/delete.
         By default we use specialized new/delete operators and avoid global new/delete.  However
         this requires some tricks to get multiple inheritance and private destructors to work

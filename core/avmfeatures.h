@@ -108,7 +108,6 @@
 #undef MMGC_INTERIOR_PTRS
 #undef AVMPLUS_WITH_JNI
 #undef AVMPLUS_HEAP_ALLOCA
-#undef VMCFG_INDIRECT_NATIVE_THUNKS
 #undef MMGC_OVERRIDE_GLOBAL_NEW
 #undef MMGC_MEMORY_PROFILER
 #undef VMCFG_CACHE_GQCN
@@ -543,17 +542,6 @@
 #endif
 
 
-/* AVMFEATURE_INDIRECT_NATIVE_THUNKS
- *
- * Enabling this will recycle native thunks with similar signatures.
- * This decreases code size at the expense of slightly slower thunks
- * and an extra field in NativeMethodInfo.
- */
-#if !defined AVMFEATURE_INDIRECT_NATIVE_THUNKS || AVMFEATURE_INDIRECT_NATIVE_THUNKS != 0 && AVMFEATURE_INDIRECT_NATIVE_THUNKS != 1
-#  error "AVMFEATURE_INDIRECT_NATIVE_THUNKS must be defined and 0 or 1 (only)."
-#endif
-
-
 /* AVMFEATURE_OVERRIDE_GLOBAL_NEW
  *
  * Enabling this will cause the mmfx_* memory macros to use global new/delete.
@@ -839,7 +827,6 @@
 
 
 
-
 #if AVMFEATURE_SWF13
 #  if !AVMFEATURE_SWF12
 #    error "AVMFEATURE_SWF12 is required for AVMFEATURE_SWF13"
@@ -1110,9 +1097,6 @@
 #endif
 #if AVMFEATURE_HEAP_ALLOCA
 #  define AVMPLUS_HEAP_ALLOCA
-#endif
-#if AVMFEATURE_INDIRECT_NATIVE_THUNKS
-#  define VMCFG_INDIRECT_NATIVE_THUNKS
 #endif
 #if AVMFEATURE_OVERRIDE_GLOBAL_NEW
 #  define MMGC_OVERRIDE_GLOBAL_NEW

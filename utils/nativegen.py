@@ -262,38 +262,30 @@ BASE_CLASS_NAME = "::avmplus::ClassClosure"
 BASE_INSTANCE_NAME = "::avmplus::ScriptObject"
 
 TMAP = {
-    # map ctype -> sigchar, in-arg-type, ret-arg-type, base-type
-    CTYPE_OBJECT:       ("o", BASE_INSTANCE_NAME+"*", BASE_INSTANCE_NAME+"*", BASE_INSTANCE_NAME),
-    CTYPE_ATOM:         ("a", "avmplus::Atom", "avmplus::Atom", "#error"),
-    CTYPE_VOID:         ("v", "void", "void", "#error"),
-    CTYPE_BOOLEAN:      ("b", "avmplus::bool32", "bool", "#error"),
-    CTYPE_INT:          ("i", "int32_t", "int32_t", "#error"),
-    CTYPE_UINT:         ("u", "uint32_t", "uint32_t", "#error"),
-    CTYPE_DOUBLE:       ("d", "double", "double", "#error"),
-    CTYPE_STRING:       ("s", "avmplus::String*", "avmplus::String*", "avmplus::String"),
-    CTYPE_NAMESPACE:    ("n", "avmplus::Namespace*", "avmplus::Namespace*", "avmplus::Namespace")
+    # map ctype -> in-arg-type, ret-arg-type, base-type
+    CTYPE_OBJECT:       (BASE_INSTANCE_NAME+"*", BASE_INSTANCE_NAME+"*", BASE_INSTANCE_NAME),
+    CTYPE_ATOM:         ("avmplus::Atom", "avmplus::Atom", "#error"),
+    CTYPE_VOID:         ("void", "void", "#error"),
+    CTYPE_BOOLEAN:      ("avmplus::bool32", "bool", "#error"),
+    CTYPE_INT:          ("int32_t", "int32_t", "#error"),
+    CTYPE_UINT:         ("uint32_t", "uint32_t", "#error"),
+    CTYPE_DOUBLE:       ("double", "double", "#error"),
+    CTYPE_STRING:       ("avmplus::String*", "avmplus::String*", "avmplus::String"),
+    CTYPE_NAMESPACE:    ("avmplus::Namespace*", "avmplus::Namespace*", "avmplus::Namespace")
 };
 
 def uint(i):
     return int(i) & 0xffffffff
 
-def sigchar_from_enum(ct, allowObject):
+def ctype_from_enum(ct, allowObject):
     if ct == CTYPE_OBJECT and not allowObject:
         ct = CTYPE_ATOM
     return TMAP[ct][0]
 
-def sigchar_from_traits(t, allowObject):
-    return sigchar_from_enum(t.ctype, allowObject)
-
-def ctype_from_enum(ct, allowObject):
-    if ct == CTYPE_OBJECT and not allowObject:
-        ct = CTYPE_ATOM
-    return TMAP[ct][1]
-
 def c_rettype_from_enum(ct, allowObject):
     if ct == CTYPE_OBJECT and not allowObject:
         ct = CTYPE_ATOM
-    return TMAP[ct][2]
+    return TMAP[ct][1]
 
 def ctype_from_traits(t, allowObject):
     return ctype_from_enum(t.ctype, allowObject)
@@ -1454,60 +1446,16 @@ class AbcThunkGen:
                     out_h.println("/* const uint32_t "+m.native_id_name+" = "+str(m.id)+"; */");
         out_h.println('')
 
-        unique_thunk_sigs = {}
-        for receiver,m in self.all_thunks:
-            sig = self.thunkSig(receiver, m)
-            if not unique_thunk_sigs.has_key(sig):
-                unique_thunk_sigs[sig] = {}
-            unique_thunk_sigs[sig][m.native_id_name] = (receiver, m)
         out_c.println("");
-        out_c.println("/* thunks (%d unique signatures, %d total) */" % (len(unique_thunk_sigs.keys()), len(self.all_thunks)));
+        out_c.println("/* thunks (%d total) */" % len(self.all_thunks));
         if opts.thunkvprof:
             out_c.println("#define DOPROF")
             out_c.println('#include "../vprof/vprof.h"')
 
-        # emit direct thunks, guarded by ifndef VMCFG_INDIRECT_NATIVE_THUNKS
-        out_c.println("")
-        out_c.println("#ifndef VMCFG_INDIRECT_NATIVE_THUNKS")
-        out_c.println("")
         for receiver,m in self.all_thunks:
             thunkname = m.native_id_name;
             self.emitThunkProto(thunkname, receiver, m);
-            self.emitThunkBody(thunkname, receiver, m, True);
-
-        out_c.println("")
-        out_c.println("#else // VMCFG_INDIRECT_NATIVE_THUNKS")
-
-        out_h.println("")
-        out_h.println("#ifdef VMCFG_INDIRECT_NATIVE_THUNKS")
-        out_h.println("")
-
-        # emit indirect thunks, guarded by ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-        for sig in unique_thunk_sigs:
-            users = unique_thunk_sigs[sig]
-            receiver = None;
-            m = None;
-            out_c.println('')
-            for native_name in sorted(users):
-                out_c.println("// "+native_name);
-                receiver = users[native_name][0];
-                m = users[native_name][1];
-            thunkname = name+"_"+sig;
-            self.emitThunkProto(thunkname, receiver, m);
-            for native_name in sorted(users):
-                # use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
-                # (sad but true, happens in some environments)
-                out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
-            out_h.println("")
-            # if there's only one client of the thunk, emit a direct call even if direct thunks aren't requested
-            do_direct = (len(users) == 1)
-            self.emitThunkBody(thunkname, receiver, m, do_direct)
-
-        out_c.println("")
-        out_c.println("#endif // VMCFG_INDIRECT_NATIVE_THUNKS")
-
-        out_h.println("#endif // VMCFG_INDIRECT_NATIVE_THUNKS")
-        out_h.println("")
+            self.emitThunkBody(thunkname, receiver, m);
 
         out_c.println("")
         self.printStructAsserts(out_c, abc)
@@ -2020,17 +1968,16 @@ class AbcThunkGen:
     def thunkDecl(self, name, m):
         ret_traits = self.lookupTraits(m.returnType)
         ret_ctype = ret_traits.ctype
-        # see note in thunkSig() about setter return types
         if m.kind == TRAIT_Setter:
             ret_ctype = CTYPE_VOID
 
         # for return types of thunks, everything but double maps to Atom
         if ret_ctype != CTYPE_DOUBLE:
-            thunk_ret_typedef = TMAP[CTYPE_ATOM][2]
+            thunk_ret_typedef = TMAP[CTYPE_ATOM][1]
         else:
-            thunk_ret_typedef = TMAP[ret_ctype][2]
+            thunk_ret_typedef = TMAP[ret_ctype][1]
 
-        ret_typedef = TMAP[ret_ctype][2]
+        ret_typedef = TMAP[ret_ctype][1]
         if ret_ctype == CTYPE_OBJECT and ret_traits.niname != None:
             ret_typedef = ret_traits.niname + "*"
 
@@ -2042,7 +1989,14 @@ class AbcThunkGen:
         decl,ret_ctype,ret_typedef = self.thunkDecl(name, m)
         self.out_h.println('extern '+decl+";");
 
-    def emitThunkBody(self, name, receiver, m, directcall):
+    def findNativeBase(self, t):
+        if t.niname != None:
+            return t.niname
+        if t.base != None:
+            return self.findNativeBase(self.lookupTraits(t.base))
+        return None
+
+    def emitThunkBody(self, name, receiver, m):
         decl,ret_ctype,ret_typedef = self.thunkDecl(name, m)
 
         unbox_receiver = self.calc_unbox_this(m)
@@ -2078,23 +2032,25 @@ class AbcThunkGen:
         args = []
 
         arg0_ctype = argtraits[0].ctype
-        arg0_typedef = TMAP[arg0_ctype][1]
-        arg0_basetype = TMAP[arg0_ctype][3]
+        arg0_typedef = TMAP[arg0_ctype][0]
+        arg0_basetype = TMAP[arg0_ctype][2]
         assert(argtraits[0].ctype in [CTYPE_OBJECT,CTYPE_STRING,CTYPE_NAMESPACE])
         if unbox_receiver:
             val = "AvmThunkUnbox_AvmAtomReceiver("+arg0_typedef+", argv[argoff0])";
         else:
             val = "AvmThunkUnbox_AvmReceiver("+arg0_typedef+", argv[argoff0])";
-        if directcall and argtraits[0].niname != None:
+        if argtraits[0].niname != None:
             val = "(%s*)%s" % (argtraits[0].niname, val)
         args.append((val, arg0_typedef))
 
         for i in range(1, len(argtraits)):
             arg_ctype = argtraits[i].ctype
-            arg_typedef = TMAP[arg_ctype][1]
+            arg_typedef = TMAP[arg_ctype][0]
             val = "AvmThunkUnbox_%s(argv[argoff%d])" % (to_cname(arg_typedef), i)
-            if directcall and arg_ctype == CTYPE_OBJECT and argtraits[i].niname != None:
-                val = "(%s*)%s" % (argtraits[i].niname, val)
+            if arg_ctype == CTYPE_OBJECT:
+                unboxname = self.findNativeBase(argtraits[i])
+                if unboxname != None:
+                    val = "(%s*)%s" % (unboxname, val)
             # argtraits includes receiver at 0, optionalValues does not
             if i > param_count - optional_count:
                 dct,defval,defvalraw = self.abc.default_ctype_and_value(m.optionalValues[i-1]);
@@ -2102,8 +2058,10 @@ class AbcThunkGen:
                 if dts != arg_typedef:
                     defval = "AvmThunkCoerce_%s_%s(%s)" % (to_cname(dts), to_cname(arg_typedef), defval)
                 val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
-                if directcall and arg_ctype == CTYPE_OBJECT and argtraits[i].niname != None:
-                    val = "(%s*)%s" % (argtraits[i].niname, val)
+                if arg_ctype == CTYPE_OBJECT:
+                    coercename = self.findNativeBase(argtraits[i])
+                    if coercename != None:
+                        val = "(%s*)%s" % (coercename, val)
             args.append((val, arg_typedef))
 
         if m.needRest():
@@ -2113,82 +2071,42 @@ class AbcThunkGen:
         if not m.hasOptional() and not m.needRest():
             self.out_c.println("(void)argc;");
 
-        if directcall:
-            self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
-            if m.receiver == None:
-                recname = BASE_INSTANCE_NAME
-            else:
-                recname = m.receiver.niname
-            self.out_c.println("%s* const obj = %s;" % (recname, args[0][0]))
-
-            if ret_ctype != CTYPE_VOID:
-                self.out_c.prnt("%s const ret = " % (ret_typedef))
-
-            if m.receiver == None:
-                self.out_c.prnt("%s(obj" % m.native_method_name)
-                need_comma = True
-            else:
-                native_method_name = m.native_method_name
-                if m.receiver.ni.method_map_name != None and m.receiver.itraits == None:
-                    native_method_name = m.receiver.ni.method_map_name + "::" + m.native_method_name
-                self.out_c.prnt("obj->%s(" % native_method_name)
-                need_comma = False
-
-            if len(args) > 1:
-                self.out_c.println("")
-                self.out_c.indent += 1
-                for i in range(1, len(args)):
-                    if need_comma:
-                        self.out_c.prnt(", ")
-                    self.out_c.println("%s" % args[i][0]);
-                    need_comma = True
-                self.out_c.indent -= 1
-            self.out_c.println(");")
-
-            if ret_ctype == CTYPE_DOUBLE:
-                self.out_c.println("return ret;")
-            elif ret_ctype != CTYPE_VOID:
-                self.out_c.println("return (Atom) ret;")
-
+        self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
+        if m.receiver == None:
+            recname = BASE_INSTANCE_NAME
         else:
-            if m.receiver == None:
-                self.out_c.prnt("typedef %s (*FuncType)(%s" % (ret_typedef, TMAP[CTYPE_OBJECT][1]))
-                for i in range(1, len(args)):
-                    self.out_c.prnt(", " + args[i][1]);
-                self.out_c.println(");");
-                self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));")
-                if ret_ctype == CTYPE_DOUBLE:
-                    self.out_c.prnt("return ")
-                elif ret_ctype != CTYPE_VOID:
-                    self.out_c.prnt("return (Atom)")
-                self.out_c.println("(*func)(%s" % (args[0][0]))
-                self.out_c.indent += 1
-                for i in range(1, len(args)):
-                    self.out_c.println(", " + args[i][0]);
-                self.out_c.indent -= 1
-                self.out_c.println(");")
-            else:
-                self.out_c.prnt("typedef %s (%s::*FuncType)(" % (ret_typedef, arg0_basetype))
-                for i in range(1, len(args)):
-                    if i > 1:
-                        self.out_c.prnt(", ")
-                    self.out_c.prnt(args[i][1]);
-                self.out_c.println(");");
-                self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));")
-                if ret_ctype == CTYPE_DOUBLE:
-                    self.out_c.prnt("return ")
-                elif ret_ctype != CTYPE_VOID:
-                    self.out_c.prnt("return (Atom)")
-                self.out_c.println("(*(%s).*(func))(" % (args[0][0]))
-                self.out_c.indent += 1
-                for i in range(1, len(args)):
-                    if i > 1:
-                        self.out_c.prnt(", ")
-                    self.out_c.println(args[i][0]);
-                self.out_c.indent -= 1
-                self.out_c.println(");")
+            recname = m.receiver.niname
+        self.out_c.println("%s* const obj = %s;" % (recname, args[0][0]))
 
-        if ret_ctype == CTYPE_VOID:
+        if ret_ctype != CTYPE_VOID:
+            self.out_c.prnt("%s const ret = " % (ret_typedef))
+
+        if m.receiver == None:
+            self.out_c.prnt("%s(obj" % m.native_method_name)
+            need_comma = True
+        else:
+            native_method_name = m.native_method_name
+            if m.receiver.ni.method_map_name != None and m.receiver.itraits == None:
+                native_method_name = m.receiver.ni.method_map_name + "::" + m.native_method_name
+            self.out_c.prnt("obj->%s(" % native_method_name)
+            need_comma = False
+
+        if len(args) > 1:
+            self.out_c.println("")
+            self.out_c.indent += 1
+            for i in range(1, len(args)):
+                if need_comma:
+                    self.out_c.prnt(", ")
+                self.out_c.println("%s" % args[i][0]);
+                need_comma = True
+            self.out_c.indent -= 1
+        self.out_c.println(");")
+
+        if ret_ctype == CTYPE_DOUBLE:
+            self.out_c.println("return ret;")
+        elif ret_ctype != CTYPE_VOID:
+            self.out_c.println("return (Atom) ret;")
+        else:
             self.out_c.println("return undefinedAtom;")
         self.out_c.indent -= 1
         self.out_c.println("}")
@@ -2240,37 +2158,6 @@ class AbcThunkGen:
         if not self.lookup_traits.has_key(name):
             raise Error("name not found: " + name)
         return self.lookup_traits[name]
-
-    def thunkSig(self, receiver, m):
-        sig = sigchar_from_traits(self.lookupTraits(m.returnType), False);
-        # many setters are declared as returning "undefined" in as3 but return "void" in C++.
-        # we could force them to be explicitly "void" in AS3, but I'm loathe to risk compatibility issues...
-        # so let's just force their native impl (and sig) to return void. (modifying the sig is important,
-        # otherwise we might combine some setters with some non-setters, which could have disastrous results)
-        if m.kind == TRAIT_Setter:
-            sig = "v"
-        sig += "2"
-        if m.returnType.name == "Number":
-            sig += "d"
-        else:
-            sig += "a"
-        sig += "_";
-        argtraits = self.argTraits(receiver, m)
-        for i in range(0, len(argtraits)):
-            sig += sigchar_from_traits(argtraits[i], True)
-        if m.hasOptional():
-            param_count = len(m.paramTypes)
-            for i in range(param_count - m.optional_count, param_count):
-                dct,defval,defvalraw = self.abc.default_ctype_and_value(m.optionalValues[i]);
-                sig += "_opt" + sigchar_from_enum(dct, True) + to_cname(defval)
-        if m.needRest():
-            sig += "_rest"
-        if self.calc_unbox_this(m):
-            sig += "_u"
-        # native script functions can't share thunk with native class methods, add a prefix to force uniqueness
-        if m.receiver == None:
-            sig = "func_" + sig
-        return sig;
 
     def gatherThunk(self, receiver, m):
         if m.native_id_name == None:

@@ -61,11 +61,6 @@ namespace avmplus
     // change now.)
     typedef int32_t bool32;
 
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    typedef void (AvmPlusScriptableObject::*AvmThunkNativeMethodHandler)();
-    typedef void (*AvmThunkNativeFunctionHandler)(AvmPlusScriptableObject* obj);
-#endif
-
     const uintptr_t kUnboxMask = ~uintptr_t(7);
 #ifdef _DEBUG
     extern void FASTCALL check_unbox(MethodEnv* env, bool u);
@@ -162,25 +157,9 @@ namespace avmplus
 
     #define AvmThunkGetConstantString(v)        (env->method->pool()->getString(v))
 
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    #define AVMTHUNK_GET_METHOD_HANDLER(env)    ((env)->method->handler_method())
-    #define AVMTHUNK_GET_FUNCTION_HANDLER(env)  ((env)->method->handler_function())
-#endif
-
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    union AvmThunkNativeHandler
-    {
-        AvmThunkNativeMethodHandler method;
-        AvmThunkNativeFunctionHandler function;
-    };
-#endif
-
     struct NativeMethodInfo
     {
     public:
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-        AvmThunkNativeHandler handler;
-#endif
         GprMethodProc thunker;
         int32_t method_id;
     };
@@ -260,11 +239,6 @@ namespace avmplus
         #endif
     };
 
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    #define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
-        reinterpret_cast<AvmThunkNativeMethodHandler>((void(CLS::*)())(PTR))
-#endif
-
 #ifdef _DEBUG
     #define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, CREATE_FUNC, ASSERT_FUNC) \
         static ClassClosure* FASTCALL CLS##_createClassClosure(VTable* cvtable) \
@@ -322,13 +296,8 @@ namespace avmplus
         static const NativeMethodInfo NAME##_methodEntries[] = {
 #endif
 
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-        { { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
-#else
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
         { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
-#endif
 
     #define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
         _AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
@@ -346,33 +315,12 @@ namespace avmplus
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { { NULL }, NULL, -1 } };
 #else
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-    // C++ won't let us auto-init a union to a field other than the first one, nor will it
-    // allow us to reliably cast between a pointer-to-function and pointer-to-member-function,
-    // thus this inline function to massage the few places that need it.
-    REALLY_INLINE AvmThunkNativeMethodHandler _to_method_handler(AvmThunkNativeFunctionHandler function)
-    {
-        AvmThunkNativeHandler handler;
-        // FIXME: this fixes bug 596608 (see also 599931)
-        handler.method = NULL;
-        handler.function = function;
-        return handler.method;
-    }
-
-    #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        { { _to_method_handler(reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL)) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
-
-    #define AVMTHUNK_END_NATIVE_METHODS() \
-        { { NULL }, NULL, -1 } };
-#else
-
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
         { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { NULL, -1 } };
 
-#endif
 #endif
 
     // ---------------
