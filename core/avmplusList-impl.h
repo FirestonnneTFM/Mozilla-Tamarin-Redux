@@ -208,13 +208,10 @@ namespace avmplus
         uint32_t const len_minus_1 = m_data->len - 1;
         AvmAssert(index <= len_minus_1);
         T const old = ListHelper::load(m_data, index);
+        ListHelper::clearRange(m_data, index, 1);
         if (index < len_minus_1)
         {
             ListHelper::moveRange(m_data, index+1, index, len_minus_1 - index);
-        }
-        else
-        {
-            ListHelper::clearRange(m_data, index, 1);
         }
         m_data->len = len_minus_1;
         return old;
