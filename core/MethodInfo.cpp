@@ -66,7 +66,7 @@ namespace avmplus
     }
 
 #ifdef VMCFG_AOT
-    MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t method_id) :
+    MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, const AvmThunkNativeHandler& handler, int32_t method_id) :
         MethodInfoProcHolder(),
         _msref(declTraits->pool->core->GetGC()->emptyWeakRef),
         _declarer(declTraits),
@@ -79,8 +79,7 @@ namespace avmplus
     {
         AvmAssert(native_info != NULL);
         this->_native.thunker = native_info->thunker;
-        this->_native.handler = native_info->handler;
-        this->setAotCompiled();
+        this->setAotCompiled(handler);
         
         declTraits->core->exec->init(this, native_info);
     }

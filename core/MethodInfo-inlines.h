@@ -235,11 +235,12 @@ REALLY_INLINE uint32_t MethodInfo::isAotCompiled() const
     return _isAotCompiled;
 }
 
-REALLY_INLINE void MethodInfo::setAotCompiled()
+REALLY_INLINE void MethodInfo::setAotCompiled(const AvmThunkNativeHandler& handler)
 {
     _isAotCompiled = 1;
     _isNative = 1;
     _hasMethodBody = 0;
+    _native.handler = handler;
 }
 #endif
 
@@ -247,6 +248,20 @@ REALLY_INLINE PoolObject* MethodInfo::pool() const
 {
     return _pool;
 }
+
+#ifdef VMCFG_AOT
+REALLY_INLINE AvmThunkNativeMethodHandler MethodInfo::handler_method() const
+{
+    AvmAssert(isNative());
+    return _native.handler.method;
+}
+
+REALLY_INLINE AvmThunkNativeFunctionHandler MethodInfo::handler_function() const
+{
+    AvmAssert(isNative());
+    return _native.handler.function;
+}
+#endif
 
 REALLY_INLINE const uint8_t* MethodInfo::abc_body_pos() const
 {

@@ -833,13 +833,12 @@ namespace avmplus
 
 #ifdef VMCFG_AOT
             bool isCompiled = false;
+            AvmThunkNativeHandler handler;
+            NativeMethodInfo compiledMethodInfo;
             {
                 Multiname returnTypeName;
                 parseTypeName(ret_type_pos, returnTypeName);
-
-                NativeMethodInfo compiledMethodInfo;
-
-                if (!ni && natives->getCompiledInfo(&compiledMethodInfo, returnTypeName, i))
+                if (!ni && natives->getCompiledInfo(&compiledMethodInfo, &handler, returnTypeName, i))
                 {
                     ni = &compiledMethodInfo;
                     isCompiled = true;
@@ -853,7 +852,7 @@ namespace avmplus
 
 #ifdef VMCFG_AOT
             if (isCompiled)
-                info->setAotCompiled();
+                info->setAotCompiled(handler);
 #endif
 
             if (core->config.methodNames)

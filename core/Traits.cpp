@@ -1696,8 +1696,9 @@ namespace avmplus
             if (aotInfo->activationInfo[m->method_id()].initHandler) {
                 NativeMethodInfo compiledMethodInfo;
                 compiledMethodInfo.thunker = aotThunker;
-                compiledMethodInfo.handler.function = aotInfo->activationInfo[m->method_id()].initHandler;
-                activationTraits->init = MethodInfo::create(core->GetGC(), MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[m->method_id()].initMethodId);
+                AvmThunkNativeHandler nhandler;
+                nhandler.function = aotInfo->activationInfo[m->method_id()].initHandler;
+                activationTraits->init = MethodInfo::create(core->GetGC(), MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, nhandler, aotInfo->activationInfo[m->method_id()].initMethodId);
             }
             // The following comes from Verifier::write() TODO: refactor so we can share this code
             const ScopeTypeChain *scope = m->activationScope();

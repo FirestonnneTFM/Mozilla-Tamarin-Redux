@@ -116,7 +116,7 @@ namespace avmplus
         MethodInfo(InitMethodStub, Traits* declTraits);
 
 #ifdef VMCFG_AOT
-        MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t method_id);
+        MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info, const AvmThunkNativeHandler& handler, int32_t method_id);
 #endif
 
     public:
@@ -136,9 +136,9 @@ namespace avmplus
         }
         
 #ifdef VMCFG_AOT
-        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits, const NativeMethodInfo* native_info, int32_t method_id)
+        REALLY_INLINE static MethodInfo* create(MMgc::GC* gc, InitMethodStub stub, Traits* declTraits, const NativeMethodInfo* native_info, const AvmThunkNativeHandler& handler, int32_t method_id)
         {
-            return new (gc, MMgc::kExact) MethodInfo(stub, declTraits, native_info, method_id);
+            return new (gc, MMgc::kExact) MethodInfo(stub, declTraits, native_info, handler, method_id);
         }
 #endif
         
@@ -215,7 +215,7 @@ namespace avmplus
 
 #ifdef VMCFG_AOT
         uint32_t isAotCompiled() const;
-        void setAotCompiled();
+        void setAotCompiled(const AvmThunkNativeHandler& handler);
 #endif
 
     public:
@@ -236,6 +236,10 @@ namespace avmplus
     public:
 
         PoolObject* pool() const;
+#ifdef VMCFG_AOT
+        AvmThunkNativeMethodHandler handler_method() const;
+        AvmThunkNativeFunctionHandler handler_function() const;
+#endif
 
         const uint8_t* abc_body_pos() const;
         void set_abc_body_pos(const uint8_t* p);
@@ -297,6 +301,9 @@ namespace avmplus
         struct NativeInfo
         {
             GprMethodProc thunker;
+#ifdef VMCFG_AOT
+            AvmThunkNativeHandler handler;
+#endif
         };
 
         struct AbcInfo

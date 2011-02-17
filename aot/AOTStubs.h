@@ -980,8 +980,9 @@ rt abcOP_newfunction(MethodEnv *env, Traits** idForDeclaringTraits, Traits*** sc
             if (handler != NULL) {
                 NativeMethodInfo compiledMethodInfo;
                 compiledMethodInfo.thunker = aotThunker;
-                compiledMethodInfo.handler.function = handler;
-                atraits->init = MethodInfo::create(env->core()->GetGC(), MethodInfo::kInitMethodStub, body->activationTraits(), &compiledMethodInfo, aotInfo->activationInfo[methodindex].initMethodId);
+                AvmThunkNativeHandler nhandler;
+                nhandler.function = handler;
+                atraits->init = MethodInfo::create(env->core()->GetGC(), MethodInfo::kInitMethodStub, body->activationTraits(), &compiledMethodInfo, nhandler, aotInfo->activationInfo[methodindex].initMethodId);
             }
 
             // ---------------------------------------------------------------------------
