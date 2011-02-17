@@ -2714,6 +2714,13 @@ namespace MMgc
             return;
         }
 
+        // It is possible, probably common, to enter FinishIncrementalMark without the 
+        // mark queue being empty.   Clear out the queue synchronously here, we don't
+        // want anything pending when we start marking roots: multiple active root protectors
+        // for the same root is a mess.
+
+        Mark();
+
         // Force repeated restarts and marking until we're done.  For discussion
         // of completion, see the comments above HandleMarkStackOverflow.
 
