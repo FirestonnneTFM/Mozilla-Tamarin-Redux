@@ -54,16 +54,17 @@ namespace avmplus
     #define AvmThunk_DEBUG_ONLY(...)
 #endif /* DEBUG */
 
-#ifdef VMCFG_AOT
-    typedef void (*AvmThunkNativeFunctionHandler)(AvmPlusScriptableObject* obj);
-#endif
-
     // Historically, bools are passed in as int32_t, as some calling conventions
     // would only use a single byte and leave the remainder of the argument word
     // as trash; this was used to ensure it was well-defined. (It's not clear to
     // me if this is still an issue, but easier to maintain the convention than
     // change now.)
     typedef int32_t bool32;
+
+#ifdef VMCFG_AOT
+    typedef void (AvmPlusScriptableObject::*AvmThunkNativeMethodHandler)();
+    typedef void (*AvmThunkNativeFunctionHandler)(AvmPlusScriptableObject* obj);
+#endif
 
     const uintptr_t kUnboxMask = ~uintptr_t(7);
 #ifdef _DEBUG
@@ -161,6 +162,14 @@ namespace avmplus
 
     #define AvmThunkGetConstantString(v)        (env->method->pool()->getString(v))
 
+#ifdef VMCFG_AOT
+    union AvmThunkNativeHandler
+    {
+        AvmThunkNativeMethodHandler method;
+        AvmThunkNativeFunctionHandler function;
+    };
+#endif
+
     struct NativeMethodInfo
     {
     public:
@@ -206,7 +215,7 @@ namespace avmplus
         const NativeMethodInfo* getNativeInfo(uint32_t i) const { return get_method(i); }
 
         #ifdef VMCFG_AOT
-            bool getCompiledInfo(NativeMethodInfo *info, Multiname &returnTypeName, uint32_t i) const;
+            bool getCompiledInfo(NativeMethodInfo *info, AvmThunkNativeHandler* handlerOut, Multiname &returnTypeName, uint32_t i) const;
             bool hasBuiltins() const { return methodCount || classCount; }
             const AOTInfo* get_aotInfo() const { return aotInfo; }
         #endif

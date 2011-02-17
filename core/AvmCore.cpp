@@ -648,8 +648,9 @@ namespace avmplus
             if (aotInfo->activationInfo[method->method_id()].initHandler != NULL) {
                 NativeMethodInfo compiledMethodInfo;
                 compiledMethodInfo.thunker = aotThunker;
-                compiledMethodInfo.handler.function = aotInfo->activationInfo[method->method_id()].initHandler;
-                activationTraits->init = MethodInfo::create(core->GetGC(), MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, aotInfo->activationInfo[method->method_id()].initMethodId);
+                AvmThunkNativeHandler nhandler;
+                nhandler.function = aotInfo->activationInfo[method->method_id()].initHandler;
+                activationTraits->init = MethodInfo::create(core->GetGC(), MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo, nhandler, aotInfo->activationInfo[method->method_id()].initMethodId);
             }
             method->activationTraits()->resolveSignatures(toplevel);
         }
