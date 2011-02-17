@@ -54,6 +54,10 @@ namespace avmplus
     #define AvmThunk_DEBUG_ONLY(...)
 #endif /* DEBUG */
 
+#ifdef VMCFG_AOT
+    typedef void (*AvmThunkNativeFunctionHandler)(AvmPlusScriptableObject* obj);
+#endif
+
     // Historically, bools are passed in as int32_t, as some calling conventions
     // would only use a single byte and leave the remainder of the argument word
     // as trash; this was used to ensure it was well-defined. (It's not clear to
@@ -308,20 +312,10 @@ namespace avmplus
     #define AVMTHUNK_NATIVE_METHOD_NAMESPACE(METHID, IMPL) \
         _AVMTHUNK_NATIVE_METHOD(avmplus::Namespace, METHID, IMPL)
 
-#ifdef VMCFG_AOT
-    // AOT build env is ok with designated inits
-    #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-        { { function: reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
-    #define AVMTHUNK_END_NATIVE_METHODS() \
-        { { NULL }, NULL, -1 } };
-#else
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
         { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
-
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { NULL, -1 } };
-
-#endif
 
     // ---------------
 

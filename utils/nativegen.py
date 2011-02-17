@@ -2072,7 +2072,7 @@ class AbcThunkGen:
             self.out_c.println("(void)argc;");
 
         self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
-        if m.receiver == None:
+        if m.receiver == None or m.receiver.niname == None:
             recname = BASE_INSTANCE_NAME
         else:
             recname = m.receiver.niname
