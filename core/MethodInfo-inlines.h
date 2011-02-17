@@ -248,20 +248,6 @@ REALLY_INLINE PoolObject* MethodInfo::pool() const
     return _pool;
 }
 
-#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
-REALLY_INLINE AvmThunkNativeMethodHandler MethodInfo::handler_method() const
-{
-    AvmAssert(isNative());
-    return _native.handler.method;
-}
-
-REALLY_INLINE AvmThunkNativeFunctionHandler MethodInfo::handler_function() const
-{
-    AvmAssert(isNative());
-    return _native.handler.function;
-}
-#endif
-
 REALLY_INLINE const uint8_t* MethodInfo::abc_body_pos() const
 {
     AvmAssert(!isNative());
