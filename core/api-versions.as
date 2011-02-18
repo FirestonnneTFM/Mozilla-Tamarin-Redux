@@ -51,5 +51,5 @@ CONFIG const AIR_2_6 = 671;
 CONFIG const SWF_12 = 672;
 CONFIG const AIR_2_7 = 673;
 CONFIG const SWF_13 = 674;
-CONFIG const AIR_2_8 = 675;
+CONFIG const AIR_3_0 = 675;
 CONFIG const VM_INTERNAL = 676;
