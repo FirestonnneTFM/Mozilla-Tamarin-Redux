@@ -49,283 +49,283 @@ double Math_private__min_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->_min(
-        AvmThunkUnbox_double(argv[argoff1])
-        , AvmThunkUnbox_double(argv[argoff2])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
+        , AvmThunkUnbox_DOUBLE(double, argv[argoff2])
     );
-    return ret;
+    return double(ret);
 }
 double Math_private__max_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->_max(
-        AvmThunkUnbox_double(argv[argoff1])
-        , AvmThunkUnbox_double(argv[argoff2])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
+        , AvmThunkUnbox_DOUBLE(double, argv[argoff2])
     );
-    return ret;
+    return double(ret);
 }
 double Math_abs_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->abs(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_acos_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->acos(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_asin_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->asin(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_atan_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->atan(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_ceil_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->ceil(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_cos_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->cos(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_exp_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->exp(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_floor_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->floor(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_log_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->log(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_round_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->round(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_sin_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->sin(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_sqrt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->sqrt(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_tan_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->tan(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Math_atan2_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->atan2(
-        AvmThunkUnbox_double(argv[argoff1])
-        , AvmThunkUnbox_double(argv[argoff2])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
+        , AvmThunkUnbox_DOUBLE(double, argv[argoff2])
     );
-    return ret;
+    return double(ret);
 }
 double Math_pow_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->pow(
-        AvmThunkUnbox_double(argv[argoff1])
-        , AvmThunkUnbox_double(argv[argoff2])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
+        , AvmThunkUnbox_DOUBLE(double, argv[argoff2])
     );
-    return ret;
+    return double(ret);
 }
 double Math_max_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
-    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_DOUBLE;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->max(
-        (argc < 1 ? MathUtils::kNegInfinity : AvmThunkUnbox_double(argv[argoff1]))
-        , (argc < 2 ? MathUtils::kNegInfinity : AvmThunkUnbox_double(argv[argoff2]))
+        (argc < 1 ? MathUtils::kNegInfinity : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
+        , (argc < 2 ? MathUtils::kNegInfinity : AvmThunkUnbox_DOUBLE(double, argv[argoff2]))
         , (argc <= 2 ? NULL : argv + argoffV)
         , (argc <= 2 ? 0 : argc - 2)
     );
-    return ret;
+    return double(ret);
 }
 double Math_min_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
-    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_DOUBLE;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->min(
-        (argc < 1 ? MathUtils::kInfinity : AvmThunkUnbox_double(argv[argoff1]))
-        , (argc < 2 ? MathUtils::kInfinity : AvmThunkUnbox_double(argv[argoff2]))
+        (argc < 1 ? MathUtils::kInfinity : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
+        , (argc < 2 ? MathUtils::kInfinity : AvmThunkUnbox_DOUBLE(double, argv[argoff2]))
         , (argc <= 2 ? NULL : argv + argoffV)
         , (argc <= 2 ? 0 : argc - 2)
     );
-    return ret;
+    return double(ret);
 }
 double Math_random_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -334,23 +334,23 @@ double Math_random_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    MathClass* const obj = (MathClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::MathClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::MathClass*, argv[argoff0]);
     double const ret = obj->random();
-    return ret;
+    return double(ret);
 }
 avmplus::Atom Error_getErrorMessage_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ErrorClass* const obj = (ErrorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ErrorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ErrorClass*, argv[argoff0]);
     avmplus::String* const ret = obj->getErrorMessage(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Error_getStackTrace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -359,51 +359,51 @@ avmplus::Atom Error_getStackTrace_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     };
     (void)argc;
     (void)env;
-    ErrorObject* const obj = (ErrorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ErrorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ErrorObject*, argv[argoff0]);
     avmplus::String* const ret = obj->getStackTrace();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double Date_parse_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DateClass* const obj = (DateClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateClass*, argv[argoff0]);
     double const ret = obj->parse(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Date_UTC_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize_avmplus_Atom
-        , argoff4 = argoff3 + AvmThunkArgSize_avmplus_Atom
-        , argoff5 = argoff4 + AvmThunkArgSize_avmplus_Atom
-        , argoff6 = argoff5 + AvmThunkArgSize_avmplus_Atom
-        , argoff7 = argoff6 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_ATOM
+        , argoff4 = argoff3 + AvmThunkArgSize_ATOM
+        , argoff5 = argoff4 + AvmThunkArgSize_ATOM
+        , argoff6 = argoff5 + AvmThunkArgSize_ATOM
+        , argoff7 = argoff6 + AvmThunkArgSize_ATOM
     };
-    const uint32_t argoffV = argoff7 + AvmThunkArgSize_avmplus_Atom;
+    const uint32_t argoffV = argoff7 + AvmThunkArgSize_ATOM;
     (void)env;
-    DateClass* const obj = (DateClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateClass*, argv[argoff0]);
     double const ret = obj->UTC(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
-        , (argc < 3 ? AvmThunkCoerce_int32_t_avmplus_Atom(1) : AvmThunkUnbox_avmplus_Atom(argv[argoff3]))
-        , (argc < 4 ? AvmThunkCoerce_int32_t_avmplus_Atom(0) : AvmThunkUnbox_avmplus_Atom(argv[argoff4]))
-        , (argc < 5 ? AvmThunkCoerce_int32_t_avmplus_Atom(0) : AvmThunkUnbox_avmplus_Atom(argv[argoff5]))
-        , (argc < 6 ? AvmThunkCoerce_int32_t_avmplus_Atom(0) : AvmThunkUnbox_avmplus_Atom(argv[argoff6]))
-        , (argc < 7 ? AvmThunkCoerce_int32_t_avmplus_Atom(0) : AvmThunkUnbox_avmplus_Atom(argv[argoff7]))
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
+        , (argc < 3 ? AvmThunkCoerce_INT_ATOM(1) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3]))
+        , (argc < 4 ? AvmThunkCoerce_INT_ATOM(0) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff4]))
+        , (argc < 5 ? AvmThunkCoerce_INT_ATOM(0) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff5]))
+        , (argc < 6 ? AvmThunkCoerce_INT_ATOM(0) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff6]))
+        , (argc < 7 ? AvmThunkCoerce_INT_ATOM(0) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff7]))
         , (argc <= 7 ? NULL : argv + argoffV)
         , (argc <= 7 ? 0 : argc - 7)
     );
-    return ret;
+    return double(ret);
 }
 double Date_AS3_valueOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -412,51 +412,51 @@ double Date_AS3_valueOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_valueOf();
-    return ret;
+    return double(ret);
 }
 avmplus::Atom Date_private__toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     avmplus::String* const ret = obj->_toString(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double Date_private__setTime_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setTime(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_get(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -465,9 +465,9 @@ double Date_AS3_getUTCFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCFullYear();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -476,9 +476,9 @@ double Date_AS3_getUTCMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCMonth();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -487,9 +487,9 @@ double Date_AS3_getUTCDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCDate();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCDay_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -498,9 +498,9 @@ double Date_AS3_getUTCDay_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCDay();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -509,9 +509,9 @@ double Date_AS3_getUTCHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCHours();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -520,9 +520,9 @@ double Date_AS3_getUTCMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCMinutes();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -531,9 +531,9 @@ double Date_AS3_getUTCSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCSeconds();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getUTCMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -542,9 +542,9 @@ double Date_AS3_getUTCMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getUTCMilliseconds();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -553,9 +553,9 @@ double Date_AS3_getFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getFullYear();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -564,9 +564,9 @@ double Date_AS3_getMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getMonth();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -575,9 +575,9 @@ double Date_AS3_getDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getDate();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getDay_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -586,9 +586,9 @@ double Date_AS3_getDay_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getDay();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -597,9 +597,9 @@ double Date_AS3_getHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getHours();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -608,9 +608,9 @@ double Date_AS3_getMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getMinutes();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -619,9 +619,9 @@ double Date_AS3_getSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getSeconds();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -630,9 +630,9 @@ double Date_AS3_getMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getMilliseconds();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getTimezoneOffset_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -641,9 +641,9 @@ double Date_AS3_getTimezoneOffset_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getTimezoneOffset();
-    return ret;
+    return double(ret);
 }
 double Date_AS3_getTime_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -652,205 +652,205 @@ double Date_AS3_getTime_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->AS3_getTime();
-    return ret;
+    return double(ret);
 }
 double Date_private__setFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setFullYear(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setMonth(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setDate(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setHours(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setMinutes(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setSeconds(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setMilliseconds(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setUTCFullYear_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setUTCFullYear(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setUTCMonth_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setUTCMonth(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setUTCDate_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setUTCDate(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setUTCHours_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setUTCHours(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setUTCMinutes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setUTCMinutes(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setUTCSeconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setUTCSeconds(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 double Date_private__setUTCMilliseconds_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DateObject* const obj = (DateObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DateObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DateObject*, argv[argoff0]);
     double const ret = obj->_setUTCMilliseconds(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return ret;
+    return double(ret);
 }
 avmplus::Atom RegExp_source_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -859,9 +859,9 @@ avmplus::Atom RegExp_source_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     avmplus::String* const ret = obj->get_source();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom RegExp_global_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -870,9 +870,9 @@ avmplus::Atom RegExp_global_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     bool const ret = obj->get_global();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom RegExp_ignoreCase_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -881,9 +881,9 @@ avmplus::Atom RegExp_ignoreCase_get_thunk(MethodEnv* env, uint32_t argc, Atom* a
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     bool const ret = obj->get_ignoreCase();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom RegExp_multiline_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -892,9 +892,9 @@ avmplus::Atom RegExp_multiline_get_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     bool const ret = obj->get_multiline();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom RegExp_lastIndex_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -903,21 +903,21 @@ avmplus::Atom RegExp_lastIndex_get_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     int32_t const ret = obj->get_lastIndex();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom RegExp_lastIndex_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     obj->set_lastIndex(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -928,9 +928,9 @@ avmplus::Atom RegExp_dotall_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     bool const ret = obj->get_dotall();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom RegExp_extended_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -939,22 +939,22 @@ avmplus::Atom RegExp_extended_get_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     };
     (void)argc;
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     bool const ret = obj->get_extended();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom RegExp_AS3_exec_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    RegExpObject* const obj = (RegExpObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::RegExpObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::RegExpObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_exec(
-        (argc < 1 ? AvmThunkGetConstantString(0)/* "" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        (argc < 1 ? AvmThunkGetConstantString(0)/* "" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_ignoreComments_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -963,21 +963,21 @@ avmplus::Atom XML_ignoreComments_get_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     bool const ret = obj->get_ignoreComments();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_ignoreComments_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_ignoreComments(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -988,21 +988,21 @@ avmplus::Atom XML_ignoreProcessingInstructions_get_thunk(MethodEnv* env, uint32_
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     bool const ret = obj->get_ignoreProcessingInstructions();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_ignoreProcessingInstructions_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_ignoreProcessingInstructions(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1013,21 +1013,21 @@ avmplus::Atom XML_ignoreWhitespace_get_thunk(MethodEnv* env, uint32_t argc, Atom
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     bool const ret = obj->get_ignoreWhitespace();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_ignoreWhitespace_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_ignoreWhitespace(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1038,21 +1038,21 @@ avmplus::Atom XML_prettyPrinting_get_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     bool const ret = obj->get_prettyPrinting();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_prettyPrinting_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_prettyPrinting(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1063,21 +1063,21 @@ avmplus::Atom XML_prettyIndent_get_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     int32_t const ret = obj->get_prettyIndent();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_prettyIndent_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLClass* const obj = (XMLClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_prettyIndent(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1088,77 +1088,77 @@ avmplus::Atom XML_AS3_toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_toString();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_hasOwnProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmAtomReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmAtomReceiver(avmplus::XMLObject*, argv[argoff0]);
     bool const ret = obj->XML_AS3_hasOwnProperty(
-        (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+        (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_propertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmAtomReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmAtomReceiver(avmplus::XMLObject*, argv[argoff0]);
     bool const ret = obj->XML_AS3_propertyIsEnumerable(
-        (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+        (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_addNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_addNamespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_addNamespace(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_appendChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_appendChild(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_appendChild(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_attribute_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_attribute(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_attribute(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_attributes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1167,23 +1167,23 @@ avmplus::Atom XML_AS3_attributes_thunk(MethodEnv* env, uint32_t argc, Atom* argv
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_attributes();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_attributes();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_child_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_child(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_child(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_childIndex_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1192,9 +1192,9 @@ avmplus::Atom XML_AS3_childIndex_thunk(MethodEnv* env, uint32_t argc, Atom* argv
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     int32_t const ret = obj->AS3_childIndex();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_children_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1203,9 +1203,9 @@ avmplus::Atom XML_AS3_children_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_children();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_children();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_comments_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1214,23 +1214,23 @@ avmplus::Atom XML_AS3_comments_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_comments();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_comments();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_contains_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     bool const ret = obj->AS3_contains(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_copy_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1239,35 +1239,35 @@ avmplus::Atom XML_AS3_copy_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_copy();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_copy();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_descendants_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_descendants(
-        (argc < 1 ? AvmThunkCoerce_avmplus_String__avmplus_Atom(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_descendants(
+        (argc < 1 ? AvmThunkCoerce_STRING_ATOM(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_elements_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_elements(
-        (argc < 1 ? AvmThunkCoerce_avmplus_String__avmplus_Atom(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_elements(
+        (argc < 1 ? AvmThunkCoerce_STRING_ATOM(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_hasComplexContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1276,9 +1276,9 @@ avmplus::Atom XML_AS3_hasComplexContent_thunk(MethodEnv* env, uint32_t argc, Ato
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     bool const ret = obj->AS3_hasComplexContent();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_hasSimpleContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1287,9 +1287,9 @@ avmplus::Atom XML_AS3_hasSimpleContent_thunk(MethodEnv* env, uint32_t argc, Atom
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     bool const ret = obj->AS3_hasSimpleContent();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_inScopeNamespaces_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1298,41 +1298,41 @@ avmplus::Atom XML_AS3_inScopeNamespaces_thunk(MethodEnv* env, uint32_t argc, Ato
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->AS3_inScopeNamespaces();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->AS3_inScopeNamespaces();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_insertChildAfter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_insertChildAfter(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_insertChildBefore_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_insertChildBefore(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_localName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1341,9 +1341,9 @@ avmplus::Atom XML_AS3_localName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_localName();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_name_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1352,25 +1352,25 @@ avmplus::Atom XML_AS3_name_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_name();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_private__namespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_namespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_int32_t(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_namespaceDeclarations_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1379,9 +1379,9 @@ avmplus::Atom XML_AS3_namespaceDeclarations_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->AS3_namespaceDeclarations();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->AS3_namespaceDeclarations();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_nodeKind_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1390,9 +1390,9 @@ avmplus::Atom XML_AS3_nodeKind_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_nodeKind();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1401,9 +1401,9 @@ avmplus::Atom XML_AS3_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_normalize();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_normalize();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_parent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1412,92 +1412,92 @@ avmplus::Atom XML_AS3_parent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_parent();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_processingInstructions_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_processingInstructions(
-        (argc < 1 ? AvmThunkCoerce_avmplus_String__avmplus_Atom(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_processingInstructions(
+        (argc < 1 ? AvmThunkCoerce_STRING_ATOM(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_prependChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_prependChild(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_prependChild(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_removeNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_removeNamespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_removeNamespace(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_replace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_replace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_replace(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_setChildren_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_setChildren(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_setChildren(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_setLocalName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     obj->AS3_setLocalName(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1505,13 +1505,13 @@ avmplus::Atom XML_AS3_setName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     obj->AS3_setName(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1519,13 +1519,13 @@ avmplus::Atom XML_AS3_setNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* ar
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     obj->AS3_setNamespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1536,9 +1536,9 @@ avmplus::Atom XML_AS3_text_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_text();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_text();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_toXMLString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1547,9 +1547,9 @@ avmplus::Atom XML_AS3_toXMLString_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_toXMLString();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_notification_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1558,23 +1558,23 @@ avmplus::Atom XML_AS3_notification_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    FunctionObject* const ret = obj->AS3_notification();
-    return (Atom) ret;
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
+    avmplus::FunctionObject* const ret = obj->AS3_notification();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XML_AS3_setNotification_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLObject* const obj = (XMLObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_setNotification(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1583,49 +1583,49 @@ avmplus::Atom XMLList_AS3_toString_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_toString();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_hasOwnProperty_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmAtomReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmAtomReceiver(avmplus::XMLListObject*, argv[argoff0]);
     bool const ret = obj->XMLList_AS3_hasOwnProperty(
-        (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+        (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_propertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmAtomReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmAtomReceiver(avmplus::XMLListObject*, argv[argoff0]);
     bool const ret = obj->XMLList_AS3_propertyIsEnumerable(
-        (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+        (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_attribute_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_attribute(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_attribute(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_attributes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1634,23 +1634,23 @@ avmplus::Atom XMLList_AS3_attributes_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_attributes();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_attributes();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_child_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_child(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_child(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_children_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1659,9 +1659,9 @@ avmplus::Atom XMLList_AS3_children_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_children();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_children();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_comments_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1670,23 +1670,23 @@ avmplus::Atom XMLList_AS3_comments_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_comments();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_comments();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_contains_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     bool const ret = obj->AS3_contains(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_copy_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1695,35 +1695,35 @@ avmplus::Atom XMLList_AS3_copy_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_copy();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_copy();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_descendants_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_descendants(
-        (argc < 1 ? AvmThunkCoerce_avmplus_String__avmplus_Atom(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_descendants(
+        (argc < 1 ? AvmThunkCoerce_STRING_ATOM(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_elements_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_elements(
-        (argc < 1 ? AvmThunkCoerce_avmplus_String__avmplus_Atom(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_elements(
+        (argc < 1 ? AvmThunkCoerce_STRING_ATOM(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_hasComplexContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1732,9 +1732,9 @@ avmplus::Atom XMLList_AS3_hasComplexContent_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     bool const ret = obj->AS3_hasComplexContent();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_hasSimpleContent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1743,9 +1743,9 @@ avmplus::Atom XMLList_AS3_hasSimpleContent_thunk(MethodEnv* env, uint32_t argc, 
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     bool const ret = obj->AS3_hasSimpleContent();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_length_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1754,9 +1754,9 @@ avmplus::Atom XMLList_AS3_length_thunk(MethodEnv* env, uint32_t argc, Atom* argv
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     int32_t const ret = obj->AS3_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_name_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1765,9 +1765,9 @@ avmplus::Atom XMLList_AS3_name_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_name();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1776,9 +1776,9 @@ avmplus::Atom XMLList_AS3_normalize_thunk(MethodEnv* env, uint32_t argc, Atom* a
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_normalize();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_normalize();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_parent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1787,22 +1787,22 @@ avmplus::Atom XMLList_AS3_parent_thunk(MethodEnv* env, uint32_t argc, Atom* argv
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_parent();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_processingInstructions_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_processingInstructions(
-        (argc < 1 ? AvmThunkCoerce_avmplus_String__avmplus_Atom(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_processingInstructions(
+        (argc < 1 ? AvmThunkCoerce_STRING_ATOM(AvmThunkGetConstantString(517)/* "*" */) : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_text_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1811,9 +1811,9 @@ avmplus::Atom XMLList_AS3_text_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLListObject* const ret = obj->AS3_text();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLListObject* const ret = obj->AS3_text();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_toXMLString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1822,37 +1822,37 @@ avmplus::Atom XMLList_AS3_toXMLString_thunk(MethodEnv* env, uint32_t argc, Atom*
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_toXMLString();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_addNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_addNamespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_addNamespace(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_appendChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_appendChild(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_appendChild(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_childIndex_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1861,9 +1861,9 @@ avmplus::Atom XMLList_AS3_childIndex_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     int32_t const ret = obj->AS3_childIndex();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_inScopeNamespaces_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1872,41 +1872,41 @@ avmplus::Atom XMLList_AS3_inScopeNamespaces_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->AS3_inScopeNamespaces();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->AS3_inScopeNamespaces();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_insertChildAfter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_insertChildAfter(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_insertChildBefore_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_insertChildBefore(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_nodeKind_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1915,25 +1915,25 @@ avmplus::Atom XMLList_AS3_nodeKind_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_nodeKind();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_private__namespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_namespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_int32_t(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_localName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1942,9 +1942,9 @@ avmplus::Atom XMLList_AS3_localName_thunk(MethodEnv* env, uint32_t argc, Atom* a
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_localName();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_namespaceDeclarations_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1953,79 +1953,79 @@ avmplus::Atom XMLList_AS3_namespaceDeclarations_thunk(MethodEnv* env, uint32_t a
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->AS3_namespaceDeclarations();
-    return (Atom) ret;
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->AS3_namespaceDeclarations();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_prependChild_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_prependChild(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_prependChild(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_removeNamespace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_removeNamespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_removeNamespace(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_replace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_replace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_replace(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_setChildren_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    XMLObject* const ret = obj->AS3_setChildren(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
+    avmplus::XMLObject* const ret = obj->AS3_setChildren(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom XMLList_AS3_setLocalName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     obj->AS3_setLocalName(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2033,13 +2033,13 @@ avmplus::Atom XMLList_AS3_setName_thunk(MethodEnv* env, uint32_t argc, Atom* arg
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     obj->AS3_setName(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2047,13 +2047,13 @@ avmplus::Atom XMLList_AS3_setNamespace_thunk(MethodEnv* env, uint32_t argc, Atom
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    XMLListObject* const obj = (XMLListObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::XMLListObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLListObject*, argv[argoff0]);
     obj->AS3_setNamespace(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2064,9 +2064,9 @@ avmplus::Atom QName_localName_get_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     };
     (void)argc;
     (void)env;
-    QNameObject* const obj = (QNameObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::QNameObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::QNameObject*, argv[argoff0]);
     avmplus::String* const ret = obj->get_localName();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom QName_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2075,9 +2075,9 @@ avmplus::Atom QName_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    QNameObject* const obj = (QNameObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::QNameObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::QNameObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->get_uri();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_defaultObjectEncoding_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2086,21 +2086,21 @@ avmplus::Atom flash_utils_ByteArray_defaultObjectEncoding_get_thunk(MethodEnv* e
     };
     (void)argc;
     (void)env;
-    ByteArrayClass* const obj = (ByteArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayClass*, argv[argoff0]);
     uint32_t const ret = obj->get_defaultObjectEncoding();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_defaultObjectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayClass* const obj = (ByteArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayClass*, argv[argoff0]);
     obj->set_defaultObjectEncoding(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2108,16 +2108,16 @@ avmplus::Atom flash_utils_ByteArray_readBytes_thunk(MethodEnv* env, uint32_t arg
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
+        , argoff3 = argoff2 + AvmThunkArgSize_UINT
     };
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->readBytes(
-        (ByteArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , (argc < 2 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff2]))
-        , (argc < 3 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff3]))
+        (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1])
+        , (argc < 2 ? AvmThunkCoerce_INT_UINT(0) : AvmThunkUnbox_UINT(uint32_t, argv[argoff2]))
+        , (argc < 3 ? AvmThunkCoerce_INT_UINT(0) : AvmThunkUnbox_UINT(uint32_t, argv[argoff3]))
     );
     return undefinedAtom;
 }
@@ -2125,16 +2125,16 @@ avmplus::Atom flash_utils_ByteArray_writeBytes_thunk(MethodEnv* env, uint32_t ar
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
+        , argoff3 = argoff2 + AvmThunkArgSize_UINT
     };
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeBytes(
-        (ByteArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , (argc < 2 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff2]))
-        , (argc < 3 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff3]))
+        (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1])
+        , (argc < 2 ? AvmThunkCoerce_INT_UINT(0) : AvmThunkUnbox_UINT(uint32_t, argv[argoff2]))
+        , (argc < 3 ? AvmThunkCoerce_INT_UINT(0) : AvmThunkUnbox_UINT(uint32_t, argv[argoff3]))
     );
     return undefinedAtom;
 }
@@ -2142,13 +2142,13 @@ avmplus::Atom flash_utils_ByteArray_writeBoolean_thunk(MethodEnv* env, uint32_t 
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeBoolean(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2156,13 +2156,13 @@ avmplus::Atom flash_utils_ByteArray_writeByte_thunk(MethodEnv* env, uint32_t arg
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeByte(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2170,13 +2170,13 @@ avmplus::Atom flash_utils_ByteArray_writeShort_thunk(MethodEnv* env, uint32_t ar
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeShort(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2184,13 +2184,13 @@ avmplus::Atom flash_utils_ByteArray_writeInt_thunk(MethodEnv* env, uint32_t argc
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeInt(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2198,13 +2198,13 @@ avmplus::Atom flash_utils_ByteArray_writeUnsignedInt_thunk(MethodEnv* env, uint3
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeUnsignedInt(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2212,13 +2212,13 @@ avmplus::Atom flash_utils_ByteArray_writeFloat_thunk(MethodEnv* env, uint32_t ar
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeFloat(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2226,13 +2226,13 @@ avmplus::Atom flash_utils_ByteArray_writeDouble_thunk(MethodEnv* env, uint32_t a
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeDouble(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2240,15 +2240,15 @@ avmplus::Atom flash_utils_ByteArray_writeMultiByte_thunk(MethodEnv* env, uint32_
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeMultiByte(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
     );
     return undefinedAtom;
 }
@@ -2256,13 +2256,13 @@ avmplus::Atom flash_utils_ByteArray_writeUTF_thunk(MethodEnv* env, uint32_t argc
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeUTF(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2270,13 +2270,13 @@ avmplus::Atom flash_utils_ByteArray_writeUTFBytes_thunk(MethodEnv* env, uint32_t
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeUTFBytes(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2287,9 +2287,9 @@ avmplus::Atom flash_utils_ByteArray_readBoolean_thunk(MethodEnv* env, uint32_t a
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     bool const ret = obj->readBoolean();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2298,9 +2298,9 @@ avmplus::Atom flash_utils_ByteArray_readByte_thunk(MethodEnv* env, uint32_t argc
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     int32_t const ret = obj->readByte();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readUnsignedByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2309,9 +2309,9 @@ avmplus::Atom flash_utils_ByteArray_readUnsignedByte_thunk(MethodEnv* env, uint3
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->readUnsignedByte();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2320,9 +2320,9 @@ avmplus::Atom flash_utils_ByteArray_readShort_thunk(MethodEnv* env, uint32_t arg
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     int32_t const ret = obj->readShort();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readUnsignedShort_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2331,9 +2331,9 @@ avmplus::Atom flash_utils_ByteArray_readUnsignedShort_thunk(MethodEnv* env, uint
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->readUnsignedShort();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2342,9 +2342,9 @@ avmplus::Atom flash_utils_ByteArray_readInt_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     int32_t const ret = obj->readInt();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readUnsignedInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2353,9 +2353,9 @@ avmplus::Atom flash_utils_ByteArray_readUnsignedInt_thunk(MethodEnv* env, uint32
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->readUnsignedInt();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double flash_utils_ByteArray_readFloat_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2364,9 +2364,9 @@ double flash_utils_ByteArray_readFloat_thunk(MethodEnv* env, uint32_t argc, Atom
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     double const ret = obj->readFloat();
-    return ret;
+    return double(ret);
 }
 double flash_utils_ByteArray_readDouble_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2375,25 +2375,25 @@ double flash_utils_ByteArray_readDouble_thunk(MethodEnv* env, uint32_t argc, Ato
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     double const ret = obj->readDouble();
-    return ret;
+    return double(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readMultiByte_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_uint32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_UINT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     avmplus::String* const ret = obj->readMultiByte(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readUTF_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2402,23 +2402,23 @@ avmplus::Atom flash_utils_ByteArray_readUTF_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     avmplus::String* const ret = obj->readUTF();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_readUTFBytes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     avmplus::String* const ret = obj->readUTFBytes(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2427,21 +2427,21 @@ avmplus::Atom flash_utils_ByteArray_length_get_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->set_length(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2449,13 +2449,13 @@ avmplus::Atom flash_utils_ByteArray_writeObject_thunk(MethodEnv* env, uint32_t a
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeObject(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2466,21 +2466,21 @@ avmplus::Atom flash_utils_ByteArray_readObject_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->readObject();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_private__compress_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->_compress(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2488,13 +2488,13 @@ avmplus::Atom flash_utils_ByteArray_private__uncompress_thunk(MethodEnv* env, ui
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->_uncompress(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2505,9 +2505,9 @@ avmplus::Atom flash_utils_ByteArray_private__toString_thunk(MethodEnv* env, uint
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     avmplus::String* const ret = obj->_toString();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_bytesAvailable_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2516,9 +2516,9 @@ avmplus::Atom flash_utils_ByteArray_bytesAvailable_get_thunk(MethodEnv* env, uin
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->get_bytesAvailable();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_position_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2527,21 +2527,21 @@ avmplus::Atom flash_utils_ByteArray_position_get_thunk(MethodEnv* env, uint32_t 
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->get_position();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_position_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->set_position(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2552,21 +2552,21 @@ avmplus::Atom flash_utils_ByteArray_objectEncoding_get_thunk(MethodEnv* env, uin
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->get_objectEncoding();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_objectEncoding_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->set_objectEncoding(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2577,21 +2577,21 @@ avmplus::Atom flash_utils_ByteArray_endian_get_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     avmplus::String* const ret = obj->get_endian();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_ByteArray_endian_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->set_endian(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2602,7 +2602,7 @@ avmplus::Atom flash_utils_ByteArray_clear_thunk(MethodEnv* env, uint32_t argc, A
     };
     (void)argc;
     (void)env;
-    ByteArrayObject* const obj = (ByteArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->clear();
     return undefinedAtom;
 }
@@ -2610,49 +2610,49 @@ avmplus::Atom Object_private__hasOwnProperty_thunk(MethodEnv* env, uint32_t argc
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ObjectClass* const obj = (ObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectClass*, argv[argoff0]);
     bool const ret = obj->_hasOwnProperty(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Object_private__propertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ObjectClass* const obj = (ObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectClass*, argv[argoff0]);
     bool const ret = obj->_propertyIsEnumerable(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Object_protected__setPropertyIsEnumerable_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_STRING
     };
     (void)argc;
     (void)env;
-    ObjectClass* const obj = (ObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectClass*, argv[argoff0]);
     obj->_setPropertyIsEnumerable(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_bool32(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
+        , AvmThunkUnbox_BOOLEAN(bool32, argv[argoff3])
     );
     return undefinedAtom;
 }
@@ -2660,31 +2660,31 @@ avmplus::Atom Object_private__isPrototypeOf_thunk(MethodEnv* env, uint32_t argc,
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ObjectClass* const obj = (ObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectClass*, argv[argoff0]);
     bool const ret = obj->_isPrototypeOf(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Object_private__toString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectClass* const obj = (ObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectClass*, argv[argoff0]);
     avmplus::String* const ret = obj->_toString(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Class_prototype_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2693,9 +2693,9 @@ avmplus::Atom Class_prototype_get_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     };
     (void)argc;
     (void)env;
-    ClassClosure* const obj = (ClassClosure*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ClassClosure* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ClassClosure*, argv[argoff0]);
     avmplus::Atom const ret = obj->get_prototype();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Function_prototype_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2704,21 +2704,21 @@ avmplus::Atom Function_prototype_get_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    FunctionObject* const obj = (FunctionObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::FunctionObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::FunctionObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->get_prototype();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Function_prototype_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    FunctionObject* const obj = (FunctionObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::FunctionObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::FunctionObject*, argv[argoff0]);
     obj->set_prototype(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2729,40 +2729,40 @@ avmplus::Atom Function_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* arg
     };
     (void)argc;
     (void)env;
-    FunctionObject* const obj = (FunctionObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::FunctionObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::FunctionObject*, argv[argoff0]);
     int32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Function_AS3_call_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    const uint32_t argoffV = argoff1 + AvmThunkArgSize_avmplus_Atom;
+    const uint32_t argoffV = argoff1 + AvmThunkArgSize_ATOM;
     (void)env;
-    FunctionObject* const obj = (FunctionObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::FunctionObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::FunctionObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_call(
-        (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+        (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
         , (argc <= 1 ? NULL : argv + argoffV)
         , (argc <= 1 ? 0 : argc - 1)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Function_AS3_apply_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)env;
-    FunctionObject* const obj = (FunctionObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::FunctionObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::FunctionObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_apply(
-        (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
-        , (argc < 2 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff2]))
+        (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
+        , (argc < 2 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Namespace_prefix_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2771,9 +2771,9 @@ avmplus::Atom Namespace_prefix_get_thunk(MethodEnv* env, uint32_t argc, Atom* ar
     };
     (void)argc;
     (void)env;
-    Namespace* const obj = (Namespace*)AvmThunkUnbox_AvmReceiver(avmplus::Namespace*, argv[argoff0]);
+    avmplus::Namespace* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Namespace*, argv[argoff0]);
     avmplus::Atom const ret = obj->get_prefix();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Namespace_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2782,43 +2782,43 @@ avmplus::Atom Namespace_uri_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    Namespace* const obj = (Namespace*)AvmThunkUnbox_AvmReceiver(avmplus::Namespace*, argv[argoff0]);
+    avmplus::Namespace* const obj = AvmThunkUnbox_AvmReceiver(avmplus::Namespace*, argv[argoff0]);
     avmplus::String* const ret = obj->get_uri();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Number_private__numberToString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)argc;
     (void)env;
-    NumberClass* const obj = (NumberClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::NumberClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::NumberClass*, argv[argoff0]);
     avmplus::String* const ret = obj->_numberToString(
-        AvmThunkUnbox_double(argv[argoff1])
-        , AvmThunkUnbox_int32_t(argv[argoff2])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Number_private__convert_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
-        , argoff3 = argoff2 + AvmThunkArgSize_int32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
+        , argoff3 = argoff2 + AvmThunkArgSize_INT
     };
     (void)argc;
     (void)env;
-    NumberClass* const obj = (NumberClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::NumberClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::NumberClass*, argv[argoff0]);
     avmplus::String* const ret = obj->_convert(
-        AvmThunkUnbox_double(argv[argoff1])
-        , AvmThunkUnbox_int32_t(argv[argoff2])
-        , AvmThunkUnbox_int32_t(argv[argoff3])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff2])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double Number_private__minValue_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2827,91 +2827,91 @@ double Number_private__minValue_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    NumberClass* const obj = (NumberClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::NumberClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::NumberClass*, argv[argoff0]);
     double const ret = obj->_minValue();
-    return ret;
+    return double(ret);
 }
 avmplus::Atom String_AS3_fromCharCode_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    StringClass* const obj = (StringClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::StringClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::StringClass*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_fromCharCode(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__match_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)argc;
     (void)env;
-    StringClass* const obj = (StringClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->_match(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+    avmplus::StringClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::StringClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->_match(
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__replace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
-        , argoff3 = argoff2 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
+        , argoff3 = argoff2 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    StringClass* const obj = (StringClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::StringClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::StringClass*, argv[argoff0]);
     avmplus::String* const ret = obj->_replace(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__search_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)argc;
     (void)env;
-    StringClass* const obj = (StringClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::StringClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::StringClass*, argv[argoff0]);
     int32_t const ret = obj->_search(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__split_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
-        , argoff3 = argoff2 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
+        , argoff3 = argoff2 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    StringClass* const obj = (StringClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->_split(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
-        , AvmThunkUnbox_uint32_t(argv[argoff3])
+    avmplus::StringClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::StringClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->_split(
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -2920,198 +2920,198 @@ avmplus::Atom String_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     int32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__indexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     int32_t const ret = obj->_indexOf(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , (argc < 2 ? 0 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_indexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     int32_t const ret = obj->AS3_indexOf(
-        (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
-        , (argc < 2 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff2]))
+        (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
+        , (argc < 2 ? AvmThunkCoerce_INT_DOUBLE(0) : AvmThunkUnbox_DOUBLE(double, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__lastIndexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     int32_t const ret = obj->_lastIndexOf(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , (argc < 2 ? 2147483647 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_lastIndexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     int32_t const ret = obj->AS3_lastIndexOf(
-        (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
-        , (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+        (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
+        , (argc < 2 ? AvmThunkCoerce_INT_DOUBLE(2147483647) : AvmThunkUnbox_DOUBLE(double, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_charAt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_charAt(
-        (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+        (argc < 1 ? AvmThunkCoerce_INT_DOUBLE(0) : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double String_AS3_charCodeAt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     double const ret = obj->AS3_charCodeAt(
-        (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+        (argc < 1 ? AvmThunkCoerce_INT_DOUBLE(0) : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
     );
-    return ret;
+    return double(ret);
 }
 avmplus::Atom String_AS3_localeCompare_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     int32_t const ret = obj->AS3_localeCompare(
-        (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+        (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__slice_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_int32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_INT
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->_slice(
-        (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
-        , (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+        (argc < 1 ? 0 : AvmThunkUnbox_INT(int32_t, argv[argoff1]))
+        , (argc < 2 ? 2147483647 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_slice_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_slice(
-        (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
-        , (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+        (argc < 1 ? AvmThunkCoerce_INT_DOUBLE(0) : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
+        , (argc < 2 ? AvmThunkCoerce_INT_DOUBLE(2147483647) : AvmThunkUnbox_DOUBLE(double, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__substring_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_int32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_INT
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->_substring(
-        (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
-        , (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+        (argc < 1 ? 0 : AvmThunkUnbox_INT(int32_t, argv[argoff1]))
+        , (argc < 2 ? 2147483647 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_substring_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_substring(
-        (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
-        , (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+        (argc < 1 ? AvmThunkCoerce_INT_DOUBLE(0) : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
+        , (argc < 2 ? AvmThunkCoerce_INT_DOUBLE(2147483647) : AvmThunkUnbox_DOUBLE(double, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_private__substr_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_int32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_INT
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->_substr(
-        (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
-        , (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+        (argc < 1 ? 0 : AvmThunkUnbox_INT(int32_t, argv[argoff1]))
+        , (argc < 2 ? 2147483647 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_substr_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_avmplus_String_
-        , argoff2 = argoff1 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_STRING
+        , argoff2 = argoff1 + AvmThunkArgSize_DOUBLE
     };
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_substr(
-        (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
-        , (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+        (argc < 1 ? AvmThunkCoerce_INT_DOUBLE(0) : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
+        , (argc < 2 ? AvmThunkCoerce_INT_DOUBLE(2147483647) : AvmThunkUnbox_DOUBLE(double, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_toLowerCase_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3120,9 +3120,9 @@ avmplus::Atom String_AS3_toLowerCase_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_toLowerCase();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom String_AS3_toUpperCase_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3131,238 +3131,238 @@ avmplus::Atom String_AS3_toUpperCase_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    String* const obj = (String*)AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
+    avmplus::String* const obj = AvmThunkUnbox_AvmReceiver(avmplus::String*, argv[argoff0]);
     avmplus::String* const ret = obj->AS3_toUpperCase();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_pop(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_reverse(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__concat_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->_concat(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->_concat(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_shift(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__slice_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize_double
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_DOUBLE
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->_slice(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_double(argv[argoff2])
-        , AvmThunkUnbox_double(argv[argoff3])
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->_slice(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_DOUBLE(double, argv[argoff2])
+        , AvmThunkUnbox_DOUBLE(double, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     uint32_t const ret = obj->_unshift(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__splice_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->_splice(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->_splice(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_sort(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__sortOn_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_sortOn(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__indexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     int32_t const ret = obj->_indexOf(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
-        , AvmThunkUnbox_int32_t(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__lastIndexOf_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_ATOM
     };
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     int32_t const ret = obj->_lastIndexOf(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
-        , (argc < 3 ? 0 : AvmThunkUnbox_int32_t(argv[argoff3]))
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
+        , (argc < 3 ? 0 : AvmThunkUnbox_INT(int32_t, argv[argoff3]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     bool const ret = obj->_every(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->_filter(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->_filter(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     obj->_forEach(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
     return undefinedAtom;
 }
@@ -3370,37 +3370,37 @@ avmplus::Atom Array_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->_map(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->_map(
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_private__some_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayClass* const obj = (ArrayClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayClass*, argv[argoff0]);
     bool const ret = obj->_some(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3409,21 +3409,21 @@ avmplus::Atom Array_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    ArrayObject* const obj = (ArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ArrayObject* const obj = (ArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayObject*, argv[argoff0]);
     obj->set_length(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -3434,230 +3434,230 @@ avmplus::Atom Array_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
     };
     (void)argc;
     (void)env;
-    ArrayObject* const obj = (ArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_pop();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    ArrayObject* const obj = (ArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_push(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom Array_AS3_unshift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    ArrayObject* const obj = (ArrayObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ArrayObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_unshift(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_bugzilla_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     bool const ret = Toplevel::bugzilla(obj
-        , AvmThunkUnbox_int32_t(argv[argoff1])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_decodeURI_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = Toplevel::decodeURI(obj
-        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_decodeURIComponent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = Toplevel::decodeURIComponent(obj
-        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_encodeURI_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = Toplevel::encodeURI(obj
-        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_encodeURIComponent_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = Toplevel::encodeURIComponent(obj
-        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_isNaN_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     bool const ret = Toplevel::isNaN(obj
-        , (argc < 1 ? AvmThunkCoerce_avmplus_Atom_double(undefinedAtom) : AvmThunkUnbox_double(argv[argoff1]))
+        , (argc < 1 ? AvmThunkCoerce_ATOM_DOUBLE(undefinedAtom) : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_isFinite_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     bool const ret = Toplevel::isFinite(obj
-        , (argc < 1 ? AvmThunkCoerce_avmplus_Atom_double(undefinedAtom) : AvmThunkUnbox_double(argv[argoff1]))
+        , (argc < 1 ? AvmThunkCoerce_ATOM_DOUBLE(undefinedAtom) : AvmThunkUnbox_DOUBLE(double, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double native_script_function_parseInt_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     double const ret = Toplevel::parseInt(obj
-        , (argc < 1 ? AvmThunkGetConstantString(60)/* "NaN" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
-        , (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
+        , (argc < 1 ? AvmThunkGetConstantString(60)/* "NaN" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
+        , (argc < 2 ? 0 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
-    return ret;
+    return double(ret);
 }
 double native_script_function_parseFloat_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     double const ret = Toplevel::parseFloat(obj
-        , (argc < 1 ? AvmThunkGetConstantString(60)/* "NaN" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        , (argc < 1 ? AvmThunkGetConstantString(60)/* "NaN" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return ret;
+    return double(ret);
 }
 avmplus::Atom native_script_function_escape_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = Toplevel::escape(obj
-        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_unescape_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = Toplevel::unescape(obj
-        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_avmplus_String_(argv[argoff1]))
+        , (argc < 1 ? AvmThunkGetConstantString(58)/* "undefined" */ : AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_isXMLName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     bool const ret = Toplevel::isXMLName(obj
-        , (argc < 1 ? undefinedAtom : AvmThunkUnbox_avmplus_Atom(argv[argoff1]))
+        , (argc < 1 ? undefinedAtom : AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectVectorClass* const obj = (ObjectVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorClass*, argv[argoff0]);
     bool const ret = obj->_every(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectVectorClass* const obj = (ObjectVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorClass*, argv[argoff0]);
     obj->_forEach(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
     return undefinedAtom;
 }
@@ -3665,35 +3665,35 @@ avmplus::Atom __AS3___vec_Vector_object_private__some_thunk(MethodEnv* env, uint
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectVectorClass* const obj = (ObjectVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorClass*, argv[argoff0]);
     bool const ret = obj->_some(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ObjectVectorClass* const obj = (ObjectVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_sort(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3702,9 +3702,9 @@ avmplus::Atom __AS3___vec_Vector_object_private_newThisType_thunk(MethodEnv* env
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ObjectVectorObject* const ret = obj->newThisType();
-    return (Atom) ret;
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const ret = obj->newThisType();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3713,21 +3713,21 @@ avmplus::Atom __AS3___vec_Vector_object_length_get_thunk(MethodEnv* env, uint32_
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     obj->set_length(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -3735,13 +3735,13 @@ avmplus::Atom __AS3___vec_Vector_object_fixed_set_thunk(MethodEnv* env, uint32_t
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -3752,23 +3752,23 @@ avmplus::Atom __AS3___vec_Vector_object_fixed_get_thunk(MethodEnv* env, uint32_t
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     bool const ret = obj->get_fixed();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_push(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3777,7 +3777,7 @@ avmplus::Atom __AS3___vec_Vector_object_private__reverse_thunk(MethodEnv* env, u
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     obj->_reverse();
     return undefinedAtom;
 }
@@ -3785,21 +3785,21 @@ avmplus::Atom __AS3___vec_Vector_object_private__spliceHelper_thunk(MethodEnv* e
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_uint32_t
-        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
-        , argoff4 = argoff3 + AvmThunkArgSize_uint32_t
-        , argoff5 = argoff4 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_UINT
+        , argoff3 = argoff2 + AvmThunkArgSize_UINT
+        , argoff4 = argoff3 + AvmThunkArgSize_UINT
+        , argoff5 = argoff4 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     obj->_spliceHelper(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
-        , AvmThunkUnbox_uint32_t(argv[argoff2])
-        , AvmThunkUnbox_uint32_t(argv[argoff3])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff4])
-        , AvmThunkUnbox_uint32_t(argv[argoff5])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff2])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff3])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff4])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff5])
     );
     return undefinedAtom;
 }
@@ -3808,46 +3808,46 @@ avmplus::Atom __AS3___vec_Vector_object_AS3_unshift_thunk(MethodEnv* env, uint32
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_unshift(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_filter(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_map(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3856,9 +3856,9 @@ avmplus::Atom __AS3___vec_Vector_object_AS3_pop_thunk(MethodEnv* env, uint32_t a
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_pop();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_object_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3867,43 +3867,43 @@ avmplus::Atom __AS3___vec_Vector_object_AS3_shift_thunk(MethodEnv* env, uint32_t
     };
     (void)argc;
     (void)env;
-    ObjectVectorObject* const obj = (ObjectVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->AS3_shift();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    IntVectorClass* const obj = (IntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorClass*, argv[argoff0]);
     bool const ret = obj->_every(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    IntVectorClass* const obj = (IntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorClass*, argv[argoff0]);
     obj->_forEach(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
     return undefinedAtom;
 }
@@ -3911,35 +3911,35 @@ avmplus::Atom __AS3___vec_Vector_int_private__some_thunk(MethodEnv* env, uint32_
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    IntVectorClass* const obj = (IntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorClass*, argv[argoff0]);
     bool const ret = obj->_some(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    IntVectorClass* const obj = (IntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_sort(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3948,9 +3948,9 @@ avmplus::Atom __AS3___vec_Vector_int_private_newThisType_thunk(MethodEnv* env, u
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    IntVectorObject* const ret = obj->newThisType();
-    return (Atom) ret;
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const ret = obj->newThisType();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -3959,21 +3959,21 @@ avmplus::Atom __AS3___vec_Vector_int_length_get_thunk(MethodEnv* env, uint32_t a
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     obj->set_length(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -3981,13 +3981,13 @@ avmplus::Atom __AS3___vec_Vector_int_fixed_set_thunk(MethodEnv* env, uint32_t ar
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -3998,23 +3998,23 @@ avmplus::Atom __AS3___vec_Vector_int_fixed_get_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     bool const ret = obj->get_fixed();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_push(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4023,7 +4023,7 @@ avmplus::Atom __AS3___vec_Vector_int_private__reverse_thunk(MethodEnv* env, uint
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     obj->_reverse();
     return undefinedAtom;
 }
@@ -4031,21 +4031,21 @@ avmplus::Atom __AS3___vec_Vector_int_private__spliceHelper_thunk(MethodEnv* env,
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_uint32_t
-        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
-        , argoff4 = argoff3 + AvmThunkArgSize_uint32_t
-        , argoff5 = argoff4 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_UINT
+        , argoff3 = argoff2 + AvmThunkArgSize_UINT
+        , argoff4 = argoff3 + AvmThunkArgSize_UINT
+        , argoff5 = argoff4 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     obj->_spliceHelper(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
-        , AvmThunkUnbox_uint32_t(argv[argoff2])
-        , AvmThunkUnbox_uint32_t(argv[argoff3])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff4])
-        , AvmThunkUnbox_uint32_t(argv[argoff5])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff2])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff3])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff4])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff5])
     );
     return undefinedAtom;
 }
@@ -4054,46 +4054,46 @@ avmplus::Atom __AS3___vec_Vector_int_AS3_unshift_thunk(MethodEnv* env, uint32_t 
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_unshift(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_filter(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_map(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4102,9 +4102,9 @@ avmplus::Atom __AS3___vec_Vector_int_AS3_pop_thunk(MethodEnv* env, uint32_t argc
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     int32_t const ret = obj->AS3_pop();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_int_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4113,43 +4113,43 @@ avmplus::Atom __AS3___vec_Vector_int_AS3_shift_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    IntVectorObject* const obj = (IntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     int32_t const ret = obj->AS3_shift();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    UIntVectorClass* const obj = (UIntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorClass*, argv[argoff0]);
     bool const ret = obj->_every(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    UIntVectorClass* const obj = (UIntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorClass*, argv[argoff0]);
     obj->_forEach(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
     return undefinedAtom;
 }
@@ -4157,35 +4157,35 @@ avmplus::Atom __AS3___vec_Vector_uint_private__some_thunk(MethodEnv* env, uint32
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    UIntVectorClass* const obj = (UIntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorClass*, argv[argoff0]);
     bool const ret = obj->_some(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    UIntVectorClass* const obj = (UIntVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_sort(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4194,9 +4194,9 @@ avmplus::Atom __AS3___vec_Vector_uint_private_newThisType_thunk(MethodEnv* env, 
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    UIntVectorObject* const ret = obj->newThisType();
-    return (Atom) ret;
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const ret = obj->newThisType();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4205,21 +4205,21 @@ avmplus::Atom __AS3___vec_Vector_uint_length_get_thunk(MethodEnv* env, uint32_t 
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     obj->set_length(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -4227,13 +4227,13 @@ avmplus::Atom __AS3___vec_Vector_uint_fixed_set_thunk(MethodEnv* env, uint32_t a
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -4244,23 +4244,23 @@ avmplus::Atom __AS3___vec_Vector_uint_fixed_get_thunk(MethodEnv* env, uint32_t a
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     bool const ret = obj->get_fixed();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_push(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4269,7 +4269,7 @@ avmplus::Atom __AS3___vec_Vector_uint_private__reverse_thunk(MethodEnv* env, uin
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     obj->_reverse();
     return undefinedAtom;
 }
@@ -4277,21 +4277,21 @@ avmplus::Atom __AS3___vec_Vector_uint_private__spliceHelper_thunk(MethodEnv* env
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_uint32_t
-        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
-        , argoff4 = argoff3 + AvmThunkArgSize_uint32_t
-        , argoff5 = argoff4 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_UINT
+        , argoff3 = argoff2 + AvmThunkArgSize_UINT
+        , argoff4 = argoff3 + AvmThunkArgSize_UINT
+        , argoff5 = argoff4 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     obj->_spliceHelper(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
-        , AvmThunkUnbox_uint32_t(argv[argoff2])
-        , AvmThunkUnbox_uint32_t(argv[argoff3])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff4])
-        , AvmThunkUnbox_uint32_t(argv[argoff5])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff2])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff3])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff4])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff5])
     );
     return undefinedAtom;
 }
@@ -4300,46 +4300,46 @@ avmplus::Atom __AS3___vec_Vector_uint_AS3_unshift_thunk(MethodEnv* env, uint32_t
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_unshift(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_filter(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_map(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4348,9 +4348,9 @@ avmplus::Atom __AS3___vec_Vector_uint_AS3_pop_thunk(MethodEnv* env, uint32_t arg
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_pop();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_uint_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4359,43 +4359,43 @@ avmplus::Atom __AS3___vec_Vector_uint_AS3_shift_thunk(MethodEnv* env, uint32_t a
     };
     (void)argc;
     (void)env;
-    UIntVectorObject* const obj = (UIntVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_shift();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_private__every_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DoubleVectorClass* const obj = (DoubleVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorClass*, argv[argoff0]);
     bool const ret = obj->_every(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_private__forEach_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DoubleVectorClass* const obj = (DoubleVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorClass*, argv[argoff0]);
     obj->_forEach(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
     return undefinedAtom;
 }
@@ -4403,35 +4403,35 @@ avmplus::Atom __AS3___vec_Vector_double_private__some_thunk(MethodEnv* env, uint
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DoubleVectorClass* const obj = (DoubleVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorClass*, argv[argoff0]);
     bool const ret = obj->_some(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff3])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff3])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_private__sort_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    DoubleVectorClass* const obj = (DoubleVectorClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->_sort(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_private_newThisType_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4440,9 +4440,9 @@ avmplus::Atom __AS3___vec_Vector_double_private_newThisType_thunk(MethodEnv* env
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    DoubleVectorObject* const ret = obj->newThisType();
-    return (Atom) ret;
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const ret = obj->newThisType();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_length_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4451,21 +4451,21 @@ avmplus::Atom __AS3___vec_Vector_double_length_get_thunk(MethodEnv* env, uint32_
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->get_length();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_length_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     obj->set_length(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -4473,13 +4473,13 @@ avmplus::Atom __AS3___vec_Vector_double_fixed_set_thunk(MethodEnv* env, uint32_t
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -4490,23 +4490,23 @@ avmplus::Atom __AS3___vec_Vector_double_fixed_get_thunk(MethodEnv* env, uint32_t
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     bool const ret = obj->get_fixed();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_AS3_push_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_push(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_private__reverse_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4515,7 +4515,7 @@ avmplus::Atom __AS3___vec_Vector_double_private__reverse_thunk(MethodEnv* env, u
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     obj->_reverse();
     return undefinedAtom;
 }
@@ -4523,21 +4523,21 @@ avmplus::Atom __AS3___vec_Vector_double_private__spliceHelper_thunk(MethodEnv* e
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_uint32_t
-        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
-        , argoff4 = argoff3 + AvmThunkArgSize_uint32_t
-        , argoff5 = argoff4 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_UINT
+        , argoff3 = argoff2 + AvmThunkArgSize_UINT
+        , argoff4 = argoff3 + AvmThunkArgSize_UINT
+        , argoff5 = argoff4 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     obj->_spliceHelper(
-        AvmThunkUnbox_uint32_t(argv[argoff1])
-        , AvmThunkUnbox_uint32_t(argv[argoff2])
-        , AvmThunkUnbox_uint32_t(argv[argoff3])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff4])
-        , AvmThunkUnbox_uint32_t(argv[argoff5])
+        AvmThunkUnbox_UINT(uint32_t, argv[argoff1])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff2])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff3])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff4])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff5])
     );
     return undefinedAtom;
 }
@@ -4546,46 +4546,46 @@ avmplus::Atom __AS3___vec_Vector_double_AS3_unshift_thunk(MethodEnv* env, uint32
     enum {
         argoff0 = 0
     };
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_OBJECT;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     uint32_t const ret = obj->AS3_unshift(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_private__filter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_filter(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom __AS3___vec_Vector_double_private__map_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->_map(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff2])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double __AS3___vec_Vector_double_AS3_pop_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4594,9 +4594,9 @@ double __AS3___vec_Vector_double_AS3_pop_thunk(MethodEnv* env, uint32_t argc, At
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     double const ret = obj->AS3_pop();
-    return ret;
+    return double(ret);
 }
 double __AS3___vec_Vector_double_AS3_shift_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -4605,594 +4605,462 @@ double __AS3___vec_Vector_double_AS3_shift_thunk(MethodEnv* env, uint32_t argc, 
     };
     (void)argc;
     (void)env;
-    DoubleVectorObject* const obj = (DoubleVectorObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     double const ret = obj->AS3_shift();
-    return ret;
+    return double(ret);
 }
 avmplus::Atom native_script_function_avmplus_describeTypeJSON_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = DescribeTypeClass::describeTypeJSON(obj
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , AvmThunkUnbox_uint32_t(argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_avmplus_getQualifiedClassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = DescribeTypeClass::getQualifiedClassName(obj
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_avmplus_getQualifiedSuperclassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = DescribeTypeClass::getQualifiedSuperclassName(obj
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 
 class SlotOffsetsAndAsserts
 {
-private:
-    static uint32_t getSlotOffset(Traits* t, int nameId);
 public:
-    // This exists solely to silence a warning (generally GCC 4.4+):
-    // "all member functions in class SlotOffsetsAndAsserts are private"
-    static inline void do_nothing();
-    static const uint16_t s_slotsOffsetObjectClass = offsetof(ObjectClass, m_slots_ObjectClass);
-    static const uint16_t s_slotsOffsetScriptObject = 0;
+    static uint32_t getSlotOffset(Traits* t, int nameId);
+    enum {
+        kSlotsOffsetObjectClass = offsetof(avmplus::ObjectClass, m_slots_ObjectClass),
+        kSlotsOffsetScriptObject = 0,
+        kSlotsOffsetClassClass = offsetof(avmplus::ClassClass, m_slots_ClassClass),
+        kSlotsOffsetClassClosure = 0,
+        kSlotsOffsetFunctionClass = offsetof(avmplus::FunctionClass, m_slots_FunctionClass),
+        kSlotsOffsetFunctionObject = 0,
+        kSlotsOffsetNamespaceClass = offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass),
+        kSlotsOffsetNamespace = 0,
+        kSlotsOffsetBooleanClass = offsetof(avmplus::BooleanClass, m_slots_BooleanClass),
+        kSlotsOffsetbool = 0,
+        kSlotsOffsetNumberClass = offsetof(avmplus::NumberClass, m_slots_NumberClass),
+        kSlotsOffsetdouble = 0,
+        kSlotsOffsetIntClass = offsetof(avmplus::IntClass, m_slots_IntClass),
+        kSlotsOffsetint32_t = 0,
+        kSlotsOffsetUIntClass = offsetof(avmplus::UIntClass, m_slots_UIntClass),
+        kSlotsOffsetuint32_t = 0,
+        kSlotsOffsetStringClass = offsetof(avmplus::StringClass, m_slots_StringClass),
+        kSlotsOffsetString = 0,
+        kSlotsOffsetArrayClass = offsetof(avmplus::ArrayClass, m_slots_ArrayClass),
+        kSlotsOffsetArrayObject = 0,
+        kSlotsOffsetVectorClass = 0,
+        kSlotsOffsetObjectVectorObject = 0,
+        kSlotsOffsetObjectVectorClass = 0,
+        kSlotsOffsetIntVectorClass = 0,
+        kSlotsOffsetIntVectorObject = 0,
+        kSlotsOffsetUIntVectorClass = 0,
+        kSlotsOffsetUIntVectorObject = 0,
+        kSlotsOffsetDoubleVectorClass = 0,
+        kSlotsOffsetDoubleVectorObject = 0,
+        kSlotsOffsetMethodClosureClass = 0,
+        kSlotsOffsetMethodClosure = 0,
+        kSlotsOffsetMathClass = offsetof(avmplus::MathClass, m_slots_MathClass),
+        kSlotsOffsetErrorClass = offsetof(avmplus::ErrorClass, m_slots_ErrorClass),
+        kSlotsOffsetErrorObject = offsetof(avmplus::ErrorObject, m_slots_ErrorObject),
+        kSlotsOffsetDefinitionErrorClass = offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass),
+        kSlotsOffsetDefinitionErrorObject = 0,
+        kSlotsOffsetEvalErrorClass = offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass),
+        kSlotsOffsetEvalErrorObject = 0,
+        kSlotsOffsetRangeErrorClass = offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass),
+        kSlotsOffsetRangeErrorObject = 0,
+        kSlotsOffsetReferenceErrorClass = offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass),
+        kSlotsOffsetReferenceErrorObject = 0,
+        kSlotsOffsetSecurityErrorClass = offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass),
+        kSlotsOffsetSecurityErrorObject = 0,
+        kSlotsOffsetSyntaxErrorClass = offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass),
+        kSlotsOffsetSyntaxErrorObject = 0,
+        kSlotsOffsetTypeErrorClass = offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass),
+        kSlotsOffsetTypeErrorObject = 0,
+        kSlotsOffsetURIErrorClass = offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass),
+        kSlotsOffsetURIErrorObject = 0,
+        kSlotsOffsetVerifyErrorClass = offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass),
+        kSlotsOffsetVerifyErrorObject = 0,
+        kSlotsOffsetUninitializedErrorClass = offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass),
+        kSlotsOffsetUninitializedErrorObject = 0,
+        kSlotsOffsetArgumentErrorClass = offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass),
+        kSlotsOffsetArgumentErrorObject = 0,
+        kSlotsOffsetDateClass = offsetof(avmplus::DateClass, m_slots_DateClass),
+        kSlotsOffsetDateObject = 0,
+        kSlotsOffsetRegExpClass = offsetof(avmplus::RegExpClass, m_slots_RegExpClass),
+        kSlotsOffsetRegExpObject = 0,
+        kSlotsOffsetXMLClass = offsetof(avmplus::XMLClass, m_slots_XMLClass),
+        kSlotsOffsetXMLObject = 0,
+        kSlotsOffsetXMLListClass = offsetof(avmplus::XMLListClass, m_slots_XMLListClass),
+        kSlotsOffsetXMLListObject = 0,
+        kSlotsOffsetQNameClass = offsetof(avmplus::QNameClass, m_slots_QNameClass),
+        kSlotsOffsetQNameObject = 0,
+        kSlotsOffsetByteArrayClass = offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass),
+        kSlotsOffsetByteArrayObject = 0,
+        kSlotsOffset_fnord
+    };
     #ifdef DEBUG
-    static void doObjectClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetClassClass = offsetof(ClassClass, m_slots_ClassClass);
-    static const uint16_t s_slotsOffsetClassClosure = 0;
-    #ifdef DEBUG
-    static void doClassClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetFunctionClass = offsetof(FunctionClass, m_slots_FunctionClass);
-    static const uint16_t s_slotsOffsetFunctionObject = 0;
-    #ifdef DEBUG
-    static void doFunctionClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetNamespaceClass = offsetof(NamespaceClass, m_slots_NamespaceClass);
-    static const uint16_t s_slotsOffsetNamespace = 0;
-    #ifdef DEBUG
-    static void doNamespaceClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetBooleanClass = offsetof(BooleanClass, m_slots_BooleanClass);
-    static const uint16_t s_slotsOffsetbool = 0;
-    #ifdef DEBUG
-    static void doBooleanClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetNumberClass = offsetof(NumberClass, m_slots_NumberClass);
-    static const uint16_t s_slotsOffsetdouble = 0;
-    #ifdef DEBUG
-    static void doNumberClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetIntClass = offsetof(IntClass, m_slots_IntClass);
-    static const uint16_t s_slotsOffsetint32_t = 0;
-    #ifdef DEBUG
-    static void doIntClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetUIntClass = offsetof(UIntClass, m_slots_UIntClass);
-    static const uint16_t s_slotsOffsetuint32_t = 0;
-    #ifdef DEBUG
-    static void doUIntClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetStringClass = offsetof(StringClass, m_slots_StringClass);
-    static const uint16_t s_slotsOffsetString = 0;
-    #ifdef DEBUG
-    static void doStringClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetArrayClass = offsetof(ArrayClass, m_slots_ArrayClass);
-    static const uint16_t s_slotsOffsetArrayObject = 0;
-    #ifdef DEBUG
-    static void doArrayClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetVectorClass = 0;
-    static const uint16_t s_slotsOffsetObjectVectorObject = 0;
-    #ifdef DEBUG
-    static void doVectorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetObjectVectorClass = 0;
-    #ifdef DEBUG
-    static void doObjectVectorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetIntVectorClass = 0;
-    static const uint16_t s_slotsOffsetIntVectorObject = 0;
-    #ifdef DEBUG
-    static void doIntVectorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetUIntVectorClass = 0;
-    static const uint16_t s_slotsOffsetUIntVectorObject = 0;
-    #ifdef DEBUG
-    static void doUIntVectorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetDoubleVectorClass = 0;
-    static const uint16_t s_slotsOffsetDoubleVectorObject = 0;
-    #ifdef DEBUG
-    static void doDoubleVectorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetMethodClosureClass = 0;
-    static const uint16_t s_slotsOffsetMethodClosure = 0;
-    #ifdef DEBUG
-    static void doMethodClosureClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetMathClass = offsetof(MathClass, m_slots_MathClass);
-    #ifdef DEBUG
-    static void doMathClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetErrorClass = offsetof(ErrorClass, m_slots_ErrorClass);
-    static const uint16_t s_slotsOffsetErrorObject = offsetof(ErrorObject, m_slots_ErrorObject);
-    #ifdef DEBUG
-    static void doErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetDefinitionErrorClass = offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass);
-    static const uint16_t s_slotsOffsetDefinitionErrorObject = 0;
-    #ifdef DEBUG
-    static void doDefinitionErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetEvalErrorClass = offsetof(EvalErrorClass, m_slots_EvalErrorClass);
-    static const uint16_t s_slotsOffsetEvalErrorObject = 0;
-    #ifdef DEBUG
-    static void doEvalErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetRangeErrorClass = offsetof(RangeErrorClass, m_slots_RangeErrorClass);
-    static const uint16_t s_slotsOffsetRangeErrorObject = 0;
-    #ifdef DEBUG
-    static void doRangeErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetReferenceErrorClass = offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass);
-    static const uint16_t s_slotsOffsetReferenceErrorObject = 0;
-    #ifdef DEBUG
-    static void doReferenceErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetSecurityErrorClass = offsetof(SecurityErrorClass, m_slots_SecurityErrorClass);
-    static const uint16_t s_slotsOffsetSecurityErrorObject = 0;
-    #ifdef DEBUG
-    static void doSecurityErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetSyntaxErrorClass = offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass);
-    static const uint16_t s_slotsOffsetSyntaxErrorObject = 0;
-    #ifdef DEBUG
-    static void doSyntaxErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetTypeErrorClass = offsetof(TypeErrorClass, m_slots_TypeErrorClass);
-    static const uint16_t s_slotsOffsetTypeErrorObject = 0;
-    #ifdef DEBUG
-    static void doTypeErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetURIErrorClass = offsetof(URIErrorClass, m_slots_URIErrorClass);
-    static const uint16_t s_slotsOffsetURIErrorObject = 0;
-    #ifdef DEBUG
-    static void doURIErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetVerifyErrorClass = offsetof(VerifyErrorClass, m_slots_VerifyErrorClass);
-    static const uint16_t s_slotsOffsetVerifyErrorObject = 0;
-    #ifdef DEBUG
-    static void doVerifyErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetUninitializedErrorClass = offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass);
-    static const uint16_t s_slotsOffsetUninitializedErrorObject = 0;
-    #ifdef DEBUG
-    static void doUninitializedErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetArgumentErrorClass = offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass);
-    static const uint16_t s_slotsOffsetArgumentErrorObject = 0;
-    #ifdef DEBUG
-    static void doArgumentErrorClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetDateClass = offsetof(DateClass, m_slots_DateClass);
-    static const uint16_t s_slotsOffsetDateObject = 0;
-    #ifdef DEBUG
-    static void doDateClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetRegExpClass = offsetof(RegExpClass, m_slots_RegExpClass);
-    static const uint16_t s_slotsOffsetRegExpObject = 0;
-    #ifdef DEBUG
-    static void doRegExpClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetXMLClass = offsetof(XMLClass, m_slots_XMLClass);
-    static const uint16_t s_slotsOffsetXMLObject = 0;
-    #ifdef DEBUG
-    static void doXMLClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetXMLListClass = offsetof(XMLListClass, m_slots_XMLListClass);
-    static const uint16_t s_slotsOffsetXMLListObject = 0;
-    #ifdef DEBUG
-    static void doXMLListClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetQNameClass = offsetof(QNameClass, m_slots_QNameClass);
-    static const uint16_t s_slotsOffsetQNameObject = 0;
-    #ifdef DEBUG
-    static void doQNameClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetByteArrayClass = offsetof(ByteArrayClass, m_slots_ByteArrayClass);
-    static const uint16_t s_slotsOffsetByteArrayObject = 0;
-    #ifdef DEBUG
-    static void doByteArrayClassAsserts(Traits* cTraits, Traits* iTraits);
+    static void doObjectClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doClassClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doFunctionClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doNamespaceClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doBooleanClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doNumberClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doIntClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doUIntClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doStringClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doArrayClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doVectorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doObjectVectorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doIntVectorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doUIntVectorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doDoubleVectorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doMethodClosureClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doMathClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doDefinitionErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doEvalErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doRangeErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doReferenceErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doSecurityErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doSyntaxErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doTypeErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doURIErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doVerifyErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doUninitializedErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doArgumentErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doDateClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doRegExpClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doXMLClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doXMLListClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doQNameClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doByteArrayClassAsserts(Traits* ctraits, Traits* itraits);
     #endif
 };
 #ifdef DEBUG
-REALLY_INLINE void SlotOffsetsAndAsserts::doObjectClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doObjectClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(ObjectClass, m_slots_ObjectClass) == s_slotsOffsetObjectClass);
-    MMGC_STATIC_ASSERT(offsetof(ObjectClass, m_slots_ObjectClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ObjectClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(ObjectClass, m_slots_ObjectClass) + offsetof(ObjectClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ObjectClass, m_slots_ObjectClass) == kSlotsOffsetObjectClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ObjectClass, m_slots_ObjectClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ObjectClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ObjectClass, m_slots_ObjectClass) + offsetof(avmplus_ObjectClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doClassClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doClassClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(ClassClass, m_slots_ClassClass) == s_slotsOffsetClassClass);
-    MMGC_STATIC_ASSERT(offsetof(ClassClass, m_slots_ClassClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ClassClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(ClassClass, m_slots_ClassClass) + offsetof(ClassClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(ClassClosure::EmptySlotsStruct_ClassClosure) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ClassClass, m_slots_ClassClass) == kSlotsOffsetClassClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ClassClass, m_slots_ClassClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ClassClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ClassClass, m_slots_ClassClass) + offsetof(avmplus_ClassClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doFunctionClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doFunctionClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(FunctionClass, m_slots_FunctionClass) == s_slotsOffsetFunctionClass);
-    MMGC_STATIC_ASSERT(offsetof(FunctionClass, m_slots_FunctionClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(FunctionClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(FunctionClass, m_slots_FunctionClass) + offsetof(FunctionClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(FunctionObject::EmptySlotsStruct_FunctionObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::FunctionClass, m_slots_FunctionClass) == kSlotsOffsetFunctionClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::FunctionClass, m_slots_FunctionClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::FunctionClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::FunctionClass, m_slots_FunctionClass) + offsetof(avmplus_FunctionClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNamespaceClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doNamespaceClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(NamespaceClass, m_slots_NamespaceClass) == s_slotsOffsetNamespaceClass);
-    MMGC_STATIC_ASSERT(offsetof(NamespaceClass, m_slots_NamespaceClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(NamespaceClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(NamespaceClass, m_slots_NamespaceClass) + offsetof(NamespaceClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass) == kSlotsOffsetNamespaceClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::NamespaceClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass) + offsetof(avmplus_NamespaceClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doBooleanClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doBooleanClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(BooleanClass, m_slots_BooleanClass) == s_slotsOffsetBooleanClass);
-    MMGC_STATIC_ASSERT(offsetof(BooleanClass, m_slots_BooleanClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(BooleanClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(BooleanClass, m_slots_BooleanClass) + offsetof(BooleanClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::BooleanClass, m_slots_BooleanClass) == kSlotsOffsetBooleanClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::BooleanClass, m_slots_BooleanClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::BooleanClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::BooleanClass, m_slots_BooleanClass) + offsetof(avmplus_BooleanClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNumberClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doNumberClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(NumberClass, m_slots_NumberClass) == s_slotsOffsetNumberClass);
-    MMGC_STATIC_ASSERT(offsetof(NumberClass, m_slots_NumberClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(NumberClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_length)));
-    AvmAssert(getSlotOffset(cTraits, 159) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_NaN)));
-    AvmAssert(getSlotOffset(cTraits, 160) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_NEGATIVE_INFINITY)));
-    AvmAssert(getSlotOffset(cTraits, 161) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_POSITIVE_INFINITY)));
-    AvmAssert(getSlotOffset(cTraits, 162) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_MIN_VALUE)));
-    AvmAssert(getSlotOffset(cTraits, 163) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_MAX_VALUE)));
-    AvmAssert(getSlotOffset(cTraits, 164) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_private_DTOSTR_FIXED)));
-    AvmAssert(getSlotOffset(cTraits, 165) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_private_DTOSTR_PRECISION)));
-    AvmAssert(getSlotOffset(cTraits, 166) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_private_DTOSTR_EXPONENTIAL)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NumberClass, m_slots_NumberClass) == kSlotsOffsetNumberClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NumberClass, m_slots_NumberClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::NumberClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_length)));
+    AvmAssert(getSlotOffset(ctraits, 159) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_NaN)));
+    AvmAssert(getSlotOffset(ctraits, 160) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_NEGATIVE_INFINITY)));
+    AvmAssert(getSlotOffset(ctraits, 161) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_POSITIVE_INFINITY)));
+    AvmAssert(getSlotOffset(ctraits, 162) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_MIN_VALUE)));
+    AvmAssert(getSlotOffset(ctraits, 163) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_MAX_VALUE)));
+    AvmAssert(getSlotOffset(ctraits, 164) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_private_DTOSTR_FIXED)));
+    AvmAssert(getSlotOffset(ctraits, 165) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_private_DTOSTR_PRECISION)));
+    AvmAssert(getSlotOffset(ctraits, 166) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_private_DTOSTR_EXPONENTIAL)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doIntClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doIntClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(IntClass, m_slots_IntClass) == s_slotsOffsetIntClass);
-    MMGC_STATIC_ASSERT(offsetof(IntClass, m_slots_IntClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(IntClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 162) == (offsetof(IntClass, m_slots_IntClass) + offsetof(IntClassSlots, m_MIN_VALUE)));
-    AvmAssert(getSlotOffset(cTraits, 163) == (offsetof(IntClass, m_slots_IntClass) + offsetof(IntClassSlots, m_MAX_VALUE)));
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(IntClass, m_slots_IntClass) + offsetof(IntClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::IntClass, m_slots_IntClass) == kSlotsOffsetIntClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::IntClass, m_slots_IntClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::IntClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 162) == (offsetof(avmplus::IntClass, m_slots_IntClass) + offsetof(avmplus_IntClassSlots, m_MIN_VALUE)));
+    AvmAssert(getSlotOffset(ctraits, 163) == (offsetof(avmplus::IntClass, m_slots_IntClass) + offsetof(avmplus_IntClassSlots, m_MAX_VALUE)));
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::IntClass, m_slots_IntClass) + offsetof(avmplus_IntClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doUIntClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doUIntClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(UIntClass, m_slots_UIntClass) == s_slotsOffsetUIntClass);
-    MMGC_STATIC_ASSERT(offsetof(UIntClass, m_slots_UIntClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(UIntClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 162) == (offsetof(UIntClass, m_slots_UIntClass) + offsetof(UIntClassSlots, m_MIN_VALUE)));
-    AvmAssert(getSlotOffset(cTraits, 163) == (offsetof(UIntClass, m_slots_UIntClass) + offsetof(UIntClassSlots, m_MAX_VALUE)));
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(UIntClass, m_slots_UIntClass) + offsetof(UIntClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::UIntClass, m_slots_UIntClass) == kSlotsOffsetUIntClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::UIntClass, m_slots_UIntClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::UIntClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 162) == (offsetof(avmplus::UIntClass, m_slots_UIntClass) + offsetof(avmplus_UIntClassSlots, m_MIN_VALUE)));
+    AvmAssert(getSlotOffset(ctraits, 163) == (offsetof(avmplus::UIntClass, m_slots_UIntClass) + offsetof(avmplus_UIntClassSlots, m_MAX_VALUE)));
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::UIntClass, m_slots_UIntClass) + offsetof(avmplus_UIntClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doStringClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doStringClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(StringClass, m_slots_StringClass) == s_slotsOffsetStringClass);
-    MMGC_STATIC_ASSERT(offsetof(StringClass, m_slots_StringClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(StringClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(StringClass, m_slots_StringClass) + offsetof(StringClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::StringClass, m_slots_StringClass) == kSlotsOffsetStringClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::StringClass, m_slots_StringClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::StringClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::StringClass, m_slots_StringClass) + offsetof(avmplus_StringClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doArrayClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doArrayClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(ArrayClass, m_slots_ArrayClass) == s_slotsOffsetArrayClass);
-    MMGC_STATIC_ASSERT(offsetof(ArrayClass, m_slots_ArrayClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ArrayClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 329) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_CASEINSENSITIVE)));
-    AvmAssert(getSlotOffset(cTraits, 330) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_DESCENDING)));
-    AvmAssert(getSlotOffset(cTraits, 331) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_UNIQUESORT)));
-    AvmAssert(getSlotOffset(cTraits, 332) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_RETURNINDEXEDARRAY)));
-    AvmAssert(getSlotOffset(cTraits, 333) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_NUMERIC)));
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(ArrayObject::EmptySlotsStruct_ArrayObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ArrayClass, m_slots_ArrayClass) == kSlotsOffsetArrayClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ArrayClass, m_slots_ArrayClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ArrayClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 329) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_CASEINSENSITIVE)));
+    AvmAssert(getSlotOffset(ctraits, 330) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_DESCENDING)));
+    AvmAssert(getSlotOffset(ctraits, 331) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_UNIQUESORT)));
+    AvmAssert(getSlotOffset(ctraits, 332) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_RETURNINDEXEDARRAY)));
+    AvmAssert(getSlotOffset(ctraits, 333) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_NUMERIC)));
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doVectorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(VectorClass::EmptySlotsStruct_VectorClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doObjectVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doObjectVectorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorClass::EmptySlotsStruct_ObjectVectorClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doIntVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doIntVectorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(IntVectorClass::EmptySlotsStruct_IntVectorClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(IntVectorObject::EmptySlotsStruct_IntVectorObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doUIntVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doUIntVectorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(UIntVectorClass::EmptySlotsStruct_UIntVectorClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(UIntVectorObject::EmptySlotsStruct_UIntVectorObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDoubleVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doDoubleVectorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(DoubleVectorClass::EmptySlotsStruct_DoubleVectorClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(DoubleVectorObject::EmptySlotsStruct_DoubleVectorObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doMethodClosureClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doMethodClosureClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(MethodClosureClass::EmptySlotsStruct_MethodClosureClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(MethodClosure::EmptySlotsStruct_MethodClosure) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doMathClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doMathClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(MathClass, m_slots_MathClass) == s_slotsOffsetMathClass);
-    MMGC_STATIC_ASSERT(offsetof(MathClass, m_slots_MathClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(MathClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 777) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_E)));
-    AvmAssert(getSlotOffset(cTraits, 778) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LN10)));
-    AvmAssert(getSlotOffset(cTraits, 779) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LN2)));
-    AvmAssert(getSlotOffset(cTraits, 780) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LOG10E)));
-    AvmAssert(getSlotOffset(cTraits, 781) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LOG2E)));
-    AvmAssert(getSlotOffset(cTraits, 782) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_PI)));
-    AvmAssert(getSlotOffset(cTraits, 783) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_SQRT1_2)));
-    AvmAssert(getSlotOffset(cTraits, 784) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_SQRT2)));
-    AvmAssert(getSlotOffset(cTraits, 802) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_private_NegInfinity)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::MathClass, m_slots_MathClass) == kSlotsOffsetMathClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::MathClass, m_slots_MathClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::MathClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 777) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_E)));
+    AvmAssert(getSlotOffset(ctraits, 778) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_LN10)));
+    AvmAssert(getSlotOffset(ctraits, 779) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_LN2)));
+    AvmAssert(getSlotOffset(ctraits, 780) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_LOG10E)));
+    AvmAssert(getSlotOffset(ctraits, 781) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_LOG2E)));
+    AvmAssert(getSlotOffset(ctraits, 782) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_PI)));
+    AvmAssert(getSlotOffset(ctraits, 783) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_SQRT1_2)));
+    AvmAssert(getSlotOffset(ctraits, 784) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_SQRT2)));
+    AvmAssert(getSlotOffset(ctraits, 802) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_private_NegInfinity)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(ErrorClass, m_slots_ErrorClass) == s_slotsOffsetErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(ErrorClass, m_slots_ErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(ErrorClass, m_slots_ErrorClass) + offsetof(ErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(offsetof(ErrorObject, m_slots_ErrorObject) == s_slotsOffsetErrorObject);
-    MMGC_STATIC_ASSERT(offsetof(ErrorObject, m_slots_ErrorObject) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ErrorObject) <= 0xFFFF);
-    AvmAssert(getSlotOffset(iTraits, 831) == (offsetof(ErrorObject, m_slots_ErrorObject) + offsetof(ErrorObjectSlots, m_message)));
-    AvmAssert(getSlotOffset(iTraits, 832) == (offsetof(ErrorObject, m_slots_ErrorObject) + offsetof(ErrorObjectSlots, m_name)));
-    AvmAssert(getSlotOffset(iTraits, 834) == (offsetof(ErrorObject, m_slots_ErrorObject) + offsetof(ErrorObjectSlots, m_private__errorID)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorClass, m_slots_ErrorClass) == kSlotsOffsetErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorClass, m_slots_ErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ErrorClass, m_slots_ErrorClass) + offsetof(avmplus_ErrorClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorObject, m_slots_ErrorObject) == kSlotsOffsetErrorObject);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorObject, m_slots_ErrorObject) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ErrorObject) <= 0xFFFF);
+    AvmAssert(getSlotOffset(itraits, 831) == (offsetof(avmplus::ErrorObject, m_slots_ErrorObject) + offsetof(avmplus_ErrorObjectSlots, m_message)));
+    AvmAssert(getSlotOffset(itraits, 832) == (offsetof(avmplus::ErrorObject, m_slots_ErrorObject) + offsetof(avmplus_ErrorObjectSlots, m_name)));
+    AvmAssert(getSlotOffset(itraits, 834) == (offsetof(avmplus::ErrorObject, m_slots_ErrorObject) + offsetof(avmplus_ErrorObjectSlots, m_private__errorID)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) == s_slotsOffsetDefinitionErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(DefinitionErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) + offsetof(DefinitionErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(DefinitionErrorObject::EmptySlotsStruct_DefinitionErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass) == kSlotsOffsetDefinitionErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::DefinitionErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass) + offsetof(avmplus_DefinitionErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doEvalErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doEvalErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(EvalErrorClass, m_slots_EvalErrorClass) == s_slotsOffsetEvalErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(EvalErrorClass, m_slots_EvalErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(EvalErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(EvalErrorClass, m_slots_EvalErrorClass) + offsetof(EvalErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(EvalErrorObject::EmptySlotsStruct_EvalErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass) == kSlotsOffsetEvalErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::EvalErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass) + offsetof(avmplus_EvalErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doRangeErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doRangeErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(RangeErrorClass, m_slots_RangeErrorClass) == s_slotsOffsetRangeErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(RangeErrorClass, m_slots_RangeErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(RangeErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(RangeErrorClass, m_slots_RangeErrorClass) + offsetof(RangeErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(RangeErrorObject::EmptySlotsStruct_RangeErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass) == kSlotsOffsetRangeErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::RangeErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass) + offsetof(avmplus_RangeErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) == s_slotsOffsetReferenceErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ReferenceErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) + offsetof(ReferenceErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(ReferenceErrorObject::EmptySlotsStruct_ReferenceErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass) == kSlotsOffsetReferenceErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ReferenceErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass) + offsetof(avmplus_ReferenceErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) == s_slotsOffsetSecurityErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(SecurityErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) + offsetof(SecurityErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(SecurityErrorObject::EmptySlotsStruct_SecurityErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass) == kSlotsOffsetSecurityErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::SecurityErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass) + offsetof(avmplus_SecurityErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) == s_slotsOffsetSyntaxErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(SyntaxErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) + offsetof(SyntaxErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(SyntaxErrorObject::EmptySlotsStruct_SyntaxErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass) == kSlotsOffsetSyntaxErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::SyntaxErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass) + offsetof(avmplus_SyntaxErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doTypeErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doTypeErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(TypeErrorClass, m_slots_TypeErrorClass) == s_slotsOffsetTypeErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(TypeErrorClass, m_slots_TypeErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(TypeErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(TypeErrorClass, m_slots_TypeErrorClass) + offsetof(TypeErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(TypeErrorObject::EmptySlotsStruct_TypeErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass) == kSlotsOffsetTypeErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::TypeErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass) + offsetof(avmplus_TypeErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doURIErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doURIErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(URIErrorClass, m_slots_URIErrorClass) == s_slotsOffsetURIErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(URIErrorClass, m_slots_URIErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(URIErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(URIErrorClass, m_slots_URIErrorClass) + offsetof(URIErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(URIErrorObject::EmptySlotsStruct_URIErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass) == kSlotsOffsetURIErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::URIErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass) + offsetof(avmplus_URIErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) == s_slotsOffsetVerifyErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(VerifyErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) + offsetof(VerifyErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(VerifyErrorObject::EmptySlotsStruct_VerifyErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass) == kSlotsOffsetVerifyErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::VerifyErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass) + offsetof(avmplus_VerifyErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) == s_slotsOffsetUninitializedErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(UninitializedErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) + offsetof(UninitializedErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(UninitializedErrorObject::EmptySlotsStruct_UninitializedErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass) == kSlotsOffsetUninitializedErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::UninitializedErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass) + offsetof(avmplus_UninitializedErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) == s_slotsOffsetArgumentErrorClass);
-    MMGC_STATIC_ASSERT(offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ArgumentErrorClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) + offsetof(ArgumentErrorClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(ArgumentErrorObject::EmptySlotsStruct_ArgumentErrorObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) == kSlotsOffsetArgumentErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ArgumentErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) + offsetof(avmplus_ArgumentErrorClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDateClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doDateClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(DateClass, m_slots_DateClass) == s_slotsOffsetDateClass);
-    MMGC_STATIC_ASSERT(offsetof(DateClass, m_slots_DateClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(DateClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(DateClass, m_slots_DateClass) + offsetof(DateClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(DateObject::EmptySlotsStruct_DateObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DateClass, m_slots_DateClass) == kSlotsOffsetDateClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DateClass, m_slots_DateClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::DateClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::DateClass, m_slots_DateClass) + offsetof(avmplus_DateClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doRegExpClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doRegExpClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(RegExpClass, m_slots_RegExpClass) == s_slotsOffsetRegExpClass);
-    MMGC_STATIC_ASSERT(offsetof(RegExpClass, m_slots_RegExpClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(RegExpClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(RegExpClass, m_slots_RegExpClass) + offsetof(RegExpClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(RegExpObject::EmptySlotsStruct_RegExpObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::RegExpClass, m_slots_RegExpClass) == kSlotsOffsetRegExpClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::RegExpClass, m_slots_RegExpClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::RegExpClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::RegExpClass, m_slots_RegExpClass) + offsetof(avmplus_RegExpClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doXMLClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doXMLClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(XMLClass, m_slots_XMLClass) == s_slotsOffsetXMLClass);
-    MMGC_STATIC_ASSERT(offsetof(XMLClass, m_slots_XMLClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(XMLClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(XMLClass, m_slots_XMLClass) + offsetof(XMLClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(XMLObject::EmptySlotsStruct_XMLObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLClass, m_slots_XMLClass) == kSlotsOffsetXMLClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLClass, m_slots_XMLClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::XMLClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::XMLClass, m_slots_XMLClass) + offsetof(avmplus_XMLClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doXMLListClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doXMLListClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(XMLListClass, m_slots_XMLListClass) == s_slotsOffsetXMLListClass);
-    MMGC_STATIC_ASSERT(offsetof(XMLListClass, m_slots_XMLListClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(XMLListClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(XMLListClass, m_slots_XMLListClass) + offsetof(XMLListClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(XMLListObject::EmptySlotsStruct_XMLListObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLListClass, m_slots_XMLListClass) == kSlotsOffsetXMLListClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLListClass, m_slots_XMLListClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::XMLListClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::XMLListClass, m_slots_XMLListClass) + offsetof(avmplus_XMLListClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(QNameClass, m_slots_QNameClass) == s_slotsOffsetQNameClass);
-    MMGC_STATIC_ASSERT(offsetof(QNameClass, m_slots_QNameClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(QNameClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 87) == (offsetof(QNameClass, m_slots_QNameClass) + offsetof(QNameClassSlots, m_length)));
-    // MMGC_STATIC_ASSERT(sizeof(QNameObject::EmptySlotsStruct_QNameObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::QNameClass, m_slots_QNameClass) == kSlotsOffsetQNameClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::QNameClass, m_slots_QNameClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::QNameClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::QNameClass, m_slots_QNameClass) + offsetof(avmplus_QNameClassSlots, m_length)));
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doByteArrayClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doByteArrayClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(ByteArrayClass, m_slots_ByteArrayClass) == s_slotsOffsetByteArrayClass);
-    MMGC_STATIC_ASSERT(offsetof(ByteArrayClass, m_slots_ByteArrayClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(ByteArrayClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 1354) == (offsetof(ByteArrayClass, m_slots_ByteArrayClass) + offsetof(ByteArrayClassSlots, m_private__defaultObjectEncoding)));
-    // MMGC_STATIC_ASSERT(sizeof(ByteArrayObject::EmptySlotsStruct_ByteArrayObject) >= 0);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass) == kSlotsOffsetByteArrayClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::ByteArrayClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 1354) == (offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass) + offsetof(avmplus_ByteArrayClassSlots, m_private__defaultObjectEncoding)));
+    (void)itraits;
 }
 #endif // DEBUG
 
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ObjectClass, ObjectClass, ClassClosure::createScriptObjectProc, SlotOffsetsAndAsserts::doObjectClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ClassClass, ClassClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doClassClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(FunctionClass, FunctionClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doFunctionClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(NamespaceClass, NamespaceClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doNamespaceClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(BooleanClass, BooleanClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doBooleanClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(NumberClass, NumberClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doNumberClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(IntClass, IntClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doIntClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(UIntClass, UIntClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doUIntClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(StringClass, StringClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doStringClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ArrayClass, ArrayClass, avmplus::ArrayClass::createInstanceProc, SlotOffsetsAndAsserts::doArrayClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(VectorClass, VectorClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doVectorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ObjectVectorClass, ObjectVectorClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doObjectVectorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(IntVectorClass, IntVectorClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doIntVectorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(UIntVectorClass, UIntVectorClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doUIntVectorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(DoubleVectorClass, DoubleVectorClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doDoubleVectorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(MethodClosureClass, MethodClosureClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doMethodClosureClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(MathClass, MathClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doMathClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ErrorClass, ErrorClass, avmplus::ErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(DefinitionErrorClass, DefinitionErrorClass, avmplus::DefinitionErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(EvalErrorClass, EvalErrorClass, avmplus::EvalErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doEvalErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(RangeErrorClass, RangeErrorClass, avmplus::RangeErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doRangeErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ReferenceErrorClass, ReferenceErrorClass, avmplus::ReferenceErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doReferenceErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(SecurityErrorClass, SecurityErrorClass, avmplus::SecurityErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doSecurityErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(SyntaxErrorClass, SyntaxErrorClass, avmplus::SyntaxErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(TypeErrorClass, TypeErrorClass, avmplus::TypeErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doTypeErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(URIErrorClass, URIErrorClass, avmplus::URIErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doURIErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(VerifyErrorClass, VerifyErrorClass, avmplus::VerifyErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doVerifyErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(UninitializedErrorClass, UninitializedErrorClass, avmplus::UninitializedErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ArgumentErrorClass, ArgumentErrorClass, avmplus::ArgumentErrorClass::createInstanceProc, SlotOffsetsAndAsserts::doArgumentErrorClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(DateClass, DateClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doDateClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(RegExpClass, RegExpClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doRegExpClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(XMLClass, XMLClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doXMLClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(XMLListClass, XMLListClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doXMLListClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(QNameClass, QNameClass, ClassClosure::impossibleCreateInstanceProc, SlotOffsetsAndAsserts::doQNameClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(ByteArrayClass, ByteArrayClass, avmplus::ByteArrayClass::createInstanceProc, SlotOffsetsAndAsserts::doByteArrayClassAsserts)
 
 AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
 
@@ -5212,369 +5080,369 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_decodeURIComponent, Toplevel::decodeURIComponent)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_decodeURI, Toplevel::decodeURI)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_bugzilla, Toplevel::bugzilla)
-        AVMTHUNK_NATIVE_METHOD(Object_private__hasOwnProperty, ObjectClass::_hasOwnProperty)
-        AVMTHUNK_NATIVE_METHOD(Object_private__propertyIsEnumerable, ObjectClass::_propertyIsEnumerable)
-        AVMTHUNK_NATIVE_METHOD(Object_protected__setPropertyIsEnumerable, ObjectClass::_setPropertyIsEnumerable)
-        AVMTHUNK_NATIVE_METHOD(Object_private__isPrototypeOf, ObjectClass::_isPrototypeOf)
-        AVMTHUNK_NATIVE_METHOD(Object_private__toString, ObjectClass::_toString)
-        AVMTHUNK_NATIVE_METHOD(Class_prototype_get, ClassClosure::get_prototype)
-        AVMTHUNK_NATIVE_METHOD(Function_prototype_get, FunctionObject::get_prototype)
-        AVMTHUNK_NATIVE_METHOD(Function_prototype_set, FunctionObject::set_prototype)
-        AVMTHUNK_NATIVE_METHOD(Function_length_get, FunctionObject::get_length)
-        AVMTHUNK_NATIVE_METHOD(Function_AS3_call, FunctionObject::AS3_call)
-        AVMTHUNK_NATIVE_METHOD(Function_AS3_apply, FunctionObject::AS3_apply)
-        AVMTHUNK_NATIVE_METHOD_NAMESPACE(Namespace_prefix_get, Namespace::get_prefix)
-        AVMTHUNK_NATIVE_METHOD_NAMESPACE(Namespace_uri_get, Namespace::get_uri)
-        AVMTHUNK_NATIVE_METHOD(Number_private__numberToString, NumberClass::_numberToString)
-        AVMTHUNK_NATIVE_METHOD(Number_private__convert, NumberClass::_convert)
-        AVMTHUNK_NATIVE_METHOD(Number_private__minValue, NumberClass::_minValue)
-        AVMTHUNK_NATIVE_METHOD(String_AS3_fromCharCode, StringClass::AS3_fromCharCode)
-        AVMTHUNK_NATIVE_METHOD(String_private__match, StringClass::_match)
-        AVMTHUNK_NATIVE_METHOD(String_private__replace, StringClass::_replace)
-        AVMTHUNK_NATIVE_METHOD(String_private__search, StringClass::_search)
-        AVMTHUNK_NATIVE_METHOD(String_private__split, StringClass::_split)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_length_get, String::get_length)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_private__indexOf, String::_indexOf)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_indexOf, String::AS3_indexOf)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_private__lastIndexOf, String::_lastIndexOf)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_lastIndexOf, String::AS3_lastIndexOf)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_charAt, String::AS3_charAt)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_charCodeAt, String::AS3_charCodeAt)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_localeCompare, String::AS3_localeCompare)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_private__slice, String::_slice)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_slice, String::AS3_slice)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_private__substring, String::_substring)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_substring, String::AS3_substring)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_private__substr, String::_substr)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_substr, String::AS3_substr)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_toLowerCase, String::AS3_toLowerCase)
-        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_toUpperCase, String::AS3_toUpperCase)
-        AVMTHUNK_NATIVE_METHOD(Array_private__pop, ArrayClass::_pop)
-        AVMTHUNK_NATIVE_METHOD(Array_private__reverse, ArrayClass::_reverse)
-        AVMTHUNK_NATIVE_METHOD(Array_private__concat, ArrayClass::_concat)
-        AVMTHUNK_NATIVE_METHOD(Array_private__shift, ArrayClass::_shift)
-        AVMTHUNK_NATIVE_METHOD(Array_private__slice, ArrayClass::_slice)
-        AVMTHUNK_NATIVE_METHOD(Array_private__unshift, ArrayClass::_unshift)
-        AVMTHUNK_NATIVE_METHOD(Array_private__splice, ArrayClass::_splice)
-        AVMTHUNK_NATIVE_METHOD(Array_private__sort, ArrayClass::_sort)
-        AVMTHUNK_NATIVE_METHOD(Array_private__sortOn, ArrayClass::_sortOn)
-        AVMTHUNK_NATIVE_METHOD(Array_private__indexOf, ArrayClass::_indexOf)
-        AVMTHUNK_NATIVE_METHOD(Array_private__lastIndexOf, ArrayClass::_lastIndexOf)
-        AVMTHUNK_NATIVE_METHOD(Array_private__every, ArrayClass::_every)
-        AVMTHUNK_NATIVE_METHOD(Array_private__filter, ArrayClass::_filter)
-        AVMTHUNK_NATIVE_METHOD(Array_private__forEach, ArrayClass::_forEach)
-        AVMTHUNK_NATIVE_METHOD(Array_private__map, ArrayClass::_map)
-        AVMTHUNK_NATIVE_METHOD(Array_private__some, ArrayClass::_some)
-        AVMTHUNK_NATIVE_METHOD(Array_length_get, ArrayObject::get_length)
-        AVMTHUNK_NATIVE_METHOD(Array_length_set, ArrayObject::set_length)
-        AVMTHUNK_NATIVE_METHOD(Array_AS3_pop, ArrayObject::AS3_pop)
-        AVMTHUNK_NATIVE_METHOD(Array_AS3_push, ArrayObject::AS3_push)
-        AVMTHUNK_NATIVE_METHOD(Array_AS3_unshift, ArrayObject::AS3_unshift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__every, ObjectVectorClass::_every)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__forEach, ObjectVectorClass::_forEach)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__some, ObjectVectorClass::_some)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__sort, ObjectVectorClass::_sort)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private_newThisType, ObjectVectorObject::newThisType)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_length_get, ObjectVectorObject::get_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_length_set, ObjectVectorObject::set_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_fixed_set, ObjectVectorObject::set_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_fixed_get, ObjectVectorObject::get_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_push, ObjectVectorObject::AS3_push)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__reverse, ObjectVectorObject::_reverse)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__spliceHelper, ObjectVectorObject::_spliceHelper)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_unshift, ObjectVectorObject::AS3_unshift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__filter, ObjectVectorObject::_filter)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__map, ObjectVectorObject::_map)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_pop, ObjectVectorObject::AS3_pop)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_shift, ObjectVectorObject::AS3_shift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__every, IntVectorClass::_every)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__forEach, IntVectorClass::_forEach)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__some, IntVectorClass::_some)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__sort, IntVectorClass::_sort)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private_newThisType, IntVectorObject::newThisType)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_length_get, IntVectorObject::get_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_length_set, IntVectorObject::set_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_fixed_set, IntVectorObject::set_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_fixed_get, IntVectorObject::get_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_push, IntVectorObject::AS3_push)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__reverse, IntVectorObject::_reverse)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__spliceHelper, IntVectorObject::_spliceHelper)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_unshift, IntVectorObject::AS3_unshift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__filter, IntVectorObject::_filter)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__map, IntVectorObject::_map)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_pop, IntVectorObject::AS3_pop)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_shift, IntVectorObject::AS3_shift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__every, UIntVectorClass::_every)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__forEach, UIntVectorClass::_forEach)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__some, UIntVectorClass::_some)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__sort, UIntVectorClass::_sort)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private_newThisType, UIntVectorObject::newThisType)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_length_get, UIntVectorObject::get_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_length_set, UIntVectorObject::set_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_set, UIntVectorObject::set_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_get, UIntVectorObject::get_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_push, UIntVectorObject::AS3_push)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__reverse, UIntVectorObject::_reverse)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__spliceHelper, UIntVectorObject::_spliceHelper)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_unshift, UIntVectorObject::AS3_unshift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__filter, UIntVectorObject::_filter)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__map, UIntVectorObject::_map)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_pop, UIntVectorObject::AS3_pop)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_shift, UIntVectorObject::AS3_shift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__every, DoubleVectorClass::_every)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__forEach, DoubleVectorClass::_forEach)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__some, DoubleVectorClass::_some)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__sort, DoubleVectorClass::_sort)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private_newThisType, DoubleVectorObject::newThisType)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_length_get, DoubleVectorObject::get_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_length_set, DoubleVectorObject::set_length)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_fixed_set, DoubleVectorObject::set_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_fixed_get, DoubleVectorObject::get_fixed)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_push, DoubleVectorObject::AS3_push)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__reverse, DoubleVectorObject::_reverse)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__spliceHelper, DoubleVectorObject::_spliceHelper)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_unshift, DoubleVectorObject::AS3_unshift)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__filter, DoubleVectorObject::_filter)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__map, DoubleVectorObject::_map)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_pop, DoubleVectorObject::AS3_pop)
-        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_shift, DoubleVectorObject::AS3_shift)
-        AVMTHUNK_NATIVE_METHOD(Math_private__min, MathClass::_min)
-        AVMTHUNK_NATIVE_METHOD(Math_private__max, MathClass::_max)
-        AVMTHUNK_NATIVE_METHOD(Math_abs, MathClass::abs)
-        AVMTHUNK_NATIVE_METHOD(Math_acos, MathClass::acos)
-        AVMTHUNK_NATIVE_METHOD(Math_asin, MathClass::asin)
-        AVMTHUNK_NATIVE_METHOD(Math_atan, MathClass::atan)
-        AVMTHUNK_NATIVE_METHOD(Math_ceil, MathClass::ceil)
-        AVMTHUNK_NATIVE_METHOD(Math_cos, MathClass::cos)
-        AVMTHUNK_NATIVE_METHOD(Math_exp, MathClass::exp)
-        AVMTHUNK_NATIVE_METHOD(Math_floor, MathClass::floor)
-        AVMTHUNK_NATIVE_METHOD(Math_log, MathClass::log)
-        AVMTHUNK_NATIVE_METHOD(Math_round, MathClass::round)
-        AVMTHUNK_NATIVE_METHOD(Math_sin, MathClass::sin)
-        AVMTHUNK_NATIVE_METHOD(Math_sqrt, MathClass::sqrt)
-        AVMTHUNK_NATIVE_METHOD(Math_tan, MathClass::tan)
-        AVMTHUNK_NATIVE_METHOD(Math_atan2, MathClass::atan2)
-        AVMTHUNK_NATIVE_METHOD(Math_pow, MathClass::pow)
-        AVMTHUNK_NATIVE_METHOD(Math_max, MathClass::max)
-        AVMTHUNK_NATIVE_METHOD(Math_min, MathClass::min)
-        AVMTHUNK_NATIVE_METHOD(Math_random, MathClass::random)
-        AVMTHUNK_NATIVE_METHOD(Error_getErrorMessage, ErrorClass::getErrorMessage)
-        AVMTHUNK_NATIVE_METHOD(Error_getStackTrace, ErrorObject::getStackTrace)
-        AVMTHUNK_NATIVE_METHOD(Date_parse, DateClass::parse)
-        AVMTHUNK_NATIVE_METHOD(Date_UTC, DateClass::UTC)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_valueOf, DateObject::AS3_valueOf)
-        AVMTHUNK_NATIVE_METHOD(Date_private__toString, DateObject::_toString)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setTime, DateObject::_setTime)
-        AVMTHUNK_NATIVE_METHOD(Date_private__get, DateObject::_get)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCFullYear, DateObject::AS3_getUTCFullYear)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCMonth, DateObject::AS3_getUTCMonth)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCDate, DateObject::AS3_getUTCDate)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCDay, DateObject::AS3_getUTCDay)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCHours, DateObject::AS3_getUTCHours)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCMinutes, DateObject::AS3_getUTCMinutes)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCSeconds, DateObject::AS3_getUTCSeconds)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCMilliseconds, DateObject::AS3_getUTCMilliseconds)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getFullYear, DateObject::AS3_getFullYear)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getMonth, DateObject::AS3_getMonth)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getDate, DateObject::AS3_getDate)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getDay, DateObject::AS3_getDay)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getHours, DateObject::AS3_getHours)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getMinutes, DateObject::AS3_getMinutes)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getSeconds, DateObject::AS3_getSeconds)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getMilliseconds, DateObject::AS3_getMilliseconds)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getTimezoneOffset, DateObject::AS3_getTimezoneOffset)
-        AVMTHUNK_NATIVE_METHOD(Date_AS3_getTime, DateObject::AS3_getTime)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setFullYear, DateObject::_setFullYear)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setMonth, DateObject::_setMonth)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setDate, DateObject::_setDate)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setHours, DateObject::_setHours)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setMinutes, DateObject::_setMinutes)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setSeconds, DateObject::_setSeconds)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setMilliseconds, DateObject::_setMilliseconds)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCFullYear, DateObject::_setUTCFullYear)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCMonth, DateObject::_setUTCMonth)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCDate, DateObject::_setUTCDate)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCHours, DateObject::_setUTCHours)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCMinutes, DateObject::_setUTCMinutes)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCSeconds, DateObject::_setUTCSeconds)
-        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCMilliseconds, DateObject::_setUTCMilliseconds)
-        AVMTHUNK_NATIVE_METHOD(RegExp_source_get, RegExpObject::get_source)
-        AVMTHUNK_NATIVE_METHOD(RegExp_global_get, RegExpObject::get_global)
-        AVMTHUNK_NATIVE_METHOD(RegExp_ignoreCase_get, RegExpObject::get_ignoreCase)
-        AVMTHUNK_NATIVE_METHOD(RegExp_multiline_get, RegExpObject::get_multiline)
-        AVMTHUNK_NATIVE_METHOD(RegExp_lastIndex_get, RegExpObject::get_lastIndex)
-        AVMTHUNK_NATIVE_METHOD(RegExp_lastIndex_set, RegExpObject::set_lastIndex)
-        AVMTHUNK_NATIVE_METHOD(RegExp_dotall_get, RegExpObject::get_dotall)
-        AVMTHUNK_NATIVE_METHOD(RegExp_extended_get, RegExpObject::get_extended)
-        AVMTHUNK_NATIVE_METHOD(RegExp_AS3_exec, RegExpObject::AS3_exec)
-        AVMTHUNK_NATIVE_METHOD(XML_ignoreComments_get, XMLClass::get_ignoreComments)
-        AVMTHUNK_NATIVE_METHOD(XML_ignoreComments_set, XMLClass::set_ignoreComments)
-        AVMTHUNK_NATIVE_METHOD(XML_ignoreProcessingInstructions_get, XMLClass::get_ignoreProcessingInstructions)
-        AVMTHUNK_NATIVE_METHOD(XML_ignoreProcessingInstructions_set, XMLClass::set_ignoreProcessingInstructions)
-        AVMTHUNK_NATIVE_METHOD(XML_ignoreWhitespace_get, XMLClass::get_ignoreWhitespace)
-        AVMTHUNK_NATIVE_METHOD(XML_ignoreWhitespace_set, XMLClass::set_ignoreWhitespace)
-        AVMTHUNK_NATIVE_METHOD(XML_prettyPrinting_get, XMLClass::get_prettyPrinting)
-        AVMTHUNK_NATIVE_METHOD(XML_prettyPrinting_set, XMLClass::set_prettyPrinting)
-        AVMTHUNK_NATIVE_METHOD(XML_prettyIndent_get, XMLClass::get_prettyIndent)
-        AVMTHUNK_NATIVE_METHOD(XML_prettyIndent_set, XMLClass::set_prettyIndent)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_toString, XMLObject::AS3_toString)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_hasOwnProperty, XMLObject::XML_AS3_hasOwnProperty)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_propertyIsEnumerable, XMLObject::XML_AS3_propertyIsEnumerable)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_addNamespace, XMLObject::AS3_addNamespace)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_appendChild, XMLObject::AS3_appendChild)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_attribute, XMLObject::AS3_attribute)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_attributes, XMLObject::AS3_attributes)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_child, XMLObject::AS3_child)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_childIndex, XMLObject::AS3_childIndex)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_children, XMLObject::AS3_children)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_comments, XMLObject::AS3_comments)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_contains, XMLObject::AS3_contains)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_copy, XMLObject::AS3_copy)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_descendants, XMLObject::AS3_descendants)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_elements, XMLObject::AS3_elements)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_hasComplexContent, XMLObject::AS3_hasComplexContent)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_hasSimpleContent, XMLObject::AS3_hasSimpleContent)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_inScopeNamespaces, XMLObject::AS3_inScopeNamespaces)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_insertChildAfter, XMLObject::AS3_insertChildAfter)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_insertChildBefore, XMLObject::AS3_insertChildBefore)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_localName, XMLObject::AS3_localName)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_name, XMLObject::AS3_name)
-        AVMTHUNK_NATIVE_METHOD(XML_private__namespace, XMLObject::_namespace)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_namespaceDeclarations, XMLObject::AS3_namespaceDeclarations)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_nodeKind, XMLObject::AS3_nodeKind)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_normalize, XMLObject::AS3_normalize)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_parent, XMLObject::AS3_parent)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_processingInstructions, XMLObject::AS3_processingInstructions)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_prependChild, XMLObject::AS3_prependChild)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_removeNamespace, XMLObject::AS3_removeNamespace)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_replace, XMLObject::AS3_replace)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_setChildren, XMLObject::AS3_setChildren)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_setLocalName, XMLObject::AS3_setLocalName)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_setName, XMLObject::AS3_setName)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_setNamespace, XMLObject::AS3_setNamespace)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_text, XMLObject::AS3_text)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_toXMLString, XMLObject::AS3_toXMLString)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_notification, XMLObject::AS3_notification)
-        AVMTHUNK_NATIVE_METHOD(XML_AS3_setNotification, XMLObject::AS3_setNotification)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_toString, XMLListObject::AS3_toString)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_hasOwnProperty, XMLListObject::XMLList_AS3_hasOwnProperty)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_propertyIsEnumerable, XMLListObject::XMLList_AS3_propertyIsEnumerable)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_attribute, XMLListObject::AS3_attribute)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_attributes, XMLListObject::AS3_attributes)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_child, XMLListObject::AS3_child)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_children, XMLListObject::AS3_children)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_comments, XMLListObject::AS3_comments)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_contains, XMLListObject::AS3_contains)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_copy, XMLListObject::AS3_copy)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_descendants, XMLListObject::AS3_descendants)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_elements, XMLListObject::AS3_elements)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_hasComplexContent, XMLListObject::AS3_hasComplexContent)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_hasSimpleContent, XMLListObject::AS3_hasSimpleContent)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_length, XMLListObject::AS3_length)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_name, XMLListObject::AS3_name)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_normalize, XMLListObject::AS3_normalize)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_parent, XMLListObject::AS3_parent)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_processingInstructions, XMLListObject::AS3_processingInstructions)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_text, XMLListObject::AS3_text)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_toXMLString, XMLListObject::AS3_toXMLString)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_addNamespace, XMLListObject::AS3_addNamespace)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_appendChild, XMLListObject::AS3_appendChild)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_childIndex, XMLListObject::AS3_childIndex)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_inScopeNamespaces, XMLListObject::AS3_inScopeNamespaces)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_insertChildAfter, XMLListObject::AS3_insertChildAfter)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_insertChildBefore, XMLListObject::AS3_insertChildBefore)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_nodeKind, XMLListObject::AS3_nodeKind)
-        AVMTHUNK_NATIVE_METHOD(XMLList_private__namespace, XMLListObject::_namespace)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_localName, XMLListObject::AS3_localName)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_namespaceDeclarations, XMLListObject::AS3_namespaceDeclarations)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_prependChild, XMLListObject::AS3_prependChild)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_removeNamespace, XMLListObject::AS3_removeNamespace)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_replace, XMLListObject::AS3_replace)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setChildren, XMLListObject::AS3_setChildren)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setLocalName, XMLListObject::AS3_setLocalName)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setName, XMLListObject::AS3_setName)
-        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setNamespace, XMLListObject::AS3_setNamespace)
-        AVMTHUNK_NATIVE_METHOD(QName_localName_get, QNameObject::get_localName)
-        AVMTHUNK_NATIVE_METHOD(QName_uri_get, QNameObject::get_uri)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_defaultObjectEncoding_get, ByteArrayClass::get_defaultObjectEncoding)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_defaultObjectEncoding_set, ByteArrayClass::set_defaultObjectEncoding)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readBytes, ByteArrayObject::readBytes)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeBytes, ByteArrayObject::writeBytes)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeBoolean, ByteArrayObject::writeBoolean)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeByte, ByteArrayObject::writeByte)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeShort, ByteArrayObject::writeShort)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeInt, ByteArrayObject::writeInt)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeUnsignedInt, ByteArrayObject::writeUnsignedInt)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeFloat, ByteArrayObject::writeFloat)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeDouble, ByteArrayObject::writeDouble)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeMultiByte, ByteArrayObject::writeMultiByte)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeUTF, ByteArrayObject::writeUTF)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeUTFBytes, ByteArrayObject::writeUTFBytes)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readBoolean, ByteArrayObject::readBoolean)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readByte, ByteArrayObject::readByte)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUnsignedByte, ByteArrayObject::readUnsignedByte)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readShort, ByteArrayObject::readShort)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUnsignedShort, ByteArrayObject::readUnsignedShort)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readInt, ByteArrayObject::readInt)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUnsignedInt, ByteArrayObject::readUnsignedInt)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readFloat, ByteArrayObject::readFloat)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readDouble, ByteArrayObject::readDouble)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readMultiByte, ByteArrayObject::readMultiByte)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUTF, ByteArrayObject::readUTF)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUTFBytes, ByteArrayObject::readUTFBytes)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_length_get, ByteArrayObject::get_length)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_length_set, ByteArrayObject::set_length)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeObject, ByteArrayObject::writeObject)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readObject, ByteArrayObject::readObject)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_private__compress, ByteArrayObject::_compress)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_private__uncompress, ByteArrayObject::_uncompress)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_private__toString, ByteArrayObject::_toString)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_bytesAvailable_get, ByteArrayObject::get_bytesAvailable)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_position_get, ByteArrayObject::get_position)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_position_set, ByteArrayObject::set_position)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_objectEncoding_get, ByteArrayObject::get_objectEncoding)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_objectEncoding_set, ByteArrayObject::set_objectEncoding)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_endian_get, ByteArrayObject::get_endian)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_endian_set, ByteArrayObject::set_endian)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_clear, ByteArrayObject::clear)
+        AVMTHUNK_NATIVE_METHOD(Object_private__hasOwnProperty, avmplus::ObjectClass::_hasOwnProperty)
+        AVMTHUNK_NATIVE_METHOD(Object_private__propertyIsEnumerable, avmplus::ObjectClass::_propertyIsEnumerable)
+        AVMTHUNK_NATIVE_METHOD(Object_protected__setPropertyIsEnumerable, avmplus::ObjectClass::_setPropertyIsEnumerable)
+        AVMTHUNK_NATIVE_METHOD(Object_private__isPrototypeOf, avmplus::ObjectClass::_isPrototypeOf)
+        AVMTHUNK_NATIVE_METHOD(Object_private__toString, avmplus::ObjectClass::_toString)
+        AVMTHUNK_NATIVE_METHOD(Class_prototype_get, avmplus::ClassClosure::get_prototype)
+        AVMTHUNK_NATIVE_METHOD(Function_prototype_get, avmplus::FunctionObject::get_prototype)
+        AVMTHUNK_NATIVE_METHOD(Function_prototype_set, avmplus::FunctionObject::set_prototype)
+        AVMTHUNK_NATIVE_METHOD(Function_length_get, avmplus::FunctionObject::get_length)
+        AVMTHUNK_NATIVE_METHOD(Function_AS3_call, avmplus::FunctionObject::AS3_call)
+        AVMTHUNK_NATIVE_METHOD(Function_AS3_apply, avmplus::FunctionObject::AS3_apply)
+        AVMTHUNK_NATIVE_METHOD_NAMESPACE(Namespace_prefix_get, avmplus::Namespace::get_prefix)
+        AVMTHUNK_NATIVE_METHOD_NAMESPACE(Namespace_uri_get, avmplus::Namespace::get_uri)
+        AVMTHUNK_NATIVE_METHOD(Number_private__numberToString, avmplus::NumberClass::_numberToString)
+        AVMTHUNK_NATIVE_METHOD(Number_private__convert, avmplus::NumberClass::_convert)
+        AVMTHUNK_NATIVE_METHOD(Number_private__minValue, avmplus::NumberClass::_minValue)
+        AVMTHUNK_NATIVE_METHOD(String_AS3_fromCharCode, avmplus::StringClass::AS3_fromCharCode)
+        AVMTHUNK_NATIVE_METHOD(String_private__match, avmplus::StringClass::_match)
+        AVMTHUNK_NATIVE_METHOD(String_private__replace, avmplus::StringClass::_replace)
+        AVMTHUNK_NATIVE_METHOD(String_private__search, avmplus::StringClass::_search)
+        AVMTHUNK_NATIVE_METHOD(String_private__split, avmplus::StringClass::_split)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_length_get, avmplus::String::get_length)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_private__indexOf, avmplus::String::_indexOf)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_indexOf, avmplus::String::AS3_indexOf)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_private__lastIndexOf, avmplus::String::_lastIndexOf)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_lastIndexOf, avmplus::String::AS3_lastIndexOf)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_charAt, avmplus::String::AS3_charAt)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_charCodeAt, avmplus::String::AS3_charCodeAt)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_localeCompare, avmplus::String::AS3_localeCompare)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_private__slice, avmplus::String::_slice)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_slice, avmplus::String::AS3_slice)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_private__substring, avmplus::String::_substring)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_substring, avmplus::String::AS3_substring)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_private__substr, avmplus::String::_substr)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_substr, avmplus::String::AS3_substr)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_toLowerCase, avmplus::String::AS3_toLowerCase)
+        AVMTHUNK_NATIVE_METHOD_STRING(String_AS3_toUpperCase, avmplus::String::AS3_toUpperCase)
+        AVMTHUNK_NATIVE_METHOD(Array_private__pop, avmplus::ArrayClass::_pop)
+        AVMTHUNK_NATIVE_METHOD(Array_private__reverse, avmplus::ArrayClass::_reverse)
+        AVMTHUNK_NATIVE_METHOD(Array_private__concat, avmplus::ArrayClass::_concat)
+        AVMTHUNK_NATIVE_METHOD(Array_private__shift, avmplus::ArrayClass::_shift)
+        AVMTHUNK_NATIVE_METHOD(Array_private__slice, avmplus::ArrayClass::_slice)
+        AVMTHUNK_NATIVE_METHOD(Array_private__unshift, avmplus::ArrayClass::_unshift)
+        AVMTHUNK_NATIVE_METHOD(Array_private__splice, avmplus::ArrayClass::_splice)
+        AVMTHUNK_NATIVE_METHOD(Array_private__sort, avmplus::ArrayClass::_sort)
+        AVMTHUNK_NATIVE_METHOD(Array_private__sortOn, avmplus::ArrayClass::_sortOn)
+        AVMTHUNK_NATIVE_METHOD(Array_private__indexOf, avmplus::ArrayClass::_indexOf)
+        AVMTHUNK_NATIVE_METHOD(Array_private__lastIndexOf, avmplus::ArrayClass::_lastIndexOf)
+        AVMTHUNK_NATIVE_METHOD(Array_private__every, avmplus::ArrayClass::_every)
+        AVMTHUNK_NATIVE_METHOD(Array_private__filter, avmplus::ArrayClass::_filter)
+        AVMTHUNK_NATIVE_METHOD(Array_private__forEach, avmplus::ArrayClass::_forEach)
+        AVMTHUNK_NATIVE_METHOD(Array_private__map, avmplus::ArrayClass::_map)
+        AVMTHUNK_NATIVE_METHOD(Array_private__some, avmplus::ArrayClass::_some)
+        AVMTHUNK_NATIVE_METHOD(Array_length_get, avmplus::ArrayObject::get_length)
+        AVMTHUNK_NATIVE_METHOD(Array_length_set, avmplus::ArrayObject::set_length)
+        AVMTHUNK_NATIVE_METHOD(Array_AS3_pop, avmplus::ArrayObject::AS3_pop)
+        AVMTHUNK_NATIVE_METHOD(Array_AS3_push, avmplus::ArrayObject::AS3_push)
+        AVMTHUNK_NATIVE_METHOD(Array_AS3_unshift, avmplus::ArrayObject::AS3_unshift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__every, avmplus::ObjectVectorClass::_every)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__forEach, avmplus::ObjectVectorClass::_forEach)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__some, avmplus::ObjectVectorClass::_some)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__sort, avmplus::ObjectVectorClass::_sort)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private_newThisType, avmplus::ObjectVectorObject::newThisType)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_length_get, avmplus::ObjectVectorObject::get_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_length_set, avmplus::ObjectVectorObject::set_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_fixed_set, avmplus::ObjectVectorObject::set_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_fixed_get, avmplus::ObjectVectorObject::get_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_push, avmplus::ObjectVectorObject::AS3_push)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__reverse, avmplus::ObjectVectorObject::_reverse)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__spliceHelper, avmplus::ObjectVectorObject::_spliceHelper)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_unshift, avmplus::ObjectVectorObject::AS3_unshift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__filter, avmplus::ObjectVectorObject::_filter)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_private__map, avmplus::ObjectVectorObject::_map)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_pop, avmplus::ObjectVectorObject::AS3_pop)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_object_AS3_shift, avmplus::ObjectVectorObject::AS3_shift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__every, avmplus::IntVectorClass::_every)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__forEach, avmplus::IntVectorClass::_forEach)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__some, avmplus::IntVectorClass::_some)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__sort, avmplus::IntVectorClass::_sort)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private_newThisType, avmplus::IntVectorObject::newThisType)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_length_get, avmplus::IntVectorObject::get_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_length_set, avmplus::IntVectorObject::set_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_fixed_set, avmplus::IntVectorObject::set_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_fixed_get, avmplus::IntVectorObject::get_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_push, avmplus::IntVectorObject::AS3_push)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__reverse, avmplus::IntVectorObject::_reverse)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__spliceHelper, avmplus::IntVectorObject::_spliceHelper)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_unshift, avmplus::IntVectorObject::AS3_unshift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__filter, avmplus::IntVectorObject::_filter)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_private__map, avmplus::IntVectorObject::_map)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_pop, avmplus::IntVectorObject::AS3_pop)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_int_AS3_shift, avmplus::IntVectorObject::AS3_shift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__every, avmplus::UIntVectorClass::_every)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__forEach, avmplus::UIntVectorClass::_forEach)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__some, avmplus::UIntVectorClass::_some)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__sort, avmplus::UIntVectorClass::_sort)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private_newThisType, avmplus::UIntVectorObject::newThisType)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_length_get, avmplus::UIntVectorObject::get_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_length_set, avmplus::UIntVectorObject::set_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_set, avmplus::UIntVectorObject::set_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_get, avmplus::UIntVectorObject::get_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_push, avmplus::UIntVectorObject::AS3_push)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__reverse, avmplus::UIntVectorObject::_reverse)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__spliceHelper, avmplus::UIntVectorObject::_spliceHelper)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_unshift, avmplus::UIntVectorObject::AS3_unshift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__filter, avmplus::UIntVectorObject::_filter)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_private__map, avmplus::UIntVectorObject::_map)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_pop, avmplus::UIntVectorObject::AS3_pop)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_uint_AS3_shift, avmplus::UIntVectorObject::AS3_shift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__every, avmplus::DoubleVectorClass::_every)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__forEach, avmplus::DoubleVectorClass::_forEach)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__some, avmplus::DoubleVectorClass::_some)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__sort, avmplus::DoubleVectorClass::_sort)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private_newThisType, avmplus::DoubleVectorObject::newThisType)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_length_get, avmplus::DoubleVectorObject::get_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_length_set, avmplus::DoubleVectorObject::set_length)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_fixed_set, avmplus::DoubleVectorObject::set_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_fixed_get, avmplus::DoubleVectorObject::get_fixed)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_push, avmplus::DoubleVectorObject::AS3_push)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__reverse, avmplus::DoubleVectorObject::_reverse)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__spliceHelper, avmplus::DoubleVectorObject::_spliceHelper)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_unshift, avmplus::DoubleVectorObject::AS3_unshift)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__filter, avmplus::DoubleVectorObject::_filter)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_private__map, avmplus::DoubleVectorObject::_map)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_pop, avmplus::DoubleVectorObject::AS3_pop)
+        AVMTHUNK_NATIVE_METHOD(__AS3___vec_Vector_double_AS3_shift, avmplus::DoubleVectorObject::AS3_shift)
+        AVMTHUNK_NATIVE_METHOD(Math_private__min, avmplus::MathClass::_min)
+        AVMTHUNK_NATIVE_METHOD(Math_private__max, avmplus::MathClass::_max)
+        AVMTHUNK_NATIVE_METHOD(Math_abs, avmplus::MathClass::abs)
+        AVMTHUNK_NATIVE_METHOD(Math_acos, avmplus::MathClass::acos)
+        AVMTHUNK_NATIVE_METHOD(Math_asin, avmplus::MathClass::asin)
+        AVMTHUNK_NATIVE_METHOD(Math_atan, avmplus::MathClass::atan)
+        AVMTHUNK_NATIVE_METHOD(Math_ceil, avmplus::MathClass::ceil)
+        AVMTHUNK_NATIVE_METHOD(Math_cos, avmplus::MathClass::cos)
+        AVMTHUNK_NATIVE_METHOD(Math_exp, avmplus::MathClass::exp)
+        AVMTHUNK_NATIVE_METHOD(Math_floor, avmplus::MathClass::floor)
+        AVMTHUNK_NATIVE_METHOD(Math_log, avmplus::MathClass::log)
+        AVMTHUNK_NATIVE_METHOD(Math_round, avmplus::MathClass::round)
+        AVMTHUNK_NATIVE_METHOD(Math_sin, avmplus::MathClass::sin)
+        AVMTHUNK_NATIVE_METHOD(Math_sqrt, avmplus::MathClass::sqrt)
+        AVMTHUNK_NATIVE_METHOD(Math_tan, avmplus::MathClass::tan)
+        AVMTHUNK_NATIVE_METHOD(Math_atan2, avmplus::MathClass::atan2)
+        AVMTHUNK_NATIVE_METHOD(Math_pow, avmplus::MathClass::pow)
+        AVMTHUNK_NATIVE_METHOD(Math_max, avmplus::MathClass::max)
+        AVMTHUNK_NATIVE_METHOD(Math_min, avmplus::MathClass::min)
+        AVMTHUNK_NATIVE_METHOD(Math_random, avmplus::MathClass::random)
+        AVMTHUNK_NATIVE_METHOD(Error_getErrorMessage, avmplus::ErrorClass::getErrorMessage)
+        AVMTHUNK_NATIVE_METHOD(Error_getStackTrace, avmplus::ErrorObject::getStackTrace)
+        AVMTHUNK_NATIVE_METHOD(Date_parse, avmplus::DateClass::parse)
+        AVMTHUNK_NATIVE_METHOD(Date_UTC, avmplus::DateClass::UTC)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_valueOf, avmplus::DateObject::AS3_valueOf)
+        AVMTHUNK_NATIVE_METHOD(Date_private__toString, avmplus::DateObject::_toString)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setTime, avmplus::DateObject::_setTime)
+        AVMTHUNK_NATIVE_METHOD(Date_private__get, avmplus::DateObject::_get)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCFullYear, avmplus::DateObject::AS3_getUTCFullYear)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCMonth, avmplus::DateObject::AS3_getUTCMonth)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCDate, avmplus::DateObject::AS3_getUTCDate)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCDay, avmplus::DateObject::AS3_getUTCDay)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCHours, avmplus::DateObject::AS3_getUTCHours)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCMinutes, avmplus::DateObject::AS3_getUTCMinutes)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCSeconds, avmplus::DateObject::AS3_getUTCSeconds)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getUTCMilliseconds, avmplus::DateObject::AS3_getUTCMilliseconds)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getFullYear, avmplus::DateObject::AS3_getFullYear)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getMonth, avmplus::DateObject::AS3_getMonth)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getDate, avmplus::DateObject::AS3_getDate)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getDay, avmplus::DateObject::AS3_getDay)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getHours, avmplus::DateObject::AS3_getHours)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getMinutes, avmplus::DateObject::AS3_getMinutes)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getSeconds, avmplus::DateObject::AS3_getSeconds)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getMilliseconds, avmplus::DateObject::AS3_getMilliseconds)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getTimezoneOffset, avmplus::DateObject::AS3_getTimezoneOffset)
+        AVMTHUNK_NATIVE_METHOD(Date_AS3_getTime, avmplus::DateObject::AS3_getTime)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setFullYear, avmplus::DateObject::_setFullYear)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setMonth, avmplus::DateObject::_setMonth)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setDate, avmplus::DateObject::_setDate)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setHours, avmplus::DateObject::_setHours)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setMinutes, avmplus::DateObject::_setMinutes)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setSeconds, avmplus::DateObject::_setSeconds)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setMilliseconds, avmplus::DateObject::_setMilliseconds)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCFullYear, avmplus::DateObject::_setUTCFullYear)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCMonth, avmplus::DateObject::_setUTCMonth)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCDate, avmplus::DateObject::_setUTCDate)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCHours, avmplus::DateObject::_setUTCHours)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCMinutes, avmplus::DateObject::_setUTCMinutes)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCSeconds, avmplus::DateObject::_setUTCSeconds)
+        AVMTHUNK_NATIVE_METHOD(Date_private__setUTCMilliseconds, avmplus::DateObject::_setUTCMilliseconds)
+        AVMTHUNK_NATIVE_METHOD(RegExp_source_get, avmplus::RegExpObject::get_source)
+        AVMTHUNK_NATIVE_METHOD(RegExp_global_get, avmplus::RegExpObject::get_global)
+        AVMTHUNK_NATIVE_METHOD(RegExp_ignoreCase_get, avmplus::RegExpObject::get_ignoreCase)
+        AVMTHUNK_NATIVE_METHOD(RegExp_multiline_get, avmplus::RegExpObject::get_multiline)
+        AVMTHUNK_NATIVE_METHOD(RegExp_lastIndex_get, avmplus::RegExpObject::get_lastIndex)
+        AVMTHUNK_NATIVE_METHOD(RegExp_lastIndex_set, avmplus::RegExpObject::set_lastIndex)
+        AVMTHUNK_NATIVE_METHOD(RegExp_dotall_get, avmplus::RegExpObject::get_dotall)
+        AVMTHUNK_NATIVE_METHOD(RegExp_extended_get, avmplus::RegExpObject::get_extended)
+        AVMTHUNK_NATIVE_METHOD(RegExp_AS3_exec, avmplus::RegExpObject::AS3_exec)
+        AVMTHUNK_NATIVE_METHOD(XML_ignoreComments_get, avmplus::XMLClass::get_ignoreComments)
+        AVMTHUNK_NATIVE_METHOD(XML_ignoreComments_set, avmplus::XMLClass::set_ignoreComments)
+        AVMTHUNK_NATIVE_METHOD(XML_ignoreProcessingInstructions_get, avmplus::XMLClass::get_ignoreProcessingInstructions)
+        AVMTHUNK_NATIVE_METHOD(XML_ignoreProcessingInstructions_set, avmplus::XMLClass::set_ignoreProcessingInstructions)
+        AVMTHUNK_NATIVE_METHOD(XML_ignoreWhitespace_get, avmplus::XMLClass::get_ignoreWhitespace)
+        AVMTHUNK_NATIVE_METHOD(XML_ignoreWhitespace_set, avmplus::XMLClass::set_ignoreWhitespace)
+        AVMTHUNK_NATIVE_METHOD(XML_prettyPrinting_get, avmplus::XMLClass::get_prettyPrinting)
+        AVMTHUNK_NATIVE_METHOD(XML_prettyPrinting_set, avmplus::XMLClass::set_prettyPrinting)
+        AVMTHUNK_NATIVE_METHOD(XML_prettyIndent_get, avmplus::XMLClass::get_prettyIndent)
+        AVMTHUNK_NATIVE_METHOD(XML_prettyIndent_set, avmplus::XMLClass::set_prettyIndent)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_toString, avmplus::XMLObject::AS3_toString)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_hasOwnProperty, avmplus::XMLObject::XML_AS3_hasOwnProperty)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_propertyIsEnumerable, avmplus::XMLObject::XML_AS3_propertyIsEnumerable)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_addNamespace, avmplus::XMLObject::AS3_addNamespace)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_appendChild, avmplus::XMLObject::AS3_appendChild)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_attribute, avmplus::XMLObject::AS3_attribute)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_attributes, avmplus::XMLObject::AS3_attributes)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_child, avmplus::XMLObject::AS3_child)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_childIndex, avmplus::XMLObject::AS3_childIndex)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_children, avmplus::XMLObject::AS3_children)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_comments, avmplus::XMLObject::AS3_comments)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_contains, avmplus::XMLObject::AS3_contains)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_copy, avmplus::XMLObject::AS3_copy)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_descendants, avmplus::XMLObject::AS3_descendants)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_elements, avmplus::XMLObject::AS3_elements)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_hasComplexContent, avmplus::XMLObject::AS3_hasComplexContent)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_hasSimpleContent, avmplus::XMLObject::AS3_hasSimpleContent)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_inScopeNamespaces, avmplus::XMLObject::AS3_inScopeNamespaces)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_insertChildAfter, avmplus::XMLObject::AS3_insertChildAfter)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_insertChildBefore, avmplus::XMLObject::AS3_insertChildBefore)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_localName, avmplus::XMLObject::AS3_localName)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_name, avmplus::XMLObject::AS3_name)
+        AVMTHUNK_NATIVE_METHOD(XML_private__namespace, avmplus::XMLObject::_namespace)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_namespaceDeclarations, avmplus::XMLObject::AS3_namespaceDeclarations)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_nodeKind, avmplus::XMLObject::AS3_nodeKind)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_normalize, avmplus::XMLObject::AS3_normalize)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_parent, avmplus::XMLObject::AS3_parent)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_processingInstructions, avmplus::XMLObject::AS3_processingInstructions)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_prependChild, avmplus::XMLObject::AS3_prependChild)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_removeNamespace, avmplus::XMLObject::AS3_removeNamespace)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_replace, avmplus::XMLObject::AS3_replace)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_setChildren, avmplus::XMLObject::AS3_setChildren)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_setLocalName, avmplus::XMLObject::AS3_setLocalName)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_setName, avmplus::XMLObject::AS3_setName)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_setNamespace, avmplus::XMLObject::AS3_setNamespace)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_text, avmplus::XMLObject::AS3_text)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_toXMLString, avmplus::XMLObject::AS3_toXMLString)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_notification, avmplus::XMLObject::AS3_notification)
+        AVMTHUNK_NATIVE_METHOD(XML_AS3_setNotification, avmplus::XMLObject::AS3_setNotification)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_toString, avmplus::XMLListObject::AS3_toString)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_hasOwnProperty, avmplus::XMLListObject::XMLList_AS3_hasOwnProperty)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_propertyIsEnumerable, avmplus::XMLListObject::XMLList_AS3_propertyIsEnumerable)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_attribute, avmplus::XMLListObject::AS3_attribute)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_attributes, avmplus::XMLListObject::AS3_attributes)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_child, avmplus::XMLListObject::AS3_child)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_children, avmplus::XMLListObject::AS3_children)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_comments, avmplus::XMLListObject::AS3_comments)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_contains, avmplus::XMLListObject::AS3_contains)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_copy, avmplus::XMLListObject::AS3_copy)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_descendants, avmplus::XMLListObject::AS3_descendants)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_elements, avmplus::XMLListObject::AS3_elements)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_hasComplexContent, avmplus::XMLListObject::AS3_hasComplexContent)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_hasSimpleContent, avmplus::XMLListObject::AS3_hasSimpleContent)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_length, avmplus::XMLListObject::AS3_length)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_name, avmplus::XMLListObject::AS3_name)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_normalize, avmplus::XMLListObject::AS3_normalize)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_parent, avmplus::XMLListObject::AS3_parent)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_processingInstructions, avmplus::XMLListObject::AS3_processingInstructions)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_text, avmplus::XMLListObject::AS3_text)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_toXMLString, avmplus::XMLListObject::AS3_toXMLString)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_addNamespace, avmplus::XMLListObject::AS3_addNamespace)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_appendChild, avmplus::XMLListObject::AS3_appendChild)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_childIndex, avmplus::XMLListObject::AS3_childIndex)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_inScopeNamespaces, avmplus::XMLListObject::AS3_inScopeNamespaces)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_insertChildAfter, avmplus::XMLListObject::AS3_insertChildAfter)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_insertChildBefore, avmplus::XMLListObject::AS3_insertChildBefore)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_nodeKind, avmplus::XMLListObject::AS3_nodeKind)
+        AVMTHUNK_NATIVE_METHOD(XMLList_private__namespace, avmplus::XMLListObject::_namespace)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_localName, avmplus::XMLListObject::AS3_localName)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_namespaceDeclarations, avmplus::XMLListObject::AS3_namespaceDeclarations)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_prependChild, avmplus::XMLListObject::AS3_prependChild)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_removeNamespace, avmplus::XMLListObject::AS3_removeNamespace)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_replace, avmplus::XMLListObject::AS3_replace)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setChildren, avmplus::XMLListObject::AS3_setChildren)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setLocalName, avmplus::XMLListObject::AS3_setLocalName)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setName, avmplus::XMLListObject::AS3_setName)
+        AVMTHUNK_NATIVE_METHOD(XMLList_AS3_setNamespace, avmplus::XMLListObject::AS3_setNamespace)
+        AVMTHUNK_NATIVE_METHOD(QName_localName_get, avmplus::QNameObject::get_localName)
+        AVMTHUNK_NATIVE_METHOD(QName_uri_get, avmplus::QNameObject::get_uri)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_defaultObjectEncoding_get, avmplus::ByteArrayClass::get_defaultObjectEncoding)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_defaultObjectEncoding_set, avmplus::ByteArrayClass::set_defaultObjectEncoding)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readBytes, avmplus::ByteArrayObject::readBytes)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeBytes, avmplus::ByteArrayObject::writeBytes)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeBoolean, avmplus::ByteArrayObject::writeBoolean)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeByte, avmplus::ByteArrayObject::writeByte)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeShort, avmplus::ByteArrayObject::writeShort)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeInt, avmplus::ByteArrayObject::writeInt)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeUnsignedInt, avmplus::ByteArrayObject::writeUnsignedInt)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeFloat, avmplus::ByteArrayObject::writeFloat)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeDouble, avmplus::ByteArrayObject::writeDouble)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeMultiByte, avmplus::ByteArrayObject::writeMultiByte)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeUTF, avmplus::ByteArrayObject::writeUTF)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeUTFBytes, avmplus::ByteArrayObject::writeUTFBytes)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readBoolean, avmplus::ByteArrayObject::readBoolean)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readByte, avmplus::ByteArrayObject::readByte)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUnsignedByte, avmplus::ByteArrayObject::readUnsignedByte)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readShort, avmplus::ByteArrayObject::readShort)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUnsignedShort, avmplus::ByteArrayObject::readUnsignedShort)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readInt, avmplus::ByteArrayObject::readInt)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUnsignedInt, avmplus::ByteArrayObject::readUnsignedInt)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readFloat, avmplus::ByteArrayObject::readFloat)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readDouble, avmplus::ByteArrayObject::readDouble)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readMultiByte, avmplus::ByteArrayObject::readMultiByte)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUTF, avmplus::ByteArrayObject::readUTF)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readUTFBytes, avmplus::ByteArrayObject::readUTFBytes)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_length_get, avmplus::ByteArrayObject::get_length)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_length_set, avmplus::ByteArrayObject::set_length)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_writeObject, avmplus::ByteArrayObject::writeObject)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_readObject, avmplus::ByteArrayObject::readObject)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_private__compress, avmplus::ByteArrayObject::_compress)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_private__uncompress, avmplus::ByteArrayObject::_uncompress)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_private__toString, avmplus::ByteArrayObject::_toString)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_bytesAvailable_get, avmplus::ByteArrayObject::get_bytesAvailable)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_position_get, avmplus::ByteArrayObject::get_position)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_position_set, avmplus::ByteArrayObject::set_position)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_objectEncoding_get, avmplus::ByteArrayObject::get_objectEncoding)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_objectEncoding_set, avmplus::ByteArrayObject::set_objectEncoding)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_endian_get, avmplus::ByteArrayObject::get_endian)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_endian_set, avmplus::ByteArrayObject::set_endian)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_ByteArray_clear, avmplus::ByteArrayObject::clear)
     AVMTHUNK_END_NATIVE_METHODS()
 
     AVMTHUNK_BEGIN_NATIVE_CLASSES(builtin)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Object, ObjectClass, ObjectClass, SlotOffsetsAndAsserts::s_slotsOffsetObjectClass, ::avmplus::ScriptObject, SlotOffsetsAndAsserts::s_slotsOffsetScriptObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Class, ClassClass, ClassClass, SlotOffsetsAndAsserts::s_slotsOffsetClassClass, ClassClosure, SlotOffsetsAndAsserts::s_slotsOffsetClassClosure, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Function, FunctionClass, FunctionClass, SlotOffsetsAndAsserts::s_slotsOffsetFunctionClass, FunctionObject, SlotOffsetsAndAsserts::s_slotsOffsetFunctionObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Namespace, NamespaceClass, NamespaceClass, SlotOffsetsAndAsserts::s_slotsOffsetNamespaceClass, Namespace, SlotOffsetsAndAsserts::s_slotsOffsetNamespace, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Boolean, BooleanClass, BooleanClass, SlotOffsetsAndAsserts::s_slotsOffsetBooleanClass, bool, SlotOffsetsAndAsserts::s_slotsOffsetbool, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Number, NumberClass, NumberClass, SlotOffsetsAndAsserts::s_slotsOffsetNumberClass, double, SlotOffsetsAndAsserts::s_slotsOffsetdouble, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_int, IntClass, IntClass, SlotOffsetsAndAsserts::s_slotsOffsetIntClass, int32_t, SlotOffsetsAndAsserts::s_slotsOffsetint32_t, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_uint, UIntClass, UIntClass, SlotOffsetsAndAsserts::s_slotsOffsetUIntClass, uint32_t, SlotOffsetsAndAsserts::s_slotsOffsetuint32_t, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_String, StringClass, StringClass, SlotOffsetsAndAsserts::s_slotsOffsetStringClass, String, SlotOffsetsAndAsserts::s_slotsOffsetString, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Array, ArrayClass, ArrayClass, SlotOffsetsAndAsserts::s_slotsOffsetArrayClass, ArrayObject, SlotOffsetsAndAsserts::s_slotsOffsetArrayObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector, VectorClass, VectorClass, SlotOffsetsAndAsserts::s_slotsOffsetVectorClass, ObjectVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetObjectVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_object, ObjectVectorClass, ObjectVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetObjectVectorClass, ObjectVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetObjectVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_int, IntVectorClass, IntVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetIntVectorClass, IntVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetIntVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_uint, UIntVectorClass, UIntVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetUIntVectorClass, UIntVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetUIntVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_double, DoubleVectorClass, DoubleVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetDoubleVectorClass, DoubleVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetDoubleVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_private_MethodClosure, MethodClosureClass, MethodClosureClass, SlotOffsetsAndAsserts::s_slotsOffsetMethodClosureClass, MethodClosure, SlotOffsetsAndAsserts::s_slotsOffsetMethodClosure, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Math, MathClass, MathClass, SlotOffsetsAndAsserts::s_slotsOffsetMathClass, double, SlotOffsetsAndAsserts::s_slotsOffsetdouble, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Error, ErrorClass, ErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetErrorClass, ErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_DefinitionError, DefinitionErrorClass, DefinitionErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetDefinitionErrorClass, DefinitionErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetDefinitionErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_EvalError, EvalErrorClass, EvalErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetEvalErrorClass, EvalErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetEvalErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_RangeError, RangeErrorClass, RangeErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetRangeErrorClass, RangeErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetRangeErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_ReferenceError, ReferenceErrorClass, ReferenceErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetReferenceErrorClass, ReferenceErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetReferenceErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_SecurityError, SecurityErrorClass, SecurityErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetSecurityErrorClass, SecurityErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetSecurityErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_SyntaxError, SyntaxErrorClass, SyntaxErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetSyntaxErrorClass, SyntaxErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetSyntaxErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_TypeError, TypeErrorClass, TypeErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetTypeErrorClass, TypeErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetTypeErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_URIError, URIErrorClass, URIErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetURIErrorClass, URIErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetURIErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_VerifyError, VerifyErrorClass, VerifyErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetVerifyErrorClass, VerifyErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetVerifyErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_UninitializedError, UninitializedErrorClass, UninitializedErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetUninitializedErrorClass, UninitializedErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetUninitializedErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_ArgumentError, ArgumentErrorClass, ArgumentErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetArgumentErrorClass, ArgumentErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetArgumentErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Date, DateClass, DateClass, SlotOffsetsAndAsserts::s_slotsOffsetDateClass, DateObject, SlotOffsetsAndAsserts::s_slotsOffsetDateObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_RegExp, RegExpClass, RegExpClass, SlotOffsetsAndAsserts::s_slotsOffsetRegExpClass, RegExpObject, SlotOffsetsAndAsserts::s_slotsOffsetRegExpObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_XML, XMLClass, XMLClass, SlotOffsetsAndAsserts::s_slotsOffsetXMLClass, XMLObject, SlotOffsetsAndAsserts::s_slotsOffsetXMLObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, XMLListClass, SlotOffsetsAndAsserts::s_slotsOffsetXMLListClass, XMLListObject, SlotOffsetsAndAsserts::s_slotsOffsetXMLListObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, QNameClass, SlotOffsetsAndAsserts::s_slotsOffsetQNameClass, QNameObject, SlotOffsetsAndAsserts::s_slotsOffsetQNameObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_ByteArray, ByteArrayClass, ByteArrayClass, SlotOffsetsAndAsserts::s_slotsOffsetByteArrayClass, ByteArrayObject, SlotOffsetsAndAsserts::s_slotsOffsetByteArrayObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Object, ObjectClass, avmplus::ObjectClass, SlotOffsetsAndAsserts::kSlotsOffsetObjectClass, avmplus::ScriptObject, SlotOffsetsAndAsserts::kSlotsOffsetScriptObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Class, ClassClass, avmplus::ClassClass, SlotOffsetsAndAsserts::kSlotsOffsetClassClass, avmplus::ClassClosure, SlotOffsetsAndAsserts::kSlotsOffsetClassClosure, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Function, FunctionClass, avmplus::FunctionClass, SlotOffsetsAndAsserts::kSlotsOffsetFunctionClass, avmplus::FunctionObject, SlotOffsetsAndAsserts::kSlotsOffsetFunctionObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Namespace, NamespaceClass, avmplus::NamespaceClass, SlotOffsetsAndAsserts::kSlotsOffsetNamespaceClass, avmplus::Namespace, SlotOffsetsAndAsserts::kSlotsOffsetNamespace, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Boolean, BooleanClass, avmplus::BooleanClass, SlotOffsetsAndAsserts::kSlotsOffsetBooleanClass, bool, SlotOffsetsAndAsserts::kSlotsOffsetbool, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Number, NumberClass, avmplus::NumberClass, SlotOffsetsAndAsserts::kSlotsOffsetNumberClass, double, SlotOffsetsAndAsserts::kSlotsOffsetdouble, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_int, IntClass, avmplus::IntClass, SlotOffsetsAndAsserts::kSlotsOffsetIntClass, int32_t, SlotOffsetsAndAsserts::kSlotsOffsetint32_t, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_uint, UIntClass, avmplus::UIntClass, SlotOffsetsAndAsserts::kSlotsOffsetUIntClass, uint32_t, SlotOffsetsAndAsserts::kSlotsOffsetuint32_t, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_String, StringClass, avmplus::StringClass, SlotOffsetsAndAsserts::kSlotsOffsetStringClass, avmplus::String, SlotOffsetsAndAsserts::kSlotsOffsetString, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Array, ArrayClass, avmplus::ArrayClass, SlotOffsetsAndAsserts::kSlotsOffsetArrayClass, avmplus::ArrayObject, SlotOffsetsAndAsserts::kSlotsOffsetArrayObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector, VectorClass, avmplus::VectorClass, SlotOffsetsAndAsserts::kSlotsOffsetVectorClass, avmplus::ObjectVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetObjectVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_object, ObjectVectorClass, avmplus::ObjectVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetObjectVectorClass, avmplus::ObjectVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetObjectVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_int, IntVectorClass, avmplus::IntVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetIntVectorClass, avmplus::IntVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetIntVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_uint, UIntVectorClass, avmplus::UIntVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetUIntVectorClass, avmplus::UIntVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetUIntVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_double, DoubleVectorClass, avmplus::DoubleVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetDoubleVectorClass, avmplus::DoubleVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetDoubleVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_private_MethodClosure, MethodClosureClass, avmplus::MethodClosureClass, SlotOffsetsAndAsserts::kSlotsOffsetMethodClosureClass, avmplus::MethodClosure, SlotOffsetsAndAsserts::kSlotsOffsetMethodClosure, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Math, MathClass, avmplus::MathClass, SlotOffsetsAndAsserts::kSlotsOffsetMathClass, double, SlotOffsetsAndAsserts::kSlotsOffsetdouble, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Error, ErrorClass, avmplus::ErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetErrorClass, avmplus::ErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_DefinitionError, DefinitionErrorClass, avmplus::DefinitionErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetDefinitionErrorClass, avmplus::DefinitionErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetDefinitionErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_EvalError, EvalErrorClass, avmplus::EvalErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetEvalErrorClass, avmplus::EvalErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetEvalErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_RangeError, RangeErrorClass, avmplus::RangeErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetRangeErrorClass, avmplus::RangeErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetRangeErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_ReferenceError, ReferenceErrorClass, avmplus::ReferenceErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetReferenceErrorClass, avmplus::ReferenceErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetReferenceErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_SecurityError, SecurityErrorClass, avmplus::SecurityErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetSecurityErrorClass, avmplus::SecurityErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetSecurityErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_SyntaxError, SyntaxErrorClass, avmplus::SyntaxErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetSyntaxErrorClass, avmplus::SyntaxErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetSyntaxErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_TypeError, TypeErrorClass, avmplus::TypeErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetTypeErrorClass, avmplus::TypeErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetTypeErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_URIError, URIErrorClass, avmplus::URIErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetURIErrorClass, avmplus::URIErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetURIErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_VerifyError, VerifyErrorClass, avmplus::VerifyErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetVerifyErrorClass, avmplus::VerifyErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetVerifyErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_UninitializedError, UninitializedErrorClass, avmplus::UninitializedErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetUninitializedErrorClass, avmplus::UninitializedErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetUninitializedErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_ArgumentError, ArgumentErrorClass, avmplus::ArgumentErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetArgumentErrorClass, avmplus::ArgumentErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetArgumentErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Date, DateClass, avmplus::DateClass, SlotOffsetsAndAsserts::kSlotsOffsetDateClass, avmplus::DateObject, SlotOffsetsAndAsserts::kSlotsOffsetDateObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_RegExp, RegExpClass, avmplus::RegExpClass, SlotOffsetsAndAsserts::kSlotsOffsetRegExpClass, avmplus::RegExpObject, SlotOffsetsAndAsserts::kSlotsOffsetRegExpObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_XML, XMLClass, avmplus::XMLClass, SlotOffsetsAndAsserts::kSlotsOffsetXMLClass, avmplus::XMLObject, SlotOffsetsAndAsserts::kSlotsOffsetXMLObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, avmplus::XMLListClass, SlotOffsetsAndAsserts::kSlotsOffsetXMLListClass, avmplus::XMLListObject, SlotOffsetsAndAsserts::kSlotsOffsetXMLListObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, avmplus::QNameClass, SlotOffsetsAndAsserts::kSlotsOffsetQNameClass, avmplus::QNameObject, SlotOffsetsAndAsserts::kSlotsOffsetQNameObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_ByteArray, ByteArrayClass, avmplus::ByteArrayClass, SlotOffsetsAndAsserts::kSlotsOffsetByteArrayClass, avmplus::ByteArrayObject, SlotOffsetsAndAsserts::kSlotsOffsetByteArrayObject, false, false, false)
     AVMTHUNK_END_NATIVE_CLASSES()
 
 AVMTHUNK_END_NATIVE_TABLES()
@@ -8599,224 +8467,469 @@ const char* const builtin_versioned_uris[] = {
 
 #ifdef VMCFG_AOT
 extern "C" const struct {
-    const char* const n_0; ::avmplus::ScriptObject* const m_0;
-    const char* const n_1; ArgumentErrorClass* const m_1;
-    const char* const n_2; ArgumentErrorObject* const m_2;
-    const char* const n_3; ArrayClass* const m_3;
-    const char* const n_4; ArrayObject* const m_4;
-    const char* const n_5; BooleanClass* const m_5;
-    const char* const n_6; ByteArrayClass* const m_6;
-    const char* const n_7; ByteArrayObject* const m_7;
-    const char* const n_8; ClassClass* const m_8;
-    const char* const n_9; ClassClosure* const m_9;
-    const char* const n_10; DateClass* const m_10;
-    const char* const n_11; DateObject* const m_11;
-    const char* const n_12; DefinitionErrorClass* const m_12;
-    const char* const n_13; DefinitionErrorObject* const m_13;
-    const char* const n_14; DoubleVectorClass* const m_14;
-    const char* const n_15; DoubleVectorObject* const m_15;
-    const char* const n_16; ErrorClass* const m_16;
-    const char* const n_17; ErrorObject* const m_17;
-    const char* const n_18; EvalErrorClass* const m_18;
-    const char* const n_19; EvalErrorObject* const m_19;
-    const char* const n_20; FunctionClass* const m_20;
-    const char* const n_21; FunctionObject* const m_21;
-    const char* const n_22; IntClass* const m_22;
-    const char* const n_23; IntVectorClass* const m_23;
-    const char* const n_24; IntVectorObject* const m_24;
-    const char* const n_25; MathClass* const m_25;
-    const char* const n_26; MethodClosure* const m_26;
-    const char* const n_27; MethodClosureClass* const m_27;
-    const char* const n_28; NamespaceClass* const m_28;
-    const char* const n_29; NumberClass* const m_29;
-    const char* const n_30; ObjectClass* const m_30;
-    const char* const n_31; ObjectVectorClass* const m_31;
-    const char* const n_32; ObjectVectorObject* const m_32;
-    const char* const n_33; QNameClass* const m_33;
-    const char* const n_34; QNameObject* const m_34;
-    const char* const n_35; RangeErrorClass* const m_35;
-    const char* const n_36; RangeErrorObject* const m_36;
-    const char* const n_37; ReferenceErrorClass* const m_37;
-    const char* const n_38; ReferenceErrorObject* const m_38;
-    const char* const n_39; RegExpClass* const m_39;
-    const char* const n_40; RegExpObject* const m_40;
-    const char* const n_41; SecurityErrorClass* const m_41;
-    const char* const n_42; SecurityErrorObject* const m_42;
-    const char* const n_43; StringClass* const m_43;
-    const char* const n_44; SyntaxErrorClass* const m_44;
-    const char* const n_45; SyntaxErrorObject* const m_45;
-    const char* const n_46; TypeErrorClass* const m_46;
-    const char* const n_47; TypeErrorObject* const m_47;
-    const char* const n_48; UIntClass* const m_48;
-    const char* const n_49; UIntVectorClass* const m_49;
-    const char* const n_50; UIntVectorObject* const m_50;
-    const char* const n_51; URIErrorClass* const m_51;
-    const char* const n_52; URIErrorObject* const m_52;
-    const char* const n_53; UninitializedErrorClass* const m_53;
-    const char* const n_54; UninitializedErrorObject* const m_54;
-    const char* const n_55; VectorClass* const m_55;
-    const char* const n_56; VerifyErrorClass* const m_56;
-    const char* const n_57; VerifyErrorObject* const m_57;
-    const char* const n_58; XMLClass* const m_58;
-    const char* const n_59; XMLListClass* const m_59;
-    const char* const n_60; XMLListObject* const m_60;
-    const char* const n_61; XMLObject* const m_61;
+    const char* const n_0; avmplus::ArgumentErrorClass* const m_0;
+    const char* const n_1; avmplus::ArgumentErrorObject* const m_1;
+    const char* const n_2; avmplus::ArrayClass* const m_2;
+    const char* const n_3; avmplus::ArrayObject* const m_3;
+    const char* const n_4; avmplus::BooleanClass* const m_4;
+    const char* const n_5; avmplus::ByteArrayClass* const m_5;
+    const char* const n_6; avmplus::ByteArrayObject* const m_6;
+    const char* const n_7; avmplus::ClassClass* const m_7;
+    const char* const n_8; avmplus::ClassClosure* const m_8;
+    const char* const n_9; avmplus::DateClass* const m_9;
+    const char* const n_10; avmplus::DateObject* const m_10;
+    const char* const n_11; avmplus::DefinitionErrorClass* const m_11;
+    const char* const n_12; avmplus::DefinitionErrorObject* const m_12;
+    const char* const n_13; avmplus::DoubleVectorClass* const m_13;
+    const char* const n_14; avmplus::DoubleVectorObject* const m_14;
+    const char* const n_15; avmplus::ErrorClass* const m_15;
+    const char* const n_16; avmplus::ErrorObject* const m_16;
+    const char* const n_17; avmplus::EvalErrorClass* const m_17;
+    const char* const n_18; avmplus::EvalErrorObject* const m_18;
+    const char* const n_19; avmplus::FunctionClass* const m_19;
+    const char* const n_20; avmplus::FunctionObject* const m_20;
+    const char* const n_21; avmplus::IntClass* const m_21;
+    const char* const n_22; avmplus::IntVectorClass* const m_22;
+    const char* const n_23; avmplus::IntVectorObject* const m_23;
+    const char* const n_24; avmplus::MathClass* const m_24;
+    const char* const n_25; avmplus::MethodClosure* const m_25;
+    const char* const n_26; avmplus::MethodClosureClass* const m_26;
+    const char* const n_27; avmplus::NamespaceClass* const m_27;
+    const char* const n_28; avmplus::NumberClass* const m_28;
+    const char* const n_29; avmplus::ObjectClass* const m_29;
+    const char* const n_30; avmplus::ObjectVectorClass* const m_30;
+    const char* const n_31; avmplus::ObjectVectorObject* const m_31;
+    const char* const n_32; avmplus::QNameClass* const m_32;
+    const char* const n_33; avmplus::QNameObject* const m_33;
+    const char* const n_34; avmplus::RangeErrorClass* const m_34;
+    const char* const n_35; avmplus::RangeErrorObject* const m_35;
+    const char* const n_36; avmplus::ReferenceErrorClass* const m_36;
+    const char* const n_37; avmplus::ReferenceErrorObject* const m_37;
+    const char* const n_38; avmplus::RegExpClass* const m_38;
+    const char* const n_39; avmplus::RegExpObject* const m_39;
+    const char* const n_40; avmplus::ScriptObject* const m_40;
+    const char* const n_41; avmplus::SecurityErrorClass* const m_41;
+    const char* const n_42; avmplus::SecurityErrorObject* const m_42;
+    const char* const n_43; avmplus::StringClass* const m_43;
+    const char* const n_44; avmplus::SyntaxErrorClass* const m_44;
+    const char* const n_45; avmplus::SyntaxErrorObject* const m_45;
+    const char* const n_46; avmplus::TypeErrorClass* const m_46;
+    const char* const n_47; avmplus::TypeErrorObject* const m_47;
+    const char* const n_48; avmplus::UIntClass* const m_48;
+    const char* const n_49; avmplus::UIntVectorClass* const m_49;
+    const char* const n_50; avmplus::UIntVectorObject* const m_50;
+    const char* const n_51; avmplus::URIErrorClass* const m_51;
+    const char* const n_52; avmplus::URIErrorObject* const m_52;
+    const char* const n_53; avmplus::UninitializedErrorClass* const m_53;
+    const char* const n_54; avmplus::UninitializedErrorObject* const m_54;
+    const char* const n_55; avmplus::VectorClass* const m_55;
+    const char* const n_56; avmplus::VerifyErrorClass* const m_56;
+    const char* const n_57; avmplus::VerifyErrorObject* const m_57;
+    const char* const n_58; avmplus::XMLClass* const m_58;
+    const char* const n_59; avmplus::XMLListClass* const m_59;
+    const char* const n_60; avmplus::XMLListObject* const m_60;
+    const char* const n_61; avmplus::XMLObject* const m_61;
 } aotABCTypes_builtin = {
-    "::avmplus::ScriptObject", 0,
-    "ArgumentErrorClass", 0,
-    "ArgumentErrorObject", 0,
-    "ArrayClass", 0,
-    "ArrayObject", 0,
-    "BooleanClass", 0,
-    "ByteArrayClass", 0,
-    "ByteArrayObject", 0,
-    "ClassClass", 0,
-    "ClassClosure", 0,
-    "DateClass", 0,
-    "DateObject", 0,
-    "DefinitionErrorClass", 0,
-    "DefinitionErrorObject", 0,
-    "DoubleVectorClass", 0,
-    "DoubleVectorObject", 0,
-    "ErrorClass", 0,
-    "ErrorObject", 0,
-    "EvalErrorClass", 0,
-    "EvalErrorObject", 0,
-    "FunctionClass", 0,
-    "FunctionObject", 0,
-    "IntClass", 0,
-    "IntVectorClass", 0,
-    "IntVectorObject", 0,
-    "MathClass", 0,
-    "MethodClosure", 0,
-    "MethodClosureClass", 0,
-    "NamespaceClass", 0,
-    "NumberClass", 0,
-    "ObjectClass", 0,
-    "ObjectVectorClass", 0,
-    "ObjectVectorObject", 0,
-    "QNameClass", 0,
-    "QNameObject", 0,
-    "RangeErrorClass", 0,
-    "RangeErrorObject", 0,
-    "ReferenceErrorClass", 0,
-    "ReferenceErrorObject", 0,
-    "RegExpClass", 0,
-    "RegExpObject", 0,
-    "SecurityErrorClass", 0,
-    "SecurityErrorObject", 0,
-    "StringClass", 0,
-    "SyntaxErrorClass", 0,
-    "SyntaxErrorObject", 0,
-    "TypeErrorClass", 0,
-    "TypeErrorObject", 0,
-    "UIntClass", 0,
-    "UIntVectorClass", 0,
-    "UIntVectorObject", 0,
-    "URIErrorClass", 0,
-    "URIErrorObject", 0,
-    "UninitializedErrorClass", 0,
-    "UninitializedErrorObject", 0,
-    "VectorClass", 0,
-    "VerifyErrorClass", 0,
-    "VerifyErrorObject", 0,
-    "XMLClass", 0,
-    "XMLListClass", 0,
-    "XMLListObject", 0,
-    "XMLObject", 0,
+    "avmplus::ArgumentErrorClass", 0,
+    "avmplus::ArgumentErrorObject", 0,
+    "avmplus::ArrayClass", 0,
+    "avmplus::ArrayObject", 0,
+    "avmplus::BooleanClass", 0,
+    "avmplus::ByteArrayClass", 0,
+    "avmplus::ByteArrayObject", 0,
+    "avmplus::ClassClass", 0,
+    "avmplus::ClassClosure", 0,
+    "avmplus::DateClass", 0,
+    "avmplus::DateObject", 0,
+    "avmplus::DefinitionErrorClass", 0,
+    "avmplus::DefinitionErrorObject", 0,
+    "avmplus::DoubleVectorClass", 0,
+    "avmplus::DoubleVectorObject", 0,
+    "avmplus::ErrorClass", 0,
+    "avmplus::ErrorObject", 0,
+    "avmplus::EvalErrorClass", 0,
+    "avmplus::EvalErrorObject", 0,
+    "avmplus::FunctionClass", 0,
+    "avmplus::FunctionObject", 0,
+    "avmplus::IntClass", 0,
+    "avmplus::IntVectorClass", 0,
+    "avmplus::IntVectorObject", 0,
+    "avmplus::MathClass", 0,
+    "avmplus::MethodClosure", 0,
+    "avmplus::MethodClosureClass", 0,
+    "avmplus::NamespaceClass", 0,
+    "avmplus::NumberClass", 0,
+    "avmplus::ObjectClass", 0,
+    "avmplus::ObjectVectorClass", 0,
+    "avmplus::ObjectVectorObject", 0,
+    "avmplus::QNameClass", 0,
+    "avmplus::QNameObject", 0,
+    "avmplus::RangeErrorClass", 0,
+    "avmplus::RangeErrorObject", 0,
+    "avmplus::ReferenceErrorClass", 0,
+    "avmplus::ReferenceErrorObject", 0,
+    "avmplus::RegExpClass", 0,
+    "avmplus::RegExpObject", 0,
+    "avmplus::ScriptObject", 0,
+    "avmplus::SecurityErrorClass", 0,
+    "avmplus::SecurityErrorObject", 0,
+    "avmplus::StringClass", 0,
+    "avmplus::SyntaxErrorClass", 0,
+    "avmplus::SyntaxErrorObject", 0,
+    "avmplus::TypeErrorClass", 0,
+    "avmplus::TypeErrorObject", 0,
+    "avmplus::UIntClass", 0,
+    "avmplus::UIntVectorClass", 0,
+    "avmplus::UIntVectorObject", 0,
+    "avmplus::URIErrorClass", 0,
+    "avmplus::URIErrorObject", 0,
+    "avmplus::UninitializedErrorClass", 0,
+    "avmplus::UninitializedErrorObject", 0,
+    "avmplus::VectorClass", 0,
+    "avmplus::VerifyErrorClass", 0,
+    "avmplus::VerifyErrorObject", 0,
+    "avmplus::XMLClass", 0,
+    "avmplus::XMLListClass", 0,
+    "avmplus::XMLListObject", 0,
+    "avmplus::XMLObject", 0,
 };
 #endif
 } }
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArrayClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ObjectClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::createScriptObjectProc;
+    ClassClosure* const cc = avmplus::ObjectClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doObjectClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ClassClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::ClassClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doClassClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::FunctionClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::FunctionClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doFunctionClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::NamespaceClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::NamespaceClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNamespaceClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::BooleanClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::BooleanClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doBooleanClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::NumberClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::NumberClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNumberClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::IntClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::IntClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doIntClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::UIntClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::UIntClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doUIntClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::StringClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::StringClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doStringClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ArrayClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::ArrayClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::ArrayClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doArrayClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ArrayClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::ArrayObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArrayClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArrayObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::VectorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::VectorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ObjectVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ObjectVectorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::ObjectVectorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doObjectVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::IntVectorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::IntVectorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doIntVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IntVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::UIntVectorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::UIntVectorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doUIntVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UIntVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::DoubleVectorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::DoubleVectorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDoubleVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DoubleVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::MethodClosureClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::MethodClosureClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doMethodClosureClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::MathClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::MathClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doMathClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::ErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::ErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::ErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DefinitionErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::DefinitionErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::DefinitionErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::DefinitionErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::DefinitionErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::DefinitionErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DefinitionErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DefinitionErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EvalErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::EvalErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::EvalErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::EvalErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doEvalErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::EvalErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::EvalErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EvalErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EvalErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RangeErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::RangeErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::RangeErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::RangeErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doRangeErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::RangeErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::RangeErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RangeErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RangeErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ReferenceErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ReferenceErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::ReferenceErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::ReferenceErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ReferenceErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::ReferenceErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ReferenceErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ReferenceErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SecurityErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::SecurityErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::SecurityErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::SecurityErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SecurityErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::SecurityErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SecurityErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SecurityErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SyntaxErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::SyntaxErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::SyntaxErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::SyntaxErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SyntaxErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::SyntaxErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SyntaxErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SyntaxErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::TypeErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::TypeErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::TypeErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::TypeErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doTypeErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::TypeErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::TypeErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::TypeErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::TypeErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::URIErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::URIErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::URIErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::URIErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doURIErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::URIErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::URIErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::URIErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::URIErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::VerifyErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::VerifyErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::VerifyErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::VerifyErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::VerifyErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::VerifyErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::VerifyErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::VerifyErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UninitializedErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::UninitializedErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::UninitializedErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::UninitializedErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::UninitializedErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::UninitializedErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UninitializedErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UninitializedErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ArgumentErrorClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::ArgumentErrorClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::ArgumentErrorClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ArgumentErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::ArgumentErrorObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::DateClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::DateClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDateClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DateObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::RegExpClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::RegExpClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doRegExpClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RegExpObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::XMLClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::XMLClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doXMLClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::XMLObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::XMLListClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::XMLListClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doXMLListClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::XMLListObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::QNameClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
+    ClassClosure* const cc = avmplus::QNameClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doQNameClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::QNameObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ByteArrayClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::ByteArrayClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::ByteArrayClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::ByteArrayClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doByteArrayClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ByteArrayClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::ByteArrayObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ByteArrayClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ByteArrayObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )

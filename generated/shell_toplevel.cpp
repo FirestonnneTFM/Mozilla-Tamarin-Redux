@@ -52,9 +52,9 @@ avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    DomainClass* const obj = (DomainClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    DomainObject* const ret = obj->get_currentDomain();
-    return (Atom) ret;
+    avmplus::DomainClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainClass*, argv[argoff0]);
+    avmplus::DomainObject* const ret = obj->get_currentDomain();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -63,21 +63,21 @@ avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, 
     };
     (void)argc;
     (void)env;
-    DomainClass* const obj = (DomainClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DomainClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainClass*, argv[argoff0]);
     uint32_t const ret = obj->get_MIN_DOMAIN_MEMORY_LENGTH();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_Domain_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DomainObject* const obj = (DomainObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
     obj->init(
-        (DomainObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        (avmplus::DomainObject*)AvmThunkUnbox_OBJECT(avmplus::DomainObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -85,30 +85,30 @@ avmplus::Atom avmplus_Domain_loadBytes_thunk(MethodEnv* env, uint32_t argc, Atom
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    DomainObject* const obj = (DomainObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->loadBytes(
-        (ByteArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , (argc < 2 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff2]))
+        (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1])
+        , (argc < 2 ? AvmThunkCoerce_INT_UINT(0) : AvmThunkUnbox_UINT(uint32_t, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_Domain_getClass_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DomainObject* const obj = (DomainObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ClassClosure* const ret = obj->getClass(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+    avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
+    avmplus::ClassClosure* const ret = obj->getClass(
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_Domain_domainMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -117,21 +117,21 @@ avmplus::Atom avmplus_Domain_domainMemory_get_thunk(MethodEnv* env, uint32_t arg
     };
     (void)argc;
     (void)env;
-    DomainObject* const obj = (DomainObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ByteArrayObject* const ret = obj->get_domainMemory();
-    return (Atom) ret;
+    avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
+    avmplus::ByteArrayObject* const ret = obj->get_domainMemory();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_Domain_domainMemory_set_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DomainObject* const obj = (DomainObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DomainObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DomainObject*, argv[argoff0]);
     obj->set_domainMemory(
-        (ByteArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -142,9 +142,9 @@ avmplus::Atom flash_sampler_NewObjectSample_object_get_thunk(MethodEnv* env, uin
     };
     (void)argc;
     (void)env;
-    NewObjectSampleObject* const obj = (NewObjectSampleObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::NewObjectSampleObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::NewObjectSampleObject*, argv[argoff0]);
     avmplus::Atom const ret = obj->get_object();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double flash_sampler_NewObjectSample_size_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -153,9 +153,9 @@ double flash_sampler_NewObjectSample_size_get_thunk(MethodEnv* env, uint32_t arg
     };
     (void)argc;
     (void)env;
-    NewObjectSampleObject* const obj = (NewObjectSampleObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::NewObjectSampleObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::NewObjectSampleObject*, argv[argoff0]);
     double const ret = obj->get_size();
-    return ret;
+    return double(ret);
 }
 avmplus::Atom native_script_function_flash_sampler_clearSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -164,7 +164,7 @@ avmplus::Atom native_script_function_flash_sampler_clearSamples_thunk(MethodEnv*
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::clearSamples(obj);
     return undefinedAtom;
 }
@@ -175,7 +175,7 @@ avmplus::Atom native_script_function_flash_sampler_startSampling_thunk(MethodEnv
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::startSampling(obj);
     return undefinedAtom;
 }
@@ -186,7 +186,7 @@ avmplus::Atom native_script_function_flash_sampler_stopSampling_thunk(MethodEnv*
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::stopSampling(obj);
     return undefinedAtom;
 }
@@ -197,7 +197,7 @@ avmplus::Atom native_script_function_flash_sampler_pauseSampling_thunk(MethodEnv
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::pauseSampling(obj);
     return undefinedAtom;
 }
@@ -205,13 +205,13 @@ avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(Me
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::sampleInternalAllocs(obj
-        , AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        , AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -219,13 +219,13 @@ avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_thunk(Met
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::_setSamplerCallback(obj
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -233,30 +233,30 @@ double native_script_function_flash_sampler_getSize_thunk(MethodEnv* env, uint32
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     double const ret = SamplerScript::getSize(obj
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = SamplerScript::getMemberNames(obj
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (argc < 2 ? false : AvmThunkUnbox_avmplus_bool32(argv[argoff2]))
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (argc < 2 ? false : AvmThunkUnbox_BOOLEAN(bool32, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_flash_sampler_getSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -265,9 +265,9 @@ avmplus::Atom native_script_function_flash_sampler_getSamples_thunk(MethodEnv* e
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = SamplerScript::getSamples(obj);
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double native_script_function_flash_sampler_getSampleCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -276,127 +276,127 @@ double native_script_function_flash_sampler_getSampleCount_thunk(MethodEnv* env,
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     double const ret = SamplerScript::getSampleCount(obj);
-    return ret;
+    return double(ret);
 }
 double native_script_function_flash_sampler__getInvocationCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
-        , argoff3 = argoff2 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
+        , argoff3 = argoff2 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     double const ret = SamplerScript::_getInvocationCount(obj
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (QNameObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
-        , AvmThunkUnbox_uint32_t(argv[argoff3])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::QNameObject*)AvmThunkUnbox_OBJECT(avmplus::QNameObject*, argv[argoff2])
+        , AvmThunkUnbox_UINT(uint32_t, argv[argoff3])
     );
-    return ret;
+    return double(ret);
 }
 avmplus::Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_Atom
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_ATOM
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     bool const ret = SamplerScript::isGetterSetter(obj
-        , AvmThunkUnbox_avmplus_Atom(argv[argoff1])
-        , (QNameObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
+        , (avmplus::QNameObject*)AvmThunkUnbox_OBJECT(avmplus::QNameObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_flash_sampler_getLexicalScopes_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = SamplerScript::getLexicalScopes(obj
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = SamplerScript::getLexicalScopes(obj
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_flash_sampler_getSavedThis_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = SamplerScript::getSavedThis(obj
-        , (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        , (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom native_script_function_flash_sampler_getMasterString_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::String* const ret = SamplerScript::getMasterString(obj
-        , AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_trace_Trace_setLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_int32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_INT
     };
     (void)env;
-    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::TraceClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::TraceClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->setLevel(
-        AvmThunkUnbox_int32_t(argv[argoff1])
-        , (argc < 2 ? 2 : AvmThunkUnbox_int32_t(argv[argoff2]))
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
+        , (argc < 2 ? 2 : AvmThunkUnbox_INT(int32_t, argv[argoff2]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_trace_Trace_getLevel_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)env;
-    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::TraceClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::TraceClass*, argv[argoff0]);
     int32_t const ret = obj->getLevel(
-        (argc < 1 ? 2 : AvmThunkUnbox_int32_t(argv[argoff1]))
+        (argc < 1 ? 2 : AvmThunkUnbox_INT(int32_t, argv[argoff1]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_trace_Trace_setListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::TraceClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::TraceClass*, argv[argoff0]);
     avmplus::Atom const ret = obj->setListener(
-        (FunctionObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        (avmplus::FunctionObject*)AvmThunkUnbox_OBJECT(avmplus::FunctionObject*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -405,21 +405,21 @@ avmplus::Atom flash_trace_Trace_getListener_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    FunctionObject* const ret = obj->getListener();
-    return (Atom) ret;
+    avmplus::TraceClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::TraceClass*, argv[argoff0]);
+    avmplus::FunctionObject* const ret = obj->getListener();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom flash_utils_Dictionary_private_init_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    DictionaryObject* const obj = (DictionaryObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::DictionaryObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DictionaryObject*, argv[argoff0]);
     obj->init(
-        AvmThunkUnbox_avmplus_bool32(argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -427,124 +427,124 @@ avmplus::Atom avmplus_JObject_create_thunk(MethodEnv* env, uint32_t argc, Atom* 
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    const uint32_t argoffV = argoff1 + AvmThunkArgSize_avmplus_String_;
+    const uint32_t argoffV = argoff1 + AvmThunkArgSize_STRING;
     (void)env;
-    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    JObject* const ret = obj->create(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+    avmplus::JObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::JObjectClass*, argv[argoff0]);
+    avmplus::JObject* const ret = obj->create(
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
         , (argc <= 1 ? NULL : argv + argoffV)
         , (argc <= 1 ? 0 : argc - 1)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_JObject_createArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff3 = argoff2 + AvmThunkArgSize_int32_t
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
+        , argoff3 = argoff2 + AvmThunkArgSize_INT
     };
     (void)env;
-    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    JObject* const ret = obj->createArray(
-        (JObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_int32_t(argv[argoff2])
-        , (ArrayObject*)(argc < 3 ? AvmThunkCoerce_avmplus_Atom__avmplus_ScriptObject_(nullObjectAtom) : (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff3]))
+    avmplus::JObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::JObjectClass*, argv[argoff0]);
+    avmplus::JObject* const ret = obj->createArray(
+        (avmplus::JObject*)AvmThunkUnbox_OBJECT(avmplus::JObject*, argv[argoff1])
+        , AvmThunkUnbox_INT(int32_t, argv[argoff2])
+        , (avmplus::ArrayObject*)(argc < 3 ? AvmThunkCoerce_ATOM_OBJECT(nullObjectAtom) : (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff3]))
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_JObject_toArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->toArray(
-        (JObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+    avmplus::JObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::JObjectClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->toArray(
+        (avmplus::JObject*)AvmThunkUnbox_OBJECT(avmplus::JObject*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_JObject_constructorSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
-    const uint32_t argoffV = argoff1 + AvmThunkArgSize_avmplus_String_;
+    const uint32_t argoffV = argoff1 + AvmThunkArgSize_STRING;
     (void)env;
-    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::JObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::JObjectClass*, argv[argoff0]);
     avmplus::String* const ret = obj->constructorSignature(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
         , (argc <= 1 ? NULL : argv + argoffV)
         , (argc <= 1 ? 0 : argc - 1)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_JObject_methodSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
-    const uint32_t argoffV = argoff2 + AvmThunkArgSize_avmplus_String_;
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_STRING;
     (void)env;
-    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::JObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::JObjectClass*, argv[argoff0]);
     avmplus::String* const ret = obj->methodSignature(
-        (JObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
+        (avmplus::JObject*)AvmThunkUnbox_OBJECT(avmplus::JObject*, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
         , (argc <= 2 ? NULL : argv + argoffV)
         , (argc <= 2 ? 0 : argc - 2)
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_JObject_fieldSignature_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmplus::JObjectClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::JObjectClass*, argv[argoff0]);
     avmplus::String* const ret = obj->fieldSignature(
-        (JObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
+        (avmplus::JObject*)AvmThunkUnbox_OBJECT(avmplus::JObject*, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double avmplus_MI_plus_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::MIObject* const obj = (::avmshell::MIObject*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::MIObject* const obj = AvmThunkUnbox_AvmReceiver(avmshell::MIObject*, argv[argoff0]);
     double const ret = obj->::avmshell::MIObjectImpl::plus(
-        AvmThunkUnbox_double(argv[argoff1])
+        AvmThunkUnbox_DOUBLE(double, argv[argoff1])
     );
-    return ret;
+    return double(ret);
 }
 avmplus::Atom avmplus_System_exit_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->exit(
-        AvmThunkUnbox_int32_t(argv[argoff1])
+        AvmThunkUnbox_INT(int32_t, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -552,15 +552,15 @@ avmplus::Atom avmplus_System_exec_thunk(MethodEnv* env, uint32_t argc, Atom* arg
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     int32_t const ret = obj->exec(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_getAvmplusVersion_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -569,9 +569,9 @@ avmplus::Atom avmplus_System_getAvmplusVersion_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     avmplus::String* const ret = obj->getAvmplusVersion();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_getFeatures_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -580,9 +580,9 @@ avmplus::Atom avmplus_System_getFeatures_thunk(MethodEnv* env, uint32_t argc, At
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     avmplus::String* const ret = obj->getFeatures();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_getRunmode_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -591,21 +591,21 @@ avmplus::Atom avmplus_System_getRunmode_thunk(MethodEnv* env, uint32_t argc, Ato
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     avmplus::String* const ret = obj->getRunmode();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_trace_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->trace(
-        (ArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        (avmplus::ArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ArrayObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -613,13 +613,13 @@ avmplus::Atom avmplus_System_write_thunk(MethodEnv* env, uint32_t argc, Atom* ar
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->write(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -630,7 +630,7 @@ avmplus::Atom avmplus_System_debugger_thunk(MethodEnv* env, uint32_t argc, Atom*
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->debugger();
     return undefinedAtom;
 }
@@ -641,9 +641,9 @@ avmplus::Atom avmplus_System_isDebugger_thunk(MethodEnv* env, uint32_t argc, Ato
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     bool const ret = obj->isDebugger();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_getTimer_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -652,9 +652,9 @@ avmplus::Atom avmplus_System_getTimer_thunk(MethodEnv* env, uint32_t argc, Atom*
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     uint32_t const ret = obj->getTimer();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_private_getArgv_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -663,9 +663,9 @@ avmplus::Atom avmplus_System_private_getArgv_thunk(MethodEnv* env, uint32_t argc
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ArrayObject* const ret = obj->getArgv();
-    return (Atom) ret;
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
+    avmplus::ArrayObject* const ret = obj->getArgv();
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_readLine_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -674,9 +674,9 @@ avmplus::Atom avmplus_System_readLine_thunk(MethodEnv* env, uint32_t argc, Atom*
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     avmplus::String* const ret = obj->readLine();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 double avmplus_System_totalMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -685,9 +685,9 @@ double avmplus_System_totalMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom*
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     double const ret = obj->get_totalMemory();
-    return ret;
+    return double(ret);
 }
 double avmplus_System_freeMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -696,9 +696,9 @@ double avmplus_System_freeMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* 
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     double const ret = obj->get_freeMemory();
-    return ret;
+    return double(ret);
 }
 double avmplus_System_privateMemory_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -707,9 +707,9 @@ double avmplus_System_privateMemory_get_thunk(MethodEnv* env, uint32_t argc, Ato
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     double const ret = obj->get_privateMemory();
-    return ret;
+    return double(ret);
 }
 avmplus::Atom avmplus_System_forceFullCollection_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -718,7 +718,7 @@ avmplus::Atom avmplus_System_forceFullCollection_thunk(MethodEnv* env, uint32_t 
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->forceFullCollection();
     return undefinedAtom;
 }
@@ -729,7 +729,7 @@ avmplus::Atom avmplus_System_queueCollection_thunk(MethodEnv* env, uint32_t argc
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->queueCollection();
     return undefinedAtom;
 }
@@ -740,7 +740,7 @@ avmplus::Atom avmplus_System_ns_example_nstest_thunk(MethodEnv* env, uint32_t ar
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->ns_example_nstest();
     return undefinedAtom;
 }
@@ -748,15 +748,15 @@ avmplus::Atom avmplus_System_isGlobal_thunk(MethodEnv* env, uint32_t argc, Atom*
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     bool const ret = obj->isGlobal(
-        AvmThunkUnbox_avmplus_Atom(argv[argoff1])
+        AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_swfVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -765,9 +765,9 @@ avmplus::Atom avmplus_System_swfVersion_get_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     int32_t const ret = obj->get_swfVersion();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_apiVersion_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -776,21 +776,21 @@ avmplus::Atom avmplus_System_apiVersion_get_thunk(MethodEnv* env, uint32_t argc,
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     int32_t const ret = obj->get_apiVersion();
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_System_disposeXML_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::SystemClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::SystemClass*, argv[argoff0]);
     obj->disposeXML(
-        (XMLObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff1])
+        (avmplus::XMLObject*)AvmThunkUnbox_OBJECT(avmplus::XMLObject*, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -798,43 +798,43 @@ avmplus::Atom avmplus_File_exists_thunk(MethodEnv* env, uint32_t argc, Atom* arg
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     bool const ret = obj->exists(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_File_read_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     avmplus::String* const ret = obj->read(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)argc;
     (void)env;
-    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     obj->write(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , AvmThunkUnbox_avmplus_String_(argv[argoff2])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
     );
     return undefinedAtom;
 }
@@ -842,325 +842,254 @@ avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, At
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
     };
     (void)argc;
     (void)env;
-    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
-    ByteArrayObject* const ret = obj->readByteArray(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
+    avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
+    avmplus::ByteArrayObject* const ret = obj->readByteArray(
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv)
 {
     enum {
         argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize__avmplus_ScriptObject_
-        , argoff2 = argoff1 + AvmThunkArgSize_avmplus_String_
+        , argoff1 = argoff0 + AvmThunkArgSize_OBJECT
+        , argoff2 = argoff1 + AvmThunkArgSize_STRING
     };
     (void)argc;
     (void)env;
-    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(::avmplus::ScriptObject*, argv[argoff0]);
+    avmshell::FileClass* const obj = AvmThunkUnbox_AvmReceiver(avmshell::FileClass*, argv[argoff0]);
     bool const ret = obj->writeByteArray(
-        AvmThunkUnbox_avmplus_String_(argv[argoff1])
-        , (ByteArrayObject*)AvmThunkUnbox__avmplus_ScriptObject_(argv[argoff2])
+        AvmThunkUnbox_STRING(avmplus::String*, argv[argoff1])
+        , (avmplus::ByteArrayObject*)AvmThunkUnbox_OBJECT(avmplus::ByteArrayObject*, argv[argoff2])
     );
-    return (Atom) ret;
+    return avmplus::Atom(ret);
 }
 
 class SlotOffsetsAndAsserts
 {
-private:
-    static uint32_t getSlotOffset(Traits* t, int nameId);
 public:
-    // This exists solely to silence a warning (generally GCC 4.4+):
-    // "all member functions in class SlotOffsetsAndAsserts are private"
-    static inline void do_nothing();
-    static const uint16_t s_slotsOffsetMIClass = 0;
-    static const uint16_t s_slotsOffsetMIObject = 0;
+    static uint32_t getSlotOffset(Traits* t, int nameId);
+    enum {
+        kSlotsOffsetMIClass = 0,
+        kSlotsOffsetMIObject = 0,
+        kSlotsOffsetSystemClass = offsetof(avmshell::SystemClass, m_slots_SystemClass),
+        kSlotsOffsetScriptObject = 0,
+        kSlotsOffsetFileClass = 0,
+        kSlotsOffsetAbstractBaseClass = 0,
+        kSlotsOffsetAbstractBaseObject = 0,
+        kSlotsOffsetRestrictedBaseClass = 0,
+        kSlotsOffsetRestrictedBaseObject = 0,
+        kSlotsOffsetAbstractRestrictedBaseClass = 0,
+        kSlotsOffsetAbstractRestrictedBaseObject = 0,
+        kSlotsOffsetCheckBaseClass = 0,
+        kSlotsOffsetCheckBaseObject = 0,
+        kSlotsOffsetNativeSubclassOfAbstractBaseClass = 0,
+        kSlotsOffsetNativeSubclassOfAbstractBaseObject = 0,
+        kSlotsOffsetNativeSubclassOfRestrictedBaseClass = 0,
+        kSlotsOffsetNativeSubclassOfRestrictedBaseObject = 0,
+        kSlotsOffsetNativeSubclassOfAbstractRestrictedBaseClass = 0,
+        kSlotsOffsetNativeSubclassOfAbstractRestrictedBaseObject = 0,
+        kSlotsOffsetDomainClass = 0,
+        kSlotsOffsetDomainObject = 0,
+        kSlotsOffsetStackFrameClass = 0,
+        kSlotsOffsetStackFrameObject = offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject),
+        kSlotsOffsetSampleClass = 0,
+        kSlotsOffsetSampleObject = offsetof(avmplus::SampleObject, m_slots_SampleObject),
+        kSlotsOffsetNewObjectSampleClass = 0,
+        kSlotsOffsetNewObjectSampleObject = offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject),
+        kSlotsOffsetDeleteObjectSampleClass = 0,
+        kSlotsOffsetDeleteObjectSampleObject = offsetof(avmplus::DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject),
+        kSlotsOffsetTraceClass = offsetof(avmplus::TraceClass, m_slots_TraceClass),
+        kSlotsOffsetDictionaryClass = 0,
+        kSlotsOffsetDictionaryObject = 0,
+        kSlotsOffsetJObjectClass = 0,
+        kSlotsOffsetJObject = 0,
+        kSlotsOffset_fnord
+    };
     #ifdef DEBUG
-    static void doMIClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetSystemClass = offsetof(::avmshell::SystemClass, m_slots_SystemClass);
-    static const uint16_t s_slotsOffsetScriptObject = 0;
-    #ifdef DEBUG
-    static void doSystemClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetFileClass = 0;
-    #ifdef DEBUG
-    static void doFileClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetAbstractBaseClass = 0;
-    static const uint16_t s_slotsOffsetAbstractBaseObject = 0;
-    #ifdef DEBUG
-    static void doAbstractBaseClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetRestrictedBaseClass = 0;
-    static const uint16_t s_slotsOffsetRestrictedBaseObject = 0;
-    #ifdef DEBUG
-    static void doRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetAbstractRestrictedBaseClass = 0;
-    static const uint16_t s_slotsOffsetAbstractRestrictedBaseObject = 0;
-    #ifdef DEBUG
-    static void doAbstractRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetCheckBaseClass = 0;
-    static const uint16_t s_slotsOffsetCheckBaseObject = 0;
-    #ifdef DEBUG
-    static void doCheckBaseClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetNativeSubclassOfAbstractBaseClass = 0;
-    static const uint16_t s_slotsOffsetNativeSubclassOfAbstractBaseObject = 0;
-    #ifdef DEBUG
-    static void doNativeSubclassOfAbstractBaseClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetNativeSubclassOfRestrictedBaseClass = 0;
-    static const uint16_t s_slotsOffsetNativeSubclassOfRestrictedBaseObject = 0;
-    #ifdef DEBUG
-    static void doNativeSubclassOfRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetNativeSubclassOfAbstractRestrictedBaseClass = 0;
-    static const uint16_t s_slotsOffsetNativeSubclassOfAbstractRestrictedBaseObject = 0;
-    #ifdef DEBUG
-    static void doNativeSubclassOfAbstractRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetDomainClass = 0;
-    static const uint16_t s_slotsOffsetDomainObject = 0;
-    #ifdef DEBUG
-    static void doDomainClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetStackFrameClass = 0;
-    static const uint16_t s_slotsOffsetStackFrameObject = offsetof(StackFrameObject, m_slots_StackFrameObject);
-    #ifdef DEBUG
-    static void doStackFrameClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetSampleClass = 0;
-    static const uint16_t s_slotsOffsetSampleObject = offsetof(SampleObject, m_slots_SampleObject);
-    #ifdef DEBUG
-    static void doSampleClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetNewObjectSampleClass = 0;
-    static const uint16_t s_slotsOffsetNewObjectSampleObject = offsetof(NewObjectSampleObject, m_slots_NewObjectSampleObject);
-    #ifdef DEBUG
-    static void doNewObjectSampleClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetDeleteObjectSampleClass = 0;
-    static const uint16_t s_slotsOffsetDeleteObjectSampleObject = offsetof(DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject);
-    #ifdef DEBUG
-    static void doDeleteObjectSampleClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetTraceClass = offsetof(TraceClass, m_slots_TraceClass);
-    #ifdef DEBUG
-    static void doTraceClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetDictionaryClass = 0;
-    static const uint16_t s_slotsOffsetDictionaryObject = 0;
-    #ifdef DEBUG
-    static void doDictionaryClassAsserts(Traits* cTraits, Traits* iTraits);
-    #endif
-    static const uint16_t s_slotsOffsetJObjectClass = 0;
-    static const uint16_t s_slotsOffsetJObject = 0;
-    #ifdef DEBUG
-    static void doJObjectClassAsserts(Traits* cTraits, Traits* iTraits);
+    static void doMIClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doSystemClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doFileClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doAbstractBaseClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doAbstractRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doCheckBaseClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doNativeSubclassOfAbstractBaseClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doNativeSubclassOfRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doNativeSubclassOfAbstractRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doDomainClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doStackFrameClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doSampleClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doNewObjectSampleClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doDeleteObjectSampleClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doTraceClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doDictionaryClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doJObjectClassAsserts(Traits* ctraits, Traits* itraits);
     #endif
 };
 #ifdef DEBUG
-REALLY_INLINE void SlotOffsetsAndAsserts::doMIClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doMIClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::MIClass::EmptySlotsStruct_MIClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::MIObject::EmptySlotsStruct_MIObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doSystemClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doSystemClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(::avmshell::SystemClass, m_slots_SystemClass) == s_slotsOffsetSystemClass);
-    MMGC_STATIC_ASSERT(offsetof(::avmshell::SystemClass, m_slots_SystemClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(::avmshell::SystemClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 39) == (offsetof(::avmshell::SystemClass, m_slots_SystemClass) + offsetof(_avmshell_SystemClassSlots, m_argv)));
+    MMGC_STATIC_ASSERT(offsetof(avmshell::SystemClass, m_slots_SystemClass) == kSlotsOffsetSystemClass);
+    MMGC_STATIC_ASSERT(offsetof(avmshell::SystemClass, m_slots_SystemClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmshell::SystemClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 39) == (offsetof(avmshell::SystemClass, m_slots_SystemClass) + offsetof(avmshell_SystemClassSlots, m_argv)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doFileClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doFileClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::FileClass::EmptySlotsStruct_FileClass) >= 0);
+    (void)ctraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doAbstractBaseClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doAbstractBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::AbstractBaseClass::EmptySlotsStruct_AbstractBaseClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::AbstractBaseObject::EmptySlotsStruct_AbstractBaseObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::RestrictedBaseClass::EmptySlotsStruct_RestrictedBaseClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::RestrictedBaseObject::EmptySlotsStruct_RestrictedBaseObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doAbstractRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doAbstractRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::AbstractRestrictedBaseClass::EmptySlotsStruct_AbstractRestrictedBaseClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::AbstractRestrictedBaseObject::EmptySlotsStruct_AbstractRestrictedBaseObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doCheckBaseClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doCheckBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::CheckBaseClass::EmptySlotsStruct_CheckBaseClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::CheckBaseObject::EmptySlotsStruct_CheckBaseObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfAbstractBaseClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfAbstractBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::NativeSubclassOfAbstractBaseClass::EmptySlotsStruct_NativeSubclassOfAbstractBaseClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::NativeSubclassOfAbstractBaseObject::EmptySlotsStruct_NativeSubclassOfAbstractBaseObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::NativeSubclassOfRestrictedBaseClass::EmptySlotsStruct_NativeSubclassOfRestrictedBaseClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::NativeSubclassOfRestrictedBaseObject::EmptySlotsStruct_NativeSubclassOfRestrictedBaseObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfAbstractRestrictedBaseClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfAbstractRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::NativeSubclassOfAbstractRestrictedBaseClass::EmptySlotsStruct_NativeSubclassOfAbstractRestrictedBaseClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(::avmshell::NativeSubclassOfAbstractRestrictedBaseObject::EmptySlotsStruct_NativeSubclassOfAbstractRestrictedBaseObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDomainClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doDomainClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(DomainClass::EmptySlotsStruct_DomainClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(DomainObject::EmptySlotsStruct_DomainObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doStackFrameClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doStackFrameClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(StackFrameClass::EmptySlotsStruct_StackFrameClass) >= 0);
-    MMGC_STATIC_ASSERT(offsetof(StackFrameObject, m_slots_StackFrameObject) == s_slotsOffsetStackFrameObject);
-    MMGC_STATIC_ASSERT(offsetof(StackFrameObject, m_slots_StackFrameObject) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(StackFrameObject) <= 0xFFFF);
-    AvmAssert(getSlotOffset(iTraits, 336) == (offsetof(StackFrameObject, m_slots_StackFrameObject) + offsetof(StackFrameObjectSlots, m_name)));
-    AvmAssert(getSlotOffset(iTraits, 337) == (offsetof(StackFrameObject, m_slots_StackFrameObject) + offsetof(StackFrameObjectSlots, m_file)));
-    AvmAssert(getSlotOffset(iTraits, 338) == (offsetof(StackFrameObject, m_slots_StackFrameObject) + offsetof(StackFrameObjectSlots, m_line)));
-    AvmAssert(getSlotOffset(iTraits, 339) == (offsetof(StackFrameObject, m_slots_StackFrameObject) + offsetof(StackFrameObjectSlots, m_scriptID)));
+    (void)ctraits;
+    MMGC_STATIC_ASSERT(offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) == kSlotsOffsetStackFrameObject);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::StackFrameObject) <= 0xFFFF);
+    AvmAssert(getSlotOffset(itraits, 336) == (offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) + offsetof(avmplus_StackFrameObjectSlots, m_name)));
+    AvmAssert(getSlotOffset(itraits, 337) == (offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) + offsetof(avmplus_StackFrameObjectSlots, m_file)));
+    AvmAssert(getSlotOffset(itraits, 338) == (offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) + offsetof(avmplus_StackFrameObjectSlots, m_line)));
+    AvmAssert(getSlotOffset(itraits, 339) == (offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) + offsetof(avmplus_StackFrameObjectSlots, m_scriptID)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doSampleClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doSampleClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(SampleClass::EmptySlotsStruct_SampleClass) >= 0);
-    MMGC_STATIC_ASSERT(offsetof(SampleObject, m_slots_SampleObject) == s_slotsOffsetSampleObject);
-    MMGC_STATIC_ASSERT(offsetof(SampleObject, m_slots_SampleObject) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(SampleObject) <= 0xFFFF);
-    AvmAssert(getSlotOffset(iTraits, 342) == (offsetof(SampleObject, m_slots_SampleObject) + offsetof(SampleObjectSlots, m_time)));
-    AvmAssert(getSlotOffset(iTraits, 343) == (offsetof(SampleObject, m_slots_SampleObject) + offsetof(SampleObjectSlots, m_stack)));
+    (void)ctraits;
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SampleObject, m_slots_SampleObject) == kSlotsOffsetSampleObject);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SampleObject, m_slots_SampleObject) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::SampleObject) <= 0xFFFF);
+    AvmAssert(getSlotOffset(itraits, 342) == (offsetof(avmplus::SampleObject, m_slots_SampleObject) + offsetof(avmplus_SampleObjectSlots, m_time)));
+    AvmAssert(getSlotOffset(itraits, 343) == (offsetof(avmplus::SampleObject, m_slots_SampleObject) + offsetof(avmplus_SampleObjectSlots, m_stack)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNewObjectSampleClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doNewObjectSampleClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(NewObjectSampleClass::EmptySlotsStruct_NewObjectSampleClass) >= 0);
-    MMGC_STATIC_ASSERT(offsetof(NewObjectSampleObject, m_slots_NewObjectSampleObject) == s_slotsOffsetNewObjectSampleObject);
-    MMGC_STATIC_ASSERT(offsetof(NewObjectSampleObject, m_slots_NewObjectSampleObject) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(NewObjectSampleObject) <= 0xFFFF);
-    AvmAssert(getSlotOffset(iTraits, 345) == (offsetof(NewObjectSampleObject, m_slots_NewObjectSampleObject) + offsetof(NewObjectSampleObjectSlots, m_id)));
-    AvmAssert(getSlotOffset(iTraits, 346) == (offsetof(NewObjectSampleObject, m_slots_NewObjectSampleObject) + offsetof(NewObjectSampleObjectSlots, m_type)));
+    (void)ctraits;
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) == kSlotsOffsetNewObjectSampleObject);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::NewObjectSampleObject) <= 0xFFFF);
+    AvmAssert(getSlotOffset(itraits, 345) == (offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) + offsetof(avmplus_NewObjectSampleObjectSlots, m_id)));
+    AvmAssert(getSlotOffset(itraits, 346) == (offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) + offsetof(avmplus_NewObjectSampleObjectSlots, m_type)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDeleteObjectSampleClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doDeleteObjectSampleClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(DeleteObjectSampleClass::EmptySlotsStruct_DeleteObjectSampleClass) >= 0);
-    MMGC_STATIC_ASSERT(offsetof(DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) == s_slotsOffsetDeleteObjectSampleObject);
-    MMGC_STATIC_ASSERT(offsetof(DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(DeleteObjectSampleObject) <= 0xFFFF);
-    AvmAssert(getSlotOffset(iTraits, 345) == (offsetof(DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) + offsetof(DeleteObjectSampleObjectSlots, m_id)));
-    AvmAssert(getSlotOffset(iTraits, 348) == (offsetof(DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) + offsetof(DeleteObjectSampleObjectSlots, m_size)));
+    (void)ctraits;
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) == kSlotsOffsetDeleteObjectSampleObject);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::DeleteObjectSampleObject) <= 0xFFFF);
+    AvmAssert(getSlotOffset(itraits, 345) == (offsetof(avmplus::DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) + offsetof(avmplus_DeleteObjectSampleObjectSlots, m_id)));
+    AvmAssert(getSlotOffset(itraits, 348) == (offsetof(avmplus::DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) + offsetof(avmplus_DeleteObjectSampleObjectSlots, m_size)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doTraceClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doTraceClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(offsetof(TraceClass, m_slots_TraceClass) == s_slotsOffsetTraceClass);
-    MMGC_STATIC_ASSERT(offsetof(TraceClass, m_slots_TraceClass) <= 0xFFFF);
-    MMGC_STATIC_ASSERT(sizeof(TraceClass) <= 0xFFFF);
-    AvmAssert(getSlotOffset(cTraits, 382) == (offsetof(TraceClass, m_slots_TraceClass) + offsetof(TraceClassSlots, m_OFF)));
-    AvmAssert(getSlotOffset(cTraits, 383) == (offsetof(TraceClass, m_slots_TraceClass) + offsetof(TraceClassSlots, m_METHODS)));
-    AvmAssert(getSlotOffset(cTraits, 384) == (offsetof(TraceClass, m_slots_TraceClass) + offsetof(TraceClassSlots, m_METHODS_WITH_ARGS)));
-    AvmAssert(getSlotOffset(cTraits, 385) == (offsetof(TraceClass, m_slots_TraceClass) + offsetof(TraceClassSlots, m_METHODS_AND_LINES)));
-    AvmAssert(getSlotOffset(cTraits, 386) == (offsetof(TraceClass, m_slots_TraceClass) + offsetof(TraceClassSlots, m_METHODS_AND_LINES_WITH_ARGS)));
-    AvmAssert(getSlotOffset(cTraits, 387) == (offsetof(TraceClass, m_slots_TraceClass) + offsetof(TraceClassSlots, m_FILE)));
-    AvmAssert(getSlotOffset(cTraits, 388) == (offsetof(TraceClass, m_slots_TraceClass) + offsetof(TraceClassSlots, m_LISTENER)));
+    MMGC_STATIC_ASSERT(offsetof(avmplus::TraceClass, m_slots_TraceClass) == kSlotsOffsetTraceClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::TraceClass, m_slots_TraceClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::TraceClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 382) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_OFF)));
+    AvmAssert(getSlotOffset(ctraits, 383) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_METHODS)));
+    AvmAssert(getSlotOffset(ctraits, 384) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_METHODS_WITH_ARGS)));
+    AvmAssert(getSlotOffset(ctraits, 385) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_METHODS_AND_LINES)));
+    AvmAssert(getSlotOffset(ctraits, 386) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_METHODS_AND_LINES_WITH_ARGS)));
+    AvmAssert(getSlotOffset(ctraits, 387) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_FILE)));
+    AvmAssert(getSlotOffset(ctraits, 388) == (offsetof(avmplus::TraceClass, m_slots_TraceClass) + offsetof(avmplus_TraceClassSlots, m_LISTENER)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDictionaryClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doDictionaryClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(DictionaryClass::EmptySlotsStruct_DictionaryClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(DictionaryObject::EmptySlotsStruct_DictionaryObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doJObjectClassAsserts(Traits* cTraits, Traits* iTraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::doJObjectClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)cTraits; (void)iTraits;
-    // MMGC_STATIC_ASSERT(sizeof(JObjectClass::EmptySlotsStruct_JObjectClass) >= 0);
-    // MMGC_STATIC_ASSERT(sizeof(JObject::EmptySlotsStruct_JObject) >= 0);
+    (void)ctraits;
+    (void)itraits;
 }
 #endif // DEBUG
 
-AVMTHUNK_NATIVE_CLASS_GLUE(MIClass, ::avmshell::MIClass, avmshell::MIClass::createInstanceProc, SlotOffsetsAndAsserts::doMIClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(SystemClass, ::avmshell::SystemClass, ClassClosure::cantInstantiateCreateInstanceProc, SlotOffsetsAndAsserts::doSystemClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(FileClass, ::avmshell::FileClass, ClassClosure::cantInstantiateCreateInstanceProc, SlotOffsetsAndAsserts::doFileClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(AbstractBaseClass, ::avmshell::AbstractBaseClass, ClassClosure::cantInstantiateCreateInstanceProc, SlotOffsetsAndAsserts::doAbstractBaseClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(RestrictedBaseClass, ::avmshell::RestrictedBaseClass, avmshell::RestrictedBaseClass::createInstanceProc, SlotOffsetsAndAsserts::doRestrictedBaseClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(AbstractRestrictedBaseClass, ::avmshell::AbstractRestrictedBaseClass, ClassClosure::cantInstantiateCreateInstanceProc, SlotOffsetsAndAsserts::doAbstractRestrictedBaseClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(CheckBaseClass, ::avmshell::CheckBaseClass, avmshell::CheckBaseClass::createInstanceProc, SlotOffsetsAndAsserts::doCheckBaseClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(NativeSubclassOfAbstractBaseClass, ::avmshell::NativeSubclassOfAbstractBaseClass, avmshell::NativeSubclassOfAbstractBaseClass::createInstanceProc, SlotOffsetsAndAsserts::doNativeSubclassOfAbstractBaseClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(NativeSubclassOfRestrictedBaseClass, ::avmshell::NativeSubclassOfRestrictedBaseClass, avmshell::NativeSubclassOfRestrictedBaseClass::createInstanceProc, SlotOffsetsAndAsserts::doNativeSubclassOfRestrictedBaseClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(NativeSubclassOfAbstractRestrictedBaseClass, ::avmshell::NativeSubclassOfAbstractRestrictedBaseClass, avmshell::NativeSubclassOfAbstractRestrictedBaseClass::createInstanceProc, SlotOffsetsAndAsserts::doNativeSubclassOfAbstractRestrictedBaseClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(DomainClass, DomainClass, avmplus::DomainClass::createInstanceProc, SlotOffsetsAndAsserts::doDomainClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(StackFrameClass, StackFrameClass, avmplus::StackFrameClass::createInstanceProc, SlotOffsetsAndAsserts::doStackFrameClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(SampleClass, SampleClass, avmplus::SampleClass::createInstanceProc, SlotOffsetsAndAsserts::doSampleClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(NewObjectSampleClass, NewObjectSampleClass, avmplus::NewObjectSampleClass::createInstanceProc, SlotOffsetsAndAsserts::doNewObjectSampleClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(DeleteObjectSampleClass, DeleteObjectSampleClass, avmplus::DeleteObjectSampleClass::createInstanceProc, SlotOffsetsAndAsserts::doDeleteObjectSampleClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(TraceClass, TraceClass, ClassClosure::cantInstantiateCreateInstanceProc, SlotOffsetsAndAsserts::doTraceClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE_EXACT(DictionaryClass, DictionaryClass, avmplus::DictionaryClass::createInstanceProc, SlotOffsetsAndAsserts::doDictionaryClassAsserts)
-AVMTHUNK_NATIVE_CLASS_GLUE(JObjectClass, JObjectClass, avmplus::JObjectClass::createInstanceProc, SlotOffsetsAndAsserts::doJObjectClassAsserts)
 
 AVMTHUNK_BEGIN_NATIVE_TABLES(shell_toplevel)
 
     AVMTHUNK_BEGIN_NATIVE_METHODS(shell_toplevel)
         AVMTHUNK_NATIVE_METHOD(avmplus_MI_plus, ::avmshell::MIObjectImpl::plus)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_exit, ::avmshell::SystemClass::exit)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_exec, ::avmshell::SystemClass::exec)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_getAvmplusVersion, ::avmshell::SystemClass::getAvmplusVersion)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_getFeatures, ::avmshell::SystemClass::getFeatures)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_getRunmode, ::avmshell::SystemClass::getRunmode)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_trace, ::avmshell::SystemClass::trace)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_write, ::avmshell::SystemClass::write)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_debugger, ::avmshell::SystemClass::debugger)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_isDebugger, ::avmshell::SystemClass::isDebugger)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_getTimer, ::avmshell::SystemClass::getTimer)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_private_getArgv, ::avmshell::SystemClass::getArgv)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_readLine, ::avmshell::SystemClass::readLine)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_totalMemory_get, ::avmshell::SystemClass::get_totalMemory)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_freeMemory_get, ::avmshell::SystemClass::get_freeMemory)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_privateMemory_get, ::avmshell::SystemClass::get_privateMemory)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_forceFullCollection, ::avmshell::SystemClass::forceFullCollection)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_queueCollection, ::avmshell::SystemClass::queueCollection)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_ns_example_nstest, ::avmshell::SystemClass::ns_example_nstest)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_isGlobal, ::avmshell::SystemClass::isGlobal)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_swfVersion_get, ::avmshell::SystemClass::get_swfVersion)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_apiVersion_get, ::avmshell::SystemClass::get_apiVersion)
-        AVMTHUNK_NATIVE_METHOD(avmplus_System_disposeXML, ::avmshell::SystemClass::disposeXML)
-        AVMTHUNK_NATIVE_METHOD(avmplus_File_exists, ::avmshell::FileClass::exists)
-        AVMTHUNK_NATIVE_METHOD(avmplus_File_read, ::avmshell::FileClass::read)
-        AVMTHUNK_NATIVE_METHOD(avmplus_File_write, ::avmshell::FileClass::write)
-        AVMTHUNK_NATIVE_METHOD(avmplus_File_readByteArray, ::avmshell::FileClass::readByteArray)
-        AVMTHUNK_NATIVE_METHOD(avmplus_File_writeByteArray, ::avmshell::FileClass::writeByteArray)
-        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_currentDomain_get, DomainClass::get_currentDomain)
-        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get, DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH)
-        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_private_init, DomainObject::init)
-        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_loadBytes, DomainObject::loadBytes)
-        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_getClass, DomainObject::getClass)
-        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_domainMemory_get, DomainObject::get_domainMemory)
-        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_domainMemory_set, DomainObject::set_domainMemory)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_exit, avmshell::SystemClass::exit)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_exec, avmshell::SystemClass::exec)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_getAvmplusVersion, avmshell::SystemClass::getAvmplusVersion)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_getFeatures, avmshell::SystemClass::getFeatures)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_getRunmode, avmshell::SystemClass::getRunmode)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_trace, avmshell::SystemClass::trace)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_write, avmshell::SystemClass::write)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_debugger, avmshell::SystemClass::debugger)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_isDebugger, avmshell::SystemClass::isDebugger)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_getTimer, avmshell::SystemClass::getTimer)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_private_getArgv, avmshell::SystemClass::getArgv)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_readLine, avmshell::SystemClass::readLine)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_totalMemory_get, avmshell::SystemClass::get_totalMemory)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_freeMemory_get, avmshell::SystemClass::get_freeMemory)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_privateMemory_get, avmshell::SystemClass::get_privateMemory)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_forceFullCollection, avmshell::SystemClass::forceFullCollection)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_queueCollection, avmshell::SystemClass::queueCollection)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_ns_example_nstest, avmshell::SystemClass::ns_example_nstest)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_isGlobal, avmshell::SystemClass::isGlobal)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_swfVersion_get, avmshell::SystemClass::get_swfVersion)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_apiVersion_get, avmshell::SystemClass::get_apiVersion)
+        AVMTHUNK_NATIVE_METHOD(avmplus_System_disposeXML, avmshell::SystemClass::disposeXML)
+        AVMTHUNK_NATIVE_METHOD(avmplus_File_exists, avmshell::FileClass::exists)
+        AVMTHUNK_NATIVE_METHOD(avmplus_File_read, avmshell::FileClass::read)
+        AVMTHUNK_NATIVE_METHOD(avmplus_File_write, avmshell::FileClass::write)
+        AVMTHUNK_NATIVE_METHOD(avmplus_File_readByteArray, avmshell::FileClass::readByteArray)
+        AVMTHUNK_NATIVE_METHOD(avmplus_File_writeByteArray, avmshell::FileClass::writeByteArray)
+        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_currentDomain_get, avmplus::DomainClass::get_currentDomain)
+        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get, avmplus::DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH)
+        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_private_init, avmplus::DomainObject::init)
+        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_loadBytes, avmplus::DomainObject::loadBytes)
+        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_getClass, avmplus::DomainObject::getClass)
+        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_domainMemory_get, avmplus::DomainObject::get_domainMemory)
+        AVMTHUNK_NATIVE_METHOD(avmplus_Domain_domainMemory_set, avmplus::DomainObject::set_domainMemory)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_flash_sampler_getMasterString, SamplerScript::getMasterString)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_flash_sampler_getSavedThis, SamplerScript::getSavedThis)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_flash_sampler_getLexicalScopes, SamplerScript::getLexicalScopes)
@@ -1176,40 +1105,40 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(shell_toplevel)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_flash_sampler_stopSampling, SamplerScript::stopSampling)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_flash_sampler_startSampling, SamplerScript::startSampling)
         AVMTHUNK_NATIVE_FUNCTION(native_script_function_flash_sampler_clearSamples, SamplerScript::clearSamples)
-        AVMTHUNK_NATIVE_METHOD(flash_sampler_NewObjectSample_object_get, NewObjectSampleObject::get_object)
-        AVMTHUNK_NATIVE_METHOD(flash_sampler_NewObjectSample_size_get, NewObjectSampleObject::get_size)
-        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_setLevel, TraceClass::setLevel)
-        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_getLevel, TraceClass::getLevel)
-        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_setListener, TraceClass::setListener)
-        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_getListener, TraceClass::getListener)
-        AVMTHUNK_NATIVE_METHOD(flash_utils_Dictionary_private_init, DictionaryObject::init)
-        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_create, JObjectClass::create)
-        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_createArray, JObjectClass::createArray)
-        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_toArray, JObjectClass::toArray)
-        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_constructorSignature, JObjectClass::constructorSignature)
-        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_methodSignature, JObjectClass::methodSignature)
-        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_fieldSignature, JObjectClass::fieldSignature)
+        AVMTHUNK_NATIVE_METHOD(flash_sampler_NewObjectSample_object_get, avmplus::NewObjectSampleObject::get_object)
+        AVMTHUNK_NATIVE_METHOD(flash_sampler_NewObjectSample_size_get, avmplus::NewObjectSampleObject::get_size)
+        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_setLevel, avmplus::TraceClass::setLevel)
+        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_getLevel, avmplus::TraceClass::getLevel)
+        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_setListener, avmplus::TraceClass::setListener)
+        AVMTHUNK_NATIVE_METHOD(flash_trace_Trace_getListener, avmplus::TraceClass::getListener)
+        AVMTHUNK_NATIVE_METHOD(flash_utils_Dictionary_private_init, avmplus::DictionaryObject::init)
+        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_create, avmplus::JObjectClass::create)
+        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_createArray, avmplus::JObjectClass::createArray)
+        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_toArray, avmplus::JObjectClass::toArray)
+        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_constructorSignature, avmplus::JObjectClass::constructorSignature)
+        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_methodSignature, avmplus::JObjectClass::methodSignature)
+        AVMTHUNK_NATIVE_METHOD(avmplus_JObject_fieldSignature, avmplus::JObjectClass::fieldSignature)
     AVMTHUNK_END_NATIVE_METHODS()
 
     AVMTHUNK_BEGIN_NATIVE_CLASSES(shell_toplevel)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_MI, MIClass, ::avmshell::MIClass, SlotOffsetsAndAsserts::s_slotsOffsetMIClass, ::avmshell::MIObject, SlotOffsetsAndAsserts::s_slotsOffsetMIObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_System, SystemClass, ::avmshell::SystemClass, SlotOffsetsAndAsserts::s_slotsOffsetSystemClass, ::avmplus::ScriptObject, SlotOffsetsAndAsserts::s_slotsOffsetScriptObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_File, FileClass, ::avmshell::FileClass, SlotOffsetsAndAsserts::s_slotsOffsetFileClass, ::avmplus::ScriptObject, SlotOffsetsAndAsserts::s_slotsOffsetScriptObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_AbstractBase, AbstractBaseClass, ::avmshell::AbstractBaseClass, SlotOffsetsAndAsserts::s_slotsOffsetAbstractBaseClass, ::avmshell::AbstractBaseObject, SlotOffsetsAndAsserts::s_slotsOffsetAbstractBaseObject, false, false, true)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_RestrictedBase, RestrictedBaseClass, ::avmshell::RestrictedBaseClass, SlotOffsetsAndAsserts::s_slotsOffsetRestrictedBaseClass, ::avmshell::RestrictedBaseObject, SlotOffsetsAndAsserts::s_slotsOffsetRestrictedBaseObject, false, true, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_AbstractRestrictedBase, AbstractRestrictedBaseClass, ::avmshell::AbstractRestrictedBaseClass, SlotOffsetsAndAsserts::s_slotsOffsetAbstractRestrictedBaseClass, ::avmshell::AbstractRestrictedBaseObject, SlotOffsetsAndAsserts::s_slotsOffsetAbstractRestrictedBaseObject, false, true, true)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_CheckBase, CheckBaseClass, ::avmshell::CheckBaseClass, SlotOffsetsAndAsserts::s_slotsOffsetCheckBaseClass, ::avmshell::CheckBaseObject, SlotOffsetsAndAsserts::s_slotsOffsetCheckBaseObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_NativeSubclassOfAbstractBase, NativeSubclassOfAbstractBaseClass, ::avmshell::NativeSubclassOfAbstractBaseClass, SlotOffsetsAndAsserts::s_slotsOffsetNativeSubclassOfAbstractBaseClass, ::avmshell::NativeSubclassOfAbstractBaseObject, SlotOffsetsAndAsserts::s_slotsOffsetNativeSubclassOfAbstractBaseObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_NativeSubclassOfRestrictedBase, NativeSubclassOfRestrictedBaseClass, ::avmshell::NativeSubclassOfRestrictedBaseClass, SlotOffsetsAndAsserts::s_slotsOffsetNativeSubclassOfRestrictedBaseClass, ::avmshell::NativeSubclassOfRestrictedBaseObject, SlotOffsetsAndAsserts::s_slotsOffsetNativeSubclassOfRestrictedBaseObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_NativeSubclassOfAbstractRestrictedBase, NativeSubclassOfAbstractRestrictedBaseClass, ::avmshell::NativeSubclassOfAbstractRestrictedBaseClass, SlotOffsetsAndAsserts::s_slotsOffsetNativeSubclassOfAbstractRestrictedBaseClass, ::avmshell::NativeSubclassOfAbstractRestrictedBaseObject, SlotOffsetsAndAsserts::s_slotsOffsetNativeSubclassOfAbstractRestrictedBaseObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_Domain, DomainClass, DomainClass, SlotOffsetsAndAsserts::s_slotsOffsetDomainClass, DomainObject, SlotOffsetsAndAsserts::s_slotsOffsetDomainObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_StackFrame, StackFrameClass, StackFrameClass, SlotOffsetsAndAsserts::s_slotsOffsetStackFrameClass, StackFrameObject, SlotOffsetsAndAsserts::s_slotsOffsetStackFrameObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_Sample, SampleClass, SampleClass, SlotOffsetsAndAsserts::s_slotsOffsetSampleClass, SampleObject, SlotOffsetsAndAsserts::s_slotsOffsetSampleObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_NewObjectSample, NewObjectSampleClass, NewObjectSampleClass, SlotOffsetsAndAsserts::s_slotsOffsetNewObjectSampleClass, NewObjectSampleObject, SlotOffsetsAndAsserts::s_slotsOffsetNewObjectSampleObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_DeleteObjectSample, DeleteObjectSampleClass, DeleteObjectSampleClass, SlotOffsetsAndAsserts::s_slotsOffsetDeleteObjectSampleClass, DeleteObjectSampleObject, SlotOffsetsAndAsserts::s_slotsOffsetDeleteObjectSampleObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_trace_Trace, TraceClass, TraceClass, SlotOffsetsAndAsserts::s_slotsOffsetTraceClass, ::avmplus::ScriptObject, SlotOffsetsAndAsserts::s_slotsOffsetScriptObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_Dictionary, DictionaryClass, DictionaryClass, SlotOffsetsAndAsserts::s_slotsOffsetDictionaryClass, DictionaryObject, SlotOffsetsAndAsserts::s_slotsOffsetDictionaryObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_JObject, JObjectClass, JObjectClass, SlotOffsetsAndAsserts::s_slotsOffsetJObjectClass, JObject, SlotOffsetsAndAsserts::s_slotsOffsetJObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_MI, MIClass, avmshell::MIClass, SlotOffsetsAndAsserts::kSlotsOffsetMIClass, avmshell::MIObject, SlotOffsetsAndAsserts::kSlotsOffsetMIObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_System, SystemClass, avmshell::SystemClass, SlotOffsetsAndAsserts::kSlotsOffsetSystemClass, avmplus::ScriptObject, SlotOffsetsAndAsserts::kSlotsOffsetScriptObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_File, FileClass, avmshell::FileClass, SlotOffsetsAndAsserts::kSlotsOffsetFileClass, avmplus::ScriptObject, SlotOffsetsAndAsserts::kSlotsOffsetScriptObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_AbstractBase, AbstractBaseClass, avmshell::AbstractBaseClass, SlotOffsetsAndAsserts::kSlotsOffsetAbstractBaseClass, avmshell::AbstractBaseObject, SlotOffsetsAndAsserts::kSlotsOffsetAbstractBaseObject, false, false, true)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_RestrictedBase, RestrictedBaseClass, avmshell::RestrictedBaseClass, SlotOffsetsAndAsserts::kSlotsOffsetRestrictedBaseClass, avmshell::RestrictedBaseObject, SlotOffsetsAndAsserts::kSlotsOffsetRestrictedBaseObject, false, true, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_AbstractRestrictedBase, AbstractRestrictedBaseClass, avmshell::AbstractRestrictedBaseClass, SlotOffsetsAndAsserts::kSlotsOffsetAbstractRestrictedBaseClass, avmshell::AbstractRestrictedBaseObject, SlotOffsetsAndAsserts::kSlotsOffsetAbstractRestrictedBaseObject, false, true, true)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_CheckBase, CheckBaseClass, avmshell::CheckBaseClass, SlotOffsetsAndAsserts::kSlotsOffsetCheckBaseClass, avmshell::CheckBaseObject, SlotOffsetsAndAsserts::kSlotsOffsetCheckBaseObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_NativeSubclassOfAbstractBase, NativeSubclassOfAbstractBaseClass, avmshell::NativeSubclassOfAbstractBaseClass, SlotOffsetsAndAsserts::kSlotsOffsetNativeSubclassOfAbstractBaseClass, avmshell::NativeSubclassOfAbstractBaseObject, SlotOffsetsAndAsserts::kSlotsOffsetNativeSubclassOfAbstractBaseObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_NativeSubclassOfRestrictedBase, NativeSubclassOfRestrictedBaseClass, avmshell::NativeSubclassOfRestrictedBaseClass, SlotOffsetsAndAsserts::kSlotsOffsetNativeSubclassOfRestrictedBaseClass, avmshell::NativeSubclassOfRestrictedBaseObject, SlotOffsetsAndAsserts::kSlotsOffsetNativeSubclassOfRestrictedBaseObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmshell_NativeSubclassOfAbstractRestrictedBase, NativeSubclassOfAbstractRestrictedBaseClass, avmshell::NativeSubclassOfAbstractRestrictedBaseClass, SlotOffsetsAndAsserts::kSlotsOffsetNativeSubclassOfAbstractRestrictedBaseClass, avmshell::NativeSubclassOfAbstractRestrictedBaseObject, SlotOffsetsAndAsserts::kSlotsOffsetNativeSubclassOfAbstractRestrictedBaseObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_Domain, DomainClass, avmplus::DomainClass, SlotOffsetsAndAsserts::kSlotsOffsetDomainClass, avmplus::DomainObject, SlotOffsetsAndAsserts::kSlotsOffsetDomainObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_StackFrame, StackFrameClass, avmplus::StackFrameClass, SlotOffsetsAndAsserts::kSlotsOffsetStackFrameClass, avmplus::StackFrameObject, SlotOffsetsAndAsserts::kSlotsOffsetStackFrameObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_Sample, SampleClass, avmplus::SampleClass, SlotOffsetsAndAsserts::kSlotsOffsetSampleClass, avmplus::SampleObject, SlotOffsetsAndAsserts::kSlotsOffsetSampleObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_NewObjectSample, NewObjectSampleClass, avmplus::NewObjectSampleClass, SlotOffsetsAndAsserts::kSlotsOffsetNewObjectSampleClass, avmplus::NewObjectSampleObject, SlotOffsetsAndAsserts::kSlotsOffsetNewObjectSampleObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_sampler_DeleteObjectSample, DeleteObjectSampleClass, avmplus::DeleteObjectSampleClass, SlotOffsetsAndAsserts::kSlotsOffsetDeleteObjectSampleClass, avmplus::DeleteObjectSampleObject, SlotOffsetsAndAsserts::kSlotsOffsetDeleteObjectSampleObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_trace_Trace, TraceClass, avmplus::TraceClass, SlotOffsetsAndAsserts::kSlotsOffsetTraceClass, avmplus::ScriptObject, SlotOffsetsAndAsserts::kSlotsOffsetScriptObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_Dictionary, DictionaryClass, avmplus::DictionaryClass, SlotOffsetsAndAsserts::kSlotsOffsetDictionaryClass, avmplus::DictionaryObject, SlotOffsetsAndAsserts::kSlotsOffsetDictionaryObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_avmplus_JObject, JObjectClass, avmplus::JObjectClass, SlotOffsetsAndAsserts::kSlotsOffsetJObjectClass, avmplus::JObject, SlotOffsetsAndAsserts::kSlotsOffsetJObject, false, false, false)
     AVMTHUNK_END_NATIVE_CLASSES()
 
 AVMTHUNK_END_NATIVE_TABLES()
@@ -2177,161 +2106,287 @@ const char* const shell_toplevel_versioned_uris[] = {
 
 #ifdef VMCFG_AOT
 extern "C" const struct {
-    const char* const n_0; ::avmplus::ScriptObject* const m_0;
-    const char* const n_1; ::avmshell::AbstractBaseClass* const m_1;
-    const char* const n_2; ::avmshell::AbstractBaseObject* const m_2;
-    const char* const n_3; ::avmshell::AbstractRestrictedBaseClass* const m_3;
-    const char* const n_4; ::avmshell::AbstractRestrictedBaseObject* const m_4;
-    const char* const n_5; ::avmshell::CheckBaseClass* const m_5;
-    const char* const n_6; ::avmshell::CheckBaseObject* const m_6;
-    const char* const n_7; ::avmshell::FileClass* const m_7;
-    const char* const n_8; ::avmshell::MIClass* const m_8;
-    const char* const n_9; ::avmshell::MIObject* const m_9;
-    const char* const n_10; ::avmshell::NativeSubclassOfAbstractBaseClass* const m_10;
-    const char* const n_11; ::avmshell::NativeSubclassOfAbstractBaseObject* const m_11;
-    const char* const n_12; ::avmshell::NativeSubclassOfAbstractRestrictedBaseClass* const m_12;
-    const char* const n_13; ::avmshell::NativeSubclassOfAbstractRestrictedBaseObject* const m_13;
-    const char* const n_14; ::avmshell::NativeSubclassOfRestrictedBaseClass* const m_14;
-    const char* const n_15; ::avmshell::NativeSubclassOfRestrictedBaseObject* const m_15;
-    const char* const n_16; ::avmshell::RestrictedBaseClass* const m_16;
-    const char* const n_17; ::avmshell::RestrictedBaseObject* const m_17;
-    const char* const n_18; ::avmshell::SystemClass* const m_18;
-    const char* const n_19; DeleteObjectSampleClass* const m_19;
-    const char* const n_20; DeleteObjectSampleObject* const m_20;
-    const char* const n_21; DictionaryClass* const m_21;
-    const char* const n_22; DictionaryObject* const m_22;
-    const char* const n_23; DomainClass* const m_23;
-    const char* const n_24; DomainObject* const m_24;
-    const char* const n_25; JObject* const m_25;
-    const char* const n_26; JObjectClass* const m_26;
-    const char* const n_27; NewObjectSampleClass* const m_27;
-    const char* const n_28; NewObjectSampleObject* const m_28;
-    const char* const n_29; SampleClass* const m_29;
-    const char* const n_30; SampleObject* const m_30;
-    const char* const n_31; StackFrameClass* const m_31;
-    const char* const n_32; StackFrameObject* const m_32;
-    const char* const n_33; TraceClass* const m_33;
+    const char* const n_0; avmplus::DeleteObjectSampleClass* const m_0;
+    const char* const n_1; avmplus::DeleteObjectSampleObject* const m_1;
+    const char* const n_2; avmplus::DictionaryClass* const m_2;
+    const char* const n_3; avmplus::DictionaryObject* const m_3;
+    const char* const n_4; avmplus::DomainClass* const m_4;
+    const char* const n_5; avmplus::DomainObject* const m_5;
+    const char* const n_6; avmplus::JObject* const m_6;
+    const char* const n_7; avmplus::JObjectClass* const m_7;
+    const char* const n_8; avmplus::NewObjectSampleClass* const m_8;
+    const char* const n_9; avmplus::NewObjectSampleObject* const m_9;
+    const char* const n_10; avmplus::SampleClass* const m_10;
+    const char* const n_11; avmplus::SampleObject* const m_11;
+    const char* const n_12; avmplus::ScriptObject* const m_12;
+    const char* const n_13; avmplus::StackFrameClass* const m_13;
+    const char* const n_14; avmplus::StackFrameObject* const m_14;
+    const char* const n_15; avmplus::TraceClass* const m_15;
+    const char* const n_16; avmshell::AbstractBaseClass* const m_16;
+    const char* const n_17; avmshell::AbstractBaseObject* const m_17;
+    const char* const n_18; avmshell::AbstractRestrictedBaseClass* const m_18;
+    const char* const n_19; avmshell::AbstractRestrictedBaseObject* const m_19;
+    const char* const n_20; avmshell::CheckBaseClass* const m_20;
+    const char* const n_21; avmshell::CheckBaseObject* const m_21;
+    const char* const n_22; avmshell::FileClass* const m_22;
+    const char* const n_23; avmshell::MIClass* const m_23;
+    const char* const n_24; avmshell::MIObject* const m_24;
+    const char* const n_25; avmshell::NativeSubclassOfAbstractBaseClass* const m_25;
+    const char* const n_26; avmshell::NativeSubclassOfAbstractBaseObject* const m_26;
+    const char* const n_27; avmshell::NativeSubclassOfAbstractRestrictedBaseClass* const m_27;
+    const char* const n_28; avmshell::NativeSubclassOfAbstractRestrictedBaseObject* const m_28;
+    const char* const n_29; avmshell::NativeSubclassOfRestrictedBaseClass* const m_29;
+    const char* const n_30; avmshell::NativeSubclassOfRestrictedBaseObject* const m_30;
+    const char* const n_31; avmshell::RestrictedBaseClass* const m_31;
+    const char* const n_32; avmshell::RestrictedBaseObject* const m_32;
+    const char* const n_33; avmshell::SystemClass* const m_33;
 } aotABCTypes_shell_toplevel = {
-    "::avmplus::ScriptObject", 0,
-    "::avmshell::AbstractBaseClass", 0,
-    "::avmshell::AbstractBaseObject", 0,
-    "::avmshell::AbstractRestrictedBaseClass", 0,
-    "::avmshell::AbstractRestrictedBaseObject", 0,
-    "::avmshell::CheckBaseClass", 0,
-    "::avmshell::CheckBaseObject", 0,
-    "::avmshell::FileClass", 0,
-    "::avmshell::MIClass", 0,
-    "::avmshell::MIObject", 0,
-    "::avmshell::NativeSubclassOfAbstractBaseClass", 0,
-    "::avmshell::NativeSubclassOfAbstractBaseObject", 0,
-    "::avmshell::NativeSubclassOfAbstractRestrictedBaseClass", 0,
-    "::avmshell::NativeSubclassOfAbstractRestrictedBaseObject", 0,
-    "::avmshell::NativeSubclassOfRestrictedBaseClass", 0,
-    "::avmshell::NativeSubclassOfRestrictedBaseObject", 0,
-    "::avmshell::RestrictedBaseClass", 0,
-    "::avmshell::RestrictedBaseObject", 0,
-    "::avmshell::SystemClass", 0,
-    "DeleteObjectSampleClass", 0,
-    "DeleteObjectSampleObject", 0,
-    "DictionaryClass", 0,
-    "DictionaryObject", 0,
-    "DomainClass", 0,
-    "DomainObject", 0,
-    "JObject", 0,
-    "JObjectClass", 0,
-    "NewObjectSampleClass", 0,
-    "NewObjectSampleObject", 0,
-    "SampleClass", 0,
-    "SampleObject", 0,
-    "StackFrameClass", 0,
-    "StackFrameObject", 0,
-    "TraceClass", 0,
+    "avmplus::DeleteObjectSampleClass", 0,
+    "avmplus::DeleteObjectSampleObject", 0,
+    "avmplus::DictionaryClass", 0,
+    "avmplus::DictionaryObject", 0,
+    "avmplus::DomainClass", 0,
+    "avmplus::DomainObject", 0,
+    "avmplus::JObject", 0,
+    "avmplus::JObjectClass", 0,
+    "avmplus::NewObjectSampleClass", 0,
+    "avmplus::NewObjectSampleObject", 0,
+    "avmplus::SampleClass", 0,
+    "avmplus::SampleObject", 0,
+    "avmplus::ScriptObject", 0,
+    "avmplus::StackFrameClass", 0,
+    "avmplus::StackFrameObject", 0,
+    "avmplus::TraceClass", 0,
+    "avmshell::AbstractBaseClass", 0,
+    "avmshell::AbstractBaseObject", 0,
+    "avmshell::AbstractRestrictedBaseClass", 0,
+    "avmshell::AbstractRestrictedBaseObject", 0,
+    "avmshell::CheckBaseClass", 0,
+    "avmshell::CheckBaseObject", 0,
+    "avmshell::FileClass", 0,
+    "avmshell::MIClass", 0,
+    "avmshell::MIObject", 0,
+    "avmshell::NativeSubclassOfAbstractBaseClass", 0,
+    "avmshell::NativeSubclassOfAbstractBaseObject", 0,
+    "avmshell::NativeSubclassOfAbstractRestrictedBaseClass", 0,
+    "avmshell::NativeSubclassOfAbstractRestrictedBaseObject", 0,
+    "avmshell::NativeSubclassOfRestrictedBaseClass", 0,
+    "avmshell::NativeSubclassOfRestrictedBaseObject", 0,
+    "avmshell::RestrictedBaseClass", 0,
+    "avmshell::RestrictedBaseObject", 0,
+    "avmshell::SystemClass", 0,
 };
 #endif
 } }
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::MIClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::MIClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmshell::MIClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::MIClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doMIClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::MIClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmshell::MIObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmshell::MIObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::MIClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::MIObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::SystemClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
+    ClassClosure* const cc = avmshell::SystemClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doSystemClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::SystemClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::FileClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::FileClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doFileClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::FileClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::AbstractBaseClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::AbstractBaseClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doAbstractBaseClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::AbstractBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::AbstractBaseObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::RestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::RestrictedBaseClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmshell::RestrictedBaseClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::RestrictedBaseClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doRestrictedBaseClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::RestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmshell::RestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmshell::RestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::RestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::RestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::AbstractRestrictedBaseClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::AbstractRestrictedBaseClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doAbstractRestrictedBaseClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::AbstractRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::AbstractRestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::CheckBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::CheckBaseClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmshell::CheckBaseClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::CheckBaseClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doCheckBaseClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::CheckBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     avmshell::CheckBaseClass::preCreateInstanceCheck(cls);
-    return new(cls->gc(), cls->getExtraSize()) avmshell::CheckBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmshell::CheckBaseObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::CheckBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::CheckBaseObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::NativeSubclassOfAbstractBaseClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmshell::NativeSubclassOfAbstractBaseClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::NativeSubclassOfAbstractBaseClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNativeSubclassOfAbstractBaseClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::NativeSubclassOfAbstractBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfAbstractBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfAbstractBaseObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::AbstractBaseObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::NativeSubclassOfRestrictedBaseClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmshell::NativeSubclassOfRestrictedBaseClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::NativeSubclassOfRestrictedBaseClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNativeSubclassOfRestrictedBaseClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::NativeSubclassOfRestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfRestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::RestrictedBaseObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmshell::NativeSubclassOfAbstractRestrictedBaseClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmshell::NativeSubclassOfAbstractRestrictedBaseClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmshell::NativeSubclassOfAbstractRestrictedBaseClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNativeSubclassOfAbstractRestrictedBaseClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmshell::NativeSubclassOfAbstractRestrictedBaseClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfAbstractRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmshell::NativeSubclassOfAbstractRestrictedBaseObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractRestrictedBaseClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmshell::NativeSubclassOfAbstractRestrictedBaseObject::construct(int argc, avmplus::Atom* argv) { return avmshell::AbstractRestrictedBaseObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DomainClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::DomainClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::DomainClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::DomainClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDomainClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::DomainClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::DomainObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DomainClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DomainObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::StackFrameClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::StackFrameClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::StackFrameClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::StackFrameClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doStackFrameClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::StackFrameClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmplus::StackFrameObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmplus::StackFrameObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::StackFrameClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::StackFrameObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::SampleClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::SampleClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::SampleClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doSampleClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SampleClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmplus::SampleObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmplus::SampleObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SampleObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NewObjectSampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::NewObjectSampleClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::NewObjectSampleClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::NewObjectSampleClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNewObjectSampleClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::NewObjectSampleClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmplus::NewObjectSampleObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmplus::NewObjectSampleObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NewObjectSampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::NewObjectSampleObject::construct(int argc, avmplus::Atom* argv) { return avmplus::SampleObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DeleteObjectSampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::DeleteObjectSampleClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::DeleteObjectSampleClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::DeleteObjectSampleClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDeleteObjectSampleClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::DeleteObjectSampleClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmplus::DeleteObjectSampleObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmplus::DeleteObjectSampleObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DeleteObjectSampleClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DeleteObjectSampleObject::construct(int argc, avmplus::Atom* argv) { return avmplus::SampleObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::TraceClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = ClassClosure::cantInstantiateCreateInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::TraceClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doTraceClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::TraceClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DictionaryClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::DictionaryClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::DictionaryClass::createInstanceProc;
+    ClassClosure* const cc = avmplus::DictionaryClass::create(cvtable->gc(), cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDictionaryClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::DictionaryClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
     return avmplus::DictionaryObject::create(cls->gc(), cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DictionaryClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DictionaryObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
-AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::JObjectClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::JObjectClass::createClassClosure(VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::JObjectClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::JObjectClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doJObjectClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::JObjectClass::createInstanceProc(avmplus::ClassClosure* cls)
 {
-    return new(cls->gc(), cls->getExtraSize()) avmplus::JObject(cls->ivtable(), cls->prototypePtr());
+    return new (cls->gc(), cls->getExtraSize()) avmplus::JObject(cls->ivtable(), cls->prototypePtr());
 }
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::JObjectClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::JObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
