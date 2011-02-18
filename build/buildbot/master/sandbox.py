@@ -57,7 +57,7 @@ class sandbox:
     #### SANDBOX
     compile = Scheduler(name="compile-sandbox", branch=BRANCH, treeStableTimer=30, properties={'silent':'true'},
                      builderNames=["windows-compile-sandbox", "windows64-compile-sandbox",
-                                   "mac-intel-10.4-compile-sandbox", "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
+                                   "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
                                    "linux-compile-sandbox", "linux2-compile-sandbox",
                                    "linux64-compile-sandbox",
                                    "solaris-sparc-compile-sandbox",
@@ -69,7 +69,7 @@ class sandbox:
 
     smoke = BuilderDependent(name="smoke-sandbox",upstream=compile, callbackInterval=60, properties={'silent':'true'},
                     builderNames=["windows-smoke-sandbox", "windows64-smoke-sandbox",
-                                   "mac-intel-10.4-smoke-sandbox", "mac-intel-10.5-smoke-sandbox", "mac64-intel-smoke-sandbox",
+                                   "mac-intel-10.5-smoke-sandbox", "mac64-intel-smoke-sandbox",
                                    "linux-smoke-sandbox", "linux2-smoke-sandbox",
                                    "linux64-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox",
@@ -80,7 +80,6 @@ class sandbox:
                     builderDependencies=[
                                   ["windows-smoke-sandbox", "windows-compile-sandbox"], 
                                   ["windows64-smoke-sandbox", "windows64-compile-sandbox"], 
-                                  ["mac-intel-10.4-smoke-sandbox", "mac-intel-10.4-compile-sandbox"], 
                                   ["mac-intel-10.5-smoke-sandbox", "mac-intel-10.5-compile-sandbox"],
                                   ["mac64-intel-smoke-sandbox", "mac64-intel-compile-sandbox"],
                                   ["linux-smoke-sandbox", "linux-compile-sandbox"],
@@ -97,7 +96,7 @@ class sandbox:
 
     test = BuilderDependent(name="test-sandbox",upstream=smoke, callbackInterval=60, properties={'silent':'true'},
                     builderNames=["windows-test-sandbox", "windows64-test-sandbox",
-                                   "mac-intel-10.4-test-sandbox", "mac-intel-10.5-test-sandbox", "mac64-intel-test-sandbox",
+                                   "mac-intel-10.5-test-sandbox", "mac64-intel-test-sandbox",
                                    "linux-test-sandbox", "linux2-test-sandbox",
                                    "linux64-test-sandbox",
                                    "solaris-sparc-test-sandbox",
@@ -108,7 +107,6 @@ class sandbox:
                     builderDependencies=[
                                   ["windows-test-sandbox", "windows-smoke-sandbox"], 
                                   ["windows64-test-sandbox", "windows64-smoke-sandbox"], 
-                                  ["mac-intel-10.4-test-sandbox", "mac-intel-10.4-smoke-sandbox"], 
                                   ["mac-intel-10.5-test-sandbox", "mac-intel-10.5-smoke-sandbox"],
                                   ["mac64-intel-test-sandbox", "mac64-intel-smoke-sandbox"],
                                   ["linux-test-sandbox", "linux-smoke-sandbox"],
@@ -232,30 +230,6 @@ class sandbox:
 
 
     ####################################################
-    #### builder for mac-intel-10_4-compile-sandbox ####
-    ####################################################
-    sb_mac_intel_104_compile_factory = factory.BuildFactory()
-    sb_mac_intel_104_compile_factory.addStep(sync_clean)
-    sb_mac_intel_104_compile_factory.addStep(sync_clone_sandbox)
-    sb_mac_intel_104_compile_factory.addStep(sync_update)
-    sb_mac_intel_104_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-10_4"))
-    sb_mac_intel_104_compile_factory.addStep(compile_builtin)
-    sb_mac_intel_104_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_104", args="--enable-shell --mac-sdk=104u", upload="false"))
-    sb_mac_intel_104_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_104", args="--enable-shell --enable-debug --mac-sdk=104u", upload="false"))
-    sb_mac_intel_104_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_104", args="--enable-shell --enable-debugger --mac-sdk=104u", upload="false"))
-    sb_mac_intel_104_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_104", args="--enable-shell --enable-debug --enable-debugger --mac-sdk=104u", upload="false"))
-    sb_mac_intel_104_compile_factory.addStep(compile_buildcheck)
-    sb_mac_intel_104_compile_factory.addStep(util_upload_asteam)
-
-    sb_mac_intel_104_compile_builder = {
-                'name': "mac-intel-10.4-compile-sandbox",
-                'slavename': "mac-intel-10_4",
-                'factory': sb_mac_intel_104_compile_factory,
-                'builddir': './sandbox-mac-intel-10_4-compile',
-    }
-
-
-    ####################################################
     #### builder for mac-intel-10_5-compile-sandbox ####
     ####################################################
     sb_mac_intel_105_compile_factory = factory.BuildFactory()
@@ -264,10 +238,10 @@ class sandbox:
     sb_mac_intel_105_compile_factory.addStep(sync_update)
     sb_mac_intel_105_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-10_5"))
     sb_mac_intel_105_compile_factory.addStep(compile_builtin)
-    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--enable-shell --mac-sdk=104u", upload="false"))
-    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug --mac-sdk=104u", upload="false"))
-    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger --mac-sdk=104u", upload="false"))
-    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger --mac-sdk=104u", upload="false"))
+    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--enable-shell --mac-sdk=105", upload="false"))
+    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug --mac-sdk=105", upload="false"))
+    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger --mac-sdk=105", upload="false"))
+    sb_mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger --mac-sdk=105", upload="false"))
     sb_mac_intel_105_compile_factory.addStep(compile_buildcheck)
     sb_mac_intel_105_compile_factory.addStep(util_upload_asteam)
 
@@ -637,22 +611,6 @@ class sandbox:
 
 
     ##################################################
-    #### builder for mac-intel-10_4-smoke-sandbox ####
-    ##################################################
-    sb_mac_intel_104_smoke_factory = factory.BuildFactory()
-    sb_mac_intel_104_smoke_factory.addStep(download_testmedia)
-    sb_mac_intel_104_smoke_factory.addStep(test_smoke)
-    sb_mac_intel_104_smoke_factory.addStep(util_process_clean)
-
-    sb_mac_intel_104_smoke_builder = {
-                'name': "mac-intel-10.4-smoke-sandbox",
-                'slavename': "mac-intel-10_4",
-                'factory': sb_mac_intel_104_smoke_factory,
-                'builddir': './sandbox-mac-intel-10_4-smoke',
-    }
-
-
-    ##################################################
     #### builder for mac-intel-10_5-smoke-sandbox ####
     ##################################################
     sb_mac_intel_105_smoke_factory = factory.BuildFactory()
@@ -930,32 +888,6 @@ class sandbox:
 
 
     #################################################
-    #### builder for mac-intel-10_4-test-sandbox ####
-    #################################################
-    sb_mac_intel_104_test_factory = factory.BuildFactory()
-    sb_mac_intel_104_test_factory.addStep(test_commandline)
-    sb_mac_intel_104_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_104"))
-    sb_mac_intel_104_test_factory.addStep(test_generic(name="Release", shellname="avmshell_104", vmargs="", config="", scriptargs=""))
-    sb_mac_intel_104_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_104", vmargs="-Dinterp", config="", scriptargs=""))
-    sb_mac_intel_104_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_104", vmargs="-Ojit", config="", scriptargs=""))
-    sb_mac_intel_104_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_104", vmargs="", config="", scriptargs=""))
-    sb_mac_intel_104_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_104", vmargs="", config="", scriptargs=""))
-    sb_mac_intel_104_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_104", vmargs="", config="", scriptargs=""))
-    sb_mac_intel_104_test_factory.addStep(test_differential)
-    sb_mac_intel_104_test_factory.addStep(util_process_clean)
-    sb_mac_intel_104_test_factory.addStep(util_clean_buildsdir)
-    sb_mac_intel_104_test_factory.addStep(sync_clean)
-
-    sb_mac_intel_104_test_builder = {
-                'name': "mac-intel-10.4-test-sandbox",
-                'slavename': "mac-intel-10_4",
-                'factory': sb_mac_intel_104_test_factory,
-                'builddir': './sandbox-mac-intel-10_4-test',
-    }
-
-
-
-    #################################################
     #### builder for mac-intel-10_5-test-sandbox ####
     #################################################
     sb_mac_intel_105_test_factory = factory.BuildFactory()
@@ -1200,7 +1132,6 @@ class sandbox:
     builders = [
                 sb_windows_compile_builder,
                 sb_windows_64_compile_builder,
-                sb_mac_intel_104_compile_builder,
                 sb_mac_intel_105_compile_builder,
                 sb_mac_intel_64_compile_builder,
                 sb_linux_compile_builder,
@@ -1216,7 +1147,6 @@ class sandbox:
                 
                 sb_windows_smoke_builder,
                 sb_windows_64_smoke_builder,
-                sb_mac_intel_104_smoke_builder,
                 sb_mac_intel_105_smoke_builder,
                 sb_mac_intel_64_smoke_builder,
                 sb_linux_smoke_builder,
@@ -1232,7 +1162,6 @@ class sandbox:
                 
                 sb_windows_test_builder,
                 sb_windows_64_test_builder,
-                sb_mac_intel_104_test_builder,
                 sb_mac_intel_105_test_builder,
                 sb_mac_intel_64_test_builder,
                 sb_linux_test_builder,
