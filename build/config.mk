@@ -71,7 +71,8 @@ all::
 # Note: positional parameters passed to $(call) are expanded "early". This is
 # the magic that sets and revert $(curdir) and $(srcdir) properly.
 define RECURSE_DIR
-curdir := $(1)/$(2)
+# Bug 632086: Generate paths without "./"; closer to canonical form make needs.
+curdir := $(subst ./,,$(1)/$(2))
 srcdir := $(topsrcdir)/$$(curdir)
 include $(topsrcdir)/$$(curdir)/manifest.mk
 curdir := $(1)

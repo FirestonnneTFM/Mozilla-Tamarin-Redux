@@ -102,10 +102,26 @@ endif
 $(call RECURSE_DIRS,eval)
 $(call RECURSE_DIRS,shell)
 
-$(avmplus_CXXSRCS) $(vmbase_CXXSRCS): $(topsrcdir)/generated/builtin.h
+# Bug 632086: These definitions must come *after* the foo_CXXSRCS
+# variables have been completely populated.
+avmplus_PREPROCESSED := $(avmplus_CXXSRCS:.cpp=.$(II_SUFFIX))
+vmbase_PREPROCESSED := $(vmbase_CXXSRCS:.cpp=.$(II_SUFFIX))
+shell_PREPROCESSED := $(shell_CXXSRCS:.cpp=.$(II_SUFFIX))
 
-$(shell_CXXSRCS): $(topsrcdir)/generated/builtin.h \
- $(topsrcdir)/generated/shell_toplevel.h
+# Bug 632086: Tie generated code for .h and .cpp together, so that
+# requiring the regeneration of the .cpp file will force the
+# regeneration of both to happen before the .h file is read.
+GENERATED_BUILTIN_CODE := \
+ $(topsrcdir)/generated/builtin.h \
+ $(topsrcdir)/generated/builtin.cpp
+GENERATED_SHELL_CODE := \
+ $(topsrcdir)/generated/shell_toplevel.h \
+ $(topsrcdir)/generated/shell_toplevel.cpp
+
+$(avmplus_PREPROCESSED): $(GENERATED_BUILTIN_CODE)
+$(vmbase_PREPROCESSED): $(GENERATED_BUILTIN_CODE)
+$(shell_PREPROCESSED): $(GENERATED_BUILTIN_CODE)
+$(shell_PREPROCESSED): $(GENERATED_SHELL_CODE)
 
 echo:
 	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
