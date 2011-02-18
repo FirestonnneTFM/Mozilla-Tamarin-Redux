@@ -122,7 +122,9 @@ cd $basedir/generated
 # revert files
 mv builtin.abc.orig builtin.abc
 mv builtin.cpp.orig builtin.cpp
+touch builtin.cpp
 mv builtin.h.orig builtin.h
+touch builtin.h
 
 ##
 # Build the shell_toplevel.abc
@@ -164,7 +166,9 @@ cd $basedir/generated
 # revert files
 mv shell_toplevel.abc.orig shell_toplevel.abc
 mv shell_toplevel.cpp.orig shell_toplevel.cpp
+touch shell_toplevel.cpp
 mv shell_toplevel.h.orig shell_toplevel.h
+touch shell_toplevel.h
 
 endSilent
 
