@@ -67,7 +67,7 @@ enum ApiVersion {
     kApiVersion_SWF_12 = 12,
     kApiVersion_AIR_2_7 = 13,
     kApiVersion_SWF_13 = 14,
-    kApiVersion_AIR_2_8 = 15,
+    kApiVersion_AIR_3_0 = 15,
     kApiVersion_VM_INTERNAL = 16
 };
 
