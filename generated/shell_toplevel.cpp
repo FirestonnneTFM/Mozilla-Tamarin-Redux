@@ -934,11 +934,11 @@ public:
 #ifdef DEBUG
 REALLY_INLINE void SlotOffsetsAndAsserts::doMIClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doSystemClassAsserts(Traits* ctraits, Traits* itraits)
 {
+    (void)ctraits; (void)itraits;
     MMGC_STATIC_ASSERT(offsetof(avmshell::SystemClass, m_slots_SystemClass) == kSlotsOffsetSystemClass);
     MMGC_STATIC_ASSERT(offsetof(avmshell::SystemClass, m_slots_SystemClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmshell::SystemClass) <= 0xFFFF);
@@ -946,51 +946,43 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doSystemClassAsserts(Traits* ctraits, 
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doFileClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doAbstractBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doAbstractRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doCheckBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfAbstractBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doNativeSubclassOfAbstractRestrictedBaseClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doDomainClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doStackFrameClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
+    (void)ctraits; (void)itraits;
     MMGC_STATIC_ASSERT(offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) == kSlotsOffsetStackFrameObject);
     MMGC_STATIC_ASSERT(offsetof(avmplus::StackFrameObject, m_slots_StackFrameObject) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::StackFrameObject) <= 0xFFFF);
@@ -1001,7 +993,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doStackFrameClassAsserts(Traits* ctrai
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doSampleClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
+    (void)ctraits; (void)itraits;
     MMGC_STATIC_ASSERT(offsetof(avmplus::SampleObject, m_slots_SampleObject) == kSlotsOffsetSampleObject);
     MMGC_STATIC_ASSERT(offsetof(avmplus::SampleObject, m_slots_SampleObject) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::SampleObject) <= 0xFFFF);
@@ -1010,7 +1002,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doSampleClassAsserts(Traits* ctraits, 
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doNewObjectSampleClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
+    (void)ctraits; (void)itraits;
     MMGC_STATIC_ASSERT(offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) == kSlotsOffsetNewObjectSampleObject);
     MMGC_STATIC_ASSERT(offsetof(avmplus::NewObjectSampleObject, m_slots_NewObjectSampleObject) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::NewObjectSampleObject) <= 0xFFFF);
@@ -1019,7 +1011,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doNewObjectSampleClassAsserts(Traits* 
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doDeleteObjectSampleClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
+    (void)ctraits; (void)itraits;
     MMGC_STATIC_ASSERT(offsetof(avmplus::DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) == kSlotsOffsetDeleteObjectSampleObject);
     MMGC_STATIC_ASSERT(offsetof(avmplus::DeleteObjectSampleObject, m_slots_DeleteObjectSampleObject) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::DeleteObjectSampleObject) <= 0xFFFF);
@@ -1028,6 +1020,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doDeleteObjectSampleClassAsserts(Trait
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doTraceClassAsserts(Traits* ctraits, Traits* itraits)
 {
+    (void)ctraits; (void)itraits;
     MMGC_STATIC_ASSERT(offsetof(avmplus::TraceClass, m_slots_TraceClass) == kSlotsOffsetTraceClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::TraceClass, m_slots_TraceClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::TraceClass) <= 0xFFFF);
@@ -1041,13 +1034,11 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doTraceClassAsserts(Traits* ctraits, T
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doDictionaryClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doJObjectClassAsserts(Traits* ctraits, Traits* itraits)
 {
-    (void)ctraits;
-    (void)itraits;
+    (void)ctraits; (void)itraits;
 }
 #endif // DEBUG
 
