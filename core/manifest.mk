@@ -127,8 +127,8 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 
 #  $(curdir)/avmplus.cpp \
 
-# See manifest.mk in root directory for this dependency.
-#$(avmplus_CXXSRCS): $(topsrcdir)/generated/builtin.h
+# See manifest.mk in root directory for the dependencies
+# on $(topsrcdir)/generated/builtin.h.
 
 # Use of '%' [to force a pattern-rule] instead of '$(curdir)/..' or
 # '$(topsrcdir)' [which would then not be a pattern-rule] is crucial
@@ -136,9 +136,12 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
 %/generated/builtin.h %/generated/builtin.cpp: $(topsrcdir)/core/builtin.as
 	cd $(topsrcdir)/core; python builtin.py
 
-# Use of '$(topsrcdir)/generated' rather than '$(curdir)/..'  is
-# deliberate; the root manifest.mk needs to use it (because it needs a
-# context-independent path to builtin.cpp), and since make will not
-# canonicalize the paths, it is best to use the same path everywhere.
-# See Bug 632086.
-$(curdir)/AbcData.cpp: $(topsrcdir)/generated/builtin.cpp
+# 1. Use of '$(topsrcdir)/generated' is deliberate; we use absolute
+#    paths for code being generated outside build dir.
+#
+# 2. Use of '$(curdir)/AbcData.$(II_SUFFIX)' is also deliberate:
+#    preprocessed file as target must be specified via same path that
+#    is used in root manifest.mk.
+#
+# Further discussion at Bug 632086.
+$(curdir)/AbcData.$(II_SUFFIX): $(topsrcdir)/generated/builtin.cpp
