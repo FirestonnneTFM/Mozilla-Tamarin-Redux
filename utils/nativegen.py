@@ -2019,6 +2019,7 @@ class AbcThunkGen:
                 out.println('{')
                 out.indent += 1
                 assert (c.has_cpp_name)
+                out.println('(void)ctraits; (void)itraits;')
                 self.printStructAssertsForTraits(out, c, True, 'ctraits')
                 if self.needsInstanceSlotsStruct(c):
                     self.printStructAssertsForTraits(out, c.itraits, False, 'itraits')
@@ -2035,9 +2036,6 @@ class AbcThunkGen:
                 if slot != None:
                     out.println('AvmAssert(getSlotOffset(%s, %u) == (offsetof(%s, %s) + offsetof(%s, m_%s)));' 
                         % (traitsVarName, self.namesDict[id(slot.name)], t.fqcppname(), t.slotsInstanceName, t.slotsStructName, to_cname(slot.name)))
-        else:
-            out.println('(void)%s;' % traitsVarName)
-        
 
     def argTraits(self, receiver, m):
         argtraits = [ receiver ]
