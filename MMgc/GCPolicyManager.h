@@ -331,6 +331,11 @@ namespace MMgc
          */
         double queryLoadForHeapsize(double H);
 
+        /**
+         * Return percentage of bytes scanned exactly. 
+         */
+        uint32_t queryExactPercentage();
+
         // ----- Public data --------------------------------------
 
         // Elapsed time (in ticks) for various collection phases, and the maximum phase time
