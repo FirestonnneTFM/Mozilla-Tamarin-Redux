@@ -300,6 +300,7 @@ namespace MMgc
 #ifdef MMGC_CONSERVATIVE_PROFILER
         if (demos != NULL)
         {
+            GCLog("Exactly traced percentage: %u\n", policy.queryExactPercentage());
             demos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
             delete demos;
             demos = NULL;
@@ -2434,8 +2435,8 @@ namespace MMgc
                     demos->accountForRoot(size);
                     break;
                 case GCMarkStack::kGCObject:
-                    GCAssert(!(GetGCBits(GetRealPointer(wi.Ptr())) & kVirtualGCTrace));
-                    demos->accountForObject(wi.Ptr());
+                    GCAssert(!(GetGCBits(GetRealPointer(baseptr)) & kVirtualGCTrace));
+                    demos->accountForObject(baseptr);
                     break;
                 case GCMarkStack::kLargeObjectChunk:
                     // Skip it - it's a chunk of a large object that's been split, it has already
