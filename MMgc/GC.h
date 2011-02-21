@@ -280,20 +280,20 @@ namespace MMgc
         GCRoot *prev;
         const void *object;
         size_t size;
-        GCWorkItem *markStackSentinel;
+        uintptr_t markStackSentinel;
 
-        GCWorkItem GetWorkItem() const;
+        void GetWorkItem(const void*& _object, uint32_t& _size) const;
 
-        GCWorkItem *GetMarkStackSentinelPointer();
+        uintptr_t GetMarkStackSentinelPointer();
 
-        // SetMarkStackSentinelPointer stores the pointer and clears
+        // SetMarkStackSentinelPointer stores the item index and clears
         // the existing one if it exists.  Since all the roots are
         // pushed in StartIncrementalMark and FinishIncrementalMark
         // the root can be on the stack twice.
-        void SetMarkStackSentinelPointer(GCWorkItem *wi);
+        void SetMarkStackSentinelPointer(uintptr_t);
 
-        // ClearMarkStackSentinelPointer just sets the pointer to
-        // NULL, use SetMarkStackSentinelPointer(NULL) to also clear
+        // ClearMarkStackSentinelPointer just sets the item index to
+        // zero, use SetMarkStackSentinelPointer(0) to also clear
         // the work item off the mark stack.
         void ClearMarkStackSentinelPointer();
     };
@@ -1212,8 +1212,6 @@ namespace MMgc
 
         uintptr_t GetStackEnter() const;
 
-        // for deciding a tree of things should be scanned from presweep
-        void PushWorkItem_MayFail(GCWorkItem &item);
         bool GetMarkStackOverflow() const { return m_markStackOverflow; }
 
         // If the object is not marked and is not on the mark queue, then mark it and
@@ -1392,8 +1390,8 @@ namespace MMgc
          * is the mark stack and it should be careful not to invoke OOM handling, but debugging
          * code and other ad-hoc code may interfere.  This state variable is cheap insurance.)
          *
-         * The flag is a counter because some functions call both Mark and MarkItem, and then
-         * Mark also calls MarkItem, so the flag may needs to be set and reset on several levels.
+         * The flag is a counter because some functions call both Mark and MarkItem_*, and then
+         * Mark also calls MarkItem_*, so the flag may needs to be set and reset on several levels.
          * The counter takes care of this naturally.
          */
         uint32_t markerActive;
@@ -1427,9 +1425,11 @@ namespace MMgc
 
         bool m_markStackOverflow;
         void HandleMarkStackOverflow();
-        void SignalMarkStackOverflow(GCWorkItem& item);
         
-        // Set at initialization to the deepest recursion level MarkItem is allowed to
+        void SignalMarkStackOverflow_GCObject(const void *p);
+        void SignalMarkStackOverflow_NonGCObject();
+        
+        // Set at initialization to the deepest recursion level MarkItem_* is allowed to
         // reach.  Managed entirely within MarkItem.
         uint32_t mark_item_recursion_control;
 
@@ -1529,14 +1529,14 @@ namespace MMgc
         void ForceSweepAtShutdown();
         void MarkAllRoots(bool deep=false);
         void Mark();
+        void Mark(uint32_t count);
         void MarkQueueAndStack(bool scanStack=true);
-#ifdef MMGC_CONSERVATIVE_PROFILER
-        void MarkItem(GCWorkItem &wi, bool isRoot=false);
-#else
-        void MarkItem(GCWorkItem &wi);
-#endif
-        bool HandleLargeMarkItem(GCWorkItem &wi, size_t &size);
-        void HandleContinuedMarkingOfExactGCItem(GCWorkItem &wi);
+        void MarkTopItem_NonGCObject();
+        void MarkItem_GCObject(const void* object);
+        void MarkItem_ExactObjectTail(const void* object, size_t cursor);
+        void MarkItem_ConservativeOrNonGCObject(const void* object, uint32_t size, GCMarkStack::TypeTag type, const void* baseptr, bool interiorPtrs);
+        void SplitExactGCObject(const void* object);
+        void SplitItem_ConservativeOrNonGCObject(const void* object, uint32_t& size, GCMarkStack::TypeTag type, const void* baseptr);
         void EstablishSweepInvariants();
         void ClearMarkStack();
 
@@ -1630,22 +1630,24 @@ namespace MMgc
         void ProfileExplicitDeletion(const void* item);
 #endif
 
-private:
+    public:
+        // Used by the sampler.  Attempt to push the object p, but ignore mark stack 
+        // overflow if it fails.
+        void Push_GCObject_MayFail(const void *p);
 
-        // PushWorkItem is defined in GC.cpp, always inlined in callers there.
-        // item.ptr must not be NULL.
-        void PushWorkItem(GCWorkItem item);
-
-        // Like PushWorkItem but does not try to assert the WorkItemInvariants;
-        // they don't hold when transfering items from the barrier stack, for
-        // example.
-        void PushWorkItem_Unsafe(GCWorkItem item);
-
+    private:
+        // Push various kinds of items onto the mark stack.
+        void Push_GCObject(const void *p);
+        void Push_LargeExactObjectTail(const void* p, size_t cursor);
+        void Push_StackMemory(const void* p, uint32_t size, const void* baseptr);
+        void Push_LargeObjectChunk(const void *p, uint32_t size, const void* baseptr);
+        void Push_LargeRootChunk(const void *p, uint32_t size, const void* baseptr);
+        bool Push_RootProtector(const void* p);
+        void Push_LargeObjectProtector(const void* p);
+        
 #ifdef _DEBUG
-        /**
-         * Check that a work item is consistent.
-         */
-        void WorkItemInvariants(GCWorkItem item);
+        // Assert invariants on GCObjects about to go on the mark stack.
+        void WorkItemInvariants_GCObject(const void *p);
         
         /**
          * Check the consistency of the free lists for all the allocators.

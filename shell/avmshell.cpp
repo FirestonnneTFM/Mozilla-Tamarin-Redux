@@ -958,11 +958,11 @@ namespace avmshell
                 }
 #ifdef MMGC_MARKSTACK_ALLOWANCE
                 else if (!VMPI_strcmp(arg, "-gcstack")) {
-                    unsigned stack;
+                    int stack;
                     int nchar;
                     const char* val = argv[++i];
-                    if (VMPI_sscanf(val, "%u%n", &stack, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val)) {
-                        settings.markstackAllowance = uint32_t(stack);
+                    if (VMPI_sscanf(val, "%d%n", &stack, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && stack >= 0) {
+                        settings.markstackAllowance = int32_t(stack);
                     }
                     else
                     {

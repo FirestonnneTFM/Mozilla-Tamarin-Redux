@@ -673,12 +673,11 @@ namespace avmplus
                 void *ptr = sotGetGCPointer(s.sot);
                 if (ptr != NULL && !GC::GetMark(ptr))
                 {
-                    GCWorkItem item(ptr, (uint32_t)GC::Size(ptr), GCWorkItem::kGCObject);
-                    // NOTE that PushWorkItem_MayFail can fail due to mark stack overflow in tight memory situations.
-                    // This failure is visible as GC::GetMarkStackOverflow() being true.  The GC compensates
-                    // for that but it seems hard to compensate for it here.  The most credible workaround
-                    // is likely to test that flag at the end of presweep and disable the sampler if it is set.
-                    gc->PushWorkItem_MayFail(item);
+                    // NOTE that Push_GCObject_MayFail can fail due to mark stack overflow in tight memory
+                    // situations.  It seems hard to compensate for it here, so we don't.  The most credible
+                    // workaround is likely to test the overflow flag at the end of presweep and disable
+                    // the sampler if it is set.
+                    gc->Push_GCObject_MayFail(ptr);
                 }
             }
 #ifdef _DEBUG

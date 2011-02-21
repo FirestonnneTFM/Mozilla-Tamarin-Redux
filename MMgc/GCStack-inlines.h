@@ -42,147 +42,41 @@
 
 namespace MMgc
 {
-    
-    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, uint32_t s, GCWorkItemType workItemType)
-        : ptr(p)
-#ifdef MMGC_INTERIOR_PTRS
-        , _size(s | uint32_t(kHasInteriorPtrs) | uint32_t(workItemType))
-#else
-        , _size(s | uint32_t(workItemType))
-#endif
+    REALLY_INLINE uintptr_t GCMarkStack::Top()
     {
-        GCAssert((s & 3) == 0);
-        // The size is computed on demand for GC objects by GCWorkItem::GetSize(), so
-        // should always be passed as zero here.  Long term the size may not be stored
-        // in the mark item at all as it will only be needed for conservatively
-        // traced objects and for very accurate accounting.
-        GCAssert(workItemType != GCWorkItem::kGCObject || s == 0);
-        GCAssert(((uintptr_t)p & 3) == 0);
-        GCAssert(s != kSentinel1Size && s != kSentinel2Size);
-#ifdef _DEBUG
-        if (IsGCItem()) {
-            GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
-        }
-#endif
+        GCAssert(!IsEmpty());
+        return uintptr_t(m_top-1);
     }
     
-    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel1ItemType type)
-        : iptr(uintptr_t(p) | type),
-        _size(kSentinel1Size)
+    REALLY_INLINE bool GCMarkStack::Push_GCObject(const void* p)
     {
-        GCAssert(((uintptr_t)p & 3) == 0);
-    }
-    
-    REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinel2ItemType type)
-        : iptr(uintptr_t(p) | type),
-        _size(kSentinel2Size)
-    {
-        GCAssert(((uintptr_t)p & 3) == 0);
-    }
-    
-    REALLY_INLINE void GCWorkItem::Clear()
-    {
-        iptr = kDeadItem;
-        // use sentinel so we're skipped off the fast path in MarkItem
-        _size = kSentinel1Size;
-    }
-    
-    REALLY_INLINE uint32_t GCWorkItem::GetSize() const
-    {
-        return uint32_t(IsGCItem() ? GC::Size(ptr) : _size & ~3);
-    }
-    
-    REALLY_INLINE const void* GCWorkItem::Ptr() const
-    {
-        return ptr;
-    }
-
-    REALLY_INLINE void* GCWorkItem::GetEnd() const
-    {
-        return (void*)(iptr + GetSize());
-    }
-    
-    REALLY_INLINE uint32_t GCWorkItem::IsGCItem() const
-    {
-        return _size & uint32_t(kGCObject);
-    }
-    
-    REALLY_INLINE uint32_t GCWorkItem::HasInteriorPtrs() const
-    {
-        return _size & uint32_t(kHasInteriorPtrs);
-    }
-    
-    REALLY_INLINE bool GCWorkItem::IsNull() const
-    {
-        return ptr == NULL;
-    }
-    
-    REALLY_INLINE bool GCWorkItem::IsClear() const
-    {
-        return iptr == kDeadItem;
-    }
-    
-    REALLY_INLINE bool GCWorkItem::IsSentinel1Item() const
-    {
-        return (_size & ~3) == kSentinel1Size;
-    }
-    
-    REALLY_INLINE bool GCWorkItem::IsSentinel2Item() const
-    {
-        return (_size & ~3) == kSentinel2Size; 
-    }
-    
-    REALLY_INLINE GCWorkItem::GCSentinel1ItemType GCWorkItem::GetSentinel1Type() const
-    {
-        return (GCSentinel1ItemType)(iptr & 3);
-    }
-    
-    REALLY_INLINE GCWorkItem::GCSentinel2ItemType GCWorkItem::GetSentinel2Type() const
-    {
-        return (GCSentinel2ItemType)(iptr & 3);
-    }
-    
-    REALLY_INLINE void *GCWorkItem::GetSentinelPointer() const
-    {
-        return (void*) (iptr & ~3);
-    }
-    
-    REALLY_INLINE bool GCMarkStack::Push(GCWorkItem item)
-    {
-        GCAssert(!item.IsNull());
-        if (m_top == m_limit)
-            if (!PushSegment())
-                return false;
-        GCAssert(m_top < m_limit);
-        *m_top++ = item;
-#ifdef MMGC_MARKSTACK_DEPTH
-        uint32_t depth = Count();
-        if (depth > m_maxDepth)
-            m_maxDepth = depth;
-#endif
-        GCAssert(Invariants());
+        uintptr_t* top = allocSpace(1);
+        if (top == NULL)
+            return false;
+        top[0] = uintptr_t(p);
         return true;
     }
-
-    REALLY_INLINE GCWorkItem GCMarkStack::Pop()
+    
+    REALLY_INLINE const void* GCMarkStack::Pop_GCObject()
     {
-        GCAssert(m_top > m_base);
-        GCWorkItem t = *--m_top;
-        GCAssert(!t.IsNull());
-#ifdef _DEBUG
-        VMPI_memset(m_top, 0, sizeof(GCWorkItem));
-#endif
-        if (m_top == m_base)
-            if (m_topSegment->m_prev != NULL)
-                PopSegment();
-        GCAssert(Invariants());
-        return t;
+        GCAssert(!IsEmpty());
+        uintptr_t w = m_top[-1];
+        GCAssert(!(w & 1));
+        if ((w & 3) == 0) {
+            freeSpace(1);
+            return (void*)w;
+        }
+        return NULL;
     }
-
-    REALLY_INLINE GCWorkItem *GCMarkStack::Peek()
+    
+    REALLY_INLINE GCMarkStack::TypeTag GCMarkStack::PeekTypetag()
     {
-        GCAssert(m_top > m_base);
-        return m_top-1;
+        GCAssert(!IsEmpty());
+        uintptr_t w = m_top[-1];
+        GCAssert(!(w & 1));
+        if ((w & 3) == 0)
+            return kGCObject;
+        return GCMarkStack::TypeTag(w >> 2);
     }
 
     REALLY_INLINE bool GCMarkStack::IsEmpty()
@@ -197,14 +91,9 @@ namespace MMgc
         return uint32_t(m_top - m_base) + m_hiddenCount;
     }
 
-    REALLY_INLINE uint32_t GCMarkStack::ElementsPerSegment()
+    REALLY_INLINE uint32_t GCMarkStack::InactiveSegments()
     {
-        return kMarkStackItems;
-    }
-
-    REALLY_INLINE uint32_t GCMarkStack::EntirelyFullSegments()
-    {
-        return Count() / kMarkStackItems;
+        return m_hiddenSegments;
     }
 
 #ifdef MMGC_MARKSTACK_DEPTH
@@ -213,6 +102,38 @@ namespace MMgc
         return m_maxDepth;
     }
 #endif
+
+    REALLY_INLINE uintptr_t* GCMarkStack::allocSpace(size_t nwords)
+    {
+        GCAssert(Invariants());
+        if (m_top+nwords > m_limit)
+            if (!PushSegment()) {
+                GCAssert(Invariants());
+                return NULL;
+            }
+        m_top += nwords;
+#ifdef MMGC_MARKSTACK_DEPTH
+        uint32_t depth = Count();
+        if (depth > m_maxDepth)
+            m_maxDepth = depth;
+#endif
+        GCAssert(Invariants());
+        return m_top-1;
+    }
+
+    REALLY_INLINE void GCMarkStack::freeSpace(size_t nwords)
+    {
+        GCAssert(Invariants());
+        GCAssert(m_top-nwords >= m_base);
+        m_top -= nwords;
+#ifdef _DEBUG
+        VMPI_memset(m_top, 0, nwords*sizeof(uintptr_t));
+#endif
+        if (m_top == m_base) 
+            PopSegment_UnlessLast();
+        GCAssert(Invariants());
+    }
+
 }
 
 #endif /* __GCStack_inlines__ */

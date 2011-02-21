@@ -17,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -43,270 +43,322 @@
 namespace MMgc
 {
     /**
-     * A GCWorkItem represents a pointer that the collector must examine, and
-     * information about the pointer.
+     * Stack for the marking garbage collector.
      *
-     * There are two fields, 'ptr' and 'size'.  Both are split into a n-2 bit
-     * payload part (actual pointer value, actual size value) and a 2-bit
-     * information part.
+     * Stack items are strongly typed and items of different types are pushed and
+     * popped using different methods (Push_GCObject, Push_StackMemory, ...; Pop_GCObject,
+     * Pop_StackMemory, ...).  Calling a Pop method without knowing that the item on
+     * top of the stack is of the correct type is an error.
      *
-     * The low two bits of the 'size' field encode the type of the work item:
-     * whether it's a GC object or not (low bit), and whether we should scan
-     * the pointed-to object for pointers into other objects.
+     * A method PeekTypetag() is provided for reading the type of the top item.
      *
-     * The high bits of the 'size' field are zero if the item is a GC item; in
-     * this case the size is computed by the collector when the work item is
-     * processed.
-     *
-     * For 'normal' work items the two low bits of the pointer field are zero.
-     *
-     * If the low bits of 'size' are zero and the rest of the size field carries
-     * a special large value denoting a sentinel work item then the low bits of
-     * the pointer carry additional information.  The additional information
-     * depends on the sentinel type, and the pointer value may or may not
-     * represent a pointer.  There are several sentinel values, each imposes 
-     * each own interpretation of the two bits and the pointer value.
+     * As the most common item type is a simple object pointer, Pop_GCObject() does not
+     * require PeekTypetag to be used to sniff the type before it is called, but instead
+     * returns NULL if the top item is not a plain object pointer.
      */
-    class GCWorkItem
-    {
-    public:
-        // It's possible to 'or' kGCObject/kNonGCObject and kHasInteriorPtrs together, and
-        // when MMGC_INTERIOR_PTRS is defined this happens automatically in the GCWorkItem
-        // constructor.
-
-        // We only have two bits here because GCRoot items can be a multiple of 4 bytes.
-
-        enum GCWorkItemType
-        {
-            kNonGCObject=0,
-            kGCObject=1,
-            kHasInteriorPtrs=2,
-            kStackMemory=2          // convenient shorthand for kNonGCObject|kHasInteriorPtrs
-        };
-
-        // A sentinel is a work item that doesn't actually do any mark work but
-        // causes some action to be taken when encountered, see GC::HandleLargeMarkItem.
-        // It is stored in lower bits of ptr, so again we only have 2 bits to play with.
-        // Since we need more bits than that, we have multiple sentinel tags.
-        
-        enum GCSentinel1ItemType
-        {
-            kDeadItem=3, // Pop asserts on 0
-            kGCLargeAlloc=1,
-            kGCRoot=2,
-        };
-
-        // More sentinel tags (they use a different pseudo-size value).
-
-        enum GCSentinel2ItemType
-        {
-            kLargeExactlyTracedTail=1,
-            kInertPayload=2,
-        };
-
-        static const uint32_t kSentinel1Size = ~0U - 3; // low two bits
-        static const uint32_t kSentinel2Size = ~0U - 7; //    must be zero
-
-        // FIXME? The initialization is redundant for most locals and for the mark stack we
-        // don't want to have to init all the elements in the array as it makes allocating a mark
-        // stack segment expensive.  I believe we could safely get rid of the two initializing
-        // clauses here.  --lars
-
-        GCWorkItem() : ptr(NULL), _size(0) { }
-
-        GCWorkItem(const void *p, uint32_t s, GCWorkItemType itemType);
-        GCWorkItem(const void *p, GCSentinel1ItemType type);
-        GCWorkItem(const void *p, GCSentinel2ItemType type);
-
-        // Return non-zero if the item represents a GC item (a subtype of GCObject
-        // or GCTraceableBase).
-        uint32_t IsGCItem() const;
-
-        // Return non-zero if the item holds an object that should be scanned
-        // such that any pointers from the object into other objects should be
-        // treated as pointers to the start of the latter objects.
-        uint32_t HasInteriorPtrs() const;
-        
-        // Return true if the ptr is NULL.
-        bool IsNull() const;
-        
-        // Return true if the item is no longer active because it has been cleared.
-        bool IsClear() const;
-        
-        // Return true if the item is a sentinel of type 1.
-        bool IsSentinel1Item() const;
-        
-        // Return true if the item is a sentinel of type 2.
-        bool IsSentinel2Item() const;
-
-        // Retrieve the size field.  Will compute the actual object size if the size
-        // is not present in the mark item.
-        uint32_t GetSize() const;
-        
-        // Retrieve the pointer value.
-        const void* Ptr() const;
-
-        // Compute the end of the object.
-        void* GetEnd() const;
-
-        // The item must be a sentinel of type 1.  Return its subtype.
-        GCSentinel1ItemType GetSentinel1Type() const;
-        
-        // The item must be a sentinel of type 2.  Return its subtype.
-        GCSentinel2ItemType GetSentinel2Type() const;
-        
-        // The item must be a sentinel of either type.  Return the pointer stored in
-        // the sentinel.
-        void *GetSentinelPointer() const;
-
-        // Cancel item by clearing its pointer, setting sentinel to
-        // kDeadItem, and setting size to kSentinelSize.
-        void Clear();
-
-    private:
-        // If a WI is a GC item, `ptr` is the UserPointer; it must not
-        // be the RealPointer nor an interior pointer.  When _size
-        // is kSentinelSize the lower 2 bits of ptr contain the sentinel
-        // type.
-        union {
-            const void *ptr;
-            uintptr_t iptr;
-        };
-
-        // The low bit of _size stores whether this is a GC item.
-        // Always access this through `GetSize` and `IsGCItem`
-        uint32_t _size;
-    };
-
-    // Each GCWorkItem is two words.  There's a one-word overhead in the segment data
-    // structure, and on a 32-bit system there's one word of alignment.  Ergo we have
-    // space for (4k-8)/2w items in a block, where w(ordsize) is 4 or 8.  (FixedMalloc
-    // does not add further overhead in Release builds.)
-#ifdef AVMPLUS_64BIT
-    enum { kMarkStackItems=255 };
-#else
-    enum { kMarkStackItems=511 };
-#endif
-
-    // Invariant: m_topSegment, m_base, m_top, and m_limit are never NULL following construction.
-    // Invariant: m_base <= m_top <= m_limit
-    // Invariant: m_base == m_topSegment->m_items
-    // Invariant: m_limit == m_topSegment->m_items + kMarkStackItems
-
     class GCMarkStack
     {
     public:
+        /**
+         * Stack item classification, as returned by PeekTypetag.
+         *
+         * The "Data" comment summarizes the data carried by the item; see doc block
+         * further down for more detailed information.
+         */
+        enum TypeTag
+        {
+            // Data: Pointer to the beginning of a GC object (GCTraceableBase, GCObject).
+            kGCObject = 0,
+
+            // Data: Pointer to the beginning of a GC object; cursor value.
+            kLargeExactObjectTail = 1,
+            
+            // Data: Pointer into a stack segment; length of the rest of the segment; base pointer.
+            kStackMemory = 2,
+
+            // Data: Pointer into a large object; length of the rest of the object; base pointer.
+            kLargeObjectChunk = 3,
+
+            // Data: Pointer into a split root; length of the rest of the root; base pointer.
+            kLargeRootChunk = 4,
+            
+            // Data: Pointer to root object that's protected against deletion by this item.
+            kRootProtector = 5,
+
+            // Data: Pointer to the large object that's protected against deletion by this item.
+            kLargeObjectProtector = 6
+        };
+
+    public:
 #ifdef MMGC_MARKSTACK_ALLOWANCE
-        GCMarkStack(uint32_t allowance);    // Pass 0 for allowance to request "unlimited"
+        GCMarkStack(int32_t allowance);    // Pass 0 for allowance to request "unlimited", never negative
 #else
         GCMarkStack();
 #endif
         ~GCMarkStack();
 
         /**
-         * Push 'item' onto the stack.
-         *
-         * This should only ever be called from GC::PushWorkItem, because
-         * that function does extra processing and may push various derived
-         * items (for large objects).
-         *
-         * @return true if the item could be pushed, false if the system
-         *         is out of memory and the item was not pushed.
+         * Initialization: Provide the stack with an item to use for clearing dead slots.
+         * 'item' must point to a managed GC object (not a root) that the GC promises to 
+         * keep alive.  It must not be NULL.
          */
-        bool Push(GCWorkItem item);
+        void SetDeadItem(void* item);
 
-        /**
-         * Pop one item off the stack.  Precondition: The stack must not be empty.
-         * @return the popped element.
-         */
-        GCWorkItem Pop();
+        /** Push a GC item; return true if successful, false if OOM */
+        bool Push_GCObject(const void *p);
+        
+        /** Push a the tail of a large exactly traced GC item; return true if successful, false if OOM */
+        bool Push_LargeExactObjectTail(const void *p, size_t cursor);
 
-        /** @return the number of elements on the stack. */
+        /** Push a stack chunk; return true if successful, false if OOM */
+        bool Push_StackMemory(const void *p, uint32_t size, const void* baseptr);
+
+        /** Push a large-object chunk; return true if successful, false if OOM */
+        bool Push_LargeObjectChunk(const void *p, uint32_t size, const void* baseptr);
+
+        /** Push a large-root chunk; return true if successful, false if OOM */
+        bool Push_LargeRootChunk(const void *p, uint32_t size, const void* baseptr);
+        
+        /** Push an item that protects a split large object from being deleted; return true if successful, false if OOM */
+        bool Push_LargeObjectProtector(const void *p);
+        
+        /** Push an item that protects a split large root from being deleted; return true if successful, false if OOM */
+        bool Push_RootProtector(const void *p);
+
+        /** Get the mark stack typetag for the top stack element. */
+        TypeTag PeekTypetag();
+        
+        /** If the top item is a GC item then pop it off the non-empty stack and return it, otherwise return null.  */
+        const void* Pop_GCObject();
+        
+        /** Pop one large exactly traced tail GC item off the non-empty stack and return it.  Type tag must match. */
+        void Pop_LargeExactObjectTail(const void * &p, size_t &cursor);
+        
+        /** Pop one stack chunk item off the non-empty stack and return it.  Type tag must match. */
+        void Pop_StackMemory(const void * &p, uint32_t &size, const void * &baseptr);
+
+        /** Pop one large object chunk item off the non-empty stack and return it.  Type tag must match. */
+        void Pop_LargeObjectChunk(const void * &p, uint32_t &size, const void * &baseptr);
+
+        /** Pop one large root chunk item off the non-empty stack and return it.  Type tag must match. */
+        void Pop_LargeRootChunk(const void * &p, uint32_t &size, const void * &baseptr);
+        
+        /** Pop one large object protector item off the non-empty stack and return it.  Type tag must match. */
+        void Pop_LargeObjectProtector(const void * &p);
+
+        /** Pop one root protector item off the non-empty stack and return it.  Type tag must match. */
+        void Pop_RootProtector(const void * &p);
+
+        /** Return the number of elements on the stack. */
         uint32_t Count();
 
-        /** @return true if the stack is empty */
+        /** Return true iff the stack is empty. */
         bool IsEmpty();
 
-        /** Pop all elements off the stack, discard the cached extra segment. */
+        /** Pop all elements off the stack and discard any cached memory. */
         void Clear();
 
-        /** @return the number of elements in a segment */
-        uint32_t ElementsPerSegment();
-
-        /** @return the number of entirely full segments */
-        uint32_t EntirelyFullSegments();
+        /** Return an "index" denoting the item currently on the mark stack top. */
+        uintptr_t Top();
 
         /**
-         * Move one entirely full segment from 'other' and insert it into our segment list.
-         * @return true if the transfer was successful, false if an out-of-memory condition
-         *         prevented reestablishing invariants in 'other' following the transfer.
-         *         (In the latter case the stacks remain unchanged.)
+         * Clear the item at the given "index".  The item at that index must not have been
+         * popped since the index was obtained.
          */
-        bool TransferOneFullSegmentFrom(GCMarkStack& other);
+        void ClearItemAt(uintptr_t index);
+
+        /**
+         * The item at "index" must be a RootProtector for "rootptr".  Clear the item, and search
+         * the mark stack upward for any LargeRootChunk item that belongs to the same root, and if
+         * it's found then clear that too.  The item at index must not have been popped since
+         * index was obtained.
+         */
+        void ClearRootProtectorAndChunkAbove(uintptr_t index, const void* rootptr);
+
+        /**
+         * @return the number of inactive mark stack segments (obscure, but useful for moving work 
+         * from the barrier stack to the mark stack).
+         */
+        uint32_t InactiveSegments();
+
+        /**
+         * Move one inactive segment from "other" and insert it into our segment list.  The stack
+         * "other" must not have any protector items or split items; "other" will normally be
+         * the barrier stack.  OOM conditions are ignored, but at the end both stacks are in a
+         * consistent state.
+         */
+        void TransferOneInactiveSegmentFrom(GCMarkStack& other);
+
+        /**
+         * Move everything from "other" and insert into this stack.    The stack "other" must not
+         * have any protector items or split items; "other" will normally be the barrier stack.
+         * Return true if the transfer was successful, false if an out-of-memory condition
+         * prevented reestablishing invariants in "other" following the transfer.  (In the latter
+         * case the stacks may have changed, but they will be consistent.)
+         */
+        bool TransferEverythingFrom(GCMarkStack& other);
 
 #ifdef MMGC_MARKSTACK_DEPTH
-        /** @return the number of elements on the stack when its depth was the greatest */
+        /** Return the number of elements on the stack when its depth was the greatest. */
         uint32_t MaxCount();
 #endif
+    private:
+        // No implementation of copy constructors and assignment operators
 
-        /**
-         * Get a pointer to the top of the stack.
-         * @return top of stack
-         */
-        GCWorkItem *Peek();
-
-        /** Retrieve the item above an existing stack item. If the
-         * item passed is the top of the stack NULL is returned.  The
-         * item must be in the stack.
-         * @return item above argument
-         */
-        GCWorkItem *GetItemAbove(GCWorkItem *item);
-
-    protected:
-        // no implementation of these
         GCMarkStack(const GCMarkStack& other);
         GCMarkStack& operator=(const GCMarkStack& other);
-
+        
     private:
+        /**
+         * Mark stack representation:
+         *
+         * The stack is a sequence of machine words; one or more words are grouped to
+         * form a single item.  Every word is tagged in the low two bits.  The low
+         * bit is the "first-word" bit: if *clear* the word is the first word of the item,
+         * and if *set* the word is a subsequent word of the item.  The high bit is the
+         * "end" bit: if *clear* this is the last word of the item, and if *set* then it is not.
+         *
+         * The tag 00 is reserved for single-word "GCObject" items that hold pointers to 
+         * managed objects; every other item uses more than one word.  For multi-word items
+         * the payload of the first word is always a tag (shifted left two bits), from the
+         * set of typetags above.  "size" fields are always a multiple of four bytes; pointers
+         * are always at least 4-byte aligned.
+         *
+         * Managed object
+         *    object pointer               | 00
+         *
+         * Large exact object tail:
+         *    (kLargeExactObjectTail << 2) | 10
+         *    object pointer               | 11
+         *    (cursor << 2)                | 01
+         *
+         * Stack memory:
+         *    (kStackMemory << 2)          | 10
+         *    pointer                      | 11
+         *    size                         | 11
+         *    basepointer                  | 01
+         *
+         * Large object chunk:
+         *    (kLargeObjectChunk << 2)     | 10
+         *    pointer                      | 11
+         *    size                         | 11
+         *    basepointer                  | 01
+         *
+         * Large root chunk:
+         *    (kLargeRootChunk << 2)       | 10
+         *    pointer                      | 11
+         *    size                         | 11
+         *    basepointer                  | 01
+         *
+         * Root protector:
+         *    (kRootProtector << 2)        | 10
+         *    pointer                      | 01
+         *
+         * Large object protector:
+         *    (kLargeObjectProtector << 2) | 10
+         *    pointer                      | 01
+         *
+         * When a multi-word item is placed on the stack it will never be split across
+         * two stack chunks.
+         */
 
-        struct GCStackSegment
+        static const uintptr_t kFirstWord = 2;      // Tag for the first word of a multi-word item
+        static const uintptr_t kMiddleWord = 3;     // Tag for the middle word of a multi-word item
+        static const uintptr_t kLastWord = 1;       // Tag for the last word of a multi-word item
+
+        // A "stack segment" is a single heap block (4K bytes) that has two parts: the header
+        // and the payload.  The payload starts where the header ends, and ends at the end of
+        // the block.
+        //
+        // In DEBUG builds there are sentinels before and after the payload to catch overwrites
+        // and other errors in the stack logic.
+
+        struct StackSegment
         {
-            GCWorkItem      m_items[kMarkStackItems];
-            GCStackSegment* m_prev;
-        };
+            StackSegment();
 
-        GCWorkItem*         m_base;         // first entry in m_topSegment
-        GCWorkItem*         m_top;          // first free entry in m_topSegment
-        GCWorkItem*         m_limit;        // first entry following m_topSegment
-        GCStackSegment*     m_topSegment;   // current stack segment, older segments linked through 'prev'
-        uint32_t            m_hiddenCount;  // number of elements in those older segments
-        GCStackSegment*     m_extraSegment; // single-element cache used to avoid hysteresis
+            uintptr_t*      m_savedTop;  // Saved m_top value when this segment is not topmost
+            StackSegment* m_prev;        // The segment below this one
+#ifdef DEBUG
+            uintptr_t       sentinel1;
+            uintptr_t       sentinel2;
+#endif
+        };
+        
+        // Useful invariants on stack state:
+        //
+        //   m_topSegment, m_base, m_top, and m_limit are never NULL following construction
+        //   m_base <= m_top <= m_limit
+        //   m_base == items(m_topSegment)
+        //   m_limit == limit(m_topSegment)
+        
+        uintptr_t*          m_base;           // First entry in m_topSegment
+        uintptr_t*          m_top;            // First free entry in m_topSegment
+        uintptr_t*          m_limit;          // First entry following m_topSegment
+        StackSegment*       m_topSegment;     // Current stack segment, older segments linked through 'prev'
+        uint32_t            m_hiddenCount;    // Number of elements in those older segments
+        uint32_t            m_hiddenSegments; // Number of those older segments
+        StackSegment*       m_extraSegment;   // Aingle-element cache to control costs of straddling a segment boundary
+        uintptr_t           m_deadItem;       // A managed object that is used to clear out dead slots
 #ifdef MMGC_MARKSTACK_ALLOWANCE
-        uint32_t            m_allowance;    // allowance for the number of elements
+        int32_t             m_allowance;      // Allowance for the number of elements
 #endif
 #ifdef MMGC_MARKSTACK_DEPTH
-        uint32_t            m_maxDepth;     // max depth of mark stack
+        uint32_t            m_maxDepth;       // Max depth of mark stack
 #endif
 
-        /**
-         * The current segment must be NULL or full (top == limit).  Push a new segment onto the
-         * stack, and update all instance vars.
-         * @param mustSucceed  If true, the allocation must not fail.  This is true during initialization.
-         *                     Failure in this case is signaled through the normal OOM mechanism.
-         * @return true if the segment could be pushed or false if not (if it could not be allocated).
-         */
+        // Allocate n consecutive words on the stack and return a pointer to the one at the 
+        // highest address.  Return NULL if space could not be obtained.
+        uintptr_t* allocSpace(size_t nwords);
+
+        // Free n consecutive words allocated through allocSpace.
+        void freeSpace(size_t nwords);
+
+        // Return the address of the first payload word in the segment.
+        static uintptr_t* items(StackSegment* seg);
+
+        // Return the address above the last payload word in the segment.  In DEBUG builds there
+        // are two sentinel words starting at this address.
+        static uintptr_t* limit(StackSegment* seg);
+
+        // Push a new segment onto the stack, and update all instance vars.  If "mustSucceed" is true
+        // then the allocation must not fail - used during initialization only.  If it fails, the
+        // normal OOM mechanism will kick in.  Return true if the segment could be pushed or false 
+        // if it could not be allocated.
         bool PushSegment(bool mustSucceed=false);
 
         // The current segment is discarded and the previous segment, if any, reinstated.
         // Update all instance vars.
         void PopSegment();
 
+        // The current segment is discarded if there is a previous segment.
+        void PopSegment_UnlessLast();
+
+        // Populate m_extraSegment if NULL, return true if successful, false otherwise.  If
+        // "mustSucceed" is true then failure to allocate will trigger normal OOM handling.
+        bool PopulateExtraSegment(bool mustSucceed);
+
         // Allocate a segment, return NULL if it could not be allocated.  If mustSucceed is true
-        // then abort the program if the allocation fails.
+        // then failure to allocate will trigger normal OOM handling.
         void* AllocStackSegment(bool mustSucceed);
 
         // Free a segment allocated through AllocStackSegment.
         void FreeStackSegment(void* p);
+
+        // cdr down a segment list and return the last one.
+        StackSegment* FindLastSegment(StackSegment* first);
+
+        // Given a pointer to an item on the stack, return the one above it (the younger one),
+        // or NULL if the item is the top item.
+        uintptr_t* GetNextItemAbove(uintptr_t* item);
+
+#ifdef MMGC_MARKSTACK_ALLOWANCE
+        // Make sure the stack can grow by nseg segments (relative to its allowance); return true
+        // if so and false otherwise.  May free the extra segment if it's present, and will take
+        // into account an empty segment that will be popped if segments are inserted underneath
+        // it.
+        bool MakeSpaceForSegments(int32_t nseg);
+#endif
 
 #ifdef _DEBUG
         // Check as many invariants as possible
