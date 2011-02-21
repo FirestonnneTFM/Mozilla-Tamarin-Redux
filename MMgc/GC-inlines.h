@@ -59,21 +59,6 @@ namespace MMgc
         FixedMalloc::GetFixedMalloc()->OutOfLineFree(object);
     }
 
-    REALLY_INLINE void GCRoot::ClearMarkStackSentinelPointer()
-    {
-        markStackSentinel = NULL;
-    }
-
-    REALLY_INLINE GCWorkItem *GCRoot::GetMarkStackSentinelPointer()
-    {
-        return markStackSentinel;
-    }
-
-    REALLY_INLINE GCWorkItem GCRoot::GetWorkItem() const
-    {
-        return GCWorkItem(object, (uint32_t)size, GCWorkItem::kNonGCObject);
-    }
-
     // GC
 
     REALLY_INLINE void *GC::GetGCContextVariable(int var) const

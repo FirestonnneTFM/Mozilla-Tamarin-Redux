@@ -43,8 +43,6 @@
 
 namespace MMgc
 {
-    class GCWorkItem;
-
     /**
      * The Zero Count Table used by deferred reference counting.
      *

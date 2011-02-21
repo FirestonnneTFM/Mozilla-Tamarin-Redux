@@ -52,8 +52,8 @@ namespace MMgc
     private:
 
         // Additional per-object flags for large objects.  These are stored in flags[1].
-        // Note that GC::MarkItem knows about flags[1], but otherwise the knowledge is
-        // confined to GCLargeAlloc code.
+        // Note that the marker (GC::MarkItem_*) knows about flags[1], but otherwise the 
+        // knowledge is confined to GCLargeAlloc code.
 
         enum {
             kProtected        = 0x01    // Object is protected from Free, see comments around GC::MarkItem

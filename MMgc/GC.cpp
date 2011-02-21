@@ -276,6 +276,8 @@ namespace MMgc
         MMGC_GCENTER(this);
         emptyWeakRef = new (this) GCWeakRef(NULL);
 
+        m_incrementalWork.SetDeadItem(emptyWeakRef);    // The empty weak ref is as good an object as any for this
+
 #ifdef MMGC_CONSERVATIVE_PROFILER
         if (demos == NULL && heap->profiler != NULL)
             demos = new ObjectPopulationProfiler(this, "Conservative scanning volume incurred by allocation site");
@@ -418,63 +420,93 @@ namespace MMgc
         policy.fullCollectionComplete();
     }
 
-#ifdef RECURSIVE_MARK
-    REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
+    REALLY_INLINE void GC::Push_StackMemory(const void* p, uint32_t size, const void* baseptr)
     {
-        GCAssert(item.ptr != NULL);
-        markerActive++;
-        MarkItem(item);
-        markerActive--;
-    }
+        GCAssert(p != NULL);
+        GCAssert(!IsPointerToGCPage(GetRealPointer(p)) || !IsPointerToGCObject(GetRealPointer(p)));
 
-    REALLY_INLINE void GC::PushWorkItem_Unsafe(GCWorkItem item)
-    {
-        PushWorkItem(item);
+        if (!m_incrementalWork.Push_StackMemory(p, size, baseptr))
+            SignalMarkStackOverflow_NonGCObject();
     }
-#else
-    REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
-    {
-#ifdef _DEBUG
-        WorkItemInvariants(item);
-#endif
-        PushWorkItem_Unsafe(item);
-    }
-
-    REALLY_INLINE void GC::PushWorkItem_Unsafe(GCWorkItem item)
-    {
-        if (!m_incrementalWork.Push(item))
-            SignalMarkStackOverflow(item);
-    }
-#endif
-
-#ifdef _DEBUG
-    void GC::WorkItemInvariants(GCWorkItem item)
-    {
-        GCAssert(!item.IsNull());
-        if (item.IsGCItem())
-        {
-            GCAssert(IsPointerToGCObject(GetRealPointer(item.Ptr())));
-            GCAssert(ContainsPointers(item.Ptr()));
-            GCAssert(!IsRCObject(item.Ptr()) || ((RCObject*)item.Ptr())->composite != 0);
-            GCAssert((GetGCBits(GetRealPointer(item.Ptr())) & (kQueued|kMark)) == kQueued);
-        }
-        else
-        {
-            // Some roots are on GC pages - a little unclear why, as of yet.  So for
-            // now just require non-GCItems not to point to GC objects.
-            GCAssert(item.GetSize() != GCWorkItem::kSentinel1Size && item.GetSize() != GCWorkItem::kSentinel2Size);
-            GCAssert(!IsPointerToGCPage(GetRealPointer(item.Ptr())) || !IsPointerToGCObject(GetRealPointer(item.Ptr())));
-        }
-    }
-#endif
     
-    void GC::PushWorkItem_MayFail(GCWorkItem &item)
+    REALLY_INLINE bool GC::Push_RootProtector(const void* p)
     {
-        if (item.Ptr())
-            PushWorkItem(item);
+        GCAssert(p != NULL);
+        GCAssert(!IsPointerToGCPage(GetRealPointer(p)) || !IsPointerToGCObject(GetRealPointer(p)));
+
+        if (!m_incrementalWork.Push_RootProtector(p)) {
+            SignalMarkStackOverflow_NonGCObject();
+            return false;
+        }
+        return true;
+    }
+    
+    REALLY_INLINE void GC::Push_LargeObjectProtector(const void* p)
+    {
+        GCAssert(p != NULL);
+        GCAssert(IsPointerToGCPage(GetRealPointer(p)) && IsPointerToGCObject(GetRealPointer(p)));
+
+        if (!m_incrementalWork.Push_LargeObjectProtector(p))
+            SignalMarkStackOverflow_NonGCObject();
+    }
+    
+    REALLY_INLINE void GC::Push_LargeExactObjectTail(const void* p, size_t cursor)
+    {
+        GCAssert(p != NULL);
+        GCAssert(cursor != 0);
+        GCAssert(IsPointerToGCPage(GetRealPointer(p)) && IsPointerToGCObject(GetRealPointer(p)));
+
+        if (!m_incrementalWork.Push_LargeExactObjectTail(p, cursor))
+            SignalMarkStackOverflow_NonGCObject();
     }
 
-#ifdef _DEBUG
+    REALLY_INLINE void GC::Push_LargeObjectChunk(const void *p, uint32_t size, const void* baseptr)
+    {
+        GCAssert(p != NULL);
+        GCAssert(IsPointerToGCPage(p));
+        GCAssert(IsPointerToGCPage((char*)p + size - 1));
+
+        if (!m_incrementalWork.Push_LargeObjectChunk(p, size, baseptr))
+            SignalMarkStackOverflow_NonGCObject();
+    }
+
+    REALLY_INLINE void GC::Push_LargeRootChunk(const void *p, uint32_t size, const void* baseptr)
+    {
+        GCAssert(p != NULL);
+        GCAssert(!IsPointerToGCPage(p));
+        GCAssert(!IsPointerToGCPage((char*)p + size - 1));
+        
+        if (!m_incrementalWork.Push_LargeRootChunk(p, size, baseptr))
+            SignalMarkStackOverflow_NonGCObject();
+    }
+    
+    REALLY_INLINE void GC::Push_GCObject(const void *p)
+    {
+#ifdef DEBUG
+        WorkItemInvariants_GCObject(p);
+#endif
+        if (!m_incrementalWork.Push_GCObject(p))
+            SignalMarkStackOverflow_GCObject(p);
+    }
+
+    void GC::Push_GCObject_MayFail(const void *p)
+    {
+#ifdef DEBUG
+        WorkItemInvariants_GCObject(p);
+#endif
+        m_incrementalWork.Push_GCObject(p);
+    }
+
+#ifdef DEBUG
+    void GC::WorkItemInvariants_GCObject(const void *p)
+    {
+        GCAssert(p != NULL);
+        GCAssert(IsPointerToGCObject(GetRealPointer(p)));
+        GCAssert(ContainsPointers(p));
+        GCAssert(!IsRCObject(p) || ((RCObject*)p)->composite != 0);
+        GCAssert((GetGCBits(GetRealPointer(p)) & (kQueued|kMark)) == kQueued);
+    }
+
     bool GC::Trace(const void *stackStart/*=NULL*/, uint32_t stackSize/*=0*/)
     {
         SAMPLE_FRAME("[mark]", core());
@@ -497,8 +529,7 @@ namespace MMgc
             // grab the stack, push it, and
             MarkQueueAndStack();
         } else {
-            GCWorkItem item(stackStart, stackSize, GCWorkItem::kNonGCObject);
-            PushWorkItem(item);
+            Push_StackMemory(stackStart, stackSize, stackStart);
             Mark();
         }
 
@@ -1214,10 +1245,26 @@ namespace MMgc
     {
         markerActive++;
         while(m_incrementalWork.Count()) {
-            GCWorkItem item = m_incrementalWork.Pop();
-            MarkItem(item);
+            const void* ptr;
+            if ((ptr = m_incrementalWork.Pop_GCObject()) != NULL)
+                MarkItem_GCObject(ptr);
+            else
+                MarkTopItem_NonGCObject();
         }
         markerActive--;
+    }
+
+    void GC::Mark(uint32_t count)
+    {
+        // Caller's responsibility to make the marker active!
+        GCAssert(markerActive > 0);
+        for(unsigned int i=0; i<count && !m_incrementalWork.IsEmpty() ; i++) {
+            const void* ptr;
+            if ((ptr = m_incrementalWork.Pop_GCObject()) != NULL)
+                MarkItem_GCObject(ptr);
+            else
+                MarkTopItem_NonGCObject();
+        }
     }
 
     // This must not trigger OOM handling.  It is /possible/ to restructure the
@@ -1282,8 +1329,7 @@ namespace MMgc
         // Push the stack onto the mark stack and then mark synchronously until
         // everything reachable from the stack has been marked.
 
-        GCWorkItem item(stackPointer, uint32_t(stackBase - (char*)stackPointer), GCWorkItem::kStackMemory);
-        gc->PushWorkItem(item);
+        gc->Push_StackMemory(stackPointer, uint32_t(stackBase - (char*)stackPointer), stackPointer);
         gc->Mark();
     }
 
@@ -1343,24 +1389,31 @@ namespace MMgc
         this->size = _size;
     }
 
-    void GCRoot::SetMarkStackSentinelPointer(GCWorkItem *wi)
+    void GCRoot::GetWorkItem(const void*& _object, uint32_t& _size) const
     {
-        if(markStackSentinel != NULL) {
-            // There is already a sentinel for this item and above
-            // will be a fragment of the root, clear them both since
-            // we need to rescan the whole thing.
-            GCAssert(markStackSentinel->GetSentinelPointer() == this);
-            GCWorkItem *markStackItem = gc->m_incrementalWork.GetItemAbove(markStackSentinel);
+        _object = object;
+        _size = (uint32_t)size;
+    }
+    
+    uintptr_t GCRoot::GetMarkStackSentinelPointer()
+    {
+        return markStackSentinel;
+    }
+    
+    void GCRoot::SetMarkStackSentinelPointer(uintptr_t sentinel)
+    {
+        // If the sentinel is not zero then there is a protector item on the
+        // stack, and above it (usually right above it) may be a fragment of
+        // the root.  Clear them both since we need to rescan the whole thing.
+        if (markStackSentinel != 0)
+            gc->m_incrementalWork.ClearRootProtectorAndChunkAbove(markStackSentinel, this);
 
-            // markStackItem can be NULL if the sentinel was on the top of the stack.
-            // Its also possible we popped the last fragment and haven't popped the sentinel yet,
-            // check that the markStackItem is for this root before clearing.
-            if(markStackItem && markStackItem->GetEnd() == End()) {
-                markStackItem->Clear();
-            }
-            markStackSentinel->Clear();
-        }
-        markStackSentinel = wi;
+        markStackSentinel = sentinel;
+    }
+
+    void GCRoot::ClearMarkStackSentinelPointer()
+    {
+        markStackSentinel = NULL;
     }
 
     void GCRoot::Destroy()
@@ -1879,9 +1932,23 @@ namespace MMgc
             IncrementalMark();
     }
 
-    // The mark stack overflow logic depends on this calling MarkItem directly
-    // for each of the roots.
+    // This is the default value for the 'interiorPtrs' flag for non-stack memory.
+    // For stack memory the value is always 'true'.
 
+#ifdef MMGC_INTERIOR_PTRS
+    #define MMGC_INTERIOR_PTRS_FLAG true
+#else
+    #define MMGC_INTERIOR_PTRS_FLAG false
+#endif
+
+    // Note: The mark stack overflow logic depends on this calling MarkItem_* directly
+    // for each of the roots.
+    //
+    // Note: Root splitting must be supported to support "stacks" (AS1 stack, alloca).
+    // See https://bugzilla.mozilla.org/show_bug.cgi?id=634651 for more information.
+    // If the API proposed there can land we can almost certainly stop splitting
+    // objects here.
+    
     void GC::MarkAllRoots(bool deep)
     {
         // Need to do this while holding the root lock so we don't end
@@ -1892,27 +1959,24 @@ namespace MMgc
         markerActive++;
         GCRoot *r = m_roots;
         while(r) {
-            GCWorkItem item = r->GetWorkItem();
-            if(item.Ptr()) {
+            const void* object;
+            uint32_t size;
+            r->GetWorkItem(object, size);
+            if(object != NULL) {
+                GCAssert(!IsPointerToGCPage(object));
+                GCAssert(!IsPointerToGCPage((char*)object + size - 1));
                 // If this root will be split push a sentinel item and store
                 // a pointer to it in the root.   This will allow us to clean
                 // the stack if the root is deleted.  See GCRoot::Destroy and
-                // GC::HandleLargeMarkItem
-                if(item.GetSize() > kMarkItemSplitThreshold) {
-                    // Push a sentinel item
-                    PushWorkItem_Unsafe(GCWorkItem(r, GCWorkItem::kGCRoot));
-
-                    // Test if the push succeeded; register the location of the sentinel
-                    // item on the mark stack with the root if it did succeed. 
-                    GCWorkItem *item = m_incrementalWork.Peek();
-                    if(item->GetSentinelPointer() == r)
-                        r->SetMarkStackSentinelPointer(item);
+                // GC::HandleLargeItem
+                if(size > kMarkItemSplitThreshold) {
+                    // Push a sentinel item for protection, and if it succeeded then
+                    // register the location of the sentinel item on the mark stack
+                    // with the root.
+                    if (Push_RootProtector(r))
+                        r->SetMarkStackSentinelPointer(m_incrementalWork.Top());
                 }
-#ifdef MMGC_CONSERVATIVE_PROFILER
-                MarkItem(item, true);
-#else
-                MarkItem(item);
-#endif
+                MarkItem_ConservativeOrNonGCObject(object, size, GCMarkStack::kLargeRootChunk, r, MMGC_INTERIOR_PTRS_FLAG);
                 if (deep)
                     Mark();
             }
@@ -1925,13 +1989,13 @@ namespace MMgc
     //
     // Mark stack overflow occurs when an item cannot be pushed onto the mark stack because
     // the top mark stack segment is full and a new segment can't be allocated.  In
-    // practice, any call to GC::PushWorkItem (or its callers, such as GC::Mark, GC::MarkItem,
-    // GC::MarkAllRoots, GC::MarkQueueAndStack, and not least the write barrier GC::TrapWrite)
-    // can cause a mark stack overflow.
+    // practice, any call to the GC::Push_* methods (or their callers, such as GC::Mark,
+    // GC::MarkItem_*, GC::MarkAllRoots, GC::MarkQueueAndStack, and not least the write
+    // barrier GC::TrapWrite) can cause a mark stack overflow.
     //
     // Since garbage collection cannot be allowed to abort the program as a result of
     // the allocation failure, but must run to completion, overflow is handled specially.
-    // The mark stack Push method returns an error code, which is detected in GC::PushWorkItem,
+    // The mark stack Push method returns an error code, which is detected in GC::Push_*,
     // which in turn calls GC::SignalMarkStackOverflow to handle the overflow.  Overflow
     // is handled by discarding some elements and setting the global m_markStackOverflow flag.
     //
@@ -1963,9 +2027,9 @@ namespace MMgc
 
     void GC::HandleMarkStackOverflow()
     {
-        // Crucial for completion that we do not push marked items.  MarkItem handles this
-        // for us: it pushes referenced objects that are not marked.  (MarkAllRoots calls
-        // MarkItem on each root.)
+        // Crucial for completion that we do not push marked items.  MarkItem_* handles this
+        // for us: thye push referenced objects that are not marked.  (MarkAllRoots calls
+        // MarkItem_* on each root.)
 
         MarkAllRoots(true);
 
@@ -1980,22 +2044,19 @@ namespace MMgc
         for(int i=0; i < kNumSizeClasses; i++) {
             GCAllocIterator iter1(containsPointersRCAllocs[i]);
             while (iter1.GetNextMarkedObject(ptr)) {
-                GCWorkItem item(ptr, 0, GCWorkItem::kGCObject);
-                MarkItem(item);
+                MarkItem_GCObject(ptr);
                 Mark();
             }
             GCAllocIterator iter2(containsPointersAllocs[i]);
             while (iter2.GetNextMarkedObject(ptr)) {
-                GCWorkItem item(ptr, 0, GCWorkItem::kGCObject);
-                MarkItem(item);
+                MarkItem_GCObject(ptr);
                 Mark();
             }
         }
 
         GCLargeAllocIterator iter3(largeAlloc);
         while (iter3.GetNextMarkedObject(ptr)) {
-            GCWorkItem item(ptr, 0, GCWorkItem::kGCObject);
-            MarkItem(item);
+            MarkItem_GCObject(ptr);
             Mark();
         }
 
@@ -2014,15 +2075,19 @@ namespace MMgc
     // enter the stack overflow recovery code (in HandleMarkStackOverflow, above).  Ergo
     // we drop 'item' on the floor.
 
-    void GC::SignalMarkStackOverflow(GCWorkItem& item)
+    void GC::SignalMarkStackOverflow_GCObject(const void* p)
     {
-        GCAssert(!item.IsNull());
-        if (item.IsGCItem())
-            ClearQueued(item.Ptr());
+        GCAssert(p != NULL);
+        ClearQueued(p);
         m_markStackOverflow = true;
     }
 
-    // HandleLargeMarkItem handles work items that are too big to be
+    void GC::SignalMarkStackOverflow_NonGCObject()
+    {
+        m_markStackOverflow = true;
+    }
+
+    // HandleLargeItem handles work items that are too big to be
     // marked atomically.  It does so by splitting the work into chunks;
     // the incremental marker then gets an opportunity to stop marking 
     // after processing each chunk.
@@ -2100,88 +2165,43 @@ namespace MMgc
     // allocation has reached a limit the final phase of GC is run which marks
     // whatever remains to be marked nonincrementally.
 
-    bool GC::HandleLargeMarkItem(GCWorkItem &wi, size_t& size)
+    void GC::SplitItem_ConservativeOrNonGCObject(const void *userptr, uint32_t& size, GCMarkStack::TypeTag type, const void* baseptr)
     {
-        size_t cursor = 0;
-
-        if (wi.IsSentinel1Item())
+        if (type == GCMarkStack::kGCObject)
         {
-            if(wi.GetSentinel1Type() == GCWorkItem::kGCLargeAlloc)
-            {
-                // Unprotect an item that was protected earlier, see comment block above.
-                GCLargeAlloc::UnprotectAgainstFree(wi.GetSentinelPointer());
-            }
-
-            if(wi.GetSentinel1Type() == GCWorkItem::kGCRoot)
-            {
-                // The GCRoot is no longer on the stack, clear the pointers into the stack.
-                GCRoot *sentinelRoot = (GCRoot*)wi.GetSentinelPointer();
-                sentinelRoot->ClearMarkStackSentinelPointer();
-            }
-            return true;
-        }
-
-        if (wi.IsGCItem())
-        {
-            const void *userptr = wi.Ptr();
-            
             // An ounce of prevention...
             GCAssert(ContainsPointers(userptr));
 
-            // Exactly traced GCItems should have been handled inside MarkItem
+            // Exactly traced GCItems should have been handled inside MarkItem_GCObject
             GCAssert(!(GetGCBits(GetRealPointer(userptr)) & kVirtualGCTrace));
 
             // Need to protect it against 'Free': push a magic item representing this object
             // that will prevent this split item from being freed, see comment block above.
 
             GCLargeAlloc::ProtectAgainstFree(userptr);
-            PushWorkItem_Unsafe(GCWorkItem(userptr, GCWorkItem::kGCLargeAlloc));
-        }
-        else if (wi.IsSentinel2Item())
-        {
-            if (wi.GetSentinel2Type() == GCWorkItem::kLargeExactlyTracedTail)
-            {
-                // The cursor is in the second item.
-                GCWorkItem payload = m_incrementalWork.Pop();
-                
-                GCAssert(payload.GetSentinel2Type() == GCWorkItem::kInertPayload);
-                
-                // Set up for some more tracing.
-                GCTraceableBase* exactlyTraced = (GCTraceableBase*)wi.GetSentinelPointer();
-                cursor = (size_t)payload.GetSentinelPointer();
-
-                // Save the new state.
-                PushWorkItem_Unsafe(GCWorkItem((void*)(cursor + 4), GCWorkItem::kInertPayload));
-                GCWorkItem* e1 = m_incrementalWork.Peek();
-
-                PushWorkItem_Unsafe(GCWorkItem(wi.GetSentinelPointer(), GCWorkItem::kLargeExactlyTracedTail));
-                GCWorkItem* e2 = m_incrementalWork.Peek();
-
-                if (!exactlyTraced->gcTrace(this, cursor>>2))
-                {
-                    // No more mark work, so clean up the mark state.
-                    e1->Clear();        // Cursor
-                    e2->Clear();        // Object
-                }
-                
-                return true;    // Do not fall through to conservative tracing in MarkItem
-            }
-            else if (wi.GetSentinel2Type() == GCWorkItem::kInertPayload) {
-                // Discard it - we're seeing this because of some arbitrary popping during
-                // overflow handling.
-                return true;
-            }
-            else {
-                GCAssert(!"Unexpected sentinel value.");
-            }
+            Push_LargeObjectProtector(userptr);
         }
 
-        PushWorkItem(GCWorkItem((void*)((uintptr_t)wi.Ptr() + kLargestAlloc),
-                                uint32_t(size - kLargestAlloc),
-                                wi.HasInteriorPtrs() ? GCWorkItem::kStackMemory : GCWorkItem::kNonGCObject));
-        
+        const void *chunkptr = (const void*)((uintptr_t)userptr + kLargestAlloc);
+        uint32_t chunksize = uint32_t(size - kLargestAlloc);
+        switch (type) {
+            case GCMarkStack::kStackMemory:
+                Push_StackMemory(chunkptr, chunksize, baseptr);
+                break;
+
+            case GCMarkStack::kLargeRootChunk:
+                Push_LargeRootChunk(chunkptr, chunksize, baseptr);
+                break;
+
+            case GCMarkStack::kGCObject:
+            case GCMarkStack::kLargeObjectChunk:
+                Push_LargeObjectChunk(chunkptr, chunksize, baseptr);
+                break;
+
+            default:
+                GCAssert(!"Unexpected item passed to SplitItem_ConservativeOrNonGCObject");
+        }
         size = kMarkItemSplitThreshold;
-        return false;
     }
 
     // The mark has been set on the object, and the mark work for the entire object
@@ -2208,15 +2228,12 @@ namespace MMgc
     // growth.  It's OK to push them on top of the items already pushed; doing so
     // means the mark stack may be up to twice as large as it would have been had the
     // state been pushed below, but that's it.  It is possible to push the state underneath,
-    // but (a) it adds some code on the fast path of MarkItem (not too bad) and (b) it
+    // but (a) it adds some code on the fast path of MarkItem_GCObject and (b) it
     // introduces some complexity in the code below, as the stack has to be rearranged to
     // allow elements to be inserted like that.
     
-    void GC::HandleContinuedMarkingOfExactGCItem(GCWorkItem &wi)
+    void GC::SplitExactGCObject(const void *userptr)
     {
-        const void *userptr = wi.Ptr();
-
-        GCAssert(wi.IsGCItem());
         GCAssert((GetGCBits(GetRealPointer(userptr)) & (kVirtualGCTrace|kMark)) == (kVirtualGCTrace|kMark));
 
         // If it's not a large object then mark it until we're done.
@@ -2235,7 +2252,7 @@ namespace MMgc
         // that will prevent this split item from being freed, see comment block above.
 
         GCLargeAlloc::ProtectAgainstFree(userptr);
-        PushWorkItem_Unsafe(GCWorkItem(userptr, GCWorkItem::kGCLargeAlloc));
+        Push_LargeObjectProtector(userptr);
 
         // Create a mark state for the large, exactly traced object.
         //
@@ -2249,9 +2266,71 @@ namespace MMgc
         // the bottom item is inert and is just discarded if it appears by itself,
         // which is possible in the presence of mark stack overflows.
         
-        // Save the state: cursor underneath and object on top.
-        PushWorkItem_Unsafe(GCWorkItem((void*)(1 << 2), GCWorkItem::kInertPayload));
-        PushWorkItem_Unsafe(GCWorkItem(userptr, GCWorkItem::kLargeExactlyTracedTail));
+        // Save the state: initial cursor.
+        Push_LargeExactObjectTail(userptr, 1);
+    }
+
+    // Pop an item and handle it; GC objects should be handled in the caller.
+    
+    void GC::MarkTopItem_NonGCObject()
+    {
+        switch (m_incrementalWork.PeekTypetag()) {
+            default:
+                GCAssert(!"Unhandled mark item tag");
+                break;
+                
+            case GCMarkStack::kLargeExactObjectTail: {
+                const void* ptr;
+                size_t cursor;
+                m_incrementalWork.Pop_LargeExactObjectTail(ptr, cursor);
+                MarkItem_ExactObjectTail(ptr, cursor);
+                break;
+            }
+
+            case GCMarkStack::kStackMemory: {
+                const void* ptr;
+                const void* baseptr;
+                uint32_t size;
+                m_incrementalWork.Pop_StackMemory(ptr, size, baseptr);
+                MarkItem_ConservativeOrNonGCObject(ptr, size, GCMarkStack::kStackMemory, baseptr, true);
+                break;
+            }
+
+            case GCMarkStack::kLargeObjectChunk: {
+                const void* ptr;
+                const void* baseptr;
+                uint32_t size;
+                m_incrementalWork.Pop_LargeObjectChunk(ptr, size, baseptr);
+                MarkItem_ConservativeOrNonGCObject(ptr, size, GCMarkStack::kLargeObjectChunk, baseptr, MMGC_INTERIOR_PTRS_FLAG);
+                break;
+            }
+                
+            case GCMarkStack::kLargeRootChunk: {
+                const void* ptr;
+                const void* baseptr;
+                uint32_t size;
+                m_incrementalWork.Pop_LargeRootChunk(ptr, size, baseptr);
+                MarkItem_ConservativeOrNonGCObject(ptr, size, GCMarkStack::kLargeRootChunk, baseptr, MMGC_INTERIOR_PTRS_FLAG);
+                break;
+            }
+
+            case GCMarkStack::kRootProtector: {
+                const void* ptr;
+                m_incrementalWork.Pop_RootProtector(ptr);
+                GCRoot *sentinelRoot = (GCRoot*)ptr;
+                // The GCRoot is no longer on the stack, clear the pointers into the stack.
+                sentinelRoot->ClearMarkStackSentinelPointer();
+                break;
+            }
+
+            case GCMarkStack::kLargeObjectProtector: {
+                const void* ptr;
+                m_incrementalWork.Pop_LargeObjectProtector(ptr);
+                // Unprotect an item that was protected earlier, see comment block above.
+                GCLargeAlloc::UnprotectAgainstFree(ptr);
+                break;
+            }
+        }
     }
 
     // This will mark the item whether the item was previously marked or not.
@@ -2263,11 +2342,7 @@ namespace MMgc
     // Large gc-items are recognizable by a header bit designating the object
     // as large, the bit is set in the large-object allocator.
 
-    void GC::MarkItem(GCWorkItem &wi
-#ifdef MMGC_CONSERVATIVE_PROFILER
-                      , bool isRoot
-#endif
-                      )
+    void GC::MarkItem_GCObject(const void *userptr)
     {
         GCAssert(markerActive);
 
@@ -2280,42 +2355,54 @@ namespace MMgc
         // will be marked conservatively and will sometimes show up as false positive 
         // in the profiling of conservatively marked objects.
 
-        size_t size = wi.GetSize();
-        
         // The common case is an exactly traced gc item (and an important subcase is
         // an item that can be traced exactly by a single call to gcTrace).
 
-        // EXACTGC OPTIMIZEME: It's doubtful that it's cost-effective to have the
-        // IsGCItem test on the hot path if we could instead have two mark stacks 
-        // or a split mark stack.  That way the test could be lifted out into the
-        // caller of MarkItem, where we can frequently hoist it out of a loop.
+        uint32_t size = uint32_t(GC::Size(userptr));
+        const void *realptr = GetRealPointer(userptr);
+        GCAssert(GetGC(realptr) == this);
+        GCAssert(IsPointerToGCObject(realptr));
 
-        if (wi.IsGCItem())
+        gcbits_t& bits = GetGCBits(realptr);
+
+        if (bits & kVirtualGCTrace)
         {
-            const void *userptr = wi.Ptr();
-            const void *realptr = GetRealPointer(userptr);
-            GCAssert(GetGC(realptr) == this);
-            GCAssert(IsPointerToGCObject(realptr));
+            // Inlined and merged SetMark, since we have the bits anyway. 
+            bits = (bits & ~kQueued) | kMark;
 
-            gcbits_t& bits = GetGCBits(realptr);
+            if (((GCTraceableBase*)userptr)->gcTrace(this, 0))
+                SplitExactGCObject(userptr);
 
-            if (bits & kVirtualGCTrace)
-            {
-                // Inlined and merged SetMark, since we have the bits anyway. 
-                bits = (bits & ~kQueued) | kMark;
+            // EXACTGC INVESTIGATEME - Not clear if this could be done before marking.
+            // EXACTGC INVESTIGATEME - We're signaling the mark work for the entire
+            // object here, even if that object is being split.  Can that go wrong somehow,
+            // eg, will it upset the computation of the mark rate?
 
-                if (((GCTraceableBase*)userptr)->gcTrace(this, 0))
-                    HandleContinuedMarkingOfExactGCItem(wi);
-
-                // EXACTGC INVESTIGATEME - Not clear if this could be done before marking.
-                // EXACTGC INVESTIGATEME - We're signaling the mark work for the entire
-                // object here, even if that object is being split.  Can that go wrong somehow,
-                // eg, will it upset the computation of the mark rate?
-                policy.signalExactMarkWork(size);
-                return;
-            }
+            policy.signalExactMarkWork(size);
+            return;
         }
 
+        MarkItem_ConservativeOrNonGCObject(userptr, size, GCMarkStack::kGCObject, userptr, MMGC_INTERIOR_PTRS_FLAG);
+    }
+
+    void GC::MarkItem_ExactObjectTail(const void* userptr, size_t cursor)
+    {
+        // Set up for some more tracing.
+        GCTraceableBase* exactlyTraced = reinterpret_cast<GCTraceableBase*>(const_cast<void*>(userptr));
+        
+        // Save the new state.
+        Push_LargeExactObjectTail(userptr, cursor+1);
+        uintptr_t e1 = m_incrementalWork.Top();
+        
+        if (!exactlyTraced->gcTrace(this, cursor))
+        {
+            // No more mark work, so clean up the mark state.
+            m_incrementalWork.ClearItemAt(e1);
+        }
+    }
+    
+    void GC::MarkItem_ConservativeOrNonGCObject(const void *userptr, uint32_t size, GCMarkStack::TypeTag type, const void* baseptr, bool interiorPtrs)
+    {
         // Conservative tracing.
 
         // First we consider whether to split the object into multiple pieces.
@@ -2326,56 +2413,47 @@ namespace MMgc
         //
         // See bugzilla #495049 for a discussion of this problem.
         //
-        // See comments above HandleLargeMarkItem for the mechanics of how this
+        // See comments above HandleLargeItem for the mechanics of how this
         // is done and why kMarkItemSplitThreshold == kLargestAlloc.
 
         if (size > kMarkItemSplitThreshold)
-        {
-            if(HandleLargeMarkItem(wi, size))
-                return;
-        }
+            SplitItem_ConservativeOrNonGCObject(userptr, size, type, baseptr);
 
-        if(wi.IsGCItem())
-        {
-            SetMark(wi.Ptr());
-        }
+        if (type == GCMarkStack::kGCObject)
+            SetMark(userptr);
 
         policy.signalConservativeMarkWork(size);
 #ifdef MMGC_CONSERVATIVE_PROFILER
-        MemoryProfiler* profiler = heap->GetProfiler();
-        if (profiler != NULL)
+        if (demos != NULL)
         {
-            // There isn't really information to decisively tell roots and stacks apart,
-            // but since we only recognize interior pointers from the stack at present
-            // we make use of that fact for the time being.
-            
-            // Note for roots and stack we must use 'size', which is the amount we're
-            // marking at this increment.  Using it means we don't get a good idea of
-            // how large the roots and stacks actually are.  FIXME.
-
-            if (wi.IsGCItem())
-            {
-                GCAssert(!(GetGCBits(GetRealPointer(wi.Ptr())) & kVirtualGCTrace));
-                demos->accountForObject(wi.Ptr());
-            }
-            else if (wi.HasInteriorPtrs())
-                demos->accountForStack(size);
-            else if (isRoot)
-                demos->accountForRoot(size);
-            else {
-                /* skip it - it's a chunk of a large object that's been split, it has already
-                 * been accounted for because the accounting for the header piece will
-                 * account for the entire object
-                 */
+            switch (type) {
+                case GCMarkStack::kStackMemory:
+                    demos->accountForStack(size);
+                    break;
+                case GCMarkStack::kLargeRootChunk:
+                    demos->accountForRoot(size);
+                    break;
+                case GCMarkStack::kGCObject:
+                    GCAssert(!(GetGCBits(GetRealPointer(wi.Ptr())) & kVirtualGCTrace));
+                    demos->accountForObject(wi.Ptr());
+                    break;
+                case GCMarkStack::kLargeObjectChunk:
+                    // Skip it - it's a chunk of a large object that's been split, it has already
+                    // been accounted for because the accounting for the header piece (kGCObject)
+                    // will account for the entire object
+                    break;
+                default:
+                    GCAssert(!"Unknown tag in MarkItem_ConservativeOrNonGCObject");
+                    break;
             }
         }
 #endif
         
-        uintptr_t *p = (uintptr_t*) wi.Ptr();
+        uintptr_t *p = (uintptr_t*) userptr;
         uintptr_t *end = p + (size / sizeof(void*));
         while(p < end)
         {
-            TraceConservativePointer(uintptr_t(*p), wi.HasInteriorPtrs() != 0 HEAP_GRAPH_ARG(p));
+            TraceConservativePointer(uintptr_t(*p), interiorPtrs HEAP_GRAPH_ARG(p));
             p++;
         }
     }
@@ -2459,7 +2537,6 @@ namespace MMgc
                 if(block->containsPointers)
                 {
                     const void *realItem = GetUserPointer(item);
-                    GCWorkItem newItem(realItem, 0, GCWorkItem::kGCObject);
                     // EXACTGC INVESTIGATEME - is recursive marking still a good idea?  Note that we
                     // expect the bulk of the marking to be exact, and exact marking is not recursive,
                     // it always uses the mark stack.  (On the other hand it's type-aware and can
@@ -2470,12 +2547,12 @@ namespace MMgc
                     if(((uintptr_t)realItem & GCHeap::kBlockMask) != thisPage || mark_item_recursion_control == 0)
                     {
                         bits2 |= kQueued;
-                        PushWorkItem(newItem);
+                        Push_GCObject(realItem);
                     }
                     else
                     {
                         mark_item_recursion_control--;
-                        MarkItem(newItem);
+                        MarkItem_GCObject(realItem);
                         mark_item_recursion_control++;
                     }
                 }
@@ -2530,7 +2607,7 @@ namespace MMgc
                 if(b->containsPointers)
                 {
                     b->flags[0] |= kQueued;
-                    PushWorkItem(GCWorkItem(GetUserPointer(item), 0, GCWorkItem::kGCObject));
+                    Push_GCObject(GetUserPointer(item));
                 }
                 else
                 {
@@ -2585,8 +2662,7 @@ namespace MMgc
         {
             if (ContainsPointers(obj)) {
                 bits2 |= kQueued;
-                GCWorkItem newItem(obj, 0, GCWorkItem::kGCObject);
-                PushWorkItem(newItem);
+                Push_GCObject(obj);
             }
             else {
                 bits2 |= kMark;
@@ -2682,11 +2758,7 @@ namespace MMgc
             if (count > checkTimeIncrements) {
                 count = checkTimeIncrements;
             }
-            for(unsigned int i=0; i<count && !m_incrementalWork.IsEmpty() ; i++)
-            {
-                GCWorkItem item = m_incrementalWork.Pop();
-                MarkItem(item);
-            }
+            Mark(count);
             SAMPLE_CHECK();
         } while(VMPI_getPerformanceCounter() < ticks);
 
@@ -2817,9 +2889,9 @@ namespace MMgc
 
     void GC::CheckBarrierWork()
     {
-        if (m_barrierWork.EntirelyFullSegments() < 9)   // 9 is pretty arbitrary
+        if (m_barrierWork.InactiveSegments() < 9)   // 9 is pretty arbitrary
             return;
-        m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork);
+        m_incrementalWork.TransferOneInactiveSegmentFrom(m_barrierWork);
     }
 
     // Here the purpose is to shift all the work from the barrier mark stack to the regular
@@ -2832,18 +2904,8 @@ namespace MMgc
 
     void GC::FlushBarrierWork()
     {
-        for ( uint32_t numfull = m_barrierWork.EntirelyFullSegments() ; numfull > 0 ; --numfull )
-            if (!m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork))
-                break;
-        while (m_barrierWork.Count() > 0) {
-            GCWorkItem item = m_barrierWork.Pop();
-            // The general invariants may be violated here - see comment block at the
-            // beginning of MarkItem() for how deleted objects can foul up the works.
-            // So use the invariant-unaware API.  But check for sentinels - would be bad
-            // to find them here.
-            GCAssert(item.GetSize() != GCWorkItem::kSentinel1Size && item.GetSize() != GCWorkItem::kSentinel2Size);
-            PushWorkItem_Unsafe(item);
-        }
+        if (!m_incrementalWork.TransferEverythingFrom(m_barrierWork))
+            SignalMarkStackOverflow_NonGCObject();
     }
 
     void GC::WriteBarrierTrap(const void *container)
@@ -2931,19 +2993,17 @@ namespace MMgc
             SetMark(container);
             return;
         }
-        GCWorkItem item(container, 0, GCWorkItem::kGCObject);
-        // Note, pushing directly here works right now because PushWorkItem never
+        // Note, pushing directly here works right now because Push_GCObject never
         // performs any processing (breaking up a large object into shorter
-        // segments, for example).  If that changes, we must probably introduce
-        // PushBarrierItem to do the same thing for m_barrierWork.
+        // segments, for example).
 #ifdef _DEBUG
         // If this fails it's because the write barrier hits on an already-deleted
         // object - which is a bug to be sure, but we don't know if we may have to
         // support it anyway.
-        WorkItemInvariants(item);
+        WorkItemInvariants_GCObject(container);
 #endif
-        if (!m_barrierWork.Push(item))
-            PushWorkItem(item);
+        if (!m_barrierWork.Push_GCObject(container))
+            Push_GCObject(container);
     }
 
     void GC::movePointers(void* dstObject, void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers)
@@ -3145,10 +3205,10 @@ namespace MMgc
                 // use that condition as a guard.
                 if (gc->Presweeping()) {
                     // Bugzilla 615511:
-                    // PushWorkItem does not set the queued bit, but every object on
+                    // Push_GCObject does not set the queued bit, but every object on
                     // the mark stack must have the queued bit set.
                     GC::GetGCBits(GetRealPointer(m_obj)) |= kQueued;
-                    gc->PushWorkItem(GCWorkItem(m_obj, 0, GCWorkItem::kGCObject));
+                    gc->Push_GCObject(m_obj);
                 }
             }
         }

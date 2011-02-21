@@ -60,7 +60,7 @@ namespace MMgc
          * The GC ignores this flag unless MMGC_MARKSTACK_ALLOWANCE has been
          * defined in MMgc.h.
          */
-        uint32_t markstackAllowance;
+        int32_t markstackAllowance;
 
         /* Defaults to true.  Set it to false to disable exact tracing.
          * The GC ignores this flag unless AVMTWEAK_SELECTABLE_EXACT_TRACING 

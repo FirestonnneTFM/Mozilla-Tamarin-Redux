@@ -269,23 +269,27 @@ delete gc;
             testGC->StartIncrementalMark();
             // self test for tricky GCRoot deletion logic
             // do this a bunch, idea is to try to hit GetItemAbove border edge cases
+            //GCMarkStack& ms = testGC->m_incrementalWork;
             for(int i=0;i<10000;i++) {
                 GCRoot *fauxRoot = new GCRoot(testGC, new char[GC::kMarkItemSplitThreshold*2], GC::kMarkItemSplitThreshold*2);
                 testGC->MarkAllRoots();
                 // tail of fauxRoot is on stack
-                GCWorkItem *sentinel = fauxRoot->GetMarkStackSentinelPointer();
-                if(sentinel) {
-                    %%verify sentinel->GetSentinelPointer() == fauxRoot
-                    GCWorkItem *tail = testGC->m_incrementalWork.GetItemAbove(sentinel);
-                    %%verify tail->GetEnd() == fauxRoot->End()
-                    %%verify sentinel != NULL
-                }
+                //uintptr_t sentinel = fauxRoot->GetMarkStackSentinelPointer();
+                //if(sentinel) {
+                //    const void* ptr;
+                //    ms.Read_RootProtector(sentinel, ptr);
+                //    %%verify ptr == fauxRoot
+                //    uintptr_t tail = ms.GetItemAbove(sentinel);
+                //    %%verify ms.GetEndAt(tail) == fauxRoot->End()
+                //    %%verify sentinel != 0
+                //}
                 delete [] (char*)fauxRoot->Get();
                 delete fauxRoot;
-                if(sentinel) {
-                    %%verify sentinel->GetSentinel1Type() == GCWorkItem::kDeadItem
-                    %%verify testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinel1Type() == GCWorkItem::kDeadItem
-                }
+                //if(sentinel) {
+                //    %%verify ms.P(sentinel) == GCMarkStack::kDeadItem
+                //    %%verify ms.GetSentinel1TypeAt(ms.GetItemAbove(sentinel)) == GCMarkStack::kDeadItem
+                //}
+                %%verify true
             }
             testGC->Mark();
             testGC->ClearMarkStack();
