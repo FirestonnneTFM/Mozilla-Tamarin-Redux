@@ -818,6 +818,6 @@ namespace MMgc
         uint64_t exact = bytesScannedExactlyTotal + bytesScannedExactlyLastCollection;
         if(exact == 0)
             return 0;
-        return exact * 100 / (exact+conserv);
+        return uint32_t(exact * 100 / (exact+conserv));
     }
 }
