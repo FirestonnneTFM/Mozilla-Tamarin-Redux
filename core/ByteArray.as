@@ -54,42 +54,30 @@ include "api-versions.as"
  * @langversion 3.0
  *  
  */
-CONFIG::BYTEARRAY_API_AIR
+public final class CompressionAlgorithm
 {
-    public final class CompressionAlgorithm
-    {
-        /**
-        * Defines the string to use for the zlib compression algorithm.
-        * 
-        * @playerversion AIR 1.0
-        * @langversion 3.0
-        *  
-        */
-        public static const ZLIB:String = "zlib";
-        /**
-         * Defines the string to use for the deflate compression algorithm.
-        *  
-        * @playerversion AIR 1.0
-        * @langversion 3.0  
-        *  
-        */
-        public static const DEFLATE:String = "deflate";
-    };
-} // CONFIG::BYTEARRAY_API_AIR
+    /**
+     * Defines the string to use for the zlib compression algorithm.
+     * 
+     * @playerversion AIR 1.0
+     * @langversion 3.0
+     *  
+     */
+    public static const ZLIB:String = "zlib";
+    /**
+     * Defines the string to use for the deflate compression algorithm.
+     *  
+     * @playerversion AIR 1.0
+     * @langversion 3.0  
+     *  
+     */
+    public static const DEFLATE:String = "deflate";
+};
 
 
 //
 // ByteArray
 //
-
-// Note that this class exposes two different, incompatible signatures of ByteArray.compress
-// and ByteArray.uncompress, depending on the value of BYTEARRAY_API_AIR; API versioning
-// cannot (yet) handle the overloaded nature of this change, and for now we must maintain
-// existing behavior to avoid issues if subclasses override these methods. Thus, for now,
-// you must explicitly choose the API you want on the ASC command-line:
-//
-//  -config CONFIG::BYTEARRAY_API_AIR=true (compress/uncompress take an optional argument)
-//  -config CONFIG::BYTEARRAY_API_FLASH=true (compress/uncompress take no arguments)
 
 
 /**
@@ -748,21 +736,11 @@ public class ByteArray implements IDataInput, IDataOutput
      * @keyword ByteArray, ByteArray.compress, compress
      *  
      */
-    CONFIG::BYTEARRAY_API_AIR
+    public function compress(algorithm:String = CompressionAlgorithm.ZLIB):void
     {
-        public function compress(algorithm:String = CompressionAlgorithm.ZLIB):void
-        {
-            _compress(algorithm);
-        }
+        _compress(algorithm);
     }
-    CONFIG::BYTEARRAY_API_FLASH
-    {
-        public function compress():void
-        {
-            _compress("zlib");
-        }
-    }
-     
+
     [API(CONFIG::FP_10_0)]
     /**
      * Decompresses the byte array using the deflate compression algorithm. 
@@ -844,19 +822,9 @@ public class ByteArray implements IDataInput, IDataOutput
      *  
      * @playerversion Lite 4
      */
-    CONFIG::BYTEARRAY_API_AIR
+    public function uncompress(algorithm:String = CompressionAlgorithm.ZLIB):void
     {
-        public function uncompress(algorithm:String = CompressionAlgorithm.ZLIB):void
-        {
-            _uncompress(algorithm);
-        }
-    }
-    CONFIG::BYTEARRAY_API_FLASH
-    {
-        public function uncompress():void
-        {
-            _uncompress("zlib");
-        }
+        _uncompress(algorithm);
     }
 
     /**
