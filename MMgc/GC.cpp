@@ -1403,7 +1403,7 @@ namespace MMgc
         _isStackMemory = (bool)(size & 1);
         if (_isStackMemory)
         {
-            uint32_t newSize = ((StackMemory*)this)->Top();
+            uint32_t newSize = uint32_t(((StackMemory*)this)->Top());
             GCAssert(newSize <= _size);
             _size = newSize;
         }
