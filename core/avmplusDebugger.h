@@ -61,11 +61,6 @@ namespace avmplus
     {
     public:
         /**
-         * Dummy destructor
-         */
-        virtual ~SourceInfo() {}
-
-        /**
          * Name of the source file
          */
         virtual Stringp name() const = 0;
@@ -110,11 +105,6 @@ namespace avmplus
     {
     public:
         /**
-         * Dummy destructor
-         */
-        virtual ~AbcInfo() {}
-
-        /**
          * Information about the source files encountered within this abc file.
          */
         virtual int sourceCount() const = 0;
@@ -135,7 +125,8 @@ namespace avmplus
     class DebugFrame : public MMgc::GCObject
     {
     public:
-        // since we have virtual functions, we probably need a virtual dtor
+        // since we have virtual functions, we need a virtual dtor to shut up the
+        // compiler, but the GC will never call this destructor.
         virtual ~DebugFrame() {}
 
         /**
