@@ -56,6 +56,8 @@ quiet = False
 verbose = False
 (avmr,avmrd,avmd,avmdd)=('','','','')
 
+PY3 = sys.version_info.major >= 3
+
 # read the list of vm's to use from filename
 # todo: support wildcards
 #
@@ -148,7 +150,8 @@ def avm(vm, avmshell_args, test_args):
     output = ()
     try:
         for line in p.stdout:
-            line = line.decode('latin-1')
+            if PY3:
+                line = line.decode('latin-1')
             line=scrub_errors(line.strip())
             if len(line)>0:
                 output = output + (line,)
@@ -224,7 +227,6 @@ def compare(vmlist, avmshell_args, test_args):
 
 def printlines(seq):
     for l in seq:
-        l = l.encode('latin-1')
         print('%s ' % scrub_passfail(l))
 
 def pick_majoirty(results):
@@ -266,7 +268,7 @@ def test(vmlist, avmshell_args, test_args):
     elif stat0 < 0:
         # everyone crashed the same way
         print(avmshell_args, test_args, 'FAILED!', describe(e0))
-        prinlines(out0)
+        printlines(out0)
         return stat0
     if quiet:
         return 0
