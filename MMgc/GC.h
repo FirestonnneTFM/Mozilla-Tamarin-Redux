@@ -195,7 +195,7 @@ namespace MMgc
 
         const void *Get() const { return object; }
         const void *End() const { return (char*)object + Size(); }
-        const size_t Size() const { return size & ~1; }
+        size_t Size() const { return size & ~1; }
 
         GC *GetGC() const { return gc; }
         /** if your object goes away after the GC is deleted this can be useful */
