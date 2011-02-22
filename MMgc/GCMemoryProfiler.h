@@ -49,16 +49,63 @@ namespace MMgc
 #ifdef MMGC_MEMORY_PROFILER
 
     const int kMaxStackTrace = 16; // RtlCaptureStackBackTrace stops working when this is 32
+    
+    bool knownMMgcAddress(uintptr_t ip);
+    bool knownDestructorAddress(uintptr_t ip);
+    bool lookupFunctionName(uintptr_t ip);
+    
+    class StackTrace : public GCAllocObject
+    {
+    public:
+        StackTrace(uintptr_t *trace)
+            : size(0)
+            , totalSize(0)
+            , sweepSize(0)
+            , firstNonMMgcFrame(-1)
+            , package(NULL)
+            , category(NULL)
+            , name(NULL)
+            , count(0)
+            , totalCount(0)
+            , sweepCount(0)
+            , master(NULL)
+            , skip(0)
+        {
+            VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(uintptr_t));
+        }
+        uintptr_t ips[kMaxStackTrace];
+        size_t size;
+        size_t totalSize;
+        size_t sweepSize;
+        int firstNonMMgcFrame;
+        const char *package;
+        const char *category;
+        const char *name;
+        uint32_t count;
+        uint32_t totalCount;
+        uint32_t sweepCount;
+        StackTrace *master;
+        uint8_t skip;
 
-#define MMGC_MEM_TAG(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemTag(_x)
-#define MMGC_MEM_TYPE(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemType(_x)
-
-    class StackTrace;
-
+        int getFirstNonMMgcFrame()
+        {
+            if(firstNonMMgcFrame==-1) {
+                int i;
+                for ( i=0; i < kMaxStackTrace && knownMMgcAddress(ips[i]); i++ )
+                    ;
+                firstNonMMgcFrame = i;
+            }
+            return firstNonMMgcFrame;
+        }
+    };
+    
     void SetMemTag(const char *memtag);
     void SetMemType(const void *memtype);
     void PrintStackTrace(StackTrace *trace, int limit=INT_MAX);
 
+#define MMGC_MEM_TAG(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemTag(_x)
+#define MMGC_MEM_TYPE(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemType(_x)
+    
     class GCStackTraceHashtableKeyHandler
     {
     public:
@@ -81,6 +128,7 @@ namespace MMgc
 
     typedef GCHashtableBase<const void*, GCStackTraceHashtableKeyHandler,GCHashtableAllocHandler_VMPI> GCStackTraceHashtable_VMPI;
 
+    template <class StackTraceHandler>
     class ObjectPopulationProfiler : public GCAllocObject
     {
     public:
@@ -108,13 +156,6 @@ namespace MMgc
         // derived profilers it may be something else.
         virtual StackTrace* obtainStackTrace(const void* obj);
 
-        // Return true if the two traces are to be considered equal, false otherwise.
-        // If true, then stop has the number of elements considered significant for the comparison.
-        //
-        // For the ObjectPopulationProfiler we currently compare all addresses in the traces,
-        // and the traces are equal only if all addresses are pairwise equal.
-        virtual bool equalStackTraces(StackTrace* a, StackTrace* b, int& stop);
-        
         // Print a single informational line describing the activity we're profiling.
         //
         // For the ObjectPopulationProfiler it's the number of bytes and objects scanned.
@@ -124,7 +165,7 @@ namespace MMgc
         // trace printing (it may follow other skipped addresses).  This is useful for
         // filtering out info about MMgc, for example.
         //
-        // For the ObjectPopulationProfiler it always returns false - everything's printed.
+        // Skip MMgc addresses
         virtual bool skipThisAddress(uintptr_t ip);
 
     protected:
@@ -149,14 +190,81 @@ namespace MMgc
         
         // Objects
         struct PopulationNode;
-
-        PopulationNode *list;
-        uint32_t length;
+        
+        // Maps StackTrace* to PopulationNode*
+        typedef GCHashtableBase<PopulationNode*,StackTraceHandler,GCHashtableAllocHandler_VMPI> NodeTable;
+        NodeTable nodes;
         const bool root_info;
         const bool stack_info;
     };
 
-    class DeletionProfiler : public ObjectPopulationProfiler
+    class AllocationSiteHandler
+    {
+    public:
+        inline static uint32_t hash(const void* k)
+        {
+            StackTrace *trace = (StackTrace*)k;
+            return (uint32_t)trace->ips[trace->getFirstNonMMgcFrame()];
+        }
+
+        inline static bool equal(const void* k1, const void* k2)
+        {
+            StackTrace *t1 = (StackTrace*)k1;
+            StackTrace *t2 = (StackTrace*)k2;
+            return t1 == t2 || t1->getFirstNonMMgcFrame() == t2->getFirstNonMMgcFrame();
+        }
+        
+        inline static int GetSignificance(StackTrace *trace)
+        {
+            return trace->getFirstNonMMgcFrame()+1;
+        }
+    };
+
+    typedef ObjectPopulationProfiler<AllocationSiteHandler> AllocationSiteProfiler;
+
+    class DeletionNodeHandler
+    {
+    public:
+        inline static uint32_t hash(const void* k)
+        {
+            return GCHashtableKeyHandler::hash(k);
+        }
+
+        inline static bool equal(const void* k1, const void* k2)
+        {
+            StackTrace *a = (StackTrace*)k1;
+            StackTrace *b = (StackTrace*)k2;
+            int i;
+            for ( i=0; i < kMaxStackTrace && a->ips[i] == b->ips[i] ; i++ )
+                ;
+            
+            if (i == kMaxStackTrace) {
+                return true;
+            }
+            
+            // We stopped too soon, but maybe it's OK to stop here?  Our criterion is
+            // that the ones we stopped at are not in MMgc and are not destructors.
+            
+            if (knownMMgcAddress(a->ips[i]) || knownDestructorAddress(a->ips[i]) ||
+                knownMMgcAddress(b->ips[i]) || knownDestructorAddress(b->ips[i]))
+                return false;
+            
+            // Name resolution disabled?
+            
+            //if (last_ip == 0)
+              //  return false;
+            
+            return true;
+        }
+
+
+        inline static int GetSignificance(StackTrace*)
+        {
+            return kMaxStackTrace;
+        }
+    };
+
+    class DeletionProfiler : public ObjectPopulationProfiler<DeletionNodeHandler>
     {
     public:
         DeletionProfiler(GC* gc, const char* profileName);
@@ -168,27 +276,13 @@ namespace MMgc
         // is deleted.
         virtual StackTrace* obtainStackTrace(const void* obj);
         
-        // For the DeletionProfiler two stacks are equal if their prefixes
-        // (starting with the innermost frame) are equal and the frame they
-        // stop being equal on is neither inside MMgc nor a destructor.
-        virtual bool equalStackTraces(StackTrace* a, StackTrace* b, int& stop);
-        
         // For the DeletionProfiler it's the number of bytes and objects deleted
         // from a particular locus.
         virtual void dumpObjectInfo(unsigned long long numbytes, unsigned numobjects);
         
-        // For the DeletionProfiler we filter out all MMgc addresses.
+        // Skip MMgc addresses
         virtual bool skipThisAddress(uintptr_t ip);
-
     private:
-        uintptr_t mmgc_addresses[213];          // direct-mapped cache for MMgc addresses
-        uintptr_t destructor_addresses[213];    // direct-mapped cache for destructor addresses
-        uintptr_t last_ip;                      // ip last used to look up a name (or 0)
-        char      last_buf[256];                //   and the name for non-zero ip
-
-        bool knownMMgcAddress(uintptr_t ip);
-        bool knownDestructorAddress(uintptr_t ip);
-        bool lookupFunctionName(uintptr_t ip);
     };
 
     class MemoryProfiler : public GCAllocObject

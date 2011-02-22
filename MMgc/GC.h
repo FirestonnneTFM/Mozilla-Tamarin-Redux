@@ -1649,7 +1649,7 @@ namespace MMgc
         void DumpPauseInfo();
 #endif
 #ifdef MMGC_CONSERVATIVE_PROFILER
-        ObjectPopulationProfiler* demos;
+        ObjectPopulationProfiler<AllocationSiteHandler>* demos;
 #endif
 
     private:

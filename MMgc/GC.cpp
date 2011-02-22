@@ -278,7 +278,7 @@ namespace MMgc
 
 #ifdef MMGC_CONSERVATIVE_PROFILER
         if (demos == NULL && heap->profiler != NULL)
-            demos = new ObjectPopulationProfiler(this, "Conservative scanning volume incurred by allocation site");
+            demos = new AllocationSiteProfiler(this, "Conservative scanning volume incurred by allocation site");
 #endif
 #ifdef MMGC_DELETION_PROFILER
         if (deletos == NULL && heap->profiler != NULL)
@@ -299,7 +299,7 @@ namespace MMgc
         if (demos != NULL)
         {
             GCLog("Exactly traced percentage: %u\n", policy.queryExactPercentage());
-            demos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
+            demos->dumpTopBacktraces(30, demos->BY_COUNT);
             delete demos;
             demos = NULL;
         }
@@ -379,7 +379,7 @@ namespace MMgc
          */  
         if (deletos != NULL) 
         {
-            deletos->dumpTopBacktraces(30, ObjectPopulationProfiler::BY_COUNT);
+            deletos->dumpTopBacktraces(30, deletos->BY_COUNT);
             delete deletos;
             deletos = NULL;
         }

@@ -51,29 +51,12 @@ namespace MMgc
     const bool showTotal = false;
     const bool showSwept = false;
 
-    bool simpleDump;
+    uintptr_t mmgc_addresses[213];          // direct-mapped cache for MMgc addresses
+    uintptr_t destructor_addresses[213];    // direct-mapped cache for destructor addresses
+    uintptr_t last_ip;                      // ip last used to look up a name (or 0)
+    char      last_buf[256];                //   and the name for non-zero ip
 
-    class StackTrace : public GCAllocObject
-    {
-    public:
-        StackTrace(uintptr_t *trace)
-        {
-            VMPI_memset(this, 0, sizeof(StackTrace));
-            VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(uintptr_t));
-        }
-        uintptr_t ips[kMaxStackTrace];
-        size_t size;
-        size_t totalSize;
-        size_t sweepSize;
-        const char *package;
-        const char *category;
-        const char *name;
-        uint32_t count;
-        uint32_t totalCount;
-        uint32_t sweepCount;
-        StackTrace *master;
-        uint8_t skip;
-    };
+    bool simpleDump;
 
     struct AllocInfo : public GCAllocObject
     {
@@ -483,8 +466,8 @@ namespace MMgc
             }
         }
 
-        GCLog("\n\nMemory allocation report for %llu allocations, totaling %llu kb (%llu ave) across %llu packages\n", 
-              (unsigned long long)residentCount, 
+        GCLog("\n\nMemory allocation report for %llu allocations, totaling %llu kb (%llu ave) across %llu packages\n",
+              (unsigned long long)residentCount,
               (unsigned long long)(residentSize>>10),
               (unsigned long long)(residentSize / residentCount),
               (unsigned long long)packageCount);
@@ -524,10 +507,10 @@ namespace MMgc
                 }
             }
 
-            GCLog("%s - %3.1f%% - %llu kb %u items, avg %llu b\n", 
+            GCLog("%s - %3.1f%% - %llu kb %u items, avg %llu b\n",
                   pg->name,
                   PERCENT(residentSize, pg->size),
-                  (unsigned long long)(pg->size>>10), 
+                  (unsigned long long)(pg->size>>10),
                   (unsigned)pg->count,
                   (unsigned long long)(pg->count ? pg->size/pg->count : 0));
 
@@ -558,7 +541,7 @@ namespace MMgc
                             size = trace->totalSize;
                             count = trace->totalCount;
                         }
-                        GCLog("\t\t %3.1f%% - %llu kb - %u items - ", 
+                        GCLog("\t\t %3.1f%% - %llu kb - %u items - ",
                               PERCENT(tg->size, size),
                               (unsigned long long)(size>>10),
                               (unsigned)count);
@@ -703,7 +686,7 @@ namespace MMgc
         // to make sure symbol resolution is available and enabled, otherwise
         // the profiles won't make a lot of sense.
 #ifdef AVMSHELL_BUILD
-        // Ad-hoc configuration.  If MMGC_PROFILE_CONFIG is present we try to 
+        // Ad-hoc configuration.  If MMGC_PROFILE_CONFIG is present we try to
         // interpret it.  Its presence means we want allocation site profiling,
         // not leak profiling.  The string additionally can be empty, but if not
         // empty it has this form:
@@ -723,7 +706,7 @@ namespace MMgc
             if (VMPI_sscanf(x, "%u,%s%n", &limit, buf, &len) == 2 && unsigned(len) == VMPI_strlen(x)) {
                 if (VMPI_strcmp(buf, "count") == 0)
                     s = MemoryProfiler::BY_COUNT;
-                else 
+                else
                     s = MemoryProfiler::BY_VOLUME;
             }
             else if (VMPI_sscanf(x, "%u%n", &limit, &len) == 1 && unsigned(len) == VMPI_strlen(x)) {
@@ -841,14 +824,14 @@ namespace MMgc
         return NULL;
     }
 
-    struct ObjectPopulationProfiler::PopulationNode : public GCAllocObject
+    template <class T>
+    struct ObjectPopulationProfiler<T>::PopulationNode : public GCAllocObject
     {
         PopulationNode(StackTrace* trace)
             : trace(trace)
             , numobjects(0)
             , numbytes(0)
-            , significant(kMaxStackTrace)
-            , next(NULL)
+            , significant(T::GetSignificance(trace))
         {
         }
 
@@ -856,77 +839,53 @@ namespace MMgc
         size_t numobjects;
         uint64_t numbytes;
         int significant;
-        PopulationNode* next;
     };
     
-    ObjectPopulationProfiler::ObjectPopulationProfiler(GC* gc, const char* profileName, bool roots, bool stacks)
+    template <class T>
+    ObjectPopulationProfiler<T>::ObjectPopulationProfiler(GC* gc, const char* profileName, bool roots, bool stacks)
         : gc(gc)
         , heap(gc->GetGCHeap())
         , profileName(profileName)
-        , list(NULL)
-        , length(0)
         , root_info(roots)
         , stack_info(stacks)
     {
     }
 
-    ObjectPopulationProfiler::~ObjectPopulationProfiler()
+    template <class T>
+    ObjectPopulationProfiler<T>::~ObjectPopulationProfiler()
     {
-        while (list != NULL)
+        typename NodeTable::Iterator traceIter(&nodes);
+        const void *obj;
+        while((obj = traceIter.nextKey()) != NULL)
         {
-            PopulationNode* pn = list;
-            list = list->next;
+            PopulationNode *pn = (PopulationNode*)traceIter.value();
             delete pn;
         }
     }
 
-    StackTrace* ObjectPopulationProfiler::obtainStackTrace(const void* obj)
+    template <class T>
+    StackTrace* ObjectPopulationProfiler<T>::obtainStackTrace(const void* obj)
     {
         return heap->GetProfiler()->GetAllocationTrace(obj);
     }
 
-    bool ObjectPopulationProfiler::equalStackTraces(StackTrace* a, StackTrace* b, int& stop)
-    {
-        int i;
-        for ( i=0; i < kMaxStackTrace && a->ips[i] == b->ips[i] ; i++ )
-            ;
-
-        if (i == kMaxStackTrace)
-        {
-            stop = i;
-            return true;
-        }
-        return false;
-    }
-    
-    void ObjectPopulationProfiler::accountForObject(const void* obj)
+    template <class T>
+    void ObjectPopulationProfiler<T>::accountForObject(const void* obj)
     {
         StackTrace* trace = obtainStackTrace(obj);
         if (trace != NULL)
         {
             size_t size = GC::Size(obj);
-            PopulationNode* l = list;
-            int stop = 0;
-            while (l != NULL)
+            PopulationNode* pn = nodes.get(trace);
+            
+            if (pn == NULL)
             {
-                if (equalStackTraces(l->trace, trace, stop))
-                    break;
-                l = l->next;
+                pn = new PopulationNode(trace);
+                nodes.put(trace, pn);
             }
             
-            if (l == NULL)
-            {
-                PopulationNode* pn = new PopulationNode(trace);
-                length++;
-                pn->next = list;
-                list = pn;
-                l = pn;
-                stop = kMaxStackTrace;
-            }
-            
-            l->numobjects++;
-            l->numbytes += size;
-            l->significant = stop < l->significant ? stop : l->significant;
+            pn->numobjects++;
+            pn->numbytes += size;
         }
     }
 
@@ -939,8 +898,9 @@ namespace MMgc
         }
         return result;
     }
-
-    void ObjectPopulationProfiler::accountForRoot(size_t size)
+    
+    template <class T>
+    void ObjectPopulationProfiler<T>::accountForRoot(size_t size)
     {
         GCAssert(root_info);
         roots.numobjects++;
@@ -949,8 +909,9 @@ namespace MMgc
         rootHistogram[slot].numobjects++;
         rootHistogram[slot].numbytes += size;
     }
-
-    void ObjectPopulationProfiler::accountForStack(size_t size)
+    
+    template <class T>
+    void ObjectPopulationProfiler<T>::accountForStack(size_t size)
     {
         GCAssert(stack_info);
         stacks.numobjects++;
@@ -962,14 +923,18 @@ namespace MMgc
     
     // Sort by byte volume, then dump the top entries
     
-    void ObjectPopulationProfiler::dumpTopBacktraces(int howmany, DumpMode mode)
+    template <class T>
+    void ObjectPopulationProfiler<T>::dumpTopBacktraces(int howmany, DumpMode mode)
     {
         MMgc::GC::AllocaAutoPtr _popnode;
         PopulationNode** xs = (PopulationNode**)VMPI_alloca_gc(gc, _popnode, howmany*sizeof(PopulationNode*));
         int live = 0;
         
-        for ( PopulationNode* l = list ; l != NULL ; l = l->next )
+        typename NodeTable::Iterator traceIter(&nodes);
+        const void *obj;
+        while((obj = traceIter.nextKey()) != NULL)
         {
+            PopulationNode* l = traceIter.value();
             bool inserted = false;
             for ( int i=0 ; i < live && !inserted ; i++ )
             {
@@ -996,14 +961,14 @@ namespace MMgc
         }
 
         GCLog("Object population profile: %s\n", profileName);
-        GCLog("Nodes: %u\n", (unsigned)length);
+        GCLog("Nodes: %u\n", (unsigned)nodes.count());
         if (root_info)
         {
             GCLog("Roots:  %llu bytes scanned  - %u objs scanned\n", (unsigned long long)roots.numbytes, (unsigned)roots.numobjects);
             for ( size_t i=0 ; i < ARRAY_SIZE(rootHistogram) ; i++ )
             {
                 if (rootHistogram[i].numobjects > 0)
-                    GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
+                    GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n",
                           (1 << i),
                           (1 << (i+1))-1,
                           (unsigned long long)rootHistogram[i].numbytes, (unsigned)rootHistogram[i].numobjects);
@@ -1015,7 +980,7 @@ namespace MMgc
             for ( size_t i=0 ; i < ARRAY_SIZE(stackHistogram) ; i++ )
             {
                 if (stackHistogram[i].numobjects > 0)
-                    GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n", 
+                    GCLog("  Class %d-%d:  %llu bytes scanned  - %u objs scanned\n",
                           (1 << i),
                           (1 << (i+1))-1,
                           (unsigned long long)stackHistogram[i].numbytes, (unsigned)stackHistogram[i].numobjects);
@@ -1035,24 +1000,22 @@ namespace MMgc
             GCLog("\n");
         }
     }
-
-    bool ObjectPopulationProfiler::skipThisAddress(uintptr_t ip)
+    
+    template <class T>
+    bool ObjectPopulationProfiler<T>::skipThisAddress(uintptr_t ip)
     {
-        (void)ip;
-        return false;
+        return knownMMgcAddress(ip);
     }
-
-    void ObjectPopulationProfiler::dumpObjectInfo(unsigned long long numbytes, unsigned numobjects)
+    
+    template <class T>
+    void ObjectPopulationProfiler<T>::dumpObjectInfo(unsigned long long numbytes, unsigned numobjects)
     {
         GCLog("  %llu bytes scanned - %u objs scanned", numbytes, (unsigned)numobjects);
     }
                            
     DeletionProfiler::DeletionProfiler(GC* gc, const char* profileName)
-        : ObjectPopulationProfiler(gc, profileName, false, false)
+        : ObjectPopulationProfiler<DeletionNodeHandler>(gc, profileName, false, false)
     {
-        VMPI_memset(mmgc_addresses, 0, sizeof(mmgc_addresses));
-        VMPI_memset(destructor_addresses, 0, sizeof(destructor_addresses));
-        last_ip = 0;
     }
     
     StackTrace* DeletionProfiler::obtainStackTrace(const void* obj)
@@ -1070,40 +1033,12 @@ namespace MMgc
             GCLog("  %u objects deleted", numobjects);
     }
 
-    // Experimental
-    bool DeletionProfiler::equalStackTraces(StackTrace* a, StackTrace* b, int& stop)
-    {
-        int i;
-        for ( i=0; i < kMaxStackTrace && a->ips[i] == b->ips[i] ; i++ )
-            ;
-
-        if (i == kMaxStackTrace) {
-            stop = i;
-            return true;
-        }
-        
-        // We stopped too soon, but maybe it's OK to stop here?  Our criterion is
-        // that the ones we stopped at are not in MMgc and are not destructors.
-
-        if (knownMMgcAddress(a->ips[i]) || knownDestructorAddress(a->ips[i]) || 
-            knownMMgcAddress(b->ips[i]) || knownDestructorAddress(b->ips[i]))
-            return false;
-
-        // Name resolution disabled?
-
-        if (last_ip == 0)
-            return false;
-
-        stop = i;
-        return true;
-    }
-
     bool DeletionProfiler::skipThisAddress(uintptr_t ip)
     {
-        return knownMMgcAddress(ip);
+        return knownMMgcAddress(ip) || knownDestructorAddress(ip);
     }
 
-    bool DeletionProfiler::knownMMgcAddress(uintptr_t ip)
+    bool knownMMgcAddress(uintptr_t ip)
     {
         if (mmgc_addresses[(ip >> 3) % ARRAY_SIZE(mmgc_addresses)] == ip)
             return true;
@@ -1118,7 +1053,7 @@ namespace MMgc
         return false;
     }
     
-    bool DeletionProfiler::knownDestructorAddress(uintptr_t ip)
+    bool knownDestructorAddress(uintptr_t ip)
     {
         if (destructor_addresses[(ip >> 3) % ARRAY_SIZE(destructor_addresses)] == ip)
             return true;
@@ -1133,7 +1068,7 @@ namespace MMgc
         return false;
     }
 
-    bool DeletionProfiler::lookupFunctionName(uintptr_t ip)
+    bool lookupFunctionName(uintptr_t ip)
     {
         if (last_ip == ip)
             return true;
@@ -1143,6 +1078,11 @@ namespace MMgc
         last_ip = ip;
         return true;
     }
+    
+    // instantiations to appease GCC
+    template class ObjectPopulationProfiler<AllocationSiteHandler>;
+    template class ObjectPopulationProfiler<DeletionNodeHandler>;
+
 #else
 
     void PrintAllocStackTrace(const void *) {}
@@ -1245,7 +1185,7 @@ namespace MMgc
         PrintDeleteStackTrace(GetUserPointer(item));
         GCDebugMsg(true, "Deleted item write violation!");
     }
-
+    
 #endif // defined MMGC_MEMORY_INFO
 
 } // namespace MMgc
