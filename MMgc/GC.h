@@ -182,12 +182,10 @@ namespace MMgc
         friend class avmplus::ST_mmgc_basics;
 #endif
         GCRoot();
-        void init(GC*gc, const void *object, size_t size);
+        void init(GC*gc, const void *object, size_t size, bool isStackMemory);
     public:
         /** subclassing constructor */
         GCRoot(GC *gc);
-        /** general constructor */
-        GCRoot(GC *gc, const void *object, size_t size);
         virtual ~GCRoot();
 
         // override new and delete so we can know the objects extents (via FixedMalloc::Size())
@@ -196,8 +194,8 @@ namespace MMgc
         void operator delete (void *object);
 
         const void *Get() const { return object; }
-        const void *End() const { return (char*)object + size; }
-        void Set(const void *object, size_t size);
+        const void *End() const { return (char*)object + Size(); }
+        const size_t Size() const { return size & ~1; }
 
         GC *GetGC() const { return gc; }
         /** if your object goes away after the GC is deleted this can be useful */
@@ -275,14 +273,13 @@ namespace MMgc
         
     private:
         GC * gc;
-
         GCRoot *next;
         GCRoot *prev;
-        const void *object;
-        size_t size;
-        uintptr_t markStackSentinel;
+        const void *object;             // High w-2 bits: the pointer.  Bit 1: available.  Bit 0: available.
+        size_t size;                    // High w-2 bits: the size in bytes.  Bit 1: available.   Bit 0: StackMemory flag.
+        uintptr_t markStackSentinel;    // If not 0 this is the index on the mark stack that holds the RootProtector for this root.
 
-        void GetWorkItem(const void*& _object, uint32_t& _size) const;
+        void GetWorkItem(const void*& _object, uint32_t& _size, bool& _isStackMemory) const;
 
         uintptr_t GetMarkStackSentinelPointer();
 
@@ -296,6 +293,36 @@ namespace MMgc
         // zero, use SetMarkStackSentinelPointer(0) to also clear
         // the work item off the mark stack.
         void ClearMarkStackSentinelPointer();
+        
+    protected:
+        // THESE METHODS ARE ONLY FOR MMGC INTERNAL USE!
+
+        GCRoot(GC*gc, const void *object, size_t size, bool isStackMemory);
+
+        void PrivilegedSet(const void *object, uint32_t size, bool isStackMemory);
+    };
+
+    /**
+     * StackMemory is root memory that is only scanned at the end of GC, not at 
+     * the beginning.  It should be used for heap memory that functions as a stack: 
+     * alloca memory, or the AS1 stack.
+     */
+    class StackMemory : public GCRoot
+    {
+    public:
+        /**
+         * Initialize the stack memory.
+         */
+        StackMemory(GC *gc, const void *object, size_t size);
+
+        /**
+         * Return the value of the stack top in the range [0,size].  The GC will scan the memory
+         * in the range [object,object+top).  The default implementation just returns "size".
+         */
+        virtual size_t Top();
+
+        /** Reinitialize with this memory instead of the old memory.  To clear use Set(NULL,0). */
+        void Set(const void *object, size_t size);
     };
 
     /**
@@ -708,7 +735,7 @@ namespace MMgc
         // See comments for HandleLargeMarkItem.
         const static size_t kMarkItemSplitThreshold = kLargestAlloc;
 
-        class RCRootSegment : public GCRoot
+        class RCRootSegment : public StackMemory
         {
         public:
             RCRootSegment(GC* gc, void* mem, size_t size);
@@ -1410,7 +1437,6 @@ namespace MMgc
         GCAutoEnter* stackEnter;
         uint32_t enterCount;
 
-        GCRoot* emptyWeakRefRoot;
 #ifdef VMCFG_SELECTABLE_EXACT_TRACING
         const gcbits_t runtimeSelectableExactnessFlag; // 0 or kVirtualGCTrace
 #endif
@@ -1527,7 +1553,9 @@ namespace MMgc
         void Finalize();
         void Sweep();
         void ForceSweepAtShutdown();
-        void MarkAllRoots(bool deep=false);
+        void MarkNonstackRoots(bool deep=false);
+        void MarkStackRoots();
+        void MarkRoots(bool deep, bool stackroots);
         void Mark();
         void Mark(uint32_t count);
         void MarkQueueAndStack(bool scanStack=true);

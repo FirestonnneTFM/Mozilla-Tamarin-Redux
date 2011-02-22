@@ -159,7 +159,6 @@ namespace MMgc
         rememberedStackTop(0),
         stackEnter(0),
         enterCount(0),
-        emptyWeakRefRoot(0),
 #ifdef VMCFG_SELECTABLE_EXACT_TRACING
         runtimeSelectableExactnessFlag(config == NULL || config->exactTracing ? kVirtualGCTrace : 0),
 #endif
@@ -272,7 +271,6 @@ namespace MMgc
 
         allocaInit();
 
-        emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef));
         MMGC_GCENTER(this);
         emptyWeakRef = new (this) GCWeakRef(NULL);
 
@@ -361,7 +359,6 @@ namespace MMgc
 
         pageMap.DestroyPageMapVia(heap);
 
-        delete emptyWeakRefRoot;
         GCAssert(!m_roots);
         GCAssert(!m_callbacks);
 
@@ -522,7 +519,7 @@ namespace MMgc
 
         SAMPLE_CHECK();
 
-        MarkAllRoots();
+        MarkNonstackRoots();
 
         SAMPLE_CHECK();
 
@@ -545,7 +542,7 @@ namespace MMgc
 #endif
 
     GC::RCRootSegment::RCRootSegment(GC* gc, void* mem, size_t size)
-        : GCRoot(gc, mem, size)
+        : StackMemory(gc, mem, size)
         , mem(mem)
         , size(size)
         , prev(NULL)
@@ -1311,8 +1308,10 @@ namespace MMgc
 
     void GC::MarkQueueAndStack(bool scanStack)
     {
-        if(scanStack)
+        if(scanStack) {
+            MarkStackRoots();
             VMPI_callWithRegistersSaved(GC::DoMarkFromStack, this);
+        }
         else
             Mark();
     }
@@ -1358,24 +1357,27 @@ namespace MMgc
         VMPI_callWithRegistersSaved(DoCreateRootFromCurrentStack, &arg2);
     }
 
-    void GCRoot::init(GC* _gc, const void *_object, size_t _size)
+    void GCRoot::init(GC* _gc, const void *_object, size_t _size, bool isStackMemory)
     {
+        GCAssert(_object != NULL || _size == 0);
+        GCAssert(_size % 4 == 0);
+        GCAssert(uintptr_t(_object) % 4 == 0);
+
         gc = _gc;
         object = _object;
-        size = _size;
+        size = _size | (isStackMemory ? 1 : 0);
         markStackSentinel = NULL;
-        GCAssert(size % 2 == 0);
         gc->AddRoot(this);
+    }
+
+    GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size, bool _isStackMemory)
+    {
+        init(_gc, _object, _size, _isStackMemory);
     }
 
     GCRoot::GCRoot(GC * _gc)
     {
-        init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this));
-    }
-
-    GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size)
-    {
-        init(_gc, _object, _size);
+        init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this), false);
     }
 
     GCRoot::~GCRoot()
@@ -1383,17 +1385,28 @@ namespace MMgc
         Destroy();
     }
 
-    void GCRoot::Set(const void * _object, size_t _size)
+    void GCRoot::PrivilegedSet(const void* _object, uint32_t _size, bool _isStackMemory)
     {
+        GCAssert(_object != NULL || _size == 0);
+        GCAssert(_size % 4 == 0);
+        GCAssert(uintptr_t(_object) % 4 == 0);
+        
         SetMarkStackSentinelPointer(NULL);
-        this->object = _object;
-        this->size = _size;
+        object = _object;
+        size = (_size | (_isStackMemory ? 1 : 0));
     }
 
-    void GCRoot::GetWorkItem(const void*& _object, uint32_t& _size) const
+    void GCRoot::GetWorkItem(const void*& _object, uint32_t& _size, bool& _isStackMemory) const
     {
         _object = object;
-        _size = (uint32_t)size;
+        _size = (uint32_t)(size & ~1);
+        _isStackMemory = (bool)(size & 1);
+        if (_isStackMemory)
+        {
+            uint32_t newSize = ((StackMemory*)this)->Top();
+            GCAssert(newSize <= _size);
+            _size = newSize;
+        }
     }
     
     uintptr_t GCRoot::GetMarkStackSentinelPointer()
@@ -1419,11 +1432,26 @@ namespace MMgc
 
     void GCRoot::Destroy()
     {
-        Set(NULL, 0);
+        PrivilegedSet(NULL, 0, false);
         if(gc) {
             gc->RemoveRoot(this);
         }
         gc = NULL;
+    }
+
+    StackMemory::StackMemory(GC * _gc, const void * _object, size_t _size)
+        : GCRoot(_gc, _object, _size, true)
+    {
+    }
+    
+    size_t StackMemory::Top()
+    {
+        return Size();
+    }
+
+    void StackMemory::Set(const void * _object, size_t _size)
+    {
+        PrivilegedSet(_object, uint32_t(_size), true);
     }
 
     GCCallback::GCCallback(GC * _gc) : gc(_gc)
@@ -1922,7 +1950,7 @@ namespace MMgc
 #endif
 
         if (incremental)
-            MarkAllRoots();
+            MarkNonstackRoots();
 
         policy.signal(GCPolicyManager::END_StartIncrementalMark);
 
@@ -1950,11 +1978,26 @@ namespace MMgc
     // If the API proposed there can land we can almost certainly stop splitting
     // objects here.
     
-    void GC::MarkAllRoots(bool deep)
+    void GC::MarkNonstackRoots(bool deep)
     {
-        // Need to do this while holding the root lock so we don't end
-        // up trying to scan a deleted item later, another reason to keep
-        // the root set small.
+        MarkRoots(deep, false);
+    }
+    
+    void GC::MarkStackRoots()
+    {
+        MarkRoots(false, true);
+    }
+    
+    void GC::MarkRoots(bool deep, bool stackroots)
+    {
+        if (!stackroots) {
+            // Mark objects owned by the GC as if they were rooted
+            TraceLocation(&emptyWeakRef);
+        }
+        
+       // Need to do this while holding the root lock so we don't end
+       // up trying to scan a deleted item later, another reason to keep
+       // the root set small.
 
         MMGC_LOCK(m_rootListLock);
         markerActive++;
@@ -1962,8 +2005,9 @@ namespace MMgc
         while(r) {
             const void* object;
             uint32_t size;
-            r->GetWorkItem(object, size);
-            if(object != NULL) {
+            bool isStackMemory;
+            r->GetWorkItem(object, size, isStackMemory);
+            if(object != NULL && isStackMemory == stackroots) {
                 GCAssert(!IsPointerToGCPage(object));
                 GCAssert(!IsPointerToGCPage((char*)object + size - 1));
                 // If this root will be split push a sentinel item and store
@@ -1977,6 +2021,9 @@ namespace MMgc
                     if (Push_RootProtector(r))
                         r->SetMarkStackSentinelPointer(m_incrementalWork.Top());
                 }
+                // Note: here we could push a kStackMemory instead of a kGCRoot, if stackroots==true.
+                // That would mean that interior pointers from StackMemory roots would be recognized,
+                // which may or may not be right - it's not something we've done so far.
                 MarkItem_ConservativeOrNonGCObject(object, size, GCMarkStack::kLargeRootChunk, r, MMGC_INTERIOR_PTRS_FLAG);
                 if (deep)
                     Mark();
@@ -1991,8 +2038,8 @@ namespace MMgc
     // Mark stack overflow occurs when an item cannot be pushed onto the mark stack because
     // the top mark stack segment is full and a new segment can't be allocated.  In
     // practice, any call to the GC::Push_* methods (or their callers, such as GC::Mark,
-    // GC::MarkItem_*, GC::MarkAllRoots, GC::MarkQueueAndStack, and not least the write
-    // barrier GC::TrapWrite) can cause a mark stack overflow.
+    // GC::MarkItem_*, GC::MarkNonStackRoots, GC::MarkStackRoots, GC::MarkQueueAndStack, and not 
+    // least the write barrier GC::TrapWrite) can cause a mark stack overflow.
     //
     // Since garbage collection cannot be allowed to abort the program as a result of
     // the allocation failure, but must run to completion, overflow is handled specially.
@@ -2029,10 +2076,10 @@ namespace MMgc
     void GC::HandleMarkStackOverflow()
     {
         // Crucial for completion that we do not push marked items.  MarkItem_* handles this
-        // for us: thye push referenced objects that are not marked.  (MarkAllRoots calls
+        // for us: it pushes referenced objects that are not marked.  (MarkNonstackRoots calls
         // MarkItem_* on each root.)
 
-        MarkAllRoots(true);
+        MarkNonstackRoots(true);
 
         // For all iterator types, GetNextMarkedObject returns true if 'item' has been
         // updated to reference a marked, non-free object to mark, false if the allocator
@@ -2138,7 +2185,7 @@ namespace MMgc
     // tail is entirely equivalent to discarding the work items that
     // would result from scanning the tail.
     //
-    // Large GCRoots are also split here.  MarkAllRoots pushes a
+    // Large GCRoots are also split here.  MarkNonstackRoots pushes a
     // sentinel item on the stack that will be right below the GCRoot.
     // If the GCRoot is deleted it uses the sentinel pointer to clear
     // the tail work item from GCRoot::Destroy along with the sentinel
@@ -2815,7 +2862,7 @@ namespace MMgc
         GCAssert(!m_markStackOverflow);
 
         FlushBarrierWork();
-        MarkAllRoots();
+        MarkNonstackRoots();
         MarkQueueAndStack(scanStack);
 
         // Force repeated restarts and marking until we're done.  For discussion

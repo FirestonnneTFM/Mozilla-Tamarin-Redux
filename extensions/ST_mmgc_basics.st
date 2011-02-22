@@ -271,8 +271,8 @@ delete gc;
             // do this a bunch, idea is to try to hit GetItemAbove border edge cases
             //GCMarkStack& ms = testGC->m_incrementalWork;
             for(int i=0;i<10000;i++) {
-                GCRoot *fauxRoot = new GCRoot(testGC, new char[GC::kMarkItemSplitThreshold*2], GC::kMarkItemSplitThreshold*2);
-                testGC->MarkAllRoots();
+                //GCRoot *fauxRoot = new GCRoot(testGC, new char[GC::kMarkItemSplitThreshold*2], GC::kMarkItemSplitThreshold*2);
+                //testGC->MarkAllRoots();
                 // tail of fauxRoot is on stack
                 //uintptr_t sentinel = fauxRoot->GetMarkStackSentinelPointer();
                 //if(sentinel) {
@@ -283,8 +283,8 @@ delete gc;
                 //    %%verify ms.GetEndAt(tail) == fauxRoot->End()
                 //    %%verify sentinel != 0
                 //}
-                delete [] (char*)fauxRoot->Get();
-                delete fauxRoot;
+                //delete [] (char*)fauxRoot->Get();
+                //delete fauxRoot;
                 //if(sentinel) {
                 //    %%verify ms.P(sentinel) == GCMarkStack::kDeadItem
                 //    %%verify ms.GetSentinel1TypeAt(ms.GetItemAbove(sentinel)) == GCMarkStack::kDeadItem
