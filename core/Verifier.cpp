@@ -393,51 +393,53 @@ namespace avmplus
 
     void RestArgAnalyzer::writeOpcodeVerified(const FrameState* state, const uint8_t *pc, AbcOpcode opcode)
     {
-        if (!optimize)
-            return;
-        switch (opcode)
+        if (optimize)
         {
-            case OP_getlocal:
+            switch (opcode)
             {
-                uint32_t imm30=0, imm30b=0;
-                int32_t imm8=0, imm24=0;
-                AvmCore::readOperands(pc, imm30, imm24, imm30b, imm8);
-                if (restVar == imm30)
-                    isRestArray[state->sp()] = true;
-                break;
-            }
-            case OP_getlocal0:
-            case OP_getlocal1:
-            case OP_getlocal2:
-            case OP_getlocal3:
-            {
-                if (restVar == uint32_t(opcode-OP_getlocal0))
-                    isRestArray[state->sp()] = true;
-                break;
-            }
+                case OP_getlocal:
+                {
+                    uint32_t imm30=0, imm30b=0;
+                    int32_t imm8=0, imm24=0;
+                    AvmCore::readOperands(pc, imm30, imm24, imm30b, imm8);
+                    if (restVar == imm30)
+                        isRestArray[state->sp()] = true;
+                    break;
+                }
+                case OP_getlocal0:
+                case OP_getlocal1:
+                case OP_getlocal2:
+                case OP_getlocal3:
+                {
+                    if (restVar == uint32_t(opcode-OP_getlocal0))
+                        isRestArray[state->sp()] = true;
+                    break;
+                }
 
-            case OP_iflt:
-            case OP_ifle:
-            case OP_ifnlt:
-            case OP_ifnle:
-            case OP_ifgt:
-            case OP_ifge:
-            case OP_ifngt:
-            case OP_ifnge:
-            case OP_ifeq:
-            case OP_ifstricteq:
-            case OP_ifne:
-            case OP_ifstrictne:
-            case OP_iftrue:
-            case OP_iffalse:
-            case OP_jump:
-            case OP_lookupswitch:
-            case OP_throw:
-            case OP_returnvalue:
-            case OP_returnvoid:
-                endBlock();
-                break;
+                case OP_iflt:
+                case OP_ifle:
+                case OP_ifnlt:
+                case OP_ifnle:
+                case OP_ifgt:
+                case OP_ifge:
+                case OP_ifngt:
+                case OP_ifnge:
+                case OP_ifeq:
+                case OP_ifstricteq:
+                case OP_ifne:
+                case OP_ifstrictne:
+                case OP_iftrue:
+                case OP_iffalse:
+                case OP_jump:
+                case OP_lookupswitch:
+                case OP_throw:
+                case OP_returnvalue:
+                case OP_returnvoid:
+                    endBlock();
+                    break;
+            }
         }
+
         coder->writeOpcodeVerified(state, pc, opcode);
     }
 
