@@ -100,17 +100,20 @@ while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
 }
 %%verify pass == true
 
-%%test bug610022
-    Stringp str = core->newConstantStringLatin1("some string that is likely to be unique");
-    WeakRefList<String> list(core->GetGC(), 0);
+    // FIXME: this needs a "register this object with the GC" mechanism; this abuse of the GCRoot mechanism
+    // is no longer allowed
+//%%test bug610022
+//    Stringp str = core->newConstantStringLatin1("some string that is likely to be unique");
+//    WeakRefList<String> list(core->GetGC(), 0);
     // We are going to skip scanning the stack (so that "str" won't hold the string in place)
     // but that means we need a root to ensure that "list" doesn't also get collected.
-    MMgc::GCRoot root(core->GetGC(), &list, sizeof(list));
-    list.add(str);
-    str = NULL;
-    core->GetGC()->Collect(/*scanStack*/false);
-    int removed = list.removeCollectedItems();
-    int count = list.length();
-%%verify removed == 1 && count == 0
+    //
+    //MMgc::GCRoot root(core->GetGC(), &list, sizeof(list));
+    //list.add(str);
+    //str = NULL;
+    //core->GetGC()->Collect(/*scanStack*/false);
+    //int removed = list.removeCollectedItems();
+    //int count = list.length();
+//%%verify removed == 1 && count == 0
 
 
