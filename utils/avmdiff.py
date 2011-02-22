@@ -56,7 +56,7 @@ quiet = False
 verbose = False
 (avmr,avmrd,avmd,avmdd)=('','','','')
 
-PY3 = sys.version_info.major >= 3
+PY3 = sys.version_info >= (3,0)
 
 # read the list of vm's to use from filename
 # todo: support wildcards
@@ -151,6 +151,7 @@ def avm(vm, avmshell_args, test_args):
     try:
         for line in p.stdout:
             if PY3:
+                # need to decode byte-string to string
                 line = line.decode('latin-1')
             line=scrub_errors(line.strip())
             if len(line)>0:
