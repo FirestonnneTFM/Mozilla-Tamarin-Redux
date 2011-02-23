@@ -1156,7 +1156,7 @@ namespace MMgc
                 // be printed tells you where the block was allocated from.  To find the
                 // overrun, put a memory breakpoint on the location endMarker is pointing to.
                 GCDebugMsg(false, "Memory overwrite detected\n");
-                PrintAllocStackTrace(item);
+                PrintAllocStackTrace(GetUserPointer(item));
                 GCAssert(false);
             }
         }
