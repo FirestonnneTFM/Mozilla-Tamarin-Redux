@@ -612,7 +612,8 @@ class NativeInfo:
     def set_instancebase(self, name):
         if self.instancebase_name != None:
             raise Error("native(instancebase) may not be specified multiple times for the same class: %s %s" % (self.instancebase_name, name))
-        self.instancebase_name = self.fullyQualifiedCPPClassName(name)
+        comps = self.fullyQualifiedCPPClassName(name)
+        self.instancebase_name = '::'.join(filter(lambda ns: len(ns) > 0, comps))
 
     def set_construct(self, value, is_vm_builtin):
         if self.construct != None:
