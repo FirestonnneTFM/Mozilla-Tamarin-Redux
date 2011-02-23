@@ -1261,6 +1261,9 @@ namespace MMgc
         
         template <class T>
         void TraceLocation(MMgc::WriteBarrierRC<T> const * loc);
+
+        template <class T>
+        void TraceLocation(MMgc::GCMemberBase<T> const * loc);
         
         void TraceAtom(AtomWBCore * loc);
         

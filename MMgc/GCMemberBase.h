@@ -57,6 +57,7 @@ namespace MMgc
     template <class T>
     class GCMemberBase : public GCRef<T>
     {
+        friend class GC;
     private:
         //  'set' is invoked whenever the garbage collected pointer value 't' changes
         REALLY_INLINE void set(const T *tNew)
@@ -64,6 +65,16 @@ namespace MMgc
             T::WriteBarrier((void**)&(this->t), (void*)tNew);
         }
         
+        REALLY_INLINE T* value() const
+        {
+            return this->t;
+        }
+
+        REALLY_INLINE T** location() const
+        {
+            return &(this->t);
+        }
+
     protected:
         
         //  In order to keep the usage syntax uniform as "GCMember",
