@@ -230,7 +230,7 @@ def printlines(seq):
     for l in seq:
         try:
             print('%s ' % scrub_passfail(l))
-        except UnicodeDecodeError:
+        except UnicodeEncodeError:
             # cygwin can not handle printing certain invalid unicode chars
             pass
 
