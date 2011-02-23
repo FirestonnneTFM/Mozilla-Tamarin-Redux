@@ -152,7 +152,7 @@ def avm(vm, avmshell_args, test_args):
         for line in p.stdout:
             if PY3:
                 # need to decode byte-string to string
-                line = line.decode('latin-1')
+                line = line.decode('latin-1', 'replace')
             line=scrub_errors(line.strip())
             if len(line)>0:
                 output = output + (line,)
@@ -228,7 +228,11 @@ def compare(vmlist, avmshell_args, test_args):
 
 def printlines(seq):
     for l in seq:
-        print('%s ' % scrub_passfail(l))
+        try:
+            print('%s ' % scrub_passfail(l))
+        except UnicodeDecodeError:
+            # cygwin can not handle printing certain invalid unicode chars
+            pass
 
 def pick_majoirty(results):
     # pick the result with the most examples
