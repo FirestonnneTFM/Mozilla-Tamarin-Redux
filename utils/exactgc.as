@@ -126,6 +126,8 @@ class GCClass
 
     public function toString() { return printProps(this, ["cls","base","hook","ifdef"]) }
 
+    public function fullName() { return fullClassPrefix + cls; }
+
     const cls;
     const base;
     const hook;
@@ -133,6 +135,7 @@ class GCClass
     const ifndef;
     const if_;
 
+    var fullClassPrefix=""; // for nested classes
     var out = new Printer(1);
     var next = null;
     var fieldList = [];              // sorted by property name
@@ -724,6 +727,13 @@ function readFiles(files)
         return cppFieldTag.exec(line.substring(where));
     }
 
+    function stackToCppPrefix() {
+        var pfx="";
+        for ( var i=0; i < cppClassStack.length; i++)
+            pfx += cppClassStack[i] + "::";
+        return pfx;
+    }
+
     const nativeAnnotationRegex:RegExp = /^\[native\s*\((.*)\)\s*\]/;
 
     // FIXME: Additional error checking we could add here:
@@ -788,8 +798,10 @@ function readFiles(files)
                         cppClassStack.pop();
                     }
                     if (!(v is GCDataSection)) {
-                        if (v is GCClass)
+                        if (v is GCClass) {
+                            v.fullClassPrefix = stackToCppPrefix();
                             cppClassStack.push(v.cls);
+                        }
                         specs.push(v);
                     }
                 }
@@ -1194,7 +1206,7 @@ function constructAndPrintTracers()
                     NL();
             if (c.probablyLarge) {
                 output.
-                    PR("bool " + c.cls + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").
+                    PR("bool " + c.fullName() + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").
                     PR("{").
                     DO(function (output) {
                             if (output === builtins) {
@@ -1217,7 +1229,7 @@ function constructAndPrintTracers()
             }
             else {
                 output.
-                    PR("bool " + c.cls + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").
+                    PR("bool " + c.fullName() + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").
                     PR("{").
                     IN().
                     PR("(void)gc;").
