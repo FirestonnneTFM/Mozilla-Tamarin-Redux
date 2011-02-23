@@ -1092,6 +1092,8 @@ function constructTracerBodies()
         case "GCFinalizedObject":
         case "MMgc::GCTraceableObject":
         case "GCTraceableObject":
+        case "MMgc::RCObject":
+        case "RCObject":
             return true;
         default:
             return false;
