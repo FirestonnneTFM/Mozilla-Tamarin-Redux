@@ -62,8 +62,3 @@ export LIBPATH="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;c:\Program File
 if [ "$compile64" == "true" ]; then
     . ../windows64/scripts/environment.sh
 fi
-
-
-## Used by make in the build scripts
-export make_opt="-j16"
-

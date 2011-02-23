@@ -48,7 +48,3 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=mac
-
-## Used by make in the build scripts
-export make_opt="-j24"
-

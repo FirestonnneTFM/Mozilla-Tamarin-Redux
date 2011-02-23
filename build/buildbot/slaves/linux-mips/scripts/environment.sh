@@ -52,8 +52,8 @@ export platform=linux
 export shell_release=avmshell_mips
 export shell_debug=avmshell_mips_d
 
-## Used by make in the build scripts
-export make_opt="-j2"
+# Override the default MAKE_OPTIONS env variable on the machine
+export MAKE_OPTIONS="-j2"
 
 # Override this, default is avmshell* and since this slave runs on a machine
 # with other slaves, the process cleaner /can/ find avmshell processes, 

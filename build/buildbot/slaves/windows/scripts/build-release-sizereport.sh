@@ -84,8 +84,8 @@ echo ""
 echo "*******************************************************************************"
 echo ""
 
-make $make_opt clean
-make $make_opt 
+make $MAKE_OPTIONS clean
+make $MAKE_OPTIONS 
 res=$?
 
 test "$res" = "0" || {

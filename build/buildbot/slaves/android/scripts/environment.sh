@@ -49,9 +49,6 @@ export shell_extension=
 
 export platform=android
 
-## Used by make in the build scripts
-export make_opt="-j4"
-
 # Override this, default is avmshell* and since this slave runs on a machine
 # with other slaves, the process cleaner /can/ find avmshell processes, 
 # BUT they will NEVER belong to this slave since the shell is run on a device
