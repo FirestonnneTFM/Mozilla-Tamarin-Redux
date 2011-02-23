@@ -647,6 +647,30 @@ REALLY_INLINE void MethodFrame::setDxns(Namespace* ns)
     dxns = ns;
 }
 
+template<class CLASSMANIFEST>
+CLASSMANIFEST* AvmCore::prepareBuiltinActionPool(PoolObject* pool,
+                                      Toplevel* toplevel,
+                                      CodeContext* codeContext)
+{
+    AvmAssert(pool != NULL);
+    AvmAssert(toplevel != NULL);
+
+    // get the main entry point and its global traits
+    if (pool->scriptCount() == 0)
+    {
+        toplevel->throwVerifyError(kMissingEntryPointError);
+    }
+
+    AvmAssert(codeContext != NULL);
+    AvmAssert(codeContext->domainEnv() != NULL);
+    AvmAssert(codeContext->domainEnv()->domain() == pool->domain);
+
+    AbcEnv* abcEnv = AbcEnv::create(GetGC(), pool, codeContext);
+    ScriptEnv* entryPoint = initAllScripts(toplevel, abcEnv);
+    CLASSMANIFEST* manifest = CLASSMANIFEST::create(entryPoint);
+    return manifest;
+}
+
 
 } // namespace avmplus
 

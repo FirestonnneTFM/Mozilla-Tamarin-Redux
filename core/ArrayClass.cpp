@@ -69,7 +69,6 @@ namespace avmplus
         AvmCore* core = this->core();
         Toplevel* toplevel = this->toplevel();
 
-        toplevel->arrayClass = this;
         AvmAssert(traits()->getSizeOfInstance() == sizeof(ArrayClass));
 
         VTable* ivtable = this->ivtable();
@@ -149,7 +148,7 @@ namespace avmplus
             newLength += b ? b->getLengthProperty() : 1;
         }
 
-        ArrayObject* out = toplevel->arrayClass->newArray(newLength);
+        ArrayObject* out = toplevel->arrayClass()->newArray(newLength);
         ArrayObject* a = toArray(thisAtom);
         if (a)
         {
@@ -301,7 +300,7 @@ namespace avmplus
         if (b < a)
             b = a;
 
-        ArrayObject *out = toplevel->arrayClass->newArray(b-a);
+        ArrayObject *out = toplevel->arrayClass()->newArray(b-a);
 
         uint32_t outIndex=0;
         for (uint32_t i=a; i<b; i++) {
@@ -611,7 +610,7 @@ namespace avmplus
         if (options & kReturnIndexedArray)
         {
             // return the index array without modifying the original array
-            ArrayObject *obj = toplevel->arrayClass->newArray(len);
+            ArrayObject *obj = toplevel->arrayClass()->newArray(len);
 
             for (uint32_t i = 0; i < len; i++)
             {
@@ -1149,7 +1148,7 @@ namespace avmplus
         }
 
         Atom result;
-        ArraySort sort(result, toplevel->arrayClass, d, opt, compare, altCompare, cmp);
+        ArraySort sort(result, toplevel->arrayClass(), d, opt, compare, altCompare, cmp);
 
         return result;
     }
@@ -1190,7 +1189,7 @@ namespace avmplus
             fn[0].name = core->internString(namesAtom);
             fn[0].options = options;
         }
-        else if (AvmCore::istype(namesAtom, toplevel->arrayClass->ivtable()->traits /* array itraits */))
+        else if (AvmCore::istype(namesAtom, toplevel->arrayClass()->ivtable()->traits /* array itraits */))
         {
             ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(namesAtom);
 
@@ -1203,7 +1202,7 @@ namespace avmplus
                 fn[i].options = 0;
             }
 
-            if (AvmCore::istype(optionsAtom, toplevel->arrayClass->ivtable()->traits /* array itraits */))
+            if (AvmCore::istype(optionsAtom, toplevel->arrayClass()->ivtable()->traits /* array itraits */))
             {
                 ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(optionsAtom);
                 uint32_t nOptions = obj->getLength();
@@ -1229,7 +1228,7 @@ namespace avmplus
 
         // ~ArraySort() will "delete [] fn;"
         Atom result;
-        ArraySort sort(result, toplevel->arrayClass, d, options, ArraySort::FieldCompareFunc, NULL, undefinedAtom, nFields, fn);
+        ArraySort sort(result, toplevel->arrayClass(), d, options, ArraySort::FieldCompareFunc, NULL, undefinedAtom, nFields, fn);
         return result;
     }
 
@@ -1275,7 +1274,7 @@ namespace avmplus
             return out;
         }
         // Copy out the elements we are going to remove
-        out = toplevel->arrayClass->newArray(deleteCount);
+        out = toplevel->arrayClass()->newArray(deleteCount);
         for (uint32_t i=0; i< deleteCount; i++) {
             out->setUintProperty(i, d->getUintProperty(i+insertPoint));
         }
@@ -1414,7 +1413,7 @@ namespace avmplus
 
     /*static*/ ArrayObject* ArrayClass::generic_filter(Toplevel* toplevel, Atom thisAtom, ScriptObject *callback, Atom thisObject)
     {
-        ArrayObject *r = toplevel->arrayClass->newArray();
+        ArrayObject *r = toplevel->arrayClass()->newArray();
 
         if (!AvmCore::isObject(thisAtom) || !callback)
             return r;
@@ -1510,7 +1509,7 @@ namespace avmplus
 
     /*static*/ ArrayObject* ArrayClass::generic_map(Toplevel* toplevel, Atom thisAtom, ScriptObject *callback, Atom thisObject)
     {
-        ArrayObject *r = toplevel->arrayClass->newArray();
+        ArrayObject *r = toplevel->arrayClass()->newArray();
 
         if (!AvmCore::isObject(thisAtom) || !callback)
             return r;

@@ -1509,6 +1509,11 @@ class AbcThunkGen:
 
         out.println(' '.join(('}',) * len(nativeIDNamespaces)))
 
+        out.println('namespace %s {' % opts.rootImplNS)
+        self.emitGlueClassManifest(out)
+        out.println('}')
+
+
     def emit_cpp(self, out, name):
 
         out.println(MPL_HEADER);
@@ -1700,6 +1705,42 @@ class AbcThunkGen:
             out_h.indent -= 1
             out_h.println(' '.join(('}',) * len(nsList)))
             out_h.println('')
+
+    def emitGlueClassManifest(self, out):
+        names = []
+        for i in range(0, len(self.abc.classes)):
+            c = self.abc.classes[i]
+            as3name = to_cname(c.itraits.name.name) + "Class"
+            if c.has_cpp_name() or c.itraits.has_cpp_name():
+                cppname = c.fqcppname()
+            else:
+                cppname = BASE_CLASS_NAME
+            clsid = "%s::%s" % (opts.nativeIDNS, self.class_id_name(c))
+            names.append((as3name,cppname,clsid))
+        names = sorted(names)
+        man_name = "%sClassManifest" % self.abc.scriptName
+        out.println("");
+        out.println("class %s : public avmplus::ClassManifestBase" % man_name)
+        out.println("{")
+        out.indent += 1
+        out.println("friend class avmplus::AvmCore;")
+        out.println("friend class avmplus::IntVectorClass;")
+        out.println("friend class avmplus::UIntVectorClass;")
+        out.println("friend class avmplus::DoubleVectorClass;")
+        out.println("friend class avmplus::ObjectVectorClass;")
+        out.indent -= 1
+        out.println("private:")
+        out.indent += 1
+        out.println("REALLY_INLINE %s(avmplus::ScriptEnv* e) : ClassManifestBase(%d, e) { }" % (man_name, len(names)))
+        out.println("REALLY_INLINE static %s* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*%d) %s(e); }" % (man_name, len(names)-1, man_name))
+        out.indent -= 1
+        out.println("public:")
+        out.indent += 1
+        for as3name,cppname,clsid in names:
+            # We can't use static_cast<> because the subclass is only forward-declared at this point
+            out.println("REALLY_INLINE GCRef<%s> get_%s() { return (%s*)(lazyInitClass(%s)); }" % (cppname, as3name, cppname, clsid))
+        out.indent -= 1
+        out.println("};")
 
     @staticmethod
     def cmpSlots(slotA, slotB, slotsTypeInfo):

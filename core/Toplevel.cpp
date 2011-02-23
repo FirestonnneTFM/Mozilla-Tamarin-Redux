@@ -48,9 +48,6 @@ namespace avmplus
         AvmCore* core = this->core();
         MMgc::GC* gc = core->GetGC();
 
-        _builtinClasses = ExactHeapList< RCList<ClassClosure> >::create(gc, core->builtinPool->classCount());
-        _builtinClasses->list.set(core->builtinPool->classCount()-1, 0);
-
         // create a temp object vtable to use, since the real one isn't created yet
         // later, in OP_newclass, we'll replace with the real Object vtable, so methods
         // of Object and Class have the right scope.
@@ -79,18 +76,6 @@ namespace avmplus
         return cc;
     }
 
-    ClassClosure* Toplevel::resolveBuiltinClass(int class_id)
-    {
-#ifdef VMCFG_VERIFYALL
-        if (core()->config.verifyonly)
-            return NULL;
-#endif
-        AvmAssert(_mainEntryPoint == global()->vtable->init);
-        ClassClosure* cc = findClassInScriptEnv(class_id, _mainEntryPoint);
-        _builtinClasses->list.set(class_id, cc);
-        return cc;
-    }
-
     ScriptObject* Toplevel::toPrototype(Atom atom)
     {
         if (!AvmCore::isNullOrUndefined(atom))
@@ -100,10 +85,10 @@ namespace avmplus
             default:
 
             case kNamespaceType:
-                return namespaceClass->prototypePtr();
+                return namespaceClass()->prototypePtr();
 
             case kStringType:
-                return stringClass->prototypePtr();
+                return stringClass()->prototypePtr();
 
             case kObjectType:
                 return AvmCore::atomToScriptObject(atom)->getDelegate();
@@ -111,10 +96,10 @@ namespace avmplus
             case kDoubleType:
             case kIntptrType:
                 // ISSUE what about int?
-                return numberClass->prototypePtr();
+                return numberClass()->prototypePtr();
 
             case kBooleanType:
-                return booleanClass->prototypePtr();
+                return booleanClass()->prototypePtr();
             }
         }
         else
@@ -151,7 +136,7 @@ namespace avmplus
         else
         {
             // TypeError in ECMA
-            ErrorClass *error = typeErrorClass();
+            GCRef<TypeErrorClass> error = typeErrorClass();
             if( error )
                 error->throwError(
                     (atom == undefinedAtom) ? kConvertUndefinedToObjectError :
@@ -624,7 +609,7 @@ namespace avmplus
             }
             // extracting a method
             MethodEnv *m = vtable->methods[AvmCore::bindingToMethodId(b)];
-            return methodClosureClass->create(m, obj)->atom();
+            return methodClosureClass()->create(m, obj)->atom();
         }
 
         case BKIND_VAR:
@@ -1370,32 +1355,6 @@ namespace avmplus
     {
         Multiname mn(core()->findPublicNamespace(), name);
         referenceErrorClass()->throwError(id, core()->toErrorString(mn));
-    }
-
-    DateClass* Toplevel::dateClass() { return (DateClass*)getBuiltinClass(avmplus::NativeID::abcclass_Date); }
-    RegExpClass* Toplevel::regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
-    XMLClass* Toplevel::xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }
-    XMLListClass* Toplevel::xmlListClass() { return (XMLListClass*)getBuiltinClass(avmplus::NativeID::abcclass_XMLList); }
-    QNameClass* Toplevel::qnameClass() { return (QNameClass*)getBuiltinClass(avmplus::NativeID::abcclass_QName); }
-    ByteArrayClass* Toplevel::byteArrayClass() { return (ByteArrayClass*)getBuiltinClass(avmplus::NativeID::abcclass_flash_utils_ByteArray); }
-    ErrorClass* Toplevel::errorClass() const { return getErrorClass(avmplus::NativeID::abcclass_Error); }
-    ErrorClass* Toplevel::argumentErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ArgumentError); }
-    ErrorClass* Toplevel::evalErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_EvalError); }
-    ErrorClass* Toplevel::typeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_TypeError); }
-    ErrorClass* Toplevel::rangeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_RangeError); }
-    ErrorClass* Toplevel::uriErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_URIError); }
-    ErrorClass* Toplevel::referenceErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ReferenceError); }
-    ErrorClass* Toplevel::securityErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SecurityError); }
-    ErrorClass* Toplevel::syntaxErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SyntaxError); }
-    ErrorClass* Toplevel::verifyErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_VerifyError); }
-    ErrorClass* Toplevel::ioErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_flash_errors_IOError); }
-    ErrorClass* Toplevel::eofErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_flash_errors_EOFError); }
-    ErrorClass* Toplevel::memoryErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_flash_errors_MemoryError); }
-
-    // virtual
-    ClassClosure *Toplevel::getBuiltinExtensionClass(int /*clsid*/)
-    {
-        return NULL;
     }
 
     // virtual

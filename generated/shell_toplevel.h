@@ -40,6 +40,7 @@
 namespace avmplus {
     class ArrayObject; // Array
     class ClassClosure; // Class
+    class ClassFactoryClass; // flash.sampler::ClassFactory$
     class DeleteObjectSampleClass; // flash.sampler::DeleteObjectSample$
     class DeleteObjectSampleObject; // flash.sampler::DeleteObjectSample
     class DictionaryClass; // flash.utils::Dictionary$
@@ -54,6 +55,7 @@ namespace avmplus {
     class SampleObject; // flash.sampler::Sample
     class ScriptObject; // avmplus::System
     class ScriptObject; // avmplus::File
+    class ScriptObject; // flash.sampler::ClassFactory
     class ScriptObject; // flash.trace::Trace
     class StackFrameClass; // flash.sampler::StackFrame$
     class StackFrameObject; // flash.sampler::StackFrame
@@ -132,12 +134,13 @@ const uint32_t abcclass_avmshell_SubclassOfAbstractRestrictedBase = 35;
 const uint32_t abcclass_avmplus_Domain = 36;
 const uint32_t abcclass_flash_sampler_StackFrame = 37;
 const uint32_t abcclass_flash_sampler_Sample = 38;
-const uint32_t abcclass_flash_sampler_NewObjectSample = 39;
-const uint32_t abcclass_flash_sampler_DeleteObjectSample = 40;
-const uint32_t abcclass_flash_trace_Trace = 41;
-const uint32_t abcclass_flash_utils_Dictionary = 42;
-const uint32_t abcclass_flash_utils_Endian = 43;
-const uint32_t abcclass_avmplus_JObject = 44;
+const uint32_t abcclass_flash_sampler_ClassFactory = 39;
+const uint32_t abcclass_flash_sampler_NewObjectSample = 40;
+const uint32_t abcclass_flash_sampler_DeleteObjectSample = 41;
+const uint32_t abcclass_flash_trace_Trace = 42;
+const uint32_t abcclass_flash_utils_Dictionary = 43;
+const uint32_t abcclass_flash_utils_Endian = 44;
+const uint32_t abcclass_avmplus_JObject = 45;
 
 /* methods */
 const uint32_t avmplus_MI_plus = 43;
@@ -181,28 +184,28 @@ const uint32_t native_script_function_flash_sampler_getLexicalScopes = 184;
 const uint32_t native_script_function_flash_sampler_isGetterSetter = 185;
 const uint32_t native_script_function_flash_sampler__getInvocationCount = 186;
 const uint32_t native_script_function_flash_sampler_getSampleCount = 190;
-const uint32_t native_script_function_flash_sampler_getSamples = 191;
-const uint32_t native_script_function_flash_sampler_getMemberNames = 192;
-const uint32_t native_script_function_flash_sampler_getSize = 193;
-const uint32_t native_script_function_flash_sampler__setSamplerCallback = 194;
-const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 197;
-const uint32_t native_script_function_flash_sampler_pauseSampling = 198;
-const uint32_t native_script_function_flash_sampler_stopSampling = 199;
-const uint32_t native_script_function_flash_sampler_startSampling = 200;
-const uint32_t native_script_function_flash_sampler_clearSamples = 201;
-const uint32_t flash_sampler_NewObjectSample_object_get = 208;
-const uint32_t flash_sampler_NewObjectSample_size_get = 209;
-const uint32_t flash_trace_Trace_setLevel = 215;
-const uint32_t flash_trace_Trace_getLevel = 216;
-const uint32_t flash_trace_Trace_setListener = 217;
-const uint32_t flash_trace_Trace_getListener = 218;
-const uint32_t flash_utils_Dictionary_private_init = 222;
-const uint32_t avmplus_JObject_create = 229;
-const uint32_t avmplus_JObject_createArray = 230;
-const uint32_t avmplus_JObject_toArray = 231;
-const uint32_t avmplus_JObject_constructorSignature = 232;
-const uint32_t avmplus_JObject_methodSignature = 233;
-const uint32_t avmplus_JObject_fieldSignature = 234;
+const uint32_t native_script_function_flash_sampler__getSamples = 191;
+const uint32_t native_script_function_flash_sampler_getMemberNames = 193;
+const uint32_t native_script_function_flash_sampler_getSize = 194;
+const uint32_t native_script_function_flash_sampler__setSamplerCallback = 195;
+const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 198;
+const uint32_t native_script_function_flash_sampler_pauseSampling = 199;
+const uint32_t native_script_function_flash_sampler_stopSampling = 200;
+const uint32_t native_script_function_flash_sampler_startSampling = 201;
+const uint32_t native_script_function_flash_sampler_clearSamples = 202;
+const uint32_t flash_sampler_NewObjectSample_object_get = 211;
+const uint32_t flash_sampler_NewObjectSample_size_get = 212;
+const uint32_t flash_trace_Trace_setLevel = 218;
+const uint32_t flash_trace_Trace_getLevel = 219;
+const uint32_t flash_trace_Trace_setListener = 220;
+const uint32_t flash_trace_Trace_getListener = 221;
+const uint32_t flash_utils_Dictionary_private_init = 225;
+const uint32_t avmplus_JObject_create = 232;
+const uint32_t avmplus_JObject_createArray = 233;
+const uint32_t avmplus_JObject_toArray = 234;
+const uint32_t avmplus_JObject_constructorSignature = 235;
+const uint32_t avmplus_JObject_methodSignature = 236;
+const uint32_t avmplus_JObject_fieldSignature = 237;
 
 extern avmplus::Atom avmplus_Domain_currentDomain_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -221,7 +224,7 @@ extern avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_t
 extern avmplus::Atom native_script_function_flash_sampler__setSamplerCallback_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double native_script_function_flash_sampler_getSize_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
-extern avmplus::Atom native_script_function_flash_sampler_getSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
+extern avmplus::Atom native_script_function_flash_sampler__getSamples_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double native_script_function_flash_sampler_getSampleCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double native_script_function_flash_sampler__getInvocationCount_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_flash_sampler_isGetterSetter_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -794,6 +797,41 @@ private:
 
 //-----------------------------------------------------------
 
+// flash.sampler::ClassFactory$
+//-----------------------------------------------------------
+class avmplus_ClassFactoryClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE avmplus::ClassClosure* get_StackFrameClass() const { return m_StackFrameClass; }
+    REALLY_INLINE avmplus::ClassClosure* get_SampleClass() const { return m_SampleClass; }
+    REALLY_INLINE avmplus::ClassClosure* get_DeleteObjectSampleClass() const { return m_DeleteObjectSampleClass; }
+    REALLY_INLINE avmplus::ClassClosure* get_NewObjectSampleClass() const { return m_NewObjectSampleClass; }
+private:
+    DRCWB(avmplus::ClassClosure*) m_StackFrameClass;
+    DRCWB(avmplus::ClassClosure*) m_SampleClass;
+    DRCWB(avmplus::ClassClosure*) m_DeleteObjectSampleClass;
+    DRCWB(avmplus::ClassClosure*) m_NewObjectSampleClass;
+};
+#define DECLARE_SLOTS_ClassFactoryClass \
+    public: \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+    public: \
+        AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
+    private: \
+        AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE avmplus::ClassClosure* get_StackFrameClass() const { return m_slots_ClassFactoryClass.get_StackFrameClass(); } \
+        REALLY_INLINE avmplus::ClassClosure* get_SampleClass() const { return m_slots_ClassFactoryClass.get_SampleClass(); } \
+        REALLY_INLINE avmplus::ClassClosure* get_DeleteObjectSampleClass() const { return m_slots_ClassFactoryClass.get_DeleteObjectSampleClass(); } \
+        REALLY_INLINE avmplus::ClassClosure* get_NewObjectSampleClass() const { return m_slots_ClassFactoryClass.get_NewObjectSampleClass(); } \
+    private: \
+        avmplus::NativeID::avmplus_ClassFactoryClassSlots m_slots_ClassFactoryClass \
+
+//-----------------------------------------------------------
+
 // flash.sampler::NewObjectSample$
 //-----------------------------------------------------------
 class avmplus_NewObjectSampleClassSlots
@@ -1027,3 +1065,64 @@ private:
 //-----------------------------------------------------------
 
 } }
+namespace avmplus {
+
+class shell_toplevelClassManifest : public avmplus::ClassManifestBase
+{
+    friend class avmplus::AvmCore;
+    friend class avmplus::IntVectorClass;
+    friend class avmplus::UIntVectorClass;
+    friend class avmplus::DoubleVectorClass;
+    friend class avmplus::ObjectVectorClass;
+private:
+    REALLY_INLINE shell_toplevelClassManifest(avmplus::ScriptEnv* e) : ClassManifestBase(46, e) { }
+    REALLY_INLINE static shell_toplevelClassManifest* create(avmplus::ScriptEnv* e) { return new (MMgc::GC::GetGC(e), MMgc::kExact, sizeof(ClassClosure*)*45) shell_toplevelClassManifest(e); }
+public:
+    REALLY_INLINE GCRef<avmshell::AbstractBaseClass> get_AbstractBaseClass() { return (avmshell::AbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractBase)); }
+    REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseClass> get_AbstractRestrictedBaseClass() { return (avmshell::AbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractRestrictedBase)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_CTestClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_CTest)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_CapabilitiesClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_Capabilities)); }
+    REALLY_INLINE GCRef<avmshell::CheckBaseClass> get_CheckBaseClass() { return (avmshell::CheckBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_CheckBase)); }
+    REALLY_INLINE GCRef<avmplus::ClassFactoryClass> get_ClassFactoryClass() { return (avmplus::ClassFactoryClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_ClassFactory)); }
+    REALLY_INLINE GCRef<avmplus::DeleteObjectSampleClass> get_DeleteObjectSampleClass() { return (avmplus::DeleteObjectSampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_DeleteObjectSample)); }
+    REALLY_INLINE GCRef<avmplus::DictionaryClass> get_DictionaryClass() { return (avmplus::DictionaryClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Dictionary)); }
+    REALLY_INLINE GCRef<avmplus::DomainClass> get_DomainClass() { return (avmplus::DomainClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_Domain)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_EndianClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Endian)); }
+    REALLY_INLINE GCRef<avmshell::FileClass> get_FileClass() { return (avmshell::FileClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_File)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_ITestClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_ITest)); }
+    REALLY_INLINE GCRef<avmplus::JObjectClass> get_JObjectClass() { return (avmplus::JObjectClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_JObject)); }
+    REALLY_INLINE GCRef<avmshell::MIClass> get_MIClass() { return (avmshell::MIClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_MI)); }
+    REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractBaseClass> get_NativeSubclassOfAbstractBaseClass() { return (avmshell::NativeSubclassOfAbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfAbstractBase)); }
+    REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseClass> get_NativeSubclassOfAbstractRestrictedBaseClass() { return (avmshell::NativeSubclassOfAbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfAbstractRestrictedBase)); }
+    REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseClass> get_NativeSubclassOfRestrictedBaseClass() { return (avmshell::NativeSubclassOfRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_NativeSubclassOfRestrictedBase)); }
+    REALLY_INLINE GCRef<avmplus::NewObjectSampleClass> get_NewObjectSampleClass() { return (avmplus::NewObjectSampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_NewObjectSample)); }
+    REALLY_INLINE GCRef<avmshell::RestrictedBaseClass> get_RestrictedBaseClass() { return (avmshell::RestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_RestrictedBase)); }
+    REALLY_INLINE GCRef<avmplus::SampleClass> get_SampleClass() { return (avmplus::SampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_Sample)); }
+    REALLY_INLINE GCRef<avmplus::StackFrameClass> get_StackFrameClass() { return (avmplus::StackFrameClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_StackFrame)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_SubclassOfAbstractBaseClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfAbstractBase)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_SubclassOfAbstractRestrictedBaseClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfAbstractRestrictedBase)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_SubclassOfRestrictedBaseClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfRestrictedBase)); }
+    REALLY_INLINE GCRef<avmshell::SystemClass> get_SystemClass() { return (avmshell::SystemClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_System)); }
+    REALLY_INLINE GCRef<avmplus::TraceClass> get_TraceClass() { return (avmplus::TraceClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_trace_Trace)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_classClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5_1Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_1)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_FP_10_0_32Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32_AIR_1_0_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interfaceClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5_1Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_1)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_1_FP_10_0_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_FP_10_0_32Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0_32)); }
+    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0_32_AIR_1_0_FP_10_0)); }
+};
+}

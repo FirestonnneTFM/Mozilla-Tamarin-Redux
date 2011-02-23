@@ -243,23 +243,10 @@ namespace avmshell
             return (ShellCore*)Toplevel::core();
         }
 
-        virtual ClassClosure *getBuiltinExtensionClass(int class_id)
-        {
-            return shellClasses->list[class_id] ? shellClasses->list[class_id] : resolveShellClass(class_id);
-        }
-
     private:
-        ClassClosure* resolveShellClass(int class_id)
-        {
-            ClassClosure* cc = findClassInScriptEnv(class_id, shellEntryPoint);
-            shellClasses->list.set(class_id, cc);
-            return cc;
-        }
-
         GC_DATA_BEGIN(ShellToplevel)
         
-        DWB(ScriptEnv*)                             GC_POINTER(shellEntryPoint);
-        DWB(ExactHeapList< RCList<ClassClosure> >*) GC_POINTER(shellClasses);
+        DWB(shell_toplevelClassManifest*)           GC_POINTER(shellClasses);
 
         GC_DATA_END(ShellToplevel)
     };

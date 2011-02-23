@@ -74,7 +74,6 @@ bool ShellToplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     avmplus::Toplevel::gcTrace(gc, 0);
     (void)(avmplus_Toplevel_isExactInterlock != 0);
     gc->TraceLocation(&shellClasses);
-    gc->TraceLocation(&shellEntryPoint);
     return false;
 }
 

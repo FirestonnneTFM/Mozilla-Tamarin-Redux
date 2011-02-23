@@ -46,7 +46,7 @@ namespace avmplus
     NamespaceClass::NamespaceClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        toplevel()->namespaceClass = this;
+        toplevel()->_namespaceClass = this;
         AvmAssert(traits()->getSizeOfInstance() == sizeof(NamespaceClass));
         createVanillaPrototype();
     }

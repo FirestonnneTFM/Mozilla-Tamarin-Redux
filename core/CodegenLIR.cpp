@@ -6429,12 +6429,12 @@ namespace avmplus
         LIns* toplevel = loadEnvToplevel();
 
         int offset;
-        if (t == NAMESPACE_TYPE)    offset = offsetof(Toplevel, namespaceClass);
-        else if (t == STRING_TYPE)  offset = offsetof(Toplevel, stringClass);
-        else if (t == BOOLEAN_TYPE) offset = offsetof(Toplevel, booleanClass);
-        else if (t == NUMBER_TYPE)  offset = offsetof(Toplevel, numberClass);
-        else if (t == INT_TYPE)     offset = offsetof(Toplevel, intClass);
-        else if (t == UINT_TYPE)    offset = offsetof(Toplevel, uintClass);
+        if (t == NAMESPACE_TYPE)    offset = offsetof(Toplevel, _namespaceClass);
+        else if (t == STRING_TYPE)  offset = offsetof(Toplevel, _stringClass);
+        else if (t == BOOLEAN_TYPE) offset = offsetof(Toplevel, _booleanClass);
+        else if (t == NUMBER_TYPE)  offset = offsetof(Toplevel, _numberClass);
+        else if (t == INT_TYPE)     offset = offsetof(Toplevel, _intClass);
+        else if (t == UINT_TYPE)    offset = offsetof(Toplevel, _uintClass);
         else
         {
             // *, Object or Void

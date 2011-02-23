@@ -188,7 +188,7 @@ namespace avmplus
         AvmCore* core = toplevel->core();
         Namespacep traitsNs = this->traits->ns();
 
-        VTable* objVecVTable = toplevel->objectVectorClass->vtable;
+        VTable* objVecVTable = toplevel->objectVectorClass()->vtable;
         AbcEnv* objVecAbcEnv = toplevel->vectorobj_cscope->abcEnv();
         Toplevel* objVecToplevel = objVecVTable->toplevel();
         VTable* objVecIVTable = objVecVTable->ivtable;
@@ -196,9 +196,9 @@ namespace avmplus
         // these cases should all be filtered out by the caller;
         // we only want to handle Vector<SomeObject> here
         AvmAssert(param_traits != NULL &&
-                    param_traits != toplevel->intClass->vtable->traits->itraits &&
-                    param_traits != toplevel->uintClass->vtable->traits->itraits &&
-                    param_traits != toplevel->numberClass->vtable->traits->itraits);
+                    param_traits != toplevel->intClass()->vtable->traits->itraits &&
+                    param_traits != toplevel->uintClass()->vtable->traits->itraits &&
+                    param_traits != toplevel->numberClass()->vtable->traits->itraits);
 
         PoolObject* traitsPool = this->traits->pool;
 

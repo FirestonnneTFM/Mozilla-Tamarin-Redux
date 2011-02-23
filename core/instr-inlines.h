@@ -161,7 +161,7 @@ Binding getBinding(E env, VTable* vtable, const Multiname* ref)
 template <class E> REALLY_INLINE
 ArrayObject* newarray(E caller_env, int argc, Atom* ap) {
     Toplevel* toplevel = caller_env->toplevel();
-    ArrayClass* arrayClass = toplevel->arrayClass;
+    ArrayClass* arrayClass = toplevel->arrayClass();
     return arrayClass->newarray(ap, argc);
 }
 

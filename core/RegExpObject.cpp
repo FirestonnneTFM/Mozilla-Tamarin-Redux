@@ -292,7 +292,7 @@ namespace avmplus
 
     ArrayObject* RegExpObject::split(Stringp subject, uint32_t limit)
     {
-        ArrayObject *out = toplevel()->arrayClass->newArray();
+        ArrayObject *out = toplevel()->arrayClass()->newArray();
         StIndexableUTF8String utf8Subject(subject);
 
         int startIndex=0;
@@ -411,7 +411,7 @@ namespace avmplus
         }
 
         AvmCore *core = this->core();
-        ArrayObject *a = toplevel()->arrayClass->newArray(results);
+        ArrayObject *a = toplevel()->arrayClass()->newArray(results);
 
         a->setAtomProperty(core->kindex->atom(),
                core->intToAtom(utf8Subject.toIndex(ovector[0])));
@@ -478,7 +478,7 @@ namespace avmplus
         }
         else
         {
-            ArrayObject *a = toplevel()->arrayClass->newArray();
+            ArrayObject *a = toplevel()->arrayClass()->newArray();
 
             int oldLastIndex = m_lastIndex;
             m_lastIndex = 0;

@@ -44,7 +44,7 @@ namespace avmplus
 {
     IntClass::IntClass(VTable* cvtable) : ClassClosure(cvtable)
     {
-        toplevel()->intClass = this;
+        toplevel()->_intClass = this;
         // prototype objects are always vanilla objects.
         createVanillaPrototype();
     }
@@ -60,7 +60,7 @@ namespace avmplus
 
     UIntClass::UIntClass(VTable* cvtable) : ClassClosure(cvtable)
     {
-        toplevel()->uintClass = this;
+        toplevel()->_uintClass = this;
         // prototype objects are always vanilla objects.
         createVanillaPrototype();
     }

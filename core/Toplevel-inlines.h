@@ -44,7 +44,48 @@ REALLY_INLINE Toplevel* Toplevel::create(MMgc::GC* gc, AbcEnv* abcEnv)
 {
     return new (gc, MMgc::kExact) Toplevel(abcEnv);
 }
+
+REALLY_INLINE GCRef<builtinClassManifest> Toplevel::builtinClasses() const
+{
+    AvmAssert(_builtinClasses != NULL);
+    return GCRef<builtinClassManifest>(_builtinClasses);
+}
     
+REALLY_INLINE GCRef<ArgumentErrorClass> Toplevel::argumentErrorClass() const { return builtinClasses()->get_ArgumentErrorClass(); }
+REALLY_INLINE GCRef<ArrayClass> Toplevel::arrayClass() const { return builtinClasses()->get_ArrayClass(); }
+REALLY_INLINE GCRef<BooleanClass> Toplevel::booleanClass() const { return builtinClasses()->get_BooleanClass(); }
+REALLY_INLINE GCRef<ByteArrayClass> Toplevel::byteArrayClass() const { return builtinClasses()->get_ByteArrayClass(); }
+REALLY_INLINE GCRef<ClassClass> Toplevel::classClass() const { return builtinClasses()->get_ClassClass(); }
+REALLY_INLINE GCRef<ClassClosure> Toplevel::eofErrorClass() const { return builtinClasses()->get_EOFErrorClass(); }
+REALLY_INLINE GCRef<ClassClosure> Toplevel::ioErrorClass() const { return builtinClasses()->get_IOErrorClass(); }
+REALLY_INLINE GCRef<ClassClosure> Toplevel::memoryErrorClass() const { return builtinClasses()->get_MemoryErrorClass(); }
+REALLY_INLINE GCRef<DateClass> Toplevel::dateClass() const { return builtinClasses()->get_DateClass(); }
+REALLY_INLINE GCRef<DoubleVectorClass> Toplevel::doubleVectorClass() const { return builtinClasses()->get_Vector_doubleClass(); }
+REALLY_INLINE GCRef<ErrorClass> Toplevel::errorClass() const { return builtinClasses()->get_ErrorClass(); }
+REALLY_INLINE GCRef<EvalErrorClass> Toplevel::evalErrorClass() const { return builtinClasses()->get_EvalErrorClass(); }
+REALLY_INLINE GCRef<FunctionClass> Toplevel::functionClass() const { return builtinClasses()->get_FunctionClass(); }
+REALLY_INLINE GCRef<IntClass> Toplevel::intClass() const { return builtinClasses()->get_intClass(); }
+REALLY_INLINE GCRef<IntVectorClass> Toplevel::intVectorClass() const { return builtinClasses()->get_Vector_intClass(); }
+REALLY_INLINE GCRef<MethodClosureClass> Toplevel::methodClosureClass() const { return builtinClasses()->get_MethodClosureClass(); }
+REALLY_INLINE GCRef<NamespaceClass> Toplevel::namespaceClass() const { return builtinClasses()->get_NamespaceClass(); }
+REALLY_INLINE GCRef<NumberClass> Toplevel::numberClass() const { return builtinClasses()->get_NumberClass(); }
+REALLY_INLINE GCRef<ObjectVectorClass> Toplevel::objectVectorClass() const { return builtinClasses()->get_Vector_objectClass(); }
+REALLY_INLINE GCRef<QNameClass> Toplevel::qnameClass() const { return builtinClasses()->get_QNameClass(); }
+REALLY_INLINE GCRef<RangeErrorClass> Toplevel::rangeErrorClass() const { return builtinClasses()->get_RangeErrorClass(); }
+REALLY_INLINE GCRef<ReferenceErrorClass> Toplevel::referenceErrorClass() const { return builtinClasses()->get_ReferenceErrorClass(); }
+REALLY_INLINE GCRef<RegExpClass> Toplevel::regexpClass() const { return builtinClasses()->get_RegExpClass(); }
+REALLY_INLINE GCRef<SecurityErrorClass> Toplevel::securityErrorClass() const { return builtinClasses()->get_SecurityErrorClass(); }
+REALLY_INLINE GCRef<StringClass> Toplevel::stringClass() const { return builtinClasses()->get_StringClass(); }
+REALLY_INLINE GCRef<SyntaxErrorClass> Toplevel::syntaxErrorClass() const { return builtinClasses()->get_SyntaxErrorClass(); }
+REALLY_INLINE GCRef<TypeErrorClass> Toplevel::typeErrorClass() const { return builtinClasses()->get_TypeErrorClass(); }
+REALLY_INLINE GCRef<UIntClass> Toplevel::uintClass() const { return builtinClasses()->get_uintClass(); }
+REALLY_INLINE GCRef<UIntVectorClass> Toplevel::uintVectorClass() const { return builtinClasses()->get_Vector_uintClass(); }
+REALLY_INLINE GCRef<URIErrorClass> Toplevel::uriErrorClass() const { return builtinClasses()->get_URIErrorClass(); }
+REALLY_INLINE GCRef<VectorClass> Toplevel::vectorClass() const { return builtinClasses()->get_VectorClass(); }
+REALLY_INLINE GCRef<VerifyErrorClass> Toplevel::verifyErrorClass() const { return builtinClasses()->get_VerifyErrorClass(); }
+REALLY_INLINE GCRef<XMLClass> Toplevel::xmlClass() const { return builtinClasses()->get_XMLClass(); }
+REALLY_INLINE GCRef<XMLListClass> Toplevel::xmlListClass() const { return builtinClasses()->get_XMLListClass(); }
+
 REALLY_INLINE Atom Toplevel::callproperty(Atom base, const Multiname* name, int argc, Atom* atomv, VTable* vtable)
 {
     AssertNotNull(base);
@@ -90,18 +131,6 @@ REALLY_INLINE QNameObject* Toplevel::ToAttributeName(const Stringp arg)
 REALLY_INLINE Atom Toplevel::coerce(Atom atom, Traits* expected) const
 {
     return avmplus::coerce(this, atom, expected);
-}
-
-REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
-{
-    if (_builtinClasses->list[class_id])
-        return _builtinClasses->list[class_id];
-    return const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
-}
-
-REALLY_INLINE ErrorClass* Toplevel::getErrorClass(int class_id) const
-{
-    return (ErrorClass*)getBuiltinClass(class_id);
 }
 
 // static
@@ -171,11 +200,11 @@ REALLY_INLINE Atom Toplevel::add2(Atom val1, Atom val2)
     return avmplus::op_add(this->core(), val1, val2);
 }
 
-REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main)
+REALLY_INLINE void Toplevel::init_mainEntryPoint(ScriptEnv* main, builtinClassManifest* builtins)
 {
     AvmAssert(_mainEntryPoint == NULL);
     _mainEntryPoint = main;
-
+    _builtinClasses = builtins;
 }
 
 REALLY_INLINE ScopeChain* Toplevel::toplevel_scope()

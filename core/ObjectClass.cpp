@@ -62,7 +62,7 @@ namespace avmplus
         // patch global.__proto__ = Object.prototype
         Toplevel* toplevel = this->toplevel();
         toplevel->global()->setDelegate(prototypePtr());                // global.__proto__ = Object.prototype
-        this->setDelegate(toplevel->classClass->prototypePtr());        // Object.__proto__ = Class.prototype
+        this->setDelegate(toplevel->classClass()->prototypePtr());        // Object.__proto__ = Class.prototype
     }
 
     ScriptObject* ObjectClass::construct()

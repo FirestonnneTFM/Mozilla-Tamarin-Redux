@@ -185,7 +185,7 @@ namespace avmplus
             Sample s;
             sampler->readSample(cursor, s);
             count--;
-            ScriptObject* sam = SamplerScript::makeSample(script, s);
+            ScriptObject* sam = SamplerScript::makeSample(script, cf, s);
             if(!sam) {
                 count = 0;
                 return undefinedAtom;
@@ -206,6 +206,8 @@ namespace avmplus
         uint32_t count;
         uint8_t *cursor;
         DRCWB(ScriptObject*) script;
+    public:
+        DRCWB(ClassFactoryClass*) cf;
     };
 
     class SlotIterator : public ScriptObject
@@ -263,7 +265,7 @@ namespace avmplus
     }
 #endif
 
-    Atom SamplerScript::getSamples(ScriptObject* self)
+    Atom SamplerScript::_getSamples(ScriptObject* self, ClassClosure* cf)
     {
 #ifdef DEBUGGER
         AvmCore* core = self->core();
@@ -273,10 +275,11 @@ namespace avmplus
 
         if (s->sampleIteratorVTable == NULL)
             s->sampleIteratorVTable = _newVT(self->toplevel(), self->traits()->pool, sizeof(SampleIterator));
-        ScriptObject *iter = new (self->gc()) SampleIterator(self, s->sampleIteratorVTable);
+        SampleIterator* iter = new (self->gc()) SampleIterator(self, s->sampleIteratorVTable);
+        iter->cf = (ClassFactoryClass*)cf;
         return iter->atom();
 #else
-        (void)self;
+        (void)self; (void)cf;
         return undefinedAtom;
 #endif
     }
@@ -313,13 +316,13 @@ namespace avmplus
                 // for the sampler)
                 tl = sotGetToplevel(sot);
                 if (!tl) tl = ss_toplevel;
-                return tl->stringClass;
+                return tl->stringClass();
             }
             case kSOT_Namespace:
             {
                 tl = sotGetToplevel(sot);
                 if (!tl) tl = ss_toplevel;
-                return tl->namespaceClass;
+                return tl->namespaceClass();
             }
             default:
                 AvmAssert(0);
@@ -335,11 +338,11 @@ namespace avmplus
         ScriptObject* obj = (ScriptObject*)ptr;
         if (obj && AvmCore::istype(obj->atom(), core->traits.class_itraits))
         {
-            type = tl->classClass;
+            type = tl->classClass();
         }
         else if (obj && AvmCore::istype(obj->atom(), core->traits.function_itraits))
         {
-            type = tl->functionClass;
+            type = tl->functionClass();
         }
         else if (obj && obj->traits()->isActivationTraits())
         {
@@ -363,7 +366,7 @@ namespace avmplus
             if (sc && sc->getSize() <= 1)
             {
                 if(sc->getSize() == 1)
-                    type = tl->classClass;
+                    type = tl->classClass();
             }
             else if (sc)
             {
@@ -374,7 +377,7 @@ namespace avmplus
                     if(!AvmCore::istype(type->atom(), core->traits.class_itraits))
                     {
                         // obj is a ClassClosure
-                        type = tl->classClass;
+                        type = tl->classClass();
                     }
                 }
             }
@@ -385,7 +388,7 @@ namespace avmplus
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
-    bool SamplerScript::set_stack(ScriptObject* self, const Sample& sample, SampleObject* sam)
+    bool SamplerScript::set_stack(ScriptObject* self, ClassFactoryClass* cf, const Sample& sample, SampleObject* sam)
     {
         if (sample.stack.depth > 0)
         {
@@ -393,8 +396,8 @@ namespace avmplus
             AvmCore* core = toplevel->core();
             Sampler* s = core->get_sampler();
 
-            StackFrameClass* sfcc = (StackFrameClass*)toplevel->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame);
-            ArrayObject* stack = toplevel->arrayClass->newArray(sample.stack.depth);
+            StackFrameClass* sfcc = (StackFrameClass*)cf->get_StackFrameClass();
+            ArrayObject* stack = toplevel->arrayClass()->newArray(sample.stack.depth);
             StackTrace::Element* e = (StackTrace::Element*)sample.stack.trace;
             for(uint32_t i=0; i < sample.stack.depth; i++, e++)
             {
@@ -420,16 +423,7 @@ namespace avmplus
         return true;
     }
 
-    SampleObject* SamplerScript::new_sam(ScriptObject* self, const Sample& sample, int clsid)
-    {
-        Toplevel* toplevel = self->toplevel();
-        ClassClosure* cc = toplevel->getBuiltinExtensionClass(clsid);
-        SampleObject* sam = (SampleObject*)cc->newInstance();
-        sam->set_time(static_cast<double>(sample.micros));
-        return sam;
-    }
-
-    ScriptObject* SamplerScript::makeSample(ScriptObject* self, const Sample& sample)
+    ScriptObject* SamplerScript::makeSample(ScriptObject* self, ClassFactoryClass* cf, const Sample& sample)
     {
         Toplevel* toplevel = self->toplevel();
         AvmCore* core = toplevel->core();
@@ -441,23 +435,26 @@ namespace avmplus
         {
             case Sampler::RAW_SAMPLE:
             {
-                SampleObject* sam = new_sam(self, sample, NativeID::abcclass_flash_sampler_Sample);
-                if (!set_stack(self, sample, sam))
+                SampleObject* sam = (SampleObject*)cf->get_SampleClass()->newInstance();
+                sam->set_time(static_cast<double>(sample.micros));
+                if (!set_stack(self, cf, sample, sam))
                     return NULL;
                 return sam;
             }
             case Sampler::DELETED_OBJECT_SAMPLE:
             {
-                DeleteObjectSampleObject* dsam = (DeleteObjectSampleObject*)new_sam(self, sample, NativeID::abcclass_flash_sampler_DeleteObjectSample);
+                DeleteObjectSampleObject* dsam = (DeleteObjectSampleObject*)cf->get_DeleteObjectSampleClass()->newInstance();
+                dsam->set_time(static_cast<double>(sample.micros));
                 dsam->set_id(static_cast<double>(sample.id));
                 dsam->set_size(static_cast<double>(sample.size));
                 return dsam;
             }
             case Sampler::NEW_OBJECT_SAMPLE:
             {
-                NewObjectSampleObject* nsam = (NewObjectSampleObject*)new_sam(self, sample, NativeID::abcclass_flash_sampler_NewObjectSample);
+                NewObjectSampleObject* nsam = (NewObjectSampleObject*)cf->get_NewObjectSampleClass()->newInstance();
+                nsam->set_time(static_cast<double>(sample.micros));
                 nsam->set_id(static_cast<double>(sample.id));
-                if (!set_stack(self, sample, nsam))
+                if (!set_stack(self, cf, sample, nsam))
                     return NULL;
                 if (sample.ptr != NULL )
                     nsam->setRef((AvmPlusScriptableObject*)sample.ptr);
@@ -467,9 +464,10 @@ namespace avmplus
             }
             case Sampler::NEW_AUX_SAMPLE:
             {
-                NewObjectSampleObject* nsam = (NewObjectSampleObject*)new_sam(self, sample, NativeID::abcclass_flash_sampler_NewObjectSample);
+                NewObjectSampleObject* nsam = (NewObjectSampleObject*)cf->get_NewObjectSampleClass()->newInstance();
+                nsam->set_time(static_cast<double>(sample.micros));
                 nsam->set_id(static_cast<double>(sample.id));
-                if (!set_stack(self, sample, nsam))
+                if (!set_stack(self, cf, sample, nsam))
                     return NULL;
                 nsam->setSize(sample.alloc_size);
                 return nsam;

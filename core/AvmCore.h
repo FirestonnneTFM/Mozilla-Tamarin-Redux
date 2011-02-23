@@ -675,9 +675,10 @@ const int kBufferPadding = 16;
                                    Toplevel* toplevel,
                                    CodeContext *codeContext);
 
-        ScriptEnv* prepareActionPool(PoolObject* pool,
+        template<class CLASSMANIFEST>
+        CLASSMANIFEST* prepareBuiltinActionPool(PoolObject* pool,
                                      Toplevel* toplevel,
-                                     CodeContext *codeContext);
+                                     CodeContext* codeContext);
 
         /**
          * Parse the ABC block starting at offset start in code.
@@ -701,6 +702,18 @@ const int kBufferPadding = 16;
                                      Toplevel* toplevel,
                                      Domain* domain,
                                      const NativeInitializer* ninit,
+                                     ApiVersion apiVersion);
+
+        // This is equivalent to a call to parseActionBlock,
+        // followed by a call to the now-defunct prepareActionPool.
+        // Basically, it does everything handleActionBlock does
+        // *except* that it doesn't actually call the main entry
+        // point, but rather, returns it to the caller. (Needed
+        // by Flash in QueueAbcBuffer.)
+        ScriptEnv* prepareActionBlock(ScriptBuffer code,
+                                     Toplevel* toplevel,
+                                     Domain* domain,
+                                     CodeContext* codeContext,
                                      ApiVersion apiVersion);
 
         /**

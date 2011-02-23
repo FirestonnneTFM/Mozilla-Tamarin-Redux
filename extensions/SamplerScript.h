@@ -68,7 +68,7 @@ namespace avmplus
 
         static double getSize(ScriptObject* self, Atom o);
         static Atom getMemberNames(ScriptObject* self, Atom o, bool instanceNames);
-        static Atom getSamples(ScriptObject* self);
+        static Atom _getSamples(ScriptObject* self, ClassClosure* cf);
         static void clearSamples(ScriptObject* self);
         static void startSampling(ScriptObject* self);
         static void stopSampling(ScriptObject* self);
@@ -89,9 +89,8 @@ namespace avmplus
         static ClassClosure* getType(Toplevel* toplevel, SamplerObjectType sot, const void *obj);
 
         friend class SampleIterator;
-        static ScriptObject* makeSample(ScriptObject* self, const Sample& sample);
-        static bool set_stack(ScriptObject* self, const Sample& sample, SampleObject* sam);
-        static SampleObject* new_sam(ScriptObject* self, const Sample& sample, int clsid);
+        static ScriptObject* makeSample(ScriptObject* self, ClassFactoryClass* cf, const Sample& sample);
+        static bool set_stack(ScriptObject* self, ClassFactoryClass* cf, const Sample& sample, SampleObject* sam);
 #endif
     };
 
@@ -168,6 +167,15 @@ namespace avmplus
         StackFrameClass(VTable *vtable) : ClassClosure(vtable) { createVanillaPrototype(); }
 
         DECLARE_SLOTS_StackFrameClass;
+    };
+
+    class ClassFactoryClass : public ClassClosure
+    {
+        friend class SamplerScript;
+    public:
+        ClassFactoryClass(VTable *vtable) : ClassClosure(vtable) { createVanillaPrototype(); }
+
+        DECLARE_SLOTS_ClassFactoryClass;
     };
 }
 #endif // __avmplus_SamplerScript__

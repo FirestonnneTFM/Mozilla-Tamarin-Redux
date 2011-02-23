@@ -98,7 +98,6 @@ namespace avmplus
     VectorClass::VectorClass(VTable *vtable)
         : ClassClosure(vtable)
     {
-        toplevel()->vectorClass = this;
         setPrototypePtr(toplevel()->objectClass->construct());
     }
 
@@ -117,19 +116,19 @@ namespace avmplus
         Toplevel* toplevel = this->toplevel();
         if (typeClass == NULL)
         {
-            result = toplevel->objectVectorClass;
+            result = toplevel->objectVectorClass();
         }
-        else if (typeClass == toplevel->intClass)
+        else if (typeClass == toplevel->intClass())
         {
-            result = toplevel->intVectorClass;
+            result = toplevel->intVectorClass();
         }
-        else if (typeClass == toplevel->uintClass)
+        else if (typeClass == toplevel->uintClass())
         {
-            result = toplevel->uintVectorClass;
+            result = toplevel->uintVectorClass();
         }
-        else if (typeClass == toplevel->numberClass)
+        else if (typeClass == toplevel->numberClass())
         {
-            result = toplevel->doubleVectorClass;
+            result = toplevel->doubleVectorClass();
         }
         else
         {
@@ -148,10 +147,10 @@ namespace avmplus
                 vt->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
                 ObjectVectorClass* parameterizedVector = ObjectVectorClass::create(vt->gc(), vt);
                 parameterizedVector->m_typeTraits = typeClass ? typeClass->traits()->itraits : NULL;
-                parameterizedVector->setDelegate(toplevel->classClass->prototypePtr());
+                parameterizedVector->setDelegate(toplevel->classClass()->prototypePtr());
 
                 // Is this right?  Should each instantiation get its own prototype?
-                parameterizedVector->setPrototypePtr(toplevel->objectVectorClass->prototypePtr());
+                parameterizedVector->setPrototypePtr(toplevel->objectVectorClass()->prototypePtr());
                 typeDomain->addParameterizedType(typeClass, parameterizedVector);
 
                 result = parameterizedVector;
@@ -207,9 +206,13 @@ namespace avmplus
     IntVectorClass::IntVectorClass(VTable* vtable)
         : TypedVectorClass<IntVectorObject>(vtable)
     {
-        if (!toplevel()->intVectorClass)
-            toplevel()->intVectorClass = this;
-        this->m_typeTraits = toplevel()->intClass->traits()->itraits;
+        // This is an ugly hack: Vector<> doesn't work properly with the ClassManifest setup,
+        // because the name it returns for itself isn't the name listed for finddef.
+        // To work around this (and maintain legacy internal behavior), we pre-emptively
+        // enter the Vector classes into the table upon first creation. (Arguably the name
+        // lookup issue should be fixed.)
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_int, this); 
+        this->m_typeTraits = toplevel()->intClass()->traits()->itraits;
     }
 
     Atom IntVectorClass::construct(int argc, Atom* argv)
@@ -222,9 +225,13 @@ namespace avmplus
     UIntVectorClass::UIntVectorClass(VTable* vtable)
         : TypedVectorClass<UIntVectorObject>(vtable)
     {
-        if (!toplevel()->uintVectorClass)
-            toplevel()->uintVectorClass = this;
-        this->m_typeTraits = toplevel()->uintClass->traits()->itraits;
+        // This is an ugly hack: Vector<> doesn't work properly with the ClassManifest setup,
+        // because the name it returns for itself isn't the name listed for finddef.
+        // To work around this (and maintain legacy internal behavior), we pre-emptively
+        // enter the Vector classes into the table upon first creation. (Arguably the name
+        // lookup issue should be fixed.)
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_uint, this); 
+        this->m_typeTraits = toplevel()->uintClass()->traits()->itraits;
     }
 
     Atom UIntVectorClass::construct(int argc, Atom* argv)
@@ -237,9 +244,13 @@ namespace avmplus
     DoubleVectorClass::DoubleVectorClass(VTable* vtable)
         : TypedVectorClass<DoubleVectorObject>(vtable)
     {
-        if (!toplevel()->doubleVectorClass)
-            toplevel()->doubleVectorClass = this;
-        this->m_typeTraits = toplevel()->numberClass->traits()->itraits;
+        // This is an ugly hack: Vector<> doesn't work properly with the ClassManifest setup,
+        // because the name it returns for itself isn't the name listed for finddef.
+        // To work around this (and maintain legacy internal behavior), we pre-emptively
+        // enter the Vector classes into the table upon first creation. (Arguably the name
+        // lookup issue should be fixed.)
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_double, this); 
+        this->m_typeTraits = toplevel()->numberClass()->traits()->itraits;
     }
 
     Atom DoubleVectorClass::construct(int argc, Atom* argv)
@@ -252,8 +263,12 @@ namespace avmplus
     ObjectVectorClass::ObjectVectorClass(VTable* vtable)
         : TypedVectorClass<ObjectVectorObject>(vtable)
     {
-        if (!toplevel()->objectVectorClass)
-            toplevel()->objectVectorClass = this;
+        // This is an ugly hack: Vector<> doesn't work properly with the ClassManifest setup,
+        // because the name it returns for itself isn't the name listed for finddef.
+        // To work around this (and maintain legacy internal behavior), we pre-emptively
+        // enter the Vector classes into the table upon first creation. (Arguably the name
+        // lookup issue should be fixed.)
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_object, this); 
         this->m_typeTraits = toplevel()->objectClass->traits()->itraits;
     }
 

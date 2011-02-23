@@ -46,7 +46,7 @@ namespace avmplus
     StringClass::StringClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        toplevel()->stringClass = this;
+        toplevel()->_stringClass = this;
         createVanillaPrototype();
 
         // Some sanity tests for string/wchar* comparison routines
@@ -249,11 +249,11 @@ namespace avmplus
         AvmCore* core = this->core();
 
         if (limit == 0)
-            return toplevel()->arrayClass->newArray();
+            return toplevel()->arrayClass()->newArray();
 
         if (in->length() == 0)
         {
-            ArrayObject* out = toplevel()->arrayClass->newArray();
+            ArrayObject* out = toplevel()->arrayClass()->newArray();
             out->setUintProperty(0,in->atom());
             return out;
         }
@@ -265,7 +265,7 @@ namespace avmplus
             return reObj->split(in, limit);
         }
 
-        ArrayObject *out = toplevel()->arrayClass->newArray();
+        ArrayObject *out = toplevel()->arrayClass()->newArray();
         Stringp delim = core->string(delimAtom);
 
         int ilen = in->length();

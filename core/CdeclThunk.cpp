@@ -1172,7 +1172,7 @@ namespace avmplus
                             core->console << " argCoerceLoop: passing extra params as Array\n";
 #endif
                             if (!argsOrRest)
-                                argsOrRest = args ? args : toplevel->arrayClass->newArray(1);
+                                argsOrRest = args ? args : toplevel->arrayClass()->newArray(1);
                             do
                             {
                                 Atom a = coerceArgToAny(toplevel, callerAp, callerT);
@@ -1225,7 +1225,7 @@ namespace avmplus
         if (calleeTypeIter.needArguments() || calleeTypeIter.hasRest())
         {
             if (!argsOrRest)
-                argsOrRest = args ? args : toplevel->arrayClass->newArray(0);
+                argsOrRest = args ? args : toplevel->arrayClass()->newArray(0);
             handleRest(toplevel, argDescWriter, argsOrRest);
         }
         return argc;

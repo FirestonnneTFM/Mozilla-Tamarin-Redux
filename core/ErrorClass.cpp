@@ -74,11 +74,6 @@ namespace avmplus
         #endif
     }
 
-    void ErrorClass::throwError(int errorID, Stringp arg1, Stringp arg2, Stringp arg3)
-    {
-        core()->throwErrorV(this, errorID, arg1, arg2, arg3);
-    }
-
     Stringp ErrorObject::getStackTrace() const
     {
         #ifdef DEBUGGER

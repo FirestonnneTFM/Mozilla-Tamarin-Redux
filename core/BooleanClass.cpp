@@ -45,7 +45,7 @@ namespace avmplus
     BooleanClass::BooleanClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        toplevel()->booleanClass = this;
+        toplevel()->_booleanClass = this;
         createVanillaPrototype();
     }
 

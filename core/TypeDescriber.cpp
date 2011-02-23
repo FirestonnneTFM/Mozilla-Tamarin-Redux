@@ -72,7 +72,7 @@ namespace avmplus
 
     ArrayObject* TypeDescriber::new_array()
     {
-        return (ArrayObject*)m_toplevel->arrayClass->newInstance();
+        return (ArrayObject*)m_toplevel->arrayClass()->newInstance();
     }
 
     void TypeDescriber::setpropmulti(ScriptObject* o, const TypeDescriber::KVPair* kv, uint32_t count)
