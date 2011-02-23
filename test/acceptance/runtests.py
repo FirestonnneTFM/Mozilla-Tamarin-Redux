@@ -201,7 +201,9 @@ class AcceptanceRuntest(RuntestBase):
         if self.androidthreads:
             p=subprocess.Popen('adb devices',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             (out,err)=p.communicate()
-            for line in out.split('\n'):
+            out = out.decode('latin_1','replace')
+            out = out.split('\n')
+            for line in out:
                 items=line.split()
                 if len(items)==2 and items[1]=='device':
                     for i in range(self.threads):
