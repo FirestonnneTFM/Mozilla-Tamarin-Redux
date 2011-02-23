@@ -48,10 +48,3 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=linux
-
-
-## Used by make in the build scripts
-export make_opt="-j8"
-
-
-

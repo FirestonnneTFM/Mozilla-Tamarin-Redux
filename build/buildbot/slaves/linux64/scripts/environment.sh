@@ -55,7 +55,3 @@ export shell_debug=${shell_debug}_64
 export shell_release_debugger=${shell_release_debugger}_64
 export shell_debug_debugger=${shell_debug_debugger}_64
 export shell_selftest=${shell_selftest}_64
-
-## Used by make in the build scripts
-export make_opt="-j2"
-

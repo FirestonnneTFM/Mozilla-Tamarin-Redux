@@ -68,5 +68,3 @@ export INCLUDE="${INCLUDE};C:\Program Files\Microsoft SDKs\Windows\v6.0\Include;
 export LIB="${LIB};C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
 export LIBPATH="${LIBPATH};C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
 
-## Used by make in the build scripts
-export make_opt="-j2"

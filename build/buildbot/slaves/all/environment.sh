@@ -46,9 +46,6 @@ export ascbuilds=ftp://10.60.48.47/asc/latest/
 ## Used by performance slaves for locking
 export sleeptime=`expr $RANDOM % 60 + 60`
 
-## Used by make in the build scripts
-export make_opt=""
-
 ## Only set the branch if it has not already been set
 echo branch [before]: $branch
 if [ "$branch" == "" ]; then

@@ -57,5 +57,3 @@ export platform=solaris
 # binary while running the smokes in the first phase of the build.
 export shell_debug=$shell_debug_debugger
 
-## Used by make in the build scripts
-export make_opt="-j2"

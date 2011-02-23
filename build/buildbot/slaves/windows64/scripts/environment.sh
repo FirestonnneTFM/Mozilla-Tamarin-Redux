@@ -64,6 +64,3 @@ export PATH="$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin/amd64:$VS_HOME_PATH\
 export INCLUDE="C:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
 export LIB="C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
 export LIBPATH="C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x64;$VS_HOME\VC\atlmfc\lib\amd64;$VS_HOME\VC\lib\amd64;"
-
-## Used by make in the build scripts
-export make_opt="-j2"
