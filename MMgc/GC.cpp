@@ -1375,6 +1375,11 @@ namespace MMgc
         init(_gc, _object, _size, _isStackMemory);
     }
 
+    GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size)
+    {
+        init(_gc, _object, _size, false);
+    }
+    
     GCRoot::GCRoot(GC * _gc)
     {
         init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this), false);

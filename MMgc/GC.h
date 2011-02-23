@@ -186,6 +186,16 @@ namespace MMgc
     public:
         /** subclassing constructor */
         GCRoot(GC *gc);
+        
+        /**
+         * Special-purpose constructor.  Provided in order to allow non-FixedMalloc memory
+         * to be root memory (used by AIR/APE).
+         *
+         * If you're about to use this constructor please consider carefully whether you
+         * should be using the StackMemory subclass instead.
+         */
+        GCRoot(GC* gc, const void* object, size_t size);
+
         virtual ~GCRoot();
 
         // override new and delete so we can know the objects extents (via FixedMalloc::Size())
