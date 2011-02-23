@@ -129,15 +129,15 @@ VTable* toVTable(E env, Atom atom)
         switch (atomKind(atom))
         {
         case kNamespaceType:
-            return toplevel->namespaceClass->ivtable();
+            return toplevel->namespaceClass()->ivtable();
         case kStringType:
-            return toplevel->stringClass->ivtable();
+            return toplevel->stringClass()->ivtable();
         case kBooleanType:
-            return toplevel->booleanClass->ivtable();
+            return toplevel->booleanClass()->ivtable();
         case kIntptrType:
         case kDoubleType:
             // ISSUE what about int?
-            return toplevel->numberClass->ivtable();
+            return toplevel->numberClass()->ivtable();
         }
     }
 

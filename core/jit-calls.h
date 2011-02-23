@@ -364,7 +364,7 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     Atom getprop_obj_method(GetCache& c, MethodEnv* env, Atom obj)
     {
         PROF_IF ("getprop_obj_method hit", OBJ_HIT(obj, c)) {
-            return env->toplevel()->methodClosureClass->create(c.method, obj)->atom();
+            return env->toplevel()->methodClosureClass()->create(c.method, obj)->atom();
         }
         return getprop_miss(c, env, obj);
     }
@@ -1065,7 +1065,7 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
         // Corner cases for which we cons the array if it hasn't been
         // consed already: non-int or out-of-range property name.
         if (*restLocal == 0)
-            *restLocal = toplevel->arrayClass->newarray(restArea, argc);
+            *restLocal = toplevel->arrayClass()->newarray(restArea, argc);
 
         // Obvious optimization
         if (atomIsIntptr(val) && atomCanBeUint32(val))

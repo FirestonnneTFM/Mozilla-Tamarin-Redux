@@ -152,4 +152,59 @@ namespace avmplus
         }
     }
 #endif
+
+    void ClassManifestBase::fillInClass(uint32_t class_id, ClassClosure* c)
+    {
+        AvmAssert(class_id < _count);
+        // This is subtle but important: this call exists solely as a hack for the Vector<>
+        // classes, which don't look up by name properly. Int/UInt/DoubleVectorClass
+        // are all initialized once, as you'd expected, but ObjectVectorClass is initialized
+        // multiple times: once for Vector<*>, then again for each specialization. We
+        // only want the first one stored (not subsequent specializations), so only
+        // store if nothing is there yet.
+        if (_classes[class_id] == NULL)
+            WBRC(c->gc(), this, &_classes[class_id], c);
+    }
+    
+    ClassClosure* FASTCALL ClassManifestBase::lazyInitClass(uint32_t class_id)
+    {
+        AvmAssert(class_id < _count);
+        ClassClosure** cc = &_classes[class_id];
+        if (*cc == NULL)
+        {
+            PoolObject* pool = _env->abcEnv()->pool();
+            Traits* traits = pool->getClassTraits(class_id)->itraits;
+            Multiname qname(traits->ns(), traits->name());
+            ScriptObject* container = _env->finddef(&qname);
+            Atom classAtom = _env->toplevel()->getproperty(container->atom(), &qname, container->vtable);
+            WBRC(pool->core->GetGC(), this, cc, (ClassClosure*)AvmCore::atomToScriptObject(classAtom));
+        }
+#ifdef _DEBUG
+        // make sure the handful of special-cased entries in Toplevel match what we have cached.
+        Toplevel* t = _env->toplevel();
+        if (this == t->_builtinClasses)
+        {
+            switch(class_id)
+            {
+            case avmplus::NativeID::abcclass_Object: AvmAssert(*cc == t->objectClass); break;
+            case avmplus::NativeID::abcclass_Class: AvmAssert(*cc == t->_classClass); break;
+            case avmplus::NativeID::abcclass_Function: AvmAssert(*cc == t->_functionClass); break;
+            case avmplus::NativeID::abcclass_Boolean: AvmAssert(*cc == t->_booleanClass); break;
+            case avmplus::NativeID::abcclass_Namespace: AvmAssert(*cc == t->_namespaceClass); break;
+            case avmplus::NativeID::abcclass_Number: AvmAssert(*cc == t->_numberClass); break;
+            case avmplus::NativeID::abcclass_int: AvmAssert(*cc == t->_intClass); break;
+            case avmplus::NativeID::abcclass_uint: AvmAssert(*cc == t->_uintClass); break;
+            case avmplus::NativeID::abcclass_String: AvmAssert(*cc == t->_stringClass); break;
+            }
+        }
+#endif
+        return *cc;
+    }
+
+    bool ClassManifestBase::gcTrace(MMgc::GC* gc, size_t /*ignored*/)
+    {
+        gc->TraceLocation<ScriptEnv>(&_env); 
+        gc->TraceLocations<ClassClosure>(&_classes[0], _count); 
+        return false;
+    }
 }

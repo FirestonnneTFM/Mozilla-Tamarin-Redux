@@ -329,6 +329,20 @@ namespace avmplus
     #define AVM_INIT_BUILTIN_ABC(MAPNAME, CORE) \
         avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (CORE)->builtinDomain)
 
+    class ClassManifestBase : public MMgc::GCTraceableObject
+    {
+    public:
+        avmplus::ScriptEnv* env() const { return _env; }
+    protected:
+        uint32_t const _count;                  
+        avmplus::ScriptEnv* const _env;         // const non-RC, so no WB needed
+        avmplus::ClassClosure* _classes[1];     // lying, really [_count]. written with explicit WBRCs.
+    protected:
+        REALLY_INLINE ClassManifestBase(uint32_t count, avmplus::ScriptEnv* e) : _count(count), _env(e) { }
+        ClassClosure* FASTCALL lazyInitClass(uint32_t class_id);
+        void fillInClass(uint32_t class_id, ClassClosure* c);
+        virtual bool gcTrace(MMgc::GC* gc, size_t);
+    };
 }
 
 #endif /* __avmplus_NativeFunction__ */

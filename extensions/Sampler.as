@@ -39,6 +39,8 @@
 
 package flash.sampler
 {
+    include "../core/api-versions.as"
+
     /**
      * The StackFrame class provides access to the properties of a data block
      * containing a function. For Flash Player debugger version only.
@@ -354,8 +356,10 @@ package flash.sampler
      * @keyword getSamples
      * @see flash.sampler.Sample
      */
-    [native("SamplerScript::getSamples")]
-    public native function getSamples():Object;
+    public function getSamples():Object { return _getSamples(ClassFactory); }
+
+    [native("SamplerScript::_getSamples")]
+    internal native function _getSamples(cf:Class):Object;
 
     /**
      * Returns the number of samples collected. For Flash Player debugger version only.
@@ -478,4 +482,14 @@ package flash.sampler
      */
     [native("SamplerScript::getMasterString")]
     public native function getMasterString(str:String):String;
+    
+    [native(cls="ClassFactoryClass", methods="auto", construct="none")] // @todo: native only for slot getter/setter
+    [API(CONFIG::VM_INTERNAL)]
+    internal final class ClassFactory
+    {
+        public static const StackFrameClass:Class = StackFrame;
+        public static const SampleClass:Class = Sample;
+        public static const DeleteObjectSampleClass:Class = DeleteObjectSample;
+        public static const NewObjectSampleClass:Class = NewObjectSample;
+    }
 };

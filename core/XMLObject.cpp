@@ -450,7 +450,7 @@ namespace avmplus
                 (hasSimpleContent()))
             {
                 Stringp r0 = core->string (this->atom());
-                return toplevel()->callproperty (r0->atom(), multiname, argc, argv, toplevel()->stringClass->vtable);
+                return toplevel()->callproperty(r0->atom(), multiname, argc, argv, toplevel()->stringClass()->vtable);
             }
         }
         argv[0] = atom(); // replace receiver
@@ -1770,7 +1770,7 @@ namespace avmplus
         // step 3
         m_node->BuildInScopeNamespaceList(core, inScopeNS);
 
-        ArrayObject *a = toplevel()->arrayClass->newArray(inScopeNS.length());
+        ArrayObject *a = toplevel()->arrayClass()->newArray(inScopeNS.length());
 
         uint32_t i;
         for (i = 0; i < inScopeNS.length(); i++)
@@ -1954,7 +1954,7 @@ namespace avmplus
     ArrayObject *XMLObject::AS3_namespaceDeclarations ()
     {
         AvmCore *core = this->core();
-        ArrayObject *a = toplevel()->arrayClass->newArray();
+        ArrayObject *a = toplevel()->arrayClass()->newArray();
 
         if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
             return a;

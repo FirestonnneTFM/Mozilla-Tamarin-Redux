@@ -81,9 +81,6 @@ namespace avmshell
 
     ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
     {
-        shellClasses = ExactHeapList< RCList<ClassClosure> >::create(core()->gc, avmplus::NativeID::shell_toplevel_abc_class_count);
-        if (avmplus::NativeID::shell_toplevel_abc_class_count > 0)
-            shellClasses->list.set(avmplus::NativeID::shell_toplevel_abc_class_count-1, 0);
     }
 
     ShellCore::ShellCore(MMgc::GC* gc, ApiVersionSeries apiVersionSeries)
@@ -208,7 +205,7 @@ namespace avmshell
         ShellCodeContext* shell_codeContext = new(GetGC()) ShellCodeContext(shell_domainEnv, shell_bugCompatibility);
 
         //handleActionPool(shellPool, shell_toplevel, shell_codeContext);
-        shell_toplevel->shellEntryPoint = prepareActionPool(shellPool, shell_toplevel, shell_codeContext);
+        shell_toplevel->shellClasses = prepareBuiltinActionPool<shell_toplevelClassManifest>(shellPool, shell_toplevel, shell_codeContext);
 
         return shell_toplevel;
     }

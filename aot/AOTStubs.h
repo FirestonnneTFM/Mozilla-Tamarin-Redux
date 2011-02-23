@@ -741,7 +741,7 @@ void abcOP_setcallee(MethodEnv *env, t1 arrayval, t2 arg0val) {
     ScriptObject *closure;
 
     if (env->method->needClosure())
-        closure = env->toplevel()->methodClosureClass->create(env, arg0);
+        closure = env->toplevel()->methodClosureClass()->create(env, arg0);
     else
         closure = ((FunctionEnv*) env)->closure;
     arguments->setStringProperty(env->core()->kcallee, closure->atom());
@@ -925,7 +925,7 @@ rt abcOP_newarray(MethodEnv *env, adt argDesc, ...) {
     va_list ap;
     va_start(ap, argDesc); // FIXME va_end
 
-    ArrayObject *array = env->toplevel()->arrayClass->newArray(env, argDesc, ap);
+    ArrayObject *array = env->toplevel()->arrayClass()->newArray(env, argDesc, ap);
     if(conversion<rt, ArrayObject *>::eq)
         return conversion<rt, ArrayObject *>::convert(array);
     if(conversion<rt, ScriptObject *>::eq)
@@ -1130,18 +1130,18 @@ VTable *abcOP_toVTable(MethodEnv *env, objt objp)
     {
         if(nc)
             nullcheck(env, objp);
-        vtable = env->toplevel()->stringClass->ivtable();
+        vtable = env->toplevel()->stringClass()->ivtable();
     }
     else if(conversion<Namespace *, objt>::eq)
     {
         if(nc)
             nullcheck(env, objp);
-        vtable = env->toplevel()->namespaceClass->ivtable();
+        vtable = env->toplevel()->namespaceClass()->ivtable();
     }
     else if(conversion<LLVMBool, objt>::eq)
-        vtable = env->toplevel()->booleanClass->ivtable();
+        vtable = env->toplevel()->booleanClass()->ivtable();
     else if(conversion<int32_t, objt>::eq || conversion<uint32_t, objt>::eq || conversion<double, objt>::eq)
-        vtable = env->toplevel()->numberClass->ivtable();
+        vtable = env->toplevel()->numberClass()->ivtable();
     else {
         Atom rcv = (Atom)abcOP_box<LLVMAtom, objt>(env, objp);
         vtable = env->toplevel()->toVTable(rcv); // does nullcheck
@@ -3224,7 +3224,7 @@ rt abcOP_String_concat(MethodEnv *env, t1 a, LLVMAtom argv, int32_t argc, ArrayO
 
 template<typename rt>
 rt abcOP_String_fromCharCode(MethodEnv *env, LLVMAtom argv, int32_t argc, ArrayObject*) {
-    return abcOP_box<rt> (env, env->toplevel()->stringClass->fromCharCode((Atom*)argv, argc));
+    return abcOP_box<rt> (env, env->toplevel()->stringClass()->fromCharCode((Atom*)argv, argc));
 }
 
 //------------------------------------------------------------------------------
@@ -3282,7 +3282,7 @@ rt abcOP_String_match(MethodEnv *env, t1 a, t2 b) {
     Stringp instance = abcOP_convert_s<Stringp, t1> (env, a);
     Atom pattern = (Atom) abcOP_box<LLVMAtom, t2> (env, b);
     nullcheck(env, pattern);
-    return abcOP_box<rt> (env, env->toplevel()->stringClass->_match(instance, pattern));
+    return abcOP_box<rt> (env, env->toplevel()->stringClass()->_match(instance, pattern));
 }
 
 //------------------------------------------------------------------------------
@@ -3294,7 +3294,7 @@ rt abcOP_String_replace(MethodEnv *env, t1 a, t2 b, t3 c) {
     Stringp instance = abcOP_convert_s<Stringp, t1> (env, a);
     Atom pattern = (Atom) abcOP_box<LLVMAtom, t2> (env, b);
     Atom replacementAtom = (Atom) abcOP_box<LLVMAtom, t3> (env, c);
-    return abcOP_box<rt> (env, env->toplevel()->stringClass->_replace(instance, pattern, replacementAtom));
+    return abcOP_box<rt> (env, env->toplevel()->stringClass()->_replace(instance, pattern, replacementAtom));
 }
 
 //------------------------------------------------------------------------------
@@ -3306,7 +3306,7 @@ rt abcOP_String_search(MethodEnv *env, t1 a, t2 b) {
     Stringp instance = abcOP_convert_s<Stringp, t1> (env, a);
     Atom pattern = (Atom) abcOP_box<LLVMAtom, t2> (env, b);
     nullcheck(env, pattern);
-    return abcOP_box<rt> (env, env->toplevel()->stringClass->_search(instance, pattern));
+    return abcOP_box<rt> (env, env->toplevel()->stringClass()->_search(instance, pattern));
 }
 
 //------------------------------------------------------------------------------
@@ -3341,7 +3341,7 @@ rt abcOP_String_split(MethodEnv *env, t1 a, t2 b, t3 c) {
     if (limit == 0x7fffffff)
         limit = 0xffffffff;
 
-    return abcOP_box<rt> (env, env->toplevel()->stringClass->_split(instance, delimiter, limit));
+    return abcOP_box<rt> (env, env->toplevel()->stringClass()->_split(instance, delimiter, limit));
 }
 
 template<typename rt, typename t1, typename t2>

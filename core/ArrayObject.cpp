@@ -997,7 +997,7 @@ unshift_sparse:
         {
             insertPoint -= this->m_denseStart;
 
-            ArrayObject* deletedItems = toplevel()->arrayClass->newArray(0);
+            ArrayObject* deletedItems = toplevel()->arrayClass()->newArray(0);
             deletedItems->m_denseArray.splice(0, deleteCount, 0, this->m_denseArray, insertPoint);
             deletedItems->m_denseStart = 0;
             deletedItems->m_denseUsed = deleteCount;

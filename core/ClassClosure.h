@@ -88,6 +88,13 @@ namespace avmplus
 
         VTable* ivtable() const;
 
+        /**
+         * throwError is a convenience function for throwing
+         * an exception with a formatted error message,
+         * printf-style
+         */
+        void throwError(int errorID, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
+
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
 #endif

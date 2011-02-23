@@ -49,8 +49,8 @@ namespace avmplus
         : ClassClosure(cvtable)
     {
         Toplevel* toplevel = this->toplevel();
+        toplevel->_functionClass = this;
 
-        toplevel->functionClass = this;
         AvmAssert(traits()->getSizeOfInstance() == sizeof(FunctionClass));
 
         setPrototypePtr(createEmptyFunction());

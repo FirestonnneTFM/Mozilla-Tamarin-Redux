@@ -194,7 +194,7 @@ namespace avmshell
         Toplevel *toplevel = this->toplevel();
         AvmCore *core = this->core();
 
-        ArrayObject *array = toplevel->arrayClass->newArray();
+        ArrayObject *array = toplevel->arrayClass()->newArray();
         for(int i=0; i<user_argc;i++)
             array->setUintProperty(i, core->newStringUTF8(user_argv[i])->atom());
 

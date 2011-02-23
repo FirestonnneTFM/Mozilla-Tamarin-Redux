@@ -151,7 +151,7 @@ namespace avmplus
 
         // TypeError in ECMA
         Toplevel* toplevel = this->toplevel();
-        ErrorClass *error = toplevel->typeErrorClass();
+        GCRef<TypeErrorClass> error = toplevel->typeErrorClass();
         if( error ){
             error->throwError(
                     (atom == undefinedAtom) ? kConvertUndefinedToObjectError :
@@ -168,7 +168,7 @@ namespace avmplus
         const int32_t param_count = ms->param_count();
         Atom* extra = argv + param_count + 1;
         const int32_t extra_count = argc > param_count ? argc - param_count : 0;
-        return toplevel()->arrayClass->newarray(extra, extra_count);
+        return toplevel()->arrayClass()->newarray(extra, extra_count);
     }
 
 #if defined VMCFG_NANOJIT || defined VMCFG_AOT
@@ -417,7 +417,7 @@ namespace avmplus
         extra_8 = (char*)ap + rest_offset;
         const int param_count = ms->param_count();
         const int extra_count = argc > param_count ? argc - param_count : 0;
-        return toplevel()->arrayClass->newarray(extra, extra_count);
+        return toplevel()->arrayClass()->newarray(extra, extra_count);
     }
 
 #endif // VMCFG_NANOJIT
@@ -666,7 +666,7 @@ namespace avmplus
             case kNamespaceType:
                 {
                     index = AvmCore::atomToNamespace(objAtom)->nextNameIndex(index);
-                    delegate = toplevel()->namespaceClass->prototypePtr();
+                    delegate = toplevel()->namespaceClass()->prototypePtr();
                 }
                 break;
             default:
@@ -709,7 +709,7 @@ namespace avmplus
         AvmCore* core = toplevel->core();
         MMgc::GC* gc = core->GetGC();
 
-        FunctionClass* functionClass = toplevel->functionClass;
+        FunctionClass* functionClass = toplevel->_functionClass; // can't use functionClass(), might not be inited yet
         VTable* fvtable = functionClass->ivtable();
         AvmAssert(fvtable->ivtable == NULL || fvtable->ivtable == toplevel->object_ivtable);
         fvtable->ivtable = toplevel->object_ivtable;
@@ -761,7 +761,7 @@ namespace avmplus
         if (!base && itraits->base)
         {
             // class has a base but no base object was provided
-            ErrorClass* error = toplevel->typeErrorClass();
+            GCRef<TypeErrorClass> error = toplevel->typeErrorClass();
             if (error)
                 error->throwError(kConvertNullToObjectError);
             else
@@ -774,7 +774,7 @@ namespace avmplus
         // make sure the traits of the base vtable matches the base traits
         if (!((base == NULL && itraits->base == NULL) || (base != NULL && itraitsBase == baseIvtableTraits)))
         {
-            ErrorClass* error = toplevel->verifyErrorClass();
+            GCRef<VerifyErrorClass> error = toplevel->verifyErrorClass();
             if (error)
                 error->throwError(kInvalidBaseClassError);
             else
@@ -873,9 +873,9 @@ namespace avmplus
             iscope->setScope(gc, i, cc->atom());
         }
 
-        if (toplevel->classClass)
+        if (toplevel->_classClass)
         {
-            cc->setDelegate( toplevel->classClass->prototypePtr() );
+            cc->setDelegate( toplevel->_classClass->prototypePtr() );
         }
 
         // Invoke the class init function.
@@ -1039,7 +1039,7 @@ namespace avmplus
         {
             // extracting a virtual method
             MethodEnv *m = vtable->methods[AvmCore::bindingToMethodId(b)];
-            return toplevel->methodClosureClass->create(m, obj)->atom();
+            return toplevel->methodClosureClass()->create(m, obj)->atom();
         }
 
         case BKIND_VAR:
@@ -1322,11 +1322,11 @@ namespace avmplus
     ArrayObject* MethodEnv::createArguments(Atom *atomv, int argc)
     {
         Toplevel* toplevel = this->toplevel();
-        ArrayObject *arguments = toplevel->arrayClass->newarray(atomv+1,argc);
+        ArrayObject *arguments = toplevel->arrayClass()->newarray(atomv+1,argc);
         ScriptObject *closure;
         if (method->needClosure())
         {
-            closure = toplevel->methodClosureClass->create(this, atomv[0]);
+            closure = toplevel->methodClosureClass()->create(this, atomv[0]);
         }
         else
         {
@@ -1483,7 +1483,7 @@ namespace avmplus
         if(_scope->getSize() == 0)
             return NULL;
 
-        ArrayObject *scopes = toplevel()->arrayClass->newArray(_scope->getSize());
+        ArrayObject *scopes = toplevel()->arrayClass()->newArray(_scope->getSize());
 
         for(int i=_scope->getSize()-1, j=0; i >= 0; i--, j++) {
             Atom scope = _scope->getScope(i);

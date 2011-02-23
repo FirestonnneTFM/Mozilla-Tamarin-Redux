@@ -754,7 +754,8 @@ namespace avmplus
         builtinDomainEnv->setToplevel(toplevel);
 
         ScriptEnv* main = initAllScripts(toplevel, abcEnv);
-        toplevel->init_mainEntryPoint(main);
+        builtinClassManifest* builtins = builtinClassManifest::create(main);
+        toplevel->init_mainEntryPoint(main, builtins);
 
         callScriptEnvEntryPoint(main); // ignore result
 
@@ -763,14 +764,12 @@ namespace avmplus
         return toplevel;
     }
 
-    ScriptEnv* AvmCore::prepareActionPool(PoolObject* pool,
-                                          Toplevel* toplevel,
-                                          CodeContext* codeContext)
+    Atom AvmCore::handleActionPool(PoolObject* pool,
+                                        Toplevel* toplevel,
+                                        CodeContext* codeContext)
     {
-        AvmAssert(pool != NULL);
         AvmAssert(toplevel != NULL);
 
-        // get the main entry point and its global traits
         if (pool->scriptCount() == 0)
         {
             toplevel->throwVerifyError(kMissingEntryPointError);
@@ -781,21 +780,14 @@ namespace avmplus
         AvmAssert(codeContext->domainEnv()->domain() == pool->domain);
 
         AbcEnv* abcEnv = AbcEnv::create(GetGC(), pool, codeContext);
-        return initAllScripts(toplevel, abcEnv);
-    }
+        ScriptEnv* main = initAllScripts(toplevel, abcEnv);
 
-    Atom AvmCore::handleActionPool(PoolObject* pool,
-                                        Toplevel* toplevel,
-                                        CodeContext* codeContext)
-    {
-        AvmAssert(toplevel != NULL);
-
-        ScriptEnv* main = prepareActionPool(pool, toplevel, codeContext);
 #ifdef VMCFG_VERIFYALL
         AvmAssert(config.verifyonly ? true : toplevel->objectClass != NULL);
 #else
         AvmAssert(toplevel->objectClass != NULL);
 #endif
+
         return callScriptEnvEntryPoint(main);
     }
 
@@ -822,6 +814,26 @@ namespace avmplus
         #endif
 
         return pool;
+    }
+
+    ScriptEnv* AvmCore::prepareActionBlock(ScriptBuffer code,
+                                          Toplevel* toplevel,
+                                          Domain* domain,
+                                          CodeContext* codeContext,
+                                          ApiVersion apiVersion)
+    {
+        PoolObject* pool = parseActionBlock(code, 0, toplevel, domain, NULL, apiVersion);
+        if (pool->scriptCount() == 0)
+        {
+            toplevel->throwVerifyError(kMissingEntryPointError);
+        }
+        AvmAssert(codeContext != NULL);
+        AvmAssert(codeContext->domainEnv() != NULL);
+        AvmAssert(codeContext->domainEnv()->domain() == pool->domain);
+
+        AbcEnv* abcEnv = AbcEnv::create(GetGC(), pool, codeContext);
+        ScriptEnv* entryPoint = initAllScripts(toplevel, abcEnv);
+        return entryPoint;
     }
 
     Atom AvmCore::handleActionBlock(ScriptBuffer code,

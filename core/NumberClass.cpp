@@ -46,7 +46,7 @@ namespace avmplus
     NumberClass::NumberClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        toplevel()->numberClass = this;
+        toplevel()->_numberClass = this;
 
         // prototype objects are always vanilla objects.
         createVanillaPrototype();

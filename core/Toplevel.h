@@ -44,18 +44,22 @@
 namespace avmplus
 {
     class VectorClass;
+    class builtinClassManifest;
 
     /**
      * class Toplevel
      */
     class GC_CPP_EXACT(Toplevel, MMgc::GCFinalizedObject)
     {
+        friend class ClassManifestBase;
     protected:
         Toplevel(AbcEnv* abcEnv);
     public:
         static Toplevel* create(MMgc::GC* gc, AbcEnv* abcEnv);
 
-        void init_mainEntryPoint(ScriptEnv* main);
+        GCRef<builtinClassManifest> builtinClasses() const;
+
+        void init_mainEntryPoint(ScriptEnv* main, builtinClassManifest* builtins);
 
         AbcEnv* abcEnv() const;
         DomainEnv* domainEnv() const;
@@ -64,32 +68,42 @@ namespace avmplus
         ScriptObject* global() const;
         Atom atom() const;
 
-        DateClass* dateClass();
-        RegExpClass* regexpClass();
-        XMLClass* xmlClass();
-        XMLListClass* xmlListClass();
-        QNameClass* qnameClass();
-        ByteArrayClass* byteArrayClass();
-
-        /**
-         * @name Error Subclasses
-         * These are subclasses of Error used in the VM.
-         */
-        /*@{*/
-        ErrorClass* errorClass() const;
-        ErrorClass* argumentErrorClass() const;
-        ErrorClass* evalErrorClass() const;
-        ErrorClass* typeErrorClass() const;
-        ErrorClass* rangeErrorClass() const;
-        ErrorClass* uriErrorClass() const;
-        ErrorClass* referenceErrorClass() const;
-        ErrorClass* securityErrorClass() const;
-        ErrorClass* syntaxErrorClass() const;
-        ErrorClass* verifyErrorClass() const;
-        ErrorClass* eofErrorClass() const;
-        ErrorClass* ioErrorClass() const;
-        ErrorClass* memoryErrorClass() const;
-        /*@}*/
+        // these are now all just convenience legacy wrappers 
+        // around builtinClasses()->get_SomeClass()
+        GCRef<ArgumentErrorClass> argumentErrorClass() const;
+        GCRef<ArrayClass> arrayClass() const;
+        GCRef<BooleanClass> booleanClass() const;
+        GCRef<ByteArrayClass> byteArrayClass() const;
+        GCRef<ClassClass> classClass() const;
+        GCRef<ClassClosure> eofErrorClass() const;
+        GCRef<ClassClosure> ioErrorClass() const;
+        GCRef<ClassClosure> memoryErrorClass() const;
+        GCRef<DateClass> dateClass() const;
+        GCRef<DoubleVectorClass> doubleVectorClass() const;
+        GCRef<ErrorClass> errorClass() const;
+        GCRef<EvalErrorClass> evalErrorClass() const;
+        GCRef<FunctionClass> functionClass() const;
+        GCRef<IntClass> intClass() const;
+        GCRef<IntVectorClass> intVectorClass() const;
+        GCRef<MethodClosureClass> methodClosureClass() const;
+        GCRef<NamespaceClass> namespaceClass() const;
+        GCRef<NumberClass> numberClass() const;
+        GCRef<ObjectVectorClass> objectVectorClass() const;
+        GCRef<QNameClass> qnameClass() const;
+        GCRef<RangeErrorClass> rangeErrorClass() const;
+        GCRef<ReferenceErrorClass> referenceErrorClass() const;
+        GCRef<RegExpClass> regexpClass() const;
+        GCRef<SecurityErrorClass> securityErrorClass() const;
+        GCRef<StringClass> stringClass() const;
+        GCRef<SyntaxErrorClass> syntaxErrorClass() const;
+        GCRef<TypeErrorClass> typeErrorClass() const;
+        GCRef<UIntClass> uintClass() const;
+        GCRef<UIntVectorClass> uintVectorClass() const;
+        GCRef<URIErrorClass> uriErrorClass() const;
+        GCRef<VectorClass> vectorClass() const;
+        GCRef<VerifyErrorClass> verifyErrorClass() const;
+        GCRef<XMLClass> xmlClass() const;
+        GCRef<XMLListClass> xmlListClass() const;
 
         void throwVerifyError(int id) const;
         void throwVerifyError(int id, Stringp arg1) const;
@@ -319,13 +333,7 @@ namespace avmplus
         // For E4X
         static bool isXMLName(ScriptObject*, Atom v);
 
-        ClassClosure* getBuiltinClass(int class_id) const;
-        ErrorClass* getErrorClass(int class_id) const;
-
         unsigned int readU30(const uint8_t *&p) const;
-
-        // implementations supporting any of our extensions should override this
-        virtual ClassClosure *getBuiltinExtensionClass(int clsid);
 
         // subclasses can override this to check for security violations
         // and prohibit certain operations. default implementation always
@@ -447,16 +455,13 @@ namespace avmplus
 
         static bool contains(const uint32_t *uriSet, uint32_t ch);
 
-        ClassClosure* resolveBuiltinClass(int class_id);
-
     // ------------------------ DATA SECTION BEGIN
         GC_DATA_BEGIN(Toplevel)
 
     private:
         DWB(AbcEnv*)                GC_POINTER(_abcEnv);
-        DWB(ExactHeapList<RCList<ClassClosure> >*)
-                                    GC_POINTER(_builtinClasses);
         DWB(ScriptEnv*)             GC_POINTER(_mainEntryPoint);
+        DWB(builtinClassManifest*)  GC_POINTER(_builtinClasses);
     public:
         DWB(VTable*)                GC_POINTER(object_ivtable);
         DWB(VTable*)                GC_POINTER(class_ivtable);
@@ -464,22 +469,37 @@ namespace avmplus
         DWB(ScopeChain*)            GC_POINTER(vectorobj_cscope);
         DWB(ScopeChain*)            GC_POINTER(vectorobj_iscope);
     public:
-        DRCWB(ArrayClass*)          GC_POINTER(arrayClass);
-        DRCWB(BooleanClass*)        GC_POINTER(booleanClass);
-        DRCWB(ClassClass*)          GC_POINTER(classClass);
-        DRCWB(FunctionClass*)       GC_POINTER(functionClass);
-        DRCWB(MethodClosureClass*)  GC_POINTER(methodClosureClass);
-        DRCWB(NamespaceClass*)      GC_POINTER(namespaceClass);
-        DRCWB(NumberClass*)         GC_POINTER(numberClass);
-        DRCWB(IntClass*)            GC_POINTER(intClass);
-        DRCWB(UIntClass*)           GC_POINTER(uintClass);
+        // objectClass is still needed for bootstrapping
+        // the VM; it's still public because of 100's of
+        // to-be-expunged references in Flash/AIR
         DRCWB(ObjectClass*)         GC_POINTER(objectClass);
-        DRCWB(IntVectorClass*)      GC_POINTER(intVectorClass);
-        DRCWB(DoubleVectorClass*)   GC_POINTER(doubleVectorClass);
-        DRCWB(UIntVectorClass*)     GC_POINTER(uintVectorClass);
-        DRCWB(ObjectVectorClass*)   GC_POINTER(objectVectorClass);
-        DRCWB(VectorClass*)         GC_POINTER(vectorClass);
-        DRCWB(StringClass*)         GC_POINTER(stringClass);
+    private:
+        // This are also needed for bootstrapping, but shouldn't be accessible
+        // to the general public.
+        // NB: if you add or change these, you may need to
+        // update ClassManifestBase::lazyInitClass. 
+        friend class ClassClass;
+        friend class FunctionClass;
+        friend class MethodEnv;
+        DRCWB(ClassClass*)          GC_POINTER(_classClass);
+        DRCWB(FunctionClass*)       GC_POINTER(_functionClass);
+    private:
+        // These exist solely for CodegenLIR to access
+        // NB: if you add or change these, you may need to
+        // update ClassManifestBase::lazyInitClass. 
+        friend class CodegenLIR;
+        friend class BooleanClass;
+        friend class NamespaceClass;
+        friend class NumberClass;
+        friend class IntClass;
+        friend class UIntClass;
+        friend class StringClass;
+        DRCWB(BooleanClass*)        GC_POINTER(_booleanClass);
+        DRCWB(NamespaceClass*)      GC_POINTER(_namespaceClass);
+        DRCWB(NumberClass*)         GC_POINTER(_numberClass);
+        DRCWB(IntClass*)            GC_POINTER(_intClass);
+        DRCWB(UIntClass*)           GC_POINTER(_uintClass);
+        DRCWB(StringClass*)         GC_POINTER(_stringClass);
 
         GC_DATA_END(Toplevel)
     // ------------------------ DATA SECTION END

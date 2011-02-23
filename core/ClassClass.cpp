@@ -46,7 +46,7 @@ namespace avmplus
     ClassClass::ClassClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        toplevel()->classClass = this;
+        toplevel()->_classClass = this;
 
         AvmAssert(traits()->getSizeOfInstance() == sizeof(ClassClass));
 
