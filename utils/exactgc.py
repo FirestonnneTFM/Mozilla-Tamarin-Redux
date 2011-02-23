@@ -59,7 +59,7 @@ import platform
 
 utilsdir = os.path.abspath(os.path.dirname(__file__))
 
-def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns="avmplus"):
+def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns=''):
     avm = os.environ.get('AVM')
     if avm == None:
         print "ERROR: AVM environment variable must point to avm executable"
@@ -109,7 +109,11 @@ def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns="avmplus"):
     else:
         tmpfile.flush()
 
-    exactgccmd = '%s %s -- -b %s-tracers.hh -n %s-tracers.hh -i %s-tracers.h -ns %s %s' % (avm, abcfile, prefix, prefix, prefix, ns, '@'+tmpfile.name)
+    # leave off -ns arg if default namespace
+    if ns != '':
+        ns = '-ns ' + ns
+
+    exactgccmd = '%s %s -- -b %s-tracers.hh -n %s-tracers.hh -i %s-tracers.h %s %s' % (avm, abcfile, prefix, prefix, prefix, ns, '@'+tmpfile.name)
     ret = os.system(exactgccmd)
     
     if oldpy:
@@ -141,9 +145,9 @@ def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns="avmplus"):
             
 def gen_builtins(outdir):
     coredir = utilsdir + "/../core/"
-    gen(prefix = 'avmplus', inputfiles = '*.h *.as', outputdir = outdir, srcdir = coredir)
+    gen(prefix = 'avmplus', inputfiles = '*.h *.as', outputdir = outdir, srcdir = coredir, ns = 'avmplus')
 
 def gen_shell(outdir):
     shelldir = utilsdir + "/../shell/"
     gen(prefix = 'avmshell', inputfiles = 'shell_toplevel.as DebugCLI.h ShellCore.h SystemClass.h', outputdir = outdir, srcdir = shelldir, ns = 'avmshell')
-    gen(prefix = 'extensions', inputfiles = 'DomainClass.h Domain.as ../extensions/*.h ../extensions/*.as', outputdir = outdir, srcdir = shelldir)
+    gen(prefix = 'extensions', inputfiles = 'DomainClass.h Domain.as ../extensions/*.h ../extensions/*.as', outputdir = outdir, srcdir = shelldir, ns = 'avmplus')

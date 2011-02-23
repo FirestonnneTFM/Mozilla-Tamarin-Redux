@@ -69,7 +69,7 @@
 //    -n filename    Emit tracers for GC_CPP_EXACT ("natives") to this file
 //    -b filename    Emit tracers for GC_AS3_EXACT ("builtins") to this file
 //    -i filename    Emit interlock definitons to this file
-//    -ns namespace  The C++ namespace to wrap around the output, default "avmplus"
+//    -ns namespace  The C++ namespace to wrap around the output, default global
 //
 //
 // Performance notes.
@@ -351,7 +351,7 @@ const largeObjectCutoff = 2000;  // more arbitrary than not, "close" to large ob
 var builtinOutputFile = null;         // null == don't output, otherwise file name
 var nativeOutputFile = null;          // null == don't output, otherwise file name
 var interlockOutputFile = null;       // null == don't output (and don't do interlock checking), otherwise file name
-var cppNamespace = "avmplus";         // wrap this namespace around the emitted code
+var cppNamespace = "";                // wrap this namespace around the emitted code if not empty string
 
 // Used during parsing and some initial processing
 var specs = [];                // intermediate list of all metadata during parsing and field/class collection
@@ -1260,6 +1260,22 @@ function constructAndPrintTracers()
         File.write(fn, txt);
     }
 
+    function nsOpen()
+    {
+        if(cppNamespace == "")
+            return "\n";
+        else
+            return "namespace " + cppNamespace +"\n{\n";
+    }
+
+    function nsClose()
+    {
+        if(cppNamespace == "")
+            return "\n";
+        else
+            return "}\n";
+    }
+
     errorContext = "Emitting code";
 
     emitTracers();
@@ -1270,18 +1286,18 @@ function constructAndPrintTracers()
         printToFile(builtinOutputFile, 
                     (LICENSE + 
                      doNotEdit +
-                     "namespace " + cppNamespace +"\n{\n" +
+                     nsOpen() +
                      builtins.get() + 
                      (nativeOutputFile == builtinOutputFile ? natives.get() : "") +
-                     "}\n"));
+                     nsClose()));
 
     if (nativeOutputFile && nativeOutputFile != builtinOutputFile)
         printToFile(nativeOutputFile,
                     (LICENSE + 
                      doNotEdit +
-                     "namespace " + cppNamespace +"\n{\n" +
+                     nsOpen() +
                      natives.get() + 
-                     "}\n"));
+                     nsClose()));
 
     if (interlockOutputFile)
         printToFile(interlockOutputFile,
