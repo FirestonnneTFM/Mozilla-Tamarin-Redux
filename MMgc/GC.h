@@ -578,6 +578,13 @@ namespace MMgc
         virtual ~GC();
 
         /**
+         * ForceSweepAtShutdown allows clients to force all finalization to occur first
+         * and then delete the GC later.  ~GC will still call this just in case.
+         * See bugzilla 636376.
+         */
+        void ForceSweepAtShutdown();
+
+        /**
          * Causes an immediate stop-the-world garbage collection (or finishes any
          * incremental collection underway).
          */
@@ -1565,7 +1572,6 @@ namespace MMgc
     private:
         void Finalize();
         void Sweep();
-        void ForceSweepAtShutdown();
         void MarkNonstackRoots(bool deep=false);
         void MarkStackRoots();
         void MarkRoots(bool deep, bool stackroots);
