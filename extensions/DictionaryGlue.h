@@ -51,7 +51,7 @@ namespace avmplus
     public:
         REALLY_INLINE static DictionaryObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
         {
-            return new (gc, ivtable->getExtraSize()) DictionaryObject(ivtable, delegate);
+            return new (gc, MMgc::kExact, ivtable->getExtraSize()) DictionaryObject(ivtable, delegate);
         }
 
         void init(bool weakKeys);
@@ -92,7 +92,7 @@ namespace avmplus
     public:
         REALLY_INLINE static DictionaryClass* create(MMgc::GC* gc, VTable* cvtable)
         {
-            return new (gc, cvtable->getExtraSize()) DictionaryClass(cvtable);
+            return new (gc, MMgc::kExact, cvtable->getExtraSize()) DictionaryClass(cvtable);
         }
 
     // ------------------------ DATA SECTION BEGIN
