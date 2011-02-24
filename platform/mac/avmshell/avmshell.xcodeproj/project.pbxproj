@@ -382,6 +382,8 @@
 		8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */; };
 		815846DD129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */; };
 		815846DE129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */; };
+		817CEE7B12E511C40019E8DF /* Safepoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE7912E511C40019E8DF /* Safepoint.cpp */; };
+		817CEE7C12E511C40019E8DF /* Safepoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE7912E511C40019E8DF /* Safepoint.cpp */; };
 		81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
 		81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
 		D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
@@ -905,6 +907,9 @@
 		8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_vmpi_threads.cpp; path = ../../../extensions/ST_vmpi_threads.cpp; sourceTree = SOURCE_ROOT; };
 		815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_vmbase_concurrency.cpp; path = ../../../extensions/ST_vmbase_concurrency.cpp; sourceTree = SOURCE_ROOT; };
 		815846DF129AFA740083D9B0 /* ST_vmbase_concurrency.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_vmbase_concurrency.st; path = ../../../extensions/ST_vmbase_concurrency.st; sourceTree = SOURCE_ROOT; };
+		817CEE7812E511C40019E8DF /* Safepoint-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Safepoint-inlines.h"; path = "../../../vmbase/Safepoint-inlines.h"; sourceTree = SOURCE_ROOT; };
+		817CEE7912E511C40019E8DF /* Safepoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Safepoint.cpp; path = ../../../vmbase/Safepoint.cpp; sourceTree = SOURCE_ROOT; };
+		817CEE7A12E511C40019E8DF /* Safepoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Safepoint.h; path = ../../../vmbase/Safepoint.h; sourceTree = SOURCE_ROOT; };
 		81B69B1E123848B200B9DF4F /* vmbase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vmbase.h; path = ../../../vmbase/vmbase.h; sourceTree = SOURCE_ROOT; };
 		81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmAssert.cpp; path = ../../../vmbase/AvmAssert.cpp; sourceTree = SOURCE_ROOT; };
 		81B69B2912384D1D00B9DF4F /* AvmAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmAssert.h; path = ../../../vmbase/AvmAssert.h; sourceTree = SOURCE_ROOT; };
@@ -1708,6 +1713,9 @@
 				07D95AE41254C39000DD872D /* atom.h */,
 				81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */,
 				81B69B2912384D1D00B9DF4F /* AvmAssert.h */,
+				817CEE7812E511C40019E8DF /* Safepoint-inlines.h */,
+				817CEE7912E511C40019E8DF /* Safepoint.cpp */,
+				817CEE7A12E511C40019E8DF /* Safepoint.h */,
 				07D95ABB1254C05500DD872D /* vmbase-inlines.h */,
 				81B69B1E123848B200B9DF4F /* vmbase.h */,
 				81EB4AFD129A55C100D1B0BB /* VMThread-inlines.h */,
@@ -1997,6 +2005,7 @@
 				81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */,
 				815846DE129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
 				07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */,
+				817CEE7C12E511C40019E8DF /* Safepoint.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2193,6 +2202,7 @@
 				81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */,
 				815846DD129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
 				07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */,
+				817CEE7B12E511C40019E8DF /* Safepoint.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

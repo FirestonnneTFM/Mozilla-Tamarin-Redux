@@ -123,7 +123,7 @@ namespace vmbase {
         // update to TERMINATED before one of the joiners. So we have
         // to count joining threads in and out, and have the VMThread
         // dtor wait until there are zero joiners.
-        SCOPE_LOCK_NAMED(locker, m_joinMonitor) {
+        SCOPE_LOCK_SP_NAMED(locker, m_joinMonitor) {
             if (m_state != NOT_STARTED) {
                 while (m_state == RUNNABLE || m_joinerQty != 0) {
                     locker.wait();
@@ -170,7 +170,7 @@ namespace vmbase {
 
     bool VMThread::start(vmpi_thread_attr_t* attr)
     {
-        SCOPE_LOCK(m_joinMonitor) {
+        SCOPE_LOCK_SP(m_joinMonitor) {
             AvmAssert(m_state == NOT_STARTED);
             if (m_state == NOT_STARTED) {
                 if (VMPI_threadCreate(&m_threadID, attr, VMThread::startInternal, (vmpi_thread_arg_t) (this))) {
@@ -184,7 +184,7 @@ namespace vmbase {
 
     void VMThread::join()
     {
-        SCOPE_LOCK_NAMED(locker, m_joinMonitor) {
+        SCOPE_LOCK_SP_NAMED(locker, m_joinMonitor) {
             AvmAssert(m_state != NOT_STARTED);
             if (m_state != TERMINATED) {
                 m_joinerQty++;
@@ -202,14 +202,14 @@ namespace vmbase {
         VMThread::m_currentThread.set(thread);
 
         // Block until we know our parent thread has finished its side of the setup
-        SCOPE_LOCK(thread->m_joinMonitor) {
+        SCOPE_LOCK_NO_SP(thread->m_joinMonitor) {
             AvmAssert(thread->m_state == RUNNABLE);
         }
 
         thread->m_runnable->run();
 
         // VMThread has logically terminated. Cleanup and notify all joiners.
-        SCOPE_LOCK_NAMED(locker, thread->m_joinMonitor) {
+        SCOPE_LOCK_NO_SP_NAMED(locker, thread->m_joinMonitor) {
             VMPI_threadDetach(thread->m_threadID);
             thread->m_state = TERMINATED;
             locker.notifyAll();
@@ -227,9 +227,37 @@ namespace vmbase {
         // Override me.
     }
 
+#ifdef VMCFG_SAFEPOINTS
+    /**
+     * Wraps calls to VMPI_threadSleep with a register flush and safepoint gate
+     */
+    class SafepointHelper_VMThreadSleep {
+    private:
+        static void sleepInSafepointGate(void* stackPointer, void* timeout)
+        {
+            SafepointGate gate(stackPointer);
+            VMPI_threadSleep((int32_t)(intptr_t)timeout);
+        }
+    public:
+        static void sleep(int32_t timeout)
+        {
+            VMPI_callWithRegistersSaved(sleepInSafepointGate, (void*)timeout);
+        }
+    };
+
+    /* static */ void VMThread::sleep(int32_t timeout)
+    {
+        if (SafepointRecord::hasCurrent()) {
+            SafepointHelper_VMThreadSleep::sleep(timeout);
+        } else {
+            // Thread has no current safepoint context, so just sleep.
+            VMPI_threadSleep(timeout);
+        }
+    }
+#else
     /* static */ void VMThread::sleep(int32_t timeout)
     {
         VMPI_threadSleep(timeout);
     }
-
+#endif
 }

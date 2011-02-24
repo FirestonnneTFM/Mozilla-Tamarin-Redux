@@ -173,6 +173,9 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_VALGRIND
     "AVMFEATURE_VALGRIND;"
   #endif
+  #if AVMFEATURE_SAFEPOINTS
+    "AVMFEATURE_SAFEPOINTS;"
+  #endif
   #if AVMFEATURE_SWF12
     "AVMFEATURE_SWF12;"
   #endif

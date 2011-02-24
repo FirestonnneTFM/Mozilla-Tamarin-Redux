@@ -148,6 +148,11 @@ def featureSettings(o):
         args += "-DAVMFEATURE_VALGRIND=1 "
     if (arg == False):
         args += "-DAVMFEATURE_VALGRIND=0 "
+    arg = o.getBoolArg("safepoints")
+    if (arg == True):
+        args += "-DAVMFEATURE_SAFEPOINTS=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_SAFEPOINTS=0 "
     arg = o.getBoolArg("swf12")
     if (arg == True):
         args += "-DAVMFEATURE_SWF12=1 "

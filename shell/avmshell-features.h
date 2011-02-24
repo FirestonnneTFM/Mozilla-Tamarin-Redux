@@ -214,6 +214,10 @@
   #define AVMFEATURE_VALGRIND 0
 #endif
 
+#ifndef AVMFEATURE_SAFEPOINTS
+  #define AVMFEATURE_SAFEPOINTS 1
+#endif
+
 #ifndef AVMFEATURE_SWF12
   #define AVMFEATURE_SWF12 1
 #endif

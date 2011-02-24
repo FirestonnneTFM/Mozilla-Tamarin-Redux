@@ -42,5 +42,7 @@
 
 #include "atom-inlines.h"
 #include "VMThread-inlines.h"
-
+#ifdef VMCFG_SAFEPOINTS
+#include "Safepoint-inlines.h"
+#endif
 #endif // __vmbase_atom__

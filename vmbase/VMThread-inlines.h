@@ -164,6 +164,7 @@ namespace vmbase {
         m_condVar.broadcast();
     }
 
+#ifndef VMCFG_SAFEPOINTS // See Safepoint-inlines.h for templatized versions
     REALLY_INLINE MutexLocker::MutexLocker(RecursiveMutex& mutex)
         : m_mutex(mutex)
     {
@@ -204,6 +205,7 @@ namespace vmbase {
     {
         m_monitor.notifyAll();
     }
+#endif
 
     REALLY_INLINE AtomicCounter32::AtomicCounter32(int32_t value)
         : m_value(value)

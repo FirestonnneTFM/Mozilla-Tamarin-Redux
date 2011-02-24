@@ -112,6 +112,7 @@
 #undef MMGC_MEMORY_PROFILER
 #undef VMCFG_CACHE_GQCN
 #undef MMGC_VALGRIND
+#undef VMCFG_SAFEPOINTS
 #undef VMCFG_SWF12
 #undef VMCFG_FLOAT
 #undef VMCFG_FLOAT4
@@ -584,6 +585,15 @@
 #endif
 
 
+/* AVMFEATURE_SAFEPOINTS
+ *
+ * Enables safepoints and the mechanism to dispatch SafepointTasks
+ */
+#if !defined AVMFEATURE_SAFEPOINTS || AVMFEATURE_SAFEPOINTS != 0 && AVMFEATURE_SAFEPOINTS != 1
+#  error "AVMFEATURE_SAFEPOINTS must be defined and 0 or 1 (only)."
+#endif
+
+
 /* AVMFEATURE_SWF12
  *
  * Enabling this will support SWF12 / ABC version 47.12
@@ -813,6 +823,7 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
 
 
 
@@ -1109,6 +1120,9 @@
 #endif
 #if AVMFEATURE_VALGRIND
 #  define MMGC_VALGRIND
+#endif
+#if AVMFEATURE_SAFEPOINTS
+#  define VMCFG_SAFEPOINTS
 #endif
 #if AVMFEATURE_SWF12
 #  define VMCFG_SWF12
