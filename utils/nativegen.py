@@ -1833,7 +1833,10 @@ class AbcThunkGen:
                 assert slot.kind in (TRAIT_Slot, TRAIT_Const)
                 (slotCType, slotArgType, slotRetType, slotMemberType) = slotsTypeInfo[id(slot)]
                 name = to_cname(slot.name)
-                out.println('REALLY_INLINE %s get_%s() const { return m_%s; }' % (slotRetType, name, name))
+                if slotCType == CTYPE_BOOLEAN:
+                    out.println('REALLY_INLINE %s get_%s() const { return m_%s != 0; }' % (slotRetType, name, name))
+                else:
+                    out.println('REALLY_INLINE %s get_%s() const { return m_%s; }' % (slotRetType, name, name))
                 if ((slot.kind == TRAIT_Slot) or (t.has_const_setters)):
                     out.println('REALLY_INLINE void set_%s(%s newVal) { m_%s = newVal; }' % (name, slotArgType, name))
         out.indent -= 1
