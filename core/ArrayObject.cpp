@@ -993,6 +993,7 @@ unshift_sparse:
             that->isDense() &&
             insertPoint >= this->m_denseStart &&
             insertPoint <= this->m_denseStart + this->m_denseArray.length() &&
+            insertPoint + deleteCount <= this->m_denseStart + this->m_denseArray.length() &&
             that->m_denseStart == 0)
         {
             insertPoint -= this->m_denseStart;
