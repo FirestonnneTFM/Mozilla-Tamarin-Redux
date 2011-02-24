@@ -1898,7 +1898,7 @@ class AbcThunkGen:
             # FIXME: make these non-public, friend access only
             out.println("public:")
             out.indent += 1
-            out.println("static %s* FASTCALL createClassClosure(VTable* cvtable);" % BASE_CLASS_NAME)
+            out.println("static %s* FASTCALL createClassClosure(avmplus::VTable* cvtable);" % BASE_CLASS_NAME)
             out.indent -= 1
 
             if t.has_custom_createInstanceProc:
@@ -1931,7 +1931,7 @@ class AbcThunkGen:
     def emitConstructStubs(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
 
         if isClassTraits:
-            out.println("/*static*/ %s* FASTCALL %s::createClassClosure(VTable* cvtable)" % (BASE_CLASS_NAME,t.fqcppname()))
+            out.println("/*static*/ %s* FASTCALL %s::createClassClosure(avmplus::VTable* cvtable)" % (BASE_CLASS_NAME,t.fqcppname()))
             out.println("{")
             out.indent += 1
             if t.is_gc_exact:
