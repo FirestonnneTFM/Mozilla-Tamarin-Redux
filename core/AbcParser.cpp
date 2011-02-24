@@ -266,15 +266,15 @@ namespace avmplus
 
         if (this->version >= (47<<16|12)) {
             // Flash Player TBD
+        }
+        if (this->version >= (47<<16|13)) {
+            // Flash Player TBD
 #ifdef VMCFG_FLOAT
             floatSupport = 1;
 #endif
 #ifdef VMCFG_FLOAT4
             float4Support = 1;
 #endif
-        }
-        if (this->version >= (47<<16|13)) {
-            // Flash Player TBD
         }
         if (this->version >= (47<<16|14)) {
             // Flash Player TBD
