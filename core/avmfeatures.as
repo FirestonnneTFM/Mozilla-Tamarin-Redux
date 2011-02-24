@@ -640,6 +640,13 @@ var FEATURES =
     <name> AVMFEATURE_VALGRIND </name>
     <defines> MMGC_VALGRIND </defines>
   </feature>
+  
+  <feature>
+    <desc> Enables safepoints and the mechanism to dispatch SafepointTasks
+      </desc>
+    <name> AVMFEATURE_SAFEPOINTS </name>
+    <defines> VMCFG_SAFEPOINTS </defines>
+  </feature>
 
   <feature>
     <desc> Enabling this will support SWF12 / ABC version 47.12 </desc>

@@ -39,23 +39,52 @@
 #define __vmbase_VMThread__
 
 /**
- * Defines the preferred style of block-scoped locking, e.g:
+ * Defines the preferred style of block-scoped mutex locking, e.g:
  *
  *     void Foo::foo(int val)
  *     {
  *
  *         // Outside critical section
  *
- *         SCOPE_LOCK(m_monitor) {
- *             m_sharedState += val; // Critical section protected by m_monitor
+ *         SCOPE_LOCK(m_mutex) {
+ *             m_sharedState += val; // Critical section protected by m_mutex
  *         }
  *
  *         // Outside critical section
  *     }
  *
- * See the MutexLocker class for full details.
+ * When VMCFG_SAFEPOINTS is defined, the SCOPE_LOCK_SP version of the macro
+ * ensures that any threads blocked on the mutex are considered 'safe' with respect
+ * to their current safepoint context. I.e. lock acquisition is performed within
+ * the RAII scope of a SafepointGate to create an implicit safepoint.
+ *
+ * The SCOPE_LOCK_SP version is more expensive than SCOPE_LOCK_NO_SP only under
+ * contention, however SCOPE_LOCK_SP is *always* safe to use, whereas use
+ * of SCOPE_LOCK_NO_SP can lead to deadlock if used incorrectly in the presence
+ * of safepoints. The default macro for clients, SCOPE_LOCK, is therefore defined
+ * as SCOPE_LOCK_SP. Conservatively, SCOPE_LOCK_NO_SP should only be used in the
+ * following scenarios:
+ * a) For critical sections known only to be entered by threads that have
+ *    no current safepointing context.
+ * b) For mutexes that can never be contended by threads that have entered
+ *    a common safepointing context.
+ * c) For mutexes that protect only 'uninterruptible' critical sections, i.e.
+ *    critical sections that have none of the following reachable from within
+ *    their scope: a safepoint (either implicit or explicit), a request to a
+ *    SafepointManager to execute a SafepointTask.
+ *
+ * Note that any type of lock in VM, GC or avm-host code that is acquired without
+ * a MutexLocker will have equivalent acquire semantics to that of SCOPE_LOCK_NO_SP.
  */
+#ifdef VMCFG_SAFEPOINTS
+#define SCOPE_LOCK(_m_)                   SCOPE_LOCK_SP(_m_)
+#define SCOPE_LOCK_NO_SP(_m_)             if (vmbase::MutexLocker<vmbase::NO_SAFEPOINT>       __locker = _m_) {} else
+#define SCOPE_LOCK_SP(_m_)                if (vmbase::MutexLocker<vmbase::IMPLICIT_SAFEPOINT> __locker = _m_) {} else
+#else
 #define SCOPE_LOCK(_m_)                   if (vmbase::MutexLocker __locker = _m_) {} else
+#define SCOPE_LOCK_NO_SP(_m_)             SCOPE_LOCK(_m_)
+#define SCOPE_LOCK_SP(_m_)                SCOPE_LOCK(_m_)
+#endif
 
 /**
  * Defines the preferred style of block-scoped monitor locking. The given
@@ -75,11 +104,32 @@
  *         // Outside critical section
  *     }
  *
- * See the MonitorLocker class for full details.
+ * When VMCFG_SAFEPOINTS is defined, the SCOPE_LOCK_SP_NAMED version of the macro
+ * defines an implicit safepoint for threads blocked on the monitor (identical to
+ * SCOPE_LOCK_SP). Additionally, SCOPE_LOCK_SP_NAMED defines an implicit safepoint
+ * for threads waiting and timed-waiting on the monitor.
+ * The rules for using SCOPE_LOCK_NO_SP_NAMED instead of SCOPE_LOCK_SP_NAMED are
+ * the same as those for SCOPE_LOCK_NO_SP described above.
  */
-#define SCOPE_LOCK_NAMED(_name_, _m_)     if (vmbase::MonitorLocker _name_ = _m_) {} else
+#ifdef VMCFG_SAFEPOINTS
+#define SCOPE_LOCK_NAMED(_name_, _m_)           SCOPE_LOCK_SP_NAMED(_name_, _m_)
+#define SCOPE_LOCK_NO_SP_NAMED(_name_, _m_)     if (vmbase::MonitorLocker<vmbase::NO_SAFEPOINT>       _name_ = _m_) {} else
+#define SCOPE_LOCK_SP_NAMED(_name_, _m_)        if (vmbase::MonitorLocker<vmbase::IMPLICIT_SAFEPOINT> _name_ = _m_) {} else
+#else
+#define SCOPE_LOCK_NAMED(_name_, _m_)           if (vmbase::MonitorLocker _name_ = _m_) {} else
+#define SCOPE_LOCK_NO_SP_NAMED(_name_, _m_)     SCOPE_LOCK_NAMED(_name_, _m_)
+#define SCOPE_LOCK_SP_NAMED(_name_, _m_)        SCOPE_LOCK_NAMED(_name_, _m_)
+#endif
 
 namespace vmbase {
+
+#ifdef VMCFG_SAFEPOINTS
+    enum BlockingMode
+    {
+        IMPLICIT_SAFEPOINT, // When blocked, a thread should be considered 'safe' with respect to its current safepoint context
+        NO_SAFEPOINT        // Blocking has no effect on a thread's safepoint status
+    };
+#endif
 
     /**
      * Class wrapper for a (recursive) mutex synchronization primitive.
@@ -94,8 +144,14 @@ namespace vmbase {
     {
         friend class ConditionVariable;
         friend class WaitNotifyMonitor;
+#ifdef VMCFG_SAFEPOINTS
+        template<BlockingMode> friend class MutexLocker;
+        template<BlockingMode> friend class MonitorLocker;
+        friend class SafepointHelper_RecursiveMutex;
+#else
         friend class MutexLocker;
         friend class MonitorLocker;
+#endif
 
     public:
         RecursiveMutex();
@@ -211,8 +267,14 @@ namespace vmbase {
      */
     class WaitNotifyMonitor : public RecursiveMutex
     {
+#ifdef VMCFG_SAFEPOINTS
+        template<BlockingMode> friend class MutexLocker;
+        template<BlockingMode> friend class MonitorLocker;
+        friend class SafepointHelper_WaitNotifyMonitor;
+#else
         friend class MutexLocker;
         friend class MonitorLocker;
+#endif
 
     public:
         WaitNotifyMonitor();
@@ -294,7 +356,7 @@ namespace vmbase {
      * }
      *
      * MutexLockers are intended to be used with the
-     * SCOPE_LOCK macro, to give synchronized-block
+     * SCOPE_LOCK macros, to give synchronized-block
      * sugaring to their declaration and scoping. For
      * example, the above function Foo::foo would be:
      *
@@ -304,7 +366,17 @@ namespace vmbase {
      *             m_sharedState += val;
      *         }
      *     }
+     *
+     * BlockingMode:
+     *
+     * When a MutexLocker is specialized with a BlockingMode
+     * of IMPLICIT_SAFEPOINT, blocking calls made on a mutex
+     * via the MutexLocker are considered implicit safepoints
+     * (see Safepoint.h).
      */
+#ifdef VMCFG_SAFEPOINTS
+    template <BlockingMode BLOCKING_MODE>
+#endif
     class MutexLocker
     {
     public:
@@ -315,7 +387,11 @@ namespace vmbase {
 
     private:
         // No copying allowed: undefined semantics
+#ifdef VMCFG_SAFEPOINTS
+        const MutexLocker<BLOCKING_MODE>& operator=(const MutexLocker<BLOCKING_MODE>& locker);
+#else
         const MutexLocker& operator=(const MutexLocker& locker);
+#endif
         // Force stack allocation
         void* operator new(size_t);
 
@@ -364,7 +440,16 @@ namespace vmbase {
      *         }
      *     }
      *
+     * BlockingMode:
+     *
+     * When a MonitorLocker is specialized with a BlockingMode
+     * of IMPLICIT_SAFEPOINT, blocking calls (including waits)
+     * made on a monitor via the MonitorLocker are considered
+     * implicit safepoints (see Safepoint.h).
      */
+#ifdef VMCFG_SAFEPOINTS
+    template <BlockingMode BLOCKING_MODE>
+#endif
     class MonitorLocker
     {
     public:
@@ -382,7 +467,11 @@ namespace vmbase {
 
     private:
         // No copying allowed: undefined semantics
+#ifdef VMCFG_SAFEPOINTS
+        const MonitorLocker<BLOCKING_MODE>& operator=(const MonitorLocker<BLOCKING_MODE>& locker);
+#else
         const MonitorLocker& operator=(const MonitorLocker& locker);
+#endif
         // Force stack allocation
         void* operator new(size_t);
 

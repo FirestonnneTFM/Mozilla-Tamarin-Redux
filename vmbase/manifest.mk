@@ -42,5 +42,6 @@ vmbase_CXXSRCS := $(vmbase_CXXSRCS) \
   $(curdir)/atom.cpp \
   $(curdir)/AvmAssert.cpp \
   $(curdir)/VMThread.cpp \
+  $(curdir)/Safepoint.cpp \
   $(NULL)
 
