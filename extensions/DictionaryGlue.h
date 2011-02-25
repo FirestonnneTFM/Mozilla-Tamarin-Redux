@@ -43,7 +43,7 @@
 
 namespace avmplus
 {
-    class GC_AS3_EXACT(DictionaryObject, ScriptObject)
+    class GC_AS3_EXACT_WITH_HOOK(DictionaryObject, ScriptObject)
     {
     protected:
         DictionaryObject(VTable *vtable, ScriptObject *delegate);
@@ -69,6 +69,18 @@ namespace avmplus
         bool isUsingWeakKeys() const { return getHeapHashtable()->weakKeys(); }
 
     private:
+
+        REALLY_INLINE void gcTraceHook_DictionaryObject(MMgc::GC *gc)
+        {
+            // This code was ripped out of ScriptObject::getTableNoInit
+            union {
+                uint8_t* p;
+                HeapHashtable** hht;
+            };
+            p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+            gc->TraceLocation(hht);
+        }
+            
         inline HeapHashtable* getHeapHashtable() const
         {
             // uintptr_t (rather than char*) to avoid "increases required alignment" warning
