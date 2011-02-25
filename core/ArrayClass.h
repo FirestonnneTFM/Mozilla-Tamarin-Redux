@@ -52,11 +52,6 @@ namespace avmplus
         ArrayClass(VTable* cvtable);
         
     public:
-        REALLY_INLINE static ArrayClass* create(MMgc::GC* gc, VTable* cvtable)
-        {
-            return new (gc, MMgc::kExact, cvtable->getExtraSize()) ArrayClass(cvtable);
-        }
-        
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]

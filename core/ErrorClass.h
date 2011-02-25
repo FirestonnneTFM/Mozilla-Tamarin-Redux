@@ -89,15 +89,11 @@ namespace avmplus
      */
     class GC_AS3_EXACT(ErrorObject,ScriptObject)
     {
+        friend class ErrorClass;
     protected:
         ErrorObject(VTable *vtable, ScriptObject *delegate);
 
     public:
-        REALLY_INLINE static ErrorObject* create(MMgc::GC* gc, VTable *ivtable, ScriptObject *prototype)
-        {
-            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ErrorObject(ivtable, prototype);
-        }
-
         ~ErrorObject() {
 #ifdef DEBUGGER
             stackTrace = NULL;
@@ -145,17 +141,14 @@ namespace avmplus
     };
 
     #define DECLARE_NATIVE_ERROR_CLASS(cls, obj)                                                \
-        class obj : public ErrorObject                                                    \
+        class obj : public ErrorObject                                                          \
         {                                                                                       \
+            friend class cls;                                                                   \
         protected:                                                                              \
             REALLY_INLINE obj(VTable *vtable, ScriptObject *delegate)                           \
                 : ErrorObject(vtable, delegate) {}                                              \
-        public:                                                                                 \
-            REALLY_INLINE static obj* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate) { \
-                return new (gc, MMgc::kExact, ivtable->getExtraSize()) obj(ivtable, delegate); \
-            }                                                                                   \
         private:                                                                                \
-            virtual bool gcTrace(MMgc::GC* gc, size_t cursor); \
+            virtual bool gcTrace(MMgc::GC* gc, size_t cursor);                                  \
             DECLARE_SLOTS_##obj;                                                                \
         };                                                                                      \
                                                                                                 \
@@ -165,11 +158,7 @@ namespace avmplus
             REALLY_INLINE cls(VTable* cvtable)                                                  \
                 : NativeErrorClass(cvtable) {}                                                  \
         public:                                                                                 \
-            REALLY_INLINE static cls* create(MMgc::GC* gc, VTable* cvtable)                     \
-            {                                                                                   \
-                return new (gc, MMgc::kExact, cvtable->getExtraSize()) cls(cvtable);            \
-            }                                                                                   \
-            virtual bool gcTrace(MMgc::GC* gc, size_t cursor); \
+            virtual bool gcTrace(MMgc::GC* gc, size_t cursor);                                  \
             DECLARE_SLOTS_##cls;                                                                \
         };
 

@@ -48,13 +48,10 @@ namespace avmplus
 {
     class GC_AS3_EXACT(DomainObject, ScriptObject)
     {
+        friend class DomainClass;
     protected:
         DomainObject(VTable *vtable, ScriptObject *delegate);
     public:
-        REALLY_INLINE static DomainObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
-        {
-            return new (gc, ivtable->getExtraSize()) DomainObject(ivtable, delegate);
-        }
 
         void init(DomainObject *base);
         Atom loadBytes(ByteArrayObject* bytes, uint32_t swfVersion);
@@ -86,11 +83,6 @@ namespace avmplus
         DomainClass(VTable* cvtable);
         
     public:
-        REALLY_INLINE static DomainClass* create(MMgc::GC* gc, VTable* cvtable)
-        {
-            return new (gc, cvtable->getExtraSize()) DomainClass(cvtable);
-        }
-
         DomainObject* get_currentDomain();
         int get_MIN_DOMAIN_MEMORY_LENGTH();
 

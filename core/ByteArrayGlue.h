@@ -223,11 +223,6 @@ namespace avmplus
         ByteArrayClass(VTable *vtable);
 
     public:
-        REALLY_INLINE static ByteArrayClass* create(MMgc::GC* gc, VTable* vtable)
-        {
-            return new (gc, MMgc::kExact, vtable->getExtraSize()) ByteArrayClass(vtable);
-        }
-
         ~ByteArrayClass() { }
 
         ByteArrayObject* constructByteArray();
@@ -244,14 +239,11 @@ namespace avmplus
 
     class GC_AS3_EXACT(ByteArrayObject, ScriptObject)
     {
+        friend class ByteArrayClass;
     protected:
         ByteArrayObject(VTable* ivtable, ScriptObject* delegate);
 
     public:
-        REALLY_INLINE static ByteArrayObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
-        {
-            return new (gc, MMgc::kExact, ivtable->getExtraSize()) ByteArrayObject(ivtable, delegate);
-        }
 
         virtual bool hasAtomProperty(Atom name) const;
         virtual void setAtomProperty(Atom name, Atom value);

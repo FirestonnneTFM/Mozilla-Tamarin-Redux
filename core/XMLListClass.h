@@ -51,11 +51,6 @@ namespace avmplus
     protected:
         XMLListClass(VTable* cvtable);
     public:
-        REALLY_INLINE static XMLListClass* create(MMgc::GC* gc, VTable* cvtable)
-        {
-            return new (gc, MMgc::kExact, cvtable->getExtraSize()) XMLListClass(cvtable);
-        }
-
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]

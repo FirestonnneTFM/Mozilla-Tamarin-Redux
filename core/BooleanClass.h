@@ -52,11 +52,6 @@ namespace avmplus
         BooleanClass(VTable* vtable);
 
     public:
-        REALLY_INLINE static BooleanClass* create(MMgc::GC* gc, VTable* cvtable)
-        {
-            return new (gc, MMgc::kExact, cvtable->getExtraSize()) BooleanClass(cvtable);
-        }
-
         // this = argv[0]
         // arg1 = argv[1]
         // argN = argv[argc]
