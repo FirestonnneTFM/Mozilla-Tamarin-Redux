@@ -372,20 +372,31 @@ Possible values are:
     def getDebug(self):
         return self._debug
 
-    def subst(self, name, value):
-        self._acvars[name] = value
+    def subst(self, name, value, recursive=True):
+        '''Add/substitute Makefile variables:
+            recursive refers to the make variable flavor:
+                True  : (default) recursively expanded var, defined with "="
+                False : simply expanded var, defined with ":="
+            more info: http://www.gnu.org/software/make/manual/make.html#Flavors
+        '''
+        self._acvars[name] = {'value':value, 'recursive':recursive}
 
     _confvar = re.compile("@([^@]+)@")
 
     def generate(self, makefile):
         outpath = self._objdir + "/" + makefile
 
-        contents = \
-            "\n".join([k + "=" + str(v) \
-                       for (k,v) in self._acvars.iteritems()]) + \
-            "\n\ninclude $(topsrcdir)/build/config.mk\n" \
-            "include $(topsrcdir)/manifest.mk\n" \
-            "include $(topsrcdir)/build/rules.mk\n"
+        contents = ''
+        for (k,v) in self._acvars.iteritems():
+            if type(v) == dict: # not all _acvars are added with self.subst
+                contents += '%s%s%s\n' % (k, '=' if v['recursive'] else ':=',
+                                          v['value'])
+            else:
+                contents += '%s=%s\n' % (k,v)
+
+        contents += "\n\ninclude $(topsrcdir)/build/config.mk\n" \
+                    "include $(topsrcdir)/manifest.mk\n" \
+                    "include $(topsrcdir)/build/rules.mk\n"
 
         writeFileIfChanged(outpath, contents)
 
