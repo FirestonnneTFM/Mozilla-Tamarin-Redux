@@ -118,7 +118,7 @@
                         var smoke = "builder=windows-smoke&builder=windows64-smoke&builder=mac-intel-10.5-smoke&builder=mac64-intel-smoke&builder=linux-smoke&builder=linux2-smoke&builder=linux64-smoke&builder=solaris-sparc-smoke&builder=android-smoke&builder=linux-arm-smoke&builder=linux-arm2-smoke&builder=linux-arm3-smoke&builder=linux-mips-smoke&builder=linux-sh4-smoke"
                         var test = "builder=windows-test&builder=windows64-test&builder=mac-intel-10.5-test&builder=mac64-intel-test&builder=linux-test&builder=linux2-test&builder=linux64-test&builder=solaris-sparc-test&builder=android-test&builder=linux-arm-test&builder=linux-arm2-test&builder=linux-arm3-test&builder=linux-mips-test&builder=linux-sh4-test"
                         var performance = "builder=windows-performance&builder=mac-performance&builder=mac64-performance&builder=linux-performance&builder=android-performance"
-                        var deep = "builder=windows-deep&builder=windows-p3-deep&builder=mac-deep&builder=windows64-deep&builder=solaris-sparc-deep&builder=solaris-sparc2-deep&builder=linux-deep&builder=linux-arm-deep&builder=linux-arm2-deep&builder=linux-mips-deep&builder=windows-frr"
+                        var deep = "builder=windows-deep&builder=windows-p3-deep&builder=mac-deep&builder=mac64-deep&builder=windows64-deep&builder=solaris-sparc-deep&builder=solaris-sparc2-deep&builder=linux-deep&builder=linux-arm-deep&builder=linux-arm2-deep&builder=linux-mips-deep&builder=windows-frr"
                         
                         var compile_sandbox = "builder=windows-compile-sandbox&builder=windows64-compile-sandbox&builder=mac-intel-10.5-compile-sandbox&builder=mac64-intel-compile-sandbox&builder=linux-compile-sandbox&builder=linux2-compile-sandbox&builder=linux64-compile-sandbox&builder=solaris-sparc-compile-sandbox&builder=android-compile-sandbox&builder=linux-arm-compile-sandbox&builder=linux-arm2-compile-sandbox&builder=linux-arm3-compile-sandbox&builder=linux-mips-compile-sandbox&builder=linux-sh4-compile-sandbox"
                         var smoke_sandbox = "builder=windows-smoke-sandbox&builder=windows64-smoke-sandbox&builder=mac-intel-10.5-smoke-sandbox&builder=mac64-intel-smoke-sandbox&builder=linux-smoke-sandbox&builder=linux2-smoke-sandbox&builder=linux64-smoke-sandbox&builder=solaris-sparc-smoke-sandbox&builder=android-smoke-sandbox&builder=linux-arm-smoke-sandbox&builder=linux-arm2-smoke-sandbox&builder=linux-arm3-smoke-sandbox&builder=linux-mips-smoke-sandbox&builder=linux-sh4-smoke-sandbox"
@@ -149,17 +149,6 @@
                         DisplayBar(performance, "Performance", "performance");
                         DisplayBar(deep, "Deep-Test", "deep");
 
-			/*
-                        DisplayHeader("Argo Build Phase 1");
-                        DisplayBar(compile_argo, "Compile", "compile-argo");
-                        DisplayBar(smoke_argo, "Smoke", "smoke-argo");
-                        DisplayBar(test_argo, "Test", "test-argo");
-                        
-                        DisplayHeader("Argo Build Phase 2");
-                        DisplayBar(performance_argo, "Performance", "performance-argo");
-                        DisplayBar(deep_argo, "Deep-Test", "deep-argo");
-			*/
-			    
                         DisplayHeader("Sandbox Build");
                         DisplayBar(compile_sandbox, "Sandbox&nbsp;Compile", "compile-sandbox");
                         DisplayBar(smoke_sandbox, "Sandbox&nbsp;Smoke", "smoke-sandbox");
