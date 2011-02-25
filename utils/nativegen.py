@@ -1936,7 +1936,7 @@ class AbcThunkGen:
             out.indent += 1
             if t.is_gc_exact:
                 out.println("cvtable->ivtable->createInstanceProc = %s;" % (t.createInstanceProcName));
-                out.println("ClassClosure* const cc = %s::create(cvtable->gc(), cvtable);" % t.fqcppname())
+                out.println("ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) %s(cvtable);" % t.fqcppname())
             else:
                 out.println("cvtable->ivtable->createInstanceProc = %s;" % (t.createInstanceProcName));
                 out.println("ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) %s(cvtable);" % t.fqcppname())
@@ -1952,7 +1952,7 @@ class AbcThunkGen:
                 if t.has_pre_create_check: 
                     out.println("%s::preCreateInstanceCheck(cls);" % (t.fqcppname()));
                 if t.itraits.is_gc_exact:
-                    out.println("return %s::create(cls->gc(), cls->ivtable(), cls->prototypePtr());" % (t.itraits.fqcppname()))
+                    out.println("return new (cls->gc(), MMgc::kExact, cls->getExtraSize()) %s(cls->ivtable(), cls->prototypePtr());" % (t.itraits.fqcppname()))
                 else:
                     out.println("return new (cls->gc(), cls->getExtraSize()) %s(cls->ivtable(), cls->prototypePtr());" % (t.itraits.fqcppname()))
                 out.indent -= 1

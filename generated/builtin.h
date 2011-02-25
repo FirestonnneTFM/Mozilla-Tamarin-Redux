@@ -853,7 +853,7 @@ private:
 };
 #define DECLARE_SLOTS_ObjectClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -880,7 +880,7 @@ private:
 };
 #define DECLARE_SLOTS_ClassClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -926,7 +926,7 @@ private:
 };
 #define DECLARE_SLOTS_FunctionClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -976,7 +976,7 @@ public:
 };
 #define DECLARE_SLOTS_NamespaceClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1003,7 +1003,7 @@ private:
 };
 #define DECLARE_SLOTS_BooleanClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1046,7 +1046,7 @@ private:
 };
 #define DECLARE_SLOTS_NumberClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1085,7 +1085,7 @@ private:
 };
 #define DECLARE_SLOTS_IntClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1118,7 +1118,7 @@ private:
 };
 #define DECLARE_SLOTS_UIntClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1147,7 +1147,7 @@ private:
 };
 #define DECLARE_SLOTS_StringClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1184,7 +1184,7 @@ private:
 };
 #define DECLARE_SLOTS_ArrayClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1235,7 +1235,7 @@ private:
 };
 #define DECLARE_SLOTS_VectorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1275,7 +1275,7 @@ private:
 };
 #define DECLARE_SLOTS_ObjectVectorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1296,7 +1296,7 @@ private:
 };
 #define DECLARE_SLOTS_IntVectorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1336,7 +1336,7 @@ private:
 };
 #define DECLARE_SLOTS_UIntVectorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1376,7 +1376,7 @@ private:
 };
 #define DECLARE_SLOTS_DoubleVectorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1416,7 +1416,7 @@ private:
 };
 #define DECLARE_SLOTS_MethodClosureClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1474,7 +1474,7 @@ private:
 };
 #define DECLARE_SLOTS_MathClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -1509,7 +1509,7 @@ private:
 };
 #define DECLARE_SLOTS_ErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1580,7 +1580,7 @@ private:
 };
 #define DECLARE_SLOTS_DefinitionErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1628,7 +1628,7 @@ private:
 };
 #define DECLARE_SLOTS_EvalErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1676,7 +1676,7 @@ private:
 };
 #define DECLARE_SLOTS_RangeErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1724,7 +1724,7 @@ private:
 };
 #define DECLARE_SLOTS_ReferenceErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1772,7 +1772,7 @@ private:
 };
 #define DECLARE_SLOTS_SecurityErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1820,7 +1820,7 @@ private:
 };
 #define DECLARE_SLOTS_SyntaxErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1868,7 +1868,7 @@ private:
 };
 #define DECLARE_SLOTS_TypeErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1916,7 +1916,7 @@ private:
 };
 #define DECLARE_SLOTS_URIErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -1964,7 +1964,7 @@ private:
 };
 #define DECLARE_SLOTS_VerifyErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -2012,7 +2012,7 @@ private:
 };
 #define DECLARE_SLOTS_UninitializedErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -2060,7 +2060,7 @@ private:
 };
 #define DECLARE_SLOTS_ArgumentErrorClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \
@@ -2108,7 +2108,7 @@ private:
 };
 #define DECLARE_SLOTS_DateClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -2154,7 +2154,7 @@ private:
 };
 #define DECLARE_SLOTS_RegExpClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -2204,7 +2204,7 @@ public:
 };
 #define DECLARE_SLOTS_XMLClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -2254,7 +2254,7 @@ public:
 };
 #define DECLARE_SLOTS_XMLListClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -2304,7 +2304,7 @@ public:
 };
 #define DECLARE_SLOTS_QNameClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
@@ -2351,7 +2351,7 @@ private:
 };
 #define DECLARE_SLOTS_ByteArrayClass \
     public: \
-        static avmplus::ClassClosure* FASTCALL createClassClosure(VTable* cvtable); \
+        static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable); \
     public: \
         static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*); \
     public: \

@@ -45,14 +45,11 @@ namespace avmplus
 {
     class GC_AS3_EXACT_WITH_HOOK(DictionaryObject, ScriptObject)
     {
+        friend class DictionaryClass;
     protected:
         DictionaryObject(VTable *vtable, ScriptObject *delegate);
         
     public:
-        REALLY_INLINE static DictionaryObject* create(MMgc::GC* gc, VTable* ivtable, ScriptObject* delegate)
-        {
-            return new (gc, ivtable->getExtraSize()) DictionaryObject(ivtable, delegate);
-        }
 
         void init(bool weakKeys);
 
@@ -102,11 +99,6 @@ namespace avmplus
     private:
         DictionaryClass(VTable *vtable);
     public:
-        REALLY_INLINE static DictionaryClass* create(MMgc::GC* gc, VTable* cvtable)
-        {
-            return new (gc, cvtable->getExtraSize()) DictionaryClass(cvtable);
-        }
-
     // ------------------------ DATA SECTION BEGIN
         GC_NO_DATA(DictionaryClass)
 

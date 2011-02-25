@@ -62,7 +62,7 @@ namespace avmplus
         Atom getUintPropertyImpl(uint32_t index) const;
 
     protected:
-        ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity);
+        ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32_t capacity=0);
         ArrayObject(VTable* ivtable, ScriptObject *delegate, Atom *argv, int argc);
 #ifdef VMCFG_AOT
         template <typename ADT> ArrayObject(VTable* ivtable, ScriptObject *delegate, MethodEnv *env, ADT argDesc, uint32_t argc, va_list ap);

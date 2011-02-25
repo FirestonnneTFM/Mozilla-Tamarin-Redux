@@ -52,10 +52,6 @@ namespace avmplus
         DateClass(VTable* cvtable);
 
     public:
-        REALLY_INLINE static DateClass* create(MMgc::GC* gc, VTable* cvtable)
-        {
-            return new (gc, MMgc::kExact, cvtable->getExtraSize()) DateClass(cvtable);
-        }
 
         // this = argv[0]
         // arg1 = argv[1]
