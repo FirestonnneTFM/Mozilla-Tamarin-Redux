@@ -121,27 +121,37 @@ def gen(prefix,inputfiles,outputdir,srcdir=os.getcwd(),ns=''):
     else:
         os.unlink(tmpfile.name)
         
+    success = True
     if ret != 0:
         print "Invoking avmshell on exactgc script failed"
-        return False
+        success = False
 
     tmpfile.close()
 
     if not os.path.exists(prefix+'-tracers.hh'):
         print "Error: failed to generate tracers"
-        exit(1)
-    
-    if not os.path.exists(outputdir):
+        success = False
+    elif not os.path.exists(outputdir):
         os.makedirs(outputdir)
 
     # copy changed headers stuff to output dir
     for src in [prefix+'-tracers.hh', prefix+'-tracers.h']:
         target = outputdir + "/" + src
-        if not os.path.exists(target) or not filecmp.cmp(target,src):
-            shutil.move(src,target)
+        # delete target file in case of error
+        if not success:
+            if os.path.exists(target):            
+                os.remove(target)
         else:
-            os.remove(src)
+            if not os.path.exists(target) or not filecmp.cmp(target,src):
+                shutil.move(src,target)
+            else:
+                os.remove(src)
+
     os.chdir(savedir)
+
+    if not success:
+        exit(1)
+    
             
 def gen_builtins(outdir):
     coredir = utilsdir + "/../core/"
