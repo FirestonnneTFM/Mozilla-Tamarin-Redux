@@ -141,6 +141,7 @@ class tamarinredux:
                                     "windows-p3-deep",
                                     "windows-frr",
                                     "mac-deep",
+                                    "mac64-deep",
                                     "solaris-sparc-deep", "solaris-sparc2-deep",
                                     "windows64-deep",
                                     "linux-deep",
@@ -156,6 +157,7 @@ class tamarinredux:
                                   ["windows-p3-deep", "windows-test"],
                                   ["windows-frr", "windows-test"], 
                                   ["mac-deep","mac-intel-10.5-test"],
+                                  ["mac64-deep","mac64-intel-test"],
                                   ["solaris-sparc-deep", "solaris-sparc-test"],
                                   ["solaris-sparc2-deep", "solaris-sparc-test"],
                                   ["windows64-deep", "windows64-test"], 
@@ -1422,32 +1424,20 @@ class tamarinredux:
     mac_deep_factory.addStep(bb_slaveupdate(slave="mac-deep"))
     mac_deep_factory.addStep(compile_builtin)
     mac_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-shell --enable-wordcode-interp --mac-sdk=105", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_WORDCODE_INTERP"))
-    mac_deep_factory.addStep(compile_generic(name="Release-wordcode64", shellname="avmshell_wordcode_64", args="--enable-shell --enable-wordcode-interp --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
     mac_deep_factory.addStep(download_testmedia)
     mac_deep_factory.addStep(deep_release_esc)
     mac_deep_factory.addStep(test_misc)
     mac_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
-    mac_deep_factory.addStep(test_selftest(name="Debug64", shellname="avmshell_d_64"))
     mac_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
-    mac_deep_factory.addStep(test_selftest(name="ReleaseDebugger64", shellname="avmshell_s_64"))
     mac_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd"))
-    mac_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd_64"))
     mac_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
-    mac_deep_factory.addStep(test_generic(name="Release-wordcode-interp64", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
     mac_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER +AVMFEATURE_OVERRIDE_GLOBAL_NEW +AVMFEATURE_USE_SYSTEM_MALLOC"))
     mac_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air", vmargs="", config="", scriptargs=""))
-    mac_deep_factory.addStep(compile_generic(name="ReleaseDebugger64-air", shellname="avmshell_air_64", args="--enable-shell --target=x86_64-darwin --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER +AVMFEATURE_OVERRIDE_GLOBAL_NEW +AVMFEATURE_USE_SYSTEM_MALLOC"))
-    mac_deep_factory.addStep(test_generic(name="ReleaseDebugger64-air", shellname="avmshell_air_64", vmargs="", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
-    mac_deep_factory.addStep(test_generic(name="Release64-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
-    mac_deep_factory.addStep(test_generic(name="DebugDebugger64_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
-    mac_deep_factory.addStep(test_generic(name="DebugDebugger64_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
     mac_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    mac_deep_factory.addStep(test_generic(name="Release64-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    mac_deep_factory.addStep(test_generic(name="DebugDebugger64-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
     mac_deep_factory.addStep(deep_run_brightspot(name='ReleaseDebugger', shell='avmshell_s', testargs='--quiet'))
     mac_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
     mac_deep_factory.addStep(deep_codecoverage_process)
@@ -1476,6 +1466,46 @@ class tamarinredux:
                 'factory': mac_deep_factory,
                 'builddir': './mac-deep',
     }
+
+
+    ################################
+    #### builder for mac64-deep ####
+    ################################
+    mac64_deep_factory = factory.BuildFactory()
+    mac64_deep_factory.addStep(sync_clean)
+    mac64_deep_factory.addStep(sync_clone(url=HG_URL))
+    mac64_deep_factory.addStep(sync_update)
+    mac64_deep_factory.addStep(bb_slaveupdate(slave="mac64-deep"))
+    mac64_deep_factory.addStep(compile_builtin)
+    mac64_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-shell --enable-wordcode-interp --target=x86_64-darwin --mac-sdk=105", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
+    mac64_deep_factory.addStep(download_testmedia)
+    mac64_deep_factory.addStep(deep_release_esc)
+    mac64_deep_factory.addStep(test_misc)
+    mac64_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d_64"))
+    mac64_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s_64"))
+    mac64_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd_64"))
+    mac64_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
+    mac64_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", args="--enable-shell --target=x86_64-darwin --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER +AVMFEATURE_OVERRIDE_GLOBAL_NEW +AVMFEATURE_USE_SYSTEM_MALLOC"))
+    mac64_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", vmargs="", config="", scriptargs=""))
+    mac64_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
+    mac64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    mac64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    mac64_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac64_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    mac64_deep_factory.addStep(deep_run_brightspot(name='ReleaseDebugger', shell='avmshell_s_64', testargs='--quiet'))
+    mac64_deep_factory.addStep(compile_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", args="--enable-shell --enable-debugger --enable-valgrind --mac-sdk=105 --target=x86_64-darwin", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER +AVMFEATURE_VALGRIND"))
+    mac64_deep_factory.addStep(test_generic(name="ReleaseDebugger-Valgrind", shellname="avmshell_s_valgrind_64", vmargs="", config="", scriptargs="--valgrind"))
+    mac64_deep_factory.addStep(util_process_clean)
+    mac64_deep_factory.addStep(util_clean_buildsdir)
+    mac64_deep_factory.addStep(sync_clean)
+
+    mac64_deep_builder = {
+                'name': "mac64-deep",
+                'slavename': "mac64-deep",
+                'factory': mac64_deep_factory,
+                'builddir': './mac64-deep',
+    }
+
 
     ##################################
     #### builder for windows-p3-deep ####
@@ -1878,6 +1908,7 @@ class tamarinredux:
                 windows_deep_builder,
                 windows_p3_deep_builder,
                 mac_deep_builder,
+                mac64_deep_builder,
                 windows_64_deep_builder,
                 solaris_sparc_deep_builder,
                 solaris_sparc2_deep_builder,
