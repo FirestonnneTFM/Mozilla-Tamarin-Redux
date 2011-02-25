@@ -300,7 +300,7 @@ class RuntestBase(object):
             elif o in ('-x', '--exclude'):
                 self.exclude += v.split(',')
                 # remove any trailing /,\ and whitespace from exclude list
-                self.exclude = map(lambda s: s.rstrip('\\/ '), self.exclude)
+                self.exclude = list(map(lambda s: s.rstrip('\\/ '), self.exclude))
             elif o in ('-t', '--notime'):
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
