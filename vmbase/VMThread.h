@@ -424,11 +424,8 @@ namespace vmbase {
          *   - All load and store operations executed before the barrier will appear to
          *     complete before all load and store operations after the barrier.
          *
-         * Note that this function implies an equivalent compiler memory-barrier in addition
+         * Note that this function inserts an equivalent compiler memory-barrier in addition
          * to the hardware barrier.
-         *
-         * On uniprocessor systems this will either be a no-op or translated into
-         * a compiler memory-barrier.
          */
         static void readWrite();
     };
