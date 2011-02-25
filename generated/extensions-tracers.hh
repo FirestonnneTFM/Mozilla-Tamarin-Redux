@@ -60,6 +60,7 @@ bool DictionaryObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
+    gcTraceHook_DictionaryObject(gc);
     return false;
 }
 

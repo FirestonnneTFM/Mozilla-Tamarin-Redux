@@ -114,18 +114,8 @@ namespace avmplus
             // Avoid initializing the hash table here
             InlineHashtable* iht = getTableNoInit();
             iht->gcTrace(gc);
-            
-            if (vtable->traits->isDictionary())
-            {
-                // This code was ripped out of ScriptObject::getTableNoInit
-                union {
-                    uint8_t* p;
-                    HeapHashtable** hht;
-                };
-                p = (uint8_t*)this + vtable->traits->getHashtableOffset();
-                gc->TraceLocation(hht);
-            }
         }
+
         return false;
     }
 
