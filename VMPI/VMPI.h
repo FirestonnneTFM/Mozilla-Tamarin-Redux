@@ -605,7 +605,8 @@ extern int32_t VMPI_atomicIncAndGet32(volatile int32_t* value);
 
 /**
  * Atomically increments and returns the value pointed to by 'value'.
- * The operation includes a full memory barrier.
+ * The operation includes a memory barrier with the ordering guarantees
+ * of VMPI_memoryBarrier().
  *
  * @param value Points to the value to increment
  * @return The incremented value
@@ -623,7 +624,8 @@ extern int32_t VMPI_atomicDecAndGet32(volatile int32_t* value);
 
 /**
  * Atomically decrements and returns the value pointed to by 'value'.
- * The operation includes a full memory barrier.
+ * The operation includes a memory barrier with the ordering guarantees
+ * of VMPI_memoryBarrier().
  *
  * @param value Points to the value to increment
  * @return The decremented value
@@ -634,6 +636,7 @@ extern int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value);
  * Performs an atomic Compare-And-Swap operation.
  * If the contents at 'address' are equal to 'oldValue', then they
  * are replaced with 'newValue'.
+ * If the implementation allows, then no memory barrier will be applied.
  *
  * @param oldValue The value to compare
  * @param newValue The value to swap-in, if oldValue is the current value
@@ -646,8 +649,8 @@ extern bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile i
  * Performs an atomic Compare-And-Swap operation.
  * If the contents at 'address' are equal to 'oldValue', then they
  * are replaced with 'newValue'.
- *
- * The operation includes a full memory barrier.
+ * The operation includes a memory barrier with the ordering guarantees
+ * of VMPI_memoryBarrier().
  *
  * @param oldValue The value to compare
  * @param newValue The value to swap-in, if oldValue is the current value
@@ -657,7 +660,13 @@ extern bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile i
 extern bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address);
 
 /**
- * Inserts a read and write memory barrier (fence).
+ * Inserts the strongest hardware read/write memory barrier provided by the platform.
+ * The minimum guarantee provided by this barrier will be:
+ *   - All load and store operations executed before the barrier will appear to
+ *     complete before all load and store operations after the barrier.
+ *
+ * Note that this function inserts an equivalent compiler memory-barrier in addition
+ * to the hardware barrier.
  */
 extern void VMPI_memoryBarrier();
 
