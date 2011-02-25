@@ -1,0 +1,16 @@
+shell_name, suite, vm_args, config_string, script_args
+avmshell_cov, acceptance, , , 
+avmshell_cov, acceptance, -Dinterp, , 
+avmshell_cov, acceptance, -Ojit, , 
+avmshell_s_cov, acceptance, , , 
+avmshell_s_cov, acceptance, -Dnodebugger, , 
+avmshell_d_cov, acceptance, , , 
+avmshell_sd_cov, acceptance, , , 
+avmshell_cov, acceptance,"-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20" , , 
+avmshell_sd_cov, acceptance,"-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20" , , 
+avmshell_sd_cov, acceptance, -gcsummary , , 
+avmshell_cov, selftest, , , 
+avmshell_s_cov, selftest, , , 
+avmshell_d_cov, selftest, , , 
+avmshell_sd_cov, selftest, , , 
+avmshell_cov, acceptance, , ,"--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"

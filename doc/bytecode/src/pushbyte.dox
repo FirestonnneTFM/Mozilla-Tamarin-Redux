@@ -1,0 +1,43 @@
+/*! \page pushbyte 
+
+\addindex pushbyte
+
+
+\section pushbyte pushbyte
+
+\subsection operation Operation
+
+Push a byte value.
+
+\subsection format Format
+
+\code
+pushbyte
+byte_value
+\endcode
+
+\subsection forms Forms
+\code
+pushbyte = 36 (0x24)
+\endcode
+\subsection stack Stack
+
+\code
+... => ..., value
+\endcode
+
+\subsection description Description
+
+byte_value is a signed byte. The byte_value is sign extended to an int, and the 
+result is pushed onto the stack.
+
+\subsection rt_execeptions Runtime exceptions
+
+None.
+
+\subsection notes Notes
+
+None.
+
+*/
+
