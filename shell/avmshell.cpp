@@ -1092,6 +1092,12 @@ namespace avmshell
             if (RUNNING_ON_VALGRIND)
                 AvmLog("-valgrind");
             AvmLog(" build " AVMPLUS_BUILD_CODE "\n");
+#ifdef AVMPLUS_DESC_STRING
+        if (VMPI_strcmp(AVMPLUS_DESC_STRING, ""))
+        {
+            AvmLog("Description: " AVMPLUS_DESC_STRING "\n");
+        }
+#endif
             AvmLog("features %s\n", avmfeatures);
             Platform::GetInstance()->exit(1);
         }
@@ -1151,6 +1157,12 @@ namespace avmshell
     void Shell::usage()
     {
         AvmLog("avmplus shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE " build " AVMPLUS_BUILD_CODE "\n\n");
+#ifdef AVMPLUS_DESC_STRING
+        if (VMPI_strcmp(AVMPLUS_DESC_STRING, ""))
+        {
+            AvmLog("Description: " AVMPLUS_DESC_STRING "\n\n");
+        }
+#endif
         AvmLog("usage: avmplus\n");
 #ifdef DEBUGGER
         AvmLog("          [-d]          enter debugger on start\n");

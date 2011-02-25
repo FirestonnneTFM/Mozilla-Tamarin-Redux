@@ -122,7 +122,7 @@ buildTamarin = o.getBoolArg('tamarin', True)
 if buildTamarin:
     config.subst("ENABLE_TAMARIN", 1)
 
-buildShell = o.getBoolArg("shell", False)
+buildShell = o.getBoolArg("shell", True)
 if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
@@ -187,6 +187,21 @@ if 'DISABLE_RTMPE' in os.environ:
     DISABLE_RTMPE += os.environ['DISABLE_RTMPE'] + " "    
 if o.getBoolArg('valgrind', False, False):
     OPT_CXXFLAGS = "-O1 -g "
+
+# check that there is a valid hg repo here
+hg_returncode = subprocess.call(['hg', 'id', '-n'],
+                     stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE)
+if hg_returncode == 0: # success
+    # HGVERSION is to be set at "make" time
+    HGVERSION = "$(shell hg parents --template '{rev}:{node|short}')"
+    APP_CPPFLAGS += '-DHGVERSION="${HGVERSION}" '
+    config.subst("HGVERSION", HGVERSION, recursive=False)
+
+# Get the optional avm description string - this is used by dev/qe to identify
+# this particular build
+AVMPLUS_DESC = o.getStringArg('desc') or ''
+APP_CPPFLAGS += '-DAVMPLUS_DESC="${AVMPLUS_DESC}" '
 
 valinc = '$(topsrcdir)/other-licenses'
 if 'VALGRIND_HOME' in os.environ:
@@ -505,7 +520,7 @@ if o.help:
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
                         for (var, val) in MMGC_DEFINES.iteritems())
 
-
+config.subst("AVMPLUS_DESC", AVMPLUS_DESC)
 config.subst("APP_CPPFLAGS", APP_CPPFLAGS)
 config.subst("APP_CXXFLAGS", APP_CXXFLAGS)
 config.subst("OPT_CPPFLAGS", OPT_CPPFLAGS)
