@@ -55,8 +55,6 @@ namespace avmplus
         Profiler()
         {
         }
-
-        virtual ~Profiler() {}
     };
 #endif
 }
