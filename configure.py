@@ -198,11 +198,6 @@ if hg_returncode == 0: # success
     APP_CPPFLAGS += '-DHGVERSION="${HGVERSION}" '
     config.subst("HGVERSION", HGVERSION, recursive=False)
 
-# Get the optional avm description string - this is used by dev/qe to identify
-# this particular build
-AVMPLUS_DESC = o.getStringArg('desc') or ''
-APP_CPPFLAGS += '-DAVMPLUS_DESC="${AVMPLUS_DESC}" '
-
 valinc = '$(topsrcdir)/other-licenses'
 if 'VALGRIND_HOME' in os.environ:
     valinc = os.environ['VALGRIND_HOME'] + '/include'
@@ -515,12 +510,24 @@ if o.help:
     sys.stdout.write(o.getHelp())
     sys.exit(1)
 
+# Get the optional avm description string
+# This is NOT supported on windows/cygwin due to cygwin-wrapper.sh
+# not passing the string correctly to cl.exe
+AVMPLUS_DESC = o.getStringArg('desc') or ''
+if the_os == "windows" or the_os == "cygwin":
+    if AVMPLUS_DESC:
+        print('AVMPLUS_DESC is not supported on windows via cygwin make.'
+              '  Ignoring description.')
+else: # all other platforms
+    # place in Makefile even if the value is empty so
+    # it can be updated by hand if desired
+    APP_CPPFLAGS += '-DAVMPLUS_DESC="${AVMPLUS_DESC}" '
+    config.subst("AVMPLUS_DESC", AVMPLUS_DESC)
 
 # Append MMGC_DEFINES to APP_CPPFLAGS
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
                         for (var, val) in MMGC_DEFINES.iteritems())
 
-config.subst("AVMPLUS_DESC", AVMPLUS_DESC)
 config.subst("APP_CPPFLAGS", APP_CPPFLAGS)
 config.subst("APP_CXXFLAGS", APP_CXXFLAGS)
 config.subst("OPT_CPPFLAGS", OPT_CPPFLAGS)
