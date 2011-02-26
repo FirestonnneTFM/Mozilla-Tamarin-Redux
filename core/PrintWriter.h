@@ -126,7 +126,6 @@ namespace avmplus
     public:
         PrintWriter(AvmCore* core) { m_core = core; m_stream = NULL; }
         PrintWriter(AvmCore* core, OutputStream *stream) { m_core = core; m_stream = stream; }
-        ~PrintWriter() {}
 
         void setOutputStream(OutputStream *stream) { m_stream = stream; }
         void setCore(AvmCore* core) { m_core = core; }
