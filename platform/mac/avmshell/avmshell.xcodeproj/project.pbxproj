@@ -384,6 +384,8 @@
 		815846DE129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */; };
 		817CEE7B12E511C40019E8DF /* Safepoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE7912E511C40019E8DF /* Safepoint.cpp */; };
 		817CEE7C12E511C40019E8DF /* Safepoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE7912E511C40019E8DF /* Safepoint.cpp */; };
+		817CEE9212E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */; };
+		817CEE9312E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */; };
 		81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
 		81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
 		D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
@@ -910,6 +912,8 @@
 		817CEE7812E511C40019E8DF /* Safepoint-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Safepoint-inlines.h"; path = "../../../vmbase/Safepoint-inlines.h"; sourceTree = SOURCE_ROOT; };
 		817CEE7912E511C40019E8DF /* Safepoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Safepoint.cpp; path = ../../../vmbase/Safepoint.cpp; sourceTree = SOURCE_ROOT; };
 		817CEE7A12E511C40019E8DF /* Safepoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Safepoint.h; path = ../../../vmbase/Safepoint.h; sourceTree = SOURCE_ROOT; };
+		817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_vmbase_safepoints.cpp; path = ../../../extensions/ST_vmbase_safepoints.cpp; sourceTree = SOURCE_ROOT; };
+		817CEE9412E5122B0019E8DF /* ST_vmbase_safepoints.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_vmbase_safepoints.st; path = ../../../extensions/ST_vmbase_safepoints.st; sourceTree = SOURCE_ROOT; };
 		81B69B1E123848B200B9DF4F /* vmbase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vmbase.h; path = ../../../vmbase/vmbase.h; sourceTree = SOURCE_ROOT; };
 		81B69B2812384D1D00B9DF4F /* AvmAssert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmAssert.cpp; path = ../../../vmbase/AvmAssert.cpp; sourceTree = SOURCE_ROOT; };
 		81B69B2912384D1D00B9DF4F /* AvmAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmAssert.h; path = ../../../vmbase/AvmAssert.h; sourceTree = SOURCE_ROOT; };
@@ -1078,6 +1082,7 @@
 				0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */,
 				8133F062128A767500C732B7 /* ST_vmpi_threads.st */,
 				815846DF129AFA740083D9B0 /* ST_vmbase_concurrency.st */,
+				817CEE9412E5122B0019E8DF /* ST_vmbase_safepoints.st */,
 			);
 			name = sources;
 			sourceTree = "<group>";
@@ -1490,6 +1495,7 @@
 				D95B635511FE4601004ED0D5 /* ST_mmgc_finalize_uninit.cpp */,
 				8133F063128A768800C732B7 /* ST_vmpi_threads.cpp */,
 				815846DC129AFA630083D9B0 /* ST_vmbase_concurrency.cpp */,
+				817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */,
 			);
 			name = selftest;
 			sourceTree = "<group>";
@@ -2006,6 +2012,7 @@
 				815846DE129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
 				07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */,
 				817CEE7C12E511C40019E8DF /* Safepoint.cpp in Sources */,
+				817CEE9312E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2203,6 +2210,7 @@
 				815846DD129AFA630083D9B0 /* ST_vmbase_concurrency.cpp in Sources */,
 				07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */,
 				817CEE7B12E511C40019E8DF /* Safepoint.cpp in Sources */,
+				817CEE9212E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
