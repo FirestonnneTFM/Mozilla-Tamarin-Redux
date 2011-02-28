@@ -326,9 +326,9 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 // already being used in the player.
 //
 // Note that on single-core devices, memory barriers are
-// no-ops on all architectures that we support, so the
-// VMPI_memoryBarrier() and VMPI_*WithBarrier functions
-// fulfill their documented API.
+// reduced to compiler memory barriers on all architectures
+// that we support, so the VMPI_memoryBarrier() and
+// VMPI_*WithBarrier functions fulfill their documented API.
 //
 // Linking with sys/atomics.h causes linker warnings such as:
 // "warning: type and size of dynamic symbol `__atomic_inc'
@@ -338,78 +338,96 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
 {
-    return android_atomic_inc(value) - 1;
+    __asm__ __volatile__("" : : : "memory");
+    int32_t result = android_atomic_inc(value) - 1;
+    __asm__ __volatile__("" : : : "memory");
+    return result;
 }
 
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
 {
-    return VMPI_atomicIncAndGet32WithBarrier(value);
+    return android_atomic_inc(value) - 1;
 }
 
 REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
 {
-    return android_atomic_dec(value) + 1;
+    __asm__ __volatile__("" : : : "memory");
+    int32_t result = android_atomic_dec(value) + 1;
+    __asm__ __volatile__("" : : : "memory");
+    return result;
 }
 
 REALLY_INLINE int32_t VMPI_atomicDecAndGet32(volatile int32_t* value)
 {
-    return VMPI_atomicDecAndGet32WithBarrier(value);
+    return android_atomic_dec(value) + 1;
 }
 
 REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address)
 {
-    return android_atomic_cmpxchg(oldValue, newValue, address) == 0;
+    __asm__ __volatile__("" : : : "memory");
+    bool result = android_atomic_cmpxchg(oldValue, newValue, address) == 0;
+    __asm__ __volatile__("" : : : "memory");
+    return result;
 }
 
 REALLY_INLINE bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address)
 {
-    return VMPI_compareAndSwap32WithBarrier(oldValue, newValue, address);
+    return android_atomic_cmpxchg(oldValue, newValue, address) == 0;
 }
 
 REALLY_INLINE void VMPI_memoryBarrier()
 {
     // No memory barrier native API
     volatile int32_t dummy;
-    VMPI_compareAndSwap32WithBarrier(0, 1, &dummy);
+    VMPI_atomicIncAndGet32WithBarrier(&dummy);
 }
 
 #else // USE_CUTILS_ATOMICS
 
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
 {
-    return __atomic_inc((volatile int*)value) - 1;
+    __asm__ __volatile__("" : : : "memory");
+    int32_t result = __atomic_inc((volatile int*)value) - 1;
+    __asm__ __volatile__("" : : : "memory");
+    return result;
 }
 
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
 {
-    return VMPI_atomicIncAndGet32WithBarrier(value);
+    return __atomic_inc((volatile int*)value) - 1;
 }
 
 REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
 {
-    return __atomic_dec((volatile int*)value) - 1;
+    __asm__ __volatile__("" : : : "memory");
+    int32_t result = __atomic_dec((volatile int*)value) - 1;
+    __asm__ __volatile__("" : : : "memory");
+    return result;
 }
 
 REALLY_INLINE int32_t VMPI_atomicDecAndGet32(volatile int32_t* value)
 {
-    return VMPI_atomicDecAndGet32WithBarrier(value);
+    return __atomic_dec((volatile int*)value) - 1;
 }
 
 REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address)
 {
-    return __atomic_cmpxchg((int)oldValue, (int)newValue, (volatile int*)address) == 0;
+    __asm__ __volatile__("" : : : "memory");
+    int32_t result =  __atomic_cmpxchg((int)oldValue, (int)newValue, (volatile int*)address) == 0;
+    __asm__ __volatile__("" : : : "memory");
+    return result;
 }
 
 REALLY_INLINE bool VMPI_compareAndSwap32(int32_t oldValue, int32_t newValue, volatile int32_t* address)
 {
-    return VMPI_compareAndSwap32WithBarrier(oldValue, newValue, address);
+    return __atomic_cmpxchg((int)oldValue, (int)newValue, (volatile int*)address) == 0;
 }
 
 REALLY_INLINE void VMPI_memoryBarrier()
 {
     // No memory barrier native API
     volatile int32_t dummy;
-    VMPI_compareAndSwap32WithBarrier(0, 1, &dummy);
+    VMPI_atomicIncAndGet32WithBarrier(&dummy);
 }
 
 #endif // USE_CUTILS_ATOMICS
