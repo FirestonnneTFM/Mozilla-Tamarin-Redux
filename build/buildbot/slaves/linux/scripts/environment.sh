@@ -48,3 +48,7 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=linux
+
+# required to force compiler to generate 32bit binaries
+export CXX="g++ -m32"
+export CC="gcc -m32"
