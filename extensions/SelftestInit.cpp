@@ -60,6 +60,9 @@ extern void create_mmgc_threads(AvmCore* core);
 #endif
 extern void create_mmgc_weakref(AvmCore* core);
 extern void create_vmbase_concurrency(AvmCore* core);
+#if defined VMCFG_SAFEPOINTS
+extern void create_vmbase_safepoints(AvmCore* core);
+#endif
 extern void create_vmpi_threads(AvmCore* core);
 void SelftestRunner::createGeneratedSelftestClasses() {
 create_avmplus_basics(core);
@@ -84,6 +87,9 @@ create_mmgc_threads(core);
 #endif
 create_mmgc_weakref(core);
 create_vmbase_concurrency(core);
+#if defined VMCFG_SAFEPOINTS
+create_vmbase_safepoints(core);
+#endif
 create_vmpi_threads(core);
 }
 #endif // VMCFG_SELFTEST

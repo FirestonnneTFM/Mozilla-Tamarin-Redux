@@ -1783,6 +1783,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\ST_vmbase_safepoints.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\ST_vmpi_threads.cpp"
 				>
 			</File>
