@@ -50,5 +50,10 @@ export shell_extension=
 export platform=linux
 
 # required to force compiler to generate 32bit binaries
-export CXX="g++ -m32"
-export CC="gcc -m32"
+if [ -z "$CXX" ]; then
+    export CXX="g++ -m32"
+fi
+if [ -z "$CC" ]; then
+    export CC="gcc -m32"
+fi
+
