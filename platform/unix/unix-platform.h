@@ -339,27 +339,27 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
 {
     __asm__ __volatile__("" : : : "memory");
-    int32_t result = android_atomic_inc(value) - 1;
+    int32_t result = android_atomic_inc(value) + 1;
     __asm__ __volatile__("" : : : "memory");
     return result;
 }
 
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
 {
-    return android_atomic_inc(value) - 1;
+    return android_atomic_inc(value) + 1;
 }
 
 REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
 {
     __asm__ __volatile__("" : : : "memory");
-    int32_t result = android_atomic_dec(value) + 1;
+    int32_t result = android_atomic_dec(value) - 1;
     __asm__ __volatile__("" : : : "memory");
     return result;
 }
 
 REALLY_INLINE int32_t VMPI_atomicDecAndGet32(volatile int32_t* value)
 {
-    return android_atomic_dec(value) + 1;
+    return android_atomic_dec(value) - 1;
 }
 
 REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t newValue, volatile int32_t* address)
@@ -387,14 +387,14 @@ REALLY_INLINE void VMPI_memoryBarrier()
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32WithBarrier(volatile int32_t* value)
 {
     __asm__ __volatile__("" : : : "memory");
-    int32_t result = __atomic_inc((volatile int*)value) - 1;
+    int32_t result = __atomic_inc((volatile int*)value) + 1;
     __asm__ __volatile__("" : : : "memory");
     return result;
 }
 
 REALLY_INLINE int32_t VMPI_atomicIncAndGet32(volatile int32_t* value)
 {
-    return __atomic_inc((volatile int*)value) - 1;
+    return __atomic_inc((volatile int*)value) + 1;
 }
 
 REALLY_INLINE int32_t VMPI_atomicDecAndGet32WithBarrier(volatile int32_t* value)
