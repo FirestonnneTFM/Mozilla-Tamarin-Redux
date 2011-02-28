@@ -114,9 +114,8 @@ namespace avmshell
         inStackOverflow = true;
 
         Stringp errorMessage = getErrorMessage(kStackOverflowError);
-        Atom args[2] = { nullObjectAtom, errorMessage->atom() };
-        Atom errorAtom = toplevel->errorClass()->construct(1, args);
-        Exception *exception = new (GetGC()) Exception(this, errorAtom);
+        GCRef<ErrorObject> error = toplevel->errorClass()->constructObject(errorMessage->atom(), this->intToAtom(0));
+        Exception *exception = new (GetGC()) Exception(this, error->atom());
 
         // Restore stack overflow checks
         inStackOverflow = false;
@@ -138,9 +137,8 @@ namespace avmshell
             // the grace period.
             // Throw an exception it cannot catch.
             Stringp errorMessage = getErrorMessage(kScriptTerminatedError);
-            Atom args[2] = { nullObjectAtom, errorMessage->atom() };
-            Atom errorAtom = toplevel->errorClass()->construct(1, args);
-            Exception *exception = new (GetGC()) Exception(this, errorAtom);
+            GCRef<ErrorObject> error = toplevel->errorClass()->constructObject(errorMessage->atom(), this->intToAtom(0));
+            Exception *exception = new (GetGC()) Exception(this, error->atom());
             exception->flags |= Exception::EXIT_EXCEPTION;
             throwException(exception);
         }

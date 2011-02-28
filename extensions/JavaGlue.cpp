@@ -256,8 +256,7 @@ namespace avmplus
             return 0;
 
         // now let's create an AS object using this class as a template
-        Atom args[1] = { nullObjectAtom };
-        JObject* obj = (JObject*) AvmCore::atomToScriptObject( construct(0,args) );
+        GCRef<JObject> obj = constructObject();
         obj->setClass(clazz);
         AvmAssert( jvm()->jni->ExceptionOccurred() == 0);
         return obj;

@@ -223,7 +223,7 @@ namespace avmplus
         ByteArrayClass(VTable *vtable);
 
     public:
-        ByteArrayObject* constructByteArray();
+        GCRef<ByteArrayObject> constructByteArray();
 
         uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }
         void set_defaultObjectEncoding(uint32_t version) { set_private__defaultObjectEncoding(version); }

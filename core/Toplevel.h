@@ -75,9 +75,9 @@ namespace avmplus
         GCRef<BooleanClass> booleanClass() const;
         GCRef<ByteArrayClass> byteArrayClass() const;
         GCRef<ClassClass> classClass() const;
-        GCRef<ClassClosure> eofErrorClass() const;
-        GCRef<ClassClosure> ioErrorClass() const;
-        GCRef<ClassClosure> memoryErrorClass() const;
+        GCRef<EOFErrorClass> eofErrorClass() const;
+        GCRef<IOErrorClass> ioErrorClass() const;
+        GCRef<MemoryErrorClass> memoryErrorClass() const;
         GCRef<DateClass> dateClass() const;
         GCRef<DoubleVectorClass> doubleVectorClass() const;
         GCRef<ErrorClass> errorClass() const;

@@ -37,8 +37,13 @@
 
 /* machine generated file -- do not edit */
 
+#ifndef _H_nativegen_header_shell_toplevel
+#define _H_nativegen_header_shell_toplevel
+
 namespace avmplus {
     class ArrayObject; // Array
+    class CTestClass; // avmplus::CTest$
+    class CapabilitiesClass; // flash.system::Capabilities$
     class ClassClosure; // Class
     class ClassFactoryClass; // flash.sampler::ClassFactory$
     class DeleteObjectSampleClass; // flash.sampler::DeleteObjectSample$
@@ -47,6 +52,7 @@ namespace avmplus {
     class DictionaryObject; // flash.utils::Dictionary
     class DomainClass; // avmplus::Domain$
     class DomainObject; // avmplus::Domain
+    class EndianClass; // flash.utils::Endian$
     class JObject; // avmplus::JObject
     class JObjectClass; // avmplus::JObject$
     class NewObjectSampleClass; // flash.sampler::NewObjectSample$
@@ -60,7 +66,20 @@ namespace avmplus {
     class StackFrameClass; // flash.sampler::StackFrame$
     class StackFrameObject; // flash.sampler::StackFrame
     class String; // String
+    class SubclassOfAbstractBaseClass; // avmshell::SubclassOfAbstractBase$
+    class SubclassOfAbstractRestrictedBaseClass; // avmshell::SubclassOfAbstractRestrictedBase$
+    class SubclassOfRestrictedBaseClass; // avmshell::SubclassOfRestrictedBase$
     class TraceClass; // flash.trace::Trace$
+    class public_classClass; // avmshell::public_class$
+    class public_class_AIR_1_0Class; // avmshell::public_class_AIR_1_0$
+    class public_class_AIR_1_0_FP_10_0Class; // avmshell::public_class_AIR_1_0_FP_10_0$
+    class public_class_AIR_1_5Class; // avmshell::public_class_AIR_1_5$
+    class public_class_AIR_1_5_1Class; // avmshell::public_class_AIR_1_5_1$
+    class public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class; // avmshell::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2$
+    class public_class_AIR_1_5_2Class; // avmshell::public_class_AIR_1_5_2$
+    class public_class_FP_10_0Class; // avmshell::public_class_FP_10_0$
+    class public_class_FP_10_0_32Class; // avmshell::public_class_FP_10_0_32$
+    class public_class_FP_10_0_32_AIR_1_0_FP_10_0Class; // avmshell::public_class_FP_10_0_32_AIR_1_0_FP_10_0$
 }
 
 namespace avmshell {
@@ -271,6 +290,18 @@ extern avmplus::Atom avmplus_File_write_thunk(MethodEnv* env, uint32_t argc, Ato
 extern avmplus::Atom avmplus_File_readByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom avmplus_File_writeByteArray_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 class SlotOffsetsAndAsserts;
+//-----------------------------------------------------------
+// avmplus::CTest$
+//-----------------------------------------------------------
+class avmplus_CTestClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmplus::MI$
 //-----------------------------------------------------------
 class avmshell_MIClassSlots
@@ -288,11 +319,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmshell::MIObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmshell::MIObject>((avmshell::MIObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmplus::MI
 //-----------------------------------------------------------
 class avmshell_MIObjectSlots
@@ -311,6 +350,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmplus::System$
 //-----------------------------------------------------------
 class avmshell_SystemClassSlots
@@ -342,6 +382,7 @@ public:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmplus::File$
 //-----------------------------------------------------------
 class avmshell_FileClassSlots
@@ -362,6 +403,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::AbstractBase$
 //-----------------------------------------------------------
 class avmshell_AbstractBaseClassSlots
@@ -382,6 +424,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::AbstractBase
 //-----------------------------------------------------------
 class avmshell_AbstractBaseObjectSlots
@@ -400,6 +443,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::RestrictedBase$
 //-----------------------------------------------------------
 class avmshell_RestrictedBaseClassSlots
@@ -417,11 +461,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmshell::RestrictedBaseObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmshell::RestrictedBaseObject>((avmshell::RestrictedBaseObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::RestrictedBase
 //-----------------------------------------------------------
 class avmshell_RestrictedBaseObjectSlots
@@ -440,6 +492,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::AbstractRestrictedBase$
 //-----------------------------------------------------------
 class avmshell_AbstractRestrictedBaseClassSlots
@@ -460,6 +513,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::AbstractRestrictedBase
 //-----------------------------------------------------------
 class avmshell_AbstractRestrictedBaseObjectSlots
@@ -478,6 +532,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::CheckBase$
 //-----------------------------------------------------------
 class avmshell_CheckBaseClassSlots
@@ -496,11 +551,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmshell::CheckBaseObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmshell::CheckBaseObject>((avmshell::CheckBaseObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::CheckBase
 //-----------------------------------------------------------
 class avmshell_CheckBaseObjectSlots
@@ -519,6 +582,128 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// flash.system::Capabilities$
+//-----------------------------------------------------------
+class avmplus_CapabilitiesClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class$
+//-----------------------------------------------------------
+class avmplus_public_classClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_AIR_1_0$
+//-----------------------------------------------------------
+class avmplus_public_class_AIR_1_0ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_FP_10_0$
+//-----------------------------------------------------------
+class avmplus_public_class_FP_10_0ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_AIR_1_5$
+//-----------------------------------------------------------
+class avmplus_public_class_AIR_1_5ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_AIR_1_5_1$
+//-----------------------------------------------------------
+class avmplus_public_class_AIR_1_5_1ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_FP_10_0_32$
+//-----------------------------------------------------------
+class avmplus_public_class_FP_10_0_32ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_AIR_1_5_2$
+//-----------------------------------------------------------
+class avmplus_public_class_AIR_1_5_2ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_AIR_1_0_FP_10_0$
+//-----------------------------------------------------------
+class avmplus_public_class_AIR_1_0_FP_10_0ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2$
+//-----------------------------------------------------------
+class avmplus_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmshell::public_class_FP_10_0_32_AIR_1_0_FP_10_0$
+//-----------------------------------------------------------
+class avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0ClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmshell::NativeSubclassOfAbstractBase$
 //-----------------------------------------------------------
 class avmshell_NativeSubclassOfAbstractBaseClassSlots
@@ -536,11 +721,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractBaseObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmshell::NativeSubclassOfAbstractBaseObject>((avmshell::NativeSubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::NativeSubclassOfAbstractBase
 //-----------------------------------------------------------
 class avmshell_NativeSubclassOfAbstractBaseObjectSlots
@@ -559,6 +752,18 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// avmshell::SubclassOfAbstractBase$
+//-----------------------------------------------------------
+class avmplus_SubclassOfAbstractBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmshell::NativeSubclassOfRestrictedBase$
 //-----------------------------------------------------------
 class avmshell_NativeSubclassOfRestrictedBaseClassSlots
@@ -576,11 +781,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmshell::NativeSubclassOfRestrictedBaseObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmshell::NativeSubclassOfRestrictedBaseObject>((avmshell::NativeSubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::NativeSubclassOfRestrictedBase
 //-----------------------------------------------------------
 class avmshell_NativeSubclassOfRestrictedBaseObjectSlots
@@ -599,6 +812,18 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// avmshell::SubclassOfRestrictedBase$
+//-----------------------------------------------------------
+class avmplus_SubclassOfRestrictedBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmshell::NativeSubclassOfAbstractRestrictedBase$
 //-----------------------------------------------------------
 class avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots
@@ -616,11 +841,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject>((avmshell::NativeSubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmshell::NativeSubclassOfAbstractRestrictedBase
 //-----------------------------------------------------------
 class avmshell_NativeSubclassOfAbstractRestrictedBaseObjectSlots
@@ -639,6 +872,18 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// avmshell::SubclassOfAbstractRestrictedBase$
+//-----------------------------------------------------------
+class avmplus_SubclassOfAbstractRestrictedBaseClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmplus::Domain$
 //-----------------------------------------------------------
 class avmplus_DomainClassSlots
@@ -657,11 +902,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::DomainObject> constructObject(GCRef<avmplus::DomainObject> arg1) \
+        { \
+            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(1, args); \
+            return GCRef<avmplus::DomainObject>((avmplus::DomainObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmplus::Domain
 //-----------------------------------------------------------
 class avmplus_DomainObjectSlots
@@ -681,6 +934,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::StackFrame$
 //-----------------------------------------------------------
 class avmplus_StackFrameClassSlots
@@ -698,11 +952,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::StackFrameObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::StackFrame
 //-----------------------------------------------------------
 class avmplus_StackFrameObjectSlots
@@ -744,6 +1006,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::Sample$
 //-----------------------------------------------------------
 class avmplus_SampleClassSlots
@@ -761,11 +1024,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::SampleObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::Sample
 //-----------------------------------------------------------
 class avmplus_SampleObjectSlots
@@ -797,6 +1068,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::ClassFactory$
 //-----------------------------------------------------------
 class avmplus_ClassFactoryClassSlots
@@ -832,6 +1104,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::NewObjectSample$
 //-----------------------------------------------------------
 class avmplus_NewObjectSampleClassSlots
@@ -849,11 +1122,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::NewObjectSampleObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::NewObjectSampleObject>((avmplus::NewObjectSampleObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::NewObjectSample
 //-----------------------------------------------------------
 class avmplus_NewObjectSampleObjectSlots
@@ -885,6 +1166,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::DeleteObjectSample$
 //-----------------------------------------------------------
 class avmplus_DeleteObjectSampleClassSlots
@@ -902,11 +1184,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::DeleteObjectSampleObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.sampler::DeleteObjectSample
 //-----------------------------------------------------------
 class avmplus_DeleteObjectSampleObjectSlots
@@ -938,6 +1228,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.trace::Trace$
 //-----------------------------------------------------------
 class avmplus_TraceClassSlots
@@ -982,6 +1273,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.utils::Dictionary$
 //-----------------------------------------------------------
 class avmplus_DictionaryClassSlots
@@ -1000,11 +1292,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::DictionaryObject> constructObject(bool arg1) \
+        { \
+            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), ((arg1) ? trueAtom : falseAtom) }; \
+            avmplus::Atom const result = this->construct(1, args); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.utils::Dictionary
 //-----------------------------------------------------------
 class avmplus_DictionaryObjectSlots
@@ -1024,6 +1324,22 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// flash.utils::Endian$
+//-----------------------------------------------------------
+class avmplus_EndianClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE avmplus::String* get_BIG_ENDIAN() const { return m_BIG_ENDIAN; }
+    REALLY_INLINE avmplus::String* get_LITTLE_ENDIAN() const { return m_LITTLE_ENDIAN; }
+private:
+    DRCWB(avmplus::String*) m_BIG_ENDIAN;
+    DRCWB(avmplus::String*) m_LITTLE_ENDIAN;
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmplus::JObject$
 //-----------------------------------------------------------
 class avmplus_JObjectClassSlots
@@ -1041,11 +1357,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::JObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::JObject>((avmplus::JObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // avmplus::JObject
 //-----------------------------------------------------------
 class avmplus_JObjectSlots
@@ -1080,14 +1404,14 @@ private:
 public:
     REALLY_INLINE GCRef<avmshell::AbstractBaseClass> get_AbstractBaseClass() { return (avmshell::AbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractBase)); }
     REALLY_INLINE GCRef<avmshell::AbstractRestrictedBaseClass> get_AbstractRestrictedBaseClass() { return (avmshell::AbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_AbstractRestrictedBase)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_CTestClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_CTest)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_CapabilitiesClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_Capabilities)); }
+    REALLY_INLINE GCRef<avmplus::CTestClass> get_CTestClass() { return (avmplus::CTestClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_CTest)); }
+    REALLY_INLINE GCRef<avmplus::CapabilitiesClass> get_CapabilitiesClass() { return (avmplus::CapabilitiesClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_system_Capabilities)); }
     REALLY_INLINE GCRef<avmshell::CheckBaseClass> get_CheckBaseClass() { return (avmshell::CheckBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_CheckBase)); }
     REALLY_INLINE GCRef<avmplus::ClassFactoryClass> get_ClassFactoryClass() { return (avmplus::ClassFactoryClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_ClassFactory)); }
     REALLY_INLINE GCRef<avmplus::DeleteObjectSampleClass> get_DeleteObjectSampleClass() { return (avmplus::DeleteObjectSampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_DeleteObjectSample)); }
     REALLY_INLINE GCRef<avmplus::DictionaryClass> get_DictionaryClass() { return (avmplus::DictionaryClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Dictionary)); }
     REALLY_INLINE GCRef<avmplus::DomainClass> get_DomainClass() { return (avmplus::DomainClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_Domain)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_EndianClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Endian)); }
+    REALLY_INLINE GCRef<avmplus::EndianClass> get_EndianClass() { return (avmplus::EndianClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_Endian)); }
     REALLY_INLINE GCRef<avmshell::FileClass> get_FileClass() { return (avmshell::FileClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_File)); }
     REALLY_INLINE GCRef<avmplus::ClassClosure> get_ITestClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_ITest)); }
     REALLY_INLINE GCRef<avmplus::JObjectClass> get_JObjectClass() { return (avmplus::JObjectClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_JObject)); }
@@ -1099,21 +1423,21 @@ public:
     REALLY_INLINE GCRef<avmshell::RestrictedBaseClass> get_RestrictedBaseClass() { return (avmshell::RestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_RestrictedBase)); }
     REALLY_INLINE GCRef<avmplus::SampleClass> get_SampleClass() { return (avmplus::SampleClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_Sample)); }
     REALLY_INLINE GCRef<avmplus::StackFrameClass> get_StackFrameClass() { return (avmplus::StackFrameClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_sampler_StackFrame)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_SubclassOfAbstractBaseClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfAbstractBase)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_SubclassOfAbstractRestrictedBaseClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfAbstractRestrictedBase)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_SubclassOfRestrictedBaseClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfRestrictedBase)); }
+    REALLY_INLINE GCRef<avmplus::SubclassOfAbstractBaseClass> get_SubclassOfAbstractBaseClass() { return (avmplus::SubclassOfAbstractBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfAbstractBase)); }
+    REALLY_INLINE GCRef<avmplus::SubclassOfAbstractRestrictedBaseClass> get_SubclassOfAbstractRestrictedBaseClass() { return (avmplus::SubclassOfAbstractRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfAbstractRestrictedBase)); }
+    REALLY_INLINE GCRef<avmplus::SubclassOfRestrictedBaseClass> get_SubclassOfRestrictedBaseClass() { return (avmplus::SubclassOfRestrictedBaseClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_SubclassOfRestrictedBase)); }
     REALLY_INLINE GCRef<avmshell::SystemClass> get_SystemClass() { return (avmshell::SystemClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmplus_System)); }
     REALLY_INLINE GCRef<avmplus::TraceClass> get_TraceClass() { return (avmplus::TraceClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_trace_Trace)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_classClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0_FP_10_0)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5_1Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_1)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_AIR_1_5_2Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_2)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_FP_10_0_32Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32_AIR_1_0_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::public_classClass> get_public_classClass() { return (avmplus::public_classClass*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class)); }
+    REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0Class> get_public_class_AIR_1_0Class() { return (avmplus::public_class_AIR_1_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0)); }
+    REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0_FP_10_0Class> get_public_class_AIR_1_0_FP_10_0Class() { return (avmplus::public_class_AIR_1_0_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_0_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5Class> get_public_class_AIR_1_5Class() { return (avmplus::public_class_AIR_1_5Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5)); }
+    REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1Class> get_public_class_AIR_1_5_1Class() { return (avmplus::public_class_AIR_1_5_1Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_1)); }
+    REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class> get_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class() { return (avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_2Class> get_public_class_AIR_1_5_2Class() { return (avmplus::public_class_AIR_1_5_2Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_AIR_1_5_2)); }
+    REALLY_INLINE GCRef<avmplus::public_class_FP_10_0Class> get_public_class_FP_10_0Class() { return (avmplus::public_class_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0)); }
+    REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32Class> get_public_class_FP_10_0_32Class() { return (avmplus::public_class_FP_10_0_32Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32)); }
+    REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class> get_public_class_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_class_FP_10_0_32_AIR_1_0_FP_10_0)); }
     REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interfaceClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface)); }
     REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0)); }
     REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_AIR_1_0_FP_10_0)); }
@@ -1126,3 +1450,4 @@ public:
     REALLY_INLINE GCRef<avmplus::ClassClosure> get_public_interface_FP_10_0_32_AIR_1_0_FP_10_0Class() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_avmshell_public_interface_FP_10_0_32_AIR_1_0_FP_10_0)); }
 };
 }
+#endif // _H_nativegen_header_shell_toplevel

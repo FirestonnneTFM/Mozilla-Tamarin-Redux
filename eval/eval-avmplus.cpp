@@ -121,14 +121,16 @@ namespace avmplus
 
     void AvmplusHostContext::throwSyntaxError(const char* msgz)
     {
-        Atom error_args[3] = { nullObjectAtom, core->newStringUTF8(msgz)->atom(), core->intToAtom(0) }; // FIXME - proper error ID?
-        core->throwAtom(toplevel->syntaxErrorClass()->construct(2, error_args));
+        // FIXME - proper error ID?
+        GCRef<SyntaxErrorObject> e = toplevel->syntaxErrorClass()->constructObject(core->newStringUTF8(msgz)->atom(), core->intToAtom(0));
+        core->throwAtom(e->atom());
     }
     
     void AvmplusHostContext::throwInternalError(const char* msgz)
     {
-        Atom error_args[3] = { nullObjectAtom, core->newStringUTF8(msgz)->atom(), core->intToAtom(0) }; // FIXME - proper error ID?
-        core->throwAtom(toplevel->errorClass()->construct(2, error_args));
+        // FIXME - proper error ID?
+        GCRef<ErrorObject> e = toplevel->errorClass()->constructObject(core->newStringUTF8(msgz)->atom(), core->intToAtom(0));
+        core->throwAtom(e->atom());
     }
     
     ScriptBuffer compileProgram(AvmCore* core, Toplevel* toplevel, String* code, String* filename)

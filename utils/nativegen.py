@@ -269,6 +269,18 @@ TYPEMAP_RETTYPE = {
     CTYPE_NAMESPACE:    "avmplus::Namespace*",
 }
 
+TYPEMAP_RETTYPE_GCREF = {
+    CTYPE_OBJECT:       lambda type: "GCRef<%s>" % type,
+    CTYPE_ATOM:         lambda type: "avmplus::Atom",
+    CTYPE_VOID:         lambda type: "void",
+    CTYPE_BOOLEAN:      lambda type: "bool",
+    CTYPE_INT:          lambda type: "int32_t",
+    CTYPE_UINT:         lambda type: "uint32_t",
+    CTYPE_DOUBLE:       lambda type: "double",
+    CTYPE_STRING:       lambda type: "GCRef<avmplus::String>",
+    CTYPE_NAMESPACE:    lambda type: "GCRef<avmplus::Namespace>",
+}
+
 TYPEMAP_THUNKRETTYPE = {
     CTYPE_OBJECT:       "avmplus::Atom(%s)",
     CTYPE_ATOM:         "avmplus::Atom(%s)",
@@ -327,6 +339,61 @@ TYPEMAP_ARGTYPE_FOR_UNBOX = {
     CTYPE_DOUBLE:       "double",
     CTYPE_STRING:       "avmplus::String*",
     CTYPE_NAMESPACE:    "avmplus::Namespace*",
+}
+
+TYPEMAP_TO_ATOM = {
+    # The explicit cast to ScriptObject is necessary because the type in
+    # question may have only been forward-declared, thus calling methods
+    # on it isn't legal; since we know it's a ScriptObject, we can force the issue.
+    # Note that, for this reason, we can't use staticCast, as the compiler
+    # will complain that they are apparently unrelated types. 
+    CTYPE_OBJECT:       lambda val: "%s.reinterpretCast<avmplus::ScriptObject>()->atom()" % val,
+    CTYPE_ATOM:         lambda val: "%s" % val,
+    CTYPE_VOID:         lambda val: "undefinedAtom",
+    CTYPE_BOOLEAN:      lambda val: "((%s) ? trueAtom : falseAtom)" % val,
+    CTYPE_INT:          lambda val: "core->intToAtom(%s)" % val,
+    CTYPE_UINT:         lambda val: "core->uintToAtom(%s)" % val,
+    CTYPE_DOUBLE:       lambda val: "core->doubleToAtom(%s)" % val,
+    CTYPE_STRING:       lambda val: "%s->atom()" % val,
+    CTYPE_NAMESPACE:    lambda val: "%s->atom()" % val,
+}
+
+TYPEMAP_TO_ATOM_NEEDS_CORE = {
+    CTYPE_OBJECT:       False,
+    CTYPE_ATOM:         False,
+    CTYPE_VOID:         False,
+    CTYPE_BOOLEAN:      False,
+    CTYPE_INT:          True,
+    CTYPE_UINT:         True,
+    CTYPE_DOUBLE:       True,
+    CTYPE_STRING:       False,
+    CTYPE_NAMESPACE:    False,
+}
+
+TYPEMAP_FROM_ATOM = {
+    # We can't use static_cast<> because the subclass might be only forward-declared at this point;
+    # use good old brute-force cast instead.
+    CTYPE_OBJECT:       lambda val,type: "(%s*)(AvmCore::atomToScriptObject(%s))" % (type,val),
+    CTYPE_ATOM:         lambda val,type: "%s" % val,
+    CTYPE_VOID:         lambda val,type: "undefinedAtom",
+    CTYPE_BOOLEAN:      lambda val,type: "((%s) != falseAtom)" % val,
+    CTYPE_INT:          lambda val,type: "AvmCore::integer(%s)" % val,
+    CTYPE_UINT:         lambda val,type: "AvmCore::toUInt32(%s)" % val,
+    CTYPE_DOUBLE:       lambda val,type: "AvmCore::number(%s)" % val,
+    CTYPE_STRING:       lambda val,type: "AvmCore::atomToString(%s)" % val,
+    CTYPE_NAMESPACE:    lambda val,type: "AvmCore::atomToNamespace(%s)" % val,
+}
+
+TYPEMAP_TO_GCREF = {
+    CTYPE_OBJECT:       lambda val,type: "GCRef<%s>(%s)" % (type,val),
+    CTYPE_ATOM:         lambda val,type: val,
+    CTYPE_VOID:         lambda val,type: val,
+    CTYPE_BOOLEAN:      lambda val,type: val,
+    CTYPE_INT:          lambda val,type: val,
+    CTYPE_UINT:         lambda val,type: val,
+    CTYPE_DOUBLE:       lambda val,type: val,
+    CTYPE_STRING:       lambda val,type: "GCRef<%s>(%s)" % (type,val),
+    CTYPE_NAMESPACE:    lambda val,type: "GCRef<%s>(%s)" % (type,val),
 }
 
 def uint(i):
@@ -672,6 +739,10 @@ class NativeInfo:
                 t.cpp_name_comps = BASE_CLASS_NAME.split('::')
             if itraits.cpp_name_comps == None:
                 itraits.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
+        elif not itraits.is_interface:
+            # we are going to create a synthetic class for this
+            t.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Class")
+            t.is_synthetic = True
 
         # force to True or False (no "None" allowed)
         if ni.class_gc_exact != True:
@@ -779,6 +850,7 @@ class Traits:
     has_pre_create_check = False
     has_const_setters = False
     gen_method_map = False
+    is_synthetic = False
     # FIXME, this is a hack for MI classes in AIR
     fqinstancebase_name = None
     # FIXME, this is a hack for MI classes in AIR
@@ -1416,6 +1488,11 @@ GLUECLASSES_WITHOUT_SLOTS = frozenset((
     'avmplus::String',
     'uint32_t'))
 
+GLUECLASSES_WITHOUT_CONSTRUCT_WRAPPERS = frozenset((
+    'bool',
+    'double',
+    'int32_t',
+    'uint32_t'))
 
 class AbcThunkGen:
     abc = None
@@ -1437,7 +1514,7 @@ class AbcThunkGen:
     def emitAOT(self, out, name, ctypeObject):
         out.println('#ifdef VMCFG_AOT')
         
-        traits = filter(lambda t: (t.has_cpp_name()) and (t.fqcppname() != "double") and ((t.ctype == ctypeObject) or (t.fqcppname() == BASE_INSTANCE_NAME) or (t.fqcppname() == BASE_CLASS_NAME)), self.abc.classes + self.abc.instances)
+        traits = filter(lambda t: (t.has_cpp_name()) and (not t.is_synthetic) and (t.fqcppname() != "double") and ((t.ctype == ctypeObject) or (t.fqcppname() == BASE_INSTANCE_NAME) or (t.fqcppname() == BASE_CLASS_NAME)), self.abc.classes + self.abc.instances)
         glueClasses = sorted(set(map(lambda t: t.fqcppname(), traits)))
         
         out.println('extern "C" const struct {')
@@ -1465,6 +1542,10 @@ class AbcThunkGen:
         out.println(MPL_HEADER);
         out.println('')
         out.println("/* machine generated file -- do not edit */");
+        out.println('')
+
+        out.println("#ifndef _H_nativegen_header_%s" % name);
+        out.println("#define _H_nativegen_header_%s" % name);
         out.println('')
 
         self.forwardDeclareGlueClasses(out)
@@ -1513,6 +1594,29 @@ class AbcThunkGen:
         self.emitGlueClassManifest(out)
         out.println('}')
 
+        out.println("#endif // _H_nativegen_header_%s" % name);
+
+
+    def emit_cls(self, out, name):
+
+        out.println(MPL_HEADER);
+        out.println('')
+        out.println("/* machine generated file -- do not edit */");
+        out.println('')
+        out.println("#ifndef _H_nativegen_classes_%s" % name);
+        out.println("#define _H_nativegen_classes_%s" % name);
+        out.println('')
+        
+        rootNS = opts.rootImplNS.split('::')
+        out.println(' '.join(map(lambda ns: 'namespace %s {' % ns, rootNS)))
+        out.println('')
+
+        self.emitSyntheticClasses(out)
+        
+        out.println(' '.join(('}',) * len(rootNS)))
+
+        out.println('')
+        out.println("#endif // _H_nativegen_classes_%s" % name);
 
     def emit_cpp(self, out, name):
 
@@ -1575,7 +1679,7 @@ class AbcThunkGen:
         out.indent += 1
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
-            if c.has_cpp_name() or c.itraits.has_cpp_name():
+            if (c.has_cpp_name() or c.itraits.has_cpp_name()) and not c.is_synthetic:
                 if c.gen_method_map:
                     offsetOfSlotsClass = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.cppname()
                     offsetOfSlotsInstance = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.itraits.cppname()
@@ -1644,7 +1748,7 @@ class AbcThunkGen:
         # note, these are emitted *after* closing the namespaces
         self.emitStructStubs(out)
 
-    def emit(self, abc, name, out_h, out_c):
+    def emit(self, abc, name, out_h, out_cls, out_c):
         self.abc = abc;
         self.all_thunks = []
         self.lookup_traits = None
@@ -1659,6 +1763,7 @@ class AbcThunkGen:
                 self.processTraits(script)
         
         self.emit_h(out_h, name)
+        self.emit_cls(out_cls, name)
         self.emit_cpp(out_c, name)
 
     def forwardDeclareGlueClasses(self, out_h):
@@ -1691,7 +1796,7 @@ class AbcThunkGen:
                         glueClassToTraits[key] = []
                     glueClassToTraits[key].append(t)
         for (nsStr, glueClasses) in sorted(cppNamespaceToGlueClasses.iteritems()):
-            # turn list of namespaces [foo, bar, baz] into "namespace foo { namespace bar { namespace baz{"
+            # turn list of namespaces [foo, bar, baz] into "namespace foo { namespace bar { namespace baz {"
             nsList = nsStr.split('::')
             out_h.println(' '.join(map(lambda ns: 'namespace %s {' % ns, nsList)))
             out_h.indent += 1
@@ -1787,6 +1892,13 @@ class AbcThunkGen:
             else:
                 assert not self.needsInstanceSlotsStruct(c)
 
+    def emitStructInlines(self, out):
+        for i in range(0, len(self.abc.classes)):
+            c = self.abc.classes[i]
+            if (c.has_cpp_name()):
+                self.emitMethodWrapperBodies(out, c)
+                self.emitMethodWrapperBodies(out, c.itraits)
+
     def emitStructStubs(self, out):
         visitedGlueClasses = set()
         for i in range(0, len(self.abc.classes)):
@@ -1815,9 +1927,9 @@ class AbcThunkGen:
         sortedSlots = sorted(t.slots, lambda x,y: self.cmpSlots(x, y, slotsTypeInfo))
         return sortedSlots, slotsTypeInfo
 
-
     def emitDeclareSlotClass(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
         memberVars = []
+        out.println('//-----------------------------------------------------------')
         out.println('// %s' % str(t.name))
         out.println('//-----------------------------------------------------------')
         out.println('class %s' % t.slotsStructName)
@@ -1893,7 +2005,10 @@ class AbcThunkGen:
         out.println('};')
 
     def emitConstructDeclarations(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
-
+        
+        if t.is_synthetic:
+            return
+            
         if isClassTraits:
             # FIXME: make these non-public, friend access only
             out.println("public:")
@@ -1930,6 +2045,9 @@ class AbcThunkGen:
 
     def emitConstructStubs(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
 
+        if t.is_synthetic:
+            return
+
         if isClassTraits:
             out.println("/*static*/ %s* FASTCALL %s::createClassClosure(avmplus::VTable* cvtable)" % (BASE_CLASS_NAME,t.fqcppname()))
             out.println("{")
@@ -1965,7 +2083,70 @@ class AbcThunkGen:
                 baseclassname = self.lookupTraits(t.base).fqcppname()
             out.println("AvmThunk_DEBUG_ONLY( avmplus::Atom %s::construct(int argc, avmplus::Atom* argv) { return %s::construct(argc, argv); } )" % (t.fqcppname(), baseclassname))
 
-    def emitSlotDeclarations(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
+    def get_args_info(self, t, m):
+        argtraits = self.argTraits(t, m)
+        args = []
+        needcore = False
+        for i in range(0, len(argtraits)):
+            argt = argtraits[i]
+            if i == 0:
+                argname = "thisRef"
+            else:
+                argname = "arg%d" % i
+            if argt.is_interface:
+                # FIXME: interface arguments just pass in as ScriptObject, for now
+                arg_typedef = BASE_INSTANCE_NAME
+            elif argt.ctype == CTYPE_OBJECT:
+                arg_typedef = self.findNativeBase(argt)
+            else:
+                arg_typedef = None # unused
+            arg_typedef = TYPEMAP_RETTYPE_GCREF[argt.ctype](arg_typedef)
+            args.append((argt, arg_typedef, argname))
+            if TYPEMAP_TO_ATOM_NEEDS_CORE[argt.ctype]:
+                needcore = True
+        return args,needcore
+
+    def shouldEmitConstructObject(self, t):
+        return t.itraits != None and \
+                t.construct != "none" and \
+                not t.is_abstract_base and \
+                (not t.itraits.has_cpp_name() or not t.itraits.fqcppname() in GLUECLASSES_WITHOUT_CONSTRUCT_WRAPPERS) and \
+                not t.itraits.init.needRest()
+
+    def emitConstructObjectDeclaration(self, out, t, args):
+        ret_typedef = TYPEMAP_RETTYPE_GCREF[t.itraits.ctype](t.itraits.fqcppname())
+        arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
+        out.println("%s constructObject(%s);" % (ret_typedef, arglist))
+
+    def emitMethodWrappers(self, out, t):
+        # For now, only emit a constructObject() wrapper; 
+        # someday, probably emit other C++ -> AS3 call wrappers.
+        if self.shouldEmitConstructObject(t):
+            out.println("public:")
+            out.indent += 1
+            args,needcore = self.get_args_info(t,t.itraits.init)
+            ctype = t.itraits.ctype
+            # t.itraits is a pure-AS3 class, so it has no C++ class;
+            # the most closest native ancestor and use that.
+            fqcppname = self.findNativeBase(t.itraits)
+            ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](fqcppname)
+            arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
+            out.println("REALLY_INLINE %s constructObject(%s)" % (ret_typedef, arglist))
+            out.println("{")
+            out.indent += 1
+            if needcore:
+                # explicitly cast to AvmCore* because it might be an only-forward-declared subclass
+                out.println("avmplus::AvmCore* const core = ((AvmCore*)(this->core()));")
+            arglist = ', '.join(map(lambda (argt, arg_typedef, argname): TYPEMAP_TO_ATOM[argt.ctype](argname), args))
+            out.println("avmplus::Atom args[%d] = { %s };" % (len(args), arglist))
+            out.println("avmplus::Atom const result = this->construct(%d, args);" % (len(args)-1))
+            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", fqcppname)
+            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,fqcppname))
+            out.indent -= 1
+            out.println("}")
+            out.indent -= 1
+
+    def emitSlotDeclarations(self, out, t, sortedSlots, slotsTypeInfo, closingSemi):
         out.println("private:")
         out.indent += 1
         out.println("friend class %s::SlotOffsetsAndAsserts;" % opts.nativeIDNS)
@@ -1983,7 +2164,7 @@ class AbcThunkGen:
             out.indent -= 1
             out.println("private:")
             out.indent += 1
-            out.println("%s::%s %s" % (opts.nativeIDNS, t.slotsStructName, t.slotsInstanceName) )
+            out.println("%s::%s %s%s" % (opts.nativeIDNS, t.slotsStructName, t.slotsInstanceName,closingSemi) )
             out.indent -= 1
 
     def emitStructDeclarationsForTraits(self, out, t, visitedGlueClasses, isClassTraits):
@@ -2000,17 +2181,46 @@ class AbcThunkGen:
         sortedSlots,slotsTypeInfo = self.sortSlots(t)
         self.emitDeclareSlotClass(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
         
-        out.backslash += 1
-        out.println('#define DECLARE_SLOTS_%s' % t.cppname())
-        out.indent += 1
-        self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
-        self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
-        out.indent -= 1
-        out.backslash -= 1
-        out.println('')
+        if not t.is_synthetic:
+            out.backslash += 1
+            out.println('#define DECLARE_SLOTS_%s' % t.cppname())
+            out.indent += 1
+            self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
+            self.emitMethodWrappers(out, t)
+            self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, "")
+            out.indent -= 1
+            out.backslash -= 1
+            out.println('')
+
         out.println('//-----------------------------------------------------------')
         out.println('')
 
+    def emitSyntheticClasses(self, out):
+        out.println('// NOTE: The following classes are never actually instantiated as such;')
+        out.println('// they are provided as a C++ front end onto pure AS3 classes.')
+        for i in range(0, len(self.abc.classes)):
+            t = self.abc.classes[i]
+            if t.is_synthetic:
+                isClassTraits = True
+                sortedSlots,slotsTypeInfo = self.sortSlots(t)
+                out.println('//-----------------------------------------------------------')
+                out.println('// %s' % str(t.name))
+                out.println('//-----------------------------------------------------------')
+                out.println("class %s : public %s" % (t.cppname(), BASE_CLASS_NAME))
+                out.println("{")
+                self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
+                self.emitMethodWrappers(out, t)
+                self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, ";")
+                out.println("private:")
+                out.indent += 1
+                out.println("explicit %s(); // unimplemented" % t.cppname())
+                out.println("explicit %s(const %s&); // unimplemented" % (t.cppname(), t.cppname()))
+                out.println("void operator=(const %s&); // unimplemented" % t.cppname())
+                out.indent -= 1
+                out.println("};")
+                out.println('')
+
+        
     def emitStructStubsForTraits(self, out, t, visitedGlueClasses, isClassTraits):
         
         if (t.fqcppname() in visitedGlueClasses):
@@ -2059,7 +2269,7 @@ class AbcThunkGen:
         out.println('#ifdef DEBUG');
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]
-            if (c.has_cpp_name()):
+            if (c.has_cpp_name() and not c.is_synthetic):
                 out.println('REALLY_INLINE void SlotOffsetsAndAsserts::do%sAsserts(Traits* ctraits, Traits* itraits)' % c.cppname())
                 out.println('{')
                 out.indent += 1
@@ -2311,19 +2521,23 @@ for file in args:
     abcGenName = os.path.splitext(file)[0]
 
 if abcGenFor:
-    hf = None
-    hc = None
+    hfile = None
+    cppfile = None
     try:
-        hf = open(abcGenName+".h","w")
-        hc = open(abcGenName+".cpp","w")
-        h = IndentingPrintWriter(hf)
-        c = IndentingPrintWriter(hc)
-        ngen.emit(abcGenFor, abcScriptName, h, c);
+        hfile = open(abcGenName+".h","w")
+        clsfile = open(abcGenName+"-classes.hh","w")
+        cppfile = open(abcGenName+".cpp","w")
+        h = IndentingPrintWriter(hfile)
+        cls = IndentingPrintWriter(clsfile)
+        c = IndentingPrintWriter(cppfile)
+        ngen.emit(abcGenFor, abcScriptName, h, cls, c);
     except Exception, e:
         sys.stderr.write("ERROR: "+str(e)+"\n")
         exit(1)
     finally:
-        if hf != None:
-            hf.close()
-        if hc != None:
-            hc.close()
+        if hfile != None:
+            hfile.close()
+        if clsfile != None:
+            clsfile.close()
+        if cppfile != None:
+            cppfile.close()
