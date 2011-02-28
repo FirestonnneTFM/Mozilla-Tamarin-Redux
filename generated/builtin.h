@@ -37,6 +37,9 @@
 
 /* machine generated file -- do not edit */
 
+#ifndef _H_nativegen_header_builtin
+#define _H_nativegen_header_builtin
+
 namespace avmplus {
     class ArgumentErrorClass; // ArgumentError$
     class ArgumentErrorObject; // ArgumentError
@@ -47,22 +50,26 @@ namespace avmplus {
     class ByteArrayObject; // flash.utils::ByteArray
     class ClassClass; // Class$
     class ClassClosure; // Class
+    class CompressionAlgorithmClass; // flash.utils::CompressionAlgorithm$
     class DateClass; // Date$
     class DateObject; // Date
     class DefinitionErrorClass; // DefinitionError$
     class DefinitionErrorObject; // DefinitionError
     class DoubleVectorClass; // __AS3__.vec::Vector$double$
     class DoubleVectorObject; // __AS3__.vec::Vector$double
+    class EOFErrorClass; // flash.errors::EOFError$
     class ErrorClass; // Error$
     class ErrorObject; // Error
     class EvalErrorClass; // EvalError$
     class EvalErrorObject; // EvalError
     class FunctionClass; // Function$
     class FunctionObject; // Function
+    class IOErrorClass; // flash.errors::IOError$
     class IntClass; // int$
     class IntVectorClass; // __AS3__.vec::Vector$int$
     class IntVectorObject; // __AS3__.vec::Vector$int
     class MathClass; // Math$
+    class MemoryErrorClass; // flash.errors::MemoryError$
     class MethodClosure; // private::MethodClosure
     class MethodClosureClass; // private::MethodClosure$
     class Namespace; // Namespace
@@ -840,6 +847,7 @@ extern avmplus::Atom native_script_function_avmplus_describeTypeJSON_thunk(Metho
 extern avmplus::Atom native_script_function_avmplus_getQualifiedClassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern avmplus::Atom native_script_function_avmplus_getQualifiedSuperclassName_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 class SlotOffsetsAndAsserts;
+//-----------------------------------------------------------
 // Object$
 //-----------------------------------------------------------
 class avmplus_ObjectClassSlots
@@ -858,6 +866,13 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE avmplus::Atom constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return result; \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -867,6 +882,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Class$
 //-----------------------------------------------------------
 class avmplus_ClassClassSlots
@@ -885,6 +901,13 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::ClassClosure> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::ClassClosure>((avmplus::ClassClosure*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -894,6 +917,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Class
 //-----------------------------------------------------------
 class avmplus_ClassClosureSlots
@@ -913,6 +937,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Function$
 //-----------------------------------------------------------
 class avmplus_FunctionClassSlots
@@ -931,6 +956,13 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::FunctionObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::FunctionObject>((avmplus::FunctionObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -940,6 +972,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Function
 //-----------------------------------------------------------
 class avmplus_FunctionObjectSlots
@@ -959,6 +992,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Namespace$
 //-----------------------------------------------------------
 class avmplus_NamespaceClassSlots
@@ -981,6 +1015,13 @@ public:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::Namespace> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::Namespace>(AvmCore::atomToNamespace(result)); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -990,6 +1031,7 @@ public:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Boolean$
 //-----------------------------------------------------------
 class avmplus_BooleanClassSlots
@@ -1017,6 +1059,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Number$
 //-----------------------------------------------------------
 class avmplus_NumberClassSlots
@@ -1068,6 +1111,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // int$
 //-----------------------------------------------------------
 class avmplus_IntClassSlots
@@ -1101,6 +1145,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // uint$
 //-----------------------------------------------------------
 class avmplus_UIntClassSlots
@@ -1134,6 +1179,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // String$
 //-----------------------------------------------------------
 class avmplus_StringClassSlots
@@ -1152,6 +1198,13 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::String> constructObject(avmplus::Atom arg1) \
+        { \
+            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1 }; \
+            avmplus::Atom const result = this->construct(1, args); \
+            return GCRef<avmplus::String>(AvmCore::atomToString(result)); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1161,6 +1214,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Array$
 //-----------------------------------------------------------
 class avmplus_ArrayClassSlots
@@ -1205,6 +1259,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Array
 //-----------------------------------------------------------
 class avmplus_ArrayObjectSlots
@@ -1224,6 +1279,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$
 //-----------------------------------------------------------
 class avmplus_VectorClassSlots
@@ -1240,11 +1296,19 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::ObjectVectorObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::ObjectVectorObject>((avmplus::ObjectVectorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector
 //-----------------------------------------------------------
 class avmplus_ObjectVectorObjectSlots
@@ -1264,6 +1328,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$object$
 //-----------------------------------------------------------
 class avmplus_ObjectVectorClassSlots
@@ -1280,11 +1345,20 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::ObjectVectorObject> constructObject(uint32_t arg1, bool arg2) \
+        { \
+            avmplus::AvmCore* const core = ((AvmCore*)(this->core())); \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1), ((arg2) ? trueAtom : falseAtom) }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::ObjectVectorObject>((avmplus::ObjectVectorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$int$
 //-----------------------------------------------------------
 class avmplus_IntVectorClassSlots
@@ -1301,11 +1375,20 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::IntVectorObject> constructObject(uint32_t arg1, bool arg2) \
+        { \
+            avmplus::AvmCore* const core = ((AvmCore*)(this->core())); \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1), ((arg2) ? trueAtom : falseAtom) }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::IntVectorObject>((avmplus::IntVectorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$int
 //-----------------------------------------------------------
 class avmplus_IntVectorObjectSlots
@@ -1325,6 +1408,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$uint$
 //-----------------------------------------------------------
 class avmplus_UIntVectorClassSlots
@@ -1341,11 +1425,20 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::UIntVectorObject> constructObject(uint32_t arg1, bool arg2) \
+        { \
+            avmplus::AvmCore* const core = ((AvmCore*)(this->core())); \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1), ((arg2) ? trueAtom : falseAtom) }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::UIntVectorObject>((avmplus::UIntVectorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$uint
 //-----------------------------------------------------------
 class avmplus_UIntVectorObjectSlots
@@ -1365,6 +1458,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$double$
 //-----------------------------------------------------------
 class avmplus_DoubleVectorClassSlots
@@ -1381,11 +1475,20 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::DoubleVectorObject> constructObject(uint32_t arg1, bool arg2) \
+        { \
+            avmplus::AvmCore* const core = ((AvmCore*)(this->core())); \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), core->uintToAtom(arg1), ((arg2) ? trueAtom : falseAtom) }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::DoubleVectorObject>((avmplus::DoubleVectorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // __AS3__.vec::Vector$double
 //-----------------------------------------------------------
 class avmplus_DoubleVectorObjectSlots
@@ -1405,6 +1508,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // private::MethodClosure$
 //-----------------------------------------------------------
 class avmplus_MethodClosureClassSlots
@@ -1421,11 +1525,19 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::MethodClosure> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::MethodClosure>((avmplus::MethodClosure*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // private::MethodClosure
 //-----------------------------------------------------------
 class avmplus_MethodClosureSlots
@@ -1445,6 +1557,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Math$
 //-----------------------------------------------------------
 class avmplus_MathClassSlots
@@ -1496,6 +1609,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Error$
 //-----------------------------------------------------------
 class avmplus_ErrorClassSlots
@@ -1516,6 +1630,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::ErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1525,6 +1646,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Error
 //-----------------------------------------------------------
 class avmplus_ErrorObjectSlots
@@ -1567,6 +1689,7 @@ public:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // DefinitionError$
 //-----------------------------------------------------------
 class avmplus_DefinitionErrorClassSlots
@@ -1587,6 +1710,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::DefinitionErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::DefinitionErrorObject>((avmplus::DefinitionErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1596,6 +1726,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // DefinitionError
 //-----------------------------------------------------------
 class avmplus_DefinitionErrorObjectSlots
@@ -1615,6 +1746,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // EvalError$
 //-----------------------------------------------------------
 class avmplus_EvalErrorClassSlots
@@ -1635,6 +1767,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::EvalErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::EvalErrorObject>((avmplus::EvalErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1644,6 +1783,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // EvalError
 //-----------------------------------------------------------
 class avmplus_EvalErrorObjectSlots
@@ -1663,6 +1803,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // RangeError$
 //-----------------------------------------------------------
 class avmplus_RangeErrorClassSlots
@@ -1683,6 +1824,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::RangeErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::RangeErrorObject>((avmplus::RangeErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1692,6 +1840,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // RangeError
 //-----------------------------------------------------------
 class avmplus_RangeErrorObjectSlots
@@ -1711,6 +1860,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // ReferenceError$
 //-----------------------------------------------------------
 class avmplus_ReferenceErrorClassSlots
@@ -1731,6 +1881,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::ReferenceErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::ReferenceErrorObject>((avmplus::ReferenceErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1740,6 +1897,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // ReferenceError
 //-----------------------------------------------------------
 class avmplus_ReferenceErrorObjectSlots
@@ -1759,6 +1917,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // SecurityError$
 //-----------------------------------------------------------
 class avmplus_SecurityErrorClassSlots
@@ -1779,6 +1938,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::SecurityErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::SecurityErrorObject>((avmplus::SecurityErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1788,6 +1954,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // SecurityError
 //-----------------------------------------------------------
 class avmplus_SecurityErrorObjectSlots
@@ -1807,6 +1974,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // SyntaxError$
 //-----------------------------------------------------------
 class avmplus_SyntaxErrorClassSlots
@@ -1827,6 +1995,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::SyntaxErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::SyntaxErrorObject>((avmplus::SyntaxErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1836,6 +2011,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // SyntaxError
 //-----------------------------------------------------------
 class avmplus_SyntaxErrorObjectSlots
@@ -1855,6 +2031,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // TypeError$
 //-----------------------------------------------------------
 class avmplus_TypeErrorClassSlots
@@ -1875,6 +2052,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::TypeErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::TypeErrorObject>((avmplus::TypeErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1884,6 +2068,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // TypeError
 //-----------------------------------------------------------
 class avmplus_TypeErrorObjectSlots
@@ -1903,6 +2088,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // URIError$
 //-----------------------------------------------------------
 class avmplus_URIErrorClassSlots
@@ -1923,6 +2109,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::URIErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::URIErrorObject>((avmplus::URIErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1932,6 +2125,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // URIError
 //-----------------------------------------------------------
 class avmplus_URIErrorObjectSlots
@@ -1951,6 +2145,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // VerifyError$
 //-----------------------------------------------------------
 class avmplus_VerifyErrorClassSlots
@@ -1971,6 +2166,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::VerifyErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::VerifyErrorObject>((avmplus::VerifyErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -1980,6 +2182,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // VerifyError
 //-----------------------------------------------------------
 class avmplus_VerifyErrorObjectSlots
@@ -1999,6 +2202,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // UninitializedError$
 //-----------------------------------------------------------
 class avmplus_UninitializedErrorClassSlots
@@ -2019,6 +2223,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::UninitializedErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::UninitializedErrorObject>((avmplus::UninitializedErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2028,6 +2239,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // UninitializedError
 //-----------------------------------------------------------
 class avmplus_UninitializedErrorObjectSlots
@@ -2047,6 +2259,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // ArgumentError$
 //-----------------------------------------------------------
 class avmplus_ArgumentErrorClassSlots
@@ -2067,6 +2280,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::ArgumentErrorObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::ArgumentErrorObject>((avmplus::ArgumentErrorObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2076,6 +2296,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // ArgumentError
 //-----------------------------------------------------------
 class avmplus_ArgumentErrorObjectSlots
@@ -2095,6 +2316,40 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// flash.errors::IOError$
+//-----------------------------------------------------------
+class avmplus_IOErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.errors::MemoryError$
+//-----------------------------------------------------------
+class avmplus_MemoryErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.errors::EOFError$
+//-----------------------------------------------------------
+class avmplus_EOFErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // Date$
 //-----------------------------------------------------------
 class avmplus_DateClassSlots
@@ -2113,6 +2368,13 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::DateObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2, avmplus::Atom arg3, avmplus::Atom arg4, avmplus::Atom arg5, avmplus::Atom arg6, avmplus::Atom arg7) \
+        { \
+            avmplus::Atom args[8] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2, arg3, arg4, arg5, arg6, arg7 }; \
+            avmplus::Atom const result = this->construct(7, args); \
+            return GCRef<avmplus::DateObject>((avmplus::DateObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2122,6 +2384,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // Date
 //-----------------------------------------------------------
 class avmplus_DateObjectSlots
@@ -2141,6 +2404,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // RegExp$
 //-----------------------------------------------------------
 class avmplus_RegExpClassSlots
@@ -2159,6 +2423,13 @@ private:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::RegExpObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::RegExpObject>((avmplus::RegExpObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2168,6 +2439,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // RegExp
 //-----------------------------------------------------------
 class avmplus_RegExpObjectSlots
@@ -2187,6 +2459,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // XML$
 //-----------------------------------------------------------
 class avmplus_XMLClassSlots
@@ -2209,6 +2482,13 @@ public:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::XMLObject> constructObject(avmplus::Atom arg1) \
+        { \
+            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1 }; \
+            avmplus::Atom const result = this->construct(1, args); \
+            return GCRef<avmplus::XMLObject>((avmplus::XMLObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2218,6 +2498,7 @@ public:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // XML
 //-----------------------------------------------------------
 class avmplus_XMLObjectSlots
@@ -2237,6 +2518,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // XMLList$
 //-----------------------------------------------------------
 class avmplus_XMLListClassSlots
@@ -2259,6 +2541,13 @@ public:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::XMLListObject> constructObject(avmplus::Atom arg1) \
+        { \
+            avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1 }; \
+            avmplus::Atom const result = this->construct(1, args); \
+            return GCRef<avmplus::XMLListObject>((avmplus::XMLListObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2268,6 +2557,7 @@ public:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // XMLList
 //-----------------------------------------------------------
 class avmplus_XMLListObjectSlots
@@ -2287,6 +2577,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // QName$
 //-----------------------------------------------------------
 class avmplus_QNameClassSlots
@@ -2309,6 +2600,13 @@ public:
         virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::QNameObject> constructObject(avmplus::Atom arg1, avmplus::Atom arg2) \
+        { \
+            avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1, arg2 }; \
+            avmplus::Atom const result = this->construct(2, args); \
+            return GCRef<avmplus::QNameObject>((avmplus::QNameObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2318,6 +2616,7 @@ public:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // QName
 //-----------------------------------------------------------
 class avmplus_QNameObjectSlots
@@ -2337,6 +2636,22 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
+// flash.utils::CompressionAlgorithm$
+//-----------------------------------------------------------
+class avmplus_CompressionAlgorithmClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE avmplus::String* get_ZLIB() const { return m_ZLIB; }
+    REALLY_INLINE avmplus::String* get_DEFLATE() const { return m_DEFLATE; }
+private:
+    DRCWB(avmplus::String*) m_ZLIB;
+    DRCWB(avmplus::String*) m_DEFLATE;
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // flash.utils::ByteArray$
 //-----------------------------------------------------------
 class avmplus_ByteArrayClassSlots
@@ -2358,6 +2673,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
+        REALLY_INLINE GCRef<avmplus::ByteArrayObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::ByteArrayObject>((avmplus::ByteArrayObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     protected: \
@@ -2368,6 +2690,7 @@ private:
 
 //-----------------------------------------------------------
 
+//-----------------------------------------------------------
 // flash.utils::ByteArray
 //-----------------------------------------------------------
 class avmplus_ByteArrayObjectSlots
@@ -2406,18 +2729,18 @@ public:
     REALLY_INLINE GCRef<avmplus::BooleanClass> get_BooleanClass() { return (avmplus::BooleanClass*)(lazyInitClass(avmplus::NativeID::abcclass_Boolean)); }
     REALLY_INLINE GCRef<avmplus::ByteArrayClass> get_ByteArrayClass() { return (avmplus::ByteArrayClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_ByteArray)); }
     REALLY_INLINE GCRef<avmplus::ClassClass> get_ClassClass() { return (avmplus::ClassClass*)(lazyInitClass(avmplus::NativeID::abcclass_Class)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_CompressionAlgorithmClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_CompressionAlgorithm)); }
+    REALLY_INLINE GCRef<avmplus::CompressionAlgorithmClass> get_CompressionAlgorithmClass() { return (avmplus::CompressionAlgorithmClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_CompressionAlgorithm)); }
     REALLY_INLINE GCRef<avmplus::DateClass> get_DateClass() { return (avmplus::DateClass*)(lazyInitClass(avmplus::NativeID::abcclass_Date)); }
     REALLY_INLINE GCRef<avmplus::DefinitionErrorClass> get_DefinitionErrorClass() { return (avmplus::DefinitionErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_DefinitionError)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_EOFErrorClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_EOFError)); }
+    REALLY_INLINE GCRef<avmplus::EOFErrorClass> get_EOFErrorClass() { return (avmplus::EOFErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_EOFError)); }
     REALLY_INLINE GCRef<avmplus::ErrorClass> get_ErrorClass() { return (avmplus::ErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_Error)); }
     REALLY_INLINE GCRef<avmplus::EvalErrorClass> get_EvalErrorClass() { return (avmplus::EvalErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_EvalError)); }
     REALLY_INLINE GCRef<avmplus::FunctionClass> get_FunctionClass() { return (avmplus::FunctionClass*)(lazyInitClass(avmplus::NativeID::abcclass_Function)); }
     REALLY_INLINE GCRef<avmplus::ClassClosure> get_IDataInputClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataInput)); }
     REALLY_INLINE GCRef<avmplus::ClassClosure> get_IDataOutputClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_utils_IDataOutput)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_IOErrorClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_IOError)); }
+    REALLY_INLINE GCRef<avmplus::IOErrorClass> get_IOErrorClass() { return (avmplus::IOErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_IOError)); }
     REALLY_INLINE GCRef<avmplus::MathClass> get_MathClass() { return (avmplus::MathClass*)(lazyInitClass(avmplus::NativeID::abcclass_Math)); }
-    REALLY_INLINE GCRef<avmplus::ClassClosure> get_MemoryErrorClass() { return (avmplus::ClassClosure*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_MemoryError)); }
+    REALLY_INLINE GCRef<avmplus::MemoryErrorClass> get_MemoryErrorClass() { return (avmplus::MemoryErrorClass*)(lazyInitClass(avmplus::NativeID::abcclass_flash_errors_MemoryError)); }
     REALLY_INLINE GCRef<avmplus::MethodClosureClass> get_MethodClosureClass() { return (avmplus::MethodClosureClass*)(lazyInitClass(avmplus::NativeID::abcclass_private_MethodClosure)); }
     REALLY_INLINE GCRef<avmplus::NamespaceClass> get_NamespaceClass() { return (avmplus::NamespaceClass*)(lazyInitClass(avmplus::NativeID::abcclass_Namespace)); }
     REALLY_INLINE GCRef<avmplus::NumberClass> get_NumberClass() { return (avmplus::NumberClass*)(lazyInitClass(avmplus::NativeID::abcclass_Number)); }
@@ -2444,3 +2767,4 @@ public:
     REALLY_INLINE GCRef<avmplus::UIntClass> get_uintClass() { return (avmplus::UIntClass*)(lazyInitClass(avmplus::NativeID::abcclass_uint)); }
 };
 }
+#endif // _H_nativegen_header_builtin

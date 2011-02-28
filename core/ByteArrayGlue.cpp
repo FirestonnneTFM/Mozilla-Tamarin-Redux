@@ -879,11 +879,9 @@ namespace avmplus
         set_defaultObjectEncoding(kEncodeDefault);
     }
 
-    ByteArrayObject* ByteArrayClass::constructByteArray()
+    GCRef<ByteArrayObject> ByteArrayClass::constructByteArray()
     {
-        Atom args[1] = { nullObjectAtom };
-        Atom outAtom = construct(0, args);
-        return (ByteArrayObject*)AvmCore::atomToScriptObject(outAtom);
+        return constructObject();
     }
 }
 

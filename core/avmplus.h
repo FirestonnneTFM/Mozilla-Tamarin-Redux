@@ -345,6 +345,8 @@ namespace avmplus
 #endif
 #include "ByteArrayGlue.h"
 
+#include "builtin-classes.hh"
+
 // inline implementations
 
 #include "AtomWriteBarrier-inlines.h"

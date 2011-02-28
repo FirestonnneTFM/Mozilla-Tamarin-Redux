@@ -56,9 +56,9 @@ REALLY_INLINE GCRef<ArrayClass> Toplevel::arrayClass() const { return builtinCla
 REALLY_INLINE GCRef<BooleanClass> Toplevel::booleanClass() const { return builtinClasses()->get_BooleanClass(); }
 REALLY_INLINE GCRef<ByteArrayClass> Toplevel::byteArrayClass() const { return builtinClasses()->get_ByteArrayClass(); }
 REALLY_INLINE GCRef<ClassClass> Toplevel::classClass() const { return builtinClasses()->get_ClassClass(); }
-REALLY_INLINE GCRef<ClassClosure> Toplevel::eofErrorClass() const { return builtinClasses()->get_EOFErrorClass(); }
-REALLY_INLINE GCRef<ClassClosure> Toplevel::ioErrorClass() const { return builtinClasses()->get_IOErrorClass(); }
-REALLY_INLINE GCRef<ClassClosure> Toplevel::memoryErrorClass() const { return builtinClasses()->get_MemoryErrorClass(); }
+REALLY_INLINE GCRef<EOFErrorClass> Toplevel::eofErrorClass() const { return builtinClasses()->get_EOFErrorClass(); }
+REALLY_INLINE GCRef<IOErrorClass> Toplevel::ioErrorClass() const { return builtinClasses()->get_IOErrorClass(); }
+REALLY_INLINE GCRef<MemoryErrorClass> Toplevel::memoryErrorClass() const { return builtinClasses()->get_MemoryErrorClass(); }
 REALLY_INLINE GCRef<DateClass> Toplevel::dateClass() const { return builtinClasses()->get_DateClass(); }
 REALLY_INLINE GCRef<DoubleVectorClass> Toplevel::doubleVectorClass() const { return builtinClasses()->get_Vector_doubleClass(); }
 REALLY_INLINE GCRef<ErrorClass> Toplevel::errorClass() const { return builtinClasses()->get_ErrorClass(); }
