@@ -178,7 +178,8 @@ namespace MMgc
         victimIterator(0),
         m_roots(0),
         m_callbacks(0),
-        zct()
+        zct(),
+        lockedObjects(NULL)
 #ifdef MMGC_CONSERVATIVE_PROFILER
         , demos(0)
 #endif
@@ -1998,6 +1999,7 @@ namespace MMgc
         if (!stackroots) {
             // Mark objects owned by the GC as if they were rooted
             TraceLocation(&emptyWeakRef);
+            TraceLocation(&lockedObjects);
         }
         
        // Need to do this while holding the root lock so we don't end
@@ -3827,4 +3829,70 @@ namespace MMgc
             deletos->accountForObject(item);
     }
 #endif
+    
+    // Object locks are implemented as garbage-collectable objects for simplicity
+    // but are never eligible for garbage collection while locked.  In principle
+    // they can be deleted explicitly in UnlockObject because it's illegal for the
+    // mutator to use the lock object after it has been unlocked.
+    //
+    // The user of the protocol does not know that lock objects are GC objects.
+    // The lock object pointer need not be stored in a reachable location and even
+    // if it is no write barrier should be used.
+
+    class GCObjectLock : public GCTraceableObject
+    {
+    public:
+        GCObjectLock(const void* object)
+            : object(object)
+            , prev(NULL)
+            , next(NULL)
+        {
+        }
+        
+        virtual bool gcTrace(GC* gc, size_t)
+        {
+            gc->TraceLocation(&object);
+            gc->TraceLocation(&next);
+            gc->TraceLocation(&prev);
+            return false;
+        }
+
+        const void* object;
+        GCObjectLock* prev;
+        GCObjectLock* next;
+    };
+
+    GCObjectLock* GC::LockObject(const void* userptr)
+    {
+        GCAssertMsg(userptr != NULL, "LockObject should never be called on a NULL pointer.");
+        GCObjectLock* lock = new (this, kExact) GCObjectLock(userptr);
+        if (lockedObjects != NULL)
+            lockedObjects->prev = lock;
+        lock->next = lockedObjects;
+        lockedObjects = lock;
+        return lock;
+    }
+
+    const void* GC::GetLockedObject(GCObjectLock* lock)
+    {
+        GCAssertMsg(lock->object != NULL, !"GetLockedObject should never be called on an unlocked lock.");
+        return lock->object;
+    }
+
+    void GC::UnlockObject(GCObjectLock* lock)
+    {
+        if (lock->object == NULL) {
+            GCAssert(!"UnlockObject should never be called on an unlocked lock.");
+            return;
+        }
+        if (lock->prev != NULL)
+            lock->prev->next = lock->next;
+        else 
+            lockedObjects = lock->next;
+        if (lock->next != NULL)
+            lock->next->prev = lock->prev;
+        lock->next = NULL;
+        lock->prev = NULL;
+        lock->object = NULL;
+    }
 }

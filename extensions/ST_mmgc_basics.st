@@ -65,6 +65,76 @@ public:
     ~AllocInFinalizer() { new (GC::GetGC(this)) AllocInFinalizer2(); }
 };
 
+class LockableObject : public GCFinalizedObject {
+public:
+    LockableObject(int* counter) : counter(counter) {}
+    virtual ~LockableObject() {
+        *counter = *counter + 1;
+    }
+    int * const counter;
+};
+
+class LockerAndUnlocker
+{
+public:   
+    static GCObjectLock* lock[10];
+    static GCObjectLock* lock2[10];
+    static int counter;
+    
+    static bool createAndLockObjects(GC* gc) {
+        counter = 0;
+        for ( int i=0 ; i < 10 ; i++ )
+            lock[i] = gc->LockObject(new (gc) LockableObject(&counter));
+        return true;
+    }
+
+    static bool lockLevel2(GC* gc) {
+        for ( int i=0 ; i < 10 ; i++ )
+            lock2[i] = gc->LockObject(gc->GetLockedObject(lock[i]));
+        return true;
+    }
+
+    static bool testLocksHeld(GC* gc, int level) {
+        if (counter != 0)
+            return false;
+
+        int held = 0;
+        for ( int i=0 ; i < 10 ; i++ )
+            held += bool(gc->GetLockedObject(lock[i]) != NULL);
+        if (level > 1)
+            for ( int i=0 ; i < 10 ; i++ )
+                held += bool(gc->GetLockedObject(lock2[i]) != NULL);
+
+        if (held != level*10)
+            return false;
+            
+        return true;
+    }
+    
+    static bool testLocksNotHeld(GC*) {
+        // At least some of the destructors should have run...
+        if (counter < 5)
+            return false;
+        return true;
+    }
+
+    static bool unlockLevel2(GC* gc) {
+        for ( int i=0 ; i < 10 ; i++ )
+            gc->UnlockObject(lock2[i]);
+        return true;
+    }
+
+    static bool unlockLevel1(GC* gc) {
+        for ( int i=0 ; i < 10 ; i++ )
+            gc->UnlockObject(lock[i]);
+        return true;
+    }
+};
+
+GCObjectLock* LockerAndUnlocker::lock[10];
+GCObjectLock* LockerAndUnlocker::lock2[10];
+int LockerAndUnlocker::counter = 0;
+
 %%decls
 private:
     MMgc::GC *gc;
@@ -259,6 +329,37 @@ delete gc;
 
         // just fishing for asserts/hangs/crashes
         %%verify true
+    }
+
+%%test lockObject
+    {
+        GC *gc = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        MMGC_GCENTER(gc);
+
+        %%verify LockerAndUnlocker::createAndLockObjects(gc)
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::testLocksHeld(gc, 1)
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::lockLevel2(gc)
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::testLocksHeld(gc, 2)
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::unlockLevel2(gc)
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::testLocksHeld(gc, 1)
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::unlockLevel1(gc)
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::testLocksNotHeld(gc)
+
+        delete gc;
     }
 
 %%test regression_551169
