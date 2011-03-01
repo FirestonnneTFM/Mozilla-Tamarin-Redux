@@ -2688,23 +2688,11 @@ namespace MMgc
         
         gcbits_t& bits2 = GetGCBits(GetRealPointer(obj));
 
-        // We cannot yet assert the following.  The reason is an interaction between
-        // exact tracing, stack pinning, and reference counting.  Reference counts
-        // must reflect at least the number of references from exactly traced objects.
-        // But code that maintains arrays of reference counts and cleverly "transfers"
-        // the counts from one copy of the array to the other without resetting the
-        // exact-trace bit or clearing the object or freeing it will end up in a
-        // situation where, if the dead array copy is reached during tracing, the
-        // reference counts will be wrong and the assert will hit.  The object can be
-        // reached even if the C++ code is correct since we trace the stack and some
-        // objects conservatively.  The problem will disappear when we remove
-        // reference counting.
-        //
-        // Another problem here is that explicit deletion of objects can create
-        // dangling pointers that will also hit the assert, but in that case there are
-        // other, more insidious bugs, so explicit deletion has to be dealt with in
-        // any case.
-        // GCAssert((bits2 & (kMark|kQueued)) != (kMark|kQueued));
+        // Explicit deletion of objects can create dangling pointers which will hit 
+        // this assert. 
+        // More information here: https://bugzilla.mozilla.org/show_bug.cgi?id=626684
+        // If you hit this assert, report with detailed information on the above bug    
+        GCAssertMsg((bits2 & (kMark|kQueued)) != (kMark|kQueued), "Dangling pointers hit during exact tracing, please report with the details on Bugzilla bug# 626684");
         
         GCAssert(ContainsPointers(obj) || (bits2 & kQueued) == 0);
 
