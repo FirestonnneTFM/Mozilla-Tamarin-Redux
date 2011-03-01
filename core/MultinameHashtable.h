@@ -168,8 +168,6 @@ namespace avmplus
             return new (gc, MMgc::kExact) MultinameHashtable(capacity);
         }
 
-        ~MultinameHashtable();
-
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
         bool isFull() const;

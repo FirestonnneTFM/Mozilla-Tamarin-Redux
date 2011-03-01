@@ -131,12 +131,6 @@ namespace avmplus
     }
 
     template <class VALUE_TYPE, class VALUE_WRITER>
-    MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::~MultinameHashtable()
-    {
-        freeQuads(GC::GetGC(this));
-    }
-
-    template <class VALUE_TYPE, class VALUE_WRITER>
     void MultinameHashtable<VALUE_TYPE, VALUE_WRITER>::freeQuads(MMgc::GC* gc)
     {
         QuadContainer<VALUE_TYPE>* quads = m_quads;
