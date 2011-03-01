@@ -184,6 +184,11 @@ REALLY_INLINE int VMPI_processorQtyAtBoot()
     return 1;
 }
 
+REALLY_INLINE void VMPI_spinloopPause()
+{
+    // No-op
+}
+
 #define EMULATE_ATOMICS_WITH_PTHREAD_MUTEX
 
 #include "../VMPI/ThreadsPosix-inlines.h"

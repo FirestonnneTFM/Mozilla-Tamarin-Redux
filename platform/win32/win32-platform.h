@@ -452,5 +452,12 @@ REALLY_INLINE int VMPI_processorQtyAtBoot()
     return systemInfo.dwNumberOfProcessors < 1 ? 1 : systemInfo.dwNumberOfProcessors;
 }
 
+REALLY_INLINE void VMPI_spinloopPause()
+{
+#ifdef AVMPLUS_IA32
+    __asm pause;
+#endif
+}
+
 #endif // __avmplus_win32_platform__
 
