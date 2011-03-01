@@ -311,15 +311,16 @@ class AcceptanceRuntest(RuntestBase):
                     # run avm with all bugcompat versions
                     for swf_ver in self.swfversions:
                         line = uses_swfversion.sub('', line)
-                        line, extraVmArgs, abcargs = self.process_avm_args_line(line, dir)
+                        line, extraVmArgs, abcargs, multiabc = self.process_avm_args_line(line, dir)
                         extraVmArgs += ' -swfversion %s ' % swf_ver
                         outputCalls.extend(self.runTest(
                             ast, root, testName, '%s.%s' % (testnum, index),
                             settings, extraVmArgs, abcargs))
                         index += 1
                     continue
-                line, extraVmArgs, abcargs = self.process_avm_args_line(line, dir)
-                outputCalls.extend(self.runTest(ast, root, testName, '%s.%s' % (testnum, index), settings, extraVmArgs, abcargs))
+                line, extraVmArgs, abcargs, multiabc = self.process_avm_args_line(line, dir)
+                outputCalls.extend(self.runTest(ast, root, testName, '%s.%s' % (testnum, index),
+                                                settings, extraVmArgs, abcargs, multiabc))
         else:
             outputCalls.extend(self.runTest(ast, root, testName, testnum, settings))
 
@@ -362,14 +363,19 @@ class AcceptanceRuntest(RuntestBase):
 
     def process_avm_args_line(self, line, dir):
         abcargs = ''
+        multiabc = ''
+        extraVmArgs = ''
         line = line.replace("$DIR", dir)
         if line.find('--') != -1:
-            (extraVmArgs, abcargs) = line.split('--')
+            (line, abcargs) = line.split('--')
+        if line.find('|multiabc|') != -1:
+            multiabc = line[line.find('|multiabc|')+10:]
+            extraVmArgs += line[:line.find('|multiabc|')]
         else:
             extraVmArgs = line
-        return line, extraVmArgs, abcargs
+        return line, extraVmArgs, abcargs, multiabc
 
-    def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
+    def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs='', multiabc=''):
         passByEnv=None
         if self.passthreadid:
             try:
@@ -459,7 +465,9 @@ class AcceptanceRuntest(RuntestBase):
                 lpass += 1
         else:
             if abcargs:
-                (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs), outputCalls=outputCalls, envVars=passByEnv)
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, multiabc, testName, abcargs), outputCalls=outputCalls, envVars=passByEnv)
+            elif multiabc:
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, multiabc,testName), outputCalls=outputCalls, envVars=passByEnv)
             else:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName), outputCalls=outputCalls, envVars=passByEnv)
 
