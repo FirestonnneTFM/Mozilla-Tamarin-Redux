@@ -120,6 +120,8 @@
 #include <libkern/OSAtomic.h>
 #include <signal.h>
 
+#include <sys/sysctl.h>
+
 #ifdef DEBUG
 #include <assert.h>
 #endif
@@ -299,6 +301,17 @@ REALLY_INLINE bool VMPI_compareAndSwap32WithBarrier(int32_t oldValue, int32_t ne
 REALLY_INLINE void VMPI_memoryBarrier()
 {
     OSMemoryBarrier();
+}
+
+REALLY_INLINE int VMPI_processorQtyAtBoot()
+{
+    size_t len = 0;
+    int num = 0;
+    int mib[] = {CTL_HW, HW_NCPU};
+    sysctl(mib, 2, NULL, &len, NULL, 0);
+    sysctl(mib, 2, &num, &len, NULL, 0);
+    // May be unreliable, but we know we have at least one processor
+    return num < 1 ? 1 : num;
 }
 
 #include "../VMPI/ThreadsPosix-inlines.h"

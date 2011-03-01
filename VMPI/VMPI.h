@@ -975,4 +975,11 @@ extern size_t VMPI_threadAttrDefaultStackSize();
  */
 extern void VMPI_threadYield();
 
+/**
+ * Returns the number of processors (inc. logical processors) that were available
+ * at boot time. Note that the number of dynamically available processors can change
+ * (e.g. via power management), so do not rely on this function for algorithm correctness.
+ */
+extern int VMPI_processorQtyAtBoot();
+
 #endif /* __avmplus_VMPI__ */
