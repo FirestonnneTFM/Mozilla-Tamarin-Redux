@@ -65,18 +65,12 @@
     #define VALGRIND_FREELIKE_BLOCK(_a,rdz) {}
 #endif
 
-#if defined MMGC_MEMORY_INFO && defined MMGC_64BIT
-    #error "MMGC_MEMORY_INFO not supported on 64-bit (see bugzilla 468501)"
-#endif
-
 #ifdef DEBUG
     #define MMGC_DELETE_DEBUGGING
-    #ifndef MMGC_64BIT              // see bugzilla 468501
     // Valgrind integration is trickier with fresh memory scribbling and free memory
     // poisoning and its pointless since valgrind will uncover the same problems.
     #ifndef MMGC_VALGRIND
         #define MMGC_MEMORY_INFO
-    #endif
     #endif
 #endif
 
