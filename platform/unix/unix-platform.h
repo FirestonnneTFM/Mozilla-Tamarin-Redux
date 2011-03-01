@@ -554,6 +554,14 @@ REALLY_INLINE void VMPI_memoryBarrier()
 }
 #endif
 
+REALLY_INLINE int VMPI_processorQtyAtBoot()
+{
+    int num = sysconf(_SC_NPROCESSORS_CONF);
+    // May be unreliable, but we know we have at least one processor
+    // (sysconf also returns -1 for error)
+    return num < 1 ? 1 : num;
+}
+
 #include "../VMPI/ThreadsPosix-inlines.h"
 
 #endif // __avmplus_unix_platform__

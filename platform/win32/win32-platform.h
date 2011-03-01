@@ -444,5 +444,13 @@ REALLY_INLINE void VMPI_threadYield()
 #endif
 }
 
+REALLY_INLINE int VMPI_processorQtyAtBoot()
+{
+    SYSTEM_INFO systemInfo;
+    GetSystemInfo(&systemInfo);
+    // dwNumberOfProcessors can be unreliable, but we know we have at least one processor
+    return systemInfo.dwNumberOfProcessors < 1 ? 1 : systemInfo.dwNumberOfProcessors;
+}
+
 #endif // __avmplus_win32_platform__
 
