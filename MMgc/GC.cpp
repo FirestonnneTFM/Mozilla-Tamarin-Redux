@@ -3875,7 +3875,7 @@ namespace MMgc
 
     const void* GC::GetLockedObject(GCObjectLock* lock)
     {
-        GCAssertMsg(lock->object != NULL, !"GetLockedObject should never be called on an unlocked lock.");
+        GCAssertMsg(lock->object != NULL, "GetLockedObject should never be called on an unlocked lock.");
         return lock->object;
     }
 
