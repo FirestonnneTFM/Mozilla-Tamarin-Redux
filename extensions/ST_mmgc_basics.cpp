@@ -66,6 +66,7 @@ void test11();
 void test12();
 void test13();
 void test14();
+void test15();
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
@@ -75,8 +76,8 @@ private:
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
     : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names,ST_mmgc_basics::ST_explicits)
 {}
-const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcheapAlign","gcmethods","finalizerAlloc","finalizerDelete","nestedGCs","collectDormantGC","regression_551169", NULL };
-const bool ST_mmgc_basics::ST_explicits[] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false, false };
+const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcheapAlign","gcmethods","finalizerAlloc","finalizerDelete","nestedGCs","collectDormantGC","lockObject","regression_551169", NULL };
+const bool ST_mmgc_basics::ST_explicits[] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false, false };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -94,6 +95,7 @@ case 11: test11(); return;
 case 12: test12(); return;
 case 13: test13(); return;
 case 14: test14(); return;
+case 15: test15(); return;
 }
 }
 void ST_mmgc_basics::prologue() {
@@ -131,8 +133,78 @@ public:
     ~AllocInFinalizer() { new (GC::GetGC(this)) AllocInFinalizer2(); }
 };
 
+class LockableObject : public GCFinalizedObject {
+public:
+    LockableObject(int* counter) : counter(counter) {}
+    virtual ~LockableObject() {
+        *counter = *counter + 1;
+    }
+    int * const counter;
+};
+
+class LockerAndUnlocker
+{
+public:   
+    static GCObjectLock* lock[10];
+    static GCObjectLock* lock2[10];
+    static int counter;
+    
+    static bool createAndLockObjects(GC* gc) {
+        counter = 0;
+        for ( int i=0 ; i < 10 ; i++ )
+            lock[i] = gc->LockObject(new (gc) LockableObject(&counter));
+        return true;
+    }
+
+    static bool lockLevel2(GC* gc) {
+        for ( int i=0 ; i < 10 ; i++ )
+            lock2[i] = gc->LockObject(gc->GetLockedObject(lock[i]));
+        return true;
+    }
+
+    static bool testLocksHeld(GC* gc, int level) {
+        if (counter != 0)
+            return false;
+
+        int held = 0;
+        for ( int i=0 ; i < 10 ; i++ )
+            held += bool(gc->GetLockedObject(lock[i]) != NULL);
+        if (level > 1)
+            for ( int i=0 ; i < 10 ; i++ )
+                held += bool(gc->GetLockedObject(lock2[i]) != NULL);
+
+        if (held != level*10)
+            return false;
+            
+        return true;
+    }
+    
+    static bool testLocksNotHeld(GC*) {
+        // At least some of the destructors should have run...
+        if (counter < 5)
+            return false;
+        return true;
+    }
+
+    static bool unlockLevel2(GC* gc) {
+        for ( int i=0 ; i < 10 ; i++ )
+            gc->UnlockObject(lock2[i]);
+        return true;
+    }
+
+    static bool unlockLevel1(GC* gc) {
+        for ( int i=0 ; i < 10 ; i++ )
+            gc->UnlockObject(lock[i]);
+        return true;
+    }
+};
+
+GCObjectLock* LockerAndUnlocker::lock[10];
+GCObjectLock* LockerAndUnlocker::lock2[10];
+int LockerAndUnlocker::counter = 0;
+
 void ST_mmgc_basics::test0() {
-#line 85 "ST_mmgc_basics.st"
+#line 155 "ST_mmgc_basics.st"
 verifyPass(gc != NULL, "gc != NULL", __FILE__, __LINE__);
 
 }
@@ -140,10 +212,10 @@ void ST_mmgc_basics::test1() {
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-#line 91 "ST_mmgc_basics.st"
+#line 161 "ST_mmgc_basics.st"
 verifyPass(mygcobject!=NULL, "mygcobject!=NULL", __FILE__, __LINE__);
     mygcobject->i=10;
-#line 93 "ST_mmgc_basics.st"
+#line 163 "ST_mmgc_basics.st"
 verifyPass(mygcobject->i==10, "mygcobject->i==10", __FILE__, __LINE__);
 
 }
@@ -153,7 +225,7 @@ void ST_mmgc_basics::test2() {
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
 //    AvmLog("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
-#line 101 "ST_mmgc_basics.st"
+#line 171 "ST_mmgc_basics.st"
 verifyPass(gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize(), "gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize()", __FILE__, __LINE__);
     delete mygcobject;
 
@@ -163,47 +235,47 @@ void ST_mmgc_basics::test3() {
     MyGCObject *mygcobject;
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-#line 109 "ST_mmgc_basics.st"
+#line 179 "ST_mmgc_basics.st"
 verifyPass((int)gc->GetBytesInUse()>inuse, "(int)gc->GetBytesInUse()>inuse", __FILE__, __LINE__);
     delete mygcobject;
 //    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
     gc->Collect();
 //    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
-#line 114 "ST_mmgc_basics.st"
+#line 184 "ST_mmgc_basics.st"
 verifyPass((int)gc->GetBytesInUse()<=inuse, "(int)gc->GetBytesInUse()<=inuse", __FILE__, __LINE__);
 
 }
 void ST_mmgc_basics::test4() {
-#line 117 "ST_mmgc_basics.st"
+#line 187 "ST_mmgc_basics.st"
 verifyPass(gc->GetGCHeap()!=NULL, "gc->GetGCHeap()!=NULL", __FILE__, __LINE__);
 
 }
 void ST_mmgc_basics::test5() {
     MMgc::FixedAlloc *fa;
     fa=new MMgc::FixedAlloc(2048,MMgc::GCHeap::GetGCHeap());
-#line 122 "ST_mmgc_basics.st"
+#line 192 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetMaxAlloc()==0, "(int)fa->GetMaxAlloc()==0", __FILE__, __LINE__);
-#line 123 "ST_mmgc_basics.st"
+#line 193 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetNumBlocks()==0, "(int)fa->GetNumBlocks()==0", __FILE__, __LINE__);
     void *data1=fa->Alloc(2048);
-#line 125 "ST_mmgc_basics.st"
+#line 195 "ST_mmgc_basics.st"
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data1)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data1)==fa", __FILE__, __LINE__);
-#line 126 "ST_mmgc_basics.st"
+#line 196 "ST_mmgc_basics.st"
 verifyPass(fa->GetBytesInUse()==DebugSize()+2048, "fa->GetBytesInUse()==DebugSize()+2048", __FILE__, __LINE__);
-#line 127 "ST_mmgc_basics.st"
+#line 197 "ST_mmgc_basics.st"
 verifyPass(fa->GetItemSize()==2048, "fa->GetItemSize()==2048", __FILE__, __LINE__);
     void *data2=fa->Alloc(2048);
-#line 129 "ST_mmgc_basics.st"
+#line 199 "ST_mmgc_basics.st"
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data2)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data2)==fa", __FILE__, __LINE__);
 //    AvmLog("fa->GetItemSize=%d\n",(int)fa->GetItemSize());
-#line 131 "ST_mmgc_basics.st"
+#line 201 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
     fa->Free(data1);
-#line 133 "ST_mmgc_basics.st"
+#line 203 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
-#line 134 "ST_mmgc_basics.st"
+#line 204 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetMaxAlloc()==1, "(int)fa->GetMaxAlloc()==1", __FILE__, __LINE__);
-#line 135 "ST_mmgc_basics.st"
+#line 205 "ST_mmgc_basics.st"
 verifyPass((int)fa->GetNumBlocks()==1, "(int)fa->GetNumBlocks()==1", __FILE__, __LINE__);
     fa->Free(data2);
     delete fa;
@@ -214,10 +286,10 @@ void ST_mmgc_basics::test6() {
     int start=(int)fm->GetBytesInUse();
     int starttotal=(int)fm->GetTotalSize();
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
-#line 144 "ST_mmgc_basics.st"
+#line 214 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
-#line 146 "ST_mmgc_basics.st"
+#line 216 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     void *obj=fm->Alloc(8192);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
@@ -226,24 +298,24 @@ verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==startt
 //    %%verify (int)fm->GetTotalSize()==starttotal+2
     fm->Free(obj);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
-#line 154 "ST_mmgc_basics.st"
+#line 224 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
-#line 156 "ST_mmgc_basics.st"
+#line 226 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     obj=fm->Calloc(1024,10);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
 // FixedMalloc is currently (as of redux 3229) tracking large allocs using a list of
 // small objects, in some debug modes.  So we can't have a precise test here.
-#line 161 "ST_mmgc_basics.st"
+#line 231 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()>=start+1024*12 && (int)fm->GetBytesInUse()<=start+1024*12+64, "(int)fm->GetBytesInUse()>=start+1024*12 && (int)fm->GetBytesInUse()<=start+1024*12+64", __FILE__, __LINE__);
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
-#line 163 "ST_mmgc_basics.st"
+#line 233 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal+3, "(int)fm->GetTotalSize()==starttotal+3", __FILE__, __LINE__);
     fm->Free(obj);
-#line 165 "ST_mmgc_basics.st"
+#line 235 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
-#line 166 "ST_mmgc_basics.st"
+#line 236 "ST_mmgc_basics.st"
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
 
 }
@@ -252,15 +324,15 @@ void ST_mmgc_basics::test7() {
     int startfreeheap=(int)gh->GetFreeHeapSize();
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-#line 173 "ST_mmgc_basics.st"
+#line 243 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
 //gh->Config().heapLimit = 1024;
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-#line 177 "ST_mmgc_basics.st"
+#line 247 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
        void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
-#line 179 "ST_mmgc_basics.st"
+#line 249 "ST_mmgc_basics.st"
 verifyPass((int)gh->GetTotalHeapSize()>startfreeheap, "(int)gh->GetTotalHeapSize()>startfreeheap", __FILE__, __LINE__);
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 	   gh->FreeNoProfile(data);
@@ -282,9 +354,9 @@ void ST_mmgc_basics::test8() {
     // 
     for ( size_t k=2 ; k <= 256 ; k *= 2 ) {
         void *data = gh->Alloc(10,MMgc::GCHeap::flags_Alloc, k);
-#line 199 "ST_mmgc_basics.st"
+#line 269 "ST_mmgc_basics.st"
 verifyPass(((uintptr_t)data & (k*MMgc::GCHeap::kBlockSize - 1)) == 0, "((uintptr_t)data & (k*MMgc::GCHeap::kBlockSize - 1)) == 0", __FILE__, __LINE__);
-#line 200 "ST_mmgc_basics.st"
+#line 270 "ST_mmgc_basics.st"
 verifyPass(gh->Size(data) == 10, "gh->Size(data) == 10", __FILE__, __LINE__);
         gh->Free(data);
     }
@@ -294,9 +366,9 @@ void ST_mmgc_basics::test9() {
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-#line 208 "ST_mmgc_basics.st"
+#line 278 "ST_mmgc_basics.st"
 verifyPass((MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject, "(MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject", __FILE__, __LINE__);
-#line 209 "ST_mmgc_basics.st"
+#line 279 "ST_mmgc_basics.st"
 verifyPass((MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject, "(MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject", __FILE__, __LINE__);
 
 // Bugzilla 542529 - in debug mode we would assert here due to logic flaws in the allocatr
@@ -305,7 +377,7 @@ void ST_mmgc_basics::test10() {
     MMGC_GCENTER(gc);
     new (gc) AllocInFinalizer();
     gc->Collect(false);
-#line 216 "ST_mmgc_basics.st"
+#line 286 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -314,7 +386,7 @@ void ST_mmgc_basics::test11() {
     new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
     //delete m; delete m; // this verifies we crash, it does
     gc->Collect(false);
-#line 223 "ST_mmgc_basics.st"
+#line 293 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
     GCFinalizedObject *gcfo = new (gc) GCFinalizedObject();
     gcfo->~GCFinalizedObject();
@@ -338,7 +410,7 @@ void ST_mmgc_basics::test12() {
     }
     a = gc->Alloc(8);
     // just fishing for asserts/hangs/crashes
-#line 245 "ST_mmgc_basics.st"
+#line 315 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
     delete gcb;
 
@@ -356,12 +428,52 @@ void ST_mmgc_basics::test13() {
         delete gcb;
 
         // just fishing for asserts/hangs/crashes
-#line 261 "ST_mmgc_basics.st"
+#line 331 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
     }
 
 }
 void ST_mmgc_basics::test14() {
+    {
+        GC *gc = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        MMGC_GCENTER(gc);
+
+#line 339 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::createAndLockObjects(gc), "LockerAndUnlocker::createAndLockObjects(gc)", __FILE__, __LINE__);
+        gc->Collect();
+        gc->Collect();
+#line 342 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::testLocksHeld(gc, 1), "LockerAndUnlocker::testLocksHeld(gc, 1)", __FILE__, __LINE__);
+        gc->Collect();
+        gc->Collect();
+#line 345 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::lockLevel2(gc), "LockerAndUnlocker::lockLevel2(gc)", __FILE__, __LINE__);
+        gc->Collect();
+        gc->Collect();
+#line 348 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::testLocksHeld(gc, 2), "LockerAndUnlocker::testLocksHeld(gc, 2)", __FILE__, __LINE__);
+        gc->Collect();
+        gc->Collect();
+#line 351 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::unlockLevel2(gc), "LockerAndUnlocker::unlockLevel2(gc)", __FILE__, __LINE__);
+        gc->Collect();
+        gc->Collect();
+#line 354 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::testLocksHeld(gc, 1), "LockerAndUnlocker::testLocksHeld(gc, 1)", __FILE__, __LINE__);
+        gc->Collect();
+        gc->Collect();
+#line 357 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::unlockLevel1(gc), "LockerAndUnlocker::unlockLevel1(gc)", __FILE__, __LINE__);
+        gc->Collect();
+        gc->Collect();
+#line 360 "ST_mmgc_basics.st"
+verifyPass(LockerAndUnlocker::testLocksNotHeld(gc), "LockerAndUnlocker::testLocksNotHeld(gc)", __FILE__, __LINE__);
+
+        delete gc;
+    }
+
+}
+void ST_mmgc_basics::test15() {
     {
         GC *testGC = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
         {
@@ -389,7 +501,7 @@ void ST_mmgc_basics::test14() {
                 //    %%verify ms.P(sentinel) == GCMarkStack::kDeadItem
                 //    %%verify ms.GetSentinel1TypeAt(ms.GetItemAbove(sentinel)) == GCMarkStack::kDeadItem
                 //}
-#line 292 "ST_mmgc_basics.st"
+#line 393 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
             }
             testGC->Mark();

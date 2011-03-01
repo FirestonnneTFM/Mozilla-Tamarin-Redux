@@ -413,6 +413,11 @@ namespace MMgc
     };
 
     /**
+     * GCObjectLock is abstract and instances of it are returned from GC::LockObject.
+     */
+    class GCObjectLock;
+
+    /**
      * This is a general-purpose garbage collector used by the Flash Player.
      * Application code must implement the GCRoot interface to mark all
      * reachable data.  Unreachable data is automatically destroyed.
@@ -1661,6 +1666,34 @@ namespace MMgc
         void PreventImmediateReaping(RCObject* obj);
 
         static const void *Pointer(const void *p);
+
+    public:
+        /**
+         * LockObject protects the object against being garbage collected, despite no references to
+         * the object being found in a root, the stack, or any other heap object.  The object must
+         * not be NULL.  Locks on an object accumulate: if you lock an object n times you must 
+         * unlock it n times - call UnlockObject on all the returned locks - to make it collectable
+         * again.  Each lock returned is distinct and becomes an invalid object reference the moment
+         * it is unlocked.
+         */
+        GCObjectLock* LockObject(const void* obj);
+
+        /**
+         * Return the object locked by the lock.
+         *
+         * NOTE! It is an ERROR to call this if the lock has been unlocked!  YOUR PROGRAM WILL CRASH.
+         */
+        const void* GetLockedObject(GCObjectLock* lock);
+
+        /**
+         * UnlockObject unlocks a lock that was returned by LockObject.
+         *
+         * NOTE! It is an ERROR to call this if the lock has been unlocked!  YOUR PROGRAM WILL CRASH.
+         */
+        void UnlockObject(GCObjectLock* lock);
+        
+    private:
+        GCObjectLock* lockedObjects;
 
     public:
         void DumpMemoryInfo();
