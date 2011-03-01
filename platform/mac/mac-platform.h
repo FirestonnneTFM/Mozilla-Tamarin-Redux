@@ -314,6 +314,13 @@ REALLY_INLINE int VMPI_processorQtyAtBoot()
     return num < 1 ? 1 : num;
 }
 
+REALLY_INLINE void VMPI_spinloopPause()
+{
+#ifdef AVMPLUS_IA32
+    __asm__("pause");
+#endif
+}
+
 #include "../VMPI/ThreadsPosix-inlines.h"
 
 #endif // __avmplus_mac_platform__

@@ -982,4 +982,21 @@ extern void VMPI_threadYield();
  */
 extern int VMPI_processorQtyAtBoot();
 
+/**
+ * This intrinsic provides a PAUSE instruction for x86 platforms.
+ * (It is a NO-OP for all other architectures.)
+ *
+ * To reduce costly recovery from possible memory ordering violations,
+ * Intel Pentium 4's and Xeons benefit from a PAUSE instruction
+ * being inserted into spin-wait loops. This serves as a hint
+ * to the processor that it is busy-waiting, and to avoid the
+ * memory ordering violations.
+ *
+ * The instruction is ignored by x86 processors that do not require it.
+ *
+ * See:
+ * Intel 64 and IA-32 Architectures Software Developer's Manual Volume 2B 4-71
+ */
+extern void VMPI_spinloopPause();
+
 #endif /* __avmplus_VMPI__ */
