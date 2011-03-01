@@ -140,103 +140,258 @@ namespace avmplus
         GC_NO_DATA(NativeErrorClass)
     };
 
-    #define DECLARE_NATIVE_ERROR_CLASS(cls, obj)                                                \
-        class obj : public ErrorObject                                                          \
-        {                                                                                       \
-            friend class cls;                                                                   \
-        protected:                                                                              \
-            REALLY_INLINE obj(VTable *vtable, ScriptObject *delegate)                           \
-                : ErrorObject(vtable, delegate) {}                                              \
-        private:                                                                                \
-            virtual bool gcTrace(MMgc::GC* gc, size_t cursor);                                  \
-            DECLARE_SLOTS_##obj;                                                                \
-        };                                                                                      \
-                                                                                                \
-        class cls : public NativeErrorClass                                                     \
-        {                                                                                       \
-        protected:                                                                              \
-            REALLY_INLINE cls(VTable* cvtable)                                                  \
-                : NativeErrorClass(cvtable) {}                                                  \
-        public:                                                                                 \
-            virtual bool gcTrace(MMgc::GC* gc, size_t cursor);                                  \
-            DECLARE_SLOTS_##cls;                                                                \
-        };
+    // ArgumentError
+    
+    class GC_AS3_EXACT(ArgumentErrorClass, NativeErrorClass)
+    {
+    protected:
+        ArgumentErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(ArgumentErrorClass);
+        DECLARE_SLOTS_ArgumentErrorClass;
+    };
+    
+    class GC_AS3_EXACT(ArgumentErrorObject, ErrorObject)
+    {
+        friend class ArgumentErrorClass;
+    protected:
+        ArgumentErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(ArgumentErrorObject);
+        DECLARE_SLOTS_ArgumentErrorObject;
+    };
 
-    // This is a hack that's required because the tracer generator really needs
-    // to examine the output of the DECLARE_NATIVE_ERROR_CLASS macro expansions
-    // (or actually the partial macro expansions - stopping before GC_AS3_EXACT
-    // is expanded), but as things stand it will examine the macros themselves.
-    //
-    // It's probably the case that the macros don't pay for themselves.
+    // DefinitionError
+    
+    class GC_AS3_EXACT(DefinitionErrorClass, NativeErrorClass)
+    {
+    protected:
+        DefinitionErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
 
-#if 0
-      GC_AS3_EXACT(DefinitionErrorClass, NativeErrorClass)
-      GC_NO_DATA(DefinitionErrorClass)
-      GC_AS3_EXACT(DefinitionErrorObject, ErrorObject)
-      GC_NO_DATA(DefinitionErrorObject)
-      
-      GC_AS3_EXACT(EvalErrorClass, NativeErrorClass)
-      GC_NO_DATA(EvalErrorClass)
-      GC_AS3_EXACT(EvalErrorObject, ErrorObject)
-      GC_NO_DATA(EvalErrorObject)
+    public:
+        GC_NO_DATA(DefinitionErrorClass);
+        DECLARE_SLOTS_DefinitionErrorClass;
+    };
 
-      GC_AS3_EXACT(RangeErrorClass, NativeErrorClass)
-      GC_NO_DATA(RangeErrorClass)
-      GC_AS3_EXACT(RangeErrorObject, ErrorObject)
-      GC_NO_DATA(RangeErrorObject)
-      
-      GC_AS3_EXACT(ReferenceErrorClass, NativeErrorClass)
-      GC_NO_DATA(ReferenceErrorClass)
-      GC_AS3_EXACT(ReferenceErrorObject, ErrorObject)
-      GC_NO_DATA(ReferenceErrorObject)
+    class GC_AS3_EXACT(DefinitionErrorObject, ErrorObject)
+    {
+        friend class DefinitionErrorClass;
+    protected:
+        DefinitionErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(DefinitionErrorObject);
+        DECLARE_SLOTS_DefinitionErrorObject;
+    };
 
-      GC_AS3_EXACT(SecurityErrorClass, NativeErrorClass)
-      GC_NO_DATA(SecurityErrorClass)
-      GC_AS3_EXACT(SecurityErrorObject, ErrorObject)
-      GC_NO_DATA(SecurityErrorObject)
+    // EvalError
+    
+    class GC_AS3_EXACT(EvalErrorClass, NativeErrorClass)
+    {
+    protected:
+        EvalErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(EvalErrorClass);
+        DECLARE_SLOTS_EvalErrorClass;
+    };
+    
+    class GC_AS3_EXACT(EvalErrorObject, ErrorObject)
+    {
+        friend class EvalErrorClass;
+    protected:
+        EvalErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(EvalErrorObject);
+        DECLARE_SLOTS_EvalErrorObject;
+    };
+    
+    // RangeError
+    
+    class GC_AS3_EXACT(RangeErrorClass, NativeErrorClass)
+    {
+    protected:
+        RangeErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(RangeErrorClass);
+        DECLARE_SLOTS_RangeErrorClass;
+    };
+    
+    class GC_AS3_EXACT(RangeErrorObject, ErrorObject)
+    {
+        friend class RangeErrorClass;
+    protected:
+        RangeErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(RangeErrorObject);
+        DECLARE_SLOTS_RangeErrorObject;
+    };
+    
+    // ReferenceError
+    
+    class GC_AS3_EXACT(ReferenceErrorClass, NativeErrorClass)
+    {
+    protected:
+        ReferenceErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(ReferenceErrorClass);
+        DECLARE_SLOTS_ReferenceErrorClass;
+    };
+    
+    class GC_AS3_EXACT(ReferenceErrorObject, ErrorObject)
+    {
+        friend class ReferenceErrorClass;
+    protected:
+        ReferenceErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(ReferenceErrorObject);
+        DECLARE_SLOTS_ReferenceErrorObject;
+    };
+    
+    // SecurityError
+    
+    class GC_AS3_EXACT(SecurityErrorClass, NativeErrorClass)
+    {
+    protected:
+        SecurityErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(SecurityErrorClass);
+        DECLARE_SLOTS_SecurityErrorClass;
+    };
+    
+    class GC_AS3_EXACT(SecurityErrorObject, ErrorObject)
+    {
+        friend class SecurityErrorClass;
+    protected:
+        SecurityErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(SecurityErrorObject);
+        DECLARE_SLOTS_SecurityErrorObject;
+    };
+    
+    // SyntaxError
+    
+    class GC_AS3_EXACT(SyntaxErrorClass, NativeErrorClass)
+    {
+    protected:
+        SyntaxErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(SyntaxErrorClass);
+        DECLARE_SLOTS_SyntaxErrorClass;
+    };
+    
+    class GC_AS3_EXACT(SyntaxErrorObject, ErrorObject)
+    {
+        friend class SyntaxErrorClass;
+    protected:
+        SyntaxErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(SyntaxErrorObject);
+        DECLARE_SLOTS_SyntaxErrorObject;
+    };
+    
+    // TypeError
+    
+    class GC_AS3_EXACT(TypeErrorClass, NativeErrorClass)
+    {
+    protected:
+        TypeErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(TypeErrorClass);
+        DECLARE_SLOTS_TypeErrorClass;
+    };
+    
+    class GC_AS3_EXACT(TypeErrorObject, ErrorObject)
+    {
+        friend class TypeErrorClass;
+    protected:
+        TypeErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(TypeErrorObject);
+        DECLARE_SLOTS_TypeErrorObject;
+    };
+    
+    // UninitializedError
+    
+    class GC_AS3_EXACT(UninitializedErrorClass, NativeErrorClass)
+    {
+    protected:
+        UninitializedErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(UninitializedErrorClass);
+        DECLARE_SLOTS_UninitializedErrorClass;
+    };
+    
+    class GC_AS3_EXACT(UninitializedErrorObject, ErrorObject)
+    {
+        friend class UninitializedErrorClass;
+    protected:
+        UninitializedErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(UninitializedErrorObject);
+        DECLARE_SLOTS_UninitializedErrorObject;
+    };
+    
+    // URIError
+    
+    class GC_AS3_EXACT(URIErrorClass, NativeErrorClass)
+    {
+    protected:
+        URIErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(URIErrorClass);
+        DECLARE_SLOTS_URIErrorClass;
+    };
+    
+    class GC_AS3_EXACT(URIErrorObject, ErrorObject)
+    {
+        friend class URIErrorClass;
+    protected:
+        URIErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(URIErrorObject);
+        DECLARE_SLOTS_URIErrorObject;
+    };
 
-      GC_AS3_EXACT(SyntaxErrorClass, NativeErrorClass)
-      GC_NO_DATA(SyntaxErrorClass)
-      GC_AS3_EXACT(SyntaxErrorObject, ErrorObject)
-      GC_NO_DATA(SyntaxErrorObject)
-
-      GC_AS3_EXACT(TypeErrorClass, NativeErrorClass)
-      GC_NO_DATA(TypeErrorClass)
-      GC_AS3_EXACT(TypeErrorObject, ErrorObject)
-      GC_NO_DATA(TypeErrorObject)
-
-      GC_AS3_EXACT(URIErrorClass, NativeErrorClass)
-      GC_NO_DATA(URIErrorClass)
-      GC_AS3_EXACT(URIErrorObject, ErrorObject)
-      GC_NO_DATA(URIErrorObject)
-
-      GC_AS3_EXACT(VerifyErrorClass, NativeErrorClass)
-      GC_NO_DATA(VerifyErrorClass)
-      GC_AS3_EXACT(VerifyErrorObject, ErrorObject)
-      GC_NO_DATA(VerifyErrorObject)
-
-      GC_AS3_EXACT(UninitializedErrorClass, NativeErrorClass)
-      GC_NO_DATA(UninitializedErrorClass)
-      GC_AS3_EXACT(UninitializedErrorObject, ErrorObject)
-      GC_NO_DATA(UninitializedErrorObject)
-
-      GC_AS3_EXACT(ArgumentErrorClass, NativeErrorClass)
-      GC_NO_DATA(ArgumentErrorClass)
-      GC_AS3_EXACT(ArgumentErrorObject, ErrorObject)
-      GC_NO_DATA(ArgumentErrorObject)
-#endif
-
-    DECLARE_NATIVE_ERROR_CLASS(DefinitionErrorClass, DefinitionErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(EvalErrorClass, EvalErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(RangeErrorClass, RangeErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(ReferenceErrorClass, ReferenceErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(SecurityErrorClass, SecurityErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(SyntaxErrorClass, SyntaxErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(TypeErrorClass, TypeErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(URIErrorClass, URIErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(VerifyErrorClass, VerifyErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(UninitializedErrorClass, UninitializedErrorObject)
-    DECLARE_NATIVE_ERROR_CLASS(ArgumentErrorClass, ArgumentErrorObject)
+    // VerifyError
+    
+    class GC_AS3_EXACT(VerifyErrorClass, NativeErrorClass)
+    {
+    protected:
+        VerifyErrorClass(VTable* cvtable) : NativeErrorClass(cvtable) {}
+        
+    public:
+        GC_NO_DATA(VerifyErrorClass);
+        DECLARE_SLOTS_VerifyErrorClass;
+    };
+    
+    class GC_AS3_EXACT(VerifyErrorObject, ErrorObject)
+    {
+        friend class VerifyErrorClass;
+    protected:
+        VerifyErrorObject(VTable *vtable, ScriptObject *delegate) : ErrorObject(vtable, delegate) {}
+        
+    private:
+        GC_NO_DATA(VerifyErrorObject);
+        DECLARE_SLOTS_VerifyErrorObject;
+    };
 }
 
 #endif /* __avmplus_ErrorClass__ */
