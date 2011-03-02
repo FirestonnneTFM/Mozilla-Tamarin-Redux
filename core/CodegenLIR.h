@@ -458,7 +458,7 @@ namespace avmplus
         CacheBuilder<GetCache> get_cache_builder;
         CacheBuilder<SetCache> set_cache_builder;
         PrologWriter *prolog;
-        LIns* prologLastIns;
+        LIns* skip_ins; // Skips from start of body to end of prologue.
         HashMap<LIns*, LIns*> *specializedCallHashMap;
         HashMap<const uint8_t*, CodegenLabel*> *blockLabels;
         LirWriter* redirectWriter;
@@ -528,6 +528,12 @@ namespace avmplus
                 nanojit::BitSet& varlivein, LabelBitSet& varlabels,
                 nanojit::BitSet& taglivein, LabelBitSet& taglabels);
         void copyParam(int i, int &offset);
+
+        /**
+         * Overwrite the given instruction with a LIR_skip and adjust
+         * skip_ins if it was pointing to the skipped instruction.
+         */
+        void eraseIns(LIns* ins, LIns* prevIns);
 
         LIns* loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet, LoadQual loadQual=LOAD_NORMAL);
         LIns* storeIns(LOpcode op, LIns* val, int32_t disp, LIns *base, AccSet accSet);
