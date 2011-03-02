@@ -605,6 +605,7 @@ class MethodInfo(MemberInfo):
 class SlotInfo(MemberInfo):
     type = ""
     value = ""
+    ns = None
     fileOffset = -1
 
 class NativeInfo:
@@ -1321,6 +1322,7 @@ class Abc:
             member = None
             if kind in [TRAIT_Slot, TRAIT_Const, TRAIT_Class]:
                 member = SlotInfo()
+                member.ns = name.ns
                 member.fileOffset = bindingOffset
                 memberId = self.data.readU30()
                 member.id = (memberId - 1) if memberId != 0 else (len(t.slots) + lastBaseTraitsSlotId)
@@ -2157,16 +2159,19 @@ class AbcThunkGen:
         out.println("friend class %s::SlotOffsetsAndAsserts;" % opts.nativeIDNS)
         out.indent -= 1
         if (len(t.slots) > 0):
-            out.println("protected:")
-            out.indent += 1
             for slot in sortedSlots:
                 assert slot.kind in (TRAIT_Slot, TRAIT_Const)
                 (slotCType, slotArgType, slotRetType, slotMemberType) = slotsTypeInfo[id(slot)]
                 name = to_cname(slot.name)
+                if slot.ns.isPublic():
+                    out.println("public:")
+                else:
+                    out.println("protected:")
+                out.indent += 1
                 out.println("REALLY_INLINE %s get_%s() const { return %s.get_%s(); }" % (slotRetType, name, t.slotsInstanceName, name));
                 if ((slot.kind == TRAIT_Slot) or (t.has_const_setters)):
                     out.println("REALLY_INLINE void set_%s(%s newVal) { %s.set_%s(newVal); }" % (name, slotArgType, t.slotsInstanceName, name))
-            out.indent -= 1
+                out.indent -= 1
             out.println("private:")
             out.indent += 1
             out.println("%s::%s %s%s" % (opts.nativeIDNS, t.slotsStructName, t.slotsInstanceName,closingSemi) )

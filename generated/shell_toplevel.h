@@ -375,7 +375,7 @@ public:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::ArrayObject* get_argv() const { return m_slots_SystemClass.get_argv(); } \
     private: \
         avmplus::NativeID::avmshell_SystemClassSlots m_slots_SystemClass \
@@ -992,13 +992,16 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE uint32_t get_line() const { return m_slots_StackFrameObject.get_line(); } \
         REALLY_INLINE void set_line(uint32_t newVal) { m_slots_StackFrameObject.set_line(newVal); } \
+    public: \
         REALLY_INLINE avmplus::String* get_name() const { return m_slots_StackFrameObject.get_name(); } \
         REALLY_INLINE void set_name(avmplus::String* newVal) { m_slots_StackFrameObject.set_name(newVal); } \
+    public: \
         REALLY_INLINE avmplus::String* get_file() const { return m_slots_StackFrameObject.get_file(); } \
         REALLY_INLINE void set_file(avmplus::String* newVal) { m_slots_StackFrameObject.set_file(newVal); } \
+    public: \
         REALLY_INLINE double get_scriptID() const { return m_slots_StackFrameObject.get_scriptID(); } \
         REALLY_INLINE void set_scriptID(double newVal) { m_slots_StackFrameObject.set_scriptID(newVal); } \
     private: \
@@ -1058,9 +1061,10 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::ArrayObject* get_stack() const { return m_slots_SampleObject.get_stack(); } \
         REALLY_INLINE void set_stack(avmplus::ArrayObject* newVal) { m_slots_SampleObject.set_stack(newVal); } \
+    public: \
         REALLY_INLINE double get_time() const { return m_slots_SampleObject.get_time(); } \
         REALLY_INLINE void set_time(double newVal) { m_slots_SampleObject.set_time(newVal); } \
     private: \
@@ -1094,10 +1098,13 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::ClassClosure* get_StackFrameClass() const { return m_slots_ClassFactoryClass.get_StackFrameClass(); } \
+    public: \
         REALLY_INLINE avmplus::ClassClosure* get_SampleClass() const { return m_slots_ClassFactoryClass.get_SampleClass(); } \
+    public: \
         REALLY_INLINE avmplus::ClassClosure* get_DeleteObjectSampleClass() const { return m_slots_ClassFactoryClass.get_DeleteObjectSampleClass(); } \
+    public: \
         REALLY_INLINE avmplus::ClassClosure* get_NewObjectSampleClass() const { return m_slots_ClassFactoryClass.get_NewObjectSampleClass(); } \
     private: \
         avmplus::NativeID::avmplus_ClassFactoryClassSlots m_slots_ClassFactoryClass \
@@ -1156,9 +1163,10 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::ClassClosure* get_type() const { return m_slots_NewObjectSampleObject.get_type(); } \
         REALLY_INLINE void set_type(avmplus::ClassClosure* newVal) { m_slots_NewObjectSampleObject.set_type(newVal); } \
+    public: \
         REALLY_INLINE double get_id() const { return m_slots_NewObjectSampleObject.get_id(); } \
         REALLY_INLINE void set_id(double newVal) { m_slots_NewObjectSampleObject.set_id(newVal); } \
     private: \
@@ -1218,9 +1226,10 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE double get_id() const { return m_slots_DeleteObjectSampleObject.get_id(); } \
         REALLY_INLINE void set_id(double newVal) { m_slots_DeleteObjectSampleObject.set_id(newVal); } \
+    public: \
         REALLY_INLINE double get_size() const { return m_slots_DeleteObjectSampleObject.get_size(); } \
         REALLY_INLINE void set_size(double newVal) { m_slots_DeleteObjectSampleObject.set_size(newVal); } \
     private: \
@@ -1260,13 +1269,19 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_OFF() const { return m_slots_TraceClass.get_OFF(); } \
+    public: \
         REALLY_INLINE int32_t get_METHODS() const { return m_slots_TraceClass.get_METHODS(); } \
+    public: \
         REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_WITH_ARGS(); } \
+    public: \
         REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_slots_TraceClass.get_METHODS_AND_LINES(); } \
+    public: \
         REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_AND_LINES_WITH_ARGS(); } \
+    public: \
         REALLY_INLINE avmplus::Atom get_FILE() const { return m_slots_TraceClass.get_FILE(); } \
+    public: \
         REALLY_INLINE avmplus::Atom get_LISTENER() const { return m_slots_TraceClass.get_LISTENER(); } \
     private: \
         avmplus::NativeID::avmplus_TraceClassSlots m_slots_TraceClass \

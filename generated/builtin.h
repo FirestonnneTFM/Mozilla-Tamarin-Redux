@@ -875,7 +875,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ObjectClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_ObjectClassSlots m_slots_ObjectClass \
@@ -910,7 +910,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ClassClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_ClassClassSlots m_slots_ClassClass \
@@ -965,7 +965,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_FunctionClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_FunctionClassSlots m_slots_FunctionClass \
@@ -1036,7 +1036,7 @@ public:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_NamespaceClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_NamespaceClassSlots m_slots_NamespaceClass \
@@ -1064,7 +1064,7 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_BooleanClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_BooleanClassSlots m_slots_BooleanClass \
@@ -1108,15 +1108,23 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_NumberClass.get_length(); } \
+    protected: \
         REALLY_INLINE int32_t get_private_DTOSTR_FIXED() const { return m_slots_NumberClass.get_private_DTOSTR_FIXED(); } \
+    protected: \
         REALLY_INLINE int32_t get_private_DTOSTR_PRECISION() const { return m_slots_NumberClass.get_private_DTOSTR_PRECISION(); } \
+    protected: \
         REALLY_INLINE int32_t get_private_DTOSTR_EXPONENTIAL() const { return m_slots_NumberClass.get_private_DTOSTR_EXPONENTIAL(); } \
+    public: \
         REALLY_INLINE double get_NaN() const { return m_slots_NumberClass.get_NaN(); } \
+    public: \
         REALLY_INLINE double get_NEGATIVE_INFINITY() const { return m_slots_NumberClass.get_NEGATIVE_INFINITY(); } \
+    public: \
         REALLY_INLINE double get_POSITIVE_INFINITY() const { return m_slots_NumberClass.get_POSITIVE_INFINITY(); } \
+    public: \
         REALLY_INLINE double get_MIN_VALUE() const { return m_slots_NumberClass.get_MIN_VALUE(); } \
+    public: \
         REALLY_INLINE double get_MAX_VALUE() const { return m_slots_NumberClass.get_MAX_VALUE(); } \
     private: \
         avmplus::NativeID::avmplus_NumberClassSlots m_slots_NumberClass \
@@ -1148,9 +1156,11 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_MIN_VALUE() const { return m_slots_IntClass.get_MIN_VALUE(); } \
+    public: \
         REALLY_INLINE int32_t get_MAX_VALUE() const { return m_slots_IntClass.get_MAX_VALUE(); } \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_IntClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_IntClassSlots m_slots_IntClass \
@@ -1182,9 +1192,11 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE uint32_t get_MIN_VALUE() const { return m_slots_UIntClass.get_MIN_VALUE(); } \
+    public: \
         REALLY_INLINE uint32_t get_MAX_VALUE() const { return m_slots_UIntClass.get_MAX_VALUE(); } \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_UIntClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_UIntClassSlots m_slots_UIntClass \
@@ -1225,7 +1237,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_StringClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_StringClassSlots m_slots_StringClass \
@@ -1265,12 +1277,17 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE uint32_t get_CASEINSENSITIVE() const { return m_slots_ArrayClass.get_CASEINSENSITIVE(); } \
+    public: \
         REALLY_INLINE uint32_t get_DESCENDING() const { return m_slots_ArrayClass.get_DESCENDING(); } \
+    public: \
         REALLY_INLINE uint32_t get_UNIQUESORT() const { return m_slots_ArrayClass.get_UNIQUESORT(); } \
+    public: \
         REALLY_INLINE uint32_t get_RETURNINDEXEDARRAY() const { return m_slots_ArrayClass.get_RETURNINDEXEDARRAY(); } \
+    public: \
         REALLY_INLINE uint32_t get_NUMERIC() const { return m_slots_ArrayClass.get_NUMERIC(); } \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ArrayClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_ArrayClassSlots m_slots_ArrayClass \
@@ -1664,15 +1681,23 @@ private:
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE double get_E() const { return m_slots_MathClass.get_E(); } \
+    public: \
         REALLY_INLINE double get_LN10() const { return m_slots_MathClass.get_LN10(); } \
+    public: \
         REALLY_INLINE double get_LN2() const { return m_slots_MathClass.get_LN2(); } \
+    public: \
         REALLY_INLINE double get_LOG10E() const { return m_slots_MathClass.get_LOG10E(); } \
+    public: \
         REALLY_INLINE double get_LOG2E() const { return m_slots_MathClass.get_LOG2E(); } \
+    public: \
         REALLY_INLINE double get_PI() const { return m_slots_MathClass.get_PI(); } \
+    public: \
         REALLY_INLINE double get_SQRT1_2() const { return m_slots_MathClass.get_SQRT1_2(); } \
+    public: \
         REALLY_INLINE double get_SQRT2() const { return m_slots_MathClass.get_SQRT2(); } \
+    protected: \
         REALLY_INLINE double get_private_NegInfinity() const { return m_slots_MathClass.get_private_NegInfinity(); } \
     private: \
         avmplus::NativeID::avmplus_MathClassSlots m_slots_MathClass \
@@ -1721,7 +1746,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_ErrorClassSlots m_slots_ErrorClass \
@@ -1762,8 +1787,10 @@ public:
     protected: \
         REALLY_INLINE int32_t get_private__errorID() const { return m_slots_ErrorObject.get_private__errorID(); } \
         REALLY_INLINE void set_private__errorID(int32_t newVal) { m_slots_ErrorObject.set_private__errorID(newVal); } \
+    public: \
         REALLY_INLINE avmplus::Atom get_message() const { return m_slots_ErrorObject.get_message(); } \
         REALLY_INLINE void set_message(avmplus::Atom newVal) { m_slots_ErrorObject.set_message(newVal); } \
+    public: \
         REALLY_INLINE avmplus::Atom get_name() const { return m_slots_ErrorObject.get_name(); } \
         REALLY_INLINE void set_name(avmplus::Atom newVal) { m_slots_ErrorObject.set_name(newVal); } \
     private: \
@@ -1813,7 +1840,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_DefinitionErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_DefinitionErrorClassSlots m_slots_DefinitionErrorClass \
@@ -1882,7 +1909,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_EvalErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_EvalErrorClassSlots m_slots_EvalErrorClass \
@@ -1951,7 +1978,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_RangeErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_RangeErrorClassSlots m_slots_RangeErrorClass \
@@ -2020,7 +2047,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ReferenceErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_ReferenceErrorClassSlots m_slots_ReferenceErrorClass \
@@ -2089,7 +2116,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_SecurityErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_SecurityErrorClassSlots m_slots_SecurityErrorClass \
@@ -2158,7 +2185,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_SyntaxErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_SyntaxErrorClassSlots m_slots_SyntaxErrorClass \
@@ -2227,7 +2254,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_TypeErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_TypeErrorClassSlots m_slots_TypeErrorClass \
@@ -2296,7 +2323,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_URIErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_URIErrorClassSlots m_slots_URIErrorClass \
@@ -2365,7 +2392,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_VerifyErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_VerifyErrorClassSlots m_slots_VerifyErrorClass \
@@ -2434,7 +2461,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_UninitializedErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_UninitializedErrorClassSlots m_slots_UninitializedErrorClass \
@@ -2503,7 +2530,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_ArgumentErrorClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_ArgumentErrorClassSlots m_slots_ArgumentErrorClass \
@@ -2633,7 +2660,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_DateClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_DateClassSlots m_slots_DateClass \
@@ -2700,7 +2727,7 @@ private:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE int32_t get_length() const { return m_slots_RegExpClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_RegExpClassSlots m_slots_RegExpClass \
@@ -2765,7 +2792,7 @@ public:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_XMLClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_XMLClassSlots m_slots_XMLClass \
@@ -2830,7 +2857,7 @@ public:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_XMLListClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_XMLListClassSlots m_slots_XMLListClass \
@@ -2901,7 +2928,7 @@ public:
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
-    protected: \
+    public: \
         REALLY_INLINE avmplus::Atom get_length() const { return m_slots_QNameClass.get_length(); } \
     private: \
         avmplus::NativeID::avmplus_QNameClassSlots m_slots_QNameClass \
