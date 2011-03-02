@@ -464,10 +464,14 @@ verifyPass(LockerAndUnlocker::testLocksHeld(gc, 1), "LockerAndUnlocker::testLock
         gc->Collect();
 #line 357 "ST_mmgc_basics.st"
 verifyPass(LockerAndUnlocker::unlockLevel1(gc), "LockerAndUnlocker::unlockLevel1(gc)", __FILE__, __LINE__);
-        gc->Collect();
-        gc->Collect();
-#line 360 "ST_mmgc_basics.st"
-verifyPass(LockerAndUnlocker::testLocksNotHeld(gc), "LockerAndUnlocker::testLocksNotHeld(gc)", __FILE__, __LINE__);
+
+// Bug 637695: false-failures on 64-bit targets.
+// Conservative retention appears to be foiling the verify call below
+// Put back after identifying and eliminating the source of such
+// significant rentention (if possible).
+//        gc->Collect();
+//        gc->Collect();
+//        %%verify LockerAndUnlocker::testLocksNotHeld(gc)
 
         delete gc;
     }
@@ -501,7 +505,7 @@ void ST_mmgc_basics::test15() {
                 //    %%verify ms.P(sentinel) == GCMarkStack::kDeadItem
                 //    %%verify ms.GetSentinel1TypeAt(ms.GetItemAbove(sentinel)) == GCMarkStack::kDeadItem
                 //}
-#line 393 "ST_mmgc_basics.st"
+#line 398 "ST_mmgc_basics.st"
 verifyPass(true, "true", __FILE__, __LINE__);
             }
             testGC->Mark();

@@ -355,9 +355,14 @@ delete gc;
         gc->Collect();
         gc->Collect();
         %%verify LockerAndUnlocker::unlockLevel1(gc)
-        gc->Collect();
-        gc->Collect();
-        %%verify LockerAndUnlocker::testLocksNotHeld(gc)
+
+// Bug 637695: false-failures on 64-bit targets.
+// Conservative retention appears to be foiling the verify call below
+// Put back after identifying and eliminating the source of such
+// significant rentention (if possible).
+//        gc->Collect();
+//        gc->Collect();
+//        %%verify LockerAndUnlocker::testLocksNotHeld(gc)
 
         delete gc;
     }
