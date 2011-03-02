@@ -56,12 +56,14 @@ namespace avmplus
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) MathClass(cvtable);
         }
 
+#ifdef DRC_TRIVIAL_DESTRUCTOR
         ~MathClass()
         {
             seed.uValue = 0;
             seed.uXorMask = 0;
             seed.uSequenceLength = 0;
         }
+#endif
 
         // this = argv[0]
         // arg1 = argv[1]

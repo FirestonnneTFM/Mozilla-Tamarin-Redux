@@ -59,7 +59,11 @@ namespace avmplus
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate);
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity);
 
+        // Not actually entirely trivial, as it decrements reference counts
+        // manually, not just by DRCWB smart pointer destructors.
+#ifdef DRC_TRIVIAL_DESTRUCTOR
         ~ScriptObject();
+#endif
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 

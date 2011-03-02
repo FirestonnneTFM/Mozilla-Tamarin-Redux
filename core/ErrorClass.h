@@ -94,11 +94,13 @@ namespace avmplus
         ErrorObject(VTable *vtable, ScriptObject *delegate);
 
     public:
+#ifdef DRC_TRIVIAL_DESTRUCTOR
         ~ErrorObject() {
 #ifdef DEBUGGER
             stackTrace = NULL;
 #endif
         }
+#endif
 
         Stringp getStackTrace() const;
 #ifdef DEBUGGER

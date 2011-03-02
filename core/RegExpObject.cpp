@@ -175,6 +175,7 @@ namespace avmplus
         completeInitialization(options);
     }
 
+#ifdef DRC_TRIVIAL_DESTRUCTOR
     RegExpObject::~RegExpObject()
     {
         m_global = false;
@@ -182,6 +183,7 @@ namespace avmplus
         m_optionFlags = 0;
         m_hasNamedGroups = false;
     }
+#endif
 
     // Note 'options' may be the same as m_source, and the options substring
     // will then start in the middle somewhere.  So don't go inspecting that

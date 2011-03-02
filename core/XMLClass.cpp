@@ -65,11 +65,13 @@ namespace avmplus
         // XML.defaultSettings()
     }
 
+#ifdef DRC_TRIVIAL_DESTRUCTOR
     XMLClass::~XMLClass()
     {
         m_prettyIndent = 0;
         m_flags = 0;
     }
+#endif
 
     // E4X 13.4.2, page 70
     // this = argv[0] (ignored)

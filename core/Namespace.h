@@ -78,7 +78,9 @@ namespace avmplus
             return new (gc, MMgc::kExact) Namespace(prefix, uri, type, apiVersion);
         }
 
+#ifdef DRC_TRIVIAL_DESTRUCTOR
         ~Namespace();
+#endif
 
         virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
