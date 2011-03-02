@@ -3802,9 +3802,10 @@ namespace MMgc
             const void *p;
             while((p = iter.nextKey()) != NULL) {
                 if(!GetMark(p)) {
-                    removeFromBlacklist(p);
+                    blacklist.remove(p, /*allowrehash=*/false);
                 }
             }
+            blacklist.prune();
         }
     }
 
