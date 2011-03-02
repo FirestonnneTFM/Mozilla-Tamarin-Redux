@@ -77,19 +77,20 @@ public:
 class LockerAndUnlocker
 {
 public:   
-    static GCObjectLock* lock[10];
-    static GCObjectLock* lock2[10];
+    static const int numlocked = 100;
+    static GCObjectLock* lock[numlocked];
+    static GCObjectLock* lock2[numlocked];
     static int counter;
     
     static bool createAndLockObjects(GC* gc) {
         counter = 0;
-        for ( int i=0 ; i < 10 ; i++ )
+        for ( int i=0 ; i < numlocked ; i++ )
             lock[i] = gc->LockObject(new (gc) LockableObject(&counter));
         return true;
     }
 
     static bool lockLevel2(GC* gc) {
-        for ( int i=0 ; i < 10 ; i++ )
+        for ( int i=0 ; i < numlocked ; i++ )
             lock2[i] = gc->LockObject(gc->GetLockedObject(lock[i]));
         return true;
     }
@@ -99,13 +100,13 @@ public:
             return false;
 
         int held = 0;
-        for ( int i=0 ; i < 10 ; i++ )
+        for ( int i=0 ; i < numlocked ; i++ )
             held += bool(gc->GetLockedObject(lock[i]) != NULL);
         if (level > 1)
-            for ( int i=0 ; i < 10 ; i++ )
+            for ( int i=0 ; i < numlocked ; i++ )
                 held += bool(gc->GetLockedObject(lock2[i]) != NULL);
 
-        if (held != level*10)
+        if (held != level*numlocked)
             return false;
             
         return true;
@@ -113,26 +114,30 @@ public:
     
     static bool testLocksNotHeld(GC*) {
         // At least some of the destructors should have run...
-        if (counter < 5)
+        if (counter < numlocked/2)
             return false;
         return true;
     }
 
     static bool unlockLevel2(GC* gc) {
-        for ( int i=0 ; i < 10 ; i++ )
+        for ( int i=0 ; i < numlocked ; i++ )
             gc->UnlockObject(lock2[i]);
         return true;
     }
 
     static bool unlockLevel1(GC* gc) {
-        for ( int i=0 ; i < 10 ; i++ )
+        for ( int i=0 ; i < numlocked ; i++ ) {
+#ifdef MMGC_HEAP_GRAPH
+            gc->addToBlacklist(gc->GetLockedObject(lock[i]));
+#endif
             gc->UnlockObject(lock[i]);
+        }
         return true;
     }
 };
 
-GCObjectLock* LockerAndUnlocker::lock[10];
-GCObjectLock* LockerAndUnlocker::lock2[10];
+GCObjectLock* LockerAndUnlocker::lock[numlocked];
+GCObjectLock* LockerAndUnlocker::lock2[numlocked];
 int LockerAndUnlocker::counter = 0;
 
 %%decls
@@ -356,13 +361,10 @@ delete gc;
         gc->Collect();
         %%verify LockerAndUnlocker::unlockLevel1(gc)
 
-// Bug 637695: false-failures on 64-bit targets.
-// Conservative retention appears to be foiling the verify call below
-// Put back after identifying and eliminating the source of such
-// significant rentention (if possible).
-//        gc->Collect();
-//        gc->Collect();
-//        %%verify LockerAndUnlocker::testLocksNotHeld(gc)
+        // Bug 637695: be aware: conservative retention may foil verify below
+        gc->Collect();
+        gc->Collect();
+        %%verify LockerAndUnlocker::testLocksNotHeld(gc)
 
         delete gc;
     }
