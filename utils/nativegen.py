@@ -2086,7 +2086,6 @@ class AbcThunkGen:
     def get_args_info(self, t, m):
         argtraits = self.argTraits(t, m)
         args = []
-        needcore = False
         for i in range(0, len(argtraits)):
             argt = argtraits[i]
             if i == 0:
@@ -2102,11 +2101,11 @@ class AbcThunkGen:
                 arg_typedef = None # unused
             arg_typedef = TYPEMAP_RETTYPE_GCREF[argt.ctype](arg_typedef)
             args.append((argt, arg_typedef, argname))
-            if TYPEMAP_TO_ATOM_NEEDS_CORE[argt.ctype]:
-                needcore = True
-        return args,needcore
+        return args
 
     def shouldEmitConstructObject(self, t):
+        # note, we don't support needRest() methods; we probably could with some effort,
+        # but there's currently no need, so we haven't bothered
         return t.itraits != None and \
                 t.construct != "none" and \
                 not t.is_abstract_base and \
@@ -2124,26 +2123,32 @@ class AbcThunkGen:
         if self.shouldEmitConstructObject(t):
             out.println("public:")
             out.indent += 1
-            args,needcore = self.get_args_info(t,t.itraits.init)
+            args = self.get_args_info(t,t.itraits.init)
             ctype = t.itraits.ctype
             # t.itraits is a pure-AS3 class, so it has no C++ class;
             # the most closest native ancestor and use that.
             fqcppname = self.findNativeBase(t.itraits)
             ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](fqcppname)
-            arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
-            out.println("REALLY_INLINE %s constructObject(%s)" % (ret_typedef, arglist))
-            out.println("{")
-            out.indent += 1
-            if needcore:
-                # explicitly cast to AvmCore* because it might be an only-forward-declared subclass
-                out.println("avmplus::AvmCore* const core = ((AvmCore*)(this->core()));")
-            arglist = ', '.join(map(lambda (argt, arg_typedef, argname): TYPEMAP_TO_ATOM[argt.ctype](argname), args))
-            out.println("avmplus::Atom args[%d] = { %s };" % (len(args), arglist))
-            out.println("avmplus::Atom const result = this->construct(%d, args);" % (len(args)-1))
-            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", fqcppname)
-            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,fqcppname))
-            out.indent -= 1
-            out.println("}")
+            for i in range(0, t.itraits.init.optional_count+1):
+                arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
+                out.println("REALLY_INLINE %s constructObject(%s)" % (ret_typedef, arglist))
+                out.println("{")
+                out.indent += 1
+                # bah, does Python not have an equivalent to JS Array.some?
+                needcore = False
+                for (argt, arg_typedef, argname) in args[1:]:
+                    needcore = needcore or TYPEMAP_TO_ATOM_NEEDS_CORE[argt.ctype]
+                if needcore:
+                    # explicitly cast to AvmCore* because it might be an only-forward-declared subclass
+                    out.println("avmplus::AvmCore* const core = ((AvmCore*)(this->core()));")
+                arglist = ', '.join(map(lambda (argt, arg_typedef, argname): TYPEMAP_TO_ATOM[argt.ctype](argname), args))
+                out.println("avmplus::Atom args[%d] = { %s };" % (len(args), arglist))
+                out.println("avmplus::Atom const result = this->construct(%d, args);" % (len(args)-1))
+                raw_result = TYPEMAP_FROM_ATOM[ctype]("result", fqcppname)
+                out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,fqcppname))
+                out.indent -= 1
+                out.println("}")
+                args.pop()
             out.indent -= 1
 
     def emitSlotDeclarations(self, out, t, sortedSlots, slotsTypeInfo, closingSemi):

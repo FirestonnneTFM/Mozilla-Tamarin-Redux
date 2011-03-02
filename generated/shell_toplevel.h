@@ -1299,6 +1299,12 @@ private:
             avmplus::Atom const result = this->construct(1, args); \
             return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+        REALLY_INLINE GCRef<avmplus::DictionaryObject> constructObject() \
+        { \
+            avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() }; \
+            avmplus::Atom const result = this->construct(0, args); \
+            return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(AvmCore::atomToScriptObject(result))); \
+        } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 

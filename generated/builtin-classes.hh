@@ -57,6 +57,18 @@ public:
         avmplus::Atom const result = this->construct(2, args);
         return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
+    REALLY_INLINE GCRef<avmplus::ErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    {
+        avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
+        avmplus::Atom const result = this->construct(1, args);
+        return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ErrorObject> constructObject()
+    {
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
 private:
@@ -78,6 +90,18 @@ public:
         avmplus::Atom const result = this->construct(2, args);
         return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
+    REALLY_INLINE GCRef<avmplus::ErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    {
+        avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
+        avmplus::Atom const result = this->construct(1, args);
+        return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ErrorObject> constructObject()
+    {
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
 private:
@@ -97,6 +121,18 @@ public:
         avmplus::AvmCore* const core = ((AvmCore*)(this->core()));
         avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom(), core->intToAtom(arg2) };
         avmplus::Atom const result = this->construct(2, args);
+        return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    {
+        avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
+        avmplus::Atom const result = this->construct(1, args);
+        return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ErrorObject> constructObject()
+    {
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::ErrorObject>((avmplus::ErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
 private:
