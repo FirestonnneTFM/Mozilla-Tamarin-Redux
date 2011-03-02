@@ -777,6 +777,7 @@ namespace avmplus
         get_cache_builder(*alloc1, *pool->codeMgr),
         set_cache_builder(*alloc1, *pool->codeMgr),
         prolog(NULL),
+        skip_ins(NULL),
         specializedCallHashMap(NULL),
         blockLabels(NULL),
         cseFilter(NULL),
@@ -1972,6 +1973,7 @@ namespace avmplus
         // LirBuffer to hold the body, and redirect further output to the body.
         LirBuffer *body_buf = new (*lir_alloc) LirBuffer(*lir_alloc);
         LirWriter *body = new (*alloc1) LirBufWriter(body_buf, core->config.njconfig);
+        skip_ins = body->insSkip(prolog->lastIns);
         debug_only(
             body = validate3 = new (*alloc1) ValidateWriter(body, vbNames, "writePrologue(body)");
             validate3->setCheckAccSetExtras(extras);
@@ -1983,7 +1985,6 @@ namespace avmplus
                 body = vbWriter = new (*alloc1) VerboseWriter(*alloc1, body, vbNames, &pool->codeMgr->log);
             }
         )
-        body->ins0(LIR_start);
         redirectWriter->out = body;
         /// END SWITCH CODE
 
@@ -6224,7 +6225,7 @@ namespace avmplus
         livep(methodFrame);
         livep(env_param);
         frag->lastIns = livep(coreAddr);
-        prologLastIns = prolog->lastIns;
+        skip_ins->overwriteWithSkip(prolog->lastIns);
 
         info->set_lookup_cache_size(finddef_cache_builder.next_cache);
 
@@ -6683,37 +6684,6 @@ namespace avmplus
             b->vtable = NULL;
     }
 
-    // read all of in1, followed by all of in2
-    class SeqReader: public LirFilter
-    {
-        LirReader r1, r2;
-#ifdef _DEBUG
-        ValidateReader v1, v2;
-#endif
-        LirFilter *p1, *p2;
-    public:
-        SeqReader(LIns* lastIns1, LIns* lastIns2)
-            : LirFilter(NULL), r1(lastIns1), r2(lastIns2),
-#ifdef _DEBUG
-            v1(&r1), v2(&r2), p1(&v1), p2(&v2)
-#else
-            p1(&r1), p2(&r2)
-#endif
-        {
-            in = p1;
-        }
-
-        LIns* read()
-        {
-            LIns* ins = in->read();
-            if (ins->isop(LIR_start) && in == p1) {
-                in = p2;
-                ins = in->read();
-            }
-            return ins;
-        }
-    };
-
     void analyze_edge(LIns* label, nanojit::BitSet &livein,
                       LabelBitSet& labels, InsList* looplabels)
     {
@@ -6858,7 +6828,7 @@ namespace avmplus
             again = false;
             varlivein.reset();
             taglivein.reset();
-            SeqReader in(frag->lastIns, prologLastIns);
+            LirReader in(frag->lastIns);
             for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
                 LOpcode op = i->opcode();
                 switch (op) {
@@ -6945,25 +6915,20 @@ namespace avmplus
         )
     }
 
-    // return the previous instruction, handling skips appropriately
-    static LIns* findPrevIns(LIns* ins)
+    // Erase the instruction by rewriting it as a skip.
+    // TODO this can go away if we turn this kill pass into a LirReader
+    // and do the work inline with the assembly pass.
+    void CodegenLIR::eraseIns(LIns* ins, LIns* prevIns)
     {
-        // table of LIR instruction sizes (private to this file)
-        // TODO this can go away if we turn this kill pass into a LirReader
-        // and do the work inline with the assembly pass.
-        static const uint8_t lirSizes[] = {
-        #define OP___(op, number, repkind, retType, isCse) sizeof(LIns##repkind),
-        #include "../nanojit/LIRopcode.tbl"
-        #undef OP___
-                0
-        };
-        LIns* prev = (LIns*) (uintptr_t(ins) - lirSizes[ins->opcode()]);
-        // Ensure prev doesn't end up pointing to a skip.
-        while (prev->isop(LIR_skip)) {
-            NanoAssert(prev->prevLIns() != prev);
-            prev = prev->prevLIns();
-        }
-        return prev;
+#ifdef NJ_VERBOSE
+      LInsPrinter *printer = frag->lirbuf->printer;
+      bool verbose = printer && pool->isVerbose(VB_jit);
+      if (verbose) {
+          InsBuf b;
+          AvmLog("- %s\n", printer->formatIns(&b, ins));
+      }
+#endif
+      ins->overwriteWithSkip(prevIns);
     }
 
     void CodegenLIR::deadvars_kill(Allocator& alloc,
@@ -6980,7 +6945,7 @@ namespace avmplus
         taglivein.reset();
         bool tags_touched = false;
         bool vars_touched = false;
-        SeqReader in(frag->lastIns, prologLastIns);
+        LirReader in(frag->lastIns);
         for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
             LOpcode op = i->opcode();
             switch (op) {
@@ -6997,13 +6962,7 @@ namespace avmplus
                     if (i->oprnd2() == vars) {
                         int d = i->disp() / VARSIZE;
                         if (!varlivein.get(d)) {
-                            verbose_only(if (verbose)
-                                AvmLog("- %s\n", printer->formatIns(&b, i));)
-                            // erase the store by rewriting it as a skip
-                            LIns* prevIns = findPrevIns(i);
-                            if (prologLastIns == i)
-                                prologLastIns = prevIns;
-                            i->initLInsSk(prevIns);
+                            eraseIns(i, in.peek());
                             continue;
                         } else {
                             varlivein.clear(d);
@@ -7013,13 +6972,7 @@ namespace avmplus
                     else if (i->oprnd2() == tags) {
                         int d = i->disp(); // 1 byte per tag
                         if (!taglivein.get(d)) {
-                            verbose_only(if (verbose)
-                                AvmLog("- %s\n", printer->formatIns(&b, i));)
-                            // erase the store by rewriting it as a skip
-                            LIns* prevIns = findPrevIns(i);
-                            if (prologLastIns == i)
-                                prologLastIns = prevIns;
-                            i->initLInsSk(prevIns);
+                            eraseIns(i, in.peek());
                             continue;
                         } else {
                             // keep the store
@@ -7141,11 +7094,11 @@ namespace avmplus
 #endif
 
 #ifdef NJ_VERBOSE
-    void listing(const char* title, AvmLogControl &log, Fragment* frag, LIns* prologLastIns)
+    void listing(const char* title, AvmLogControl &log, Fragment* frag)
     {
-        SeqReader seqReader(frag->lastIns, prologLastIns);
+        LirReader reader(frag->lastIns);
         Allocator lister_alloc;
-        ReverseLister lister(&seqReader, lister_alloc, frag->lirbuf->printer, &log, title);
+        ReverseLister lister(&reader, lister_alloc, frag->lirbuf->printer, &log, title);
         for (LIns* ins = lister.read(); !ins->isop(LIR_start); ins = lister.read())
         {}
         lister.finish();
@@ -7170,11 +7123,11 @@ namespace avmplus
             StringBuffer sb(core);
             sb << info;
             core->console << "Final LIR " << info;
-            listing(sb.c_str(), mgr->log, frag, prologLastIns);
+            listing(sb.c_str(), mgr->log, frag);
         }
         if (pool->isVerbose(LC_Liveness)) {
             Allocator live_alloc;
-            SeqReader in(frag->lastIns, prologLastIns);
+            LirReader in(frag->lastIns);
             nanojit::live(&in, live_alloc, frag, &mgr->log);
         }
         if (pool->isVerbose(LC_AfterDCE | LC_Native)) {
@@ -7195,8 +7148,8 @@ namespace avmplus
         verbose_only( if (!pool->isVerbose(VB_raw)) assm->_outputCache = &asmOutput; )
 
         assm->beginAssembly(frag);
-        SeqReader seqReader(frag->lastIns, prologLastIns);
-        assm->assemble(frag, &seqReader);
+        LirReader reader(frag->lastIns);
+        assm->assemble(frag, &reader);
         assm->endAssembly(frag);
         PERFM_NTPROF_END("compile");
 
