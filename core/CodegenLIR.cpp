@@ -7356,7 +7356,7 @@ namespace nanojit
     };
     #endif
 
-    void* Allocator::allocChunk(size_t size) {
+    void* Allocator::allocChunk(size_t size, bool /* fallible */) {
         return mmfx_alloc(size);
     }
 
