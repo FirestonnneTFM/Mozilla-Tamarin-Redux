@@ -50,7 +50,7 @@ namespace avmplus
     {
     private:
         ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits);
-        static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra);
+        static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameValue* values, int32_t nValues, Traits* append, Traits* extra);
 
     public:
 

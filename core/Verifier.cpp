@@ -956,7 +956,7 @@ namespace avmplus
                     if (pc >= code_pos + handler->from && pc < code_pos + handler->to) {
                         int saveStackDepth = state->stackDepth;
                         int saveScopeDepth = state->scopeDepth;
-                        Value stackEntryZero = saveStackDepth > 0 ? state->stackValue(0) : state->value(0);
+                        FrameValue stackEntryZero = saveStackDepth > 0 ? state->stackValue(0) : state->value(0);
                         state->stackDepth = 0;
                         state->scopeDepth = 0;
 
@@ -1188,7 +1188,7 @@ namespace avmplus
                 checkStack(1,0);
                 checkLocal(imm30);
                 coder->write(state, pc, opcode);
-                Value &v = state->stackTop();
+                FrameValue &v = state->stackTop();
                 state->setType(imm30, v.traits, v.notNull);
                 state->pop();
                 break;
@@ -1203,7 +1203,7 @@ namespace avmplus
                 int index = opcode-OP_setlocal0;
                 checkLocal(index);
                 coder->write(state, pc, opcode);
-                Value &v = state->stackTop();
+                FrameValue &v = state->stackTop();
                 state->setType(index, v.traits, v.notNull);
                 state->pop();
                 break;
@@ -1211,7 +1211,7 @@ namespace avmplus
             case OP_getlocal:
             {
                 checkStack(0,1);
-                Value& v = checkLocal(imm30);
+                FrameValue& v = checkLocal(imm30);
                 coder->write(state, pc, opcode);
                 state->push(v);
                 break;
@@ -1222,7 +1222,7 @@ namespace avmplus
             case OP_getlocal3:
             {
                 checkStack(0,1);
-                Value& v = checkLocal(opcode-OP_getlocal0);
+                FrameValue& v = checkLocal(opcode-OP_getlocal0);
                 coder->write(state, pc, opcode);
                 state->push(v);
                 break;
@@ -1337,7 +1337,7 @@ namespace avmplus
                 checkPropertyMultiname(n, multiname);
 
                 Traitsp declarer = NULL;
-                Value& obj = state->peek(n);
+                FrameValue& obj = state->peek(n);
                 Binding b = (opcode == OP_initproperty) ?
                             toplevel->getBindingAndDeclarer(obj.traits, multiname, declarer) :
                             toplevel->getBinding(obj.traits, &multiname);
@@ -1420,7 +1420,7 @@ namespace avmplus
 
                 if (emitPass && emitOptimizedRestArg)
                 {
-                    Value& obj = state->peek(n);
+                    FrameValue& obj = state->peek(n);
                     if (multiname.isRtname())
                     {
                         // restarg assumes the property name is an atom, so we must coerce it to an atom on input
@@ -1509,7 +1509,7 @@ namespace avmplus
             case OP_astypelate:
             {
                 checkStack(2,1);
-                Value& classValue = state->peek(1); // rhs - class
+                FrameValue& classValue = state->peek(1); // rhs - class
                 Traits* ct = classValue.traits;
                 Traits* t = NULL;
                 if (ct && (t=ct->itraits) != 0)
@@ -1523,7 +1523,7 @@ namespace avmplus
             case OP_coerce:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = checkTypeName(imm30);
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1533,7 +1533,7 @@ namespace avmplus
             case OP_coerce_b:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = BOOLEAN_TYPE;
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1542,7 +1542,7 @@ namespace avmplus
             case OP_coerce_o:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = OBJECT_TYPE;
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1551,7 +1551,7 @@ namespace avmplus
             case OP_coerce_a:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = NULL;
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1561,7 +1561,7 @@ namespace avmplus
             case OP_coerce_i:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = INT_TYPE;
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1571,7 +1571,7 @@ namespace avmplus
             case OP_coerce_u:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = UINT_TYPE;
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1581,7 +1581,7 @@ namespace avmplus
             case OP_coerce_d:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = NUMBER_TYPE;
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1590,7 +1590,7 @@ namespace avmplus
             case OP_coerce_s:
             {
                 checkStack(1,1);
-                Value &v = state->value(sp);
+                FrameValue &v = state->value(sp);
                 Traits *type = STRING_TYPE;
                 coder->write(state, pc, opcode, type);
                 state->setType(sp, type, v.notNull);
@@ -1709,7 +1709,7 @@ namespace avmplus
                 const int disp_id = imm30-1;
                 if (disp_id >= 0)
                 {
-                    Value& obj = state->peek(argc+1);
+                    FrameValue& obj = state->peek(argc+1);
                     if( !obj.traits )
                         verifyFailed(kCorruptABCError);
                     else
@@ -1753,7 +1753,7 @@ namespace avmplus
                 checkPropertyMultiname(n, multiname);
 
 
-                Value& obj = state->peek(n); // make sure object is there
+                FrameValue& obj = state->peek(n); // make sure object is there
                 Binding b = toplevel->getBinding(obj.traits, &multiname);
                 Traits* ctraits = readBinding(obj.traits, b);
                 emitCheckNull(sp-(n-1));
@@ -2069,7 +2069,7 @@ namespace avmplus
             case OP_getslot:
             {
                 checkStack(1,1);
-                Value& obj = state->peek();
+                FrameValue& obj = state->peek();
                 checkEarlySlotBinding(obj.traits);
                 Traits* slotTraits = checkSlot(obj.traits, imm30-1);
                 emitCheckNull(state->sp());
@@ -2081,7 +2081,7 @@ namespace avmplus
             case OP_setslot:
             {
                 checkStack(2,0);
-                Value& obj = state->peek(2); // object
+                FrameValue& obj = state->peek(2); // object
                 checkEarlySlotBinding(obj.traits);
                 Traits* slotTraits = checkSlot(obj.traits, imm30-1);
                 emitCoerce(slotTraits, state->sp());
@@ -2100,7 +2100,7 @@ namespace avmplus
             case OP_dup:
             {
                 checkStack(1, 2);
-                Value& v = state->peek();
+                FrameValue& v = state->peek();
                 coder->write(state, pc, opcode);
                 state->push(v);
                 break;
@@ -2109,8 +2109,8 @@ namespace avmplus
             case OP_swap:
             {
                 checkStack(2,2);
-                Value v1 = state->peek(1);
-                Value v2 = state->peek(2);
+                FrameValue v1 = state->peek(1);
+                FrameValue v2 = state->peek(2);
                 coder->write(state, pc, opcode);
                 state->pop(2);
                 state->push(v1);
@@ -2126,8 +2126,8 @@ namespace avmplus
                 // if either the LHS or RHS is a number type, then we know
                 // it will be a numeric comparison.
                 checkStack(2,1);
-                Value& rhs = state->peek(1);
-                Value& lhs = state->peek(2);
+                FrameValue& rhs = state->peek(1);
+                FrameValue& lhs = state->peek(2);
                 Traits *lhst = lhs.traits;
                 Traits *rhst = rhs.traits;
                 if (rhst && rhst->isNumeric() && lhst && !lhst->isNumeric())
@@ -2165,8 +2165,8 @@ namespace avmplus
             {
                 checkStack(2,1);
 
-                Value& rhs = state->peek(1);
-                Value& lhs = state->peek(2);
+                FrameValue& rhs = state->peek(1);
+                FrameValue& lhs = state->peek(2);
                 Traits* lhst = lhs.traits;
                 Traits* rhst = rhs.traits;
                 if ((lhst == STRING_TYPE && lhs.notNull) || (rhst == STRING_TYPE && rhs.notNull))
@@ -2328,7 +2328,7 @@ namespace avmplus
             {
                 checkStack(0,1);
                 checkLocal(imm30);
-                Value& v = checkLocal(imm30b);
+                FrameValue& v = checkLocal(imm30b);
                 if (imm30 == imm30b)
                     verifyFailed(kInvalidHasNextError);
                 if (v.traits != INT_TYPE)
@@ -2549,7 +2549,7 @@ namespace avmplus
         {
             // is this a user defined class?  A(1+ args) means coerce to A
             AvmAssert(slotType->itraits != NULL);
-            Value &v = state->value(sp);
+            FrameValue &v = state->value(sp);
             coder->write(state, pc, OP_coerce, slotType->itraits);
             state->setType(sp, slotType->itraits, v.notNull);
         }
@@ -2566,7 +2566,7 @@ namespace avmplus
         }
         else
         {
-            Value v = state->stackTop();
+            FrameValue v = state->stackTop();
             // NOTE writeNip is necessary until lir optimizes the "nip"
             // case to avoid the extra copies that result from swap+pop
             coder->writeNip(state, pc);
@@ -2593,7 +2593,7 @@ namespace avmplus
             }
             for (; index >= base; index--)
             {
-                Value& v = state->value(index);
+                FrameValue& v = state->value(index);
                 Binding b = toplevel->getBinding(v.traits, &multiname);
                 if (b != BIND_NONE)
                 {
@@ -2672,7 +2672,7 @@ namespace avmplus
 
     void Verifier::emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const uint8_t *pc)
     {
-        Value& obj = state->peek(n);
+        FrameValue& obj = state->peek(n);
 
         Binding b = toplevel->getBinding(obj.traits, &multiname);
         Traits* propType = readBinding(obj.traits, b);
@@ -2775,7 +2775,7 @@ namespace avmplus
 
     void Verifier::emitCheckNull(int i)
     {
-        Value& value = state->value(i);
+        FrameValue& value = state->value(i);
         if (!value.notNull) {
             coder->writeCheckNull(state, i);
             value.notNull = true;
@@ -2808,7 +2808,7 @@ namespace avmplus
 
     void Verifier::emitCoerce(Traits* target, int index)
     {
-        Value &v = state->value(index);
+        FrameValue &v = state->value(index);
         coder->writeCoerce(state, index, target);
         state->setType(index, target, v.notNull);
     }
@@ -2869,7 +2869,7 @@ namespace avmplus
         checkStack(pop,push);
     }
 
-    Value& Verifier::checkLocal(int local)
+    FrameValue& Verifier::checkLocal(int local)
     {
         if (local < 0 || local >= ms->local_count())
             verifyFailed(kInvalidRegisterError, core->toErrorString(local));
@@ -3072,8 +3072,8 @@ namespace avmplus
             if (i >= scopeTop && i < ms->stack_base())
                 continue;
 
-            const Value& curValue = state->value(i);
-            Value& targetValue = targetState->value(i);
+            const FrameValue& curValue = state->value(i);
+            FrameValue& targetValue = targetState->value(i);
 
             if (curValue.isWith != targetValue.isWith) {
                 // failure: pushwith on one edge, pushscope on other edge, cannot merge.
@@ -3404,7 +3404,7 @@ namespace avmplus
         }
     }
 
-    void Verifier::printValue(Value& v)
+    void Verifier::printValue(FrameValue& v)
     {
         Traits* t = v.traits;
         PrintWriter& out = core->console;

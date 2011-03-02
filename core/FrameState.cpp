@@ -51,7 +51,7 @@ namespace avmplus
           targetOfBackwardsBranch(false),
           wl_pending(false)
     {
-        locals = (Value*)mmfx_alloc_opt(sizeof(Value) * frameSize, MMgc::kZero);
+        locals = (FrameValue*)mmfx_alloc_opt(sizeof(FrameValue) * frameSize, MMgc::kZero);
     }
 
     FrameState::~FrameState()
@@ -64,6 +64,6 @@ namespace avmplus
         scopeDepth = other->scopeDepth;
         stackDepth = other->stackDepth;
         withBase = other->withBase;
-        VMPI_memcpy(locals, other->locals, frameSize * sizeof(Value));
+        VMPI_memcpy(locals, other->locals, frameSize * sizeof(FrameValue));
     }
 }

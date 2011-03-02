@@ -199,7 +199,7 @@ namespace avmplus
     class WordcodeEmitter;
 #endif
     class UnicodeUtils;
-    class Value;
+    class FrameValue;
     class Verifier;
     class VTable;
     class VoidClass;

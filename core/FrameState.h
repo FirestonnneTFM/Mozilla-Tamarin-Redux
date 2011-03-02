@@ -45,7 +45,7 @@ namespace avmplus
     /**
      * represents a value in the verifier
      */
-    class Value
+    class FrameValue
     {
     public:
         Traits* traits;
@@ -73,7 +73,7 @@ namespace avmplus
         // Info about each local var in this frame.
         // Length is frameConsts->frameSize, one entry per local, scope, and stack operand.
     private:
-        Value *locals;
+        FrameValue *locals;
     public:
         FrameState* wl_next; // next block in verifier->worklist.  ideally this is only accessed by Verifier.
         const uint8_t* abc_pc;  // pointer into abc bytecode
@@ -93,19 +93,19 @@ namespace avmplus
         ~FrameState();
 
         void init(const FrameState* other);
-        Value& value(int32_t i);
-        const Value& value(int32_t i) const;
-        Value& scopeValue(int32_t i);
-        const Value& scopeValue(int32_t i) const;
-        Value& stackValue(int32_t i);
-        Value& stackTop();
+        FrameValue& value(int32_t i);
+        const FrameValue& value(int32_t i) const;
+        FrameValue& scopeValue(int32_t i);
+        const FrameValue& scopeValue(int32_t i) const;
+        FrameValue& stackValue(int32_t i);
+        FrameValue& stackTop();
         int32_t sp() const;
         void setType(int32_t i, Traits* t, bool notNull=false, bool isWith=false);
         void pop(int32_t n=1);
-        Value& peek(int32_t n=1);
-        const Value& peek(int32_t n) const;
+        FrameValue& peek(int32_t n=1);
+        const FrameValue& peek(int32_t n) const;
         void pop_push(int32_t n, Traits* type, bool notNull=false);
-        void push(Value& _value);
+        void push(FrameValue& _value);
         void push(Traits* traits, bool notNull=false);
     };
 }

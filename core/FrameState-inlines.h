@@ -39,37 +39,37 @@
 
 namespace avmplus
 {
-REALLY_INLINE Value& FrameState::value(int32_t i)
+REALLY_INLINE FrameValue& FrameState::value(int32_t i)
 {
     AvmAssert(i >= 0 && i < frameSize);
     return locals[i];
 }
 
-REALLY_INLINE const Value& FrameState::value(int32_t i) const
+REALLY_INLINE const FrameValue& FrameState::value(int32_t i) const
 {
     AvmAssert(i >= 0 && i < frameSize);
     return locals[i];
 }
 
-REALLY_INLINE Value& FrameState::scopeValue(int32_t i)
+REALLY_INLINE FrameValue& FrameState::scopeValue(int32_t i)
 {
     AvmAssert(i >= 0 && i < scopeDepth);
     return value(scopeBase + i);
 }
 
-REALLY_INLINE const Value& FrameState::scopeValue(int32_t i) const
+REALLY_INLINE const FrameValue& FrameState::scopeValue(int32_t i) const
 {
     AvmAssert(i >= 0 && i < scopeDepth);
     return value(scopeBase + i);
 }
 
-REALLY_INLINE Value& FrameState::stackValue(int32_t i)
+REALLY_INLINE FrameValue& FrameState::stackValue(int32_t i)
 {
     AvmAssert(i >= 0 && i < stackDepth);
     return value(stackBase + i);
 }
 
-REALLY_INLINE Value& FrameState::stackTop()
+REALLY_INLINE FrameValue& FrameState::stackTop()
 {
     return value(stackBase + stackDepth - 1);
 }
@@ -81,7 +81,7 @@ REALLY_INLINE int32_t FrameState::sp() const
 
 REALLY_INLINE void FrameState::setType(int32_t i, Traits* t, bool notNull, bool isWith)
 {
-    Value& v = value(i);
+    FrameValue& v = value(i);
     v.traits = t;
     v.notNull = notNull;
     v.isWith = isWith;
@@ -97,12 +97,12 @@ REALLY_INLINE void FrameState::pop(int32_t n)
     AvmAssert(stackDepth >= 0);
 }
 
-REALLY_INLINE Value& FrameState::peek(int32_t n)
+REALLY_INLINE FrameValue& FrameState::peek(int32_t n)
 {
     return value(stackBase + stackDepth - n);
 }
 
-REALLY_INLINE const Value& FrameState::peek(int32_t n) const
+REALLY_INLINE const FrameValue& FrameState::peek(int32_t n) const
 {
     return value(stackBase + stackDepth - n);
 }
@@ -114,7 +114,7 @@ REALLY_INLINE void FrameState::pop_push(int32_t n, Traits* type, bool notNull)
     stackDepth = sp+1;
 }
 
-REALLY_INLINE void FrameState::push(Value& value)
+REALLY_INLINE void FrameState::push(FrameValue& value)
 {
     AvmAssert(stackBase + stackDepth + 1 <= frameSize);
     setType(stackBase + stackDepth++, value.traits, value.notNull);
