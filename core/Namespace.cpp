@@ -63,11 +63,13 @@ namespace avmplus
         AvmAssert(flags != NS_Public ? apiVersion == kApiVersion_VM_ALLVERSIONS : true);
     }
 
+#ifdef DRC_TRIVIAL_DESTRUCTOR
     Namespace::~Namespace()
     {
         setUri(NULL, NS_Public);
         *const_cast<ApiVersion*>(&m_apiVersion) = ApiVersion(0);
     }
+#endif
 
     bool Namespace::gcTrace(MMgc::GC* gc, size_t cursor)
     {

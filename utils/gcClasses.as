@@ -83,7 +83,9 @@ var rootclass = "GCFinalizedObject";
 
 const ignorePaths =
     [ new RegExp("^.*/shell/.*$"),
-      new RegExp("^.*/extensions/ST_.*$")];
+     new RegExp("^.*/extensions/ST_.*$"),
+     new RegExp("^.*/extensions/JavaGlue.*$"),
+     new RegExp("^.*/MMgc/GCTests.*$")];
 
 class LineInfo
 {
@@ -152,10 +154,30 @@ function readFiles(argv) {
 
     function filterFile(fn) {
         var lines = readFile(fn);
+        var ignore = false;
+        var ignorelevel = 0;
         for ( var i=0 ; i < lines.length ; i++ ) {
             var l = lines[i];
             var result;
             // Faster to filter by indexOf and then do regex matching than just regex matching.
+            if (l.indexOf("#") != -1) {
+                // Preprocessor macro?
+                // We need to know the regions commented out by #ifdef DRC_TRIVIAL_DESTRUCTOR .. #endif
+                // but we must track nested regions too.
+                if (l.match(/^\s*#\s*(?:ifdef|ifndef|if|elif)/)) {
+                    if (l.match(/^\s*#\s*ifdef\s+DRC_TRIVIAL_DESTRUCTOR/))
+                        ignore = true;
+                    if (ignore)
+                        ignorelevel++;
+                }
+                else if (l.match(/^\s*#\s*endif/)) {
+                    if (ignore) {
+                        --ignorelevel;
+                        if (ignorelevel == 0)
+                            ignore = false;
+                    }
+                }
+            }
             if (l.indexOf("class") != -1) {
                 if ((result = l.match(re1)) || (result = l.match(re2))) {
                     var derived = result[1];
@@ -163,7 +185,7 @@ function readFiles(argv) {
                     all_lines.push(new LineInfo(derived,base,fn,i+1));
                 }
             }
-            else if (l.indexOf("~") != -1) {
+            else if (!ignore && l.indexOf("~") != -1) {
                 if (result = l.match(red)) {
                     probable_destructors[result[1]] = true;
                 }

@@ -81,7 +81,9 @@ namespace avmplus
             return new (gc, MMgc::kExact, ivtable->getExtraSize()) RegExpObject(ivtable, delegate, pattern, options);
         }
 
+#ifdef DRC_TRIVIAL_DESTRUCTOR
         ~RegExpObject();
+#endif
 
         // call is implicit exec
         // atom[0] = this

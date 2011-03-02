@@ -81,11 +81,15 @@ namespace avmplus
         }
     }
 
+    // Not actually entirely trivial, as it decrements reference counts
+    // manually, not just by DRCWB smart pointer destructors.
+#ifdef DRC_TRIVIAL_DESTRUCTOR
     ScriptObject::~ScriptObject()
     {
         //setDelegate(NULL); -- no longer necessary
         vtable->traits->destroyInstance(this);
     }
+#endif
 
     /* The storage for a ScriptObject or a subclass SO of ScriptObject is
      * laid out as follows.

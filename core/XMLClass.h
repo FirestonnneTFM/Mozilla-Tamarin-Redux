@@ -52,7 +52,9 @@ namespace avmplus
         XMLClass(VTable* cvtable);
         
     public:
+#ifdef DRC_TRIVIAL_DESTRUCTOR
         ~XMLClass();
+#endif
 
         REALLY_INLINE static XMLClass* create(MMgc::GC* gc, VTable* cvtable)
         {

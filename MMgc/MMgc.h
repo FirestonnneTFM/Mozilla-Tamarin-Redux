@@ -279,5 +279,11 @@ namespace MMgc
 #define MMGC_DRC
 #define WRITE_BARRIERS
 
+// DRC_TRIVIAL_DESTRUCTOR is an #ifdef you can use to mark destructors
+// of subclasses of RCObject that /only/ zero out fields, including those
+// that store NULL pointers in RC fields.  Those destructors will be 
+// removed if and when that type is made not to inherit from RCObject.
+#define DRC_TRIVIAL_DESTRUCTOR
+
 #endif /* __MMgc__ */
 
