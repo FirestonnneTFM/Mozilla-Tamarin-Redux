@@ -900,7 +900,7 @@ namespace avmplus
      * Eliminates redundant loads within a block, and tracks the nullability of pointers
      * within blocks and across edges.  CodegenLIR will inform VarTracker that a
      * pointer is not null by calling setNotNull(ptr, type) either when the Verifier's
-     * FrameState.Value is not null, in localGetp(), or after a null check in emitNullCheck().
+     * FrameState.FrameValue is not null, in localGetp(), or after a null check in emitNullCheck().
      *
      * Within a block, we track nullability of references to instructions; when references
      * are copied, we know the copies are not null.
@@ -995,7 +995,7 @@ namespace avmplus
             if (state->targetOfBackwardsBranch) {
                 // Clear any notNull bits that are not set in FrameState.
                 for (int i=0, n=nvar; i < n; i++) {
-                    const Value& v = state->value(i);
+                    const FrameValue& v = state->value(i);
                     bool stateNotNull = v.notNull && isNullable(v.traits);
                     if (!stateNotNull || (i >= scopeTop && i < stackBase) || (i >= stackTop))
                         bits->clear(i);
@@ -1008,7 +1008,7 @@ namespace avmplus
                 // If we are tracking an expression for a non-null variable,
                 // add it to the set of checked expressions.
                 for (int i=0, n=nvar; i < n; i++) {
-                    const Value& v = state->value(i);
+                    const FrameValue& v = state->value(i);
                     bool stateNotNull = v.notNull && isNullable(v.traits);
                     if ((i >= scopeTop && i < stackBase) || (i >= stackTop)) {
                         bits->clear(i);
@@ -1299,7 +1299,7 @@ namespace avmplus
 
     LIns* CodegenLIR::localGet(int i) {
 #ifdef DEBUG
-        const Value& v = state->value(i);
+        const FrameValue& v = state->value(i);
         AvmAssert((v.sst_mask == (1 << SST_int32) && v.traits == INT_TYPE) ||
                   (v.sst_mask == (1 << SST_uint32) && v.traits == UINT_TYPE) ||
                   (v.sst_mask == (1 << SST_bool32) && v.traits == BOOLEAN_TYPE));
@@ -1309,7 +1309,7 @@ namespace avmplus
 
     LIns* CodegenLIR::localGetf(int i) {
 #ifdef DEBUG
-        const Value& v = state->value(i);
+        const FrameValue& v = state->value(i);
         AvmAssert(v.sst_mask == (1<<SST_double) && v.traits == NUMBER_TYPE);
 #endif
         return lirout->insLoad(LIR_ldd, vars, i * VARSIZE, ACCSET_VARS);
@@ -1319,7 +1319,7 @@ namespace avmplus
     // informs us that it is not null via FrameState.value.
     LIns* CodegenLIR::localGetp(int i)
     {
-        const Value& v = state->value(i);
+        const FrameValue& v = state->value(i);
         LIns* ins;
         if (exactlyOneBit(v.sst_mask)) {
             // pointer or atom
@@ -2340,8 +2340,8 @@ namespace avmplus
 
     void CodegenLIR::emitAdd(int i, int j, Traits* type)
     {
-        const Value& val1 = state->value(i);
-        const Value& val2 = state->value(j);
+        const FrameValue& val1 = state->value(i);
+        const FrameValue& val2 = state->value(j);
         if ((val1.traits == STRING_TYPE && val1.notNull) || (val2.traits == STRING_TYPE && val2.notNull)) {
             // string concatenation
             AvmAssert(type == STRING_TYPE);
@@ -2419,7 +2419,7 @@ namespace avmplus
         for (int i=0, n=state->sp()+1; i < n; i++) {
             if (i >= scopeTop && i < ms->stack_base())
                 continue;
-            const Value& v = state->value(i);
+            const FrameValue& v = state->value(i);
             AvmAssert(!jit_sst[i] || jit_sst[i] == v.sst_mask);
         }
 #else
@@ -2682,7 +2682,7 @@ namespace avmplus
 
         case OP_getslot:
         {
-            const Value& obj = state->peek(1);
+            const FrameValue& obj = state->peek(1);
             int index = imm30-1;
             Traits* slotTraits = obj.traits ? obj.traits->getTraitsBindings()->getSlotTraits(index) : NULL;
             emitGetslot(index, sp, slotTraits);
@@ -3073,7 +3073,7 @@ namespace avmplus
 
     LIns* CodegenLIR::coerceToString(int index)
     {
-        const Value& value = state->value(index);
+        const FrameValue& value = state->value(index);
         Traits* in = value.traits;
 
         switch (bt(in)) {
@@ -3105,7 +3105,7 @@ namespace avmplus
     /** emit code for * -> Number conversion */
     LIns* CodegenLIR::coerceToNumber(int index)
     {
-        const Value& value = state->value(index);
+        const FrameValue& value = state->value(index);
         Traits* in = value.traits;
 
         if (in && (in->isNumeric() || in == BOOLEAN_TYPE)) {
@@ -3206,7 +3206,7 @@ namespace avmplus
     // coerce:  undefinedAtom -> "null" (see coerce_s)
     LIns* CodegenLIR::convertToString(int index, bool preserveNull)
     {
-        const Value& value = state->value(index);
+        const FrameValue& value = state->value(index);
         Traits* in = value.traits;
         Traits* stringType = STRING_TYPE;
 
@@ -3371,7 +3371,7 @@ namespace avmplus
             const uint32_t argc = opd2;
             const Multiname* name = pool->precomputedMultiname(opd1);
 
-            const Value& obj = state->peek(argc+1); // object
+            const FrameValue& obj = state->peek(argc+1); // object
             Binding b = toplevel->getBinding(obj.traits, name);
 
             if (AvmCore::isSlotBinding(b))
@@ -3392,7 +3392,7 @@ namespace avmplus
         {
             // NOTE opd2 is the stack offset to the reciever
             const Multiname* name = pool->precomputedMultiname(opd1);
-            const Value& obj = state->peek(opd2); // object
+            const FrameValue& obj = state->peek(opd2); // object
             Binding b = toplevel->getBinding(obj.traits, name);
 
             // early bind accessor
@@ -3423,7 +3423,7 @@ namespace avmplus
         {
             // opd2=n the stack offset to the reciever
             const Multiname *name = pool->precomputedMultiname(opd1);
-            const Value& obj = state->peek(opd2); // object
+            const FrameValue& obj = state->peek(opd2); // object
             Binding b = toplevel->getBinding(obj.traits, name);
 
             // early bind accessor
@@ -3683,7 +3683,7 @@ namespace avmplus
 
     LIns* CodegenLIR::coerceToType(int loc, Traits* result)
     {
-        const Value& value = state->value(loc);
+        const FrameValue& value = state->value(loc);
         Traits* in = value.traits;
         LIns* expr;
 

@@ -475,7 +475,7 @@ namespace avmplus
         /** jit_sst is an array of sst_mask bytes, used to double check that we
          *  are modelling storage types the same way the verifier did for us.
          *  Mismatches are caught in writeOpcodeVerified() after the Verifier has
-         *  updated Value.sst_mask. */
+         *  updated FrameValue.sst_mask. */
         uint8_t *jit_sst;   // array of SST masks to sanity check with FrameState
         ValidateWriter* validate3; // ValidateWriter for method body.
 #endif

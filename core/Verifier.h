@@ -229,7 +229,7 @@ namespace avmplus
         const uint8_t* verifyBlock(const uint8_t* pc);
         const uint8_t* loadBlockState(FrameState* blk);
         void checkParams();
-        Value& checkLocal(int local);
+        FrameValue& checkLocal(int local);
         MethodInfo* checkMethodInfo(uint32_t method_id);
         Traits* checkClassInfo(uint32_t class_id);
         void checkTarget(const uint8_t* current, const uint8_t* target);
@@ -276,7 +276,7 @@ namespace avmplus
         void printState(StringBuffer& prefix, FrameState* state);
         void printOpcode(const uint8_t* pc, const uint8_t* code_end);
     private:
-        void printValue(Value& v);
+        void printValue(FrameValue& v);
 #endif
     };
 }

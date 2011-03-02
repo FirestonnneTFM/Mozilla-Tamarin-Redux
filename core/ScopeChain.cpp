@@ -42,7 +42,7 @@
 
 namespace avmplus
 {
-    /* static */ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra)
+    /* static */ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameValue* values, int32_t nValues, Traits* append, Traits* extra)
     {
         const int32_t capture = nValues + (append ? 1 : 0);
         const int32_t extraEntries = extra ? 1 : 0;
@@ -57,7 +57,7 @@ namespace avmplus
         }
         for (int32_t i = 0; i < nValues; i++)
         {
-            const Value& v = values[i];
+            const FrameValue& v = values[i];
             nscope->setScopeAt(j++, v.traits, v.isWith);
         }
         if (append)
@@ -85,7 +85,7 @@ namespace avmplus
     /*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra)
     {
         MMgc::GC::AllocaAutoPtr valuesPtr;
-        Value *values = (Value *)VMPI_alloca_gc(gc, valuesPtr, sizeof(Value)*nStateTraits);
+        FrameValue *values = (FrameValue *)VMPI_alloca_gc(gc, valuesPtr, sizeof(FrameValue)*nStateTraits);
         uint32_t firstWith = nStateTraits - nStateWithTraits;
         for (uint32_t i = 0; i < nStateTraits; i++)
         {
