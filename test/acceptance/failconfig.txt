@@ -319,3 +319,5 @@ ecma3/TypeConversion/e9_9_1_rt, ppc64-mac-tvm-(?!.*Dinterp).*,, skip, https://bu
 as3/sampling/BackwardBranches , .* ,, skip, Bugzilla 614529
 as3/sampling/Callback , .* ,, skip,  Bugzilla 614529
 as3/sampling/FunctionEntry , .* ,, skip,  Bugzilla 614529
+
+as3/Definitions/Function/OneOptArgFunction, mips-lnx-tvm-release,, skip, Intermittent Failure: Bugzilla 638533
