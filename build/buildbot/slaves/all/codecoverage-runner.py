@@ -52,6 +52,7 @@ class CodeCoverageRunner:
     bullseye_dir=None
     builds_dir=None
     platform=None
+    exclude_regions=None
     
     options='b:'
     longOptions=['buildnum=','compilecsv=','testcsv=']
@@ -67,6 +68,7 @@ class CodeCoverageRunner:
             sys.exit(1)
 
         self.bullseye_dir=env["bullseyedir"]
+        self.exclude_regions=env["coverage_exclude_regions"]
 
         # Determine the hash of the change, required to know what the build directory is
         out,exit = self.run_pipe(cmd="hg log -r %s | head -n 1 | awk -F: '{print $3}'" % self.buildnum)
@@ -331,7 +333,7 @@ class CodeCoverageRunner:
                 del env["AVMRD"]
             
         # Get the current coverage data, execute from the root_dir so that path information is correct
-        cmd="%s/covdir -q -m" % self.bullseye_dir
+        cmd="%s/covdir -q -m %s" % (self.bullseye_dir, self.exclude_regions)
         stdout,exit = self.run_pipe(cmd=cmd, env=env, cwd=self.root_dir)
         for line in stdout:
             print line
@@ -362,7 +364,7 @@ class CodeCoverageRunner:
             print line
             
         # Get the current coverage data, execute from the root_dir so that path information is correct
-        cmd="%s/covdir -q -m" % self.bullseye_dir
+        cmd="%s/covdir -q -m %s" % (self.bullseye_dir, self.exclude_regions)
         stdout,exit = self.run_pipe(cmd=cmd, env=env, cwd=self.root_dir)
         Total=None
         for line in stdout:
