@@ -94,6 +94,13 @@
     #define FASTCALL
 #endif
 
+// Bug 569361.  NO_INLINE is hint that annotated function should be kept
+// out-of-line.  Caveats: the NO_INLINE annotations guarantee nothing,
+// as is evident from catch-all definition below (also, some compilers
+// may require it to be applied to declaration sites to be effective).
+#ifndef NO_INLINE
+    #define NO_INLINE
+#endif
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
