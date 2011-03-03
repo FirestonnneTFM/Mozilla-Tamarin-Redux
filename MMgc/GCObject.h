@@ -160,6 +160,43 @@ namespace MMgc
         // compiler from inserting a call to the system's delete operator into
         // the base class destructor.
         static void operator delete(void *) { /* must be empty */ }
+
+        // Methods used by GCMember<T>
+        REALLY_INLINE static void WriteBarrier(void **address, void *value)
+        {
+            GC::WriteBarrier(address, value);
+        }
+
+        // These are noops overridden by RCObject to do the right thing.
+        REALLY_INLINE void IncrementRef() {}
+        REALLY_INLINE void DecrementRef() {}
+
+        template<class T>
+        class GCMember : public GCMemberBase<T>
+        {
+        public:
+            template <class T2>
+            REALLY_INLINE void operator =(const GCRef<T2>& other)
+            {
+                GCMemberBase<T>::operator=(other);
+            }
+
+            REALLY_INLINE void operator=(T *tNew)
+            {
+                GCMemberBase<T>::operator=(tNew);
+            }
+
+            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
+            REALLY_INLINE GCMember(){}
+
+            template <class T2>
+            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
+            REALLY_INLINE GCMember(T* valuePtr)
+            {
+                GCMemberBase<T>::operator=(valuePtr);
+            }
+            explicit REALLY_INLINE GCMember(const GCMember &other): GCMemberBase<T>(other) {}
+        };
     };
 
     /**
@@ -230,45 +267,6 @@ namespace MMgc
     {
     public:
         // This class can only have an empty destructor.
-                
-        // Methods used by GCMember<T>
-        REALLY_INLINE static void WriteBarrier(void **address, void *value)
-        {
-            GC::WriteBarrier(address, value);
-        }
-        
-        // These are noops overridden by RCObject to do the right thing.
-        REALLY_INLINE void IncrementRef() {}
-        REALLY_INLINE void DecrementRef() {}
-
-        //  Define GCFinalizedObject's local definition of GCMember
-        template<class T>
-        class GCMember : public GCMemberBase<T>
-        {
-        public:
-            
-            template <class T2>
-            REALLY_INLINE void operator =(const GCRef<T2>& other)
-            {
-                GCMemberBase<T>::operator=(other);
-            }
-
-            REALLY_INLINE void operator=(T *tNew)
-            {
-                GCMemberBase<T>::operator=(tNew);
-            }
-
-            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
-            GCMember(){}
-            REALLY_INLINE GCMember(T* valuePtr)
-            {
-                GCMemberBase<T>::operator=(valuePtr);
-            }
-            template <class T2>
-            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
-
-            explicit REALLY_INLINE GCMember(const GCMember &other): GCMemberBase<T>(other) {}
-        };
 
         //  Create a GCRef from "this" with parameter for auto template specialization.
         template <class T>
