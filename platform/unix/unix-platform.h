@@ -160,6 +160,10 @@ typedef void *maddr_ptr;
 
 #ifdef __GNUC__
 #define REALLY_INLINE inline __attribute__((always_inline))
+
+// Bug 569361.  See notes for NO_INLINE in VMPI.h
+#define NO_INLINE __attribute__((noinline))
+
 // only define FASTCALL for x86-32; other gcc versions will spew warnings
 #ifdef AVMPLUS_IA32
     #define FASTCALL __attribute__((fastcall))

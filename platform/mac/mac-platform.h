@@ -159,6 +159,10 @@ typedef pthread_t vmpi_thread_t;
 #  else
 #    define REALLY_INLINE inline __attribute__((always_inline))
 #  endif
+
+// Bug 569361.  See notes for NO_INLINE in VMPI.h
+#  define NO_INLINE __attribute__((noinline))
+
 // only define FASTCALL for x86-32; other gcc versions will spew warnings
 #  ifdef AVMPLUS_IA32
 #    ifndef VMCFG_AOT // Doesn't work with llvm compiler (need a better symbol for this, but don't know one)
