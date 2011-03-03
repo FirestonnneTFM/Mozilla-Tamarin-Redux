@@ -235,22 +235,6 @@ struct ABCInfo;
 
 #include "avm.h"
 
-namespace avmplus
-{
-    // conversion routines -- intended only for Tamarin internal use
-    // but, other the short term, clients may need to make use of them as
-    // they adapt to the new api
-    #define AVM_MAP(EXT, INT) \
-        inline avm::EXT avmTo##EXT(const avmplus::INT e) { return (avm::EXT)e; } \
-        inline avmplus::INT avmFrom##EXT(avm::EXT m) { return (avmplus::INT)m; } \
-
-    AVM_MAP(Instance, AvmCore*)
-    AVM_MAP(Object, ScriptObject*)
-    AVM_MAP(CodeContext, CodeContext*)
-
-    #undef AVM_MAP
-}
-
 #include "MMgc.h"
 #include "QCache.h"
 #include "MathUtils.h"
