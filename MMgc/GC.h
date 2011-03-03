@@ -471,7 +471,7 @@ namespace MMgc
         // The new GCMember delegates to methods in these classes that
         // use the private write barriers.
         friend class GCObject;
-        friend class GCTracebleBase;
+        friend class GCTraceableBase;
 #ifdef VMCFG_SELFTEST
         friend class avmplus::ST_mmgc_basics;
 #endif
