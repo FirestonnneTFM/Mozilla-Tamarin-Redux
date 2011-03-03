@@ -64,15 +64,7 @@ namespace avmplus
     template<class T, class ListHelper>
     ListImpl<T,ListHelper>::~ListImpl()
     {
-        // Normally, m_data can't be null, but a call to neuter() can
-        // cause this to happen. This is necessary for certain shutdown
-        // conditions in Flash/AIR.
-        if (m_data != NULL)
-        {
-            if (m_data->len > 0)
-                ListHelper::clearRange(m_data, 0, m_data->len);
-            freeData(m_data->gc());
-        }
+        destroy();
     }
 
     template<class T, class ListHelper>
@@ -81,6 +73,26 @@ namespace avmplus
         typename ListHelper::LISTDATA* data = m_data;
         m_data = NULL;
         ListHelper::LISTDATA::free(gc, data);
+    }
+
+    template<class T, class ListHelper>
+    void ListImpl<T,ListHelper>::destroy()
+    {
+        // Normally, m_data can't be null, but a call to destroy() can
+        // cause this to happen. This is necessary for certain shutdown
+        // conditions in Flash/AIR.
+        if (m_data != NULL)
+        {
+            if (m_data->len > 0)
+                ListHelper::clearRange(m_data, 0, m_data->len);
+            freeData(m_data->gc()); // note that this leaves m_data set to NULL.
+        }
+    }
+
+    template<class T, class ListHelper>
+    REALLY_INLINE bool ListImpl<T,ListHelper>::isDestroyed() const
+    {
+        return m_data == NULL;
     }
 
     template<class T, class ListHelper>
