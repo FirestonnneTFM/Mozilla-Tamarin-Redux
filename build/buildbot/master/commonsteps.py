@@ -449,7 +449,7 @@ def acceptance_performance(name, shellname, vmargs="", config="", scriptargs="")
 
 def deep_codecoverage(compilecsv, testcsv):
     return BuildShellCommand(
-            command=['../all/codecoverage-runner.py', '-b', WithProperties('%s','revision'), '--compilecsv=%s' % compilecsv, '--testcsv=%s' % testcsv],
+            command=['../all/codecoverage-runner.sh', '-b', WithProperties('%s','revision'), '--compilecsv=%s' % compilecsv, '--testcsv=%s' % testcsv],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting code coverage...',
             descriptionDone='finished code coverage',
