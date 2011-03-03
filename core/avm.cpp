@@ -46,32 +46,29 @@ namespace avm {
 
     // -------- AvmObject --------
 
-    bool isFunction(Object o)
+    bool isFunction(avmplus::ScriptObject* so)
     {
-        avmplus::ScriptObject* so = avmplus::avmFromObject(o);
         return so && so->core()->isFunction(so->atom());
     }
 
-    CodeContext getFunctionCodeContext(Object o)
+    avmplus::CodeContext* getFunctionCodeContext(avmplus::ScriptObject* so)
     {
-        if (!isFunction(o))
+        if (!isFunction(so))
         {
             AvmAssert(!"Only Function is legal here.");
             return NULL;
         }
-        avmplus::ScriptObject* so = avmplus::avmFromObject(o);
     //  avmplus::CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
     // getFunctionCodeContext() has been temporarily relocated to ScriptObject, as AIR defines
     // some classes that are subclasses of Function (in AS3) but not of FunctionObject (in C++)...
         avmplus::CodeContext* cc = ((avmplus::ScriptObject*)so)->getFunctionCodeContext();
-        return avmToCodeContext(cc);
+        return cc;
     }
 
-    CodeContext getClassCodeContext(Object o)
+    avmplus::CodeContext* getClassCodeContext(avmplus::ScriptObject* so)
     {
-        if (!o)
+        if (!so)
             return NULL;
-        avmplus::ScriptObject* so = avmplus::avmFromObject(o);
         if (so->core()->isFunction(so->atom()))
         {
             AvmAssert(!"Function or MC is not legal here.");
@@ -90,7 +87,7 @@ namespace avm {
             return NULL;
         }
         avmplus::CodeContext* cc = init->scope()->abcEnv()->codeContext();
-        return avmToCodeContext(cc);
+        return cc;
     }
 
 } // namespace avm
