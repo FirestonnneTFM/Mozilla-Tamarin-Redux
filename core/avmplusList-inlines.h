@@ -493,16 +493,6 @@ namespace avmplus
         return newData;
     }
     
-    template<class T, class ListHelper>
-    REALLY_INLINE void ListImpl<T,ListHelper>::skipDestructor()
-    {
-        // Note that we explicitly do not attempt to free the data here;
-        // this method should only be called in situations where we
-        // know that MMGC has already been torn down, thus an attempt
-        // to free the data would be unsafe.
-        m_data = NULL;
-    }
-
     // ----------------------------
 
 
@@ -662,9 +652,15 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void GCList<T>::skipDestructor()
+    REALLY_INLINE void GCList<T>::destroy()
     {
-        m_list.skipDestructor();
+        m_list.destroy();
+    }
+
+    template<class T>
+    REALLY_INLINE bool GCList<T>::isDestroyed() const
+    {
+        return m_list.isDestroyed();
     }
 
     template<class T>
@@ -828,9 +824,15 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void RCList<T>::skipDestructor()
+    REALLY_INLINE void RCList<T>::destroy()
     {
-        m_list.skipDestructor();
+        m_list.destroy();
+    }
+
+    template<class T>
+    REALLY_INLINE bool RCList<T>::isDestroyed() const
+    {
+        return m_list.isDestroyed();
     }
 
     template<class T>
@@ -1001,9 +1003,15 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void UnmanagedPointerList<T>::skipDestructor()
+    REALLY_INLINE void UnmanagedPointerList<T>::destroy()
     {
-        m_list.skipDestructor();
+        m_list.destroy();
+    }
+
+    template<class T>
+    REALLY_INLINE bool UnmanagedPointerList<T>::isDestroyed() const
+    {
+        return m_list.isDestroyed();
     }
 
     template<class T>
@@ -1170,9 +1178,15 @@ namespace avmplus
     }
 
     template<class T>
-    REALLY_INLINE void WeakRefList<T>::skipDestructor()
+    REALLY_INLINE void WeakRefList<T>::destroy()
     {
-        m_list.skipDestructor();
+        m_list.destroy();
+    }
+
+    template<class T>
+    REALLY_INLINE bool WeakRefList<T>::isDestroyed() const
+    {
+        return m_list.isDestroyed();
     }
 
     template<class T>

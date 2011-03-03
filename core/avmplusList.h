@@ -432,12 +432,17 @@ namespace avmplus
         // Return the number of bytes used for the ListImpl's dynamically-allocated storage.
         uint64_t bytesUsed() const;
 
-        // Zero out the data field; this is necessary in unusual situations where the List's dtor
-        // can be run after MMGC is torn down (which would result in using a stale pointer).
+        // This unusual method should only be called if the MMGC instance might be destroyed
+        // *before* the List dtor can run, which can happen in some obscure situations
+        // in Flash/AIR. This destroys all storage in the List, but renders the List unsafe
+        // to use afterwards.
         // *** DANGER*** Most code should never need (or want) to use this call;
         // it renders the list unsafe to use, and calling *any* method on the list afterwards
-        // (other than the dtor) will result in a crash.
-        void skipDestructor();
+        // (other than the dtor or isDestroyed()) will result in a crash.
+        void destroy();
+
+        // return true iff destroy() has been called for this list.
+        bool isDestroyed() const; 
 
         // Trace GC pointers in the owned data, if appropriate for the data type.
         void gcTrace(MMgc::GC* gc);
@@ -509,7 +514,8 @@ namespace avmplus
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const;
-        void skipDestructor();
+        void destroy();
+        bool isDestroyed() const;
         void gcTrace(MMgc::GC* gc);
 
     private:
@@ -561,7 +567,8 @@ namespace avmplus
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const;
-        void skipDestructor();
+        void destroy();
+        bool isDestroyed() const;
         void gcTrace(MMgc::GC* gc);
 
     private:
@@ -620,7 +627,8 @@ namespace avmplus
         T operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const;
-        void skipDestructor();
+        void destroy();
+        bool isDestroyed() const;
         void gcTrace(MMgc::GC* gc);
 
     private:
@@ -671,7 +679,8 @@ namespace avmplus
         TYPE operator[](uint32_t index) const;
         void ensureCapacity(uint32_t cap);
         uint64_t bytesUsed() const;
-        void skipDestructor();
+        void destroy();
+        bool isDestroyed() const;
         void gcTrace(MMgc::GC* gc);
 
         // This removes all items from the list that have been collected.
