@@ -225,8 +225,8 @@ namespace avmplus
     public:
         GCRef<ByteArrayObject> constructByteArray();
 
-        uint32_t get_defaultObjectEncoding() const { return get_private__defaultObjectEncoding(); }
-        void set_defaultObjectEncoding(uint32_t version) { set_private__defaultObjectEncoding(version); }
+        uint32_t get_defaultObjectEncoding() const { return get__defaultObjectEncoding(); }
+        void set_defaultObjectEncoding(uint32_t version) { set__defaultObjectEncoding(version); }
         
     // ------------------------ DATA SECTION BEGIN
         GC_NO_DATA(ByteArrayClass)

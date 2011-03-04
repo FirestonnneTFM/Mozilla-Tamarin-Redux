@@ -359,9 +359,9 @@ public:
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
 public:
-    REALLY_INLINE avmplus::String* get_BIG_ENDIAN() const { return m_slots_EndianClass.get_BIG_ENDIAN(); }
+    REALLY_INLINE avmplus::String* get_BIG_ENDIAN() const { return m_slots_EndianClass.m_BIG_ENDIAN; }
 public:
-    REALLY_INLINE avmplus::String* get_LITTLE_ENDIAN() const { return m_slots_EndianClass.get_LITTLE_ENDIAN(); }
+    REALLY_INLINE avmplus::String* get_LITTLE_ENDIAN() const { return m_slots_EndianClass.m_LITTLE_ENDIAN; }
 private:
     avmplus::NativeID::avmplus_EndianClassSlots m_slots_EndianClass;
 private:
