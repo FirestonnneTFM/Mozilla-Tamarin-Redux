@@ -43,44 +43,20 @@
 
 #include "VMPI.h"
 
-/*
-    Rules of the game:
-
-    -- no ifdefs; all calls for Debugger/Debug are all present (though perhaps stubbed)
-
-    -- all types must be opaque, with accessors required (some accessors might
-        have an inline implementation in a separate file, but that's an implementation detail)
-
-    -- there are conversion routines for lots of the opaque types in avmplus.h
-        (e.g. AvmMethod<->MethodEnv) but these are intended as temporary impedance matchers;
-        code outside of AVM itself should wean itself away from these
-
-    -- someday, should compile without requiring avmplus.h; design with that in mind
-
-    -- C++ is fine, but strive for simple, normal function calls rather than class hierarchies. in particular,
-        avoid the need (por possibility) of the client subclasses any provided classes.
-*/
-
 
 namespace avm {
-
-    // -------- Types --------
-
-    typedef struct Instance_*       Instance;
-    typedef struct Object_*         Object;
-    typedef struct CodeContext_*    CodeContext;
 
     // -------- Object --------
 
     // If the given Object is a Function (or subclass thereof), return true. Otherwise, return false.
-    bool            isFunction(Object o);
+    bool            isFunction(avmplus::ScriptObject* o);
 
     // given an Object that is a Function or MethodClosure, return the CodeContext
     // that is associated with the function's point of definition.
     // It will not return a useful result for anything other than a Function (or MethodClosure
     // or other subclass of Function): passing such an object to this call will return NULL
     // (and assert in debug builds.)
-    CodeContext     getFunctionCodeContext(Object o);
+    avmplus::CodeContext*     getFunctionCodeContext(avmplus::ScriptObject* o);
 
     // given an Object, return the CodeContext that is associated with the object's
     // point of definition. Note that this API is deprecated and should really only be
@@ -88,7 +64,7 @@ namespace avm {
     // It will not return a useful result for Functions, MethodClosures, activation
     // objects, or catch objects: passing such an object to this call will return NULL
     // (and assert in debug builds.)
-    CodeContext     getClassCodeContext(Object o);
+    avmplus::CodeContext*     getClassCodeContext(avmplus::ScriptObject* o);
 
 } // namespace avm
 
