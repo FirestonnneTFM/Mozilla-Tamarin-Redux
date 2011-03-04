@@ -56,6 +56,53 @@ void *operator new(size_t size, MMgc::GC *gc, int flags);
 namespace MMgc
 {
     /**
+     * Base class for GC pointer containing structures that aren't
+     * directly heap allocated but are used to compose other GCObject
+     * or GCRoots.  In practice this introduces the GCMember local
+     * definition and hides new/delete.
+     */    
+    class GCSubStructure
+    {
+    public:
+        // Empty ctor to avoid silly no-public members compiler warnings.
+        class GCSubStructure() {}
+
+        //  GCObject's local definition of GCMember
+        template<class T>
+        class GCMember : public GCMemberBase<T>
+        {
+        public:
+                        
+            template <class T2>
+            REALLY_INLINE void operator =(const GCRef<T2>& other)
+            {
+                GCMemberBase<T>::operator=(other);
+            }
+
+            REALLY_INLINE void operator=(T *tNew)
+            {
+                GCMemberBase<T>::operator=(tNew);
+            }
+
+            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
+            REALLY_INLINE GCMember(){}
+        
+            template <class T2>
+            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
+            REALLY_INLINE GCMember(T* valuePtr)
+            {
+                GCMemberBase<T>::operator=(valuePtr);
+            }
+            
+            explicit REALLY_INLINE GCMember(const GCMember &other): GCMemberBase<T>(other) {}
+        };
+    private:
+        // Private and unimplemented to prevent heap allocation.
+        static void *operator new(size_t size) GNUC_ONLY(throw());
+        static void operator delete(void *gcObject);
+    };
+
+    /**
      * Base class for GC managed objects that aren't finalized and are
      * conservatively traced.
      */
