@@ -294,10 +294,7 @@ vtable, so <tt>gcTrace</tt> is just added as a method on that table,
 giving every finalizable object (including every <tt>RCObject</tt>)
 the option of exact tracing.
 
-<P> For <tt>GCObject</tt> it's worse; we can't just add a vtable,
-partly because many managed types do not in fact derive explicitly
-from <tt>GCObject</tt> (so it would be wrong to assume
-that <tt>GCObject</tt> has any methods or data at all), partly because
+<P> For <tt>GCObject</tt> it's worse; we can't just add a vtable because
 the overhead of a vtable is not affordable.
 
 <P> In the case where the type deriving from <tt>GCObject</tt> can
@@ -324,6 +321,13 @@ rewritten in terms of the VM's <tt>ExactHeapList</tt> type, for
 example.  Exact tracing of the array storage then happens
 automatically.
 
+<li> <P> <b>Arrays of Struct:</b> For small objects that are allocated
+in packed array (as opposed to pointers which ExactHeapList is for)
+with GC::Calloc <tt>ExactStructContainer</tt> can be used.  Here you also
+have to provide a custom <tt>gcTrace</tt> on the struct type.
+ExactStructContainer subclasses provides a vtable and
+a <tt>gcTrace</tt> that scans each element.
+
 <li> <P> <B>Tiny objects:</B> Objects that are small and populous and
 can't have a vtable because that would increase heap size
 significantly are a little tricky.  (It doesn't happen too often but
@@ -333,9 +337,12 @@ objects is for the owner-object to perform the tracing.  Typically
 this is done by the small object exporting
 a <tt>void&nbsp;gcTrace(GC*)</tt> method that is called by the small
 object's owner's <tt>gcTrace</tt> method under a guard that checks
-whether the small object has been marked previously.
+whether the small object has been marked previously.  This approach
+has the big drawback of write barrier firing on the sub object causing
+it to be scanned conservatively (see
+bug <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=636424">636424</a>).
 
-<p> A future possibility is to have off-object tracer methods for
+<P> A future possibility is to have off-object tracer methods for
 particular object types, triggered by bits in the object header.
 (That's particularly appealing if we redesign object layouts to
 accomodate more header bits, or through the use of BiBoP allocation.)
@@ -602,28 +609,6 @@ argument lists.
 for slot array tracers based on the slot traits.  Doing so removes all
 interpretation overhead currently in GC::TraceSlots.  For objects that
 are sparsely populated with pointers it will be particularly sweet.
-
-
-<P> <B>Avoiding Computing Object Size by Finding a Good Proxy for the
-Mark Rate:</B> Currently each GCWorkItem must carry the object size,
-and we must compute the object size every time we push a pointer.
-However, the object size is only needed for (a) conservative items and
-(b) to compute the mark rate.  For conservative GC-managed items we
-can figure out the object size using GC::Size anyway.  For
-conservative non-GC-managed items it may be a little trickier, but
-let's assume something can be done to encode the size in a separate
-item on the stack.  So if we can find a good proxy value for the true
-number of bytes marked, or if we can compute it in some other way than
-tracking each individual word scanned, we will make it faster to
-create and push GCWorkItems.  I am particularly keen on being able to
-use a single word per work item; that's tricky right now with how we
-use sentinels and other flags, but those can be encoded in other ways
-(eg in values that are obviously not pointers to GC-managed storage).
-For example, if the low bit of a word is 0 for pointers and 1 for
-metadata then we have a big switch right there, as long as we add
-mechanisms for atomically pushing a pointer and all its metadata or
-pushing nothing (on overflow).
-
 
 <hr>
 

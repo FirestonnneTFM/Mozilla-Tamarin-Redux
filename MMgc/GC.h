@@ -146,12 +146,17 @@
 #define GC_STRUCTURES(field_and_size,count) field_and_size
 #define GC_STRUCTURES_SMALL(field_and_size,count) field_and_size
 
-// Used by the GC annotation macros, can also be used manually
-// in a pinch but normally you can ignore this.
+// Used by the GC annotation macros, can also be used manually in a
+// pinch but normally you can ignore this.  We don't adorn gcTrace
+// with virtual and instead rely on the superclass to say its virtual.
+// This allows us to exactly trace structures using the existing
+// machinery without adding a vtable to them.  Structure tracing is
+// also why the cursor argument is optional, so this declaration can
+// handle GC_STRUCTURE decorations.
 
 #define GC_DECLARE_EXACT_METHODS \
     public: \
-        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
+        /*virtual*/ bool gcTrace(MMgc::GC* gc, size_t cursor=0);
 
 
 namespace avmplus

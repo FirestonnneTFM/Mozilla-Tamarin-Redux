@@ -239,8 +239,18 @@ important:
      the section <a href="#vtable-not-affordable">What to do when the
      vtable is not affordable</a> for more information.
 
-<li> <P> A class can be exactly traced only if its base class is exactly
-     traced.
+	 <P> If a class contains GC pointers and isn't allocated directly
+     but is instead used to compose other GCObjects as an inline
+     member we've
+     introduced <tt>GCSubStructure</tt>.  <tt>GCSubStructure</tt>
+     subclasses can use the same annotation system and have generated
+     tracers just like objects allocated
+     directly.  <tt>GCSubStructure</tt> does not introduce a vtable or
+     any other members and where it is used must be decorated with the
+     GC_STRUCTURE annotation (see <a href="#gcstruct">example</a>).
+
+<li> <P> A class can be exactly traced only if its base class is
+     exactly traced.
 
      <P> The reason for this is that the <tt>gcTrace</tt> method in a subclass
      usually starts or ends by calling its parent's <tt>gcTrace</tt> method to
@@ -421,6 +431,16 @@ and
 an <tt>#ifdef</tt> block in the source file alread.  (There are also <tt>_IF</tt> and
 <tt>_IFNDEF</tt> variants of all these.)
 
+<a name="gcstruct"/>
+<P> You can use <tt>GC_CPP_EXACT</tt> on a substructure like so:
+
+<pre>
+  class GC_CPP_EXACT(BehaviorList, GCSubStructure) { ...}
+  class GC_CPP_EXACT(ScriptThread, GCFinalized) {
+      BehaviorList GC_STRUCTURE(m_behaviors);
+  };
+</pre>
+
 <a name="data-regions">
 <h4>Data annotations - Data regions</h4>
 
@@ -477,11 +497,13 @@ are several kinds of annotations.
 The field can be a <tt>uintptr_t</tt>, <tt>intptr_t</tt>, or some pointer type
 (where that pointer may carry tags).
 
-<li><P> Substructures, typically <tt>GCList&lt;></tt> and <tt>RCList&lt;></tt> members, are
-     annotated with <tt>GC_STRUCTURE</tt>.  In this case the substructure
-     member must provide a <tt>void gcTrace(MMgc::GC* gc)</tt> method that
-     will be used to trace the substructure.  (See <a href="manual-tracers">the section below</a>
-     on how to write manual tracers.)
+<li><P> Substructures, typically <tt>GCList&lt;></tt>
+     and <tt>RCList&lt;></tt> members, are annotated
+     with <tt>GC_STRUCTURE</tt>.  In this case the substructure member
+     can have its tracer generated like a normal GC class or provide
+     a <tt>void gcTrace(MMgc::GC* gc)</tt> method that will be used to
+     trace the substructure.  (See <a href="manual-tracers">the
+     section below</a> on how to write manual tracers.)
 <pre>
   AtomArray GC_STRUCTURE(m_denseArr);
 </pre>

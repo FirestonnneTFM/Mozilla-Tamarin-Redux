@@ -1099,13 +1099,12 @@ function constructTracerBodies()
     }
 
     function noUsefulTracer(n) {
+        n = n.replace(/^MMgc::/,"")
         switch (n) {
-        case "MMgc::GCFinalizedObject":
         case "GCFinalizedObject":
-        case "MMgc::GCTraceableObject":
         case "GCTraceableObject":
-        case "MMgc::RCObject":
         case "RCObject":
+        case "GCSubStructure":
             return true;
         default:
             return false;
