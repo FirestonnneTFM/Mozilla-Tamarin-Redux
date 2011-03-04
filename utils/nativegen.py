@@ -1938,25 +1938,10 @@ class AbcThunkGen:
         out.println('{')
         out.indent += 1
         out.println('friend class SlotOffsetsAndAsserts;')
-        out.indent -= 1
-        out.println('public:')
-        out.indent += 1
-
-        for slot in sortedSlots:
-            if (slot is not None):
-                assert slot.kind in (TRAIT_Slot, TRAIT_Const)
-                (slotCType, slotArgType, slotRetType, slotMemberType) = slotsTypeInfo[id(slot)]
-                name = to_cname(slot.name)
-                if slotCType == CTYPE_BOOLEAN:
-                    out.println('REALLY_INLINE %s get_%s() const { return m_%s != 0; }' % (slotRetType, name, name))
-                else:
-                    out.println('REALLY_INLINE %s get_%s() const { return m_%s; }' % (slotRetType, name, name))
-                if ((slot.kind == TRAIT_Slot) or (t.has_const_setters)):
-                    out.println('REALLY_INLINE void set_%s(%s newVal) { m_%s = newVal; }' % (name, slotArgType, name))
+        out.println('friend class %s;' % t.fqcppname())
         out.indent -= 1
         out.println('private:')
         out.indent += 1
-
         anonCount = 0
         for slot in sortedSlots:
             if (slot is not None):
@@ -2162,15 +2147,19 @@ class AbcThunkGen:
             for slot in sortedSlots:
                 assert slot.kind in (TRAIT_Slot, TRAIT_Const)
                 (slotCType, slotArgType, slotRetType, slotMemberType) = slotsTypeInfo[id(slot)]
-                name = to_cname(slot.name)
+                slotMemberName = to_cname(slot.name)
+                slotAccessorName = to_cname(slot.name.name) # omit the ns
                 if slot.ns.isPublic():
                     out.println("public:")
                 else:
                     out.println("protected:")
                 out.indent += 1
-                out.println("REALLY_INLINE %s get_%s() const { return %s.get_%s(); }" % (slotRetType, name, t.slotsInstanceName, name));
+                suffix = ""
+                if slotCType == CTYPE_BOOLEAN:
+                    suffix = " != 0"
+                out.println("REALLY_INLINE %s get_%s() const { return %s.m_%s%s; }" % (slotRetType, slotAccessorName, t.slotsInstanceName, slotMemberName, suffix));
                 if ((slot.kind == TRAIT_Slot) or (t.has_const_setters)):
-                    out.println("REALLY_INLINE void set_%s(%s newVal) { %s.set_%s(newVal); }" % (name, slotArgType, t.slotsInstanceName, name))
+                    out.println("REALLY_INLINE void set_%s(%s newVal) { %s.m_%s = newVal; }" % (slotAccessorName, slotArgType, t.slotsInstanceName, slotMemberName))
                 out.indent -= 1
             out.println("private:")
             out.indent += 1

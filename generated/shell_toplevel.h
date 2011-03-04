@@ -296,7 +296,7 @@ class SlotOffsetsAndAsserts;
 class avmplus_CTestClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::CTestClass;
 private:
 };
 //-----------------------------------------------------------
@@ -307,7 +307,7 @@ private:
 class avmshell_MIClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::MIClass;
 private:
 };
 #define DECLARE_SLOTS_MIClass \
@@ -337,7 +337,7 @@ private:
 class avmshell_MIObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::MIObject;
 private:
 };
 #define DECLARE_SLOTS_MIObject \
@@ -356,8 +356,7 @@ private:
 class avmshell_SystemClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE avmplus::ArrayObject* get_argv() const { return m_argv; }
+    friend class avmshell::SystemClass;
 private:
     DRCWB(avmplus::ArrayObject*) m_argv;
 public:
@@ -376,7 +375,7 @@ public:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     public: \
-        REALLY_INLINE avmplus::ArrayObject* get_argv() const { return m_slots_SystemClass.get_argv(); } \
+        REALLY_INLINE avmplus::ArrayObject* get_argv() const { return m_slots_SystemClass.m_argv; } \
     private: \
         avmplus::NativeID::avmshell_SystemClassSlots m_slots_SystemClass \
 
@@ -388,7 +387,7 @@ public:
 class avmshell_FileClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::FileClass;
 private:
 };
 #define DECLARE_SLOTS_FileClass \
@@ -409,7 +408,7 @@ private:
 class avmshell_AbstractBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::AbstractBaseClass;
 private:
 };
 #define DECLARE_SLOTS_AbstractBaseClass \
@@ -430,7 +429,7 @@ private:
 class avmshell_AbstractBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::AbstractBaseObject;
 private:
 };
 #define DECLARE_SLOTS_AbstractBaseObject \
@@ -449,7 +448,7 @@ private:
 class avmshell_RestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::RestrictedBaseClass;
 private:
 };
 #define DECLARE_SLOTS_RestrictedBaseClass \
@@ -479,7 +478,7 @@ private:
 class avmshell_RestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::RestrictedBaseObject;
 private:
 };
 #define DECLARE_SLOTS_RestrictedBaseObject \
@@ -498,7 +497,7 @@ private:
 class avmshell_AbstractRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::AbstractRestrictedBaseClass;
 private:
 };
 #define DECLARE_SLOTS_AbstractRestrictedBaseClass \
@@ -519,7 +518,7 @@ private:
 class avmshell_AbstractRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::AbstractRestrictedBaseObject;
 private:
 };
 #define DECLARE_SLOTS_AbstractRestrictedBaseObject \
@@ -538,7 +537,7 @@ private:
 class avmshell_CheckBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::CheckBaseClass;
 private:
 };
 #define DECLARE_SLOTS_CheckBaseClass \
@@ -569,7 +568,7 @@ private:
 class avmshell_CheckBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::CheckBaseObject;
 private:
 };
 #define DECLARE_SLOTS_CheckBaseObject \
@@ -588,7 +587,7 @@ private:
 class avmplus_CapabilitiesClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::CapabilitiesClass;
 private:
 };
 //-----------------------------------------------------------
@@ -599,7 +598,7 @@ private:
 class avmplus_public_classClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_classClass;
 private:
 };
 //-----------------------------------------------------------
@@ -610,7 +609,7 @@ private:
 class avmplus_public_class_AIR_1_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_AIR_1_0Class;
 private:
 };
 //-----------------------------------------------------------
@@ -621,7 +620,7 @@ private:
 class avmplus_public_class_FP_10_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_FP_10_0Class;
 private:
 };
 //-----------------------------------------------------------
@@ -632,7 +631,7 @@ private:
 class avmplus_public_class_AIR_1_5ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_AIR_1_5Class;
 private:
 };
 //-----------------------------------------------------------
@@ -643,7 +642,7 @@ private:
 class avmplus_public_class_AIR_1_5_1ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_AIR_1_5_1Class;
 private:
 };
 //-----------------------------------------------------------
@@ -654,7 +653,7 @@ private:
 class avmplus_public_class_FP_10_0_32ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_FP_10_0_32Class;
 private:
 };
 //-----------------------------------------------------------
@@ -665,7 +664,7 @@ private:
 class avmplus_public_class_AIR_1_5_2ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_AIR_1_5_2Class;
 private:
 };
 //-----------------------------------------------------------
@@ -676,7 +675,7 @@ private:
 class avmplus_public_class_AIR_1_0_FP_10_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_AIR_1_0_FP_10_0Class;
 private:
 };
 //-----------------------------------------------------------
@@ -687,7 +686,7 @@ private:
 class avmplus_public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Class;
 private:
 };
 //-----------------------------------------------------------
@@ -698,7 +697,7 @@ private:
 class avmplus_public_class_FP_10_0_32_AIR_1_0_FP_10_0ClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Class;
 private:
 };
 //-----------------------------------------------------------
@@ -709,7 +708,7 @@ private:
 class avmshell_NativeSubclassOfAbstractBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::NativeSubclassOfAbstractBaseClass;
 private:
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractBaseClass \
@@ -739,7 +738,7 @@ private:
 class avmshell_NativeSubclassOfAbstractBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::NativeSubclassOfAbstractBaseObject;
 private:
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractBaseObject \
@@ -758,7 +757,7 @@ private:
 class avmplus_SubclassOfAbstractBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::SubclassOfAbstractBaseClass;
 private:
 };
 //-----------------------------------------------------------
@@ -769,7 +768,7 @@ private:
 class avmshell_NativeSubclassOfRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::NativeSubclassOfRestrictedBaseClass;
 private:
 };
 #define DECLARE_SLOTS_NativeSubclassOfRestrictedBaseClass \
@@ -799,7 +798,7 @@ private:
 class avmshell_NativeSubclassOfRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::NativeSubclassOfRestrictedBaseObject;
 private:
 };
 #define DECLARE_SLOTS_NativeSubclassOfRestrictedBaseObject \
@@ -818,7 +817,7 @@ private:
 class avmplus_SubclassOfRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::SubclassOfRestrictedBaseClass;
 private:
 };
 //-----------------------------------------------------------
@@ -829,7 +828,7 @@ private:
 class avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::NativeSubclassOfAbstractRestrictedBaseClass;
 private:
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseClass \
@@ -859,7 +858,7 @@ private:
 class avmshell_NativeSubclassOfAbstractRestrictedBaseObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmshell::NativeSubclassOfAbstractRestrictedBaseObject;
 private:
 };
 #define DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseObject \
@@ -878,7 +877,7 @@ private:
 class avmplus_SubclassOfAbstractRestrictedBaseClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::SubclassOfAbstractRestrictedBaseClass;
 private:
 };
 //-----------------------------------------------------------
@@ -889,7 +888,7 @@ private:
 class avmplus_DomainClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::DomainClass;
 private:
 #define GC_TRIVIAL_TRACER_DomainClass
 };
@@ -920,7 +919,7 @@ private:
 class avmplus_DomainObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::DomainObject;
 private:
 #define GC_TRIVIAL_TRACER_DomainObject
 };
@@ -940,7 +939,7 @@ private:
 class avmplus_StackFrameClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::StackFrameClass;
 private:
 };
 #define DECLARE_SLOTS_StackFrameClass \
@@ -970,15 +969,7 @@ private:
 class avmplus_StackFrameObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE uint32_t get_line() const { return m_line; }
-    REALLY_INLINE void set_line(uint32_t newVal) { m_line = newVal; }
-    REALLY_INLINE avmplus::String* get_name() const { return m_name; }
-    REALLY_INLINE void set_name(avmplus::String* newVal) { m_name = newVal; }
-    REALLY_INLINE avmplus::String* get_file() const { return m_file; }
-    REALLY_INLINE void set_file(avmplus::String* newVal) { m_file = newVal; }
-    REALLY_INLINE double get_scriptID() const { return m_scriptID; }
-    REALLY_INLINE void set_scriptID(double newVal) { m_scriptID = newVal; }
+    friend class avmplus::StackFrameObject;
 private:
     uint32_t m_line;
     DRCWB(avmplus::String*) m_name;
@@ -993,17 +984,17 @@ private:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     public: \
-        REALLY_INLINE uint32_t get_line() const { return m_slots_StackFrameObject.get_line(); } \
-        REALLY_INLINE void set_line(uint32_t newVal) { m_slots_StackFrameObject.set_line(newVal); } \
+        REALLY_INLINE uint32_t get_line() const { return m_slots_StackFrameObject.m_line; } \
+        REALLY_INLINE void set_line(uint32_t newVal) { m_slots_StackFrameObject.m_line = newVal; } \
     public: \
-        REALLY_INLINE avmplus::String* get_name() const { return m_slots_StackFrameObject.get_name(); } \
-        REALLY_INLINE void set_name(avmplus::String* newVal) { m_slots_StackFrameObject.set_name(newVal); } \
+        REALLY_INLINE avmplus::String* get_name() const { return m_slots_StackFrameObject.m_name; } \
+        REALLY_INLINE void set_name(avmplus::String* newVal) { m_slots_StackFrameObject.m_name = newVal; } \
     public: \
-        REALLY_INLINE avmplus::String* get_file() const { return m_slots_StackFrameObject.get_file(); } \
-        REALLY_INLINE void set_file(avmplus::String* newVal) { m_slots_StackFrameObject.set_file(newVal); } \
+        REALLY_INLINE avmplus::String* get_file() const { return m_slots_StackFrameObject.m_file; } \
+        REALLY_INLINE void set_file(avmplus::String* newVal) { m_slots_StackFrameObject.m_file = newVal; } \
     public: \
-        REALLY_INLINE double get_scriptID() const { return m_slots_StackFrameObject.get_scriptID(); } \
-        REALLY_INLINE void set_scriptID(double newVal) { m_slots_StackFrameObject.set_scriptID(newVal); } \
+        REALLY_INLINE double get_scriptID() const { return m_slots_StackFrameObject.m_scriptID; } \
+        REALLY_INLINE void set_scriptID(double newVal) { m_slots_StackFrameObject.m_scriptID = newVal; } \
     private: \
         avmplus::NativeID::avmplus_StackFrameObjectSlots m_slots_StackFrameObject \
 
@@ -1015,7 +1006,7 @@ private:
 class avmplus_SampleClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::SampleClass;
 private:
 };
 #define DECLARE_SLOTS_SampleClass \
@@ -1045,11 +1036,7 @@ private:
 class avmplus_SampleObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE avmplus::ArrayObject* get_stack() const { return m_stack; }
-    REALLY_INLINE void set_stack(avmplus::ArrayObject* newVal) { m_stack = newVal; }
-    REALLY_INLINE double get_time() const { return m_time; }
-    REALLY_INLINE void set_time(double newVal) { m_time = newVal; }
+    friend class avmplus::SampleObject;
 private:
     DRCWB(avmplus::ArrayObject*) m_stack;
     double m_time;
@@ -1062,11 +1049,11 @@ private:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     public: \
-        REALLY_INLINE avmplus::ArrayObject* get_stack() const { return m_slots_SampleObject.get_stack(); } \
-        REALLY_INLINE void set_stack(avmplus::ArrayObject* newVal) { m_slots_SampleObject.set_stack(newVal); } \
+        REALLY_INLINE avmplus::ArrayObject* get_stack() const { return m_slots_SampleObject.m_stack; } \
+        REALLY_INLINE void set_stack(avmplus::ArrayObject* newVal) { m_slots_SampleObject.m_stack = newVal; } \
     public: \
-        REALLY_INLINE double get_time() const { return m_slots_SampleObject.get_time(); } \
-        REALLY_INLINE void set_time(double newVal) { m_slots_SampleObject.set_time(newVal); } \
+        REALLY_INLINE double get_time() const { return m_slots_SampleObject.m_time; } \
+        REALLY_INLINE void set_time(double newVal) { m_slots_SampleObject.m_time = newVal; } \
     private: \
         avmplus::NativeID::avmplus_SampleObjectSlots m_slots_SampleObject \
 
@@ -1078,11 +1065,7 @@ private:
 class avmplus_ClassFactoryClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE avmplus::ClassClosure* get_StackFrameClass() const { return m_StackFrameClass; }
-    REALLY_INLINE avmplus::ClassClosure* get_SampleClass() const { return m_SampleClass; }
-    REALLY_INLINE avmplus::ClassClosure* get_DeleteObjectSampleClass() const { return m_DeleteObjectSampleClass; }
-    REALLY_INLINE avmplus::ClassClosure* get_NewObjectSampleClass() const { return m_NewObjectSampleClass; }
+    friend class avmplus::ClassFactoryClass;
 private:
     DRCWB(avmplus::ClassClosure*) m_StackFrameClass;
     DRCWB(avmplus::ClassClosure*) m_SampleClass;
@@ -1099,13 +1082,13 @@ private:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     public: \
-        REALLY_INLINE avmplus::ClassClosure* get_StackFrameClass() const { return m_slots_ClassFactoryClass.get_StackFrameClass(); } \
+        REALLY_INLINE avmplus::ClassClosure* get_StackFrameClass() const { return m_slots_ClassFactoryClass.m_StackFrameClass; } \
     public: \
-        REALLY_INLINE avmplus::ClassClosure* get_SampleClass() const { return m_slots_ClassFactoryClass.get_SampleClass(); } \
+        REALLY_INLINE avmplus::ClassClosure* get_SampleClass() const { return m_slots_ClassFactoryClass.m_SampleClass; } \
     public: \
-        REALLY_INLINE avmplus::ClassClosure* get_DeleteObjectSampleClass() const { return m_slots_ClassFactoryClass.get_DeleteObjectSampleClass(); } \
+        REALLY_INLINE avmplus::ClassClosure* get_DeleteObjectSampleClass() const { return m_slots_ClassFactoryClass.m_DeleteObjectSampleClass; } \
     public: \
-        REALLY_INLINE avmplus::ClassClosure* get_NewObjectSampleClass() const { return m_slots_ClassFactoryClass.get_NewObjectSampleClass(); } \
+        REALLY_INLINE avmplus::ClassClosure* get_NewObjectSampleClass() const { return m_slots_ClassFactoryClass.m_NewObjectSampleClass; } \
     private: \
         avmplus::NativeID::avmplus_ClassFactoryClassSlots m_slots_ClassFactoryClass \
 
@@ -1117,7 +1100,7 @@ private:
 class avmplus_NewObjectSampleClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::NewObjectSampleClass;
 private:
 };
 #define DECLARE_SLOTS_NewObjectSampleClass \
@@ -1147,11 +1130,7 @@ private:
 class avmplus_NewObjectSampleObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE avmplus::ClassClosure* get_type() const { return m_type; }
-    REALLY_INLINE void set_type(avmplus::ClassClosure* newVal) { m_type = newVal; }
-    REALLY_INLINE double get_id() const { return m_id; }
-    REALLY_INLINE void set_id(double newVal) { m_id = newVal; }
+    friend class avmplus::NewObjectSampleObject;
 private:
     DRCWB(avmplus::ClassClosure*) m_type;
     double m_id;
@@ -1164,11 +1143,11 @@ private:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     public: \
-        REALLY_INLINE avmplus::ClassClosure* get_type() const { return m_slots_NewObjectSampleObject.get_type(); } \
-        REALLY_INLINE void set_type(avmplus::ClassClosure* newVal) { m_slots_NewObjectSampleObject.set_type(newVal); } \
+        REALLY_INLINE avmplus::ClassClosure* get_type() const { return m_slots_NewObjectSampleObject.m_type; } \
+        REALLY_INLINE void set_type(avmplus::ClassClosure* newVal) { m_slots_NewObjectSampleObject.m_type = newVal; } \
     public: \
-        REALLY_INLINE double get_id() const { return m_slots_NewObjectSampleObject.get_id(); } \
-        REALLY_INLINE void set_id(double newVal) { m_slots_NewObjectSampleObject.set_id(newVal); } \
+        REALLY_INLINE double get_id() const { return m_slots_NewObjectSampleObject.m_id; } \
+        REALLY_INLINE void set_id(double newVal) { m_slots_NewObjectSampleObject.m_id = newVal; } \
     private: \
         avmplus::NativeID::avmplus_NewObjectSampleObjectSlots m_slots_NewObjectSampleObject \
 
@@ -1180,7 +1159,7 @@ private:
 class avmplus_DeleteObjectSampleClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::DeleteObjectSampleClass;
 private:
 };
 #define DECLARE_SLOTS_DeleteObjectSampleClass \
@@ -1210,11 +1189,7 @@ private:
 class avmplus_DeleteObjectSampleObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE double get_id() const { return m_id; }
-    REALLY_INLINE void set_id(double newVal) { m_id = newVal; }
-    REALLY_INLINE double get_size() const { return m_size; }
-    REALLY_INLINE void set_size(double newVal) { m_size = newVal; }
+    friend class avmplus::DeleteObjectSampleObject;
 private:
     double m_id;
     double m_size;
@@ -1227,11 +1202,11 @@ private:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     public: \
-        REALLY_INLINE double get_id() const { return m_slots_DeleteObjectSampleObject.get_id(); } \
-        REALLY_INLINE void set_id(double newVal) { m_slots_DeleteObjectSampleObject.set_id(newVal); } \
+        REALLY_INLINE double get_id() const { return m_slots_DeleteObjectSampleObject.m_id; } \
+        REALLY_INLINE void set_id(double newVal) { m_slots_DeleteObjectSampleObject.m_id = newVal; } \
     public: \
-        REALLY_INLINE double get_size() const { return m_slots_DeleteObjectSampleObject.get_size(); } \
-        REALLY_INLINE void set_size(double newVal) { m_slots_DeleteObjectSampleObject.set_size(newVal); } \
+        REALLY_INLINE double get_size() const { return m_slots_DeleteObjectSampleObject.m_size; } \
+        REALLY_INLINE void set_size(double newVal) { m_slots_DeleteObjectSampleObject.m_size = newVal; } \
     private: \
         avmplus::NativeID::avmplus_DeleteObjectSampleObjectSlots m_slots_DeleteObjectSampleObject \
 
@@ -1243,14 +1218,7 @@ private:
 class avmplus_TraceClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE int32_t get_OFF() const { return m_OFF; }
-    REALLY_INLINE int32_t get_METHODS() const { return m_METHODS; }
-    REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_METHODS_WITH_ARGS; }
-    REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_METHODS_AND_LINES; }
-    REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_METHODS_AND_LINES_WITH_ARGS; }
-    REALLY_INLINE avmplus::Atom get_FILE() const { return m_FILE; }
-    REALLY_INLINE avmplus::Atom get_LISTENER() const { return m_LISTENER; }
+    friend class avmplus::TraceClass;
 private:
     int32_t m_OFF;
     int32_t m_METHODS;
@@ -1270,19 +1238,19 @@ private:
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
     public: \
-        REALLY_INLINE int32_t get_OFF() const { return m_slots_TraceClass.get_OFF(); } \
+        REALLY_INLINE int32_t get_OFF() const { return m_slots_TraceClass.m_OFF; } \
     public: \
-        REALLY_INLINE int32_t get_METHODS() const { return m_slots_TraceClass.get_METHODS(); } \
+        REALLY_INLINE int32_t get_METHODS() const { return m_slots_TraceClass.m_METHODS; } \
     public: \
-        REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_WITH_ARGS(); } \
+        REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_slots_TraceClass.m_METHODS_WITH_ARGS; } \
     public: \
-        REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_slots_TraceClass.get_METHODS_AND_LINES(); } \
+        REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_slots_TraceClass.m_METHODS_AND_LINES; } \
     public: \
-        REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_AND_LINES_WITH_ARGS(); } \
+        REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_slots_TraceClass.m_METHODS_AND_LINES_WITH_ARGS; } \
     public: \
-        REALLY_INLINE avmplus::Atom get_FILE() const { return m_slots_TraceClass.get_FILE(); } \
+        REALLY_INLINE avmplus::Atom get_FILE() const { return m_slots_TraceClass.m_FILE; } \
     public: \
-        REALLY_INLINE avmplus::Atom get_LISTENER() const { return m_slots_TraceClass.get_LISTENER(); } \
+        REALLY_INLINE avmplus::Atom get_LISTENER() const { return m_slots_TraceClass.m_LISTENER; } \
     private: \
         avmplus::NativeID::avmplus_TraceClassSlots m_slots_TraceClass \
 
@@ -1294,7 +1262,7 @@ private:
 class avmplus_DictionaryClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::DictionaryClass;
 private:
 #define GC_TRIVIAL_TRACER_DictionaryClass
 };
@@ -1331,7 +1299,7 @@ private:
 class avmplus_DictionaryObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::DictionaryObject;
 private:
 #define GC_TRIVIAL_TRACER_DictionaryObject
 };
@@ -1351,9 +1319,7 @@ private:
 class avmplus_EndianClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
-    REALLY_INLINE avmplus::String* get_BIG_ENDIAN() const { return m_BIG_ENDIAN; }
-    REALLY_INLINE avmplus::String* get_LITTLE_ENDIAN() const { return m_LITTLE_ENDIAN; }
+    friend class avmplus::EndianClass;
 private:
     DRCWB(avmplus::String*) m_BIG_ENDIAN;
     DRCWB(avmplus::String*) m_LITTLE_ENDIAN;
@@ -1366,7 +1332,7 @@ private:
 class avmplus_JObjectClassSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::JObjectClass;
 private:
 };
 #define DECLARE_SLOTS_JObjectClass \
@@ -1396,7 +1362,7 @@ private:
 class avmplus_JObjectSlots
 {
     friend class SlotOffsetsAndAsserts;
-public:
+    friend class avmplus::JObject;
 private:
 };
 #define DECLARE_SLOTS_JObject \
