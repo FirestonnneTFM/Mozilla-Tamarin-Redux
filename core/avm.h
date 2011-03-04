@@ -49,14 +49,14 @@ namespace avm {
     // -------- Object --------
 
     // If the given Object is a Function (or subclass thereof), return true. Otherwise, return false.
-    bool            isFunction(avmplus::ScriptObject* o);
+    bool            isFunction(const avmplus::ScriptObject* o);
 
     // given an Object that is a Function or MethodClosure, return the CodeContext
     // that is associated with the function's point of definition.
     // It will not return a useful result for anything other than a Function (or MethodClosure
     // or other subclass of Function): passing such an object to this call will return NULL
     // (and assert in debug builds.)
-    avmplus::CodeContext*     getFunctionCodeContext(avmplus::ScriptObject* o);
+    avmplus::CodeContext*     getFunctionCodeContext(const avmplus::ScriptObject* o);
 
     // given an Object, return the CodeContext that is associated with the object's
     // point of definition. Note that this API is deprecated and should really only be
@@ -64,7 +64,7 @@ namespace avm {
     // It will not return a useful result for Functions, MethodClosures, activation
     // objects, or catch objects: passing such an object to this call will return NULL
     // (and assert in debug builds.)
-    avmplus::CodeContext*     getClassCodeContext(avmplus::ScriptObject* o);
+    avmplus::CodeContext*     getClassCodeContext(const avmplus::ScriptObject* o);
 
 } // namespace avm
 
