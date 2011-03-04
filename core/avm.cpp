@@ -46,12 +46,12 @@ namespace avm {
 
     // -------- AvmObject --------
 
-    bool isFunction(avmplus::ScriptObject* so)
+    bool isFunction(const avmplus::ScriptObject* so)
     {
         return so && so->core()->isFunction(so->atom());
     }
 
-    avmplus::CodeContext* getFunctionCodeContext(avmplus::ScriptObject* so)
+    avmplus::CodeContext* getFunctionCodeContext(const avmplus::ScriptObject* so)
     {
         if (!isFunction(so))
         {
@@ -65,7 +65,7 @@ namespace avm {
         return cc;
     }
 
-    avmplus::CodeContext* getClassCodeContext(avmplus::ScriptObject* so)
+    avmplus::CodeContext* getClassCodeContext(const avmplus::ScriptObject* so)
     {
         if (!so)
             return NULL;
