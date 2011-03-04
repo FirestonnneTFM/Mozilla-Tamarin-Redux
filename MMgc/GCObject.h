@@ -65,7 +65,7 @@ namespace MMgc
     {
     public:
         // Empty ctor to avoid silly no-public members compiler warnings.
-        class GCSubStructure() {}
+        GCSubStructure() {}
 
         //  GCObject's local definition of GCMember
         template<class T>
