@@ -58,11 +58,4 @@ REALLY_INLINE void CodeWriter::writeOp2(const FrameState* state, const uint8_t *
     writeOp2(state, pc, opcode, opd1, opd2, NULL);
 }
 
-#ifdef VMCFG_LOOKUP_CACHE
-REALLY_INLINE uint32_t LookupCacheBuilder::get_entry(int i)
-{
-    return caches[i];
-}
-#endif
-
 } // namespace avmplus
