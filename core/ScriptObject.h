@@ -75,7 +75,20 @@ namespace avmplus
         AvmCore* core() const;
         MMgc::GC* gc() const;
         Toplevel* toplevel() const;
+        /**
+         * Returns a pointer to hashtable to use for dynamic
+         * properties, this is a derived pointer and can never be
+         * NULL.  This method should not be called until the full
+         * construction sequence (C++ and AS3) is complete and will
+         * assert if called on a Dictionary before its init method has
+         * run.
+         */
         InlineHashtable* getTable() const;
+        /**
+         * Like getTable but doesn't init the table if its empty, and
+         * will return NULL and not assert on a yet to be initialized
+         * Dictionary.
+         */
         InlineHashtable* getTableNoInit() const;
 
         Atom getSlotAtom(uint32_t slot);
