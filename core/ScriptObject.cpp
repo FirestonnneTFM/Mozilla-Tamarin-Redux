@@ -117,7 +117,10 @@ namespace avmplus
         {
             // Avoid initializing the hash table here
             InlineHashtable* iht = getTableNoInit();
-            iht->gcTrace(gc);
+            // The iht pointer can be NULL for Dictionary objects that
+            // haven't had init called yet.
+            if(iht)
+                iht->gcTrace(gc);
         }
 
         return false;
@@ -155,7 +158,9 @@ namespace avmplus
         {
             //DictionaryObjects store pointer to HeapHashtable at
             //the hashtable offset
-            return (*hht)->get_ht();
+            InlineHashtable *ihp = (*hht)->get_ht();
+            AvmAssertMsg(ihp != NULL, "Illegal to call getTable before Dictionary init is called");
+            return ihp;
         }
     }
 
