@@ -148,22 +148,39 @@ namespace avmplus
         m_atomsAndFlags &= ~kHasDeletedItems;
     }
 
-    REALLY_INLINE Atom* InlineHashtable::getAtoms()
+    REALLY_INLINE InlineHashtable::AtomContainer* InlineHashtable::getAtomContainer() const
     {
-        return (Atom*)(m_atomsAndFlags & ~kAtomFlags);
+        return (AtomContainer*)(m_atomsAndFlags & ~kAtomFlags);
     }
 
     REALLY_INLINE const Atom* InlineHashtable::getAtoms() const
     {
-        return (const Atom*)(m_atomsAndFlags & ~kAtomFlags);
+        return (const Atom*)getAtomContainer()->atoms;
+    }
+
+    REALLY_INLINE Atom* InlineHashtable::getAtoms()
+    {
+        return (Atom*)getAtomContainer()->atoms;
+    }
+    
+    REALLY_INLINE size_t InlineHashtable::AtomContainer::count() const
+    { 
+        return (MMgc::GC::Size(this) - sizeof(AtomContainer) + sizeof(Atom)) / sizeof(Atom); 
+    }
+
+    REALLY_INLINE InlineHashtable::AtomContainer* InlineHashtable::createAtoms(MMgc::GC* gc, int capacity) const
+    { 
+        size_t extra = 0;
+        if (capacity > 0)
+            extra = MMgc::GCHeap::CheckForCallocSizeOverflow(capacity-1, sizeof(Atom));
+        return new (gc, MMgc::kExact, extra) AtomContainer();
     }
 
     REALLY_INLINE void InlineHashtable::freeAtoms()
     {
-        Atom* atoms = (Atom*)(m_atomsAndFlags & ~kAtomFlags);
+        AtomContainer* atoms = getAtomContainer();
         m_atomsAndFlags = m_atomsAndFlags & kAtomFlags;  // Must clear the pointer bits to avoid a dangling pointer
-        MMgc::GC* gc = MMgc::GC::GetGC(atoms);
-        gc->Free(atoms);
+        delete atoms;
     }
 
     // @todo -- move this mess to VMPI, see https://bugzilla.mozilla.org/show_bug.cgi?id=546354
@@ -257,12 +274,6 @@ namespace avmplus
     REALLY_INLINE int HeapHashtableRC::next(int index)
     {
         return ht.next(index);
-    }
-
-    REALLY_INLINE void InlineHashtable::gcTrace(MMgc::GC* gc)
-    {
-        if (getAtoms() != NULL && MMgc::GC::TraceObjectGuard(getAtoms()))
-            gc->TraceAtoms(getAtoms(), getCapacity());
     }
 
     REALLY_INLINE Atom HeapHashtableRC::keyAt(int index)

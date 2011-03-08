@@ -66,7 +66,7 @@ namespace avmplus
         AvmAssert(getCapacity());
         MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
         uint32_t const cap = getCapacity() + (hasIterIndex() ? 2 : 0);
-        setAtoms((Atom *)gc->Calloc(cap, sizeof(Atom), GC::kContainsPointers|GC::kZero));
+        setAtoms(createAtoms(gc, cap));
     }
 
     void InlineHashtable::destroy()
@@ -82,7 +82,7 @@ namespace avmplus
         m_logCapacity = 0;
     }
 
-    void InlineHashtable::setAtoms(Atom *newAtoms)
+    void InlineHashtable::setAtoms(InlineHashtable::AtomContainer* newAtoms)
     {
         GC *gc = GC::GetGC(newAtoms);
         uintptr_t newVal = uintptr_t(newAtoms) | (m_atomsAndFlags & kAtomFlags);
@@ -92,17 +92,18 @@ namespace avmplus
     void InlineHashtable::put(Atom name, Atom value)
     {
         AvmAssert(name != EMPTY && value != EMPTY);
-        Atom* atoms = getAtoms();
+        AtomContainer* atomContainer = getAtomContainer();
+        Atom* atoms = atomContainer->atoms;
         int i = find(name, atoms, getCapacity());
         GC *gc = GC::GetGC(atoms);
         if (removeDontEnumMask(atoms[i]) != name) {
             AvmAssert(!isFull());
             //atoms[i] = name;
-            WBATOM(gc, atoms, &atoms[i], name);
+            WBATOM(gc, atomContainer, &atoms[i], name);
             m_size++;
         }
         //atoms[i+1] = value;
-        WBATOM(gc, atoms, &atoms[i+1], value);
+        WBATOM(gc, atomContainer, &atoms[i+1], value);
     }
 
     Atom InlineHashtable::get(Atom name) const
@@ -262,7 +263,8 @@ namespace avmplus
         GC* gc = GC::GetGC(atoms);
         MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
         const uint32_t newCapacityAlloc = newCapacity + (hasIterIndex() ? 2 : 0);
-        Atom* newAtoms = (Atom*)gc->Calloc(newCapacityAlloc, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+        AtomContainer* atomContainer = createAtoms(gc, newCapacityAlloc);
+        Atom* newAtoms = atomContainer->atoms;
         // WE#2621977 -- the behavior of growing-during-enumeration has always been ill-defined,
         // but this change caused that to (effectively) terminate the enumeration. This is a hack:
         // if we have an iter index, copy it over to preserve the previous oddball behavior. (srj)
@@ -275,7 +277,7 @@ namespace avmplus
         }
         m_size = rehash(atoms, oldCapacity, newAtoms, newCapacity);
         freeAtoms();
-        setAtoms(newAtoms);
+        setAtoms(atomContainer);
         setCapacity(newCapacity);
         clrHasDeletedItems();
     }
@@ -345,13 +347,14 @@ namespace avmplus
         {
             GC* gc = GC::GetGC(atoms);
             MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
-            Atom* newAtoms = (Atom*)gc->Calloc(cap+2, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+            AtomContainer* atomContainer = createAtoms(gc, cap+2);
+            Atom* newAtoms = atomContainer->atoms;
             // no need to rehash: size is the same as far as atoms are concerned
             VMPI_memcpy(newAtoms, atoms, cap*sizeof(Atom));
             freeAtoms();
             atoms = newAtoms;
             m_atomsAndFlags |= kHasIterIndex;
-            setAtoms(newAtoms);
+            setAtoms(atomContainer);
         }
 
         AvmAssert(hasIterIndex()); // @todo

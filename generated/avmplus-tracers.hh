@@ -839,6 +839,23 @@ bool AbcInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #endif // DEBUGGER
 
+bool InlineHashtable::AtomContainer::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    const size_t _xact_work_increment = 2000/sizeof(void*);
+    const size_t _xact_work_count = count();
+    if (_xact_cursor * _xact_work_increment >= _xact_work_count)
+        return false;
+    size_t _xact_work = _xact_work_increment;
+    bool _xact_more = true;
+    if ((_xact_cursor + 1) * _xact_work_increment >= _xact_work_count)
+    {
+        _xact_work = _xact_work_count - (_xact_cursor * _xact_work_increment);
+        _xact_more = false;
+    }
+    gc->TraceAtoms((atoms+(_xact_cursor * _xact_work_increment)), _xact_work);
+    return _xact_more;
+}
+
 bool AttributeE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
@@ -984,6 +1001,14 @@ bool HeapHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)gc;
     (void)_xact_cursor;
     ht.gcTrace(gc);
+    return false;
+}
+
+bool InlineHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    gc->TraceLocation(&m_atomsAndFlags);
     return false;
 }
 

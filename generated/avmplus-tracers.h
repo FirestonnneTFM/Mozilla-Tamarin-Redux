@@ -44,6 +44,7 @@
 #define avmplus_ArgumentErrorObject_isExactInterlock 1
 #define avmplus_ArrayClass_isExactInterlock 1
 #define avmplus_ArrayObject_isExactInterlock 1
+#define avmplus_AtomContainer_isExactInterlock 1
 #define avmplus_AttributeE4XNode_isExactInterlock 1
 #define avmplus_BooleanClass_isExactInterlock 1
 #define avmplus_ByteArrayClass_isExactInterlock 1
@@ -74,6 +75,7 @@
 #define avmplus_FunctionEnv_isExactInterlock 1
 #define avmplus_FunctionObject_isExactInterlock 1
 #define avmplus_HeapHashtable_isExactInterlock 1
+#define avmplus_InlineHashtable_isExactInterlock 1
 #define avmplus_IntClass_isExactInterlock 1
 #define avmplus_IntVectorClass_isExactInterlock 1
 #define avmplus_IntVectorObject_isExactInterlock 1
