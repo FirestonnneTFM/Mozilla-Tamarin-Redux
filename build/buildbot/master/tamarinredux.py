@@ -58,31 +58,30 @@ class tamarinredux:
     compile = Scheduler(name="compile", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile, properties={'silent':'false'},
                      builderNames=["windows-compile", "windows64-compile",
                                    "mac-intel-10.5-compile", "mac64-intel-compile",
-                                   "linux-compile", "linux2-compile",
+                                   "linux-compile",
                                    "linux64-compile",
                                    "solaris-sparc-compile",
                                    "android-compile",
                                    "linux-arm-compile", "linux-arm2-compile", "linux-arm3-compile",
                                    "linux-mips-compile",
-                                   "linux-sh4-compile"])
+                                    ])
 
     smoke = BuilderDependent(name="smoke",upstream=compile, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-smoke", "windows64-smoke",
                                    "mac-intel-10.5-smoke", "mac64-intel-smoke",
-                                   "linux-smoke", "linux2-smoke",
+                                   "linux-smoke",
                                    "linux64-smoke",
                                    "solaris-sparc-smoke",
                                    "android-smoke",
                                    "linux-arm-smoke", "linux-arm2-smoke", "linux-arm3-smoke",
                                    "linux-mips-smoke",
-                                   "linux-sh4-smoke"],
+                                   ],
                     builderDependencies=[
                                   ["windows-smoke", "windows-compile"], 
                                   ["windows64-smoke", "windows64-compile"], 
                                   ["mac-intel-10.5-smoke", "mac-intel-10.5-compile"],
                                   ["mac64-intel-smoke", "mac64-intel-compile"],
                                   ["linux-smoke", "linux-compile"],
-                                  ["linux2-smoke", "linux2-compile"],
                                   ["linux64-smoke", "linux64-compile"],
                                   ["solaris-sparc-smoke", "solaris-sparc-compile"],
                                   ["android-smoke","android-compile"],
@@ -90,19 +89,18 @@ class tamarinredux:
                                   ["linux-arm2-smoke","linux-compile"],
                                   ["linux-arm3-smoke","linux-compile"],
                                   ["linux-mips-smoke","linux-mips-compile"],
-                                  ["linux-sh4-smoke","linux2-compile"],
                                  ])
 
     test = BuilderDependent(name="test",upstream=smoke, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-test", "windows64-test",
                                    "mac-intel-10.5-test", "mac64-intel-test",
-                                   "linux-test", "linux2-test",
+                                   "linux-test",
                                    "linux64-test",
                                    "solaris-sparc-test",
                                    "android-test",
                                    "linux-arm-test", "linux-arm2-test", "linux-arm3-test",
                                    "linux-mips-test",
-                                   "linux-sh4-test"],
+                                   ],
                     builderDependencies=[
                                   ["windows-test", "windows-smoke"], 
                                   ["windows64-test", "windows64-smoke"], 
@@ -117,7 +115,6 @@ class tamarinredux:
                                   ["linux-arm2-test", "linux-arm2-smoke"],
                                   ["linux-arm3-test", "linux-arm3-smoke"],
                                   ["linux-mips-test", "linux-mips-smoke"],
-                                  ["linux-sh4-test", "linux-sh4-smoke"],
                                  ])
 
     performance = PhaseTwoScheduler(name="performance", branch="%s-performance" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
@@ -391,52 +388,6 @@ class tamarinredux:
     }
 
 
-    ####################################
-    #### builder for linux2-compile ####
-    ####################################
-    linux2_compile_factory = factory.BuildFactory()
-    linux2_compile_factory.addStep(sync_clean)
-    linux2_compile_factory.addStep(sync_clone(url=HG_URL))
-    linux2_compile_factory.addStep(sync_update)
-    linux2_compile_factory.addStep(bb_slaveupdate(slave="linux"))
-    linux2_compile_factory.addStep(compile_builtin)
-    linux2_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=sh4-linux', 'avmshell_sh4', 'true'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'CXX': 'sh4-linux-g++',
-                    'CC' : 'sh4-linux-gcc',
-                    'LD' : 'sh4-linux-ld',
-                    'AR' : 'sh4-linux-ar',
-                },
-                description='starting Release_sh4-linux build...',
-                descriptionDone='finished Release_sh4-linux build.',
-                name="Release_sh4-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    linux2_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=sh4-linux', 'avmshell_sh4_d', 'true'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'CXX': 'sh4-linux-g++',
-                    'CC' : 'sh4-linux-gcc',
-                    'LD' : 'sh4-linux-ld',
-                    'AR' : 'sh4-linux-ar',
-                },
-                description='starting Debug_sh4-linux build...',
-                descriptionDone='finished Debug_sh4-linux build.',
-                name="Debug_sh4-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    
-    linux2_compile_builder = {
-                'name': "linux2-compile",
-                'slavename': "linux2",
-                'factory': linux2_compile_factory,
-                'builddir': './linux2-compile',
-    }
-
-
     #####################################
     #### builder for linux64-compile ####
     #####################################
@@ -605,22 +556,6 @@ class tamarinredux:
                 'builddir': './linux-mips-compile',
     }
 
-    ###############################
-    #### builder for linux-sh4 ####
-    ###############################
-    linux_sh4_compile_factory = factory.BuildFactory()
-    linux_sh4_compile_factory.addStep(sync_clean)
-    linux_sh4_compile_factory.addStep(sync_clone(url=HG_URL))
-    linux_sh4_compile_factory.addStep(sync_update)
-    linux_sh4_compile_factory.addStep(bb_slaveupdate(slave="linux-sh4"))
-
-    linux_sh4_compile_builder = {
-                'name': "linux-sh4-compile",
-                'slavename': "linux-sh4",
-                'factory': linux_sh4_compile_factory,
-                'builddir': './linux-sh4-compile',
-    }
-
     
 
     ################################################################################
@@ -712,22 +647,6 @@ class tamarinredux:
                 'slavename': "linux",
                 'factory': linux_smoke_factory,
                 'builddir': './linux-smoke',
-    }
-
-    ##################################
-    #### builder for linux2-smoke ####
-    ##################################
-    linux2_smoke_factory = factory.BuildFactory()
-    linux2_smoke_factory.addStep(download_testmedia)
-    # Machine currently ONLY compiles for SH4 platform
-    #linux2_smoke_factory.addStep(test_smoke)
-    #linux2_smoke_factory.addStep(util_process_clean)
-
-    linux2_smoke_builder = {
-                'name': "linux2-smoke",
-                'slavename': "linux2",
-                'factory': linux2_smoke_factory,
-                'builddir': './linux2-smoke',
     }
 
 
@@ -862,27 +781,6 @@ class tamarinredux:
                 'builddir': './linux-mips-smoke',
     }
 
-    ##########################################
-    #### builder for linux-sh4-smoke      ####
-    ##########################################
-    linux_sh4_smoke_factory = factory.BuildFactory()
-    linux_sh4_smoke_factory.addStep(download_testmedia)
-    linux_sh4_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    linux_sh4_smoke_factory.addStep(util_process_clean)
-
-    linux_sh4_smoke_builder = {
-                'name': "linux-sh4-smoke",
-                'slavename': "linux-sh4",
-                'factory': linux_sh4_smoke_factory,
-                'builddir': './linux-sh4-smoke',
-    }
 
 
     ################################################################################
@@ -1016,23 +914,6 @@ class tamarinredux:
                 'slavename': "linux",
                 'factory': linux_test_factory,
                 'builddir': './linux-test',
-    }
-
-
-    #################################
-    #### builder for linux2-test ####
-    #################################
-    linux2_test_factory = factory.BuildFactory()
-    # Builder currently ONLY compiles for the SH4 platform
-    linux2_test_factory.addStep(util_process_clean)
-    linux2_test_factory.addStep(util_clean_buildsdir)
-    linux2_test_factory.addStep(sync_clean)
-
-    linux2_test_builder = {
-                'name': "linux2-test",
-                'slavename': "linux2",
-                'factory': linux2_test_factory,
-                'builddir': './linux2-test',
     }
 
 
@@ -1170,23 +1051,6 @@ class tamarinredux:
                 'slavename': "linux-mips",
                 'factory': linux_mips_test_factory,
                 'builddir': './linux-mips-test',
-    }
-
-
-    #########################################
-    #### builder for linux-sh4-test      ####
-    #########################################
-    linux_sh4_test_factory = factory.BuildFactory()
-    linux_sh4_test_factory.addStep(test_generic(name="Release", shellname="avmshell_sh4", vmargs="", config="", scriptargs=""))
-    linux_sh4_test_factory.addStep(util_process_clean)
-    linux_sh4_test_factory.addStep(util_clean_buildsdir)
-    linux_sh4_test_factory.addStep(sync_clean)
-
-    linux_sh4_test_builder = {
-                'name': "linux-sh4-test",
-                'slavename': "linux-sh4",
-                'factory': linux_sh4_test_factory,
-                'builddir': './linux-sh4-test',
     }
 
 
@@ -1859,7 +1723,6 @@ class tamarinredux:
                 mac_intel_105_compile_builder,
                 mac_intel_64_compile_builder,
                 linux_compile_builder,
-                linux2_compile_builder,
                 linux_64_compile_builder,
                 solaris_sparc_compile_builder,
                 android_compile_builder,
@@ -1867,14 +1730,12 @@ class tamarinredux:
                 linux_arm2_compile_builder,
                 linux_arm3_compile_builder,
                 linux_mips_compile_builder,
-                linux_sh4_compile_builder,
                 
                 windows_smoke_builder,
                 windows_64_smoke_builder,
                 mac_intel_105_smoke_builder,
                 mac_intel_64_smoke_builder,
                 linux_smoke_builder,
-                linux2_smoke_builder,
                 linux_64_smoke_builder,
                 solaris_sparc_smoke_builder,
                 android_smoke_builder,
@@ -1882,14 +1743,12 @@ class tamarinredux:
                 linux_arm2_smoke_builder,
                 linux_arm3_smoke_builder,
                 linux_mips_smoke_builder,
-                linux_sh4_smoke_builder,
                 
                 windows_test_builder,
                 windows_64_test_builder,
                 mac_intel_105_test_builder,
                 mac_intel_64_test_builder,
                 linux_test_builder,
-                linux2_test_builder,
                 linux_64_test_builder,
                 solaris_sparc_test_builder,
                 android_test_builder,
@@ -1897,7 +1756,6 @@ class tamarinredux:
                 linux_arm2_test_builder,
                 linux_arm3_test_builder,
                 linux_mips_test_builder,
-                linux_sh4_test_builder,
 
                 windows_performance_builder,
                 mac_performance_builder,
