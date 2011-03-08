@@ -1104,7 +1104,7 @@ function constructTracerBodies()
         case "GCFinalizedObject":
         case "GCTraceableObject":
         case "RCObject":
-        case "GCSubStructure":
+        case "GCInlineObject":
             return true;
         default:
             return false;

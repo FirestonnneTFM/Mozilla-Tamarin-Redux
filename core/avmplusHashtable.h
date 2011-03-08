@@ -64,7 +64,7 @@ namespace avmplus
     // NOTE NOTE NOTE NOTE
     // NOTE NOTE NOTE NOTE
     // NOTE NOTE NOTE NOTE
-    class GC_CPP_EXACT(InlineHashtable, MMgc::GCSubStructure)
+    class GC_CPP_EXACT(InlineHashtable, MMgc::GCInlineObject)
     {
         friend class HeapHashtable;
         friend class HeapHashtableRC;
