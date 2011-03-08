@@ -242,10 +242,10 @@ important:
 	 <P> If a class contains GC pointers and isn't allocated directly
      but is instead used to compose other GCObjects as an inline
      member we've
-     introduced <tt>GCSubStructure</tt>.  <tt>GCSubStructure</tt>
+     introduced <tt>GCInlineObject</tt>.  <tt>GCInlineObject</tt>
      subclasses can use the same annotation system and have generated
      tracers just like objects allocated
-     directly.  <tt>GCSubStructure</tt> does not introduce a vtable or
+     directly.  <tt>GCInlineObject</tt> does not introduce a vtable or
      any other members and where it is used must be decorated with the
      GC_STRUCTURE annotation (see <a href="#gcstruct">example</a>).
 
@@ -435,7 +435,7 @@ an <tt>#ifdef</tt> block in the source file alread.  (There are also <tt>_IF</tt
 <P> You can use <tt>GC_CPP_EXACT</tt> on a substructure like so:
 
 <pre>
-  class GC_CPP_EXACT(BehaviorList, GCSubStructure) { ...}
+  class GC_CPP_EXACT(BehaviorList, GCInlineObject) { ...}
   class GC_CPP_EXACT(ScriptThread, GCFinalized) {
       BehaviorList GC_STRUCTURE(m_behaviors);
   };

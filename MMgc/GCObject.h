@@ -61,11 +61,11 @@ namespace MMgc
      * or GCRoots.  In practice this introduces the GCMember local
      * definition and hides new/delete.
      */    
-    class GCSubStructure
+    class GCInlineObject
     {
     public:
         // Empty ctor to avoid silly no-public members compiler warnings.
-        GCSubStructure() {}
+        GCInlineObject() {}
 
         //  GCObject's local definition of GCMember
         template<class T>
