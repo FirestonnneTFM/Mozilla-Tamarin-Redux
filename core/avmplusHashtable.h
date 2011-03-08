@@ -64,7 +64,7 @@ namespace avmplus
     // NOTE NOTE NOTE NOTE
     // NOTE NOTE NOTE NOTE
     // NOTE NOTE NOTE NOTE
-    class InlineHashtable
+    class GC_CPP_EXACT(InlineHashtable, MMgc::GCSubStructure)
     {
         friend class HeapHashtable;
         friend class HeapHashtableRC;
@@ -152,10 +152,6 @@ namespace avmplus
         int next(int index);
         Atom keyAt(int index);
         Atom valueAt(int index);
-
-        // Must be called by the embedder of the InlineHashtable as InlineHashtable does not
-        // have a vtable and cannot implement exact tracing through the normal mechanism.
-        void gcTrace(MMgc::GC* gc);
 
     protected:
 
@@ -247,14 +243,30 @@ namespace avmplus
         // do NOT make this virtual; we want InlineHashtable to NOT have ANY virtual methods, not even a dtor
         ~InlineHashtable();
 
+        class GC_CPP_EXACT(AtomContainer, MMgc::GCTraceableObject)
+        {
+        public:
+            /** 
+             * In theory size should come from m_size but that isn't
+             * accessible to us here so we just scan all the atoms
+             * that could possibly be there based on GC::Size.
+             */
+            size_t count() const;
+            GC_DATA_BEGIN(AtomContainer);
+            Atom GC_ATOMS(atoms[1], "count()");
+            GC_DATA_END(AtomContainer);
+        };
+    
         bool hasDeletedItems() const;
         void setCapacity(uint32_t cap);
         void put(Atom name, Atom value);
         int rehash(const Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen) const;
         void throwFailureToGrow(AvmCore* core);
-        void setAtoms(Atom* atoms);
+        void setAtoms(AtomContainer* atoms);
+        AtomContainer* getAtomContainer() const;
         Atom* getAtoms();
         const Atom* getAtoms() const;
+        AtomContainer* createAtoms(MMgc::GC* gc, int capacity) const;
         void freeAtoms();
         static uint32_t FindOneBit(uint32_t value);
         Atom removeDontEnumMask(Atom a) const;
@@ -283,7 +295,9 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     private:
-        uintptr_t m_atomsAndFlags;  /** property hashtable, this has no DWB on purpose, setAtoms contains the WB */
+        GC_DATA_BEGIN(InlineHashtable);
+        uintptr_t GC_POINTER(m_atomsAndFlags);  /** property hashtable, this has no DWB on purpose, setAtoms contains the WB */
+        GC_DATA_END(InlineHashtable);
     #ifdef AVMPLUS_64BIT
         // on 64-bit systems, padding will force us to 16 bytes here anyway, so let's just use unpacked ints
         uint32_t m_size;            // number of properties
