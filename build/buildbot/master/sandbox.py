@@ -58,32 +58,30 @@ class sandbox:
     compile = Scheduler(name="compile-sandbox", branch=BRANCH, treeStableTimer=30, properties={'silent':'true'},
                      builderNames=["windows-compile-sandbox", "windows64-compile-sandbox",
                                    "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
-                                   "linux-compile-sandbox", "linux2-compile-sandbox",
+                                   "linux-compile-sandbox",
                                    "linux64-compile-sandbox",
                                    "solaris-sparc-compile-sandbox",
                                    "android-compile-sandbox",
                                    "linux-arm-compile-sandbox", "linux-arm2-compile-sandbox", "linux-arm3-compile-sandbox",
                                    "linux-mips-compile-sandbox",
-                                   "linux-sh4-compile-sandbox"
                                    ])
 
     smoke = BuilderDependent(name="smoke-sandbox",upstream=compile, callbackInterval=60, properties={'silent':'true'},
                     builderNames=["windows-smoke-sandbox", "windows64-smoke-sandbox",
                                    "mac-intel-10.5-smoke-sandbox", "mac64-intel-smoke-sandbox",
-                                   "linux-smoke-sandbox", "linux2-smoke-sandbox",
+                                   "linux-smoke-sandbox",
                                    "linux64-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox",
                                    "android-smoke-sandbox",
                                    "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox", "linux-arm3-smoke-sandbox",
                                    "linux-mips-smoke-sandbox",
-                                   "linux-sh4-smoke-sandbox"],
+                                   ],
                     builderDependencies=[
                                   ["windows-smoke-sandbox", "windows-compile-sandbox"], 
                                   ["windows64-smoke-sandbox", "windows64-compile-sandbox"], 
                                   ["mac-intel-10.5-smoke-sandbox", "mac-intel-10.5-compile-sandbox"],
                                   ["mac64-intel-smoke-sandbox", "mac64-intel-compile-sandbox"],
                                   ["linux-smoke-sandbox", "linux-compile-sandbox"],
-                                  ["linux2-smoke-sandbox", "linux2-compile-sandbox"],
                                   ["linux64-smoke-sandbox", "linux64-compile-sandbox"],
                                   ["solaris-sparc-smoke-sandbox", "solaris-sparc-compile-sandbox"],
                                   ["android-smoke-sandbox","android-compile-sandbox"],
@@ -91,26 +89,24 @@ class sandbox:
                                   ["linux-arm2-smoke-sandbox","linux-compile-sandbox"],
                                   ["linux-arm3-smoke-sandbox","linux-compile-sandbox"],
                                   ["linux-mips-smoke-sandbox","linux-mips-compile-sandbox"],
-                                  ["linux-sh4-smoke-sandbox","linux2-compile-sandbox"],
                                  ])
 
     test = BuilderDependent(name="test-sandbox",upstream=smoke, callbackInterval=60, properties={'silent':'true'},
                     builderNames=["windows-test-sandbox", "windows64-test-sandbox",
                                    "mac-intel-10.5-test-sandbox", "mac64-intel-test-sandbox",
-                                   "linux-test-sandbox", "linux2-test-sandbox",
+                                   "linux-test-sandbox",
                                    "linux64-test-sandbox",
                                    "solaris-sparc-test-sandbox",
                                    "android-test-sandbox",
                                    "linux-arm-test-sandbox", "linux-arm2-test-sandbox", "linux-arm3-test-sandbox",
                                    "linux-mips-test-sandbox",
-                                   "linux-sh4-test-sandbox"],
+                                   ],
                     builderDependencies=[
                                   ["windows-test-sandbox", "windows-smoke-sandbox"], 
                                   ["windows64-test-sandbox", "windows64-smoke-sandbox"], 
                                   ["mac-intel-10.5-test-sandbox", "mac-intel-10.5-smoke-sandbox"],
                                   ["mac64-intel-test-sandbox", "mac64-intel-smoke-sandbox"],
                                   ["linux-test-sandbox", "linux-smoke-sandbox"],
-                                  ["linux2-test-sandbox", "linux2-smoke-sandbox"],
                                   ["linux64-test-sandbox", "linux64-smoke-sandbox"],
                                   ["solaris-sparc-test-sandbox", "solaris-sparc-smoke-sandbox"],
                                   ["android-test-sandbox", "android-smoke-sandbox"],
@@ -118,7 +114,6 @@ class sandbox:
                                   ["linux-arm2-test-sandbox", "linux-arm2-smoke-sandbox"],
                                   ["linux-arm3-test-sandbox", "linux-arm3-smoke-sandbox"],
                                   ["linux-mips-test-sandbox", "linux-mips-smoke-sandbox"],
-                                  ["linux-sh4-test-sandbox", "linux-sh4-smoke-sandbox"],
                                  ])
 
     schedulers = [compile, smoke, test]
@@ -331,54 +326,6 @@ class sandbox:
     }
 
 
-    ####################################
-    #### builder for linux2-compile ####
-    ####################################
-    sb_linux2_compile_factory = factory.BuildFactory()
-    sb_linux2_compile_factory.addStep(sync_clean)
-    sb_linux2_compile_factory.addStep(sync_clone_sandbox)
-    sb_linux2_compile_factory.addStep(sync_update)
-    sb_linux2_compile_factory.addStep(bb_slaveupdate(slave="linux"))
-    sb_linux2_compile_factory.addStep(compile_builtin)
-    sb_linux2_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=sh4-linux', 'avmshell_sh4', 'true'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'CXX': 'sh4-linux-g++',
-                    'CC' : 'sh4-linux-gcc',
-                    'LD' : 'sh4-linux-ld',
-                    'AR' : 'sh4-linux-ar',
-                },
-                description='starting Release_sh4-linux build...',
-                descriptionDone='finished Release_sh4-linux build.',
-                name="Release_sh4-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux2_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --target=sh4-linux', 'avmshell_sh4_d', 'true'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'CXX': 'sh4-linux-g++',
-                    'CC' : 'sh4-linux-gcc',
-                    'LD' : 'sh4-linux-ld',
-                    'AR' : 'sh4-linux-ar',
-                },
-                description='starting Debug_sh4-linux build...',
-                descriptionDone='finished Debug_sh4-linux build.',
-                name="Debug_sh4-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    
-    sb_linux2_compile_builder = {
-                'name': "linux2-compile-sandbox",
-                'slavename': "linux2",
-                'factory': sb_linux2_compile_factory,
-                'builddir': './sandbox-linux2-compile',
-    }
-
-
     #############################################
     #### builder for linux64-compile-sandbox ####
     #############################################
@@ -550,23 +497,6 @@ class sandbox:
     }
 
 
-    ###############################
-    #### builder for linux-sh4 ####
-    ###############################
-    sb_linux_sh4_compile_factory = factory.BuildFactory()
-    sb_linux_sh4_compile_factory.addStep(sync_clean)
-    sb_linux_sh4_compile_factory.addStep(sync_clone_sandbox)
-    sb_linux_sh4_compile_factory.addStep(sync_update)
-    sb_linux_sh4_compile_factory.addStep(bb_slaveupdate(slave="linux-sh4"))
-
-    sb_linux_sh4_compile_builder = {
-                'name': "linux-sh4-compile-sandbox",
-                'slavename': "linux-sh4",
-                'factory': sb_linux_sh4_compile_factory,
-                'builddir': './sandbox-linux-sh4-compile',
-    }
-
-
     ################################################################################
     ################################################################################
     ####                                                                        ####
@@ -655,23 +585,6 @@ class sandbox:
                 'slavename': "linux",
                 'factory': sb_linux_smoke_factory,
                 'builddir': './sandbox-linux-smoke',
-    }
-
-
-    ##################################
-    #### builder for linux2-smoke ####
-    ##################################
-    sb_linux2_smoke_factory = factory.BuildFactory()
-    sb_linux2_smoke_factory.addStep(download_testmedia)
-    # Machine currently ONLY compiles for SH4 platform
-    #sb_linux2_smoke_factory.addStep(test_smoke)
-    #sb_linux2_smoke_factory.addStep(util_process_clean)
-
-    sb_linux2_smoke_builder = {
-                'name': "linux2-smoke-sandbox",
-                'slavename': "linux2",
-                'factory': sb_linux2_smoke_factory,
-                'builddir': './sandbox-linux2-smoke',
     }
 
 
@@ -806,27 +719,6 @@ class sandbox:
                 'builddir': './sandbox-linux-mips-smoke',
     }
 
-    ##########################################
-    #### builder for linux-sh4-smoke      ####
-    ##########################################
-    sb_linux_sh4_smoke_factory = factory.BuildFactory()
-    sb_linux_sh4_smoke_factory.addStep(download_testmedia)
-    sb_linux_sh4_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux_sh4_smoke_factory.addStep(util_process_clean)
-
-    sb_linux_sh4_smoke_builder = {
-                'name': "linux-sh4-smoke-sandbox",
-                'slavename': "linux-sh4",
-                'factory': sb_linux_sh4_smoke_factory,
-                'builddir': './sandbox-linux-sh4-smoke',
-    }
 
     ################################################################################
     ################################################################################
@@ -957,23 +849,6 @@ class sandbox:
                 'slavename': "linux",
                 'factory': sb_linux_test_factory,
                 'builddir': './sandbox-linux-test',
-    }
-
-
-    #################################
-    #### builder for linux2-test ####
-    #################################
-    sb_linux2_test_factory = factory.BuildFactory()
-    # Builder currently ONLY compiles for the SH4 platform
-    sb_linux2_test_factory.addStep(util_process_clean)
-    sb_linux2_test_factory.addStep(util_clean_buildsdir)
-    sb_linux2_test_factory.addStep(sync_clean)
-
-    sb_linux2_test_builder = {
-                'name': "linux2-test-sandbox",
-                'slavename': "linux2",
-                'factory': sb_linux2_test_factory,
-                'builddir': './sandbox-linux2-test',
     }
 
 
@@ -1111,31 +986,14 @@ class sandbox:
                 'factory': sb_linux_mips_test_factory,
                 'builddir': './sandbox-linux-mips-test',
     }
-    
 
-    #########################################
-    #### builder for linux-sh4-test      ####
-    #########################################
-    sb_linux_sh4_test_factory = factory.BuildFactory()
-    sb_linux_sh4_test_factory.addStep(test_generic(name="Release", shellname="avmshell_sh4", vmargs="", config="", scriptargs=""))
-    sb_linux_sh4_test_factory.addStep(util_process_clean)
-    sb_linux_sh4_test_factory.addStep(util_clean_buildsdir)
-    sb_linux_sh4_test_factory.addStep(sync_clean)
 
-    sb_linux_sh4_test_builder = {
-                'name': "linux-sh4-test-sandbox",
-                'slavename': "linux-sh4",
-                'factory': sb_linux_sh4_test_factory,
-                'builddir': './sandbox-linux-sh4-test',
-    }
-    
     builders = [
                 sb_windows_compile_builder,
                 sb_windows_64_compile_builder,
                 sb_mac_intel_105_compile_builder,
                 sb_mac_intel_64_compile_builder,
                 sb_linux_compile_builder,
-                sb_linux2_compile_builder,
                 sb_linux_64_compile_builder,
                 sb_solaris_sparc_compile_builder,
                 sb_android_compile_builder,
@@ -1143,14 +1001,12 @@ class sandbox:
                 sb_linux_arm2_compile_builder,
                 sb_linux_arm3_compile_builder,
                 sb_linux_mips_compile_builder,
-                sb_linux_sh4_compile_builder,
                 
                 sb_windows_smoke_builder,
                 sb_windows_64_smoke_builder,
                 sb_mac_intel_105_smoke_builder,
                 sb_mac_intel_64_smoke_builder,
                 sb_linux_smoke_builder,
-                sb_linux2_smoke_builder,
                 sb_linux_64_smoke_builder,
                 sb_solaris_sparc_smoke_builder,
                 sb_android_smoke_builder,
@@ -1158,14 +1014,12 @@ class sandbox:
                 sb_linux_arm2_smoke_builder,
                 sb_linux_arm3_smoke_builder,
                 sb_linux_mips_smoke_builder,
-                sb_linux_sh4_smoke_builder,
                 
                 sb_windows_test_builder,
                 sb_windows_64_test_builder,
                 sb_mac_intel_105_test_builder,
                 sb_mac_intel_64_test_builder,
                 sb_linux_test_builder,
-                sb_linux2_test_builder,
                 sb_linux_64_test_builder,
                 sb_solaris_sparc_test_builder,
                 sb_android_test_builder,
@@ -1173,7 +1027,6 @@ class sandbox:
                 sb_linux_arm2_test_builder,
                 sb_linux_arm3_test_builder,
                 sb_linux_mips_test_builder,
-                sb_linux_sh4_test_builder,
 
                 ]
 
