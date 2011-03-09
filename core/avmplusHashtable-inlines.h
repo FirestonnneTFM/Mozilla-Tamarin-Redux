@@ -165,7 +165,11 @@ namespace avmplus
     
     REALLY_INLINE size_t InlineHashtable::AtomContainer::count() const
     { 
-        return (MMgc::GC::Size(this) - sizeof(AtomContainer) + sizeof(Atom)) / sizeof(Atom); 
+        // Count must be power of two lest we scan the iteration
+        // indices that are sometimes stored at the end of the array
+        // as Atoms which they aren't.
+        size_t numAtoms = (MMgc::GC::Size(this) - sizeof(AtomContainer) + sizeof(Atom)) / sizeof(Atom);
+        return size_t(1 << InlineHashtable::FindOneBit((uint32_t)numAtoms));
     }
 
     REALLY_INLINE InlineHashtable::AtomContainer* InlineHashtable::createAtoms(MMgc::GC* gc, int capacity) const
