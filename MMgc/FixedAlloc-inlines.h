@@ -197,6 +197,11 @@ namespace MMgc
         // If the block has no more free items, be sure to remove it from the list of
         // blocks with free items.
         if (IsFull(b)) {
+            // Crash fast in case of heap corruption, aka safe unlinking.
+            if ( ((b->prevFree && (b->prevFree->nextFree!=b))) ||
+                 ((b->nextFree && (b->nextFree->prevFree!=b))) )
+                VMPI_abort();
+
             m_firstFree = b->nextFree;
             b->nextFree = NULL;
             GCAssert(b->prevFree == NULL);
