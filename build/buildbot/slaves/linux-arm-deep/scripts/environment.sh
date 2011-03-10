@@ -54,6 +54,13 @@ export shell_release_debugger=avmshell_neon_arm
 export shell_debug=avmshell_neon_arm_d
 export shell_debug_debugger=avmshell_neon_arm_d
 
+export ssh_proc_names="avmshell_neon_arm avmshell_neon_arm_d"
+
+# Override this, default is avmshell* and since this slave runs on a machine
+# with other slaves, the process cleaner /can/ find avmshell processes, 
+# BUT they will NEVER belong to this slave since the shell is run on a device
+# not on the host machine. Reset this to something that will never be found/killed
+export proc_names="fake_never_find_me"
 
 export PYTHON_RUNTESTS=python3
 
