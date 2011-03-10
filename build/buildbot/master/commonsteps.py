@@ -311,6 +311,17 @@ def test_selftest(name, shellname):
             workdir="../repo/build/buildbot/slaves/scripts"
             )
 
+def test_selftest_ssh(name, shellname):
+    # factory.addStep(test_selftest_ssh("Release", "avmshell"))
+    return TestSuiteShellCommand(
+            command=['../all/run-selftest-generic-ssh.sh', WithProperties('%s','revision'), '%s' % shellname],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='starting selftest %s...' % name,
+            descriptionDone='finished selftest %s.' % name,
+            name="Testsuite_Selftest_%s" % name,
+            workdir="../repo/build/buildbot/slaves/scripts"
+            )
+
 test_commandline = TestSuiteShellCommand(
             command=['../all/run-commandline-tests.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
@@ -388,7 +399,7 @@ util_process_clean_ssh = BuildShellCommand(
             alwaysRun="True" )
 
 util_acceptance_clean_ssh = BuildShellCommand(
-            command=['./util-acceptance-clean-ssh.sh', WithProperties('%s','revision')],
+            command=['../all/util-acceptance-clean-ssh.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Cleaning acceptance tests...',
             descriptionDone='Cleaning acceptance tests completed',
