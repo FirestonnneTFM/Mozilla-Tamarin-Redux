@@ -193,6 +193,12 @@ package avmshell
     public class CheckBase
     {
     }
+
+    // this class exists solely to test construct="native"
+    [native(cls="::avmshell::NativeBaseClass", instance="::avmshell::NativeBaseObject", methods="auto", construct="native")]
+    public class NativeBase
+    {
+    }
 }
 
 // The flash.system package is present so identical ATS test media can be used

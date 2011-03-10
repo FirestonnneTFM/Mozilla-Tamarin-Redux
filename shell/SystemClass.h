@@ -184,6 +184,22 @@ namespace avmshell
         DECLARE_SLOTS_CheckBaseObject;
     };
 
+    class NativeBaseClass : public avmplus::ClassClosure
+    {
+    public:
+        NativeBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+
+        DECLARE_SLOTS_NativeBaseClass;
+    };
+
+    class NativeBaseObject : public avmplus::ScriptObject
+    {
+    public:
+        NativeBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+
+        DECLARE_SLOTS_NativeBaseObject;
+    };
+
     // this class exists solely to test native classes that use MI.
     class MIObject : public MIObjectImpl, public MixinClassThatDoesNotDescendFromScriptObject
     {

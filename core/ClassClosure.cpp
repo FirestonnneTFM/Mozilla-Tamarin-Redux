@@ -187,6 +187,22 @@ create_normal:
         }
     }
 
+    // tbhis is used by construct="native" to special-case construction of some objects.
+    Atom ClassClosure::construct_native(CreateInstanceProc ciproc, int argc, Atom* argv)
+    {
+        VTable* ivtable = this->ivtable();
+        AvmAssert(ivtable != NULL);
+        AvmAssert(argv != NULL); // need at least one arg spot passed in
+
+        ScriptObject* obj = (*ciproc)(this);
+        AvmAssert(obj != NULL); //should never be null
+        Atom a = obj->atom();
+        argv[0] = a; // new object is receiver
+        ivtable->init->coerceEnter(argc, argv);
+        // this is a class. always return new instance.
+        return a;
+    }
+
     // this = argv[0] (ignored)
     // arg1 = argv[1]
     // argN = argv[argc]

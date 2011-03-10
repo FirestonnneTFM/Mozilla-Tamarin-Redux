@@ -205,6 +205,8 @@ namespace avmshell
         //handleActionPool(shellPool, shell_toplevel, shell_codeContext);
         shell_toplevel->shellClasses = prepareBuiltinActionPool<shell_toplevelClassManifest>(shellPool, shell_toplevel, shell_codeContext);
 
+        shell_toplevel->shellClasses->get_NativeBaseClass()->constructObject();
+
         return shell_toplevel;
     }
 
