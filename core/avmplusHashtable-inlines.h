@@ -166,6 +166,7 @@ namespace avmplus
     REALLY_INLINE size_t InlineHashtable::AtomContainer::count() const
     { 
         size_t count = (MMgc::GC::Size(this) - sizeof(AtomContainer) + sizeof(Atom)) / sizeof(Atom);
+        AvmAssert(count > 0);
         size_t powof2 = 1;
         // Power of two floor operation to only scan Atoms and not
         // potential iteration indices which aren't atoms.
