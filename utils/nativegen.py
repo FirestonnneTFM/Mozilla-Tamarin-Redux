@@ -88,6 +88,9 @@
 #                   "abstract-restricted": is the union of of abstract+restricted: the class can't be instantiated,
 #                       and subclasses can only from from the same ABC chunk.
 #
+#                   "native": the class can be instantiated only from the C++ constructObject() wrapper; 
+#                       attempting to instantiate from AS3 will throw kCantInstantiateError.
+#
 #                   * THE FOLLOWING VALUES FOR construct ARE ONLY LEGAL FOR USE IN THE BASE VM BUILTINS * 
 #
 #                   "override": the Class must provide an override of the ScriptObject::construct() method.
@@ -690,7 +693,7 @@ class NativeInfo:
             if not is_vm_builtin:
                 raise Error('construct=%s may only be specified for the VM builtins' % value)
             self.construct = value
-        elif value in ["none", "abstract", "abstract-restricted", "restricted", "check", "restricted-check"]:
+        elif value in ["none", "abstract", "abstract-restricted", "restricted", "check", "restricted-check", "native"]:
             self.construct = value
         else:
             raise Error('native metadata specified illegal value, "%s" for construct field.' % value)
@@ -776,6 +779,11 @@ class NativeInfo:
 
         elif t.construct in ["override", "instance"] or itraits.ctype != CTYPE_OBJECT:
             t.createInstanceProcName = "ClassClosure::impossibleCreateInstanceProc"
+
+        elif t.construct == "native":
+            t.createInstanceProcName = "ClassClosure::cantInstantiateCreateInstanceProc"
+            t.has_custom_createInstanceProc = True
+            assert t.cpp_name_comps != None
 
         elif t.cpp_name_comps != None:
             t.createInstanceProcName = "%s::createInstanceProc" % t.fqcppname()
@@ -2130,7 +2138,10 @@ class AbcThunkGen:
                     out.println("avmplus::AvmCore* const core = ((AvmCore*)(this->core()));")
                 arglist = ', '.join(map(lambda (argt, arg_typedef, argname): TYPEMAP_TO_ATOM[argt.ctype](argname), args))
                 out.println("avmplus::Atom args[%d] = { %s };" % (len(args), arglist))
-                out.println("avmplus::Atom const result = this->construct(%d, args);" % (len(args)-1))
+                if t.construct == "native":
+                    out.println("avmplus::Atom const result = this->construct_native(%s::createInstanceProc, %d, args);" % (t.fqcppname(), len(args)-1))
+                else:
+                    out.println("avmplus::Atom const result = this->construct(%d, args);" % (len(args)-1))
                 raw_result = TYPEMAP_FROM_ATOM[ctype]("result", fqcppname)
                 out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,fqcppname))
                 out.indent -= 1

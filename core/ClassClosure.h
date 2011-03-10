@@ -111,6 +111,9 @@ namespace avmplus
     protected:
         static CreateInstanceProc FASTCALL calcCreateInstanceProc(VTable* cvtable);
 
+    protected:
+        Atom construct_native(CreateInstanceProc ciproc, int argc, Atom* argv);
+
     public:
         static ScriptObject* FASTCALL createScriptObjectProc(ClassClosure* cls);
         static ScriptObject* FASTCALL cantInstantiateCreateInstanceProc(ClassClosure* cls);
