@@ -379,7 +379,7 @@ util_process_clean = BuildShellCommand(
             alwaysRun="True" )
 
 util_process_clean_ssh = BuildShellCommand(
-            command=['./all/util-process-clean-ssh.sh', WithProperties('%s','revision')],
+            command=['../all/util-process-clean-ssh.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Zombie hunting...',
             descriptionDone='Zombie hunt completed',
