@@ -37,34 +37,99 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=linux
-
-export shell_release=avmshell_neon_arm
-export shell_release_debugger=avmshell_neon_arm
-export shell_debug=avmshell_neon_arm_d
-export shell_debug_debugger=avmshell_neon_arm_d
+. ./environment.sh
 
 
-export PYTHON_RUNTESTS=python3
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
 
-export threads=2
 
-export SSH_SHELL_REMOTE_HOST0=asteambeagle3
-export SSH_SHELL_REMOTE_USER0=build
-export SSH_SHELL_REMOTE_BASEDIR0=/home/build
-export SSH_SHELL_REMOTE_DIR0=/home/build/app1
+showhelp ()
+{
+    echo ""
+    echo "usage: run-selftest-generic.sh <change> <filename>"
+    echo "  <change>     build number of shell to test"
+    echo "  <filename>   name of the shell, do not include file extenstion"
+    exit 1
+}
 
-export SSH_SHELL_REMOTE_HOST1=asteambeagle4
-export SSH_SHELL_REMOTE_USER1=build
-export SSH_SHELL_REMOTE_BASEDIR1=/home/build
-export SSH_SHELL_REMOTE_DIR1=/home/build/app2
+if [ "$#" -lt 2 ]
+then
+    echo "not enough args passed"
+    showhelp
+fi
+
+filename=$2
+
+export shell=$filename$shell_extension
+
+
+##
+# Download the AVMSHELL if it does not exist
+##
+download_shell $shell
+
+## 
+# call ssh-shell-deployer.sh to make sure the remote device is setup
+##
+echo "setup $branch/${change}-${changeid}"
+../all/ssh-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell
+res=$?
+test "$res" = "0" || {
+    echo "message: setup failed"
+    exit 1
+}
+
+
+###
+# check for running avmshell processes
+###
+echo "checking for running avmshell processes"
+../all/util-process-clean-ssh.sh
+
+
+export AVM=$basedir/build/buildbot/slaves/all/ssh-shell.sh
+
+echo AVM=$AVM
+echo "`$AVM`"
+test -f $AVM || {
+  echo "ERROR: $AVM not found"
+  exit 1
+}
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
+echo ""
+
+$AVM -Dselftest > selftest.out 2>&1
+ret=$?
+
+cat selftest.out
+
+passes=`grep pass selftest.out | wc -l`
+fails=`grep fail selftest.out | wc -l`
+
+# a non-zero exit code indicates an avm crash, therefore increment the failures by 1
+if [ "$ret" -ne "0" ]; then
+    let fails=fails+1
+fi
+
+echo "passes            : $passes"
+echo "failures          : $fails"
+
+rm selftest.out
+
+###
+# check for running avmshell processes
+###
+ echo "checking for running avmshell processes"
+ cd $basedir/build/buildbot/slaves/scripts
+ ../all/util-process-clean-ssh.sh
+
+exit $ret
+ 

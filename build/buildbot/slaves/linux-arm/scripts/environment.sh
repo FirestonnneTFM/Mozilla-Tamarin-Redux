@@ -55,3 +55,36 @@ export shell_debug=avmshell_neon_arm_d
 export shell_debug_debugger=avmshell_neon_arm_d
 export shell_selftest=avmshell_neon_arm
 
+export PYTHON_RUNTESTS=python3
+
+export threads=6
+
+export SSH_SHELL_REMOTE_HOST0=asteam-beagle-xM1
+export SSH_SHELL_REMOTE_USER0=build
+export SSH_SHELL_REMOTE_BASEDIR0=/home/build
+export SSH_SHELL_REMOTE_DIR0=/home/build/app1
+
+export SSH_SHELL_REMOTE_HOST1=asteam-beagle-xM1
+export SSH_SHELL_REMOTE_USER1=build
+export SSH_SHELL_REMOTE_BASEDIR1=/home/build
+export SSH_SHELL_REMOTE_DIR1=/home/build/app2
+
+export SSH_SHELL_REMOTE_HOST2=asteam-beagle-xM2
+export SSH_SHELL_REMOTE_USER2=build
+export SSH_SHELL_REMOTE_BASEDIR2=/home/build
+export SSH_SHELL_REMOTE_DIR2=/home/build/app1
+
+export SSH_SHELL_REMOTE_HOST3=asteam-beagle-xM2
+export SSH_SHELL_REMOTE_USER3=build
+export SSH_SHELL_REMOTE_BASEDIR3=/home/build
+export SSH_SHELL_REMOTE_DIR3=/home/build/app2
+
+export SSH_SHELL_REMOTE_HOST4=asteam-beagle-xM3
+export SSH_SHELL_REMOTE_USER4=build
+export SSH_SHELL_REMOTE_BASEDIR4=/home/build
+export SSH_SHELL_REMOTE_DIR4=/home/build/app1
+
+export SSH_SHELL_REMOTE_HOST5=asteam-beagle-xM3
+export SSH_SHELL_REMOTE_USER5=build
+export SSH_SHELL_REMOTE_BASEDIR5=/home/build
+export SSH_SHELL_REMOTE_DIR5=/home/build/app2

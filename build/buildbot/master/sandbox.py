@@ -62,7 +62,7 @@ class sandbox:
                                    "linux64-compile-sandbox",
                                    "solaris-sparc-compile-sandbox",
                                    "android-compile-sandbox",
-                                   "linux-arm-compile-sandbox", "linux-arm2-compile-sandbox", "linux-arm3-compile-sandbox",
+                                   "linux-arm-compile-sandbox",
                                    "linux-mips-compile-sandbox",
                                    ])
 
@@ -73,7 +73,7 @@ class sandbox:
                                    "linux64-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox",
                                    "android-smoke-sandbox",
-                                   "linux-arm-smoke-sandbox", "linux-arm2-smoke-sandbox", "linux-arm3-smoke-sandbox",
+                                   "linux-arm-smoke-sandbox",
                                    "linux-mips-smoke-sandbox",
                                    ],
                     builderDependencies=[
@@ -86,8 +86,6 @@ class sandbox:
                                   ["solaris-sparc-smoke-sandbox", "solaris-sparc-compile-sandbox"],
                                   ["android-smoke-sandbox","android-compile-sandbox"],
                                   ["linux-arm-smoke-sandbox","linux-compile-sandbox"],
-                                  ["linux-arm2-smoke-sandbox","linux-compile-sandbox"],
-                                  ["linux-arm3-smoke-sandbox","linux-compile-sandbox"],
                                   ["linux-mips-smoke-sandbox","linux-mips-compile-sandbox"],
                                  ])
 
@@ -98,7 +96,7 @@ class sandbox:
                                    "linux64-test-sandbox",
                                    "solaris-sparc-test-sandbox",
                                    "android-test-sandbox",
-                                   "linux-arm-test-sandbox", "linux-arm2-test-sandbox", "linux-arm3-test-sandbox",
+                                   "linux-arm-test-sandbox",
                                    "linux-mips-test-sandbox",
                                    ],
                     builderDependencies=[
@@ -111,8 +109,6 @@ class sandbox:
                                   ["solaris-sparc-test-sandbox", "solaris-sparc-smoke-sandbox"],
                                   ["android-test-sandbox", "android-smoke-sandbox"],
                                   ["linux-arm-test-sandbox", "linux-arm-smoke-sandbox"],
-                                  ["linux-arm2-test-sandbox", "linux-arm2-smoke-sandbox"],
-                                  ["linux-arm3-test-sandbox", "linux-arm3-smoke-sandbox"],
                                   ["linux-mips-test-sandbox", "linux-mips-smoke-sandbox"],
                                  ])
 
@@ -414,40 +410,6 @@ class sandbox:
     
     
     ################################
-    #### builder for linux-arm2 ####
-    ################################
-    sb_linux_arm2_compile_factory = factory.BuildFactory()
-    sb_linux_arm2_compile_factory.addStep(sync_clean)
-    sb_linux_arm2_compile_factory.addStep(sync_clone_sandbox)
-    sb_linux_arm2_compile_factory.addStep(sync_update)
-    sb_linux_arm2_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
-
-    sb_linux_arm2_compile_builder = {
-                'name': "linux-arm2-compile-sandbox",
-                'slavename': "linux-arm2",
-                'factory': sb_linux_arm2_compile_factory,
-                'builddir': './sandbox-linux-arm2-compile',
-    }
-
-
-    ################################
-    #### builder for linux-arm3 ####
-    ################################
-    sb_linux_arm3_compile_factory = factory.BuildFactory()
-    sb_linux_arm3_compile_factory.addStep(sync_clean)
-    sb_linux_arm3_compile_factory.addStep(sync_clone_sandbox)
-    sb_linux_arm3_compile_factory.addStep(sync_update)
-    sb_linux_arm3_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
-
-    sb_linux_arm3_compile_builder = {
-                'name': "linux-arm3-compile-sandbox",
-                'slavename': "linux-arm3",
-                'factory': sb_linux_arm3_compile_factory,
-                'builddir': './sandbox-linux-arm3-compile',
-    }
-
-
-    ################################
     #### builder for linux-mips ####
     ################################
     sb_linux_mips_compile_factory = factory.BuildFactory()
@@ -641,7 +603,7 @@ class sandbox:
     sb_linux_arm_smoke_factory = factory.BuildFactory()
     sb_linux_arm_smoke_factory.addStep(download_testmedia)
     sb_linux_arm_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
+                command=['../all/run-smoketests-ssh.sh', WithProperties('%s','revision'), './runsmokes-ssh.txt'],
                 env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='starting to run smoke tests...',
                 descriptionDone='finished smoke tests.',
@@ -658,52 +620,6 @@ class sandbox:
     }
     
     
-    ###########################################
-    #### builder for linxu-arm2-smoke      ####
-    ###########################################
-    sb_linux_arm2_smoke_factory = factory.BuildFactory()
-    sb_linux_arm2_smoke_factory.addStep(download_testmedia)
-    sb_linux_arm2_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
-                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux_arm2_smoke_factory.addStep(util_process_clean)
-
-    sb_linux_arm2_smoke_builder = {
-                'name': "linux-arm2-smoke-sandbox",
-                'slavename': "linux-arm2",
-                'factory': sb_linux_arm2_smoke_factory,
-                'builddir': './sandbox-linux-arm2-smoke',
-    }
-
-
-    ###########################################
-    #### builder for linxu-arm3-smoke      ####
-    ###########################################
-    sb_linux_arm3_smoke_factory = factory.BuildFactory()
-    sb_linux_arm3_smoke_factory.addStep(download_testmedia)
-    sb_linux_arm3_smoke_factory.addStep(TestSuiteShellCommand(
-                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
-                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
-                description='starting to run smoke tests...',
-                descriptionDone='finished smoke tests.',
-                name="SmokeTest",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux_arm3_smoke_factory.addStep(util_process_clean)
-
-    sb_linux_arm3_smoke_builder = {
-                'name': "linux-arm3-smoke-sandbox",
-                'slavename': "linux-arm3",
-                'factory': sb_linux_arm3_smoke_factory,
-                'builddir': './sandbox-linux-arm3-smoke',
-    }
-
-
     #########################################
     #### builder for linux-mips-smoke    ####
     #########################################
@@ -922,9 +838,11 @@ class sandbox:
     #### builder for linux-arm-test       ####
     ##########################################
     sb_linux_arm_test_factory = factory.BuildFactory()
-    sb_linux_arm_test_factory.addStep(test_selftest(name="Release", shellname="avmshell_neon_arm"))
-    sb_linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
-    sb_linux_arm_test_factory.addStep(util_process_clean)
+    sb_linux_arm_test_factory.addStep(test_selftest_ssh(name="Release", shellname="avmshell_neon_arm"))
+    sb_linux_arm_test_factory.addStep(test_generic_ssh(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="arm-lnx-tvm-release", scriptargs=""))
+    sb_linux_arm_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="arm-lnx-tvm-release", scriptargs=""))
+    sb_linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="arm-lnx-tvm-release", scriptargs=""))
+    sb_linux_arm_test_factory.addStep(util_acceptance_clean_ssh)
     sb_linux_arm_test_factory.addStep(util_clean_buildsdir)
     sb_linux_arm_test_factory.addStep(sync_clean)
 
@@ -936,40 +854,6 @@ class sandbox:
     }
     
     
-    ##########################################
-    #### builder for linux-arm2-test      ####
-    ##########################################
-    sb_linux_arm2_test_factory = factory.BuildFactory()
-    sb_linux_arm2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
-    sb_linux_arm2_test_factory.addStep(util_process_clean)
-    sb_linux_arm2_test_factory.addStep(util_clean_buildsdir)
-    sb_linux_arm2_test_factory.addStep(sync_clean)
-
-    sb_linux_arm2_test_builder = {
-                'name': "linux-arm2-test-sandbox",
-                'slavename': "linux-arm2",
-                'factory': sb_linux_arm2_test_factory,
-                'builddir': './sandbox-linux-arm2-test',
-    }
-
-
-    ###########################################
-    #### builder for linux-arm3-test       ####
-    ###########################################
-    sb_linux_arm3_test_factory = factory.BuildFactory()
-    sb_linux_arm3_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
-    sb_linux_arm3_test_factory.addStep(util_process_clean)
-    sb_linux_arm3_test_factory.addStep(util_clean_buildsdir)
-    sb_linux_arm3_test_factory.addStep(sync_clean)
-
-    sb_linux_arm3_test_builder = {
-                'name': "linux-arm3-test-sandbox",
-                'slavename': "linux-arm3",
-                'factory': sb_linux_arm3_test_factory,
-                'builddir': './sandbox-linux-arm3-test',
-    }
-
-
     ##########################################
     #### builder for linux-mips-test      ####
     ##########################################
@@ -998,8 +882,6 @@ class sandbox:
                 sb_solaris_sparc_compile_builder,
                 sb_android_compile_builder,
                 sb_linux_arm_compile_builder,
-                sb_linux_arm2_compile_builder,
-                sb_linux_arm3_compile_builder,
                 sb_linux_mips_compile_builder,
                 
                 sb_windows_smoke_builder,
@@ -1011,8 +893,6 @@ class sandbox:
                 sb_solaris_sparc_smoke_builder,
                 sb_android_smoke_builder,
                 sb_linux_arm_smoke_builder,
-                sb_linux_arm2_smoke_builder,
-                sb_linux_arm3_smoke_builder,
                 sb_linux_mips_smoke_builder,
                 
                 sb_windows_test_builder,
@@ -1024,8 +904,6 @@ class sandbox:
                 sb_solaris_sparc_test_builder,
                 sb_android_test_builder,
                 sb_linux_arm_test_builder,
-                sb_linux_arm2_test_builder,
-                sb_linux_arm3_test_builder,
                 sb_linux_mips_test_builder,
 
                 ]
