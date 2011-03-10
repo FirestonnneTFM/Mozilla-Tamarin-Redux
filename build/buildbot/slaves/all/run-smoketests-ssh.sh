@@ -102,6 +102,7 @@ test "$silent" = "true" && {
 # check for running avmshell processes
 ###
 echo "checking for running avmshell processes"
+cd $basedir/build/buildbot/slaves/scripts
 ../all/util-process-clean-ssh.sh
 
 ##
