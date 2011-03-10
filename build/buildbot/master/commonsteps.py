@@ -276,6 +276,14 @@ test_smoke = TestSuiteShellCommand(
             name="SmokeTest",
             workdir="../repo/build/buildbot/slaves/scripts")
 
+test_smoke_ssh = TestSuiteShellCommand(
+            command=['../all/run-smoketests-ssh.sh', WithProperties('%s','revision')],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='starting to run smoke tests...',
+            descriptionDone='finished smoke tests.',
+            name="SmokeTest",
+            workdir="../repo/build/buildbot/slaves/scripts")
+
 test_smoke_local = TestSuiteShellCommand(
             command=['./run-smoketests.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
@@ -367,6 +375,24 @@ util_process_clean = BuildShellCommand(
             description='Zombie hunting...',
             descriptionDone='Zombie hunt completed',
             name='Util_ZombieKiller',
+            workdir="../repo/build/buildbot/slaves/scripts",
+            alwaysRun="True" )
+
+util_process_clean_ssh = BuildShellCommand(
+            command=['./all/util-process-clean-ssh.sh', WithProperties('%s','revision')],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='Zombie hunting...',
+            descriptionDone='Zombie hunt completed',
+            name='Util_ZombieKiller',
+            workdir="../repo/build/buildbot/slaves/scripts",
+            alwaysRun="True" )
+
+util_acceptance_clean_ssh = BuildShellCommand(
+            command=['./util-acceptance-clean-ssh.sh', WithProperties('%s','revision')],
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
+            description='Cleaning acceptance tests...',
+            descriptionDone='Cleaning acceptance tests completed',
+            name='Util_CleanAcceptanceTests',
             workdir="../repo/build/buildbot/slaves/scripts",
             alwaysRun="True" )
 

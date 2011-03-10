@@ -38,61 +38,76 @@
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 ##
-# Set any variables that my be needed higher up the chain
+# Bring in the environment variables
 ##
-export shell_extension=
+. ./environment.sh
+
 
 ##
-# Bring in the BRANCH environment variables
+# Calculate the change number and change id
 ##
-. ../all/environment.sh
+. ../all/util-calculate-change.sh $1
 
-export platform=linux
 
-export shell_release=avmshell_mips
-export shell_debug=avmshell_mips_d
-export ssh_proc_names="avmshell_mips avmshell_mips_d"
 
-# Override the default MAKE_OPTIONS env variable on the machine
-export MAKE_OPTIONS="-j2"
+##
+# Download the AVMSHELL if it does not exist
+##
+download_shell $shell_release
 
-# Override this, default is avmshell* and since this slave runs on a machine
-# with other slaves, the process cleaner /can/ find avmshell processes, 
-# BUT they will NEVER belong to this slave since the shell is run on a device
-# not on the host machine. Reset this to something that will never be found/killed
-export proc_names="fake_never_find_me"
 
-export PYTHON_RUNTESTS=python3
+echo "setup $branch/${change}-${changeid}"
+../all/ssh-shell-deployer.sh ${change} ${buildsdir}/${change}-${changeid}/${platform}/$shell_release
+res=$?
+test "$res" = "0" || {
+    echo "message: setup failed"
+    exit 1
+}
 
-export threads=6
+###
+# check for running avmshell processes
+###
+echo "checking for running avmshell processes"
+../all/util-process-clean-ssh.sh
 
-export SSH_SHELL_REMOTE_HOST0=asteammips5
-export SSH_SHELL_REMOTE_USER0=root
-export SSH_SHELL_REMOTE_BASEDIR0=/root
-export SSH_SHELL_REMOTE_DIR0=/root/app1
+download_asc
 
-export SSH_SHELL_REMOTE_HOST1=asteammips5
-export SSH_SHELL_REMOTE_USER1=root
-export SSH_SHELL_REMOTE_BASEDIR1=/root
-export SSH_SHELL_REMOTE_DIR1=/root/app2
+export AVM=$basedir/build/buildbot/slaves/all/ssh-shell.sh
+export avmr=$AVM
+export avmrd=$AVM
+export avmd=$AVM
+export avmdd=$AVM
 
-export SSH_SHELL_REMOTE_HOST2=asteammips6
-export SSH_SHELL_REMOTE_USER2=root
-export SSH_SHELL_REMOTE_BASEDIR2=/root
-export SSH_SHELL_REMOTE_DIR2=/root/app1
+# silence output if silent=true (function defined in environment.sh)
+logfile=smokes-arm.log
+beginSilent
 
-export SSH_SHELL_REMOTE_HOST3=asteammips6
-export SSH_SHELL_REMOTE_USER3=root
-export SSH_SHELL_REMOTE_BASEDIR3=/root
-export SSH_SHELL_REMOTE_DIR3=/root/app2
+cd $basedir/test
+$PYTHON_RUNTESTS ./runsmokes.py --testfile=./runsmokes-ssh.txt --time=120
+ret=$?
 
-export SSH_SHELL_REMOTE_HOST4=asteammips1
-export SSH_SHELL_REMOTE_USER4=root
-export SSH_SHELL_REMOTE_BASEDIR4=/root
-export SSH_SHELL_REMOTE_DIR4=/root/app1
+exitcode=0
+test "$ret" = "0" ||
+   exitcode=1
 
-export SSH_SHELL_REMOTE_HOST5=asteammips1
-export SSH_SHELL_REMOTE_USER5=root
-export SSH_SHELL_REMOTE_BASEDIR5=/root
-export SSH_SHELL_REMOTE_DIR5=/root/app2
+endSilent
 
+test "$silent" = "true" && {
+    # display smoke results to stdout so that buildbot parses the results
+    grep "^ *passes" $logfile
+    grep "^ *failures" $logfile
+}
+
+###
+# check for running avmshell processes
+###
+echo "checking for running avmshell processes"
+../all/util-process-clean-ssh.sh
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
+
+exit $exitcode

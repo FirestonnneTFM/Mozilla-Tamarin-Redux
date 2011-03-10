@@ -118,4 +118,3 @@ cd ./acceptance;./runtests.py  --notimecheck --androidthreads --vmargs=-Ojit ecm
 cd ./acceptance;./runtests.py  --notimecheck --androidthreads regress/bug_460872.as
 cd ./acceptance;./runtests.py  --notimecheck --androidthreads --vmargs=-Dinterp regress/bug_460872.as
 cd ./acceptance;./runtests.py  --notimecheck --androidthreads --vmargs=-Ojit regress/bug_460872.as
-
