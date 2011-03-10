@@ -51,6 +51,7 @@ export platform=linux
 
 export shell_release=avmshell_mips
 export shell_debug=avmshell_mips_d
+export ssh_proc_names="avmshell_mips avmshell_mips_d"
 
 # Override the default MAKE_OPTIONS env variable on the machine
 export MAKE_OPTIONS="-j2"

@@ -108,6 +108,12 @@ test "$res" = "0" || {
     exit 1
 }
 
+###
+# check for running avmshell processes
+###
+echo "checking for running avmshell processes"
+../all/util-process-clean-ssh.sh
+
 export AVM=$basedir/build/buildbot/slaves/all/ssh-shell.sh
 
 echo AVM=$AVM
@@ -130,15 +136,7 @@ echo ""
 echo "*******************************************************************************"
 echo ""
 
-
-##
-# Ensure that the system is clean and ready
-##
-cd $basedir/build/buildbot/slaves/scripts
-../all/util-acceptance-clean.sh
-
 cd $basedir/test/acceptance
-
 
 if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
     logfile=`echo acceptance-$shell$vmargs.log | sed 's/ //g' | sed 's/\.exe//g'`
@@ -147,7 +145,7 @@ fi
 
 # threads is set in environment.sh
 test "$threads" = "" || {
-    scriptargs="$scriptargs --passthreadid --threads=$threads"
+    scriptargs="--passthreadid --threads=$threads $scriptargs"
 }
 if [ "$config" != "" ]
 then
@@ -169,6 +167,13 @@ if [ "$silent" == "true" ] && [ "$internal_repo" == "true" ]; then
     echo "Acceptance logfile can be found here: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile"
     echo "url: http://asteam.corp.adobe.com/builds/$branch/${change}-${changeid}/$platform/$logfile logfile"
 fi
+
+###
+# check for running avmshell processes
+###
+ echo "checking for running avmshell processes"
+ cd $basedir/build/buildbot/slaves/scripts
+ ../all/util-process-clean-ssh.sh
 
 ##
 # Ensure that the system is torn down and clean

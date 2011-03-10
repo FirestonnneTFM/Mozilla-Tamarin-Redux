@@ -771,8 +771,8 @@ class tamarinredux:
     #########################################
     linux_mips_smoke_factory = factory.BuildFactory()
     linux_mips_smoke_factory.addStep(download_testmedia)
-    linux_mips_smoke_factory.addStep(test_smoke_local)
-    linux_mips_smoke_factory.addStep(util_process_clean)
+    linux_mips_smoke_factory.addStep(test_smoke_ssh)
+    linux_mips_smoke_factory.addStep(util_process_clean_ssh)
 
     linux_mips_smoke_builder = {
                 'name': "linux-mips-smoke",
@@ -1040,9 +1040,9 @@ class tamarinredux:
     #### builder for linux-mips-test      ####
     ##########################################
     linux_mips_test_factory = factory.BuildFactory()
-    linux_mips_test_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs="--threads=1 --timeout=600 --random"))
-    linux_mips_test_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs="--threads=1 --timeout=600 --random"))
-    linux_mips_test_factory.addStep(util_process_clean)
+    linux_mips_test_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs=""))
+    linux_mips_test_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs=""))
+    linux_mips_test_factory.addStep(util_acceptance_clean_ssh)
     linux_mips_test_factory.addStep(util_clean_buildsdir)
     linux_mips_test_factory.addStep(sync_clean)
 
@@ -1668,9 +1668,9 @@ class tamarinredux:
     linux_mips_deep_factory.addStep(sync_update)
     linux_mips_deep_factory.addStep(bb_slaveupdate(slave="linux-mips-deep"))
     linux_mips_deep_factory.addStep(download_testmedia)
-    linux_mips_deep_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="", config="mips-lnx-tvm-release", scriptargs=""))
-    linux_mips_deep_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="", config="mips-lnx-tvm-debug", scriptargs=""))
-    linux_mips_deep_factory.addStep(util_process_clean)
+    linux_mips_test_factory.addStep(test_generic_ssh(name="Release", shellname="avmshell_mips", vmargs="-Dinterp", config="mips-lnx-tvm-release", scriptargs=""))
+    linux_mips_test_factory.addStep(test_generic_ssh(name="Debug", shellname="avmshell_mips_d", vmargs="-Dinterp", config="mips-lnx-tvm-debug", scriptargs=""))
+    linux_mips_deep_factory.addStep(util_acceptance_clean_ssh)
     linux_mips_deep_factory.addStep(util_clean_buildsdir)
     linux_mips_deep_factory.addStep(sync_clean)
 
