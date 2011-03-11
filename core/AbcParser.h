@@ -105,7 +105,7 @@ namespace avmplus
         static void addAOTDebugInfo(PoolObject *pool);
 #endif
 
-        // If floatSupport is set (introduced in SWF12) then:
+        // If floatSupport is set (introduced in Brannan) then:
         //
         //  - The ABC contains a pool of float values
         //  - OP_pushfloat is an instruction
@@ -120,7 +120,7 @@ namespace avmplus
 
         /*const*/ unsigned floatSupport:1;
 
-        // If float4Support is set (introduced in SWF12) then:
+        // If float4Support is set (introduced in Brannan) then:
         //
         // - TBD
 
