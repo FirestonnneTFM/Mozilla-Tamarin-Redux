@@ -47,7 +47,7 @@ namespace avmplus
         , m_cachedTraits(MultinameTraitsHashtable::create(core->GetGC()))
         , m_loadedScripts(MultinameMethodInfoHashtable::create(core->GetGC()))
         , m_cachedScripts(MultinameMethodInfoHashtable::create(core->GetGC()))
-        , m_parameterizedTypes(new (core->GetGC()) WeakKeyHashtable(core->GetGC()))
+        , m_parameterizedTypes(WeakKeyHashtable::create(core->GetGC()))
         , m_baseCount(baseCount)
     {
         WB(core->GetGC(), this, &m_bases[0], this);

@@ -357,13 +357,16 @@ namespace avmplus
     };
 
     // Holds RCObject values, not Atom values.  Otherwise like HeapHashtable.
-    class HeapHashtableRC : public MMgc::GCFinalizedObject
+    class GC_CPP_EXACT(HeapHashtableRC, MMgc::GCFinalizedObject)
     {
+        GC_DATA_BEGIN(HeapHashtableRC);
     private:
-        InlineHashtable ht;
+        InlineHashtable GC_STRUCTURE(ht);
+        GC_DATA_END(HeapHashtableRC);
 
-    public:
         HeapHashtableRC(MMgc::GC* gc, int32_t capacity = InlineHashtable::kDefaultCapacity);
+    public:
+        static HeapHashtableRC* create(MMgc::GC* gc, int32_t capacity = InlineHashtable::kDefaultCapacity);
         virtual ~HeapHashtableRC();
 
         void reset();
@@ -389,11 +392,14 @@ namespace avmplus
     /**
      * If key is an object, weak refs are used
      */
-    class WeakKeyHashtable : public HeapHashtable
+    class GC_CPP_EXACT(WeakKeyHashtable, HeapHashtable)
     {
     public:
+        // Should be private but there are members inlined in other GCObjects
         WeakKeyHashtable(MMgc::GC* _gc);
 
+    public:
+        static WeakKeyHashtable* create(MMgc::GC* gc);
         virtual int next(int index);
 
         virtual void add(Atom key, Atom value, Toplevel* toplevel=NULL);
@@ -405,16 +411,21 @@ namespace avmplus
     private:
         Atom getKey(Atom key) const;
         void prune();
+        
+        GC_NO_DATA(WeakKeyHashtable);
     };
 
     /**
      * If value is an object, weak refs are used
      */
-    class WeakValueHashtable : public HeapHashtable
+    class GC_CPP_EXACT(WeakValueHashtable, HeapHashtable)
     {
     public:
+        // Should be private but there are members inlined in other GCObjects
         WeakValueHashtable(MMgc::GC* _gc);
 
+    public:
+        static WeakValueHashtable* create(MMgc::GC* gc);
         virtual void add(Atom key, Atom value, Toplevel* toplevel=NULL);
         virtual Atom get(Atom key);
         virtual Atom remove(Atom key);
@@ -423,6 +434,8 @@ namespace avmplus
     private:
         Atom getValue(Atom key, Atom value);
         void prune();
+        
+        GC_NO_DATA(WeakValueHashtable);
     };
 }
 
