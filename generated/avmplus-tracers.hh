@@ -1071,6 +1071,15 @@ bool MethodSignature::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
+bool Namespace::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    gc->TraceAtom(&m_prefix);
+    gc->TraceLocation(&m_uriAndType);
+    return false;
+}
+
 bool NamespaceSet::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;

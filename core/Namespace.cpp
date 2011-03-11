@@ -71,14 +71,6 @@ namespace avmplus
     }
 #endif
 
-    bool Namespace::gcTrace(MMgc::GC* gc, size_t cursor)
-    {
-        (void)cursor;
-        gc->TraceAtom(&m_prefix);
-        gc->TraceLocation(&m_uriAndType);
-        return false;
-    }
-    
     void Namespace::setUri(Stringp uri, NamespaceType flags)
     {
         WBRC(GC::GetGC(this), this, &m_uriAndType, (int32_t)flags | (uintptr_t) uri);
