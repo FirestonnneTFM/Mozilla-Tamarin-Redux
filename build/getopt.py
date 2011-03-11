@@ -57,7 +57,18 @@ class Options:
         self.help = False
         self._allargs = {}
         self.mac_sdk_version = None
-        self.arm_arch = None
+        self.arm_arch = "armv7-a"
+
+        # These arguments don't go in _allargs, and they aren't standard
+        # --enable/--disable switches. The getHelp method needs a list of these
+        # special arguments.
+        self._specialargs = (               \
+                "target",                   \
+                "host",                     \
+                "ignore_unknown_flags",     \
+                "mac_sdk_version",          \
+                "arm_arch"                  \
+                )
 
         unknown_args = []
         for arg in argv[1:]:
@@ -158,6 +169,13 @@ class Options:
                 ret += "%-35s [=enabled]\n" % ("--enable-%s" % opt)
             else:
                 ret += "%-35s [=not enabled]\n" % ("--enable-%s" % opt)
+                
+        # Print special-case options that aren't standard --enable/--disable
+        # switches.
+        for opt in self._specialargs:
+            arg = "--%s=..." % (opt)
+            ret += "%-35s [=%s]\n" % (arg, getattr(self,opt))
+                
         return ret
 
 
