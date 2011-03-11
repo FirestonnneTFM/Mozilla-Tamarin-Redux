@@ -265,10 +265,16 @@ namespace avmplus
         // Flag overrides based on version go here
 
         if (this->version >= (47<<16|12)) {
-            // Flash Player TBD
+            // Flash Player Wasabi
         }
         if (this->version >= (47<<16|13)) {
-            // Flash Player TBD
+            // Flash Player Serrano
+        }
+        if (this->version >= (47<<16|14)) {
+            // Flash Player Anza
+        }
+        if (this->version >= (47<<16|15)) {
+            // Flash Player Brannan
 #ifdef VMCFG_FLOAT
             floatSupport = 1;
 #endif
@@ -276,20 +282,14 @@ namespace avmplus
             float4Support = 1;
 #endif
         }
-        if (this->version >= (47<<16|14)) {
-            // Flash Player TBD
-        }
-        if (this->version >= (47<<16|15)) {
-            // Flash Player TBD
-        }
         if (this->version >= (47<<16|16)) {
-            // Flash Player TBD
+            // Flash Player Cyril
         }
         if (this->version >= (47<<16|17)) {
-            // Flash Player TBD
+            // Flash Player Dolores
         }
         if (this->version >= (47<<16|18)) {
-            // Flash Player TBD
+            // Flash Player Ellis
         }
         if (this->version >= (47<<16|19)) {
             // Flash Player TBD
