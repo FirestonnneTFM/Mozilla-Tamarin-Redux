@@ -1105,6 +1105,7 @@ function constructTracerBodies()
         case "GCTraceableObject":
         case "RCObject":
         case "GCInlineObject":
+        case "AvmPlusScriptableObject":
             return true;
         default:
             return false;

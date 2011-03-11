@@ -87,6 +87,7 @@
 #define avmplus_MethodInfo_isExactInterlock 1
 #define avmplus_MethodInfoProcHolder_isExactInterlock 1
 #define avmplus_MethodSignature_isExactInterlock 1
+#define avmplus_Namespace_isExactInterlock 1
 #define avmplus_NamespaceClass_isExactInterlock 1
 #define avmplus_NamespaceSet_isExactInterlock 1
 #define avmplus_NativeErrorClass_isExactInterlock 1

@@ -46,17 +46,19 @@ namespace avmplus
     /**
      * a namespace is a primitive value in the system, similar to String
      */
-    class Namespace : public AvmPlusScriptableObject
+    class GC_CPP_EXACT(Namespace, AvmPlusScriptableObject)
     {
     private:
         friend class AvmCore;
         template <class VALUE_TYPE, class VALUE_WRITER> friend class MultinameHashtable;
         template <class VALUE_TYPE> friend class Quad;
 
+        GC_DATA_BEGIN(Namespace);
     private:
-        AtomWB              m_prefix;
-        uintptr_t           m_uriAndType;          // Uses 3 bits for flags, but otherwise is really a Stringp
+        AtomWB              GC_ATOM(m_prefix);
+        uintptr_t           GC_POINTER(m_uriAndType);          // Uses 3 bits for flags, but otherwise is really a Stringp
         ApiVersion  const   m_apiVersion;
+        GC_DATA_END(Namespace);
 
     public:
         enum NamespaceType
@@ -81,8 +83,6 @@ namespace avmplus
 #ifdef DRC_TRIVIAL_DESTRUCTOR
         ~Namespace();
 #endif
-
-        virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
 
         // AS3 native functions
         REALLY_INLINE Atom get_prefix() const { return m_prefix; }
