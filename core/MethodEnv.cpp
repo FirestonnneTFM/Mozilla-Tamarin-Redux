@@ -1437,13 +1437,13 @@ namespace avmplus
         int type = getType();
         if(!activationOrMCTable)
         {
-            WeakKeyHashtable *wkh = new (core()->GetGC()) WeakKeyHashtable(core()->GetGC());
+            WeakKeyHashtable *wkh = WeakKeyHashtable::create(core()->GetGC());
             setActivationOrMCTable(wkh, kMethodTable);
             return wkh;
         }
         else if(type == kActivation)
         {
-            WeakKeyHashtable *wkh = new (core()->GetGC()) WeakKeyHashtable(core()->GetGC());
+            WeakKeyHashtable *wkh = WeakKeyHashtable::create(core()->GetGC());
             ActivationMethodTablePair *amtp = new (core()->GetGC()) ActivationMethodTablePair(getActivationVTable(), wkh);
             setActivationOrMCTable(amtp, kActivationMethodTablePair);
             return wkh;

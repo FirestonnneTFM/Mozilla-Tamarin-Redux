@@ -262,6 +262,11 @@ namespace avmplus
         m_logCapacity = cap ? (FindOneBit(cap)+1) : 0;
         AvmAssert(getCapacity() == cap);
     }
+    
+    REALLY_INLINE HeapHashtableRC* HeapHashtableRC::create(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)
+    {
+        return new (gc, MMgc::kExact) HeapHashtableRC(gc, capacity);
+    }
 
     REALLY_INLINE HeapHashtableRC::HeapHashtableRC(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)
     {
@@ -367,7 +372,17 @@ namespace avmplus
     REALLY_INLINE WeakKeyHashtable::WeakKeyHashtable(MMgc::GC* _gc) : HeapHashtable(_gc)
     {
     }
+    
+    REALLY_INLINE WeakKeyHashtable* WeakKeyHashtable::create(MMgc::GC* gc)
+    {
+        return new (gc, MMgc::kExact) WeakKeyHashtable(gc);
+    }
 
+    REALLY_INLINE WeakValueHashtable* WeakValueHashtable::create(MMgc::GC* gc)
+    {
+        return new (gc, MMgc::kExact) WeakValueHashtable(gc);
+    }
+    
     REALLY_INLINE WeakValueHashtable::WeakValueHashtable(MMgc::GC* _gc) : HeapHashtable(_gc)
     {
     }

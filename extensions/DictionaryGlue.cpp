@@ -69,7 +69,7 @@ namespace avmplus
         GCAssert(vtable->traits->isDictionary());
         MMgc::GC* gc = this->gc();
 
-        HeapHashtable* ht = weakKeys ? new (gc) WeakKeyHashtable(gc) : HeapHashtable::create(gc);
+        HeapHashtable* ht = weakKeys ? WeakKeyHashtable::create(gc) : HeapHashtable::create(gc);
 
         //store pointer of newly created hashtable, encapsulated with writebarrier,
         //at the hashtable offset address of the corresponding traits

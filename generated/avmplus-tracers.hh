@@ -1004,6 +1004,14 @@ bool HeapHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
+bool HeapHashtableRC::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    ht.gcTrace(gc);
+    return false;
+}
+
 bool InlineHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
@@ -1379,6 +1387,15 @@ bool VectorBaseObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
+bool WeakKeyHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    HeapHashtable::gcTrace(gc, 0);
+    (void)(avmplus_HeapHashtable_isExactInterlock != 0);
+    return false;
+}
+
 bool WeakMethodClosure::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
@@ -1386,6 +1403,15 @@ bool WeakMethodClosure::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     MethodClosure::gcTrace(gc, 0);
     (void)(avmplus_MethodClosure_isExactInterlock != 0);
     gc->TraceLocation(&m_weakSavedThis);
+    return false;
+}
+
+bool WeakValueHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    HeapHashtable::gcTrace(gc, 0);
+    (void)(avmplus_HeapHashtable_isExactInterlock != 0);
     return false;
 }
 
