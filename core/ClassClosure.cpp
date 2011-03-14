@@ -187,7 +187,7 @@ create_normal:
         }
     }
 
-    // tbhis is used by construct="native" to special-case construction of some objects.
+    // This is used by construct="native" to special-case construction of some objects.
     Atom ClassClosure::construct_native(CreateInstanceProc ciproc, int argc, Atom* argv)
     {
         VTable* ivtable = this->ivtable();
