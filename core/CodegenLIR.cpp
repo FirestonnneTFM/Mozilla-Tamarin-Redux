@@ -579,6 +579,16 @@ namespace avmplus
      * ---------------------------------
      */
 
+    // returns true for functions that never return
+    static bool neverReturns(const CallInfo* call)
+    {
+        return call == FUNCTIONID(throwAtom) ||
+            call == FUNCTIONID(npe) ||
+            call == FUNCTIONID(upe) ||
+            call == FUNCTIONID(mop_rangeCheckFailed) ||
+            call == FUNCTIONID(handleInterruptMethodEnv);
+    }
+
     // address calc instruction
     LIns* CodegenLIR::leaIns(int32_t disp, LIns* base) {
         return lirout->ins2(LIR_addp, base, InsConstPtr((void*)disp));
@@ -601,7 +611,13 @@ namespace avmplus
         LIns* argIns[MAXARGS];
         for (uint32_t i=0; i < argc; i++)
             argIns[argc-i-1] = va_arg(ap, LIns*);
-        return lirout->insCall(ci, argIns);
+        LIns* ins = lirout->insCall(ci, argIns);
+
+        // for non-returning functions ensure that we signify this fact
+        // by terminating control-flow with a ret.
+        if (neverReturns(ci))
+            lirout->ins1(LIR_retp, InsConstPtr(0));
+        return ins;
     }
 
     LIns* CodegenLIR::localCopy(int i)
@@ -1264,16 +1280,6 @@ namespace avmplus
             return out->insJtbl(index, size);
         }
 
-        // returns true for functions that are known to always throw an exception.
-        bool alwaysThrows(const CallInfo* call)
-        {
-            return call == FUNCTIONID(throwAtom) ||
-                call == FUNCTIONID(npe) ||
-                call == FUNCTIONID(upe) ||
-                call == FUNCTIONID(mop_rangeCheckFailed) ||
-                call == FUNCTIONID(handleInterruptMethodEnv);
-        }
-
         // assume any non-pure function can throw an exception, and that pure functions cannot.
         bool canThrow(const CallInfo* call)
         {
@@ -1286,7 +1292,7 @@ namespace avmplus
         LIns *insCall(const CallInfo *call, LIns* args[]) {
             if (haveDebugger && canThrow(call))
                 clearVarState(); // debugger might have modified locals, so make sure we reload after call.
-            if (alwaysThrows(call))
+            if (neverReturns(call))
                 reachable = false;
             if (call->_address == (uintptr_t)&restargHelper) {
                 // That helper has a by-reference argument which points into the vars array
