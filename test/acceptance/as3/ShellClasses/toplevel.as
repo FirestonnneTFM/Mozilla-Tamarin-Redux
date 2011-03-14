@@ -47,6 +47,11 @@
 
     writeHeaderToLog( SECTION + " "+ TITLE );
 
+
+    AddTestCase("queue a gc collection",
+      void,
+      System.queueCollection());
+
     AddTestCase("playerType is AVMPlus",
       "AVMPlus",
       Capabilities.playerType);
