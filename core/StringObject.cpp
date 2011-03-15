@@ -2844,7 +2844,7 @@ namespace avmplus
 
     PrintWriter& String::print(PrintWriter& prw) const
     {
-        if (k8 == getWidth())
+        if (getWidth() == k8 && (m_bitsAndFlags & TSTR_7BIT_FLAG))
         {
             // fast form
             Pointers ptrs(this);
