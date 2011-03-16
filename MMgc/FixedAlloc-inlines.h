@@ -95,7 +95,7 @@ namespace MMgc
     {
         if(m_heap->HooksEnabled() && item != NULL) {
             FixedBlock *b = FixedAlloc::GetFixedBlock(item);
-            m_heap->AllocHook(item, size, b->size - DebugSize());
+            m_heap->AllocHook(item, size, b->size - DebugSize(),/*managed=*/false);
         }
     }
 

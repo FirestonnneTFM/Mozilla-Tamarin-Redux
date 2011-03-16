@@ -235,7 +235,7 @@ namespace MMgc
             item = GetUserPointer(item);
 #ifdef MMGC_HOOKS
             if(m_heap->HooksEnabled())
-                m_heap->AllocHook(item, size - DebugSize(), Size(item));
+                m_heap->AllocHook(item, size - DebugSize(), Size(item), /*managed=*/false);
 #endif // MMGC_HOOKS
 
             UpdateLargeAllocStats(item, blocksNeeded);

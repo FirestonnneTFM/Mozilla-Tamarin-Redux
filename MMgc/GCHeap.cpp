@@ -382,7 +382,7 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_PROFILER
             if((flags & kProfile) && HooksEnabled() && profiler) {
-                profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
+                profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize, /*managed=*/false);
             }
 #endif
 
@@ -2083,7 +2083,7 @@ namespace MMgc
     }
 
 #ifdef MMGC_HOOKS
-    void GCHeap::AllocHook(const void *item, size_t askSize, size_t gotSize)
+    void GCHeap::AllocHook(const void *item, size_t askSize, size_t gotSize, bool managed)
     {
         (void)item;
         (void)askSize;
@@ -2093,7 +2093,7 @@ namespace MMgc
             VMPI_spyCallback();
         }
         if(profiler)
-            profiler->RecordAllocation(item, askSize, gotSize);
+            profiler->RecordAllocation(item, askSize, gotSize, managed);
 #endif
 
 #ifdef MMGC_MEMORY_INFO
@@ -2637,7 +2637,7 @@ namespace MMgc
         if(!IsProfilerInitialized())
             InitProfiler();
         if(profiler)
-            profiler->RecordAllocation(addr, askSize, VMPI_size(addr));
+            profiler->RecordAllocation(addr, askSize, VMPI_size(addr), /*managed=*/false);
     }
 
     void GCHeap::TrackSystemFree(void *addr)

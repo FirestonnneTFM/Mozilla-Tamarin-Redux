@@ -70,6 +70,8 @@ namespace MMgc
             , sweepCount(0)
             , master(NULL)
             , skip(0)
+            , managed(false)
+            , wasTracedConservatively(false)
         {
             VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(uintptr_t));
         }
@@ -86,6 +88,8 @@ namespace MMgc
         uint32_t sweepCount;
         StackTrace *master;
         uint8_t skip;
+        bool managed;
+        bool wasTracedConservatively;
 
         int getFirstNonMMgcFrame()
         {
@@ -148,6 +152,9 @@ namespace MMgc
 
         void dumpTopBacktraces(int howmany, DumpMode mode=BY_VOLUME);
 
+        // Maps StackTrace* to PopulationNode*
+        struct PopulationNode;
+        typedef GCHashtableBase<PopulationNode*,StackTraceHandler,GCHashtableAllocHandler_VMPI> NodeTable;
     protected:
         // Obtain the stack trace we're interested in for this object.  It will
         // be called by accountForObject.
@@ -189,10 +196,7 @@ namespace MMgc
         Summary stackHistogram[32];
         
         // Objects
-        struct PopulationNode;
         
-        // Maps StackTrace* to PopulationNode*
-        typedef GCHashtableBase<PopulationNode*,StackTraceHandler,GCHashtableAllocHandler_VMPI> NodeTable;
         NodeTable nodes;
         const bool root_info;
         const bool stack_info;
@@ -290,7 +294,7 @@ namespace MMgc
     public:
         MemoryProfiler();
         ~MemoryProfiler();
-        void RecordAllocation(const void *item, size_t askSize, size_t gotSize);
+        void RecordAllocation(const void *item, size_t askSize, size_t gotSize, bool managed);
         void RecordDeallocation(const void *item, size_t size);
         void DumpAllocationProfile();
         void DumpFatties();

@@ -144,9 +144,9 @@ namespace MMgc
                 size_t userSize = block->size - DebugSize();
 #ifdef MMGC_MEMORY_PROFILER
                 m_totalAskSize += originalSize;
-                heap->AllocHook(GetUserPointer(item), originalSize, userSize);
+                heap->AllocHook(GetUserPointer(item), originalSize, userSize, /*managed=*/true);
 #else
-                heap->AllocHook(GetUserPointer(item), 0, userSize);
+                heap->AllocHook(GetUserPointer(item), 0, userSize, /*managed=*/true);
 #endif
             }
 #endif
