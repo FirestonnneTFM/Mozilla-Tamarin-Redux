@@ -992,6 +992,40 @@ function computeLargeOrSmall()
     }
 }
 
+function noUsefulTracer(n)
+{
+    n = n.replace(/^MMgc::/,"");
+    switch (n) {
+    case "GCRoot":
+    case "GCFinalizedObject":
+    case "GCTraceableObject":
+    case "RCObject":
+    case "GCInlineObject":
+    case "AvmPlusScriptableObject":
+        return true;
+    default:
+        return false;
+    }
+}
+
+function ifdefOpen(out, fieldOrClass)
+{
+    if (fieldOrClass.ifdef)
+        out.PR("#ifdef " + fieldOrClass.ifdef);
+    
+    if (fieldOrClass.ifndef)
+        out.PR("#ifndef " + fieldOrClass.ifndef);
+    
+    if (fieldOrClass.if_)
+        out.PR("#if " + fieldOrClass.if_);
+}
+
+function ifdefClose(out, fieldOrClass)
+{
+    if (fieldOrClass.ifdef || fieldOrClass.ifndef || fieldOrClass.if_)
+        out.PR("#endif // " + (fieldOrClass.ifdef || fieldOrClass.ifndef || fieldOrClass.if_));
+}
+
 // If a class is large it could be because it has a pointer array or
 // because it has many fixed fields or both.  It is pretty much never
 // going to be the case that it has many fixed fields so we always
@@ -1001,15 +1035,7 @@ function computeLargeOrSmall()
 function constructTracerBodies()
 {
     function traceField(out, field) {
-        if (field.ifdef)
-            out.PR("#ifdef " + field.ifdef);
-
-        if (field.ifndef)
-            out.PR("#ifndef " + field.ifndef);
-
-        if (field.if_)
-            out.PR("#if " + field.if_);
-
+        ifdefOpen(out, field);
         try {
             throw field;
         }
@@ -1020,9 +1046,7 @@ function constructTracerBodies()
         catch (f: *) {
             fail("Unknown type to trace: " + field);
         }
-
-        if (field.ifdef || field.ifndef || field.if_)
-            out.PR("#endif");
+        ifdefClose(out, field);
     }
 
     // Here we can do better: we can collect the fields that have the
@@ -1098,21 +1122,6 @@ function constructTracerBodies()
         }
     }
 
-    function noUsefulTracer(n) {
-        n = n.replace(/^MMgc::/,"")
-        switch (n) {
-        case "GCRoot":
-        case "GCFinalizedObject":
-        case "GCTraceableObject":
-        case "RCObject":
-        case "GCInlineObject":
-        case "AvmPlusScriptableObject":
-            return true;
-        default:
-            return false;
-        }
-    }
-
     function cleanupNs(name) {
         // If the name has a namespace, keep it
         // Otherwise prepend the current output namespace
@@ -1176,6 +1185,74 @@ function constructAndPrintTracers()
             interlocks.PR("#define " + cppNamespace + "_" + c.cls + "_isExactInterlock 1");
     }
 
+    function emitSafetyNet(c,output)
+    {
+        output.
+            PR("#ifdef DEBUG");
+        
+        if(c.fieldList.length > 0) {
+            output.
+                PR("const uint32_t " + c.fullName() + "::gcTracePointerOffsets[] = {").
+                IN();
+            for ( var j=0 ; j < c.fieldList.length ; j++ ) {
+                var f = c.fieldList[j];
+                ifdefOpen(output, f);
+                output.
+                    PR("offsetof("+c.fullName()+", "+f.name+"),");
+                ifdefClose(output, f);
+            }
+            output.
+                PR("0};").
+                OUT().
+                NL();
+        }
+        output.
+            PR("MMgc::GCTracerCheckResult " + c.fullName() + "::gcTraceOffsetIsTraced(uint32_t off) const").
+                PR("{").
+            IN().
+            PR("MMgc::GCTracerCheckResult result;").
+            PR("(void)off;").
+            PR("(void)result;");
+        
+        // invoke GC_STRUCTURE checkers on types we've seen
+        for ( var j=0 ; j < c.fieldList.length ; j++ ) {
+            var f = c.fieldList[j];
+            if (f is GCStructure) {
+                ifdefOpen(output, f);
+                output.
+                    PR("if((result = " + f.name + ".gcTraceOffsetIsTraced(off - offsetof("+c.cls+","+f.name+"))) != MMgc::kOffsetNotFound) {").
+                    IN().
+                    //PR("GC::ExactTraceManualWarning(" + QUOT(c.cls) + ", " + f.name + ");").
+                    PR("return result;").
+                    OUT().
+                    PR("}");
+                ifdefClose(output, f);
+            }
+        }
+
+        // invoke super class checker
+        if (!noUsefulTracer(c.base)) {
+            output.
+                PR("if((result = " + c.base + "::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)").
+                    IN().
+                PR("return result;").
+                OUT();
+        }
+        
+        if(c.fieldList.length > 0)
+            output.
+                PR("return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,"+c.fieldList.length+");");
+        else
+            output.
+                PR("return MMgc::kOffsetNotFound;");
+        
+        output.
+            OUT().
+            PR("}").
+            PR("#endif // DEBUG").
+            NL();
+    }
+
     function emitTracers()
     {
         for ( var i=0 ; i < cppClassList.length ; i++ ) {
@@ -1193,18 +1270,13 @@ function constructAndPrintTracers()
             }
 
             emitInterlock(c);
-            if (c.ifdef)
-                output.
-                    PR("#ifdef " + c.ifdef).
-                    NL();
-            else if (c.ifndef)
-                output.
-                    PR("#ifndef " + c.ifndef).
-                    NL();
-            else if (c.if_)
-                output.
-                    PR("#if " + c.if_).
-                    NL();
+
+            ifdefOpen(output, c);
+            output.NL();
+                     
+            // Safety net stuff
+            emitSafetyNet(c,output);
+
             if (c.probablyLarge) {
                 output.
                     PR("bool " + c.fullName() + "::gcTrace(MMgc::GC* gc, size_t _xact_cursor)").
@@ -1251,10 +1323,8 @@ function constructAndPrintTracers()
                     PR("}").
                     NL();
             }
-            if (c.ifdef || c.ifndef || c.if_) 
-                output.
-                    PR("#endif // " + (c.ifdef || c.ifndef || c.if_)).
-                    NL();
+            ifdefClose(output,c);
+            output.NL();
         }
     }
 

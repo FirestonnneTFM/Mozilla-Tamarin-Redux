@@ -37,24 +37,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#ifndef __GCTypes__
-#define __GCTypes__
-
-#include "VMPI.h"
+#ifndef _SMART_POINTER_H_
+#define _SMART_POINTER_H_
 
 namespace MMgc
 {
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-
-    enum FixedMallocOpts { kNone=0, kZero=1, kCanFail=2, kCanFailAndZero=3 };
-
-    enum GCTracerCheckResult { kPassDueToManualTracer, kOffsetFound, kOffsetNotFound };
-
-    #ifndef NULL
-    #define NULL 0
-    #endif
+    class SmartPointer
+    {
+    public:
+        SmartPointer();
+    };
 }
 
-#endif /* __GCTypes__ */
+#endif // _SMART_POINTER_H_

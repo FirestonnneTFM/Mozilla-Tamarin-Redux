@@ -185,6 +185,15 @@ namespace avmplus
             DataInput::gcTrace(gc);
             DataOutput::gcTrace(gc);
         }
+        
+#ifdef DEBUG
+        // Normally manually traced classes would subclass
+        // GCInlineObject to pick this up but ByteArray is an anomaly.
+        MMgc::GCTracerCheckResult gcTraceOffsetIsTraced(uint32_t) const
+        {
+            return MMgc::kPassDueToManualTracer;
+        }
+#endif
 
     private:
         Toplevel* const         m_toplevel;

@@ -84,7 +84,7 @@ namespace MMgc
      * const and no allocations occur between the construction of the object holding the field
      * and the assignment.
      */
-    template<class T> class WriteBarrier
+    template<class T> class WriteBarrier : private SmartPointer
     {
 #ifdef MMGC_HEAP_GRAPH
         friend class GC;    // for location()
@@ -147,7 +147,7 @@ namespace MMgc
      * WriteBarrierRC is a write barrier for naked (not pointer swizzled) RC objects.
      * the only thing going in and out of the slot is NULL or a valid RCObject
      */
-    template<class T> class WriteBarrierRC
+    template<class T> class WriteBarrierRC : private SmartPointer
     {
 #ifdef MMGC_HEAP_GRAPH
         friend class GC;    // for location()
@@ -210,7 +210,7 @@ namespace MMgc
     // This is intended to be subclassed by avmplus::AtomWB /only/.  It provides the
     // minimum of functionality required by exact tracing of AtomWB smart pointers.
 
-    class AtomWBCore
+    class AtomWBCore : private SmartPointer
     {
         friend class GC;
         

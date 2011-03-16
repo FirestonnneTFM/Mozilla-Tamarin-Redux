@@ -55,7 +55,7 @@ namespace MMgc
     //
     
     template <class T>
-    class GCMemberBase : public GCRef<T>
+    class GCMemberBase : public GCRef<T>, private SmartPointer
     {
         friend class GC;
     private:

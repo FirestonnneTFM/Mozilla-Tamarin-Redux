@@ -88,6 +88,7 @@ the <a href="exactgc-architecture.html">architecture document</a>.
      <a href="#correspondences">Correspondences</a><br>
      <a href="#interlocks">Interlocks</a><br>
      <a href="#assertions">Assertions</a><br>
+     <a href="#safetynet">Safety Net</a><br>
      </div>
   <a href="#limitations">Limitations of the annotation system</a><br>
   </div>
@@ -240,10 +241,10 @@ important:
      the section <a href="#vtable-not-affordable">What to do when the
      vtable is not affordable</a> for more information.
 
+<li>
 	 <P> If a class contains GC pointers and isn't allocated directly
-     but is instead used to compose other GCObjects as an inline
-     member we've
-     introduced <tt>GCInlineObject</tt>.  <tt>GCInlineObject</tt>
+     but is instead used to compose other GC objects as an inline
+     members it must inherit from <tt>GCInlineObject</tt>.   <tt>GCInlineObject</tt>
      subclasses can use the same annotation system and have generated
      tracers just like objects allocated
      directly.  <tt>GCInlineObject</tt> does not introduce a vtable or
@@ -670,6 +671,24 @@ exact tracing callbacks are only invoked on live objects.  An
 assertion in <tt>GC::TracePointer</tt> usually indicates some sort of
 incorrect usage.
 
+<a name="safetynet">
+<h4> Safety Net</h4>
+
+<P> If you forget to annotate an instance
+of <tt>MMgc::SmartPointer</tt> and your class is completely traced by
+the exactgc tracer generator then you will get assertions.  The
+following <tt>MMgc::SmartPointer</tt>'s exist:
+
+<ul>
+<li><tt>GCMember&lt;T&gt;</tt></li>
+<li><tt>MMgc::WriteBarrier&lt;T&gt;</tt> (also used as <tt>DWB(T)</tt>)</li>
+<li><tt>MMgc::WriteBarrierRC&lt;T&gt;</tt> (also used as <tt>DRCWB(T)</tt>)</li>
+</ul>
+
+<P> If your class has a baseclass or uses a structure that isn't
+traced with the annotation system then the safety net doesn't work.
+Its highly recommend to use the annotation system and avoid manual tracers.
+
 <P> Further ideas are tracked
 by <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=604733">Bugzilla&nbsp;604733</a>;
 add your idea there.
@@ -686,12 +705,6 @@ add your idea there.
      manually, the debugging interlocks for the templated base class
      must still be inserted by hand so that the generated code works.
      See <a href="#templates">Dealing with templates</a>.
-
-<li> <P> It's not possible (yet) to generate tracers for
-     substructures.  (Tracked
-     by <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=624402">Bugzilla&nbsp;624402</a>;
-     please leave a comment there if this is a hardship.)  We hope to
-     correct this before long.
 
 </ul>
 
