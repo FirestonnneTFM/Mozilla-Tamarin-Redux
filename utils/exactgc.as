@@ -1101,6 +1101,7 @@ function constructTracerBodies()
     function noUsefulTracer(n) {
         n = n.replace(/^MMgc::/,"")
         switch (n) {
+        case "GCRoot":
         case "GCFinalizedObject":
         case "GCTraceableObject":
         case "RCObject":
