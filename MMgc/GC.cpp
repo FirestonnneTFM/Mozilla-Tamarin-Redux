@@ -1358,7 +1358,7 @@ namespace MMgc
         VMPI_callWithRegistersSaved(DoCreateRootFromCurrentStack, &arg2);
     }
 
-    void GCRoot::init(GC* _gc, const void *_object, size_t _size, bool isStackMemory)
+    void GCRoot::init(GC* _gc, const void *_object, size_t _size, bool _isStackMemory, bool _isExactlyTraced)
     {
         GCAssert(_object != NULL || _size == 0);
         GCAssert(_size % 4 == 0);
@@ -1366,24 +1366,29 @@ namespace MMgc
 
         gc = _gc;
         object = _object;
-        size = _size | (isStackMemory ? 1 : 0);
+        size = (_size | (_isExactlyTraced ? kIsExactlyTraced : 0) | (_isStackMemory ? kIsStackMemory : 0));
         markStackSentinel = NULL;
         gc->AddRoot(this);
     }
 
-    GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size, bool _isStackMemory)
+    GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size, bool _isStackMemory, bool _isExactlyTraced)
     {
-        init(_gc, _object, _size, _isStackMemory);
+        init(_gc, _object, _size, _isStackMemory, _isExactlyTraced);
     }
 
     GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size)
     {
-        init(_gc, _object, _size, false);
+        init(_gc, _object, _size, false, false);
     }
     
     GCRoot::GCRoot(GC * _gc)
     {
-        init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this), false);
+        init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this), false, false);
+    }
+
+    GCRoot::GCRoot(GC * _gc, GCExactFlag)
+    {
+        init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this), false, true);
     }
 
     GCRoot::~GCRoot()
@@ -1391,7 +1396,7 @@ namespace MMgc
         Destroy();
     }
 
-    void GCRoot::PrivilegedSet(const void* _object, uint32_t _size, bool _isStackMemory)
+    void GCRoot::PrivilegedSet(const void* _object, uint32_t _size)
     {
         GCAssert(_object != NULL || _size == 0);
         GCAssert(_size % 4 == 0);
@@ -1399,14 +1404,14 @@ namespace MMgc
         
         SetMarkStackSentinelPointer(NULL);
         object = _object;
-        size = (_size | (_isStackMemory ? 1 : 0));
+        size = (_size | (size & kFlags));    // Flags are sticky
     }
 
-    void GCRoot::GetWorkItem(const void*& _object, uint32_t& _size, bool& _isStackMemory) const
+    void GCRoot::GetConservativeWorkItem(const void*& _object, uint32_t& _size, bool& _isStackMemory) const
     {
         _object = object;
-        _size = (uint32_t)(size & ~1);
-        _isStackMemory = (bool)(size & 1);
+        _size = (uint32_t)(size & ~kFlags);
+        _isStackMemory = (bool)(size & kIsStackMemory);
         if (_isStackMemory)
         {
             uint32_t newSize = uint32_t(((StackMemory*)this)->Top());
@@ -1438,15 +1443,21 @@ namespace MMgc
 
     void GCRoot::Destroy()
     {
-        PrivilegedSet(NULL, 0, false);
+        PrivilegedSet(NULL, 0);
         if(gc) {
             gc->RemoveRoot(this);
         }
         gc = NULL;
     }
 
-    StackMemory::StackMemory(GC * _gc, const void * _object, size_t _size)
-        : GCRoot(_gc, _object, _size, true)
+    bool GCRoot::gcTrace(GC*, size_t)
+    {
+        GCAssert(!"GCRoot::gcTrace should never be called.");
+        return false;
+    }
+
+    StackMemory::StackMemory(GC * _gc, const void * _object, size_t _size, bool _isExact)
+        : GCRoot(_gc, _object, _size, true, _isExact)
     {
     }
     
@@ -1457,7 +1468,7 @@ namespace MMgc
 
     void StackMemory::Set(const void * _object, size_t _size)
     {
-        PrivilegedSet(_object, uint32_t(_size), true);
+        PrivilegedSet(_object, uint32_t(_size));
     }
 
     GCCallback::GCCallback(GC * _gc) : gc(_gc)
@@ -2010,31 +2021,38 @@ namespace MMgc
         markerActive++;
         GCRoot *r = m_roots;
         while(r) {
-            const void* object;
-            uint32_t size;
-            bool isStackMemory;
-            r->GetWorkItem(object, size, isStackMemory);
-            if(object != NULL && isStackMemory == stackroots) {
-                GCAssert(!IsPointerToGCPage(object));
-                GCAssert(!IsPointerToGCPage((char*)object + size - 1));
-                // If this root will be split push a sentinel item and store
-                // a pointer to it in the root.   This will allow us to clean
-                // the stack if the root is deleted.  See GCRoot::Destroy and
-                // GC::HandleLargeItem
-                if(size > kMarkItemSplitThreshold) {
-                    // Push a sentinel item for protection, and if it succeeded then
-                    // register the location of the sentinel item on the mark stack
-                    // with the root.
-                    if (Push_RootProtector(r))
-                        r->SetMarkStackSentinelPointer(m_incrementalWork.Top());
-                }
-                // Note: here we could push a kStackMemory instead of a kGCRoot, if stackroots==true.
-                // That would mean that interior pointers from StackMemory roots would be recognized,
-                // which may or may not be right - it's not something we've done so far.
-                MarkItem_ConservativeOrNonGCObject(object, size, GCMarkStack::kLargeRootChunk, r, MMGC_INTERIOR_PTRS_FLAG);
-                if (deep)
-                    Mark();
+            if (r->IsExactlyTraced()) {
+                bool result = r->gcTrace(this, 0);
+                (void)result;
+                GCAssertMsg(result == false, "A GCRoot tracer must never return true.");
             }
+            else {
+                const void* object;
+                uint32_t size;
+                bool isStackMemory;
+                r->GetConservativeWorkItem(object, size, isStackMemory);
+                if(object != NULL && isStackMemory == stackroots) {
+                    GCAssert(!IsPointerToGCPage(object));
+                    GCAssert(!IsPointerToGCPage((char*)object + size - 1));
+                    // If this root will be split push a sentinel item and store
+                    // a pointer to it in the root.   This will allow us to clean
+                    // the stack if the root is deleted.  See GCRoot::Destroy and
+                    // GC::HandleLargeItem
+                    if(size > kMarkItemSplitThreshold) {
+                        // Push a sentinel item for protection, and if it succeeded then
+                        // register the location of the sentinel item on the mark stack
+                        // with the root.
+                        if (Push_RootProtector(r))
+                            r->SetMarkStackSentinelPointer(m_incrementalWork.Top());
+                    }
+                    // Note: here we could push a kStackMemory instead of a kGCRoot, if stackroots==true.
+                    // That would mean that interior pointers from StackMemory roots would be recognized,
+                    // which may or may not be right - it's not something we've done so far.
+                    MarkItem_ConservativeOrNonGCObject(object, size, GCMarkStack::kLargeRootChunk, r, MMGC_INTERIOR_PTRS_FLAG);
+                }
+            }
+            if (deep)
+                Mark();
             r = r->next;
         }
         markerActive--;

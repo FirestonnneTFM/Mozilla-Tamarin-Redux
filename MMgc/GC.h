@@ -187,11 +187,28 @@ namespace MMgc
         friend class avmplus::ST_mmgc_basics;
 #endif
         GCRoot();
-        void init(GC*gc, const void *object, size_t size, bool isStackMemory);
+        void init(GC*gc, const void *object, size_t size, bool isStackMemory, bool isExactlyTraced);
+
+        // Flags that are stored in the 'size' field
+        static const int kIsStackMemory = 1;
+        static const int kIsExactlyTraced = 2;
+        static const int kFlags = 3;
+
     public:
-        /** subclassing constructor */
+        /** subclassing constructor - conservatively traced */
         GCRoot(GC *gc);
         
+        /** subclassing constructor - exactly traced */
+        GCRoot(GC *gc, GCExactFlag flag);
+
+        /**
+         * The return value and both arguments are technically unnecessary, but by using this
+         * signature the GCRoot tracers will be trivially compatible with the tracer generator
+         * system; roots can therefore be annotated in the usual manner and tracers for roots
+         * can be generated.
+         */
+        virtual bool gcTrace(GC* gc, size_t cursor=0);
+
         /**
          * Special-purpose constructor.  Provided in order to allow non-FixedMalloc memory
          * to be root memory (used by AIR/APE).
@@ -210,7 +227,9 @@ namespace MMgc
 
         const void *Get() const { return object; }
         const void *End() const { return (char*)object + Size(); }
-        size_t Size() const { return size & ~1; }
+        size_t Size() const { return size & ~kFlags; }
+        bool IsStackMemory() const { return (size & kIsStackMemory) ? true : false; }
+        bool IsExactlyTraced() const { return (size & kIsExactlyTraced) ? true : false; }
 
         GC *GetGC() const { return gc; }
         /** if your object goes away after the GC is deleted this can be useful */
@@ -291,10 +310,10 @@ namespace MMgc
         GCRoot *next;
         GCRoot *prev;
         const void *object;             // High w-2 bits: the pointer.  Bit 1: available.  Bit 0: available.
-        size_t size;                    // High w-2 bits: the size in bytes.  Bit 1: available.   Bit 0: StackMemory flag.
+        size_t size;                    // High w-2 bits: the size in bytes.  Bit 1: isExactlyTraced flag.   Bit 0: isStackMemory flag.
         uintptr_t markStackSentinel;    // If not 0 this is the index on the mark stack that holds the RootProtector for this root.
 
-        void GetWorkItem(const void*& _object, uint32_t& _size, bool& _isStackMemory) const;
+        void GetConservativeWorkItem(const void*& _object, uint32_t& _size, bool& _isStackMemory) const;
 
         uintptr_t GetMarkStackSentinelPointer();
 
@@ -312,9 +331,9 @@ namespace MMgc
     protected:
         // THESE METHODS ARE ONLY FOR MMGC INTERNAL USE!
 
-        GCRoot(GC*gc, const void *object, size_t size, bool isStackMemory);
+        GCRoot(GC*gc, const void *object, size_t size, bool isStackMemory, bool isExactlyTraced);
 
-        void PrivilegedSet(const void *object, uint32_t size, bool isStackMemory);
+        void PrivilegedSet(const void *object, uint32_t size);
     };
 
     /**
@@ -328,7 +347,7 @@ namespace MMgc
         /**
          * Initialize the stack memory.
          */
-        StackMemory(GC *gc, const void *object, size_t size);
+        StackMemory(GC *gc, const void *object, size_t size, bool isExactlyTraced=false);
 
         /**
          * Return the value of the stack top in the range [0,size].  The GC will scan the memory

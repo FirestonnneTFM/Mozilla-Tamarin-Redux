@@ -49,7 +49,7 @@
 <br>
 All There Is to Know About Writing Annotations</center></h1>
 
-<P> <center> (Largely complete draft, 2011-02-07)</center>
+<P> <center> (Largely complete draft, 2011-03-01)</center>
 
 <P> MMgc provides a facility that allows classes to opt-in to "exact
 GC" during garbage collection.  "Exact GC" means that
@@ -93,6 +93,7 @@ the <a href="exactgc-architecture.html">architecture document</a>.
   </div>
 <a href="#manual-tracers">Writing manual tracers</a><br>
 <a href="#object-construction">Setting up your construction code</a><br>
+<a href="#roots">Root objects</a><br>
 <a href="#script-running">Running the exactgc.as script, and other scripts</a><br>
 <a href="#vtable-not-affordable">What to do when a vtable is not affordable or possible</a><br>
 <a href="#alloc-and-calloc">How to handle GC::Alloc and GC::Calloc</a><br>
@@ -754,6 +755,26 @@ constructor and a public, static, inline factory function:
        return new (gc, <b>MMgc::kExact,</b> ivtable->getExtraSize()) ArrayObject(...);
      }
 </pre>
+
+
+<a name="roots">
+<h2>Root objects</h2>
+
+<P> It is possible to opt in to exact tracing for <tt>GCRoot</tt>
+subtypes by overriding the virtual <tt>gcTrace</tt> method
+of <tt>GCRoot</tt>:
+<pre>
+    virtual bool gcTrace(MMgc::GC* gc, size_t cursor);
+</pre>
+
+<P> The signature of a root tracer is compatible with that of a
+regular tracer in order to make use of the standard annotation and
+tracer generator system.  However, a root tracer <em>must</em>
+return <b>false</b> and <em>must</em> fully trace the object when it
+is called with <i>cursor==0</i>.  Root objects should in general be
+small.  Large root objects should be reengineered to become small root
+objects.
+
 
 <a name="script-running">
 <h2>Running the exactgc.as script, and other scripts</h2>
