@@ -266,18 +266,22 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
         toplevel->throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
     }
     default:
+    {
+        ScriptObject* o;
         if (atomKind(obj)==kObjectType)
         {
-            return AvmCore::atomToScriptObject(obj)->constructProperty(multiname, argc, atomv);
+            o = AvmCore::atomToScriptObject(obj);
         }
         else
         {
             // primitive types are not dynamic, so we can go directly
             // to their __proto__ object
-            ScriptObject* proto = toplevel->toPrototype(obj);
-            Atom ctor = proto->getMultinameProperty(multiname);
-            return op_construct(toplevel, ctor, argc, atomv);
+            o = toplevel->toPrototype(obj);
         }
+        atomv[0] = o->atom(); // replace receiver
+        Atom ctor = o->getMultinameProperty(multiname);
+        return op_construct(toplevel, ctor, argc, atomv);
+    }
     }
 }
 

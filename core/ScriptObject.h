@@ -108,7 +108,6 @@ namespace avmplus
 
         // argv[0] = receiver
         virtual Atom callProperty(const Multiname* name, int argc, Atom* argv);
-        virtual Atom constructProperty(const Multiname* name, int argc, Atom* argv);
 
         // common set/set/has/delete/etc virtual methods renamed to explicitly name the expected arg types,
         // to avoid potentially hidden virtual functions
