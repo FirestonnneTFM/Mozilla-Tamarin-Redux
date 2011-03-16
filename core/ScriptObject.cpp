@@ -551,13 +551,6 @@ namespace avmplus
         return toplevel->op_call(method, argc, argv);
     }
 
-    Atom ScriptObject::constructProperty(const Multiname* multiname, int argc, Atom* argv)
-    {
-        Atom ctor = getMultinameProperty(multiname);
-        argv[0] = atom(); // replace receiver
-        return toplevel()->op_construct(ctor, argc, argv);
-    }
-
     Atom ScriptObject::getDescendants(const Multiname* /*name*/) const
     {
         toplevel()->throwTypeError(kDescendentsError, core()->toErrorString(traits()));
