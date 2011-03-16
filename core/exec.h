@@ -433,7 +433,7 @@ public:
  * Holder for interface method dispatch table within class VTable,
  * declared here because it is private to the ExecMgr implementation.
  */
-class ImtHolder
+class ImtHolder : public MMgc::GCInlineObject
 {
     friend class BaseExecMgr;
     friend class CodegenLIR;

@@ -190,7 +190,7 @@ namespace avmplus
     // Special care must be taken if this object is not embedded within the first 4K of a GC object,
     // because write barriers must be handled differently.  See comments to setMultiname below and
     // comments on the destructor in Multiname.cpp.
-    class HeapMultiname
+    class HeapMultiname : public MMgc::GCInlineObject
     {
     public:
 

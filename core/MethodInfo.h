@@ -47,7 +47,7 @@
 
 namespace avmplus
 {
-     class ScopeOrTraits
+     class ScopeOrTraits : public MMgc::GCInlineObject
      {
      private:
         static const uintptr_t IS_SCOPE = 0x01;

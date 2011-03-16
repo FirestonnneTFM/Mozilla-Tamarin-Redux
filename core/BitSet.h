@@ -180,7 +180,7 @@ namespace avmplus
     // and doesn't require allocation for <=31 (or 63) size. This expects
     // to be embedded as a member variable in a GCObject and will
     // use WB if allocation is necessary.
-    class FixedBitSet
+    class FixedBitSet : public MMgc::GCInlineObject
     {
     public:
         inline explicit FixedBitSet() : m_bits(0)
