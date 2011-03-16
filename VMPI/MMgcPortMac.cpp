@@ -386,7 +386,8 @@ void VMPI_setupPCResolution()
     //attempt launch of atos for the first time
     //if it fails for some reason we never reattempt it
     // silence occasional errors from atos
-    //    startATOSProcess();
+    if(VMPI_isMemoryProfilingEnabled())
+        startATOSProcess();
 }
 
 void VMPI_desetupPCResolution()
