@@ -4591,9 +4591,23 @@ return the result of the comparison ToPrimitive(x) == y.
                     rcptr->IncrementRef();
                 // fall through to InlineWriteBarrierTrap()
             }
+#ifdef DEBUG
+            else
+            {
+                AvmAssert(!gc->IsRCObjectSafe(atomPtr(a)));
+            }
+#endif
             if (gc->BarrierActive())
                 gc->InlineWriteBarrierTrap(container);
         }
+#ifdef DEBUG
+        else
+        {
+            // Its illegal for kUnusedAtomTag, kSpecialType and
+            // kBooleanType to carry a GC pointer.
+            AvmAssert(atomKind(a) == kIntptrType || !gc->IsPointerToGCPage(atomPtr(a)));
+        }
+#endif
     }
 
     /*static*/
