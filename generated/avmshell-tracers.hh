@@ -39,6 +39,19 @@
 
 namespace avmshell
 {
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult SystemClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = avmplus::ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
 bool SystemClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
@@ -51,7 +64,26 @@ bool SystemClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
+
 #ifdef DEBUGGER
+
+#ifdef DEBUG
+const uint32_t DebugCLI::gcTracePointerOffsets[] = {
+    offsetof(DebugCLI, currentFile),
+    offsetof(DebugCLI, firstBreakAction),
+    offsetof(DebugCLI, lastBreakAction),
+    0};
+
+MMgc::GCTracerCheckResult DebugCLI::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = avmplus::Debugger::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,3);
+}
+#endif // DEBUG
 
 bool DebugCLI::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
@@ -67,6 +99,23 @@ bool DebugCLI::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #endif // DEBUGGER
 
+
+#ifdef DEBUG
+const uint32_t ShellToplevel::gcTracePointerOffsets[] = {
+    offsetof(ShellToplevel, shellClasses),
+    0};
+
+MMgc::GCTracerCheckResult ShellToplevel::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = avmplus::Toplevel::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,1);
+}
+#endif // DEBUG
+
 bool ShellToplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
@@ -76,5 +125,6 @@ bool ShellToplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&shellClasses);
     return false;
 }
+
 
 }

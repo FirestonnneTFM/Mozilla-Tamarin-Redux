@@ -229,10 +229,12 @@ namespace MMgc
     class Cleaner;
     class GCAlloc;
     class GCHeap;
+    class GCTraceableBase;
 }
 
 #define CAPACITY(T)  (uint32_t(GCHeap::kBlockSize) / uint32_t(sizeof(T)))
 
+#include "SmartPointer.h"
 #include "StaticAssert.h"
 #include "GCTypes.h"
 #include "AllocationMacros.h"
@@ -261,6 +263,7 @@ namespace MMgc
 #include "GCObject.h"
 #include "GCWeakRef.h"
 
+#include "SmartPointer-inlines.h"
 #include "Shared-inlines.h"
 #include "GCHashtable-inlines.h"
 #include "FixedAlloc-inlines.h"

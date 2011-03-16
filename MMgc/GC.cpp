@@ -3914,4 +3914,30 @@ namespace MMgc
         lock->prev = NULL;
         lock->object = NULL;
     }
+
+#ifdef DEBUG
+    void GC::TracePointerCheck(const void *derivedPointer)
+    {
+        GC *gc = GetActiveGC();
+        void *userptr = gc->FindBeginningFast(derivedPointer);
+        uint32_t offset = uint32_t(uintptr_t(derivedPointer) - uintptr_t(userptr));
+        if(GC::GetGCBits(GetRealPointer(userptr)) & kVirtualGCTrace)
+        {
+            GCAssertMsg(((GCTraceableBase*)userptr)->gcTraceOffsetIsTraced(offset) != kOffsetNotFound, "Missing exact tracing annotation!");
+        }
+    }
+
+    /*static*/
+    GCTracerCheckResult GC::CheckOffsetIsInList(uint32_t offset, const uint32_t offsets[],size_t len)
+    {
+        for(size_t i=0;i<len;i++)
+        {
+            if(offsets[i]==offset)
+                return kOffsetFound;
+        }
+        return kOffsetNotFound;
+    }
+
+#endif // DEBUG
+
 }

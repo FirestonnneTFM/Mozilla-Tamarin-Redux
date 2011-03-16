@@ -80,6 +80,9 @@ invariants</a> for instances of class opting into being exactly GC'd:
     GCFinalizedObject, or RCObject.  It <em>must not</em> derive from
     GCObject, or from no GC class at all.
 
+<li><P> An object not heap allocated but inlined into another GC object must
+	inherit from GCInlineObject.
+
 <li><P> A class can be exactly GC'd only if its base class is exactly GC'd.
 
 <li><P> The class <em>must</em> disclose <em>all</em> its GC-pointer
@@ -113,7 +116,8 @@ metadata.
 <li><P> You must turn on exact GC for all instances of the type as you
 allocate them.
 
-<li><P> You must regenerate the "tracing methods" by running a script.
+<li><P> You must regenerate the "tracing methods" by running a script (only true 
+	for tamarin, not true of the Flash Player build process.)
 
 <P><em>TODO.</em>  We will make that part of the build process, so this
 step will go away.
@@ -301,43 +305,8 @@ automatically; in the avmshell you have to do it manually:
 
 <P> <a href="#structure-usecase">Earlier you saw how to annotate
 member that is a class or structure with <tt>GC_STRUCTURE</tt>.</a>
-However, at this time there is no annotation system for structure
-members, and unless the structure has already been set up to handle
-exact GC you must implement the exact GC protocol on the structure
-manually.
-
-<P> Specifically, you must implement the following method on the structure:
-<pre>
-  void gcTrace(MMgc::GC*gc)
-</pre>
-The new method will perform the tracing of the structure, ie, inform the GC of the
-pointer members in the structure.
-
-<p>Suppose the structure (or class) looks like this:
-<pre>
-  struct S {
-      int x;
-      DRCWB(ScriptObject*) p;  // untagged pointer
-      ATOM_WB a;               // AVM+ atom
-      uintptr_t q;             // tagged pointer with manual barrier
-      uintptr_t w;             // maybe pointer, maybe not
-      GCList&lt;Atom> atoms;      // substructure
-  }
-</pre>
-
-<P>Then you would add this method to its body:
-<pre>
-    inline void gcTrace(MMgc::GC* gc) {
-        gc->TraceAtom(&a);
-        gc->TraceLocation(&p);
-        gc->TraceLocation(&q);
-        gc->TraceConservativeLocation(&w);
-        atoms.gcTrace(gc);
-    }
-</pre>
-
-<P> (Frequently a structure is used few places and it makes sense to
-make the tracer "inline".)
+The same annotation system can be used for these structures.  The only 
+requirement is that the class inherit from GCInlineObject.   <a href="exactgc-manual.html#gcstruct">Here's</a> an example.
 
 <h2>Troubleshooting</h2>
 
@@ -356,9 +325,9 @@ compile-time errors if:
 <li><P> You forget to run the tracer generation script after adding an annotation.
 </ul>
 
-<p> Missing annotations are particularly easy to acquire during
-merges, if the author of the merged-in code is unaware that somebody
-has changed the merged-into class to be exactly GC'd.
+You will however get assertions if you fail to annotate a GC smart
+pointer.  See the <a href="exactgc-manual.html#safetynet">Safety
+Net</a> for details.
 
 </body>
 </html>

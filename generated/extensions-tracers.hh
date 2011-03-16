@@ -39,6 +39,19 @@
 
 namespace avmplus
 {
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult DictionaryClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
 bool DictionaryClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
@@ -50,6 +63,20 @@ bool DictionaryClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
     return false;
 }
+
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult DictionaryObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
 
 bool DictionaryObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
@@ -64,6 +91,20 @@ bool DictionaryObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
+
+
+#ifdef DEBUG
+MMgc::GCTracerCheckResult DomainClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
 bool DomainClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
@@ -75,6 +116,25 @@ bool DomainClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)(avmplus_ClassClosure_isExactInterlock != 0);
     return false;
 }
+
+
+
+#ifdef DEBUG
+const uint32_t DomainObject::gcTracePointerOffsets[] = {
+    offsetof(DomainObject, domainEnv),
+    offsetof(DomainObject, domainToplevel),
+    0};
+
+MMgc::GCTracerCheckResult DomainObject::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,2);
+}
+#endif // DEBUG
 
 bool DomainObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
@@ -89,5 +149,6 @@ bool DomainObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&domainToplevel);
     return false;
 }
+
 
 }

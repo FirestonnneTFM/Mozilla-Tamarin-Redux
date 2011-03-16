@@ -64,8 +64,43 @@ namespace MMgc
     class GCInlineObject
     {
     public:
-        // Empty ctor to avoid silly no-public members compiler warnings.
-        GCInlineObject() {}
+#ifdef DEBUG
+        /**
+         * The function gcTraceOffsetIsTraced is overriden in classes
+         * with generated tracers (its declared by GC_DATA_BEGIN).  In
+         * classes with manual tracers this implementation here is
+         * used and it returns kPassDueToManualTrace which tells the
+         * safety check to stop the checking process.  We can't
+         * perform the safety check unless the entire class is
+         * annotated with the exactgc system. Note that the form of
+         * the generated function is:
+
+           GCTracerCheckResult result;
+           if((result = super->gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound) 
+               return result;
+           if((someStruct.gcTraceOffsetIsTraced(off, offsetof(MyClass, someStruct))) != MMgc::kOffsetNotFound)
+               return result;
+           return GC::CheckOffsetIsInList(off,myOffsets);
+
+           * Its important for "super" above to never to be
+           * GCInlineObject or GCTraceableBase because we would always
+           * return kPassDueToManualTracer and skip the safety
+           * checking.  The trace gen script accounts for this by not
+           * generating the super call when the base class doesn't
+           * have a tracer (ie GCInlineObject or GCTraceableBase and
+           * its immediate subclasses).
+         */
+        GCTracerCheckResult gcTraceOffsetIsTraced(uint32_t) const 
+        {
+            return kPassDueToManualTracer;
+        }
+#endif
+
+        void gcTrace(GC*, size_t cursor=0)
+        {
+            (void)cursor;
+            GCAssertMsg(false, "This class needs a gcTrace, did you forget to annotate it or write a custom gcTrace?");
+        }
 
         //  GCObject's local definition of GCMember
         template<class T>
@@ -173,6 +208,16 @@ namespace MMgc
 
     class GCTraceableBase
     {
+        friend class GC;
+#ifdef DEBUG
+    protected:
+        // See comments for GCInlineObject gcTraceOffsetIsTraced.
+        virtual GCTracerCheckResult gcTraceOffsetIsTraced(uint32_t) const 
+        { 
+            return kPassDueToManualTracer; 
+        }
+#endif
+
     public:
         virtual ~GCTraceableBase() { /* must be empty */ }
 

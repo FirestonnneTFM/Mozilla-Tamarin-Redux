@@ -155,8 +155,11 @@
 // handle GC_STRUCTURE decorations.
 
 #define GC_DECLARE_EXACT_METHODS \
+    private:\
+        static const uint32_t gcTracePointerOffsets[];\
     public: \
-        /*virtual*/ bool gcTrace(MMgc::GC* gc, size_t cursor=0);
+        /*sometimes virtual*/ MMgc::GCTracerCheckResult gcTraceOffsetIsTraced(uint32_t) const; \
+        /*sometimes virtual*/ bool gcTrace(MMgc::GC* gc, size_t cursor=0);
 
 
 namespace avmplus
@@ -487,6 +490,7 @@ namespace MMgc
         friend class ZCT;
         friend class AutoRCRootSegment;
         friend class GCPolicyManager;
+        friend class SmartPointer;
 
         // WriteBarrier classes use private write barriers.
         template<class T> friend class WriteBarrier;
@@ -1917,6 +1921,18 @@ public:
         HeapGraph mutatorGraph;
         HeapGraph markerGraph;
 #endif
+
+#ifdef DEBUG
+    public:
+
+        // Called by generated tracer checking code.
+        static MMgc::GCTracerCheckResult CheckOffsetIsInList(uint32_t offset, const uint32_t offsets[],size_t len);
+
+    private:
+
+        // Called by SmartPointer to verify that its being traced.
+        static void TracePointerCheck(const void *derivedPointer);
+#endif // DEBUG
     };
 
     // helper class to wipe out vtable pointer of members for DRC
