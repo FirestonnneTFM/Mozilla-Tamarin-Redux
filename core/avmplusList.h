@@ -305,7 +305,7 @@ namespace avmplus
     // ----------------------------
 
     template<class T, class ListHelper>
-    class ListImpl
+    class ListImpl : public MMgc::GCInlineObject
     {
         template<class TLIST> friend class VectorAccessor;
         template<class T2> friend class DataListAccessor;
@@ -477,7 +477,7 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    class GCList
+    class GCList : public MMgc::GCInlineObject
     {
     private:
         typedef ListImpl<MMgc::GCObject*, GCListHelper> LIST;
@@ -530,7 +530,7 @@ namespace avmplus
     // ----------------------------
 
     template<class T>
-    class RCList
+    class RCList : public MMgc::GCInlineObject
     {
     private:
         typedef ListImpl<MMgc::RCObject*, RCListHelper> LIST;
@@ -590,7 +590,7 @@ namespace avmplus
     typedef Unmanaged* UnmanagedPointer;
     
     template<class T>
-    class UnmanagedPointerList
+    class UnmanagedPointerList : public MMgc::GCInlineObject
     {
     private:
         typedef ListImpl< UnmanagedPointer, DataListHelper<UnmanagedPointer> > LIST;
@@ -642,7 +642,7 @@ namespace avmplus
 
     // ----------------------------
     template<class T>
-    class WeakRefList
+    class WeakRefList : public MMgc::GCInlineObject
     {
     private:
         typedef ListImpl<MMgc::GCObject*, WeakRefListHelper> LIST;
