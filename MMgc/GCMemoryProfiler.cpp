@@ -86,8 +86,36 @@ namespace MMgc
 
     MemoryProfiler::~MemoryProfiler()
     {
-        GCStackTraceHashtable_VMPI::Iterator traceIter(&stackTraceMap);
         const void *obj;
+#ifdef MMGC_CONSERVATIVE_PROFILER
+        ObjectPopulationProfiler<AllocationSiteHandler>::NodeTable nodes;
+
+        // Hash all traces into nodes, which will boil them down to
+        // unique allocation sites.  Uniqueness as implemented by the
+        // AllocationSiteHandler means that the first frame that isn't
+        // an MMgc frame is the same.
+        GCStackTraceHashtable_VMPI::Iterator traceIter1(&stackTraceMap);
+        while((obj = traceIter1.nextKey()) != NULL)
+        {
+            StackTrace *trace = (StackTrace*)traceIter1.value();
+            if(trace->managed)
+                nodes.put(trace, NULL);
+         }
+
+        size_t numConserv=0;
+        
+        ObjectPopulationProfiler<AllocationSiteHandler>::NodeTable::Iterator nodesIter(&nodes);
+        while((obj = nodesIter.nextKey()) != NULL)
+        {
+            StackTrace *trace = (StackTrace*)obj;
+            if(trace->wasTracedConservatively)
+                numConserv++;
+        }
+
+        GCLog("GC allocation sites: %d, conservatively traced: %d (%d%% exact)\n",  nodes.count(), numConserv,  (100 *(nodes.count()-numConserv))/ nodes.count());
+#endif
+
+        GCStackTraceHashtable_VMPI::Iterator traceIter(&stackTraceMap);
         while((obj = traceIter.nextKey()) != NULL)
         {
             StackTrace *trace = (StackTrace*)traceIter.value();
@@ -199,13 +227,14 @@ namespace MMgc
         GCAssert(trace->count != 0 || trace->size == 0);
     }
 
-    void MemoryProfiler::RecordAllocation(const void *item, size_t askSize, size_t gotSize)
+    void MemoryProfiler::RecordAllocation(const void *item, size_t askSize, size_t gotSize, bool managed)
     {
         GCAssert(gotSize != 0);
         MMGC_LOCK(lock);
         (void)askSize;
 
         StackTrace *trace = GetStackTraceLocked();
+        trace->managed = managed;
 
         ChangeSize(trace, true, gotSize);
 
@@ -873,6 +902,7 @@ namespace MMgc
     void ObjectPopulationProfiler<T>::accountForObject(const void* obj)
     {
         StackTrace* trace = obtainStackTrace(obj);
+        trace->wasTracedConservatively = true;
         if (trace != NULL)
         {
             size_t size = GC::Size(obj);

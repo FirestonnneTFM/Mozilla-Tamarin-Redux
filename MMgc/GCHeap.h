@@ -540,7 +540,7 @@ namespace MMgc
         /* controls whether AllocHook and FreeHook are called */
         void EnableHooks();
         bool HooksEnabled() const;
-        void AllocHook(const void *item, size_t askSize, size_t gotSize);
+        void AllocHook(const void *item, size_t askSize, size_t gotSize, bool managed);
         // called when object is determined to be garbage but we can't write to it yet
         void FinalizeHook(const void *item, size_t size);
         // called when object is really dead and can be poisoned

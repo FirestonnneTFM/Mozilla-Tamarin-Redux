@@ -481,9 +481,9 @@ namespace MMgc
             // subtract if the profiler is installed.
             if(heap->GetProfiler())
                 m_totalAskSize += askSize;
-            heap->AllocHook(GetUserPointer(item), askSize, userSize);
+            heap->AllocHook(GetUserPointer(item), askSize, userSize, /*managed=*/true);
 #else
-            heap->AllocHook(GetUserPointer(item), 0, userSize);
+            heap->AllocHook(GetUserPointer(item), 0, userSize, /*managed=*/true);
 #endif
         }
 #endif // MMGC_HOOKS
