@@ -55,7 +55,7 @@ fail=0
 # Release
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   echo "message: Release Failed"
-#  fail=1
+  fail=1
 }
 
 # Debug
