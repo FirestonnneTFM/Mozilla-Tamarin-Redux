@@ -2094,6 +2094,8 @@ namespace MMgc
         }
         if(profiler)
             profiler->RecordAllocation(item, askSize, gotSize, managed);
+#else
+        (void)managed;
 #endif
 
 #ifdef MMGC_MEMORY_INFO
