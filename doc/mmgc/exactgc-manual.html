@@ -450,6 +450,7 @@ be wrapped in <tt>GC_DATA_BEGIN</tt> and <tt>GC_DATA_END</tt> annotations:
 
 <PRE>
   GC_DATA_BEGIN(Domain)
+private:
   ...
   GC_DATA_END(Domain)
 </PRE>
@@ -457,6 +458,11 @@ be wrapped in <tt>GC_DATA_BEGIN</tt> and <tt>GC_DATA_END</tt> annotations:
 <P> Those annotations must pair up properly but they can nest.  (That
 said, it's bad form to place nested class definitions inside the data
 section of a class.)
+
+<P> Note that the C++ <tt>private:</tt> following the <tt>GC_DATA_BEGIN</tt> is
+intentional because it introduces <tt>public:</tt> into your class.
+<tt>GC_DATA_BEGIN</tt> declares the virtual gcTrace method which has to be
+public.
 
 <P> If a class has no traceable fields, there's an abbreviation:
 <pre>
