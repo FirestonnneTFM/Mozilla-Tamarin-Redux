@@ -50,7 +50,11 @@ then
         
     # only revision passed in
     elif [ "$withhash" == ""  ]; then
-        change=$1
+        if [ "$1" == "tip" ]; then
+            change=`hg identify -n | awk -F+ '{print $1}'`
+        else
+            change=$1
+        fi
         echo "change number passed: $change"
         changeid=`hg log -r $change | head -n 1 | awk -F: '{print $3}'`
     

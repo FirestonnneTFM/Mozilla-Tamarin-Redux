@@ -66,12 +66,12 @@ export PYTHON_RUNTESTS=python3
 
 export threads=6
 
-export SSH_SHELL_REMOTE_HOST0=asteammips5
+export SSH_SHELL_REMOTE_HOST0=asteammips8
 export SSH_SHELL_REMOTE_USER0=root
 export SSH_SHELL_REMOTE_BASEDIR0=/root
 export SSH_SHELL_REMOTE_DIR0=/root/app1
 
-export SSH_SHELL_REMOTE_HOST1=asteammips5
+export SSH_SHELL_REMOTE_HOST1=asteammips8
 export SSH_SHELL_REMOTE_USER1=root
 export SSH_SHELL_REMOTE_BASEDIR1=/root
 export SSH_SHELL_REMOTE_DIR1=/root/app2
