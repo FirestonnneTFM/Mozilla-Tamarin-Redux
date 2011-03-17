@@ -80,6 +80,7 @@
 #define avmplus_IntClass_isExactInterlock 1
 #define avmplus_IntVectorClass_isExactInterlock 1
 #define avmplus_IntVectorObject_isExactInterlock 1
+#define avmplus_LivePoolNode_isExactInterlock 1
 #define avmplus_MathClass_isExactInterlock 1
 #define avmplus_MethodClosure_isExactInterlock 1
 #define avmplus_MethodClosureClass_isExactInterlock 1
