@@ -246,18 +246,22 @@ namespace MMgc
             //  'set' method handles logic whenever the GC pointer value changes
             REALLY_INLINE void set(T *tNew)
             {
-                if (this->t != NULL)
+                if (valid())
                 {
                     //  This is NOOP for GCObject and GCFinalizedObject
                     this->t->DecrementRef();
                 }
-                if (tNew != NULL)
+                this->t = tNew;
+                if (valid())
                 {
                     //  This is NOOP for GCObject and GCFinalizedObject
-                    tNew->IncrementRef();
+                    this->t->IncrementRef();
                 }
-                this->t = tNew;
             }
+            
+            // The AvmCore code uses an invalid pointer (AVMPLUS_STRING_DELETED) for the intern
+            // table, whose value is '1'.
+            inline bool valid() { return (uintptr_t)(this->t) > 1; }
 
         public:
             GCMember() : GCRef<T>(){}
