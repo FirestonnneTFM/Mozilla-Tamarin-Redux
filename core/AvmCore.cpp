@@ -54,6 +54,8 @@
 
 #include "avmplus-tracers.hh"
 
+#define AVMPLUS_STRING_DELETED ((Stringp)(1))
+
 namespace avmplus
 {
     using namespace MMgc;

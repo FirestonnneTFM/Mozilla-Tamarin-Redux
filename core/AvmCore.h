@@ -400,8 +400,6 @@ const int kBufferPadding = 16;
         // BEGIN public data definitions
 
     public:
-#define AVMPLUS_STRING_DELETED ((Stringp)(1))
-
         enum InterruptReason
         {
             // normal state.  must be 0 to allow efficient code for interrupt checks
