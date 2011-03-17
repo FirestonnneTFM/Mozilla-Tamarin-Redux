@@ -118,8 +118,8 @@ def prompt_yesno(ui, operation):
                            (('&No'),('&Yes')), 0)
 
 def has_bugzilla_reference(line):
-    # Match bug number of >= 6 digits and prefixed by "Bug" or "For"
-    return re.match(r'.*(Bug|For)\s*[0-9]{6,}', line, re.IGNORECASE)
+    # Match bug number of >= 6 digits and prefixed by "Bug", "For", etc
+    return re.match(r'.*(Bug|For|Fix)\s*[0-9]{6,}', line, re.IGNORECASE)
 
 def has_reviewer_notes(line):
     # Match "r=<name>" or "r+<name>"; assumes names are alphanumeric.
