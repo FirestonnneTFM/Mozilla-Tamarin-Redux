@@ -2264,6 +2264,30 @@ bool InlineHashtable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 
 #ifdef DEBUG
+const uint32_t LivePoolNode::gcTracePointerOffsets[] = {
+    offsetof(LivePoolNode, pool),
+    0};
+
+MMgc::GCTracerCheckResult LivePoolNode::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,1);
+}
+#endif // DEBUG
+
+bool LivePoolNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    gc->TraceLocation(&pool);
+    return false;
+}
+
+
+
+#ifdef DEBUG
 const uint32_t MethodEnv::gcTracePointerOffsets[] = {
     offsetof(MethodEnv, _scope),
     offsetof(MethodEnv, activationOrMCTable),

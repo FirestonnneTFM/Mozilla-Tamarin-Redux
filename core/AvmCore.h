@@ -351,6 +351,18 @@ const int kBufferPadding = 16;
         explicit BugCompatibility(Version v);
     };
 
+    // Internal to AvmCore, do not use for other purposes
+    class GC_CPP_EXACT(LivePoolNode, MMgc::GCRoot)
+    {
+        GC_DATA_BEGIN(LivePoolNode)
+    public:
+        LivePoolNode* next;
+        MMgc::GCWeakRef* GC_POINTER(pool);
+        GC_DATA_END(LivePoolNode)
+        
+        LivePoolNode(MMgc::GC* gc) : GCRoot(gc, MMgc::kExact) {}
+    };
+    
     /**
      * The main class of the AVM+ virtual machine.  This is the
      * main entry point to the VM for running ActionScript code.
@@ -444,14 +456,6 @@ const int kBufferPadding = 16;
 #endif
 
     private:
-        class LivePoolNode : public MMgc::GCRoot
-        {
-        public:
-            LivePoolNode* next;
-            MMgc::GCWeakRef* pool;
-            LivePoolNode(MMgc::GC* gc) : GCRoot(gc) {}
-        };
-
         // note, allocated using mmfx_new, *not* gc memory
         LivePoolNode* livePools;
 
