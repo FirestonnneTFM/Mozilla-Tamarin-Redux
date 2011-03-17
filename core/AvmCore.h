@@ -366,6 +366,14 @@ const int kBufferPadding = 16;
     /**
      * The main class of the AVM+ virtual machine.  This is the
      * main entry point to the VM for running ActionScript code.
+     *
+     * ----- NOTE!! NOTE!! NOTE!! NOTE!! --------------------------
+     *
+     * AvmCore internal types and data fields are grouped at the beginning of the class
+     * definition in order to give exact tracing a credible shot at staying correct.
+     * PLEASE add data fields only in the correct group.
+     *
+     * ----- NOTE!! NOTE!! NOTE!! NOTE!! --------------------------
      */
     class AvmCore : public MMgc::GCRoot
     {
@@ -374,7 +382,147 @@ const int kBufferPadding = 16;
         friend class EnterMethodEnv;
         friend class ExceptionFrame;
         friend class MethodFrame;
-        
+        friend class Traits;
+
+        ////////////////////////////////////////////////////////////////////
+        // BEGIN private data definitions
+
+    private:
+        enum {
+            MIN_API_MARK = 0xE294, // that's "0xE000 + 660", 660 being an odd legacy wart
+            MAX_API_MARK = 0xF8FF
+        };
+
+        // END private data definitions
+        ////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////
+        // BEGIN public data definitions
+
+    public:
+#define AVMPLUS_STRING_DELETED ((Stringp)(1))
+
+        enum InterruptReason
+        {
+            // normal state.  must be 0 to allow efficient code for interrupt checks
+            NotInterrupted = 0,
+            
+            // script is running too long
+            ScriptTimeout = 1,
+            
+            // host-defined external interrupt, other than a script timeout.
+            ExternalInterrupt = 2
+        };
+
+        // avoid multiple inheritance issues
+        class GCInterface : MMgc::GCCallback
+        {
+        public:
+            GCInterface(MMgc::GC * _gc) : MMgc::GCCallback(_gc), core(NULL) {}
+            void SetCore(AvmCore* _core) { this->core = _core; }
+            void presweep() { if(core) core->presweep(); }
+            void postsweep() { if(core) core->postsweep(); }
+            void log(const char *str) { if(core) core->console << str; }
+            void oom(MMgc::MemoryStatus status) { if(core) core->oom(status); }
+        private:
+            AvmCore *core;
+        };
+
+        class ICodeContextCreator
+        {
+        public:
+            virtual ~ICodeContextCreator() {}
+            virtual CodeContext* create(DomainEnv* domainEnv, const BugCompatibility* bugCompatibility) = 0;
+        };
+
+        struct CacheSizes
+        {
+            enum { DEFAULT_BINDINGS = 32, DEFAULT_METADATA = 1, DEFAULT_METHODS = 32 };
+
+            uint16_t bindings;
+            uint16_t metadata;
+            uint16_t methods;
+
+            inline CacheSizes() : bindings(DEFAULT_BINDINGS), metadata(DEFAULT_METADATA), methods(DEFAULT_METHODS) {}
+        };
+
+        // END public data definitions
+        ////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////
+        // BEGIN untraced private fields
+
+    private:
+#ifdef DEBUGGER
+        Sampler*  _sampler;   // Sampler is a GCRoot
+#endif
+
+        /**
+         * Stack limit set by host and checked by executing AS3 code.
+         * If the stack pointer goes below this value, handleStackOverflow is invoked,
+         * which in turn calls the host-provided virtual stackOverflow() handler.
+         */
+        uintptr_t minstack;
+
+        /**
+         * the host-provided stack limit.  we never change this, but
+         * it's used to save/restore minstack when minstack is moved
+         * to trigger interrupt handling.
+         */
+        uintptr_t stack_limit;
+
+        /**
+         * If this field is not NotInterrupted, the host has requested that the currently
+         * executing AS3 code stop and invoke handleInterrupt.  The field
+         * is checked directly by executing code.
+         *
+         * Set to ScriptTimeout for a timeout interrupt,
+         * ExternalInterrupt for an external (i.e., signal handler) interrupt.
+         */
+        InterruptReason interrupted;
+
+        /**
+         * points to the topmost AS3 frame that's executing and provides
+         * the full AS3 callstack.  Every AS3 method prolog/epilog updates
+         * this pointer.  Exception catch handlers update this as well.
+         */
+        MethodFrame*        currentMethodFrame;
+
+        // note, allocated using mmfx_new, *not* gc memory
+        LivePoolNode* livePools;
+
+        static const int k_atomDoesNotNeedCoerce_Masks[8];
+
+        /** size of interned String table */
+        int stringCount;
+
+        /** number of deleted entries in our String table */
+        int deletedCount;
+
+        /** size of interned Namespace table */
+        int nsCount;
+
+        int numStrings;
+        int numNamespaces;
+
+        // API versioning state
+        ApiVersionSeries const  m_activeApiVersionSeries;
+        uint32_t const          m_activeApiVersionSeriesMask;
+
+#ifdef VMCFG_LOOKUP_CACHE
+        // Saturating counter.
+        uint32_t lookup_cache_timestamp;
+#endif
+#ifdef VMCFG_NANOJIT
+        // when set, we flush all binding caches at the end of the next gc sweep.
+        bool m_flushBindingCachesNextSweep;
+#endif
+
+        // END untraced private fields
+        ////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////
+        // BEGIN untraced public fields
     public:
         /**
          * Default values for the config parameters.  These need to be visible, because
@@ -398,7 +546,6 @@ const int kBufferPadding = 16;
         static const uint32_t DEFAULT_VERBOSE_ON;
 #endif
 
-    public:
         /**
          * The console object.  Text to be displayed to the developer
          * or end-user can be directed to console, much like the cout
@@ -423,41 +570,207 @@ const int kBufferPadding = 16;
         vmpi_thread_t       codeContextThread;
 #endif
 
-    public:
-
         // Please see BugCompatibility for an explanation of this field.
         bool bugzilla444630;
 
+#ifdef DEBUGGER
+        int                 langID;
+        bool                passAllExceptionsToDebugger;
+#endif
+
+        Config config;
+
+        // execution manager, responsible for all invocation
+        ExecMgr* exec;
+
+#ifdef AVMPLUS_WITH_JNI
+        Java* java;     /* java vm control */
+#endif
+
+        /** The call stack of currently executing code. */
+        CallStackNode *callStack;
+
+        /** env of the highest catch handler on the call stack, or NULL */
+        ExceptionFrame *exceptionFrame;
+
+        GCInterface gcInterface;
+
+        // END untraced public fields
+        ////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////
+        // BEGIN traced private fields
+
+    private:
+#ifdef DEBUGGER
+        Debugger*       _debugger;
+        Profiler*       _profiler;
+#endif
+        QCache*         m_tbCache;
+        QCache*         m_tmCache;
+        QCache*         m_msCache;
+        DomainMgr*      m_domainMgr;
+
+        // hash set containing intern'ed strings
+        DRC(Stringp) * strings;
+
+        // hash set containing namespaces
+        DRC(Namespacep) * namespaces;
+        
+        // API versioning state
+        HeapHashtable*          m_versionedURIs;
+#ifdef _DEBUG
+        HeapHashtable*          m_unversionedURIs;
+#endif
+        
+        Traits** _emptySupertypeList; // empty supertype list shared by many Traits
+        
+        // END traced private fields
+        ////////////////////////////////////////////////////////////////////
+        
+        ////////////////////////////////////////////////////////////////////
+        // BEGIN traced public fields
+
+    public:
+        RegexCache      m_regexCache;   // Substructure with traceable data
+        
+        /**
+         * This method will be invoked when the first exception
+         * frame is set up.  This will be a good point to set
+         * minstack by calling setStackLimit().
+         */
+        virtual void setStackBase();
+        
+        /** Internal table of strings for boolean type ("true", "false") */
+        DRC(Stringp) booleanStrings[2];
+        
+        /** Container object for traits of built-in classes */
+        BuiltinTraits traits;
+        
+        /** PoolObject for built-in classes */
+        PoolObject* builtinPool;
+        
+        /** Domain for built-in classes */
+        Domain* builtinDomain;
+
+        /** BugCompatibility used to initialize the built-in classes */
+        const BugCompatibility* builtinBugCompatibility;
+
+        /**
+         * The default namespace, "public"
+         */
+        DRC(Namespacep) publicNamespace;
+
+        /**
+         * The unnamed public namespaces
+         */
+        NamespaceSet* publicNamespaces;
+        
+        /**
+         * @name interned constants
+         * Constants used frequently in the VM; these are typically
+         * identifiers that are part of the core language semantics
+         * like "prototype" and "constructor".  These are interned
+         * up front and held in AvmCore for easy reference.
+         */
+        /*@{*/
+        
+        DRC(Stringp) kconstructor;
+        DRC(Stringp) kEmptyString;
+        DRC(Stringp) ktrue;
+        DRC(Stringp) kfalse;
+        DRC(Stringp) kundefined;
+        DRC(Stringp) knull;
+        DRC(Stringp) ktoString;
+        DRC(Stringp) ktoLocaleString;
+        DRC(Stringp) kvalueOf;
+        DRC(Stringp) kvalue;
+        DRC(Stringp) klength;
+        DRC(Stringp) kobject;
+        DRC(Stringp) kxml;
+        DRC(Stringp) kfunction;
+        DRC(Stringp) kboolean;
+        DRC(Stringp) kvoid;
+        DRC(Stringp) knumber;
+        DRC(Stringp) kstring;
+        DRC(Stringp) kuri;
+        DRC(Stringp) kprefix;
+        DRC(Stringp) kglobal;
+        DRC(Stringp) kcallee;
+        DRC(Stringp) kNeedsDxns;
+        DRC(Stringp) kVersion;
+        DRC(Stringp) kanonymousFunc;
+        // From here at least the spelling mirrors exactly the spelling in the string constant
+        DRC(Stringp) klittleEndian;
+        DRC(Stringp) kbigEndian;
+        DRC(Stringp) kparent;
+        DRC(Stringp) kattribute;
+        DRC(Stringp) kcomment;
+        DRC(Stringp) kprocessing_instruction;
+        DRC(Stringp) kelement;
+        DRC(Stringp) ktext;
+        DRC(Stringp) kattributeAdded;
+        DRC(Stringp) kattributeRemoved;
+        DRC(Stringp) kattributeChanged;
+        DRC(Stringp) knodeAdded;
+        DRC(Stringp) knodeRemoved;
+        DRC(Stringp) knodeChanged;
+        DRC(Stringp) knamespaceAdded;
+        DRC(Stringp) knamespaceRemoved;
+        DRC(Stringp) knamespaceSet;
+        DRC(Stringp) knameSet;
+        DRC(Stringp) ktextSet;
+        DRC(Stringp) klocalName;
+        DRC(Stringp) kindex;
+        DRC(Stringp) kinput;
+        DRC(Stringp) kemptyCtor;
+        
+        DRC(Stringp) kAsterisk;     // '*'
+        DRC(Stringp) kColon;        // ':'
+        DRC(Stringp) kUnderscore;   // '_'
+        DRC(Stringp) kXML1998NS;    // http://www.w3.org/XML/1998/namespace
+        DRC(Stringp) kzero;         // '0'  - 'kZero' conflicts with MMgc
+        DRC(Stringp) kClassS;       // 'Class$'
+        DRC(Stringp) kVectorNumber; // 'Vector.<Number>'
+        DRC(Stringp) kVectorint;    // 'Vector.<int>'
+        DRC(Stringp) kVectoruint;   // 'Vector.<uint>'
+        DRC(Stringp) kVectorAny;    // 'Vector.<*>'
+        
+        Atom kNaN;
+        
+        DRC(Stringp) cachedChars[128];
+        /*@}*/
+        
+        Exception *exceptionAddr;
+        
+        /** The XML entities table, used by E4X */
+        HeapHashtable* xmlEntities;
+
+        // END traced public fields
+        ////////////////////////////////////////////////////////////////////
+        
+        ////////////////////////////////////////////////////////////////////
+        // BEGIN methods (private/public intermixed)
+
+    public:
         // return the BugCompatibility that is associated with the current
         // CodeContext. If there is no current CodeContext, return the
         // BugCompatibility associated with the VM's builtins.
         // This call will never return NULL.
         const BugCompatibility* currentBugCompatibility() const;
 
-    private:
-
 #ifdef DEBUGGER
-    private:
-        Debugger*       _debugger;
-        Profiler*       _profiler;
-        Sampler*        _sampler;
     public:
         Debugger* debugger() const;
         Profiler* profiler() const;
         Sampler* get_sampler() const;
         void sampleCheck();
+
     protected:
         virtual Debugger* createDebugger(int tracelevel);
         virtual Profiler* createProfiler();
         virtual Sampler* createSampler();
-    public:
-        int                 langID;
-        bool                passAllExceptionsToDebugger;
 #endif
-
-    private:
-        // note, allocated using mmfx_new, *not* gc memory
-        LivePoolNode* livePools;
 
     public:
         void addLivePool(PoolObject* pool);
@@ -470,30 +783,14 @@ const int kBufferPadding = 16;
          */
         bool interruptCheck(bool interruptable);
 
-    private:
-        QCache*         m_tbCache;
-        QCache*         m_tmCache;
-        QCache*         m_msCache;
     public:
         QCache* tbCache();
         QCache* tmCache();
         QCache* msCache();
-        struct CacheSizes
-        {
-            enum { DEFAULT_BINDINGS = 32, DEFAULT_METADATA = 1, DEFAULT_METHODS = 32 };
 
-            uint16_t bindings;
-            uint16_t metadata;
-            uint16_t methods;
-
-            inline CacheSizes() : bindings(DEFAULT_BINDINGS), metadata(DEFAULT_METADATA), methods(DEFAULT_METHODS) {}
-        };
         // safe to call at any time, but calling tosses existing caches, thus has a perf hit --
         // don't call cavalierly
         void setCacheSizes(const CacheSizes& cs);
-
-    public:
-        RegexCache m_regexCache;
 
     public:
         /**
@@ -511,16 +808,8 @@ const int kBufferPadding = 16;
         virtual void postsweep();
         virtual void oom(MMgc::MemoryStatus status);
 
-        Config config;
-
-    private:
-        DomainMgr* m_domainMgr;
-
     public:
         DomainMgr* domainMgr() const;
-
-        // execution manager, responsible for all invocation
-        ExecMgr* exec;
 
 #ifdef VMCFG_NANOJIT // accessors
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
@@ -534,17 +823,6 @@ const int kBufferPadding = 16;
         static uint32_t parseVerboseFlags(const char* arg, char*& badFlag);
         virtual const char* identifyDomain(Domain* domain);
 #endif
-
-        enum InterruptReason {
-            // normal state.  must be 0 to allow efficient code for interrupt checks
-            NotInterrupted = 0,
-
-            // script is running too long
-            ScriptTimeout = 1,
-
-            // host-defined external interrupt, other than a script timeout.
-            ExternalInterrupt = 2
-        };
 
         /**
          * Check for stack overflow and call handler if it happens.
@@ -587,81 +865,11 @@ const int kBufferPadding = 16;
         static void releasePCREContext();
 
     private:
-        /**
-         * Stack limit set by host and checked by executing AS3 code.
-         * If the stack pointer goes below this value, handleStackOverflow is invoked,
-         * which in turn calls the host-provided virtual stackOverflow() handler.
-         */
-        uintptr_t minstack;
-
-        /**
-         * the host-provided stack limit.  we never change this, but
-         * it's used to save/restore minstack when minstack is moved
-         * to trigger interrupt handling.
-         */
-        uintptr_t stack_limit;
-
-        /**
-         * If this field is not NotInterrupted, the host has requested that the currently
-         * executing AS3 code stop and invoke handleInterrupt.  The field
-         * is checked directly by executing code.
-         *
-         * Set to ScriptTimeout for a timeout interrupt,
-         * ExternalInterrupt for an external (i.e., signal handler) interrupt.
-         */
-        InterruptReason interrupted;
-
-        /**
-         * points to the topmost AS3 frame that's executing and provides
-         * the full AS3 callstack.  Every AS3 method prolog/epilog updates
-         * this pointer.  Exception catch handlers update this as well.
-         */
-        MethodFrame*        currentMethodFrame;
-
-        public:
-        /**
-         * This method will be invoked when the first exception
-         * frame is set up.  This will be a good point to set
-         * minstack by calling setStackLimit().
-         */
-        virtual void setStackBase();
-
-        /** Internal table of strings for boolean type ("true", "false") */
-        DRC(Stringp) booleanStrings[2];
-
-        /** Container object for traits of built-in classes */
-        BuiltinTraits traits;
-
-        /** PoolObject for built-in classes */
-        PoolObject* builtinPool;
-
-        /** Domain for built-in classes */
-        Domain* builtinDomain;
-
-    private:
-        /** BugCompatibility used to initialize the built-in classes */
-        const BugCompatibility* builtinBugCompatibility;
-
-        /**
-         * The default namespace, "public"
-         */
-        DRC(Namespacep) publicNamespace;
-
-    private:
         ScriptEnv* initOneScript(Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits);
         ScriptEnv* initAllScripts(Toplevel* toplevel, AbcEnv* abcEnv);
         Atom callScriptEnvEntryPoint(ScriptEnv* main);
 
     public:
-        /**
-         * The unnamed public namespaces
-         */
-        NamespaceSet* publicNamespaces;
-
-#ifdef AVMPLUS_WITH_JNI
-        Java* java;     /* java vm control */
-#endif
-
         /**
          * Execute an ABC file that has been parsed into a
          * PoolObject.
@@ -914,82 +1122,6 @@ const int kBufferPadding = 16;
 #endif
         static void formatMultiname(PrintWriter& out, uint32_t index, PoolObject* pool);
 #endif
-
-        /**
-         * @name interned constants
-         * Constants used frequently in the VM; these are typically
-         * identifiers that are part of the core language semantics
-         * like "prototype" and "constructor".  These are interned
-         * up front and held in AvmCore for easy reference.
-         */
-        /*@{*/
-
-        DRC(Stringp) kconstructor;
-        DRC(Stringp) kEmptyString;
-        DRC(Stringp) ktrue;
-        DRC(Stringp) kfalse;
-        DRC(Stringp) kundefined;
-        DRC(Stringp) knull;
-        DRC(Stringp) ktoString;
-        DRC(Stringp) ktoLocaleString;
-        DRC(Stringp) kvalueOf;
-        DRC(Stringp) kvalue;
-        DRC(Stringp) klength;
-        DRC(Stringp) kobject;
-        DRC(Stringp) kxml;
-        DRC(Stringp) kfunction;
-        DRC(Stringp) kboolean;
-        DRC(Stringp) kvoid;
-        DRC(Stringp) knumber;
-        DRC(Stringp) kstring;
-        DRC(Stringp) kuri;
-        DRC(Stringp) kprefix;
-        DRC(Stringp) kglobal;
-        DRC(Stringp) kcallee;
-        DRC(Stringp) kNeedsDxns;
-        DRC(Stringp) kVersion;
-        DRC(Stringp) kanonymousFunc;
-        // From here at least the spelling mirrors exactly the spelling in the string constant
-        DRC(Stringp) klittleEndian;
-        DRC(Stringp) kbigEndian;
-        DRC(Stringp) kparent;
-        DRC(Stringp) kattribute;
-        DRC(Stringp) kcomment;
-        DRC(Stringp) kprocessing_instruction;
-        DRC(Stringp) kelement;
-        DRC(Stringp) ktext;
-        DRC(Stringp) kattributeAdded;
-        DRC(Stringp) kattributeRemoved;
-        DRC(Stringp) kattributeChanged;
-        DRC(Stringp) knodeAdded;
-        DRC(Stringp) knodeRemoved;
-        DRC(Stringp) knodeChanged;
-        DRC(Stringp) knamespaceAdded;
-        DRC(Stringp) knamespaceRemoved;
-        DRC(Stringp) knamespaceSet;
-        DRC(Stringp) knameSet;
-        DRC(Stringp) ktextSet;
-        DRC(Stringp) klocalName;
-        DRC(Stringp) kindex;
-        DRC(Stringp) kinput;
-        DRC(Stringp) kemptyCtor;
-
-        DRC(Stringp) kAsterisk;     // '*'
-        DRC(Stringp) kColon;        // ':'
-        DRC(Stringp) kUnderscore;   // '_'
-        DRC(Stringp) kXML1998NS;    // http://www.w3.org/XML/1998/namespace
-        DRC(Stringp) kzero;         // '0'  - 'kZero' conflicts with MMgc
-        DRC(Stringp) kClassS;       // 'Class$'
-        DRC(Stringp) kVectorNumber; // 'Vector.<Number>'
-        DRC(Stringp) kVectorint;    // 'Vector.<int>'
-        DRC(Stringp) kVectoruint;   // 'Vector.<uint>'
-        DRC(Stringp) kVectorAny;    // 'Vector.<*>'
-
-        Atom kNaN;
-
-        DRC(Stringp) cachedChars[128];
-        /*@}*/
-
         /** Constructor */
         AvmCore(MMgc::GC *gc, ApiVersionSeries apiVersionSeries);
 
@@ -1012,13 +1144,6 @@ const int kBufferPadding = 16;
 #else
         void initBuiltinPool();
 #endif
-        
-        class ICodeContextCreator
-        {
-        public:
-            virtual ~ICodeContextCreator() {}
-            virtual CodeContext* create(DomainEnv* domainEnv, const BugCompatibility* bugCompatibility) = 0;
-        };
 
         /**
          * Initializes the specified Toplevel object by running
@@ -1274,15 +1399,11 @@ const int kBufferPadding = 16;
         /** Helper function; reads an unsigned 16-bit integer from pc */
         static int32_t readU16(const uint8_t *pc);
 
-    private:
-        static const int k_atomDoesNotNeedCoerce_Masks[8];
-
     public:
         // note, return of true means we definitely DO NOT need a coerce,
         // but return of false still means we *might* need to (ie, negating the result of this function
         // isn't "needscoerce")
         static bool atomDoesNotNeedCoerce(Atom a, BuiltinType bt);
-
 
         /**
          * this is the implementation of the actionscript "is" operator.  similar to java's
@@ -1448,9 +1569,6 @@ const int kBufferPadding = 16;
         void dumpStackTrace();
 #endif
 
-        /** The call stack of currently executing code. */
-        CallStackNode *callStack;
-
 #endif /* DEBUGGER */
 
         CodeContext* codeContext() const;
@@ -1470,11 +1588,6 @@ const int kBufferPadding = 16;
          * default xml namespace.
          */
         void setDxnsLate(MethodFrame*, Atom uri);
-
-        /** env of the highest catch handler on the call stack, or NULL */
-        ExceptionFrame *exceptionFrame;
-
-        Exception *exceptionAddr;
 
         /**
          * Searches the exception handler table of info for
@@ -1582,30 +1695,10 @@ const int kBufferPadding = 16;
         /** Implementation of OP_typeof */
         Stringp _typeof (Atom arg);
 
-        /** The XML entities table, used by E4X */
-        HeapHashtable* xmlEntities;
-
     private:
         static bool isBuiltinType(Atom atm, BuiltinType bt);
         static bool isBuiltinTypeMask(Atom atm, int btmask);
 
-    private:
-        //
-        // this used to be Heap
-        //
-
-        /** size of interned String table */
-        int stringCount;
-
-        /** number of deleted entries in our String table */
-        int deletedCount;
-#define AVMPLUS_STRING_DELETED ((Stringp)(1))
-
-        /** size of interned Namespace table */
-        int nsCount;
-
-        int numStrings;
-        int numNamespaces;
 
     public:
 
@@ -1646,11 +1739,6 @@ const int kBufferPadding = 16;
         int findNamespace(Namespacep ns, bool canRehash = true);
         
         Namespacep gotNamespace(uintptr_t uriAndType, ApiVersion apiVersion);
-
-        enum {
-            MIN_API_MARK = 0xE294, // that's "0xE000 + 660", 660 being an odd legacy wart
-            MAX_API_MARK = 0xF8FF
-        };
 
     public:
         /**
@@ -1776,24 +1864,7 @@ const int kBufferPadding = 16;
         // fills the area with nullObjectAtom
         static void decrementAtomRegion_null(Atom *ar, int length);
 
-    private:
-        // hash set containing intern'ed strings
-        DRC(Stringp) * strings;
-        // hash set containing namespaces
-        DRC(Namespacep) * namespaces;
-
-        // API versioning state
-        ApiVersionSeries const  m_activeApiVersionSeries;
-        uint32_t const          m_activeApiVersionSeriesMask;
-        HeapHashtable*          m_versionedURIs;
-#ifdef _DEBUG
-        HeapHashtable*          m_unversionedURIs;
-#endif
-
 #ifdef VMCFG_LOOKUP_CACHE
-    private:
-        // Saturating counter.
-        uint32_t lookup_cache_timestamp;
     public:
         uint32_t lookupCacheTimestamp() const;
         bool lookupCacheIsValid(uint32_t t) const;
@@ -1801,32 +1872,12 @@ const int kBufferPadding = 16;
 #endif
 
 #ifdef VMCFG_NANOJIT
-    private:
-        // when set, we flush all binding caches at the end of the next gc sweep.
-        bool m_flushBindingCachesNextSweep;
     public:
         void flushBindingCachesNextSweep();
 #endif
 
-    private:
-        friend class Traits;
-        Traits** _emptySupertypeList; // empty supertype list shared by many Traits
-
-    public:
-        // avoid multiple inheritance issues
-        class GCInterface : MMgc::GCCallback
-        {
-        public:
-            GCInterface(MMgc::GC * _gc) : MMgc::GCCallback(_gc), core(NULL) {}
-            void SetCore(AvmCore* _core) { this->core = _core; }
-            void presweep() { if(core) core->presweep(); }
-            void postsweep() { if(core) core->postsweep(); }
-            void log(const char *str) { if(core) core->console << str; }
-            void oom(MMgc::MemoryStatus status) { if(core) core->oom(status); }
-        private:
-            AvmCore *core;
-        };
-        GCInterface gcInterface;
+        // END methods (private/public intermixed)
+        ////////////////////////////////////////////////////////////////////
     };
 
     /*

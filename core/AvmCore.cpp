@@ -259,26 +259,11 @@ namespace avmplus
         "\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7A\x7B\x7C\x7D\x7E\x7F";
     AvmCore::AvmCore(GC* g, ApiVersionSeries apiVersionSeries)
         : GCRoot(g)
-        , console(NULL)
-        , gc(g)
-#ifdef _DEBUG
-        , codeContextThread(VMPI_currentThread())
-#endif
-        , bugzilla444630(false)
 #ifdef DEBUGGER
-        , _debugger(NULL)
-        , _profiler(NULL)
         , _sampler(NULL)
-        , langID(-1)
-        , passAllExceptionsToDebugger(false)
 #endif
-        , livePools(NULL)
-        , m_tbCache(QCache::create(CacheSizes::DEFAULT_BINDINGS, g))
-        , m_tmCache(QCache::create(CacheSizes::DEFAULT_METADATA, g))
-        , m_msCache(QCache::create(CacheSizes::DEFAULT_METHODS, g))
-        , m_domainMgr(NULL)
-        , exec(NULL)
         , currentMethodFrame(NULL)
+        , livePools(NULL)
         , m_activeApiVersionSeries(apiVersionSeries)
         , m_activeApiVersionSeriesMask(1 << apiVersionSeries)
 #ifdef VMCFG_LOOKUP_CACHE
@@ -287,7 +272,26 @@ namespace avmplus
 #ifdef VMCFG_NANOJIT
         , m_flushBindingCachesNextSweep(false)
 #endif
+        , console(NULL)
+        , gc(g)
+#ifdef _DEBUG
+        , codeContextThread(VMPI_currentThread())
+#endif
+        , bugzilla444630(false)
+#ifdef DEBUGGER
+        , langID(-1)
+        , passAllExceptionsToDebugger(false)
+#endif
+        , exec(NULL)
         , gcInterface(g)
+#ifdef DEBUGGER
+        , _debugger(NULL)
+        , _profiler(NULL)
+#endif
+        , m_tbCache(QCache::create(CacheSizes::DEFAULT_BINDINGS, g))
+        , m_tmCache(QCache::create(CacheSizes::DEFAULT_METADATA, g))
+        , m_msCache(QCache::create(CacheSizes::DEFAULT_METHODS, g))
+        , m_domainMgr(NULL)
     {
         // sanity check for all our types
         MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
