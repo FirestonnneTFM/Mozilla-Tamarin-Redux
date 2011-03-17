@@ -405,11 +405,10 @@ const int kBufferPadding = 16;
          */
         MMgc::GC * const gc;
 
-
 #ifdef _DEBUG
-            // Only the thread used to create the AvmCore is allowed to modify currentMethodFrame (and thus, use EnterCodeContext).
-            // We don't enforce this in Release builds, but check for it and assert in Debug builds.
-            vmpi_thread_t       codeContextThread;
+        // Only the thread used to create the AvmCore is allowed to modify currentMethodFrame (and thus, use EnterCodeContext).
+        // We don't enforce this in Release builds, but check for it and assert in Debug builds.
+        vmpi_thread_t       codeContextThread;
 #endif
 
     public:
@@ -426,22 +425,22 @@ const int kBufferPadding = 16;
     private:
 
 #ifdef DEBUGGER
-        private:
-            Debugger*       _debugger;
-            Profiler*       _profiler;
-            Sampler*        _sampler;
-        public:
-            Debugger* debugger() const;
-            Profiler* profiler() const;
-            Sampler* get_sampler() const;
-            void sampleCheck();
-        protected:
-            virtual Debugger* createDebugger(int tracelevel);
-            virtual Profiler* createProfiler();
-            virtual Sampler* createSampler();
-        public:
-            int                 langID;
-            bool                passAllExceptionsToDebugger;
+    private:
+        Debugger*       _debugger;
+        Profiler*       _profiler;
+        Sampler*        _sampler;
+    public:
+        Debugger* debugger() const;
+        Profiler* profiler() const;
+        Sampler* get_sampler() const;
+        void sampleCheck();
+    protected:
+        virtual Debugger* createDebugger(int tracelevel);
+        virtual Profiler* createProfiler();
+        virtual Sampler* createSampler();
+    public:
+        int                 langID;
+        bool                passAllExceptionsToDebugger;
 #endif
 
     private:
