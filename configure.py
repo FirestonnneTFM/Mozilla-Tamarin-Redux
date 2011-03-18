@@ -393,7 +393,7 @@ if the_os == "darwin":
     parts = os_ver.split('.')
     os_ver = parts[0] + '.' + parts[1]
 
-    AVMSHELL_LDFLAGS += " -exported_symbols_list "  + thisdir + "/platform/mac/avmshell/exports.exp"
+    AVMSHELL_LDFLAGS += " -exported_symbols_list $(topsrcdir)/platform/mac/avmshell/exports.exp"
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
                          '_MAC': None,
