@@ -2088,6 +2088,7 @@ namespace MMgc
         (void)item;
         (void)askSize;
         (void)gotSize;
+        (void)managed;
 #ifdef MMGC_MEMORY_PROFILER
         if(hasSpy) {
             VMPI_spyCallback();
