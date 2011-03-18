@@ -149,7 +149,11 @@ class Configuration:
                 self._target = _configSub(targetos, targetcpu)
 
         self._acvars = {
-            'topsrcdir': self._topsrcdir,
+            # Bug 606989: GNU make forms like VPATH treat spaces as
+            # list entry delimiters.  Easiest way around this: Use
+            # rel. path when refering to the topsrcdir in Makefile
+            # (not fool-proof, but it is far more robust).
+            'topsrcdir': os.path.relpath(self._topsrcdir),
             'HOST_OS': self._host[0],
             'TARGET_OS': self._target[0],
             'TARGET_CPU': self._target[1]
