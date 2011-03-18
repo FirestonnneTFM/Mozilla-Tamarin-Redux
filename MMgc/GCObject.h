@@ -688,7 +688,7 @@ namespace MMgc
             }
 
 #ifdef MMGC_RC_HISTORY
-            if(GC::GetGC(this)->keepDRCHistory)
+            if(GC::GetGC(this)->keepDRCHistory && GCHeap::GetGCHeap()->GetProfiler())
                 history.Add(GCHeap::GetGCHeap()->GetProfiler()->GetStackTrace());
 #endif
         }
@@ -752,7 +752,7 @@ namespace MMgc
             composite--;
 
 #ifdef MMGC_RC_HISTORY
-            if(GC::GetGC(this)->keepDRCHistory)
+            if(GC::GetGC(this)->keepDRCHistory && GCHeap::GetGCHeap()->GetProfiler())
                 history.Add(GCHeap::GetGCHeap()->GetProfiler()->GetStackTrace());
 #endif
 
