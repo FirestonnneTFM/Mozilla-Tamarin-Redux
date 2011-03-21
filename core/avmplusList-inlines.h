@@ -564,7 +564,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void GCList<T>::add(const GCList<T>& that)
     {
-        m_list.add(*(const LIST*)&that);
+        m_list.add(that.m_list);
     }
 
     template<class T>
@@ -736,7 +736,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void RCList<T>::add(const RCList<T>& that)
     {
-        m_list.add(*(const LIST*)&that);
+        m_list.add(that.m_list);
     }
 
     template<class T>
@@ -915,7 +915,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void UnmanagedPointerList<T>::add(const UnmanagedPointerList<T>& that)
     {
-        m_list.add(*(const LIST*)&that);
+        m_list.add(that.m_list);
     }
 
     template<class T>
@@ -1090,7 +1090,7 @@ namespace avmplus
     template<class T>
     REALLY_INLINE void WeakRefList<T>::add(const WeakRefList<T>& that)
     {
-        m_list.add(*(const LIST*)&that);
+        m_list.add(that.m_list);
     }
 
     template<class T>
