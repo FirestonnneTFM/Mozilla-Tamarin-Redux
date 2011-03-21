@@ -44,50 +44,21 @@
 namespace avmplus
 {
     /**
-     * StringOutputStream is an OutputStream subclass, where
-     * any data written to the stream is accumulated into
-     * an in-memory buffer.  The buffer can later be retrieved
-     * using the c_str method.
-     */
-    class StringOutputStream : public OutputStream
-    {
-    public:
-        StringOutputStream(MMgc::GC *gc);
-        ~StringOutputStream();
-
-        const char* c_str() { return m_buffer; }    // note, always in UTF8 form
-        int length() const { return m_length; }
-        void reset() { m_length=0; }
-
-        void write(const char* utf8);
-        void writeN(const char* utf8, size_t count);
-
-    private:
-        enum { kInitialCapacity = 256 };
-
-        MMgc::GC* m_gc;
-        char* m_buffer;
-        int m_length;
-
-        void grow(int newLength);
-    };
-
-    /**
-     * StringBuffer is a PrintWriter subclass which enables
-     * easy, cout-like output of text to a string buffer
-     * in memory.
+     * StringBuffer is a PrintWriter subclass which enables easy, cout-like output of
+     * text to a string buffer in memory.
+     *
+     * NOTE!  This is *not* a GC class.  A StringBuffer instance *must* be allocated 
+     * on the stack, inside GCRoots, or inside GC'd objects (as a member, not a pointer).
+     *
+     * A StringBuffer has a destructor which will free resouces opportunistically,
+     * but if an exception jumps over the destructor then resources will not leak.
      */
     class StringBuffer : public PrintWriter
     {
     public:
-        StringBuffer(MMgc::GC* gc) :
-            PrintWriter(NULL), m_stream(gc)
-        {
-            setOutputStream(&m_stream);
-        }
-
-        StringBuffer(AvmCore* core) :
-            PrintWriter(core), m_stream(core->GetGC())
+        StringBuffer(AvmCore* core)
+            : PrintWriter(core)
+            , m_stream(core->gc)
         {
             setOutputStream(&m_stream);
         }
@@ -101,6 +72,41 @@ namespace avmplus
         String* toString() { return core()->newStringUTF8(c_str(), length()); }
 
     private:
+        /**
+         * StringOutputStream accumulates any data written to the stream into an in-memory buffer.
+         * The buffer can later be retrieved using the c_str method.
+         *
+         * NOTE!  This is *not* a GC object.  You *must* ensure that the destructor of this object
+         * is called in order to properly deallocate resources.
+         *
+         * lhansen made StringOutputStream a private class of StringBuffer on 2011-02-26 because
+         * StringBuffer is the only client of StringOutputStream in the entire Flash Player source tree.
+         */
+        class StringOutputStream : public NonGCOutputStream
+        {
+        public:
+            StringOutputStream(MMgc::GC *gc);
+            ~StringOutputStream();
+
+            const char* c_str() { return m_buffer; }    // note, always in UTF8 form
+            int length() const { return m_length; }
+            void reset() { m_length=0; }
+            
+            void write(const char* utf8);
+            void writeN(const char* utf8, size_t count);
+            
+        private:
+            enum { kInitialCapacity = 256 };
+
+            void ensureCapacity(size_t count);
+    
+            MMgc::GC* m_gc;
+            char* m_buffer;     // managed memory
+            int m_length;
+            
+            void grow(int newLength);
+        };
+        
         StringOutputStream m_stream;
     };
 }

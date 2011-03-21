@@ -49,11 +49,8 @@ namespace avmshell
 
     void ConsoleOutputStream::writeN(const char* utf8, size_t count)
     {
-        if (!buffer) {
-            buffer = new (gc) StringBuffer(gc);
-        }
-        buffer->writeN(utf8, count); // builds null terminated buffer
-        Platform::GetInstance()->logMessage(buffer->c_str());
-        buffer->reset();
+        buffer.writeN(utf8, count); // builds null terminated buffer
+        Platform::GetInstance()->logMessage(buffer.c_str());
+        buffer.reset();
     }
 }

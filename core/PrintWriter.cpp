@@ -42,6 +42,44 @@
 
 namespace avmplus
 {
+    PrintWriter::StreamAdapter::StreamAdapter()
+    {
+        gcStream = NULL;
+        nongcStream = NULL;
+    }
+
+    void PrintWriter::StreamAdapter::set(GCOutputStream* s)
+    {
+        MMgc::GC* gc = MMgc::GC::GetGC(s);
+        if (gc->IsPointerToGCPage(this))
+            WB(gc, gc->FindBeginningFast(this), &gcStream, s);
+        else
+            gcStream=s;
+        nongcStream=NULL;
+    }
+
+    void PrintWriter::StreamAdapter::set(NonGCOutputStream* s)
+    {
+        gcStream=NULL;
+        nongcStream=s;
+    }
+
+    void PrintWriter::StreamAdapter::write(const char* utf8)
+    {
+        if (gcStream)
+            gcStream->write(utf8);
+        else if (nongcStream)
+            nongcStream->write(utf8);
+    }
+
+    void PrintWriter::StreamAdapter::writeN(const char* utf8, size_t charCount)
+    {
+        if (gcStream)
+            gcStream->writeN(utf8, charCount);
+        else if (nongcStream)
+            nongcStream->writeN(utf8, charCount);
+    }
+
     // The 2 base methods below (write/writeN) forward the request to the underlying
     // m_stream.  For optimal performance you should check the m_stream methods and
     // ensure that you're not performing unnecessary copies.  For example, if you have
@@ -53,12 +91,12 @@ namespace avmplus
 
     void PrintWriter::write(const char* utf8)
     {
-        m_stream->write(utf8);
+        m_stream.write(utf8);
     }
 
     void PrintWriter::writeN(const char* utf8, size_t count)
     {
-        m_stream->writeN(utf8, count);
+        m_stream.writeN(utf8, count);
     }
 
     // ------------------------------------------------------------

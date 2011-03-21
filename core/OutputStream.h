@@ -43,19 +43,37 @@
 
 namespace avmplus
 {
+    // The OutputStream classes are abstract base classes for output streams.
+
     /**
-     * The OutputStream class is an abstract base class for
-     * output streams.  Subclasses must implement the "write"
-     * method.
+     * GCOutputStream is a base class for output streams that are allocated on
+     * the managed heap.
      *
-     * The OutputStream class is typically layered with
-     * a PrintWriter to facilitate easy output of text.
+     * GCOutputStream instances *must always* be allocated on the GC'd heap.
      */
-    class OutputStream : public MMgc::GCObject
+    class GCOutputStream : public MMgc::GCFinalizedObject
     {
     public:
-        OutputStream() {}
-        virtual ~OutputStream() {}
+        GCOutputStream() {}
+        virtual void write(const char* utf8) = 0;  // null terminated-utf8 data
+        virtual void writeN(const char* utf8, size_t charCount) = 0;  // fixed amount of utf8 data
+    };
+
+    /**
+     * NonGCOutputStream is a base class for output streams that are allocated on
+     * on the stack, inside GCRoots, or in unmanaged (malloc'd) memory.
+     *
+     * NonGCOutputStream instances *must never* be allocated on the GC'd heap.
+     */
+    class NonGCOutputStream
+    {
+    private:
+        // This operator is private and not implemented, in order to catch errors.
+        static void *operator new(size_t size, MMgc::GC *gc);
+        
+    public:
+        NonGCOutputStream() {}
+        virtual ~NonGCOutputStream() {}
         virtual void write(const char* utf8) = 0;  // null terminated-utf8 data
         virtual void writeN(const char* utf8, size_t charCount) = 0;  // fixed amount of utf8 data
     };
