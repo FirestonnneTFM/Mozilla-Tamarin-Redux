@@ -51,15 +51,14 @@ namespace avmshell
      * exception messages to stdout in the AVM+
      * command-line shell.
      */
-    class ConsoleOutputStream : public OutputStream
+    class ConsoleOutputStream : public GCOutputStream
     {
     public:
-        ConsoleOutputStream(MMgc::GC* gc) : gc(gc), buffer(0) {}
+        ConsoleOutputStream(AvmCore* core) : buffer(core) {}
         void write(const char* utf8);
         void writeN(const char* utf8, size_t count);
     private:
-        MMgc::GC* gc;
-        DWB(StringBuffer*) buffer;
+        StringBuffer buffer;
     };
 }
 

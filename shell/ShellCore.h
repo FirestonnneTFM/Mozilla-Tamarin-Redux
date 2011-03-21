@@ -211,7 +211,7 @@ namespace avmshell
 #endif
         SystemClass* systemClass;
         PoolObject* shellPool;
-        OutputStream *consoleOutputStream;
+        GCOutputStream *consoleOutputStream;
         bool gracePeriod;
         bool inStackOverflow;
         int allowDebugger;

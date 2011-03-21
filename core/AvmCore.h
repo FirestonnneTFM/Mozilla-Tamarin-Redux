@@ -797,7 +797,8 @@ const int kBufferPadding = 16;
          * error messages will be sent here.
          * @param stream output stream to use for console output
          */
-        void setConsoleStream(OutputStream *stream);
+        void setConsoleStream(GCOutputStream *stream);
+        void setConsoleStream(NonGCOutputStream *stream);
 
         /**
          * GCCallback functions

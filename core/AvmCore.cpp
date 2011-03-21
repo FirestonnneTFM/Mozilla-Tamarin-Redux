@@ -2461,11 +2461,16 @@ return the result of the comparison ToPrimitive(x) == y.
         }
     }
 
-    void AvmCore::setConsoleStream(OutputStream *stream)
+    void AvmCore::setConsoleStream(GCOutputStream *stream)
     {
         console.setOutputStream(stream);
     }
 
+    void AvmCore::setConsoleStream(NonGCOutputStream *stream)
+    {
+        console.setOutputStream(stream);
+    }
+    
     /*static*/ bool AvmCore::isBuiltinType(Atom atm, BuiltinType bt)
     {
         return isObject(atm) && Traits::getBuiltinType(atomToScriptObject(atm)->traits()) == bt;

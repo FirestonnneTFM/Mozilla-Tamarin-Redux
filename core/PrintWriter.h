@@ -120,14 +120,27 @@ namespace avmplus
      * text.  It has an interface similar to the C++ iostreams
      * library, overloading the "<<" operator to accept most
      * standard types used in the VM.
+     *
+     * A PrintWriter will keep any installed GCOutputStream alive.
+     *
+     * An exception can jump past the destructor of a PrintWriter without resources 
+     * leaking.
+     *
+     * NOTE!  This is *not* a GC class.  A PrintWriter instance *must* be allocated 
+     * on the stack, inside GCRoots, or inside GC'd objects (as a member, not a pointer).
      */
-    class PrintWriter : public OutputStream
+    class PrintWriter
     {
-    public:
-        PrintWriter(AvmCore* core) { m_core = core; m_stream = NULL; }
-        PrintWriter(AvmCore* core, OutputStream *stream) { m_core = core; m_stream = stream; }
+    private:
+        static void *operator new(size_t size, MMgc::GC *gc); // private and not implemented, in order to catch errors
 
-        void setOutputStream(OutputStream *stream) { m_stream = stream; }
+    public:
+        PrintWriter(AvmCore* core) { m_core = core; }
+        PrintWriter(AvmCore* core, GCOutputStream *stream) { m_core = core; m_stream.set(stream); }
+        PrintWriter(AvmCore* core, NonGCOutputStream *stream) { m_core = core; m_stream.set(stream); }
+
+        void setOutputStream(GCOutputStream *stream) { m_stream.set(stream); }
+        void setOutputStream(NonGCOutputStream *stream) { m_stream.set(stream); }
         void setCore(AvmCore* core) { m_core = core; }
 
         void write(const char* utf8);  // null terminated
@@ -167,7 +180,17 @@ namespace avmplus
         AvmCore* core() { return m_core; }
 
     private:
-        OutputStream *m_stream;
+        class StreamAdapter {
+        public:
+            StreamAdapter();
+            void set(NonGCOutputStream* s);
+            void set(GCOutputStream* s);
+            void write(const char* utf8);
+            void writeN(const char* utf8, size_t charCount);
+        private:
+            GCOutputStream*    gcStream;
+            NonGCOutputStream* nongcStream;
+        } m_stream;
         AvmCore *m_core;
 
         void writeHexNibble(uint8_t value);
