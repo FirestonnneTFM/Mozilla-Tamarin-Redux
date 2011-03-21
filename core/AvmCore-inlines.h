@@ -525,13 +525,9 @@ REALLY_INLINE /*static*/ bool AvmCore::getIndexFromAtom(Atom a, uint32_t *result
 
 REALLY_INLINE Atom AvmCore::allocDouble(double n)
 {
-    union {
-        double *d;
-        void *v;
-    };
-    v = GetGC()->AllocDouble();
+    double *d = (double*)GetGC()->AllocDouble();
     *d = n;
-    return kDoubleType | (uintptr_t)v;
+    return kDoubleType | (uintptr_t)d;
 }
 
 #ifdef VMCFG_LOOKUP_CACHE

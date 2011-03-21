@@ -95,18 +95,14 @@ REALLY_INLINE Toplevel* ScriptObject::toplevel() const
 
 REALLY_INLINE InlineHashtable* ScriptObject::getTableNoInit() const
 {
-    union {
-        uint8_t* p;
-        InlineHashtable* iht;
-        HeapHashtable** hht;
-    };
-    p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+    InlineHashtable* iht = (InlineHashtable*)((uint8_t*)this + vtable->traits->getHashtableOffset());
     if(!vtable->traits->isDictionary())
     {
         return iht;
     }
     else
     {
+        HeapHashtable** hht = (HeapHashtable**)iht;
         //DictionaryObjects store pointer to HeapHashtable at
         //the hashtable offset
         return (*hht)->get_ht();
