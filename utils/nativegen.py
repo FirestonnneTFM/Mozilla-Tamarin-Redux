@@ -940,7 +940,14 @@ class Traits:
     # return the cpp namespace(s), eg "foo::bar"
     def cppns(self):
         return '::'.join(filter(lambda ns: len(ns) > 0, self.cpp_name_comps[:-1]))
-        
+
+    # return the complete name if it starts with ::, otherwise just the cppname
+    def niname(self):
+        if self.cpp_name_comps[0] == "":
+            return '::'.join(self.cpp_name_comps)
+        else:
+            return self.cpp_name_comps[-1]
+
 
 NULL = Traits("*")
 UNDEFINED = Traits("void")
@@ -1525,14 +1532,14 @@ class AbcThunkGen:
         out.println('#ifdef VMCFG_AOT')
         
         traits = filter(lambda t: (t.has_cpp_name()) and (not t.is_synthetic) and (t.fqcppname() != "double") and ((t.ctype == ctypeObject) or (t.fqcppname() == BASE_INSTANCE_NAME) or (t.fqcppname() == BASE_CLASS_NAME)), self.abc.classes + self.abc.instances)
-        glueClasses = sorted(set(map(lambda t: t.fqcppname(), traits)))
+        glueClasses = sorted(set(map(lambda t: tuple([t.fqcppname(), t.niname()]), traits)))
         
         out.println('extern "C" const struct {')
         out.indent += 1
         
         i = 0
         for i in range(0, len(glueClasses)):
-            out.println('const char* const n_%(count)u; %(glueClass)s* const m_%(count)u;' % { 'count' : i, 'glueClass': glueClasses[i]})
+            out.println('const char* const n_%(count)u; %(glueClass)s* const m_%(count)u;' % { 'count' : i, 'glueClass': glueClasses[i][0]})
         
         out.indent -= 1
         out.println('} aotABCTypes_%s = {' % name)
@@ -1540,7 +1547,7 @@ class AbcThunkGen:
         
         i = 0
         for i in range(0, len(glueClasses)):
-            out.println('"%(glueClass)s", 0,' % { 'count' : i, 'glueClass': glueClasses[i]})
+            out.println('"%(glueClass)s", 0,' % { 'count' : i, 'glueClass': glueClasses[i][1]})
         
         out.indent -= 1
         out.println('};')
