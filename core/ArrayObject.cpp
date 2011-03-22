@@ -647,7 +647,7 @@ convert_and_set_sparse:
         if (index <= denseLength)
         {
             AvmAssert(isDense());
-            return core()->intToAtom(index-1);
+            return core()->intToAtom(index + m_denseStart - 1);
         }
         else
         {
