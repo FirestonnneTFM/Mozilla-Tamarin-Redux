@@ -4239,6 +4239,11 @@ return the result of the comparison ToPrimitive(x) == y.
         int intval = int32_t(d);
         if (intval != (int)0x80000000)
             return intval;
+#elif defined(AVMPLUS_MIPS)
+        // mips int32_t(double) returns 0x7fffffff if d is not in a valid integer range
+        int intval = int32_t(d);
+        if (intval != 0x7fffffff)
+            return intval;
 #elif defined(AVMPLUS_SPARC) || defined(AVMPLUS_ARM)
         // an int cast which should give:
         // +/-0.0:0 +/-nan:0 +/-ind:0 -inf:0x80000000 +inf:0x7fffffff den:0 >=0x7fffffff:x7fffffff <=0x80000000:0x80000000
