@@ -2631,7 +2631,6 @@ bool PoolObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
     (void)_xact_cursor;
-    gcTraceHook_PoolObject(gc);
     gc->TraceLocation(&_abcStrings);
     _classes.gcTrace(gc);
     gc->TraceLocation(&_code);

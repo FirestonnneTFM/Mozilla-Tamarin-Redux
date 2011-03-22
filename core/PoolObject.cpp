@@ -101,15 +101,6 @@ namespace avmplus
 #endif
     }
 
-    void PoolObject::gcTraceHook_PoolObject(MMgc::GC* gc)
-    {
-        (void)gc;
-#ifdef VMCFG_NANOJIT
-        if (codeMgr != NULL)
-            codeMgr->gcTrace(gc);
-#endif
-    }
-    
     void PoolObject::dynamicizeStrings()
     {
         if (!MMgc::GC::GetGC(this)->Destroying())
