@@ -121,12 +121,6 @@ namespace avmplus
                                         // (only for flushing... lifetime is still managed by codeAlloc)
         CodeMgr();
         void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
-        
-        void gcTrace(MMgc::GC* gc)
-        {
-            // Punt until we figure out if this is what's intended
-            gc->TraceConservativeLocation((uintptr_t*)&bindingCaches);
-        }
     };
 
     /**

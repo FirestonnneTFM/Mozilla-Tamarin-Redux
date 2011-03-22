@@ -94,7 +94,7 @@ namespace avmplus
      * decoded from an ABC file: the constant pool, the methods
      * defined in the ABC, the classes defined in the ABC, and so on.
      */
-    class GC_CPP_EXACT_WITH_HOOK(PoolObject, MMgc::GCFinalizedObject)
+    class GC_CPP_EXACT(PoolObject, MMgc::GCFinalizedObject)
     {
         friend class AbcParser;
         friend class ConstantStringContainer;
@@ -105,8 +105,6 @@ namespace avmplus
         static PoolObject* create(AvmCore* core, ScriptBuffer& sb, const uint8_t* startpos, ApiVersion apiVersion);
 
         ~PoolObject();
-
-        void gcTraceHook_PoolObject(MMgc::GC* gc);
  
         int32_t getAPI();
 
@@ -162,7 +160,7 @@ namespace avmplus
 
 
         #ifdef VMCFG_NANOJIT
-        CodeMgr* codeMgr;   // Traced by gcTraceHook, above
+        CodeMgr* codeMgr;   // points to unmanaged memory and so, not traced
         #endif
 
         // search metadata record at meta_pos for name, return true if present
