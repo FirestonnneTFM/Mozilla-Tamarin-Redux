@@ -2000,6 +2000,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\LirHelper-inlines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\LirHelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\LirHelper.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\MathClass.cpp"
 				>
 			</File>

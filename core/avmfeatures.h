@@ -52,9 +52,11 @@
 #undef VMCFG_LITTLE_ENDIAN
 #undef VMCFG_DOUBLE_MSW_FIRST
 #undef VMCFG_IA32
+#undef VMCFG_SSE2
 #undef MMGC_IA32
 #undef AVMPLUS_IA32
 #undef VMCFG_AMD64
+#undef VMCFG_SSE2
 #undef MMGC_AMD64
 #undef AVMPLUS_AMD64
 #undef VMCFG_ARM
@@ -942,6 +944,9 @@
 #  define VMCFG_IA32
 #endif
 #if AVMSYSTEM_IA32
+#  define VMCFG_SSE2
+#endif
+#if AVMSYSTEM_IA32
 #  define MMGC_IA32
 #endif
 #if AVMSYSTEM_IA32
@@ -949,6 +954,9 @@
 #endif
 #if AVMSYSTEM_AMD64
 #  define VMCFG_AMD64
+#endif
+#if AVMSYSTEM_AMD64
+#  define VMCFG_SSE2
 #endif
 #if AVMSYSTEM_AMD64
 #  define MMGC_AMD64

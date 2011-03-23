@@ -37,10 +37,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-static const ArgType ARGTYPE_U = ARGTYPE_UI; // uint32_t
-static const ArgType ARGTYPE_F = ARGTYPE_D;  // double
-static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
-
 #define SIG0(r)\
     nanojit::CallInfo::typeSig0(ARGTYPE_##r)
 #define SIG1(r,a1)\
@@ -65,14 +61,12 @@ static const ArgType ARGTYPE_A = ARGTYPE_P;  // Atom
     nanojit::CallInfo::typeSig8(ARGTYPE_##r, ARGTYPE_##a1, ARGTYPE_##a2, ARGTYPE_##a3,\
                         ARGTYPE_##a4, ARGTYPE_##a5, ARGTYPE_##a6, ARGTYPE_##a7, ARGTYPE_##a8)
 
-#define FUNCTIONID(n) &ci_##n
-
 #ifdef NJ_VERBOSE
     #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
-        static const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet, #name };
+        const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet, #name };
 #else
     #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
-        static const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet };
+        const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet };
 #endif
 
 #if _MSC_VER

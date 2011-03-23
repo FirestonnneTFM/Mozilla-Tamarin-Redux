@@ -77,6 +77,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/FunctionClass.cpp \
   $(curdir)/IntClass.cpp \
   $(curdir)/Interpreter.cpp \
+  $(curdir)/LirHelper.cpp \
   $(curdir)/MathClass.cpp \
   $(curdir)/MathUtils.cpp \
   $(curdir)/MethodClosure.cpp \

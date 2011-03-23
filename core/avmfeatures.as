@@ -220,6 +220,7 @@ var FEATURES =
     <name>      AVMSYSTEM_IA32 </name>
     <precludes> AVMSYSTEM_64BIT </precludes>
     <defines>   VMCFG_IA32 </defines>
+    <defines>   VMCFG_SSE2 </defines>
     <defines>   MMGC_IA32 </defines>     <!-- FIXME: Bug 536304 legacy name -->
     <defines>   AVMPLUS_IA32 </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>
@@ -230,6 +231,7 @@ var FEATURES =
     <name>     AVMSYSTEM_AMD64 </name>
     <requires> AVMSYSTEM_64BIT </requires>
     <defines>  VMCFG_AMD64 </defines>
+    <defines>  VMCFG_SSE2 </defines>
     <defines>  MMGC_AMD64 </defines>     <!-- FIXME: Bug 536304 legacy name -->
     <defines>  AVMPLUS_AMD64 </defines>  <!-- FIXME: Bug 536304 legacy name -->
   </feature>

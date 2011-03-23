@@ -99,6 +99,7 @@
     <ClCompile Include="..\..\core\instr.cpp" />
     <ClCompile Include="..\..\core\IntClass.cpp" />
     <ClCompile Include="..\..\core\Interpreter.cpp" />
+    <ClCompile Include="..\..\core\LirHelper.cpp" />
     <ClCompile Include="..\..\core\MathClass.cpp" />
     <ClCompile Include="..\..\core\MathUtils.cpp" />
     <ClCompile Include="..\..\core\MethodClosure.cpp" />
@@ -422,6 +423,8 @@
     <ClInclude Include="..\..\core\IntClass.h" />
     <ClInclude Include="..\..\core\Interpreter.h" />
     <ClInclude Include="..\..\core\jit-calls.h" />
+    <ClInclude Include="..\..\core\LirHelper-inlines.h" />
+    <ClInclude Include="..\..\core\LirHelper.h" />
     <ClInclude Include="..\..\core\MathClass.h" />
     <ClInclude Include="..\..\core\MathUtils.h" />
     <ClInclude Include="..\..\core\MethodClosure.h" />

@@ -41,14 +41,7 @@
 #ifndef __avmplus_CodegenLIR__
 #define __avmplus_CodegenLIR__
 
-using namespace MMgc;
-#include "../nanojit/nanojit.h"
-
-#ifdef DEBUGGER
-#define DEBUGGER_ONLY(...) __VA_ARGS__
-#else
-#define DEBUGGER_ONLY(...)
-#endif
+#include "LirHelper.h"
 
 namespace avmplus
 {
@@ -298,83 +291,6 @@ namespace avmplus
     };
 
     class VarTracker;
-
-    /** helper code to make LIR generation nice and tidy */
-    class LirHelper {
-    protected:
-        LirHelper(PoolObject*);
-        ~LirHelper();
-        void cleanup();
-
-    protected:
-        LIns* downcast_obj(LIns* atom, LIns* env, Traits* t); // atom -> typed scriptobj
-        static BuiltinType bt(Traits *t);
-        LIns* nativeToAtom(LIns* value, Traits* valType);
-        LIns* atomToNative(BuiltinType, LIns* i);
-        LIns* eqi0(LIns* i);             // eq(i, imm(0))
-        LIns* eqp0(LIns* ptr);          // peq(ptr, immq(0))
-        LIns* qlo(LIns* q);             // LIR_dlo2i(q)
-        LIns* i2p(LIns* i);             // 32bit: nop, 64bit: l2q(i)
-        LIns* ui2p(LIns* u);             // 32bit: nop, 64bit: ul2uq(i)
-        LIns* p2i(LIns* ptr);           // 32bit: nop, 64bit: q2l(ptr)
-        LIns* InsConst(int32_t c);
-        LIns* InsConstPtr(const void *p);
-        LIns* InsConstAtom(Atom c);
-        LIns* callIns(const CallInfo *, uint32_t argc, ...);
-        LIns* vcallIns(const CallInfo *, uint32_t argc, va_list args);
-        LIns* eqp(LIns* a, Atom b);
-        LIns* eqp(LIns* a, LIns* b);
-        LIns* ltup(LIns* a, LIns* b);
-        LIns* choose(LIns* c, Atom t, LIns* f);
-        LIns* addp(LIns* a, Atom imm);
-        LIns* addi(LIns* a, int32_t imm);
-        LIns* andp(LIns* a, Atom mask);
-        LIns* orp(LIns* a, Atom mask);
-        LIns* ori(LIns* a, int32_t mask);
-        LIns* xorp(LIns* a, Atom mask);
-        LIns* subp(LIns* a, int32_t offset);
-        LIns* retp(LIns* a);
-        LIns* label();
-        LIns* jlti(LIns* a, int32_t b);
-        LIns* jgti(LIns* a, int32_t b);
-        LIns* jnei(LIns* a, int32_t b);
-        LIns* sti(LIns* val, LIns* p, int32_t d, AccSet);
-        LIns* stp(LIns* val, LIns* p, int32_t d, AccSet);
-        LIns* std(LIns* val, LIns* p, int32_t d, AccSet);
-        LIns* stForTraits(Traits *t, LIns* val, LIns* p, int32_t d, AccSet);
-        LIns* ldi(LIns* p, int32_t d, AccSet);
-        LIns* ldd(LIns* p, int32_t d, AccSet);
-        LIns* ldp(LIns* p, int32_t d, AccSet);
-        LIns* ldForTraits(Traits *t, LIns* p, int32_t d, AccSet);
-        LIns* livep(LIns*);
-        LIns* param(int n, const char *name);
-        LIns* lshi(LIns* a, int32_t b);
-        LIns* rshi(LIns* a, int32_t b);
-        LIns* lshp(LIns* a, int32_t b);
-        LIns* rshp(LIns* a, int32_t b);
-        LIns* rshup(LIns* a, int32_t b);
-        void  liveAlloc(LIns* expr);        // extend lifetime of LIR_allocp, otherwise no-op
-        void  emitStart(Allocator&, LirBuffer*, LirWriter*&);
-
-        /**
-         * Compute number of bytes needed for the unboxed representation
-         * of this argument value when passed on the stack.
-         */
-        static int32_t argSize(MethodSignaturep, int32_t i);
-
-    protected: // data
-        LirWriter *lirout;
-        Fragment *frag;
-        PoolObject* pool;
-        AvmCore *core;
-        LIns *coreAddr;
-        Allocator* alloc1;    // allocator used in first pass, while writing LIR
-        Allocator* lir_alloc; // allocator with LIR buffer lifetime
-        bool const use_cmov;
-        debug_only(ValidateWriter* validate1;)
-        debug_only(ValidateWriter* validate2;)
-    };
-
     class MopsRangeCheckFilter;
     class PrologWriter;
 
