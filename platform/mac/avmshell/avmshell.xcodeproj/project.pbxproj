@@ -189,6 +189,8 @@
 		198CF91D11B973BD00A939C7 /* exec-verifyall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91911B973BD00A939C7 /* exec-verifyall.cpp */; };
 		198CF91E11B973BD00A939C7 /* exec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91A11B973BD00A939C7 /* exec.cpp */; };
 		1992FDA3102869D10032FBBF /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1992FDA1102869D10032FBBF /* Containers.cpp */; };
+		19A1174B133A2266003B9C38 /* LirHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A11749133A2266003B9C38 /* LirHelper.cpp */; };
+		19A1174C133A2266003B9C38 /* LirHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A11749133A2266003B9C38 /* LirHelper.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BDA443100CC20200172A70 /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BDA441100CC20200172A70 /* Allocator.cpp */; };
 		19F9614F1277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19F9614E1277300D0079C6E9 /* ST_mmgc_580603.cpp */; };
@@ -880,6 +882,9 @@
 		1992FDA2102869D10032FBBF /* Containers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Containers.h; path = ../../../nanojit/Containers.h; sourceTree = SOURCE_ROOT; };
 		1998F9E81072A6ED00780913 /* CodegenLIR-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "CodegenLIR-inlines.h"; path = "../../../core/CodegenLIR-inlines.h"; sourceTree = SOURCE_ROOT; };
 		1998F9E91072A6ED00780913 /* Toplevel-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Toplevel-inlines.h"; path = "../../../core/Toplevel-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19A11748133A2266003B9C38 /* LirHelper-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "LirHelper-inlines.h"; path = "../../../core/LirHelper-inlines.h"; sourceTree = SOURCE_ROOT; };
+		19A11749133A2266003B9C38 /* LirHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LirHelper.cpp; path = ../../../core/LirHelper.cpp; sourceTree = SOURCE_ROOT; };
+		19A1174A133A2266003B9C38 /* LirHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LirHelper.h; path = ../../../core/LirHelper.h; sourceTree = SOURCE_ROOT; };
 		19A21B371213443300CB55E0 /* PageMap-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PageMap-inlines.h"; path = "../../../MMgc/PageMap-inlines.h"; sourceTree = SOURCE_ROOT; };
 		19A21B381213443300CB55E0 /* PageMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PageMap.cpp; path = ../../../MMgc/PageMap.cpp; sourceTree = SOURCE_ROOT; };
 		19A21B391213443300CB55E0 /* PageMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PageMap.h; path = ../../../MMgc/PageMap.h; sourceTree = SOURCE_ROOT; };
@@ -1192,6 +1197,9 @@
 				079DF7F30F3A882D0031D1B4 /* Interpreter.cpp */,
 				079DF7F40F3A882D0031D1B4 /* Interpreter.h */,
 				E8B532201069A28F00ED299A /* jit-calls.h */,
+				19A11749133A2266003B9C38 /* LirHelper.cpp */,
+				19A1174A133A2266003B9C38 /* LirHelper.h */,
+				19A11748133A2266003B9C38 /* LirHelper-inlines.h */,
 				079DF7F50F3A882D0031D1B4 /* MathUtils.cpp */,
 				079DF7F60F3A882D0031D1B4 /* MathUtils.h */,
 				0755C24312D735B900432BEB /* MathUtils-inlines.h */,
@@ -2013,6 +2021,7 @@
 				07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */,
 				817CEE7C12E511C40019E8DF /* Safepoint.cpp in Sources */,
 				817CEE9312E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
+				19A1174C133A2266003B9C38 /* LirHelper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2211,6 +2220,7 @@
 				07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */,
 				817CEE7B12E511C40019E8DF /* Safepoint.cpp in Sources */,
 				817CEE9212E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
+				19A1174B133A2266003B9C38 /* LirHelper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

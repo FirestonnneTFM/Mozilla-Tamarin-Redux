@@ -127,6 +127,7 @@ AVMPLUS_SRCS := \
 	XMLObject.cpp \
 	XMLParser16.cpp \
 	CodegenLIR.cpp \
+	LirHelper.cpp \
 	Allocator.cpp \
 	CodeAlloc.cpp \
 	Containers.cpp \

@@ -153,6 +153,9 @@
     <ClCompile Include="..\..\core\Interpreter.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\LirHelper.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\core\MathClass.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -832,6 +835,12 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\jit-calls.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\LirHelper.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\LirHelper-inlines.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\core\MathClass.h">
