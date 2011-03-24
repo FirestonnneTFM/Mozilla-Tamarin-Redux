@@ -349,16 +349,16 @@ namespace MMgc
         // If we have no space, and aren't going to pop a segment that's empty
         // before we return, and there's not an extra segment to give up, then
         // we fail.
-		if (m_allowance >= nseg)
-			return true;
-		if (m_allowance+1 == nseg && m_top == m_base)
-			return true;
-		if (m_allowance+1 == nseg && m_extraSegment != NULL) {
+        if (m_allowance >= nseg)
+            return true;
+        if (m_allowance+1 == nseg && m_top == m_base)
+            return true;
+        if (m_allowance+1 == nseg && m_extraSegment != NULL) {
             FreeStackSegment(m_extraSegment);
             m_extraSegment = NULL;
-			return true;
-		}
-		return false;
+            return true;
+        }
+        return false;
     }
 #endif
 
@@ -475,7 +475,7 @@ namespace MMgc
         StackSegment* prev = NULL;
         while (seg != NULL) {
             if(item >= items(seg) && item < seg->m_savedTop) {
-                // If the current item is the top item in the segment then the item 
+                // If the current item is the top item in the segment then the item
                 // above is in the segment above, otherwise it's in this segment
                 uintptr_t* p = (item == seg->m_savedTop-1) ? items(prev) : item+1;
 
