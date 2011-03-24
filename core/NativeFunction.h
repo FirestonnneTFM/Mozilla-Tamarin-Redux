@@ -167,6 +167,9 @@ namespace avmplus
     struct NativeMethodInfo
     {
     public:
+#ifdef VMCFG_AOT
+        AvmThunkNativeHandler handler;
+#endif
         GprMethodProc thunker;
         int32_t method_id;
     };
@@ -247,6 +250,9 @@ namespace avmplus
     };
 
 #ifdef VMCFG_AOT
+    #define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
+        reinterpret_cast<AvmThunkNativeMethodHandler>((void(CLS::*)())(PTR))
+ 
     #define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME) \
         extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain); \
         extern const NativeClassInfo NAME##_classEntries[]; \
@@ -269,8 +275,13 @@ namespace avmplus
         static const NativeMethodInfo NAME##_methodEntries[] = {
 #endif
 
+#ifdef VMCFG_AOT
+    #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
+        { { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+#else
     #define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
         { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+#endif
 
     #define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
         _AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
@@ -281,10 +292,18 @@ namespace avmplus
     #define AVMTHUNK_NATIVE_METHOD_NAMESPACE(METHID, IMPL) \
         _AVMTHUNK_NATIVE_METHOD(avmplus::Namespace, METHID, IMPL)
 
+#ifdef VMCFG_AOT
+    // AOT build env is ok with designated inits
+    #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
+        { { function: reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL) }, (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+    #define AVMTHUNK_END_NATIVE_METHODS() \
+        { { NULL }, NULL, -1 } };
+#else
     #define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
         { (GprMethodProc)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
     #define AVMTHUNK_END_NATIVE_METHODS() \
         { NULL, -1 } };
+#endif
 
     // ---------------
 

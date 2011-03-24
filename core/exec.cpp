@@ -92,6 +92,11 @@ void BaseExecMgr::init(MethodInfo* m, const NativeMethodInfo* native_info)
     if (native_info) {
         m->_apply_fastpath = 1;
         m->_native.thunker = native_info->thunker;
+#ifdef VMCFG_AOT
+        if(!m->isAotCompiled()) {
+            m->_native.handler = native_info->handler;
+        }
+#endif
     } else {
         #ifdef VMCFG_VERIFYALL
         if (config.verifyonly && m->isNative())
