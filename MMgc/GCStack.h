@@ -298,7 +298,7 @@ namespace MMgc
         StackSegment*       m_topSegment;     // Current stack segment, older segments linked through 'prev'
         uint32_t            m_hiddenCount;    // Number of elements in those older segments
         uint32_t            m_hiddenSegments; // Number of those older segments
-        StackSegment*       m_extraSegment;   // Aingle-element cache to control costs of straddling a segment boundary
+        StackSegment*       m_extraSegment;   // Single-element cache to control costs of straddling a segment boundary
         uintptr_t           m_deadItem;       // A managed object that is used to clear out dead slots
 #ifdef MMGC_MARKSTACK_ALLOWANCE
         int32_t             m_allowance;      // Allowance for the number of elements
