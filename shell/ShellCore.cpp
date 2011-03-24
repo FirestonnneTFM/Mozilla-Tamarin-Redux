@@ -483,7 +483,7 @@ namespace avmshell
     {
 #ifdef VMCFG_AOT
         ScriptBuffer dummyScriptBuffer;
-        return handleArbitraryExecutableContent(dummyScriptBuffer, NULL);
+        return handleArbitraryExecutableContent(settings, dummyScriptBuffer, NULL);
 #endif
 
         if (config.interrupts)
