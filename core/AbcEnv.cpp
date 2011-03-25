@@ -57,7 +57,8 @@ namespace avmplus
 #ifdef DEBUGGER
         if (_pool->core->debugger())
         {
-            m_invocationCounts = (uint64_t*)_pool->core->GetGC()->Alloc(_pool->methodCount() * sizeof(uint64_t), MMgc::GC::kZero);
+            MMgc::GC* gc = _pool->core->GetGC();
+            WB(gc, this, &m_invocationCounts, (uint64_t*)gc->Alloc(_pool->methodCount() * sizeof(uint64_t), MMgc::GC::kZero));
         }
 #endif
 

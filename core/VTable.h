@@ -82,10 +82,10 @@ namespace avmplus
         Toplevel* const GC_POINTER(_toplevel);
 
     public:
-        DWB(MethodEnv*) GC_POINTER(init);
-        DWB(VTable*)    GC_POINTER(base);
-        DWB(VTable*)    GC_POINTER(ivtable);
-        Traits* const   GC_POINTER(traits);
+        GCMember<MethodEnv> GC_POINTER(init);
+        GCMember<VTable>    GC_POINTER(base);
+        GCMember<VTable>    GC_POINTER(ivtable);
+        Traits* const       GC_POINTER(traits);
         CreateInstanceProc  createInstanceProc;
         bool linked;    // @todo -- surely there's a spare bit we can use for this.
         bool pad[2];

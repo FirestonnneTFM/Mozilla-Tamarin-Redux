@@ -96,7 +96,7 @@ namespace avmplus
     protected:
         GC_DATA_BEGIN(TypedVectorClassBase)
 
-        DWB(Traits*) GC_POINTER(m_typeTraits);
+        GCMember<Traits> GC_POINTER(m_typeTraits);
 
         GC_DATA_END(TypedVectorClassBase)
     };
@@ -262,7 +262,7 @@ namespace avmplus
     
         GC_DATA_BEGIN(VectorBaseObject)
 
-        DRCWB(TypedVectorClassBase*)    GC_POINTER(m_vecClass);
+        GCMember<TypedVectorClassBase>    GC_POINTER(m_vecClass);
         bool                            m_fixed;
 
         GC_DATA_END(VectorBaseObject)

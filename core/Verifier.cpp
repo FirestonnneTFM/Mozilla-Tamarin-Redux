@@ -1686,7 +1686,7 @@ namespace avmplus
 
                 // don't need null check, AvmCore::construct() uses toFunction() for null check.
                 Traits* ctraits = state->peek(argc+1).traits;
-                Traits* itraits = ctraits ? ctraits->itraits : NULL;
+                Traits* itraits = ctraits ? (Traits*)(ctraits->itraits) : NULL;
                 coder->writeOp1(state, pc, opcode, argc);
                 state->pop_push(argc+1, itraits, true);
                 break;
@@ -1759,7 +1759,7 @@ namespace avmplus
                 emitCheckNull(sp-(n-1));
                 coder->writeOp2(state, pc, opcode, imm30, argc, ctraits);
 
-                Traits* itraits = ctraits ? ctraits->itraits : NULL;
+                Traits* itraits = ctraits ? (Traits*)(ctraits->itraits) : NULL;
                 state->pop_push(n, itraits, itraits==NULL?false:true);
                 break;
             }

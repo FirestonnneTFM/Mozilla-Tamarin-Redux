@@ -60,7 +60,7 @@ namespace avmplus
         ShellCore* core = (ShellCore*) this->core();
 
         DomainEnv* baseDomainEnv = parentDomain ?
-                                parentDomain->domainEnv :
+                                (DomainEnv*)parentDomain->domainEnv :
                                 (DomainEnv*)NULL;
         Domain* baseDomain = baseDomainEnv ?
                                 baseDomainEnv->domain() :
@@ -71,7 +71,7 @@ namespace avmplus
                             core->createShellToplevel();
 
         Domain* domain = Domain::newDomain(core, baseDomain);
-        domainEnv = DomainEnv::newDomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
+        domainEnv = DomainEnv::newDomainEnv(core, domain, parentDomain ? (DomainEnv*)parentDomain->domainEnv : (DomainEnv*)NULL);
     }
 
     Atom DomainObject::loadBytes(ByteArrayObject* b, uint32_t swfVersion)

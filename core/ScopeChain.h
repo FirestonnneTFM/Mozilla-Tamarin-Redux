@@ -129,7 +129,7 @@ namespace avmplus
         VTable* const                   GC_POINTER(_vtable);
         AbcEnv* const                   GC_POINTER(_abcEnv);
         const ScopeTypeChain* const     GC_POINTER(_scopeTraits);
-        DRCWB(Namespacep) const         GC_POINTER(_defaultXmlNamespace);
+        GCMember<Namespace> const       GC_POINTER(_defaultXmlNamespace);
         Atom                            GC_ATOMS_SMALL(_scopes[1], "getSize()");
 
     GC_DATA_END(ScopeChain)

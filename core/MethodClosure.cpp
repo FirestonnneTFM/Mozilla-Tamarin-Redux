@@ -167,7 +167,7 @@ namespace avmplus
     {
         // Don't assert: just use the null result to form the hashKey.
         // AvmAssert(isValid());
-        return ((uintptr_t(m_callEnv.value()) << 8) | (uintptr_t(get_savedThisOrNull()) >> 3));
+        return ((uintptr_t((MethodEnv*)m_callEnv) << 8) | (uintptr_t(get_savedThisOrNull()) >> 3));
     }
 
     // this = argv[0] (ignored)

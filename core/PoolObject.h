@@ -136,7 +136,7 @@ namespace avmplus
         UnmanagedPointerList<const uint8_t*> GC_STRUCTURE(metadata_infos);
 
         /** domain */
-        DWB(Domain*) GC_POINTER(domain);
+        GCMember<Domain> GC_POINTER(domain);
 
         /** # of elements in metadata array */
         uint32_t metadataCount;
@@ -151,7 +151,8 @@ namespace avmplus
         uint32_t constantNsSetCount;
 
     private:
-        DWB(ExactStructContainer<HeapMultiname>*) GC_POINTER(precompNames);   // a GCFinalizedObject
+        GCMember<ExactStructContainer<HeapMultiname> > GC_POINTER(precompNames);   // a GCFinalizedObject
+
     public:
         void initPrecomputedMultinames();
         const Multiname* precomputedMultiname(int32_t index);
@@ -217,19 +218,19 @@ namespace avmplus
         // take precedence over the loaded ones (on a freeze-on-first-use basis)
         // to ensure that the types associated with a name can't change as new
         // Domains are loaded. See DomainMgr for more info.
-        DWB(MultinameTraitsHashtable*)              GC_POINTER(m_loadedTraits);
-        DWB(MultinameTraitsHashtable*)              GC_POINTER(m_cachedTraits);
-        DWB(MultinameMethodInfoHashtable*)          GC_POINTER(m_loadedScripts);
-        DWB(MultinameMethodInfoHashtable*)          GC_POINTER(m_cachedScripts);
+        GCMember<MultinameTraitsHashtable>          GC_POINTER(m_loadedTraits);
+        GCMember<MultinameTraitsHashtable>          GC_POINTER(m_cachedTraits);
+        GCMember<MultinameMethodInfoHashtable>      GC_POINTER(m_loadedScripts);
+        GCMember<MultinameMethodInfoHashtable>      GC_POINTER(m_cachedScripts);
 
     private:
-        DWB(ScriptBufferImpl*)                      GC_POINTER(_code);
+        GCMember<ScriptBufferImpl>                  GC_POINTER(_code);
         const uint8_t * const                       _abcStart;
         // start of static ABC string data
         const uint8_t *                             _abcStringStart;
         // points behind end of ABC string data - see AbcParser.cpp
         const uint8_t *                             _abcStringEnd;
-        DWB(ConstantStringContainer*)               GC_POINTER(_abcStrings);                // The length is constantStringCount
+        GCMember<ConstantStringContainer>           GC_POINTER(_abcStrings);                // The length is constantStringCount
         GCList<Traits>                              GC_STRUCTURE(_classes);
         GCList<Traits>                              GC_STRUCTURE(_scripts);
         GCList<MethodInfo>                          GC_STRUCTURE(_methods);

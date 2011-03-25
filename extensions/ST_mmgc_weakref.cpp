@@ -50,7 +50,7 @@ public:
     C(int key) : key(key) {}
     ~C() { key = -1; }
     int key;
-    DWB(C*) next;
+    GCMember<C> next;
 };
 
 class MyCallback : public GCCallback

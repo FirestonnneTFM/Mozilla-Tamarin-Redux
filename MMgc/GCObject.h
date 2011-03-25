@@ -859,7 +859,7 @@ namespace MMgc
             //
             // DataIOBase is a virtual base class, so we don't know if the
             // subclass is GCObject or not. We need it to be const, or
-            // a GCObject would require a DWB(), and if it's const, we
+            // a GCObject would require a GCMember<>, and if it's const, we
             // cannot zero it out during ~DataIOBase. The simplest solution
             // seemed to be zeroing out the member here.
 
@@ -908,7 +908,11 @@ namespace MMgc
         inline bool valid() { return (uintptr_t)t > 1; }
         T t;
     };
-    
+
+///////////////////////////////////////////////////////////////////////////
+//
+// NOTE!!  DRC and DRC_NOWB are deprecated!  Use GCMember<> when possible.
+
 // put spaces around the template arg to avoid possible digraph warnings
 #define DRC(_type) MMgc::RCPtr< _type, true >
 

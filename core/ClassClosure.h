@@ -130,7 +130,7 @@ namespace avmplus
         GC_DATA_BEGIN(ClassClosure)
 
     private:
-        DRCWB(ScriptObject*)        GC_POINTER(m_prototype);
+        GCMember<ScriptObject>      GC_POINTER(m_prototype);
         CreateInstanceProc const    m_createInstanceProc;   // not GC memory
 
         GC_DATA_END(ClassClosure)

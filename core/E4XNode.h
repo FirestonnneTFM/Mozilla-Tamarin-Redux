@@ -135,11 +135,11 @@ namespace avmplus
     private:
         GC_DATA_BEGIN(E4XNodeAux)
 
-        DRCWB(Stringp)          GC_POINTER(m_name);
-        DRCWB(Namespace*)       GC_POINTER(m_ns);
+        GCMember<String>         GC_POINTER(m_name);
+        GCMember<Namespace>      GC_POINTER(m_ns);
 
         /** callback on changes to children, attribute, name or namespace */
-        DRCWB(FunctionObject*)  GC_POINTER(m_notification);
+        GCMember<FunctionObject> GC_POINTER(m_notification);
 
         GC_DATA_END(E4XNodeAux)
     };
@@ -161,7 +161,7 @@ namespace avmplus
         GC_DATA_BEGIN(E4XNode)
         
         /** Either null or an E4XNode, valid for all node types */
-        DWB(E4XNode*) GC_POINTER(m_parent);
+        GCMember<E4XNode> GC_POINTER(m_parent);
 
         // If this is a simple name with no namespace or notification function,
         // we just have a string pointer.  Otherwise, we're a E4XNodeAux value
@@ -281,7 +281,7 @@ namespace avmplus
     class GC_CPP_EXACT(TextE4XNode, E4XNode)
     {
         GC_DATA_BEGIN(TextE4XNode)
-        DRCWB(Stringp) GC_POINTER(m_value);
+        GCMember<String> GC_POINTER(m_value);
         GC_DATA_END(TextE4XNode)
 
         TextE4XNode (E4XNode *parent, String *value);
@@ -304,7 +304,7 @@ namespace avmplus
     class GC_CPP_EXACT(CommentE4XNode, E4XNode)
     {
         GC_DATA_BEGIN(CommentE4XNode)
-        DRCWB(Stringp) GC_POINTER(m_value);
+        GCMember<String> GC_POINTER(m_value);
         GC_DATA_END(CommentE4XNode)
 
         CommentE4XNode (E4XNode *parent, String *value);
@@ -327,7 +327,7 @@ namespace avmplus
     class GC_CPP_EXACT(AttributeE4XNode, E4XNode)
     {
         GC_DATA_BEGIN(AttributeE4XNode)
-        DRCWB(Stringp) GC_POINTER(m_value);
+        GCMember<String> GC_POINTER(m_value);
         GC_DATA_END(AttributeE4XNode)
 
         AttributeE4XNode (E4XNode *parent, String *value);
@@ -351,7 +351,7 @@ namespace avmplus
     class GC_CPP_EXACT(CDATAE4XNode, E4XNode)
     {
         GC_DATA_BEGIN(CDATAE4XNode)
-        DRCWB(Stringp) GC_POINTER(m_value);
+        GCMember<String> GC_POINTER(m_value);
         GC_DATA_END(CDATAE4XNode)
 
         CDATAE4XNode (E4XNode *parent, String *value);
@@ -374,7 +374,7 @@ namespace avmplus
     class GC_CPP_EXACT(PIE4XNode, E4XNode)
     {
         GC_DATA_BEGIN(PIE4XNode)
-        DRCWB(Stringp) GC_POINTER(m_value); // only when m_class != kElement
+        GCMember<String> GC_POINTER(m_value); // only when m_class != kElement
         GC_DATA_END(PIE4XNode)
 
         PIE4XNode (E4XNode *parent, String *value);
@@ -399,14 +399,13 @@ namespace avmplus
     {
         GC_DATA_BEGIN(ElementE4XNode)
 
-        DWB(HeapE4XNodeList*) GC_POINTER(m_attributes);
-
-        DWB(HeapNamespaceList*) GC_POINTER(m_namespaces);
+        GCMember<HeapE4XNodeList>   GC_POINTER(m_attributes);
+        GCMember<HeapNamespaceList> GC_POINTER(m_namespaces);
 
         // If the low bit of this integer is set, this value points directly
         // to a single child (one E4XNode *).  If there are multiple children,
         // this points to a HeapE4XNodeList
-        DWB(uintptr_t) GC_POINTER(m_children);
+        uintptr_t        GC_POINTER(m_children);        // Must write with WB, GCMember<> does not work.
         #define SINGLECHILDBIT 0x1
 
         GC_DATA_END(ElementE4XNode)

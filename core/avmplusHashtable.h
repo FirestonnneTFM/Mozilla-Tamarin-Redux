@@ -296,7 +296,7 @@ namespace avmplus
     // ------------------------ DATA SECTION BEGIN
     private:
         GC_DATA_BEGIN(InlineHashtable);
-        uintptr_t GC_POINTER(m_atomsAndFlags);  /** property hashtable, this has no DWB on purpose, setAtoms contains the WB */
+        uintptr_t GC_POINTER(m_atomsAndFlags);  /** property hashtable, this has no GCMember<> on purpose, setAtoms contains the WB */
         GC_DATA_END(InlineHashtable);
     #ifdef AVMPLUS_64BIT
         // on 64-bit systems, padding will force us to 16 bytes here anyway, so let's just use unpacked ints

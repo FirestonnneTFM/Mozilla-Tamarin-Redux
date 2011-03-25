@@ -85,8 +85,8 @@ namespace avmplus
 
     RegExpObject::RegExpObject(RegExpObject *toCopy)
         : ScriptObject(toCopy->vtable, toCopy->getDelegate())
-        , m_source(toCopy->m_source.value())
-        , m_pcreInst(toCopy->m_pcreInst.value())
+        , m_source(toCopy->m_source)
+        , m_pcreInst((CompiledRegExp*)(toCopy->m_pcreInst))
         , m_lastIndex(0)
         , m_optionFlags(toCopy->m_optionFlags)
         , m_global(toCopy->m_global)

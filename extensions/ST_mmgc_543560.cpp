@@ -109,8 +109,8 @@ struct BigThing : public MMgc::GCFinalizedObject
     {
         //printf("~BigThing: %u 0x%08X 0x%08X\n", m_serial, this, this + 1);
     }
-    DWB(BigThing*) m_next;
-    DWB(BigThing*) m_prev;
+    GCMember<BigThing> m_next;
+    GCMember<BigThing> m_prev;
     unsigned m_serial;
     char m_data[512 * 1024];
 };

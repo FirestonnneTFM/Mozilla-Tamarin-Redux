@@ -76,7 +76,7 @@ namespace avmplus
 
         GC_DATA_BEGIN(DebuggerMethodInfo)
 
-        DWB(AbcFile*)           GC_POINTER(file);               // the abc file from which this method came
+        GCMember<AbcFile>       GC_POINTER(file);               // the abc file from which this method came
         int32_t                 firstSourceLine;    // source line number where function starts
         int32_t                 lastSourceLine;     // source line number where function ends
         int32_t                 offsetInAbc;        // offset in abc file
@@ -309,7 +309,7 @@ namespace avmplus
         struct AbcInfo
         {
             const uint8_t*          body_pos;
-            ExceptionHandlerTable*  exceptions;     // we write this once, in Verifier, with an explicit WB.  so no DWB.
+            ExceptionHandlerTable*  exceptions;     // we write this once, in Verifier, with an explicit WB.  so no GCMember<>.
     #ifdef VMCFG_LOOKUP_CACHE
             int                     lookup_cache_size;     // Number of items in lookup cache
     #endif
@@ -317,7 +317,7 @@ namespace avmplus
             struct
             {
                 TranslatedCode*         translated_code;    // The object that contains the code pointed to by body_pos, written with explicit WB
-                // We write this once, in WordcodeTranslator, with an explicit WB.  so no DWB.
+                // We write this once, in WordcodeTranslator, with an explicit WB.  so no GCMember<>.
                 // The contents are the same as the 'exceptions' structure above, except the 'from', 'to', and 'target' fields.
                 ExceptionHandlerTable*  exceptions;
             } word_code;
@@ -330,20 +330,20 @@ namespace avmplus
         GC_DATA_BEGIN(MethodInfo)
         
     private:
-        DWB(MMgc::GCWeakRef*)   GC_POINTER(_msref); // our MethodSignature
-        ScopeOrTraits           GC_STRUCTURE(_declarer);
-        ScopeOrTraits           GC_STRUCTURE(_activation);
-        PoolObject* const       GC_POINTER(_pool);
-        const uint8_t* const    _abc_info_pos;      // pointer to abc MethodInfo record
-        const int               _method_id;
+        GCMember<MMgc::GCWeakRef> GC_POINTER(_msref); // our MethodSignature
+        ScopeOrTraits             GC_STRUCTURE(_declarer);
+        ScopeOrTraits             GC_STRUCTURE(_activation);
+        PoolObject* const         GC_POINTER(_pool);
+        const uint8_t* const      _abc_info_pos;      // pointer to abc MethodInfo record
+        const int                 _method_id;
         union
         // This union is traced by the gcTraceHook()
         {
-            NativeInfo          _native;            // stuff used only for Native methods (formerly in NativeMethod)
-            AbcInfo             _abc;               // stuff used only for bytecode methods (formerly in MethodInfo)
+            NativeInfo            _native;            // stuff used only for Native methods (formerly in NativeMethod)
+            AbcInfo               _abc;               // stuff used only for bytecode methods (formerly in MethodInfo)
         };
 #ifdef AVMPLUS_SAMPLER
-        mutable DRCWB(Stringp)  GC_POINTER_IFDEF(_methodName, AVMPLUS_SAMPLER);
+        mutable GCMember<String>  GC_POINTER_IFDEF(_methodName, AVMPLUS_SAMPLER);
 #endif
 
         // -------- FLAGS SECTION

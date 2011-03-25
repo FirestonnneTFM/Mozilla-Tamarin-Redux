@@ -85,7 +85,7 @@ namespace avmplus
         }
 
     private:
-        // this is stack-allocated so we must not use DWB()
+        // this is stack-allocated so we must not use GCMember<>
         TraitsBindingsp traits;
         int index;
     };

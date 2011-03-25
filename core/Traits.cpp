@@ -1670,7 +1670,7 @@ namespace avmplus
             pw << domainString;
         } else {
             // not a well known domain, print the address to help distinguish distinct domains
-            pw << "@" << hexAddr((intptr_t)pool->domain.value());
+            pw << "@" << hexAddr((intptr_t)(Domain*)pool->domain);
         }
         return pw;
     }
@@ -2191,7 +2191,7 @@ failure:
         if (!isInstanceType() || (count = countNewInterfaces(seen)) == 0) {
             // no new interfaces, attempt to share the base type's secondary list
             if (!base) {
-                this->m_secondary_supertypes = core->_emptySupertypeList;
+                WB(gc, this, &this->m_secondary_supertypes, core->_emptySupertypeList);
             } else {
                 Traits** base_list = base->m_secondary_supertypes;
                 // If we require base in our secondary_supertypes list, so will other
@@ -2199,7 +2199,7 @@ failure:
                 // inserting base at position 0.
                 if (base->isPrimary() || base_list[0] == base) {
                     // just copy the base list.
-                    this->m_secondary_supertypes = base_list;
+                    WB(gc, this, &this->m_secondary_supertypes, base_list);
                 } else {
                     // must prepend base to base_list, save the copy on this type and base.
                     count = countSupertypes(base_list);
@@ -2207,8 +2207,8 @@ failure:
                     WB_SKIP(gc, list, list, base);
                     for (uint32_t i=0; i < count; i++)
                         WB_SKIP(gc, list, list+i+1, base_list[i]);
-                    base->m_secondary_supertypes = list;
-                    this->m_secondary_supertypes = list;
+                    WB(gc, base, &base->m_secondary_supertypes, list);
+                    WB(gc, this, &this->m_secondary_supertypes, list);
                 }
             }
         } else {
@@ -2228,7 +2228,7 @@ failure:
             } else {
                 list = allocSupertypeList(gc, count);
             }
-            this->m_secondary_supertypes = list;
+            WB(gc, this, &this->m_secondary_supertypes, list);
             for (uint32_t i=0; i < count; i++) {
                 WB_SKIP(gc, list, list+baseCount+i, seen[i]);
             }

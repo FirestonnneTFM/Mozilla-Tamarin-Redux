@@ -274,7 +274,7 @@ namespace avmplus
         {
         public:
             uint32_t timestamp;
-            DRCWB(ScriptObject*) object;
+            GCMember<ScriptObject> object;
             
             REALLY_INLINE void gcTrace(MMgc::GC* gc)
             {
@@ -301,7 +301,7 @@ namespace avmplus
         uintptr_t                   GC_CONSERVATIVE(activationOrMCTable);
     public:
 #ifdef VMCFG_LOOKUP_CACHE
-        DWB(ExactStructContainer<LookupCache>*)
+        GCMember<ExactStructContainer<LookupCache> >
                                     GC_POINTER_IFDEF(lookup_cache, VMCFG_LOOKUP_CACHE);
 #endif
 
@@ -325,7 +325,7 @@ namespace avmplus
         GC_DATA_BEGIN(ScriptEnv)
         
     public:
-        DRCWB(ScriptObject*) GC_POINTER(global); // initially null, set after initialization
+        GCMember<ScriptObject> GC_POINTER(global); // initially null, set after initialization
         
         GC_DATA_END(ScriptEnv)
     // ------------------------ DATA SECTION END
@@ -345,7 +345,7 @@ namespace avmplus
         GC_DATA_BEGIN(FunctionEnv)
         
     public:
-        DRCWB(ClassClosure*) GC_POINTER(closure);
+        GCMember<ClassClosure> GC_POINTER(closure);
         
         GC_DATA_END(FunctionEnv)
     // ------------------------ DATA SECTION END

@@ -68,11 +68,11 @@ namespace avmplus
         // take precedence over the loaded ones (on a freeze-on-first-use basis)
         // to ensure that the types associated with a name can't change as new
         // Domains are loaded. See DomainMgr for more info.
-        DWB(MultinameTraitsHashtable*)      GC_POINTER(m_loadedTraits);
-        DWB(MultinameTraitsHashtable*)      GC_POINTER(m_cachedTraits);
-        DWB(MultinameMethodInfoHashtable*)  GC_POINTER(m_loadedScripts);
-        DWB(MultinameMethodInfoHashtable*)  GC_POINTER(m_cachedScripts);
-        DWB(WeakKeyHashtable*)              GC_POINTER(m_parameterizedTypes);
+        GCMember<MultinameTraitsHashtable>     GC_POINTER(m_loadedTraits);
+        GCMember<MultinameTraitsHashtable>     GC_POINTER(m_cachedTraits);
+        GCMember<MultinameMethodInfoHashtable> GC_POINTER(m_loadedScripts);
+        GCMember<MultinameMethodInfoHashtable> GC_POINTER(m_cachedScripts);
+        GCMember<WeakKeyHashtable>             GC_POINTER(m_parameterizedTypes);
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.

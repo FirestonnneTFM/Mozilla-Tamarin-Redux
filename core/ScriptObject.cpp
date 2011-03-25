@@ -82,7 +82,7 @@ namespace avmplus
     }
 
     // Not actually entirely trivial, as it decrements reference counts
-    // manually, not just by DRCWB smart pointer destructors.
+    // manually, not just by GCMember smart pointer destructors.
 #ifdef DRC_TRIVIAL_DESTRUCTOR
     ScriptObject::~ScriptObject()
     {

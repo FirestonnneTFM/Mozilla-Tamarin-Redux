@@ -459,20 +459,20 @@ namespace avmplus
         GC_DATA_BEGIN(Toplevel)
 
     private:
-        DWB(AbcEnv*)                GC_POINTER(_abcEnv);
-        DWB(ScriptEnv*)             GC_POINTER(_mainEntryPoint);
-        DWB(builtinClassManifest*)  GC_POINTER(_builtinClasses);
+        GCMember<AbcEnv>               GC_POINTER(_abcEnv);
+        GCMember<ScriptEnv>            GC_POINTER(_mainEntryPoint);
+        GCMember<builtinClassManifest> GC_POINTER(_builtinClasses);
     public:
-        DWB(VTable*)                GC_POINTER(object_ivtable);
-        DWB(VTable*)                GC_POINTER(class_ivtable);
-        DWB(ScopeChain*)            GC_POINTER(object_cscope);
-        DWB(ScopeChain*)            GC_POINTER(vectorobj_cscope);
-        DWB(ScopeChain*)            GC_POINTER(vectorobj_iscope);
+        GCMember<VTable>               GC_POINTER(object_ivtable);
+        GCMember<VTable>               GC_POINTER(class_ivtable);
+        GCMember<ScopeChain>           GC_POINTER(object_cscope);
+        GCMember<ScopeChain>           GC_POINTER(vectorobj_cscope);
+        GCMember<ScopeChain>           GC_POINTER(vectorobj_iscope);
     public:
         // objectClass is still needed for bootstrapping
         // the VM; it's still public because of 100's of
         // to-be-expunged references in Flash/AIR
-        DRCWB(ObjectClass*)         GC_POINTER(objectClass);
+        GCMember<ObjectClass>          GC_POINTER(objectClass);
     private:
         // This are also needed for bootstrapping, but shouldn't be accessible
         // to the general public.
@@ -481,8 +481,8 @@ namespace avmplus
         friend class ClassClass;
         friend class FunctionClass;
         friend class MethodEnv;
-        DRCWB(ClassClass*)          GC_POINTER(_classClass);
-        DRCWB(FunctionClass*)       GC_POINTER(_functionClass);
+        GCMember<ClassClass>        GC_POINTER(_classClass);
+        GCMember<FunctionClass>     GC_POINTER(_functionClass);
     private:
         // These exist solely for CodegenLIR to access
         // NB: if you add or change these, you may need to
@@ -494,12 +494,12 @@ namespace avmplus
         friend class IntClass;
         friend class UIntClass;
         friend class StringClass;
-        DRCWB(BooleanClass*)        GC_POINTER(_booleanClass);
-        DRCWB(NamespaceClass*)      GC_POINTER(_namespaceClass);
-        DRCWB(NumberClass*)         GC_POINTER(_numberClass);
-        DRCWB(IntClass*)            GC_POINTER(_intClass);
-        DRCWB(UIntClass*)           GC_POINTER(_uintClass);
-        DRCWB(StringClass*)         GC_POINTER(_stringClass);
+        GCMember<BooleanClass>      GC_POINTER(_booleanClass);
+        GCMember<NamespaceClass>    GC_POINTER(_namespaceClass);
+        GCMember<NumberClass>       GC_POINTER(_numberClass);
+        GCMember<IntClass>          GC_POINTER(_intClass);
+        GCMember<UIntClass>         GC_POINTER(_uintClass);
+        GCMember<StringClass>       GC_POINTER(_stringClass);
 
         GC_DATA_END(Toplevel)
     // ------------------------ DATA SECTION END

@@ -231,7 +231,7 @@ namespace avmplus
     public:
         TraceLevel                  astrace_console;
         TraceLevel                  astrace_callback;
-        DRCWB(FunctionObject*)      GC_POINTER(trace_callback);
+        GCMember<FunctionObject>    GC_POINTER(trace_callback);
         bool                        in_trace;
         uint64_t                    astraceStartTime;
 
@@ -623,10 +623,10 @@ namespace avmplus
         GC_DATA_BEGIN(AbcFile)
 
     protected:
-        AvmCore*            core;
-        DWB(HeapHashtable*) GC_POINTER(sourcemap);  // maps filename to that file's index in "sources"
-        GCList<SourceFile>  GC_STRUCTURE(source);   // all source files used in this abc file
-        int                 byteCount;              // # bytes of bytecode
+        AvmCore*                core;
+        GCMember<HeapHashtable> GC_POINTER(sourcemap);  // maps filename to that file's index in "sources"
+        GCList<SourceFile>      GC_STRUCTURE(source);   // all source files used in this abc file
+        int                     byteCount;              // # bytes of bytecode
         
         GC_DATA_END(AbcFile)
     };
@@ -682,7 +682,7 @@ namespace avmplus
         void localBounds(int* firstLocal, int* pastLastLocal);
         int indexOfFirstLocal();
 
-        DWB(Debugger*) debugger;
+        GCMember<Debugger> debugger;
         int       frameNbr;  // top of call stack == 0
     };
 

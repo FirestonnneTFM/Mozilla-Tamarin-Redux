@@ -150,7 +150,7 @@ const int kBufferPadding = 16;
     //
     // See Bugzilla 573504 for more information.
 
-    // A single entry in the regex cache.
+    // A single entry in the regex cache.  Sits inside a GCRoot.
 
     class RegexCacheEntry
     {
@@ -181,17 +181,15 @@ const int kBufferPadding = 16;
             return pattern == this->pattern && options == this->options;
         }
 
-        // Since RegexCacheEntry is embedded in RegexCache which is embedded in AvmCore
-        // which is a GCRoot, we only need DRC here not DRCWB.
+        MMgc::GCRoot::GCMember<String>         pattern;
+        MMgc::GCRoot::GCMember<String>         options;
+        MMgc::GCRoot::GCMember<CompiledRegExp> regex;
 
-        DRC(String*)         pattern;
-        DRC(String*)         options;
-        DRC(CompiledRegExp*) regex;
-        uint64_t             timestamp;
-        uint32_t             hits;
-        int                  optionFlags;
-        bool                 global;
-        bool                 hasNamedGroups;
+        uint64_t                 timestamp;
+        uint32_t                 hits;
+        int                      optionFlags;
+        bool                     global;
+        bool                     hasNamedGroups;
     };
 
     // Cache replacement is LRU based on a simple timestamping mechanism.  There's also
@@ -610,11 +608,11 @@ const int kBufferPadding = 16;
         DomainMgr*      m_domainMgr;
 
         // hash set containing intern'ed strings
-        DRC(Stringp) * strings;
+        GCMember<String> * strings;
 
         // hash set containing namespaces
-        DRC(Namespacep) * namespaces;
-        
+        GCMember<Namespace> * namespaces;
+
         // API versioning state
         HeapHashtable*          m_versionedURIs;
 #ifdef _DEBUG
@@ -640,7 +638,7 @@ const int kBufferPadding = 16;
         virtual void setStackBase();
         
         /** Internal table of strings for boolean type ("true", "false") */
-        DRC(Stringp) booleanStrings[2];
+        GCMember<String> booleanStrings[2];
         
         /** Container object for traits of built-in classes */
         BuiltinTraits traits;
@@ -657,7 +655,7 @@ const int kBufferPadding = 16;
         /**
          * The default namespace, "public"
          */
-        DRC(Namespacep) publicNamespace;
+        GCMember<Namespace> publicNamespace;
 
         /**
          * The unnamed public namespaces
@@ -673,70 +671,70 @@ const int kBufferPadding = 16;
          */
         /*@{*/
         
-        DRC(Stringp) kconstructor;
-        DRC(Stringp) kEmptyString;
-        DRC(Stringp) ktrue;
-        DRC(Stringp) kfalse;
-        DRC(Stringp) kundefined;
-        DRC(Stringp) knull;
-        DRC(Stringp) ktoString;
-        DRC(Stringp) ktoLocaleString;
-        DRC(Stringp) kvalueOf;
-        DRC(Stringp) kvalue;
-        DRC(Stringp) klength;
-        DRC(Stringp) kobject;
-        DRC(Stringp) kxml;
-        DRC(Stringp) kfunction;
-        DRC(Stringp) kboolean;
-        DRC(Stringp) kvoid;
-        DRC(Stringp) knumber;
-        DRC(Stringp) kstring;
-        DRC(Stringp) kuri;
-        DRC(Stringp) kprefix;
-        DRC(Stringp) kglobal;
-        DRC(Stringp) kcallee;
-        DRC(Stringp) kNeedsDxns;
-        DRC(Stringp) kVersion;
-        DRC(Stringp) kanonymousFunc;
+        GCMember<String> kconstructor;
+        GCMember<String> kEmptyString;
+        GCMember<String> ktrue;
+        GCMember<String> kfalse;
+        GCMember<String> kundefined;
+        GCMember<String> knull;
+        GCMember<String> ktoString;
+        GCMember<String> ktoLocaleString;
+        GCMember<String> kvalueOf;
+        GCMember<String> kvalue;
+        GCMember<String> klength;
+        GCMember<String> kobject;
+        GCMember<String> kxml;
+        GCMember<String> kfunction;
+        GCMember<String> kboolean;
+        GCMember<String> kvoid;
+        GCMember<String> knumber;
+        GCMember<String> kstring;
+        GCMember<String> kuri;
+        GCMember<String> kprefix;
+        GCMember<String> kglobal;
+        GCMember<String> kcallee;
+        GCMember<String> kNeedsDxns;
+        GCMember<String> kVersion;
+        GCMember<String> kanonymousFunc;
         // From here at least the spelling mirrors exactly the spelling in the string constant
-        DRC(Stringp) klittleEndian;
-        DRC(Stringp) kbigEndian;
-        DRC(Stringp) kparent;
-        DRC(Stringp) kattribute;
-        DRC(Stringp) kcomment;
-        DRC(Stringp) kprocessing_instruction;
-        DRC(Stringp) kelement;
-        DRC(Stringp) ktext;
-        DRC(Stringp) kattributeAdded;
-        DRC(Stringp) kattributeRemoved;
-        DRC(Stringp) kattributeChanged;
-        DRC(Stringp) knodeAdded;
-        DRC(Stringp) knodeRemoved;
-        DRC(Stringp) knodeChanged;
-        DRC(Stringp) knamespaceAdded;
-        DRC(Stringp) knamespaceRemoved;
-        DRC(Stringp) knamespaceSet;
-        DRC(Stringp) knameSet;
-        DRC(Stringp) ktextSet;
-        DRC(Stringp) klocalName;
-        DRC(Stringp) kindex;
-        DRC(Stringp) kinput;
-        DRC(Stringp) kemptyCtor;
+        GCMember<String> klittleEndian;
+        GCMember<String> kbigEndian;
+        GCMember<String> kparent;
+        GCMember<String> kattribute;
+        GCMember<String> kcomment;
+        GCMember<String> kprocessing_instruction;
+        GCMember<String> kelement;
+        GCMember<String> ktext;
+        GCMember<String> kattributeAdded;
+        GCMember<String> kattributeRemoved;
+        GCMember<String> kattributeChanged;
+        GCMember<String> knodeAdded;
+        GCMember<String> knodeRemoved;
+        GCMember<String> knodeChanged;
+        GCMember<String> knamespaceAdded;
+        GCMember<String> knamespaceRemoved;
+        GCMember<String> knamespaceSet;
+        GCMember<String> knameSet;
+        GCMember<String> ktextSet;
+        GCMember<String> klocalName;
+        GCMember<String> kindex;
+        GCMember<String> kinput;
+        GCMember<String> kemptyCtor;
         
-        DRC(Stringp) kAsterisk;     // '*'
-        DRC(Stringp) kColon;        // ':'
-        DRC(Stringp) kUnderscore;   // '_'
-        DRC(Stringp) kXML1998NS;    // http://www.w3.org/XML/1998/namespace
-        DRC(Stringp) kzero;         // '0'  - 'kZero' conflicts with MMgc
-        DRC(Stringp) kClassS;       // 'Class$'
-        DRC(Stringp) kVectorNumber; // 'Vector.<Number>'
-        DRC(Stringp) kVectorint;    // 'Vector.<int>'
-        DRC(Stringp) kVectoruint;   // 'Vector.<uint>'
-        DRC(Stringp) kVectorAny;    // 'Vector.<*>'
+        GCMember<String> kAsterisk;     // '*'
+        GCMember<String> kColon;        // ':'
+        GCMember<String> kUnderscore;   // '_'
+        GCMember<String> kXML1998NS;    // http://www.w3.org/XML/1998/namespace
+        GCMember<String> kzero;         // '0'  - 'kZero' conflicts with MMgc
+        GCMember<String> kClassS;       // 'Class$'
+        GCMember<String> kVectorNumber; // 'Vector.<Number>'
+        GCMember<String> kVectorint;    // 'Vector.<int>'
+        GCMember<String> kVectoruint;   // 'Vector.<uint>'
+        GCMember<String> kVectorAny;    // 'Vector.<*>'
         
         Atom kNaN;
         
-        DRC(Stringp) cachedChars[128];
+        GCMember<String> cachedChars[128];
         /*@}*/
         
         Exception *exceptionAddr;
@@ -1928,7 +1926,7 @@ const int kBufferPadding = 16;
             FLAGS_MASK = 0x3
         };
         uintptr_t       envOrCodeContext;
-        Namespace*      dxns; // NOTE: this struct is always stack-allocated (or via VMPI_alloca, which is just as good), so no DRC needed
+        Namespace*      dxns; // NOTE: this struct is always stack-allocated (or via VMPI_alloca, which is just as good), so no GCMember needed
     };
 
 }

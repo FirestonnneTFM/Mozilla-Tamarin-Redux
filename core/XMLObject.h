@@ -323,10 +323,10 @@ namespace avmplus
         GC_DATA_BEGIN(XMLObject)
 
     protected:
-        DWB(E4XNode*) GC_POINTER(m_node);
+        GCMember<E4XNode> GC_POINTER(m_node);
 
     private:
-        Namespace*    GC_POINTER(publicNS);
+        GCMember<Namespace>  GC_POINTER(publicNS);
 
         GC_DATA_END(XMLObject)
 
