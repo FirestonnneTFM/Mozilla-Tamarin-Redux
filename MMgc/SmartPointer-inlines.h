@@ -45,7 +45,8 @@ namespace MMgc
     REALLY_INLINE SmartPointer::SmartPointer()
     {
 #ifdef DEBUG
-        MMgc::GC::TracePointerCheck(this);
+// Does not work
+//        MMgc::GC::TracePointerCheck(this);
 #endif
     }
 }
