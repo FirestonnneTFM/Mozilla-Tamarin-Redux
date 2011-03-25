@@ -56,5 +56,5 @@ export buildsdir=`cd ${basedir}/../builds; pwd`
 # currently running any tests. This list of process will be killed if the
 # process is found. Process must not contain extension as cygwin will return
 # the process without the extension. Used in all/util-process-clean.sh
-export proc_names="${shell_release}$ ${shell_release_wordcode}$ ${shell_debug}$ ${shell_release_debugger}$ ${shell_debug_debugger}$
+export proc_names="${shell_release}$ ${shell_release_wordcode}$ ${shell_debug}$ ${shell_release_debugger}$ ${shell_debug_debugger}$ ${shell_selftest}$"
 
