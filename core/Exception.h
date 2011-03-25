@@ -82,7 +82,7 @@ namespace avmplus
     public:
         ATOM_WB             atom;
 #ifdef DEBUGGER
-        DWB(StackTrace*)    stackTrace;
+        GCMember<StackTrace> stackTrace;
 #endif
         int32_t             flags;
 

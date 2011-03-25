@@ -246,7 +246,7 @@ namespace avmshell
     private:
         GC_DATA_BEGIN(ShellToplevel)
         
-        DWB(shell_toplevelClassManifest*)           GC_POINTER(shellClasses);
+        GCMember<shell_toplevelClassManifest> GC_POINTER(shellClasses);
 
         GC_DATA_END(ShellToplevel)
     };

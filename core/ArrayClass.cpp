@@ -337,7 +337,7 @@ namespace avmplus
         /** Array.sortOn() will pass an array of field names */
         struct FieldName
         {
-            DRCWB(Stringp) name;
+            RCObject::GCMember<String> name;
             int options;
         };
 

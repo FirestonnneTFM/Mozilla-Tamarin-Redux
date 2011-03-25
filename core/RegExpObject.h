@@ -134,12 +134,12 @@ namespace avmplus
         GC_DATA_BEGIN(RegExpObject)
 
     private:
-        DRCWB(Stringp)         GC_POINTER(m_source);
-        DRCWB(CompiledRegExp*) GC_POINTER(m_pcreInst);
-        int                    m_lastIndex;
-        int                    m_optionFlags;
-        bool                   m_global;
-        bool                   m_hasNamedGroups;
+        GCMember<String>         GC_POINTER(m_source);
+        GCMember<CompiledRegExp> GC_POINTER(m_pcreInst);
+        int                      m_lastIndex;
+        int                      m_optionFlags;
+        bool                     m_global;
+        bool                     m_hasNamedGroups;
 
         GC_DATA_END(RegExpObject)
 

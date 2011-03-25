@@ -126,7 +126,7 @@ namespace avmplus
 
     private:
         jobject      obj;       /* underlying java object */
-        DWB(JClass*) jclass;    /* class of this object */
+        GCMember<JClass> jclass;    /* class of this object */
 
         DECLARE_SLOTS_JObject;
     };
@@ -175,9 +175,9 @@ namespace avmplus
         jclass  classRef()  { return cref; }
 
     private:
-        DWB(Java*)      vm;
-        DRCWB(String*)  nm;         /* name used for class lookup */
-        jclass          cref;       /* class */
+        GCMember<Java>   vm;
+        GCMember<String> nm;         /* name used for class lookup */
+        jclass           cref;       /* class */
     };
 
 // auto class determination

@@ -67,8 +67,8 @@ namespace avmplus
         GC_DATA_BEGIN(DomainObject)
 
     public:
-        DWB(DomainEnv*) GC_POINTER(domainEnv);
-        DWB(Toplevel*)  GC_POINTER(domainToplevel);
+        GCMember<DomainEnv> GC_POINTER(domainEnv);
+        GCMember<Toplevel>  GC_POINTER(domainToplevel);
         
         GC_DATA_END(DomainObject)
 

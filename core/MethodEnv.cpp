@@ -785,7 +785,7 @@ namespace avmplus
 
         // This is a little weird, as the cvtable should have the ivtable as its base
         // i.e. Class$ derives from Class
-        VTable* cvbase = (bt == BUILTIN_class) ? ivtable : toplevel->class_ivtable;
+        VTable* cvbase = (bt == BUILTIN_class) ? ivtable : (VTable*)toplevel->class_ivtable;
         VTable* cvtable = core->newVTable(ctraits, cvbase, toplevel);
 
         // class scopechain = [..., class]
@@ -895,7 +895,7 @@ namespace avmplus
 
         if (AvmCore::bindingKind(b) == BKIND_CONST)
         {
-            if (this->method != declarer->init.value())
+            if (this->method != declarer->init)
                 toplevel->throwReferenceError(kConstWriteError, multiname, vtable->traits);
 
             b = AvmCore::makeSlotBinding(AvmCore::bindingToSlotId(b), BKIND_VAR);

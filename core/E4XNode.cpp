@@ -100,7 +100,7 @@ namespace avmplus
         childNode->setParent (this);
         if (!m_children)
         {
-            m_children = uintptr_t(childNode) | SINGLECHILDBIT;
+            WB(gc(), this, &m_children, uintptr_t(childNode) | SINGLECHILDBIT);
             return;
         }
 
@@ -134,7 +134,7 @@ namespace avmplus
             // !!@ delete our AtomList
         }
 
-        m_children = 0;
+        WB(gc(), this, &m_children, 0);
     }
 
     void ElementE4XNode::convertToE4XNodeList()
@@ -144,11 +144,11 @@ namespace avmplus
             E4XNode *firstChild = (E4XNode *) (m_children & ~SINGLECHILDBIT);
             HeapE4XNodeList* aa = new (gc()) HeapE4XNodeList(gc(), 2);
             aa->list.add(firstChild);
-            m_children = uintptr_t(aa);
+            WB(gc(), this, &m_children, uintptr_t(aa));
         }
         else if (!m_children)
         {
-            m_children = uintptr_t(new (gc()) HeapE4XNodeList(gc(), 1));
+            WB(gc(), this, &m_children, uintptr_t(new (gc()) HeapE4XNodeList(gc(), 1)));
         }
     }
 
@@ -172,7 +172,7 @@ namespace avmplus
     {
         if ((i == 0) && (m_children & SINGLECHILDBIT))
         {
-            m_children = uintptr_t(x) | SINGLECHILDBIT;
+            WB(gc(), this, &m_children, uintptr_t(x) | SINGLECHILDBIT);
         }
         else
         {
@@ -659,7 +659,7 @@ namespace avmplus
             if (numChildren())
             {
                 AvmAssert(y->m_children == 0);
-                y->m_children = uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numChildren()));
+                WB(gc(), y, &y->m_children, uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numChildren())));
                 for (uint32_t k = 0; k < _length(); k++)
                 {
                     E4XNode *child = _getAt(k);
@@ -828,7 +828,7 @@ namespace avmplus
 
         if (!m_children)
         {
-            m_children = uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), n));
+            WB(gc(), this, &m_children, uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), n)));
         }
 
         if (xl)
@@ -884,7 +884,7 @@ namespace avmplus
             i = _length();
             // add a blank spot for this child
             if (!m_children)
-                m_children = uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), 1));
+                WB(gc(), this, &m_children, uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), 1)));
             convertToE4XNodeList();
             HeapE4XNodeList* aa = ((HeapE4XNodeList*)(uintptr_t)m_children);
             aa->list.add(NULL);

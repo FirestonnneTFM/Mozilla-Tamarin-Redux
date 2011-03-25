@@ -297,15 +297,15 @@ TYPEMAP_THUNKRETTYPE = {
 }
 
 TYPEMAP_MEMBERTYPE = {
-    CTYPE_OBJECT:       "DRCWB(%s*)",
+    CTYPE_OBJECT:       "MMgc::GCTraceableObject::GCMember<%s>",
     CTYPE_ATOM:         "avmplus::AtomWB",
     CTYPE_VOID:         "#error",
     CTYPE_BOOLEAN:      "bool32",
     CTYPE_INT:          "int32_t",
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
-    CTYPE_STRING:       "DRCWB(avmplus::String*)",
-    CTYPE_NAMESPACE:    "DRCWB(avmplus::Namespace*)",
+    CTYPE_STRING:       "MMgc::GCTraceableObject::GCMember<avmplus::String>",
+    CTYPE_NAMESPACE:    "MMgc::GCTraceableObject::GCMember<avmplus::Namespace>",
 }
 
 TYPEMAP_ARGTYPE = {

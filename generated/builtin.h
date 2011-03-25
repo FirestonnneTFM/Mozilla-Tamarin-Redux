@@ -2904,8 +2904,8 @@ class avmplus_CompressionAlgorithmClassSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::CompressionAlgorithmClass;
 private:
-    DRCWB(avmplus::String*) m_ZLIB;
-    DRCWB(avmplus::String*) m_DEFLATE;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_ZLIB;
+    MMgc::GCTraceableObject::GCMember<avmplus::String> m_DEFLATE;
 };
 //-----------------------------------------------------------
 

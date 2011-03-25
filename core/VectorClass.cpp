@@ -146,7 +146,7 @@ namespace avmplus
 
                 vt->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
                 ObjectVectorClass* parameterizedVector = ObjectVectorClass::create(vt->gc(), vt);
-                parameterizedVector->m_typeTraits = typeClass ? typeClass->traits()->itraits : NULL;
+                parameterizedVector->m_typeTraits = typeClass ? (Traits*)(typeClass->traits()->itraits) : NULL;
                 parameterizedVector->setDelegate(toplevel->classClass()->prototypePtr());
 
                 // Is this right?  Should each instantiation get its own prototype?

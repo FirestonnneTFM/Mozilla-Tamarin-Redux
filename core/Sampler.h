@@ -236,7 +236,7 @@ namespace avmplus
         uint8_t*            currentSample;
         uint8_t*            lastAllocSample;
         uint64_t            lastSampleCheckMicros; // the last time we considered writing a timer sample
-        DRC(ScriptObject*)  callback;
+        GCMember<ScriptObject> callback;
         uintptr_t           timerHandle;
         MMgc::GCHashtableBase<uint64_t,MMgc::GCHashtableKeyHandler,MMgc::GCHashtableAllocHandler_VMPI>      uids;       // important to use the VMPI variant for non-MMGC-based memory allocation.
         MMgc::GCHashtable_VMPI      ptrSamples; // important to use the VMPI variant for non-MMGC-based memory allocation.

@@ -205,9 +205,9 @@ namespace avmplus
         uint64_t sampleBufferId;
         uint32_t count;
         uint8_t *cursor;
-        DRCWB(ScriptObject*) script;
+        GCMember<ScriptObject> script;
     public:
-        DRCWB(ClassFactoryClass*) cf;
+        GCMember<ClassFactoryClass> cf;
     };
 
     class SlotIterator : public ScriptObject
@@ -250,7 +250,7 @@ namespace avmplus
         }
 
     private:
-        DWB(TraitsBindingsp) currTraits;
+        GCMember<const TraitsBindings> currTraits;
     };
 
 #endif // DEBUGGER

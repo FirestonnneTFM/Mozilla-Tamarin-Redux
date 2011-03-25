@@ -60,7 +60,7 @@ namespace avmplus
         REALLY_INLINE static ScriptObject* create(MMgc::GC* gc, VTable* vtable, ScriptObject* delegate, int htCapacity);
 
         // Not actually entirely trivial, as it decrements reference counts
-        // manually, not just by DRCWB smart pointer destructors.
+        // manually, not just by GCMember smart pointer destructors.
 #ifdef DRC_TRIVIAL_DESTRUCTOR
         ~ScriptObject();
 #endif
@@ -238,7 +238,7 @@ namespace avmplus
 
     // ------------------------ DATA SECTION BEGIN
     public:     VTable* const           vtable;
-    private:    DRCWB(ScriptObject*)    delegate;     // __proto__ in AS2, archetype in semantics
+    private:    GCMember<ScriptObject>  delegate;     // __proto__ in AS2, archetype in semantics
     // ------------------------ DATA SECTION END
     };
 }

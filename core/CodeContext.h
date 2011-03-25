@@ -63,8 +63,8 @@ namespace avmplus
         REALLY_INLINE const BugCompatibility* bugCompatibility() const { return m_bugCompatibility; }
 
     private:
-        DWB(DomainEnv*)                 m_domainEnv;
-        DWB(const BugCompatibility*)    m_bugCompatibility;
+        GCMember<DomainEnv>                 m_domainEnv;
+        GCMember<const BugCompatibility>    m_bugCompatibility;
     };
 
     class EnterCodeContext

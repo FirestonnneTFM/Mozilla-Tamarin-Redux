@@ -132,7 +132,7 @@ namespace MMgc
             rcs = NULL;
             length = 0;
         }
-        DRCWB(RCObject*) r1;
+        GCMember<RCObject> r1;
 
         // naked pointer so I can kick these pinners out out of the ZCT during reap
         RCObject **rcs;

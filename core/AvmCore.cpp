@@ -365,11 +365,9 @@ namespace avmplus
         nsCount         = 0;
 
         numStrings = 1024; // power of 2
-        strings = mmfx_new_array(DRC(Stringp), numStrings);
-
         numNamespaces = 1024;  // power of 2
-        namespaces = mmfx_new_array(DRC(Namespacep), numNamespaces);
-
+        strings = mmfx_new_array(GCRoot::GCMember<String>, numStrings);
+        namespaces = mmfx_new_array(GCRoot::GCMember<Namespace>, numNamespaces);
         console.setCore(this);
 
         kconstructor = internConstantStringLatin1("constructor");
@@ -3481,7 +3479,7 @@ return the result of the comparison ToPrimitive(x) == y.
             }
 
 #ifdef DEBUGGER
-            DRC(Stringp) *oldStrings = strings;
+            GCRoot::GCMember<String> *oldStrings = strings;
 #endif
 
             other = newStringLatin1(s, len);
@@ -3532,7 +3530,7 @@ return the result of the comparison ToPrimitive(x) == y.
             }
 
 #ifdef DEBUGGER
-            DRC(Stringp)* oldStrings = strings;
+            GCRoot::GCMember<String>* oldStrings = strings;
 #endif
 
             other = s->substring(start, end);
@@ -3731,7 +3729,7 @@ return the result of the comparison ToPrimitive(x) == y.
             }
 
 #ifdef DEBUGGER
-            DRC(Stringp) *oldStrings = strings;
+            GCRoot::GCMember<String> *oldStrings = strings;
 #endif
 
             other = newStringUTF16(s, len);
@@ -3752,10 +3750,10 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         // rehash
 
-        DRC(Stringp) *oldStrings = strings;
-        int oldStringCount = numStrings;
+        GCRoot::GCMember<String> *oldStrings = strings;
+        strings = mmfx_new_array(GCRoot::GCMember<String>, newlen);
 
-        strings = mmfx_new_array(DRC(Stringp), newlen);
+        int oldStringCount = numStrings;
         numStrings = newlen;
 
 #ifdef _DEBUG // debug sanity checks
@@ -3814,10 +3812,9 @@ return the result of the comparison ToPrimitive(x) == y.
     {
         // rehash
 
-        DRC(Namespacep) *old = namespaces;
+        GCRoot::GCMember<Namespace> *old = namespaces;
+        namespaces = mmfx_new_array(GCRoot::GCMember<Namespace>, newlen);
         int oldCount = numNamespaces;
-
-        namespaces = mmfx_new_array(DRC(Namespacep), newlen);
         numNamespaces = newlen;
 
         for (int i=0; i < oldCount; i++)

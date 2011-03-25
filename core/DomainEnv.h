@@ -136,9 +136,9 @@ namespace avmplus
     private:
         // This is used by DomainMgr to simplify lookups of ScriptEnv definitions
         // by name. See DomainMgr for more info.
-        DWB(ScriptEnvMap*)              GC_POINTER(m_scriptEnvMap);
-        DWB(Domain*)                    GC_POINTER(  m_domain);       // Domain associated with this DomainEnv
-        DWB(Toplevel*)                  GC_POINTER(  m_toplevel);
+        GCMember<ScriptEnvMap>          GC_POINTER(m_scriptEnvMap);
+        GCMember<Domain>                GC_POINTER(  m_domain);       // Domain associated with this DomainEnv
+        GCMember<Toplevel>              GC_POINTER(  m_toplevel);
         // scratch memory to use if the memory object is NULL...
         // allocated via mmfx_new, which is required by nanojit
         Scratch*                        m_globalMemoryScratch;
@@ -146,7 +146,7 @@ namespace avmplus
         uint8_t*                        m_globalMemoryBase;
         uint32_t                        m_globalMemorySize;
         // the actual memory object (can be NULL)
-        DRCWB(ByteArrayObject*)         GC_POINTER(  m_globalMemoryProviderObject);
+        GCMember<ByteArrayObject>       GC_POINTER(  m_globalMemoryProviderObject);
         // note that m_baseCount is actually the number of bases, plus one:
         // we always add ourself (!) to the front of the list, to simplify
         // processing in DomainMgr.

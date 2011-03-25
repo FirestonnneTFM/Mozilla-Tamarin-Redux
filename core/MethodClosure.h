@@ -168,7 +168,7 @@ namespace avmplus
         GC_DATA_BEGIN(WeakMethodClosure)
 
     private:
-        DWB(MMgc::GCWeakRef*) GC_POINTER(m_weakSavedThis);  // WeakRef to a ScriptObject*
+        GCMember<MMgc::GCWeakRef> GC_POINTER(m_weakSavedThis);  // WeakRef to a ScriptObject*
 
         GC_DATA_END(WeakMethodClosure)
 

@@ -50,10 +50,10 @@ namespace avmshell
     {
     public:
         GCMember<BreakAction> prev;
-        DWB(BreakAction*) next;
-        DWB(SourceFile*) sourceFile;
+        GCMember<BreakAction> next;
+        GCMember<SourceFile> sourceFile;
         int id;
-        DRCWB(Stringp) filename;
+        GCMember<String> filename;
         int linenum;
 
         BreakAction(SourceFile *sourceFile,
@@ -118,7 +118,7 @@ namespace avmshell
         }
 
     private:
-        DWB(DebugFrame*) frame;
+        GCMember<DebugFrame> frame;
         int index;
     };
 
@@ -144,7 +144,7 @@ namespace avmshell
         }
 
     private:
-        DWB(DebugFrame*) frame;
+        GCMember<DebugFrame> frame;
         int index;
     };
 
@@ -168,7 +168,7 @@ namespace avmshell
         }
 
     private:
-        DRCWB(ScriptObject*) parent;
+        GCMember<ScriptObject> parent;
         HeapMultiname propertyname;
     };
 
@@ -275,12 +275,12 @@ namespace avmshell
         bool activeFlag;
         char *currentSource;
         uint32_t currentSourceLen;
-        DRCWB(Stringp) GC_POINTER(currentFile);
+        GCMember<String> GC_POINTER(currentFile);
         int breakpointCount;
         bool warnMissingSource;
 
-        DWB(BreakAction*) GC_POINTER(firstBreakAction);
-        DWB(BreakAction*) GC_POINTER(lastBreakAction);
+        GCMember<BreakAction> GC_POINTER(firstBreakAction);
+        GCMember<BreakAction> GC_POINTER(lastBreakAction);
 
         enum { kMaxCommandLine = 1024 };
         char commandLine[kMaxCommandLine];

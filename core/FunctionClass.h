@@ -101,7 +101,7 @@ namespace avmplus
         GC_DATA_BEGIN(FunctionObject)
 
     protected:
-        DWB(MethodEnv*) GC_POINTER(m_callEnv);
+        GCMember<MethodEnv> GC_POINTER(m_callEnv);
 
         GC_DATA_END(FunctionObject)
 

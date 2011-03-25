@@ -57,6 +57,10 @@ inline void write_null(void* p) { *(uintptr_t*)(p) = 0; }
 
 #define WBRC_NULL(addr) MMgc::GC::WriteBarrierRC_dtor(addr)
 
+///////////////////////////////////////////////////////////////////////////
+//
+// NOTE!!  DWB and DRCWB are deprecated!  Use GCMember<> when possible.
+
 // declare write barrier
 // put spaces around the template arg to avoid possible digraph warnings
 #define DWB(type) MMgc::WriteBarrier< type >

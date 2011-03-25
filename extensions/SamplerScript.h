@@ -121,7 +121,7 @@ namespace avmplus
         void setRef(AvmPlusScriptableObject* o) { obj = o; }
         void setSize(uint64_t s) { size = s; }
     private:
-        DRCWB(AvmPlusScriptableObject*) obj;
+        GCMember<AvmPlusScriptableObject> obj;
         uint64_t size;
 
         DECLARE_SLOTS_NewObjectSampleObject;
