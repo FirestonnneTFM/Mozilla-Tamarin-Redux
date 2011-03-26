@@ -617,9 +617,7 @@ class NativeInfo:
     class_gc_exact = None
     instancebase_name = None
     instance_gc_exact = None
-    gen_method_map = False
     method_map_name = None
-    has_const_setters = False
     construct = None
 
     def __init__(self, traits, itraits):
@@ -647,20 +645,16 @@ class NativeInfo:
             elif (k == "instancegc"):
                 self.set_instanceGC(v)
             elif (k == "methods"):
-                self.gen_method_map = True
                 if v != "auto":
                     self.method_map_name = v
-            elif (k == "constsetters"):
-                if (v == "true"):
-                    self.has_const_setters = True
-                elif (v != "false"):
-                    raise Error('native metadata specified illegal value, "%s" for constsetters field.  Value must be "true" or "false".' % v)
             elif (k == "construct"):
                 self.set_construct(v, is_vm_builtin)
             else:
                 raise Error("unknown attribute native(%s)" % k)
         if (self.traits.cpp_name_comps == None) and (self.itraits.cpp_name_comps == None):
-            raise Error("native metadata must specify (cls,instance)")
+            # it's OK to specify construct="native" for a pure AS3 class
+            if self.construct != "native":
+                raise Error("native metadata must specify (cls,instance)")
   
     def fullyQualifiedCPPClassName(self, className):
         r = className.split('::')
@@ -732,21 +726,23 @@ class NativeInfo:
         if itraits.cpp_name_comps != None and itraits.is_interface:
             raise Error("interfaces may not specify native(instance)")
 
-        if ni.gen_method_map and t.cpp_name_comps == None and itraits.cpp_name_comps == None:
-            raise Error("cannot specify native(methods) without native(cls)")
-
-        no_native_instance_specified = (ni.construct == None and itraits.cpp_name_comps == None)
-        
         # if either is specified, make sure both are
         if t.cpp_name_comps != None or itraits.cpp_name_comps != None:
             if t.cpp_name_comps == None:
                 t.cpp_name_comps = BASE_CLASS_NAME.split('::')
             if itraits.cpp_name_comps == None:
                 itraits.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
-        elif not itraits.is_interface:
+        elif itraits.is_interface:
+            # this is a little hacky, but it allows us to assume that all traits have a valid CPP name.
+            # since we don't yet surface a C++ wrapper for interfaces, this will have to do.
+            t.cpp_name_comps = BASE_CLASS_NAME.split('::')
+            itraits.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
+        else:
             # we are going to create a synthetic class for this
             t.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Class")
+            itraits.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Object")
             t.is_synthetic = True
+            itraits.is_synthetic = True
 
         # force to True or False (no "None" allowed)
         if ni.class_gc_exact != True:
@@ -770,7 +766,7 @@ class NativeInfo:
                 itraits.construct = "override"
                 itraits.has_construct_method_override = True
 
-        if str(t.name) == "Object$" or no_native_instance_specified:
+        if str(t.name) == "Object$":
             # "Object" is special-cased.
             t.createInstanceProcName = "ClassClosure::createScriptObjectProc"
 
@@ -789,25 +785,19 @@ class NativeInfo:
             t.createInstanceProcName = "%s::createInstanceProc" % t.fqcppname()
             t.has_custom_createInstanceProc = True
         
-        t.has_const_setters = ni.has_const_setters
-        t.gen_method_map = ni.gen_method_map
         # t.fqinstancebase_name = ni.instancebase_name # not supported for classes
-        if t.has_cpp_name():
-            t.method_map_name = t.fqcppname()  # custom method_map_name never applies to class
-            t.slotsStructName = to_cname(t.fqcppname()) + 'Slots'
-            t.slotsInstanceName = 'm_slots_' + t.cppname()
+        t.method_map_name = t.fqcppname()  # custom method_map_name never applies to class
+        t.slotsStructName = to_cname(t.fqcppname()) + 'Slots'
+        t.slotsInstanceName = 'm_slots_' + t.cppname()
         
         assert itraits != None
-        itraits.has_const_setters = ni.has_const_setters
-        itraits.gen_method_map = ni.gen_method_map
         itraits.fqinstancebase_name = ni.instancebase_name
-        if itraits.has_cpp_name():
-            if ni.method_map_name != None:
-                itraits.method_map_name = ni.method_map_name
-            else:
-                itraits.method_map_name = itraits.fqcppname()
-            itraits.slotsStructName = to_cname(itraits.fqcppname()) + 'Slots'
-            itraits.slotsInstanceName = 'm_slots_' + itraits.cppname()
+        if ni.method_map_name != None:
+            itraits.method_map_name = ni.method_map_name
+        else:
+            itraits.method_map_name = itraits.fqcppname()
+        itraits.slotsStructName = to_cname(itraits.fqcppname()) + 'Slots'
+        itraits.slotsInstanceName = 'm_slots_' + itraits.cppname()
 
 
 BMAP = {
@@ -857,8 +847,6 @@ class Traits:
     is_restricted_inheritance = False
     is_abstract_base = False
     has_pre_create_check = False
-    has_const_setters = False
-    gen_method_map = False
     is_synthetic = False
     # FIXME, this is a hack for MI classes in AIR
     fqinstancebase_name = None
@@ -886,48 +874,29 @@ class Traits:
     def cpp_gcmember_name(self):
         r = TYPEMAP_MEMBERTYPE[self.ctype]
         if self.ctype == CTYPE_OBJECT:
-            if self.has_cpp_name():
-                fqcppname = self.fqcppname()
-            else:
-                fqcppname = BASE_INSTANCE_NAME
-            r = r % fqcppname
+            r = r % self.fqcppname()
         return r
 
     # What's the C++ type to use when declaring this type as an input argument to a C++ method?
     def cpp_argument_name(self):
         r = TYPEMAP_ARGTYPE[self.ctype]
         if self.ctype == CTYPE_OBJECT:
-            if self.has_cpp_name():
-                fqcppname = self.fqcppname()
-            else:
-                fqcppname = BASE_INSTANCE_NAME
-            r = r % fqcppname
+            r = r % self.fqcppname()
         return r
 
     # What's the C++ type to use when unboxing this type as an input argument to a C++ method?
     def cpp_unboxing_argument_name(self):
         r = TYPEMAP_ARGTYPE_FOR_UNBOX[self.ctype]
         if self.ctype == CTYPE_OBJECT:
-            if self.has_cpp_name():
-                fqcppname = self.fqcppname()
-            else:
-                fqcppname = BASE_INSTANCE_NAME
-            r = r % fqcppname
+            r = r % self.fqcppname()
         return r
 
     # What's the C++ type to use when returning this as a function result?
     def cpp_return_name(self):
         r = TYPEMAP_RETTYPE[self.ctype]
         if self.ctype == CTYPE_OBJECT:
-            if self.has_cpp_name():
-                fqcppname = self.fqcppname()
-            else:
-                fqcppname = BASE_INSTANCE_NAME
-            r = r % fqcppname
+            r = r % self.fqcppname()
         return r
-
-    def has_cpp_name(self):
-        return self.cpp_name_comps != None
 
     # return the fully qualified cpp name, eg "foo::bar::FooObject"
     def fqcppname(self):
@@ -1088,7 +1057,6 @@ class Abc:
                                 m.receiver = None
                                 m.native_method_name = md.attrs[""]     # override
                                 m.native_id_name = "native_script_function_" + ns_prefix(m.name.ns, False) + m.name.name
-                                m.gen_method_map = True
 
 
     def assign_names(self, traits, prefix):
@@ -1412,6 +1380,9 @@ class Abc:
             t.init.name = t.name + "$init"
             t.init.kind = TRAIT_Method
             self.parseTraits(t)
+            # this is a little hacky, but it allows us to assume that all traits have a valid CPP name.
+            t.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
+            assert t.itraits == None
 
     def parseMethodBodies(self):
         count = self.data.readU30()
@@ -1531,7 +1502,7 @@ class AbcThunkGen:
     def emitAOT(self, out, name, ctypeObject):
         out.println('#ifdef VMCFG_AOT')
         
-        traits = filter(lambda t: (t.has_cpp_name()) and (not t.is_synthetic) and (t.fqcppname() != "double") and ((t.ctype == ctypeObject) or (t.fqcppname() == BASE_INSTANCE_NAME) or (t.fqcppname() == BASE_CLASS_NAME)), self.abc.classes + self.abc.instances)
+        traits = filter(lambda t: (not (t.itraits != None and t.itraits.is_interface)) and (not t.is_synthetic) and (t.fqcppname() != "double") and ((t.ctype == ctypeObject) or (t.fqcppname() == BASE_INSTANCE_NAME) or (t.fqcppname() == BASE_CLASS_NAME)), self.abc.classes + self.abc.instances)
         glueClasses = sorted(set(map(lambda t: tuple([t.fqcppname(), t.niname()]), traits)))
         
         out.println('extern "C" const struct {')
@@ -1673,7 +1644,7 @@ class AbcThunkGen:
         out.indent += 1
         for i in range(0, len(self.abc.methods)):
             m = self.abc.methods[i]
-            if m.isNative() and (m.receiver == None or m.receiver.gen_method_map):
+            if m.isNative() and (m.receiver == None or not m.receiver.is_interface):
                 assert(m.native_method_name != None)
                 assert(m.native_id_name != None)
                 if m.receiver == None:
@@ -1696,22 +1667,20 @@ class AbcThunkGen:
         out.indent += 1
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
-            if (c.has_cpp_name() or c.itraits.has_cpp_name()) and not c.is_synthetic:
-                if c.gen_method_map:
-                    offsetOfSlotsClass = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.cppname()
-                    offsetOfSlotsInstance = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.itraits.cppname()
-                    out.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s, %s, %s)" %\
-                        (self.class_id_name(c),\
-                        c.cppname(),\
-                        c.fqcppname(),\
-                        offsetOfSlotsClass,\
-                        c.itraits.fqcppname(),\
-                        offsetOfSlotsInstance,\
-                        str(c.has_construct_method_override).lower(),
-                        str(c.is_restricted_inheritance).lower(),
-                        str(c.is_abstract_base).lower()))
-                else:
-                    out.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), c.fqcppname(), c.itraits.fqcppname()))
+            if c.itraits.is_interface:
+                continue
+            offsetOfSlotsClass = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.cppname()
+            offsetOfSlotsInstance = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.itraits.cppname()
+            out.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s, %s, %s)" %\
+                (self.class_id_name(c),\
+                c.cppname(),\
+                c.fqcppname(),\
+                offsetOfSlotsClass,\
+                c.itraits.fqcppname(),\
+                offsetOfSlotsInstance,\
+                str(c.has_construct_method_override).lower(),
+                str(c.is_restricted_inheritance).lower(),
+                str(c.is_abstract_base).lower()))
         out.indent -= 1
         out.println("AVMTHUNK_END_NATIVE_CLASSES()")
 
@@ -1789,10 +1758,10 @@ class AbcThunkGen:
         traitsSet = set()
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
-            if c.has_cpp_name():
-                traitsSet.add(c)
-            if (c.itraits.has_cpp_name()):
-                traitsSet.add(c.itraits)
+            if c.itraits.is_interface:
+                continue;
+            traitsSet.add(c)
+            traitsSet.add(c.itraits)
 
         for t in frozenset(traitsSet):
             filteredSlots = filter(lambda s: s is not None, t.slots)
@@ -1802,7 +1771,7 @@ class AbcThunkGen:
 
         glueClassToTraits = {}
         for t in sorted(traitsSet):
-            if ((t.has_cpp_name()) and (CTYPE_TO_NEED_FORWARD_DECL[t.ctype])):
+            if CTYPE_TO_NEED_FORWARD_DECL[t.ctype]:
                 classNS = t.cppns()
                 glueClassName = t.cppname()
                 # special hack because the metadata for the class Math says its instance data is of type double
@@ -1833,10 +1802,7 @@ class AbcThunkGen:
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
             as3name = to_cname(c.itraits.name.name) + "Class"
-            if c.has_cpp_name() or c.itraits.has_cpp_name():
-                cppname = c.fqcppname()
-            else:
-                cppname = BASE_CLASS_NAME
+            cppname = c.fqcppname()
             clsid = "%s::%s" % (opts.nativeIDNS, self.class_id_name(c))
             names.append((as3name,cppname,clsid))
         names = sorted(names)
@@ -1896,36 +1862,35 @@ class AbcThunkGen:
 
     @staticmethod
     def needsInstanceSlotsStruct(c):
-        return (c.itraits.has_cpp_name()) and (c.itraits.fqcppname() != BASE_INSTANCE_NAME)
+        return c.itraits.fqcppname() != BASE_INSTANCE_NAME
 
     def emitStructDeclarations(self, out):
         visitedGlueClasses = set()
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
-            if (c.has_cpp_name()):
-                self.emitStructDeclarationsForTraits(out, c, visitedGlueClasses, True)
-                if (self.needsInstanceSlotsStruct(c)):
-                    self.emitStructDeclarationsForTraits(out, c.itraits, visitedGlueClasses, False)
-            else:
-                assert not self.needsInstanceSlotsStruct(c)
+            if c.itraits.is_interface:
+                continue
+            self.emitStructDeclarationsForTraits(out, c, visitedGlueClasses)
+            if (self.needsInstanceSlotsStruct(c)):
+                self.emitStructDeclarationsForTraits(out, c.itraits, visitedGlueClasses)
 
     def emitStructInlines(self, out):
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
-            if (c.has_cpp_name()):
-                self.emitMethodWrapperBodies(out, c)
-                self.emitMethodWrapperBodies(out, c.itraits)
+            if c.itraits.is_interface:
+                continue
+            self.emitMethodWrapperBodies(out, c)
+            self.emitMethodWrapperBodies(out, c.itraits)
 
     def emitStructStubs(self, out):
         visitedGlueClasses = set()
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
-            if (c.has_cpp_name()):
-                self.emitStructStubsForTraits(out, c, visitedGlueClasses, True)
-                if (self.needsInstanceSlotsStruct(c)):
-                    self.emitStructStubsForTraits(out, c.itraits, visitedGlueClasses, False)
-            else:
-                assert not self.needsInstanceSlotsStruct(c)
+            if c.itraits.is_interface:
+                continue
+            self.emitStructStubsForTraits(out, c, visitedGlueClasses)
+            if (self.needsInstanceSlotsStruct(c)):
+                self.emitStructStubsForTraits(out, c.itraits, visitedGlueClasses)
 
     def sortSlots(self, t):
         filteredSlots = filter(lambda s: s is not None, t.slots)
@@ -1944,7 +1909,7 @@ class AbcThunkGen:
         sortedSlots = sorted(t.slots, lambda x,y: self.cmpSlots(x, y, slotsTypeInfo))
         return sortedSlots, slotsTypeInfo
 
-    def emitDeclareSlotClass(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
+    def emitDeclareSlotClass(self, out, t, sortedSlots, slotsTypeInfo):
         memberVars = []
         out.println('//-----------------------------------------------------------')
         out.println('// %s' % str(t.name))
@@ -1954,9 +1919,10 @@ class AbcThunkGen:
         out.indent += 1
         out.println('friend class SlotOffsetsAndAsserts;')
         out.println('friend class %s;' % t.fqcppname())
-        out.indent -= 1
-        out.println('private:')
-        out.indent += 1
+        if len(sortedSlots) > 0:
+            out.indent -= 1
+            out.println('private:')
+            out.indent += 1
         anonCount = 0
         for slot in sortedSlots:
             if (slot is not None):
@@ -2006,12 +1972,9 @@ class AbcThunkGen:
         out.indent -= 1
         out.println('};')
 
-    def emitConstructDeclarations(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
+    def emitConstructDeclarations(self, out, t, sortedSlots, slotsTypeInfo):
         
-        if t.is_synthetic:
-            return
-            
-        if isClassTraits:
+        if t.itraits != None:
             # FIXME: make these non-public, friend access only
             out.println("public:")
             out.indent += 1
@@ -2045,12 +2008,9 @@ class AbcThunkGen:
         out.println("AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )")
         out.indent -= 1
 
-    def emitConstructStubs(self, out, t, sortedSlots, slotsTypeInfo, isClassTraits):
+    def emitConstructStubs(self, out, t, sortedSlots, slotsTypeInfo):
 
-        if t.is_synthetic:
-            return
-
-        if isClassTraits:
+        if t.itraits != None:
             out.println("/*static*/ %s* FASTCALL %s::createClassClosure(avmplus::VTable* cvtable)" % (BASE_CLASS_NAME,t.fqcppname()))
             out.println("{")
             out.indent += 1
@@ -2098,7 +2058,7 @@ class AbcThunkGen:
                 # FIXME: interface arguments just pass in as ScriptObject, for now
                 arg_typedef = BASE_INSTANCE_NAME
             elif argt.ctype == CTYPE_OBJECT:
-                arg_typedef = self.findNativeBase(argt)
+                arg_typedef = argt.fqcppname()
             else:
                 arg_typedef = None # unused
             arg_typedef = TYPEMAP_RETTYPE_GCREF[argt.ctype](arg_typedef)
@@ -2111,7 +2071,8 @@ class AbcThunkGen:
         return t.itraits != None and \
                 t.construct != "none" and \
                 not t.is_abstract_base and \
-                (not t.itraits.has_cpp_name() or not t.itraits.fqcppname() in GLUECLASSES_WITHOUT_CONSTRUCT_WRAPPERS) and \
+                not t.itraits.is_interface and \
+                not t.itraits.fqcppname() in GLUECLASSES_WITHOUT_CONSTRUCT_WRAPPERS and \
                 not t.itraits.init.needRest()
 
     def emitConstructObjectDeclaration(self, out, t, args):
@@ -2129,7 +2090,7 @@ class AbcThunkGen:
             ctype = t.itraits.ctype
             # t.itraits is a pure-AS3 class, so it has no C++ class;
             # the most closest native ancestor and use that.
-            fqcppname = self.findNativeBase(t.itraits)
+            fqcppname = t.itraits.fqcppname()
             ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](fqcppname)
             for i in range(0, t.itraits.init.optional_count+1):
                 arglist = ', '.join(map(lambda (argt, arg_typedef, argname): "%s %s" % (arg_typedef, argname), args[1:]))
@@ -2176,15 +2137,17 @@ class AbcThunkGen:
                 if slotCType == CTYPE_BOOLEAN:
                     suffix = " != 0"
                 out.println("REALLY_INLINE %s get_%s() const { return %s.m_%s%s; }" % (slotRetType, slotAccessorName, t.slotsInstanceName, slotMemberName, suffix));
-                if ((slot.kind == TRAIT_Slot) or (t.has_const_setters)):
+                if slot.kind == TRAIT_Slot:
                     out.println("REALLY_INLINE void set_%s(%s newVal) { %s.m_%s = newVal; }" % (slotAccessorName, slotArgType, t.slotsInstanceName, slotMemberName))
+                elif slot.kind == TRAIT_Const:
+                    out.println("REALLY_INLINE void setconst_%s(%s newVal) { %s.m_%s = newVal; }" % (slotAccessorName, slotArgType, t.slotsInstanceName, slotMemberName))
                 out.indent -= 1
             out.println("private:")
             out.indent += 1
             out.println("%s::%s %s%s" % (opts.nativeIDNS, t.slotsStructName, t.slotsInstanceName,closingSemi) )
             out.indent -= 1
 
-    def emitStructDeclarationsForTraits(self, out, t, visitedGlueClasses, isClassTraits):
+    def emitStructDeclarationsForTraits(self, out, t, visitedGlueClasses):
         
         if (t.fqcppname() in visitedGlueClasses):
             if (len(t.slots) == 0):
@@ -2196,13 +2159,13 @@ class AbcThunkGen:
             return
         
         sortedSlots,slotsTypeInfo = self.sortSlots(t)
-        self.emitDeclareSlotClass(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
+        self.emitDeclareSlotClass(out, t, sortedSlots, slotsTypeInfo)
         
         if not t.is_synthetic:
             out.backslash += 1
             out.println('#define DECLARE_SLOTS_%s' % t.cppname())
             out.indent += 1
-            self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
+            self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo)
             self.emitMethodWrappers(out, t)
             self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, "")
             out.indent -= 1
@@ -2212,33 +2175,43 @@ class AbcThunkGen:
         out.println('//-----------------------------------------------------------')
         out.println('')
 
+    def emitOneSyntheticClass(self, out, t):
+        sortedSlots,slotsTypeInfo = self.sortSlots(t)
+        out.println('//-----------------------------------------------------------')
+        out.println('// %s' % str(t.name))
+        out.println('//-----------------------------------------------------------')
+        baseclassname = self.lookupTraits(t.base).fqcppname()
+        out.println("class %s : public %s" % (t.cppname(), baseclassname))
+        out.println("{")
+        self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo)
+        self.emitMethodWrappers(out, t)
+        self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, ";")
+        out.println("protected:")
+        out.indent += 1
+        if t.itraits != None:
+            out.println("inline explicit %s(VTable* cvtable) : %s(cvtable) { createVanillaPrototype(); }" % (t.cppname(), baseclassname))
+        else:
+            out.println("friend class %s;" % t.ctraits.fqcppname())
+            out.println("REALLY_INLINE explicit %s(VTable* ivtable, ScriptObject* delegate) : %s(ivtable, delegate) {}" % (t.cppname(), baseclassname))
+        out.indent -= 1
+        out.println("private:")
+        out.indent += 1
+        out.println("explicit %s(const %s&); // unimplemented" % (t.cppname(), t.cppname()))
+        out.println("void operator=(const %s&); // unimplemented" % t.cppname())
+        out.indent -= 1
+        out.println("};")
+        out.println('')
+
     def emitSyntheticClasses(self, out):
-        out.println('// NOTE: The following classes are never actually instantiated as such;')
-        out.println('// they are provided as a C++ front end onto pure AS3 classes.')
         for i in range(0, len(self.abc.classes)):
             t = self.abc.classes[i]
+            # emit Object first, since Class is likely to reference it
+            if t.itraits.is_synthetic:
+                self.emitOneSyntheticClass(out, t.itraits)
             if t.is_synthetic:
-                isClassTraits = True
-                sortedSlots,slotsTypeInfo = self.sortSlots(t)
-                out.println('//-----------------------------------------------------------')
-                out.println('// %s' % str(t.name))
-                out.println('//-----------------------------------------------------------')
-                out.println("class %s : public %s" % (t.cppname(), BASE_CLASS_NAME))
-                out.println("{")
-                self.emitConstructDeclarations(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
-                self.emitMethodWrappers(out, t)
-                self.emitSlotDeclarations(out, t, sortedSlots, slotsTypeInfo, ";")
-                out.println("private:")
-                out.indent += 1
-                out.println("explicit %s(); // unimplemented" % t.cppname())
-                out.println("explicit %s(const %s&); // unimplemented" % (t.cppname(), t.cppname()))
-                out.println("void operator=(const %s&); // unimplemented" % t.cppname())
-                out.indent -= 1
-                out.println("};")
-                out.println('')
-
+                self.emitOneSyntheticClass(out, t)
         
-    def emitStructStubsForTraits(self, out, t, visitedGlueClasses, isClassTraits):
+    def emitStructStubsForTraits(self, out, t, visitedGlueClasses):
         
         if (t.fqcppname() in visitedGlueClasses):
             if (len(t.slots) == 0):
@@ -2250,7 +2223,7 @@ class AbcThunkGen:
             return
         
         sortedSlots,slotsTypeInfo = self.sortSlots(t)
-        self.emitConstructStubs(out, t, sortedSlots, slotsTypeInfo, isClassTraits)
+        self.emitConstructStubs(out, t, sortedSlots, slotsTypeInfo)
 
     def printStructAsserts(self, out, abc):
         out.println('class SlotOffsetsAndAsserts')
@@ -2263,13 +2236,14 @@ class AbcThunkGen:
         visitedNativeClasses = set()
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]
-            if (c.gen_method_map):
-                if (c.fqcppname() not in visitedNativeClasses):
-                    visitedNativeClasses.add(c.fqcppname())
-                    out.println('kSlotsOffset%s = %s,' % (c.cppname(), c.cpp_offsetof_slots()))
-                if (c.itraits.fqcppname() not in visitedNativeClasses):
-                    visitedNativeClasses.add(c.itraits.fqcppname())
-                    out.println('kSlotsOffset%s = %s,' % (c.itraits.cppname(), c.itraits.cpp_offsetof_slots()))
+            if c.itraits.is_interface:
+                continue;
+            if (c.fqcppname() not in visitedNativeClasses):
+                visitedNativeClasses.add(c.fqcppname())
+                out.println('kSlotsOffset%s = %s,' % (c.cppname(), c.cpp_offsetof_slots()))
+            if (c.itraits.fqcppname() not in visitedNativeClasses):
+                visitedNativeClasses.add(c.itraits.fqcppname())
+                out.println('kSlotsOffset%s = %s,' % (c.itraits.cppname(), c.itraits.cpp_offsetof_slots()))
         out.println('kSlotsOffset_fnord')
         out.indent -= 1
         out.println('};')
@@ -2277,8 +2251,9 @@ class AbcThunkGen:
         out.println('#ifdef DEBUG')
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]
-            if (c.gen_method_map):
-                out.println('static void do%sAsserts(Traits* ctraits, Traits* itraits);' % c.cppname())
+            if c.itraits.is_interface:
+                continue
+            out.println('static void do%sAsserts(Traits* ctraits, Traits* itraits);' % c.cppname())
         out.println('#endif');
 
         out.indent -= 1
@@ -2286,20 +2261,20 @@ class AbcThunkGen:
         out.println('#ifdef DEBUG');
         for i in range(0, len(abc.classes)):
             c = abc.classes[i]
-            if (c.has_cpp_name() and not c.is_synthetic):
-                out.println('REALLY_INLINE void SlotOffsetsAndAsserts::do%sAsserts(Traits* ctraits, Traits* itraits)' % c.cppname())
-                out.println('{')
-                out.indent += 1
-                assert (c.has_cpp_name)
-                out.println('(void)ctraits; (void)itraits;')
-                self.printStructAssertsForTraits(out, c, True, 'ctraits')
-                if self.needsInstanceSlotsStruct(c):
-                    self.printStructAssertsForTraits(out, c.itraits, False, 'itraits')
-                out.indent -= 1
-                out.println('}')
+            if c.itraits.is_interface:
+                continue;
+            out.println('REALLY_INLINE void SlotOffsetsAndAsserts::do%sAsserts(Traits* ctraits, Traits* itraits)' % c.cppname())
+            out.println('{')
+            out.indent += 1
+            out.println('(void)ctraits; (void)itraits;')
+            self.printStructAssertsForTraits(out, c, 'ctraits')
+            if self.needsInstanceSlotsStruct(c):
+                self.printStructAssertsForTraits(out, c.itraits, 'itraits')
+            out.indent -= 1
+            out.println('}')
         out.println('#endif // DEBUG')
 
-    def printStructAssertsForTraits(self, out, t, isClassTraits, traitsVarName):
+    def printStructAssertsForTraits(self, out, t, traitsVarName):
         if (len(t.slots) > 0):
             out.println('MMGC_STATIC_ASSERT(offsetof(%s, %s) == kSlotsOffset%s);' % (t.fqcppname(), t.slotsInstanceName, t.cppname()))
             out.println('MMGC_STATIC_ASSERT(offsetof(%s, %s) <= 0xFFFF);' % (t.fqcppname(), t.slotsInstanceName))
@@ -2314,13 +2289,6 @@ class AbcThunkGen:
         for i in range(0, len(m.paramTypes)):
             argtraits.append(self.lookupTraits(m.paramTypes[i]))
         return argtraits
-
-    def findNativeBase(self, t):
-        if t.has_cpp_name():
-            return t.fqcppname()
-        if t.base != None:
-            return self.findNativeBase(self.lookupTraits(t.base))
-        return None
 
     def thunkInfo(self, m):
         ret_traits = self.lookupTraits(m.returnType)
@@ -2386,7 +2354,7 @@ class AbcThunkGen:
             arg_typedef = argtraits[i].cpp_unboxing_argument_name()
             val = "AvmThunkUnbox_%s(%s, argv[argoff%d])" % (TYPEMAP_ARGTYPE_SUFFIX[arg_ctype], arg_typedef, i)
             if arg_ctype == CTYPE_OBJECT:
-                unboxname = self.findNativeBase(argtraits[i])
+                unboxname = argtraits[i].fqcppname()
                 if unboxname != None:
                     val = "(%s*)%s" % (unboxname, val)
             # argtraits includes receiver at 0, optionalValues does not
@@ -2396,7 +2364,7 @@ class AbcThunkGen:
                     defval = "AvmThunkCoerce_%s_%s(%s)" % (TYPEMAP_ARGTYPE_SUFFIX[dct], TYPEMAP_ARGTYPE_SUFFIX[arg_ctype], defval)
                 val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
                 if arg_ctype == CTYPE_OBJECT:
-                    coercename = self.findNativeBase(argtraits[i])
+                    coercename = argtraits[i].fqcppname()
                     if coercename != None:
                         val = "(%s*)%s" % (coercename, val)
             args.append((val, arg_typedef))
@@ -2409,7 +2377,7 @@ class AbcThunkGen:
             out.println("(void)argc;");
 
         out.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
-        if m.receiver == None or not m.receiver.has_cpp_name():
+        if m.receiver == None:
             rec_type = BASE_INSTANCE_NAME+"*"
         else:
             rec_type = m.receiver.cpp_argument_name()
@@ -2548,9 +2516,9 @@ if abcGenFor:
         cls = IndentingPrintWriter(clsfile)
         c = IndentingPrintWriter(cppfile)
         ngen.emit(abcGenFor, abcScriptName, h, cls, c);
-    except Exception, e:
-        sys.stderr.write("ERROR: "+str(e)+"\n")
-        exit(1)
+#    except Exception, e:
+#        sys.stderr.write("ERROR: "+str(e)+"\n")
+#        exit(1)
     finally:
         if hfile != None:
             hfile.close()

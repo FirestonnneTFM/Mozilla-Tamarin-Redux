@@ -48,7 +48,6 @@ package flash.sampler
      * @langversion 3.0
      * @keyword StackFrame
      */
-    [native(cls="StackFrameClass", instance="StackFrameObject", methods="auto", constsetters="true")] // @todo: native only for slot getter/setter
     public final class StackFrame
     {
 
@@ -108,7 +107,6 @@ package flash.sampler
      * @keyword Sample
      * @see package.html#getSamples() flash.sampler.getSamples()
      */
-    [native(cls="SampleClass", instance="SampleObject", methods="auto", constsetters="true")]
     public class Sample
     {
         /**
@@ -140,7 +138,7 @@ package flash.sampler
     * @see package.html#getSamples() flash.sampler.getSamples()
     * @includeExample examples\SampleTypesExample.as -noswf
     */
-    [native(cls="NewObjectSampleClass", instance="NewObjectSampleObject", methods="auto", constsetters="true")]
+    [native(cls="NewObjectSampleClass", instance="NewObjectSampleObject", methods="auto")]
     public final class NewObjectSample extends Sample
     {
         /**
@@ -192,7 +190,6 @@ package flash.sampler
     * @see package.html#getSamples() flash.sampler.getSamples()
     * @includeExample examples\SampleTypesExample.as -noswf
     */
-    [native(cls="DeleteObjectSampleClass", instance="DeleteObjectSampleObject", methods="auto", constsetters="true")] // @todo: native only for slot getter/setter
     public final class DeleteObjectSample extends Sample
     {
         /**
@@ -483,7 +480,6 @@ package flash.sampler
     [native("SamplerScript::getMasterString")]
     public native function getMasterString(str:String):String;
     
-    [native(cls="ClassFactoryClass", methods="auto", construct="none")] // @todo: native only for slot getter/setter
     [API(CONFIG::VM_INTERNAL)]
     internal final class ClassFactory
     {

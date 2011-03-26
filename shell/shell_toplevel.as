@@ -194,9 +194,15 @@ package avmshell
     {
     }
 
-    // this class exists solely to test construct="native"
+    // this class exists solely to test construct="native" with a C++ class
     [native(cls="::avmshell::NativeBaseClass", instance="::avmshell::NativeBaseObject", methods="auto", construct="native")]
     public class NativeBase
+    {
+    }
+
+    // this class exists solely to test construct="native" with a pure-AS3 class
+    [native(construct="native")]
+    public class NativeBaseAS3
     {
     }
 }
