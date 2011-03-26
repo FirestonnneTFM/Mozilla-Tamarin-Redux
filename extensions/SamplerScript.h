@@ -40,6 +40,13 @@
 #ifndef __avmplus_SamplerScript__
 #define __avmplus_SamplerScript__
 
+#ifdef AVMSHELL_BUILD
+#include "shell_toplevel-classes.hh"
+#else
+#include "platformbuild.h"
+#include "avmplayer.h"
+#endif
+
 namespace avmplus
 {
     struct Sample;
@@ -94,23 +101,6 @@ namespace avmplus
 #endif
     };
 
-    class SampleClass : public ClassClosure
-    {
-    public:
-        SampleClass(VTable *vtable);
-
-        DECLARE_SLOTS_SampleClass;
-    };
-
-    class SampleObject : public ScriptObject
-    {
-        friend class SamplerScript;
-    public:
-        SampleObject(VTable *vtable, ScriptObject *delegate);
-
-        DECLARE_SLOTS_SampleObject;
-    };
-
     class NewObjectSampleObject : public SampleObject
     {
         friend class SamplerScript;
@@ -133,49 +123,6 @@ namespace avmplus
         NewObjectSampleClass(VTable *vtable);
 
         DECLARE_SLOTS_NewObjectSampleClass;
-    };
-
-    class DeleteObjectSampleObject : public SampleObject
-    {
-        friend class SamplerScript;
-    public:
-        DeleteObjectSampleObject(VTable *vtable, ScriptObject *delegate);
-
-        DECLARE_SLOTS_DeleteObjectSampleObject;
-    };
-
-    class DeleteObjectSampleClass : public SampleClass
-    {
-    public:
-        DeleteObjectSampleClass(VTable *vtable);
-
-        DECLARE_SLOTS_DeleteObjectSampleClass;
-    };
-
-    class StackFrameObject : public ScriptObject
-    {
-        friend class SamplerScript;
-    public:
-        StackFrameObject(VTable *vtable, ScriptObject *delegate) : ScriptObject(vtable, delegate) {}
-
-        DECLARE_SLOTS_StackFrameObject;
-    };
-
-    class StackFrameClass : public ClassClosure
-    {
-    public:
-        StackFrameClass(VTable *vtable) : ClassClosure(vtable) { createVanillaPrototype(); }
-
-        DECLARE_SLOTS_StackFrameClass;
-    };
-
-    class ClassFactoryClass : public ClassClosure
-    {
-        friend class SamplerScript;
-    public:
-        ClassFactoryClass(VTable *vtable) : ClassClosure(vtable) { createVanillaPrototype(); }
-
-        DECLARE_SLOTS_ClassFactoryClass;
     };
 }
 #endif // __avmplus_SamplerScript__

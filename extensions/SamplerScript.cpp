@@ -44,8 +44,6 @@
 #include "avmshell.h"
 #else
 // player
-#include "platformbuild.h"
-#include "avmplayer.h"
 #include "SamplerScript.h"
 #endif
 
@@ -401,7 +399,7 @@ namespace avmplus
             StackTrace::Element* e = (StackTrace::Element*)sample.stack.trace;
             for(uint32_t i=0; i < sample.stack.depth; i++, e++)
             {
-                StackFrameObject* sf = (StackFrameObject*)sfcc->newInstance();
+                StackFrameObject* sf = sfcc->constructObject();
 
                 // at every allocation the sample buffer could overflow and the samples could be deleted
                 // the StackTrace::Element pointer is a raw pointer into that buffer so we need to check
@@ -410,15 +408,14 @@ namespace avmplus
                 if (s->getSamples(num) == NULL)
                     return false;
 
-                sf->set_name(e->name()); // NOT e->info()->name() because e->name() can be a fake name
-                if(e->filename())
-                    sf->set_file(e->filename());
-                sf->set_line(e->linenum());
-                sf->set_scriptID(static_cast<double>(e->functionId()));
+                sf->setconst_name(e->name()); // NOT e->info()->name() because e->name() can be a fake name
+                sf->setconst_file(e->filename());
+                sf->setconst_line(e->linenum());
+                sf->setconst_scriptID(static_cast<double>(e->functionId()));
 
                 stack->setUintProperty(i, sf->atom());
             }
-            sam->set_stack(stack);
+            sam->setconst_stack(stack);
         }
         return true;
     }
@@ -435,38 +432,42 @@ namespace avmplus
         {
             case Sampler::RAW_SAMPLE:
             {
-                SampleObject* sam = (SampleObject*)cf->get_SampleClass()->newInstance();
-                sam->set_time(static_cast<double>(sample.micros));
+                SampleClass* cls = (SampleClass*)cf->get_SampleClass();
+                SampleObject* sam = cls->constructObject();
+                sam->setconst_time(static_cast<double>(sample.micros));
                 if (!set_stack(self, cf, sample, sam))
                     return NULL;
                 return sam;
             }
             case Sampler::DELETED_OBJECT_SAMPLE:
             {
-                DeleteObjectSampleObject* dsam = (DeleteObjectSampleObject*)cf->get_DeleteObjectSampleClass()->newInstance();
-                dsam->set_time(static_cast<double>(sample.micros));
-                dsam->set_id(static_cast<double>(sample.id));
-                dsam->set_size(static_cast<double>(sample.size));
+                DeleteObjectSampleClass* cls = (DeleteObjectSampleClass*)cf->get_DeleteObjectSampleClass();
+                DeleteObjectSampleObject* dsam = cls->constructObject();
+                dsam->setconst_time(static_cast<double>(sample.micros));
+                dsam->setconst_id(static_cast<double>(sample.id));
+                dsam->setconst_size(static_cast<double>(sample.size));
                 return dsam;
             }
             case Sampler::NEW_OBJECT_SAMPLE:
             {
-                NewObjectSampleObject* nsam = (NewObjectSampleObject*)cf->get_NewObjectSampleClass()->newInstance();
-                nsam->set_time(static_cast<double>(sample.micros));
-                nsam->set_id(static_cast<double>(sample.id));
+                NewObjectSampleClass* cls = (NewObjectSampleClass*)cf->get_NewObjectSampleClass();
+                NewObjectSampleObject* nsam = cls->constructObject();
+                nsam->setconst_time(static_cast<double>(sample.micros));
+                nsam->setconst_id(static_cast<double>(sample.id));
                 if (!set_stack(self, cf, sample, nsam))
                     return NULL;
                 if (sample.ptr != NULL )
                     nsam->setRef((AvmPlusScriptableObject*)sample.ptr);
-                nsam->set_type(getType(toplevel, sample.sot, sample.ptr));
+                nsam->setconst_type(getType(toplevel, sample.sot, sample.ptr));
                 nsam->setSize(sample.alloc_size);
                 return nsam;
             }
             case Sampler::NEW_AUX_SAMPLE:
             {
-                NewObjectSampleObject* nsam = (NewObjectSampleObject*)cf->get_NewObjectSampleClass()->newInstance();
-                nsam->set_time(static_cast<double>(sample.micros));
-                nsam->set_id(static_cast<double>(sample.id));
+                NewObjectSampleClass* cls = (NewObjectSampleClass*)cf->get_NewObjectSampleClass();
+                NewObjectSampleObject* nsam = cls->constructObject();
+                nsam->setconst_time(static_cast<double>(sample.micros));
+                nsam->setconst_id(static_cast<double>(sample.id));
                 if (!set_stack(self, cf, sample, nsam))
                     return NULL;
                 nsam->setSize(sample.alloc_size);
@@ -768,17 +769,8 @@ namespace avmplus
     }
 
 
-    SampleObject::SampleObject(VTable *vtable, ScriptObject *delegate)
-        : ScriptObject(vtable, delegate)
-    {}
-
-
     NewObjectSampleObject::NewObjectSampleObject(VTable *vtable, ScriptObject *delegate)
         : SampleObject(vtable, delegate), size(0)
-    {}
-
-    DeleteObjectSampleObject::DeleteObjectSampleObject(VTable *vtable, ScriptObject *delegate)
-        : SampleObject(vtable, delegate)
     {}
 
     Atom NewObjectSampleObject::get_object()
@@ -801,18 +793,8 @@ namespace avmplus
         return s;
     }
 
-    SampleClass::SampleClass(VTable *vtable)
-        : ClassClosure(vtable)
-    {
-        createVanillaPrototype();
-    }
-
     NewObjectSampleClass::NewObjectSampleClass(VTable *vtable)
         : SampleClass(vtable)
-    {
-    }
-
-    DeleteObjectSampleClass::DeleteObjectSampleClass(VTable* vtable) : SampleClass(vtable)
     {
     }
 

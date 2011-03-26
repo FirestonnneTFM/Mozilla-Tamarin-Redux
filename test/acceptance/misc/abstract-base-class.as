@@ -117,6 +117,7 @@ expectFailure("instantiate for external grandchild of construct=abstract-restric
 MyAddErrorTest("instantiate for construct=check", "ArgumentError: Error #1001", function() { new CheckBase; });
 
 expectFailure("instantiate for construct=native", avmshell.NativeBase);
+expectFailure("instantiate for construct=native (pure AS3)", avmshell.NativeBaseAS3);
 
 test();
 

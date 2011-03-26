@@ -4715,6 +4715,12 @@ public:
         kSlotsOffsetUninitializedErrorObject = 0,
         kSlotsOffsetArgumentErrorClass = offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass),
         kSlotsOffsetArgumentErrorObject = 0,
+        kSlotsOffsetIOErrorClass = 0,
+        kSlotsOffsetIOErrorObject = 0,
+        kSlotsOffsetMemoryErrorClass = 0,
+        kSlotsOffsetMemoryErrorObject = 0,
+        kSlotsOffsetEOFErrorClass = 0,
+        kSlotsOffsetEOFErrorObject = 0,
         kSlotsOffsetDateClass = offsetof(avmplus::DateClass, m_slots_DateClass),
         kSlotsOffsetDateObject = 0,
         kSlotsOffsetRegExpClass = offsetof(avmplus::RegExpClass, m_slots_RegExpClass),
@@ -4725,6 +4731,8 @@ public:
         kSlotsOffsetXMLListObject = 0,
         kSlotsOffsetQNameClass = offsetof(avmplus::QNameClass, m_slots_QNameClass),
         kSlotsOffsetQNameObject = 0,
+        kSlotsOffsetCompressionAlgorithmClass = offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass),
+        kSlotsOffsetCompressionAlgorithmObject = 0,
         kSlotsOffsetByteArrayClass = offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass),
         kSlotsOffsetByteArrayObject = 0,
         kSlotsOffset_fnord
@@ -4759,11 +4767,15 @@ public:
     static void doVerifyErrorClassAsserts(Traits* ctraits, Traits* itraits);
     static void doUninitializedErrorClassAsserts(Traits* ctraits, Traits* itraits);
     static void doArgumentErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doIOErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doMemoryErrorClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doEOFErrorClassAsserts(Traits* ctraits, Traits* itraits);
     static void doDateClassAsserts(Traits* ctraits, Traits* itraits);
     static void doRegExpClassAsserts(Traits* ctraits, Traits* itraits);
     static void doXMLClassAsserts(Traits* ctraits, Traits* itraits);
     static void doXMLListClassAsserts(Traits* ctraits, Traits* itraits);
     static void doQNameClassAsserts(Traits* ctraits, Traits* itraits);
+    static void doCompressionAlgorithmClassAsserts(Traits* ctraits, Traits* itraits);
     static void doByteArrayClassAsserts(Traits* ctraits, Traits* itraits);
     #endif
 };
@@ -5007,6 +5019,18 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(Traits* ct
     MMGC_STATIC_ASSERT(sizeof(avmplus::ArgumentErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) + offsetof(avmplus_ArgumentErrorClassSlots, m_length)));
 }
+REALLY_INLINE void SlotOffsetsAndAsserts::doIOErrorClassAsserts(Traits* ctraits, Traits* itraits)
+{
+    (void)ctraits; (void)itraits;
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doMemoryErrorClassAsserts(Traits* ctraits, Traits* itraits)
+{
+    (void)ctraits; (void)itraits;
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doEOFErrorClassAsserts(Traits* ctraits, Traits* itraits)
+{
+    (void)ctraits; (void)itraits;
+}
 REALLY_INLINE void SlotOffsetsAndAsserts::doDateClassAsserts(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
@@ -5046,6 +5070,15 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* ctraits, T
     MMGC_STATIC_ASSERT(offsetof(avmplus::QNameClass, m_slots_QNameClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::QNameClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::QNameClass, m_slots_QNameClass) + offsetof(avmplus_QNameClassSlots, m_length)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doCompressionAlgorithmClassAsserts(Traits* ctraits, Traits* itraits)
+{
+    (void)ctraits; (void)itraits;
+    MMGC_STATIC_ASSERT(offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) == kSlotsOffsetCompressionAlgorithmClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(avmplus::CompressionAlgorithmClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(ctraits, 1352) == (offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) + offsetof(avmplus_CompressionAlgorithmClassSlots, m_ZLIB)));
+    AvmAssert(getSlotOffset(ctraits, 1353) == (offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) + offsetof(avmplus_CompressionAlgorithmClassSlots, m_DEFLATE)));
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doByteArrayClassAsserts(Traits* ctraits, Traits* itraits)
 {
@@ -5433,11 +5466,15 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
         AVMTHUNK_NATIVE_CLASS(abcclass_VerifyError, VerifyErrorClass, avmplus::VerifyErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetVerifyErrorClass, avmplus::VerifyErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetVerifyErrorObject, false, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_UninitializedError, UninitializedErrorClass, avmplus::UninitializedErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetUninitializedErrorClass, avmplus::UninitializedErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetUninitializedErrorObject, false, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_ArgumentError, ArgumentErrorClass, avmplus::ArgumentErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetArgumentErrorClass, avmplus::ArgumentErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetArgumentErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_IOError, IOErrorClass, avmplus::IOErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetIOErrorClass, avmplus::IOErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetIOErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_MemoryError, MemoryErrorClass, avmplus::MemoryErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetMemoryErrorClass, avmplus::MemoryErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetMemoryErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_EOFError, EOFErrorClass, avmplus::EOFErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetEOFErrorClass, avmplus::EOFErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetEOFErrorObject, false, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_Date, DateClass, avmplus::DateClass, SlotOffsetsAndAsserts::kSlotsOffsetDateClass, avmplus::DateObject, SlotOffsetsAndAsserts::kSlotsOffsetDateObject, true, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_RegExp, RegExpClass, avmplus::RegExpClass, SlotOffsetsAndAsserts::kSlotsOffsetRegExpClass, avmplus::RegExpObject, SlotOffsetsAndAsserts::kSlotsOffsetRegExpObject, true, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_XML, XMLClass, avmplus::XMLClass, SlotOffsetsAndAsserts::kSlotsOffsetXMLClass, avmplus::XMLObject, SlotOffsetsAndAsserts::kSlotsOffsetXMLObject, true, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, avmplus::XMLListClass, SlotOffsetsAndAsserts::kSlotsOffsetXMLListClass, avmplus::XMLListObject, SlotOffsetsAndAsserts::kSlotsOffsetXMLListObject, true, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, avmplus::QNameClass, SlotOffsetsAndAsserts::kSlotsOffsetQNameClass, avmplus::QNameObject, SlotOffsetsAndAsserts::kSlotsOffsetQNameObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_CompressionAlgorithm, CompressionAlgorithmClass, avmplus::CompressionAlgorithmClass, SlotOffsetsAndAsserts::kSlotsOffsetCompressionAlgorithmClass, avmplus::CompressionAlgorithmObject, SlotOffsetsAndAsserts::kSlotsOffsetCompressionAlgorithmObject, false, false, false)
         AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_ByteArray, ByteArrayClass, avmplus::ByteArrayClass, SlotOffsetsAndAsserts::kSlotsOffsetByteArrayClass, avmplus::ByteArrayObject, SlotOffsetsAndAsserts::kSlotsOffsetByteArrayObject, false, false, false)
     AVMTHUNK_END_NATIVE_CLASSES()
 
@@ -8889,6 +8926,45 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UninitializedErrorObject::construct(
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::IOErrorClass::createClassClosure(avmplus::VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::IOErrorClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::IOErrorClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doIOErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ScriptObject* FASTCALL avmplus::IOErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
+{
+    return new (cls->gc(), cls->getExtraSize()) avmplus::IOErrorObject(cls->ivtable(), cls->prototypePtr());
+}
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::MemoryErrorClass::createClassClosure(avmplus::VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::MemoryErrorClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::MemoryErrorClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doMemoryErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ScriptObject* FASTCALL avmplus::MemoryErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
+{
+    return new (cls->gc(), cls->getExtraSize()) avmplus::MemoryErrorObject(cls->ivtable(), cls->prototypePtr());
+}
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ErrorObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::EOFErrorClass::createClassClosure(avmplus::VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::EOFErrorClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::EOFErrorClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doEOFErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ScriptObject* FASTCALL avmplus::EOFErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
+{
+    return new (cls->gc(), cls->getExtraSize()) avmplus::EOFErrorObject(cls->ivtable(), cls->prototypePtr());
+}
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EOFErrorClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EOFErrorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::IOErrorObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::DateClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
@@ -8929,6 +9005,19 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::XMLListObject::construct(int argc, a
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::QNameObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
+/*static*/ avmplus::ClassClosure* FASTCALL avmplus::CompressionAlgorithmClass::createClassClosure(avmplus::VTable* cvtable)
+{
+    cvtable->ivtable->createInstanceProc = avmplus::CompressionAlgorithmClass::createInstanceProc;
+    ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::CompressionAlgorithmClass(cvtable);
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doCompressionAlgorithmClassAsserts(cc->traits(), cc->traits()->itraits); )
+    return cc;
+}
+/*static*/ avmplus::ScriptObject* FASTCALL avmplus::CompressionAlgorithmClass::createInstanceProc(avmplus::ClassClosure* cls)
+{
+    return new (cls->gc(), cls->getExtraSize()) avmplus::CompressionAlgorithmObject(cls->ivtable(), cls->prototypePtr());
+}
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CompressionAlgorithmClass::construct(int argc, avmplus::Atom* argv) { return avmplus::ClassClosure::construct(argc, argv); } )
+AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CompressionAlgorithmObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ByteArrayClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::ByteArrayClass::createInstanceProc;

@@ -39,6 +39,7 @@
 
 #include "avmshell.h"
 
+#include "shell_toplevel-classes.hh"
 #include "shell_toplevel.cpp"
 
 namespace avmshell
@@ -209,7 +210,10 @@ namespace avmshell
         if (!config.verifyonly)
 #endif
         {
+            // these are here solely to verify the classes are constructable from C++
+            // (they are not constructable from AS3)
             shell_toplevel->shellClasses->get_NativeBaseClass()->constructObject();
+            shell_toplevel->shellClasses->get_NativeBaseAS3Class()->constructObject();
         }
 
         return shell_toplevel;
