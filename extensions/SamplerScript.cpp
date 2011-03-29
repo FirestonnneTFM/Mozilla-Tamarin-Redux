@@ -44,6 +44,7 @@
 #include "avmshell.h"
 #else
 // player
+#include "avmplayer-classes.h"
 #include "SamplerScript.h"
 #endif
 
