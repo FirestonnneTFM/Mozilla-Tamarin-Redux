@@ -54,7 +54,12 @@ REALLY_INLINE bool BaseExecMgr::isInterpreted(MethodEnv* env)
 REALLY_INLINE uintptr_t ImtHolder::getIID(MethodInfo* m)
 {
     AvmAssert(m->declaringTraits()->isInterface());
+#ifdef VMCFG_VERIFYALL
+    // In verifyonly mode, make all IIDs be zero to erase memory layout noise.
+    return m->pool()->core->config.verifyonly ? 0 : (uintptr_t)m;
+#else
     return (uintptr_t) m;
+#endif
 }
 
 REALLY_INLINE uint32_t ImtHolder::hashIID(uintptr_t iid)

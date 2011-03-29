@@ -885,7 +885,7 @@ namespace avmplus
                     else
                         bits->set(i);
                 }
-                printNotNull(bits, "loop label");
+                printNotNull(bits, "loop label", state);
             } else {
                 // Set any notNull bits that are set in FrameState.
                 // If we are tracking an expression for a non-null variable,
@@ -902,7 +902,7 @@ namespace avmplus
                     } else if (bits->get(i) && varTracker[i])
                         checked->put(varTracker[i], true);
                 }
-                printNotNull(bits, "forward label");
+                printNotNull(bits, "forward label", state);
             }
         }
 
@@ -960,11 +960,14 @@ namespace avmplus
         }
 
 #ifdef AVMPLUS_VERBOSE
-        void printNotNull(nanojit::BitSet* bits, const char* title) {
-            if (verbose) {
+        void printNotNull(nanojit::BitSet* bits, const char* title,
+                          const FrameState* state) {
+            if (0 && verbose) {
                 if (bits) {
-                    printf("%s notnull = ", title);
-                    for (int i=0, n=nvar; i < n; i++)
+                    int max_scope = scopeBase + state->scopeDepth - 1;
+                    int max_stack = stackBase + state->stackDepth;
+                    printf("%s [0-%d,%d-%d] notnull = ", title, max_scope+1, stackBase, max_stack-1);
+                    for (int i=0; i < max_stack; i = i != max_scope ? i + 1 : stackBase)
                         if (bits->get(i))
                             printf("%d ", i);
                     printf("\n");
@@ -974,7 +977,7 @@ namespace avmplus
             }
         }
 #else
-        void printNotNull(nanojit::BitSet*, const char*)
+        void printNotNull(nanojit::BitSet*, const char*, const FrameState*)
         {}
 #endif
 
@@ -983,8 +986,8 @@ namespace avmplus
 #ifdef DEBUG
             AvmAssert(target.labelIns != NULL);
             if (target.notnull) {
-                printNotNull(notnull, "current");
-                printNotNull(target.notnull, "target");
+                printNotNull(notnull, "current", state);
+                printNotNull(target.notnull, "target", state);
                 int scopeTop = scopeBase + state->scopeDepth;
                 int stackTop = stackBase + state->stackDepth;
                 // make sure our notnull bits at the target of the backedge were safe.
@@ -1029,10 +1032,10 @@ namespace avmplus
             if (label.notnull) {
                 syncNotNull(label.notnull, state);
                 notnull->setFrom(*label.notnull);
-                printNotNull(notnull, "merged label");
+                printNotNull(notnull, "merged label", state);
             } else {
                 syncNotNull(notnull, state);
-                printNotNull(notnull, "first-time label");
+                printNotNull(notnull, "first-time label", state);
             }
             reachable = true;
         }
@@ -6744,7 +6747,7 @@ namespace avmplus
     {
 #ifdef NJ_VERBOSE
       LInsPrinter *printer = frag->lirbuf->printer;
-      bool verbose = printer && pool->isVerbose(VB_jit);
+      bool verbose = printer && pool->isVerbose(LC_AfterDCE);
       if (verbose) {
           InsBuf b;
           AvmLog("- %s\n", printer->formatIns(&b, ins));
@@ -6759,7 +6762,7 @@ namespace avmplus
     {
 #ifdef NJ_VERBOSE
         LInsPrinter *printer = frag->lirbuf->printer;
-        bool verbose = printer && pool->isVerbose(VB_jit);
+        bool verbose = printer && pool->isVerbose(LC_AfterDCE);
         InsBuf b;
 #endif
         LIns *catcher = this->catch_label.labelIns;

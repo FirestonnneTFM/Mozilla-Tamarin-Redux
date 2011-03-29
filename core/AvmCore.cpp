@@ -226,6 +226,8 @@ namespace avmplus
                  r |= VB_jit | LC_AfterDCE | LC_Native;
             else if (substrMatches("opt", p, e))
                 r |= VB_jit | LC_Liveness | LC_ReadLIR | LC_AfterSF;
+            else if (substrMatches("lir", p, e))
+                r |= VB_jit | LC_ReadLIR;
             else if (substrMatches("regs", p, e))
                 r |= VB_jit | LC_Activation | LC_RegAlloc;
             else if (substrMatches("raw", p, e))
