@@ -1932,8 +1932,6 @@ public:
         // Called by generated tracer checking code.
         static MMgc::GCTracerCheckResult CheckOffsetIsInList(uint32_t offset, const uint32_t offsets[],size_t len);
 
-    private:
-
         // Called by SmartPointer to verify that its being traced.
         static void TracePointerCheck(const void *derivedPointer);
 #endif // DEBUG
