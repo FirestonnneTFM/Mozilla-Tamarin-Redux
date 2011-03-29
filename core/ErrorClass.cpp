@@ -46,7 +46,7 @@ namespace avmplus
     ErrorClass::ErrorClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
+        AvmAssert(traits()->getSizeOfInstance() >= sizeof(ErrorClass));
 
         // trick: set our prototype to objectClass->prototypePtr for now...
         setPrototypePtr(toplevel()->objectClass->prototypePtr());
@@ -63,7 +63,7 @@ namespace avmplus
                              ScriptObject *delegate)
         : ScriptObject(vtable, delegate)
     {
-        AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorObject));
+        AvmAssert(traits()->getSizeOfInstance() >= sizeof(ErrorObject));
 
         #ifdef DEBUGGER
         AvmCore *core = this->core();
@@ -108,7 +108,7 @@ namespace avmplus
     NativeErrorClass::NativeErrorClass(VTable* cvtable)
         : ClassClosure(cvtable)
     {
-        AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
+        AvmAssert(traits()->getSizeOfInstance() >= sizeof(ErrorClass));
         createVanillaPrototype();
     }
 }
