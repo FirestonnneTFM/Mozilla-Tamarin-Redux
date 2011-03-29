@@ -4659,171 +4659,171 @@ class SlotOffsetsAndAsserts
 public:
     static uint32_t getSlotOffset(Traits* t, int nameId);
     enum {
-        kSlotsOffsetObjectClass = offsetof(avmplus::ObjectClass, m_slots_ObjectClass),
-        kSlotsOffsetScriptObject = 0,
-        kSlotsOffsetClassClass = offsetof(avmplus::ClassClass, m_slots_ClassClass),
-        kSlotsOffsetClassClosure = 0,
-        kSlotsOffsetFunctionClass = offsetof(avmplus::FunctionClass, m_slots_FunctionClass),
-        kSlotsOffsetFunctionObject = 0,
-        kSlotsOffsetNamespaceClass = offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass),
-        kSlotsOffsetNamespace = 0,
-        kSlotsOffsetBooleanClass = offsetof(avmplus::BooleanClass, m_slots_BooleanClass),
-        kSlotsOffsetbool = 0,
-        kSlotsOffsetNumberClass = offsetof(avmplus::NumberClass, m_slots_NumberClass),
-        kSlotsOffsetdouble = 0,
-        kSlotsOffsetIntClass = offsetof(avmplus::IntClass, m_slots_IntClass),
-        kSlotsOffsetint32_t = 0,
-        kSlotsOffsetUIntClass = offsetof(avmplus::UIntClass, m_slots_UIntClass),
-        kSlotsOffsetuint32_t = 0,
-        kSlotsOffsetStringClass = offsetof(avmplus::StringClass, m_slots_StringClass),
-        kSlotsOffsetString = 0,
-        kSlotsOffsetArrayClass = offsetof(avmplus::ArrayClass, m_slots_ArrayClass),
-        kSlotsOffsetArrayObject = 0,
-        kSlotsOffsetVectorClass = 0,
-        kSlotsOffsetObjectVectorObject = 0,
-        kSlotsOffsetObjectVectorClass = 0,
-        kSlotsOffsetIntVectorClass = 0,
-        kSlotsOffsetIntVectorObject = 0,
-        kSlotsOffsetUIntVectorClass = 0,
-        kSlotsOffsetUIntVectorObject = 0,
-        kSlotsOffsetDoubleVectorClass = 0,
-        kSlotsOffsetDoubleVectorObject = 0,
-        kSlotsOffsetMethodClosureClass = 0,
-        kSlotsOffsetMethodClosure = 0,
-        kSlotsOffsetMathClass = offsetof(avmplus::MathClass, m_slots_MathClass),
-        kSlotsOffsetErrorClass = offsetof(avmplus::ErrorClass, m_slots_ErrorClass),
-        kSlotsOffsetErrorObject = offsetof(avmplus::ErrorObject, m_slots_ErrorObject),
-        kSlotsOffsetDefinitionErrorClass = offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass),
-        kSlotsOffsetDefinitionErrorObject = 0,
-        kSlotsOffsetEvalErrorClass = offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass),
-        kSlotsOffsetEvalErrorObject = 0,
-        kSlotsOffsetRangeErrorClass = offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass),
-        kSlotsOffsetRangeErrorObject = 0,
-        kSlotsOffsetReferenceErrorClass = offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass),
-        kSlotsOffsetReferenceErrorObject = 0,
-        kSlotsOffsetSecurityErrorClass = offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass),
-        kSlotsOffsetSecurityErrorObject = 0,
-        kSlotsOffsetSyntaxErrorClass = offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass),
-        kSlotsOffsetSyntaxErrorObject = 0,
-        kSlotsOffsetTypeErrorClass = offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass),
-        kSlotsOffsetTypeErrorObject = 0,
-        kSlotsOffsetURIErrorClass = offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass),
-        kSlotsOffsetURIErrorObject = 0,
-        kSlotsOffsetVerifyErrorClass = offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass),
-        kSlotsOffsetVerifyErrorObject = 0,
-        kSlotsOffsetUninitializedErrorClass = offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass),
-        kSlotsOffsetUninitializedErrorObject = 0,
-        kSlotsOffsetArgumentErrorClass = offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass),
-        kSlotsOffsetArgumentErrorObject = 0,
-        kSlotsOffsetIOErrorClass = 0,
-        kSlotsOffsetIOErrorObject = 0,
-        kSlotsOffsetMemoryErrorClass = 0,
-        kSlotsOffsetMemoryErrorObject = 0,
-        kSlotsOffsetEOFErrorClass = 0,
-        kSlotsOffsetEOFErrorObject = 0,
-        kSlotsOffsetDateClass = offsetof(avmplus::DateClass, m_slots_DateClass),
-        kSlotsOffsetDateObject = 0,
-        kSlotsOffsetRegExpClass = offsetof(avmplus::RegExpClass, m_slots_RegExpClass),
-        kSlotsOffsetRegExpObject = 0,
-        kSlotsOffsetXMLClass = offsetof(avmplus::XMLClass, m_slots_XMLClass),
-        kSlotsOffsetXMLObject = 0,
-        kSlotsOffsetXMLListClass = offsetof(avmplus::XMLListClass, m_slots_XMLListClass),
-        kSlotsOffsetXMLListObject = 0,
-        kSlotsOffsetQNameClass = offsetof(avmplus::QNameClass, m_slots_QNameClass),
-        kSlotsOffsetQNameObject = 0,
-        kSlotsOffsetCompressionAlgorithmClass = offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass),
-        kSlotsOffsetCompressionAlgorithmObject = 0,
-        kSlotsOffsetByteArrayClass = offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass),
-        kSlotsOffsetByteArrayObject = 0,
+        kSlotsOffset_avmplus_ObjectClass = offsetof(avmplus::ObjectClass, m_slots_ObjectClass),
+        kSlotsOffset_avmplus_ScriptObject = 0,
+        kSlotsOffset_avmplus_ClassClass = offsetof(avmplus::ClassClass, m_slots_ClassClass),
+        kSlotsOffset_avmplus_ClassClosure = 0,
+        kSlotsOffset_avmplus_FunctionClass = offsetof(avmplus::FunctionClass, m_slots_FunctionClass),
+        kSlotsOffset_avmplus_FunctionObject = 0,
+        kSlotsOffset_avmplus_NamespaceClass = offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass),
+        kSlotsOffset_avmplus_Namespace = 0,
+        kSlotsOffset_avmplus_BooleanClass = offsetof(avmplus::BooleanClass, m_slots_BooleanClass),
+        kSlotsOffset_bool = 0,
+        kSlotsOffset_avmplus_NumberClass = offsetof(avmplus::NumberClass, m_slots_NumberClass),
+        kSlotsOffset_double = 0,
+        kSlotsOffset_avmplus_IntClass = offsetof(avmplus::IntClass, m_slots_IntClass),
+        kSlotsOffset_int32_t = 0,
+        kSlotsOffset_avmplus_UIntClass = offsetof(avmplus::UIntClass, m_slots_UIntClass),
+        kSlotsOffset_uint32_t = 0,
+        kSlotsOffset_avmplus_StringClass = offsetof(avmplus::StringClass, m_slots_StringClass),
+        kSlotsOffset_avmplus_String = 0,
+        kSlotsOffset_avmplus_ArrayClass = offsetof(avmplus::ArrayClass, m_slots_ArrayClass),
+        kSlotsOffset_avmplus_ArrayObject = 0,
+        kSlotsOffset_avmplus_VectorClass = 0,
+        kSlotsOffset_avmplus_ObjectVectorObject = 0,
+        kSlotsOffset_avmplus_ObjectVectorClass = 0,
+        kSlotsOffset_avmplus_IntVectorClass = 0,
+        kSlotsOffset_avmplus_IntVectorObject = 0,
+        kSlotsOffset_avmplus_UIntVectorClass = 0,
+        kSlotsOffset_avmplus_UIntVectorObject = 0,
+        kSlotsOffset_avmplus_DoubleVectorClass = 0,
+        kSlotsOffset_avmplus_DoubleVectorObject = 0,
+        kSlotsOffset_avmplus_MethodClosureClass = 0,
+        kSlotsOffset_avmplus_MethodClosure = 0,
+        kSlotsOffset_avmplus_MathClass = offsetof(avmplus::MathClass, m_slots_MathClass),
+        kSlotsOffset_avmplus_ErrorClass = offsetof(avmplus::ErrorClass, m_slots_ErrorClass),
+        kSlotsOffset_avmplus_ErrorObject = offsetof(avmplus::ErrorObject, m_slots_ErrorObject),
+        kSlotsOffset_avmplus_DefinitionErrorClass = offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass),
+        kSlotsOffset_avmplus_DefinitionErrorObject = 0,
+        kSlotsOffset_avmplus_EvalErrorClass = offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass),
+        kSlotsOffset_avmplus_EvalErrorObject = 0,
+        kSlotsOffset_avmplus_RangeErrorClass = offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass),
+        kSlotsOffset_avmplus_RangeErrorObject = 0,
+        kSlotsOffset_avmplus_ReferenceErrorClass = offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass),
+        kSlotsOffset_avmplus_ReferenceErrorObject = 0,
+        kSlotsOffset_avmplus_SecurityErrorClass = offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass),
+        kSlotsOffset_avmplus_SecurityErrorObject = 0,
+        kSlotsOffset_avmplus_SyntaxErrorClass = offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass),
+        kSlotsOffset_avmplus_SyntaxErrorObject = 0,
+        kSlotsOffset_avmplus_TypeErrorClass = offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass),
+        kSlotsOffset_avmplus_TypeErrorObject = 0,
+        kSlotsOffset_avmplus_URIErrorClass = offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass),
+        kSlotsOffset_avmplus_URIErrorObject = 0,
+        kSlotsOffset_avmplus_VerifyErrorClass = offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass),
+        kSlotsOffset_avmplus_VerifyErrorObject = 0,
+        kSlotsOffset_avmplus_UninitializedErrorClass = offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass),
+        kSlotsOffset_avmplus_UninitializedErrorObject = 0,
+        kSlotsOffset_avmplus_ArgumentErrorClass = offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass),
+        kSlotsOffset_avmplus_ArgumentErrorObject = 0,
+        kSlotsOffset_avmplus_IOErrorClass = 0,
+        kSlotsOffset_avmplus_IOErrorObject = 0,
+        kSlotsOffset_avmplus_MemoryErrorClass = 0,
+        kSlotsOffset_avmplus_MemoryErrorObject = 0,
+        kSlotsOffset_avmplus_EOFErrorClass = 0,
+        kSlotsOffset_avmplus_EOFErrorObject = 0,
+        kSlotsOffset_avmplus_DateClass = offsetof(avmplus::DateClass, m_slots_DateClass),
+        kSlotsOffset_avmplus_DateObject = 0,
+        kSlotsOffset_avmplus_RegExpClass = offsetof(avmplus::RegExpClass, m_slots_RegExpClass),
+        kSlotsOffset_avmplus_RegExpObject = 0,
+        kSlotsOffset_avmplus_XMLClass = offsetof(avmplus::XMLClass, m_slots_XMLClass),
+        kSlotsOffset_avmplus_XMLObject = 0,
+        kSlotsOffset_avmplus_XMLListClass = offsetof(avmplus::XMLListClass, m_slots_XMLListClass),
+        kSlotsOffset_avmplus_XMLListObject = 0,
+        kSlotsOffset_avmplus_QNameClass = offsetof(avmplus::QNameClass, m_slots_QNameClass),
+        kSlotsOffset_avmplus_QNameObject = 0,
+        kSlotsOffset_avmplus_CompressionAlgorithmClass = offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass),
+        kSlotsOffset_avmplus_CompressionAlgorithmObject = 0,
+        kSlotsOffset_avmplus_ByteArrayClass = offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass),
+        kSlotsOffset_avmplus_ByteArrayObject = 0,
         kSlotsOffset_fnord
     };
     #ifdef DEBUG
-    static void doObjectClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doClassClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doFunctionClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doNamespaceClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doBooleanClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doNumberClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doIntClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doUIntClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doStringClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doArrayClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doVectorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doObjectVectorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doIntVectorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doUIntVectorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doDoubleVectorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doMethodClosureClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doMathClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doDefinitionErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doEvalErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doRangeErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doReferenceErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doSecurityErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doSyntaxErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doTypeErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doURIErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doVerifyErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doUninitializedErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doArgumentErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doIOErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doMemoryErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doEOFErrorClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doDateClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doRegExpClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doXMLClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doXMLListClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doQNameClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doCompressionAlgorithmClassAsserts(Traits* ctraits, Traits* itraits);
-    static void doByteArrayClassAsserts(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ObjectClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ClassClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_FunctionClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_NamespaceClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_BooleanClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_NumberClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_IntClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_UIntClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_StringClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ArrayClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_VectorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ObjectVectorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_IntVectorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_UIntVectorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_DoubleVectorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_MethodClosureClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_MathClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_DefinitionErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_EvalErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_RangeErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ReferenceErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_SecurityErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_SyntaxErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_TypeErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_URIErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_VerifyErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_UninitializedErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ArgumentErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_IOErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_MemoryErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_EOFErrorClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_DateClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_RegExpClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_XMLClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_XMLListClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_QNameClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_CompressionAlgorithmClass(Traits* ctraits, Traits* itraits);
+    static void check_avmplus_ByteArrayClass(Traits* ctraits, Traits* itraits);
     #endif
 };
 #ifdef DEBUG
-REALLY_INLINE void SlotOffsetsAndAsserts::doObjectClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ObjectClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ObjectClass, m_slots_ObjectClass) == kSlotsOffsetObjectClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ObjectClass, m_slots_ObjectClass) == kSlotsOffset_avmplus_ObjectClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ObjectClass, m_slots_ObjectClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ObjectClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ObjectClass, m_slots_ObjectClass) + offsetof(avmplus_ObjectClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doClassClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ClassClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ClassClass, m_slots_ClassClass) == kSlotsOffsetClassClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ClassClass, m_slots_ClassClass) == kSlotsOffset_avmplus_ClassClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ClassClass, m_slots_ClassClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ClassClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ClassClass, m_slots_ClassClass) + offsetof(avmplus_ClassClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doFunctionClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_FunctionClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::FunctionClass, m_slots_FunctionClass) == kSlotsOffsetFunctionClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::FunctionClass, m_slots_FunctionClass) == kSlotsOffset_avmplus_FunctionClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::FunctionClass, m_slots_FunctionClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::FunctionClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::FunctionClass, m_slots_FunctionClass) + offsetof(avmplus_FunctionClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNamespaceClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_NamespaceClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass) == kSlotsOffsetNamespaceClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass) == kSlotsOffset_avmplus_NamespaceClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::NamespaceClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::NamespaceClass, m_slots_NamespaceClass) + offsetof(avmplus_NamespaceClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doBooleanClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_BooleanClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::BooleanClass, m_slots_BooleanClass) == kSlotsOffsetBooleanClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::BooleanClass, m_slots_BooleanClass) == kSlotsOffset_avmplus_BooleanClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::BooleanClass, m_slots_BooleanClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::BooleanClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::BooleanClass, m_slots_BooleanClass) + offsetof(avmplus_BooleanClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doNumberClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_NumberClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::NumberClass, m_slots_NumberClass) == kSlotsOffsetNumberClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::NumberClass, m_slots_NumberClass) == kSlotsOffset_avmplus_NumberClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::NumberClass, m_slots_NumberClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::NumberClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_length)));
@@ -4836,38 +4836,38 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doNumberClassAsserts(Traits* ctraits, 
     AvmAssert(getSlotOffset(ctraits, 165) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_private_DTOSTR_PRECISION)));
     AvmAssert(getSlotOffset(ctraits, 166) == (offsetof(avmplus::NumberClass, m_slots_NumberClass) + offsetof(avmplus_NumberClassSlots, m_private_DTOSTR_EXPONENTIAL)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doIntClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_IntClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::IntClass, m_slots_IntClass) == kSlotsOffsetIntClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::IntClass, m_slots_IntClass) == kSlotsOffset_avmplus_IntClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::IntClass, m_slots_IntClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::IntClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 162) == (offsetof(avmplus::IntClass, m_slots_IntClass) + offsetof(avmplus_IntClassSlots, m_MIN_VALUE)));
     AvmAssert(getSlotOffset(ctraits, 163) == (offsetof(avmplus::IntClass, m_slots_IntClass) + offsetof(avmplus_IntClassSlots, m_MAX_VALUE)));
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::IntClass, m_slots_IntClass) + offsetof(avmplus_IntClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doUIntClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_UIntClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::UIntClass, m_slots_UIntClass) == kSlotsOffsetUIntClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::UIntClass, m_slots_UIntClass) == kSlotsOffset_avmplus_UIntClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::UIntClass, m_slots_UIntClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::UIntClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 162) == (offsetof(avmplus::UIntClass, m_slots_UIntClass) + offsetof(avmplus_UIntClassSlots, m_MIN_VALUE)));
     AvmAssert(getSlotOffset(ctraits, 163) == (offsetof(avmplus::UIntClass, m_slots_UIntClass) + offsetof(avmplus_UIntClassSlots, m_MAX_VALUE)));
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::UIntClass, m_slots_UIntClass) + offsetof(avmplus_UIntClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doStringClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_StringClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::StringClass, m_slots_StringClass) == kSlotsOffsetStringClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::StringClass, m_slots_StringClass) == kSlotsOffset_avmplus_StringClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::StringClass, m_slots_StringClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::StringClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::StringClass, m_slots_StringClass) + offsetof(avmplus_StringClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doArrayClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ArrayClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ArrayClass, m_slots_ArrayClass) == kSlotsOffsetArrayClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ArrayClass, m_slots_ArrayClass) == kSlotsOffset_avmplus_ArrayClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ArrayClass, m_slots_ArrayClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ArrayClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 329) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_CASEINSENSITIVE)));
@@ -4877,34 +4877,34 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doArrayClassAsserts(Traits* ctraits, T
     AvmAssert(getSlotOffset(ctraits, 333) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_NUMERIC)));
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ArrayClass, m_slots_ArrayClass) + offsetof(avmplus_ArrayClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doVectorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_VectorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doObjectVectorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ObjectVectorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doIntVectorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_IntVectorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doUIntVectorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_UIntVectorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDoubleVectorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_DoubleVectorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doMethodClosureClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_MethodClosureClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doMathClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_MathClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::MathClass, m_slots_MathClass) == kSlotsOffsetMathClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::MathClass, m_slots_MathClass) == kSlotsOffset_avmplus_MathClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::MathClass, m_slots_MathClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::MathClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 777) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_E)));
@@ -4917,173 +4917,173 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doMathClassAsserts(Traits* ctraits, Tr
     AvmAssert(getSlotOffset(ctraits, 784) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_SQRT2)));
     AvmAssert(getSlotOffset(ctraits, 802) == (offsetof(avmplus::MathClass, m_slots_MathClass) + offsetof(avmplus_MathClassSlots, m_private_NegInfinity)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorClass, m_slots_ErrorClass) == kSlotsOffsetErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorClass, m_slots_ErrorClass) == kSlotsOffset_avmplus_ErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorClass, m_slots_ErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ErrorClass, m_slots_ErrorClass) + offsetof(avmplus_ErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorObject, m_slots_ErrorObject) == kSlotsOffsetErrorObject);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorObject, m_slots_ErrorObject) == kSlotsOffset_avmplus_ErrorObject);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ErrorObject, m_slots_ErrorObject) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ErrorObject) <= 0xFFFF);
     AvmAssert(getSlotOffset(itraits, 831) == (offsetof(avmplus::ErrorObject, m_slots_ErrorObject) + offsetof(avmplus_ErrorObjectSlots, m_message)));
     AvmAssert(getSlotOffset(itraits, 832) == (offsetof(avmplus::ErrorObject, m_slots_ErrorObject) + offsetof(avmplus_ErrorObjectSlots, m_name)));
     AvmAssert(getSlotOffset(itraits, 834) == (offsetof(avmplus::ErrorObject, m_slots_ErrorObject) + offsetof(avmplus_ErrorObjectSlots, m_private__errorID)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_DefinitionErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass) == kSlotsOffsetDefinitionErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass) == kSlotsOffset_avmplus_DefinitionErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::DefinitionErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::DefinitionErrorClass, m_slots_DefinitionErrorClass) + offsetof(avmplus_DefinitionErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doEvalErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_EvalErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass) == kSlotsOffsetEvalErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass) == kSlotsOffset_avmplus_EvalErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::EvalErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::EvalErrorClass, m_slots_EvalErrorClass) + offsetof(avmplus_EvalErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doRangeErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_RangeErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass) == kSlotsOffsetRangeErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass) == kSlotsOffset_avmplus_RangeErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::RangeErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::RangeErrorClass, m_slots_RangeErrorClass) + offsetof(avmplus_RangeErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ReferenceErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass) == kSlotsOffsetReferenceErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass) == kSlotsOffset_avmplus_ReferenceErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ReferenceErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ReferenceErrorClass, m_slots_ReferenceErrorClass) + offsetof(avmplus_ReferenceErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_SecurityErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass) == kSlotsOffsetSecurityErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass) == kSlotsOffset_avmplus_SecurityErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::SecurityErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::SecurityErrorClass, m_slots_SecurityErrorClass) + offsetof(avmplus_SecurityErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_SyntaxErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass) == kSlotsOffsetSyntaxErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass) == kSlotsOffset_avmplus_SyntaxErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::SyntaxErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::SyntaxErrorClass, m_slots_SyntaxErrorClass) + offsetof(avmplus_SyntaxErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doTypeErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_TypeErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass) == kSlotsOffsetTypeErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass) == kSlotsOffset_avmplus_TypeErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::TypeErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::TypeErrorClass, m_slots_TypeErrorClass) + offsetof(avmplus_TypeErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doURIErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_URIErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass) == kSlotsOffsetURIErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass) == kSlotsOffset_avmplus_URIErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::URIErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::URIErrorClass, m_slots_URIErrorClass) + offsetof(avmplus_URIErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_VerifyErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass) == kSlotsOffsetVerifyErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass) == kSlotsOffset_avmplus_VerifyErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::VerifyErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::VerifyErrorClass, m_slots_VerifyErrorClass) + offsetof(avmplus_VerifyErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_UninitializedErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass) == kSlotsOffsetUninitializedErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass) == kSlotsOffset_avmplus_UninitializedErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::UninitializedErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::UninitializedErrorClass, m_slots_UninitializedErrorClass) + offsetof(avmplus_UninitializedErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ArgumentErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) == kSlotsOffsetArgumentErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) == kSlotsOffset_avmplus_ArgumentErrorClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ArgumentErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::ArgumentErrorClass, m_slots_ArgumentErrorClass) + offsetof(avmplus_ArgumentErrorClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doIOErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_IOErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doMemoryErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_MemoryErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doEOFErrorClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_EOFErrorClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doDateClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_DateClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::DateClass, m_slots_DateClass) == kSlotsOffsetDateClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::DateClass, m_slots_DateClass) == kSlotsOffset_avmplus_DateClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::DateClass, m_slots_DateClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::DateClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::DateClass, m_slots_DateClass) + offsetof(avmplus_DateClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doRegExpClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_RegExpClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::RegExpClass, m_slots_RegExpClass) == kSlotsOffsetRegExpClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::RegExpClass, m_slots_RegExpClass) == kSlotsOffset_avmplus_RegExpClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::RegExpClass, m_slots_RegExpClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::RegExpClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::RegExpClass, m_slots_RegExpClass) + offsetof(avmplus_RegExpClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doXMLClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_XMLClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLClass, m_slots_XMLClass) == kSlotsOffsetXMLClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLClass, m_slots_XMLClass) == kSlotsOffset_avmplus_XMLClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::XMLClass, m_slots_XMLClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::XMLClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::XMLClass, m_slots_XMLClass) + offsetof(avmplus_XMLClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doXMLListClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_XMLListClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLListClass, m_slots_XMLListClass) == kSlotsOffsetXMLListClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::XMLListClass, m_slots_XMLListClass) == kSlotsOffset_avmplus_XMLListClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::XMLListClass, m_slots_XMLListClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::XMLListClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::XMLListClass, m_slots_XMLListClass) + offsetof(avmplus_XMLListClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_QNameClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::QNameClass, m_slots_QNameClass) == kSlotsOffsetQNameClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::QNameClass, m_slots_QNameClass) == kSlotsOffset_avmplus_QNameClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::QNameClass, m_slots_QNameClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::QNameClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 87) == (offsetof(avmplus::QNameClass, m_slots_QNameClass) + offsetof(avmplus_QNameClassSlots, m_length)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doCompressionAlgorithmClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_CompressionAlgorithmClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) == kSlotsOffsetCompressionAlgorithmClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) == kSlotsOffset_avmplus_CompressionAlgorithmClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::CompressionAlgorithmClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 1352) == (offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) + offsetof(avmplus_CompressionAlgorithmClassSlots, m_ZLIB)));
     AvmAssert(getSlotOffset(ctraits, 1353) == (offsetof(avmplus::CompressionAlgorithmClass, m_slots_CompressionAlgorithmClass) + offsetof(avmplus_CompressionAlgorithmClassSlots, m_DEFLATE)));
 }
-REALLY_INLINE void SlotOffsetsAndAsserts::doByteArrayClassAsserts(Traits* ctraits, Traits* itraits)
+REALLY_INLINE void SlotOffsetsAndAsserts::check_avmplus_ByteArrayClass(Traits* ctraits, Traits* itraits)
 {
     (void)ctraits; (void)itraits;
-    MMGC_STATIC_ASSERT(offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass) == kSlotsOffsetByteArrayClass);
+    MMGC_STATIC_ASSERT(offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass) == kSlotsOffset_avmplus_ByteArrayClass);
     MMGC_STATIC_ASSERT(offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(avmplus::ByteArrayClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(ctraits, 1359) == (offsetof(avmplus::ByteArrayClass, m_slots_ByteArrayClass) + offsetof(avmplus_ByteArrayClassSlots, m_private__defaultObjectEncoding)));
@@ -5437,45 +5437,45 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
     AVMTHUNK_END_NATIVE_METHODS()
 
     AVMTHUNK_BEGIN_NATIVE_CLASSES(builtin)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Object, ObjectClass, avmplus::ObjectClass, SlotOffsetsAndAsserts::kSlotsOffsetObjectClass, avmplus::ScriptObject, SlotOffsetsAndAsserts::kSlotsOffsetScriptObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Class, ClassClass, avmplus::ClassClass, SlotOffsetsAndAsserts::kSlotsOffsetClassClass, avmplus::ClassClosure, SlotOffsetsAndAsserts::kSlotsOffsetClassClosure, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Function, FunctionClass, avmplus::FunctionClass, SlotOffsetsAndAsserts::kSlotsOffsetFunctionClass, avmplus::FunctionObject, SlotOffsetsAndAsserts::kSlotsOffsetFunctionObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Namespace, NamespaceClass, avmplus::NamespaceClass, SlotOffsetsAndAsserts::kSlotsOffsetNamespaceClass, avmplus::Namespace, SlotOffsetsAndAsserts::kSlotsOffsetNamespace, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Boolean, BooleanClass, avmplus::BooleanClass, SlotOffsetsAndAsserts::kSlotsOffsetBooleanClass, bool, SlotOffsetsAndAsserts::kSlotsOffsetbool, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Number, NumberClass, avmplus::NumberClass, SlotOffsetsAndAsserts::kSlotsOffsetNumberClass, double, SlotOffsetsAndAsserts::kSlotsOffsetdouble, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_int, IntClass, avmplus::IntClass, SlotOffsetsAndAsserts::kSlotsOffsetIntClass, int32_t, SlotOffsetsAndAsserts::kSlotsOffsetint32_t, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_uint, UIntClass, avmplus::UIntClass, SlotOffsetsAndAsserts::kSlotsOffsetUIntClass, uint32_t, SlotOffsetsAndAsserts::kSlotsOffsetuint32_t, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_String, StringClass, avmplus::StringClass, SlotOffsetsAndAsserts::kSlotsOffsetStringClass, avmplus::String, SlotOffsetsAndAsserts::kSlotsOffsetString, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Array, ArrayClass, avmplus::ArrayClass, SlotOffsetsAndAsserts::kSlotsOffsetArrayClass, avmplus::ArrayObject, SlotOffsetsAndAsserts::kSlotsOffsetArrayObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector, VectorClass, avmplus::VectorClass, SlotOffsetsAndAsserts::kSlotsOffsetVectorClass, avmplus::ObjectVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetObjectVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_object, ObjectVectorClass, avmplus::ObjectVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetObjectVectorClass, avmplus::ObjectVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetObjectVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_int, IntVectorClass, avmplus::IntVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetIntVectorClass, avmplus::IntVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetIntVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_uint, UIntVectorClass, avmplus::UIntVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetUIntVectorClass, avmplus::UIntVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetUIntVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_double, DoubleVectorClass, avmplus::DoubleVectorClass, SlotOffsetsAndAsserts::kSlotsOffsetDoubleVectorClass, avmplus::DoubleVectorObject, SlotOffsetsAndAsserts::kSlotsOffsetDoubleVectorObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_private_MethodClosure, MethodClosureClass, avmplus::MethodClosureClass, SlotOffsetsAndAsserts::kSlotsOffsetMethodClosureClass, avmplus::MethodClosure, SlotOffsetsAndAsserts::kSlotsOffsetMethodClosure, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Math, MathClass, avmplus::MathClass, SlotOffsetsAndAsserts::kSlotsOffsetMathClass, double, SlotOffsetsAndAsserts::kSlotsOffsetdouble, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Error, ErrorClass, avmplus::ErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetErrorClass, avmplus::ErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_DefinitionError, DefinitionErrorClass, avmplus::DefinitionErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetDefinitionErrorClass, avmplus::DefinitionErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetDefinitionErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_EvalError, EvalErrorClass, avmplus::EvalErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetEvalErrorClass, avmplus::EvalErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetEvalErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_RangeError, RangeErrorClass, avmplus::RangeErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetRangeErrorClass, avmplus::RangeErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetRangeErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_ReferenceError, ReferenceErrorClass, avmplus::ReferenceErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetReferenceErrorClass, avmplus::ReferenceErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetReferenceErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_SecurityError, SecurityErrorClass, avmplus::SecurityErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetSecurityErrorClass, avmplus::SecurityErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetSecurityErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_SyntaxError, SyntaxErrorClass, avmplus::SyntaxErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetSyntaxErrorClass, avmplus::SyntaxErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetSyntaxErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_TypeError, TypeErrorClass, avmplus::TypeErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetTypeErrorClass, avmplus::TypeErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetTypeErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_URIError, URIErrorClass, avmplus::URIErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetURIErrorClass, avmplus::URIErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetURIErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_VerifyError, VerifyErrorClass, avmplus::VerifyErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetVerifyErrorClass, avmplus::VerifyErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetVerifyErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_UninitializedError, UninitializedErrorClass, avmplus::UninitializedErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetUninitializedErrorClass, avmplus::UninitializedErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetUninitializedErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_ArgumentError, ArgumentErrorClass, avmplus::ArgumentErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetArgumentErrorClass, avmplus::ArgumentErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetArgumentErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_IOError, IOErrorClass, avmplus::IOErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetIOErrorClass, avmplus::IOErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetIOErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_MemoryError, MemoryErrorClass, avmplus::MemoryErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetMemoryErrorClass, avmplus::MemoryErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetMemoryErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_EOFError, EOFErrorClass, avmplus::EOFErrorClass, SlotOffsetsAndAsserts::kSlotsOffsetEOFErrorClass, avmplus::EOFErrorObject, SlotOffsetsAndAsserts::kSlotsOffsetEOFErrorObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Date, DateClass, avmplus::DateClass, SlotOffsetsAndAsserts::kSlotsOffsetDateClass, avmplus::DateObject, SlotOffsetsAndAsserts::kSlotsOffsetDateObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_RegExp, RegExpClass, avmplus::RegExpClass, SlotOffsetsAndAsserts::kSlotsOffsetRegExpClass, avmplus::RegExpObject, SlotOffsetsAndAsserts::kSlotsOffsetRegExpObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_XML, XMLClass, avmplus::XMLClass, SlotOffsetsAndAsserts::kSlotsOffsetXMLClass, avmplus::XMLObject, SlotOffsetsAndAsserts::kSlotsOffsetXMLObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, avmplus::XMLListClass, SlotOffsetsAndAsserts::kSlotsOffsetXMLListClass, avmplus::XMLListObject, SlotOffsetsAndAsserts::kSlotsOffsetXMLListObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, avmplus::QNameClass, SlotOffsetsAndAsserts::kSlotsOffsetQNameClass, avmplus::QNameObject, SlotOffsetsAndAsserts::kSlotsOffsetQNameObject, true, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_CompressionAlgorithm, CompressionAlgorithmClass, avmplus::CompressionAlgorithmClass, SlotOffsetsAndAsserts::kSlotsOffsetCompressionAlgorithmClass, avmplus::CompressionAlgorithmObject, SlotOffsetsAndAsserts::kSlotsOffsetCompressionAlgorithmObject, false, false, false)
-        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_ByteArray, ByteArrayClass, avmplus::ByteArrayClass, SlotOffsetsAndAsserts::kSlotsOffsetByteArrayClass, avmplus::ByteArrayObject, SlotOffsetsAndAsserts::kSlotsOffsetByteArrayObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Object, ObjectClass, avmplus::ObjectClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ObjectClass, avmplus::ScriptObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ScriptObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Class, ClassClass, avmplus::ClassClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ClassClass, avmplus::ClassClosure, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ClassClosure, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Function, FunctionClass, avmplus::FunctionClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_FunctionClass, avmplus::FunctionObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_FunctionObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Namespace, NamespaceClass, avmplus::NamespaceClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_NamespaceClass, avmplus::Namespace, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_Namespace, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Boolean, BooleanClass, avmplus::BooleanClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_BooleanClass, bool, SlotOffsetsAndAsserts::kSlotsOffset_bool, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Number, NumberClass, avmplus::NumberClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_NumberClass, double, SlotOffsetsAndAsserts::kSlotsOffset_double, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_int, IntClass, avmplus::IntClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_IntClass, int32_t, SlotOffsetsAndAsserts::kSlotsOffset_int32_t, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_uint, UIntClass, avmplus::UIntClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_UIntClass, uint32_t, SlotOffsetsAndAsserts::kSlotsOffset_uint32_t, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_String, StringClass, avmplus::StringClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_StringClass, avmplus::String, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_String, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Array, ArrayClass, avmplus::ArrayClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ArrayClass, avmplus::ArrayObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ArrayObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector, VectorClass, avmplus::VectorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_VectorClass, avmplus::ObjectVectorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ObjectVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_object, ObjectVectorClass, avmplus::ObjectVectorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ObjectVectorClass, avmplus::ObjectVectorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ObjectVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_int, IntVectorClass, avmplus::IntVectorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_IntVectorClass, avmplus::IntVectorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_IntVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_uint, UIntVectorClass, avmplus::UIntVectorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_UIntVectorClass, avmplus::UIntVectorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_UIntVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_double, DoubleVectorClass, avmplus::DoubleVectorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_DoubleVectorClass, avmplus::DoubleVectorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_DoubleVectorObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_private_MethodClosure, MethodClosureClass, avmplus::MethodClosureClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_MethodClosureClass, avmplus::MethodClosure, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_MethodClosure, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Math, MathClass, avmplus::MathClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_MathClass, double, SlotOffsetsAndAsserts::kSlotsOffset_double, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Error, ErrorClass, avmplus::ErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ErrorClass, avmplus::ErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_DefinitionError, DefinitionErrorClass, avmplus::DefinitionErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_DefinitionErrorClass, avmplus::DefinitionErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_DefinitionErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_EvalError, EvalErrorClass, avmplus::EvalErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_EvalErrorClass, avmplus::EvalErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_EvalErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_RangeError, RangeErrorClass, avmplus::RangeErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_RangeErrorClass, avmplus::RangeErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_RangeErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_ReferenceError, ReferenceErrorClass, avmplus::ReferenceErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ReferenceErrorClass, avmplus::ReferenceErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ReferenceErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_SecurityError, SecurityErrorClass, avmplus::SecurityErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_SecurityErrorClass, avmplus::SecurityErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_SecurityErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_SyntaxError, SyntaxErrorClass, avmplus::SyntaxErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_SyntaxErrorClass, avmplus::SyntaxErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_SyntaxErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_TypeError, TypeErrorClass, avmplus::TypeErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_TypeErrorClass, avmplus::TypeErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_TypeErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_URIError, URIErrorClass, avmplus::URIErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_URIErrorClass, avmplus::URIErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_URIErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_VerifyError, VerifyErrorClass, avmplus::VerifyErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_VerifyErrorClass, avmplus::VerifyErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_VerifyErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_UninitializedError, UninitializedErrorClass, avmplus::UninitializedErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_UninitializedErrorClass, avmplus::UninitializedErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_UninitializedErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_ArgumentError, ArgumentErrorClass, avmplus::ArgumentErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ArgumentErrorClass, avmplus::ArgumentErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ArgumentErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_IOError, IOErrorClass, avmplus::IOErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_IOErrorClass, avmplus::IOErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_IOErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_MemoryError, MemoryErrorClass, avmplus::MemoryErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_MemoryErrorClass, avmplus::MemoryErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_MemoryErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_errors_EOFError, EOFErrorClass, avmplus::EOFErrorClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_EOFErrorClass, avmplus::EOFErrorObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_EOFErrorObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Date, DateClass, avmplus::DateClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_DateClass, avmplus::DateObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_DateObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_RegExp, RegExpClass, avmplus::RegExpClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_RegExpClass, avmplus::RegExpObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_RegExpObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_XML, XMLClass, avmplus::XMLClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_XMLClass, avmplus::XMLObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_XMLObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, avmplus::XMLListClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_XMLListClass, avmplus::XMLListObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_XMLListObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, avmplus::QNameClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_QNameClass, avmplus::QNameObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_QNameObject, true, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_CompressionAlgorithm, CompressionAlgorithmClass, avmplus::CompressionAlgorithmClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_CompressionAlgorithmClass, avmplus::CompressionAlgorithmObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_CompressionAlgorithmObject, false, false, false)
+        AVMTHUNK_NATIVE_CLASS(abcclass_flash_utils_ByteArray, ByteArrayClass, avmplus::ByteArrayClass, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ByteArrayClass, avmplus::ByteArrayObject, SlotOffsetsAndAsserts::kSlotsOffset_avmplus_ByteArrayObject, false, false, false)
     AVMTHUNK_END_NATIVE_CLASSES()
 
 AVMTHUNK_END_NATIVE_TABLES()
@@ -8645,70 +8645,70 @@ extern "C" const struct {
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::createScriptObjectProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ObjectClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doObjectClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ObjectClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ClassClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ClassClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doClassClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ClassClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::FunctionClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::FunctionClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doFunctionClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_FunctionClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::NamespaceClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::NamespaceClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNamespaceClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_NamespaceClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::BooleanClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::BooleanClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doBooleanClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_BooleanClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::NumberClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::NumberClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doNumberClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_NumberClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::IntClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::IntClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doIntClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_IntClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::UIntClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::UIntClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doUIntClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_UIntClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::StringClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::StringClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doStringClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_StringClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ArrayClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::ArrayClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ArrayClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doArrayClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ArrayClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ArrayClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8721,7 +8721,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArrayObject::construct(int argc, avm
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::VectorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_VectorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ObjectVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -8729,14 +8729,14 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ObjectVectorObject::construct(int ar
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ObjectVectorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doObjectVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ObjectVectorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::IntVectorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::IntVectorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doIntVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_IntVectorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IntVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -8744,7 +8744,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IntVectorObject::construct(int argc,
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::UIntVectorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doUIntVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_UIntVectorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UIntVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -8752,7 +8752,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UIntVectorObject::construct(int argc
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::DoubleVectorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDoubleVectorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_DoubleVectorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DoubleVectorObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -8760,21 +8760,21 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DoubleVectorObject::construct(int ar
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::MethodClosureClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doMethodClosureClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_MethodClosureClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::MathClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::MathClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doMathClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_MathClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ClassClosure* FASTCALL avmplus::ErrorClass::createClassClosure(avmplus::VTable* cvtable)
 {
     cvtable->ivtable->createInstanceProc = avmplus::ErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8787,7 +8787,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ErrorObject::construct(int argc, avm
 {
     cvtable->ivtable->createInstanceProc = avmplus::DefinitionErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::DefinitionErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_DefinitionErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::DefinitionErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8800,7 +8800,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DefinitionErrorObject::construct(int
 {
     cvtable->ivtable->createInstanceProc = avmplus::EvalErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::EvalErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doEvalErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_EvalErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::EvalErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8813,7 +8813,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EvalErrorObject::construct(int argc,
 {
     cvtable->ivtable->createInstanceProc = avmplus::RangeErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::RangeErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doRangeErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_RangeErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::RangeErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8826,7 +8826,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RangeErrorObject::construct(int argc
 {
     cvtable->ivtable->createInstanceProc = avmplus::ReferenceErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ReferenceErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ReferenceErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ReferenceErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8839,7 +8839,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ReferenceErrorObject::construct(int 
 {
     cvtable->ivtable->createInstanceProc = avmplus::SecurityErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::SecurityErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_SecurityErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SecurityErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8852,7 +8852,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SecurityErrorObject::construct(int a
 {
     cvtable->ivtable->createInstanceProc = avmplus::SyntaxErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::SyntaxErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_SyntaxErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::SyntaxErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8865,7 +8865,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::SyntaxErrorObject::construct(int arg
 {
     cvtable->ivtable->createInstanceProc = avmplus::TypeErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::TypeErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doTypeErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_TypeErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::TypeErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8878,7 +8878,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::TypeErrorObject::construct(int argc,
 {
     cvtable->ivtable->createInstanceProc = avmplus::URIErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::URIErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doURIErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_URIErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::URIErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8891,7 +8891,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::URIErrorObject::construct(int argc, 
 {
     cvtable->ivtable->createInstanceProc = avmplus::VerifyErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::VerifyErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_VerifyErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::VerifyErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8904,7 +8904,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::VerifyErrorObject::construct(int arg
 {
     cvtable->ivtable->createInstanceProc = avmplus::UninitializedErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::UninitializedErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_UninitializedErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::UninitializedErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8917,7 +8917,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::UninitializedErrorObject::construct(
 {
     cvtable->ivtable->createInstanceProc = avmplus::ArgumentErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ArgumentErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ArgumentErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ArgumentErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8930,7 +8930,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::ArgumentErrorObject::construct(int a
 {
     cvtable->ivtable->createInstanceProc = avmplus::IOErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::IOErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doIOErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_IOErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::IOErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8943,7 +8943,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::IOErrorObject::construct(int argc, a
 {
     cvtable->ivtable->createInstanceProc = avmplus::MemoryErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::MemoryErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doMemoryErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_MemoryErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::MemoryErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8956,7 +8956,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::MemoryErrorObject::construct(int arg
 {
     cvtable->ivtable->createInstanceProc = avmplus::EOFErrorClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::EOFErrorClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doEOFErrorClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_EOFErrorClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::EOFErrorClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -8969,7 +8969,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::EOFErrorObject::construct(int argc, 
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::DateClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doDateClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_DateClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DateObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -8977,7 +8977,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::DateObject::construct(int argc, avmp
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::RegExpClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doRegExpClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_RegExpClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RegExpObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -8985,7 +8985,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::RegExpObject::construct(int argc, av
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::XMLClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doXMLClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_XMLClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::XMLObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -8993,7 +8993,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::XMLObject::construct(int argc, avmpl
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::XMLListClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doXMLListClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_XMLListClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::XMLListObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -9001,7 +9001,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::XMLListObject::construct(int argc, a
 {
     cvtable->ivtable->createInstanceProc = ClassClosure::impossibleCreateInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::QNameClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doQNameClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_QNameClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::QNameObject::construct(int argc, avmplus::Atom* argv) { return avmplus::ScriptObject::construct(argc, argv); } )
@@ -9009,7 +9009,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::QNameObject::construct(int argc, avm
 {
     cvtable->ivtable->createInstanceProc = avmplus::CompressionAlgorithmClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) avmplus::CompressionAlgorithmClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doCompressionAlgorithmClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_CompressionAlgorithmClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::CompressionAlgorithmClass::createInstanceProc(avmplus::ClassClosure* cls)
@@ -9022,7 +9022,7 @@ AvmThunk_DEBUG_ONLY( avmplus::Atom avmplus::CompressionAlgorithmObject::construc
 {
     cvtable->ivtable->createInstanceProc = avmplus::ByteArrayClass::createInstanceProc;
     ClassClosure* const cc = new (cvtable->gc(), MMgc::kExact, cvtable->getExtraSize()) avmplus::ByteArrayClass(cvtable);
-    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::doByteArrayClassAsserts(cc->traits(), cc->traits()->itraits); )
+    AvmThunk_DEBUG_ONLY( avmplus::NativeID::SlotOffsetsAndAsserts::check_avmplus_ByteArrayClass(cc->traits(), cc->traits()->itraits); )
     return cc;
 }
 /*static*/ avmplus::ScriptObject* FASTCALL avmplus::ByteArrayClass::createInstanceProc(avmplus::ClassClosure* cls)

@@ -57,6 +57,7 @@ namespace avmplus {
     class DomainObject; // avmplus::Domain
     class EndianClass; // flash.utils::Endian$
     class EndianObject; // flash.utils::Endian
+    class FileObject; // avmplus::File
     class JObject; // avmplus::JObject
     class JObjectClass; // avmplus::JObject$
     class NativeBaseAS3Class; // avmshell::NativeBaseAS3$
@@ -65,9 +66,6 @@ namespace avmplus {
     class NewObjectSampleObject; // flash.sampler::NewObjectSample
     class SampleClass; // flash.sampler::Sample$
     class SampleObject; // flash.sampler::Sample
-    class ScriptObject; // avmplus::System
-    class ScriptObject; // avmplus::File
-    class ScriptObject; // flash.trace::Trace
     class StackFrameClass; // flash.sampler::StackFrame$
     class StackFrameObject; // flash.sampler::StackFrame
     class String; // String
@@ -77,7 +75,9 @@ namespace avmplus {
     class SubclassOfAbstractRestrictedBaseObject; // avmshell::SubclassOfAbstractRestrictedBase
     class SubclassOfRestrictedBaseClass; // avmshell::SubclassOfRestrictedBase$
     class SubclassOfRestrictedBaseObject; // avmshell::SubclassOfRestrictedBase
+    class SystemObject; // avmplus::System
     class TraceClass; // flash.trace::Trace$
+    class TraceObject; // flash.trace::Trace
     class public_classClass; // avmshell::public_class$
     class public_classObject; // avmshell::public_class
     class public_class_AIR_1_0Class; // avmshell::public_class_AIR_1_0$
@@ -412,6 +412,16 @@ public:
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
+// avmplus::System
+//-----------------------------------------------------------
+class avmplus_SystemObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::SystemObject;
+};
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
 // avmplus::File$
 //-----------------------------------------------------------
 class avmshell_FileClassSlots
@@ -429,6 +439,16 @@ class avmshell_FileClassSlots
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
 
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// avmplus::File
+//-----------------------------------------------------------
+class avmplus_FileObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::FileObject;
+};
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
@@ -1363,6 +1383,16 @@ private:
     private: \
         avmplus::NativeID::avmplus_TraceClassSlots m_slots_TraceClass \
 
+//-----------------------------------------------------------
+
+//-----------------------------------------------------------
+// flash.trace::Trace
+//-----------------------------------------------------------
+class avmplus_TraceObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+    friend class avmplus::TraceObject;
+};
 //-----------------------------------------------------------
 
 //-----------------------------------------------------------
