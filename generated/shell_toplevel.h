@@ -387,7 +387,7 @@ class avmshell_SystemClassSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmshell::SystemClass;
 private:
-    MMgc::GCTraceableObject::GCMember<avmplus::ArrayObject> m_argv;
+    DRCWB(avmplus::ArrayObject*) m_argv;
 public:
     REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
     {
@@ -1179,8 +1179,8 @@ class avmplus_StackFrameObjectSlots
     friend class avmplus::StackFrameObject;
 private:
     uint32_t m_line;
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_name;
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_file;
+    DRCWB(avmplus::String*) m_name;
+    DRCWB(avmplus::String*) m_file;
     double m_scriptID;
 };
 //-----------------------------------------------------------
@@ -1203,7 +1203,7 @@ class avmplus_SampleObjectSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::SampleObject;
 private:
-    MMgc::GCTraceableObject::GCMember<avmplus::ArrayObject> m_stack;
+    DRCWB(avmplus::ArrayObject*) m_stack;
     double m_time;
 };
 //-----------------------------------------------------------
@@ -1216,10 +1216,10 @@ class avmplus_ClassFactoryClassSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::ClassFactoryClass;
 private:
-    MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_StackFrameClass;
-    MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_SampleClass;
-    MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_DeleteObjectSampleClass;
-    MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_NewObjectSampleClass;
+    DRCWB(avmplus::ClassClosure*) m_StackFrameClass;
+    DRCWB(avmplus::ClassClosure*) m_SampleClass;
+    DRCWB(avmplus::ClassClosure*) m_DeleteObjectSampleClass;
+    DRCWB(avmplus::ClassClosure*) m_NewObjectSampleClass;
 };
 //-----------------------------------------------------------
 
@@ -1270,7 +1270,7 @@ class avmplus_NewObjectSampleObjectSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::NewObjectSampleObject;
 private:
-    MMgc::GCTraceableObject::GCMember<avmplus::ClassClosure> m_type;
+    DRCWB(avmplus::ClassClosure*) m_type;
     double m_id;
 };
 #define DECLARE_SLOTS_NewObjectSampleObject \
@@ -1428,8 +1428,8 @@ class avmplus_EndianClassSlots
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::EndianClass;
 private:
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_BIG_ENDIAN;
-    MMgc::GCTraceableObject::GCMember<avmplus::String> m_LITTLE_ENDIAN;
+    DRCWB(avmplus::String*) m_BIG_ENDIAN;
+    DRCWB(avmplus::String*) m_LITTLE_ENDIAN;
 };
 //-----------------------------------------------------------
 
