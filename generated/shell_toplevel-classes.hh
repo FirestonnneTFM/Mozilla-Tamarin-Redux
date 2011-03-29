@@ -91,6 +91,44 @@ private:
 };
 
 //-----------------------------------------------------------
+// avmplus::System
+//-----------------------------------------------------------
+class SystemObject : public avmplus::ScriptObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmshell::SystemClass;
+    REALLY_INLINE explicit SystemObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit SystemObject(const SystemObject&); // unimplemented
+    void operator=(const SystemObject&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmplus::File
+//-----------------------------------------------------------
+class FileObject : public avmplus::ScriptObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmshell::FileClass;
+    REALLY_INLINE explicit FileObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit FileObject(const FileObject&); // unimplemented
+    void operator=(const FileObject&); // unimplemented
+};
+
+//-----------------------------------------------------------
 // avmshell::NativeBaseAS3
 //-----------------------------------------------------------
 class NativeBaseAS3Object : public avmplus::ScriptObject
@@ -1106,6 +1144,25 @@ protected:
 private:
     explicit DeleteObjectSampleClass(const DeleteObjectSampleClass&); // unimplemented
     void operator=(const DeleteObjectSampleClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.trace::Trace
+//-----------------------------------------------------------
+class TraceObject : public avmplus::ScriptObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::TraceClass;
+    REALLY_INLINE explicit TraceObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit TraceObject(const TraceObject&); // unimplemented
+    void operator=(const TraceObject&); // unimplemented
 };
 
 //-----------------------------------------------------------

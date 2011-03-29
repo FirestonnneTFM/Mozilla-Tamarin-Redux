@@ -723,26 +723,29 @@ class NativeInfo:
                 if md.name == "native":
                     ni.parse_one_nativeinfo(md.attrs, is_vm_builtin)
 
-        if itraits.cpp_name_comps != None and itraits.is_interface:
-            raise Error("interfaces may not specify native(instance)")
-
-        # if either is specified, make sure both are
-        if t.cpp_name_comps != None or itraits.cpp_name_comps != None:
-            if t.cpp_name_comps == None:
-                t.cpp_name_comps = BASE_CLASS_NAME.split('::')
-            if itraits.cpp_name_comps == None:
-                itraits.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
-        elif itraits.is_interface:
+        if itraits.is_interface:
+            if t.cpp_name_comps != None or itraits.cpp_name_comps != None:
+                raise Error("It is not legal to specify native(cls/instance) for an interface")
             # this is a little hacky, but it allows us to assume that all traits have a valid CPP name.
             # since we don't yet surface a C++ wrapper for interfaces, this will have to do.
             t.cpp_name_comps = BASE_CLASS_NAME.split('::')
             itraits.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
+
         else:
-            # we are going to create a synthetic class for this
-            t.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Class")
-            itraits.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Object")
-            t.is_synthetic = True
-            itraits.is_synthetic = True
+            if t.cpp_name_comps == None and itraits.cpp_name_comps != None:
+                raise Error("It is not legal to specify native(instance) without native(cls)")
+
+            if t.cpp_name_comps == None:
+                t.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Class")
+                t.is_synthetic = True
+
+            if itraits.cpp_name_comps == None:
+                if str(t.name) == "Object$":
+                    # "Object" is special-cased.
+                    itraits.cpp_name_comps = BASE_INSTANCE_NAME.split('::')
+                else:
+                    itraits.cpp_name_comps = ni.fullyQualifiedCPPClassName(itraits.name.name + "Object")
+                    itraits.is_synthetic = True
 
         # force to True or False (no "None" allowed)
         if ni.class_gc_exact != True:
@@ -1669,8 +1672,8 @@ class AbcThunkGen:
             c = self.abc.classes[i]
             if c.itraits.is_interface:
                 continue
-            offsetOfSlotsClass = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.cppname()
-            offsetOfSlotsInstance = "SlotOffsetsAndAsserts::kSlotsOffset%s" % c.itraits.cppname()
+            offsetOfSlotsClass = "SlotOffsetsAndAsserts::kSlotsOffset_%s" % to_cname(c.fqcppname())
+            offsetOfSlotsInstance = "SlotOffsetsAndAsserts::kSlotsOffset_%s" % to_cname(c.itraits.fqcppname())
             out.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s, %s, %s, %s, %s, %s, %s)" %\
                 (self.class_id_name(c),\
                 c.cppname(),\
@@ -2020,7 +2023,7 @@ class AbcThunkGen:
             else:
                 out.println("cvtable->ivtable->createInstanceProc = %s;" % (t.createInstanceProcName));
                 out.println("ClassClosure* const cc = new (cvtable->gc(), cvtable->getExtraSize()) %s(cvtable);" % t.fqcppname())
-            out.println("AvmThunk_DEBUG_ONLY( %s::SlotOffsetsAndAsserts::do%sAsserts(cc->traits(), cc->traits()->itraits); )" % (opts.nativeIDNS, t.cppname()))
+            out.println("AvmThunk_DEBUG_ONLY( %s::SlotOffsetsAndAsserts::check_%s(cc->traits(), cc->traits()->itraits); )" % (opts.nativeIDNS, to_cname(t.fqcppname())))
             out.println("return cc;")
             out.indent -= 1
             out.println("}")
@@ -2240,10 +2243,10 @@ class AbcThunkGen:
                 continue;
             if (c.fqcppname() not in visitedNativeClasses):
                 visitedNativeClasses.add(c.fqcppname())
-                out.println('kSlotsOffset%s = %s,' % (c.cppname(), c.cpp_offsetof_slots()))
+                out.println('kSlotsOffset_%s = %s,' % (to_cname(c.fqcppname()), c.cpp_offsetof_slots()))
             if (c.itraits.fqcppname() not in visitedNativeClasses):
                 visitedNativeClasses.add(c.itraits.fqcppname())
-                out.println('kSlotsOffset%s = %s,' % (c.itraits.cppname(), c.itraits.cpp_offsetof_slots()))
+                out.println('kSlotsOffset_%s = %s,' % (to_cname(c.itraits.fqcppname()), c.itraits.cpp_offsetof_slots()))
         out.println('kSlotsOffset_fnord')
         out.indent -= 1
         out.println('};')
@@ -2253,7 +2256,7 @@ class AbcThunkGen:
             c = abc.classes[i]
             if c.itraits.is_interface:
                 continue
-            out.println('static void do%sAsserts(Traits* ctraits, Traits* itraits);' % c.cppname())
+            out.println('static void check_%s(Traits* ctraits, Traits* itraits);' % to_cname(c.fqcppname()))
         out.println('#endif');
 
         out.indent -= 1
@@ -2263,7 +2266,7 @@ class AbcThunkGen:
             c = abc.classes[i]
             if c.itraits.is_interface:
                 continue;
-            out.println('REALLY_INLINE void SlotOffsetsAndAsserts::do%sAsserts(Traits* ctraits, Traits* itraits)' % c.cppname())
+            out.println('REALLY_INLINE void SlotOffsetsAndAsserts::check_%s(Traits* ctraits, Traits* itraits)' % to_cname(c.fqcppname()))
             out.println('{')
             out.indent += 1
             out.println('(void)ctraits; (void)itraits;')
@@ -2276,7 +2279,7 @@ class AbcThunkGen:
 
     def printStructAssertsForTraits(self, out, t, traitsVarName):
         if (len(t.slots) > 0):
-            out.println('MMGC_STATIC_ASSERT(offsetof(%s, %s) == kSlotsOffset%s);' % (t.fqcppname(), t.slotsInstanceName, t.cppname()))
+            out.println('MMGC_STATIC_ASSERT(offsetof(%s, %s) == kSlotsOffset_%s);' % (t.fqcppname(), t.slotsInstanceName, to_cname(t.fqcppname())))
             out.println('MMGC_STATIC_ASSERT(offsetof(%s, %s) <= 0xFFFF);' % (t.fqcppname(), t.slotsInstanceName))
             out.println('MMGC_STATIC_ASSERT(sizeof(%s) <= 0xFFFF);' % (t.fqcppname()))
             for slot in t.slots:
