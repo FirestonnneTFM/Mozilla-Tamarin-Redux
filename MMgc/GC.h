@@ -494,11 +494,12 @@ namespace MMgc
         friend class ZCT;
         friend class AutoRCRootSegment;
         friend class GCPolicyManager;
-        friend class SmartPointer;
 
         // WriteBarrier classes use private write barriers.
         template<class T> friend class WriteBarrier;
         template<class T> friend class WriteBarrierRC;
+        template<class T> friend class GCMemberBase;
+        friend class AtomWBCore;
 
         // The new GCMember delegates to methods in these classes that
         // use the private write barriers.
@@ -1932,7 +1933,7 @@ public:
         // Called by generated tracer checking code.
         static MMgc::GCTracerCheckResult CheckOffsetIsInList(uint32_t offset, const uint32_t offsets[],size_t len);
 
-        // Called by SmartPointer to verify that its being traced.
+        // Called by write barrier classes to verify that its being traced.
         static void TracePointerCheck(const void *derivedPointer);
 #endif // DEBUG
     };

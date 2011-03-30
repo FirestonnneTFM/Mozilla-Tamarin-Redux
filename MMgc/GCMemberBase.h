@@ -55,7 +55,7 @@ namespace MMgc
     //
     
     template <class T>
-    class GCMemberBase : public GCRef<T>, private SmartPointer
+    class GCMemberBase : public GCRef<T>
     {
         friend class GC;
     private:
@@ -79,17 +79,9 @@ namespace MMgc
         
         //  In order to keep the usage syntax uniform as "GCMember",
         //  Protect the constructors so that only "GCMember" subclasses are allowed to use this object.
-        explicit REALLY_INLINE GCMemberBase()
-        : GCRef<T>()
-        {
-        }
-        
+        explicit GCMemberBase();
         template <class T2>
-        explicit REALLY_INLINE GCMemberBase(const GCRef<T2> &other)
-        : GCRef<T>()
-        {
-            set(ProtectedGetOtherRawPtr(other));
-        }
+        explicit GCMemberBase(const GCRef<T2> &other);
 
         ~GCMemberBase()
         {

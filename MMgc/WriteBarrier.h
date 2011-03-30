@@ -88,7 +88,7 @@ namespace MMgc
      * const and no allocations occur between the construction of the object holding the field
      * and the assignment.
      */
-    template<class T> class WriteBarrier : private SmartPointer
+    template<class T> class WriteBarrier
     {
 #ifdef MMGC_HEAP_GRAPH
         friend class GC;    // for location()
@@ -98,14 +98,8 @@ namespace MMgc
         T set(const T tNew);
 
     public:
-        explicit REALLY_INLINE WriteBarrier() : t(0)
-        {
-        }
-
-        explicit REALLY_INLINE WriteBarrier(T _t)
-        {
-            set(_t);
-        }
+        explicit WriteBarrier();
+        explicit  WriteBarrier(T _t);
 
         REALLY_INLINE ~WriteBarrier()
         {
@@ -151,7 +145,7 @@ namespace MMgc
      * WriteBarrierRC is a write barrier for naked (not pointer swizzled) RC objects.
      * the only thing going in and out of the slot is NULL or a valid RCObject
      */
-    template<class T> class WriteBarrierRC : private SmartPointer
+    template<class T> class WriteBarrierRC
     {
 #ifdef MMGC_HEAP_GRAPH
         friend class GC;    // for location()
@@ -161,10 +155,7 @@ namespace MMgc
         T set(const T tNew);
 
     public:
-        explicit REALLY_INLINE WriteBarrierRC() : t(0)
-        {
-        }
-
+        explicit WriteBarrierRC();
         explicit WriteBarrierRC(const T _t);
 
         ~WriteBarrierRC();
@@ -214,7 +205,7 @@ namespace MMgc
     // This is intended to be subclassed by avmplus::AtomWB /only/.  It provides the
     // minimum of functionality required by exact tracing of AtomWB smart pointers.
 
-    class AtomWBCore : private SmartPointer
+    class AtomWBCore
     {
         friend class GC;
         
@@ -223,8 +214,8 @@ namespace MMgc
         avmplus::Atom value() const { return m_atom; }
         
     protected:
-        AtomWBCore(avmplus::Atom a) : m_atom(a) {}
-        AtomWBCore() {}
+        explicit AtomWBCore(avmplus::Atom a);
+        explicit AtomWBCore();
         
         avmplus::Atom m_atom;
         
