@@ -17,11 +17,12 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,16 +38,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef _SMART_POINTER_H_
-#define _SMART_POINTER_H_
+#ifndef __GCMemberBase_inlines__
+#define __GCMemberBase_inlines__
 
 namespace MMgc
-{
-    class SmartPointer
+{    
+    template<class T>
+    REALLY_INLINE GCMemberBase<T>::GCMemberBase() : GCRef<T>()
     {
-    public:
-        SmartPointer();
-    };
+#ifdef DEBUG
+        GC::TracePointerCheck(&(this->t));
+#endif
+    }
+    
+    template<class T>
+    template<class T2>
+    REALLY_INLINE GCMemberBase<T>::GCMemberBase(const GCRef<T2> &other) : GCRef<T>()
+    {
+#ifdef DEBUG
+        GC::TracePointerCheck(&(this->t));
+#endif
+        set(ProtectedGetOtherRawPtr(other));
+    }	
 }
 
-#endif // _SMART_POINTER_H_
+#endif /* __GCMemberBase_inlines__ */
