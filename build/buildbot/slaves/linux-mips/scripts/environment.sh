@@ -66,33 +66,55 @@ export PYTHON_RUNTESTS=python3
 
 export threads=6
 
-export SSH_SHELL_REMOTE_HOST0=asteammips8
-export SSH_SHELL_REMOTE_USER0=root
-export SSH_SHELL_REMOTE_BASEDIR0=/root
-export SSH_SHELL_REMOTE_DIR0=/root/app1
 
-export SSH_SHELL_REMOTE_HOST1=asteammips8
-export SSH_SHELL_REMOTE_USER1=root
-export SSH_SHELL_REMOTE_BASEDIR1=/root
-export SSH_SHELL_REMOTE_DIR1=/root/app2
-
-export SSH_SHELL_REMOTE_HOST2=asteammips6
-export SSH_SHELL_REMOTE_USER2=root
-export SSH_SHELL_REMOTE_BASEDIR2=/root
-export SSH_SHELL_REMOTE_DIR2=/root/app1
-
-export SSH_SHELL_REMOTE_HOST3=asteammips6
-export SSH_SHELL_REMOTE_USER3=root
-export SSH_SHELL_REMOTE_BASEDIR3=/root
-export SSH_SHELL_REMOTE_DIR3=/root/app2
-
-export SSH_SHELL_REMOTE_HOST4=asteammips1
-export SSH_SHELL_REMOTE_USER4=root
-export SSH_SHELL_REMOTE_BASEDIR4=/root
-export SSH_SHELL_REMOTE_DIR4=/root/app1
-
-export SSH_SHELL_REMOTE_HOST5=asteammips1
-export SSH_SHELL_REMOTE_USER5=root
-export SSH_SHELL_REMOTE_BASEDIR5=/root
-export SSH_SHELL_REMOTE_DIR5=/root/app2
-
+if [ "$branch" == "tamarin-redux" ]; then
+    export SSH_SHELL_REMOTE_HOST0=asteammips8
+    export SSH_SHELL_REMOTE_USER0=root
+    export SSH_SHELL_REMOTE_BASEDIR0=/root
+    export SSH_SHELL_REMOTE_DIR0=/root/app1
+    
+    export SSH_SHELL_REMOTE_HOST1=asteammips8
+    export SSH_SHELL_REMOTE_USER1=root
+    export SSH_SHELL_REMOTE_BASEDIR1=/root
+    export SSH_SHELL_REMOTE_DIR1=/root/app2
+    
+    export SSH_SHELL_REMOTE_HOST2=asteammips6
+    export SSH_SHELL_REMOTE_USER2=root
+    export SSH_SHELL_REMOTE_BASEDIR2=/root
+    export SSH_SHELL_REMOTE_DIR2=/root/app1
+    
+    export SSH_SHELL_REMOTE_HOST3=asteammips6
+    export SSH_SHELL_REMOTE_USER3=root
+    export SSH_SHELL_REMOTE_BASEDIR3=/root
+    export SSH_SHELL_REMOTE_DIR3=/root/app2
+    
+    export SSH_SHELL_REMOTE_HOST4=asteammips1
+    export SSH_SHELL_REMOTE_USER4=root
+    export SSH_SHELL_REMOTE_BASEDIR4=/root
+    export SSH_SHELL_REMOTE_DIR4=/root/app1
+    
+    export SSH_SHELL_REMOTE_HOST5=asteammips1
+    export SSH_SHELL_REMOTE_USER5=root
+    export SSH_SHELL_REMOTE_BASEDIR5=/root
+    export SSH_SHELL_REMOTE_DIR5=/root/app2
+elif [ "$branch" == "sandbox" ]; then
+    export SSH_SHELL_REMOTE_HOST0=asteammips3
+    export SSH_SHELL_REMOTE_USER0=root
+    export SSH_SHELL_REMOTE_BASEDIR0=/root
+    export SSH_SHELL_REMOTE_DIR0=/root/app1
+    
+    export SSH_SHELL_REMOTE_HOST1=asteammips3
+    export SSH_SHELL_REMOTE_USER1=root
+    export SSH_SHELL_REMOTE_BASEDIR1=/root
+    export SSH_SHELL_REMOTE_DIR1=/root/app2
+    
+    export SSH_SHELL_REMOTE_HOST2=asteammips9
+    export SSH_SHELL_REMOTE_USER2=root
+    export SSH_SHELL_REMOTE_BASEDIR2=/root
+    export SSH_SHELL_REMOTE_DIR2=/root/app1
+    
+    export SSH_SHELL_REMOTE_HOST3=asteammips9
+    export SSH_SHELL_REMOTE_USER3=root
+    export SSH_SHELL_REMOTE_BASEDIR3=/root
+    export SSH_SHELL_REMOTE_DIR3=/root/app2
+fi
