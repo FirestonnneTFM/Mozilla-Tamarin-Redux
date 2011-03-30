@@ -66,31 +66,38 @@ do
     # use indirect reference to set SSH_SHELL_REMOTE_USERn where n=$count
     eval SSH_SHELL_REMOTE_USER=\${SSH_SHELL_REMOTE_USER$count}
     eval SSH_SHELL_REMOTE_HOST=\${SSH_SHELL_REMOTE_HOST$count}
+    eval SSH_SHELL_REMOTE_BASEDIR=\${SSH_SHELL_REMOTE_BASEDIR$count}
     eval SSH_SHELL_REMOTE_DIR=\${SSH_SHELL_REMOTE_DIR$count}
 
     if [ "$SSH_SHELL_REMOTE_USER" = "" ] ||
        [ "$SSH_SHELL_REMOTE_HOST" = "" ] ||
+       [ "$SSH_SHELL_REMOTE_BASEDIR" = "" ] ||
        [ "$SSH_SHELL_REMOTE_DIR" = "" ];
     then
         echo "missing environment variable: "
         echo "SSH_SHELL_REMOTE_USER${count}" = "$SSH_SHELL_REMOTE_USER"
         echo "SSH_SHELL_REMOTE_HOST${count}" = "$SSH_SHELL_REMOTE_HOST"
+        echo "SSH_SHELL_REMOTE_BASEDIR${count}" = "$SSH_SHELL_REMOTE_BASEDIR"
         echo "SSH_SHELL_REMOTE_DIR${count}" = "$SSH_SHELL_REMOTE_DIR"
         exit 1
     fi
 
+    echo "========================================="
     echo "Cleaning up client $count"
     echo "SSH_SHELL_REMOTE_USER" = "$SSH_SHELL_REMOTE_USER"
     echo "SSH_SHELL_REMOTE_HOST" = "$SSH_SHELL_REMOTE_HOST"
+    echo "SSH_SHELL_REMOTE_BASEDIR" = "$SSH_SHELL_REMOTE_BASEDIR"
     echo "SSH_SHELL_REMOTE_DIR" = "$SSH_SHELL_REMOTE_DIR"
 
-    echo "========================================="
     #
     # remove old abc and shells from the device
     #
-    echo "========================================="
     echo "cleanup up $SSH_SHELL_REMOTE_DIR directory on remote machine..."
     ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_DIR; rm -r ./*"
+
+    echo "cleanup up $SSH_SHELL_REMOTE_BASEDIR/builds directory on remote machine..."
+    ssh $SSH_SHELL_REMOTE_USER@$SSH_SHELL_REMOTE_HOST "cd $SSH_SHELL_REMOTE_BASEDIR/builds; rm -r ./*"
+    echo "========================================="
     echo ""
 
     count=$[count+1]
