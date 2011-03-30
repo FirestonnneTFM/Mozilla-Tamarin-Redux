@@ -151,7 +151,7 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 DISABLE_RTMPE = None
-ANDROIDPLATFORMVER = "android-8"
+ANDROIDPLATFORMVER = "android-9"
 
 if 'APP_CPPFLAGS' in os.environ:
     APP_CPPFLAGS += os.environ['APP_CPPFLAGS'] + " "
