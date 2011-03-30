@@ -925,6 +925,10 @@
 		81EB4AFD129A55C100D1B0BB /* VMThread-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VMThread-inlines.h"; path = "../../../vmbase/VMThread-inlines.h"; sourceTree = SOURCE_ROOT; };
 		81EB4AFE129A55C200D1B0BB /* VMThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VMThread.cpp; path = ../../../vmbase/VMThread.cpp; sourceTree = SOURCE_ROOT; };
 		81EB4AFF129A55C200D1B0BB /* VMThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VMThread.h; path = ../../../vmbase/VMThread.h; sourceTree = SOURCE_ROOT; };
+		8579F92F1343A50800F12F4B /* GCMemberBase-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCMemberBase-inlines.h"; path = "../../../MMgc/GCMemberBase-inlines.h"; sourceTree = SOURCE_ROOT; };
+		8579F9301343A51E00F12F4B /* Shared-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Shared-inlines.h"; path = "../../../MMgc/Shared-inlines.h"; sourceTree = SOURCE_ROOT; };
+		8579F9311343A53000F12F4B /* GCRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCRef.h; path = ../../../MMgc/GCRef.h; sourceTree = SOURCE_ROOT; };
+		8579F9321343A54500F12F4B /* HeapGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HeapGraph.h; path = ../../../MMgc/HeapGraph.h; sourceTree = SOURCE_ROOT; };
 		85DEE0E1130977C200C5A33D /* avmplus-tracers.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = "avmplus-tracers.h"; path = "../../../generated/avmplus-tracers.h"; sourceTree = SOURCE_ROOT; };
 		85DEE0E2130977C200C5A33D /* avmplus-tracers.hh */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = "avmplus-tracers.hh"; path = "../../../generated/avmplus-tracers.hh"; sourceTree = SOURCE_ROOT; };
 		85DEE0E3130977E400C5A33D /* avmshell-tracers.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = "avmshell-tracers.h"; path = "../../../generated/avmshell-tracers.h"; sourceTree = SOURCE_ROOT; };
@@ -1574,6 +1578,7 @@
 				075CBF191074B252009E599C /* GCLargeAlloc-inlines.h */,
 				3FDDC5490F60A0B600E29821 /* GCLog.cpp */,
 				3FDDC54A0F60A0B600E29821 /* GCLog.h */,
+				8579F92F1343A50800F12F4B /* GCMemberBase-inlines.h */,
 				079DFA9D0F3A96BD0031D1B4 /* GCMemoryProfiler.cpp */,
 				079DFA9E0F3A96BE0031D1B4 /* GCMemoryProfiler.h */,
 				079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */,
@@ -1581,6 +1586,7 @@
 				07591FBD122BEA8F00D60F63 /* GCPolicyManager.cpp */,
 				07591FB0122BE8EC00D60F63 /* GCPolicyManager.h */,
 				07591FB8122BEA0E00D60F63 /* GCPolicyManager-inlines.h */,
+				8579F9311343A53000F12F4B /* GCRef.h */,
 				3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */,
 				07ED27EF0FBD78C4007E3950 /* GCStack.cpp */,
 				079DFAA20F3A96BE0031D1B4 /* GCStack.h */,
@@ -1592,11 +1598,13 @@
 				079DFAA70F3A96BE0031D1B4 /* GCThreads.h */,
 				079DFAA80F3A96BE0031D1B4 /* GCTypes.h */,
 				079DFAA90F3A96BE0031D1B4 /* GCWeakRef.h */,
+				8579F9321343A54500F12F4B /* HeapGraph.h */,
 				079DFAAC0F3A96BE0031D1B4 /* MMgc.h */,
 				07A8D2DD0F5EEA2B0005E66C /* OOM.h */,
 				19A21B371213443300CB55E0 /* PageMap-inlines.h */,
 				19A21B381213443300CB55E0 /* PageMap.cpp */,
 				19A21B391213443300CB55E0 /* PageMap.h */,
+				8579F9301343A51E00F12F4B /* Shared-inlines.h */,
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
