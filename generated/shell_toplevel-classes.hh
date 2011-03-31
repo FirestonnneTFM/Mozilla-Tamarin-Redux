@@ -81,6 +81,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -181,6 +182,7 @@ public:
         avmplus::Atom const result = this->construct_native(avmplus::NativeBaseAS3Class::createInstanceProc, 0, args);
         return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -243,6 +245,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -367,6 +370,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -429,6 +433,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -491,6 +496,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -553,6 +559,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -615,6 +622,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -677,6 +685,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -739,6 +748,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -801,6 +811,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -863,6 +874,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -925,6 +937,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -987,6 +1000,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -1049,6 +1063,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -1111,6 +1126,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -1187,6 +1203,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -1257,6 +1274,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -1319,6 +1337,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -1403,6 +1422,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -1484,6 +1504,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);

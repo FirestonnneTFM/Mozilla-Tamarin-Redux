@@ -356,6 +356,7 @@ class avmshell_MIClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmshell::MIObject>((avmshell::MIObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -415,6 +416,7 @@ public:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -464,6 +466,7 @@ class avmshell_FileClassSlots
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -508,6 +511,7 @@ class avmshell_AbstractBaseClassSlots
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -569,6 +573,7 @@ class avmshell_RestrictedBaseClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmshell::RestrictedBaseObject>((avmshell::RestrictedBaseObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -621,6 +626,7 @@ class avmshell_AbstractRestrictedBaseClassSlots
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -683,6 +689,7 @@ class avmshell_CheckBaseClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmshell::CheckBaseObject>((avmshell::CheckBaseObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -744,6 +751,7 @@ class avmshell_NativeBaseClassSlots
             avmplus::Atom const result = this->construct_native(avmshell::NativeBaseClass::createInstanceProc, 0, args); \
             return GCRef<avmshell::NativeBaseObject>((avmshell::NativeBaseObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1066,6 +1074,7 @@ class avmshell_NativeSubclassOfAbstractBaseClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmshell::NativeSubclassOfAbstractBaseObject>((avmshell::NativeSubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1147,6 +1156,7 @@ class avmshell_NativeSubclassOfRestrictedBaseClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmshell::NativeSubclassOfRestrictedBaseObject>((avmshell::NativeSubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1228,6 +1238,7 @@ class avmshell_NativeSubclassOfAbstractRestrictedBaseClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmshell::NativeSubclassOfAbstractRestrictedBaseObject>((avmshell::NativeSubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1310,6 +1321,7 @@ class avmplus_DomainClassSlots
             avmplus::Atom const result = this->construct(1, args); \
             return GCRef<avmplus::DomainObject>((avmplus::DomainObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1445,6 +1457,7 @@ class avmplus_NewObjectSampleClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmplus::NewObjectSampleObject>((avmplus::NewObjectSampleObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1539,6 +1552,7 @@ private:
         AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); ) \
     private: \
         AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } ) \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1622,6 +1636,7 @@ class avmplus_DictionaryClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmplus::DictionaryObject>((avmplus::DictionaryObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
@@ -1707,6 +1722,7 @@ class avmplus_JObjectClassSlots
             avmplus::Atom const result = this->construct(0, args); \
             return GCRef<avmplus::JObject>((avmplus::JObject*)(AvmCore::atomToScriptObject(result))); \
         } \
+    public: \
         REALLY_INLINE bool isType(avmplus::Atom value) \
         { \
             return isTypeImpl(value); \
