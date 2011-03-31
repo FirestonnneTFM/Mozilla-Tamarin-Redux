@@ -94,6 +94,20 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE GCRef<avmplus::IOErrorObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IOErrorObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
 protected:
@@ -153,6 +167,20 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE GCRef<avmplus::MemoryErrorObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::MemoryErrorObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
         return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
 private:
@@ -216,6 +244,20 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE GCRef<avmplus::EOFErrorObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::EOFErrorObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
 protected:
@@ -262,6 +304,20 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::CompressionAlgorithmObject>((avmplus::CompressionAlgorithmObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE GCRef<avmplus::CompressionAlgorithmObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::CompressionAlgorithmObject>((avmplus::CompressionAlgorithmObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::CompressionAlgorithmObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
         return GCRef<avmplus::CompressionAlgorithmObject>((avmplus::CompressionAlgorithmObject*)(AvmCore::atomToScriptObject(result)));
     }
 private:

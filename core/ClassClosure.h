@@ -114,6 +114,10 @@ namespace avmplus
     protected:
         Atom construct_native(CreateInstanceProc ciproc, int argc, Atom* argv);
 
+        bool FASTCALL isTypeImpl(Atom value);
+        Atom FASTCALL asTypeImpl(Atom value);
+        Atom FASTCALL coerceToTypeImpl(Atom value);
+
     public:
         static ScriptObject* FASTCALL createScriptObjectProc(ClassClosure* cls);
         static ScriptObject* FASTCALL cantInstantiateCreateInstanceProc(ClassClosure* cls);

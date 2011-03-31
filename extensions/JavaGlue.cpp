@@ -1225,7 +1225,7 @@ namespace avmplus
                 *desc++ = 'D';
             else if (core->isNullOrUndefined(a))
                 *desc++ = 'X';
-            else if (AvmCore::istype(a, ARRAY_TYPE))
+            else if (toplevel->builtinClasses()->get_ArrayClass()->isType(a))
                 *desc++ = '[';
             else if (core->isString(a))
                 *desc++ = 'G';

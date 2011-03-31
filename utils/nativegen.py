@@ -1735,7 +1735,7 @@ class AbcThunkGen:
         out.println(' '.join(('}',) * len(nativeIDNamespaces)))
 
         # note, these are emitted *after* closing the namespaces
-        self.emitStructStubs(out)
+        self.emitMethodBodies(out)
 
     def emit(self, abc, name, out_h, out_cls, out_c):
         self.abc = abc;
@@ -1885,15 +1885,15 @@ class AbcThunkGen:
             self.emitMethodWrapperBodies(out, c)
             self.emitMethodWrapperBodies(out, c.itraits)
 
-    def emitStructStubs(self, out):
+    def emitMethodBodies(self, out):
         visitedGlueClasses = set()
         for i in range(0, len(self.abc.classes)):
             c = self.abc.classes[i]
             if c.itraits.is_interface:
                 continue
-            self.emitStructStubsForTraits(out, c, visitedGlueClasses)
+            self.emitMethodBodiesForTraits(out, c, visitedGlueClasses)
             if (self.needsInstanceSlotsStruct(c)):
-                self.emitStructStubsForTraits(out, c.itraits, visitedGlueClasses)
+                self.emitMethodBodiesForTraits(out, c.itraits, visitedGlueClasses)
 
     def sortSlots(self, t):
         filteredSlots = filter(lambda s: s is not None, t.slots)
@@ -2119,6 +2119,34 @@ class AbcThunkGen:
                 out.println("}")
                 args.pop()
             out.indent -= 1
+        if t.itraits != None:
+            out.indent += 1
+            ctype = t.itraits.ctype
+            ifqcppname = t.itraits.fqcppname()
+            ret_typedef = TYPEMAP_RETTYPE_GCREF[ctype](ifqcppname)
+            out.println("REALLY_INLINE bool isType(avmplus::Atom value)")
+            out.println("{")
+            out.indent += 1
+            out.println("return isTypeImpl(value);")
+            out.indent -= 1
+            out.println("}")
+            out.println("REALLY_INLINE %s asType(avmplus::Atom value)" % ret_typedef)
+            out.println("{")
+            out.indent += 1
+            out.println("avmplus::Atom const result = asTypeImpl(value);")
+            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
+            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.indent -= 1
+            out.println("}")
+            out.println("REALLY_INLINE %s coerceToType(avmplus::Atom value)" % ret_typedef)
+            out.println("{")
+            out.indent += 1
+            out.println("avmplus::Atom const result = coerceToTypeImpl(value);")
+            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
+            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.indent -= 1
+            out.println("}")
+            out.indent -= 1
 
     def emitSlotDeclarations(self, out, t, sortedSlots, slotsTypeInfo, closingSemi):
         out.println("private:")
@@ -2214,7 +2242,7 @@ class AbcThunkGen:
             if t.is_synthetic:
                 self.emitOneSyntheticClass(out, t)
         
-    def emitStructStubsForTraits(self, out, t, visitedGlueClasses):
+    def emitMethodBodiesForTraits(self, out, t, visitedGlueClasses):
         
         if (t.fqcppname() in visitedGlueClasses):
             if (len(t.slots) == 0):

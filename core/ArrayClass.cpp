@@ -1178,8 +1178,8 @@ namespace avmplus
         ArraySort::FieldName *fn = NULL;
         uint32_t nFields = 0;
         int options = 0;
-
-        if (AvmCore::istype(namesAtom, STRING_TYPE))
+        
+        if (toplevel->builtinClasses()->get_StringClass()->isType(namesAtom))
         {
             nFields = 1;
 
@@ -1189,7 +1189,7 @@ namespace avmplus
             fn[0].name = core->internString(namesAtom);
             fn[0].options = options;
         }
-        else if (AvmCore::istype(namesAtom, toplevel->arrayClass()->ivtable()->traits /* array itraits */))
+        else if (toplevel->builtinClasses()->get_ArrayClass()->isType(namesAtom))
         {
             ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(namesAtom);
 
@@ -1202,7 +1202,7 @@ namespace avmplus
                 fn[i].options = 0;
             }
 
-            if (AvmCore::istype(optionsAtom, toplevel->arrayClass()->ivtable()->traits /* array itraits */))
+            if (toplevel->builtinClasses()->get_ArrayClass()->isType(optionsAtom))
             {
                 ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(optionsAtom);
                 uint32_t nOptions = obj->getLength();
