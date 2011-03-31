@@ -303,4 +303,19 @@ create_normal:
     {
         core()->throwErrorV(this, errorID, arg1, arg2, arg3);
     }
+
+    bool FASTCALL ClassClosure::isTypeImpl(Atom value)
+    {
+        return AvmCore::istype(value, ivtable()->traits);
+    }
+    
+    Atom FASTCALL ClassClosure::asTypeImpl(Atom value)
+    {
+        return AvmCore::astype(value, ivtable()->traits);
+    }
+    
+    Atom FASTCALL ClassClosure::coerceToTypeImpl(Atom value)
+    {
+        return toplevel()->coerce(value, ivtable()->traits);
+    }
 }

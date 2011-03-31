@@ -142,10 +142,11 @@ done:
 
     ClassClosure* DomainObject::getClass(Stringp name)
     {
-        AvmCore *core = this->core();
+        Toplevel* toplevel = this->toplevel();
+        AvmCore* core = toplevel->core();
 
         if (name == NULL) {
-            toplevel()->throwArgumentError(kNullArgumentError, core->toErrorString("name"));
+            toplevel->throwArgumentError(kNullArgumentError, core->toErrorString("name"));
         }
 
 
@@ -170,16 +171,17 @@ done:
 
         ScriptObject *container = finddef(multiname, domainEnv);
         if (!container) {
-            toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
+            toplevel->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
         }
-        Atom atom = toplevel()->getproperty(container->atom(),
+        Atom atom = toplevel->getproperty(container->atom(),
                                             &multiname,
                                             container->vtable);
 
-        if (!AvmCore::istype(atom, core->traits.class_itraits)) {
-            toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
-        }
-        return (ClassClosure*)AvmCore::atomToScriptObject(atom);
+        // Note: this used to throw "kClassNotFoundError" if the class wasn't
+        // found; now it throws "kCheckTypeFailedError" (by way of coerceToType).
+        // This probably doesn't matter since this is a shell-only class, and it
+        // gives us a testcase for coerceToType.
+        return toplevel->builtinClasses()->get_ClassClass()->coerceToType(atom);
     }
 
     DomainClass::DomainClass(VTable *cvtable)
