@@ -94,6 +94,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::IOErrorObject>((avmplus::IOErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -169,6 +170,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::MemoryErrorObject>((avmplus::MemoryErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -244,6 +246,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::EOFErrorObject>((avmplus::EOFErrorObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);
@@ -306,6 +309,7 @@ public:
         avmplus::Atom const result = this->construct(0, args);
         return GCRef<avmplus::CompressionAlgorithmObject>((avmplus::CompressionAlgorithmObject*)(AvmCore::atomToScriptObject(result)));
     }
+public:
     REALLY_INLINE bool isType(avmplus::Atom value)
     {
         return isTypeImpl(value);

@@ -2120,6 +2120,7 @@ class AbcThunkGen:
                 args.pop()
             out.indent -= 1
         if t.itraits != None:
+            out.println("public:")
             out.indent += 1
             ctype = t.itraits.ctype
             ifqcppname = t.itraits.fqcppname()
