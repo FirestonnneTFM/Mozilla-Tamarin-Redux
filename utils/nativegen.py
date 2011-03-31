@@ -2131,6 +2131,12 @@ class AbcThunkGen:
             out.println("return isTypeImpl(value);")
             out.indent -= 1
             out.println("}")
+            out.println("REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)")
+            out.println("{")
+            out.indent += 1
+            out.println("return isTypeImpl(value->atom());")
+            out.indent -= 1
+            out.println("}")
             out.println("REALLY_INLINE %s asType(avmplus::Atom value)" % ret_typedef)
             out.println("{")
             out.indent += 1
@@ -2139,10 +2145,26 @@ class AbcThunkGen:
             out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
             out.indent -= 1
             out.println("}")
+            out.println("REALLY_INLINE %s asType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
+            out.println("{")
+            out.indent += 1
+            out.println("avmplus::Atom const result = asTypeImpl(value->atom());")
+            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
+            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.indent -= 1
+            out.println("}")
             out.println("REALLY_INLINE %s coerceToType(avmplus::Atom value)" % ret_typedef)
             out.println("{")
             out.indent += 1
             out.println("avmplus::Atom const result = coerceToTypeImpl(value);")
+            raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
+            out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
+            out.indent -= 1
+            out.println("}")
+            out.println("REALLY_INLINE %s coerceToType(GCRef<avmplus::ScriptObject> value)" % ret_typedef)
+            out.println("{")
+            out.indent += 1
+            out.println("avmplus::Atom const result = coerceToTypeImpl(value->atom());")
             raw_result = TYPEMAP_FROM_ATOM[ctype]("result", ifqcppname)
             out.println("return %s;" % TYPEMAP_TO_GCREF[ctype](raw_result,ifqcppname))
             out.indent -= 1
