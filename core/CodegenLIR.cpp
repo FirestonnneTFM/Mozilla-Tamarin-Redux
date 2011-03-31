@@ -3467,24 +3467,29 @@ namespace avmplus
                 }
                 break;
             }
-            // optimize integer division when divisor is non-zero constant integer
+            // Optimize integer division when divisor is non-zero constant integer.
+            // We cannot use LIR_divi if divisor is non-constant, as we need to generate a NaN on division by zero.
             case LIR_divd: {
                 LIns *a = arg->oprnd1();
                 LOpcode aOpcode = a->opcode();
-                a = isPromote(aOpcode) ? a->oprnd1() : imm2Int(a);
-                if (a) {
-                    LIns *b = arg->oprnd2();
-                    b = imm2Int(b);
+                // We should never arrive here at all if both operands are constants, as the LIR_divd should
+                // have been folded previously.  Furthermore, Nanojit does not permit both arguments of LIR_divi
+                // to be constant, and will assert if this occurs, so let's be absolutely sure it will not by
+                // specifically not attempting to optimize that case here.
+                AvmAssert(!imm2Int(a) || !imm2Int(arg->oprnd2()));
+                if (isPromote(aOpcode)) {
+                    a = a->oprnd1();
+                    LIns *b = imm2Int(arg->oprnd2());
                     if (b) {
                         int32_t intConst = b->immI();
                         if (intConst) {
                             // use faster unsigned right shift if our arg is unsigned and
                             // we have just one bit set in the divisor.
-                            if (exactlyOneBit(intConst) && aOpcode == LIR_ui2d) {
+                            if (aOpcode == LIR_ui2d && intConst >= 0 && exactlyOneBit(intConst)) {
                                 return lirout->ins2(LIR_rshui, a, lirout->insImmI(msbSet32(intConst)));
                             }
 #if NJ_DIVI_SUPPORTED
-                            else {
+                            else if (aOpcode == LIR_i2d) {
                                 return lirout->ins2(LIR_divi, a, b);
                             }
 #endif // NJ_DIVI_SUPPORTED
