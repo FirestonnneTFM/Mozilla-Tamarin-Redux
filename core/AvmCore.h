@@ -1849,7 +1849,8 @@ const int kBufferPadding = 16;
         Atom allocDouble(double n);
 
         void rehashStrings(int newlen);
-        void rehashNamespaces(int newlen);
+        void rehashNamespaces(int newlen, bool canFail=false);
+        void rehashNamespacesIfPossible(int newlen);
 
         // static version for smart pointers
         static void atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew);

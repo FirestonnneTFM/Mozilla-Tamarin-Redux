@@ -3187,7 +3187,7 @@ return the result of the comparison ToPrimitive(x) == y.
             // if any interned strings were freed, rehash the intern table
             // todo - make this less aggressive
             if (rehashFlag)
-                rehashNamespaces(numNamespaces);
+                rehashNamespacesIfPossible(numNamespaces);
         }
 
         // Clear out the regex compile cache, just to prevent big strings or regexes from
@@ -3810,13 +3810,34 @@ return the result of the comparison ToPrimitive(x) == y.
         mmfx_delete_array(oldStrings);
     }
 
-    void AvmCore::rehashNamespaces(int newlen)
+    void AvmCore::rehashNamespacesIfPossible(int newlen)
+    {
+        rehashNamespaces(newlen, true);
+    }
+
+    void AvmCore::rehashNamespaces(int newlen, bool canFail/*=false*/)
     {
         // rehash
 
         GCRoot::GCMember<Namespace> *old = namespaces;
-        namespaces = mmfx_new_array(GCRoot::GCMember<Namespace>, newlen);
         int oldCount = numNamespaces;
+        if (canFail)
+        {
+            AvmAssert(newlen <= oldCount); // failure senseless when growing.
+
+            // alloc failure when shrinking ==> can recover without OOM Abort.
+            namespaces = mmfx_new_array_opt(GCRoot::GCMember<Namespace>, newlen,
+                                            kCanFail);
+            if (namespaces == NULL)
+            {
+                namespaces = old;
+                return;
+            }
+        }
+        else
+        {
+            namespaces = mmfx_new_array(GCRoot::GCMember<Namespace>, newlen);
+        }
         numNamespaces = newlen;
 
         for (int i=0; i < oldCount; i++)
