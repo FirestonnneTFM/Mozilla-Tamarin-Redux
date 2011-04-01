@@ -49,122 +49,64 @@
 ##
 . ../all/util-calculate-change.sh $1
 
-
-export COVFILE=$buildsdir/${change}-${changeid}/$platform/avm.cov
-test -f $COVFILE && rm -f $COVFILE
-
-cd $buildsdir/${change}-${changeid}/$platform/
-files=`ls *.cov`
-
-$bullseyedir/covmerge -c $files
-
-cd ${basedir}
-$bullseyedir/covdir -q -m
-fnpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $6}'`
-cdpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $11}'`
-
-
-
-echo "message: total function coverage:           $fnpct"
-echo "message: total condition/decision coverage: $cdpct"
-
-${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
-ret=$?
-if [ "$ret" != "0" ]; then
-    echo "Uploading of $COVFILE failed"
-    exit 1
-fi
-
-echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/avm.cov code coverage data file avm.cov"
-
-# Current known platforms generating coverage data:
-platforms="windows mac linux"
-covfiles="" # this will get built up by looping over the platforms
-
-# Get the coverage files for all platforms. If all files are not avaible, stop.
-# Only continue processing if ALL platforms are complete.
-for platform in ${platforms}
+errors=""
+covdatadir=$buildsdir/${change}-${changeid}/$platform
+for file in $covdatadir/*.cov
 do
-    covfiles+="$platform/avm.cov "
-    if [ ! -e "$buildsdir/${change}-${changeid}/$platform/avm.cov" ]; then
-	echo "Downloading $platform/avm.cov"
-	${basedir}/build/buildbot/slaves/all/util-download.sh $vmbuilds$branch/${change}-${changeid}/$platform/avm.cov $buildsdir/${change}-${changeid}/$platform/avm.cov
-	ret=$?
-	test "$ret" = "0" || {
-            echo "Downloading of $platform/avm.cov failed"
-            rm -f $buildsdir/${change}-${changeid}/$platform/avm.cov
-	    echo "Not all coverage files are available so stop processing"
-            exit 0
-	}
+    export COVFILE=$file
+    echo
+    echo "coverage file: $COVFILE"
+    cd ${basedir}
+    $bullseyedir/covdir -q -m $coverage_exclude_regions
+    fnpct=`$bullseyedir/covdir -q -m $coverage_exclude_regions | grep Total | awk '{print $6}'`
+    cdpct=`$bullseyedir/covdir -q -m $coverage_exclude_regions | grep Total | awk '{print $11}'`
+
+    echo "message: total function coverage:           $fnpct"
+    echo "message: total condition/decision coverage: $cdpct"
+
+    # download current historical files
+    basename=`basename $file | awk -F. '{print $1}'`
+    ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-recentfn.csv $covdatadir/${basename}-recentfn.csv
+    ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-recentbc.csv $covdatadir/${basename}-recentbc.csv
+    ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-milestonefn.baseline.csv $covdatadir/${basename}-milestonefn.csv
+    ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-milestonebc.baseline.csv $covdatadir/${basename}-milestonebc.csv
+    ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-milestone-missingfn.csv $covdatadir/${basename}-milestone-missingfn.csv
+
+    # parse code coverage data and generate csv reports
+    ${basedir}/build/buildbot/slaves/all/util-parse-codecoverage.py --covfile=$file --build=$change
+    result=$?
+    if [ "$result" != "0" ]
+    then
+        echo "message: error ${basedir}/build/buildbot/slaves/all/util-parse-codecoverage.py failed"
+        errors="$file FAILED $errors"
+    else
+        echo "uploading csv data"
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-info.csv ${scp_coverage}/${basename}-info.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-summaryfn.csv ${scp_coverage}/${basename}-summaryfn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-summarybc.csv ${scp_coverage}/${basename}-summarybc.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-recentfn.csv ${scp_coverage}/${basename}-recentfn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-recentbc.csv ${scp_coverage}/${basename}-recentbc.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-milestonefn.csv ${scp_coverage}/${basename}-milestonefn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-milestonebc.csv ${scp_coverage}/${basename}-milestonebc.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-missingfn.csv ${scp_coverage}/${basename}-missingfn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-missingfn-diffs.csv ${scp_coverage}/${basename}-missingfn-diffs.csv
+    
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-missingfn-diffs.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-missingfn-diffs.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-missingfn.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-missingfn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-summaryfn.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-summaryfn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-summarybc.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-summarybc.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-recentfn.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-recentfn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-recentbc.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-recentbc.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-milestonefn.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-milestonefn.csv
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-milestonebc.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-milestonebc.csv
     fi
 done
 
-# Merge all coverage files into a single file and upload
-mkdir $buildsdir/${change}-${changeid}/coverage
-export COVFILE=$buildsdir/${change}-${changeid}/coverage/avm.cov
-test -f $COVFILE && rm -f $COVFILE
-
-echo $covfiles
-cd $buildsdir/${change}-${changeid}
-$bullseyedir/covmerge -c $covfiles
-
-
-cd ${basedir}
-$bullseyedir/covdir -q -m
-fnpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $6}'`
-cdpct=`$bullseyedir/covdir -q -m | grep Total | awk '{print $11}'`
-
-
-
-echo "message: combined total function coverage:           $fnpct"
-echo "message: combined total condition/decision coverage: $cdpct"
-
-${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/coverage/avm.cov
-ret=$?
-if [ "$ret" != "0" ]; then
-    echo "Uploading of $COVFILE failed"
+if [ "$errors" != "" ]
+then
+    echo "message: code coverage processing failed"
     exit 1
+else
+    echo "message: finished code coverage processing"
+    exit 0
 fi
-echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/coverage/avm.cov combined code coverage data file avm.cov"
-
-# Remove current coverage files
-ssh ${coverage_host} "cd ${coverage_dir}/latest; rm *.cov"
-
-# Post all of the coverage files to the 'latest' directory
-for platform in ${platforms}
-do
-    echo; echo "Uploading avm-${platform}-${change}.cov ..."
-    . ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $buildsdir/${change}-${changeid}/$platform/avm.cov ${scp_coverage}/latest/avm-${platform}-${change}.cov
-done
-echo; echo "Uploading avm-${change}.cov ..."
-. ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $buildsdir/${change}-${changeid}/coverage/avm.cov ${scp_coverage}/latest/avm-${change}.cov
-
-echo; echo "Updating code coverage reports..."
-covdatadir=$buildsdir/${change}-${changeid}/coverage
-# set pwd to code root for covfn to produce correct relative path
-cd $basedir
-
-# download current historical files
-${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-fn-summary.csv $covdatadir/codecoverage-fn-summary.csv
-${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-fnpercent-summary.csv $covdatadir/codecoverage-fnpercent-summary.csv
-${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-bc-summary.csv $covdatadir/codecoverage-bc-summary.csv
-${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/codecoverage-bcpercent-summary.csv $covdatadir/codecoverage-bcpercent-summary.csv
-
-# parse code coverage data and generate csv reports
-${basedir}/build/buildbot/slaves/all/util-parse-codecoverage.py --covfile=$covdatadir/avm.cov --build=$change --skips=$coverage_skips --datadir=$covdatadir
-result=$?
-test "$result" = "0" || {
-    echo "message: error ${basedir}/build/buildbot/slaves/all/util-parse-codecoverage.py failed"
-    exit 1
-}
-
-# upload csv reports
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-fn-summary.csv ${scp_coverage}/codecoverage-fn-summary.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-fnpercent-summary.csv ${scp_coverage}/codecoverage-fnpercent-summary.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-bc-summary.csv ${scp_coverage}/codecoverage-bc-summary.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-bcpercent-summary.csv ${scp_coverage}/codecoverage-bcpercent-summary.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-fn-summary.csv ${scp_coverage}/codecoverage-fn-summary.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-info.csv ${scp_coverage}/codecoverage-info.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-summary.csv ${scp_coverage}/codecoverage-summary.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage-missingfn.csv ${scp_coverage}/latest/codecoverage-missingfn.csv
-${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/codecoverage.csv ${scp_coverage}/latest/codecoverage.csv

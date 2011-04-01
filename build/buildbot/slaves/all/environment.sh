@@ -109,8 +109,8 @@ export coverage_host=10.116.42.110
 export coverage_dir="/cygdrive/e/AVMTeam/wwwroot/analytics/codecoverage"
 export scp_coverage="${coverage_host}:${coverage_dir}"
 export http_coverage=http://tamarin-builds.mozilla.org/analytics/codecoverage
-export coverage_skips=eval,other-licenses,pcre,Total
-export coverage_exclude_regions="!extensions/JavaGlue.h !extensions/ST_*.cpp !extensions/Selftest*.cpp !generated/shell_toplevel.h !generated/shell_toplevel.cpp !MMgc/GCMemoryProfiler.h !MMgc/GCMemoryProfiler.cpp !other-licenses/ !pcre/ !shell/ !vmbase/AvmAssert.cpp !VMPI/MacDebugUtils.cpp !VMPI/SpyUtilsPosix.cpp !VMPI/UnixDebugUtils.cpp !vprof/"
+
+export coverage_exclude_regions=`../all/codecoverage-excludes.py`
 
 export doxygen_host=10.116.42.110
 export doxygen_dir="/cygdrive/e/AVMTeam/wwwroot/doxygen"
