@@ -269,6 +269,8 @@ namespace MMgc
     T *MMgcConstructTaggedArray(T* /*dummy template arg*/, size_t count, MMgc::FixedMallocOpts opts)
     {
         T *mem = (T*) MMgc::NewTaggedArray(count, sizeof(T), opts, false /* !isPrimitive */);
+        if (mem == NULL && (opts & MMgc::kCanFail))
+            return NULL;
         T *tp = mem;
         for(size_t i=count; i>0; i--, tp++)
             new ((void*)tp) T;
