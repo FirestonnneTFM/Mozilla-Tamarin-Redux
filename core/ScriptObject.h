@@ -160,7 +160,7 @@ namespace avmplus
          *
          * NOTE: subclasses should never need to declare this method in their class;
          *       an override declaration will be provided for them iff
-         *       customconstruct="some-value" is specified in the AS3 file.
+         *       construct="override" or construct="instance" is specified in the AS3 file.
          */
         virtual Atom construct(int argc, Atom* argv);
 

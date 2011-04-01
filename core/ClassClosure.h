@@ -62,6 +62,20 @@ namespace avmplus
 
     public:
 
+        // All ClassClosures get a default "constructObject" available
+        // to them with no args; which does what you might expect: attempt
+        // to call the ctor with no args. (If the ctor has nonoptional args
+        // then an exception will be thrown.) This is useful in various places
+        // in Flash, which expect subclasses of (e.g.) Font to be declared
+        // with zero-arg constructors, and allows us to avoid exposing
+        // naked calls to "construct()" with argc/argv usage.
+        //
+        // NOTE that this is *not* a virtual call.
+        //
+        // Note that this will never return NULL: if the constructor
+        // returns null (or a non-object atom), we throw kCantInstantiateError instead.
+        GCRef<ScriptObject> constructObject();
+
         static ClassClosure* FASTCALL createClassClosure(VTable* cvtable);
         
         Atom get_prototype();
