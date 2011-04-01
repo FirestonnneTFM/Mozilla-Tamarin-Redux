@@ -235,6 +235,176 @@ private:
 };
 
 //-----------------------------------------------------------
+// avmshell::ShellCoreFriend1
+//-----------------------------------------------------------
+class ShellCoreFriend1Object : public avmplus::ScriptObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+    friend class avmshell::ShellCore;
+protected:
+    friend class avmplus::ShellCoreFriend1Class;
+    REALLY_INLINE explicit ShellCoreFriend1Object(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit ShellCoreFriend1Object(const ShellCoreFriend1Object&); // unimplemented
+    void operator=(const ShellCoreFriend1Object&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::ShellCoreFriend1$
+//-----------------------------------------------------------
+class ShellCoreFriend1Class : public avmplus::ClassClosure
+{
+public:
+    static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
+public:
+    static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*);
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+public:
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> constructObject()
+    {
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+    }
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+    friend class avmshell::ShellCore;
+protected:
+    REALLY_INLINE int32_t get_foo() const { return m_slots_ShellCoreFriend1Class.m_private_foo; }
+    REALLY_INLINE void set_foo(int32_t newVal) { m_slots_ShellCoreFriend1Class.m_private_foo = newVal; }
+private:
+    avmplus::NativeID::avmplus_ShellCoreFriend1ClassSlots m_slots_ShellCoreFriend1Class;
+protected:
+    inline explicit ShellCoreFriend1Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit ShellCoreFriend1Class(const ShellCoreFriend1Class&); // unimplemented
+    void operator=(const ShellCoreFriend1Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::ShellCoreFriend2
+//-----------------------------------------------------------
+class ShellCoreFriend2Object : public avmplus::ScriptObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+    friend class avmshell::ShellCore;
+    friend class avmshell::ShellToplevel;
+protected:
+    friend class avmplus::ShellCoreFriend2Class;
+    REALLY_INLINE explicit ShellCoreFriend2Object(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit ShellCoreFriend2Object(const ShellCoreFriend2Object&); // unimplemented
+    void operator=(const ShellCoreFriend2Object&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// avmshell::ShellCoreFriend2$
+//-----------------------------------------------------------
+class ShellCoreFriend2Class : public avmplus::ClassClosure
+{
+public:
+    static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
+public:
+    static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*);
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+public:
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> constructObject()
+    {
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+    }
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+    friend class avmshell::ShellCore;
+    friend class avmshell::ShellToplevel;
+protected:
+    REALLY_INLINE int32_t get_bar() const { return m_slots_ShellCoreFriend2Class.m_private_bar; }
+    REALLY_INLINE void set_bar(int32_t newVal) { m_slots_ShellCoreFriend2Class.m_private_bar = newVal; }
+private:
+    avmplus::NativeID::avmplus_ShellCoreFriend2ClassSlots m_slots_ShellCoreFriend2Class;
+protected:
+    inline explicit ShellCoreFriend2Class(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit ShellCoreFriend2Class(const ShellCoreFriend2Class&); // unimplemented
+    void operator=(const ShellCoreFriend2Class&); // unimplemented
+};
+
+//-----------------------------------------------------------
 // flash.system::Capabilities
 //-----------------------------------------------------------
 class CapabilitiesObject : public avmplus::ScriptObject

@@ -649,11 +649,14 @@ class NativeInfo:
                     self.method_map_name = v
             elif (k == "construct"):
                 self.set_construct(v, is_vm_builtin)
+            elif (k == "friend"):
+                self.set_friend(v)
             else:
                 raise Error("unknown attribute native(%s)" % k)
         if (self.traits.cpp_name_comps == None) and (self.itraits.cpp_name_comps == None):
             # it's OK to specify construct="native" for a pure AS3 class
-            if self.construct != "native":
+            # it's OK to specify friend="whatever" for a pure AS3 class
+            if not (self.construct == "native" or self.traits.cpp_friend_classes != None):
                 raise Error("native metadata must specify (cls,instance)")
   
     def fullyQualifiedCPPClassName(self, className):
@@ -661,6 +664,12 @@ class NativeInfo:
         if (len(opts.rootImplNS) > 0) and not className.startswith('::') and not className in GLUECLASSES_WITHOUT_NS:
             r.insert(0, opts.rootImplNS)
         return r
+
+    def set_friend(self, name):
+        if self.traits.cpp_friend_classes != None:
+            raise Error("native(friend) may not be specified multiple times for the same class: %s %s" % (self.traits.fqcppname(), name))
+        self.traits.cpp_friend_classes = name.split(',')
+        self.itraits.cpp_friend_classes = name.split(',')
 
     def set_class(self, name):
         if self.traits.cpp_name_comps != None:
@@ -837,6 +846,7 @@ class Traits:
     ctype = CTYPE_OBJECT
     metadata = None
     cpp_name_comps = None
+    cpp_friend_classes = None
     slotsStructName = None
     slotsInstanceName = None
     nextSlotId = 0
@@ -2175,6 +2185,9 @@ class AbcThunkGen:
         out.println("private:")
         out.indent += 1
         out.println("friend class %s::SlotOffsetsAndAsserts;" % opts.nativeIDNS)
+        if t.cpp_friend_classes != None:
+            for f in t.cpp_friend_classes:
+                out.println("friend class %s;" % f)
         out.indent -= 1
         if (len(t.slots) > 0):
             for slot in sortedSlots:

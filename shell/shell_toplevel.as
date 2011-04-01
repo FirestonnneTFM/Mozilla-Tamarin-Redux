@@ -205,6 +205,20 @@ package avmshell
     public class NativeBaseAS3
     {
     }
+
+    // this class exists solely to test friend="someclass"
+    [native(friend="avmshell::ShellCore")]
+    public class ShellCoreFriend1
+    {
+        static private var foo:int = 42;
+    }
+
+    // this class exists solely to test friend="someclass"
+    [native(friend="avmshell::ShellCore,avmshell::ShellToplevel")]
+    public class ShellCoreFriend2
+    {
+        static private var bar:int = 101;
+    }
 }
 
 // The flash.system package is present so identical ATS test media can be used
