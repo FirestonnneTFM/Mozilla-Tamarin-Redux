@@ -63,13 +63,8 @@ echo "Removing old *.abc files"
 find ./ -name "*.abc" -exec rm {} \;
 
 echo "Rebuilding ABC test media"
-
-if [[ $AVM == *ceremoteshell* ]]
-then
-    python ./runtests.py --rebuildtests -c arm-winmobile-tvm-release-arm 
-else
-    python ./runtests.py --rebuildtests 
-fi
+python ./runtests.py --rebuildtests
+python ./runtests.py --rebuildtests --config="deep"
 
 # create zip of .abc files
 files=`find . -name "*.abc*"`
