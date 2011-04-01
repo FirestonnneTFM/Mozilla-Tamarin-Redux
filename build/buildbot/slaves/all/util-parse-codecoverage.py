@@ -47,45 +47,35 @@ usage:
 
   requirement for the csv filename output to look correct must run this script with cwd set to the tamarin-redux directory
 
-  parsecodecoverage.py --covfile avm.cov --build=5110 --skips=other-licenses,pcre,eval,Total --datadir=./data
+  parsecodecoverage.py --covfile avm.cov --build=5110
+  env variables: $coverage_exclude_regions
 
   input:
      --covfile <bullseye merged binary .cov>
-     --incsvfile <optional: use a bullseye csv as input instead of a binary .cov file>
      --build   <hg revision number>
-     --skips   <list of modules to skip seperated by ,>
-     --datadir <data directory>
      
-     codecoverage-fn-summary.csv        # historical uncovered functions
-     codecoverage-fnpercent-summary.csv # historical coverage % branches
-     codecoverage-bc-summary.csv        # historical uncovered branches
-     codecoverage-bcpercent-summary.csv # historical coverage % branches 
-
-     ** when using --covfile $bullseyedir must be set to the bin directory of the bullseye tools
-     ** can pass in --incsvfile=file.csv instead of avm.cov
-
   output:
+     for output files the $basename is the covfile with the .cov removed e.g. avmshell_s_cov_64.cov produces avmshell_s_cov_64-info.csv
      these files are created:
-         codecoverage-info.csv              # build number and timestamp
-         codecoverage-summary.csv           # function and branch data table for current build for table
-         codecoverage-missingfn.csv         # list of uncovered functions
-         codecoverage.csv                   # bullseye csv
+         $basename-info.csv              # build number and timestamp
+         $basename-summaryfn.csv         # function data table for current build for table
+         $basename-summarybc.csv         # branches/conditions data table for current build for table
+         $basename-missingfn.csv         # list of uncovered functions
+
      these files are appended:
-         codecoverage-fn-summary.csv        # uncovered function historical for chart
-         codecoverage-bc-summary.csv        # uncovered branches/conditions historical for chart
-         codecoverage-fnpercent-summary.csv # function coverage % historical for chart
-         codecoverage-bcpercent-summary.csv # branches/conditions coverage % historical for chart
+         $basename-recentfn.csv          # uncovered function historical chart for this iteration (month)
+         $basename-recentbc.csv          # uncovered branch/conditions historical chart for this iteration (month)
+         $basename-milestonefn.csv       # uncovered function historical chart for recent iterations/milestones
+         $basename-milestonebc.csv       # uncovered branches/conditions historical chart for recent iterations/milestones
+
 
   bullseye tool must be installed and in the path, covfn is executed from bullseye tested with version 7.13.32
 
   CSV output formats:
-  codecoverage-missingfn.csv format:  build,module name,source file name, function name
-  codecoverage-info.csv format (single line): build: ###, updated: YYYY-MM-DD HH:MM
-  codecoverage-summary.csv format: module,uncovered fns,total fns,% fn cov,uncovered branches,% branch cov,total branches,% branch cov
-  codecoverage-fn-summary.csv format: each column is per build uncovered functions, rows are modules
-  codecoverage-fnpercent-summary.csv format: each column is per build % function coverage, rows are modules
-  codecoverage-bc-summary.csv format: each column is per build uncovered branches, rows are modules
-  codecoverage-bcpercent-summary.csv format: each column is per build % branch coverage, rows are modules
+  $basename-missingfn.csv format:  build,module name,source file name, function name
+  $basename-info.csv format (single line): build: ###, updated: YYYY-MM-DD HH:MM
+  $basename-summaryfn.csv format: module,uncovered fns,total fns,% fn cov
+  $basename-summarygc.csv format: module,uncovered branches,% branch cov,total branches,% branch cov
 
 '''
 import getopt,os,re,subprocess,sys,datetime
@@ -103,34 +93,28 @@ class ParseCodeCoverage:
     fnpercentsummary=None
     bcsummary=None
     bcpercentsummary=None
-    defaultcovcsv=None
+    basefile=None
     modulelist=None
-
+    skips=[]
     bullseyedir=None
-    skips='other-licenses,pcre,Total,eval'
     build='unknown'
-    maxBuilds=20
+
+    
 
     options=''
-    longOptions=['covfile=','build=','skips=','incsvfile=','datadir=']
+    longOptions=['covfile=','build=','incsvfile=']
+    region=''
 
     def __init__(self):
         self.parseOptions()
 
-        # set file names
-        self.missingfnfile=self.datadir+'/codecoverage-missingfn.csv'
-        self.info=self.datadir+'/codecoverage-info.csv'
-        self.summary=self.datadir+'/codecoverage-summary.csv'
-        self.fnsummary=self.datadir+'/codecoverage-fn-summary.csv'
-        self.fnpercentsummary=self.datadir+'/codecoverage-fnpercent-summary.csv'
-        self.bcsummary=self.datadir+'/codecoverage-bc-summary.csv'
-        self.bcpercentsummary=self.datadir+'/codecoverage-bcpercent-summary.csv'
-        self.defaultcovcsv=self.datadir+'/codecoverage.csv'
-
-        self.bullseyedir=os.environ['bullseyedir']
-        if self.bullseyedir==None:
+        if os.environ.has_key('coverage_exclude_regions'):
+            self.region=os.environ['coverage_exclude_regions']
+        
+        if os.environ.has_key('bullseyedir')==False:
             print("error: must set bullseyedir environment variable to the bullseye/bin directory")
             sys.exit(1)
+        self.bullseyedir=os.environ['bullseyedir']
 
         # if incsvfile not set run covfn to generate the csv file
         if self.incsvfile==None:
@@ -140,35 +124,50 @@ class ParseCodeCoverage:
 
         # parse the csv file into missingfn csv string, and dictionaries: module:fncovered, module:fntotal, 
         #       module:bccovered, module:bctotal
-        csvdata, fnucovered,fntotal,bcucovered,bctotal = self.processCSV()
+        csvdata,fnucovered,fntotal,bcucovered,bctotal = self.processCSV()
         self.modulelist=fntotal.keys()
         self.modulelist.sort(key=str.lower)
 
         # write the missing fn csv file
-        if self.missingfnfile!=None:
-            self.saveCSV(csvdata)
+        self.missingfnfile=self.basefile+'-missingfn.csv'
+        self.saveCSV(csvdata)
+
+        # calculate missing fn diff against milestone
+        self.prepareFileForDiff(self.basefile+'-milestone-missingfn.csv')
+        self.prepareFileForDiff(self.basefile+'-missingfn.csv')
+        cmd="diff -U 0 %s %s" % (self.basefile+'-milestone-missingfn.csv.1',self.basefile+'-missingfn.csv.1')
+        process=subprocess.Popen(cmd,shell=True,stdout=open(self.basefile+'-missingfn-diffs.csv','w'),stderr=subprocess.STDOUT)
+        (stdout,stderr)=process.communicate()
 
         # write the csv table for current build and csv table with build number and timestamp
-        if self.summary!=None:
-            self.generateSummaryTable(fnucovered,fntotal,bcucovered,bctotal)
+        self.info=self.basefile+'-info.csv'
+        self.summaryfn=self.basefile+'-summaryfn.csv'
+        self.generateSummaryTableFn(fnucovered,fntotal)
+        self.summarybc=self.basefile+'-summarybc.csv'
+        self.generateSummaryTableBc(bcucovered,bctotal)
    
-        # append csv for missing function chart
-        if self.fnsummary!=None:
-            self.generateSummary(self.fnsummary,fnucovered)
-
-        # append csv for uncovered branches chart
-        if self.bcsummary!=None:
-            self.generateSummary(self.bcsummary,bcucovered)
-
-        # append csv for function percent chart
-        if self.fnpercentsummary!=None:
-            self.generatePercentSummary(self.fnpercentsummary,fnucovered,fntotal)
-
-        # append csv for branches percent chart
-        if self.bcpercentsummary!=None:
-            self.generatePercentSummary(self.bcpercentsummary,bcucovered,bctotal)
+        self.appendData(self.basefile+'-recentfn.csv',fnucovered,fntotal)
+        self.appendData(self.basefile+'-recentbc.csv',bcucovered,bctotal)
+        self.appendData(self.basefile+'-milestonefn.csv',fnucovered,fntotal)
+        self.appendData(self.basefile+'-milestonebc.csv',bcucovered,bctotal)
 
         print('finished')        
+
+    def prepareFileForDiff(self,file):
+        f=open(file)
+        contents=f.read()
+        f.close()
+        newcontents=''
+        lines=contents.split('\n')
+        for line in lines:
+            tokens=line.split(',')
+            if len(tokens)==0:
+                continue
+            tokens=tokens[1:]
+            newcontents+=",".join(tokens)+"\n"
+        f=open(file+".1","w")
+        f.write(newcontents)
+        f.close()
 
     def usage(self,c):
         print('usage: %s [options]' % sys.argv[0])
@@ -176,8 +175,6 @@ class ParseCodeCoverage:
         print('    --incsvfile   set the csv file to load, the csv is returned by covfn --csv > file.csv,')
         print('                     if not set covfn --csv is run')
         print('    --build       set the build number')
-        print('    --skips       set the list of modules to skip use , as separator e.g. pcre,Total,eval')
-        print('    --datadir     sets the data directory')
         sys.exit(c)
 
     def parseOptions(self):
@@ -190,44 +187,43 @@ class ParseCodeCoverage:
         for o,v in opts:
             if o in ('--covfile'):
                 self.covfile=v
+                if v.find('.')>-1:
+                    v=v[0:v.find('.')]
+                self.basefile=v
             if o in ('--incsvfile'):
                 self.incsvfile=v
+                if v.find('.')>-1:
+                    v=v[0:v.find('.')-1]
+                self.basefile=v
             if o in ('--build'):
                 self.build=v
-            if o in ('--skips'):
-                self.skips=v.split(',')
-            if o in ('--datadir'):
-                self.datadir=v
-                if os.path.exists(self.datadir)==False:
-                    os.mkdirs(self.datadir)
 
         if self.covfile==None and self.incsvfile==None:
             print('--covfile or --incsvfile must be set')
             sys.exit(1)
 
     def runcovfn(self):
-        if self.outcsvfile==None:
-            self.outcsvfile=self.defaultcovcsv
-
-        print('processing .cov binary to %s...' % self.outcsvfile)
+        outfile=self.basefile+'.csv'
+        print('processing .cov binary to %s...' % outfile)
  
         covarg=''
         if self.covfile!=None:
             covarg='--file %s' % self.covfile
 
-        cmd='%s/covfn %s --no-banner --csv' % (self.bullseyedir,covarg)
-        if os.path.exists(self.outcsvfile):
-            os.unlink(self.outcsvfile)
+        cmd='%s/covfn %s --no-banner --csv %s' % (self.bullseyedir,covarg,self.region)
+        if os.path.exists(outfile):
+            os.unlink(outfile)
 
-        process=subprocess.Popen(cmd,shell=True,stdout=open(self.outcsvfile,'w'),stderr=subprocess.PIPE)
+        process=subprocess.Popen(cmd,shell=True,stdout=open(outfile,'w'),stderr=subprocess.PIPE)
         (stdout,stderr)=process.communicate()
+        self.outcsvfile=outfile
 
     def processCSV(self):
         print('parsing %s...' % self.outcsvfile)
         lines=open(self.outcsvfile).read()
         output=""
         # throw away header(1st) and summary(last) lines
-        lines=lines.split('\n')[1:-1]
+        lines=lines.split('\n')[0:-1]
         uncoveredfncount={}
         totalfncount={}
         uncoveredbccount={}
@@ -281,27 +277,83 @@ class ParseCodeCoverage:
         print('saving csv data to %s' % self.missingfnfile)
         open(self.missingfnfile,'w').write(csvdata)
 
-    def generateSummaryTable(self,fnuncovered,fntotal,bcuncovered,bctotal):
-        print('generating summary data...')
-        if os.path.exists(self.summary):
-            os.unlink(self.summary)
+    def appendData(self,filename,uncovered,total):
+        print('appending results to %s' % filename)
+        uncoveredsum=0
+        totalsum=0
+        for module in self.modulelist:
+            if uncovered.has_key(module)==False:
+                if total.has_key(module)==False:
+                    print('WARNING: module %s is not in module list' % module)
+                continue
+            uncoveredsum+=uncovered[module]
+            totalsum+=total[module]
+        percent=self.calcpercent(uncoveredsum,totalsum)
+        if os.path.exists(filename)==False:
+            print("ERROR: file %s does not exist, generating new file")
+            contents="build\ncore\nnanojit\nMMgc\ngenerated\nplatform\nextensions\nVMPI\nvmbase"
+        else:
+            contents=open(filename).read()
+        newcontents=''
+        lines=contents.split('\n')
+        for line in lines:
+            if line=='':
+                continue
+            tokens=line.split(',')
+            if tokens[0]=='build':
+                value=self.build
+            elif tokens[0] in self.modulelist==False:
+                value="0"
+            elif tokens[0]=='total':
+                value=percent
+            else:
+                if uncovered.has_key(tokens[0])==False:
+                    uncov=0
+                else:
+                    uncov=uncovered[tokens[0]]
+                value=self.calcpercent(uncov,total[tokens[0]])
+            newcontents+="%s,%s\n" % (line,value)
+        f=open(filename,'w')
+        f.write(newcontents)
+        f.close()
+
+    def generateSummaryTableFn(self,fnuncovered,fntotal):
+        print('generating fn summary data...')
+        if os.path.exists(self.summaryfn):
+            os.unlink(self.summaryfn)
         fnuncoveredsum=0
         fntotalsum=0
-        bcuncoveredsum=0
-        bctotalsum=0
-        contents='module,uncovered functions,total functions,% function coverage,uncovered branches,total branches,% branch coverage\n'
+        contents='module,uncovered functions,total functions,% function coverage\n'
         for module in self.modulelist:
+            if fnuncovered.has_key(module)==False:
+                continue
             fnuncoveredsum+=fnuncovered[module]
             fntotalsum+=fntotal[module]
+            contents+='%s,%s,%s,%s%s\n' % (module,fnuncovered[module],fntotal[module],self.calcpercent(fnuncovered[module],fntotal[module]),'%')
+        contents+='total,%s,%s,%s%s\n' % (fnuncoveredsum,fntotalsum,self.calcpercent(fnuncoveredsum,fntotalsum),'%')
+        open(self.summaryfn,'w').write(contents)
+        open(self.info,'w').write('current build: %s,function coverage: %s%s' % 
+                                 (self.build,
+                                  self.calcpercent(fnuncoveredsum,fntotalsum),'%')
+                                 )
+
+    def generateSummaryTableBc(self,bcuncovered,bctotal):
+        print('generating bc summary data...')
+        if os.path.exists(self.summarybc):
+            os.unlink(self.summarybc)
+        bcuncoveredsum=0
+        bctotalsum=0
+        contents='module,uncovered branches,total branches,% branch coverage\n'
+        for module in self.modulelist:
+            if bcuncovered.has_key(module)==False:
+                continue
             bcuncoveredsum+=bcuncovered[module]
             bctotalsum+=bctotal[module]
-            contents+='%s,%s,%s,%s%s,%s,%s,%s%s\n' % (module,fnuncovered[module],fntotal[module],self.calcpercent(fnuncovered[module],fntotal[module]),'%',bcuncovered[module],bctotal[module],self.calcpercent(bcuncovered[module],bctotal[module]),'%')
-        contents+='total,%s,%s,%s%s,%s,%s,%s%s\n' % (fnuncoveredsum,fntotalsum,self.calcpercent(fnuncoveredsum,fntotalsum),'%',bcuncoveredsum,bctotalsum,self.calcpercent(bcuncoveredsum,bctotalsum),'%')
-        open(self.summary,'w').write(contents)
-        open(self.info,'w').write('current build: %s,function coverage: %s%s,branch coverage: %s%s,updated: %s' % 
-                                 (self.build,
-                                  self.calcpercent(fnuncoveredsum,fntotalsum),'%',
-                                  self.calcpercent(bcuncoveredsum,bctotalsum),'%',
+            contents+='%s,%s,%s,%s%s\n' % (module,bcuncovered[module],bctotal[module],self.calcpercent(bcuncovered[module],bctotal[module]),'%')
+        contents+='total,%s,%s,%s%s\n' % (bcuncoveredsum,bctotalsum,self.calcpercent(bcuncoveredsum,bctotalsum),'%')
+        open(self.summarybc,'w').write(contents)
+        open(self.info,'a').write(',branch coverage: %s%s,updated: %s' % 
+                                 (self.calcpercent(bcuncoveredsum,bctotalsum),'%',
                                   datetime.datetime.today().strftime('%Y-%m-%d %H:%M'))
                                  )
 
