@@ -214,12 +214,12 @@ namespace avmshell
             // (they are not constructable from AS3)
             shell_toplevel->shellClasses->get_NativeBaseClass()->constructObject();
             shell_toplevel->shellClasses->get_NativeBaseAS3Class()->constructObject();
+
+            // test "friend" metadata
+            AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend1Class()->get_foo() == 42);
+            AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend2Class()->get_bar() == 101);
         }
         
-        // test "friend" metadata
-        AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend1Class()->get_foo() == 42);
-        AvmAssert(shell_toplevel->shellClasses->get_ShellCoreFriend2Class()->get_bar() == 101);
-
         return shell_toplevel;
     }
 
