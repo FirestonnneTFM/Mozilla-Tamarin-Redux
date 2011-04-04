@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -49,25 +49,19 @@
 . ../all/util-calculate-change.sh $1
 
 
-##
-# Upload the common builds
-##
-../all/upload-asteam.sh $change
-
-
 # Release_arm-linux
-../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/avmshell_neon_arm $ftp_asteam/$branch/$change-${changeid}/$platform/avmshell_neon_arm
+../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release
 ret=$?
 if [ "$ret" != "0" ]; then
-    echo "Uploading of $platform/avmshell_neon_arm failed"
+    echo "Uploading of $platform/$shell_release failed"
     exit 1
 fi
 
 # Debug_arm-linux
-../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/avmshell_neon_arm_d $ftp_asteam/$branch/$change-${changeid}/$platform/avmshell_neon_arm_d
+../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
 ret=$?
 if [ "$ret" != "0" ]; then
-    echo "Uploading of $platform/avmshell_neon_arm_d failed"
+    echo "Uploading of $platform/$shell_debug failed"
     exit 1
 fi
 

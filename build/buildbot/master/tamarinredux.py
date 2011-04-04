@@ -85,7 +85,7 @@ class tamarinredux:
                                   ["linux64-smoke", "linux64-compile"],
                                   ["solaris-sparc-smoke", "solaris-sparc-compile"],
                                   ["android-smoke","android-compile"],
-                                  ["linux-arm-smoke","linux-compile"],
+                                  ["linux-arm-smoke","linux-arm-compile"],
                                   ["linux-mips-smoke","linux-mips-compile"],
                                  ])
 
@@ -302,36 +302,8 @@ class tamarinredux:
     linux_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
-    linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'CXX': 'arm-none-linux-gnueabi-g++',
-                    'CC' : 'arm-none-linux-gnueabi-gcc',
-                    'LD' : 'arm-none-linux-gnueabi-ld',
-                    'AR' : 'arm-none-linux-gnueabi-ar',
-                },
-                description='starting Release_arm-linux build...',
-                descriptionDone='finished Release_arm-linux build.',
-                name="Release_arm-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-debug --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm_d', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'CXX': 'arm-none-linux-gnueabi-g++',
-                    'CC' : 'arm-none-linux-gnueabi-gcc',
-                    'LD' : 'arm-none-linux-gnueabi-ld',
-                    'AR' : 'arm-none-linux-gnueabi-ar',
-                },
-                description='starting Debug_arm-linux build...',
-                descriptionDone='finished Debug_arm-linux build.',
-                name="Debug_arm-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    linux_compile_factory.addStep(compile_buildcheck_local)
-    linux_compile_factory.addStep(util_upload_asteam_local)
+    linux_compile_factory.addStep(compile_buildcheck)
+    linux_compile_factory.addStep(util_upload_asteam)
 
     linux_compile_builder = {
                 'name': "linux-compile",
@@ -419,6 +391,11 @@ class tamarinredux:
     linux_arm_compile_factory.addStep(sync_clone(url=HG_URL))
     linux_arm_compile_factory.addStep(sync_update)
     linux_arm_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+    linux_arm_compile_factory.addStep(compile_builtin)
+    linux_arm_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_neon_arm", args="--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
+    linux_arm_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_neon_arm_d", args="--enable-debug --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
+    linux_arm_compile_factory.addStep(compile_buildcheck_local)
+    linux_arm_compile_factory.addStep(util_upload_asteam_local)
 
     linux_arm_compile_builder = {
                 'name': "linux-arm-compile",
