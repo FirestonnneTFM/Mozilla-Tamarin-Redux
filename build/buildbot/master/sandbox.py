@@ -85,7 +85,7 @@ class sandbox:
                                   ["linux64-smoke-sandbox", "linux64-compile-sandbox"],
                                   ["solaris-sparc-smoke-sandbox", "solaris-sparc-compile-sandbox"],
                                   ["android-smoke-sandbox","android-compile-sandbox"],
-                                  ["linux-arm-smoke-sandbox","linux-compile-sandbox"],
+                                  ["linux-arm-smoke-sandbox","linux-arm-compile-sandbox"],
                                   ["linux-mips-smoke-sandbox","linux-mips-compile-sandbox"],
                                  ])
 
@@ -240,38 +240,8 @@ class sandbox:
     sb_linux_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32"))
     sb_linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
     sb_linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-debug --enable-debugger --target=i686-linux", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_IA32 +AVMFEATURE_DEBUGGER"))
-    sb_linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'CXX': 'arm-none-linux-gnueabi-g++',
-                    'CC' : 'arm-none-linux-gnueabi-gcc',
-                    'LD' : 'arm-none-linux-gnueabi-ld',
-                    'AR' : 'arm-none-linux-gnueabi-ar',
-                },
-                description='starting Release_arm-linux build...',
-                descriptionDone='finished Release_arm-linux build.',
-                name="Release_arm-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-debug --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm_d', 'false'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'silent':WithProperties('%s','silent'),
-                    'CXX': 'arm-none-linux-gnueabi-g++',
-                    'CC' : 'arm-none-linux-gnueabi-gcc',
-                    'LD' : 'arm-none-linux-gnueabi-ld',
-                    'AR' : 'arm-none-linux-gnueabi-ar',
-                },
-                description='starting Debug_arm-linux build...',
-                descriptionDone='finished Debug_arm-linux build.',
-                name="Debug_arm-linux",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
-    sb_linux_compile_factory.addStep(compile_buildcheck_local)
-    sb_linux_compile_factory.addStep(util_upload_asteam_local)
+    sb_linux_compile_factory.addStep(compile_buildcheck)
+    sb_linux_compile_factory.addStep(util_upload_asteam)
 
     sb_linux_compile_builder = {
                 'name': "linux-compile-sandbox",
@@ -359,6 +329,11 @@ class sandbox:
     sb_linux_arm_compile_factory.addStep(sync_clone_sandbox)
     sb_linux_arm_compile_factory.addStep(sync_update)
     sb_linux_arm_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+    sb_linux_arm_compile_factory.addStep(compile_builtin)
+    sb_linux_arm_compile_factory.addStep(compile_generic(name="Release", shellname="avmshell_neon_arm", args="--enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
+    sb_linux_arm_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_neon_arm_d", args="--enable-debug --enable-arm-neon --arm-arch=armv7-a --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5", upload="false", features=""))
+    sb_linux_arm_compile_factory.addStep(compile_buildcheck_local)
+    sb_linux_arm_compile_factory.addStep(util_upload_asteam_local)
 
     sb_linux_arm_compile_builder = {
                 'name': "linux-arm-compile-sandbox",

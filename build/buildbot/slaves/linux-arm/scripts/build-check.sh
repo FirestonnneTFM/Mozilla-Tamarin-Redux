@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -49,22 +49,18 @@
 . ../all/util-calculate-change.sh $1
 
 
-##
-# Upload the common builds
-##
-. ../all/build-check.sh
-
 
 fail=0
 
+
 # Release_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm || {
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   echo "message: Release_arm-linux Failed"
   fail=1
 }
 
 # Debug_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm_d || {
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug || {
   echo "message: Debug_arm-linux Failed"
   fail=1
 }
