@@ -81,6 +81,7 @@ do
         errors="$file FAILED $errors"
     else
         echo "uploading csv data"
+        ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $file ${scp_coverage}/${basename}.cov
         ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-info.csv ${scp_coverage}/${basename}-info.csv
         ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-summaryfn.csv ${scp_coverage}/${basename}-summaryfn.csv
         ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-summarybc.csv ${scp_coverage}/${basename}-summarybc.csv
@@ -91,6 +92,7 @@ do
         ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-missingfn.csv ${scp_coverage}/${basename}-missingfn.csv
         ${basedir}/build/buildbot/slaves/all/util-upload-scp-mozilla.sh $covdatadir/${basename}-missingfn-diffs.csv ${scp_coverage}/${basename}-missingfn-diffs.csv
     
+        ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $file $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}.cov
         ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-missingfn-diffs.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-missingfn-diffs.csv
         ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-missingfn.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-missingfn.csv
         ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $covdatadir/${basename}-summaryfn.csv $ftp_asteam/$branch/$change-${changeid}/coverage/${basename}-summaryfn.csv

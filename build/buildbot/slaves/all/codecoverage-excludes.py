@@ -51,7 +51,7 @@ exclude_pattern=""
 exclude_pattern+="!extensions/JavaGlue.h !extensions/ST_*.cpp !extensions/Selftest*.cpp "
 
 # exclude generated code
-exclude_pattern+="!generated/shell_toplevel.h !generated/shell_toplevel.cpp "
+exclude_pattern+="!generated/shell_toplevel.h !generated/shell_toplevel.cpp !generated/shell_toplevel*.hh"
 
 # exclude Memory Profiler not part of flash player shipping code
 exclude_pattern+="!MMgc/GCMemoryProfiler.h !MMgc/GCMemoryProfiler.cpp "
