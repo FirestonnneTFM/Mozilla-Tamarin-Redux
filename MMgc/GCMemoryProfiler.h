@@ -225,6 +225,26 @@ namespace MMgc
     };
 
     typedef ObjectPopulationProfiler<AllocationSiteHandler> AllocationSiteProfiler;
+    
+#ifdef MMGC_WEAKREF_PROFILER
+    class WeakRefAllocationSiteProfiler : public ObjectPopulationProfiler<AllocationSiteHandler> 
+    {
+    public:
+        WeakRefAllocationSiteProfiler(GC* gc, const char* profileName);
+        
+        void reportPopulation(uint32_t pop);
+
+        void reportGCStats(uint32_t scanned, uint32_t removed);
+
+        uint32_t peakPopulation;
+        uint64_t scannedAtGC;
+        uint64_t removedAtGC;
+        uint32_t collections;
+
+    protected:
+        void dumpObjectInfo(unsigned long long numbytes, unsigned numobjects);
+    };
+#endif
 
     class DeletionNodeHandler
     {

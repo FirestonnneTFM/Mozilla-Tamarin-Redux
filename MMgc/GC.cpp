@@ -183,6 +183,9 @@ namespace MMgc
 #ifdef MMGC_CONSERVATIVE_PROFILER
         , demos(0)
 #endif
+#ifdef MMGC_WEAKREF_PROFILER
+        , weaklings(0)
+#endif
 #ifdef MMGC_DELETION_PROFILER
         , deletos(0)
 #endif
@@ -273,13 +276,17 @@ namespace MMgc
         allocaInit();
 
         MMGC_GCENTER(this);
-        emptyWeakRef = new (this) GCWeakRef(NULL);
+        emptyWeakRef = new (this) GCWeakRef(NULL);      // Note, we don't profile this one because the profiler is not yet allocated
 
         m_incrementalWork.SetDeadItem(emptyWeakRef);    // The empty weak ref is as good an object as any for this
 
 #ifdef MMGC_CONSERVATIVE_PROFILER
         if (demos == NULL && heap->profiler != NULL)
             demos = new AllocationSiteProfiler(this, "Conservative scanning volume incurred by allocation site");
+#endif
+#ifdef MMGC_WEAKREF_PROFILER
+        if (weaklings == NULL && heap->profiler != NULL)
+            weaklings = new WeakRefAllocationSiteProfiler(this, "Weak reference allocation volume by allocation site");
 #endif
 #ifdef MMGC_DELETION_PROFILER
         if (deletos == NULL && heap->profiler != NULL)
@@ -303,6 +310,23 @@ namespace MMgc
             demos->dumpTopBacktraces(30, demos->BY_COUNT);
             delete demos;
             demos = NULL;
+        }
+#endif
+#ifdef MMGC_WEAKREF_PROFILER
+        if (weaklings != NULL)
+        {
+            GCLog("Peak weakref population: %u\n", weaklings->peakPopulation);
+            GCLog("Probes: %llu accesses: %llu ratio: %f\n", 
+                  (unsigned long long)weakRefs.probes,
+                  (unsigned long long)weakRefs.accesses,
+                  (double)weakRefs.probes/(double)weakRefs.accesses);
+            GCLog("GCs: %u, scanned: %llu, removed: %llu\n", 
+                  weaklings->collections, 
+                  (unsigned long long)weaklings->scannedAtGC,
+                  (unsigned long long)weaklings->removedAtGC);
+            weaklings->dumpTopBacktraces(30, weaklings->BY_COUNT);
+            delete weaklings;
+            weaklings = NULL;
         }
 #endif
         policy.shutdown();
@@ -988,14 +1012,26 @@ namespace MMgc
     void GC::ClearUnmarkedWeakRefs()
     {
         GCHashtable::Iterator it(&weakRefs);
+#ifdef MMGC_WEAKREF_PROFILER
+        uint32_t count = weakRefs.count();
+        uint32_t deleted = 0;
+#endif
 
         while (it.nextKey() != NULL) {
             GCWeakRef* w = (GCWeakRef*)it.value();
             GCObject* o = w->peek();
-            if (o != NULL && !GC::GetMark(o))
+            if (o != NULL && !GC::GetMark(o)) {
+#ifdef MMGC_WEAKREF_PROFILER
+                deleted++;
+#endif
                 ClearWeakRef(o, false);
+            }
         }
         weakRefs.prune();
+#ifdef MMGC_WEAKREF_PROFILER
+        if (weaklings)
+            weaklings->reportGCStats(count, deleted);
+#endif
     }
 
     void GC::ForceSweepAtShutdown()
@@ -3291,6 +3327,12 @@ namespace MMgc
             ref = new (gc) GCWeakRef(userptr);
             gc->weakRefs.put(userptr, ref);
             SetHasWeakRef(userptr, true);
+#ifdef MMGC_WEAKREF_PROFILER
+            if (gc->weaklings != NULL) {
+                gc->weaklings->accountForObject(ref);
+                gc->weaklings->reportPopulation(gc->weakRefs.count());
+            }
+#endif
         } else {
             GCAssert(ref->get() == userptr);
         }

@@ -43,11 +43,15 @@
 namespace MMgc
 {
     template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
-    GCHashtableBase<VAL, KEYHANDLER,ALLOCHANDLER>::GCHashtableBase(uint32_t capacity) :
-    table(NULL),
-    tableSize(capacity),
-    numValues(0),
-    numDeleted(0)
+    GCHashtableBase<VAL, KEYHANDLER,ALLOCHANDLER>::GCHashtableBase(uint32_t capacity)
+        : table(NULL)
+        , tableSize(capacity)
+        , numValues(0)
+        , numDeleted(0)
+#ifdef MMGC_GCHASHTABLE_PROFILER
+        , probes(0)
+        , accesses(0)
+#endif
     {
         if (tableSize > 0)
         {
@@ -71,6 +75,10 @@ namespace MMgc
         tableSize = 0;
         numValues = 0;
         numDeleted = 0;
+#ifdef MMGC_GCHASHTABLE_PROFILER
+        probes = 0;
+        accesses = 0;
+#endif
     }
 
     template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
@@ -82,11 +90,17 @@ namespace MMgc
         tableSize = 4;
         numValues = 4;
         numDeleted = 0;
+#ifdef MMGC_GCHASHTABLE_PROFILER
+        // Do *not* clear probes and accesses, those are for the lifetime of the object (for better or worse)
+#endif
     }
 
     template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
     uint32_t GCHashtableBase<VAL, KEYHANDLER,ALLOCHANDLER>::find(const void* key, Entry* table, uint32_t tableSize)
     {
+#ifdef MMGC_GCHASHTABLE_PROFILER
+        accesses++;
+#endif
         GCAssert(key != DELETED);
 
         uint32_t n = 0;
@@ -94,9 +108,15 @@ namespace MMgc
         uint32_t const bitMask = (tableSize -1);
         uint32_t i = KEYHANDLER::hash(key) & bitMask;
         const void* k;
+#ifdef MMGC_GCHASHTABLE_PROFILER
+        probes++;
+#endif
         while ((k = table[i].key) != NULL && !KEYHANDLER::equal(k, key))
         {
             i = (i +  (n += 1)) & bitMask;      // quadratic probe
+#ifdef MMGC_GCHASHTABLE_PROFILER
+            probes++;
+#endif
         }
         GCAssert(i <= bitMask);
         return i;
@@ -105,6 +125,9 @@ namespace MMgc
     template <typename VAL, class KEYHANDLER, class ALLOCHANDLER>
     void GCHashtableBase<VAL, KEYHANDLER,ALLOCHANDLER>::put(const void* key, VAL value)
     {
+#ifdef MMGC_GCHASHTABLE_PROFILER
+        accesses++;
+#endif
         GCAssert(table != NULL);
 
         // this is basically an inlined version of find() with one minor difference:
@@ -122,6 +145,9 @@ namespace MMgc
         uint32_t const bitMask = (tableSize - 1);
         uint32_t i = KEYHANDLER::hash(key) & bitMask;
         const void* k;
+#ifdef MMGC_GCHASHTABLE_PROFILER
+        probes++;
+#endif
         while ((k = table[i].key) != NULL && !KEYHANDLER::equal(k, key))
         {
             // note that we can't just stop at the first DELETED value we find --
@@ -130,6 +156,9 @@ namespace MMgc
             // (choosing any other entry would be fine, just suboptimal)
             if (k == DELETED && delindex == NO_DELINDEX) delindex = i;
             i = (i + (n += 1)) & bitMask;       // quadratic probe
+#ifdef MMGC_GCHASHTABLE_PROFILER
+            probes++;
+#endif
         }
         GCAssert(k == NULL || KEYHANDLER::equal(k, key));
         if (k == NULL)
