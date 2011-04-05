@@ -128,27 +128,41 @@
 //#define MMGC_POISON_MEMORY_FROM_OS
 
 #ifdef MMGC_MEMORY_PROFILER
+    // For the following profilers you need source information: VMPI_getFunctionNameFromPC
+    // and VMPI_getFileAndLineInfoFromPC must work.
+
     // Internal: profile uses of the conservative marker
     //
-    // You need source information (VMPI_getFunctionNameFromPC, VMPI_getFileAndLineInfoFromPC)
-    // for this to be useful.  On Mac, make sure that the call to startATOSProcess() is
-    // not commented out in VMPI_setupPCResolution in MMgcPortMac.cpp.
+    // When MMGC_DELETION_PROFILER is enabled and MMGC_PROFILE=1 is defined in the
+    // runtime environment the VM will record all uses of conservative marking and
+    // dump the allocation sites that result in conservatively marked storage when
+    // the GC is shut down.
 
     //#define MMGC_CONSERVATIVE_PROFILER
 
     // Internal: profile uses of explicit deletion
     //
     // When MMGC_DELETION_PROFILER is enabled and MMGC_PROFILE=1 is defined in the
-    // environment the VM will record all uses of explicit deletion of managed storage,
-    // and dump a profile on shutdown.  These profiles are useful because we want to
+    // runtime environment the VM will record all uses of explicit deletion of managed storage,
+    // and dump a profile on GC shutdown.  These profiles are useful because we want to
     // reduce the frequency of those deletions, and tightly control the ones that
     // continue to exist.
-    //
-    // You need source information (VMPI_getFunctionNameFromPC, VMPI_getFileAndLineInfoFromPC)
-    // for this to be useful.  On Mac, make sure that the call to startATOSProcess() is
-    // not commented out in VMPI_setupPCResolution in MMgcPortMac.cpp.
 
     //#define MMGC_DELETION_PROFILER
+
+    // Internal: profile allocations of weak reference allocations
+    //
+    // When MMGC_WEAKREF_PROFILER is enabled and MMGC_PROFILE=1 is defined in the
+    // runtime environment the VM will record all allocations of weak references and dump
+    // the allocation sites on GC shutdown.
+
+    //#define MMGC_WEAKREF_PROFILER
+#endif
+
+#ifdef MMGC_WEAKREF_PROFILER
+    // Internal: measure the lookup traffic in GCHashtable, the statistics are dumped along
+    // with the statistics for MMGC_WEAKREF_PROFILER.
+    #define MMGC_GCHASHTABLE_PROFILER
 #endif
 
 #ifdef MMGC_REFCOUNT_PROFILING

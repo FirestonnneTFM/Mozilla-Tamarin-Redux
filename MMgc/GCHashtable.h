@@ -125,6 +125,11 @@ namespace MMgc
         uint32_t tableSize;     // capacity
         uint32_t numValues;     // size of table array
         uint32_t numDeleted;    // number of delete items
+#ifdef MMGC_GCHASHTABLE_PROFILER
+    public:
+        uint64_t probes;
+        uint64_t accesses;
+#endif
     };
 
     // --------------------------------

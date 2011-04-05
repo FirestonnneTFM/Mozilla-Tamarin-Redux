@@ -1120,7 +1120,40 @@ namespace MMgc
     const char* GetAllocationName(const void *) { return NULL; }
 
 #endif //MMGC_MEMORY_PROFILER
+
+#ifdef MMGC_WEAKREF_PROFILER
+    WeakRefAllocationSiteProfiler::WeakRefAllocationSiteProfiler(GC* gc, const char* profileName)
+        : ObjectPopulationProfiler<AllocationSiteHandler>(gc, profileName, false, false)
+        , peakPopulation(0)
+        , scannedAtGC(0)
+        , removedAtGC(0)
+        , collections(0)
+    {
+    }
     
+    void WeakRefAllocationSiteProfiler::reportPopulation(uint32_t pop)
+    {
+        if (pop > peakPopulation)
+            peakPopulation = pop;
+    }
+    
+    void WeakRefAllocationSiteProfiler::reportGCStats(uint32_t scanned, uint32_t removed)
+    {
+        scannedAtGC += scanned;
+        removedAtGC += removed;
+        collections++;
+    }
+    
+    void WeakRefAllocationSiteProfiler::dumpObjectInfo(unsigned long long numbytes, unsigned numobjects)
+    {
+        (void)numbytes;
+        if (numobjects == 1)
+            GCLog("  1 object allocated");
+        else
+            GCLog("  %u objects allocated", numobjects);
+    }
+#endif
+
 #ifdef MMGC_MEMORY_INFO
 
 // end user servicable parts

@@ -1736,6 +1736,9 @@ namespace MMgc
 #ifdef MMGC_CONSERVATIVE_PROFILER
         ObjectPopulationProfiler<AllocationSiteHandler>* demos;
 #endif
+#ifdef MMGC_WEAKREF_PROFILER
+        WeakRefAllocationSiteProfiler* weaklings;
+#endif
 
     private:
 #ifdef MMGC_DELETION_PROFILER
