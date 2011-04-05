@@ -52,6 +52,11 @@ using namespace avmplus;
 typedef Traits** LLVMTraitsId;
 typedef Namespace** LLVMNamespaceId;
 
+// force instantiation in case the headers haven't already
+template class MMgc::WriteBarrierRC<avmplus::String*>;
+template class MMgc::WriteBarrierRC<avmplus::Namespace*>;
+template class MMgc::WriteBarrierRC<avmplus::ScriptObject*>;    
+
 extern "C" {
     const AOTInfo aotInfos[] = {};
     const size_t nAOTInfos = 0;
