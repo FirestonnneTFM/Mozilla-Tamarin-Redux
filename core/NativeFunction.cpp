@@ -133,6 +133,12 @@ namespace avmplus
     bool NativeInitializer::getCompiledInfo(NativeMethodInfo *info, AvmThunkNativeHandler* handlerOut, Multiname &returnTypeName, uint32_t i) const
     {
         info->thunker = (GprMethodProc)0;
+        // NativeMethodInfo.handler is a union of 
+        // pointer to function and pointer to member function.
+        // Set them both so the entire union is initialized.
+        // See bugzilla#647660
+        info->handler.method = NULL;
+        info->handler.function = NULL;
 
         if (i < compiledMethodCount && compiledMethods[i])
         {
