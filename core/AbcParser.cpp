@@ -834,7 +834,12 @@ namespace avmplus
 #ifdef VMCFG_AOT
             bool isCompiled = false;
             AvmThunkNativeHandler handler;
-            NativeMethodInfo compiledMethodInfo;
+            // NativeMethodInfo.handler is a union of 
+            // pointer to function and pointer to member function.
+            // Zero the structure so that the entire thing is 
+            // initialized.
+            // See bugzilla#647660
+            NativeMethodInfo compiledMethodInfo = {0};
             {
                 Multiname returnTypeName;
                 parseTypeName(ret_type_pos, returnTypeName);
