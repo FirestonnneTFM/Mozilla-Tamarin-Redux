@@ -328,6 +328,6 @@ test();
         array[index++] = new TestCase(SECTION, "set vector[1-1], where 1 is const", 18, setVectorSubCI(vec, 1, 18));
         array[index++] = new TestCase(SECTION, "set vector[2-1]", 19, setVectorSubII(vec, 2, 1, 19));
         array[index++] = new TestCase(SECTION, "set vector[-0x7fffffff- 0x7fffffff]", "Error #1056", setVectorSubII(vec, -0x7fffffff, 0x7fffffff, 19));
-                
+
         return (array);
 }
