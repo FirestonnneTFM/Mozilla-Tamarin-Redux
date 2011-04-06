@@ -51,7 +51,7 @@ exclude_pattern=""
 exclude_pattern+="!extensions/JavaGlue.h !extensions/ST_*.cpp !extensions/Selftest*.cpp "
 
 # exclude generated code
-exclude_pattern+="!generated/shell_toplevel.h !generated/shell_toplevel.cpp !generated/shell_toplevel*.hh"
+exclude_pattern+="!generated/shell_toplevel.h !generated/shell_toplevel.cpp !generated/shell_toplevel*.hh "
 
 # exclude Memory Profiler not part of flash player shipping code
 exclude_pattern+="!MMgc/GCMemoryProfiler.h !MMgc/GCMemoryProfiler.cpp "
@@ -63,7 +63,10 @@ exclude_pattern+="!other-licenses/ !pcre/ "
 exclude_pattern+="!shell/ "
 
 # exclude debugging utilities
-exclude_pattern+="!vmbase/AvmAssert.cpp !VMPI/MacDebugUtils.cpp !VMPI/SpyUtilsPosix.cpp !VMPI/UnixDebugUtils.cpp "
+exclude_pattern+="!vmbase/AvmAssert.cpp !VMPI/MacDebugUtils.cpp !VMPI/SpyUtils*.cpp !VMPI/*DebugUtils.cpp "
+
+# exclude Sampler
+exclude_pattern+="!extensions/SamplerScript.h "
 
 # exclude vprof and eval tools, not part of flash player shipping code
 exclude_pattern+="!vprof/ !eval/"
