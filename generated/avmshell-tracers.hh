@@ -65,7 +65,7 @@ bool SystemClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 }
 
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 const uint32_t DebugCLI::gcTracePointerOffsets[] = {
@@ -97,7 +97,7 @@ bool DebugCLI::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
 
 #ifdef DEBUG

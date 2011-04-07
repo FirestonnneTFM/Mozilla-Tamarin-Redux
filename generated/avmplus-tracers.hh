@@ -479,9 +479,9 @@ bool ErrorClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #ifdef DEBUG
 const uint32_t ErrorObject::gcTracePointerOffsets[] = {
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
     offsetof(ErrorObject, stackTrace),
-#endif // DEBUGGER
+#endif
     0};
 
 MMgc::GCTracerCheckResult ErrorObject::gcTraceOffsetIsTraced(uint32_t off) const
@@ -504,9 +504,9 @@ bool ErrorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 #endif
     ScriptObject::gcTrace(gc, 0);
     (void)(avmplus_ScriptObject_isExactInterlock != 0);
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
     gc->TraceLocation(&stackTrace);
-#endif // DEBUGGER
+#endif
     return false;
 }
 
@@ -1707,9 +1707,9 @@ bool XMLObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 const uint32_t AbcEnv::gcTracePointerOffsets[] = {
     offsetof(AbcEnv, m_codeContext),
     offsetof(AbcEnv, m_domainEnv),
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
     offsetof(AbcEnv, m_invocationCounts),
-#endif // DEBUGGER
+#endif
     offsetof(AbcEnv, m_pool),
     0};
 
@@ -1727,9 +1727,9 @@ bool AbcEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     if (_xact_cursor == 0) {
         gc->TraceLocation(&m_codeContext);
         gc->TraceLocation(&m_domainEnv);
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
         gc->TraceLocation(&m_invocationCounts);
-#endif // DEBUGGER
+#endif
         gc->TraceLocation(&m_pool);
     }
     const size_t _xact_work_increment = 2000/sizeof(void*);
@@ -1748,7 +1748,7 @@ bool AbcEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 }
 
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 const uint32_t AbcFile::gcTracePointerOffsets[] = {
@@ -1781,9 +1781,9 @@ bool AbcFile::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 MMgc::GCTracerCheckResult AbcInfo::gcTraceOffsetIsTraced(uint32_t off) const
@@ -1803,7 +1803,7 @@ bool AbcInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
 
 #ifdef DEBUG
@@ -1918,7 +1918,7 @@ bool CommentE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 }
 
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 const uint32_t Debugger::gcTracePointerOffsets[] = {
@@ -1947,9 +1947,9 @@ bool Debugger::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 const uint32_t DebuggerMethodInfo::gcTracePointerOffsets[] = {
@@ -1974,7 +1974,7 @@ bool DebuggerMethodInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
 
 #ifdef DEBUG
@@ -2291,9 +2291,9 @@ bool LivePoolNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 const uint32_t MethodEnv::gcTracePointerOffsets[] = {
     offsetof(MethodEnv, _scope),
     offsetof(MethodEnv, activationOrMCTable),
-#ifdef VMCFG_LOOKUP_CACHE
+#if defined(VMCFG_LOOKUP_CACHE)
     offsetof(MethodEnv, lookup_cache),
-#endif // VMCFG_LOOKUP_CACHE
+#endif
     offsetof(MethodEnv, method),
     0};
 
@@ -2316,9 +2316,9 @@ bool MethodEnv::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     (void)(avmplus_MethodEnvProcHolder_isExactInterlock != 0);
     gc->TraceLocation(&_scope);
     gc->TraceConservativeLocation(&activationOrMCTable);
-#ifdef VMCFG_LOOKUP_CACHE
+#if defined(VMCFG_LOOKUP_CACHE)
     gc->TraceLocation(&lookup_cache);
-#endif // VMCFG_LOOKUP_CACHE
+#endif
     gc->TraceLocation(&method);
     return false;
 }
@@ -2349,9 +2349,9 @@ bool MethodEnvProcHolder::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 const uint32_t MethodInfo::gcTracePointerOffsets[] = {
     offsetof(MethodInfo, _activation),
     offsetof(MethodInfo, _declarer),
-#ifdef AVMPLUS_SAMPLER
+#if defined(AVMPLUS_SAMPLER)
     offsetof(MethodInfo, _methodName),
-#endif // AVMPLUS_SAMPLER
+#endif
     offsetof(MethodInfo, _msref),
     offsetof(MethodInfo, _pool),
     0};
@@ -2382,9 +2382,9 @@ bool MethodInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gcTraceHook_MethodInfo(gc);
     _activation.gcTrace(gc);
     _declarer.gcTrace(gc);
-#ifdef AVMPLUS_SAMPLER
+#if defined(AVMPLUS_SAMPLER)
     gc->TraceLocation(&_methodName);
-#endif // AVMPLUS_SAMPLER
+#endif
     gc->TraceLocation(&_msref);
     gc->TraceLocation(&_pool);
     return false;
@@ -2543,24 +2543,24 @@ const uint32_t PoolObject::gcTracePointerOffsets[] = {
     offsetof(PoolObject, _abcStrings),
     offsetof(PoolObject, _classes),
     offsetof(PoolObject, _code),
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
     offsetof(PoolObject, _method_dmi),
-#endif // DEBUGGER
+#endif
     offsetof(PoolObject, _method_name_indices),
     offsetof(PoolObject, _methods),
     offsetof(PoolObject, _scripts),
     offsetof(PoolObject, cpool_double),
     offsetof(PoolObject, cpool_int),
-#ifndef AVMPLUS_64BIT
+#if !defined(AVMPLUS_64BIT)
     offsetof(PoolObject, cpool_int_atoms),
-#endif // AVMPLUS_64BIT
+#endif
     offsetof(PoolObject, cpool_mn_offsets),
     offsetof(PoolObject, cpool_ns),
     offsetof(PoolObject, cpool_ns_set),
     offsetof(PoolObject, cpool_uint),
-#ifndef AVMPLUS_64BIT
+#if !defined(AVMPLUS_64BIT)
     offsetof(PoolObject, cpool_uint_atoms),
-#endif // AVMPLUS_64BIT
+#endif
     offsetof(PoolObject, domain),
     offsetof(PoolObject, m_cachedScripts),
     offsetof(PoolObject, m_cachedTraits),
@@ -2578,11 +2578,11 @@ MMgc::GCTracerCheckResult PoolObject::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = _classes.gcTraceOffsetIsTraced(off - offsetof(PoolObject,_classes))) != MMgc::kOffsetNotFound) {
         return result;
     }
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
     if((result = _method_dmi.gcTraceOffsetIsTraced(off - offsetof(PoolObject,_method_dmi))) != MMgc::kOffsetNotFound) {
         return result;
     }
-#endif // DEBUGGER
+#endif
     if((result = _method_name_indices.gcTraceOffsetIsTraced(off - offsetof(PoolObject,_method_name_indices))) != MMgc::kOffsetNotFound) {
         return result;
     }
@@ -2598,11 +2598,11 @@ MMgc::GCTracerCheckResult PoolObject::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = cpool_int.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_int))) != MMgc::kOffsetNotFound) {
         return result;
     }
-#ifndef AVMPLUS_64BIT
+#if !defined(AVMPLUS_64BIT)
     if((result = cpool_int_atoms.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_int_atoms))) != MMgc::kOffsetNotFound) {
         return result;
     }
-#endif // AVMPLUS_64BIT
+#endif
     if((result = cpool_mn_offsets.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_mn_offsets))) != MMgc::kOffsetNotFound) {
         return result;
     }
@@ -2615,11 +2615,11 @@ MMgc::GCTracerCheckResult PoolObject::gcTraceOffsetIsTraced(uint32_t off) const
     if((result = cpool_uint.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_uint))) != MMgc::kOffsetNotFound) {
         return result;
     }
-#ifndef AVMPLUS_64BIT
+#if !defined(AVMPLUS_64BIT)
     if((result = cpool_uint_atoms.gcTraceOffsetIsTraced(off - offsetof(PoolObject,cpool_uint_atoms))) != MMgc::kOffsetNotFound) {
         return result;
     }
-#endif // AVMPLUS_64BIT
+#endif
     if((result = metadata_infos.gcTraceOffsetIsTraced(off - offsetof(PoolObject,metadata_infos))) != MMgc::kOffsetNotFound) {
         return result;
     }
@@ -2634,24 +2634,24 @@ bool PoolObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     gc->TraceLocation(&_abcStrings);
     _classes.gcTrace(gc);
     gc->TraceLocation(&_code);
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
     _method_dmi.gcTrace(gc);
-#endif // DEBUGGER
+#endif
     _method_name_indices.gcTrace(gc);
     _methods.gcTrace(gc);
     _scripts.gcTrace(gc);
     cpool_double.gcTrace(gc);
     cpool_int.gcTrace(gc);
-#ifndef AVMPLUS_64BIT
+#if !defined(AVMPLUS_64BIT)
     cpool_int_atoms.gcTrace(gc);
-#endif // AVMPLUS_64BIT
+#endif
     cpool_mn_offsets.gcTrace(gc);
     cpool_ns.gcTrace(gc);
     cpool_ns_set.gcTrace(gc);
     cpool_uint.gcTrace(gc);
-#ifndef AVMPLUS_64BIT
+#if !defined(AVMPLUS_64BIT)
     cpool_uint_atoms.gcTrace(gc);
-#endif // AVMPLUS_64BIT
+#endif
     gc->TraceLocation(&domain);
     gc->TraceLocation(&m_cachedScripts);
     gc->TraceLocation(&m_cachedTraits);
@@ -2822,7 +2822,7 @@ bool ScriptEnvMap::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 }
 
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 const uint32_t SourceFile::gcTracePointerOffsets[] = {
@@ -2855,9 +2855,9 @@ bool SourceFile::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 MMgc::GCTracerCheckResult SourceInfo::gcTraceOffsetIsTraced(uint32_t off) const
@@ -2877,9 +2877,9 @@ bool SourceInfo::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return false;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
-#ifdef DEBUGGER
+#if defined(DEBUGGER)
 
 #ifdef DEBUG
 const uint32_t StackTrace::gcTracePointerOffsets[] = {
@@ -2916,7 +2916,7 @@ bool StackTrace::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     return _xact_more;
 }
 
-#endif // DEBUGGER
+#endif // defined(DEBUGGER)
 
 
 #ifdef DEBUG
@@ -3005,9 +3005,9 @@ bool Toplevel::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 #ifdef DEBUG
 const uint32_t Traits::gcTracePointerOffsets[] = {
-#ifdef VMCFG_CACHE_GQCN
+#if defined(VMCFG_CACHE_GQCN)
     offsetof(Traits, _fullname),
-#endif // VMCFG_CACHE_GQCN
+#endif
     offsetof(Traits, _name),
     offsetof(Traits, _ns),
     offsetof(Traits, base),
@@ -3039,9 +3039,9 @@ bool Traits::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 {
     (void)gc;
     (void)_xact_cursor;
-#ifdef VMCFG_CACHE_GQCN
+#if defined(VMCFG_CACHE_GQCN)
     gc->TraceLocation(&_fullname);
-#endif // VMCFG_CACHE_GQCN
+#endif
     gc->TraceLocation(&_name);
     gc->TraceLocation(&_ns);
     gc->TraceLocation(&base);
@@ -3156,9 +3156,9 @@ bool TypedVectorClassBase::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 const uint32_t VTable::gcTracePointerOffsets[] = {
     offsetof(VTable, _toplevel),
     offsetof(VTable, base),
-#ifdef FEATURE_NANOJIT
+#if defined(VMCFG_NANOJIT)
     offsetof(VTable, imt),
-#endif // FEATURE_NANOJIT
+#endif
     offsetof(VTable, init),
     offsetof(VTable, ivtable),
     offsetof(VTable, traits),
@@ -3169,11 +3169,11 @@ MMgc::GCTracerCheckResult VTable::gcTraceOffsetIsTraced(uint32_t off) const
     MMgc::GCTracerCheckResult result;
     (void)off;
     (void)result;
-#ifdef FEATURE_NANOJIT
+#if defined(VMCFG_NANOJIT)
     if((result = imt.gcTraceOffsetIsTraced(off - offsetof(VTable,imt))) != MMgc::kOffsetNotFound) {
         return result;
     }
-#endif // FEATURE_NANOJIT
+#endif
     return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,6);
 }
 #endif // DEBUG
@@ -3183,9 +3183,9 @@ bool VTable::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
     if (_xact_cursor == 0) {
         gc->TraceLocation(&_toplevel);
         gc->TraceLocation(&base);
-#ifdef FEATURE_NANOJIT
+#if defined(VMCFG_NANOJIT)
         imt.gcTrace(gc);
-#endif // FEATURE_NANOJIT
+#endif
         gc->TraceLocation(&init);
         gc->TraceLocation(&ivtable);
         gc->TraceLocation(&traits);
