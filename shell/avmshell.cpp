@@ -95,11 +95,11 @@ namespace avmshell
                 // Here we really depend on being called fairly high up on
                 // the thread's stack, because we don't know where the highest
                 // stack address is.
-                size_t stackheight;
-                pthread_attr_t attr;
-                pthread_attr_init(&attr);
-                pthread_attr_getstacksize(&attr, &stackheight);
-                pthread_attr_destroy(&attr);
+                // In order to be platform-independent, we can no
+                // longer rely on getting the default stack height
+                // from a pthread call. Instead, we get it from the
+                // VMPI_threadAttrDefaultStackSize() call.
+                size_t stackheight = VMPI_threadAttrDefaultStackSize();
                 minstack = uintptr_t(&stackheight) - stackheight + avmshell::kStackMargin;
             }
 #else
@@ -232,12 +232,6 @@ namespace avmshell
     // the number of workers.  Those cores are scheduled on the threads.
     // The main thread acts as a supervisor, handing out work and scheduling
     // cores on the threads.
-    //
-    // At this time pthreads is required.  Windows Vista provides condition
-    // variables and it is a straightforward exercise to map from pthread types
-    // and calls to the Vista types and calls.  For older Win32 the situation
-    // is grimmer.  If you need to run this code on older Win32, please download
-    // and install the available open-source pthreads libraries for Win32.
 
     struct MultiworkerState;
 
@@ -281,34 +275,25 @@ namespace avmshell
             , filename(NULL)
             , next(NULL)
         {
-            // 'thread' is initialized after construction
-            pthread_cond_init(&c, NULL);
-            pthread_mutex_init(&m, NULL);
         }
 
-        ~ThreadNode()
-        {
-            pthread_cond_destroy(&c);
-            pthread_mutex_destroy(&m);
-        }
-
-        // Called from master, which should not be holding m.
+        // Called from master, which should not be holding
+        // thread_monitor but may hold global_monitor
         void startWork(CoreNode* corenode, const char* filename)
         {
-            pthread_mutex_lock(&m);
-            this->corenode = corenode;
-            this->filename = filename;
-            this->pendingWork = true;
-            pthread_cond_signal(&c);
-            pthread_mutex_unlock(&m);
+            SCOPE_LOCK_NAMED(locker, thread_monitor) {
+                this->corenode = corenode;
+                this->filename = filename;
+                this->pendingWork = true;
+                locker.notify();
+            }
         }
 
+        vmbase::WaitNotifyMonitor thread_monitor;
         MultiworkerState& state;
-        pthread_t thread;
+        vmbase::VMThread* thread;
         const int id;
         bool pendingWork;
-        pthread_cond_t c;
-        pthread_mutex_t m;          // Protects corenode, filename, next, c
         CoreNode* corenode;         // The core running (or about to run, or just finished running) on this thread
         const char* filename;       // The work given to that core
         ThreadNode * next;          // For the LRU list of available threads
@@ -326,42 +311,36 @@ namespace avmshell
             , free_cores_last(NULL)
             , num_free_threads(0)
         {
-            pthread_mutex_init(&m, NULL);
-            pthread_cond_init(&c, NULL);
         }
 
-        ~MultiworkerState()
-        {
-            pthread_mutex_destroy(&m);
-            pthread_cond_destroy(&c);
-        }
 
-        // Called from the slave threads, which should not be holding m.
+        // Called from the slave threads, which should be holding
+        // neither thread_monitor nor global_monitor.
         void freeThread(ThreadNode* t)
         {
-            pthread_mutex_lock(&m);
+            SCOPE_LOCK_NAMED(locker, global_monitor) {
 
-            if (free_threads_last != NULL)
-                free_threads_last->next = t;
-            else
-                free_threads = t;
-            free_threads_last = t;
-
-            if (t->corenode != NULL) {
-                if (free_cores_last != NULL)
-                    free_cores_last->next = t->corenode;
+                if (free_threads_last != NULL)
+                    free_threads_last->next = t;
                 else
-                    free_cores = t->corenode;
-                free_cores_last = t->corenode;
+                    free_threads = t;
+                free_threads_last = t;
+
+                if (t->corenode != NULL) {
+                    if (free_cores_last != NULL)
+                        free_cores_last->next = t->corenode;
+                    else
+                        free_cores = t->corenode;
+                    free_cores_last = t->corenode;
+                }
+
+                num_free_threads++;
+
+                locker.notify();
             }
-
-            num_free_threads++;
-
-            pthread_cond_signal(&c);
-            pthread_mutex_unlock(&m);
         }
 
-        // Called from the master thread, which must already hold m.
+        // Called from the master thread, which must already hold global_monitor.
         bool getThreadAndCore(ThreadNode** t, CoreNode** c)
         {
             if (free_threads == NULL || free_cores == NULL)
@@ -384,13 +363,13 @@ namespace avmshell
             return true;
         }
 
+        vmbase::WaitNotifyMonitor global_monitor;
         ShellSettings&      settings;
         int                 numthreads;
         int                 numcores;
 
-        // Queues of available threads and cores.  Protected by m, availability signaled on c.
-        pthread_mutex_t     m;
-        pthread_cond_t      c;
+        // Queues of available threads and cores.  Protected by
+        // global_monitor, also used to signal availability
         ThreadNode*         free_threads;
         ThreadNode*         free_threads_last;
         CoreNode*           free_cores;
@@ -399,7 +378,18 @@ namespace avmshell
     };
 
     static void masterThread(MultiworkerState& state);
-    static void* slaveThread(void *arg);
+
+    class SlaveThread : public vmbase::VMThread
+    {        
+    public:
+        SlaveThread(ThreadNode* tn) : self(tn) {}
+        
+        virtual void run();
+
+    private:
+        ThreadNode* self;
+        
+    };
 
     /* static */
     void Shell::multiWorker(ShellSettings& settings)
@@ -422,7 +412,8 @@ namespace avmshell
         // Create and start threads.  They add themselves to the free list.
         for ( int i=0 ; i < numthreads ; i++ )  {
             threads[i] = new ThreadNode(state, i);
-            pthread_create(&threads[i]->thread, NULL, slaveThread, threads[i]);
+            threads[i]->thread = new SlaveThread(threads[i]);
+            threads[i]->thread->start();
         }
 
         // Create collectors and cores.
@@ -447,10 +438,10 @@ namespace avmshell
         // No locks are held by the master at this point
 
         // Some threads may still be computing, so just wait for them
-        pthread_mutex_lock(&state.m);
-        while (state.num_free_threads < numthreads)
-            pthread_cond_wait(&state.c, &state.m);
-        pthread_mutex_unlock(&state.m);
+        SCOPE_LOCK_NAMED(locker, state.global_monitor) {
+            while (state.num_free_threads < numthreads)
+                locker.wait();
+        }
 
         // Shutdown: feed NULL to all threads to make them exit.
         for ( int i=0 ; i < numthreads ; i++ )
@@ -458,14 +449,16 @@ namespace avmshell
 
         // Wait for all threads to exit.
         for ( int i=0 ; i < numthreads ; i++ ) {
-            pthread_join(threads[i]->thread, NULL);
+            threads[i]->thread->join();
             LOGGING( AvmLog("T%d: joined the main thread\n", i); )
         }
 
         // Single threaded again.
 
-        for ( int i=0 ; i < numthreads ; i++ )
+        for ( int i=0 ; i < numthreads ; i++ ) {
+            delete threads[i]->thread;
             delete threads[i];
+        }
 
         for ( int i=0 ; i < numcores ; i++ )
             delete cores[i];
@@ -480,38 +473,42 @@ namespace avmshell
         const int repeats(state.settings.repeats);
         char** const filenames(state.settings.filenames);
 
-        pthread_mutex_lock(&state.m);
-        int r=0;
-        for (;;) {
-            int nextfile = 0;
-            for (;;) {
-                ThreadNode* threadnode;
-                CoreNode* corenode;
-                while (state.getThreadAndCore(&threadnode, &corenode)) {
-                    LOGGING( AvmLog("Scheduling %s on T%d with C%d\n", filenames[nextfile], threadnode->id, corenode->id); )
-                    threadnode->startWork(corenode, filenames[nextfile]);
-                    nextfile++;
-                    if (nextfile == numfiles) {
-                        r++;
-                        if (r == repeats)
-                            goto finish;
-                        nextfile = 0;
+        SCOPE_LOCK_NAMED(locker, state.global_monitor) {
+            int r=0;
+            for (bool finish = false; !finish;) {
+                int nextfile = 0;
+                for (;;) {
+                    ThreadNode* threadnode;
+                    CoreNode* corenode;
+                    while (state.getThreadAndCore(&threadnode, &corenode) && !finish) {
+                        LOGGING( AvmLog("Scheduling %s on T%d with C%d\n", filenames[nextfile], threadnode->id, corenode->id); )
+                        threadnode->startWork(corenode, filenames[nextfile]);
+                        nextfile++;
+                        if (nextfile == numfiles) {
+                            r++;
+                            if (r == repeats)
+                                finish = true;
+                            else
+                                nextfile = 0;
+                        }
                     }
+                    // The original algorithm was jumping directly to
+                    // the end of critical section upon discovering
+                    // that it should terminate all the
+                    // loops. Consequently, we have to break out of
+                    // this for loop to bypass the locker.wait()
+                    // statement.
+                    if (finish) break;
+                    locker.wait();
                 }
-
-                LOGGING( AvmLog("Waiting for available threads.\n"); )
-                pthread_cond_wait(&state.c, &state.m);
             }
         }
-    finish:
-        pthread_mutex_unlock(&state.m);
     }
 
-    static void* slaveThread(void *arg)
+    void SlaveThread::run()
     {
-        MMGC_ENTER_RETURN(NULL);
+        MMGC_ENTER_VOID;
 
-        ThreadNode* self = (ThreadNode*)arg;
         MultiworkerState& state = self->state;
 
         for (;;) {
@@ -519,20 +516,19 @@ namespace avmshell
 
             state.freeThread(self);
 
-            // Obtain more work.  We have to hold self->m here but the master won't touch corenode and
+            // Obtain more work.  We have to hold self->thread_monitor here but the master won't touch corenode and
             // filename until we register for more work, so they don't have to be copied out of
             // the thread structure.
 
-            pthread_mutex_lock(&self->m);
-            // Don't wait when pendingWork == true,
-            // slave might have been already signalled but it didn't notice because it wasn't waiting yet.
-            while (self->pendingWork == false)
-                pthread_cond_wait(&self->c, &self->m);
-            pthread_mutex_unlock(&self->m);
-
+            SCOPE_LOCK_NAMED(locker, self->thread_monitor) {
+                // Don't wait when pendingWork == true,
+                // slave might have been already signalled but it didn't notice because it wasn't waiting yet.
+                while (self->pendingWork == false)
+                    locker.wait();
+            }
             if (self->corenode == NULL) {
                 LOGGING( AvmLog("T%d: Exiting\n", self->id); )
-                pthread_exit(NULL);
+                return;
             }
 
             // Perform work
@@ -546,13 +542,13 @@ namespace avmshell
             }
             LOGGING( AvmLog("T%d: Work completed\n", self->id); )
 
-            pthread_mutex_lock(&self->m);
-            self->pendingWork = false;
-            pthread_mutex_unlock(&self->m);
+            SCOPE_LOCK(self->thread_monitor) {
+                self->pendingWork = false;
+            }
 
 
         }
-        return (void*) NULL;
+        return;
     }
 
 #endif  // VMCFG_WORKERTHREADS
