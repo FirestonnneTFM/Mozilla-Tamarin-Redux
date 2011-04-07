@@ -145,7 +145,7 @@ void my_free(char *p, alloc_method_t m)
 {
     switch (m) {
     case via_gc:     gc->Free(p); return;
-    case via_heap:   heap->Free(p); return;
+    case via_heap:   heap->FreeNoProfile(p); return;
     default: AvmAssert(p == 0); return;
     }
 }
