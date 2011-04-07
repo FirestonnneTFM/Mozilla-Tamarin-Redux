@@ -52,9 +52,13 @@
 namespace avmplus
 {
 #ifdef DEBUG
+    // This class must never be instantiated.
+
     class GC_CPP_EXACT(ExactGCTest, ScriptObject)
     {
     public:
+		ExactGCTest() : ScriptObject(NULL,NULL) {}
+
         GC_DATA_BEGIN(ExactGCTest)
 
         // Testing if, elif, else.  When compiling, we'll hit the third case, !CASE3NEG.
