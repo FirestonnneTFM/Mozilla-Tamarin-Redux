@@ -60,65 +60,38 @@ namespace MMgc
         friend class GC;
     private:
         //  'set' is invoked whenever the garbage collected pointer value 't' changes
-        REALLY_INLINE void set(const T *tNew)
-        {
-            T::WriteBarrier((void**)&(this->t), (void*)tNew);
-        }
-        
-        REALLY_INLINE T* value() const
-        {
-            return this->t;
-        }
-
-        REALLY_INLINE T** location() const
-        {
-            return &(this->t);
-        }
+        void set(const T* tNew);
+        T* value() const;
+        T** location() const;
 
     protected:
         
         //  In order to keep the usage syntax uniform as "GCMember",
         //  Protect the constructors so that only "GCMember" subclasses are allowed to use this object.
         explicit GCMemberBase();
-        template <class T2>
-        explicit GCMemberBase(const GCRef<T2> &other);
-        //copy constructor
-        explicit GCMemberBase(const GCMemberBase<T> &other);
+  
+        template<class T2>
+        explicit GCMemberBase(const GCRef<T2>& other);
+ 
+        // copy constructor
+        explicit GCMemberBase(const GCMemberBase<T>& other);
 
-        ~GCMemberBase()
-        {
-            if (this->t)
-            {
-                set(0);
-            }
-        }
+        ~GCMemberBase();
+
     public:
  
-        REALLY_INLINE GCMemberBase& operator =(const GCMemberBase &other)
-        {
-            set(ProtectedGetOtherRawPtr(other));
-            return *this;
-        }
+        GCMemberBase& operator=(const GCMemberBase& other);
 
-        template <class T2>
-        REALLY_INLINE void operator =(const GCRef<T2>& other)
-        {
-            set(ProtectedGetOtherRawPtr(other));
-        }
+        template<class T2>
+        void operator=(const GCRef<T2>& other);
 
         //  Overload the T* assignment operator so that we can set GCMember's directly to NULL.
         //  The "Clear" method is another way to do this.
-        REALLY_INLINE void operator=(T *tNew)
-        {
-            set(tNew);
-        }
+        void operator=(T* tNew);
         
         //  Sets the reference to NULL.  Syntactically the same as assigning the member ref to NULL
         //  GCMember<T> obj = (T*)NULL;
-        REALLY_INLINE void Clear()
-        {
-            set(NULL);
-        }
+        void Clear();
     };
 }
 

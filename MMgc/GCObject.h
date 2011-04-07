@@ -107,28 +107,21 @@ namespace MMgc
         class GCMember : public GCMemberBase<T>
         {
         public:
-                        
-            template <class T2>
-            REALLY_INLINE void operator =(const GCRef<T2>& other)
-            {
-                GCMemberBase<T>::operator=(other);
-            }
 
-            REALLY_INLINE void operator=(T *tNew)
-            {
-                GCMemberBase<T>::operator=(tNew);
-            }
+            template<class T2>
+            void operator=(const GCRef<T2>& other);
 
-            REALLY_INLINE GCMember(){}
+            void operator=(T* tNew);
+
+            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
+            explicit GCMember();
         
-            template <class T2>
-            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
-            REALLY_INLINE GCMember(T* valuePtr)
-            {
-                GCMemberBase<T>::operator=(valuePtr);
-            }
+            template<class T2>
+            explicit GCMember(const GCRef<T2>& other);
+
+            explicit GCMember(T* valuePtr);
             
-            explicit REALLY_INLINE GCMember(const GCMember<T> &other) : GCMemberBase<T>(other) {} 
+            explicit GCMember(const GCMember<T>& other);
         };
     private:
         // Private and unimplemented to prevent heap allocation.
@@ -160,27 +153,20 @@ namespace MMgc
         {
         public:
                         
-            template <class T2>
-            REALLY_INLINE void operator =(const GCRef<T2>& other)
-            {
-                GCMemberBase<T>::operator=(other);
-            }
+            template<class T2>
+            void operator =(const GCRef<T2>& other);
 
-            REALLY_INLINE void operator=(T *tNew)
-            {
-                GCMemberBase<T>::operator=(tNew);
-            }
+            void operator=(T* tNew);
 
-            REALLY_INLINE GCMember(){}
+            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
+            explicit GCMember();
         
-            template <class T2>
-            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
-            REALLY_INLINE GCMember(T* valuePtr)
-            {
-                GCMemberBase<T>::operator=(valuePtr);
-            }
+            template<class T2>
+            explicit GCMember(const GCRef<T2>& other);
+
+            explicit GCMember(T* valuePtr);
             
-            explicit REALLY_INLINE GCMember(const GCMember<T> &other) : GCMemberBase<T>(other) {}
+            explicit GCMember(const GCMember<T>& other);
         };
         
         // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
@@ -263,26 +249,20 @@ namespace MMgc
         class GCMember : public GCMemberBase<T>
         {
         public:
-            template <class T2>
-            REALLY_INLINE void operator =(const GCRef<T2>& other)
-            {
-                GCMemberBase<T>::operator=(other);
-            }
+            template<class T2>
+            void operator=(const GCRef<T2>& other);
 
-            REALLY_INLINE void operator=(T *tNew)
-            {
-                GCMemberBase<T>::operator=(tNew);
-            }
+            void operator=(T* tNew);
 
-            REALLY_INLINE GCMember(){}
+            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
+            explicit GCMember();
 
             template <class T2>
-            explicit REALLY_INLINE GCMember(const GCRef<T2> &other) : GCMemberBase<T>(other) {}
-            REALLY_INLINE GCMember(T* valuePtr)
-            {
-                GCMemberBase<T>::operator=(valuePtr);
-            }
-            explicit REALLY_INLINE GCMember(const GCMember<T> &other) : GCMemberBase<T>(other) {}
+            explicit GCMember(const GCRef<T2>& other);
+            
+            explicit GCMember(T* valuePtr);
+            
+            explicit GCMember(const GCMember<T>& other);
         };
     };
 

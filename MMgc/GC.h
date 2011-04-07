@@ -239,77 +239,38 @@ namespace MMgc
         void Destroy();
 
         //  GCRoot's GCMember definition, no WriteBarrier but handle ref count updates.
-        template <class T>
+        template<class T>
         class GCMember : public GCRef<T>
         {
         private:
             //  'set' method handles logic whenever the GC pointer value changes
-            REALLY_INLINE void set(T *tNew)
-            {
-                if (valid())
-                {
-                    //  This is NOOP for GCObject and GCFinalizedObject
-                    this->t->DecrementRef();
-                }
-                this->t = tNew;
-                if (valid())
-                {
-                    //  This is NOOP for GCObject and GCFinalizedObject
-                    this->t->IncrementRef();
-                }
-            }
+            void set(T* tNew);
             
             // The AvmCore code uses an invalid pointer (AVMPLUS_STRING_DELETED) for the intern
             // table, whose value is '1'.
-            inline bool valid() { return (uintptr_t)(this->t) > 1; }
+            bool valid();
 
         public:
-            GCMember() : GCRef<T>(){}
-
-            explicit REALLY_INLINE GCMember(const GCMember &other)
-                : GCRef<T>()
-            {
-                set(ProtectedGetOtherRawPtr(other));
-            }
+            explicit GCMember();
+            explicit REALLY_INLINE GCMember(const GCMember& other);
 
             //  This constructor takes any other GCRef<T2>
-
-            template <class T2>
-            explicit REALLY_INLINE GCMember(const GCRef<T2> &other)
-                : GCRef<T>()
-            {
-                set(ProtectedGetOtherRawPtr(other));
-            }
+            template<class T2>
+            explicit GCMember(const GCRef<T2>& other);
             
-            REALLY_INLINE GCMember(T* valuePtr)
-            {
-                set(valuePtr);
-            }
+            explicit GCMember(T* valuePtr);
             
             //  Make sure to decrement the refcount on RCObjects when this GCMember is destroyed
-            ~GCMember()
-            {
-                set(NULL);
-            }
+            ~GCMember();
 
             //  Override assignement to make sure our 'set' operation is invoked
-            template <class T2>
-            REALLY_INLINE void operator =(const GCRef<T2> &other)
-            {
-                set(ProtectedGetOtherRawPtr(other));
-            }
+            template<class T2>
+            void operator=(const GCRef<T2>& other);
 
-            REALLY_INLINE void operator=(T *tNew)
-            {
-                set(tNew);
-            }
+            void operator=(T *tNew);
 
             //  Handle the default assignement operator
-            REALLY_INLINE GCMember& operator =(const GCMember &other)
-            {
-                set(ProtectedGetOtherRawPtr(other));
-                return *this;
-            }
+            GCMember& operator=(const GCMember& other);
         };
         
     private:

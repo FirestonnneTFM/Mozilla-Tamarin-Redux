@@ -289,7 +289,7 @@ namespace MMgc
 #include "GC-inlines.h"
 #include "GCStack-inlines.h"
 #include "WriteBarrier-inlines.h"
-#include "GCMemberBase-inlines.h"
+#include "GCMember-inlines.h"
 
 // remove these when the player stops using them
 #define MMGC_DRC
