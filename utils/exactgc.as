@@ -115,13 +115,14 @@ class AS3Class
 
 class GCClass
 {
-    function GCClass(tag, attr) {
+    function GCClass(tag, attr, _cond) {
         cls = getAttr(attr, 0);
         base = getAttr(attr, 1);
         hook = tag.match("_WITH_HOOK") != null;
         ifdef = tag.match("_IFDEF") != null ? getAttr(attr,2) : false;
         ifndef = tag.match("_IFNDEF") != null ? getAttr(attr,2) : false;
         if_ = !ifdef && !ifndef && tag.match("_IF") != null ? getAttr(attr,2) : false;
+        cond = _cond;
     }
 
     public function toString() { return printProps(this, ["cls","base","hook","ifdef"]) }
@@ -134,6 +135,7 @@ class GCClass
     const ifdef;
     const ifndef;
     const if_;
+    const cond;
 
     var fullClassPrefix=""; // for nested classes
     var out = new Printer(1);
@@ -145,14 +147,15 @@ class GCClass
     var hint = null;
 }
 
-class GCCppExact extends GCClass { function GCCppExact(tag,attr) { super(tag,attr) } }
-class GCAS3Exact extends GCClass { function GCAS3Exact(tag,attr) { super(tag,attr) } }
+class GCCppExact extends GCClass { function GCCppExact(tag,attr,cond) { super(tag,attr,cond) } }
+class GCAS3Exact extends GCClass { function GCAS3Exact(tag,attr,cond) { super(tag,attr,cond) } }
 
 
 // For GC_DATA_BEGIN and GC_DATA_END annotations in C++ classes.
 class GCDataSection
 {
-    function GCDataSection(tag, attr) {
+    function GCDataSection(tag, attr, cond) {
+        // ignore cond
         cls = getAttr(attr, 0);
     }
 
@@ -161,9 +164,9 @@ class GCDataSection
     const cls;
 }
 
-class GCDataBegin extends GCDataSection { function GCDataBegin(tag, attr) { super(tag,attr) } }
-class GCDataEnd extends GCDataSection { function GCDataEnd(tag, attr) { super(tag,attr) } }
-class GCNoData extends GCDataSection { function GCNoData(tag, attr) { super(tag,attr) } }
+class GCDataBegin extends GCDataSection { function GCDataBegin(tag, attr, cond) { super(tag,attr,cond) } }
+class GCDataEnd extends GCDataSection { function GCDataEnd(tag, attr, cond) { super(tag,attr,cond) } }
+class GCNoData extends GCDataSection { function GCNoData(tag, attr, cond) { super(tag,attr,cond) } }
 
 // For the various field annotations in C++ classes.
 //
@@ -182,12 +185,13 @@ class GCNoData extends GCDataSection { function GCNoData(tag, attr) { super(tag,
 
 class GCField 
 {
-    function GCField(tag, attr) {
+    function GCField(tag, attr, _cond) {
         cls = getAttr(attr, 0);
         name = getAttr(attr, 1);
         ifdef = tag.match("_IFDEF") != null ? getAttr(attr,2) : false;
         ifndef = tag.match("_IFNDEF") != null ? getAttr(attr,2) : false;
         if_ = !ifdef && !ifndef && tag.match("_IF") != null ? getAttr(attr,2) : false;
+        cond = _cond;
     }
 
     public function toString() { return printProps(this, ["cls","name","ifdef", "if_"]) }
@@ -197,18 +201,19 @@ class GCField
     const ifdef;
     const ifndef;
     const if_;
+    const cond;
 }
 
-class GCPointer extends GCField { function GCPointer(tag, attr) { super(tag, attr) } }
-class GCAtom extends GCField { function GCAtom(tag, attr) { super(tag, attr) } }
-class GCStructure extends GCField { function GCStructure(tag, attr) { super(tag, attr) } }
-class GCConservative extends GCField { function GCConservative(tag, attr) { super(tag, attr) } }
+class GCPointer extends GCField { function GCPointer(tag, attr, cond) { super(tag, attr, cond) } }
+class GCAtom extends GCField { function GCAtom(tag, attr, cond) { super(tag, attr, cond) } }
+class GCStructure extends GCField { function GCStructure(tag, attr, cond) { super(tag, attr, cond) } }
+class GCConservative extends GCField { function GCConservative(tag, attr, cond) { super(tag, attr, cond) } }
 
 class GCPointers extends GCField
 {
-    function GCPointers(tag, attr) {
+    function GCPointers(tag, attr, cond) {
         splitFieldAndSize(attr, 1);
-        super(tag,attr);
+        super(tag,attr,cond);
         declCount = getAttr(attr, 2);
         count = getAttr(attr, 3);
         hint = tag.match("_SMALL") != null ? "small" : null;
@@ -223,9 +228,9 @@ class GCPointers extends GCField
 
 class GCAtoms extends GCField
 {
-    function GCAtoms(tag, attr) {
+    function GCAtoms(tag, attr, cond) {
         splitFieldAndSize(attr, 1);
-        super(tag,attr);
+        super(tag,attr,cond);
         declCount = getAttr(attr, 2);
         count = getAttr(attr, 3);
         hint = tag.match("_SMALL") != null ? "small" : null;
@@ -240,9 +245,9 @@ class GCAtoms extends GCField
 
 class GCStructures extends GCField
 {
-    function GCStructures(tag, attr) {
+    function GCStructures(tag, attr, cond) {
         splitFieldAndSize(attr, 1);
-        super(tag,attr);
+        super(tag,attr,cond);
         declCount = getAttr(attr, 2);
         count = getAttr(attr, 3);
         hint = tag.match("_SMALL") != null ? "small" : null;
@@ -302,6 +307,42 @@ class Printer
     var indent = 0;
     var indentString = "";
     var output = "";
+}
+
+class Condition
+{
+    static const IF = 0;
+    static const IFDEF = 1;
+    static const IFNDEF = 2;
+    static const ELIF = 3;
+    static const ELSE = 4;
+    static const INERT = 5;
+
+    function Condition(_type, _cond, _butnot=null) {
+        type = _type;
+        cond = _cond;
+        butnot = _butnot;
+    }
+
+    public function toString() {
+        return "Cond: " + typeName + ": " + cond;
+    }
+
+    function get typeName() {
+        switch (type) {
+        case IF: return "if";
+        case IFDEF: return "ifdef";
+        case IFNDEF: return "ifndef";
+        case ELIF: return "elif";
+        case ELSE: return "else";
+        case INERT: return "inert";
+        default: return "XXX";
+        }
+    }
+
+    const type;
+    const cond;
+    const butnot;
 }
 
 const constructors =
@@ -554,6 +595,7 @@ function readFiles(files)
 
     var cppClassStack = [];       // tracks GC_CPP_EXACT, etc
     var cppDataStack = [];        // tracks GC_DATA_BEGIN / GC_DATA_END
+    var cppIfStack = [];          // tracks #if, #ifdef, etc
 
     // TODO: factor regular expressions to avoid duplication?
 
@@ -627,6 +669,13 @@ function readFiles(files)
         return xs;
     }
 
+    function copyIfStack() {
+        var v = [];
+        for ( var i=0 ; i < cppIfStack.length ; i++ )
+            v[i] = cppIfStack[i];
+        return v;
+    }
+
     function positionalAttrs(tag, s, paren, cls) {
         var attr = splitAttrs(s, paren);
         for ( var i=0 ; i < attr.length ; i++ ) {
@@ -635,7 +684,7 @@ function readFiles(files)
         }
         if (cls != null)
             attr.unshift(cls);
-        return new constructors[tag](tag,attr);
+        return new constructors[tag](tag,attr,copyIfStack());
     }
 
     function parseNamedAttrs(s) {
@@ -736,12 +785,21 @@ function readFiles(files)
 
     const nativeAnnotationRegex:RegExp = /^\[native\s*\((.*)\)\s*\]/;
 
+    function sanitizeCondition(s) {
+        s = s.replace(/^\s*|\s*$/g, "");
+        s = s.replace(/\/\*.*\*\/\s*$/g, "");  // strip /* .. */ comments first in case it contains an embedded // 
+        s = s.replace(/\/\/.*$/g, "");
+        s = s.replace(/\s*$/g, "");
+        return s;
+    }
+
     // FIXME: Additional error checking we could add here:
     //  - only one data section per class, globally
 
     function processFile(filename) {
         cppDataStack.length = 0;
         cppClassStack.length = 0;
+        cppIfStack.length = 0;
 
         const beforeReadLines = new Date();
         const text = readLines(filename);
@@ -749,6 +807,7 @@ function readFiles(files)
 
         const beforeProcessing = new Date();
         const cppfile = Boolean(filename.match(/\.(h|cpp)$/));
+        const hfile = Boolean(filename.match(/\.h$/));
         const as3file = Boolean(filename.match(/\.as$/));
         var lineno = 0;
 
@@ -764,11 +823,14 @@ function readFiles(files)
 
             var gcIndex = -1;
             var nativeIndex = -1;
-            if (!as3file)
+            var cppIndex = -1;
+            if (!as3file) {
                 gcIndex = line.indexOf("GC_");
+                cppIndex = line.indexOf("#");
+            }
             if (!cppfile)
                 nativeIndex = line.indexOf("[native");
-            if (gcIndex == -1 && nativeIndex == -1)
+            if (gcIndex == -1 && cppIndex == -1 && nativeIndex == -1)
                 continue;
 
             errorContext = "On " + filename + " line " + lineno;
@@ -778,6 +840,65 @@ function readFiles(files)
             // known-good index.  This yields the same performance as
             // using a global regex and setting lastIndex to indicate
             // where we want to start matching.
+
+            if (cppIndex >= 0) {
+                // CPP macro?
+                //
+                // There are two options for handling elif / else:
+                //
+                //  - break them out as separate #ifdefs by accumulating (and negating) conditions
+                //  - preserve the elif / else structure
+                //
+                // I've gone with the former because it fits the structure of existing code, but
+                // if the resulting condtions end up being messy, or it becomes unreliable for
+                // any reason, then we should reconsider.  In practice most conditions are simple
+                // and #if..elif chains are not long.  The main liability is that we sort field names
+                // lexicographically so clauses may become reorganized on output; this does not lead
+                // to bugs but makes the code confusing to read.
+
+                if ((result = (/^#\s*(ifdef|ifndef|if|elif|else|endif|define)/).exec(line.substring(cppIndex))) != null) {
+                    var rest = sanitizeCondition(line.substring(cppIndex + result[0].length));
+                    var directive = result[1];
+                    switch (directive) {
+                    case "ifdef":
+                        cppIfStack.push(new Condition(Condition.IFDEF, rest));
+                        break;
+                    case "ifndef":
+                        cppIfStack.push(new Condition(Condition.IFNDEF, rest));
+                        break;
+                    case "define":
+                        // This is a hack, but it's necessary: if this is a header file, and the top element 
+                        // is #ifndef, and the condition for that element is the same name that is being 
+                        // defined here, then we replace the top element with an inert element.  This takes
+                        // care of the include-a-file-once idiom that would otherwise be hard to handle.
+                        if (hfile && 
+                            cppIfStack.length > 0 &&
+                            rest == cppIfStack[cppIfStack.length-1].cond) {
+                            cppIfStack.pop();
+                            cppIfStack.push(new Condition(Condition.INERT, rest));
+                        }
+                        break;
+                    case "if":
+                        cppIfStack.push(new Condition(Condition.IF, rest));
+                        break;
+                    case "elif":
+                        cppIfStack.length > 0 || fail("found #elif without matching #if, #ifdef, or #ifndef: " + line);
+                        var top = cppIfStack.pop();
+                        cppIfStack.push(new Condition(Condition.ELIF, rest, top));
+                        break;
+                    case "else": {
+                        cppIfStack.length > 0 || fail("found #else without matching #if, #ifdef, or #ifndef: " + line);
+                        var top = cppIfStack.pop();
+                        cppIfStack.push(new Condition(Condition.ELSE, null, top));
+                        break;
+                    }
+                    case "endif":
+                        cppIfStack.length > 0 || fail("found #endif without matching #if, #ifdef, or #ifndef: " + line);
+                        cppIfStack.pop();
+                        break;
+                    }
+                }
+            }
 
             if (gcIndex >= 0) {
                 // C++ annotations.
@@ -948,6 +1069,7 @@ function collectFields()
         if (s.if_) fieldname += "!if!" + s.if_;
         if (s.ifdef) fieldname += "!ifdef!" + s.ifdef;
         if (s.ifndef) fieldname += "!ifndef!" + s.ifndef;
+        if (s.cond) fieldname += "!cond!" + makeConditions(s.cond);
         if (isVariableLength(s)) {
             // FIXME: It would be good to loosen the following restriction up; it 
             // would be sufficient to decree that only one of the arrays can be 
@@ -1008,22 +1130,111 @@ function noUsefulTracer(n)
     }
 }
 
-function ifdefOpen(out, fieldOrClass)
-{
-    if (fieldOrClass.ifdef)
-        out.PR("#ifdef " + fieldOrClass.ifdef);
-    
-    if (fieldOrClass.ifndef)
-        out.PR("#ifndef " + fieldOrClass.ifndef);
-    
-    if (fieldOrClass.if_)
-        out.PR("#if " + fieldOrClass.if_);
+// This stack is being used to filter our output so that we do not print
+// redundant conditions.
+
+const pendingConditions = [];
+
+function matchesPendingCondition(c) {
+    for ( var i=0 ; i < pendingConditions.length ; i++ ) {
+        var x = pendingConditions[i];
+        if (c.type == x.type && c.cond == x.cond)
+            return true;
+    }
+    return false;
 }
 
-function ifdefClose(out, fieldOrClass)
+// Explicit _IFDEF etc annotations take precedence over computed annotations,
+// this allows the explicit annotations to be used as an escape valve.
+
+function ifdefOpen(out, fieldOrClass)
+{
+    if (fieldOrClass.ifdef || fieldOrClass.ifndef || fieldOrClass.if_) {
+        if (fieldOrClass.ifdef)
+            out.PR("#ifdef " + fieldOrClass.ifdef);
+        if (fieldOrClass.ifndef)
+            out.PR("#ifndef " + fieldOrClass.ifndef);
+        if (fieldOrClass.if_)
+            out.PR("#if " + fieldOrClass.if_);
+    }
+    else {
+        var conds = fieldOrClass.cond;
+        for ( var i=0 ; i < conds.length ; i++ ) {
+            if (conds[i].type == Condition.INERT)
+                continue;
+            var skip = matchesPendingCondition(conds[i]);
+            pendingConditions.push(conds[i]);
+            if (skip)
+                continue;
+            out.PR("#if " + makeCondition(conds[i]));
+        }
+    }
+}
+
+function ifdefClose(out, fieldOrClass, withName = false)
 {
     if (fieldOrClass.ifdef || fieldOrClass.ifndef || fieldOrClass.if_)
         out.PR("#endif // " + (fieldOrClass.ifdef || fieldOrClass.ifndef || fieldOrClass.if_));
+    else {
+        var conds = fieldOrClass.cond;
+        for ( var i=0 ; i < conds.length ; i++ ) {
+            if (conds[i].type == Condition.INERT)
+                continue;
+            var x = pendingConditions.pop();
+            if (matchesPendingCondition(x))
+                continue;
+            out.PR("#endif" +( withName ? (" // " + makeCondition(x)) : ""));
+        }
+    }
+}
+
+// Returns something of this form:
+//
+//   C ::= defined( N )
+//       | ( E )
+//       | !C
+//       | C && C
+//
+//   N ::= <some identifier>
+//   E ::= <some expression>
+
+function makeCondition(c, negate=false) {
+    function neg(x) {
+        if (!negate)
+            return x;
+        if (x.charCodeAt(0) == "!")
+            return x.substring(1);
+        return "!" + x;
+    }
+    switch (c.type) {
+    case Condition.IF:
+        return neg("(" + c.cond + ")");
+    case Condition.IFDEF:
+        return neg("defined(" + c.cond + ")");
+    case Condition.IFNDEF:
+        return neg("!defined(" + c.cond + ")");
+    case Condition.ELIF:
+        // Here we put the butnot condition first to make it more obvious what's going on,
+        // though in practice it'll be pretty confusing to read the code since the field
+        // names are sorted lexicographically (earlier in this script) and may be sorted
+        // in some bizarre order at some future time in order to make multi-argument calls
+        // to TraceLocation.  See comments in the parsing code above about the plusses
+        // and minuses of breaking conditions apart rather than sticking with the if-elif-else
+        // structure.
+        return makeCondition(c.butnot, true) + " && " + neg("(" + c.cond + ")");
+    case Condition.ELSE:
+        return makeCondition(c.butnot, true);
+    case Condition.INERT:
+        return "1";
+    default:
+        fail("Internal error: makeCondition does not understand this condition : " + c);
+    }
+}
+
+// A hack, used for generating unique names way up above.
+
+function makeConditions(cs) {
+    return cs.map(function (x) { return makeCondition(x,false) }).join("!");
 }
 
 // If a class is large it could be because it has a pointer array or
@@ -1136,8 +1347,16 @@ function constructTracerBodies()
 
     errorContext = "Accumulating bodies";
 
+    // Open and close ifdefs for the class on a dummy printer to avoid redundant
+    // ifdefs.  We need to do this because the tracer bodies are emitted separately
+    // and pasted into functions later.
+
+    var dummy = new Printer();
+
     for ( var i=0 ; i < cppClassList.length ; i++ ) {
         var c = cppClassList[i];
+
+        ifdefOpen(dummy, c);
 
         // The interlock is just a #define with that name emitted at
         // the beginning of the output, we'll get a compilation error
@@ -1171,6 +1390,8 @@ function constructTracerBodies()
             if (c is GCClass && c.variable_length_field != null)
                 emitArrayUnchunked(c);
         }
+
+        ifdefClose(dummy, c, true);
     }
 }
 
@@ -1323,7 +1544,7 @@ function constructAndPrintTracers()
                     PR("}").
                     NL();
             }
-            ifdefClose(output,c);
+            ifdefClose(output,c, true);
             output.NL();
         }
     }
