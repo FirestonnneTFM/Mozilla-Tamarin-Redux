@@ -329,6 +329,10 @@ struct ABCInfo;
 #endif
 #include "ByteArrayGlue.h"
 
+// Some unusual test cases for the exact-tracer script
+
+#include "ExactGCTests.h"
+
 #include "builtin-classes.hh"
 
 // inline implementations

@@ -841,6 +841,7 @@
 		079DFC970F3AB9640031D1B4 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		07A8D2DD0F5EEA2B0005E66C /* OOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OOM.h; path = ../../../MMgc/OOM.h; sourceTree = SOURCE_ROOT; };
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
+		07AE842D134DA5C200598B23 /* ExactGCTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExactGCTests.h; path = ../../../core/ExactGCTests.h; sourceTree = SOURCE_ROOT; };
 		07B1D9C21288521400685347 /* WriteBarrier-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "WriteBarrier-inlines.h"; path = "../../../MMgc/WriteBarrier-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07C0F7BE0FDE897100B0E09A /* BasicList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BasicList.h; path = ../../../MMgc/BasicList.h; sourceTree = SOURCE_ROOT; };
 		07C2E83A10A193FC00C773C6 /* SpyUtilsSymbian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsSymbian.cpp; path = ../../../VMPI/SpyUtilsSymbian.cpp; sourceTree = SOURCE_ROOT; };
@@ -1185,6 +1186,7 @@
 				079DF7EB0F3A882D0031D1B4 /* E4XNode.cpp */,
 				079DF7EC0F3A882D0031D1B4 /* E4XNode.h */,
 				0755C24212D735B900432BEB /* E4XNode-inlines.h */,
+				07AE842D134DA5C200598B23 /* ExactGCTests.h */,
 				079DF7ED0F3A882D0031D1B4 /* Exception.cpp */,
 				079DF7EE0F3A882D0031D1B4 /* Exception.h */,
 				198CF91A11B973BD00A939C7 /* exec.cpp */,
