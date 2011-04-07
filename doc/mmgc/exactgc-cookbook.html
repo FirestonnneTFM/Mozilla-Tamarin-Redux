@@ -146,14 +146,6 @@ to one of these:
   class GC_<b>CPP</b>_EXACT(Derived, Base) ...   // Does not have an AS3 counterpart
 </pre>
 
-<p>For classes defined within an <tt>#ifdef</tt> use the <tt>_IFDEF</tt> variants (ditto
-<tt>#if</tt> with <tt>_IF</tt> and <tt>#ifndef</tt> with <tt>_IFNDEF</tt>):
-<pre>
-  #ifdef <b>DEBUGGER</b>
-      class GC_CPP_EXACT_<b>IFDEF</b>(Derived, Base, <b>DEBUGGER</b>) ...
-  #endif
-</pre>
-
 
 <h3>Changing the AS3 "native" metadata</h3>
 
@@ -207,14 +199,6 @@ pointers, you do the same thing:
 predefined "List" types in the AVM+ do; if you need to implement it
 for your own type then look <a href="#structure-members">below</a>.
 
-
-<P>If the member is inside an <tt>#if</tt> or <tt>#ifdef</tt>
-or <tt>#ifndef</tt> block you must use corresponding annotations:
-<pre>
-  #ifdef <b>DEBUGGER</b>
-      DRCWB(ClassClosure*) GC_POINTER_<b>IFDEF</b>(p, <b>DEBUGGER</b>);
-  #endif
-</pre>
 
 <P> <em>TODO.</em>  We need at least one example about GCMember above.
 
