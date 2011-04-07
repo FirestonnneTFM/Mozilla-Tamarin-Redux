@@ -82,6 +82,8 @@ namespace MMgc
         explicit GCMemberBase();
         template <class T2>
         explicit GCMemberBase(const GCRef<T2> &other);
+        //copy constructor
+        explicit GCMemberBase(const GCMemberBase<T> &other);
 
         ~GCMemberBase()
         {

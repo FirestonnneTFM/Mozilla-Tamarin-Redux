@@ -119,7 +119,6 @@ namespace MMgc
                 GCMemberBase<T>::operator=(tNew);
             }
 
-            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
             REALLY_INLINE GCMember(){}
         
             template <class T2>
@@ -129,7 +128,7 @@ namespace MMgc
                 GCMemberBase<T>::operator=(valuePtr);
             }
             
-            explicit REALLY_INLINE GCMember(const GCMember &other): GCMemberBase<T>(other) {}
+            explicit REALLY_INLINE GCMember(const GCMember<T> &other) : GCMemberBase<T>(other) {} 
         };
     private:
         // Private and unimplemented to prevent heap allocation.
@@ -172,7 +171,6 @@ namespace MMgc
                 GCMemberBase<T>::operator=(tNew);
             }
 
-            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
             REALLY_INLINE GCMember(){}
         
             template <class T2>
@@ -182,7 +180,7 @@ namespace MMgc
                 GCMemberBase<T>::operator=(valuePtr);
             }
             
-            explicit REALLY_INLINE GCMember(const GCMember &other): GCMemberBase<T>(other) {}
+            explicit REALLY_INLINE GCMember(const GCMember<T> &other) : GCMemberBase<T>(other) {}
         };
         
         // 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
@@ -276,7 +274,6 @@ namespace MMgc
                 GCMemberBase<T>::operator=(tNew);
             }
 
-            //  Since we're locking up the copy constructor, we need to explicitly define the default constructor
             REALLY_INLINE GCMember(){}
 
             template <class T2>
@@ -285,7 +282,7 @@ namespace MMgc
             {
                 GCMemberBase<T>::operator=(valuePtr);
             }
-            explicit REALLY_INLINE GCMember(const GCMember &other): GCMemberBase<T>(other) {}
+            explicit REALLY_INLINE GCMember(const GCMember<T> &other) : GCMemberBase<T>(other) {}
         };
     };
 

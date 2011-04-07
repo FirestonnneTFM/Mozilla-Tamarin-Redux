@@ -59,7 +59,17 @@ namespace MMgc
         GC::TracePointerCheck(&(this->t));
 #endif
         set(ProtectedGetOtherRawPtr(other));
-    }	
+    }
+
+    //copy constructor
+    template<class T>
+    REALLY_INLINE GCMemberBase<T>::GCMemberBase(const GCMemberBase<T> &other) : GCRef<T>()
+    {
+#ifdef DEBUG
+        GC::TracePointerCheck(&(this->t));
+#endif
+        set(ProtectedGetOtherRawPtr(other));
+    }
 }
 
 #endif /* __GCMemberBase_inlines__ */
