@@ -70,6 +70,7 @@
 #define avmplus_ErrorObject_isExactInterlock 1
 #define avmplus_EvalErrorClass_isExactInterlock 1
 #define avmplus_EvalErrorObject_isExactInterlock 1
+#define avmplus_ExactGCTest_isExactInterlock 1
 #define avmplus_ExceptionHandlerTable_isExactInterlock 1
 #define avmplus_FunctionClass_isExactInterlock 1
 #define avmplus_FunctionEnv_isExactInterlock 1

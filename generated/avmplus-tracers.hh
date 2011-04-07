@@ -2126,6 +2126,82 @@ bool ElementE4XNode::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 }
 
 
+#if defined(DEBUG)
+
+#ifdef DEBUG
+const uint32_t ExactGCTest::gcTracePointerOffsets[] = {
+#if (CASE1)
+    offsetof(ExactGCTest, case1_and_3_w),
+#endif
+#if !(CASE1) && !(CASE2) && (!CASE3NEG)
+    offsetof(ExactGCTest, case1_and_3_w),
+#endif
+#if (CASE1)
+    offsetof(ExactGCTest, case1_w),
+#endif
+#if (CASE1)
+    offsetof(ExactGCTest, case1_x),
+#endif
+#if !(CASE1) && (CASE2)
+    offsetof(ExactGCTest, case2_x),
+#endif
+#if !(CASE1) && (CASE2)
+    offsetof(ExactGCTest, case2_z),
+#endif
+#if !(CASE1) && !(CASE2) && (!CASE3NEG)
+    offsetof(ExactGCTest, case3_z),
+#endif
+#if !(CASE1) && !(CASE2) && !(!CASE3NEG)
+    offsetof(ExactGCTest, else_r),
+#endif
+    0};
+
+MMgc::GCTracerCheckResult ExactGCTest::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ScriptObject::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::GC::CheckOffsetIsInList(off,gcTracePointerOffsets,8);
+}
+#endif // DEBUG
+
+bool ExactGCTest::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+    ScriptObject::gcTrace(gc, 0);
+    (void)(avmplus_ScriptObject_isExactInterlock != 0);
+#if (CASE1)
+    gc->TraceLocation(&case1_and_3_w);
+#endif
+#if !(CASE1) && !(CASE2) && (!CASE3NEG)
+    gc->TraceLocation(&case1_and_3_w);
+#endif
+#if (CASE1)
+    gc->TraceLocation(&case1_w);
+#endif
+#if (CASE1)
+    gc->TraceLocation(&case1_x);
+#endif
+#if !(CASE1) && (CASE2)
+    gc->TraceLocation(&case2_x);
+#endif
+#if !(CASE1) && (CASE2)
+    gc->TraceLocation(&case2_z);
+#endif
+#if !(CASE1) && !(CASE2) && (!CASE3NEG)
+    gc->TraceLocation(&case3_z);
+#endif
+#if !(CASE1) && !(CASE2) && !(!CASE3NEG)
+    gc->TraceLocation(&else_r);
+#endif
+    return false;
+}
+
+#endif // defined(DEBUG)
+
 
 #ifdef DEBUG
 MMgc::GCTracerCheckResult ExceptionHandlerTable::gcTraceOffsetIsTraced(uint32_t off) const
