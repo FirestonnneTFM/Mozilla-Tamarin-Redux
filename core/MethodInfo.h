@@ -66,7 +66,7 @@ namespace avmplus
 
 #ifdef DEBUGGER
     class AbcFile;
-    class GC_CPP_EXACT_IFDEF(DebuggerMethodInfo, MMgc::GCTraceableObject, "DEBUGGER")
+    class GC_CPP_EXACT(DebuggerMethodInfo, MMgc::GCTraceableObject)
     {
     private:
         explicit DebuggerMethodInfo(int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes);
@@ -343,7 +343,7 @@ namespace avmplus
             AbcInfo               _abc;               // stuff used only for bytecode methods (formerly in MethodInfo)
         };
 #ifdef AVMPLUS_SAMPLER
-        mutable GCMember<String>  GC_POINTER_IFDEF(_methodName, AVMPLUS_SAMPLER);
+        mutable GCMember<String>  GC_POINTER(_methodName);
 #endif
 
         // -------- FLAGS SECTION

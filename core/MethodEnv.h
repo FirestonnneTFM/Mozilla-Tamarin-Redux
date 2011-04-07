@@ -302,7 +302,7 @@ namespace avmplus
     public:
 #ifdef VMCFG_LOOKUP_CACHE
         GCMember<ExactStructContainer<LookupCache> >
-                                    GC_POINTER_IFDEF(lookup_cache, VMCFG_LOOKUP_CACHE);
+                                    GC_POINTER(lookup_cache);
 #endif
 
         GC_DATA_END(MethodEnv)

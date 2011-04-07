@@ -112,7 +112,7 @@ namespace avmplus
 
     private:
 #ifdef DEBUGGER
-        StackTrace* GC_POINTER_IFDEF(stackTrace,DEBUGGER);
+        StackTrace* GC_POINTER(stackTrace);
 #endif /* DEBUGGER */
 
         GC_DATA_END(ErrorObject)

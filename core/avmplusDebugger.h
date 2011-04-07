@@ -57,7 +57,7 @@ namespace avmplus
      * ----------------------------------------------------------
      */
 
-    class GC_CPP_EXACT_IFDEF(SourceInfo, MMgc::GCFinalizedObject, DEBUGGER)
+    class GC_CPP_EXACT(SourceInfo, MMgc::GCFinalizedObject)
     {
     public:
         /**
@@ -101,7 +101,7 @@ namespace avmplus
         GC_NO_DATA(SourceInfo)
     };
 
-    class GC_CPP_EXACT_IFDEF(AbcInfo, MMgc::GCFinalizedObject, DEBUGGER)
+    class GC_CPP_EXACT(AbcInfo, MMgc::GCFinalizedObject)
     {
     public:
         /**
@@ -196,7 +196,7 @@ namespace avmplus
      * example of a Debugger subclass that provides a simple
      * gdb-like interface.
      */
-    class GC_CPP_EXACT_IFDEF(Debugger, MMgc::GCFinalizedObject, DEBUGGER)
+    class GC_CPP_EXACT(Debugger, MMgc::GCFinalizedObject)
     {
         friend class AbcParser;
         friend class DebugStackFrame;
@@ -533,7 +533,7 @@ namespace avmplus
      * ----------------------------------------------------------
      */
 
-    class GC_CPP_EXACT_IFDEF(SourceFile, SourceInfo, DEBUGGER)
+    class GC_CPP_EXACT(SourceFile, SourceInfo)
     {
     private:
         SourceFile(MMgc::GC* gc, Stringp name);
@@ -583,7 +583,7 @@ namespace avmplus
      * Contains all known debug information regarding a single
      * abc/swf file
      */
-    class GC_CPP_EXACT_IFDEF(AbcFile, AbcInfo, DEBUGGER)
+    class GC_CPP_EXACT(AbcFile, AbcInfo)
     {
     private:
         AbcFile(AvmCore* core, int size);

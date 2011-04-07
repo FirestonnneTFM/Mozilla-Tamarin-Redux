@@ -92,7 +92,7 @@ namespace avmplus
 
 #ifdef VMCFG_NANOJIT
     private:
-        ImtHolder       GC_STRUCTURE_IFDEF(imt, FEATURE_NANOJIT);
+        ImtHolder       GC_STRUCTURE(imt);
 #endif
 
 #ifdef VMCFG_AOT

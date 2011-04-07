@@ -176,7 +176,7 @@ namespace avmshell
      * A simple command line interface for the Debugger.
      * Supports a gdb-like command line.
      */
-    class GC_CPP_EXACT_IFDEF(DebugCLI, avmplus::Debugger, DEBUGGER)
+    class GC_CPP_EXACT(DebugCLI, avmplus::Debugger)
     {
     private:
         DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel);

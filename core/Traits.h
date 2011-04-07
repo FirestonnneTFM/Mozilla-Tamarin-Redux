@@ -604,8 +604,7 @@ namespace avmplus
     private:    GCMember<const ScopeTypeChain>
                                         GC_POINTER(m_declaringScope);
 #ifdef VMCFG_CACHE_GQCN
-    private:    GCMember<String>        GC_POINTER_IFDEF(_fullname, VMCFG_CACHE_GQCN);
-                                                                        // _fullname is the value returned by formatClassName
+    private:    GCMember<String>        GC_POINTER(_fullname);           // _fullname is the value returned by formatClassName
 #endif
     private:    uint16_t                m_sizeofInstance;   // sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
     private:    uint16_t                m_offsetofSlots;    // offset of first slot.
