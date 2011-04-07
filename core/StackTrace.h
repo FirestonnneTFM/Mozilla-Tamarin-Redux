@@ -213,7 +213,7 @@ namespace avmplus
     // ------------------------ DATA SECTION END
     };
 
-    class GC_CPP_EXACT_IFDEF(StackTrace, MMgc::GCTraceableObject, DEBUGGER)
+    class GC_CPP_EXACT(StackTrace, MMgc::GCTraceableObject)
     {
         StackTrace(int depth) : depth(depth) {}
 

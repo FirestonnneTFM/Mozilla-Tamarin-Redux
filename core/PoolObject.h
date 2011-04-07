@@ -126,8 +126,8 @@ namespace avmplus
 #ifndef AVMPLUS_64BIT
         // lists to keep int/uint atoms "sticky".
         // @todo this can/should go away when we convert to 64-bit Box atoms.
-        AtomList GC_STRUCTURE_IFNDEF(cpool_int_atoms, AVMPLUS_64BIT);
-        AtomList GC_STRUCTURE_IFNDEF(cpool_uint_atoms, AVMPLUS_64BIT);
+        AtomList GC_STRUCTURE(cpool_int_atoms);
+        AtomList GC_STRUCTURE(cpool_uint_atoms);
 #endif
 
         DataList<uint32_t> GC_STRUCTURE(cpool_mn_offsets);
@@ -235,7 +235,7 @@ namespace avmplus
         GCList<Traits>                              GC_STRUCTURE(_scripts);
         GCList<MethodInfo>                          GC_STRUCTURE(_methods);
 #ifdef DEBUGGER
-        GCList<DebuggerMethodInfo>                  GC_STRUCTURE_IFDEF(_method_dmi, DEBUGGER);
+        GCList<DebuggerMethodInfo>                  GC_STRUCTURE(_method_dmi);
 #endif
         // Only allocated & populated if core->config.methodName is true.
         // Indexed by MethodInfo::_method_id, if the value is positive, it's an index into cpool_string;
