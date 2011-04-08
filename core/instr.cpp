@@ -238,7 +238,7 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
         AvmCore* core = toplevel->core();
         if (!ctor || (!ctor->traits()->subtypeof(CLASS_TYPE) && !ctor->traits()->subtypeof(FUNCTION_TYPE))) {
             // We know that an exception will be thrown eventually, so now do the version check.
-            if (core->currentBugCompatibility()->bugzilla456852) {
+            if (core->currentBugCompatibility()->bugzilla456852a) {
                 // Correct behavior is to throw kConstructOfNonFunctionError as op_construct would do.
                 if (!ctor) {
                     toplevel->throwTypeError(kConstructOfNonFunctionError);

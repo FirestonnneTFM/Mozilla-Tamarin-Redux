@@ -182,11 +182,7 @@ namespace avmplus
 
         if (atomKind(index) == kDoubleType)
         {
-            int32_t i = AvmCore::integer_i(index);
-            if ((double)i == AvmCore::atomToDouble(index))
-            {
-                return getpropertylate_i(obj, i);
-            }
+            return getpropertylate_d(obj, AvmCore::atomToDouble(index));
         }
 
         if (AvmCore::isObject(index))
@@ -224,18 +220,8 @@ namespace avmplus
 
         if (atomKind(index) == kDoubleType)
         {
-            int32_t i = AvmCore::integer(index);
-            uint32_t u = uint32_t(i);
-            if ((double)u == AvmCore::atomToDouble(index))
-            {
-                setpropertylate_u(obj, u, value);
-                return;
-            }
-            else if ((double)i == AvmCore::atomToDouble(index))
-            {
-                setpropertylate_i(obj, i, value);
-                return;
-            }
+            setpropertylate_d(obj, AvmCore::atomToDouble(index), value);
+            return;
         }
 
         if (AvmCore::isObject(index))
@@ -271,18 +257,8 @@ namespace avmplus
 
         if (atomKind(index) == kDoubleType)
         {
-            int32_t i = AvmCore::integer(index);
-            uint32_t u = uint32_t(i);
-            if ((double)u == AvmCore::atomToDouble(index))
-            {
-                setpropertylate_u(obj, u, value);
-                return;
-            }
-            else if ((double)i == AvmCore::atomToDouble(index))
-            {
-                setpropertylate_i(obj, i, value);
-                return;
-            }
+            setpropertylate_d(obj, AvmCore::atomToDouble(index), value);
+            return;
         }
 
         if (AvmCore::isObject(index))
@@ -495,6 +471,40 @@ namespace avmplus
             Toplevel *toplevel = this->toplevel();
             ScriptObject *protoObject = toplevel->toPrototype(obj);
             return protoObject->ScriptObject::getStringPropertyFromProtoChain(core->internUint32(index), protoObject, toplevel->toTraits(obj));
+        }
+    }
+
+    Atom MethodEnv::getpropertylate_d(Atom obj, double index) const
+    {
+        // here we put the case for bind-none, since we know there are no bindings
+        // with numeric names.
+        if (atomKind(obj) == kObjectType)
+        {
+            // Use signed conversion, as it is faster on most platforms.
+            int32_t index_i = int32_t(index);
+            if (double(index_i) == index && index_i >= 0)
+            {
+                // try dynamic lookup on instance.  even if the traits are sealed,
+                // we might need to search the prototype chain
+                return AvmCore::atomToScriptObject(obj)->getUintProperty(uint32_t(index_i));
+            }
+            else
+            {
+                // Negative, fractional, or out of range, so we must intern the double.
+                // Sufficiently large non-negative numbers will also take this slower path,
+                // but we know an exception will be thrown (Vector) or a dense representation
+                // will not be used (Array, others).
+                return AvmCore::atomToScriptObject(obj)->getAtomProperty(this->core()->internDouble(index)->atom());
+            }
+        }
+        else
+        {
+            // primitive types are not dynamic, so we can go directly
+            // to their __proto__ object
+            AvmCore* core = this->core();
+            Toplevel *toplevel = this->toplevel();
+            ScriptObject *protoObject = toplevel->toPrototype(obj);
+            return protoObject->ScriptObject::getStringPropertyFromProtoChain(core->internDouble(index), protoObject, toplevel->toTraits(obj));
         }
     }
 
@@ -942,6 +952,57 @@ namespace avmplus
 
             // throw a ReferenceError exception  Property not found and could not be created.
             Multiname tempname(core()->getPublicNamespace(method->pool()), core()->internUint32(index));
+            toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
+        }
+    }
+
+    void MethodEnv::setpropertylate_d(Atom obj, double index, Atom value) const
+    {
+        if (AvmCore::isObject(obj))
+        {
+            ScriptObject* o = AvmCore::atomToScriptObject(obj);
+
+            // Use signed conversion, as it is faster on most platforms.
+            // We do not allocate objects large enough for an integral value
+            // that will not fit an int32 to index a vector or dense array,
+            // thus we'd have to use a string property name anyway in the
+            // cases where this conversion fails.
+            int32_t index_i = int32_t(index);
+            if (double(index_i) == index && index_i >= 0)
+            {
+                o->setUintProperty(uint32_t(index_i), value);
+                return;
+            }
+
+            // On the face of it, it should be sufficient to fall back to using
+            // setAtomProperty() here.  Unfortunately, due to former differences
+            // in the way that setUintProperty() and setAtomProperty() handled
+            // out-of-range indices, a RangeError might have been thrown where
+            // setAtomProperty() would have thrown a ReferenceError. We have to
+            // preserve the distinct code paths so that the SWF10 compatibility
+            // logic can distinguish these cases.
+
+            // Try unsigned conversion.
+            uint32_t index_u = uint32_t(index);
+            if (double(index_u) == index)
+            {
+                o->setUintProperty(index_u, value);
+                return;
+            }
+
+            // Negative, fractional, or out of range, so we must intern the double.
+            // Sufficiently large non-negative numbers will also take this slower path,
+            // but we know an exception will be thrown (Vector) or a dense representation
+            // will not be used (Array, others).
+            o->setAtomProperty(this->core()->internDouble(index)->atom(), value);
+        }
+        else
+        {
+            // obj represents a primitive Number, Boolean, int, or String, and primitives
+            // are sealed and final.  Cannot add dynamic vars to them.
+
+            // throw a ReferenceError exception  Property not found and could not be created.
+            Multiname tempname(core()->getPublicNamespace(method->pool()), core()->internDouble(index));
             toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
         }
     }

@@ -4960,17 +4960,18 @@ return the result of the comparison ToPrimitive(x) == y.
 
         if (v >= kSWF11)
         {
-            bugzilla444630 = 1;     // Entities are not escaped when appending String content to XML
-            bugzilla456852 = 1;     // Different runtime errors when -Ojit set in acceptance test run
-            bugzilla504525 = 1;     // Vector.concat processes arguments in reverse order
-            bugzilla513018 = 1;     // parseFloat accepts illegal number syntax
-            bugzilla524122 = 1;     // Incorrect optimization for integers in numeric sort
-            bugzilla526662 = 1;     // XMLParser stops at NUL char
-            bugzilla551587 = 1;     // MathClass:_min() does not correctly handle -0
-            bugzilla558863 = 1;     // in operator on bytearray throws exception for non-natural number
-            bugzilla585791 = 1;     // String.localeCompare with a null String object returns 0
-            bugzilla598683 = 1;     // Bad XML with unterminated node with namespace not throwing correctly
-            bugzilla609416 = 1;     // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs
+            bugzilla444630  = 1;    // Entities are not escaped when appending String content to XML
+            bugzilla456852a = 1;    // Different runtime error for invalid constructor call when -Ojit set
+            bugzilla456852b = 1;    // Different runtime error for negative vector index when -Ojit set
+            bugzilla504525  = 1;    // Vector.concat processes arguments in reverse order
+            bugzilla513018  = 1;    // parseFloat accepts illegal number syntax
+            bugzilla524122  = 1;    // Incorrect optimization for integers in numeric sort
+            bugzilla526662  = 1;    // XMLParser stops at NUL char
+            bugzilla551587  = 1;    // MathClass:_min() does not correctly handle -0
+            bugzilla558863  = 1;    // in operator on bytearray throws exception for non-natural number
+            bugzilla585791  = 1;    // String.localeCompare with a null String object returns 0
+            bugzilla598683  = 1;    // Bad XML with unterminated node with namespace not throwing correctly
+            bugzilla609416  = 1;    // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs
         }
     }
 

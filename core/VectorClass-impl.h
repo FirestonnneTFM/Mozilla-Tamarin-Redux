@@ -223,12 +223,17 @@ namespace avmplus
         }
         else if (status == kInvalidNumber)
         {
-            return false;
+            if (core()->currentBugCompatibility()->bugzilla456852b)
+                return false;
+            else if (!isNegativeVectorIndexAtom(name))
+                // Prior to SWF11, isNumber was incorrectly set false for negative numbers,
+                // so we fall through and allow searching the prototype chain for these.
+                // See getAtomProperty() below.
+                return false;
         }
-        else // status == kNotNumber
-        {
-            return ScriptObject::hasAtomProperty(name);
-        }
+
+        // status == kNotNumber, or index is negative and compatibility is earlier than SWF11.
+        return ScriptObject::hasAtomProperty(name);
     }
         
     template<class TLIST>
@@ -240,9 +245,13 @@ namespace avmplus
         {
             setUintProperty(index, value);
         }
+        else if (status == kInvalidNumber && core()->currentBugCompatibility()->bugzilla456852b)
+        {
+            throwRangeError_a(name);
+        }
         else
         {
-           toplevel()->throwReferenceError(kWriteSealedError, core()->string(name), traits());
+            toplevel()->throwReferenceError(kWriteSealedError, core()->string(name), traits());
         }
     }
         
@@ -257,15 +266,22 @@ namespace avmplus
         }
         else if (status == kInvalidNumber)
         {
-            // Not a valid indexed name - has a decimal part
-            toplevel()->throwReferenceError(kReadSealedError, core()->string(name), traits());
-            return undefinedAtom; // not reached
+            if (core()->currentBugCompatibility()->bugzilla456852b)
+            {
+                throwRangeError_a(name);
+                return undefinedAtom; // not reached
+            }
+            else if (!isNegativeVectorIndexAtom(name))
+            {
+                // Prior to SWF11, isNumber was incorrectly set false for negative numbers.
+                toplevel()->throwReferenceError(kReadSealedError, core()->string(name), traits());
+                return undefinedAtom; // not reached
+            }
         }
-        else // status == kNotNumber
-        {
-            // Check the prototype chain - that will throw if there is no match
-            return getAtomPropertyFromProtoChain(name, getDelegate(), traits());
-        }
+
+        // status == kNotNumber, or index is negative and compatibility is earlier than SWF11.
+        // Check the prototype chain - that will throw if there is no match.
+        return getAtomPropertyFromProtoChain(name, getDelegate(), traits());
     }
 
     template<class TLIST>
@@ -439,16 +455,14 @@ namespace avmplus
     template<class TLIST>
     typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeIntProperty(int32_t index_i) const
     {
-        // Implicitly convert negative values to large uints, which will always be > length
-        uint32_t const index = checkReadIndex_u(uint32_t(index_i));
+        uint32_t const index = checkReadIndex_i(index_i);
         return m_list.get(index);
     }
 
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setNativeIntProperty(int32_t index_i, typename TLIST::TYPE value)
     {
-        // Implicitly convert negative values to large uints, which will always be > length
-        uint32_t const index = checkWriteIndex_u(uint32_t(index_i));
+        uint32_t const index = checkWriteIndex_i(index_i);
         m_list.set(index, value);
     }
 
@@ -463,6 +477,20 @@ namespace avmplus
     void TypedVectorObject<TLIST>::_setNativeUintProperty(uint32_t index, typename TLIST::TYPE value)
     {
         index = checkWriteIndex_u(index);
+        m_list.set(index, value);
+    }
+
+    template<class TLIST>
+    typename TLIST::TYPE TypedVectorObject<TLIST>::_getNativeDoubleProperty(double index_d) const
+    {
+        uint32_t const index = checkReadIndex_d(index_d);
+        return m_list.get(index);
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setNativeDoubleProperty(double index_d, typename TLIST::TYPE value)
+    {
+        uint32_t const index = checkWriteIndex_d(index_d);
         m_list.set(index, value);
     }
 
@@ -491,29 +519,54 @@ namespace avmplus
     template<class TLIST>
     Atom TypedVectorObject<TLIST>::_getIntProperty(int32_t index_i) const
     {
-        // Implicitly convert negative values to large uints, which will always be > length
-        uint32_t const index = uint32_t(index_i);
-        return _getUintProperty(index);
+        uint32_t const index = checkReadIndex_i(index_i);
+        return valueToAtom((typename TLIST::OPAQUE_TYPE)m_list.get(index));
     }
 
     template<class TLIST>
     void TypedVectorObject<TLIST>::_setIntProperty(int32_t index_i, Atom value)
     {
-        // Implicitly convert negative values to large uints, which will always be > length
-        uint32_t const index = uint32_t(index_i);
-        _setUintProperty(uint32_t(index), value);
+        uint32_t index = checkWriteIndex_i(index_i);
+        typename TLIST::OPAQUE_TYPE tmp;
+        atomToValue(value, tmp);
+        m_list.set(index, (typename TLIST::TYPE)tmp);
+    }
+
+    template<class TLIST>
+    Atom TypedVectorObject<TLIST>::_getDoubleProperty(double index_d) const
+    {
+        uint32_t const index = checkReadIndex_d(index_d);
+        return valueToAtom((typename TLIST::OPAQUE_TYPE)m_list.get(index));
+    }
+
+    template<class TLIST>
+    void TypedVectorObject<TLIST>::_setDoubleProperty(double index_d, Atom value)
+    {
+        uint32_t index = checkWriteIndex_d(index_d);
+        typename TLIST::OPAQUE_TYPE tmp;
+        atomToValue(value, tmp);
+        m_list.set(index, (typename TLIST::TYPE)tmp);
     }
     
     template<class TLIST>
-    void FASTCALL TypedVectorObject<TLIST>::throwRangeError(uint32_t index) const
+    void FASTCALL TypedVectorObject<TLIST>::throwRangeError_u(uint32_t index) const
     {
         toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_list.length()));
     }
 
-    // ----------------------------
-    // ----------------------------
-    // ----------------------------
+    template<class TLIST>
+    void FASTCALL TypedVectorObject<TLIST>::throwRangeError_i(int32_t index) const
+    {
+        toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_list.length()));
+    }
 
+    template<class TLIST>
+    void FASTCALL TypedVectorObject<TLIST>::throwRangeError_a(Atom index) const
+    {
+        toplevel()->throwRangeError(kOutOfRangeError, core()->string(index), core()->uintToString(m_list.length()));
+    }
+
+    // ----------------------------
 }
 
 #endif /* __avmplus_VectorClass_impl__ */

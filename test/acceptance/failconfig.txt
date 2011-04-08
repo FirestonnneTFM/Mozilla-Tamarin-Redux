@@ -62,7 +62,6 @@
 ####################
 # force JIT -Ojit
 ####################
-as3/Vector/nonindexproperty:index -6.*          , .*((-Ojit|-Djitordie).*),  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 ####################
 # Differential testing (avmdiff.py)
@@ -76,7 +75,6 @@ regress/bug_555542, .*diff,, skip, stack trace not handled by avmdiff https://bu
 regress/bug_555568, .*diff,, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 regress/security/bug_555059.*, .*diff,, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff ,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-as3/Vector/nonindexproperty , .*3264-diff ,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 ecma3/Math/e15_8_2_16 , .*3264-diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_18 , .*3264-diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_7 , .*3264-diff ,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
@@ -141,7 +139,6 @@ spidermonkey/js1_5/Array/regress-157652, arm-lnx.*deep,, expectedfail, https://b
 ####################
 # Windows Mobile Emulator
 ####################
-as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  ,, skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 regress/bug_555568, arm-winmobile-emulator.*,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335
 regress/bug_558442a, arm-winmobile-emulator.*,, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=562335
 

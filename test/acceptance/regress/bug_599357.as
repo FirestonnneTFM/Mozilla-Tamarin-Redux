@@ -284,17 +284,17 @@ test();
         array[index++] = new TestCase(SECTION, "array[0x80000000+0x80000000]", undefined, getArrayAddII(arr, 0x80000000, 0x80000000));
         
         array[index++] = new TestCase(SECTION, "vector[1+2]", 4, getVectorAddII(vec, 1, 2));
-        array[index++] = new TestCase(SECTION, "vector[1+ -2]", "Error #1069", getVectorAddII(vec, 1, -2));
+        array[index++] = new TestCase(SECTION, "vector[1+ -2]", "Error #1125", getVectorAddII(vec, 1, -2));
         array[index++] = new TestCase(SECTION, "vector[0x7fffffff+0x7fffffff]", "Error #1125", getVectorAddII(vec, 0x7fffffff, 0x7fffffff));
         array[index++] = new TestCase(SECTION, "vector[0x7fffffff+ -0x7fffffff]", 1, getVectorAddII(vec, 0x7fffffff, -0x7fffffff));
-        array[index++] = new TestCase(SECTION, "vector[-0x7fffffff+ -0x7fffffff]", "Error #1069", getVectorAddII(vec, -0x7fffffff, -0x7fffffff));
+        array[index++] = new TestCase(SECTION, "vector[-0x7fffffff+ -0x7fffffff]", "Error #1125", getVectorAddII(vec, -0x7fffffff, -0x7fffffff));
         array[index++] = new TestCase(SECTION, "vector[2+1], where 1 is const", 4, getVectorAddIC(vec, 2));
         array[index++] = new TestCase(SECTION, "vector[2-1], where 1 is const", 2, getVectorSubIC(vec, 2));
         array[index++] = new TestCase(SECTION, "vector[1+2], where 1 is const", 4, getVectorAddCI(vec, 2));
-        array[index++] = new TestCase(SECTION, "vector[1-2], where 1 is const", "Error #1069", getVectorSubCI(vec, 2));
+        array[index++] = new TestCase(SECTION, "vector[1-2], where 1 is const", "Error #1125", getVectorSubCI(vec, 2));
         array[index++] = new TestCase(SECTION, "vector[2-1]", 2, getVectorSubII(vec, 2, 1));
         array[index++] = new TestCase(SECTION, "vector[0x80000000-0x80000000]", 1, getVectorSubII(vec, 0x80000000, 0x80000000));
-        array[index++] = new TestCase(SECTION, "vector[0x80000000+0x80000000]", "Error #1069", getVectorAddII(vec, 0x80000000, 0x80000000));
+        array[index++] = new TestCase(SECTION, "vector[0x80000000+0x80000000]", "Error #1125", getVectorAddII(vec, 0x80000000, 0x80000000));
         
         array[index++] = new TestCase(SECTION, "array[1], where 1 is a const stored in a Number var", 2, getArrayConstToNumber(arr));
         array[index++] = new TestCase(SECTION, "array[1], where 1 is a int stored in a Number var", 2, getArrayIntToNumber(arr, 1));
@@ -317,17 +317,17 @@ test();
         array[index++] = new TestCase(SECTION, "set array[-0x7fffffff- 0x7fffffff]", 20, setArraySubII(arr, -0x7fffffff, 0x7fffffff, 20));
         
         array[index++] = new TestCase(SECTION, "set vector[1+2]", 10, setVectorAddII(vec, 1, 2, 10));
-        array[index++] = new TestCase(SECTION, "set vector[1+ -2]", "Error #1056", setVectorAddII(vec, 1, -2, 11));
+        array[index++] = new TestCase(SECTION, "set vector[1+ -2]", "Error #1125", setVectorAddII(vec, 1, -2, 11));
         array[index++] = new TestCase(SECTION, "set vector[0x7fffffff+0x7fffffff]", "Error #1125", setVectorAddII(vec, 0x7fffffff, 0x7fffffff, 12));
         array[index++] = new TestCase(SECTION, "set vector[0x7fffffff+ -0x7fffffff]", 13, setVectorAddII(vec, 0x7fffffff, -0x7fffffff, 13));
-        array[index++] = new TestCase(SECTION, "set vector[-0x7fffffff+ -0x7fffffff]", "Error #1056", setVectorAddII(vec, -0x7fffffff, -0x7fffffff, 14));
+        array[index++] = new TestCase(SECTION, "set vector[-0x7fffffff+ -0x7fffffff]", "Error #1125", setVectorAddII(vec, -0x7fffffff, -0x7fffffff, 14));
         array[index++] = new TestCase(SECTION, "set vector[2+1], where 1 is const", 15, setVectorAddIC(vec, 2, 15));
         array[index++] = new TestCase(SECTION, "set vector[2-1], where 1 is const", 16, setVectorSubIC(vec, 2, 16));
         array[index++] = new TestCase(SECTION, "set vector[1+2], where 1 is const", 17, setVectorAddCI(vec, 2, 17));
-        array[index++] = new TestCase(SECTION, "set vector[1-2], where 1 is const", "Error #1056", setVectorSubCI(vec, 2, 18));
+        array[index++] = new TestCase(SECTION, "set vector[1-2], where 1 is const", "Error #1125", setVectorSubCI(vec, 2, 18));
         array[index++] = new TestCase(SECTION, "set vector[1-1], where 1 is const", 18, setVectorSubCI(vec, 1, 18));
         array[index++] = new TestCase(SECTION, "set vector[2-1]", 19, setVectorSubII(vec, 2, 1, 19));
-        array[index++] = new TestCase(SECTION, "set vector[-0x7fffffff- 0x7fffffff]", "Error #1056", setVectorSubII(vec, -0x7fffffff, 0x7fffffff, 19));
+        array[index++] = new TestCase(SECTION, "set vector[-0x7fffffff- 0x7fffffff]", "Error #1125", setVectorSubII(vec, -0x7fffffff, 0x7fffffff, 19));
 
         return (array);
 }

@@ -312,6 +312,18 @@ namespace avmplus
         return getUintPropertyImpl(index);
     }
 
+    Atom ArrayObject::_getDoubleProperty(double d) const
+    {
+        uint32_t index = uint32_t(d);
+        if (double(index) == d)
+            // this is a hot function; explicitly call the force-inlined
+            // implementation to ensure we don't tail-call to _getUintProperty
+            return getUintPropertyImpl(index);
+        else
+            // Number is non-integral, negative, or too large to be a valid index, so intern it.
+            return getStringProperty(core()->internDouble(d));
+    }
+
 #ifdef VMCFG_AOT
     Atom *ArrayObject::getDenseCopy() const
     {
@@ -373,7 +385,7 @@ namespace avmplus
         AvmAssert(value != atomNotFound);
 
         verify();
-        
+
         // The most common case is setting a value in the dense area.
         uint32_t const denseIdx = index - m_denseStart;
         uint32_t const denseLen = m_denseArray.length();
@@ -516,6 +528,16 @@ convert_and_set_sparse:
             _setUintProperty(index, value);
         else // integer is negative - we must intern it
             setStringProperty(core()->internInt(index), value);
+    }
+
+    void ArrayObject::_setDoubleProperty(double d, Atom value)
+    {
+        uint32_t index = uint32_t(d);
+        if (double(index) == d)
+            _setUintProperty(index, value);
+        else
+            // Number is non-integral, negative, or too large to be a valid index, so intern it.
+            setStringProperty(core()->internDouble(d), value);
     }
 
     // ----------------- "del" methods

@@ -110,6 +110,7 @@ namespace avmplus
         ArrayObject* createRest(Atom* argv, int32_t argc);
         Atom getpropertylate_i(Atom obj, int32_t index) const;
         Atom getpropertylate_u(Atom obj, uint32_t index) const;
+        Atom getpropertylate_d(Atom obj, double index) const;
         /*bool*/ int32_t haspropertylate_i(Atom obj, int32_t index) const;
         /*bool*/ int32_t haspropertylate_u(Atom obj, uint32_t index) const;
 
@@ -167,6 +168,7 @@ namespace avmplus
         void initproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
         void setpropertylate_i(Atom obj, int32_t index, Atom value) const;
         void setpropertylate_u(Atom obj, uint32_t index, Atom value) const;
+        void setpropertylate_d(Atom obj, double index, Atom value) const;
 
         /** same as callproperty but only considers the bindings in given vtable */
         Atom callsuper(const Multiname* name, int32_t argc, Atom* atomv) const;

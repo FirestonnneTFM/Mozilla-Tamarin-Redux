@@ -308,6 +308,12 @@ namespace avmplus
         const CallInfo* newFunc;
     };
 
+    // A compact representation of the possible types of a numeric vector
+    // index suitable for indexing a vector of accessor function ids.  This
+    // is presently used only for an argument to CodegenLIR::emitGetIndexedProperty()
+    // and CodegenLIR::emitSetIndexedProperty().
+    typedef enum { VI_UINT, VI_INT, VI_DOUBLE, VI_SIZE } IndexKind;
+
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
      * of the JIT.  It is intended to be instantiated on the stack once for each
@@ -499,8 +505,8 @@ namespace avmplus
         void emitGetGlobalScope(int dest);
         void emitCoerce(uint32_t index, Traits* type);
         void emitCheckNull(LIns* ptr, Traits* type);
-        LIns* emitGetIntProperty(int objIndex, LIns *index, Traits *result, bool bUnsigned);
-        void emitSetIntProperty(int objIndex, int valIndex, LIns *index, bool bUnsigned);
+        LIns* emitGetIndexedProperty(int objIndex, LIns *index, Traits *result, IndexKind idxKind);
+        void emitSetIndexedProperty(int objIndex, int valIndex, LIns *index, IndexKind idxKind);
         void localSet(int i, LIns* o, Traits* type);
         LIns* convertToString(int i, bool preserveNull);
         LIns* coerceToString(int i);
