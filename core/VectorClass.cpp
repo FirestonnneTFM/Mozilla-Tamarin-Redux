@@ -64,10 +64,14 @@ namespace avmplus
     // ----------------------------
 
     // helper method
-    // sets index to the uint32_t value of name, if it can be converted
+    // sets index to the uint32_t value of name, if it can be converted to a vector index
     // isNumber is set to true if name was a number (whether it was a uint32_t value or not)
     VectorBaseObject::VectorIndexStatus VectorBaseObject::getVectorIndex(Atom name, uint32_t& index) const
     {
+        // This is implicitly asserted by the call to AvmCore::getIndexFromAtom() below.
+        // Make it explicit here.
+        AvmAssert(atomIsIntptr(name) || AvmCore::isString(name));
+
         if (AvmCore::getIndexFromAtom(name, &index))
         {
             return kValidNumber;
@@ -77,20 +81,97 @@ namespace avmplus
             Stringp s = core()->string(name);
             wchar c = s->charAt(0);
             // Does it look like a number?
-            if (s->length() > 0 && c >= '0' && c <= '9')
+            if (s->length() > 0 && ((c >= '0' && c <= '9') || c == '-'))
             {
                 double const index_d = s->toNumber();
                 if (!MathUtils::isNaN(index_d))
                 {
-                    // name is a string that looks like a number
-                    // Note: convert using int, not uint, as it's much faster
+                    // Name is a string that looks like a number.
+                    // Convert using int, not uint, as it's much faster.
                     int32_t const index_i = int32_t(index_d);
-                    index = uint32_t(index_i);
-                    return (double(index_i) == index_d) ? kValidNumber : kInvalidNumber;
+                    if (double(index_i) == index_d) {
+                        index = uint32_t(index_i);
+                        return (index_i >= 0 ? kValidNumber : kInvalidNumber);
+                    }
+                    #if 0
+                    // If number cannot be converted to a int, try to convert
+                    // to a uint.  This is slower, but we are going to throw
+                    // an exception anyway at this point:  Either the number
+                    // is non-integral, or it is larger than we can allocate
+                    // for a (dense) vector.
+                    uint32_t const index_u = uint32_t(index_d);
+                    if (double(index_u) == index_d) {
+                        index = index_u;
+                        return kValidNumber;
+                    }
+                    #else
+                    // Number is non-integral, negative, or too large for an int.
+                    // Note that some larger values that fit in a uint are valid
+                    // index values, and we would expect that kValidNumber would be
+                    // returned.  In Tamarin, however, we cannot allocate a vector
+                    // sufficiently large to make such an index legal, so such an
+                    // index will always yield a ReferenceError whenever it is used
+                    // to subscript a vector, just as for kInvalidNumber.  Furthermore,
+                    // a similar quirk has been long-standing, and compatibility with
+                    // SWF10 relies upon it.
+                    return kInvalidNumber;
+                    #endif
                 }
             }
         }
         return kNotNumber;
+    }
+
+    // Return true if name is a negative number or a string denoting the same.
+    // Assumes that getVectorIndex() has been previously invoked with argument 'name',
+    // and returned with the 'isNumber' flag true.
+    bool VectorBaseObject::isNegativeVectorIndexAtom(Atom name)
+    {
+        AvmAssert(atomIsIntptr(name) ||
+                  (AvmCore::isString(name) && AvmCore::atomToString(name)->length() > 0));
+
+        return (atomIsIntptr(name)
+                ? atomGetIntptr(name) < 0
+                : AvmCore::atomToString(name)->charAt(0) == '-');
+    }
+
+    // Helper for _getDoubleProperty and _getNativedoubleProperty
+    // Called when vector index of type double is non-integral or negative, or too large to fit in an int32.
+    void VectorBaseObject::throwGetDoubleException(double d, uint32_t length) const
+    {
+        // For SWF11 and later, throw RangeError.
+        // For SWF10 and earlier, throw ReferenceError if the value is not legal ECMAscript Array index,
+        // which must be in the range 0..2^32-2. Otherwise, throw RangeError.
+        if ((double(uint32_t(d)) == d && uint32_t(d) != 0xffffffff) || core()->currentBugCompatibility()->bugzilla456852b)
+        {
+            toplevel()->throwRangeError(kOutOfRangeError, core()->doubleToString(d), core()->uintToString(length));
+        }
+        else
+        {
+            // NOTE: Backward compatibility for SWF10 and earlier requires that we search the
+            // prototype chain.  Unfortunately, that might result in a value of type other than
+            // the declared element type of the vector, as assumed here, so we punt and just throw.
+            Multiname mn(core()->findPublicNamespace(), core()->internDouble(d));
+            toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
+        }
+    }
+
+    // Helper for _setDoubleProperty and _setNativeDoubleProperty.
+    // Called when vector index of type double is non-integral or negative, or too large to fit in an int32.
+    void VectorBaseObject::throwSetDoubleException(double d, uint32_t length) const
+    {
+        // For SWF11 and later, throw RangeError.
+        // For SWF10 and earlier, throw ReferenceError if the value is not legal ECMAscript Array index,
+        // or one greater than the largest legal index, i.e., in the range 0..2^32-1.  Othewrwise, throw RangeError.
+        if (double(uint32_t(d)) == d || core()->currentBugCompatibility()->bugzilla456852b)
+        {
+            toplevel()->throwRangeError(kOutOfRangeError, core()->doubleToString(d), core()->uintToString(length));
+        }
+        else
+        {
+            Multiname mn(core()->findPublicNamespace(), core()->internDouble(d));
+            toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
+        }
     }
 
     // ----------------------------

@@ -107,6 +107,33 @@ return foo;
 return *((intptr_t*)&_method);
 #endif
 
+#ifdef AVMPLUS_ARM
+#ifdef _MSC_VER
+#define RETURN_METHOD_PTR_F(_class, _method) \
+return *((int*)&_method);
+#else
+#define RETURN_METHOD_PTR_F(_class, _method) \
+union { \
+    double (_class::*bar)(); \
+    int foo[2]; \
+}; \
+bar = _method; \
+return foo[0];
+#endif
+
+#elif defined __GNUC__
+#define RETURN_METHOD_PTR_F(_class, _method) \
+union { \
+    double (_class::*bar)(); \
+    intptr_t foo; \
+}; \
+bar = _method; \
+return foo;
+#else
+#define RETURN_METHOD_PTR_F(_class, _method) \
+return *((intptr_t*)&_method);
+#endif
+
 #ifdef PERFM
 #define DOPROF
 #endif /* PERFM */
@@ -160,6 +187,7 @@ namespace avmplus
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
         #define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
+        #define VECTORDOUBLEADDRF(f) vectorDoubleAddrF((double (DoubleVectorObject::*)())(&f))
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
@@ -210,6 +238,11 @@ namespace avmplus
         intptr_t vectorDoubleAddr(int (DoubleVectorObject::*f)())
         {
             RETURN_METHOD_PTR(DoubleVectorObject, f);
+        }
+
+        intptr_t vectorDoubleAddrF(double (DoubleVectorObject::*f)())
+        {
+            RETURN_METHOD_PTR_F(DoubleVectorObject, f);
         }
 
         intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
@@ -4147,163 +4180,168 @@ namespace avmplus
         localSet(ctor_index, atomToNativeRep(itraits, newobj), itraits);
     }
 
-    typedef const CallInfo *CallInfop;
+    static const CallInfo* getArrayHelpers[VI_SIZE] =
+        { FUNCTIONID(ArrayObject_getUintProperty), FUNCTIONID(ArrayObject_getIntProperty), FUNCTIONID(ArrayObject_getDoubleProperty) };
 
-    // Generate code for get obj[index] where index is a signed or unsigned integer type
-    LIns* CodegenLIR::emitGetIntProperty(int objIndexOnStack, LIns *index, Traits *result, bool bUnsigned)
+    static const CallInfo* getObjectVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(ObjectVectorObject_getUintProperty), FUNCTIONID(ObjectVectorObject_getIntProperty), FUNCTIONID(ObjectVectorObject_getDoubleProperty) };
+
+    static const CallInfo* getIntVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(IntVectorObject_getNativeUintProperty), FUNCTIONID(IntVectorObject_getNativeIntProperty), FUNCTIONID(IntVectorObject_getNativeDoubleProperty) };
+
+    static const CallInfo* getIntVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(IntVectorObject_getUintProperty), FUNCTIONID(IntVectorObject_getIntProperty), FUNCTIONID(IntVectorObject_getDoubleProperty) };
+
+    static const CallInfo* getUIntVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(UIntVectorObject_getNativeUintProperty), FUNCTIONID(UIntVectorObject_getNativeIntProperty), FUNCTIONID(UIntVectorObject_getNativeDoubleProperty) };
+
+    static const CallInfo* getUIntVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(UIntVectorObject_getUintProperty), FUNCTIONID(UIntVectorObject_getIntProperty), FUNCTIONID(UIntVectorObject_getDoubleProperty) };
+
+    static const CallInfo* getDoubleVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(DoubleVectorObject_getNativeUintProperty), FUNCTIONID(DoubleVectorObject_getNativeIntProperty), FUNCTIONID(DoubleVectorObject_getNativeDoubleProperty) };
+
+    static const CallInfo* getDoubleVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(DoubleVectorObject_getUintProperty), FUNCTIONID(DoubleVectorObject_getIntProperty), FUNCTIONID(DoubleVectorObject_getDoubleProperty) };
+
+    static const CallInfo* getGenericHelpers[VI_SIZE] =
+        { FUNCTIONID(getpropertylate_u), FUNCTIONID(getpropertylate_i), FUNCTIONID(getpropertylate_d) };
+
+    // Generate code for get obj[index] where index is a signed or unsigned integer type, or double type.
+    LIns* CodegenLIR::emitGetIndexedProperty(int objIndexOnStack, LIns* index, Traits* result, IndexKind idxKind)
     {
         Traits* objType = state->value(objIndexOnStack).traits;
+        const CallInfo* getter = NULL;
         bool valIsAtom = true;
-        LIns *value;
 
         if (objType == ARRAY_TYPE) {
-            value = callIns((bUnsigned ?
-                FUNCTIONID(ArrayObject_getUintProperty) :
-                FUNCTIONID(ArrayObject_getIntProperty)),
-                2, localGetp(objIndexOnStack), index);
+            getter = getArrayHelpers[idxKind];
         }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
-            value = callIns((bUnsigned ?
-                FUNCTIONID(ObjectVectorObject_getUintProperty) :
-                FUNCTIONID(ObjectVectorObject_getIntProperty)),
-                2, localGetp(objIndexOnStack), index);
+            getter = getObjectVectorHelpers[idxKind];
         }
         else if (objType == VECTORINT_TYPE) {
-            if (result == INT_TYPE || result == UINT_TYPE) {
-                value = callIns((bUnsigned ?
-                    FUNCTIONID(IntVectorObject_getNativeUintProperty) :
-                    FUNCTIONID(IntVectorObject_getNativeIntProperty)),
-                    2, localGetp(objIndexOnStack), index);
+            if (result == INT_TYPE) {
+                getter = getIntVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
             else {
-                value = callIns((bUnsigned ?
-                    FUNCTIONID(IntVectorObject_getUintProperty) :
-                    FUNCTIONID(IntVectorObject_getIntProperty)),
-                    2, localGetp(objIndexOnStack), index);
+                getter = getIntVectorHelpers[idxKind];
             }
         }
         else if (objType == VECTORUINT_TYPE) {
-            if (result == INT_TYPE || result == UINT_TYPE) {
-                value = callIns((bUnsigned ?
-                    FUNCTIONID(UIntVectorObject_getNativeUintProperty) :
-                    FUNCTIONID(UIntVectorObject_getNativeIntProperty)),
-                    2, localGetp(objIndexOnStack), index);
+            if (result == UINT_TYPE) {
+                getter = getUIntVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
             else {
-                value = callIns((bUnsigned ?
-                    FUNCTIONID(UIntVectorObject_getUintProperty) :
-                    FUNCTIONID(UIntVectorObject_getIntProperty)),
-                    2, localGetp(objIndexOnStack), index);
+                getter = getUIntVectorHelpers[idxKind];
             }
         }
         else if (objType == VECTORDOUBLE_TYPE) {
             if (result == NUMBER_TYPE) {
-                value = callIns(bUnsigned ?
-                    FUNCTIONID(DoubleVectorObject_getNativeUintProperty) :
-                    FUNCTIONID(DoubleVectorObject_getNativeIntProperty),
-                    2, localGetp(objIndexOnStack), index);
+                getter = getDoubleVectorNativeHelpers[idxKind];
                 valIsAtom = false;
             }
             else {
-                value = callIns(bUnsigned ?
-                    FUNCTIONID(DoubleVectorObject_getUintProperty) :
-                    FUNCTIONID(DoubleVectorObject_getIntProperty),
-                    2, localGetp(objIndexOnStack), index);
+                getter = getDoubleVectorHelpers[idxKind];
             }
         }
-        else {
-            value = callIns(bUnsigned ?
-                FUNCTIONID(getpropertylate_u) :
-                FUNCTIONID(getpropertylate_i),
-                3, env_param, loadAtomRep(objIndexOnStack), index);
+        if (getter) {
+            LIns* value = callIns(getter, 2, localGetp(objIndexOnStack), index);
+            return valIsAtom ? atomToNativeRep(result, value) : value;
         }
-
-        return valIsAtom ? atomToNativeRep(result, value) : value;
+        else {
+            LIns* value = callIns(getGenericHelpers[idxKind], 3, env_param, loadAtomRep(objIndexOnStack), index);
+            return atomToNativeRep(result, value);
+        }
     }
 
-    // Generate code for 'obj[index] = value' where index is a signed or unsigned integer type
-    void CodegenLIR::emitSetIntProperty(int objIndexOnStack, int valIndexOnStack, LIns *index, bool bUnsigned)
+    static const CallInfo* setArrayHelpers[VI_SIZE] =
+        { FUNCTIONID(ArrayObject_setUintProperty), FUNCTIONID(ArrayObject_setIntProperty), FUNCTIONID(ArrayObject_setDoubleProperty) };
+
+    static const CallInfo* setObjectVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(ObjectVectorObject_setUintProperty), FUNCTIONID(ObjectVectorObject_setIntProperty), FUNCTIONID(ObjectVectorObject_setDoubleProperty) };
+
+    static const CallInfo* setIntVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(IntVectorObject_setNativeUintProperty), FUNCTIONID(IntVectorObject_setNativeIntProperty), FUNCTIONID(IntVectorObject_setNativeDoubleProperty) };
+
+    static const CallInfo* setIntVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(IntVectorObject_setUintProperty), FUNCTIONID(IntVectorObject_setIntProperty), FUNCTIONID(IntVectorObject_setDoubleProperty) };
+
+    static const CallInfo* setUIntVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(UIntVectorObject_setNativeUintProperty), FUNCTIONID(UIntVectorObject_setNativeIntProperty), FUNCTIONID(UIntVectorObject_setNativeDoubleProperty) };
+
+    static const CallInfo* setUIntVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(UIntVectorObject_setUintProperty), FUNCTIONID(UIntVectorObject_setIntProperty), FUNCTIONID(UIntVectorObject_setDoubleProperty) };
+
+    static const CallInfo* setDoubleVectorNativeHelpers[VI_SIZE] =
+        { FUNCTIONID(DoubleVectorObject_setNativeUintProperty), FUNCTIONID(DoubleVectorObject_setNativeIntProperty), FUNCTIONID(DoubleVectorObject_setNativeDoubleProperty) };
+
+    static const CallInfo* setDoubleVectorHelpers[VI_SIZE] =
+        { FUNCTIONID(DoubleVectorObject_setUintProperty), FUNCTIONID(DoubleVectorObject_setIntProperty), FUNCTIONID(DoubleVectorObject_setDoubleProperty) };
+
+    static const CallInfo* setGenericHelpers[VI_SIZE] =
+        { FUNCTIONID(setpropertylate_u), FUNCTIONID(setpropertylate_i), FUNCTIONID(setpropertylate_d) };
+
+    // Generate code for 'obj[index] = value' where index is a signed or unsigned integer type, or a double.
+    void CodegenLIR::emitSetIndexedProperty(int objIndexOnStack, int valIndexOnStack, LIns* index, IndexKind idxKind)
     {
         Traits* valueType = state->value(valIndexOnStack).traits;
         Traits* objType = state->value(objIndexOnStack).traits;
+        const CallInfo* setter = NULL;
+        LIns* value = NULL;
 
         if (objType == ARRAY_TYPE) {
-            LIns* value = loadAtomRep(valIndexOnStack);
-            callIns((bUnsigned ?
-                FUNCTIONID(ArrayObject_setUintProperty) :
-                FUNCTIONID(ArrayObject_setIntProperty)),
-                3, localGetp(objIndexOnStack), index, value);
+            value = loadAtomRep(valIndexOnStack);
+            setter = setArrayHelpers[idxKind];
         }
         else if (objType != NULL && objType->subtypeof(VECTOROBJ_TYPE)) {
-            LIns* value = loadAtomRep(valIndexOnStack);
-            callIns((bUnsigned ?
-                FUNCTIONID(ObjectVectorObject_setUintProperty) :
-                FUNCTIONID(ObjectVectorObject_setIntProperty)),
-                3, localGetp(objIndexOnStack), index, value);
+            value = loadAtomRep(valIndexOnStack);
+            setter = setObjectVectorHelpers[idxKind];
         }
         else if (objType == VECTORINT_TYPE) {
-            if (valueType == INT_TYPE || valueType == UINT_TYPE) {
-                LIns* value = localGet(valIndexOnStack);
-                callIns((bUnsigned ?
-                    FUNCTIONID(IntVectorObject_setNativeUintProperty) :
-                    FUNCTIONID(IntVectorObject_setNativeIntProperty)),
-                    3, localGetp(objIndexOnStack), index, value);
+            if (valueType == INT_TYPE) {
+                value = localGet(valIndexOnStack);
+                setter = setIntVectorNativeHelpers[idxKind];
             }
             else {
-                LIns* value = loadAtomRep(valIndexOnStack);
-                value = callIns((bUnsigned ?
-                    FUNCTIONID(IntVectorObject_setUintProperty) :
-                    FUNCTIONID(IntVectorObject_setIntProperty)),
-                    3, localGetp(objIndexOnStack), index, value);
+                value = loadAtomRep(valIndexOnStack);
+                setter = setIntVectorHelpers[idxKind];
             }
         }
         else if (objType == VECTORUINT_TYPE) {
-            if (valueType == INT_TYPE || valueType == UINT_TYPE) {
-                LIns* value = localGet(valIndexOnStack);
-                callIns((bUnsigned ?
-                    FUNCTIONID(UIntVectorObject_setNativeUintProperty) :
-                    FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
-                    3, localGetp(objIndexOnStack), index, value);
+            if (valueType == UINT_TYPE) {
+                value = localGet(valIndexOnStack);
+                setter = setUIntVectorNativeHelpers[idxKind];
             }
             else {
-                LIns* value = loadAtomRep(valIndexOnStack);
-                value = callIns((bUnsigned ?
-                    FUNCTIONID(UIntVectorObject_setUintProperty) :
-                    FUNCTIONID(UIntVectorObject_setIntProperty)),
-                    3, localGetp(objIndexOnStack), index, value);
+                value = loadAtomRep(valIndexOnStack);
+                setter = setUIntVectorHelpers[idxKind];
             }
         }
         else if (objType == VECTORDOUBLE_TYPE) {
             if (valueType == NUMBER_TYPE) {
-                LIns* value = localGetf(valIndexOnStack);
-                callIns(bUnsigned ?
-                    FUNCTIONID(DoubleVectorObject_setNativeUintProperty) :
-                    FUNCTIONID(DoubleVectorObject_setNativeIntProperty),
-                    3, localGetp(objIndexOnStack), index, value);
+                value = localGetf(valIndexOnStack);
+                setter = setDoubleVectorNativeHelpers[idxKind];
             }
             else {
-                LIns* value = loadAtomRep(valIndexOnStack);
-                value = callIns(bUnsigned ?
-                    FUNCTIONID(DoubleVectorObject_setUintProperty) :
-                    FUNCTIONID(DoubleVectorObject_setIntProperty),
-                    3, localGetp(objIndexOnStack), index, value);
+                value = loadAtomRep(valIndexOnStack);
+                setter = setDoubleVectorHelpers[idxKind];
             }
         }
-        else {
-            LIns* value = loadAtomRep(valIndexOnStack);
-            callIns(bUnsigned ?
-                FUNCTIONID(setpropertylate_u) :
-                FUNCTIONID(setpropertylate_i),
-                4, env_param, loadAtomRep(objIndexOnStack), index, value);
+        if (setter) {
+            callIns(setter, 3, localGetp(objIndexOnStack), index, value);
+        } else {
+            value = loadAtomRep(valIndexOnStack);
+            callIns(setGenericHelpers[idxKind], 4, env_param, loadAtomRep(objIndexOnStack), index, value);
         }
     }
 
     // Try to optimize our input argument to the fastest possible type.
-    //   Non-negative integer constants can be considered unsigned.
-    //   Promotions from int/uint to number can be used as integers.
-    //   Double constants that are actually integers can be used as integers.
+    // Non-negative integer constants can be considered unsigned.
+    // Promotions from int/uint to number can be used as integers.
+    // Double constants that are actually integers can be used as integers.
     LIns *CodegenLIR::optimizeIndexArgumentType(int32_t sp, Traits** indexType)
     {
         LIns *index = NULL;
@@ -4318,8 +4356,8 @@ namespace avmplus
         else if (*indexType == UINT_TYPE) {
             return localGet(sp);
         }
-        // Convert number inputs to ints or uints if they are promotions
-        // from int, uint or constant integers promoted
+        // Convert Number expression to int or uint if it is a promotion
+        // from int or uint, or if it is a constant in range for int or uint.
         else if (*indexType == NUMBER_TYPE) {
             index = localGetf(sp);
             if (index->opcode() == LIR_i2d) {
@@ -4333,14 +4371,17 @@ namespace avmplus
             else if (index->isImmD())
             {
                 double d = index->immD();
+                // Convert to uint if possible.
+                uint32_t u = uint32_t(d);
+                if (double(u) == d) {
+                    *indexType = UINT_TYPE;
+                    return InsConst(u);
+                }
+                // Failing that, it may still be possible to
+                // convert to some negative values to int.
                 int32_t i = int32_t(d);
-                if (i == d) {
-                    if (i >= 0) {
-                        *indexType = UINT_TYPE;
-                    }
-                    else {
-                        *indexType = INT_TYPE;
-                    }
+                if (double(i) == d) {
+                    *indexType = INT_TYPE;
                     return InsConst(i);
                 }
             }
@@ -5116,30 +5157,28 @@ namespace avmplus
                     index = optimizeIndexArgumentType(sp, &indexType);
 
                 if (maybeIntegerIndex && indexType == INT_TYPE) {
-                    LIns *value = emitGetIntProperty(sp-1, index, result, false);
+                    LIns *value = emitGetIndexedProperty(sp-1, index, result, VI_INT);
                     localSet(sp-1, value, result);
                 }
                 else if (maybeIntegerIndex && indexType == UINT_TYPE) {
-                    LIns *value = emitGetIntProperty(sp-1, index, result, true);
+                    LIns *value = emitGetIndexedProperty(sp-1, index, result, VI_UINT);
                     localSet(sp-1, value, result);
                 }
                 else if (maybeIntegerIndex && indexType == NUMBER_TYPE) {
-                    LIns *value;
-
-                    CodegenLabel slow_path("slow");
-                    CodegenLabel done_path("done");
-                    suspendCSE();
-
-#if defined(VMCFG_FASTPATH_ADD_INLINE) || NJ_F2I_SUPPORTED
-                    LIns* tempResult = insAllocForTraits(result);
-#endif // defined(VMCFG_FASTPATH_ADD_INLINE) || NJ_F2I_SUPPORTED
-
                     bool bGeneratedFastPath = false;
 #ifdef VMCFG_FASTPATH_ADD_INLINE
+                    // TODO: Since a helper must be called anyhow, I conjecture that fused add-and-index helpers
+                    // may be more efficient than the inlining done here.  On the other hand, it is plausible that
+                    // we would go the other way and completely inline the getNativeXXXProperty cases, in which
+                    // case we'd want to retain this for the sake of more thorough inlining.
                     LOpcode op = index->opcode();
                     if (op == LIR_addd || op == LIR_subd) {
-                        LIns *a = index->oprnd1();
-                        LIns *b = index->oprnd2();
+                        CodegenLabel slow_path("slow");
+                        CodegenLabel done_path("done");
+                        LIns* tempResult = insAllocForTraits(result);
+                        suspendCSE();
+                        LIns* a = index->oprnd1();
+                        LIns* b = index->oprnd2();
                         // Our addjovi only works with signed integers so don't use isPromote.
                         a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
                         b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
@@ -5150,61 +5189,27 @@ namespace avmplus
                             // else
                             //   call getprop_index_add (env, obj, multiname, a, b)
                             // (for subtraction, we emit (a-b) and call getprop_index_subtract)
-                            LIns *addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
+                            LIns* addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
                             branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
-                            value = emitGetIntProperty(sp-1, addOp, result, true);
-                            stForTraits(result, value, tempResult, 0, ACCSET_STORE_ANY);
+                            LIns* value0 = emitGetIndexedProperty(sp-1, addOp, result, VI_UINT);
+                            stForTraits(result, value0, tempResult, 0, ACCSET_STORE_ANY);
                             branchToLabel(LIR_j, NULL, done_path);
 
                             emitLabel(slow_path);
-                            LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
-                            value = callIns((op == LIR_addd) ?
-                                FUNCTIONID(getprop_index_add) : FUNCTIONID(getprop_index_subtract), 5,
-                                env_param, loadAtomRep(sp-1), multi, a, b);
+                            LIns* value1 = emitGetIndexedProperty(sp-1, index, result, VI_DOUBLE);
+                            stForTraits(result, value1, tempResult, 0, ACCSET_STORE_ANY);
 
-                            stForTraits(result, atomToNativeRep(result, value), tempResult, 0, ACCSET_STORE_ANY);
                             emitLabel(done_path);
-
                             localSet(sp-1, ldForTraits(result, tempResult, 0, ACCSET_LOAD_ANY), result);
                             bGeneratedFastPath = true;
                         }
+                        resumeCSE();
                     }
 #endif // VMCFG_FASTPATH_ADD_INLINE
                     if (!bGeneratedFastPath) {
-#if NJ_F2I_SUPPORTED
-                        // Inline fast path for index values that are unsigned integers
-                        // if ((i2d(d2i(index)) == index) && d2i(index) >= 0)
-                        //   call getProperty[uint]
-                        // else
-                        //   call getprop_index
-                        //
-                        LIns *intIndex = lirout->ins1(LIR_d2i, index);
-                        LIns *dIndex = i2dIns(intIndex);
-
-                        // if (i2d(d2i(index)) != index), not a valid int
-                        branchToLabel(LIR_jf, binaryIns(LIR_eqd, dIndex, index), slow_path);
-                        // if intIndex < 0, not a valid unsigned int
-                        branchToLabel(LIR_jt, binaryIns(LIR_lti, intIndex, InsConst(0)), slow_path);
-
-                        value = emitGetIntProperty(sp-1, intIndex, result, true);
-                        stForTraits(result, value, tempResult, 0, ACCSET_STORE_ANY);
-                        branchToLabel(LIR_j, NULL, done_path);
-
-                        emitLabel(slow_path);
-#endif // NJ_F2I_SUPPORTED
-                        LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
-                        index = nativeToAtom(index, NUMBER_TYPE);
-                        value = callIns(FUNCTIONID(getprop_index), 4,
-                                            env_param, loadAtomRep(sp-1), multi, index);
-#if NJ_F2I_SUPPORTED
-                        stForTraits(result, atomToNativeRep(result, value), tempResult, 0, ACCSET_STORE_ANY);
-                        emitLabel(done_path);
-                        localSet(sp-1, ldForTraits(result, tempResult, 0, ACCSET_LOAD_ANY), result);
-#else
-                        localSet(sp-1, atomToNativeRep(result, value), result);
-#endif // NJ_F2I_SUPPORTED
+                        LIns *value = emitGetIndexedProperty(sp-1, index, result, VI_DOUBLE);
+                        localSet(sp-1, value, result);
                     }
-                    resumeCSE();
                 }
                 else if (maybeIntegerIndex && indexType != STRING_TYPE) {
                     LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
@@ -5257,20 +5262,19 @@ namespace avmplus
                     index = optimizeIndexArgumentType(sp-1, &indexType);
 
                 if (maybeIntegerIndex && indexType == INT_TYPE) {
-                    emitSetIntProperty(sp-2, sp, index, false);
+                    emitSetIndexedProperty(sp-2, sp, index, VI_INT);
                 }
                 else if (maybeIntegerIndex && indexType == UINT_TYPE) {
-                    emitSetIntProperty(sp-2, sp, index, true);
+                    emitSetIndexedProperty(sp-2, sp, index, VI_UINT);
                 }
                 else if (maybeIntegerIndex && indexType == NUMBER_TYPE) {
-                    CodegenLabel slow_path("slow");
-                    CodegenLabel done_path("done");
-                    suspendCSE();
-
                     bool bGeneratedFastPath = false;
 #ifdef VMCFG_FASTPATH_ADD_INLINE
                     LOpcode op = index->opcode();
                     if (op == LIR_addd || op == LIR_subd) {
+                        CodegenLabel slow_path("slow");
+                        CodegenLabel done_path("done");
+                        suspendCSE();
                         LIns *a = index->oprnd1();
                         LIns *b = index->oprnd2();
                         // Our addjovi only works with signed integers.
@@ -5283,65 +5287,23 @@ namespace avmplus
                             // else
                             //   call set/initprop_index_add(env, obj, name, value, a, b)
                             // (for subtraction, we emit (a-b) and call set/initprop_index_subtract)
-                            LIns *addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
+                            LIns* addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
                             branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
-                            emitSetIntProperty(sp-2, sp, addOp, true);
+                            emitSetIndexedProperty(sp-2, sp, addOp, VI_UINT);
                             branchToLabel(LIR_j, NULL, done_path);
 
                             emitLabel(slow_path);
-                            LIns* name = InsConstPtr(multiname); // precomputed multiname
-                            LIns* value = loadAtomRep(sp);
-                            AvmAssert(state->value(sp-2).notNull);
-                            LIns* obj = loadAtomRep(sp-2);
-                            const CallInfo *func;
-                            if (op == LIR_addd) {
-                                func = opcode==OP_setproperty ? FUNCTIONID(setprop_index_add) :
-                                                                FUNCTIONID(initprop_index_add);
-                            }
-                            else {
-                                func = opcode==OP_setproperty ? FUNCTIONID(setprop_index_subtract) :
-                                                                FUNCTIONID(initprop_index_subtract);
-                            }
-                            callIns(func, 6, env_param, obj, name, value, a, b);
+                            emitSetIndexedProperty(sp-2, sp, index, VI_DOUBLE);
+
                             emitLabel(done_path);
                             bGeneratedFastPath = true;
                         }
+                        resumeCSE();
                     }
 #endif // VMCFG_FASTPATH_ADD_INLINE
                     if (!bGeneratedFastPath) {
-#if NJ_F2I_SUPPORTED
-                        // Inline fast path for index values that are unsigned integers
-                        // if ((i2d(d2i(index)) == index) && d2i(index) >= 0)
-                        //   call setProperty[uint]
-                        // else
-                        //   call setprop_index
-                        //
-                        LIns *intIndex = lirout->ins1(LIR_d2i, index);
-                        LIns *dIndex = i2dIns(intIndex);
-
-                        // if (i2d(d2i(index)) != index), not a valid int
-                        branchToLabel(LIR_jf, binaryIns(LIR_eqd, dIndex, index), slow_path);
-                        // if intIndex < 0, not a valid unsigned int
-                        branchToLabel(LIR_jt, binaryIns(LIR_lti, intIndex, InsConst(0)), slow_path);
-
-                        emitSetIntProperty(sp-2, sp, intIndex, true);
-                        branchToLabel(LIR_j, NULL, done_path);
-
-                        emitLabel(slow_path);
-#endif // NJ_F2I_SUPPORTED
-                        LIns* name = InsConstPtr(multiname); // precomputed multiname
-                        LIns* value = loadAtomRep(sp);
-                        index = nativeToAtom(index, NUMBER_TYPE);
-                        AvmAssert(state->value(sp-2).notNull);
-                        LIns* obj = loadAtomRep(sp-2);
-                        const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setprop_index) :
-                                                            FUNCTIONID(initprop_index);
-                        callIns(func, 5, env_param, obj, name, value, index);
-#if NJ_F2I_SUPPORTED
-                        emitLabel(done_path);
-#endif // NJ_F2I_SUPPORTED
+                        emitSetIndexedProperty(sp-2, sp, index, VI_DOUBLE);
                     }
-                    resumeCSE();
                 }
                 else if (maybeIntegerIndex) {
                     LIns* name = InsConstPtr(multiname); // precomputed multiname
@@ -5349,8 +5311,7 @@ namespace avmplus
                     LIns* index = loadAtomRep(sp-1);
                     AvmAssert(state->value(sp-2).notNull);
                     LIns* obj = loadAtomRep(sp-2);
-                    const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setprop_index) :
-                                                        FUNCTIONID(initprop_index);
+                    const CallInfo* func = (opcode == OP_setproperty) ? FUNCTIONID(setprop_index) : FUNCTIONID(initprop_index);
                     callIns(func, 5, env_param, obj, name, value, index);
                 }
                 else {

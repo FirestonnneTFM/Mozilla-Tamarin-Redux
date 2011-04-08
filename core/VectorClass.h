@@ -259,6 +259,10 @@ namespace avmplus
 
         enum VectorIndexStatus { kNotNumber, kInvalidNumber, kValidNumber };
         VectorIndexStatus getVectorIndex(Atom name, uint32_t& index) const;
+        static bool isNegativeVectorIndexAtom(Atom name);
+
+        void throwGetDoubleException(double d, uint32_t length) const;
+        void throwSetDoubleException(double d, uint32_t length) const;
     
         GC_DATA_BEGIN(VectorBaseObject)
 
@@ -323,11 +327,15 @@ namespace avmplus
         void _setNativeIntProperty(int32_t index, typename TLIST::TYPE value);
         typename TLIST::TYPE _getNativeUintProperty(uint32_t index) const;
         void _setNativeUintProperty(uint32_t index, typename TLIST::TYPE value);
+        typename TLIST::TYPE _getNativeDoubleProperty(double index) const;
+        void _setNativeDoubleProperty(double index, typename TLIST::TYPE value);
         bool _hasUintProperty(uint32_t index) const;
         Atom _getUintProperty(uint32_t index) const;
         void _setUintProperty(uint32_t index, Atom value);
         Atom _getIntProperty(int32_t index) const;
         void _setIntProperty(int32_t index, Atom value);
+        Atom _getDoubleProperty(double index) const;
+        void _setDoubleProperty(double index, Atom value);
 
 #ifdef DEBUGGER
         virtual uint64_t bytesUsed() const;
@@ -335,10 +343,16 @@ namespace avmplus
 
     private:
 
-        void FASTCALL throwRangeError(uint32_t index) const;
+        void FASTCALL throwRangeError_u(uint32_t index) const;
+        void FASTCALL throwRangeError_i(int32_t index) const;
+        void FASTCALL throwRangeError_a(Atom index) const;
 
         uint32_t checkReadIndex_u(uint32_t index) const;
+        uint32_t checkReadIndex_i(int32_t index) const;
+        uint32_t checkReadIndex_d(double index) const;
         uint32_t checkWriteIndex_u(uint32_t index) const;
+        uint32_t checkWriteIndex_i(int32_t index) const;
+        uint32_t checkWriteIndex_d(double index) const;
 
         // variant of _spliceHelper with explicit array of Atom.
         // (Not exposed to AS3.)

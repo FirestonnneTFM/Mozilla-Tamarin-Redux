@@ -855,46 +855,6 @@
     }
     FUNCTION(FUNCADDR(getprop_index), SIG4(A,P,A,P,A), getprop_index)
 
-#ifdef VMCFG_FASTPATH_ADD_INLINE
-    // This is equivalent to getprop_index but performs addition of index1 and index2
-    // to compute the index. This is only run when (index1+index2) overflows an int32_t value
-    // or is negative and is not time critical.
-    Atom getprop_index_add(MethodEnv* caller_env, Atom obj, const Multiname *name, int32_t index1, int32_t index2)
-    {
-        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 + (double) index2);
-        if (atomIsIntptr(index) && atomCanBeUint32(index)) {
-            if (isObjectPtr(obj)) {
-                _nvprof("getprop_index_add P-fast", 1);
-                return AvmCore::atomToScriptObject(obj)->getUintProperty(uint32_t(atomGetIntptr(index)));
-            }
-        }
-        _nvprof("getprop_index_add P-fast", 0);
-        Multiname tempname = *name;
-        VTable* vtable = toVTable(caller_env->toplevel(), obj);
-        return caller_env->getpropertyHelper(obj, &tempname, vtable, index);
-    }
-    FUNCTION(FUNCADDR(getprop_index_add), SIG5(A,P,A,P,I,I), getprop_index_add)
-
-    // This is equivalent to getprop_index but performs subtraction of index1 and index2
-    // to compute the index. This is only run when (index1-index2) overflows an int32_t value
-    // or is negative and is not time critical.
-    Atom getprop_index_subtract(MethodEnv* caller_env, Atom obj, const Multiname *name, int32_t index1, int32_t index2)
-    {
-        Atom index = caller_env->toplevel()->core()->doubleToAtom((double) index1 - (double) index2);
-        if (atomIsIntptr(index) && atomCanBeUint32(index)) {
-            if (isObjectPtr(obj)) {
-                _nvprof("getprop_index_subtract P-fast", 1);
-                return AvmCore::atomToScriptObject(obj)->getUintProperty(uint32_t(atomGetIntptr(index)));
-            }
-        }
-        _nvprof("getprop_index_subtract P-fast", 0);
-        Multiname tempname = *name;
-        VTable* vtable = toVTable(caller_env->toplevel(), obj);
-        return caller_env->getpropertyHelper(obj, &tempname, vtable, index);
-    }
-    FUNCTION(FUNCADDR(getprop_index_subtract), SIG5(A,P,A,P,I,I), getprop_index_subtract)
-#endif // VMCFG_FASTPATH_ADD_INLINE
-
     // called when we don't know the base object type and we have a runtime
     // index expression that is public and therefore able to access dynamic properties.
     // (typically this is late-bound array access)
@@ -1091,43 +1051,67 @@
     METHOD(ENVADDR(MethodEnv::delpropertyHelper), SIG4(A,P,A,P,A), delpropertyHelper)
     METHOD(ENVADDR(MethodEnv::internRtns), SIG2(P,P,A), internRtns)
     METHOD(ENVADDR(MethodEnv::delproperty), SIG3(A,P,A,P), delproperty)
+
     METHOD(ENVADDR(MethodEnv::setpropertylate_u), SIG4(V,P,A,U,A), setpropertylate_u)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setUintProperty), SIG3(V,P,U,A), DoubleVectorObject_setUintProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeUintProperty), SIG3(V,P,U,F), DoubleVectorObject_setNativeUintProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setUintProperty), SIG3(V,P,U,A), IntVectorObject_setUintProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setUintProperty), SIG3(V,P,U,A), UIntVectorObject_setUintProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setNativeUintProperty), SIG3(V,P,U,I), IntVectorObject_setNativeUintProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeUintProperty), SIG3(V,P,U,U), UIntVectorObject_setNativeUintProperty)
     METHOD(ARRAYADDR(ArrayObject::_setUintProperty), SIG3(V,P,U,A), ArrayObject_setUintProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_setUintProperty), SIG3(V,P,U,A), ObjectVectorObject_setUintProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setUintProperty), SIG3(V,P,U,A), UIntVectorObject_setUintProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeUintProperty), SIG3(V,P,U,U), UIntVectorObject_setNativeUintProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setUintProperty), SIG3(V,P,U,A), IntVectorObject_setUintProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setNativeUintProperty), SIG3(V,P,U,I), IntVectorObject_setNativeUintProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setUintProperty), SIG3(V,P,U,A), DoubleVectorObject_setUintProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeUintProperty), SIG3(V,P,U,F), DoubleVectorObject_setNativeUintProperty)
+
     METHOD(ENVADDR(MethodEnv::setpropertylate_i), SIG4(V,P,A,I,A), setpropertylate_i)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setIntProperty), SIG3(V,P,I,A), DoubleVectorObject_setIntProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeIntProperty), SIG3(V,P,I,F), DoubleVectorObject_setNativeIntProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setIntProperty), SIG3(V,P,I,A), IntVectorObject_setIntProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setIntProperty), SIG3(V,P,I,A), UIntVectorObject_setIntProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_setNativeIntProperty), SIG3(V,P,I,I), IntVectorObject_setNativeIntProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty), SIG3(V,P,I,U), UIntVectorObject_setNativeIntProperty)
     METHOD(ARRAYADDR(ArrayObject::_setIntProperty), SIG3(V,P,I,A), ArrayObject_setIntProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_setIntProperty), SIG3(V,P,I,A), ObjectVectorObject_setIntProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setIntProperty), SIG3(V,P,I,A), UIntVectorObject_setIntProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty), SIG3(V,P,I,U), UIntVectorObject_setNativeIntProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setIntProperty), SIG3(V,P,I,A), IntVectorObject_setIntProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setNativeIntProperty), SIG3(V,P,I,I), IntVectorObject_setNativeIntProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setIntProperty), SIG3(V,P,I,A), DoubleVectorObject_setIntProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeIntProperty), SIG3(V,P,I,F), DoubleVectorObject_setNativeIntProperty)
+
+    METHOD(ENVADDR(MethodEnv::setpropertylate_d), SIG4(V,P,A,F,A), setpropertylate_d)
+    METHOD(ARRAYADDR(ArrayObject::_setDoubleProperty), SIG3(V,P,F,A), ArrayObject_setDoubleProperty)
+    METHOD(VECTOROBJADDR(ObjectVectorObject::_setDoubleProperty), SIG3(V,P,F,A), ObjectVectorObject_setDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setDoubleProperty), SIG3(V,P,F,A), UIntVectorObject_setDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,U), UIntVectorObject_setNativeDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setDoubleProperty), SIG3(V,P,F,A), IntVectorObject_setDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,I), IntVectorObject_setNativeDoubleProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setDoubleProperty), SIG3(V,P,F,A), DoubleVectorObject_setDoubleProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeDoubleProperty), SIG3(V,P,F,F), DoubleVectorObject_setNativeDoubleProperty)
+
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
+    METHOD(ARRAYADDR(ArrayObject::_getUintProperty), SIG2(A,P,U), ArrayObject_getUintProperty)
+    METHOD(VECTOROBJADDR(ObjectVectorObject::_getUintProperty), SIG2(A,P,U), ObjectVectorObject_getUintProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getUintProperty), SIG2(A,P,U), UIntVectorObject_getUintProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeUintProperty), SIG2(U,P,U), UIntVectorObject_getNativeUintProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getUintProperty), SIG2(A,P,U), IntVectorObject_getUintProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getNativeUintProperty), SIG2(I,P,U), IntVectorObject_getNativeUintProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getUintProperty), SIG2(A,P,U), DoubleVectorObject_getUintProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getNativeUintProperty), SIG2(F,P,U), DoubleVectorObject_getNativeUintProperty)
 
-    METHOD(VECTORINTADDR(IntVectorObject::_getUintProperty), SIG2(A,P,U), IntVectorObject_getUintProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getUintProperty), SIG2(A,P,U), UIntVectorObject_getUintProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getNativeUintProperty), SIG2(I,P,U), IntVectorObject_getNativeUintProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeUintProperty), SIG2(U,P,U), UIntVectorObject_getNativeUintProperty)
-    METHOD(ARRAYADDR(ArrayObject::_getUintProperty), SIG2(A,P,U), ArrayObject_getUintProperty)
-    METHOD(VECTOROBJADDR(ObjectVectorObject::_getUintProperty), SIG2(A,P,U), ObjectVectorObject_getUintProperty)
     METHOD(ENVADDR(MethodEnv::getpropertylate_i), SIG3(A,P,A,I), getpropertylate_i)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getIntProperty), SIG2(A,P,I), DoubleVectorObject_getIntProperty)
-    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getNativeIntProperty), SIG2(F,P,I), DoubleVectorObject_getNativeIntProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getIntProperty), SIG2(A,P,I), IntVectorObject_getIntProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getIntProperty), SIG2(A,P,I), UIntVectorObject_getIntProperty)
-    METHOD(VECTORINTADDR(IntVectorObject::_getNativeIntProperty), SIG2(I,P,I), IntVectorObject_getNativeIntProperty)
-    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeIntProperty), SIG2(U,P,I), UIntVectorObject_getNativeIntProperty)
     METHOD(ARRAYADDR(ArrayObject::_getIntProperty), SIG2(A,P,I), ArrayObject_getIntProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_getIntProperty), SIG2(A,P,I), ObjectVectorObject_getIntProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getIntProperty), SIG2(A,P,I), UIntVectorObject_getIntProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeIntProperty), SIG2(U,P,I), UIntVectorObject_getNativeIntProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getIntProperty), SIG2(A,P,I), IntVectorObject_getIntProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getNativeIntProperty), SIG2(I,P,I), IntVectorObject_getNativeIntProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getIntProperty), SIG2(A,P,I), DoubleVectorObject_getIntProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getNativeIntProperty), SIG2(F,P,I), DoubleVectorObject_getNativeIntProperty)
+
+    METHOD(ENVADDR(MethodEnv::getpropertylate_d), SIG3(A,P,A,F), getpropertylate_d)
+    METHOD(ARRAYADDR(ArrayObject::_getDoubleProperty), SIG2(A,P,F), ArrayObject_getDoubleProperty)
+    METHOD(VECTOROBJADDR(ObjectVectorObject::_getDoubleProperty), SIG2(A,P,F), ObjectVectorObject_getDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getDoubleProperty), SIG2(I,P,F), IntVectorObject_getDoubleProperty)
+    METHOD(VECTORINTADDR(IntVectorObject::_getNativeDoubleProperty), SIG2(I,P,F), IntVectorObject_getNativeDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getDoubleProperty), SIG2(U,P,F), UIntVectorObject_getDoubleProperty)
+    METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeDoubleProperty), SIG2(U,P,F), UIntVectorObject_getNativeDoubleProperty)
+    METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getDoubleProperty), SIG2(F,P,F), DoubleVectorObject_getDoubleProperty)
+    METHOD(VECTORDOUBLEADDRF(DoubleVectorObject::_getNativeDoubleProperty), SIG2(F,P,F), DoubleVectorObject_getNativeDoubleProperty)
+
     METHOD(ENVADDR(MethodEnv::haspropertylate_u), SIG3(I,P,A,U), haspropertylate_u)
     METHOD(ENVADDR(MethodEnv::haspropertylate_i), SIG3(I,P,A,I), haspropertylate_i)
     METHOD(ENVADDR(MethodEnv::findproperty), SIG7(A,P,P,P,I,P,B,P), findproperty)

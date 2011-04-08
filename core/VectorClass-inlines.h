@@ -212,8 +212,32 @@ namespace avmplus
     {
         uint32_t const limit = m_list.length();
         if (index >= limit)
-            throwRangeError(index);
+            throwRangeError_u(index);
         return index;
+    }
+
+    template<class TLIST>
+    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkReadIndex_i(int32_t index) const
+    {
+        uint32_t const limit = m_list.length();
+        if (index < 0 || uint32_t(index) >= limit)
+            throwRangeError_i(index);
+        return uint32_t(index);
+    }
+
+    template<class TLIST>
+    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkReadIndex_d(double index) const
+    {
+        int32_t const index_i = int32_t(index);
+        uint32_t const index_u = uint32_t(index_i);
+        uint32_t const limit = m_list.length();
+        if (double(index_i) == index && index_i >= 0)
+        {
+            if (index_u < limit)
+                return index_u;
+        }
+        throwGetDoubleException(index, limit);
+        return 0;
     }
 
     template<class TLIST>
@@ -223,8 +247,36 @@ namespace avmplus
         // If we are not 'fixed', legal to write exactly 1 past the end, growing as needed.
         uint32_t const limit = m_list.length() + 1 - uint32_t(m_fixed);
         if (index >= limit)
-            throwRangeError(index);
+            throwRangeError_u(index);
         return index;
+    }
+
+    template<class TLIST>
+    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkWriteIndex_i(int32_t index) const
+    {
+        // If we are 'fixed', we can't write past the end.
+        // If we are not 'fixed', legal to write exactly 1 past the end, growing as needed.
+        uint32_t const limit = m_list.length() + 1 - uint32_t(m_fixed);
+        if (index < 0 || uint32_t(index) >= limit)
+            throwRangeError_i(index);
+        return uint32_t(index);
+    }
+
+    template<class TLIST>
+    REALLY_INLINE uint32_t TypedVectorObject<TLIST>::checkWriteIndex_d(double index) const
+    {
+        // If we are 'fixed', we can't write past the end.
+        // If we are not 'fixed', legal to write exactly 1 past the end, growing as needed.
+        int32_t const index_i = int32_t(index);
+        uint32_t const index_u = uint32_t(index_i);
+        uint32_t const limit = m_list.length();
+        if (double(index_i) == index && index_i >= 0)
+        {
+            if (index_u <= limit)
+                return index_u;
+        }
+        throwSetDoubleException(index, limit);
+        return 0;
     }
 
     // ----------------------------
