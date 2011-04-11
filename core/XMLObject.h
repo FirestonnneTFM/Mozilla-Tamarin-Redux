@@ -116,7 +116,7 @@
 namespace avmplus
 {
     typedef RCList<Namespace> NamespaceList;
-    typedef HeapList<NamespaceList> HeapNamespaceList;
+    typedef ExactHeapList<NamespaceList> HeapNamespaceList;
 
     class GC_AS3_EXACT(XMLObject, ScriptObject)
     {

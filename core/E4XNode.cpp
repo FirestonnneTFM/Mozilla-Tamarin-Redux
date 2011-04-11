@@ -142,13 +142,13 @@ namespace avmplus
         if (m_children & SINGLECHILDBIT)
         {
             E4XNode *firstChild = (E4XNode *) (m_children & ~SINGLECHILDBIT);
-            HeapE4XNodeList* aa = new (gc()) HeapE4XNodeList(gc(), 2);
+            HeapE4XNodeList* aa = HeapE4XNodeList::create(gc(), 2);
             aa->list.add(firstChild);
             WB(gc(), this, &m_children, uintptr_t(aa));
         }
         else if (!m_children)
         {
-            WB(gc(), this, &m_children, uintptr_t(new (gc()) HeapE4XNodeList(gc(), 1)));
+            WB(gc(), this, &m_children, uintptr_t(HeapE4XNodeList::create(gc(), 1)));
         }
     }
 
@@ -324,7 +324,7 @@ namespace avmplus
 
         // step 2e - add namespace to inscopenamespaces
         if (!m_namespaces)
-            m_namespaces = new (core->GetGC()) HeapNamespaceList(core->GetGC(), 1);
+            m_namespaces = HeapNamespaceList::create(core->GetGC(), 1);
 
         m_namespaces->list.add(ns);
 
@@ -472,7 +472,7 @@ namespace avmplus
     void ElementE4XNode::addAttribute (E4XNode *x)
     {
         if (!m_attributes)
-            m_attributes = new (gc()) HeapE4XNodeList(gc(), 1);
+            m_attributes = HeapE4XNodeList::create(gc(), 1);
 
         m_attributes->list.add(x);
     }
@@ -525,7 +525,7 @@ namespace avmplus
         if (!numAttr)
             return;
 
-        m_attributes = new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numAttr);
+        m_attributes = HeapE4XNodeList::create(core->GetGC(), numAttr);
 
         // Now we read the attributes
         index = 0;
@@ -633,7 +633,7 @@ namespace avmplus
             // step 2 - for each ns in inScopeNamespaces
             if (numNamespaces())
             {
-                y->m_namespaces = new (core->GetGC()) HeapNamespaceList(core->GetGC(), numNamespaces());
+                y->m_namespaces = HeapNamespaceList::create(core->GetGC(), numNamespaces());
                 uint32_t i;
                 for (i = 0; i < numNamespaces(); i++)
                 {
@@ -644,7 +644,7 @@ namespace avmplus
             // step 3 - duplicate attribute nodes
             if (numAttributes())
             {
-                y->m_attributes = new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numAttributes());
+                y->m_attributes = HeapE4XNodeList::create(core->GetGC(), numAttributes());
                 uint32_t i;
                 for (i = 0; i < numAttributes(); i++)
                 {
@@ -659,7 +659,7 @@ namespace avmplus
             if (numChildren())
             {
                 AvmAssert(y->m_children == 0);
-                WB(gc(), y, &y->m_children, uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), numChildren())));
+                WB(gc(), y, &y->m_children, uintptr_t(HeapE4XNodeList::create(core->GetGC(), numChildren())));
                 for (uint32_t k = 0; k < _length(); k++)
                 {
                     E4XNode *child = _getAt(k);
@@ -828,7 +828,7 @@ namespace avmplus
 
         if (!m_children)
         {
-            WB(gc(), this, &m_children, uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), n)));
+            WB(gc(), this, &m_children, uintptr_t(HeapE4XNodeList::create(core->GetGC(), n)));
         }
 
         if (xl)
@@ -884,7 +884,7 @@ namespace avmplus
             i = _length();
             // add a blank spot for this child
             if (!m_children)
-                WB(gc(), this, &m_children, uintptr_t(new (core->GetGC()) HeapE4XNodeList(core->GetGC(), 1)));
+                WB(gc(), this, &m_children, uintptr_t(HeapE4XNodeList::create(core->GetGC(), 1)));
             convertToE4XNodeList();
             HeapE4XNodeList* aa = ((HeapE4XNodeList*)(uintptr_t)m_children);
             aa->list.add(NULL);

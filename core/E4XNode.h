@@ -179,7 +179,7 @@ namespace avmplus
     public:
         
         typedef GCList<E4XNode> E4XNodeList;
-        typedef HeapList<E4XNodeList> HeapE4XNodeList;
+        typedef ExactHeapList<E4XNodeList> HeapE4XNodeList;
 
     public:
         bool getQName (Multiname *mn, Namespacep publicNS) const;
