@@ -65,7 +65,7 @@ do
     echo "message: total condition/decision coverage: $cdpct"
 
     # download current historical files
-    basename=`basename $file | awk -F. '{print $1}'`
+    basename=${platform}-`basename $file | awk -F. '{print $1}'`
     ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-recentfn.csv $covdatadir/${basename}-recentfn.csv
     ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-recentbc.csv $covdatadir/${basename}-recentbc.csv
     ${basedir}/build/buildbot/slaves/all/util-download.sh $http_coverage/${basename}-milestonefn.baseline.csv $covdatadir/${basename}-milestonefn.csv
