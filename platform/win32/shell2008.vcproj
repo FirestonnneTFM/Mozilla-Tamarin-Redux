@@ -1771,6 +1771,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\ST_mmgc_mmfx_array.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\ST_mmgc_threads.cpp"
 				>
 			</File>
