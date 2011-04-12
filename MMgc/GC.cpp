@@ -2471,7 +2471,9 @@ namespace MMgc
         const void *realptr = GetRealPointer(userptr);
         GCAssert(GetGC(realptr) == this);
         GCAssert(IsPointerToGCObject(realptr));
+        (void)realptr;
 
+#if defined VMCFG_EXACT_TRACING || defined VMCFG_SELECTABLE_EXACT_TRACING
         gcbits_t& bits = GetGCBits(realptr);
 
         if (bits & kVirtualGCTrace)
@@ -2490,6 +2492,7 @@ namespace MMgc
             policy.signalExactMarkWork(size);
             return;
         }
+#endif
 
         MarkItem_ConservativeOrNonGCObject(userptr, size, GCMarkStack::kGCObject, userptr, MMGC_INTERIOR_PTRS_FLAG);
     }

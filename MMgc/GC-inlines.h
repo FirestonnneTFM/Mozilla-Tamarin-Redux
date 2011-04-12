@@ -436,9 +436,13 @@ namespace MMgc
     /*static*/
     REALLY_INLINE int GC::IsExactlyTraced(const void *userptr)
     {
+#if defined VMCFG_EXACT_TRACING || defined VMCFG_SELECTABLE_EXACT_TRACING
         const void *realptr = GetRealPointer(userptr);
         GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
         return GetGCBits(realptr) & kVirtualGCTrace;
+#else
+        return 0;
+#endif
     }
     
     /*static*/
