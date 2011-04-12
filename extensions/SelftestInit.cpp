@@ -55,6 +55,7 @@ extern void create_mmgc_basics(AvmCore* core);
 extern void create_mmgc_dependent(AvmCore* core);
 extern void create_mmgc_finalize_uninit(AvmCore* core);
 extern void create_mmgc_gcheap(AvmCore* core);
+extern void create_mmgc_mmfx_array(AvmCore* core);
 #if defined VMCFG_WORKERTHREADS
 extern void create_mmgc_threads(AvmCore* core);
 #endif
@@ -82,6 +83,7 @@ create_mmgc_basics(core);
 create_mmgc_dependent(core);
 create_mmgc_finalize_uninit(core);
 create_mmgc_gcheap(core);
+create_mmgc_mmfx_array(core);
 #if defined VMCFG_WORKERTHREADS
 create_mmgc_threads(core);
 #endif
