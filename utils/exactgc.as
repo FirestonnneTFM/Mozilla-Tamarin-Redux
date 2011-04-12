@@ -833,13 +833,14 @@ function readFiles(files)
             if (gcIndex == -1 && cppIndex == -1 && nativeIndex == -1)
                 continue;
 
-            errorContext = "On " + filename + " line " + lineno;
+            // The start we found above may be inside a comment.  Here we handle
+            // line comments; it would be better if we could handle block comments too.
+            // Bugzilla 649333 tracks the block comment issue.
+        
+            if (line.match(/^\s*\/\//))
+                continue;
 
-            // For line matching we match only at the start of the
-            // line after taking the substring starting at the
-            // known-good index.  This yields the same performance as
-            // using a global regex and setting lastIndex to indicate
-            // where we want to start matching.
+            errorContext = "On " + filename + " line " + lineno;
 
             if (cppIndex >= 0) {
                 // CPP macro?
@@ -856,7 +857,11 @@ function readFiles(files)
                 // lexicographically so clauses may become reorganized on output; this does not lead
                 // to bugs but makes the code confusing to read.
 
-                if ((result = (/^#\s*(ifdef|ifndef|if|elif|else|endif|define)/).exec(line.substring(cppIndex))) != null) {
+                // Match the whole line to make it more likely to weed out lines inside block comments,
+                // for example we'll catch the typical column of asterisks inside a block comment this way.
+                // It's heuristic; bugzilla 649333 tracks the problem.
+
+                if ((result = (/^\s*#\s*(ifdef|ifndef|if|elif|else|endif|define)/).exec(line)) != null) {
                     var rest = sanitizeCondition(line.substring(cppIndex + result[0].length));
                     var directive = result[1];
                     switch (directive) {
@@ -899,6 +904,12 @@ function readFiles(files)
                     }
                 }
             }
+
+            // For line matching of GC_ directives we match only at
+            // the start of the line after taking the substring
+            // starting at the known-good index.  This yields the same
+            // performance as using a global regex and setting
+            // lastIndex to indicate where we want to start matching.
 
             if (gcIndex >= 0) {
                 // C++ annotations.
