@@ -41,6 +41,9 @@ shell_BASENAME = avmshell
 shell_INCLUDES = -I$(srcdir) -I$(topsrcdir)/extensions
 shell_DEFINES = -DAVMPLUS_SHELL
 shell_STATIC_LIBRARIES = zlib MMgc avmplus vmbase
+ifeq (1,$(ENABLE_AOT))
+shell_STATIC_LIBRARIES += aotstubs aot
+endif
 shell_DIR := $(curdir)/
 shell_EXTRA_CPPFLAGS := $(AVMSHELL_CPPFLAGS)
 shell_EXTRA_LDFLAGS := $(AVMSHELL_LDFLAGS)
