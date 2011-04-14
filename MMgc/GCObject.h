@@ -142,6 +142,11 @@ namespace MMgc
         {
             GC::WriteBarrier(address, value);
         }
+
+        REALLY_INLINE static void WriteBarrier_dtor(void **address)
+        {
+            *address = NULL;
+        }
         
         // These are noops overridden by RCObject to do the right thing.
         REALLY_INLINE void IncrementRef() {}
@@ -241,6 +246,11 @@ namespace MMgc
             GC::WriteBarrier(address, value);
         }
 
+        REALLY_INLINE static void WriteBarrier_dtor(void **address)
+        {
+            *address = NULL;
+        }
+        
         // These are noops overridden by RCObject to do the right thing.
         REALLY_INLINE void IncrementRef() {}
         REALLY_INLINE void DecrementRef() {}
@@ -512,6 +522,11 @@ namespace MMgc
         REALLY_INLINE static void WriteBarrier(void **address, void *value)
         {
             GC::WriteBarrierRC(address, value);
+        }
+
+        REALLY_INLINE static void WriteBarrier_dtor(void **address)
+        {
+            GC::WriteBarrierRC_dtor(address);
         }
 
         REALLY_INLINE RCObject()
