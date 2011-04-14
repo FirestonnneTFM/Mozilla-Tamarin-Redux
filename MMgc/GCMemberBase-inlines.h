@@ -95,10 +95,7 @@ namespace MMgc
     template<class T>
     REALLY_INLINE GCMemberBase<T>::~GCMemberBase()
     {
-        if (this->t)
-        {
-            set(0);
-        }
+        T::WriteBarrier_dtor((void**)&(this->t));
     }
 
     template<class T>
