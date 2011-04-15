@@ -39,6 +39,7 @@
 namespace avmplus {
 #ifdef VMCFG_SELFTEST
 extern void create_avmplus_basics(AvmCore* core);
+extern void create_avmplus_builtins(AvmCore* core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 extern void create_avmplus_peephole(AvmCore* core);
 #endif
@@ -67,6 +68,7 @@ extern void create_vmbase_safepoints(AvmCore* core);
 extern void create_vmpi_threads(AvmCore* core);
 void SelftestRunner::createGeneratedSelftestClasses() {
 create_avmplus_basics(core);
+create_avmplus_builtins(core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 create_avmplus_peephole(core);
 #endif

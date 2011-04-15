@@ -1739,6 +1739,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\ST_avmplus_builtins.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\ST_avmplus_peephole.cpp"
 				>
 			</File>
