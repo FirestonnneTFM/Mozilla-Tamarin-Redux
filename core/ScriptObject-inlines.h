@@ -105,7 +105,7 @@ REALLY_INLINE InlineHashtable* ScriptObject::getTableNoInit() const
         HeapHashtable** hht = (HeapHashtable**)iht;
         //DictionaryObjects store pointer to HeapHashtable at
         //the hashtable offset
-        return (*hht)->get_ht();
+        return ((*hht) ? (*hht)->get_ht() : NULL);
     }
 }
 
