@@ -390,6 +390,8 @@
 		817CEE9312E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 817CEE9112E512180019E8DF /* ST_vmbase_safepoints.cpp */; };
 		81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
 		81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81EB4AFE129A55C200D1B0BB /* VMThread.cpp */; };
+		CB13ECD31358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */; };
+		CB13ECD41358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */; };
 		CBB55F66134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CBB55F65134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp */; };
 		CBB55F67134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CBB55F65134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp */; };
 		D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
@@ -939,6 +941,8 @@
 		85DEE0E5130977F300C5A33D /* extensions-tracers.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = "extensions-tracers.h"; path = "../../../generated/extensions-tracers.h"; sourceTree = SOURCE_ROOT; };
 		85DEE0E6130977F300C5A33D /* extensions-tracers.hh */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = "extensions-tracers.hh"; path = "../../../generated/extensions-tracers.hh"; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* avm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = avm; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB13ECD11358E06B00A09CBE /* ST_avmplus_builtins.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_avmplus_builtins.st; path = ../../../extensions/ST_avmplus_builtins.st; sourceTree = SOURCE_ROOT; };
+		CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_avmplus_builtins.cpp; path = ../../../extensions/ST_avmplus_builtins.cpp; sourceTree = SOURCE_ROOT; };
 		CBB55F65134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_mmfx_array.cpp; path = ../../../extensions/ST_mmgc_mmfx_array.cpp; sourceTree = SOURCE_ROOT; };
 		CBB55F68134B488E00A4D8A7 /* ST_mmgc_mmfx_array.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_mmfx_array.st; path = ../../../extensions/ST_mmgc_mmfx_array.st; sourceTree = SOURCE_ROOT; };
 		D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsPosix.cpp; path = ../../../VMPI/SpyUtilsPosix.cpp; sourceTree = SOURCE_ROOT; };
@@ -1085,6 +1089,7 @@
 		074CF4F30F3AD6A300558A5F /* sources */ = {
 			isa = PBXGroup;
 			children = (
+				CB13ECD11358E06B00A09CBE /* ST_avmplus_builtins.st */,
 				D9909EB7125BBC96007EBE1E /* ST_mmgc_575631.st */,
 				19F9615E127730530079C6E9 /* ST_mmgc_580603.st */,
 				D9909EB8125BBC96007EBE1E /* ST_mmgc_finalize_uninit.st */,
@@ -1504,6 +1509,7 @@
 				079DF99F0F3A8AAB0031D1B4 /* SelftestClasses.h */,
 				079DF9A00F3A8AAB0031D1B4 /* SelftestInit.cpp */,
 				079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */,
+				CB13ECD21358E07E00A09CBE /* ST_avmplus_builtins.cpp */,
 				079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */,
 				D9909EB4125BBC79007EBE1E /* ST_mmgc_575631.cpp */,
 				19F9614E1277300D0079C6E9 /* ST_mmgc_580603.cpp */,
@@ -2043,6 +2049,7 @@
 				817CEE9312E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
 				19A1174C133A2266003B9C38 /* LirHelper.cpp in Sources */,
 				CBB55F67134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
+				CB13ECD41358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2243,6 +2250,7 @@
 				817CEE9212E512180019E8DF /* ST_vmbase_safepoints.cpp in Sources */,
 				19A1174B133A2266003B9C38 /* LirHelper.cpp in Sources */,
 				CBB55F66134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
+				CB13ECD31358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
