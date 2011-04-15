@@ -585,10 +585,24 @@ namespace MMgc
 
         /**
          * Causes an immediate stop-the-world garbage collection (or finishes any
-         * incremental collection underway).
+         * incremental collection underway). See comments above the Collect(double) method.
          */
-        void Collect(bool scanStack=true);
+        void Collect(bool scanStack=true, bool okToShrinkHeapTarget=true);
 
+        /**
+         * Causes an immediate stop-the-world garbage collection (or finishes any
+         * incremental collection underway) if the fraction of the allocation budget
+         * used is greater than or equal to allocationBudgetFractionUsed.
+         *
+         * The parameter allocationBudgetFractionUsed will be pinned to the range [0.25,1].
+         *
+         * The heap target size will *not* be reduced after this collection even if it
+         * would normally have been reduced based on live storage.  The reason is that
+         * this call is used to help schedule GC pauses but should otherwise not impact
+         * GC policy more than absolutely necessary.
+         */
+        void Collect(double allocationBudgetFractionUsed);
+        
         /**
          * Do a full collection at the next MMGC_GCENTER macro site
          */
@@ -1462,7 +1476,7 @@ namespace MMgc
 
         GCMarkStack m_incrementalWork;
         void StartIncrementalMark();
-        void FinishIncrementalMark(bool scanStack);
+        void FinishIncrementalMark(bool scanStack, bool okToShrinkHeapTarget=true);
 
         GCMarkStack m_barrierWork;
         void CheckBarrierWork();

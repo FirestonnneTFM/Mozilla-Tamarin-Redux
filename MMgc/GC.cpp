@@ -417,7 +417,7 @@ namespace MMgc
         VMPI_lockDestroy(&m_rootListLock);
     }
 
-    void GC::Collect(bool scanStack)
+    void GC::Collect(bool scanStack, bool okToShrinkHeapTarget)
     {
         GCAssertMsg(!scanStack || onThread(), "Full collection with stack scan requested however the GC isn't associated with a thread, missing MMGC_GCENTER macro.");
 
@@ -430,7 +430,7 @@ namespace MMgc
         if(!marking)
             StartIncrementalMark();
         if(marking)
-            FinishIncrementalMark(scanStack);
+            FinishIncrementalMark(scanStack, okToShrinkHeapTarget);
 
 #ifdef _DEBUG
         // Dumping the stack trace at GC time can be very helpful with stack walk bugs
@@ -441,6 +441,18 @@ namespace MMgc
 #endif
 
         policy.fullCollectionComplete();
+    }
+
+    void GC::Collect(double allocationBudgetFractionUsed)
+    {
+        if (allocationBudgetFractionUsed < 0.25) allocationBudgetFractionUsed = 0.25;
+        if (allocationBudgetFractionUsed > 1.0) allocationBudgetFractionUsed = 1.0;
+
+        // Spec says "if the parameter exceeds the fraction used ..."
+        if (policy.queryAllocationBudgetFractionUsed() <= allocationBudgetFractionUsed)
+            return;
+
+        GC::Collect(true, false);
     }
 
     REALLY_INLINE void GC::Push_StackMemory(const void* p, uint32_t size, const void* baseptr)
@@ -2877,7 +2889,7 @@ namespace MMgc
         }
     }
 
-    void GC::FinishIncrementalMark(bool scanStack)
+    void GC::FinishIncrementalMark(bool scanStack, bool okToShrinkHeapTarget)
     {
         // Don't finish an incremental mark (i.e., sweep) if we
         // are in the midst of a ZCT reap.
@@ -2955,7 +2967,7 @@ namespace MMgc
         GCAssert(m_incrementalWork.Count() == 0);
         GCAssert(m_barrierWork.Count() == 0);
 
-        policy.signal(GCPolicyManager::END_FinalizeAndSweep);   // garbage collection is finished
+        policy.signal(okToShrinkHeapTarget ? GCPolicyManager::END_FinalizeAndSweep : GCPolicyManager::END_FinalizeAndSweepNoShrink);   // garbage collection is finished
 #ifdef MMGC_MEMORY_PROFILER
         if(heap->Config().autoGCStats)
             DumpPauseInfo();

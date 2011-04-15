@@ -314,6 +314,8 @@ namespace avmshell
 
         void disposeXML(XMLObject *xmlObject);
 
+        void pauseForGCIfCollectionImminent(double imminence);
+
         GC_NO_DATA(SystemClass)
 
         DECLARE_SLOTS_SystemClass;
