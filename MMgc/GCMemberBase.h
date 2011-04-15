@@ -86,12 +86,8 @@ namespace MMgc
         void operator=(const GCRef<T2>& other);
 
         //  Overload the T* assignment operator so that we can set GCMember's directly to NULL.
-        //  The "Clear" method is another way to do this.
         void operator=(T* tNew);
         
-        //  Sets the reference to NULL.  Syntactically the same as assigning the member ref to NULL
-        //  GCMember<T> obj = (T*)NULL;
-        void Clear();
     };
 }
 

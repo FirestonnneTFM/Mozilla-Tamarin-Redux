@@ -118,11 +118,6 @@ namespace MMgc
         set(tNew);
     }
 
-    template<class T>
-    REALLY_INLINE void GCMemberBase<T>::Clear()
-    {
-        set(0);
-    }
 }
 
 #endif /* __GCMemberBase_inlines__ */
