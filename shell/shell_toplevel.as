@@ -116,6 +116,21 @@ package avmplus
         public native static function get apiVersion():int;
 
         public native static function disposeXML(xml:XML):void;
+
+        /**
+         * Suggest to the garbage collector that if collector's imminence
+         * exceeds imminence parameter then the collector should finish
+         * the incremental collection cycle.  Doing so may incur a pause.
+         *
+         * @param imminence  A number between 0 and 1 where 0 means less imminent and 1 means most imminent
+         *
+         * @note The API is provided to allow the program to help the GC schedule GC pauses, thereby
+         * working around a weakness in the garbage collector: though the GC is incremental, there is
+         * still the chance of longer-than-desired pauses in some situations.  Scheduling those pauses
+         * at points where the user won't notice or won't care (program phase transitions, say)
+         * makes for a smoother user experience.
+         */
+        public static native function pauseForGCIfCollectionImminent(imminence:Number=0.75): void;
     }
 
     [native(cls="::avmshell::FileClass", methods="auto", construct="none")]

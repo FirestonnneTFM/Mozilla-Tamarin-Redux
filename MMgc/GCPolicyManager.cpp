@@ -156,6 +156,8 @@ namespace MMgc
         , T(1.0-(1.0/L_actual))
         , G(heap->Config().gcEfficiency)
         , X(heap->Config().gcLoadCeiling)
+        , H_previous(0)
+        , majorAllocationBudget(0)
         , remainingMajorAllocationBudget(0)
         , minorAllocationBudget(0)
         , remainingMinorAllocationBudget(0)
@@ -313,7 +315,7 @@ namespace MMgc
     // Called at the start
     void GCPolicyManager::adjustPolicyInitially()
     {
-        remainingMajorAllocationBudget = double(lowerLimitCollectionThreshold()) * double(GCHeap::kBlockSize);
+        remainingMajorAllocationBudget = majorAllocationBudget = double(lowerLimitCollectionThreshold()) * double(GCHeap::kBlockSize);
 
         if (gc->incremental)
             remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
@@ -326,9 +328,14 @@ namespace MMgc
     }
 
     // Called when a collection ends
-    void GCPolicyManager::adjustPolicyForNextMajorCycle()
+    void GCPolicyManager::adjustPolicyForNextMajorCycle(bool okToShrinkHeap)
     {
         double H = double(gc->GetBytesInUse() + dependentAllocation);
+
+        if (!okToShrinkHeap && H < H_previous)
+            H = H_previous;
+        
+        H_previous = H;
 
         // Compute L_actual, which takes into account how much time we spent in GC
         // during the last cycle
@@ -336,7 +343,7 @@ namespace MMgc
 
         // The budget is H(L-1), with a floor
         double remainingBeforeGC = double(lowerLimitCollectionThreshold()) * double(GCHeap::kBlockSize) - H;
-        remainingMajorAllocationBudget = H * (L_actual - 1.0);
+        remainingMajorAllocationBudget = majorAllocationBudget = H * (L_actual - 1.0);
         if (remainingMajorAllocationBudget < remainingBeforeGC)
             remainingMajorAllocationBudget = remainingBeforeGC;
 
@@ -522,8 +529,13 @@ namespace MMgc
         }
 
 #ifdef DEBUG
-        if (start_event != (PolicyEvent)(ev - 1))
-            GCDebugMsg(true, "Should have had a matching start_event but instead had start_event=%d, ev=%d\n", (int)start_event, (int)ev);
+        {
+            PolicyEvent ev0 = ev;
+            if (ev0 == END_FinalizeAndSweepNoShrink)
+                ev0 = END_FinalizeAndSweep;
+            if (start_event != (PolicyEvent)(ev0 - 1))
+                GCDebugMsg(true, "Should have had a matching start_event but instead had start_event=%d, ev=%d\n", (int)start_event, (int)ev0);
+        }
 #endif
         start_event = NO_EVENT;
 
@@ -561,6 +573,7 @@ namespace MMgc
                 endAdjustingR();
                 break;
             case END_FinalizeAndSweep:
+            case END_FinalizeAndSweepNoShrink:
                 countFinalizeAndSweep++;
                 timeFinalizeAndSweep += elapsed;
                 timeMaxFinalizeAndSweep = max(timeMaxFinalizeAndSweep, elapsed);
@@ -575,13 +588,14 @@ namespace MMgc
             timeInLastCollection += elapsed;
 
 #ifdef MMGC_POLICY_PROFILING
-        if (summarizeGCBehavior() && ev == END_FinalizeAndSweep)
+        bool endOfCollection = (ev == END_FinalizeAndSweep || ev == END_FinalizeAndSweepNoShrink);
+        if (summarizeGCBehavior() && endOfCollection)
             PrintGCBehaviorStats();
 #endif // MMGC_POLICY_PROFILING
 #ifdef MMGC_POLICY_PROFILING
         // Need to clear these before any writes can occur, so that means right here: if earlier,
         // we'd not have them for reporting.
-        if (ev == END_FinalizeAndSweep) {
+        if (endOfCollection) {
             for ( size_t i=0 ; i < ARRAY_SIZE(barrierStageTotal) ; i++ ) {
                 barrierStageTotal[i] += barrierStageLastCollection[i];
                 barrierStageLastCollection[i] = 0;
@@ -605,7 +619,10 @@ namespace MMgc
                 adjustPolicyForNextMinorCycle();
                 break;
             case END_FinalizeAndSweep:
-                adjustPolicyForNextMajorCycle();
+                adjustPolicyForNextMajorCycle(true);
+                break;
+            case END_FinalizeAndSweepNoShrink:
+                adjustPolicyForNextMajorCycle(false);
                 break;
         }
     }
@@ -819,5 +836,13 @@ namespace MMgc
         if(exact == 0)
             return 0;
         return uint32_t(exact * 100 / (exact+conserv));
+    }
+    
+    double GCPolicyManager::queryAllocationBudgetFractionUsed()
+    {
+        double d = (remainingMajorAllocationBudget + remainingMinorAllocationBudget) / majorAllocationBudget;
+        if (d < 0) d = 0;
+        if (d > 1) d = 1;
+        return 1 - d;
     }
 }

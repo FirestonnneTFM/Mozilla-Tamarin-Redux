@@ -150,18 +150,20 @@ namespace MMgc
         enum PolicyEvent
         {
             NO_EVENT,
-            START_StartIncrementalMark, // also, start of garbage collection
+            START_StartIncrementalMark,     // also, start of garbage collection
             END_StartIncrementalMark,
             START_IncrementalMark,
             END_IncrementalMark,
             START_FinalRootAndStackScan,
             END_FinalRootAndStackScan,
             START_FinalizeAndSweep,
-            END_FinalizeAndSweep,       // also, end of garbage collection
+            END_FinalizeAndSweep,           // also, end of garbage collection
+            END_FinalizeAndSweepNoShrink,   // also, end of garbage collection
             START_ReapZCT,
             END_ReapZCT
         };
 
+           
         /**
          * Situation: a GC event corresponding to one of the PolicyEvent values occurs.
          * Tell the policy manager about it.
@@ -336,6 +338,11 @@ namespace MMgc
          */
         uint32_t queryExactPercentage();
 
+        /**
+         * Return the fraction [0,1] of allocation budget used.
+         */
+        double queryAllocationBudgetFractionUsed();
+
         // ----- Public data --------------------------------------
 
         // Elapsed time (in ticks) for various collection phases, and the maximum phase time
@@ -432,7 +439,7 @@ namespace MMgc
         // Called from the policy event handler to compute the GC policy for the next
         // major collection cycle (from the end of one FinishIncrementalMark to the start
         // of the next one)
-        void adjustPolicyForNextMajorCycle();
+        void adjustPolicyForNextMajorCycle(bool okToShrinkHeap);
 
         // Called from the policy event handler to compute the GC policy for the next
         // minor collection cycle (from the end of one IncrementalMark to the start of the
@@ -567,6 +574,13 @@ namespace MMgc
 
         // largest multiple of a selected L_ideal to which L_actual can grow (unless 0, which means unlimited)
         double X;
+
+        // Value of the heap size, H, as computed at the beginning of the last major cycle
+        double H_previous;
+
+        // The allocation budget for the major GC cycle.  This variable remains constant throughout
+        // the major cycle.
+        double majorAllocationBudget;
 
         // the remaining allocation budget for the major GC cycle.  (This can go negative
         // and the variable must accomodate negative values.  It's not frequently accessed.)

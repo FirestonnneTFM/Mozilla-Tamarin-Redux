@@ -274,6 +274,11 @@ namespace avmshell
         if(xmlObject)
             xmlObject->dispose();
     }
+
+    void SystemClass::pauseForGCIfCollectionImminent(double imminence)
+    {
+        core()->GetGC()->Collect(imminence);
+    }
     
     /*static*/ void FASTCALL CheckBaseClass::preCreateInstanceCheck(ClassClosure* cls)
     {
