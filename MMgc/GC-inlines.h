@@ -441,6 +441,7 @@ namespace MMgc
         GCAssert(GetGC(realptr)->IsPointerToGCObject(realptr));
         return GetGCBits(realptr) & kVirtualGCTrace;
 #else
+        (void)userptr;
         return 0;
 #endif
     }
