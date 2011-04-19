@@ -277,6 +277,11 @@ namespace avmshell
 
     void SystemClass::pauseForGCIfCollectionImminent(double imminence)
     {
+        if( MathUtils::isNaN(imminence) ||
+            MathUtils::isInfinite(imminence) ||
+            imminence < 0 ||
+            imminence > 1 )
+            toplevel()->throwArgumentError(kInvalidArgumentError);
         core()->GetGC()->Collect(imminence);
     }
     

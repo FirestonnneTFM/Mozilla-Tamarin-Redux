@@ -34,37 +34,73 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-package {
-
-   import avmplus.*;      // System class in the avmshell
-   import flash.system.*; // System class in the flash player
-
-   class Node 
-   {
-       var left:Node, right:Node;
-       var i:int, j:int;
-       function Node(l:Node = null, r:Node = null) { left = l; right = r; }
-   }
-
-   var fractions = [ 0.25, 0.5, 0.75, 1.0 ];
-   for each ( var f in fractions ) {
-       trace("starting pauseForGCIfCollectionImminent test @ " + f);
-
-       var hits = 0;
-       var a = [];
-       for (var i=0;i<1000;i++) {
-           for ( var j=0 ; j < 1000 ; j++ )
-               a[0] = 3.14159 + i*j; // compute a Number and store it in a * location to box it
-           var before = System.totalMemory - System.freeMemory;
-           System.pauseForGCIfCollectionImminent(f);
-           var after = System.totalMemory - System.freeMemory;
-           if (after < before)
-               hits++;
-           if (((i + 1) % 100) == 0)
-               trace("Hits: " + hits);
-       }
-       
-       trace("pauseForGCIfCollectionImminent test @ " + f + " " + ((hits > 0) == (f < 1.0) ? "PASSED!" : "FAILED!"));
-   }
+try {
+    import avmplus. * ; // System class in the avmshell
+} catch (e) {
+    import flash.system. * ; // System class in the flash player
 }
+
+var SECTION = "System::pauseForGCIfCollectionImminent";
+var VERSION = "";
+startTest();
+var TITLE = "Test pauseForGCIfCollectionImminent api";
+
+
+class Node {
+    var left: Node, right: Node;
+    var i: int, j: int;
+
+    function Node(l: Node = null,
+    r: Node = null) {
+        left = l;
+        right = r;
+    }
+}
+
+var fractions = [Number.MIN_VALUE, 0, -0, 0.2499999, 0.25, 0.5, 0.75, 1.0];
+for each(var f in fractions) {
+    trace("starting pauseForGCIfCollectionImminent test @ " + f);
+
+    var hits = 0;
+    var a = [];
+    for (var i = 0; i < 1000; i++) {
+        for (var j = 0; j < 1000; j++)
+        a[0] = 3.14159 + i * j; // compute a Number and store it in a * location to box it
+        var before = System.totalMemory - System.freeMemory;
+        System.pauseForGCIfCollectionImminent(f);
+        var after = System.totalMemory - System.freeMemory;
+        
+        if (after < before)
+            hits++;
+        if (((i + 1) % 100) == 0)
+            trace("Hits: " + hits);
+    }
+
+    AddTestCase("pauseForGCIfCollectionImminent test f=" + f + " : hits="+hits,
+                true,
+                ((hits > 0) == (f < 1.0)));
+}
+
+// Error cases
+if (playerType == 'AVMPlus') {
+    expected_error = "ArgumentError: Error #1508";
+} else {
+    expected_error = "ArgumentError: Error #2004";
+}
+
+var error_cases = [NaN, undefined, Number.NEGATIVE_INFINITY,
+                   -1, 1.000000001, 10000, Number.MAX_VALUE,
+                   Number.POSITIVE_INFINITY];
+
+for each(var ec in error_cases) {
+    error = "no error";
+    try {
+        System.pauseForGCIfCollectionImminent(ec);
+    } catch (err) {
+        error = err.toString().substr(0, expected_error.length);
+    }
+    AddTestCase("pauseForGCIfCollectionImminent error - " + ec,
+                expected_error, error);
+}
+
+test();
