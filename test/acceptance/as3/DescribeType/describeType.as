@@ -39,6 +39,7 @@
 package {
 
 	import avmplus.*;
+    import flash.utils.*;
 	
 	public namespace ns = "some_ns"
 	public namespace ns2 = "another_ns"
