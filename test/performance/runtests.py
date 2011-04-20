@@ -150,6 +150,9 @@ class PerformanceRuntest(RuntestBase):
         # Load the root testconfig file
         self.settings, self.directives = self.parseTestConfig(self.testconfig)
         self.tests = self.getTestsList(self.args)
+        if self.rebuildtests:
+            self.rebuildTests()
+            exit()
         # Load root .asc_args and .java_args files
         self.parseRootConfigFiles()
         self.loadMetricInfo()
