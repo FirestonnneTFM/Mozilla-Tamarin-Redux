@@ -1134,6 +1134,7 @@ class RuntestBase(object):
             child.expect("\(ash\)")
 
             for test in tests:
+                self.js_print('compiling %s' % test)
                 if test.endswith(self.abcasmExt):
                     self.compile_test(test)
                 elif test.endswith(self.executableExtensions):
