@@ -213,7 +213,6 @@ regress/bug_515935, .*,, ats_skip, test purposefully causes player OOM
 regress/security/bug_441280, .*,, ats_skip, uses avmplus::Domain
 as3/ShellClasses/.*, .*,, ats_skip, Tests avmplus ShellClasses
 as3/sampling/.*, .*,, ats_skip, sampling tests
-as3/DescribeType/.*, .*,, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=520082
 ecma3/Exceptions/exception_011_rt, .*,, ats_skip, test purposefully throws an uncaught error
 mmgc/.*, .*,, ats_skip, mmgc tests
 abcasm/.*, .*,, ats_skip, abcasm tests
