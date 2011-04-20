@@ -284,7 +284,7 @@ def test(vmlist, avmshell_args, test_args):
 def usage(stat):
     print('usage: %s [hqf]' % basename(argv[0]))
     print(' -h --help        print this message')
-    print('    --buildfile=  specify file with list of vms to compare, default is "Buildfile"')
+    print('    --buildfile=  specify file with list of vms to compare, default is "avmdiff.cfg"')
     print('                  MUST be defined using an equal (=) sign after --buildfile')
     print(' -q --quiet       if vms agree, print "PASSED!" and return 0 instead of the vm output')
     print(' -v --verbose     print extra info for diagnosing problems')
