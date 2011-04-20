@@ -170,6 +170,9 @@ class Errors
         public static const kVectorFixedError                 = 1126;
         public static const kTypeAppOfNonParamType            = 1127;
         public static const kWrongTypeArgCountError           = 1128;
+        public static const kJSONCyclicStructure              = 1129;
+        public static const kJSONInvalidReplacer              = 1131;
+        public static const kJSONInvalidParseInput            = 1132;
         public static const kFileOpenError                    = 1500;
         public static const kFileWriteError                   = 1501;
         public static const kScriptTimeoutError               = 1502;

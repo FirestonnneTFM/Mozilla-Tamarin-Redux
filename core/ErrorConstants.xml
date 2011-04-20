@@ -626,7 +626,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Cannot change the length of a fixed Vector.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Type application attempted on a non-parameterized type.</error>
   <error id="1128" label="kWrongTypeArgCountError">Incorrect number of type parameters for %1. Expected %2, got %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">Cyclic structure cannot be converted to JSON string.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">Replacer argument to JSON stringifier must be an array or a two parameter function.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Invalid JSON parse input.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">Error occurred opening file %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Error occurred writing to file %1.

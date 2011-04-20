@@ -92,5 +92,11 @@ dynamic public class Dictionary
     {
         init(weakKeys);
     }
+
+    // Note: clients are free to replace with method returning non-string
+    prototype.toJSON = function (k:String):* { return "Dictionary"; }
+
+    // Bug 651641: we do not want toJSON enumerated.
+    _dontEnumPrototype(prototype);
 };
 }

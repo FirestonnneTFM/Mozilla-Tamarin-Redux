@@ -156,6 +156,7 @@ namespace avmplus
     class UIntVectorObject;
     class ObjectVectorObject;
     class Java;
+    class JSONClass;
     class MathClass;
     class MathUtils;
     class MethodClosure;
@@ -314,6 +315,7 @@ struct ABCInfo;
 #include "Toplevel.h"
 #include "VectorClass.h"
 #include "AbcParser.h"
+#include "JSONClass.h"
 #include "RegExpClass.h"
 #include "RegExpObject.h"
 #include "XMLClass.h"
