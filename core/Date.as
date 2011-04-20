@@ -166,6 +166,18 @@ package
             return d.AS3::toUTCString()
         }
 
+        // Note: this is not ES5 compliant, because we do not have a
+        // toISOString method in Date for toJSON to dynamically lookup.  The
+        // most obvious/useful choice made here to produce an output that our
+        // Date constructor can parse; i.e., AS3::toString().
+        //
+        // Note: clients are free to replace with method returning non-string
+        prototype.toJSON = function(k:String):*
+        {
+            var d:Date = this;
+            return d.AS3::toString();
+        }
+
         prototype.getUTCFullYear = function():Number
         {
             var d:Date = this

@@ -313,6 +313,107 @@ private:
 };
 
 //-----------------------------------------------------------
+// JSON
+//-----------------------------------------------------------
+class JSONObject : public avmplus::ScriptObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::JSONClass;
+    REALLY_INLINE explicit JSONObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit JSONObject(const JSONObject&); // unimplemented
+    void operator=(const JSONObject&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// Walker
+//-----------------------------------------------------------
+class WalkerObject : public avmplus::ScriptObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    REALLY_INLINE avmplus::FunctionObject* get_reviver() const { return m_slots_WalkerObject.m_reviver; }
+    REALLY_INLINE void set_reviver(avmplus::FunctionObject* newVal) { m_slots_WalkerObject.m_reviver = newVal; }
+private:
+    avmplus::NativeID::avmplus_WalkerObjectSlots m_slots_WalkerObject;
+protected:
+    friend class avmplus::WalkerClass;
+    REALLY_INLINE explicit WalkerObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ScriptObject(ivtable, delegate) {}
+private:
+    explicit WalkerObject(const WalkerObject&); // unimplemented
+    void operator=(const WalkerObject&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// Walker$
+//-----------------------------------------------------------
+class WalkerClass : public avmplus::ClassClosure
+{
+public:
+    static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
+public:
+    static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*);
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+public:
+    REALLY_INLINE GCRef<avmplus::WalkerObject> constructObject(GCRef<avmplus::FunctionObject> arg1)
+    {
+        avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(1, args);
+        return GCRef<avmplus::WalkerObject>((avmplus::WalkerObject*)(AvmCore::atomToScriptObject(result)));
+    }
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::WalkerObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::WalkerObject>((avmplus::WalkerObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::WalkerObject> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::WalkerObject>((avmplus::WalkerObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::WalkerObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::WalkerObject>((avmplus::WalkerObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::WalkerObject> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::WalkerObject>((avmplus::WalkerObject*)(AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit WalkerClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit WalkerClass(const WalkerClass&); // unimplemented
+    void operator=(const WalkerClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
 // flash.utils::CompressionAlgorithm
 //-----------------------------------------------------------
 class CompressionAlgorithmObject : public avmplus::ScriptObject

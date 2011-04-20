@@ -271,6 +271,9 @@ namespace avmplus
             kVectorFixedError                               = 1126,
             kTypeAppOfNonParamType                          = 1127,
             kWrongTypeArgCountError                         = 1128,
+            kJSONCyclicStructure                            = 1129,
+            kJSONInvalidReplacer                            = 1131,
+            kJSONInvalidParseInput                          = 1132,
             kFileOpenError                                  = 1500,
             kFileWriteError                                 = 1501,
             kScriptTimeoutError                             = 1502,
@@ -292,7 +295,7 @@ namespace avmplus
         // Error message strings only in non-stubbed DEBUGGER builds.
         #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
         const int kLanguages = LANG_count;
-        const int kNumErrorConstants = 138;
+        const int kNumErrorConstants = 141;
         extern const char* errorConstants[kLanguages][kNumErrorConstants];
         extern int errorMappingTable[2*kNumErrorConstants];
         extern LangName languageNames[kLanguages];

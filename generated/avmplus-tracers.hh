@@ -700,6 +700,32 @@ bool IntVectorObject::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
 
 
 #ifdef DEBUG
+MMgc::GCTracerCheckResult JSONClass::gcTraceOffsetIsTraced(uint32_t off) const
+{
+    MMgc::GCTracerCheckResult result;
+    (void)off;
+    (void)result;
+    if((result = ClassClosure::gcTraceOffsetIsTraced(off)) != MMgc::kOffsetNotFound)
+        return result;
+    return MMgc::kOffsetNotFound;
+}
+#endif // DEBUG
+
+bool JSONClass::gcTrace(MMgc::GC* gc, size_t _xact_cursor)
+{
+    (void)gc;
+    (void)_xact_cursor;
+#ifndef GC_TRIVIAL_TRACER_JSONClass
+    m_slots_JSONClass.gcTracePrivateProperties(gc);
+#endif
+    ClassClosure::gcTrace(gc, 0);
+    (void)(avmplus_ClassClosure_isExactInterlock != 0);
+    return false;
+}
+
+
+
+#ifdef DEBUG
 MMgc::GCTracerCheckResult MathClass::gcTraceOffsetIsTraced(uint32_t off) const
 {
     MMgc::GCTracerCheckResult result;

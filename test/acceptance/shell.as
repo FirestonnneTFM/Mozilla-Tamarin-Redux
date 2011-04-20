@@ -1309,3 +1309,39 @@ function singleQuote(text)
 {
   return CHAR_QT + text + CHAR_QT;
 }
+
+function removeExceptionDetail(s:String) {
+    var fnd=s.indexOf(" ");
+    if (fnd>-1) {
+        if (s.indexOf(':',fnd)>-1) {
+                s=s.substring(0,s.indexOf(':',fnd));
+        }
+    }
+    return s;
+}
+
+function sortObject(o:Object) {
+    var keys=[];
+    for ( key in o ) {
+        if (o==undefined) {
+           continue;
+        }
+        keys[keys.length]=key;
+    }
+    keys.sort();
+    var ret="{";
+    for (i in keys) {
+        key=keys[i];
+        value=o[key];
+        if (value is String) {
+            value='"'+value+'"';
+        } else if (value is Array) {
+            value='['+value+']';
+        } else if (value is Object) {
+        }
+        ret += '"'+key+'":'+value+",";
+    }
+    ret=ret.substring(0,ret.length-1);
+    ret+="}";
+    return ret;
+}
