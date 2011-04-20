@@ -64,7 +64,7 @@ for each(var f in fractions) {
     var hits = 0;
     var a = [];
     for (var i = 0; i < 1000; i++) {
-        for (var j = 0; j < 1000; j++)
+        for (var j = 0; j < 4000; j++)
         a[0] = 3.14159 + i * j; // compute a Number and store it in a * location to box it
         var before = System.totalMemory - System.freeMemory;
         System.pauseForGCIfCollectionImminent(f);
