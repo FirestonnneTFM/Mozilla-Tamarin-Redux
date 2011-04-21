@@ -285,5 +285,6 @@ regress/bug_555612,             AOT ,, skip, AOT catches Verify errors at compil
 # MMgc
 ###########
 mmgc/outofmemory , (.*-Dgcthreshold|.*-Dverifyonly) ,, skip , Threshold test takes too long to run out of mem
+mmgc/pauseForGCIfCollectionImminent, arm-android-tvm-debug,, skip, Test takes too long to run on debug android shell
 
 
