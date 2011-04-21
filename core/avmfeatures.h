@@ -88,6 +88,7 @@
 #undef VMCFG_LOOKUP_CACHE
 #undef VMCFG_METHODENV_IMPL32
 #undef FEATURE_NANOJIT
+#undef VMCFG_OSR
 #undef VMCFG_AOT
 #undef VMCFG_AOTSHELL
 #undef VMCFG_CDECL
@@ -374,6 +375,18 @@
  */
 #if !defined AVMFEATURE_JIT || AVMFEATURE_JIT != 0 && AVMFEATURE_JIT != 1
 #  error "AVMFEATURE_JIT must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_OSR
+ *
+ * Enables delayed JIT-compilation with on-stack replacement.
+ * The default OSR compilation strategy either compiles a method eagerly
+ * or interprets it always, thus the OSR invocation threshold must be
+ * separately configured at runtime to obtain meaningful results.
+ */
+#if !defined AVMFEATURE_OSR || AVMFEATURE_OSR != 0 && AVMFEATURE_OSR != 1
+#  error "AVMFEATURE_OSR must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -806,6 +819,11 @@
 #endif
 
 #endif
+#if AVMFEATURE_OSR
+#  if !AVMFEATURE_JIT
+#    error "AVMFEATURE_JIT is required for AVMFEATURE_OSR"
+#  endif
+#endif
 #if AVMFEATURE_AOT
 #if AVMSYSTEM_IA32+AVMSYSTEM_ARM != 1
 #  error "Exactly one of AVMSYSTEM_IA32,AVMSYSTEM_ARM must be defined."
@@ -1050,6 +1068,9 @@
 #endif
 #if AVMFEATURE_JIT
 #  define FEATURE_NANOJIT
+#endif
+#if AVMFEATURE_OSR
+#  define VMCFG_OSR
 #endif
 #if AVMFEATURE_AOT
 #  define VMCFG_AOT

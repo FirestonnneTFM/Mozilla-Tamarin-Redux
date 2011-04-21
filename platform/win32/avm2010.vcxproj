@@ -92,6 +92,7 @@
     <ClCompile Include="..\..\core\ErrorConstants.cpp" />
     <ClCompile Include="..\..\core\Exception.cpp" />
     <ClCompile Include="..\..\core\exec-jit.cpp" />
+    <ClCompile Include="..\..\core\exec-osr.cpp" />
     <ClCompile Include="..\..\core\exec-verifyall.cpp" />
     <ClCompile Include="..\..\core\exec.cpp" />
     <ClCompile Include="..\..\core\FrameState.cpp" />

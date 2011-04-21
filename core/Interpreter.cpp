@@ -41,6 +41,10 @@
 #include "avmplus.h"
 #include "Interpreter.h"
 
+#ifdef FEATURE_NANOJIT
+#   include "exec-osr.h"
+#endif
+
 #ifdef AVMPLUS_MAC
 #ifndef __GNUC__
 // inline_max_total_size() defaults to 10000.
@@ -64,10 +68,17 @@ namespace avmplus
         {
             m_frame.enter(m_core, env);
         }
+
         inline ~EnterMethodEnv()
         {
             m_frame.exit(m_core);
         }
+
+        void setCurrent()
+        {
+            m_core->currentMethodFrame = &m_frame;
+        }
+
     private:
         AvmCore* m_core;
         MethodFrame& m_frame;
@@ -255,6 +266,18 @@ namespace avmplus
     }
 
 #endif // VMCFG_DIRECT_THREADED
+
+#if defined FEATURE_NANOJIT && defined VMCFG_OSR
+#   define OSR(offset) \
+        if (OSR::countEdge(env, info, ms) &&                        \
+            OSR::execute(env, framep, ms, pc + (offset), &a1l)) {   \
+            methodFrame.setCurrent();                               \
+            a1 = a1l;                                               \
+            goto return_value_from_interpreter;                     \
+        }
+#else
+#   define OSR(i1)
+#endif
 
     Atom interpBoxed(register MethodEnv* env, register int _argc, register Atom* _atomv)
     {
@@ -1094,6 +1117,7 @@ namespace avmplus
                 if (i1 < 0) {
                     SAVE_EXPC_TARGET(i1);
                     branchCheck(core, env, interruptable);
+                    OSR(i1);
                 }
                 pc += i1;
                 NEXT;
@@ -1774,6 +1798,7 @@ namespace avmplus
                     if (i1 < 0) {
                         SAVE_EXPC_TARGET(i1);
                         branchCheck(core, env, interruptable);
+                        OSR(i1);
                     }
                     pc += i1;
                 }
@@ -1805,6 +1830,7 @@ namespace avmplus
         { \
             SAVE_EXPC_TARGET(i1); \
             branchCheck(core, env, interruptable); \
+            OSR(i1); \
         } \
         pc += i1; \
     }
@@ -1817,6 +1843,7 @@ namespace avmplus
         { \
             SAVE_EXPC_TARGET(i1); \
             branchCheck(core, env, interruptable); \
+            OSR(i1); \
         } \
         pc += i1; \
     }

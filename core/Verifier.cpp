@@ -2748,7 +2748,7 @@ namespace avmplus
         }
     }
 
-    FrameState *Verifier::getFrameState(const uint8_t* pc)
+    FrameState *Verifier::getFrameState(const uint8_t* pc) const
     {
         return blockStates ? blockStates->map.get(pc) : NULL;
     }
@@ -3004,6 +3004,7 @@ namespace avmplus
 
             // first time visiting target block
             targetChanged = true;
+            AvmAssert(!state->targetOfBackwardsBranch);
             targetState->init(state);
 
             #ifdef AVMPLUS_VERBOSE

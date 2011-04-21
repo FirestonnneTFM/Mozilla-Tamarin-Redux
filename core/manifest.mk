@@ -72,6 +72,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Exception.cpp \
   $(curdir)/exec.cpp \
   $(curdir)/exec-jit.cpp \
+  $(curdir)/exec-osr.cpp \
   $(curdir)/exec-verifyall.cpp \
   $(curdir)/FrameState.cpp \
   $(curdir)/FunctionClass.cpp \

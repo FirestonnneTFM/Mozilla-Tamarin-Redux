@@ -75,11 +75,27 @@ const int kBufferPadding = 16;
         // @warning make sure these don't collide with LC_xxx bits
     };
 
+#ifdef VMCFG_NANOJIT
+    // ABC->LIR JIT options.  This doesn't belong here, but
+    // it cannot go in CodegenLIR.h to avoid a dependency cycle.
+    struct JitConfig
+    {
+        // Generate inline fastpaths, introducing new control flow.
+        // Distinct from non-speculative inlining and specialization.
+        bool opt_inline;
+
+        // Initialize with default options.
+        JitConfig() : opt_inline(true) {}
+    };
+#endif
+
     struct Config
     {
 #ifdef VMCFG_NANOJIT
         // options for nanojit
         nanojit::Config njconfig;
+        // options for CodegenLIR
+        JitConfig jitconfig;
 #endif
 
         /**
@@ -98,6 +114,7 @@ const int kBufferPadding = 16;
         bool oldVectorMethodNames;
 
         enum Runmode runmode;
+        uint32_t osr_threshold;
 
         /**
          * If this switch is set, executing code will check the
@@ -335,6 +352,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
         unsigned bugzilla524122:1;      // Incorrect optimization for integers in numeric sort
         unsigned bugzilla526662:1;      // XMLParser stops at NUL char
+        unsigned bugzilla539094:1;      // OSR (On-Stack replacement of interpreted methods by JIT-ted methods)
         unsigned bugzilla551587:1;      // MathClass:_min() does not correctly handle -0
         unsigned bugzilla558863:1;      // in operator on bytearray throws exception for non-natural number
         unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
@@ -535,6 +553,7 @@ const int kBufferPadding = 16;
         static const bool verifyall_default;
         static const bool verifyonly_default;
         static const Runmode runmode_default;
+        static const uint32_t osr_threshold_default;
         static const bool interrupts_default;
         static const bool jitordie_default;
 
@@ -1922,6 +1941,7 @@ const int kBufferPadding = 16;
 
     private:
         friend class CodegenLIR;
+        friend class OSR;
         enum {
             IS_EXPLICIT_CODECONTEXT = 0x1,
             DXNS_NOT_NULL = 0x2,

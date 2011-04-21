@@ -67,6 +67,11 @@ def featureSettings(o):
         args += "-DAVMFEATURE_VTUNE=0 "
     if o.getBoolArg("jit"):
         args += "-DAVMFEATURE_JIT=1 -DAVMFEATURE_WORDCODE_INTERP=0 -DAVMFEATURE_AOT=0 "
+    arg = o.getBoolArg("osr")
+    if (arg == True):
+        args += "-DAVMFEATURE_OSR=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_OSR=0 "
     if o.getBoolArg("aot"):
         args += "-DAVMFEATURE_AOT=1 -DAVMFEATURE_JIT=0 -DAVMFEATURE_ABC_INTERP=0 -DAVMFEATURE_WORDCODE_INTERP=0 "
     arg = o.getBoolArg("buffer-guard")

@@ -100,6 +100,7 @@ namespace avmplus
     {
         friend class CodegenLIR;
         friend class BaseExecMgr;
+        friend class OSR;
 
     public:
         enum InitMethodStub { kInitMethodStub };
@@ -199,12 +200,14 @@ namespace avmplus
         uint32_t needRestOrArguments() const;
         uint32_t setsDxns() const;
         uint32_t isStaticInit() const;
+        uint32_t hasFailedJit() const;
         uint32_t isInterpreted() const;
         uint32_t unboxThis() const;
         uint32_t onlyUntypedParameters() const;
 
         void setUnboxThis();
         void setStaticInit();
+        void setHasFailedJit();
         void setHasExceptions();
         void setLazyRest();
         void setNeedsDxns();
@@ -310,6 +313,7 @@ namespace avmplus
         {
             const uint8_t*          body_pos;
             ExceptionHandlerTable*  exceptions;     // we write this once, in Verifier, with an explicit WB.  so no GCMember<>.
+            uint32_t                countdown;      // Counts down calls plus backedges.
     #ifdef VMCFG_LOOKUP_CACHE
             int                     lookup_cache_size;     // Number of items in lookup cache
     #endif
@@ -411,6 +415,9 @@ namespace avmplus
         // set to indicate that a function has been compiled
         // to native code by the jit compiler
         uint32_t                _isJitImpl:1;
+
+        // set to indicate that an attempted jit compilation has failed
+        uint32_t                _hasFailedJit:1;
 
         // true if execution mechanism is the interpreter
         uint32_t                _isInterpImpl:1;

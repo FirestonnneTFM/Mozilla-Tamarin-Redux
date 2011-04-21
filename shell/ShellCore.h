@@ -82,6 +82,8 @@ namespace avmshell
         Runmode runmode;                // copy to config
 #ifdef VMCFG_NANOJIT
         nanojit::Config njconfig;       // copy to config
+        avmplus::JitConfig jitconfig;   // copy to config
+        uint32_t osr_threshold;         // Invocation count to trigger JIT.
 #endif
         AvmCore::CacheSizes cacheSizes; // Default to unlimited
         const char* st_component;

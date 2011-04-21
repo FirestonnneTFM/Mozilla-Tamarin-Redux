@@ -224,6 +224,16 @@ REALLY_INLINE void MethodInfo::setKind(TraitKind kind)
         _isSetter = 1;
 }
 
+REALLY_INLINE uint32_t MethodInfo::hasFailedJit() const
+{
+    return _hasFailedJit;
+}
+
+REALLY_INLINE void MethodInfo::setHasFailedJit()
+{
+    _hasFailedJit = 1;
+}
+
 REALLY_INLINE uint32_t MethodInfo::isInterpreted() const
 {
     return _isInterpImpl;

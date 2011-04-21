@@ -1940,6 +1940,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\exec-osr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\exec-osr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\exec-verifyall.cpp"
 				>
 			</File>

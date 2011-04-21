@@ -414,6 +414,8 @@
 		D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
 		E8B532061069A1DE00ED299A /* instr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B532041069A1DE00ED299A /* instr.cpp */; };
+		FF89C9231290C6910059CA78 /* exec-osr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF89C9221290C6910059CA78 /* exec-osr.cpp */; };
+		FF89C9241290C6910059CA78 /* exec-osr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF89C9221290C6910059CA78 /* exec-osr.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -997,6 +999,8 @@
 		E8B532051069A1DE00ED299A /* instr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = instr.h; path = ../../../core/instr.h; sourceTree = SOURCE_ROOT; };
 		E8B532201069A28F00ED299A /* jit-calls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "jit-calls.h"; path = "../../../core/jit-calls.h"; sourceTree = SOURCE_ROOT; };
 		FF74129B10FD70BB0024C84E /* MathUtilsUnix-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MathUtilsUnix-inlines.h"; path = "../../unix/MathUtilsUnix-inlines.h"; sourceTree = SOURCE_ROOT; };
+		FF89C9221290C6910059CA78 /* exec-osr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "exec-osr.cpp"; path = "../../../core/exec-osr.cpp"; sourceTree = SOURCE_ROOT; };
+		FF89C9271290C6B10059CA78 /* exec-osr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "exec-osr.h"; path = "../../../core/exec-osr.h"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1205,6 +1209,8 @@
 				198CF91B11B973BD00A939C7 /* exec.h */,
 				198CF91711B973BD00A939C7 /* exec-inlines.h */,
 				198CF91811B973BD00A939C7 /* exec-jit.cpp */,
+				FF89C9221290C6910059CA78 /* exec-osr.cpp */,
+				FF89C9271290C6B10059CA78 /* exec-osr.h */,
 				198CF91911B973BD00A939C7 /* exec-verifyall.cpp */,
 				079DF7EF0F3A882D0031D1B4 /* FrameState.cpp */,
 				079DF7F00F3A882D0031D1B4 /* FrameState.h */,
@@ -2040,6 +2046,7 @@
 				D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */,
 				D939B113126E358400522895 /* ByteArrayGlue.cpp in Sources */,
 				D939B114126E358400522895 /* DataIO.cpp in Sources */,
+  				FF89C9241290C6910059CA78 /* exec-osr.cpp in Sources */,
 				19F9614F1277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
 				8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */,
@@ -2241,6 +2248,7 @@
 				D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */,
 				D939B111126E358400522895 /* ByteArrayGlue.cpp in Sources */,
 				D939B112126E358400522895 /* DataIO.cpp in Sources */,
+ 				FF89C9231290C6910059CA78 /* exec-osr.cpp in Sources */,
 				19F961501277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
 				8133F064128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */,

@@ -44,6 +44,7 @@
 #ifdef VMCFG_NANOJIT
 
 #include "CodegenLIR.h"
+#include "exec-osr.h"
 
 #if defined(WIN32) && defined(AVMPLUS_ARM)
 #include <cmnintrin.h>
@@ -718,12 +719,14 @@ namespace avmplus
     }
 #endif
 
-    CodegenLIR::CodegenLIR(MethodInfo* i, MethodSignaturep ms, Toplevel* toplevel) :
+    CodegenLIR::CodegenLIR(MethodInfo* i, MethodSignaturep ms, Toplevel* toplevel,
+                           OSR* osr_state) :
         LirHelper(i->pool()),
         info(i),
         ms(ms),
         toplevel(toplevel),
         pool(i->pool()),
+        osr(osr_state),
         driver(NULL),
         state(NULL),
         mopsRangeCheckFilter(NULL),
@@ -735,6 +738,7 @@ namespace avmplus
         interrupt_label("interrupt"),
         mop_rangeCheckFailed_label("mop_rangeCheckFailed"),
         catch_label("catch"),
+        inlineFastpath(false),
         call_cache_builder(*alloc1, *initCodeMgr(pool)),
         get_cache_builder(*alloc1, *pool->codeMgr),
         set_cache_builder(*alloc1, *pool->codeMgr),
@@ -1459,6 +1463,10 @@ namespace avmplus
 
     };
 
+    #if defined(VMCFG_OSR) && defined(DEBUG)
+    FUNCTION(FUNCADDR(OSR::checkBugCompatibility), SIG1(V, P), osr_check_bugcompatibility)
+    #endif
+
     // Generate the prolog for a function with this C++ signature:
     //
     //    <return-type> f(MethodEnv* env, int argc, void* args)
@@ -1550,6 +1558,41 @@ namespace avmplus
         this->try_to = driver->getTryTo();
         framesize = ms->frame_size();
 
+        int32_t codeLength = info->parse_code_length();
+
+        // Enable inline fastpath optimizations for sufficiently small methods.
+        //
+        // An overwhelming majority of methods in the Brightspot collection
+        // are less than 50K bytes of ABC in length, and we see that JIT
+        // times for methods of this length consistently fall in the 10ms
+        // or less range with no outliers to suggest algorithmic pathologies.
+        // The framesize limit is rather arbitrary, and is set to keep within
+        // the boundaries of available brightspot data.  Note that large methods
+        // appear more common in Alchemy-generated code, with a 500KB method
+        // in Quake, for example.  We are admittedly conservative here.
+        // We see only a modest increase in native code size with the present
+        // suite of inlining optimizations and opcode mix in the code we examined.
+        //
+        // The issue we are attempting to guard against is non-linear blowup of
+        // analysis algorithms such as deadvars() that are stressed by the introduction
+        // of many new labels and branches.  Our heuristic seeks to confine the fastpath
+        // optimization to an "envelope" for we have good empirical data, without
+        // attempting to establish its true outer limits.  Additionally, from first
+        // principles, we know that specific characteristics of the flow graph are
+        // more relevant than length alone, and even a count of the labels and branches
+        // would likely give a more precise result than overall code lenth.
+        // The preferred long-term solution is to perform actual acconting for JIT
+        // resource consumption (memory and time), and aborting when reasonable limits
+        // are exceeded.
+        //
+        if  (core->config.jitconfig.opt_inline) {
+            if (codeLength < 50000 && framesize < 1000) {
+                inlineFastpath = true;
+            } else {
+                //core->console << "disabling inline fastpaths, frame size " << framesize << " code length " << codeLength << "\n";
+            }
+        }
+
         if (info->needRestOrArguments() && info->lazyRest())
             restLocal = ms->param_count()+1;
 
@@ -1601,8 +1644,7 @@ namespace avmplus
 
         // add the VarTracker filter last because we want it to be first in line.
         lirout = varTracker = new (*alloc1) VarTracker(info, *alloc1, lirout,
-                framesize, ms->scope_base(), ms->stack_base(), restLocal,
-                info->parse_code_length());
+                framesize, ms->scope_base(), ms->stack_base(), restLocal, codeLength);
 
         // last pc value that we generated a store for
         lastPcSave = NULL;
@@ -1638,6 +1680,15 @@ namespace avmplus
         #ifdef _DEBUG
         // poison MethodFrame.dxns since it's uninitialized by default
         stp(InsConstPtr((void*)(uintptr_t)0xdeadbeef), methodFrame, offsetof(MethodFrame,dxns), ACCSET_OTHER);
+        #endif
+
+        #if defined(VMCFG_OSR) && defined(DEBUG)
+        // Check that the BugCompatibility that would be used to OSR this function,
+        // whether or not we actually did so, agrees with the value returned from
+        // currentBugCompatibility() every time the function is executed.  Note that
+        // it would be preferable to modify currentBugCompatibility() such that it is
+        // structurally impossible for this test to fail.
+        callIns(FUNCTIONID(osr_check_bugcompatibility), 1, env_param);
         #endif
 
         // allocate room for our local variables
@@ -1882,6 +1933,9 @@ namespace avmplus
 
         varTracker->initNotNull(state);
 
+        if (osr)
+            emitOsrBranch();
+
         // Generate code to initialize the object, if we are compiling an initializer.
         // This is intentionally before debugEnter(), to match interpreter behavior.
         if (info->isConstructor())
@@ -1905,6 +1959,31 @@ namespace avmplus
         }
         verbose_only( if (vbWriter) { vbWriter->flush();} )
     }
+
+#ifdef VMCFG_OSR
+    FUNCTION(FUNCADDR(OSR::adjustFrame), SIG4(B, P, P, P, P), osr_adjust_frame)
+
+    // Emit code to call OSR::adjust_frame and conditionally enter loop.
+    // Note that adjust_frame will call debugEnter if necessary, since
+    // the loop-branch will skip the normal call to debugEnter.
+    void CodegenLIR::emitOsrBranch()
+    {
+        // Compiling an OSR entry point; save FrameState at the OSR loop header,
+        // for later use by adjust_frame().
+        FrameState* osr_state = mmfx_new(FrameState(ms));
+        const FrameState* loop_state = driver->getFrameState(osr->osrPc());
+        AvmAssert(loop_state->targetOfBackwardsBranch);
+        osr_state->init(loop_state);
+        osr->setFrameState(osr_state);
+        LIns *isOSR = callIns(FUNCTIONID(osr_adjust_frame), 4,
+                methodFrame,
+                haveDebugger ? csn : InsConstPtr(0),
+                vars, tags);
+        branchToAbcPos(LIR_jt, isOSR, osr->osrPc());
+    }
+#else
+    void CodegenLIR::emitOsrBranch() { }
+#endif
 
     void CodegenLIR::emitInitializers()
     {
@@ -2064,7 +2143,9 @@ namespace avmplus
     {
         LIns* rhs = loadAtomRep(j);
         LIns* lhs = localGet(i);
+
         #ifdef VMCFG_FASTPATH_ADD_INLINE
+        if (inlineFastpath) {
             CodegenLabel fallback("fallback");
             CodegenLabel done("done");
             suspendCSE();
@@ -2077,11 +2158,13 @@ namespace avmplus
             JIT_EVENT(jit_add_a_ia_slow);
             emitLabel(done);
             resumeCSE();
-        #else
-            LIns* out = callIns(FUNCTIONID(op_add_a_ia), 3, coreAddr, lhs, rhs);
-            localSet(i, out, type);
-            JIT_EVENT(jit_add_a_ia);
+            return;
+        }
         #endif
+
+        LIns* out = callIns(FUNCTIONID(op_add_a_ia), 3, coreAddr, lhs, rhs);
+        localSet(i, out, type);
+        JIT_EVENT(jit_add_a_ia);
     }
 
     // Emit code for double + atom => atom addition.
@@ -2109,7 +2192,9 @@ namespace avmplus
     {
         LIns* lhs = loadAtomRep(i);
         LIns* rhs = localGet(j);
+
         #ifdef VMCFG_FASTPATH_ADD_INLINE
+        if (inlineFastpath) {
             CodegenLabel fallback("fallback");
             CodegenLabel done("done");
             suspendCSE();
@@ -2122,11 +2207,13 @@ namespace avmplus
             JIT_EVENT(jit_add_a_ai_slow);
             emitLabel(done);
             resumeCSE();
-        #else
-            LIns* out = callIns(FUNCTIONID(op_add_a_ai), 3, coreAddr, lhs, rhs);
-            localSet(i, out, type);
-            JIT_EVENT(jit_add_a_ai);
+            return;
+        }
         #endif
+
+        LIns* out = callIns(FUNCTIONID(op_add_a_ai), 3, coreAddr, lhs, rhs);
+        localSet(i, out, type);
+        JIT_EVENT(jit_add_a_ai);
     }
 
     // Emit code for atom + double => atom addition.
@@ -2180,7 +2267,9 @@ namespace avmplus
     {
         LIns* lhs = loadAtomRep(i);
         LIns* rhs = loadAtomRep(j);
+
         #ifdef VMCFG_FASTPATH_ADD_INLINE
+        if (inlineFastpath) {
             CodegenLabel fallback("fallback");
             CodegenLabel done("done");
             // intptr + intptr fastpath
@@ -2210,11 +2299,13 @@ namespace avmplus
             JIT_EVENT(jit_add_a_aa_slow);
             emitLabel(done);
             resumeCSE();
-        #else
-            LIns* out = callIns(FUNCTIONID(op_add_a_aa), 3, coreAddr, lhs, rhs);
-            localSet(i, atomToNativeRep(type, out), type);
-            JIT_EVENT(jit_add_a_aa);
+            return;
+        }
         #endif
+
+        LIns* out = callIns(FUNCTIONID(op_add_a_aa), 3, coreAddr, lhs, rhs);
+        localSet(i, atomToNativeRep(type, out), type);
+        JIT_EVENT(jit_add_a_aa);
     }
 
 #else /* VMCFG_FASTPATH_ADD */
@@ -3004,90 +3095,96 @@ namespace avmplus
             return promoteNumberIns(in, index);
         } else {
             // * -> Number
-#ifdef VMCFG_FASTPATH_FROMATOM
-            //     double rslt;
-            //     intptr_t val = CONVERT_TO_ATOM(arg);
-            //     if ((val & kAtomTypeMask) != kIntptrType) goto not_intptr;   # test for kIntptrType tag
-            //     # kIntptrType
-            //     rslt = double(val >> kAtomTypeSize);                         # extract integer value and convert to double
-            //     goto done;
-            // not_intptr:
-            //     if ((val & kAtomTypeMask) != kDoubleType) goto not_double;   # test for kDoubleType tag
-            //     # kDoubleType
-            //     rslt = *(val - kDoubleType);                                 # remove tag and dereference
-            //     goto done;
-            // not_double:
-            //     rslt = number(val);                                          # slow path -- call helper
-            // done:
-            //     result = rslt;
-            CodegenLabel not_intptr;
-            CodegenLabel not_double;
-            CodegenLabel done;
-            suspendCSE();
-            LIns* val = loadAtomRep(index);
-            LIns* rslt = insAlloc(sizeof(double));
-            LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
-            // kIntptrType
-            branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), not_intptr);
-            // Note that this works on 64bit platforms only if we are careful
-            // to restrict the range of intptr values to those that fit within
-            // the integer range of the double type.
-            std(p2dIns(rshp(val, AtomConstants::kAtomTypeSize)), rslt, 0, ACCSET_OTHER);
-            JIT_EVENT(jit_atom2double_fast_intptr);
-            branchToLabel(LIR_j, NULL, done);
-            emitLabel(not_intptr);
-            // kDoubleType
-            branchToLabel(LIR_jf, eqp(tag, AtomConstants::kDoubleType), not_double);
-            std(ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER), rslt, 0, ACCSET_OTHER);
-            JIT_EVENT(jit_atom2double_fast_double);
-            branchToLabel(LIR_j, NULL, done);
-            emitLabel(not_double);
-            std(callIns(FUNCTIONID(number), 1, val), rslt, 0, ACCSET_OTHER);
-            JIT_EVENT(jit_atom2double_slow);
-            emitLabel(done);
-            resumeCSE();
-            return ldd(rslt, 0, ACCSET_OTHER);
-#else
+            #ifdef VMCFG_FASTPATH_FROMATOM
+            if (inlineFastpath) {
+                //     double rslt;
+                //     intptr_t val = CONVERT_TO_ATOM(arg);
+                //     if ((val & kAtomTypeMask) != kIntptrType) goto not_intptr;   # test for kIntptrType tag
+                //     # kIntptrType
+                //     rslt = double(val >> kAtomTypeSize);                         # extract integer value and convert to double
+                //     goto done;
+                // not_intptr:
+                //     if ((val & kAtomTypeMask) != kDoubleType) goto not_double;   # test for kDoubleType tag
+                //     # kDoubleType
+                //     rslt = *(val - kDoubleType);                                 # remove tag and dereference
+                //     goto done;
+                // not_double:
+                //     rslt = number(val);                                          # slow path -- call helper
+                // done:
+                //     result = rslt;
+                CodegenLabel not_intptr;
+                CodegenLabel not_double;
+                CodegenLabel done;
+                suspendCSE();
+                LIns* val = loadAtomRep(index);
+                LIns* rslt = insAlloc(sizeof(double));
+                LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
+                // kIntptrType
+                branchToLabel(LIR_jf, eqp(tag, AtomConstants::kIntptrType), not_intptr);
+                // Note that this works on 64bit platforms only if we are careful
+                // to restrict the range of intptr values to those that fit within
+                // the integer range of the double type.
+                std(p2dIns(rshp(val, AtomConstants::kAtomTypeSize)), rslt, 0, ACCSET_OTHER);
+                JIT_EVENT(jit_atom2double_fast_intptr);
+                branchToLabel(LIR_j, NULL, done);
+                emitLabel(not_intptr);
+                // kDoubleType
+                branchToLabel(LIR_jf, eqp(tag, AtomConstants::kDoubleType), not_double);
+                std(ldd(subp(val, AtomConstants::kDoubleType), 0, ACCSET_OTHER), rslt, 0, ACCSET_OTHER);
+                JIT_EVENT(jit_atom2double_fast_double);
+                branchToLabel(LIR_j, NULL, done);
+                emitLabel(not_double);
+                std(callIns(FUNCTIONID(number), 1, val), rslt, 0, ACCSET_OTHER);
+                JIT_EVENT(jit_atom2double_slow);
+                emitLabel(done);
+                resumeCSE();
+                return ldd(rslt, 0, ACCSET_OTHER);
+            }
+            #endif
+
             return callIns(FUNCTIONID(number), 1, loadAtomRep(index));
-#endif
         }
     }
 
     LIns *CodegenLIR::emitStringCall(int index, const CallInfo *stringCall, bool preserveNull)
     {
-        // Inline fast path for string conversion.
-        // if preserveNull == false:
-        //   if ((input & kAtomTypeMask) != kStringType) || (input == kStringType))
-        //     output = stringCall (input);
-        //   else
-        //     output = input ^ kStringType;
-        //
-        // if preserveNull == true:
-        //   if (input & kAtomTypeMask) != kStringType)
-        //     output = stringCall (input);
-        //   else
-        //     output = input ^ kStringType;
-
-        CodegenLabel not_stringptr;
-        CodegenLabel done;
-        suspendCSE();
         LIns* val = loadAtomRep(index);
-        LIns* result = insAlloc(sizeof(intptr_t));
-        LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
-        // kStringType
-        branchToLabel(LIR_jf, eqp(tag, AtomConstants::kStringType), not_stringptr);
-        if (!preserveNull) {
-            // If our value is equal to kStringType, we have a null String ptr
-            branchToLabel(LIR_jt, eqp(val, AtomConstants::kStringType), not_stringptr);
-        }
-        stp(xorp(val, AtomConstants::kStringType), result, 0, ACCSET_OTHER);
-        branchToLabel(LIR_j, NULL, done);
 
-        emitLabel(not_stringptr);
-        stp(callIns(stringCall, 2, coreAddr, val), result, 0, ACCSET_OTHER);
-        emitLabel(done);
-        resumeCSE();
-        return ldp(result, 0, ACCSET_OTHER);
+        if (inlineFastpath) {
+            // Inline fast path for string conversion.
+            // if preserveNull == false:
+            //   if ((input & kAtomTypeMask) != kStringType) || (input == kStringType))
+            //     output = stringCall (input);
+            //   else
+            //     output = input ^ kStringType;
+            //
+            // if preserveNull == true:
+            //   if (input & kAtomTypeMask) != kStringType)
+            //     output = stringCall (input);
+            //   else
+            //     output = input ^ kStringType;
+            CodegenLabel not_stringptr;
+            CodegenLabel done;
+            suspendCSE();
+            LIns* result = insAlloc(sizeof(intptr_t));
+            LIns* tag = andp(val, AtomConstants::kAtomTypeMask);
+            // kStringType
+            branchToLabel(LIR_jf, eqp(tag, AtomConstants::kStringType), not_stringptr);
+            if (!preserveNull) {
+                // If our value is equal to kStringType, we have a null String ptr
+                branchToLabel(LIR_jt, eqp(val, AtomConstants::kStringType), not_stringptr);
+            }
+            stp(xorp(val, AtomConstants::kStringType), result, 0, ACCSET_OTHER);
+            branchToLabel(LIR_j, NULL, done);
+
+            emitLabel(not_stringptr);
+            stp(callIns(stringCall, 2, coreAddr, val), result, 0, ACCSET_OTHER);
+            emitLabel(done);
+            resumeCSE();
+            return ldp(result, 0, ACCSET_OTHER);
+        }
+
+        return callIns(stringCall, 2, coreAddr, val);
     }
 
     // OP_convert_s needs a null String ptr to be converted to "null"
