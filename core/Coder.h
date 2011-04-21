@@ -55,6 +55,7 @@ namespace avmplus
         virtual bool hasFrameState(const uint8_t* pc) const = 0;
         virtual int getBlockCount() const = 0;
         virtual bool hasReachableExceptions() const = 0;
+        virtual FrameState* getFrameState(const uint8_t* pc) const = 0;
     };
 
     class CodeWriter {

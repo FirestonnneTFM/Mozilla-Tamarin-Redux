@@ -54,6 +54,20 @@
 
 #include "avmplus-tracers.hh"
 
+/*
+ * TUNABLE PARAMETER: OSR_THRESHOLD_DEFAULT
+ *
+ * The number of method invocations or loop iterations to trigger compilation when OSR is enabled.
+ * A value of zero is interpreted specially, indicating that static initializers should always
+ * be interpreted and other methods compiled eagerly, identical to the policy when AVMFEATURE_OSR
+ * is not configured.  The default value may be overridden by runtime configuration, e.g.,
+ * the "-osr" option to avmshell.
+ *
+ * The present value has been set based on preliminary startup-time studies on AIR Android.
+ */
+#define OSR_THRESHOLD_DEFAULT 17
+
+
 #define AVMPLUS_STRING_DELETED ((Stringp)(1))
 
 namespace avmplus
@@ -175,6 +189,7 @@ namespace avmplus
     const bool AvmCore::verifyall_default = false;
     const bool AvmCore::verifyonly_default = false;
     const Runmode AvmCore::runmode_default = RM_mixed;
+    const uint32_t AvmCore::osr_threshold_default = OSR_THRESHOLD_DEFAULT;
     const bool AvmCore::interrupts_default = false;
     const bool AvmCore::jitordie_default = false;
 
@@ -329,6 +344,7 @@ namespace avmplus
 
         // jit flag forces use of jit-compiler instead of interpreter
         config.runmode = runmode_default;
+        config.osr_threshold = osr_threshold_default;
         config.jitordie = jitordie_default;
 
         config.interrupts = interrupts_default;
@@ -4967,6 +4983,7 @@ return the result of the comparison ToPrimitive(x) == y.
             bugzilla513018  = 1;    // parseFloat accepts illegal number syntax
             bugzilla524122  = 1;    // Incorrect optimization for integers in numeric sort
             bugzilla526662  = 1;    // XMLParser stops at NUL char
+            bugzilla539094  = 1;    // OSR (On-Stack replacement of interpreted methods by JIT-ted methods)
             bugzilla551587  = 1;    // MathClass:_min() does not correctly handle -0
             bugzilla558863  = 1;    // in operator on bytearray throws exception for non-natural number
             bugzilla585791  = 1;    // String.localeCompare with a null String object returns 0

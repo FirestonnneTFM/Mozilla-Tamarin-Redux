@@ -64,6 +64,7 @@ namespace avmplus
         scopeDepth = other->scopeDepth;
         stackDepth = other->stackDepth;
         withBase = other->withBase;
+        targetOfBackwardsBranch = other->targetOfBackwardsBranch;
         VMPI_memcpy(locals, other->locals, frameSize * sizeof(FrameValue));
     }
 }

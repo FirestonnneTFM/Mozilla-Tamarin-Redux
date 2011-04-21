@@ -70,6 +70,8 @@ namespace avmshell
         , runmode(AvmCore::runmode_default)
 #ifdef VMCFG_NANOJIT
         , njconfig()
+        , jitconfig()
+        , osr_threshold(AvmCore::osr_threshold_default)
 #endif
         , st_component(NULL)
         , st_category(NULL)
@@ -407,6 +409,8 @@ namespace avmshell
         config.jitordie = settings.jitordie;
 #ifdef VMCFG_NANOJIT
         config.njconfig = settings.njconfig;
+        config.jitconfig = settings.jitconfig;
+        config.osr_threshold = settings.osr_threshold;
 #endif
 
 #ifdef AVMPLUS_VERBOSE

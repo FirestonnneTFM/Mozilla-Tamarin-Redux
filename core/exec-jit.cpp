@@ -52,12 +52,37 @@ bool BaseExecMgr::isJitEnabled() const
     return runmode == RM_mixed || runmode == RM_jit_all;
 }
 
-bool BaseExecMgr::shouldJit(const MethodInfo* m, const MethodSignaturep ms) const
+/**
+ * Run JIT Eagerly if forcing compilation of all methods, or if the method
+ * is not a static initializer and we have not detected a fast-fail condition
+ * prior to invocation.  See bug 601794.
+ */
+bool BaseExecMgr::shouldJitFirst(const AbcEnv* abc_env, const MethodInfo* m, MethodSignaturep ms) const
 {
     Runmode runmode = config.runmode;
-    // Run JIT if forcing compilation of all methods, or if the method is not a static initializer
-    // and we have not detected a fast-fail condition prior to invocation.  See bug 601794.
-    return runmode == RM_jit_all || (runmode == RM_mixed && !m->isStaticInit() && !CodegenLIR::jitWillFail(ms));
+
+    if (runmode == RM_jit_all)
+        return true;
+
+    if (runmode == RM_interp_all)
+        return false;
+
+    AvmAssert(runmode == RM_mixed);
+
+    // Some large methods with large frame sizes may cause the JIT to blow up.
+    // These cases would result in JIT failure during the assembly phase anyhow,
+    // so we will preemptively avoid compiling them.  See bug 601794.
+    if (CodegenLIR::jitWillFail(ms))
+        return false;
+
+#ifdef VMCFG_OSR
+    if (OSR::isSupported(abc_env, m, ms))
+          return false;
+#else
+    (void)abc_env;
+#endif
+
+    return !m->isStaticInit();
 }
 
 void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
@@ -70,10 +95,6 @@ void BaseExecMgr::setJit(MethodInfo* m, GprMethodProc p)
     m->_invoker = InvokerCompiler::canCompileInvoker(m)
         ? jitInvokerNext
         : invokeGeneric;
-#ifdef AVMPLUS_VERBOSE
-    if (m->pool()->isVerbose(VB_execpolicy))
-        core->console << "execpolicy jit " << m << "\n";
-#endif
 }
 
 Atom BaseExecMgr::jitInvokerNext(MethodEnv* env, int argc, Atom* args)
@@ -107,9 +128,10 @@ Atom BaseExecMgr::jitInvokerNow(MethodEnv* env, int argc, Atom* args)
     return ret;
 }
 
-void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplevel, AbcEnv* abc_env)
+void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms,
+        Toplevel *toplevel, AbcEnv* abc_env, OSR *osr)
 {
-    CodegenLIR jit(m, ms, toplevel);
+    CodegenLIR jit(m, ms, toplevel, osr);
     PERFM_NTPROF_BEGIN("verify & IR gen");
     verifyCommon(m, ms, toplevel, abc_env, &jit);
     PERFM_NTPROF_END("verify & IR gen");
@@ -132,7 +154,9 @@ void BaseExecMgr::verifyJit(MethodInfo* m, MethodSignaturep ms, Toplevel *toplev
         if (m->pool()->isVerbose(VB_execpolicy))
             core->console << "execpolicy interp " << m << " method-jit-failed\n";
 #endif
-        setInterp(m, ms);
+        setInterp(m, ms, false);
+        // Blacklist method so we don't attempt to compile it again.
+        m->setHasFailedJit();
     }
 }
 

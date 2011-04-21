@@ -40,6 +40,8 @@
 #ifndef __avmplus_exec__
 #define __avmplus_exec__
 
+#include "exec-osr.h"
+
 namespace avmplus {
 
 /**
@@ -79,7 +81,15 @@ public:
     virtual Atom call(MethodEnv*, Atom thisArg, int32_t argc, Atom* argv) = 0;
 };
 
-enum Runmode { RM_mixed, RM_jit_all, RM_interp_all };
+/**
+ * Execution Engine run modes.  All are defined, but support depends
+ * on build-time and run-time flags.
+ */
+enum Runmode {
+    RM_mixed,       /** Hybrid mode, governed by OSR threshold */
+    RM_jit_all,     /** Always JIT */
+    RM_interp_all   /** Never JIT */
+};
 
 // Signature for method invocation when caller coerces arguments
 // and boxes results.  Typically the caller is JIT code.
@@ -210,13 +220,13 @@ private:
     static Atom* FASTCALL coerceUnbox1(MethodEnv*, Atom atom, Traits* t, Atom* args);
 
     /** Just unbox a single argument that is known to be the correct type already. */
-    static Atom* FASTCALL unbox1(MethodEnv*, Atom atom, Traits* t, Atom* args);
+    static Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args);
 
     /**
      * Set trampolines and flags for the interpreter, possibly including an
-     * initializer trampoline.
+     * initializer trampoline, and possibly counting invocations for OSR.
      */
-    void setInterp(MethodInfo*, MethodSignaturep);
+    void setInterp(MethodInfo*, MethodSignaturep, bool isOsr);
 
     /** Set trampolines and flags for a native method. */
     void setNative(MethodInfo*, GprMethodProc p);
@@ -280,13 +290,14 @@ private:
     //
 
     /** Return true if we should eagerly JIT.  False means use interpreter. */
-    bool shouldJit(const MethodInfo*, const MethodSignaturep) const;
+    bool shouldJitFirst(const AbcEnv*, const MethodInfo*, MethodSignaturep) const;
 
     /** True if the JIT is enabled */
     bool isJitEnabled() const;
 
     /** Run the verifier with the JIT attached. */
-    void verifyJit(MethodInfo*, MethodSignaturep, Toplevel*, AbcEnv*);
+    void verifyJit(MethodInfo*, MethodSignaturep, Toplevel*, AbcEnv*,
+                   OSR *osr_state);
 
     /** Install JIT code pointers and set MethodInfo::_isJitImpl. */
     void setJit(MethodInfo*, GprMethodProc p);
@@ -352,6 +363,11 @@ private:
     GCList<MethodInfo> verifyFunctionQueue;
     GCList<Traits> verifyTraitsQueue;
 #endif
+#ifdef FEATURE_NANOJIT
+    // OSR support
+    friend class OSR;
+    OSR *current_osr;
+#endif
 };
 
 /**
@@ -379,6 +395,7 @@ class GC_CPP_EXACT(MethodInfoProcHolder, MMgc::GCTraceableObject)
     friend class InvokerCompiler;
     friend class BaseExecMgr;
     friend class MethodEnv;
+    friend class OSR;
 
 protected:
     MethodInfoProcHolder();
@@ -406,6 +423,7 @@ class GC_CPP_EXACT(MethodEnvProcHolder, MMgc::GCTraceableObject)
 {
     friend class CodegenLIR;
     friend class BaseExecMgr;
+    friend class OSR;
 
 protected:
     MethodEnvProcHolder();

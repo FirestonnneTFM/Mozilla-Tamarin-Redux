@@ -69,9 +69,26 @@ BaseExecMgr::BaseExecMgr(AvmCore* core)
     , verifyFunctionQueue(core->gc, 0)
     , verifyTraitsQueue(core->gc, 0)
 #endif
+#ifdef FEATURE_NANOJIT
+    , current_osr(NULL)
+#endif
 {
 #ifdef SUPERWORD_PROFILING
     WordcodeTranslator::swprofStart();
+#endif
+#if defined VMCFG_NANOJIT && defined VMCFG_OSR && defined VMCFG_OSR_ENV_VAR
+    if (config.osr_threshold == AvmCore::osr_threshold_default) {
+        // If osr_threshold hasn't been set, check for OSR environment var.
+        const char* osr_config = VMPI_getenv("OSR");
+        if (osr_config) {
+            int threshold = OSR::parseConfig(osr_config);
+            if (threshold != -1) {
+                // A valid threshold was found.
+                core->config.osr_threshold = threshold;
+                core->console << "USING ENV OSR THRESHOLD " << threshold << "\n";
+            }
+        }
+    }
 #endif
 }
 
@@ -193,43 +210,81 @@ Atom BaseExecMgr::initInvokeInterpNoCoerce(MethodEnv* env, int argc, Atom* args)
     return invokeInterpNoCoerce(env, argc, args);
 }
 
-void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms)
+void BaseExecMgr::setInterp(MethodInfo* m, MethodSignaturep ms, bool isOsr)
 {
+#ifndef VMCFG_OSR
+    AvmAssert(!isOsr);
+#endif
+
     // Choose an appropriate set of interpreter invocation stubs.
+    // * if OSR is enabled, choose a stub that counts invocations to trigger JIT.
     // * if the method is a constructor, choose a stub that initializes
     //   the object's fields before executing (init_).
     // * if the method has no typed args, choose an invoker stub that skips
     //   arg type checking entirely (_nocoerce).
-    static const AtomMethodProc invoke_stubs[2][2] = {{
-        BaseExecMgr::invokeInterpNoCoerce,        // ctor=0, typedargs=0
-        BaseExecMgr::invokeInterp                  // ctor=0, typedargs=1
+    static const AtomMethodProc invoke_stubs[2][2][2] = {{{
+        BaseExecMgr::invokeInterpNoCoerce,        // osr=0, ctor=0, typedargs=0
+        BaseExecMgr::invokeInterp                 // osr=0, ctor=0, typedargs=1
     }, {
-        BaseExecMgr::initInvokeInterpNoCoerce,   // ctor=1, typedargs=0
-        BaseExecMgr::initInvokeInterp             // ctor=1, typedargs=1
-    }};
+        BaseExecMgr::initInvokeInterpNoCoerce,    // osr=0, ctor=1, typedargs=0
+        BaseExecMgr::initInvokeInterp             // osr=0, ctor=1, typedargs=1
+    }}, {{
+#if defined FEATURE_NANOJIT && defined VMCFG_OSR
+        OSR::osrInvokeInterp,                     // osr=1, ctor=0, typedargs=0
+        OSR::osrInvokeInterp                      // osr=1, ctor=0, typedargs=1
+    }, {
+        OSR::osrInitInvokeInterp,                 // osr=1, ctor=1, typedargs=0
+        OSR::osrInitInvokeInterp                  // osr=1, ctor=1, typedargs=1
+#else
+        NULL,
+        NULL
+    }, {
+        NULL,
+        NULL
+#endif
+    }}};
+    int osr = isOsr ? 1 : 0;
     int ctor = m->isConstructor() ? 1 : 0;
     int typedargs = hasTypedArgs(ms) ? 1 : 0;
     m->_implGPR = NULL;
-    m->_invoker = invoke_stubs[ctor][typedargs];
+    m->_invoker = invoke_stubs[osr][ctor][typedargs];
     m->_isInterpImpl = 1;
+
+    AvmAssert(!isOsr || isJitEnabled());
 
 #ifdef VMCFG_NANOJIT
     if (isJitEnabled()) {
         // Choose an appropriate set of jit->interp stubs.
+        // * if OSR is enabled, choose a stub that counts invocations to trigger JIT.
         // * if the method is a constructor, choose a stub that initializes
         //   the object's fields before executing (init_).
         // * if the return type is double, the stub must have a signature that
         //   returns double. (FPR)
-        static const GprMethodProc impl_stubs[2][2] = {{
-            BaseExecMgr::interpGPR,                     // ctor=0, fpr=0
-            (GprMethodProc)BaseExecMgr::interpFPR       // ctor=0, fpr=1
+        static const GprMethodProc impl_stubs[2][2][2] = {{{
+            BaseExecMgr::interpGPR,                    // osr=0, ctor=0, fpr=0
+            (GprMethodProc)BaseExecMgr::interpFPR      // osr=0, ctor=0, fpr=1
         }, {
-            BaseExecMgr::initInterpGPR,                // ctor=1, fpr=0
-            (GprMethodProc)BaseExecMgr::initInterpFPR  // ctor=1, fpr=1
-        }};
-        int ctor = m->isConstructor() ? 1 : 0;
+            BaseExecMgr::initInterpGPR,                // osr=0, ctor=1, fpr=0
+            (GprMethodProc)BaseExecMgr::initInterpFPR  // osr=0, ctor=1, fpr=1
+        }}, {{
+#ifdef VMCFG_OSR
+            OSR::osrInterpGPR,                         // osr=1, ctor=0, fpr=0
+            (GprMethodProc)OSR::osrInterpFPR           // osr=1, ctor=0, fpr=1
+        }, {
+            OSR::osrInitInterpGPR,                     // osr=1, ctor=1, fpr=0
+            (GprMethodProc)OSR::osrInitInterpFPR       // osr=1, ctor=1, fpr=1
+#else
+            NULL,
+            NULL
+        }, {
+            NULL,
+            NULL
+#endif
+        }}};
         int fpr = ms->returnTraitsBT() == BUILTIN_number ? 1 : 0;
-        m->_implGPR = impl_stubs[ctor][fpr];
+        m->_implGPR = impl_stubs[osr][ctor][fpr];
+        if (isOsr)
+            m->_abc.countdown = config.osr_threshold;
     }
 #endif
 }
@@ -292,14 +347,26 @@ void BaseExecMgr::verifyMethod(MethodInfo* m, Toplevel *toplevel, AbcEnv* abc_en
     if (m->isNative())
         verifyNative(m, ms);
 #ifdef VMCFG_NANOJIT
-    else if (shouldJit(m, ms))
-        verifyJit(m, ms, toplevel, abc_env);
+    else if (shouldJitFirst(abc_env, m, ms)) {
+        #ifdef AVMPLUS_VERBOSE
+        if (m->pool()->isVerbose(VB_execpolicy))
+            core->console << "execpolicy jit first " << m << "\n";
+        #endif
+        verifyJit(m, ms, toplevel, abc_env, NULL);
+    }
 #endif
     else
         verifyInterp(m, ms, toplevel, abc_env);
     PERFM_NTPROF_END("verify-ticks");
 }
 
+/**
+ * If we are in a pure-interpreter mode, this simply verifies code and then
+ * installs a trampoline to run the interpreter.  If we are in a JIT mode,
+ * then a previous decision has decided not to JIT-compile during verification,
+ * and we call OSR::isSupported() to decide whether to simply install the
+ * interpreter trampoline, or a countdown trampoline to trigger OSR.
+ */
 void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *toplevel, AbcEnv* abc_env)
 {
 #ifdef VMCFG_WORDCODE
@@ -308,16 +375,24 @@ void BaseExecMgr::verifyInterp(MethodInfo* m, MethodSignaturep ms, Toplevel *top
     CodeWriter coder;
 #endif
     verifyCommon(m, ms, toplevel, abc_env, &coder);
-#ifdef AVMPLUS_VERBOSE
-# ifdef VMCFG_NANOJIT
+
+#ifdef VMCFG_NANOJIT
+# ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy)) // Currently shouldn't print "unknown", accounting for code evolution.
-        core->console << "execpolicy interp " << m << (shouldJit(m, ms) ? " unknown\n" : " jit-policy\n");
+        core->console << "execpolicy interp " << m << (shouldJitFirst(abc_env,m,ms) ? " unknown\n" : " jit-policy\n");
+# endif
+# ifdef VMCFG_OSR
+    setInterp(m, ms, OSR::isSupported(abc_env, m, ms));
 # else
+    setInterp(m, ms, false);
+# endif
+#else
+# ifdef AVMPLUS_VERBOSE
     if (m->pool()->isVerbose(VB_execpolicy))
         core->console << "execpolicy interp " << m << "\n";
 # endif
+    setInterp(m, ms, false);
 #endif
-    setInterp(m, ms);
 }
 
 // run the verifier, and if an exception is thrown,
@@ -403,15 +478,19 @@ void BaseExecMgr::setNative(MethodInfo* m, GprMethodProc p)
 void BaseExecMgr::notifyVTableResolved(VTable*)
 {}
 
-#endif
+bool BaseExecMgr::isJitEnabled() const
+{
+    return false;
+}
 
+#endif
 
 // Only unbox the value (convert atom to native representation), coerce
 // must have already happened.
-Atom* FASTCALL BaseExecMgr::unbox1(MethodEnv* env, Atom atom, Traits* t, Atom* arg0)
+Atom* FASTCALL BaseExecMgr::unbox1(Atom atom, Traits* t, Atom* arg0)
 {
-    (void)env;
-    AvmAssertMsgCanThrow(atom == env->toplevel()->coerce(atom, t),"",env->core()); // Atom must be correct type already, we're just unboxing it.
+    // Atom must be correct type already, we're just unboxing it.
+    AvmAssert(AvmCore::istype(atom, t) || AvmCore::isNullOrUndefined(atom));
     switch (Traits::getBuiltinType(t))
     {
         case BUILTIN_any:
@@ -629,7 +708,7 @@ inline Atom coerceAtom(AvmCore* core, Atom atom, Traits* t, Toplevel* toplevel)
     }
 }
 
-inline Atom BaseExecMgr::endCoerce(MethodEnv* env, int32_t argc, uint32_t *ap, MethodSignaturep ms)
+Atom BaseExecMgr::endCoerce(MethodEnv* env, int32_t argc, uint32_t *ap, MethodSignaturep ms)
 {
     // We know we have verified the method, so we can go right into it.
     AvmCore* core = env->core();
@@ -835,7 +914,7 @@ void BaseExecMgr::unboxCoerceArgs(MethodEnv* env, int32_t argc, Atom* in, uint32
 
     const int32_t param_count = ms->param_count();
     int32_t end = argc >= param_count ? param_count : argc;
-    args = unbox1(env, in[0], ms->paramTraits(0), args); // no need to coerce
+    args = unbox1(in[0], ms->paramTraits(0), args); // no need to coerce
     for (int32_t i=1; i <= end; i++)
         args = coerceUnbox1(env, in[i], ms->paramTraits(i), args);
     while (end < argc)
@@ -847,7 +926,7 @@ void BaseExecMgr::unboxCoerceArgs(MethodEnv* env, Atom thisArg, ArrayObject *a, 
 {
     int32_t argc = a->getLength();
 
-    Atom *args = unbox1(env, thisArg, ms->paramTraits(0), (Atom *) argv);
+    Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
     const int32_t param_count = ms->param_count();
     int32_t end = argc >= param_count ? param_count : argc;
@@ -860,7 +939,7 @@ void BaseExecMgr::unboxCoerceArgs(MethodEnv* env, Atom thisArg, ArrayObject *a, 
 // Specialized for Function.call().
 void BaseExecMgr::unboxCoerceArgs(MethodEnv* env, Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 {
-    Atom *args = unbox1(env, thisArg, ms->paramTraits(0), (Atom *) argv);
+    Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
     const int32_t param_count = ms->param_count();
     int32_t end = argc >= param_count ? param_count : argc;

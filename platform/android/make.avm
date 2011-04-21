@@ -76,6 +76,7 @@ AVMPLUS_SRCS := \
 	ErrorConstants.cpp \
 	exec.cpp \
 	exec-jit.cpp \
+	exec-osr.cpp \
 	exec-verifyall.cpp \
 	Exception.cpp \
 	FrameState.cpp \

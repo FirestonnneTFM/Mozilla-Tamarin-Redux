@@ -202,6 +202,7 @@ namespace avmplus
         bool hasFrameState(const uint8_t* pc) const;
         int getBlockCount() const;
         bool hasReachableExceptions() const;
+        FrameState* getFrameState(const uint8_t* pc) const;
 
     private:
         const uint8_t* code_pos;  // start of abc bytecode
@@ -225,7 +226,6 @@ namespace avmplus
         RestArgAnalyzer restArgAnalyzer;
 #endif
 
-        FrameState* getFrameState(const uint8_t* pc);
         const uint8_t* verifyBlock(const uint8_t* pc);
         const uint8_t* loadBlockState(FrameState* blk);
         void checkParams();

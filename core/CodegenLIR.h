@@ -341,6 +341,7 @@ namespace avmplus
         const MethodSignaturep ms;
         Toplevel* toplevel;
         PoolObject *pool;
+        OSR* osr;
         CodegenDriver* driver;
         const FrameState *state;
         const uint8_t* code_pos;
@@ -369,6 +370,7 @@ namespace avmplus
         int dbg_framesize; // count of locals & scopes visible to the debugger
 #endif
         int labelCount;
+        bool inlineFastpath; // Allow aggressive or speculative inlining, e.g., introducing new labels.
         LookupCacheBuilder finddef_cache_builder;
         CacheBuilder<CallCache> call_cache_builder;
         CacheBuilder<GetCache> get_cache_builder;
@@ -515,6 +517,7 @@ namespace avmplus
         LIns* coerceToType(int i, Traits*);
         void emitInitializers();
         void emitDebugEnter();
+        void emitOsrBranch();
 
         bool isPromote(LOpcode op);
         LIns* imm2Int(LIns* imm);
@@ -537,8 +540,9 @@ namespace avmplus
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
 
     public:
-        CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel);
         ~CodegenLIR();
+        CodegenLIR(MethodInfo* info, MethodSignaturep ms, Toplevel* toplevel,
+                   OSR *osr_state);
         GprMethodProc emitMD();
 
         // May return true if JIT will always fail based on information known prior to invocation.

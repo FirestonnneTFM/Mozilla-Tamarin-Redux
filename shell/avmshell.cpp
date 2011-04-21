@@ -802,6 +802,9 @@ namespace avmshell
                     else if (!VMPI_strcmp(arg+2, "nocse")) {
                         settings.njconfig.cseopt = false;
                     }
+                    else if (!VMPI_strcmp(arg+2, "noinline")) {
+                        settings.jitconfig.opt_inline = false;
+                    }
                     else if (!VMPI_strcmp(arg+2, "jitordie")) {
                         settings.runmode = RM_jit_all;
                         settings.jitordie = true;
@@ -835,6 +838,18 @@ namespace avmshell
                 else if (!VMPI_strcmp(arg, "-Ojit")) {
                     settings.runmode = RM_jit_all;
                 }
+#ifdef VMCFG_OSR
+                else if (!VMPI_strncmp(arg, "-osr=", 5)) {
+                    // parse the commandline threshold
+                    int32_t threshold;
+                    if (VMPI_sscanf(arg + 5, "%d", &threshold) != 1 ||
+                        threshold < 0) {
+                      AvmLog("Bad value to -osr: %s\n", arg + 5);
+                      usage();
+                    }
+                    settings.osr_threshold = threshold;
+                }
+#endif /* VMCFG_OSR */
 #endif /* VMCFG_NANOJIT */
 #ifdef AVMPLUS_JITMAX
                 else if (!VMPI_strcmp(arg, "-jitmax") && i+1 < argc ) {
@@ -1229,8 +1244,12 @@ namespace avmshell
         AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
         AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
         AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");
-        AvmLog("          [-Dnocse]     disable CSE optimization \n");
+        AvmLog("          [-Dnocse]     disable CSE optimization\n");
+        AvmLog("          [-Dnoinline]  disable speculative inlining\n");
         AvmLog("          [-jitharden]  enable jit hardening techniques\n");
+    #ifdef VMCFG_OSR
+        AvmLog("          [-osr=T]      enable OSR with invocation threshold T\n");
+    #endif
     #ifdef AVMPLUS_IA32
         AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");

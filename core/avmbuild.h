@@ -143,6 +143,11 @@
     #define VMCFG_RESTARG_OPTIMIZATION
 #endif
 
+// Enable setting the OSR threshold via an environment variable "OSR".
+// This may be useful in certain testing scenarios, but should not be included in production
+// releases.  It is a temporary and unsupported facility that may be removed entirely.
+//#define VMCFG_OSR_ENV_VAR
+
 // Enable more agressive use of type-specialized helper functions and speculative
 // inlining in the JIT.
 // It is likely that this will want to become a feature, as the space-for-speed

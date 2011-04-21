@@ -416,6 +416,17 @@ var FEATURES =
   </feature>
 
   <feature>
+    <desc> Enables delayed JIT-compilation with on-stack replacement.
+           The default OSR compilation strategy either compiles a method eagerly
+           or interprets it always, thus the OSR invocation threshold must be
+           separately configured at runtime to obtain meaningful results. </desc>
+
+    <name> AVMFEATURE_OSR  </name>
+    <requires> AVMFEATURE_JIT </requires>
+    <defines> VMCFG_OSR  </defines>
+  </feature>
+
+  <feature>
     <desc>Enables the ahead-of-time compiler.</desc>
 
     <name> AVMFEATURE_AOT </name>

@@ -630,6 +630,9 @@
     <ClCompile Include="..\..\core\exec-jit.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\core\exec-osr.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\core\exec-verifyall.cpp">
       <Filter>core</Filter>
     </ClCompile>
