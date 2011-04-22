@@ -2008,6 +2008,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\JSONClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\JSONClass.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\LirHelper-inlines.h"
 				>
 			</File>
@@ -2898,6 +2906,10 @@
 			</File>
 			<File
 				RelativePath="..\..\core\IDataOutput.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\JSON.as"
 				>
 			</File>
 			<File
