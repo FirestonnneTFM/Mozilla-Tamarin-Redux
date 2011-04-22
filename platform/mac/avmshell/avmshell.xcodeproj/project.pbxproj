@@ -183,6 +183,8 @@
 		07F01C5112E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
 		07F01C5212E1AD880002760B /* eval-parse-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F01C5012E1AD880002760B /* eval-parse-config.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
+		19487E261362250800586A91 /* JSONClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19487E24136224BF00586A91 /* JSONClass.cpp */; };
+		19487E271362250900586A91 /* JSONClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19487E24136224BF00586A91 /* JSONClass.cpp */; };
 		1969AE2B1250E705002F7F01 /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
 		1969AE2C1250E706002F7F01 /* PageMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19A21B381213443300CB55E0 /* PageMap.cpp */; };
 		198CF91C11B973BD00A939C7 /* exec-jit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 198CF91811B973BD00A939C7 /* exec-jit.cpp */; };
@@ -880,6 +882,9 @@
 		07FBECBD1291529500F51879 /* avmplusContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplusContainer.h; path = ../../../core/avmplusContainer.h; sourceTree = SOURCE_ROOT; };
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
+		19487E231362248E00586A91 /* JSON.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = JSON.as; path = ../../../core/JSON.as; sourceTree = SOURCE_ROOT; };
+		19487E24136224BF00586A91 /* JSONClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JSONClass.cpp; path = ../../../core/JSONClass.cpp; sourceTree = SOURCE_ROOT; };
+		19487E25136224BF00586A91 /* JSONClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONClass.h; path = ../../../core/JSONClass.h; sourceTree = SOURCE_ROOT; };
 		198CF91711B973BD00A939C7 /* exec-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "exec-inlines.h"; path = "../../../core/exec-inlines.h"; sourceTree = SOURCE_ROOT; };
 		198CF91811B973BD00A939C7 /* exec-jit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "exec-jit.cpp"; path = "../../../core/exec-jit.cpp"; sourceTree = SOURCE_ROOT; };
 		198CF91911B973BD00A939C7 /* exec-verifyall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "exec-verifyall.cpp"; path = "../../../core/exec-verifyall.cpp"; sourceTree = SOURCE_ROOT; };
@@ -1340,6 +1345,8 @@
 				079DF8BA0F3A88950031D1B4 /* FunctionClass.h */,
 				079DF8BB0F3A88950031D1B4 /* IntClass.cpp */,
 				079DF8BC0F3A88950031D1B4 /* IntClass.h */,
+				19487E24136224BF00586A91 /* JSONClass.cpp */,
+				19487E25136224BF00586A91 /* JSONClass.h */,
 				079DF8BD0F3A88950031D1B4 /* MathClass.cpp */,
 				079DF8BE0F3A88950031D1B4 /* MathClass.h */,
 				079DF8BF0F3A88950031D1B4 /* NamespaceClass.cpp */,
@@ -1457,6 +1464,7 @@
 				079DF9110F3A88EA0031D1B4 /* Error.as */,
 				079DF9120F3A88EA0031D1B4 /* ErrorConstants.as */,
 				079DF9130F3A88EA0031D1B4 /* Function.as */,
+				19487E231362248E00586A91 /* JSON.as */,
 				079DF9140F3A88EA0031D1B4 /* Math.as */,
 				079DF9150F3A88EA0031D1B4 /* Namespace.as */,
 				079DF9160F3A88EA0031D1B4 /* Number.as */,
@@ -2046,7 +2054,7 @@
 				D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */,
 				D939B113126E358400522895 /* ByteArrayGlue.cpp in Sources */,
 				D939B114126E358400522895 /* DataIO.cpp in Sources */,
-  				FF89C9241290C6910059CA78 /* exec-osr.cpp in Sources */,
+				FF89C9241290C6910059CA78 /* exec-osr.cpp in Sources */,
 				19F9614F1277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
 				8133F065128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B01129A55C200D1B0BB /* VMThread.cpp in Sources */,
@@ -2057,6 +2065,7 @@
 				19A1174C133A2266003B9C38 /* LirHelper.cpp in Sources */,
 				CBB55F67134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
 				CB13ECD41358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
+				19487E271362250900586A91 /* JSONClass.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2248,7 +2257,7 @@
 				D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */,
 				D939B111126E358400522895 /* ByteArrayGlue.cpp in Sources */,
 				D939B112126E358400522895 /* DataIO.cpp in Sources */,
- 				FF89C9231290C6910059CA78 /* exec-osr.cpp in Sources */,
+				FF89C9231290C6910059CA78 /* exec-osr.cpp in Sources */,
 				19F961501277300D0079C6E9 /* ST_mmgc_580603.cpp in Sources */,
 				8133F064128A768800C732B7 /* ST_vmpi_threads.cpp in Sources */,
 				81EB4B00129A55C200D1B0BB /* VMThread.cpp in Sources */,
@@ -2259,6 +2268,7 @@
 				19A1174B133A2266003B9C38 /* LirHelper.cpp in Sources */,
 				CBB55F66134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
 				CB13ECD31358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
+				19487E261362250800586A91 /* JSONClass.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
