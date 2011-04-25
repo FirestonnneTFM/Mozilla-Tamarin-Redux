@@ -83,7 +83,7 @@ static size_t pagesize = size_t(sysconf(_SC_PAGESIZE));
     #define FLUSHWIN()
 #endif
 
-#ifdef linux
+#if defined linux && !defined VMCFG_MIPS && !defined VMCFG_ARM
 #include <execinfo.h>
 #define HAVE_BACKTRACE
 #endif
