@@ -352,6 +352,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla513018:1;      // parseFloat accepts illegal number syntax
         unsigned bugzilla524122:1;      // Incorrect optimization for integers in numeric sort
         unsigned bugzilla526662:1;      // XMLParser stops at NUL char
+        unsigned bugzilla532454:1;      // Sort incorrectly converts result of user-supplied comparison function to integer
         unsigned bugzilla539094:1;      // OSR (On-Stack replacement of interpreted methods by JIT-ted methods)
         unsigned bugzilla551587:1;      // MathClass:_min() does not correctly handle -0
         unsigned bugzilla558863:1;      // in operator on bytearray throws exception for non-natural number

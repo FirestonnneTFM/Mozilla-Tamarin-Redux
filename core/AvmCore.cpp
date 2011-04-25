@@ -4995,6 +4995,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
         if (v >= kSWF13)
         {
+            bugzilla532454  = 1;    // Sort incorrectly converts result of user-supplied comparison function to integer
             bugzilla574600  = 1;    // Vector.<>.AS3::map returns no value
         }
     }
