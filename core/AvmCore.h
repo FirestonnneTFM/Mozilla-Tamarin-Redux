@@ -355,6 +355,7 @@ const int kBufferPadding = 16;
         unsigned bugzilla539094:1;      // OSR (On-Stack replacement of interpreted methods by JIT-ted methods)
         unsigned bugzilla551587:1;      // MathClass:_min() does not correctly handle -0
         unsigned bugzilla558863:1;      // in operator on bytearray throws exception for non-natural number
+        unsigned bugzilla574600:1;      // Vector.<>.AS3::map returns no value
         unsigned bugzilla585791:1;      // String.localeCompare with a null String object returns 0
         unsigned bugzilla598683:1;      // Bad XML with unterminated node with namespace not throwing correctly
         unsigned bugzilla609416:1;      // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs

@@ -4990,6 +4990,13 @@ return the result of the comparison ToPrimitive(x) == y.
             bugzilla598683  = 1;    // Bad XML with unterminated node with namespace not throwing correctly
             bugzilla609416  = 1;    // encodeURIComponent and decodeURIComponent give wrong output when input contains surrogate pairs
         }
+
+        // if (v >= kSWF12) { nothing to do here }
+
+        if (v >= kSWF13)
+        {
+            bugzilla574600  = 1;    // Vector.<>.AS3::map returns no value
+        }
     }
 
     /*static*/ uint32_t const BugCompatibility::kNames[BugCompatibility::VersionCount] =

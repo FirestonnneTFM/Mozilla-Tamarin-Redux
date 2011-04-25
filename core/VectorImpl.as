@@ -106,8 +106,10 @@ AS3 function every(checker:Function, thisObj: Object=null): Boolean {
 AS3 function forEach(eacher:Function, thisObj: Object=null): void {
     _forEach(this, eacher, (thisObj is Object ? thisObj : null));
 }
+
 AS3 function map(mapper:Function, thisObj:Object=null) {
-    this.private::_map(mapper, thisObj is Object ? thisObj : null);
+    var result = this.private::_map(mapper, thisObj is Object ? thisObj : null);
+    return bugzilla(574600) ? result : undefined;
 }
 
 AS3 native function push(...items:Array): uint;
