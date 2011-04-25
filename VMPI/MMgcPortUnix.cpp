@@ -83,6 +83,12 @@ static size_t pagesize = size_t(sysconf(_SC_PAGESIZE));
     #define FLUSHWIN()
 #endif
 
+#ifdef linux
+#include <execinfo.h>
+#define HAVE_BACKTRACE
+#endif
+
+
 size_t VMPI_getVMPageSize()
 {
     return pagesize;
@@ -626,13 +632,9 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
         }
     #endif
 
-#ifdef __GNUC__
-#include <execinfo.h>
-#endif
-
     bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
     {
-#ifdef __GNUC__
+#ifdef HAVE_BACKTRACE
         char **strings = backtrace_symbols((void**)&pc, 1);
         snprintf(buffer, bufferSize,"%s", strings[0]);
         free(strings);
@@ -647,7 +649,7 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
 
     bool VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* /*lineNumber*/)
     {
-#ifdef __GNUC__
+#ifdef HAVE_BACKTRACE
         char **strings = backtrace_symbols((void**)&pc, 1);
         snprintf(buffer, bufferSize,"%s", strings[0]);
         free(strings);
@@ -658,14 +660,6 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
         (void)bufferSize;
         return false;
 #endif
-    //#ifdef AVMPLUS_UNIX
-    //  Dl_info dlip;
-    //  dladdr((void *const)pc, &dlip);
-    //  VMPI_sprintf(buffer, "0x%p:%s", (void *)pc, dlip.dli_sname);
-    //  return true;
-    //#else
-    //  return false;
-    //#endif
     }
 
 
