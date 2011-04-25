@@ -57,15 +57,32 @@ class Node {
     }
 }
 
+var i_loops = 1000;
+var j_loops = 2500;
+
+// Need to reduce the number of loops on slow machines so test does
+// not time out in the player
+var start = new Date();
+var a = []
+for (var i=0; i<25000; i++)
+    a[0] = 3.14159 + i*i;
+var loop_time = new Date() - start;
+trace("loop_time: "+loop_time);
+if (loop_time > 14) {
+    i_loops = 900;
+    j_loops = 1000;
+}
+
+
 var fractions = [Number.MIN_VALUE, 0, -0, 0.2499999, 0.25, 0.5, 0.75, 1.0];
 for each(var f in fractions) {
     trace("starting pauseForGCIfCollectionImminent test @ " + f);
 
     var hits = 0;
     var a = [];
-    for (var i = 0; i < 1000; i++) {
-        for (var j = 0; j < 500; j++)
-        a[0] = 3.14159 + i * j; // compute a Number and store it in a * location to box it
+    for (var i = 0; i < i_loops; i++) {
+        for (var j = 0; j < j_loops; j++)
+            a[0] = 3.14159 + i * j; // compute a Number and store it in a * location to box it
         var before = System.totalMemory - System.freeMemory;
         System.pauseForGCIfCollectionImminent(f);
         var after = System.totalMemory - System.freeMemory;
@@ -80,6 +97,8 @@ for each(var f in fractions) {
                 true,
                 ((hits > 0) == (f < 1.0)));
 }
+
+trace("Finished loop portion")
 
 // Error cases
 if (playerType == 'AVMPlus') {
@@ -103,4 +122,5 @@ for each(var ec in error_cases) {
                 expected_error, error);
 }
 
+trace("Total Runtime: "+(new Date() - start))
 test();
