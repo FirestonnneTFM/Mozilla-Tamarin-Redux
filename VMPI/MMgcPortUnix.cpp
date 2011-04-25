@@ -533,12 +533,12 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
             /* save space for 0 terminator */
             bufferSize--;
 
-            int i = 0;
+            size_t i = 0;
 
             while (i < bufferSize && *ebp)
             {
                 /* store the current frame pointer */
-                buffer[i++] = *((sintptr*) ebp + 1);
+                buffer[i++] = *((uintptr_t*) ebp + 1);
                 /* get the next frame pointer */
                 ebp = (void**)(*ebp);
             }
@@ -626,17 +626,38 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
         }
     #endif
 
+#ifdef __GNUC__
+#include <execinfo.h>
+#endif
+
     bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
     {
+#ifdef __GNUC__
+        char **strings = backtrace_symbols((void**)&pc, 1);
+        snprintf(buffer, bufferSize,"%s", strings[0]);
+        free(strings);
+        return true;
+#else
         (void)pc;
         (void)buffer;
         (void)bufferSize;
         return false;
+#endif
     }
 
-    bool VMPI_getFileAndLineInfoFromPC(uintptr_t /*pc*/, char */*buffer*/, size_t /*bufferSize*/, uint32_t* /*lineNumber*/)
+    bool VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* /*lineNumber*/)
     {
+#ifdef __GNUC__
+        char **strings = backtrace_symbols((void**)&pc, 1);
+        snprintf(buffer, bufferSize,"%s", strings[0]);
+        free(strings);
+        return true;
+#else
+        (void)pc;
+        (void)buffer;
+        (void)bufferSize;
         return false;
+#endif
     //#ifdef AVMPLUS_UNIX
     //  Dl_info dlip;
     //  dladdr((void *const)pc, &dlip);

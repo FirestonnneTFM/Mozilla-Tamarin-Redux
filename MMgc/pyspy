@@ -103,8 +103,7 @@ def PosixSpyRoutine():
 
 if  sys.platform == 'win32':
 	WinSpyRoutine()
-elif sys.platform == 'darwin': 
-	PosixSpyRoutine()
 else:
-	print 'Error: unknown platform'
+	PosixSpyRoutine()
+
 
