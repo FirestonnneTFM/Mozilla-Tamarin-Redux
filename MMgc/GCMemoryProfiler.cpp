@@ -229,7 +229,11 @@ namespace MMgc
 
     void MemoryProfiler::RecordAllocation(const void *item, size_t askSize, size_t gotSize, bool managed)
     {
-        GCAssert(gotSize != 0);
+        if(gotSize == 0)
+        {
+            // some platform don't have malloc_size()
+            gotSize = askSize;
+        }
         MMGC_LOCK(lock);
         (void)askSize;
 
@@ -270,6 +274,8 @@ namespace MMgc
 
         GCAssert(info != NULL);
 
+        if(size == 0)
+            size = info->askSize;
         ChangeSize(info->allocTrace, false, size);
         // FIXME: how to know this is a sweep?
 
