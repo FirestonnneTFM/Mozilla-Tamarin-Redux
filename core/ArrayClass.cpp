@@ -345,7 +345,8 @@ namespace avmplus
 
         static int StringCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->StringCompare(j, k); }
         static int CaseInsensitiveStringCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->CaseInsensitiveStringCompare(j, k); }
-        static int ScriptCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->ScriptCompare(j, k); }
+        static int ScriptCompareFuncCompatible(const ArraySort *s, uint32_t j, uint32_t k) { return s->ScriptCompareCompatible(j, k); }
+        static int ScriptCompareFuncCorrect(const ArraySort *s, uint32_t j, uint32_t k) { return s->ScriptCompareCorrect(j, k); }
         static int NumericCompareFuncCompatible(const ArraySort *s, uint32_t j, uint32_t k) { return s->NumericCompareCompatible(j, k); }
         static int NumericCompareFuncCorrect(const ArraySort *s, uint32_t j, uint32_t k) { return s->NumericCompareCorrect(j, k); }
         static int DescendingCompareFunc(const ArraySort *s, uint32_t j, uint32_t k) { return s->altCmpFunc(s, k, j); }
@@ -389,7 +390,8 @@ namespace avmplus
 
         inline int StringCompare(uint32_t j, uint32_t k) const;
         inline int CaseInsensitiveStringCompare(uint32_t j, uint32_t k) const;
-        inline int ScriptCompare(uint32_t j, uint32_t k) const;
+        inline int ScriptCompareCompatible(uint32_t j, uint32_t k) const;
+        inline int ScriptCompareCorrect(uint32_t j, uint32_t k) const;
         inline int NumericCompareCompatible(uint32_t j, uint32_t k) const;
         inline int NumericCompareCorrect(uint32_t j, uint32_t k) const;
         inline int FieldCompare(uint32_t j, uint32_t k) const;
@@ -850,7 +852,21 @@ namespace avmplus
     /*
      * compare(j, k) using an actionscript function
      */
-    int ArraySort::ScriptCompare(uint32_t j, uint32_t k) const
+    int ArraySort::ScriptCompareCompatible(uint32_t j, uint32_t k) const
+    {
+        ScriptObject *o = (ScriptObject*) AvmCore::atomToScriptObject(cmpActionScript);
+
+        // Coercing result to integer may result in inccorect change of sign.
+        // See bug 532454.
+        Atom args[3] = { d->atom(), get(j), get(k) };
+        double result = AvmCore::toInteger(o->call(2, args));
+        return (result > 0 ? 1 : (result < 0 ? -1 : 0));
+    }
+
+    /*
+     * compare(j, k) using an actionscript function
+     */
+    int ArraySort::ScriptCompareCorrect(uint32_t j, uint32_t k) const
     {
         // todo must figure out the kosher way to invoke
         // callbacks like the sort comparator.
@@ -860,13 +876,12 @@ namespace avmplus
 
         ScriptObject *o = (ScriptObject*) AvmCore::atomToScriptObject(cmpActionScript);
 
-        Atom args[3] = { d->atom(), get(j), get(k) };
-        double result = AvmCore::toInteger(o->call(2, args));
         // cn: don't use AvmCore::integer on result of call.  The returned
         //  value could be bigger than 2^32 and toInt32 will return the
         //  ((value % 2^32) - 2^31), which could change the intended sign of the number.
-        //
-        //return AvmCore::integer(o->call(a->atom(), args, 2));
+
+        Atom args[3] = { d->atom(), get(j), get(k) };
+        double result = AvmCore::number(o->call(2, args));
         return (result > 0 ? 1 : (result < 0 ? -1 : 0));
     }
 
@@ -1103,7 +1118,9 @@ namespace avmplus
                 // make sure the sort function is callable
                 cmp = arg0;
                 toplevel->coerce(cmp, core->traits.function_itraits);
-                compare = ArraySort::ScriptCompareFunc;
+                compare = core->currentBugCompatibility()->bugzilla532454 ?
+                                ArraySort::ScriptCompareFuncCorrect :
+                                ArraySort::ScriptCompareFuncCompatible;
                 if (args->getLength() >= 2)
                 {
                     Atom arg1 = args->getUintProperty(1);
