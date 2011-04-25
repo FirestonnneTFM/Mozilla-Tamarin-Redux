@@ -964,6 +964,8 @@ namespace avmplus
             Stringp str = (String *)(nameOrAux);
             E4XNodeAux *aux = E4XNodeAux::create(core->GetGC(), str, publicNS, f);
             //m_nameOrAux = AUXBIT | int(aux);
+            // Clear it out in case there's already a name there.
+            WBRC_NULL(&m_nameOrAux);
             WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr_t(aux));
         }
     }
