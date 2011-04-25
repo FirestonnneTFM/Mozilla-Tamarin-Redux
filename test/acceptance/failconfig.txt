@@ -100,9 +100,6 @@ ecma3/String/split_504567:'babab', .*, diff , expectedfail, bug https://bugzilla
 # Vector
 ####################
 as3/Vector/concat:concat multiple int vectors, .*, ,expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=504525
-# vector/map passes w/ asc -ES but fails with -AS3 - skip due to differing behavior
-as3/Vector/map      , .*, -ES , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=574600
-as3/Vector/mapInitializers, .*, -ES, expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=574600
 
 ####################
 # Array
