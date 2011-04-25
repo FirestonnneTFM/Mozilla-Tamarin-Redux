@@ -44,7 +44,7 @@
 namespace MMgc
 {    
 #ifdef DEBUG
-    REALLY_INLINE static bool IsAddressOnStack(void *address)
+    REALLY_INLINE bool IsAddressOnStack(void *address)
     {
         uintptr_t stackBase = VMPI_getThreadStackBase();
         char stackTop;
