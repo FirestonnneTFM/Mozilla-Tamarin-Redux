@@ -120,16 +120,11 @@ fi
 
 cd $basedir/test/performance
 
-# CPEYER: not needed as this is a fresh repo each run
-# find ./ -name "*.abc" -exec rm {} \;
-
 measurememory="false"
-
-# CPEYER: Disable measurememory for now
-#$AVM | grep "\-memstats" > /dev/null
-#test "$?" = "0" && {
-#  measurememory="true"
-#}
+$AVM | grep "\-memstats" > /dev/null
+test "$?" = "0" && {
+  measurememory="true"
+}
 
 
 result="0"
@@ -137,17 +132,17 @@ resultmessage=""
 
 echo ""
 echo "===========   $config   ==========="
-python ./runtests.py --config=$config -r $branch -k -f -i $iterations --vmargs="$vmargs"
+python ./runtests.py --config=$config -r $branch -k -f -i $iterations --vmargs="$vmargs" --repo="$repo"
 test "$?" = "0" || { 
     result="1"; 
     resultmessage="$config time test run failed. " 
 }
 
 test "$measurememory" = "true" && {
-    python ./runtests.py --config=$config --memory -r $branch -k -f -i 1
+    python ./runtests.py --config=$config --memory -r $branch -k -f -i 1 --vmargs="$vmargs" --repo="$repo"
     test "$?" = "0" || { 
         result="1"; 
-        resultmessage="$resultmessage \n$config memory test run failed. " 
+        resultmessage="$resultmessage \n$config memory test run failed. "
     }
 }
 echo ""
