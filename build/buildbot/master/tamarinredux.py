@@ -113,20 +113,6 @@ class tamarinredux:
                                   ["linux-mips-test", "linux-mips-smoke"],
                                  ])
 
-    performance = PhaseTwoScheduler(name="performance", branch="%s-performance" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
-                    fileIsImportant=startPerformanceRun, priority=2, changeDir="changes/perf/processed",
-                    builderNames=["windows-performance",
-                                   "mac-performance", "mac64-performance",
-                                   "linux-performance",
-                                   "android-performance"],
-                    builderDependencies=[
-                                  ["windows-performance", "windows-test"], 
-                                  ["mac-performance", "mac-intel-10.5-test"],
-                                  ["mac64-performance", "mac64-intel-test"],
-                                  ["linux-performance", "linux-test"],
-                                  ["android-performance","android-test"],
-                                 ])
-
     deep = PhaseTwoScheduler(name="deep", branch="%s-deep" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startCompile, priority=2, changeDir="changes/deep/processed",
                     builderNames=[
@@ -162,7 +148,7 @@ class tamarinredux:
     
 
     
-    schedulers = [compile, smoke, test, performance, deep, promote_build]
+    schedulers = [compile, smoke, test, deep, promote_build]
     
     
 
@@ -871,174 +857,6 @@ class tamarinredux:
                 'builddir': './linux-mips-test',
     }
 
-
-    ################################################################################
-    ################################################################################
-    ####                                                                        ####
-    ####                     PERFORMANCE BUILDERS                               ####
-    ####                                                                        ####
-    ################################################################################
-    ################################################################################
-
-
-    #########################################
-    #### builder for windows-performance ####
-    #########################################
-    windows_performance_factory = factory.BuildFactory()
-    windows_performance_factory.addStep(sync_clean)
-    windows_performance_factory.addStep(sync_clone(url=HG_URL))
-    windows_performance_factory.addStep(sync_update)
-    windows_performance_factory.addStep(bb_slaveupdate(slave="windows-performance"))
-    windows_performance_factory.addStep(bb_lockacquire)
-    windows_performance_factory.addStep(perf_prepare)
-    windows_performance_factory.addStep(perf_release)
-    windows_performance_factory.addStep(perf_release_interp)
-    windows_performance_factory.addStep(perf_release_jit)
-    windows_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell"))
-    windows_performance_factory.addStep(util_process_clean)
-    windows_performance_factory.addStep(util_clean_buildsdir)
-    windows_performance_factory.addStep(bb_lockrelease)
-    windows_performance_factory.addStep(sync_clean)
-
-    windows_performance_builder = {
-                'name': "windows-performance",
-                'slavename': "windows-performance",
-                'factory': windows_performance_factory,
-                'builddir': './windows-performance',
-    }
-
-
-    #####################################
-    #### builder for mac-performance ####
-    #####################################
-    mac_performance_factory = factory.BuildFactory()
-    mac_performance_factory.addStep(sync_clean)
-    mac_performance_factory.addStep(sync_clone(url=HG_URL))
-    mac_performance_factory.addStep(sync_update)
-    mac_performance_factory.addStep(bb_slaveupdate(slave="mac-performance"))
-    mac_performance_factory.addStep(bb_lockacquire)
-    mac_performance_factory.addStep(perf_prepare)
-    mac_performance_factory.addStep(perf_release)
-    mac_performance_factory.addStep(perf_release_interp)
-    mac_performance_factory.addStep(perf_release_jit)
-    mac_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell"))
-    mac_performance_factory.addStep(util_process_clean)
-    mac_performance_factory.addStep(util_clean_buildsdir)    
-    mac_performance_factory.addStep(bb_lockrelease)
-    mac_performance_factory.addStep(sync_clean)
-
-    mac_performance_builder = {
-                'name': "mac-performance",
-                'slavename': "mac-performance",
-                'factory': mac_performance_factory,
-                'builddir': './mac-performance',
-    }
-
-
-    #######################################
-    #### builder for mac64-performance ####
-    #######################################
-    mac_64_performance_factory = factory.BuildFactory()
-    mac_64_performance_factory.addStep(sync_clean)
-    mac_64_performance_factory.addStep(sync_clone(url=HG_URL))
-    mac_64_performance_factory.addStep(sync_update)
-    mac_64_performance_factory.addStep(bb_slaveupdate(slave="mac64-performance"))
-    mac_64_performance_factory.addStep(bb_lockacquire)
-    mac_64_performance_factory.addStep(perf_prepare)
-    mac_64_performance_factory.addStep(perf_release)
-    mac_64_performance_factory.addStep(perf_release_interp)
-    mac_64_performance_factory.addStep(perf_release_jit)
-    mac_64_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell_64"))
-    mac_64_performance_factory.addStep(util_process_clean)
-    mac_64_performance_factory.addStep(util_clean_buildsdir)
-    mac_64_performance_factory.addStep(bb_lockrelease)
-    mac_64_performance_factory.addStep(sync_clean)
-
-    mac_64_performance_builder = {
-                'name': "mac64-performance",
-                'slavename': "mac64-performance",
-                'factory': mac_64_performance_factory,
-                'builddir': './mac64-performance',
-    }
-
-
-    #######################################
-    #### builder for linux-performance ####
-    #######################################
-    linux_performance_factory = factory.BuildFactory()
-    linux_performance_factory.addStep(sync_clean)
-    linux_performance_factory.addStep(sync_clone(url=HG_URL))
-    linux_performance_factory.addStep(sync_update)
-    linux_performance_factory.addStep(bb_slaveupdate(slave="linux-performance"))
-    linux_performance_factory.addStep(bb_lockacquire)
-    linux_performance_factory.addStep(perf_prepare)
-    linux_performance_factory.addStep(perf_release)
-    linux_performance_factory.addStep(perf_release_interp)
-    linux_performance_factory.addStep(perf_release_jit)
-    linux_performance_factory.addStep(acceptance_performance(name="Release", shellname="avmshell"))
-    linux_performance_factory.addStep(util_process_clean)
-    linux_performance_factory.addStep(util_clean_buildsdir)
-    linux_performance_factory.addStep(bb_lockrelease)
-    linux_performance_factory.addStep(sync_clean)
-
-    linux_performance_builder = {
-                'name': "linux-performance",
-                'slavename': "linux-performance",
-                'factory': linux_performance_factory,
-                'builddir': './linux-performance',
-    }
-
-
-    ###########################################
-    #### builder for android-performance ######
-    ###########################################
-    android_performance_factory = factory.BuildFactory()
-    android_performance_factory.addStep(sync_clean)
-    android_performance_factory.addStep(sync_clone(url=HG_URL))
-    android_performance_factory.addStep(sync_update)
-    android_performance_factory.addStep(bb_slaveupdate(slave="android-performance"))
-    android_performance_factory.addStep(perf_prepare)
-    android_performance_factory.addStep(BuildShellCommand(
-                command=['./run-performance-release-android.sh',WithProperties('%s','revision')],
-                env={'branch':WithProperties('%s','branch')},
-                description='running android performance...',
-                descriptionDone='finished running android performance.',
-                name="Release",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-    android_performance_factory.addStep(BuildShellCommand(
-                command=['./run-performance-release-android-interp.sh',WithProperties('%s','revision')],
-                env={'branch':WithProperties('%s','branch')},
-                description='running android interp performance...',
-                descriptionDone='finished running android interp performance.',
-                name="ReleaseInterp",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-    android_performance_factory.addStep(BuildShellCommand(
-                command=['./run-performance-release-android-jit.sh',WithProperties('%s','revision')],
-                env={'branch':WithProperties('%s','branch')},
-                description='running android jit performance...',
-                descriptionDone='finished running android jit performance.',
-                name="ReleaseJIT",
-                workdir="../repo/build/buildbot/slaves/scripts",
-                timeout=3600)
-    )
-    android_performance_factory.addStep(test_generic_adb(
-                name="Acceptance_Performance_Release", shellname="avmshell", vmargs="", config="",
-                scriptargs="--addtoconfig=-performance"))
-    android_performance_factory.addStep(util_clean_buildsdir)
-    android_performance_factory.addStep(sync_clean)
-
-    android_performance_builder = {
-                'name': "android-performance",
-                'slavename': "android-performance",
-                'factory': android_performance_factory,
-                'builddir': './android-performance',
-    }
-
-
     ################################################################################
     ################################################################################
     ####                                                                        ####
@@ -1558,12 +1376,6 @@ class tamarinredux:
                 android_test_builder,
                 linux_arm_test_builder,
                 linux_mips_test_builder,
-
-                windows_performance_builder,
-                mac_performance_builder,
-                mac_64_performance_builder,
-                linux_performance_builder,
-                android_performance_builder,
 
                 windows_deep_builder,
                 windows_p3_deep_builder,
