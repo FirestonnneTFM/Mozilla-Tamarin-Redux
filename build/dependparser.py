@@ -62,7 +62,7 @@ if len(sys.argv) != 3:
 outfile          = sys.argv[1]
 originating_file = sys.argv[2]
 
-relative_to_dir  = os.path.dirname(originating_file)
+relative_to_dir  = os.getcwd()
 
 _lineExp = re.compile("#(?:line)? ?\d+ \"([^\"<>]+[^/])\"");
 
