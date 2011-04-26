@@ -52,9 +52,10 @@
 
 package
 {
-    // Bug 651971: Lars notes: Spec requires that JSON's [[Prototype]] is
-    // Object.prototype; but is it?  Investigate.
 
+    include "api-versions.as"
+
+    [API(CONFIG::SWF_13)]
     [native(cls="JSONClass", classgc="exact", methods="auto", construct="none")]
     public final class JSON
     {
