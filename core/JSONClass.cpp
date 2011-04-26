@@ -334,6 +334,7 @@ namespace avmplus
         void committedToEmitFor(Atom key, String* pending,
                                 bool pendingPropnameColon);
 
+        bool isXMLInstance(Atom atom);
         bool isVectorInstance(ScriptObject* obj);
 
         // if value is parent of object in current traversal then
@@ -345,7 +346,8 @@ namespace avmplus
 
         struct AutoDestructingAtomArray {
             AutoDestructingAtomArray(MMgc::FixedMalloc* fm, int32_t atomCount)
-                : m_atomCount(atomCount)
+                : m_atoms(NULL)
+                , m_atomCount(atomCount)
                 , m_fixedmalloc(fm)
             {
                 if (atomCount > 0)
@@ -1075,6 +1077,12 @@ namespace avmplus
         m_activeValues->remove(atom);
     }
 
+    bool JSONSerializer::isXMLInstance(Atom atom)
+    {
+        return m_toplevel->builtinClasses()->get_XMLClass()->isType(atom) ||
+            m_toplevel->builtinClasses()->get_XMLListClass()->isType(atom);
+    }
+
     bool JSONSerializer::isVectorInstance(ScriptObject* o)
     {
         Traits* traits = o->vtable->traits;
@@ -1227,10 +1235,56 @@ namespace avmplus
             // getUintProperty method instead of the Toplevel hasproperty.
             if (m_toplevel->hasproperty(value, &name, vtable))
             {
-                probe = m_toplevel->getproperty(value, &name, vtable);
+                // Bug 652200: We can't use getprop to lookup the
+                // (potentially overridden) toJSON property on XML
+                // objects, because it has special behavior on XML
+                // objects.  We have three options:
+                // 1. Don't support toJSON on XML/XMLList,
+                // 2. Use callprop directly on .toJSON for the XML/XMLList, or
+                // 3. Use getprop on delegate (prototype) for the XML/XMLList.
+                //
+                // Option 1 will mean that we're stuck with whatever
+                // behavior we get from JSON's default handling of XML
+                // objects: returning the rendered JSON object {}.
+                // (The only way around producing {} is to put
+                // special-case code in JSON for XML, and if we're
+                // going to do that, we might as well go with options
+                // 2 or 3 above.)
+                //
+                // Option 2 will mean that we will attempt to perform
+                // toJSON invocations even if the client has assigned
+                // a non-function to the toJSON property.  This is
+                // is probably better than option 1.
+                //
+                // Option 3 will mean that we won't attempt a lookup
+                // on an individual XML object xmlobj, but rather go
+                // straight to its prototype.  But a property lookup
+                // on an individual object xmlobj cannot yield a
+                // function without delegating to its prototype
+                // anyway, so we would never miss a toJSON the user
+                // was intending us to call.
+                //
+                // Option 3 is probably better than option 2 in that
+                // it is a bit more faithful to what the JSON
+                // specification dictates (in that it will not attempt
+                // to invoke toJSON properties that resolve to
+                // non-functions), and it is a less invasive change to
+                // the JSON code.  So option 3 is what we implement
+                // here.
+
+
+                if (isXMLInstance(value))
+                {
+                    ScriptObject* obj = AvmCore::atomToScriptObject(value);
+                    probe = obj->getDelegate()->getMultinameProperty(&name);
+                }
+                else
+                {
+                    probe = m_toplevel->getproperty(value, &name, vtable);
+                }
             }
 
-            // toJSON dispatch
+            // toJSON dispatch only when probe is Callable value.
             if (core()->isFunction(probe)) {
                 // toJSON takes only strings for key, regardless of what
                 // form the properties take internally.
@@ -1240,15 +1294,9 @@ namespace avmplus
                     key = core()->uintToString(uintKey)->atom();
                 }
 
-                // TODO: Ensure this is setting up the 'this' appropriately
                 Atom args[2] = { value, key };
                 if (TryToplevelCall(&probe, 1, args, &value))
                     return kThrewException;
-
-                // TODO: Ensure toJSON dispatch should looks in Traits of
-                // an AS3 object as well as in object's dynamic
-                // properties. (Might already get for free via multiname
-                // lookup on public namespace.)
             }
         }
 

@@ -393,7 +393,6 @@ public final dynamic class XML extends Object
         return x.AS3::toXMLString()
     }
 
-
     _dontEnumPrototype(prototype);
 }
 
