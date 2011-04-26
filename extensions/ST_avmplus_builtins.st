@@ -40,6 +40,7 @@
 
 %%component avmplus
 %%category builtins
+%%ifndef    VMCFG_ARM
 
 %%test WeakValueHashTable
     WeakValueHashtable* tbl = WeakValueHashtable::create(core->gc);

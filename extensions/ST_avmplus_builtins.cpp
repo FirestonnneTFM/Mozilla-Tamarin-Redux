@@ -41,6 +41,7 @@
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
+#if !defined VMCFG_ARM
 namespace avmplus {
 class ST_avmplus_builtins : public Selftest {
 public:
@@ -77,9 +78,11 @@ void ST_avmplus_builtins::test0() {
     }
 
 // Retain at least 250, but it would be unreasonable to retain more than 300
-#line 60 "ST_avmplus_builtins.st"
+#line 61 "ST_avmplus_builtins.st"
 verifyPass(sum >= 250 && sum <= 300, "sum >= 250 && sum <= 300", __FILE__, __LINE__);
+
 }
 void create_avmplus_builtins(AvmCore* core) { new ST_avmplus_builtins(core); }
 }
+#endif
 #endif
