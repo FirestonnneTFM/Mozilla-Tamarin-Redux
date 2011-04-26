@@ -85,6 +85,7 @@ class PerformanceRuntest(RuntestBase):
     detail = False
     fullpath = False
     raw = False
+    repo = ''
     vmargs2 = ''
     optimize = True
     perfm = False
@@ -220,6 +221,7 @@ class PerformanceRuntest(RuntestBase):
         print("    --index=        index file to use (must end with .py)")
         print("    --saveindex=    save results to given index file name")
         print("    --fullpath      print out full path for each test")
+        print("    --repo=         repository url (used when logging to performance db)")
         exit(c)
 
     def setOptions(self):
@@ -229,7 +231,7 @@ class PerformanceRuntest(RuntestBase):
                                  'runtime=','memory','metrics=','larger','vmversion=', 'vm2version=',
                                  'vmargs2=','nooptimize', 'score', 'saveindex=', 'index=',
                                  'perfm','csv=', 'csvappend','prettyprint', 'detail', 'raw',
-                                 'fullpath'])
+                                 'fullpath', 'repo='])
 
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -289,6 +291,8 @@ class PerformanceRuntest(RuntestBase):
                 self.saveIndexFile = v
             elif o in ('--fullpath',):
                 self.fullpath = True
+            elif o in ('--repo',):
+                self.repo = v
         
         self.avmname = self.avmname or self.avmDefaultName
         self.avm2name = self.avm2name or self.avm2DefaultName
@@ -570,12 +574,12 @@ class PerformanceRuntest(RuntestBase):
             a1 = self.testData[testName][metric]['avg1'] = mean(resultDict[metric])
 
             if self.logresults:
-                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" %
+                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s::%s;" %
                                    (testName, metric, r1, conf95(resultDict[metric]),
                                     self.testData[testName][metric]['avg1'],
                                     len(resultDict[metric]),
                                     self.osName.upper(), self.log_config,
-                                    self.avmrevision, self.vmname))
+                                    self.avmrevision, self.vmname, self.repo))
 
             if self.score:
                 self.updateScore(self.score1, metric, r1)
