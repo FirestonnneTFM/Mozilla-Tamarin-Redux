@@ -147,7 +147,6 @@ void ST_mmgc_weakref::test0() {
     // crash.
 
     for ( int i=1 ; i < 1000 ; i+= 2 ) {
-#line 131 "ST_mmgc_weakref.st"
 verifyPass(objs[i]->next->key == i-1, "objs[i]->next->key == i-1", __FILE__, __LINE__);
     }
 

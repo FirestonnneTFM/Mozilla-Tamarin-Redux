@@ -291,7 +291,6 @@ void ST_mmgc_bugzilla_580603::test0() {
 
     // print_minmax();
 
-#line 275 "ST_mmgc_580603.st"
 verifyPass(1, "1", __FILE__, __LINE__);
 }
 
@@ -310,7 +309,6 @@ void ST_mmgc_bugzilla_580603::test1() {
 
     // print_minmax();
 
-#line 292 "ST_mmgc_580603.st"
 verifyPass(1, "1", __FILE__, __LINE__);
 }
 

@@ -68,11 +68,9 @@ void ST_mmgc_gcheap::test0() {
        GCHeap *heap = GCHeap::GetGCHeap();
        for(int i=1;i<4;i++) {
        	  void *item = heap->Alloc(GCHeap::kOSAllocThreshold*i);
-#line 50 "ST_mmgc_gcheap.st"
 verifyPass(heap->Size(item) == GCHeap::kOSAllocThreshold*i, "heap->Size(item) == GCHeap::kOSAllocThreshold*i", __FILE__, __LINE__);
           heap->Free(item);
        }
-#line 53 "ST_mmgc_gcheap.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
@@ -80,9 +78,7 @@ void ST_mmgc_gcheap::test1() {
        GCHeap *heap = GCHeap::GetGCHeap();
        for(int i=1;i<10;i++) {
        	  void *item = heap->Alloc(GCHeap::kOSAllocThreshold*i, GCHeap::flags_Alloc, 1<<i);
-#line 59 "ST_mmgc_gcheap.st"
 verifyPass(heap->Size(item) == GCHeap::kOSAllocThreshold*i, "heap->Size(item) == GCHeap::kOSAllocThreshold*i", __FILE__, __LINE__);
-#line 60 "ST_mmgc_gcheap.st"
 verifyPass(uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0, "uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0", __FILE__, __LINE__);
 	      heap->Free(item);
        }
