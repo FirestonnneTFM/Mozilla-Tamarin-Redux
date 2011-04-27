@@ -395,7 +395,7 @@ class AcceptanceRuntest(RuntestBase):
                 else:
                     n=int(threading.currentThread().getName()[7:])-1
                 if n<len(self.androiddevices):
-                   extraVmArgs+=" --threadid=%d --androidid=%s %s" % (n,self.androiddevices[n],extraVmArgs)
+                   extraVmArgs=" --threadid=%d --androidid=%s %s" % (n,self.androiddevices[n],extraVmArgs)
             except:
                 print(sys.exc_info())
         
