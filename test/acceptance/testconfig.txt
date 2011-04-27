@@ -288,3 +288,8 @@ mmgc/outofmemory , (.*-Dgcthreshold|.*-Dverifyonly) ,, skip , Threshold test tak
 mmgc/pauseForGCIfCollectionImminent, arm-android-tvm-debug,, skip, Test takes too long to run on debug android shell
 
 
+###########
+# Running -ES compiled tests
+###########
+e4x/XML/setNotification , .*-ES , , skip, Testcase does not work with -ES
+
