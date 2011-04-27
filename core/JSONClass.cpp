@@ -209,6 +209,7 @@ namespace avmplus
         friend class JSONClass;
 
         JSONSerializer(Toplevel* toplevel,
+                       Namespace *as3ns,
                        ArrayObject* proplist,
                        FunctionObject* replacer,
                        String* gap);
@@ -520,6 +521,7 @@ namespace avmplus
         // (Note: JSONSerializer class is solely stack-allocated.)
 
         Toplevel* const  m_toplevel;
+        Namespace* const m_as3ns;
         ArrayObject*     m_proplist; // null implies enumerate all properties
         FunctionObject*  m_replacerFunction; // null implies no replacer
         String* const    m_gap;
@@ -572,7 +574,9 @@ namespace avmplus
                                                     FunctionObject* replacer,
                                                     String* gap)
     {
-        JSONSerializer serializer(vtable->toplevel(), proplist, replacer, gap);
+        Toplevel *toplevel = vtable->toplevel();
+        Namespace *as3ns = get_as3ns();
+        JSONSerializer serializer(toplevel, as3ns, proplist, replacer, gap);
         return serializer.stringify(value);
     }
 
@@ -961,10 +965,12 @@ namespace avmplus
     }
 
     JSONSerializer::JSONSerializer(Toplevel* toplevel,
+                                   Namespace *as3ns,
                                    ArrayObject* proplist,
                                    FunctionObject* replacer,
                                    String* gap)
         : m_toplevel(toplevel)
+        , m_as3ns(as3ns)
         , m_proplist(proplist)
         , m_replacerFunction(replacer)
         , m_gap(gap)
@@ -1226,12 +1232,6 @@ namespace avmplus
             Atom probe = nullObjectAtom;
             VTable* vtable = m_toplevel->toVTable(value);
 
-            // FSK: this is where we will deliberately deviating from Lars's
-            // original choice to skip Number/String/Boolean when doing toJSON
-            Multiname name;
-            name.setNamespace(core()->findPublicNamespace());
-            name.setName(m_str_toJSON);
-
             // hasproperty tells us if toJSON is present even if it is a
             // method of an AS3 class; such a toJSON method does need to
             // be public to be visible to hasproperty.
@@ -1241,55 +1241,29 @@ namespace avmplus
             // must be a multiname, and the numeric indices that the JA
             // methods pass as names should be handled by the
             // getUintProperty method instead of the Toplevel hasproperty.
-            if (m_toplevel->hasproperty(value, &name, vtable))
+
+            // Bug 652200: can't use getprop to lookup the (potentially
+            // overridden) toJSON property on XML objects directly,
+            // because getprop has special behavior for public names on
+            // XML objects.  We resolve this by adding another level of
+            // indirection: JSON will lookup toJSON in the AS3 namespace
+            // first, and the public namespace second.
+
+            Multiname name;
+            name.setNamespace(core()->findPublicNamespace());
+            name.setName(m_str_toJSON);
+
+            Multiname as3name;
+            as3name.setNamespace(m_as3ns);
+            as3name.setName(m_str_toJSON);
+
+            if (m_toplevel->hasproperty(value, &as3name, vtable))
             {
-                // Bug 652200: We can't use getprop to lookup the
-                // (potentially overridden) toJSON property on XML
-                // objects, because it has special behavior on XML
-                // objects.  We have three options:
-                // 1. Don't support toJSON on XML/XMLList,
-                // 2. Use callprop directly on .toJSON for the XML/XMLList, or
-                // 3. Use getprop on delegate (prototype) for the XML/XMLList.
-                //
-                // Option 1 will mean that we're stuck with whatever
-                // behavior we get from JSON's default handling of XML
-                // objects: returning the rendered JSON object {}.
-                // (The only way around producing {} is to put
-                // special-case code in JSON for XML, and if we're
-                // going to do that, we might as well go with options
-                // 2 or 3 above.)
-                //
-                // Option 2 will mean that we will attempt to perform
-                // toJSON invocations even if the client has assigned
-                // a non-function to the toJSON property.  This is
-                // is probably better than option 1.
-                //
-                // Option 3 will mean that we won't attempt a lookup
-                // on an individual XML object xmlobj, but rather go
-                // straight to its prototype.  But a property lookup
-                // on an individual object xmlobj cannot yield a
-                // function without delegating to its prototype
-                // anyway, so we would never miss a toJSON the user
-                // was intending us to call.
-                //
-                // Option 3 is probably better than option 2 in that
-                // it is a bit more faithful to what the JSON
-                // specification dictates (in that it will not attempt
-                // to invoke toJSON properties that resolve to
-                // non-functions), and it is a less invasive change to
-                // the JSON code.  So option 3 is what we implement
-                // here.
-
-
-                if (isXMLInstance(value))
-                {
-                    ScriptObject* obj = AvmCore::atomToScriptObject(value);
-                    probe = obj->getDelegate()->getMultinameProperty(&name);
-                }
-                else
-                {
-                    probe = m_toplevel->getproperty(value, &name, vtable);
-                }
+                probe = m_toplevel->getproperty(value, &as3name, vtable);
+            }
+            else if (m_toplevel->hasproperty(value, &name, vtable))
+            {
+                probe = m_toplevel->getproperty(value, &name, vtable);
             }
 
             // toJSON dispatch only when probe is Callable value.

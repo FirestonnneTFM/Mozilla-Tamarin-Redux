@@ -168,6 +168,9 @@ public final dynamic class XML extends Object
     AS3 native function notification():Function;
     AS3 native function setNotification(f:Function);
 
+    // Bug 652200: level of indirection so JSON sidesteps E4X [[Get]] semantics
+    AS3 function toJSON (k:String):* { return this.public::toJSON(k); }
+
     // Dummy constructor function - This is neccessary so the compiler can do arg # checking for the ctor in strict mode
     // The code for the actual ctor is in XMLClass::construct in the avmplus
     public function XML(value = void 0)
@@ -394,7 +397,7 @@ public final dynamic class XML extends Object
     }
 
     // Note: clients are free to replace with method returning non-string
-    prototype.toJSON = function():* { return "XML"; }
+    prototype.toJSON = function(k:String):* { return "XML"; }
 
     _dontEnumPrototype(prototype);
 }
@@ -460,6 +463,9 @@ public final dynamic class XMLList extends Object
     AS3 native function setName (name):void;
     AS3 native function setNamespace (ns):void;
 
+    // Bug 652200: level of indirection so JSON sidesteps E4X [[Get]] semantics
+    AS3 function toJSON (k:String):* { return this.toJSON(k); }
+
     // notification extensions(reserved)
     //public native function notification():Function;
     //public native function setNotification(f:Function);
@@ -468,7 +474,6 @@ public final dynamic class XMLList extends Object
     // The code for the actual ctor is in XMLList::construct in the avmplus
     public function XMLList(value = void 0)
     {}
-
 
     // this is what rhino appears to do, not sure why bother
     prototype.valueOf = Object.prototype.valueOf
@@ -676,7 +681,7 @@ public final dynamic class XMLList extends Object
     }
 
     // Note: clients are free to replace with method returning non-string
-    prototype.toJSON = function():* { return "XMLList"; }
+    prototype.toJSON = function(k:String):* { return "XMLList"; }
 
     _dontEnumPrototype(prototype);
 
