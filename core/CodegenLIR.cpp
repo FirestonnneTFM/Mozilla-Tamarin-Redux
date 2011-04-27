@@ -5264,43 +5264,45 @@ namespace avmplus
                 else if (maybeIntegerIndex && indexType == NUMBER_TYPE) {
                     bool bGeneratedFastPath = false;
 #ifdef VMCFG_FASTPATH_ADD_INLINE
-                    // TODO: Since a helper must be called anyhow, I conjecture that fused add-and-index helpers
-                    // may be more efficient than the inlining done here.  On the other hand, it is plausible that
-                    // we would go the other way and completely inline the getNativeXXXProperty cases, in which
-                    // case we'd want to retain this for the sake of more thorough inlining.
-                    LOpcode op = index->opcode();
-                    if (op == LIR_addd || op == LIR_subd) {
-                        CodegenLabel slow_path("slow");
-                        CodegenLabel done_path("done");
-                        LIns* tempResult = insAllocForTraits(result);
-                        suspendCSE();
-                        LIns* a = index->oprnd1();
-                        LIns* b = index->oprnd2();
-                        // Our addjovi only works with signed integers so don't use isPromote.
-                        a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
-                        b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
-                        if (a && b) {
-                            // Inline fast path for index generated from integer add
-                            // if (a+b) does not overflow && ((a+b) >= 0)
-                            //   call getUintProperty(obj, a + b)
-                            // else
-                            //   call getprop_index_add (env, obj, multiname, a, b)
-                            // (for subtraction, we emit (a-b) and call getprop_index_subtract)
-                            LIns* addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
-                            branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
-                            LIns* value0 = emitGetIndexedProperty(sp-1, addOp, result, VI_UINT);
-                            stForTraits(result, value0, tempResult, 0, ACCSET_STORE_ANY);
-                            branchToLabel(LIR_j, NULL, done_path);
+                    if (inlineFastpath) {
+                        // TODO: Since a helper must be called anyhow, I conjecture that fused add-and-index helpers
+                        // may be more efficient than the inlining done here.  On the other hand, it is plausible that
+                        // we would go the other way and completely inline the getNativeXXXProperty cases, in which
+                        // case we'd want to retain this for the sake of more thorough inlining.
+                        LOpcode op = index->opcode();
+                        if (op == LIR_addd || op == LIR_subd) {
+                            CodegenLabel slow_path("slow");
+                            CodegenLabel done_path("done");
+                            LIns* tempResult = insAllocForTraits(result);
+                            suspendCSE();
+                            LIns* a = index->oprnd1();
+                            LIns* b = index->oprnd2();
+                            // Our addjovi only works with signed integers so don't use isPromote.
+                            a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
+                            b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
+                            if (a && b) {
+                                // Inline fast path for index generated from integer add
+                                // if (a+b) does not overflow && ((a+b) >= 0)
+                                //   call getUintProperty(obj, a + b)
+                                // else
+                                //   call getprop_index_add (env, obj, multiname, a, b)
+                                // (for subtraction, we emit (a-b) and call getprop_index_subtract)
+                                LIns* addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
+                                branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
+                                LIns* value0 = emitGetIndexedProperty(sp-1, addOp, result, VI_UINT);
+                                stForTraits(result, value0, tempResult, 0, ACCSET_STORE_ANY);
+                                branchToLabel(LIR_j, NULL, done_path);
 
-                            emitLabel(slow_path);
-                            LIns* value1 = emitGetIndexedProperty(sp-1, index, result, VI_DOUBLE);
-                            stForTraits(result, value1, tempResult, 0, ACCSET_STORE_ANY);
+                                emitLabel(slow_path);
+                                LIns* value1 = emitGetIndexedProperty(sp-1, index, result, VI_DOUBLE);
+                                stForTraits(result, value1, tempResult, 0, ACCSET_STORE_ANY);
 
-                            emitLabel(done_path);
-                            localSet(sp-1, ldForTraits(result, tempResult, 0, ACCSET_LOAD_ANY), result);
-                            bGeneratedFastPath = true;
+                                emitLabel(done_path);
+                                localSet(sp-1, ldForTraits(result, tempResult, 0, ACCSET_LOAD_ANY), result);
+                                bGeneratedFastPath = true;
+                            }
+                            resumeCSE();
                         }
-                        resumeCSE();
                     }
 #endif // VMCFG_FASTPATH_ADD_INLINE
                     if (!bGeneratedFastPath) {
@@ -5367,35 +5369,37 @@ namespace avmplus
                 else if (maybeIntegerIndex && indexType == NUMBER_TYPE) {
                     bool bGeneratedFastPath = false;
 #ifdef VMCFG_FASTPATH_ADD_INLINE
-                    LOpcode op = index->opcode();
-                    if (op == LIR_addd || op == LIR_subd) {
-                        CodegenLabel slow_path("slow");
-                        CodegenLabel done_path("done");
-                        suspendCSE();
-                        LIns *a = index->oprnd1();
-                        LIns *b = index->oprnd2();
-                        // Our addjovi only works with signed integers.
-                        a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
-                        b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
-                        if (a && b) {
-                            // Inline fast path for index generated from integer add
-                            // if (a + b) does not overflow && ((a+b) >= 0)
-                            //   call setProperty(obj, value, a + b)
-                            // else
-                            //   call set/initprop_index_add(env, obj, name, value, a, b)
-                            // (for subtraction, we emit (a-b) and call set/initprop_index_subtract)
-                            LIns* addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
-                            branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
-                            emitSetIndexedProperty(sp-2, sp, addOp, VI_UINT);
-                            branchToLabel(LIR_j, NULL, done_path);
+                    if (inlineFastpath) {
+                        LOpcode op = index->opcode();
+                        if (op == LIR_addd || op == LIR_subd) {
+                            CodegenLabel slow_path("slow");
+                            CodegenLabel done_path("done");
+                            suspendCSE();
+                            LIns *a = index->oprnd1();
+                            LIns *b = index->oprnd2();
+                            // Our addjovi only works with signed integers.
+                            a = (a->opcode() == LIR_i2d) ? a->oprnd1() : imm2Int(a);
+                            b = (b->opcode() == LIR_i2d) ? b->oprnd1() : imm2Int(b);
+                            if (a && b) {
+                                // Inline fast path for index generated from integer add
+                                // if (a + b) does not overflow && ((a+b) >= 0)
+                                //   call setProperty(obj, value, a + b)
+                                // else
+                                //   call set/initprop_index_add(env, obj, name, value, a, b)
+                                // (for subtraction, we emit (a-b) and call set/initprop_index_subtract)
+                                LIns* addOp = branchJovToLabel((op == LIR_addd) ? LIR_addjovi : LIR_subjovi, a, b, slow_path);
+                                branchToLabel(LIR_jt, binaryIns(LIR_lti, addOp, InsConst(0)), slow_path);
+                                emitSetIndexedProperty(sp-2, sp, addOp, VI_UINT);
+                                branchToLabel(LIR_j, NULL, done_path);
 
-                            emitLabel(slow_path);
-                            emitSetIndexedProperty(sp-2, sp, index, VI_DOUBLE);
+                                emitLabel(slow_path);
+                                emitSetIndexedProperty(sp-2, sp, index, VI_DOUBLE);
 
-                            emitLabel(done_path);
-                            bGeneratedFastPath = true;
+                                emitLabel(done_path);
+                                bGeneratedFastPath = true;
+                            }
+                            resumeCSE();
                         }
-                        resumeCSE();
                     }
 #endif // VMCFG_FASTPATH_ADD_INLINE
                     if (!bGeneratedFastPath) {
