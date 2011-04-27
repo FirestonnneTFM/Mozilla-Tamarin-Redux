@@ -709,7 +709,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Impossibile modificare la lunghezza di un vettore fisso.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Tentativo di applicazione del tipo a un tipo non parametrizzato.</error>
   <error id="1128" label="kWrongTypeArgCountError">Numero di parametri di tipo non corretto per %1. Previsti: %2, ricevuti: %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">Impossibile convertire una struttura ciclica in stringa JSON.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">L'argomento replacer per uno stringifier JSON deve essere una funzione a due parametri.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Input parser JSON non valido.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">Errore durante l'apertura del file %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">

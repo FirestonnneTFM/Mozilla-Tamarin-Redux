@@ -709,7 +709,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">无法更改固定矢量的长度。</error>
   <error id="1127" label="kTypeAppOfNonParamType">尝试对非参数化类型执行类型应用程序。</error>
   <error id="1128" label="kWrongTypeArgCountError">%1 的类型参数的个数不正确。应为 %2，当前为 %3。</error>
-
+  <error id="1129" label="kJSONCyclicStructure">循环结构无法转换为 JSON 字符串。</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">JSON stringifier 的 Replacer 参数必须是数组或两参数函数。</error>
+  <error id="1132" label="kJSONInvalidParseInput">无效的 JSON 解析输入。</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">打开文件 %1 时出错。</error>
   <error id="1501" hidden="true" label="kFileWriteError">

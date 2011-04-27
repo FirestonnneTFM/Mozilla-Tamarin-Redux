@@ -626,7 +626,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Kan de lengte van een vaste vector niet wijzigen.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Er is geprobeerd een type toepassing te maken op een type dat geen parameter is.</error>
   <error id="1128" label="kWrongTypeArgCountError">Onjuist aantal type parameters voor %1. %2 verwacht, huidige waarde %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">De cyclische structuur kan niet worden geconverteerd naar een JSON-tekenreeks.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">Replacer-argument naar de JSON-tekenreeksfunctie moet een array zijn of een functie met twee parameters.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Ongeldige invoer voor JSON-parser</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">Er is een fout opgetreden bij het openen van bestand %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Er is een fout opgetreden bij het schrijven naar bestand %1.

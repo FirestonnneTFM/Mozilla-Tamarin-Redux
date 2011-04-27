@@ -626,7 +626,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Nelze změnit délku pevného vektoru.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Pokus o aplikaci typu u typu, který není parametrizován.</error>
   <error id="1128" label="kWrongTypeArgCountError">Nesprávný počet parametrů typu pro %1. Očekáváno %2, obdrženo %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">Cyklickou strukturu nelze převést na řetězec JSON.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">Argument pro nahrazení pro funkci JSON stringifier musí být pole nebo funkce s dvěma parametry.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Neplatný vstup analýzy JSON.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">Při otevírání souboru %1 došlo k chybě.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Při zápisu do souboru %1 došlo k chybě.

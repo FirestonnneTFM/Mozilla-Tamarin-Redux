@@ -709,7 +709,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">고정된 벡터의 길이를 변경할 수 없습니다.</error>
   <error id="1127" label="kTypeAppOfNonParamType">매개 변수가 없는 유형에서 유형을 적용하려고 했습니다.</error>
   <error id="1128" label="kWrongTypeArgCountError">%1에 대한 형식 매개 변수의 개수가 잘못되었습니다. %2개가 필요하지만 %3개가 있습니다.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">주기적 구조는 JSON 문자열로 변환될 수 없습니다.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">JSON Stringifier에 대한 Replacer 인수는 배열이거나 매개 변수가 2개인 함수여야 합니다.</error>
+  <error id="1132" label="kJSONInvalidParseInput">JSON 파서 입력이 잘못되었습니다.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">파일 %1을(를) 여는 동안 오류가 발생했습니다.</error>
   <error id="1501" hidden="true" label="kFileWriteError">
