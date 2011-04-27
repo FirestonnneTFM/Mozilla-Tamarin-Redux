@@ -393,6 +393,9 @@ public final dynamic class XML extends Object
         return x.AS3::toXMLString()
     }
 
+    // Note: clients are free to replace with method returning non-string
+    prototype.toJSON = function():* { return "XML"; }
+
     _dontEnumPrototype(prototype);
 }
 
@@ -671,6 +674,9 @@ public final dynamic class XMLList extends Object
         var x:XMLList = this
         return x.AS3::toXMLString()
     }
+
+    // Note: clients are free to replace with method returning non-string
+    prototype.toJSON = function():* { return "XMLList"; }
 
     _dontEnumPrototype(prototype);
 
