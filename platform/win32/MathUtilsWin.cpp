@@ -190,6 +190,22 @@ namespace avmplus
 #endif /* X86_MATH */
 
 #ifdef X86_MATH
+    double MathUtils::round(double value)
+    {
+        value += 0.5;
+
+        // todo avoid control word modification
+        short oldcw, newcw;
+        _asm fnstcw [oldcw];
+        _asm mov ax, [oldcw];
+        _asm and ax, 0xf3ff; // Set to round down.
+        _asm or  ax, 0x400;
+        _asm mov [newcw], ax;
+        _asm fldcw [newcw];
+        _asm fld [value];
+        _asm frndint;
+        _asm fldcw [oldcw];
+    }
     double MathUtils::floor(double value)
     {
         // todo avoid control word modification

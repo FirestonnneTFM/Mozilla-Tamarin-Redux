@@ -153,5 +153,8 @@ function getTestCases() {
    
     array[item++] = new TestCase( SECTION,    "Math.abs(.00000012345)", "1.2345e-7",Math.abs(.00000012345)+"");
 
+    var minInt:int = 0x80000000;
+    array[item++] = new TestCase( SECTION,    "Math.abs(MIN_INT)", "2147483648",Math.abs(minInt)+"");
+
     return ( array );
 }
