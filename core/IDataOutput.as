@@ -41,23 +41,23 @@ package flash.utils
 {
     
 /**
-* The IDataOutput interface provides a set of methods for writing binary data. 
-* This interface is the I/O counterpart to the IDataInput interface, which 
-* reads binary data. The IDataOutput interface is implemented by the FileStream, Socket 
+* The IDataOutput interface provides a set of methods for writing binary data.
+* This interface is the I/O counterpart to the IDataInput interface, which
+* reads binary data. The IDataOutput interface is implemented by the FileStream, Socket
 * and ByteArray classes.
-* <p>All IDataInput and IDataOutput operations are "bigEndian" by default (the most significant 
-* byte in the sequence is stored at the lowest or first storage address), 
+* <p>All IDataInput and IDataOutput operations are "bigEndian" by default (the most significant
+* byte in the sequence is stored at the lowest or first storage address),
 * and are nonblocking. </p>
 * <p>Sign extension matters only when you read data, not when you write it. Therefore, you do not need separate
-* write methods to work with <code>IDataInput.readUnsignedByte()</code> and 
+* write methods to work with <code>IDataInput.readUnsignedByte()</code> and
 * <code>IDataInput.readUnsignedShort()</code>. In other words:</p>
 * <ul>
-*   <li>Use <code>IDataOutput.writeByte()</code> with <code>IDataInput.readUnsignedByte()</code> and 
+*   <li>Use <code>IDataOutput.writeByte()</code> with <code>IDataInput.readUnsignedByte()</code> and
 *     <code>IDataInput.readByte()</code>.</li>
-*   <li>Use <code>IDataOutput.writeShort()</code> with <code>IDataInput.readUnsignedShort()</code> and 
+*   <li>Use <code>IDataOutput.writeShort()</code> with <code>IDataInput.readUnsignedShort()</code> and
 *     <code>IDataInput.readShort()</code>.</li>
 * </ul>
-* 
+*
 * @includeExample examples\DataOutputExample.as -noswf
 *
 * @see flash.utils.IDataInput IDataInput interface
@@ -68,7 +68,7 @@ package flash.utils
 * @see flash.utils.ByteArray ByteArray class
 * @playerversion Flash 9
 * @langversion 3.0
-*  
+*
 *  @playerversion Lite 4
 */
 public interface IDataOutput
@@ -76,7 +76,7 @@ public interface IDataOutput
     /**
      * Writes a sequence of bytes from the
      * specified byte array, <code>bytes</code>,
-     * starting at the byte specified by <code>offset</code> 
+     * starting at the byte specified by <code>offset</code>
      * (using a zero-based index)
      * with a length specified by <code>length</code>,
      * into the file stream, byte stream, or byte array.
@@ -86,7 +86,7 @@ public interface IDataOutput
      * <code>offset</code> is written.
      * If the <code>offset</code> parameter is also omitted, the entire buffer is
      * written. </p>
-     * 
+     *
      * <p>If the <code>offset</code> or <code>length</code> parameter
      * is out of range, they are clamped to the beginning and end
      * of the <code>bytes</code> array.</p>
@@ -97,7 +97,7 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeBytes(bytes:ByteArray,
@@ -108,13 +108,13 @@ public interface IDataOutput
      * Writes a Boolean value. A single byte is written according to the <code>value</code> parameter,
      * either 1 if <code>true</code> or 0 if <code>false</code>.
      *
-     * @param value A Boolean value determining which byte is written. If the parameter is <code>true</code>, 
+     * @param value A Boolean value determining which byte is written. If the parameter is <code>true</code>,
      * 1 is written; if <code>false</code>, 0 is written.
      *
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeBoolean(value:Boolean):void;
@@ -129,21 +129,21 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeByte(value:int):void;
 
 
     /**
-     * Writes a 16-bit integer. The low 16 bits of the parameter are used; 
+     * Writes a 16-bit integer. The low 16 bits of the parameter are used;
      * the high 16 bits are ignored.
      * @param value A byte value as an integer.
      *
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeShort(value:int):void;
@@ -156,7 +156,7 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeInt(value:int):void;
@@ -169,7 +169,7 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeUnsignedInt(value:uint):void;
@@ -182,7 +182,7 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeFloat(value:Number):void;
@@ -195,33 +195,33 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeDouble(value:Number):void;
 
 
     /**
-     * Writes a multibyte string to the file stream, byte stream, or byte array, using the specified character set. 
+     * Writes a multibyte string to the file stream, byte stream, or byte array, using the specified character set.
      *
      * @param value The string value to be written.
      * @param charSet The string denoting the character set to use. Possible character set strings
      * include <code>"shift-jis"</code>, <code>"cn-gb"</code>, <code>"iso-8859-1"</code>, and others.
-     * For a complete list, see <a href="../../charset-codes.html">Supported Character Sets</a>. 
+     * For a complete list, see <a href="../../charset-codes.html">Supported Character Sets</a>.
      * @playerversion Flash 9
      * @langversion 3.0
      * @helpid
-     * @refpath 
+     * @refpath
      * @keyword IDataOutput, IDataOutput.writeMultiByte, writeMultiByte
-     *  
+     *
      *  @playerversion Lite 4
-     */ 
+     */
     function writeMultiByte(value:String, charSet:String):void;
 
 
     /**
-     * Writes a UTF-8 string to the file stream, byte stream, or byte array. The length of the UTF-8 string in bytes 
-     * is written first, as a 16-bit integer, followed by the bytes representing the 
+     * Writes a UTF-8 string to the file stream, byte stream, or byte array. The length of the UTF-8 string in bytes
+     * is written first, as a 16-bit integer, followed by the bytes representing the
      * characters of the string.
      * @param value The string value to be written.
      *
@@ -231,7 +231,7 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeUTF(value:String):void;
@@ -245,7 +245,7 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function writeUTFBytes(value:String):void;
@@ -262,14 +262,14 @@ public interface IDataOutput
      * @internal throws IOError An I/O error occurred?
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
-    function writeObject(object:*):void;    
+    function writeObject(object:*):void;
 
 
     /**
-     * Used to determine whether the AMF3 or AMF0 format is used when writing or reading binary data using the 
+     * Used to determine whether the AMF3 or AMF0 format is used when writing or reading binary data using the
      * <code>writeObject()</code> method. The value is a constant from the ObjectEncoding class.
      *
      * @see IDataInput#readObject()
@@ -277,7 +277,7 @@ public interface IDataOutput
      * @see flash.net.ObjectEncoding ObjectEncoding class
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function get objectEncoding():uint;
@@ -285,13 +285,13 @@ public interface IDataOutput
 
 
     /**
-     * The byte order for the data, either the <code>BIG_ENDIAN</code> or <code>LITTLE_ENDIAN</code> 
+     * The byte order for the data, either the <code>BIG_ENDIAN</code> or <code>LITTLE_ENDIAN</code>
      * constant from the Endian class.
      *
      * @see flash.utils.Endian Endian class
      * @playerversion Flash 9
      * @langversion 3.0
-     *  
+     *
      *  @playerversion Lite 4
      */
     function get endian():String;

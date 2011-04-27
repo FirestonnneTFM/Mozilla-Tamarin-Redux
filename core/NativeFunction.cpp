@@ -133,7 +133,7 @@ namespace avmplus
     bool NativeInitializer::getCompiledInfo(NativeMethodInfo *info, AvmThunkNativeHandler* handlerOut, Multiname &returnTypeName, uint32_t i) const
     {
         info->thunker = (GprMethodProc)0;
-        // NativeMethodInfo.handler is a union of 
+        // NativeMethodInfo.handler is a union of
         // pointer to function and pointer to member function.
         // Set them both so the entire union is initialized.
         // See bugzilla#647660
@@ -209,8 +209,8 @@ namespace avmplus
 
     bool ClassManifestBase::gcTrace(MMgc::GC* gc, size_t /*ignored*/)
     {
-        gc->TraceLocation<ScriptEnv>(&_env); 
-        gc->TraceLocations<ClassClosure>(&_classes[0], _count); 
+        gc->TraceLocation<ScriptEnv>(&_env);
+        gc->TraceLocations<ClassClosure>(&_classes[0], _count);
         return false;
     }
 }

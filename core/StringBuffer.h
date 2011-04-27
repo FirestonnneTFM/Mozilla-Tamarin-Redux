@@ -47,7 +47,7 @@ namespace avmplus
      * StringBuffer is a PrintWriter subclass which enables easy, cout-like output of
      * text to a string buffer in memory.
      *
-     * NOTE!  This is *not* a GC class.  A StringBuffer instance *must* be allocated 
+     * NOTE!  This is *not* a GC class.  A StringBuffer instance *must* be allocated
      * on the stack, inside GCRoots, or inside GC'd objects (as a member, not a pointer).
      *
      * A StringBuffer has a destructor which will free resouces opportunistically,

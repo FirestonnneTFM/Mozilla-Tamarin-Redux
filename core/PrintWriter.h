@@ -123,10 +123,10 @@ namespace avmplus
      *
      * A PrintWriter will keep any installed GCOutputStream alive.
      *
-     * An exception can jump past the destructor of a PrintWriter without resources 
+     * An exception can jump past the destructor of a PrintWriter without resources
      * leaking.
      *
-     * NOTE!  This is *not* a GC class.  A PrintWriter instance *must* be allocated 
+     * NOTE!  This is *not* a GC class.  A PrintWriter instance *must* be allocated
      * on the stack, inside GCRoots, or inside GC'd objects (as a member, not a pointer).
      */
     class PrintWriter

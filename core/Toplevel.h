@@ -68,7 +68,7 @@ namespace avmplus
         ScriptObject* global() const;
         Atom atom() const;
 
-        // these are now all just convenience legacy wrappers 
+        // these are now all just convenience legacy wrappers
         // around builtinClasses()->get_SomeClass()
         GCRef<ArgumentErrorClass> argumentErrorClass() const;
         GCRef<ArrayClass> arrayClass() const;
@@ -477,7 +477,7 @@ namespace avmplus
         // This are also needed for bootstrapping, but shouldn't be accessible
         // to the general public.
         // NB: if you add or change these, you may need to
-        // update ClassManifestBase::lazyInitClass. 
+        // update ClassManifestBase::lazyInitClass.
         friend class ClassClass;
         friend class FunctionClass;
         friend class MethodEnv;
@@ -486,7 +486,7 @@ namespace avmplus
     private:
         // These exist solely for CodegenLIR to access
         // NB: if you add or change these, you may need to
-        // update ClassManifestBase::lazyInitClass. 
+        // update ClassManifestBase::lazyInitClass.
         friend class CodegenLIR;
         friend class BooleanClass;
         friend class NamespaceClass;

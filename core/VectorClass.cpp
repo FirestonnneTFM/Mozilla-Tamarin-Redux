@@ -292,7 +292,7 @@ namespace avmplus
         // To work around this (and maintain legacy internal behavior), we pre-emptively
         // enter the Vector classes into the table upon first creation. (Arguably the name
         // lookup issue should be fixed.)
-        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_int, this); 
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_int, this);
         this->m_typeTraits = toplevel()->intClass()->traits()->itraits;
     }
 
@@ -311,7 +311,7 @@ namespace avmplus
         // To work around this (and maintain legacy internal behavior), we pre-emptively
         // enter the Vector classes into the table upon first creation. (Arguably the name
         // lookup issue should be fixed.)
-        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_uint, this); 
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_uint, this);
         this->m_typeTraits = toplevel()->uintClass()->traits()->itraits;
     }
 
@@ -330,7 +330,7 @@ namespace avmplus
         // To work around this (and maintain legacy internal behavior), we pre-emptively
         // enter the Vector classes into the table upon first creation. (Arguably the name
         // lookup issue should be fixed.)
-        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_double, this); 
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_double, this);
         this->m_typeTraits = toplevel()->numberClass()->traits()->itraits;
     }
 
@@ -349,7 +349,7 @@ namespace avmplus
         // To work around this (and maintain legacy internal behavior), we pre-emptively
         // enter the Vector classes into the table upon first creation. (Arguably the name
         // lookup issue should be fixed.)
-        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_object, this); 
+        toplevel()->builtinClasses()->fillInClass(avmplus::NativeID::abcclass___AS3___vec_Vector_object, this);
         this->m_typeTraits = toplevel()->objectClass->traits()->itraits;
     }
 

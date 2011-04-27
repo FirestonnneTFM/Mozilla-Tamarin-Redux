@@ -1694,9 +1694,9 @@ namespace avmplus
         // See comment in initActivationTraits about why this can be called more than once per Traits
         if (activationTraits->init == NULL) {
             if (aotInfo->activationInfo[m->method_id()].initHandler) {
-                // NativeMethodInfo.handler is a union of 
+                // NativeMethodInfo.handler is a union of
                 // pointer to function and pointer to member function.
-                // Zero the structure so that the entire thing is 
+                // Zero the structure so that the entire thing is
                 // initialized.
                 // See bugzilla#647660
                 NativeMethodInfo compiledMethodInfo = {0};

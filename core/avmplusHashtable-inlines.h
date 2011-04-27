@@ -164,7 +164,7 @@ namespace avmplus
     }
     
     REALLY_INLINE size_t InlineHashtable::AtomContainer::count() const
-    { 
+    {
         size_t count = (MMgc::GC::Size(this) - sizeof(AtomContainer) + sizeof(Atom)) / sizeof(Atom);
         AvmAssert(count > 0);
         size_t powof2 = 1;
@@ -176,7 +176,7 @@ namespace avmplus
     }
 
     REALLY_INLINE InlineHashtable::AtomContainer* InlineHashtable::createAtoms(MMgc::GC* gc, int capacity) const
-    { 
+    {
         size_t extra = 0;
         if (capacity > 0)
             extra = MMgc::GCHeap::CheckForCallocSizeOverflow(capacity-1, sizeof(Atom));
