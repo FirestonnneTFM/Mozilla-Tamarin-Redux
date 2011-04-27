@@ -57,7 +57,7 @@ namespace avmplus
     class GC_CPP_EXACT(ExactGCTest, ScriptObject)
     {
     public:
-		ExactGCTest() : ScriptObject(NULL,NULL) {}
+        ExactGCTest() : ScriptObject(NULL,NULL) {}
 
         GC_DATA_BEGIN(ExactGCTest)
 

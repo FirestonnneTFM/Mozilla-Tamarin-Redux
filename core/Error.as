@@ -284,12 +284,12 @@ package
 package flash.errors
 {
     public dynamic class IOError extends Error {
-       /** 
+       /**
         * @private
         **/
         public function IOError(message:String = "", id:int = 0) {
             super(message, id);
-        }   
+        }
     }
 
     public dynamic class EOFError extends IOError {
@@ -298,17 +298,17 @@ package flash.errors
         **/
         public function EOFError(message:String = "", id:int = 0) {
             super(message, id);
-        }   
+        }
     }
 
     public dynamic class MemoryError extends Error {
         
-       /** 
+       /**
         * @private
-        **/     
+        **/
         public function MemoryError(message:String = "", id:int = 0) {
             super(message, id);
-        }   
+        }
     }
 
     IOError.prototype.name                  = "IOError"

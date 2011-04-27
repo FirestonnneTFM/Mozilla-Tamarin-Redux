@@ -55,7 +55,7 @@ const char* const kApiVersionNames[kApiVersion_count] = {
     "SWF_12",
     "AIR_2_7",
     "SWF_13",
-    "AIR_3_0", 
+    "AIR_3_0",
     "VM_INTERNAL"
 };
 

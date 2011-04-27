@@ -54,14 +54,14 @@ namespace avmplus
     // Architecture overview: The only class visible outside this file
     // is JSONClass, and it provides a parsing method, parseCore, which
     // reads in strings and produces objects, and a stringification
-    // method, stringifySpecializedToString, which reads in objects and 
+    // method, stringifySpecializedToString, which reads in objects and
     // produces strings.
-    // 
+    //
     //
     // PARSING
     //
     // JSONClass::parseCore is a simple, hopefully fast, parser.  It
-    // delegates its work to the JSONParser class, which defines a 
+    // delegates its work to the JSONParser class, which defines a
     // set of mutually recursive methods.  The parser is simple
     // for the following reasons:
     //
@@ -123,8 +123,8 @@ namespace avmplus
     // then immediately rethrow it.
     //
     // The structure of the code is meant to parallel the description
-    // of the stringification algorithm described in section 15 of 
-    // ECMA-262 5th ed.  Some deviations in its structure were 
+    // of the stringification algorithm described in section 15 of
+    // ECMA-262 5th ed.  Some deviations in its structure were
     // introduced to avoid creation of intermediate strings during
     // the process.  (And of course, other code changes were introduced
     // to support AS3-only features such as class instances that are

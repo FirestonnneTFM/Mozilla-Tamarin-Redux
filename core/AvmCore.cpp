@@ -668,9 +668,9 @@ namespace avmplus
             AvmAssert(method->method_id() < aotInfo->nActivationTraits);
             aotInfo->activationTraits[method->method_id()] = activationTraits;
             if (aotInfo->activationInfo[method->method_id()].initHandler != NULL) {
-                // NativeMethodInfo.handler is a union of 
+                // NativeMethodInfo.handler is a union of
                 // pointer to function and pointer to member function.
-                // Zero the structure so that the entire thing is 
+                // Zero the structure so that the entire thing is
                 // initialized.
                 // See bugzilla#647660
                 NativeMethodInfo compiledMethodInfo = {0};

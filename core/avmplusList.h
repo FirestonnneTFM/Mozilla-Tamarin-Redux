@@ -442,7 +442,7 @@ namespace avmplus
         void destroy();
 
         // return true iff destroy() has been called for this list.
-        bool isDestroyed() const; 
+        bool isDestroyed() const;
 
         // Trace GC pointers in the owned data, if appropriate for the data type.
         void gcTrace(MMgc::GC* gc);

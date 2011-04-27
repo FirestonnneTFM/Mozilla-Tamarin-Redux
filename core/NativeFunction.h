@@ -353,7 +353,7 @@ namespace avmplus
     public:
         avmplus::ScriptEnv* env() const { return _env; }
     protected:
-        uint32_t const _count;                  
+        uint32_t const _count;
         avmplus::ScriptEnv* const _env;         // const non-RC, so no WB needed
         avmplus::ClassClosure* _classes[1];     // lying, really [_count]. written with explicit WBRCs.
     protected:

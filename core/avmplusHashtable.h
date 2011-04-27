@@ -246,7 +246,7 @@ namespace avmplus
         class GC_CPP_EXACT(AtomContainer, MMgc::GCTraceableObject)
         {
         public:
-            /** 
+            /**
              * In theory size should come from m_size but that isn't
              * accessible to us here so we just scan all the atoms
              * that could possibly be there based on GC::Size.
