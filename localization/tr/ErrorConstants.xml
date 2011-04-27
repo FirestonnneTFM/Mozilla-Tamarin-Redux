@@ -626,7 +626,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Sabit bir vektörün uzunluğu değiştirilemez.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Tür uygulaması parametreleştirilmemiş bir türde denendi.</error>
   <error id="1128" label="kWrongTypeArgCountError">%1 için hatalı sayıda tür parametresi. Beklenen: %2, alınan: %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">Döngüsel yapı JSON dizesine dönüştürülemiyor.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">JSON dize tanımlayıcısına giden değiştirici argüman bir dizi veya iki parametreli bir fonksiyon olmalıdır.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Geçersiz JSON ayrıştırma girişi.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">%1 dosyası açılırken hata oluştu.</error>
   <error id="1501" hidden="true" label="kFileWriteError">%1 dosyasına yazarken hata oluştu.

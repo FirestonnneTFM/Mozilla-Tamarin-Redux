@@ -626,7 +626,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Невозможно изменить длину фиксированного вектора.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Выполнена попытка выбора непараметризованного типа приложения.</error>
   <error id="1128" label="kWrongTypeArgCountError">Неверное количество параметров типа для %1. Ожидалось %2, получено %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">Циклическая структура не может быть преобразована в строку JSON.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">Аргумент Replacer в инструменте JSON Stringifier должен быть массивом или функцией с двумя параметрами.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Недействительный ввод в синтаксическом анализаторе JSON.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">Ошибка при открытии файла %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Ошибка при записи в файл %1.

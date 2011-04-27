@@ -709,7 +709,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">固定ベクターの長さは変更できません。</error>
   <error id="1127" label="kTypeAppOfNonParamType">非パラメーター化された型に対して型指定を実行しようとしました。</error>
   <error id="1128" label="kWrongTypeArgCountError">%1 の型パラメーター数が正しくありません。%2 である必要がありますが、%3 が指定されました。</error>
-
+  <error id="1129" label="kJSONCyclicStructure">周期的な構成を JSON 文字列に変換できません。</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">JSON stringifier への Replacer 引数は、1 つの配列または 2 つのパラメーターである必要があります。</error>
+  <error id="1132" label="kJSONInvalidParseInput">無効な JSON パース入力です。</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">ファイル %1 を開く際にエラーが発生しました。</error>
   <error id="1501" hidden="true" label="kFileWriteError">

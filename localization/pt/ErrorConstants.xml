@@ -626,7 +626,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Não é possível alterar o comprimento de um vetor fixo.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Tipo de aplicativo tentado de forma não-parametrizada.</error>
   <error id="1128" label="kWrongTypeArgCountError">Número incorreto de parâmetros de tipo para %1. Era esperado %2, mas foi recebido %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">Uma estrutura cíclica não pode ser convertida em uma string JSON.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">O argumento Replacer do gerador de string JSON precisa ser uma matriz ou uma função com dois parâmetros.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Entrada inválida de análise JSON.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">Erro ao abrir o arquivo %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Erro ao gravar o arquivo %1.

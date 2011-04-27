@@ -626,7 +626,11 @@ class B extends A {
   <error id="1126" label="kVectorFixedError">Nie można zmienić długości stałego wektora.</error>
   <error id="1127" label="kTypeAppOfNonParamType">Podjęto próbę zastosowania typu do niesparametryzowanego typu.</error>
   <error id="1128" label="kWrongTypeArgCountError">Nieprawidłowa liczba parametrów typu dla %1. Oczekiwano %2, otrzymano %3.</error>
-
+  <error id="1129" label="kJSONCyclicStructure">Nie można przekonwertować struktury cyklicznej na ciąg JSON.</error>
+  <!-- id 1130 was allocated and later became unnecessary. -->
+  <error id="1131" label="kJSONInvalidReplacer">Argument replacer (zastępowania) przekazany do modułu tworzenia ciągów JSON musi być tablicą lub funkcją pobierającą dwa parametry.</error>
+  <error id="1132" label="kJSONInvalidParseInput">Nieprawidłowe dane wejściowe parsera JSON.</error>
+ 
   <!-- The following errors are specific to the AVM2 command-line shell.-->
   <error id="1500" hidden="true" label="kFileOpenError">Podczas otwierania pliku %1 wystąpił błąd.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Podczas zapisywania do pliku %1 wystąpił błąd.
