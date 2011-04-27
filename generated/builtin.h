@@ -436,87 +436,87 @@ const uint32_t XML_AS3_text = 772;
 const uint32_t XML_AS3_toXMLString = 773;
 const uint32_t XML_AS3_notification = 774;
 const uint32_t XML_AS3_setNotification = 775;
-const uint32_t XMLList_AS3_toString = 818;
-const uint32_t XMLList_AS3_hasOwnProperty = 820;
-const uint32_t XMLList_AS3_propertyIsEnumerable = 821;
-const uint32_t XMLList_AS3_attribute = 822;
-const uint32_t XMLList_AS3_attributes = 823;
-const uint32_t XMLList_AS3_child = 824;
-const uint32_t XMLList_AS3_children = 825;
-const uint32_t XMLList_AS3_comments = 826;
-const uint32_t XMLList_AS3_contains = 827;
-const uint32_t XMLList_AS3_copy = 828;
-const uint32_t XMLList_AS3_descendants = 829;
-const uint32_t XMLList_AS3_elements = 830;
-const uint32_t XMLList_AS3_hasComplexContent = 831;
-const uint32_t XMLList_AS3_hasSimpleContent = 832;
-const uint32_t XMLList_AS3_length = 833;
-const uint32_t XMLList_AS3_name = 834;
-const uint32_t XMLList_AS3_normalize = 835;
-const uint32_t XMLList_AS3_parent = 836;
-const uint32_t XMLList_AS3_processingInstructions = 837;
-const uint32_t XMLList_AS3_text = 838;
-const uint32_t XMLList_AS3_toXMLString = 839;
-const uint32_t XMLList_AS3_addNamespace = 840;
-const uint32_t XMLList_AS3_appendChild = 841;
-const uint32_t XMLList_AS3_childIndex = 842;
-const uint32_t XMLList_AS3_inScopeNamespaces = 843;
-const uint32_t XMLList_AS3_insertChildAfter = 844;
-const uint32_t XMLList_AS3_insertChildBefore = 845;
-const uint32_t XMLList_AS3_nodeKind = 846;
-const uint32_t XMLList_private__namespace = 847;
-const uint32_t XMLList_AS3_localName = 849;
-const uint32_t XMLList_AS3_namespaceDeclarations = 850;
-const uint32_t XMLList_AS3_prependChild = 851;
-const uint32_t XMLList_AS3_removeNamespace = 852;
-const uint32_t XMLList_AS3_replace = 853;
-const uint32_t XMLList_AS3_setChildren = 854;
-const uint32_t XMLList_AS3_setLocalName = 855;
-const uint32_t XMLList_AS3_setName = 856;
-const uint32_t XMLList_AS3_setNamespace = 857;
-const uint32_t QName_localName_get = 861;
-const uint32_t QName_uri_get = 862;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 912;
-const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 913;
-const uint32_t flash_utils_ByteArray_readBytes = 915;
-const uint32_t flash_utils_ByteArray_writeBytes = 916;
-const uint32_t flash_utils_ByteArray_writeBoolean = 917;
-const uint32_t flash_utils_ByteArray_writeByte = 918;
-const uint32_t flash_utils_ByteArray_writeShort = 919;
-const uint32_t flash_utils_ByteArray_writeInt = 920;
-const uint32_t flash_utils_ByteArray_writeUnsignedInt = 921;
-const uint32_t flash_utils_ByteArray_writeFloat = 922;
-const uint32_t flash_utils_ByteArray_writeDouble = 923;
-const uint32_t flash_utils_ByteArray_writeMultiByte = 924;
-const uint32_t flash_utils_ByteArray_writeUTF = 925;
-const uint32_t flash_utils_ByteArray_writeUTFBytes = 926;
-const uint32_t flash_utils_ByteArray_readBoolean = 927;
-const uint32_t flash_utils_ByteArray_readByte = 928;
-const uint32_t flash_utils_ByteArray_readUnsignedByte = 929;
-const uint32_t flash_utils_ByteArray_readShort = 930;
-const uint32_t flash_utils_ByteArray_readUnsignedShort = 931;
-const uint32_t flash_utils_ByteArray_readInt = 932;
-const uint32_t flash_utils_ByteArray_readUnsignedInt = 933;
-const uint32_t flash_utils_ByteArray_readFloat = 934;
-const uint32_t flash_utils_ByteArray_readDouble = 935;
-const uint32_t flash_utils_ByteArray_readMultiByte = 936;
-const uint32_t flash_utils_ByteArray_readUTF = 937;
-const uint32_t flash_utils_ByteArray_readUTFBytes = 938;
-const uint32_t flash_utils_ByteArray_length_get = 939;
-const uint32_t flash_utils_ByteArray_length_set = 940;
-const uint32_t flash_utils_ByteArray_writeObject = 941;
-const uint32_t flash_utils_ByteArray_readObject = 942;
-const uint32_t flash_utils_ByteArray_private__compress = 944;
-const uint32_t flash_utils_ByteArray_private__uncompress = 947;
-const uint32_t flash_utils_ByteArray_private__toString = 950;
-const uint32_t flash_utils_ByteArray_bytesAvailable_get = 951;
-const uint32_t flash_utils_ByteArray_position_get = 952;
-const uint32_t flash_utils_ByteArray_position_set = 953;
-const uint32_t flash_utils_ByteArray_objectEncoding_get = 954;
-const uint32_t flash_utils_ByteArray_objectEncoding_set = 955;
-const uint32_t flash_utils_ByteArray_endian_get = 956;
-const uint32_t flash_utils_ByteArray_endian_set = 957;
-const uint32_t flash_utils_ByteArray_clear = 958;
+const uint32_t XMLList_AS3_toString = 819;
+const uint32_t XMLList_AS3_hasOwnProperty = 821;
+const uint32_t XMLList_AS3_propertyIsEnumerable = 822;
+const uint32_t XMLList_AS3_attribute = 823;
+const uint32_t XMLList_AS3_attributes = 824;
+const uint32_t XMLList_AS3_child = 825;
+const uint32_t XMLList_AS3_children = 826;
+const uint32_t XMLList_AS3_comments = 827;
+const uint32_t XMLList_AS3_contains = 828;
+const uint32_t XMLList_AS3_copy = 829;
+const uint32_t XMLList_AS3_descendants = 830;
+const uint32_t XMLList_AS3_elements = 831;
+const uint32_t XMLList_AS3_hasComplexContent = 832;
+const uint32_t XMLList_AS3_hasSimpleContent = 833;
+const uint32_t XMLList_AS3_length = 834;
+const uint32_t XMLList_AS3_name = 835;
+const uint32_t XMLList_AS3_normalize = 836;
+const uint32_t XMLList_AS3_parent = 837;
+const uint32_t XMLList_AS3_processingInstructions = 838;
+const uint32_t XMLList_AS3_text = 839;
+const uint32_t XMLList_AS3_toXMLString = 840;
+const uint32_t XMLList_AS3_addNamespace = 841;
+const uint32_t XMLList_AS3_appendChild = 842;
+const uint32_t XMLList_AS3_childIndex = 843;
+const uint32_t XMLList_AS3_inScopeNamespaces = 844;
+const uint32_t XMLList_AS3_insertChildAfter = 845;
+const uint32_t XMLList_AS3_insertChildBefore = 846;
+const uint32_t XMLList_AS3_nodeKind = 847;
+const uint32_t XMLList_private__namespace = 848;
+const uint32_t XMLList_AS3_localName = 850;
+const uint32_t XMLList_AS3_namespaceDeclarations = 851;
+const uint32_t XMLList_AS3_prependChild = 852;
+const uint32_t XMLList_AS3_removeNamespace = 853;
+const uint32_t XMLList_AS3_replace = 854;
+const uint32_t XMLList_AS3_setChildren = 855;
+const uint32_t XMLList_AS3_setLocalName = 856;
+const uint32_t XMLList_AS3_setName = 857;
+const uint32_t XMLList_AS3_setNamespace = 858;
+const uint32_t QName_localName_get = 863;
+const uint32_t QName_uri_get = 864;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_get = 914;
+const uint32_t flash_utils_ByteArray_defaultObjectEncoding_set = 915;
+const uint32_t flash_utils_ByteArray_readBytes = 917;
+const uint32_t flash_utils_ByteArray_writeBytes = 918;
+const uint32_t flash_utils_ByteArray_writeBoolean = 919;
+const uint32_t flash_utils_ByteArray_writeByte = 920;
+const uint32_t flash_utils_ByteArray_writeShort = 921;
+const uint32_t flash_utils_ByteArray_writeInt = 922;
+const uint32_t flash_utils_ByteArray_writeUnsignedInt = 923;
+const uint32_t flash_utils_ByteArray_writeFloat = 924;
+const uint32_t flash_utils_ByteArray_writeDouble = 925;
+const uint32_t flash_utils_ByteArray_writeMultiByte = 926;
+const uint32_t flash_utils_ByteArray_writeUTF = 927;
+const uint32_t flash_utils_ByteArray_writeUTFBytes = 928;
+const uint32_t flash_utils_ByteArray_readBoolean = 929;
+const uint32_t flash_utils_ByteArray_readByte = 930;
+const uint32_t flash_utils_ByteArray_readUnsignedByte = 931;
+const uint32_t flash_utils_ByteArray_readShort = 932;
+const uint32_t flash_utils_ByteArray_readUnsignedShort = 933;
+const uint32_t flash_utils_ByteArray_readInt = 934;
+const uint32_t flash_utils_ByteArray_readUnsignedInt = 935;
+const uint32_t flash_utils_ByteArray_readFloat = 936;
+const uint32_t flash_utils_ByteArray_readDouble = 937;
+const uint32_t flash_utils_ByteArray_readMultiByte = 938;
+const uint32_t flash_utils_ByteArray_readUTF = 939;
+const uint32_t flash_utils_ByteArray_readUTFBytes = 940;
+const uint32_t flash_utils_ByteArray_length_get = 941;
+const uint32_t flash_utils_ByteArray_length_set = 942;
+const uint32_t flash_utils_ByteArray_writeObject = 943;
+const uint32_t flash_utils_ByteArray_readObject = 944;
+const uint32_t flash_utils_ByteArray_private__compress = 946;
+const uint32_t flash_utils_ByteArray_private__uncompress = 949;
+const uint32_t flash_utils_ByteArray_private__toString = 952;
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 953;
+const uint32_t flash_utils_ByteArray_position_get = 954;
+const uint32_t flash_utils_ByteArray_position_set = 955;
+const uint32_t flash_utils_ByteArray_objectEncoding_get = 956;
+const uint32_t flash_utils_ByteArray_objectEncoding_set = 957;
+const uint32_t flash_utils_ByteArray_endian_get = 958;
+const uint32_t flash_utils_ByteArray_endian_set = 959;
+const uint32_t flash_utils_ByteArray_clear = 960;
 
 extern double Math_private__min_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
 extern double Math_private__max_thunk(MethodEnv* env, uint32_t argc, Atom* argv);
@@ -3668,7 +3668,13 @@ class avmplus_JSONClassSlots
 {
     friend class SlotOffsetsAndAsserts;
     friend class avmplus::JSONClass;
-#define GC_TRIVIAL_TRACER_JSONClass
+private:
+    DRCWB(avmplus::Namespace*) m_private_as3ns;
+public:
+    REALLY_INLINE void gcTracePrivateProperties(MMgc::GC* gc)
+    {
+        gc->TraceLocation(&m_private_as3ns);
+    }
 };
 #define DECLARE_SLOTS_JSONClass \
     public: \
@@ -3708,6 +3714,11 @@ class avmplus_JSONClassSlots
         } \
     private: \
         friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE avmplus::Namespace* get_as3ns() const { return m_slots_JSONClass.m_private_as3ns; } \
+        REALLY_INLINE void setconst_as3ns(avmplus::Namespace* newVal) { m_slots_JSONClass.m_private_as3ns = newVal; } \
+    private: \
+        avmplus::NativeID::avmplus_JSONClassSlots m_slots_JSONClass \
 
 //-----------------------------------------------------------
 
