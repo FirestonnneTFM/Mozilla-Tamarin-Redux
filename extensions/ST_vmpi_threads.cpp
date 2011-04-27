@@ -409,7 +409,6 @@ void ST_vmpi_threads::test0() {
 #ifndef UNDER_CE
     MutexTest mutexTest(THREAD_QTY, ITERATIONS);
     mutexTest.runTest();
-#line 367 "ST_vmpi_threads.st"
 verifyPass(mutexTest.sharedCounter == THREAD_QTY * ITERATIONS, "mutexTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -418,7 +417,6 @@ void ST_vmpi_threads::test1() {
 #ifndef UNDER_CE
     ConditionTest conditionTest(THREAD_QTY, ITERATIONS);
     conditionTest.runTest();
-#line 374 "ST_vmpi_threads.st"
 verifyPass(conditionTest.sharedCounter == THREAD_QTY * ITERATIONS, "conditionTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -427,7 +425,6 @@ void ST_vmpi_threads::test2() {
 #ifndef UNDER_CE
     AtomicIncrementTest atomicIncrementTest(THREAD_QTY, ITERATIONS, false);
     atomicIncrementTest.runTest();
-#line 381 "ST_vmpi_threads.st"
 verifyPass(atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS, "atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
     
@@ -436,7 +433,6 @@ void ST_vmpi_threads::test3() {
 #ifndef UNDER_CE
     AtomicDecrementTest atomicDecrementTest(THREAD_QTY, ITERATIONS, false);
     atomicDecrementTest.runTest();
-#line 388 "ST_vmpi_threads.st"
 verifyPass(atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS), "atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS)", __FILE__, __LINE__);
 #endif
     
@@ -445,7 +441,6 @@ void ST_vmpi_threads::test4() {
 #ifndef UNDER_CE
     CASTest casTest(THREAD_QTY, ITERATIONS, false);
     casTest.runTest();
-#line 395 "ST_vmpi_threads.st"
 verifyPass(casTest.sharedCounter == THREAD_QTY * ITERATIONS, "casTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -454,7 +449,6 @@ void ST_vmpi_threads::test5() {
 #ifndef UNDER_CE
     AtomicIncrementTest atomicIncrementTest(THREAD_QTY, ITERATIONS, true);
     atomicIncrementTest.runTest();
-#line 402 "ST_vmpi_threads.st"
 verifyPass(atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS, "atomicIncrementTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
     
@@ -463,7 +457,6 @@ void ST_vmpi_threads::test6() {
 #ifndef UNDER_CE
     AtomicDecrementTest atomicDecrementTest(THREAD_QTY, ITERATIONS, true);
     atomicDecrementTest.runTest();
-#line 409 "ST_vmpi_threads.st"
 verifyPass(atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS), "atomicDecrementTest.sharedCounter == -(THREAD_QTY * ITERATIONS)", __FILE__, __LINE__);
 #endif
     
@@ -472,7 +465,6 @@ void ST_vmpi_threads::test7() {
 #ifndef UNDER_CE
     CASTest casTest(THREAD_QTY, ITERATIONS, true);
     casTest.runTest();
-#line 416 "ST_vmpi_threads.st"
 verifyPass(casTest.sharedCounter == THREAD_QTY * ITERATIONS, "casTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -489,11 +481,9 @@ void ST_vmpi_threads::test8() {
     // only ever use 2 threads.
     MemoryBarrierTest memoryBarrierTest(ITERATIONS);
     memoryBarrierTest.runTest();
-#line 431 "ST_vmpi_threads.st"
 verifyPass(memoryBarrierTest.sharedCounter == 2 * ITERATIONS, "memoryBarrierTest.sharedCounter == 2 * ITERATIONS", __FILE__, __LINE__);
     
     */
-#line 434 "ST_vmpi_threads.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -502,7 +492,6 @@ void ST_vmpi_threads::test9() {
 #ifndef UNDER_CE
     TryLockTest tryLockTest(THREAD_QTY, ITERATIONS);
     tryLockTest.runTest();
-#line 441 "ST_vmpi_threads.st"
 verifyPass(tryLockTest.sharedCounter == THREAD_QTY * ITERATIONS, "tryLockTest.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -512,7 +501,6 @@ void ST_vmpi_threads::test10() {
     // Use 2000 iterations with a 1 ms wait
     ConditionWithWaitTest conditionWithWaitTest(THREAD_QTY, 2000);
     conditionWithWaitTest.runTest();
-#line 449 "ST_vmpi_threads.st"
 verifyPass(conditionWithWaitTest.sharedCounter == THREAD_QTY * 2000, "conditionWithWaitTest.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -522,7 +510,6 @@ void ST_vmpi_threads::test11() {
     // Use 2000 iterations with a 1 ms sleep
     SleepTest sleepTest(THREAD_QTY, 2000);
     sleepTest.runTest();
-#line 457 "ST_vmpi_threads.st"
 verifyPass(sleepTest.sharedCounter == THREAD_QTY * 2000, "sleepTest.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -532,7 +519,6 @@ void ST_vmpi_threads::test12() {
     // We can't really test for much here...
     vmpi_thread_t thread;
     VMPI_threadCreate(&thread, NULL, ThreadTestBase::detachbleThreadEntry, NULL);
-#line 465 "ST_vmpi_threads.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -540,7 +526,6 @@ verifyPass(true, "true", __FILE__, __LINE__);
 void ST_vmpi_threads::test13() {
 #ifndef UNDER_CE
     vmpi_thread_attr_t attr;
-#line 471 "ST_vmpi_threads.st"
 verifyPass(VMPI_threadAttrInit(&attr) == true, "VMPI_threadAttrInit(&attr) == true", __FILE__, __LINE__);
     
     VMPI_threadAttrSetGuardSize(&attr, VMPI_threadAttrDefaultGuardSize());
@@ -551,13 +536,11 @@ verifyPass(VMPI_threadAttrInit(&attr) == true, "VMPI_threadAttrInit(&attr) == tr
     
     vmpi_thread_t thread;
     bool started = VMPI_threadCreate(&thread, &attr, ThreadTestBase::joinableThreadEntry, NULL);
-#line 481 "ST_vmpi_threads.st"
 verifyPass(started == true, "started == true", __FILE__, __LINE__);
     if (started) {
         VMPI_threadJoin(thread);
     }
     
-#line 486 "ST_vmpi_threads.st"
 verifyPass(VMPI_threadAttrDestroy(&attr) == true, "VMPI_threadAttrDestroy(&attr) == true", __FILE__, __LINE__);
 #endif
 

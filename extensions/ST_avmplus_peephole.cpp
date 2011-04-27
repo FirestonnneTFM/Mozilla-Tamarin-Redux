@@ -96,19 +96,12 @@ void ST_avmplus_peephole::test0() {
      uintptr_t* code;
 uint32_t len = (uint32_t)t->epilogue(&code);
 
-#line 76 "ST_avmplus_peephole.st"
 verifyPass(len == 6, "len == 6", __FILE__, __LINE__);
-#line 77 "ST_avmplus_peephole.st"
 verifyPass(code[0] == NEW_OPCODE(WOP_get2locals), "code[0] == NEW_OPCODE(WOP_get2locals)", __FILE__, __LINE__);
-#line 78 "ST_avmplus_peephole.st"
 verifyPass(code[1] == ((4 << 16) | 5), "code[1] == ((4 << 16) | 5)", __FILE__, __LINE__);
-#line 79 "ST_avmplus_peephole.st"
 verifyPass(code[2] == NEW_OPCODE(WOP_getlocal), "code[2] == NEW_OPCODE(WOP_getlocal)", __FILE__, __LINE__);
-#line 80 "ST_avmplus_peephole.st"
 verifyPass(code[3] == 65536, "code[3] == 65536", __FILE__, __LINE__);
-#line 81 "ST_avmplus_peephole.st"
 verifyPass(code[4] == NEW_OPCODE(WOP_get2locals), "code[4] == NEW_OPCODE(WOP_get2locals)", __FILE__, __LINE__);
-#line 82 "ST_avmplus_peephole.st"
 verifyPass(code[5] == ((6 << 16) | 7), "code[5] == ((6 << 16) | 7)", __FILE__, __LINE__);
 
     delete t;

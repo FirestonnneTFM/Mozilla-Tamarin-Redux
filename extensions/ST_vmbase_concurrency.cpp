@@ -395,7 +395,6 @@ void ST_vmbase_concurrency::test0() {
     TestRunner runner(THREAD_QTY);
     MutexTest test(ITERATIONS);
     runner.runTest(test);
-#line 361 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -405,7 +404,6 @@ void ST_vmbase_concurrency::test1() {
     TestRunner runner(THREAD_QTY);
     ConditionTest test(ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-#line 369 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -415,7 +413,6 @@ void ST_vmbase_concurrency::test2() {
     TestRunner runner(THREAD_QTY);
     AtomicCounterTest test(ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-#line 377 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == 0, "test.sharedCounter == 0", __FILE__, __LINE__);
 #endif
 
@@ -425,7 +422,6 @@ void ST_vmbase_concurrency::test3() {
     TestRunner runner(THREAD_QTY);
     CASTest test(ITERATIONS, false);
     runner.runTest(test);
-#line 385 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -435,7 +431,6 @@ void ST_vmbase_concurrency::test4() {
     TestRunner runner(THREAD_QTY);
     CASTest test(ITERATIONS, true);
     runner.runTest(test);
-#line 393 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -453,11 +448,9 @@ void ST_vmbase_concurrency::test5() {
     TestRunner runner(2);
     MemoryBarrierTest test(ITERATIONS);
     runner.runTest(test);
-#line 409 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == 2 * ITERATIONS, "test.sharedCounter == 2 * ITERATIONS", __FILE__, __LINE__);
     */
     
-#line 412 "ST_vmbase_concurrency.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 #endif
 
@@ -467,7 +460,6 @@ void ST_vmbase_concurrency::test6() {
     TestRunner runner(THREAD_QTY);
     ConditionWithWaitTest test(2000); // Use 2000 iterations with a 1 ms wait
     runner.runTest(test);
-#line 420 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * 2000, "test.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -477,7 +469,6 @@ void ST_vmbase_concurrency::test7() {
     TestRunner runner(THREAD_QTY);
     SleepTest test(2000); // Use 2000 iterations with a 1 ms sleep
     runner.runTest(test);
-#line 428 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * 2000, "test.sharedCounter == THREAD_QTY * 2000", __FILE__, __LINE__);
 #endif
 
@@ -487,7 +478,6 @@ void ST_vmbase_concurrency::test8() {
     TestRunner runner(THREAD_QTY);
     VMThreadLocalTest test(ITERATIONS);
     runner.runTest(test);
-#line 436 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -502,7 +492,6 @@ void ST_vmbase_concurrency::test9() {
     TestRunner runner(THREAD_QTY, false);
     MutexTest test(ITERATIONS);
     runner.runTest(test);
-#line 449 "ST_vmbase_concurrency.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 

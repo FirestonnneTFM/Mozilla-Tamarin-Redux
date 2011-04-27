@@ -548,7 +548,6 @@ void ST_vmbase_safepoints::test0() {
     TestRunner runner(THREAD_QTY!=0);
     SimpleTest test(runner.safepointManager(), ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-#line 528 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -558,7 +557,6 @@ void ST_vmbase_safepoints::test1() {
     TestRunner runner(THREAD_QTY!=0);
     ProducerConsumerTest test(runner.safepointManager(), ITERATIONS, THREAD_QTY);
     runner.runTest(test);
-#line 536 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS, "test.sharedCounter == THREAD_QTY * ITERATIONS", __FILE__, __LINE__);
 #endif
 
@@ -568,7 +566,6 @@ void ST_vmbase_safepoints::test2() {
     TestRunner runner(THREAD_QTY!=0);
     NestedProducerConsumerTest test(runner.safepointManager(), ITERATIONS * 100, THREAD_QTY, NESTING_DEPTH);
     runner.runTest(test);
-#line 544 "ST_vmbase_safepoints.st"
 verifyPass(test.sharedCounter == THREAD_QTY * ITERATIONS * 100, "test.sharedCounter == THREAD_QTY * ITERATIONS * 100", __FILE__, __LINE__);
 #endif
 

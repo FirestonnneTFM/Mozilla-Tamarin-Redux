@@ -93,7 +93,6 @@ void ST_mmgc_finalize_uninit::test0() {
 
     // printf("D::finalized_count(): %d\n", D::finalized_count());
 
-#line 71 "ST_mmgc_finalize_uninit.st"
 verifyPass((D::finalized_count() > 90), "(D::finalized_count() > 90)", __FILE__, __LINE__);
 }
 
@@ -127,7 +126,6 @@ void ST_mmgc_finalize_uninit::test1() {
     core->gc->Collect();
 
     // (not dying is passing.)
-#line 103 "ST_mmgc_finalize_uninit.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 }
 
@@ -170,7 +168,6 @@ void ST_mmgc_finalize_uninit::test2() {
 
     // printf("D::finalized_count(): %d\n", D::finalized_count());
 
-#line 144 "ST_mmgc_finalize_uninit.st"
 verifyPass((D::finalized_count() > 90), "(D::finalized_count() > 90)", __FILE__, __LINE__);
 }
 
@@ -207,7 +204,6 @@ void ST_mmgc_finalize_uninit::test3() {
     core->gc->Collect();
 
     // (not dying is passing.)
-#line 179 "ST_mmgc_finalize_uninit.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 }
 

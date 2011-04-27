@@ -78,7 +78,6 @@ void ST_avmplus_builtins::test0() {
     }
 
 // Retain at least 250, but it would be unreasonable to retain more than 300
-#line 61 "ST_avmplus_builtins.st"
 verifyPass(sum >= 250 && sum <= 300, "sum >= 250 && sum <= 300", __FILE__, __LINE__);
 
 }

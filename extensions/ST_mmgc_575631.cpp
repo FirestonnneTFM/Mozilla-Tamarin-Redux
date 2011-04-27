@@ -146,7 +146,6 @@ void ST_mmgc_bugzilla_575631::test0() {
     }
 
     // not assert failing within get() is passing the test.
-#line 132 "ST_mmgc_575631.st"
 verifyPass(1, "1", __FILE__, __LINE__);
           ; // (make my auto-indenter happy)
 
@@ -160,7 +159,6 @@ verifyPass(1, "1", __FILE__, __LINE__);
         // if something went wrong above and some Snoopy's are still alive,
         // we'll get burned during their destructors.  Make sure that
         // does not happen.
-#line 145 "ST_mmgc_575631.st"
 verifyPass((Snoopy::alive_count == 0), "(Snoopy::alive_count == 0)", __FILE__, __LINE__);
               ;
     }

@@ -80,14 +80,12 @@ void ST_mmgc_mmfx_array::test0() {
     int* m_ints = mmfx_new_array(int, 1048576);
     mmfx_delete_array(m_ints);
     m_ints = NULL;
-#line 60 "ST_mmgc_mmfx_array.st"
 verifyPass(false, "false", __FILE__, __LINE__);
 
 }
 void ST_mmgc_mmfx_array::test1() {
     // This should fail and return NULL, run with -memlimit 1024
     int* m_ints = mmfx_new_array_opt(int, 1048576, MMgc::kCanFail);
-#line 65 "ST_mmgc_mmfx_array.st"
 verifyPass(m_ints == NULL, "m_ints == NULL", __FILE__, __LINE__);
     mmfx_delete_array(m_ints);
     m_ints = NULL;
@@ -98,7 +96,6 @@ void ST_mmgc_mmfx_array::test2() {
     int* m_ints = mmfx_new_array_opt(int, 1048576, MMgc::kZero);
     mmfx_delete_array(m_ints);
     m_ints = NULL;
-#line 74 "ST_mmgc_mmfx_array.st"
 verifyPass(false, "false", __FILE__, __LINE__);
 
 

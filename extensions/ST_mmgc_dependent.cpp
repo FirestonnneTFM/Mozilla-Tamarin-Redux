@@ -119,7 +119,6 @@ void ST_mmgc_dependent::test0() {
     // completely.  So assume that heap size must stay below L*2*16MB for the
     // L that applies at 32MB.
 
-#line 100 "ST_mmgc_dependent.st"
 verifyPass(size_t(gc->policy.queryLoadForHeapsize(double(2*nbytes)) * 2.0 * double(nbytes)) >= maxheap, "size_t(gc->policy.queryLoadForHeapsize(double(2*nbytes)) * 2.0 * double(nbytes)) >= maxheap", __FILE__, __LINE__);
 
 

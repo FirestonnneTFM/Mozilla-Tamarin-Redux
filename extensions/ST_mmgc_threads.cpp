@@ -173,16 +173,12 @@ void ST_mmgc_threads::test0() {
           gc->CreateRootFromCurrentStack(kickAndWait, this);
        }
 
-#line 154 "ST_mmgc_threads.st"
 verifyPass(result, "result", __FILE__, __LINE__);
 
-#line 156 "ST_mmgc_threads.st"
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
        gc->ReapZCT();
-#line 158 "ST_mmgc_threads.st"
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
        gc->Collect();
-#line 160 "ST_mmgc_threads.st"
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 
        pthread_join(pthread, NULL);

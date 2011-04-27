@@ -186,7 +186,6 @@ void ST_mmgc_bugzilla_543560::test0() {
     delete theRoot;
 
     // Will crash if it fails so the %%verify is just token
-#line 167 "ST_mmgc_543560.st"
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }

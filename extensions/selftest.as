@@ -233,8 +233,6 @@ package selftest
                         break;
                     vs++;
                     i++;
-                    // The line number is the line number of the following line, not of the #line itself
-                    t.push("#line " + i + " \"" + filename + "\"");
                     t.push("verifyPass(" + res[1] + ", \"" + quote(res[1]) + "\", __FILE__, __LINE__);");
                 }
                 if (vs == 0)
