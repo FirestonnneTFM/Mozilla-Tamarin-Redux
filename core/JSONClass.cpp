@@ -323,6 +323,7 @@ namespace avmplus
         ScriptObject* newobject();
         bool willDefinitelyEmitOn(Atom value);
         bool hasTransientMetadata(ScriptObject* description);
+        bool stackOverflowCheck();
 
         // void emit(char const* literal);
 
@@ -1196,23 +1197,30 @@ namespace avmplus
                              pendingPrefix, pendingPropnameColon);
     }
 
+    bool JSONSerializer::stackOverflowCheck()
+    {
+        TRY(core(), kCatchAction_Rethrow)
+        {
+            core()->stackCheck(m_toplevel);
+            return false;
+        }
+        CATCH(Exception* exception)
+        {
+            m_exception = exception;
+            return true;
+        }
+        END_CATCH
+        END_TRY
+    }
+
     ReturnCondition JSONSerializer::StrFoundValue(Atom value,
                                                   Atom key,
                                                   ScriptObject* holder,
                                                   String* pendingPrefix,
                                                   bool pendingPropnameColon)
     {
-        TRY(core(), kCatchAction_Rethrow)
-        {
-            core()->stackCheck(m_toplevel);
-        }
-        CATCH(Exception* exception)
-        {
-            m_exception = exception;
+        if (stackOverflowCheck())
             return kThrewException;
-        }
-        END_CATCH
-        END_TRY
 
         if (!AvmCore::isNullOrUndefined(value)) {
             Atom probe = nullObjectAtom;
