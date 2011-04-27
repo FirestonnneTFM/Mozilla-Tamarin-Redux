@@ -378,6 +378,7 @@ namespace avmplus
         PrologWriter *prolog;
         LIns* skip_ins; // Skips from start of body to end of prologue.
         HashMap<LIns*, LIns*> *specializedCallHashMap;
+        HashMap<uint32_t, uint32_t> *builtinFunctionOptimizerHashMap;
         HashMap<const uint8_t*, CodegenLabel*> *blockLabels;
         LirWriter* redirectWriter;
         CseFilter* cseFilter; // The CseFilter instance for this method, or NULL if none.
@@ -526,7 +527,6 @@ namespace avmplus
         bool inlineBuiltinFunction(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo* mi);
         LIns* optimizeIntCmpWithNumberCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
         LIns* optimizeStringCmpWithStringCall(int callIndex, int otherIndex, LOpcode icmp, bool swap);
-        bool specializeOneArgFunction(Traits *result, const CallInfo *ciInt, const CallInfo *ciUint, const CallInfo *ciNumber);
 
         void suspendCSE();
         void resumeCSE();
@@ -535,7 +535,28 @@ namespace avmplus
         LIns* addSpecializedCall(LIns* origCall, LIns* specializedCall);
         LIns* specializeIntCall(LIns *call, Specialization* specs);
 
-        LIns* emitStringCall(int index, const CallInfo *stringCall, bool preserveNull);
+        LIns* emitStringCall(int index, const CallInfo* stringCall, bool preserveNull);
+
+        typedef void (CodegenLIR::*EmitMethod)(Traits* t);
+        typedef struct {
+            int32_t methodId;
+            int32_t argCount;
+            BuiltinType argType[2];
+            const CallInfo *newFunction;
+            EmitMethod emitFunction;
+        } FunctionMatch;
+
+        static const FunctionMatch specializedFunctions[];
+
+        int32_t determineBuiltinMaskForArg (int argOffset);
+        LIns* getSpecializedArg (int argOffset, BuiltinType newBt);
+        void genBuiltinFunctionOptimizerHashMap();
+
+        void emitIsNaN(Traits* result);
+        void emitIntMathMin(Traits* result);
+        void emitIntMathMax(Traits* result);
+        void emitMathAbs(Traits* result);
+        void emitStringLength(Traits* result);
 
         LIns *optimizeIndexArgumentType(int32_t sp, Traits** indexType);
 

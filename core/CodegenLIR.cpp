@@ -745,6 +745,7 @@ namespace avmplus
         prolog(NULL),
         skip_ins(NULL),
         specializedCallHashMap(NULL),
+        builtinFunctionOptimizerHashMap(NULL),
         blockLabels(NULL),
         cseFilter(NULL),
         noise()
@@ -3855,68 +3856,292 @@ namespace avmplus
     // This is for VTable->createInstanceProc which is called by OP_construct
     FASTFUNCTION(CALL_INDIRECT, SIG2(P,P,P), createInstanceProc)
 
-    bool CodegenLIR::specializeOneArgFunction(Traits *result, const CallInfo *ciInt, const CallInfo *ciUint, const CallInfo *ciNumber)
+    void CodegenLIR::emitIsNaN(Traits* result)
     {
-        // One arg that may be a number, int or uint
-        // charCodeAt, charAt
         int op1 = state->sp();
-        LIns *arg = localGetf(op1);
-        // argument is a constant integer
-        if (arg->isImmD() && ((double)(int32_t)arg->immD() == arg->immD())) {
-            localSet(op1-1, callIns(ciInt, 2, localGetp(op1-1), InsConst((int32_t)arg->immD())), result);
-        }
-        else if (arg->opcode() == LIR_i2d) {
-            localSet(op1-1, callIns(ciInt, 2, localGetp(op1-1), arg->oprnd1()), result);
-        }
-        else if (arg->opcode() == LIR_ui2d) {
-            localSet(op1-1, callIns(ciUint, 2, localGetp(op1-1), arg->oprnd1()), result);
+        LIns *f = localGetf(op1);
+        if (isPromote(f->opcode())) {
+            // Promoting an integer to a double cannot result in a NaN.
+            localSet(op1-1, InsConst(0), result);
         }
         else {
-            localSet(op1-1, callIns(ciNumber, 2, localGetp(op1-1), arg), result);
+            // LIR is required to follow IEEE floating point semantics, thus x is a NaN iff x != x.
+            localSet(op1-1, binaryIns(LIR_eqi, binaryIns(LIR_eqd, f, f), InsConst(0)), result);
         }
-        return true;
     }
 
+    void CodegenLIR::emitIntMathMin(Traits* result)
+    {
+        // if (x < y)
+        //   return x
+        // else
+        //   return y
+        int op1 = state->sp();
+        int op2 = state->sp() - 1;
+        LIns *x = getSpecializedArg(op1, BUILTIN_int);
+        LIns *y = getSpecializedArg(op2, BUILTIN_int);
+        LIns *s1 = binaryIns(LIR_lti, x, y);
+        LIns *s2 = lirout->insChoose(s1, x, y, use_cmov);
+        // coerceNumberToInt will remove a d2i/i2d roundtrip
+        localSet(op1-2, i2dIns(s2), result);
+    }
+
+    void CodegenLIR::emitIntMathMax(Traits* result)
+    {
+        // if (x > y)
+        //   return x
+        // else
+        //   return y
+        int op1 = state->sp();
+        int op2 = state->sp() - 1;
+        LIns *x = getSpecializedArg(op1, BUILTIN_int);
+        LIns *y = getSpecializedArg(op2, BUILTIN_int);
+        LIns *s1 = binaryIns(LIR_gti, x, y);
+        LIns *s2 = lirout->insChoose(s1, x, y, use_cmov);
+        // coerceNumberToInt will remove a d2i/i2d roundtrip
+        localSet(op1-2, i2dIns(s2), result);
+    }
+
+    void CodegenLIR::emitMathAbs(Traits* result)
+    {
+        int op1 = state->sp();
+        LIns *arg = localGetf(op1);
+        // inline asm for Math.abs
+        // result = arg
+        // if (!(arg > 0.0))
+        //   result = -arg    // NaN and -0.0 get here too.
+        //
+        // We do not have an optimized integer path because Math.abs(-2147484648)
+        // generates a floating point result. (Math.abs(0x80000000) > MAX_INT)
+        CodegenLabel done("done");
+        suspendCSE();
+        localSet(op1-1, arg, result);
+
+        LIns *s2 = binaryIns(LIR_gtd, arg, lirout->insImmD(0.0));
+        branchToLabel(LIR_jt, s2, done);
+
+        localSet(op1-1, Ins(LIR_negd, arg), result);
+
+        emitLabel(done);
+        resumeCSE();
+    }
+
+    void CodegenLIR::emitStringLength(Traits* result)
+    {
+        int op1 = state->sp();
+        LIns * ptr = loadIns(LIR_ldi, offsetof(String, m_length), localGetp(op1), ACCSET_OTHER, LOAD_CONST);
+        localSet(op1, ptr, result);
+    }
+
+    // Determine a mask for our argument that indicates to which types it may be trivially converted
+    // without insertion of additional instructions and without loss.  This information may allow us
+    // to substitute a numeric operation on a more specific type than that inferred by the verifier.
+    // For example:
+    //    A number that has been promoted from an integer will be marked as a number|int.
+    //    A constant number that is an unsigned integer will be marked as a number|uint|int
+    int32_t CodegenLIR::determineBuiltinMaskForArg (int argOffset)
+    {
+        BuiltinType bt = this->bt(state->value(argOffset).traits);
+        int32_t btMask = 1 << bt;
+        if (bt == BUILTIN_number) {
+            LIns *arg = localGetf(argOffset);
+            if (arg->isImmD()) {
+                int32_t intVal = (int32_t) arg->immD();
+                if ((double) intVal == arg->immD() && !MathUtils::isNegZero(arg->immD())) {
+                    if (intVal >= 0)
+                        btMask |= 1 << BUILTIN_uint;
+                    btMask |= 1 << BUILTIN_int;
+                }
+            }
+            else if (arg->opcode() == LIR_i2d)
+                btMask |= 1 << BUILTIN_int;
+            else if (arg->opcode() == LIR_ui2d)
+                btMask |= 1 << BUILTIN_uint;
+        }
+        else if (bt == BUILTIN_int) {
+            LIns *arg = localGet(argOffset);
+            if (arg->isImmI() && arg->immI() >= 0)
+                btMask |= 1 << BUILTIN_uint;
+        }
+
+        return btMask;
+    }
+
+    // Given an argument and a builtin type to which it may be trivially converted,
+    // return a LIns that represents the argument as a value of the correct machine type.
+    LIns* CodegenLIR::getSpecializedArg (int argOffset, BuiltinType newBt)
+    {
+        BuiltinType oldBt = this->bt(state->value(argOffset).traits);
+
+        if (oldBt == BUILTIN_number) {
+            LIns *arg = localGetf(argOffset);
+            if (newBt == BUILTIN_int) {
+                if (arg->isImmD())
+                    return InsConst((int32_t)arg->immD());
+                else if (arg->opcode() == LIR_i2d)
+                    return arg->oprnd1();
+                else
+                    AvmAssert(0);
+            }
+            else if (newBt == BUILTIN_uint) {
+                if (arg->isImmD())
+                    return InsConst((int32_t)arg->immD());
+                else if (arg->opcode() == LIR_ui2d)
+                    return arg->oprnd1();
+                else
+                    AvmAssert(0);
+            }
+        }
+
+        switch (newBt) {
+        case BUILTIN_number:
+            return localGetf(argOffset);
+        case BUILTIN_boolean:
+        case BUILTIN_int:
+        case BUILTIN_uint:
+            return localGet(argOffset);
+        default:
+            return localGetp(argOffset);
+        }
+    }
+
+    // For a given builtin function id and argument count, matching of argument lists occurs in the order in which the
+    // entries appear in the table below.  More specialized variants that are expected to execute faster should be listed
+    // prior to the more general cases.  If no argument list matches, specialization is not performed.
+
+    const CodegenLIR::FunctionMatch CodegenLIR::specializedFunctions[] =
+    {
+        { 0, /* dummy entry so 0 can be treated as HashMap miss*/ 1, {}, 0, 0},
+        { avmplus::NativeID::native_script_function_isNaN, 1, {BUILTIN_number, BUILTIN_none},   0, &CodegenLIR::emitIsNaN },
+
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charCodeAtFU), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charCodeAtFI), 0},
+        { avmplus::NativeID::String_AS3_charCodeAt,        1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charCodeAtFF), 0},
+        { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_uint,   BUILTIN_none},   FUNCTIONID(String_charAtU), 0},
+        { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_int,    BUILTIN_none},   FUNCTIONID(String_charAtI), 0},
+        { avmplus::NativeID::String_AS3_charAt,            1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(String_charAtF), 0},
+
+        { avmplus::NativeID::String_length_get,            0, {BUILTIN_none,   BUILTIN_none},   0, &CodegenLIR::emitStringLength},
+
+        { avmplus::NativeID::Math_acos,                    1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_acos), 0},
+        { avmplus::NativeID::Math_asin,                    1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_asin), 0},
+        { avmplus::NativeID::Math_atan,                    1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_atan), 0},
+        { avmplus::NativeID::Math_ceil,                    1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_ceil), 0},
+        { avmplus::NativeID::Math_cos,                     1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_cos), 0},
+        { avmplus::NativeID::Math_exp,                     1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_exp), 0},
+        { avmplus::NativeID::Math_floor,                   1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_floor), 0},
+        { avmplus::NativeID::Math_log,                     1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_log), 0},
+        { avmplus::NativeID::Math_round,                   1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_round), 0},
+        { avmplus::NativeID::Math_sin,                     1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_sin), 0},
+        { avmplus::NativeID::Math_sqrt,                    1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_sqrt), 0},
+        { avmplus::NativeID::Math_tan,                     1, {BUILTIN_number, BUILTIN_none},   FUNCTIONID(Math_tan), 0},
+
+        { avmplus::NativeID::Math_atan2,                   2, {BUILTIN_number, BUILTIN_number}, FUNCTIONID(Math_atan2), 0},
+        { avmplus::NativeID::Math_pow,                     2, {BUILTIN_number, BUILTIN_number}, FUNCTIONID(Math_pow), 0},
+
+        { avmplus::NativeID::Math_abs,                     1, {BUILTIN_number, BUILTIN_none},   0, &CodegenLIR::emitMathAbs},
+
+        { avmplus::NativeID::Math_min,                     2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMin},
+        { avmplus::NativeID::Math_max,                     2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMax},
+        { avmplus::NativeID::Math_private__min,            2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMin},
+        { avmplus::NativeID::Math_private__max,            2, {BUILTIN_int,    BUILTIN_int},    0, &CodegenLIR::emitIntMathMax},
+
+        // We do not inline the non-integral cases of min and max due to the complexity of handling -0 correctly.
+        // See MathClass::_min() and MathClass::_max().
+
+        // Unsupported because it uses MathClass::seed
+        //{ avmplus::NativeID::Math_random,                  0, {BUILTIN_none,   BUILTIN_none},   FUNCTIONID(Math_random), 0},
+    };
+
+    static uint32_t genFunctionKey (int32_t methodId, int32_t argCount)
+    {
+        return uint32_t(methodId | (argCount << 16));
+    }
+
+    // Our builtinFunctionOptimizerHashMap maps from a [nativeId, argCount] key into the
+    // starting index in our specializedFunctions table.  The inlineBuiltinFunction function
+    // will then iterate over our specializedFunctions table for all matching [nativeId, argCount]
+    // pairs looking for a match to argument types.
+    void CodegenLIR::genBuiltinFunctionOptimizerHashMap()
+    {
+        builtinFunctionOptimizerHashMap = new (*alloc1) HashMap<uint32_t, uint32_t>(*alloc1, 100);
+
+        uint32_t funcKey = 0;
+        for (uint32_t i = 0; i < sizeof(specializedFunctions) / sizeof(FunctionMatch); i++) {
+            uint32_t newFuncKey = genFunctionKey (specializedFunctions[i].methodId, specializedFunctions[i].argCount);
+            if (newFuncKey != funcKey) {
+                funcKey = newFuncKey;
+                builtinFunctionOptimizerHashMap->put(funcKey, i);
+            }
+        }
+    }
+ 
     bool CodegenLIR::inlineBuiltinFunction(AbcOpcode, intptr_t, int argc, Traits* result, MethodInfo* mi)
     {
         if (haveDebugger)
             return false;
 
-        if (mi->pool() == core->builtinPool && mi->isFinal()) {
-            switch (mi->method_id()) {
-                case avmplus::NativeID::native_script_function_isNaN: {
-                    if (argc == 1) {
-#ifndef AVMPLUS_SSE2_ALWAYS
-                        // On x86, inline NaN compares are slower with non-SSE instructions
-                        SSE2_ONLY(if(core->config.njconfig.i386_sse2))
-#endif // AVMPLUS_SSE2_ALWAYS
-                        {
-                            int op1 = state->sp();
-                            LIns *f = localGetf(op1);
-                            if (isPromote(f->opcode())) {
-                                localSet(op1-1, InsConst(0), result);
-                            }
-                            else {
-                                localSet(op1-1, binaryIns(LIR_eqi, binaryIns(LIR_eqd, f, f), InsConst(0)), result);
-                            }
-                            return true;
-                        }
-                    }
-                    break;
-                }
-                case avmplus::NativeID::String_AS3_charCodeAt: {
-                    if (argc == 1) {
-                        return specializeOneArgFunction(result, FUNCTIONID(String_charCodeAtFI), FUNCTIONID(String_charCodeAtFU), FUNCTIONID(String_charCodeAtFF));
-                    }
-                    break;
-                }
-                case avmplus::NativeID::String_AS3_charAt: {
-                    if (argc == 1) {
-                        return specializeOneArgFunction(result, FUNCTIONID(String_charAtI), FUNCTIONID(String_charAtU), FUNCTIONID(String_charAtF));
-                    }
+        if (mi->pool() != core->builtinPool || !mi->isFinal())
+            return false;
+
+        if (!builtinFunctionOptimizerHashMap)
+            genBuiltinFunctionOptimizerHashMap();
+
+        uint32_t funcKey = genFunctionKey(mi->method_id(), argc);
+        uint32_t startingIndex = builtinFunctionOptimizerHashMap->get(funcKey);
+        if (!startingIndex)
+            return false;
+
+        int count = sizeof(specializedFunctions) / sizeof(FunctionMatch);
+        for (int i = startingIndex; i < count; i++) {
+            if (mi->method_id() != specializedFunctions[i].methodId)
+                return false;
+
+            if (argc != (int) specializedFunctions[i].argCount)
+                return false;
+
+            // matching identifier, matching arg count, try to match argument types
+            bool bMatch = true;
+            for (int32_t argindex = 0; argindex < argc; argindex++) {
+                int32_t btMask = determineBuiltinMaskForArg(state->sp() - argindex);
+                if (!(btMask & (1 << specializedFunctions[i].argType[argindex]))) {
+                    bMatch = false;
                     break;
                 }
             }
+
+            if (!bMatch)
+                continue;
+
+            if (specializedFunctions[i].newFunction) {
+                int32_t sp = state->sp();
+                // No 'this' param
+                if (specializedFunctions[i].newFunction->count_args() == (uint32_t) argc) {
+                    if (argc == 1)
+                        localSet(sp-1, callIns(specializedFunctions[i].newFunction, 1,
+                                               getSpecializedArg(sp, specializedFunctions[i].argType[0])), result);
+                    else if (argc == 2)
+                        localSet(sp-2, callIns(specializedFunctions[i].newFunction, 2,
+                                               getSpecializedArg(sp-1, specializedFunctions[i].argType[1]),
+                                               getSpecializedArg(sp, specializedFunctions[i].argType[0])), result);
+                }
+                else {
+                    if (argc == 1)
+                        localSet(sp-1, callIns(specializedFunctions[i].newFunction, 2, localGetp(sp-1),
+                                               getSpecializedArg(sp, specializedFunctions[i].argType[0])), result);
+                    else if (argc == 2)
+                        localSet(sp-2, callIns(specializedFunctions[i].newFunction, 3, localGetp(sp-2),
+                                               getSpecializedArg(sp-1, specializedFunctions[i].argType[1]),
+                                               getSpecializedArg(sp, specializedFunctions[i].argType[0])), result);
+                }
+            }
+            else {
+                // Invoke emitFunction as member function pointer.
+                EmitMethod emitter = specializedFunctions[i].emitFunction;
+                (this->*emitter)(result);
+            }
+
+            return true;
         }
 
         return false;
