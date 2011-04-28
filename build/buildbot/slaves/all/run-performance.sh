@@ -185,9 +185,13 @@ cd $basedir/build/buildbot/slaves/scripts/
 
 ##
 # Ensure that the system is torn down and clean
+# Skip on android so that other avmshell processes on android host do not get
+# killed.
 ##
-cd $basedir/build/buildbot/slaves/scripts
-../all/util-acceptance-teardown.sh
+if [ ! $android ]; then
+    cd $basedir/build/buildbot/slaves/scripts
+    ../all/util-acceptance-teardown.sh
+fi
 
 test "$result" = "0" && resultmessage="performance tests passed"
 echo -e "message: $resultmessage"
