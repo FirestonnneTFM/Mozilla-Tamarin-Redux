@@ -253,6 +253,7 @@ vm avmplus:DescribeTypeClass.obj
 vm avmplus:ScopeChain.obj
 vm avmplus:avmfeatures.obj
 vm avmplus:instr.obj
+vm avmplus:LirHelper.obj
 
 eval eval-abc.obj
 eval eval-avmplus.obj
@@ -285,6 +286,7 @@ builtin avmplus::ArrayObject
 builtin avmplus::ArrayClass
 builtin avmplus::avmplusList
 builtin avmplus::ArraySort
+builtin avmplus:JSONClass.obj
 
 builtin avmplus:StringClass.obj
 builtin avmplus:StringObject.obj
