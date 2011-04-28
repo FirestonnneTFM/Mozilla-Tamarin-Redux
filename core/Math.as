@@ -82,9 +82,12 @@ public final class Math
     public native static function atan2 (y:Number, x:Number):Number
     public native static function pow   (x:Number, y:Number):Number
 
+    // "Infinity" not visible due to compiler crankiness over inclusion
+    // order; just roll our own here.
+    private static const PosInfinity:Number = 1/0;
     private static const NegInfinity:Number = -1/0;
     public native static function max    (x:Number = NegInfinity, y:Number = NegInfinity, ... rest):Number
-    public native static function min    (x:Number = Infinity, y:Number = Infinity, ... rest):Number
+    public native static function min    (x:Number = PosInfinity, y:Number = PosInfinity, ... rest):Number
 
     public native static function random ():Number
 }
