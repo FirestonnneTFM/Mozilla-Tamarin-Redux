@@ -43,7 +43,15 @@
    * SWF version 11 and above.  It is retained to preserve existing tests applicable to prior versions.
    */
 
-import avmplus.System;
+import avmplus.*;
+import flash.display.*;
+
+if (playerType == 'AVMPlus') {
+    swfVersion = System.swfVersion;
+} else {
+    swfVersion = LoaderInfo.swfVersion;
+}
+
 
 var SECTION = " ";
 var VERSION = "AS3";
@@ -172,7 +180,7 @@ function AddVectorWriteExceptionTest_I(description, index, expected)
 }
 
 // 5.1
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     AddVectorReadExceptionTest    ("5.1", 5.1, RANGE);
     AddVectorWriteExceptionTest   ("5.1", 5.1, RANGE);
     AddVectorReadExceptionTest_D  ("5.1", 5.1, RANGE);
@@ -185,7 +193,7 @@ if (System.swfVersion >= 11) {
 }
 
 // "5.1"
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     AddVectorReadExceptionTest  ("'5.1'", "5.1", RANGE);
     AddVectorWriteExceptionTest ("'5.1'", "5.1", RANGE);
 } else {
@@ -194,7 +202,7 @@ if (System.swfVersion >= 11) {
 }
 
 // -5.1
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     AddVectorReadExceptionTest    ("-5.1", -5.1, RANGE);
     AddVectorWriteExceptionTest   ("-5.1", -5.1, RANGE);
     AddVectorReadExceptionTest_D  ("-5.1", -5.1, RANGE);
@@ -207,7 +215,7 @@ if (System.swfVersion >= 11) {
 }
 
 // "-5.1"
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     AddVectorReadExceptionTest  ("'-5.1'", "-5.1", RANGE);
     AddVectorWriteExceptionTest ("'-5.1'", "-5.1", RANGE);
 } else {
@@ -216,7 +224,7 @@ if (System.swfVersion >= 11) {
 }
 
 // -6
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     // Compiled code may specialize vector indexing to throw a more informative
     // exception for an otherwise valid index property that denotes a negative
     // index value.  In SWF11+, we extend this to all cases of vector indexing.
@@ -228,19 +236,21 @@ if (System.swfVersion >= 11) {
 } else {
     AddVectorReadExceptionTest    ("-6", -6, REFREAD);
     AddVectorWriteExceptionTest   ("-6", -6, REFWRITE);
-    if (System.getRunmode().indexOf('interp') != -1) {
-        // Forced interpretation.
-        AddVectorReadExceptionTest_I  ("-6", -6, REFREAD);
-        AddVectorWriteExceptionTest_I ("-6", -6, REFWRITE);
-    } else {
-        // Compiled by default.  This is JIT behavior.
-        AddVectorReadExceptionTest_I  ("-6", -6, RANGE);
-        AddVectorWriteExceptionTest_I ("-6", -6, RANGE);
+    if (playerType == 'AVMPlus') {
+        if (System.getRunmode().indexOf('interp') != -1) {
+            // Forced interpretation.
+            AddVectorReadExceptionTest_I  ("-6", -6, REFREAD);
+            AddVectorWriteExceptionTest_I ("-6", -6, REFWRITE);
+        } else {
+            // Compiled by default.  This is JIT behavior.
+            AddVectorReadExceptionTest_I  ("-6", -6, RANGE);
+            AddVectorWriteExceptionTest_I ("-6", -6, RANGE);
+        }
     }
 }
 
 // -6.0
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     // Compiled code may specialize vector indexing to throw a more informative
     // exception for an otherwise valid index property that denotes a negative
     // index value.  In SWF11+, we extend this to all cases of vector indexing.
@@ -257,7 +267,7 @@ if (System.swfVersion >= 11) {
 }
 
 // "-6"
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     // JIT doesn't specialize this, so result prior to SWF11 was the same as for the interpreter.
     AddVectorReadExceptionTest  ("'-6'", "-6", RANGE);
     AddVectorWriteExceptionTest ("'-6'", "-6", RANGE);
@@ -267,7 +277,7 @@ if (System.swfVersion >= 11) {
 }
 
 // "-6.0"
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     // JIT doesn't specialize this, so result prior to SWF11 was the same as for the interpreter.
     AddVectorReadExceptionTest  ("'-6.0'", "-6.0", RANGE);
     AddVectorWriteExceptionTest ("'-6.0'", "-6.0", RANGE);
@@ -289,7 +299,7 @@ try {
     err1 = e.toString();
 }
 
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
    AddTestCase("when Vector.<*>.prototype[3.14] is set throws exception because non-uint property",
                RANGE,
                parseError(err1, RANGE.length));
@@ -320,7 +330,7 @@ var min_int_m1   =  -2147483649;
 // Implementation limits prevent us from actually allocating a vector as large
 // as these sizes, so all of these references will be to undefined properties.
 
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     AddVectorReadExceptionTest  ("max_uint_p1", max_uint_p1,   RANGE);
     AddVectorWriteExceptionTest ("max_uint_p1", max_uint_p1,   RANGE);
     AddVectorReadExceptionTest  ("max_uint",    max_uint,      RANGE);
@@ -328,14 +338,16 @@ if (System.swfVersion >= 11) {
 } else {
     AddVectorReadExceptionTest  ("max_uint_p1", max_uint_p1,   REFREAD);
     AddVectorWriteExceptionTest ("max_uint_p1", max_uint_p1,   REFWRITE);
-    if (System.getRunmode().indexOf('interp') != -1) {
-        // Forced interpretation.
-        AddVectorReadExceptionTest  ("max_uint",    max_uint,  REFREAD);
-        AddVectorWriteExceptionTest ("max_uint",    max_uint,  REFWRITE);
-    } else {
-        // Compiled by default.  This is JIT behavior.
-        AddVectorReadExceptionTest  ("max_uint",    max_uint,  REFREAD);
-        AddVectorWriteExceptionTest ("max_uint",    max_uint,  RANGE);
+    if (playerType == 'AVMPlus') {
+        if (System.getRunmode().indexOf('interp') != -1) {
+            // Forced interpretation.
+            AddVectorReadExceptionTest  ("max_uint",    max_uint,  REFREAD);
+            AddVectorWriteExceptionTest ("max_uint",    max_uint,  REFWRITE);
+        } else {
+            // Compiled by default.  This is JIT behavior.
+            AddVectorReadExceptionTest  ("max_uint",    max_uint,  REFREAD);
+            AddVectorWriteExceptionTest ("max_uint",    max_uint,  RANGE);
+        }
     }
 }
 
@@ -357,7 +369,7 @@ AddVectorWriteExceptionTest ("max_int28",    max_int28,    RANGE);
 AddVectorReadExceptionTest  ("max_int28_m1", max_int28_m1, RANGE);
 AddVectorWriteExceptionTest ("max_int28_m1", max_int28_m1, RANGE);
 
-if (System.swfVersion >= 11) {
+if (swfVersion >= 11) {
     AddVectorReadExceptionTest  ("min_int_p1",  min_int_p1,    RANGE);     // Negative index not allowed.
     AddVectorWriteExceptionTest ("min_int_p1",  min_int_p1,    RANGE);     // Negative index not allowed.
     AddVectorReadExceptionTest  ("min_int",     min_int,       RANGE);     // Negative index not allowed.
@@ -374,3 +386,6 @@ if (System.swfVersion >= 11) {
 }
 
 test();
+
+// restore prototype properties
+delete Vector.<*>.prototype[3.14];
