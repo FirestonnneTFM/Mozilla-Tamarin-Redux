@@ -117,28 +117,26 @@ class tamarinredux:
                     fileIsImportant=startCompile, priority=2, changeDir="changes/deep/processed",
                     builderNames=[
                                     "windows-deep",
-                                    "windows-p3-deep",
-                                    "windows-frr",
+                                    "windows64-deep",                                    
                                     "mac-deep",
                                     "mac64-deep",
-                                    "solaris-sparc-deep", "solaris-sparc2-deep",
-                                    "windows64-deep",
                                     "linux-deep",
                                     "linux-arm-deep",
                                     "linux-mips-deep",
+                                    "solaris-sparc-deep", "solaris-sparc2-deep",                                    
+                                    "windows-frr",                                    
                                                                     ],
                     builderDependencies=[
+                                  ["windows-deep", "windows-test"],
+                                  ["windows64-deep", "windows64-test"],
+                                  ["mac-deep","mac-intel-10.5-test"],
+                                  ["mac64-deep","mac64-intel-test"],                                  
                                   ["linux-deep", "linux-test"],
                                   ["linux-arm-deep", "linux-arm-test"],
-                                  ["windows-deep", "windows-test"],
-                                  ["windows-p3-deep", "windows-test"],
-                                  ["windows-frr", "windows-test"], 
-                                  ["mac-deep","mac-intel-10.5-test"],
-                                  ["mac64-deep","mac64-intel-test"],
+                                  ["linux-mips-deep", "linux-mips-test"],                                  
                                   ["solaris-sparc-deep", "solaris-sparc-test"],
                                   ["solaris-sparc2-deep", "solaris-sparc-test"],
-                                  ["windows64-deep", "windows64-test"], 
-                                  ["linux-mips-deep", "linux-mips-test"],
+                                  ["windows-frr", "windows-test"],                                   
                                  ])
     
     # The promote_build phase only runs when deep passes all tests.
@@ -916,6 +914,64 @@ class tamarinredux:
     }
 
     ##################################
+    #### builder for windows64-deep ####
+    ##################################
+    windows_64_deep_factory = factory.BuildFactory()
+    windows_64_deep_factory.addStep(sync_clean)
+    windows_64_deep_factory.addStep(sync_clone(url=HG_URL))
+    windows_64_deep_factory.addStep(sync_update)
+    windows_64_deep_factory.addStep(bb_slaveupdate(slave="windows64-deep"))
+    windows_64_deep_factory.addStep(compile_builtin)
+    windows_64_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-wordcode-interp --target=x86_64-win", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
+    windows_64_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode_64", args="--enable-debug --enable-debugger --enable-wordcode-interp --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))    
+    windows_64_deep_factory.addStep(download_testmedia)
+    windows_64_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d_64"))
+    windows_64_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s_64"))
+    windows_64_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd_64"))
+    windows_64_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-wordcode-interp", shellname="avmshell_sd_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", args="--enable-override-global-new --enable-use-system-malloc --enable-debugger --target=x86_64-win", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER +AVMFEATURE_OVERRIDE_GLOBAL_NEW +AVMFEATURE_USE_SYSTEM_MALLOC"))
+    windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", vmargs="", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="x64-win-tvm-debug-deep", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="x64-win-tvm-debugdebugger-deep", scriptargs=""))
+    windows_64_deep_factory.addStep(deep_release_esc)
+    windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-Dverifyall", shellname="avmshell_s_64", vmargs="-Dverifyall", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-Dverifyall", shellname="avmshell_sd_64", vmargs="-Dverifyall", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
+    windows_64_deep_factory.addStep( TestSuiteShellCommand(
+                command=['../all/run-acceptance-avmdiff-3264.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run 32-64 differential vmtests...',
+                descriptionDone='finished 32-64 differential vmtests.',
+                name="Testsuite_Differential3264",
+                workdir="../repo/build/buildbot/slaves/scripts"
+                )
+    )
+    windows_64_deep_factory.addStep(test_misc)
+    windows_64_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    windows_64_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
+    windows_64_deep_factory.addStep(deep_codecoverage_process)
+    windows_64_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run in code coverage
+    # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
+    windows_64_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
+                                              scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    windows_64_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
+    windows_64_deep_factory.addStep(util_process_clean)
+    windows_64_deep_factory.addStep(util_clean_buildsdir)
+    windows_64_deep_factory.addStep(sync_clean)
+
+    windows_64_deep_builder = {
+                'name': "windows64-deep",
+                'slavename': "windows64-deep",
+                'factory': windows_64_deep_factory,
+                'builddir': './windows64-deep',
+    }
+
+
+    ##################################
     #### builder for mac-deep ####
     ##################################
     mac_deep_factory = factory.BuildFactory()
@@ -1009,197 +1065,6 @@ class tamarinredux:
                 'slavename': "mac64-deep",
                 'factory': mac64_deep_factory,
                 'builddir': './mac64-deep',
-    }
-
-
-    ##################################
-    #### builder for windows-p3-deep ####
-    ##################################
-    windows_p3_deep_factory = factory.BuildFactory()
-    windows_p3_deep_factory.addStep(sync_clean)
-    windows_p3_deep_factory.addStep(sync_clone(url=HG_URL))
-    windows_p3_deep_factory.addStep(sync_update)
-    windows_p3_deep_factory.addStep(bb_slaveupdate(slave="windows-p3-deep"))
-    windows_p3_deep_factory.addStep(download_testmedia)
-    windows_p3_deep_factory.addStep(test_smoke)
-    windows_p3_deep_factory.addStep(test_commandline)
-    windows_p3_deep_factory.addStep(test_selftest(name="Release", shellname="avmshell"))
-    windows_p3_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
-    windows_p3_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
-    windows_p3_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd"))
-    windows_p3_deep_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
-    windows_p3_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
-    windows_p3_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
-    windows_p3_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
-    windows_p3_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
-    windows_p3_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
-    #windows_p3_deep_factory.addStep(test_differential)
-    windows_p3_deep_factory.addStep(util_process_clean)
-    windows_p3_deep_factory.addStep(util_clean_buildsdir)
-    windows_p3_deep_factory.addStep(sync_clean)
-
-    windows_p3_deep_builder = {
-                'name': "windows-p3-deep",
-                'slavename': "windows-p3-deep",
-                'factory': windows_p3_deep_factory,
-                'builddir': './windows-p3-deep',
-    }
-
-
-    ##################################
-    #### builder for windows-frr ####
-    ##################################
-    windows_frr_factory = factory.BuildFactory()
-    windows_frr_factory.addStep(BuildShellCommand(
-                command=['./build-frr.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='building frr...',
-                descriptionDone='finished building frr.',
-                name="BuildFRR",
-                workdir="../scripts",
-                timeout=3600)
-    )
-    windows_frr_factory.addStep(BuildShellCommand(
-                command=['./run-frunit.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='running frunit...',
-                descriptionDone='finished running frunit.',
-                name="RunFrunit",
-                workdir="../scripts",
-                timeout=3600)
-    )
-
-    windows_frr_builder = {
-                'name': "windows-frr",
-                'slavename': "windows-frr",
-                'factory': windows_frr_factory,
-                'builddir': './windows-frr',
-    }
-
-
-    ########################################
-    #### builder for solaris-sparc-deep ####
-    ########################################
-    solaris_sparc_deep_factory = factory.BuildFactory()
-    solaris_sparc_deep_factory.addStep(sync_clean)
-    solaris_sparc_deep_factory.addStep(sync_clone(url=HG_URL))
-    solaris_sparc_deep_factory.addStep(sync_update)
-    solaris_sparc_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
-    solaris_sparc_deep_factory.addStep(compile_builtin)
-    solaris_sparc_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-wordcode-interp", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))
-    solaris_sparc_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode", args="--enable-debug --enable-debugger --enable-wordcode-interp", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))    
-    solaris_sparc_deep_factory.addStep(download_testmedia)
-    solaris_sparc_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
-    solaris_sparc_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd"))
-    solaris_sparc_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger-wordcode-interp", shellname="avmshell_sd_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="sparc-sol-tvm-debugdebugger-deep", scriptargs="--showtimes", _timeout=2400))
-    solaris_sparc_deep_factory.addStep(deep_release_esc)
-    solaris_sparc_deep_factory.addStep(test_misc)
-    solaris_sparc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
-    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
-    # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
-    solaris_sparc_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
-                                              scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
-    solaris_sparc_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
-    solaris_sparc_deep_factory.addStep(util_process_clean)
-    solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
-    solaris_sparc_deep_factory.addStep(sync_clean)
-
-    solaris_sparc_deep_builder = {
-                'name': "solaris-sparc-deep",
-                'slavename': "solaris-sparc-deep",
-                'factory': solaris_sparc_deep_factory,
-                'builddir': './solaris-sparc-deep',
-    }
-
-
-    #########################################
-    #### builder for solaris-sparc2-deep ####
-    #########################################
-    solaris_sparc2_deep_factory = factory.BuildFactory()
-    solaris_sparc2_deep_factory.addStep(sync_clean)
-    solaris_sparc2_deep_factory.addStep(sync_clone(url=HG_URL))
-    solaris_sparc2_deep_factory.addStep(sync_update)
-    solaris_sparc2_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
-    solaris_sparc2_deep_factory.addStep(compile_builtin)
-    solaris_sparc2_deep_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
-    solaris_sparc2_deep_factory.addStep(download_testmedia)
-    solaris_sparc2_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="Debug-deep", shellname="avmshell_d", vmargs="", config="sparc-sol-tvm-debug-deep", scriptargs="--showtimes", _timeout=2400))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
-    solaris_sparc2_deep_factory.addStep(util_process_clean)
-    solaris_sparc2_deep_factory.addStep(util_clean_buildsdir)
-    solaris_sparc2_deep_factory.addStep(sync_clean)
-
-    solaris_sparc2_deep_builder = {
-                'name': "solaris-sparc2-deep",
-                'slavename': "solaris-sparc2-deep",
-                'factory': solaris_sparc2_deep_factory,
-                'builddir': './solaris-sparc2-deep',
-    }
-
-    ##################################
-    #### builder for windows64-deep ####
-    ##################################
-    windows_64_deep_factory = factory.BuildFactory()
-    windows_64_deep_factory.addStep(sync_clean)
-    windows_64_deep_factory.addStep(sync_clone(url=HG_URL))
-    windows_64_deep_factory.addStep(sync_update)
-    windows_64_deep_factory.addStep(bb_slaveupdate(slave="windows64-deep"))
-    windows_64_deep_factory.addStep(compile_builtin)
-    windows_64_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode_64", args="--enable-wordcode-interp --target=x86_64-win", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))
-    windows_64_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode_64", args="--enable-debug --enable-debugger --enable-wordcode-interp --target=x86_64-win", upload="false", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_WORDCODE_INTERP"))    
-    windows_64_deep_factory.addStep(download_testmedia)
-    windows_64_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d_64"))
-    windows_64_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s_64"))
-    windows_64_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd_64"))
-    windows_64_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-wordcode-interp", shellname="avmshell_sd_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
-    windows_64_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", args="--enable-override-global-new --enable-use-system-malloc --enable-debugger --target=x86_64-win", upload="true", features="+AVMSYSTEM_64BIT +AVMSYSTEM_AMD64 +AVMFEATURE_DEBUGGER +AVMFEATURE_OVERRIDE_GLOBAL_NEW +AVMFEATURE_USE_SYSTEM_MALLOC"))
-    windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", vmargs="", config="", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="x64-win-tvm-debug-deep", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="x64-win-tvm-debugdebugger-deep", scriptargs=""))
-    windows_64_deep_factory.addStep(deep_release_esc)
-    windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-Dverifyall", shellname="avmshell_s_64", vmargs="-Dverifyall", config="", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-Dverifyall", shellname="avmshell_sd_64", vmargs="-Dverifyall", config="", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="Release-GCthreshold", shellname="avmshell_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-GCthreshold", shellname="avmshell_sd_64", vmargs="-Dgcthreshold 128 -load 1.05,1,1.05,5,1.05,20", config="", scriptargs=""))
-    windows_64_deep_factory.addStep( TestSuiteShellCommand(
-                command=['../all/run-acceptance-avmdiff-3264.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
-                description='starting to run 32-64 differential vmtests...',
-                descriptionDone='finished 32-64 differential vmtests.',
-                name="Testsuite_Differential3264",
-                workdir="../repo/build/buildbot/slaves/scripts"
-                )
-    )
-    windows_64_deep_factory.addStep(test_misc)
-    windows_64_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
-    windows_64_deep_factory.addStep(deep_codecoverage(compilecsv="../all/codecoverage-compile.csv", testcsv="../all/codecoverage-test.csv"))
-    windows_64_deep_factory.addStep(deep_codecoverage_process)
-    windows_64_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run in code coverage
-    # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
-    windows_64_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
-                                              scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
-    windows_64_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
-    windows_64_deep_factory.addStep(util_process_clean)
-    windows_64_deep_factory.addStep(util_clean_buildsdir)
-    windows_64_deep_factory.addStep(sync_clean)
-
-    windows_64_deep_builder = {
-                'name': "windows64-deep",
-                'slavename': "windows64-deep",
-                'factory': windows_64_deep_factory,
-                'builddir': './windows64-deep',
     }
 
 
@@ -1306,6 +1171,107 @@ class tamarinredux:
                 'factory': linux_mips_deep_factory,
                 'builddir': './linux-mips-deep',
     }
+
+
+    ########################################
+    #### builder for solaris-sparc-deep ####
+    ########################################
+    solaris_sparc_deep_factory = factory.BuildFactory()
+    solaris_sparc_deep_factory.addStep(sync_clean)
+    solaris_sparc_deep_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc_deep_factory.addStep(sync_update)
+    solaris_sparc_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
+    solaris_sparc_deep_factory.addStep(compile_builtin)
+    solaris_sparc_deep_factory.addStep(compile_generic(name="Release-wordcode", shellname="avmshell_wordcode", args="--enable-wordcode-interp", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))
+    solaris_sparc_deep_factory.addStep(compile_generic(name="DebugDebugger-wordcode", shellname="avmshell_sd_wordcode", args="--enable-debug --enable-debugger --enable-wordcode-interp", upload="false", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC +AVMFEATURE_WORDCODE_INTERP"))    
+    solaris_sparc_deep_factory.addStep(download_testmedia)
+    solaris_sparc_deep_factory.addStep(test_selftest(name="ReleaseDebugger", shellname="avmshell_s"))
+    solaris_sparc_deep_factory.addStep(test_selftest(name="DebugDebugger", shellname="avmshell_sd"))
+    solaris_sparc_deep_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger-wordcode-interp", shellname="avmshell_sd_wordcode", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="sparc-sol-tvm-debugdebugger-deep", scriptargs="--showtimes", _timeout=2400))
+    solaris_sparc_deep_factory.addStep(deep_release_esc)
+    solaris_sparc_deep_factory.addStep(test_misc)
+    solaris_sparc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
+    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyAll", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
+    solaris_sparc_deep_factory.addStep(test_generic(name="DebugDebugger_VerifyOnly", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verifyonly --timeout=300 --random"))
+    # Do a test run where we compile with -ES. MUST be the last step of the build as it recompiles the .abc files used by all the other steps
+    solaris_sparc_deep_factory.addStep(test_generic(name="Release_ES", shellname="avmshell", vmargs="", config="",
+                                              scriptargs="--ascargs=-no-AS3 --addtoconfig=-ES -f -x abcasm,ecma3,spidermonkey"))
+    solaris_sparc_deep_factory.addStep(download_testmedia) # grab test media again, to protect against previous -ES run
+    solaris_sparc_deep_factory.addStep(util_process_clean)
+    solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
+    solaris_sparc_deep_factory.addStep(sync_clean)
+
+    solaris_sparc_deep_builder = {
+                'name': "solaris-sparc-deep",
+                'slavename': "solaris-sparc-deep",
+                'factory': solaris_sparc_deep_factory,
+                'builddir': './solaris-sparc-deep',
+    }
+
+
+    #########################################
+    #### builder for solaris-sparc2-deep ####
+    #########################################
+    solaris_sparc2_deep_factory = factory.BuildFactory()
+    solaris_sparc2_deep_factory.addStep(sync_clean)
+    solaris_sparc2_deep_factory.addStep(sync_clone(url=HG_URL))
+    solaris_sparc2_deep_factory.addStep(sync_update)
+    solaris_sparc2_deep_factory.addStep(bb_slaveupdate(slave="solaris-sparc-deep"))
+    solaris_sparc2_deep_factory.addStep(compile_builtin)
+    solaris_sparc2_deep_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-debug", upload="true", features="+AVMSYSTEM_32BIT +AVMSYSTEM_SPARC"))
+    solaris_sparc2_deep_factory.addStep(download_testmedia)
+    solaris_sparc2_deep_factory.addStep(test_selftest(name="Debug", shellname="avmshell_d"))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Release", shellname="avmshell", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-interp", shellname="avmshell", vmargs="-Dinterp", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Release-jit", shellname="avmshell", vmargs="-Ojit", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="Debug-deep", shellname="avmshell_d", vmargs="", config="sparc-sol-tvm-debug-deep", scriptargs="--showtimes", _timeout=2400))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
+    solaris_sparc2_deep_factory.addStep(util_process_clean)
+    solaris_sparc2_deep_factory.addStep(util_clean_buildsdir)
+    solaris_sparc2_deep_factory.addStep(sync_clean)
+
+    solaris_sparc2_deep_builder = {
+                'name': "solaris-sparc2-deep",
+                'slavename': "solaris-sparc2-deep",
+                'factory': solaris_sparc2_deep_factory,
+                'builddir': './solaris-sparc2-deep',
+    }
+
+
+    ##################################
+    #### builder for windows-frr ####
+    ##################################
+    windows_frr_factory = factory.BuildFactory()
+    windows_frr_factory.addStep(BuildShellCommand(
+                command=['./build-frr.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='building frr...',
+                descriptionDone='finished building frr.',
+                name="BuildFRR",
+                workdir="../scripts",
+                timeout=3600)
+    )
+    windows_frr_factory.addStep(BuildShellCommand(
+                command=['./run-frunit.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running frunit...',
+                descriptionDone='finished running frunit.',
+                name="RunFrunit",
+                workdir="../scripts",
+                timeout=3600)
+    )
+
+    windows_frr_builder = {
+                'name': "windows-frr",
+                'slavename': "windows-frr",
+                'factory': windows_frr_factory,
+                'builddir': './windows-frr',
+    }
+
     
     ##########################################
     #### builder for promote-build ####
@@ -1378,15 +1344,14 @@ class tamarinredux:
                 linux_mips_test_builder,
 
                 windows_deep_builder,
-                windows_p3_deep_builder,
+                windows_64_deep_builder,                
                 mac_deep_builder,
                 mac64_deep_builder,
-                windows_64_deep_builder,
-                solaris_sparc_deep_builder,
-                solaris_sparc2_deep_builder,
                 linux_deep_builder,
                 linux_arm_deep_builder,
                 linux_mips_deep_builder,
+                solaris_sparc_deep_builder,
+                solaris_sparc2_deep_builder,                
                 windows_frr_builder,
                 
                 promote_build_builder,
