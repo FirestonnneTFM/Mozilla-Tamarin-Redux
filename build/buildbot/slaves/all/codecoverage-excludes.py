@@ -69,24 +69,24 @@ exclude_pattern+="!vmbase/AvmAssert.cpp !VMPI/MacDebugUtils.cpp !VMPI/SpyUtils*.
 exclude_pattern+="!extensions/SamplerScript.h "
 
 # exclude vprof and eval tools, not part of flash player shipping code
-exclude_pattern+="!vprof/ !eval/"
+exclude_pattern+="!vprof/ !eval/ "
 
 
 # The following functions in MathClass and MathUtils have been excluded
 # from the coverage calculation as there are currently not reachable
 # (not called from any other source):
 # https://bugzilla.mozilla.org/show_bug.cgi?id=592728
-exclude_pattern+="!avmplus::MathClass::max2(double,double) "
-exclude_pattern+="!avmplus::MathClass::min2(double,double) "
-exclude_pattern+="!avmplus::MathUtils::equals(double,double) "
-exclude_pattern+="!avmplus::MathUtils::infinity() "
-exclude_pattern+="!avmplus::MathUtils::max(double,double) "
-exclude_pattern+="!avmplus::MathUtils::min(double,double) "
-exclude_pattern+="!avmplus::MathUtils::nan() "
-exclude_pattern+="!avmplus::MathUtils::neg_infinity() "
-exclude_pattern+="!avmplus::MathUtils::nextDigit(double*) "
-exclude_pattern+="!avmplus::MathUtils::powerOfTen(int32_t,double) "
-exclude_pattern+="!avmplus::MathUtils::roundInt(double) "
+exclude_pattern+="'!avmplus::MathClass::max2(double,double)' "
+exclude_pattern+="'!avmplus::MathClass::min2(double,double)' "
+exclude_pattern+="'!avmplus::MathUtils::equals(double,double)' "
+exclude_pattern+="'!avmplus::MathUtils::infinity()' "
+exclude_pattern+="'!avmplus::MathUtils::max(double,double)' "
+exclude_pattern+="'!avmplus::MathUtils::min(double,double)' "
+exclude_pattern+="'!avmplus::MathUtils::nan()' "
+exclude_pattern+="'!avmplus::MathUtils::neg_infinity()' "
+exclude_pattern+="'!avmplus::MathUtils::nextDigit(double*)' "
+exclude_pattern+="'!avmplus::MathUtils::powerOfTen(int32_t,double)' "
+exclude_pattern+="'!avmplus::MathUtils::roundInt(double)' "
 
 # print exclude pattern
 print(exclude_pattern)
