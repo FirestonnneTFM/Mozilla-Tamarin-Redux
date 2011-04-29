@@ -75,9 +75,6 @@ function getTestCases() : Array
     pattern = /(\w+)-(\w+)/g;
     array[item++] = new TestCase(SECTION, 'str.replace(pattern, "$02-$01")', "two-one", str.replace(pattern, "$02-$01") );
 
-    var myPattern:MyRegExp = new MyRegExp("", "");
-    array[item++] = new TestCase(SECTION, 'createInstance coverage', "", myPattern.source );
-
     str = "abc-123-abc";
     pattern = /(?P<mygroup>abc)-123-(?P=mygroup)/g;
     array[item++] = new TestCase(SECTION, "pattern.exec(str)", "abc", pattern.exec(str)[1] );
@@ -89,11 +86,3 @@ function getTestCases() : Array
     return ( array );
 }
 
-
-class MyRegExp extends RegExp
-{
-    public function MyRegExp(re:String, flags:String)
-    {
-        super(re, flags);
-    }
-}
