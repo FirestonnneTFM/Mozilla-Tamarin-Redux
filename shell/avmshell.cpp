@@ -166,6 +166,7 @@ namespace avmshell
         gcconfig.collectionThreshold = settings.gcthreshold;
         gcconfig.exactTracing = settings.exactgc;
         gcconfig.markstackAllowance = settings.markstackAllowance;
+        gcconfig.drc = settings.drc;
         MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode(), &gcconfig) );
         {
             MMGC_GCENTER(gc);
@@ -734,6 +735,9 @@ namespace avmshell
                         settings.exactgc = false;
                     }
 #endif
+                    else if (!VMPI_strcmp(arg+2, "nodrc")) {
+                        settings.drc = false;
+                    }
                     else if (!VMPI_strcmp(arg+2, "nofixedcheck")) {
                         settings.fixedcheck = false;
                     }
@@ -1203,7 +1207,8 @@ namespace avmshell
         AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
         AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
         AvmLog("          [-Dgreedy]    collect before every allocation\n");
-        AvmLog("          [-Dnogc]      don't collect\n");
+        AvmLog("          [-Dnogc]      don't collect (including DRC)\n");
+        AvmLog("          [-Dnodrc]     don't use DRC (only use mark/sweep)\n");
 #ifdef VMCFG_SELECTABLE_EXACT_TRACING
         AvmLog("          [-Dnoexactgc] disable exact tracing\n");
 #endif

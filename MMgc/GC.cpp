@@ -133,6 +133,7 @@ namespace MMgc
         greedy(mode == kGreedyGC),
         nogc(mode == kDisableGC),
         incremental(mode == kIncrementalGC),
+        drcEnabled(mode != kDisableGC && (config == NULL || config->drc)),
         findUnmarkedPointers(false),
         validateDefRef(false),
         keepDRCHistory(false),

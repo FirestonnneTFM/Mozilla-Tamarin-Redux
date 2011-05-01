@@ -165,6 +165,15 @@ namespace MMgc
         top = blocktable[0];
         limit = blocktable[0] + CAPACITY(RCObject*);
         topIndex = 0;
+
+        // if disable force slow path where we check this
+        if(!gc->drcEnabled)
+        {
+            limit = top;
+#ifdef DEBUG
+            GCLog("*** DRC has been disabled for GC=%p ***\n", (void*)gc);
+#endif
+        }
     }
 
     void ZCT::Destroy()
@@ -227,6 +236,9 @@ namespace MMgc
     {
         GCAssert(top == limit);
         GCAssert(gc->collecting + reaping < 2);
+
+        if(!gc->drcEnabled)
+            return;
 
         if(gc->collecting)
         {

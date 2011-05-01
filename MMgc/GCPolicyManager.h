@@ -68,6 +68,9 @@ namespace MMgc
          */
         bool exactTracing;
 
+        /* Defaults to true. Set to false to disable DRC. */
+        bool drc;
+
         /* selects defaults for all configuration parameters. */
         GCConfig();
     private: // unimplemented ctors/methods.
