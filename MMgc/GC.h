@@ -526,6 +526,17 @@ namespace MMgc
         const bool incremental;
 
         /**
+         * drcEnabled controls whether DRC is employed.  This is true
+         * by default and disabling it is only recommended for
+         * experimentation.  When false we merely short circuit the
+         * adding of zero count items to the zero count table.  RC
+         * updates still occur in the write barriers.  Applications
+         * dependent on finalization immediacy provided by DRC could
+         * break.
+         */
+        const bool drcEnabled;
+
+        /**
          * findUnmarkedPointers is a debugging flag.  If true, the GC will scan the
          * heap at the end of garbage collection, asserting that every word that
          * looks like it conservatively points to an object points to an object that
