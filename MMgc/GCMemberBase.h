@@ -62,7 +62,7 @@ namespace MMgc
         //  'set' is invoked whenever the garbage collected pointer value 't' changes
         void set(const T* tNew);
         T* value() const;
-        T** location() const;
+        T* const* location() const;
 
     protected:
         

@@ -65,7 +65,7 @@ namespace MMgc
     }
     
     template<class T>
-    REALLY_INLINE T** GCMemberBase<T>::location() const
+    REALLY_INLINE T* const* GCMemberBase<T>::location() const
     {
         return &(this->t);
     }
