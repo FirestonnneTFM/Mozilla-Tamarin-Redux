@@ -40,13 +40,14 @@
 
 %%component avmplus
 %%category builtins
-%%ifndef    VMCFG_ARM
 
 %%test WeakValueHashTable
     WeakValueHashtable* tbl = WeakValueHashtable::create(core->gc);
     String* fhtagn = String::createLatin1(core, "Fhtagn!");
+    MMgc::GCObjectLock* fhtagn_lock = core->gc->LockObject(fhtagn);
+    fhtagn = NULL;
     for ( int i=0 ; i < 500 ; i++ ) {
-        tbl->add(atomFromIntptrValue(i), (i & 1) ? String::createLatin1(core, "Cthulhu!")->atom() : fhtagn->atom());
+        tbl->add(atomFromIntptrValue(i), (i & 1) ? String::createLatin1(core, "Cthulhu!")->atom() : ((String*)core->gc->GetLockedObject(fhtagn_lock))->atom());
     }
     core->gc->Collect();
     core->gc->Collect();
@@ -56,6 +57,8 @@
         if (a != AtomConstants::undefinedAtom)
             sum++;
     }
+    core->gc->UnlockObject(fhtagn_lock);
+    printf("fhtagn sum: %d\n", sum);
 
 // Retain at least 250, but it would be unreasonable to retain more than 300
 %%verify sum >= 250 && sum <= 300
