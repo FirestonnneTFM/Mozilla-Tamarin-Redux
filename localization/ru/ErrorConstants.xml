@@ -677,4 +677,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">Класс %1 не может быть создан.</error>
   <error id="2030" label="kEOFError">Обнаружен конец файла.</error>
   <error id="2058" label="kCompressedDataError">Ошибка при распаковке данных.</error>
+  <error id="2088" label="kProxyGetPropertyError">Класс Proxy не поддерживает getProperty. Он должен быть заменен на подкласс.</error>
+  <error id="2089" label="kProxySetPropertyError">Класс Proxy не поддерживает setProperty. Он должен быть заменен на подкласс.</error>
+  <error id="2090" label="kProxyCallPropertyError">Класс Proxy не поддерживает callProperty. Он должен быть заменен на подкласс.</error>
+  <error id="2091" label="kProxyHasPropertyError">Класс Proxy не поддерживает hasProperty. Он должен быть заменен на подкласс.</error>
+  <error id="2092" label="kProxyDeletePropertyError">Класс Proxy не поддерживает deleteProperty. Он должен быть заменен на подкласс.</error>
+  <error id="2093" label="kProxyGetDescendantsError">Класс Proxy не поддерживает getDescendants. Он должен быть заменен на подкласс.</error>
+  <error id="2105" label="kProxyNextNameIndexError">Класс Proxy не поддерживает nextNameIndex. Он должен быть заменен на подкласс.</error>
+  <error id="2106" label="kProxyNextNameError">Класс Proxy не поддерживает nextName. Он должен быть заменен на подкласс.</error>
+  <error id="2107" label="kProxyNextValueError">Класс Proxy не поддерживает nextValue. Он должен быть заменен на подкласс.</error>
 </errors>

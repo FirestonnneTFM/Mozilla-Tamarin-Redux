@@ -766,4 +766,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">无法实例化 %1 类。</error>
   <error id="2030" label="kEOFError">遇到文件尾。</error>
   <error id="2058" label="kCompressedDataError">解压缩数据时出错。</error>
+  <error id="2088" label="kProxyGetPropertyError">Proxy 类不实现 getProperty。它必须由一个子类覆盖。</error>
+  <error id="2089" label="kProxySetPropertyError">Proxy 类不实现 setProperty。它必须由一个子类覆盖。</error>
+  <error id="2090" label="kProxyCallPropertyError">Proxy 类不实现 callProperty。它必须由一个子类覆盖。</error>
+  <error id="2091" label="kProxyHasPropertyError">Proxy 类不实现 hasProperty。它必须由一个子类覆盖。</error>
+  <error id="2092" label="kProxyDeletePropertyError">Proxy 类不实现 deleteProperty。它必须由一个子类覆盖。</error>
+  <error id="2093" label="kProxyGetDescendantsError">Proxy 类不实现 getDescendants。它必须由一个子类覆盖。</error>
+  <error id="2105" label="kProxyNextNameIndexError">Proxy 类不实现 nextNameIndex。它必须由一个子类覆盖。</error>
+  <error id="2106" label="kProxyNextNameError">Proxy 类不实现 nextName。它必须由一个子类覆盖。</error>
+  <error id="2107" label="kProxyNextValueError">Proxy 类不实现 nextValue。它必须由一个子类覆盖。</error>
 </errors>

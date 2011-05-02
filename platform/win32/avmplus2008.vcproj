@@ -1784,6 +1784,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\ProxyGlue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\ProxyGlue.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\ClassClass.cpp"
 				>
 			</File>
@@ -2878,6 +2886,10 @@
 			</File>
 			<File
 				RelativePath="..\..\core\ByteArray.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\Proxy.as"
 				>
 			</File>
 			<File

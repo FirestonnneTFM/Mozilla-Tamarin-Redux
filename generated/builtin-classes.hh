@@ -223,6 +223,96 @@ private:
 };
 
 //-----------------------------------------------------------
+// flash.errors::IllegalOperationError
+//-----------------------------------------------------------
+class IllegalOperationErrorObject : public avmplus::ErrorObject
+{
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    friend class avmplus::IllegalOperationErrorClass;
+    REALLY_INLINE explicit IllegalOperationErrorObject(VTable* ivtable, ScriptObject* delegate) : avmplus::ErrorObject(ivtable, delegate) {}
+private:
+    explicit IllegalOperationErrorObject(const IllegalOperationErrorObject&); // unimplemented
+    void operator=(const IllegalOperationErrorObject&); // unimplemented
+};
+
+//-----------------------------------------------------------
+// flash.errors::IllegalOperationError$
+//-----------------------------------------------------------
+class IllegalOperationErrorClass : public avmplus::ClassClosure
+{
+public:
+    static avmplus::ClassClosure* FASTCALL createClassClosure(avmplus::VTable* cvtable);
+public:
+    static avmplus::ScriptObject* FASTCALL createInstanceProc(avmplus::ClassClosure*);
+public:
+    AvmThunk_DEBUG_ONLY( virtual avmplus::Atom construct(int argc, avmplus::Atom* argv); )
+private:
+    AvmThunk_DEBUG_ONLY( virtual void createInstance() { AvmAssert(0); } )
+public:
+    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> constructObject(GCRef<avmplus::String> arg1, int32_t arg2)
+    {
+        avmplus::AvmCore* const core = ((AvmCore*)(this->core()));
+        avmplus::Atom args[3] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom(), core->intToAtom(arg2) };
+        avmplus::Atom const result = this->construct(2, args);
+        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> constructObject(GCRef<avmplus::String> arg1)
+    {
+        avmplus::Atom args[2] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom(), arg1->atom() };
+        avmplus::Atom const result = this->construct(1, args);
+        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> constructObject()
+    {
+        avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
+        avmplus::Atom const result = this->construct(0, args);
+        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+public:
+    REALLY_INLINE bool isType(avmplus::Atom value)
+    {
+        return isTypeImpl(value);
+    }
+    REALLY_INLINE bool isType(GCRef<avmplus::ScriptObject> value)
+    {
+        return isTypeImpl(value->atom());
+    }
+    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> asType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = asTypeImpl(value);
+        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> asType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = asTypeImpl(value->atom());
+        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> coerceToType(avmplus::Atom value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value);
+        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+    REALLY_INLINE GCRef<avmplus::IllegalOperationErrorObject> coerceToType(GCRef<avmplus::ScriptObject> value)
+    {
+        avmplus::Atom const result = coerceToTypeImpl(value->atom());
+        return GCRef<avmplus::IllegalOperationErrorObject>((avmplus::IllegalOperationErrorObject*)(AvmCore::atomToScriptObject(result)));
+    }
+private:
+    friend class avmplus::NativeID::SlotOffsetsAndAsserts;
+protected:
+    inline explicit IllegalOperationErrorClass(VTable* cvtable) : avmplus::ClassClosure(cvtable) { createVanillaPrototype(); }
+private:
+    explicit IllegalOperationErrorClass(const IllegalOperationErrorClass&); // unimplemented
+    void operator=(const IllegalOperationErrorClass&); // unimplemented
+};
+
+//-----------------------------------------------------------
 // flash.errors::EOFError
 //-----------------------------------------------------------
 class EOFErrorObject : public avmplus::IOErrorObject

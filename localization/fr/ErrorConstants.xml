@@ -766,4 +766,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">Impossible d'instancier la classe %1.</error>
   <error id="2030" label="kEOFError">Fin de fichier détectée.</error>
   <error id="2058" label="kCompressedDataError">Une erreur s'est produite lors de la décompression des données.</error>
+  <error id="2088" label="kProxyGetPropertyError">La classe Proxy ne met pas en oeuvre getProperty. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2089" label="kProxySetPropertyError">La classe Proxy ne met pas en oeuvre setProperty. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2090" label="kProxyCallPropertyError">La classe Proxy ne met pas en oeuvre callProperty. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2091" label="kProxyHasPropertyError">La classe Proxy ne met pas en oeuvre hasProperty. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2092" label="kProxyDeletePropertyError">La classe Proxy ne met pas en oeuvre deleteProperty. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2093" label="kProxyGetDescendantsError">La classe Proxy ne met pas en oeuvre getDescendants. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2105" label="kProxyNextNameIndexError">La classe Proxy ne met pas en oeuvre nextNameIndex. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2106" label="kProxyNextNameError">La classe Proxy ne met pas en oeuvre nextName. Elle doit être remplacée par une sous-classe.</error>
+  <error id="2107" label="kProxyNextValueError">La classe Proxy ne met pas en oeuvre nextValue. Elle doit être remplacée par une sous-classe.</error>
 </errors>

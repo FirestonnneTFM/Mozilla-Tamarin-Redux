@@ -101,6 +101,8 @@
 #define avmplus_ObjectVectorObject_isExactInterlock 1
 #define avmplus_PIE4XNode_isExactInterlock 1
 #define avmplus_PoolObject_isExactInterlock 1
+#define avmplus_ProxyClass_isExactInterlock 1
+#define avmplus_ProxyObject_isExactInterlock 1
 #define avmplus_QCache_isExactInterlock 1
 #define avmplus_QCachedItem_isExactInterlock 1
 #define avmplus_QNameClass_isExactInterlock 1

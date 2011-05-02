@@ -247,7 +247,16 @@ namespace avmplus
             2008, 137,
             2012, 138,
             2030, 139,
-            2058, 140
+            2058, 140,
+            2088, 141,
+            2089, 142,
+            2090, 143,
+            2091, 144,
+            2092, 145,
+            2093, 146,
+            2105, 147,
+            2106, 148,
+            2107, 149
         };
 
         const char* errorConstants[][kNumErrorConstants] =
@@ -395,7 +404,16 @@ namespace avmplus
                 /*2008,137*/ "Parameter %1 must be one of the accepted values.",
                 /*2012,138*/ "%1 class cannot be instantiated.",
                 /*2030,139*/ "End of file was encountered.",
-                /*2058,140*/ "There was an error decompressing the data."
+                /*2058,140*/ "There was an error decompressing the data.",
+                /*2088,141*/ "The Proxy class does not implement getProperty. It must be overridden by a subclass.",
+                /*2089,142*/ "The Proxy class does not implement setProperty. It must be overridden by a subclass.",
+                /*2090,143*/ "The Proxy class does not implement callProperty. It must be overridden by a subclass.",
+                /*2091,144*/ "The Proxy class does not implement hasProperty. It must be overridden by a subclass.",
+                /*2092,145*/ "The Proxy class does not implement deleteProperty. It must be overridden by a subclass.",
+                /*2093,146*/ "The Proxy class does not implement getDescendants. It must be overridden by a subclass.",
+                /*2105,147*/ "The Proxy class does not implement nextNameIndex. It must be overridden by a subclass.",
+                /*2106,148*/ "The Proxy class does not implement nextName. It must be overridden by a subclass.",
+                /*2107,149*/ "The Proxy class does not implement nextValue. It must be overridden by a subclass."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -541,7 +559,16 @@ namespace avmplus
                 /*2008,137*/ "Parametr %1 musí být jedna z akceptovaných hodnot.",
                 /*2012,138*/ "Pro třídu %1 nelze vytvořit instanci.",
                 /*2030,139*/ "Bylo dosaženo konce souboru.",
-                /*2058,140*/ "Při dekomprimování dat došlo k chybě."
+                /*2058,140*/ "Při dekomprimování dat došlo k chybě.",
+                /*2088,141*/ "Třída Proxy neimplementuje funkci getProperty. Musí být přepsána podtřídou.",
+                /*2089,142*/ "Třída Proxy neimplementuje funkci setProperty. Musí být přepsána podtřídou.",
+                /*2090,143*/ "Třída Proxy neimplementuje funkci callProperty. Musí být přepsána podtřídou.",
+                /*2091,144*/ "Třída Proxy neimplementuje funkci hasProperty. Musí být přepsána podtřídou.",
+                /*2092,145*/ "Třída Proxy neimplementuje funkci deleteProperty. Musí být přepsána podtřídou.",
+                /*2093,146*/ "Třída Proxy neimplementuje funkci getDescendants. Musí být přepsána podtřídou.",
+                /*2105,147*/ "Třída Proxy neimplementuje funkci nextNameIndex. Musí být přepsána podtřídou.",
+                /*2106,148*/ "Třída Proxy neimplementuje funkci nextName. Musí být přepsána podtřídou.",
+                /*2107,149*/ "Třída Proxy neimplementuje funkci nextValue. Musí být přepsána podtřídou."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_de
@@ -687,7 +714,16 @@ namespace avmplus
                 /*2008,137*/ "Parameter %1 muss einen zulässigen Wert haben.",
                 /*2012,138*/ "%1-Klasse kann nicht instanziiert werden.",
                 /*2030,139*/ "Das Dateiende wurde erkannt.",
-                /*2058,140*/ "Fehler beim Dekomprimieren der Daten."
+                /*2058,140*/ "Fehler beim Dekomprimieren der Daten.",
+                /*2088,141*/ "Die Proxy-Klasse implementiert getProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2089,142*/ "Die Proxy-Klasse implementiert setProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2090,143*/ "Die Proxy-Klasse implementiert callProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2091,144*/ "Die Proxy-Klasse implementiert hasProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2092,145*/ "Die Proxy-Klasse implementiert deleteProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2093,146*/ "Die Proxy-Klasse implementiert getDescendants nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2105,147*/ "Die Proxy-Klasse implementiert nextNameIndex nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2106,148*/ "Die Proxy-Klasse implementiert nextName nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.",
+                /*2107,149*/ "Die Proxy-Klasse implementiert nextValue nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_es
@@ -833,7 +869,16 @@ namespace avmplus
                 /*2008,137*/ "El parámetro %1 debe tener uno de los valores aceptados.",
                 /*2012,138*/ "No se puede crear una instancia de la clase %1.",
                 /*2030,139*/ "Se alcanzó el final del archivo.",
-                /*2058,140*/ "Se produjo un error al descomprimir los datos."
+                /*2058,140*/ "Se produjo un error al descomprimir los datos.",
+                /*2088,141*/ "La clase Proxy no implementa getProperty. Debe sustituirse por una subclase.",
+                /*2089,142*/ "La clase Proxy no implementa setProperty. Debe sustituirse por una subclase.",
+                /*2090,143*/ "La clase Proxy no implementa callProperty. Debe sustituirse por una subclase.",
+                /*2091,144*/ "La clase Proxy no implementa hasProperty. Debe sustituirse por una subclase.",
+                /*2092,145*/ "La clase Proxy no implementa deleteProperty. Debe sustituirse por una subclase.",
+                /*2093,146*/ "La clase Proxy no implementa getDescendants. Debe sustituirse por una subclase.",
+                /*2105,147*/ "La clase Proxy no implementa nextNameIndex. Debe sustituirse por una subclase.",
+                /*2106,148*/ "La clase Proxy no implementa nextName. Debe sustituirse por una subclase.",
+                /*2107,149*/ "La clase Proxy no implementa nextValue. Debe sustituirse por una subclase."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_fr
@@ -979,7 +1024,16 @@ namespace avmplus
                 /*2008,137*/ "Le paramètre %1 doit être l'une des valeurs acceptées.",
                 /*2012,138*/ "Impossible d'instancier la classe %1.",
                 /*2030,139*/ "Fin de fichier détectée.",
-                /*2058,140*/ "Une erreur s'est produite lors de la décompression des données."
+                /*2058,140*/ "Une erreur s'est produite lors de la décompression des données.",
+                /*2088,141*/ "La classe Proxy ne met pas en oeuvre getProperty. Elle doit être remplacée par une sous-classe.",
+                /*2089,142*/ "La classe Proxy ne met pas en oeuvre setProperty. Elle doit être remplacée par une sous-classe.",
+                /*2090,143*/ "La classe Proxy ne met pas en oeuvre callProperty. Elle doit être remplacée par une sous-classe.",
+                /*2091,144*/ "La classe Proxy ne met pas en oeuvre hasProperty. Elle doit être remplacée par une sous-classe.",
+                /*2092,145*/ "La classe Proxy ne met pas en oeuvre deleteProperty. Elle doit être remplacée par une sous-classe.",
+                /*2093,146*/ "La classe Proxy ne met pas en oeuvre getDescendants. Elle doit être remplacée par une sous-classe.",
+                /*2105,147*/ "La classe Proxy ne met pas en oeuvre nextNameIndex. Elle doit être remplacée par une sous-classe.",
+                /*2106,148*/ "La classe Proxy ne met pas en oeuvre nextName. Elle doit être remplacée par une sous-classe.",
+                /*2107,149*/ "La classe Proxy ne met pas en oeuvre nextValue. Elle doit être remplacée par une sous-classe."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_it
@@ -1125,7 +1179,16 @@ namespace avmplus
                 /*2008,137*/ "Il valore del parametro %1 deve essere uno dei valori accettati.",
                 /*2012,138*/ "Impossibile creare un'istanza della classe %1.",
                 /*2030,139*/ "È stata raggiunta la fine del file.",
-                /*2058,140*/ "Si è verificato un errore durante la decompressione dei dati."
+                /*2058,140*/ "Si è verificato un errore durante la decompressione dei dati.",
+                /*2088,141*/ "La classe Proxy non implementa getProperty. Deve essere sostituita da una sottoclasse.",
+                /*2089,142*/ "La classe Proxy non implementa setProperty. Deve essere sostituita da una sottoclasse.",
+                /*2090,143*/ "La classe Proxy non implementa callProperty. Deve essere sostituita da una sottoclasse.",
+                /*2091,144*/ "La classe Proxy non implementa hasProperty. Deve essere sostituita da una sottoclasse.",
+                /*2092,145*/ "La classe Proxy non implementa deleteProperty. Deve essere sostituita da una sottoclasse.",
+                /*2093,146*/ "La classe Proxy non implementa getDescendants. Deve essere sostituita da una sottoclasse.",
+                /*2105,147*/ "La classe Proxy non implementa nextNameIndex. Deve essere sostituita da una sottoclasse.",
+                /*2106,148*/ "La classe Proxy non implementa nextName. Deve essere sostituita da una sottoclasse.",
+                /*2107,149*/ "La classe Proxy non implementa nextValue. Deve essere sostituita da una sottoclasse."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ja
@@ -1271,7 +1334,16 @@ namespace avmplus
                 /*2008,137*/ "パラメーター %1 は承認された値の 1 つでなければなりません。",
                 /*2012,138*/ "%1 クラスをインスタンス化することはできません。",
                 /*2030,139*/ "ファイルの終端 (EOF) が検出されました。",
-                /*2058,140*/ "圧縮データの解凍時にエラーが発生しました。"
+                /*2058,140*/ "圧縮データの解凍時にエラーが発生しました。",
+                /*2088,141*/ "Proxy クラスは、getProperty を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2089,142*/ "Proxy クラスは、setProperty を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2090,143*/ "Proxy クラスは、callProperty を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2091,144*/ "Proxy クラスは、hasProperty を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2092,145*/ "Proxy クラスは、deleteProperty を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2093,146*/ "Proxy クラスは、getDescendants を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2105,147*/ "Proxy クラスは、nextNameIndex を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2106,148*/ "Proxy クラスは、nextName を実装しません。サブクラスでオーバーライドする必要があります。",
+                /*2107,149*/ "Proxy クラスは、nextValue を実装しません。サブクラスでオーバーライドする必要があります。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ko
@@ -1417,7 +1489,16 @@ namespace avmplus
                 /*2008,137*/ "매개 변수 %1은(는) 허용된 값 중 하나여야 합니다.",
                 /*2012,138*/ "%1 클래스를 인스턴스화할 수 없습니다.",
                 /*2030,139*/ "파일의 끝입니다.",
-                /*2058,140*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다."
+                /*2058,140*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다.",
+                /*2088,141*/ "Proxy 클래스는 getProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2089,142*/ "Proxy 클래스는 setProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2090,143*/ "Proxy 클래스는 callProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2091,144*/ "Proxy 클래스는 hasProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2092,145*/ "Proxy 클래스는 deleteProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2093,146*/ "Proxy 클래스는 getDescendants를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2105,147*/ "Proxy 클래스는 nextNameIndex를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2106,148*/ "Proxy 클래스는 nextName을 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.",
+                /*2107,149*/ "Proxy 클래스는 nextValue를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_nl
@@ -1563,7 +1644,16 @@ namespace avmplus
                 /*2008,137*/ "Parameter %1 moet een van de toegestane waarden zijn.",
                 /*2012,138*/ "Klasse %1 kan niet worden geïnstantieerd.",
                 /*2030,139*/ "Einde van bestand is bereikt.",
-                /*2058,140*/ "Er is een fout opgetreden bij het decomprimeren van gegevens."
+                /*2058,140*/ "Er is een fout opgetreden bij het decomprimeren van gegevens.",
+                /*2088,141*/ "De klasse Proxy implementeert getProperty niet. Het moet worden overschreven door een subklasse.",
+                /*2089,142*/ "De klasse Proxy implementeert setProperty niet. Het moet worden overschreven door een subklasse.",
+                /*2090,143*/ "De klasse Proxy implementeert callProperty niet. Het moet worden overschreven door een subklasse.",
+                /*2091,144*/ "De klasse Proxy implementeert hasProperty niet. Het moet worden overschreven door een subklasse.",
+                /*2092,145*/ "De klasse Proxy implementeert deleteProperty niet. Het moet worden overschreven door een subklasse.",
+                /*2093,146*/ "De klasse Proxy implementeert getDescendants niet. Het moet worden overschreven door een subklasse.",
+                /*2105,147*/ "De klasse Proxy implementeert nextNameIndex niet. Het moet worden overschreven door een subklasse.",
+                /*2106,148*/ "De klasse Proxy implementeert nextName niet. Het moet worden overschreven door een subklasse.",
+                /*2107,149*/ "De klasse Proxy implementeert nextValue niet. Het moet worden overschreven door een subklasse."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_pl
@@ -1709,7 +1799,16 @@ namespace avmplus
                 /*2008,137*/ "Parametr %1 musi być jedną z akceptowanych wartości.",
                 /*2012,138*/ "Nie można utworzyć instancji klasy %1.",
                 /*2030,139*/ "Napotkano koniec pliku.",
-                /*2058,140*/ "Podczas dekompresji danych wystąpił błąd."
+                /*2058,140*/ "Podczas dekompresji danych wystąpił błąd.",
+                /*2088,141*/ "Klasa Proxy nie implementuje metody getProperty. Należy ją przesłonić w podklasie.",
+                /*2089,142*/ "Klasa Proxy nie implementuje metody setProperty. Należy ją przesłonić w podklasie.",
+                /*2090,143*/ "Klasa Proxy nie implementuje metody callProperty. Należy ją przesłonić w podklasie.",
+                /*2091,144*/ "Klasa Proxy nie implementuje metody hasProperty. Należy ją przesłonić w podklasie.",
+                /*2092,145*/ "Klasa Proxy nie implementuje metody deleteProperty. Należy ją przesłonić w podklasie.",
+                /*2093,146*/ "Klasa Proxy nie implementuje metody getDescendants. Należy ją przesłonić w podklasie.",
+                /*2105,147*/ "Klasa Proxy nie implementuje metody nextNameIndex. Należy ją przesłonić w podklasie.",
+                /*2106,148*/ "Klasa Proxy nie implementuje metody nextName. Należy ją przesłonić w podklasie.",
+                /*2107,149*/ "Klasa Proxy nie implementuje metody nextValue. Należy ją przesłonić w podklasie."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_cs
@@ -1855,7 +1954,16 @@ namespace avmplus
                 /*2008,137*/ "O parâmetro %1 deve ser um dos valores aceitos.",
                 /*2012,138*/ "A classe %1 não pode ser instanciada.",
                 /*2030,139*/ "O fim do arquivo foi encontrado.",
-                /*2058,140*/ "Erro ao descompactar os dados."
+                /*2058,140*/ "Erro ao descompactar os dados.",
+                /*2088,141*/ "A classe Proxy não implementa getProperty. Ela deve ser substituída por uma subclasse.",
+                /*2089,142*/ "A classe Proxy não implementa setProperty. Ela deve ser substituída por uma subclasse.",
+                /*2090,143*/ "A classe Proxy não implementa callProperty. Ela deve ser substituída por uma subclasse.",
+                /*2091,144*/ "A classe Proxy não implementa hasProperty. Ela deve ser substituída por uma subclasse.",
+                /*2092,145*/ "A classe Proxy não implementa deleteProperty. Ela deve ser substituída por uma subclasse.",
+                /*2093,146*/ "A classe Proxy não implementa getDescendants. Ela deve ser substituída por uma subclasse.",
+                /*2105,147*/ "A classe Proxy não implementa nextNameIndex. Ela deve ser substituída por uma subclasse.",
+                /*2106,148*/ "A classe Proxy não implementa nextName. Ela deve ser substituída por uma subclasse.",
+                /*2107,149*/ "A classe Proxy não implementa nextValue. Ela deve ser substituída por uma subclasse."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_ru
@@ -2001,7 +2109,16 @@ namespace avmplus
                 /*2008,137*/ "Параметр %1 должен быть одним из принятых значений.",
                 /*2012,138*/ "Класс %1 не может быть создан.",
                 /*2030,139*/ "Обнаружен конец файла.",
-                /*2058,140*/ "Ошибка при распаковке данных."
+                /*2058,140*/ "Ошибка при распаковке данных.",
+                /*2088,141*/ "Класс Proxy не поддерживает getProperty. Он должен быть заменен на подкласс.",
+                /*2089,142*/ "Класс Proxy не поддерживает setProperty. Он должен быть заменен на подкласс.",
+                /*2090,143*/ "Класс Proxy не поддерживает callProperty. Он должен быть заменен на подкласс.",
+                /*2091,144*/ "Класс Proxy не поддерживает hasProperty. Он должен быть заменен на подкласс.",
+                /*2092,145*/ "Класс Proxy не поддерживает deleteProperty. Он должен быть заменен на подкласс.",
+                /*2093,146*/ "Класс Proxy не поддерживает getDescendants. Он должен быть заменен на подкласс.",
+                /*2105,147*/ "Класс Proxy не поддерживает nextNameIndex. Он должен быть заменен на подкласс.",
+                /*2106,148*/ "Класс Proxy не поддерживает nextName. Он должен быть заменен на подкласс.",
+                /*2107,149*/ "Класс Proxy не поддерживает nextValue. Он должен быть заменен на подкласс."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_sv
@@ -2147,7 +2264,16 @@ namespace avmplus
                 /*2008,137*/ "Parametern %1 måste ha ett av de godkända värdena.",
                 /*2012,138*/ "Det går inte att skapa en förekomst av klassen %1.",
                 /*2030,139*/ "Filens slut påträffades.",
-                /*2058,140*/ "Ett fel uppstod vid dekomprimering av data."
+                /*2058,140*/ "Ett fel uppstod vid dekomprimering av data.",
+                /*2088,141*/ "Klassen Proxy implementerar inte getProperty. Den måste åsidosättas av en underordnad klass.",
+                /*2089,142*/ "Klassen Proxy implementerar inte setProperty. Den måste åsidosättas av en underordnad klass.",
+                /*2090,143*/ "Klassen Proxy implementerar inte callProperty. Den måste åsidosättas av en underordnad klass.",
+                /*2091,144*/ "Klassen Proxy implementerar inte hasProperty. Den måste åsidosättas av en underordnad klass.",
+                /*2092,145*/ "Klassen Proxy implementerar inte deleteProperty. Den måste åsidosättas av en underordnad klass.",
+                /*2093,146*/ "Klassen Proxy implementerar inte getDescendants. Den måste åsidosättas av en underordnad klass.",
+                /*2105,147*/ "Klassen Proxy implementerar inte nextNameIndex. Den måste åsidosättas av en underordnad klass.",
+                /*2106,148*/ "Klassen Proxy implementerar inte nextName. Den måste åsidosättas av en underordnad klass.",
+                /*2107,149*/ "Klassen Proxy implementerar inte nextValue. Den måste åsidosättas av en underordnad klass."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_tr
@@ -2293,7 +2419,16 @@ namespace avmplus
                 /*2008,137*/ "%1 parametresi kabul edilen değerlerden biridir.",
                 /*2012,138*/ "%1 sınıfı örneklendirilemiyor.",
                 /*2030,139*/ "Dosya sonuyla karşılaşıldı.",
-                /*2058,140*/ "Veri açılırken hata oluştu."
+                /*2058,140*/ "Veri açılırken hata oluştu.",
+                /*2088,141*/ "Proxy sınıfı getProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2089,142*/ "Proxy sınıfı setProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2090,143*/ "Proxy sınıfı callProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2091,144*/ "Proxy sınıfı hasProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2092,145*/ "Proxy sınıfı deleteProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2093,146*/ "Proxy sınıfı getDescendants uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2105,147*/ "Proxy sınıfı nextNameIndex uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2106,148*/ "Proxy sınıfı nextName uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.",
+                /*2107,149*/ "Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır."
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_CN
@@ -2439,7 +2574,16 @@ namespace avmplus
                 /*2008,137*/ "参数 %1 必须是某个可接受的值。",
                 /*2012,138*/ "无法实例化 %1 类。",
                 /*2030,139*/ "遇到文件尾。",
-                /*2058,140*/ "解压缩数据时出错。"
+                /*2058,140*/ "解压缩数据时出错。",
+                /*2088,141*/ "Proxy 类不实现 getProperty。它必须由一个子类覆盖。",
+                /*2089,142*/ "Proxy 类不实现 setProperty。它必须由一个子类覆盖。",
+                /*2090,143*/ "Proxy 类不实现 callProperty。它必须由一个子类覆盖。",
+                /*2091,144*/ "Proxy 类不实现 hasProperty。它必须由一个子类覆盖。",
+                /*2092,145*/ "Proxy 类不实现 deleteProperty。它必须由一个子类覆盖。",
+                /*2093,146*/ "Proxy 类不实现 getDescendants。它必须由一个子类覆盖。",
+                /*2105,147*/ "Proxy 类不实现 nextNameIndex。它必须由一个子类覆盖。",
+                /*2106,148*/ "Proxy 类不实现 nextName。它必须由一个子类覆盖。",
+                /*2107,149*/ "Proxy 类不实现 nextValue。它必须由一个子类覆盖。"
             },
         #endif
         #ifdef AVMPLUS_ERROR_LANG_zh_TW
@@ -2585,7 +2729,16 @@ namespace avmplus
                 /*2008,137*/ "參數 %1 必須是其中一個可接受值。",
                 /*2012,138*/ "無法個體化類別 %1。",
                 /*2030,139*/ "到達檔案結尾。",
-                /*2058,140*/ "解壓縮資料時發生錯誤。"
+                /*2058,140*/ "解壓縮資料時發生錯誤。",
+                /*2088,141*/ "Proxy 類別不會實作 getProperty。它必須以子類別覆寫。",
+                /*2089,142*/ "Proxy 類別不會實作 setProperty。它必須以子類別覆寫。",
+                /*2090,143*/ "Proxy 類別不會實作 callProperty。它必須以子類別覆寫。",
+                /*2091,144*/ "Proxy 類別不會實作 hasProperty。它必須以子類別覆寫。",
+                /*2092,145*/ "Proxy 類別不會實作 deleteProperty。它必須以子類別覆寫。",
+                /*2093,146*/ "Proxy 類別不會實作 getDescendants。它必須以子類別覆寫。",
+                /*2105,147*/ "Proxy 類別不會實作 nextNameIndex。它必須以子類別覆寫。",
+                /*2106,148*/ "Proxy 類別不會實作 nextName。它必須以子類別覆寫。",
+                /*2107,149*/ "Proxy 類別不會實作 nextValue。它必須以子類別覆寫。"
             }
         #endif
         };

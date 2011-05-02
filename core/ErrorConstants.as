@@ -189,4 +189,13 @@ class Errors
         public static const kCantInstantiateError             = 2012;
         public static const kEOFError                         = 2030;
         public static const kCompressedDataError              = 2058;
+        public static const kProxyGetPropertyError            = 2088;
+        public static const kProxySetPropertyError            = 2089;
+        public static const kProxyCallPropertyError           = 2090;
+        public static const kProxyHasPropertyError            = 2091;
+        public static const kProxyDeletePropertyError         = 2092;
+        public static const kProxyGetDescendantsError         = 2093;
+        public static const kProxyNextNameIndexError          = 2105;
+        public static const kProxyNextNameError               = 2106;
+        public static const kProxyNextValueError              = 2107;
 };

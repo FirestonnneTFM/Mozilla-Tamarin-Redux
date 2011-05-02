@@ -766,4 +766,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">%1-Klasse kann nicht instanziiert werden.</error>
   <error id="2030" label="kEOFError">Das Dateiende wurde erkannt.</error>
   <error id="2058" label="kCompressedDataError">Fehler beim Dekomprimieren der Daten.</error>
+  <error id="2088" label="kProxyGetPropertyError">Die Proxy-Klasse implementiert getProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2089" label="kProxySetPropertyError">Die Proxy-Klasse implementiert setProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2090" label="kProxyCallPropertyError">Die Proxy-Klasse implementiert callProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2091" label="kProxyHasPropertyError">Die Proxy-Klasse implementiert hasProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2092" label="kProxyDeletePropertyError">Die Proxy-Klasse implementiert deleteProperty nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2093" label="kProxyGetDescendantsError">Die Proxy-Klasse implementiert getDescendants nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2105" label="kProxyNextNameIndexError">Die Proxy-Klasse implementiert nextNameIndex nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2106" label="kProxyNextNameError">Die Proxy-Klasse implementiert nextName nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
+  <error id="2107" label="kProxyNextValueError">Die Proxy-Klasse implementiert nextValue nicht. Sie muss von einer Unterklasse außer Kraft gesetzt werden.</error>
 </errors>

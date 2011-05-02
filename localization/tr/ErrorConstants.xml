@@ -677,4 +677,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">%1 sınıfı örneklendirilemiyor.</error>
   <error id="2030" label="kEOFError">Dosya sonuyla karşılaşıldı.</error>
   <error id="2058" label="kCompressedDataError">Veri açılırken hata oluştu.</error>
+  <error id="2088" label="kProxyGetPropertyError">Proxy sınıfı getProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2089" label="kProxySetPropertyError">Proxy sınıfı setProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2090" label="kProxyCallPropertyError">Proxy sınıfı callProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2091" label="kProxyHasPropertyError">Proxy sınıfı hasProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2092" label="kProxyDeletePropertyError">Proxy sınıfı deleteProperty uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2093" label="kProxyGetDescendantsError">Proxy sınıfı getDescendants uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2105" label="kProxyNextNameIndexError">Proxy sınıfı nextNameIndex uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2106" label="kProxyNextNameError">Proxy sınıfı nextName uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
+  <error id="2107" label="kProxyNextValueError">Proxy sınıfı nextValue uygulayamaz. Bir alt sınıf ile geçersiz kılınmalıdır.</error>
 </errors>

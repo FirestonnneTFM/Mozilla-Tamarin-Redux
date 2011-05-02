@@ -766,4 +766,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">%1 클래스를 인스턴스화할 수 없습니다.</error>
   <error id="2030" label="kEOFError">파일의 끝입니다.</error>
   <error id="2058" label="kCompressedDataError">데이터의 압축을 푸는 동안 오류가 발생했습니다.</error>
+  <error id="2088" label="kProxyGetPropertyError">Proxy 클래스는 getProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2089" label="kProxySetPropertyError">Proxy 클래스는 setProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2090" label="kProxyCallPropertyError">Proxy 클래스는 callProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2091" label="kProxyHasPropertyError">Proxy 클래스는 hasProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2092" label="kProxyDeletePropertyError">Proxy 클래스는 deleteProperty를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2093" label="kProxyGetDescendantsError">Proxy 클래스는 getDescendants를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2105" label="kProxyNextNameIndexError">Proxy 클래스는 nextNameIndex를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2106" label="kProxyNextNameError">Proxy 클래스는 nextName을 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
+  <error id="2107" label="kProxyNextValueError">Proxy 클래스는 nextValue를 구현하지 않습니다. 하위 클래스에 의해 재정의되어야 합니다.</error>
 </errors>
