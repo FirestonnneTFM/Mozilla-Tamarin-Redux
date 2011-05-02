@@ -119,19 +119,10 @@ function findClass(sType)
   var re =  /^\[.*\s+(\w+)\s*\]$/;
   var a = sType.match(re);
 
-	// work around for bug 175820
-
-	if( Capabilities.isDebugger )
-	{
-  if (a && a[1])
-    return a[1];
-
-  return cnNoClass;
-	}
-	else
-	{
-		return "Function";
-	}
+    if (a && a[1])
+      return a[1];
+    
+    return cnNoClass;
 }
 
 

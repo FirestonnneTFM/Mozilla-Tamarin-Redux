@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-     use namespace AS3;
+
     var SECTION = "15.5.3.2-1";
     var VERSION = "ECMA_1";
     startTest();
