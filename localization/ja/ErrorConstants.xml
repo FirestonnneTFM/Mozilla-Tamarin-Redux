@@ -766,4 +766,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">%1 クラスをインスタンス化することはできません。</error>
   <error id="2030" label="kEOFError">ファイルの終端 (EOF) が検出されました。</error>
   <error id="2058" label="kCompressedDataError">圧縮データの解凍時にエラーが発生しました。</error>
+  <error id="2088" label="kProxyGetPropertyError">Proxy クラスは、getProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2089" label="kProxySetPropertyError">Proxy クラスは、setProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2090" label="kProxyCallPropertyError">Proxy クラスは、callProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2091" label="kProxyHasPropertyError">Proxy クラスは、hasProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2092" label="kProxyDeletePropertyError">Proxy クラスは、deleteProperty を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2093" label="kProxyGetDescendantsError">Proxy クラスは、getDescendants を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2105" label="kProxyNextNameIndexError">Proxy クラスは、nextNameIndex を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2106" label="kProxyNextNameError">Proxy クラスは、nextName を実装しません。サブクラスでオーバーライドする必要があります。</error>
+  <error id="2107" label="kProxyNextValueError">Proxy クラスは、nextValue を実装しません。サブクラスでオーバーライドする必要があります。</error>
 </errors>

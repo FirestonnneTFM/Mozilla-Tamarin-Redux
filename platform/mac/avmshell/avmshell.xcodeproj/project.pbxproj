@@ -400,6 +400,8 @@
 		D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
 		D90A301A125CF47E0039348E /* avmplusList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D944CADA123EF76600EA0342 /* avmplusList.cpp */; };
 		D90A301B125CF47F0039348E /* avmplusList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D944CADA123EF76600EA0342 /* avmplusList.cpp */; };
+		D914C1EE1367956F00CD302D /* ProxyGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D914C1EC1367956F00CD302D /* ProxyGlue.cpp */; };
+		D914C1EF1367956F00CD302D /* ProxyGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D914C1EC1367956F00CD302D /* ProxyGlue.cpp */; };
 		D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D92373DC11222458006D8AA3 /* njconfig.cpp */; };
 		D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D935BDEB0FA0EBA7001E3E70 /* avm.cpp */; };
 		D939B111126E358400522895 /* ByteArrayGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D939B10D126E358400522895 /* ByteArrayGlue.cpp */; };
@@ -955,6 +957,9 @@
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D90A32C2125D24E20039348E /* VectorClass-impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-impl.h"; path = "../../../core/VectorClass-impl.h"; sourceTree = SOURCE_ROOT; };
 		D90A32C3125D24E20039348E /* VectorClass-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "VectorClass-inlines.h"; path = "../../../core/VectorClass-inlines.h"; sourceTree = SOURCE_ROOT; };
+		D914C1EB1367955B00CD302D /* Proxy.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Proxy.as; path = ../../../core/Proxy.as; sourceTree = SOURCE_ROOT; };
+		D914C1EC1367956F00CD302D /* ProxyGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProxyGlue.cpp; path = ../../../core/ProxyGlue.cpp; sourceTree = SOURCE_ROOT; };
+		D914C1ED1367956F00CD302D /* ProxyGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProxyGlue.h; path = ../../../core/ProxyGlue.h; sourceTree = SOURCE_ROOT; };
 		D92373DC11222458006D8AA3 /* njconfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = njconfig.cpp; path = ../../../nanojit/njconfig.cpp; sourceTree = SOURCE_ROOT; };
 		D92373DD11222458006D8AA3 /* njconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = njconfig.h; path = ../../../nanojit/njconfig.h; sourceTree = SOURCE_ROOT; };
 		D927090C112B5FD700A13EAA /* avmplusHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmplusHashtable-inlines.h"; path = "../../../core/avmplusHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1354,6 +1359,8 @@
 				079DF8C20F3A88950031D1B4 /* NumberClass.h */,
 				079DF8C30F3A88950031D1B4 /* ObjectClass.cpp */,
 				079DF8C40F3A88950031D1B4 /* ObjectClass.h */,
+				D914C1EC1367956F00CD302D /* ProxyGlue.cpp */,
+				D914C1ED1367956F00CD302D /* ProxyGlue.h */,
 				079DF8C50F3A88950031D1B4 /* RegExpClass.cpp */,
 				079DF8C60F3A88950031D1B4 /* RegExpClass.h */,
 				079DF8C70F3A88950031D1B4 /* RegExpObject.cpp */,
@@ -1451,6 +1458,7 @@
 		079DF9090F3A889D0031D1B4 /* AS */ = {
 			isa = PBXGroup;
 			children = (
+				D914C1EB1367955B00CD302D /* Proxy.as */,
 				D939B10A126E356500522895 /* ByteArray.as */,
 				D939B10B126E356500522895 /* IDataInput.as */,
 				D939B10C126E356500522895 /* IDataOutput.as */,
@@ -2064,6 +2072,7 @@
 				CBB55F67134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
 				CB13ECD41358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
 				19487E271362250900586A91 /* JSONClass.cpp in Sources */,
+				D914C1EF1367956F00CD302D /* ProxyGlue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2267,6 +2276,7 @@
 				CBB55F66134B487200A4D8A7 /* ST_mmgc_mmfx_array.cpp in Sources */,
 				CB13ECD31358E07E00A09CBE /* ST_avmplus_builtins.cpp in Sources */,
 				19487E261362250800586A91 /* JSONClass.cpp in Sources */,
+				D914C1EE1367956F00CD302D /* ProxyGlue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

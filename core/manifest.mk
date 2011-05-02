@@ -126,6 +126,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/AbcData.cpp \
   $(curdir)/AvmPlusScriptableObject.cpp \
   $(curdir)/instr.cpp \
+  $(curdir)/ProxyGlue.cpp \
   $(NULL)
 
 #  $(curdir)/avmplus.cpp \

@@ -178,6 +178,8 @@ namespace avmplus
     class PoolObject;
     class PrintWriter;
     class Profiler;
+    class ProxyClass;
+    class ProxyObject;
     class RegExpClass;
     class RegExpObject;
     class Sampler;
@@ -330,6 +332,7 @@ struct ABCInfo;
 #include "AOTCompiler.h"
 #endif
 #include "ByteArrayGlue.h"
+#include "ProxyGlue.h"
 
 // Some unusual test cases for the exact-tracer script
 

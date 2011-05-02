@@ -179,6 +179,7 @@ AVMPLUS_SRCS := \
     eval-util.cpp \
 	atom.cpp \
 	AvmAssert.cpp \
+	ProxyGlue.cpp 
 
 ifeq ($(ENABLE_NANOJIT),true)
 	AVMPLUS_SRCS := ${AVMPLUS_SRCS} NativeARM.cpp

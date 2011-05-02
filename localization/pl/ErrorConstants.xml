@@ -677,4 +677,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">Nie można utworzyć instancji klasy %1.</error>
   <error id="2030" label="kEOFError">Napotkano koniec pliku.</error>
   <error id="2058" label="kCompressedDataError">Podczas dekompresji danych wystąpił błąd.</error>
+  <error id="2088" label="kProxyGetPropertyError">Klasa Proxy nie implementuje metody getProperty. Należy ją przesłonić w podklasie.</error>
+  <error id="2089" label="kProxySetPropertyError">Klasa Proxy nie implementuje metody setProperty. Należy ją przesłonić w podklasie.</error>
+  <error id="2090" label="kProxyCallPropertyError">Klasa Proxy nie implementuje metody callProperty. Należy ją przesłonić w podklasie.</error>
+  <error id="2091" label="kProxyHasPropertyError">Klasa Proxy nie implementuje metody hasProperty. Należy ją przesłonić w podklasie.</error>
+  <error id="2092" label="kProxyDeletePropertyError">Klasa Proxy nie implementuje metody deleteProperty. Należy ją przesłonić w podklasie.</error>
+  <error id="2093" label="kProxyGetDescendantsError">Klasa Proxy nie implementuje metody getDescendants. Należy ją przesłonić w podklasie.</error>
+  <error id="2105" label="kProxyNextNameIndexError">Klasa Proxy nie implementuje metody nextNameIndex. Należy ją przesłonić w podklasie.</error>
+  <error id="2106" label="kProxyNextNameError">Klasa Proxy nie implementuje metody nextName. Należy ją przesłonić w podklasie.</error>
+  <error id="2107" label="kProxyNextValueError">Klasa Proxy nie implementuje metody nextValue. Należy ją przesłonić w podklasie.</error>
 </errors>

@@ -766,4 +766,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">無法個體化類別 %1。</error>
   <error id="2030" label="kEOFError">到達檔案結尾。</error>
   <error id="2058" label="kCompressedDataError">解壓縮資料時發生錯誤。</error>
+  <error id="2088" label="kProxyGetPropertyError">Proxy 類別不會實作 getProperty。它必須以子類別覆寫。</error>
+  <error id="2089" label="kProxySetPropertyError">Proxy 類別不會實作 setProperty。它必須以子類別覆寫。</error>
+  <error id="2090" label="kProxyCallPropertyError">Proxy 類別不會實作 callProperty。它必須以子類別覆寫。</error>
+  <error id="2091" label="kProxyHasPropertyError">Proxy 類別不會實作 hasProperty。它必須以子類別覆寫。</error>
+  <error id="2092" label="kProxyDeletePropertyError">Proxy 類別不會實作 deleteProperty。它必須以子類別覆寫。</error>
+  <error id="2093" label="kProxyGetDescendantsError">Proxy 類別不會實作 getDescendants。它必須以子類別覆寫。</error>
+  <error id="2105" label="kProxyNextNameIndexError">Proxy 類別不會實作 nextNameIndex。它必須以子類別覆寫。</error>
+  <error id="2106" label="kProxyNextNameError">Proxy 類別不會實作 nextName。它必須以子類別覆寫。</error>
+  <error id="2107" label="kProxyNextValueError">Proxy 類別不會實作 nextValue。它必須以子類別覆寫。</error>
 </errors>

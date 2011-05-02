@@ -289,13 +289,22 @@ namespace avmplus
             kInvalidEnumError                               = 2008,
             kCantInstantiateError                           = 2012,
             kEOFError                                       = 2030,
-            kCompressedDataError                            = 2058
+            kCompressedDataError                            = 2058,
+            kProxyGetPropertyError                          = 2088,
+            kProxySetPropertyError                          = 2089,
+            kProxyCallPropertyError                         = 2090,
+            kProxyHasPropertyError                          = 2091,
+            kProxyDeletePropertyError                       = 2092,
+            kProxyGetDescendantsError                       = 2093,
+            kProxyNextNameIndexError                        = 2105,
+            kProxyNextNameError                             = 2106,
+            kProxyNextValueError                            = 2107
         };
 
         // Error message strings only in non-stubbed DEBUGGER builds.
         #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
         const int kLanguages = LANG_count;
-        const int kNumErrorConstants = 141;
+        const int kNumErrorConstants = 150;
         extern const char* errorConstants[kLanguages][kNumErrorConstants];
         extern int errorMappingTable[2*kNumErrorConstants];
         extern LangName languageNames[kLanguages];

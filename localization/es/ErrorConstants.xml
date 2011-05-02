@@ -766,4 +766,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">No se puede crear una instancia de la clase %1.</error>
   <error id="2030" label="kEOFError">Se alcanzó el final del archivo.</error>
   <error id="2058" label="kCompressedDataError">Se produjo un error al descomprimir los datos.</error>
+  <error id="2088" label="kProxyGetPropertyError">La clase Proxy no implementa getProperty. Debe sustituirse por una subclase.</error>
+  <error id="2089" label="kProxySetPropertyError">La clase Proxy no implementa setProperty. Debe sustituirse por una subclase.</error>
+  <error id="2090" label="kProxyCallPropertyError">La clase Proxy no implementa callProperty. Debe sustituirse por una subclase.</error>
+  <error id="2091" label="kProxyHasPropertyError">La clase Proxy no implementa hasProperty. Debe sustituirse por una subclase.</error>
+  <error id="2092" label="kProxyDeletePropertyError">La clase Proxy no implementa deleteProperty. Debe sustituirse por una subclase.</error>
+  <error id="2093" label="kProxyGetDescendantsError">La clase Proxy no implementa getDescendants. Debe sustituirse por una subclase.</error>
+  <error id="2105" label="kProxyNextNameIndexError">La clase Proxy no implementa nextNameIndex. Debe sustituirse por una subclase.</error>
+  <error id="2106" label="kProxyNextNameError">La clase Proxy no implementa nextName. Debe sustituirse por una subclase.</error>
+  <error id="2107" label="kProxyNextValueError">La clase Proxy no implementa nextValue. Debe sustituirse por una subclase.</error>
 </errors>

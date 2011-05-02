@@ -677,4 +677,13 @@ class B extends A {
   <error id="2012" label="kCantInstantiateError">Det går inte att skapa en förekomst av klassen %1.</error>
   <error id="2030" label="kEOFError">Filens slut påträffades.</error>
   <error id="2058" label="kCompressedDataError">Ett fel uppstod vid dekomprimering av data.</error>
+  <error id="2088" label="kProxyGetPropertyError">Klassen Proxy implementerar inte getProperty. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2089" label="kProxySetPropertyError">Klassen Proxy implementerar inte setProperty. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2090" label="kProxyCallPropertyError">Klassen Proxy implementerar inte callProperty. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2091" label="kProxyHasPropertyError">Klassen Proxy implementerar inte hasProperty. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2092" label="kProxyDeletePropertyError">Klassen Proxy implementerar inte deleteProperty. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2093" label="kProxyGetDescendantsError">Klassen Proxy implementerar inte getDescendants. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2105" label="kProxyNextNameIndexError">Klassen Proxy implementerar inte nextNameIndex. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2106" label="kProxyNextNameError">Klassen Proxy implementerar inte nextName. Den måste åsidosättas av en underordnad klass.</error>
+  <error id="2107" label="kProxyNextValueError">Klassen Proxy implementerar inte nextValue. Den måste åsidosättas av en underordnad klass.</error>
 </errors>
