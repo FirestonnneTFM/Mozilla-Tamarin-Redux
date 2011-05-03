@@ -693,7 +693,7 @@ avmplus::Atom XML_ignoreComments_set_thunk(MethodEnv* env, uint32_t argc, Atom* 
     (void)env;
     avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_ignoreComments(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -718,7 +718,7 @@ avmplus::Atom XML_ignoreProcessingInstructions_set_thunk(MethodEnv* env, uint32_
     (void)env;
     avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_ignoreProcessingInstructions(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -743,7 +743,7 @@ avmplus::Atom XML_ignoreWhitespace_set_thunk(MethodEnv* env, uint32_t argc, Atom
     (void)env;
     avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_ignoreWhitespace(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -768,7 +768,7 @@ avmplus::Atom XML_prettyPrinting_set_thunk(MethodEnv* env, uint32_t argc, Atom* 
     (void)env;
     avmplus::XMLClass* const obj = AvmThunkUnbox_AvmReceiver(avmplus::XMLClass*, argv[argoff0]);
     obj->set_prettyPrinting(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -1878,7 +1878,7 @@ avmplus::Atom flash_utils_ByteArray_writeBoolean_thunk(MethodEnv* env, uint32_t 
     (void)env;
     avmplus::ByteArrayObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ByteArrayObject*, argv[argoff0]);
     obj->writeBoolean(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -2382,7 +2382,7 @@ avmplus::Atom Object_protected__setPropertyIsEnumerable_thunk(MethodEnv* env, ui
     obj->_setPropertyIsEnumerable(
         AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
         , AvmThunkUnbox_STRING(avmplus::String*, argv[argoff2])
-        , AvmThunkUnbox_BOOLEAN(bool32, argv[argoff3])
+        , AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff3])
     );
     return undefinedAtom;
 }
@@ -3471,7 +3471,7 @@ avmplus::Atom __AS3___vec_Vector_object_fixed_set_thunk(MethodEnv* env, uint32_t
     (void)env;
     avmplus::ObjectVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ObjectVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -3717,7 +3717,7 @@ avmplus::Atom __AS3___vec_Vector_int_fixed_set_thunk(MethodEnv* env, uint32_t ar
     (void)env;
     avmplus::IntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::IntVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -3963,7 +3963,7 @@ avmplus::Atom __AS3___vec_Vector_uint_fixed_set_thunk(MethodEnv* env, uint32_t a
     (void)env;
     avmplus::UIntVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::UIntVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -4209,7 +4209,7 @@ avmplus::Atom __AS3___vec_Vector_double_fixed_set_thunk(MethodEnv* env, uint32_t
     (void)env;
     avmplus::DoubleVectorObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DoubleVectorObject*, argv[argoff0]);
     obj->set_fixed(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }

@@ -42,8 +42,8 @@
 
 namespace avmshell
 {
-    SystemClass::SystemClass(VTable *cvtable)
-        : ClassClosure(cvtable)
+    SystemClass::SystemClass(avmplus::VTable *cvtable)
+        : avmplus::ClassClosure(cvtable)
     {
         ShellCore* core = (ShellCore*)this->core();
         if (core->systemClass == NULL) {
@@ -73,7 +73,7 @@ namespace avmshell
         Platform::GetInstance()->exit(status);
     }
 
-    int SystemClass::exec(Stringp command)
+    int SystemClass::exec(avmplus::Stringp command)
     {
         if (!command) {
             toplevel()->throwArgumentError(kNullArgumentError, "command");
@@ -82,55 +82,55 @@ namespace avmshell
         AvmAssert(0);
         return 0;
         #else
-        StUTF8String commandUTF8(command);
+        avmplus::StUTF8String commandUTF8(command);
         return system(commandUTF8.c_str());
         #endif
     }
 
-    Stringp SystemClass::getAvmplusVersion()
+    avmplus::Stringp SystemClass::getAvmplusVersion()
     {
         return core()->newConstantStringLatin1(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
     }
 
-    Stringp SystemClass::getFeatures()
+    avmplus::Stringp SystemClass::getFeatures()
     {
         return core()->newConstantStringLatin1(avmfeatures);
     }
 
-    Stringp SystemClass::getRunmode()
+    avmplus::Stringp SystemClass::getRunmode()
     {
         ShellCore* core = (ShellCore*)this->core();
-        if (core->config.runmode == RM_mixed)
+        if (core->config.runmode == avmplus::RM_mixed)
             return core->newConstantStringLatin1("mixed");
-        if (core->config.runmode == RM_jit_all)
+        if (core->config.runmode == avmplus::RM_jit_all)
         {
             if (core->config.jitordie)
                 return core->newConstantStringLatin1("jitordie");
             return core->newConstantStringLatin1("jit");
         }
-        if (core->config.runmode == RM_interp_all)
+        if (core->config.runmode == avmplus::RM_interp_all)
             return core->newConstantStringLatin1("interp");
         return core->newConstantStringLatin1("unknown");
     }
 
-    void SystemClass::write(Stringp s)
+    void SystemClass::write(avmplus::Stringp s)
     {
         if (!s)
             toplevel()->throwArgumentError(kNullArgumentError, "string");
         core()->console << s;
     }
 
-    void SystemClass::trace(ArrayObject* a)
+    void SystemClass::trace(avmplus::ArrayObject* a)
     {
         if (!a)
             toplevel()->throwArgumentError(kNullArgumentError, "array");
-        AvmCore* core = this->core();
-        PrintWriter& console = core->console;
+        avmplus::AvmCore* core = this->core();
+        avmplus::PrintWriter& console = core->console;
         for (int i=0, n = a->getLength(); i < n; i++)
         {
             if (i > 0)
                 console << ' ';
-            StringIndexer s(core->string(a->getUintProperty(i)));
+            avmplus::StringIndexer s(core->string(a->getUintProperty(i)));
             for (int j = 0; j < s->length(); j++)
             {
                 wchar c = s[j];
@@ -188,23 +188,23 @@ namespace avmshell
     int SystemClass::user_argc;
     char **SystemClass::user_argv;
 
-    ArrayObject * SystemClass::getArgv()
+    avmplus::ArrayObject * SystemClass::getArgv()
     {
         // get VTable for avmplus.System
-        Toplevel *toplevel = this->toplevel();
-        AvmCore *core = this->core();
+        avmplus::Toplevel *toplevel = this->toplevel();
+        avmplus::AvmCore *core = this->core();
 
-        ArrayObject *array = toplevel->arrayClass()->newArray();
+        avmplus::ArrayObject *array = toplevel->arrayClass()->newArray();
         for(int i=0; i<user_argc;i++)
             array->setUintProperty(i, core->newStringUTF8(user_argv[i])->atom());
 
         return array;
     }
 
-    Stringp SystemClass::readLine()
+    avmplus::Stringp SystemClass::readLine()
     {
-        AvmCore* core = this->core();
-        Stringp s = core->kEmptyString;
+        avmplus::AvmCore* core = this->core();
+        avmplus::Stringp s = core->kEmptyString;
         wchar wc[64];
         int i=0;
         for (int c = getchar(); c != '\n' && c != EOF; c = getchar())
@@ -243,9 +243,9 @@ namespace avmshell
     int32_t SystemClass::get_swfVersion()
     {
         ShellCore* core = (ShellCore*)this->core();
-        BugCompatibility::Version v = core->getDefaultBugCompatibilityVersion();
-        AvmAssert(v >= 0 && v < BugCompatibility::VersionCount);
-        return BugCompatibility::kNames[v];
+        avmplus::BugCompatibility::Version v = core->getDefaultBugCompatibilityVersion();
+        AvmAssert(v >= 0 && v < avmplus::BugCompatibility::VersionCount);
+        return avmplus::BugCompatibility::kNames[v];
     }
 
     int32_t SystemClass::get_apiVersion()
@@ -264,12 +264,12 @@ namespace avmshell
         core()->GetGC()->QueueCollection();
     }
 
-    bool SystemClass::isGlobal(Atom o)
+    bool SystemClass::isGlobal(avmplus::Atom o)
     {
-        return AvmCore::isObject(o) ? AvmCore::atomToScriptObject(o)->isGlobalObject() : false;
+        return avmplus::AvmCore::isObject(o) ? avmplus::AvmCore::atomToScriptObject(o)->isGlobalObject() : false;
     }
 
-    void SystemClass::disposeXML(XMLObject *xmlObject)
+    void SystemClass::disposeXML(avmplus::XMLObject *xmlObject)
     {
         if(xmlObject)
             xmlObject->dispose();
@@ -277,17 +277,17 @@ namespace avmshell
 
     void SystemClass::pauseForGCIfCollectionImminent(double imminence)
     {
-        if( MathUtils::isNaN(imminence) ||
-            MathUtils::isInfinite(imminence) ||
+        if( avmplus::MathUtils::isNaN(imminence) ||
+            avmplus::MathUtils::isInfinite(imminence) ||
             imminence < 0 ||
             imminence > 1 )
             toplevel()->throwArgumentError(kInvalidArgumentError);
         core()->GetGC()->Collect(imminence);
     }
     
-    /*static*/ void FASTCALL CheckBaseClass::preCreateInstanceCheck(ClassClosure* cls)
+    /*static*/ void FASTCALL CheckBaseClass::preCreateInstanceCheck(avmplus::ClassClosure* cls)
     {
-        Multiname qname(cls->traits()->ns(), cls->traits()->name());
+        avmplus::Multiname qname(cls->traits()->ns(), cls->traits()->name());
         // Deliberately throw a weird, non-sequitur error here so that we
         // can distinguish this from construct="none" in the acceptance tests.
         cls->toplevel()->argumentErrorClass()->throwError(kNotImplementedError, cls->core()->toErrorString(&qname));

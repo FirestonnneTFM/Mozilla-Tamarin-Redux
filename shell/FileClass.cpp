@@ -42,13 +42,13 @@
 
 namespace avmshell
 {
-    FileClass::FileClass(VTable *cvtable)
-        : ClassClosure(cvtable)
+    FileClass::FileClass(avmplus::VTable *cvtable)
+        : avmplus::ClassClosure(cvtable)
     {
         createVanillaPrototype();
     }
 
-    bool FileClass::exists(Stringp filename)
+    bool FileClass::exists(avmplus::Stringp filename)
     {
         if (!filename) {
             toplevel()->throwArgumentError(kNullArgumentError, "filename");
@@ -56,7 +56,7 @@ namespace avmshell
 
         bool result = false;
 
-        StUTF8String filenameUTF8(filename);
+        avmplus::StUTF8String filenameUTF8(filename);
         File* fp = Platform::GetInstance()->createFile();
         if(fp)
         {
@@ -69,15 +69,15 @@ namespace avmshell
         return result;
     }
 
-    Stringp FileClass::read(Stringp filename)
+    avmplus::Stringp FileClass::read(avmplus::Stringp filename)
     {
-        Toplevel* toplevel = this->toplevel();
-        AvmCore* core = this->core();
+        avmplus::Toplevel* toplevel = this->toplevel();
+        avmplus::AvmCore* core = this->core();
 
         if (!filename) {
             toplevel->throwArgumentError(kNullArgumentError, "filename");
         }
-        StUTF8String filenameUTF8(filename);
+        avmplus::StUTF8String filenameUTF8(filename);
         File* fp = Platform::GetInstance()->createFile();
         if(!fp || !fp->open(filenameUTF8.c_str(), File::OPEN_READ))
         {
@@ -107,7 +107,7 @@ namespace avmshell
         fp->close();
         Platform::GetInstance()->destroyFile(fp);
 
-        Stringp ret = NULL;
+        avmplus::Stringp ret = NULL;
 
         if (len >= 3)
         {
@@ -143,10 +143,10 @@ namespace avmshell
         return ret;
     }
 
-    void FileClass::write(Stringp filename,
-                          Stringp data)
+    void FileClass::write(avmplus::Stringp filename,
+                          avmplus::Stringp data)
     {
-        Toplevel* toplevel = this->toplevel();
+        avmplus::Toplevel* toplevel = this->toplevel();
 
         if (!filename) {
             toplevel->throwArgumentError(kNullArgumentError, "filename");
@@ -154,7 +154,7 @@ namespace avmshell
         if (!data) {
             toplevel->throwArgumentError(kNullArgumentError, "data");
         }
-        StUTF8String filenameUTF8(filename);
+        avmplus::StUTF8String filenameUTF8(filename);
         File* fp = Platform::GetInstance()->createFile();
         if (!fp || !fp->open(filenameUTF8.c_str(), File::OPEN_WRITE))
         {
@@ -164,7 +164,7 @@ namespace avmshell
             }
             toplevel->throwError(kFileWriteError, filename);
         }
-        StUTF8String dataUTF8(data);
+        avmplus::StUTF8String dataUTF8(data);
         if ((int32_t)fp->write(dataUTF8.c_str(), dataUTF8.length()) != dataUTF8.length()) {
             toplevel->throwError(kFileWriteError, filename);
         }
@@ -172,13 +172,13 @@ namespace avmshell
         Platform::GetInstance()->destroyFile(fp);
     }
 
-    ByteArrayObject* FileClass::readByteArray(Stringp filename)
+    avmplus::ByteArrayObject* FileClass::readByteArray(avmplus::Stringp filename)
     {
-        Toplevel* toplevel = this->toplevel();
+        avmplus::Toplevel* toplevel = this->toplevel();
         if (!filename) {
             toplevel->throwArgumentError(kNullArgumentError, "filename");
         }
-        StUTF8String filenameUTF8(filename);
+        avmplus::StUTF8String filenameUTF8(filename);
 
         File* fp = Platform::GetInstance()->createFile();
         if (fp == NULL || !fp->open(filenameUTF8.c_str(), File::OPEN_READ_BINARY))
@@ -200,7 +200,7 @@ namespace avmshell
 
         unsigned char *c = mmfx_new_array( unsigned char, readCount+1);
 
-        ByteArrayObject* b = toplevel->byteArrayClass()->constructByteArray();
+        avmplus::ByteArrayObject* b = toplevel->byteArrayClass()->constructByteArray();
         b->set_length(0);
 
         while (readCount > 0)
@@ -226,14 +226,14 @@ namespace avmshell
         return b;
     }
 
-    bool FileClass::writeByteArray(Stringp filename, ByteArrayObject* bytes)
+    bool FileClass::writeByteArray(avmplus::Stringp filename, avmplus::ByteArrayObject* bytes)
     {
-        Toplevel* toplevel = this->toplevel();
+        avmplus::Toplevel* toplevel = this->toplevel();
         if (!filename) {
             toplevel->throwArgumentError(kNullArgumentError, "filename");
         }
 
-        StUTF8String filenameUTF8(filename);
+        avmplus::StUTF8String filenameUTF8(filename);
 
         File* fp = Platform::GetInstance()->createFile();
         if (fp == NULL || !fp->open(filenameUTF8.c_str(), File::OPEN_WRITE_BINARY))

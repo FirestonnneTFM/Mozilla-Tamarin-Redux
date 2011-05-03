@@ -451,7 +451,7 @@ namespace avmshell
         // Wait for all threads to exit.
         for ( int i=0 ; i < numthreads ; i++ ) {
             threads[i]->thread->join();
-            LOGGING( AvmLog("T%d: joined the main thread\n", i); )
+            LOGGING( avmplus::AvmLog("T%d: joined the main thread\n", i); )
         }
 
         // Single threaded again.
@@ -482,7 +482,7 @@ namespace avmshell
                     ThreadNode* threadnode;
                     CoreNode* corenode;
                     while (state.getThreadAndCore(&threadnode, &corenode) && !finish) {
-                        LOGGING( AvmLog("Scheduling %s on T%d with C%d\n", filenames[nextfile], threadnode->id, corenode->id); )
+                        LOGGING( avmplus::AvmLog("Scheduling %s on T%d with C%d\n", filenames[nextfile], threadnode->id, corenode->id); )
                         threadnode->startWork(corenode, filenames[nextfile]);
                         nextfile++;
                         if (nextfile == numfiles) {
@@ -528,12 +528,12 @@ namespace avmshell
                     locker.wait();
             }
             if (self->corenode == NULL) {
-                LOGGING( AvmLog("T%d: Exiting\n", self->id); )
+                LOGGING( avmplus::AvmLog("T%d: Exiting\n", self->id); )
                 return;
             }
 
             // Perform work
-            LOGGING( AvmLog("T%d: Work starting\n", self->id); )
+            LOGGING( avmplus::AvmLog("T%d: Work starting\n", self->id); )
             {
                 MMGC_GCENTER(self->corenode->core->GetGC());
 #ifdef _DEBUG
@@ -541,7 +541,7 @@ namespace avmshell
 #endif
                 self->corenode->core->evaluateFile(state.settings, self->filename); // Ignore the exit code for now
             }
-            LOGGING( AvmLog("T%d: Work completed\n", self->id); )
+            LOGGING( avmplus::AvmLog("T%d: Work completed\n", self->id); )
 
             SCOPE_LOCK(self->thread_monitor) {
                 self->pendingWork = false;
@@ -561,22 +561,22 @@ namespace avmshell
     {
         const int kMaxCommandLine = 1024;
         char commandLine[kMaxCommandLine];
-        String* input;
+        avmplus::String* input;
 
-        AvmLog("avmplus interactive shell\n"
+        avmplus::AvmLog("avmplus interactive shell\n"
                "Type '?' for help\n\n");
 
         for (;;)
         {
             bool record_time = false;
-            AvmLog("> ");
+            avmplus::AvmLog("> ");
 
             if(Platform::GetInstance()->getUserInput(commandLine, kMaxCommandLine) == NULL)
                 return;
 
             commandLine[kMaxCommandLine-1] = 0;
             if (VMPI_strncmp(commandLine, "?", 1) == 0) {
-                AvmLog("Text entered at the prompt is compiled and evaluated unless\n"
+                avmplus::AvmLog("Text entered at the prompt is compiled and evaluated unless\n"
                        "it is one of these commands:\n\n"
                        "  ?             print help\n"
                        "  .input        collect lines until a line that reads '.end',\n"
@@ -596,7 +596,7 @@ namespace avmshell
                 // FIXME: implement .load
                 // Small amount of generalization of the code currently in the main loop should
                 // take care of it.
-                AvmLog("The .load command is not implemented\n");
+                avmplus::AvmLog("The .load command is not implemented\n");
                 continue;
             }
 
@@ -791,12 +791,12 @@ namespace avmshell
 #endif /* VMCFG_SELFTEST */
 #ifdef AVMPLUS_VERBOSE
                     else if (!VMPI_strncmp(arg+2, "verbose", 7)) {
-                        settings.do_verbose = AvmCore::DEFAULT_VERBOSE_ON; // all 'on' by default
+                        settings.do_verbose = avmplus::AvmCore::DEFAULT_VERBOSE_ON; // all 'on' by default
                         if (arg[9] == '=') {
                             char* badFlag;
-                            settings.do_verbose = AvmCore::parseVerboseFlags(&arg[10], badFlag);
+                            settings.do_verbose = avmplus::AvmCore::parseVerboseFlags(&arg[10], badFlag);
                             if (badFlag) {
-                                AvmLog("Unknown verbose flag while parsing '%s'\n", badFlag);
+                                avmplus::AvmLog("Unknown verbose flag while parsing '%s'\n", badFlag);
                                 usage();
                             }
                         }
@@ -810,15 +810,15 @@ namespace avmshell
                         settings.jitconfig.opt_inline = false;
                     }
                     else if (!VMPI_strcmp(arg+2, "jitordie")) {
-                        settings.runmode = RM_jit_all;
+                        settings.runmode = avmplus::RM_jit_all;
                         settings.jitordie = true;
                     }
 #endif /* VMCFG_NANOJIT */
                     else if (!VMPI_strcmp(arg+2, "interp")) {
-                        settings.runmode = RM_interp_all;
+                        settings.runmode = avmplus::RM_interp_all;
                     }
                     else {
-                        AvmLog("Unrecognized option %s\n", arg);
+                        avmplus::AvmLog("Unrecognized option %s\n", arg);
                         usage();
                     }
                 }
@@ -840,7 +840,7 @@ namespace avmshell
                     settings.njconfig.harden_function_alignment = true;
                 }
                 else if (!VMPI_strcmp(arg, "-Ojit")) {
-                    settings.runmode = RM_jit_all;
+                    settings.runmode = avmplus::RM_jit_all;
                 }
 #ifdef VMCFG_OSR
                 else if (!VMPI_strncmp(arg, "-osr=", 5)) {
@@ -848,7 +848,7 @@ namespace avmshell
                     int32_t threshold;
                     if (VMPI_sscanf(arg + 5, "%d", &threshold) != 1 ||
                         threshold < 0) {
-                      AvmLog("Bad value to -osr: %s\n", arg + 5);
+                      avmplus::AvmLog("Bad value to -osr: %s\n", arg + 5);
                       usage();
                     }
                     settings.osr_threshold = threshold;
@@ -930,7 +930,7 @@ namespace avmshell
                                 break;
                             }
                         }
-                        AvmLog("Bad value to -load: %s\n", origval);
+                        avmplus::AvmLog("Bad value to -load: %s\n", origval);
                         usage();
                     }
                 }
@@ -942,7 +942,7 @@ namespace avmshell
                         MMgc::GCHeap::GetGCHeap()->Config().gcLoadCeiling = ceiling;
                     }
                     else {
-                        AvmLog("Bad value to -loadCeiling: %s\n", val);
+                        avmplus::AvmLog("Bad value to -loadCeiling: %s\n", val);
                         usage();
                     }
                 }
@@ -954,7 +954,7 @@ namespace avmshell
                         MMgc::GCHeap::GetGCHeap()->Config().gcEfficiency = work;
                     }
                     else {
-                        AvmLog("Bad value to -gcwork: %s\n", val);
+                        avmplus::AvmLog("Bad value to -gcwork: %s\n", val);
                         usage();
                     }
                 }
@@ -967,7 +967,7 @@ namespace avmshell
                     }
                     else
                     {
-                        AvmLog("Bad argument to -stack\n");
+                        avmplus::AvmLog("Bad argument to -stack\n");
                         usage();
                     }
                 }
@@ -981,7 +981,7 @@ namespace avmshell
                     }
                     else
                     {
-                        AvmLog("Bad argument to -gcstack\n");
+                        avmplus::AvmLog("Bad argument to -gcstack\n");
                         usage();
                     }
                 }
@@ -1002,14 +1002,14 @@ namespace avmshell
                         val = "";
                     if (VMPI_sscanf(val, "%d,%d,%d%n", &settings.numworkers, &settings.numthreads, &settings.repeats, &nchar) != 3)
                         if (VMPI_sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2) {
-                            AvmLog("Bad value to -workers: %s\n", val);
+                            avmplus::AvmLog("Bad value to -workers: %s\n", val);
                             usage();
                         }
                     if (settings.numthreads < 1 ||
                         settings.numworkers < settings.numthreads ||
                         settings.repeats < 1 ||
                         size_t(nchar) != VMPI_strlen(val)) {
-                        AvmLog("Bad value to -workers: %s\n", val);
+                        avmplus::AvmLog("Bad value to -workers: %s\n", val);
                         usage();
                     }
                 }
@@ -1047,37 +1047,37 @@ namespace avmshell
                 }
 #endif /* DEBUGGER */
                 else if (!VMPI_strcmp(arg, "-api") && i+1 < argc) {
-                    if (!AvmCore::parseApiVersion(argv[i+1], settings.apiVersion, settings.apiVersionSeries))
+                    if (!avmplus::AvmCore::parseApiVersion(argv[i+1], settings.apiVersion, settings.apiVersionSeries))
                     {
-                        AvmLog("Unknown api version'%s'\n", argv[i+1]);
+                        avmplus::AvmLog("Unknown api version'%s'\n", argv[i+1]);
                         usage();
                     }
                     i++;
                 }
                 else if (VMPI_strcmp(arg, "-swfversion") == 0 && i+1 < argc) {
-                    int j = BugCompatibility::VersionCount;
+                    int j = avmplus::BugCompatibility::VersionCount;
                     unsigned swfVersion;
                     int nchar;
                     const char* val = argv[++i];
                     if (VMPI_sscanf(val, "%u%n", &swfVersion, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val))
                     {
-                        for (j = 0; j < BugCompatibility::VersionCount; ++j)
+                        for (j = 0; j < avmplus::BugCompatibility::VersionCount; ++j)
                         {
-                            if (BugCompatibility::kNames[j] == swfVersion)
+                            if (avmplus::BugCompatibility::kNames[j] == swfVersion)
                             {
-                                settings.swfVersion = (BugCompatibility::Version)j;
+                                settings.swfVersion = (avmplus::BugCompatibility::Version)j;
                                 break;
                             }
                         }
                     }
-                    if (j == BugCompatibility::VersionCount) {
-                        AvmLog("Unrecognized -swfversion version %s\n", val);
+                    if (j == avmplus::BugCompatibility::VersionCount) {
+                        avmplus::AvmLog("Unrecognized -swfversion version %s\n", val);
                         usage();
                     }
                 }
                 else {
                     // Unrecognized command line option
-                    AvmLog("Unrecognized option %s\n", arg);
+                    avmplus::AvmLog("Unrecognized option %s\n", arg);
                     usage();
                 }
             }
@@ -1103,17 +1103,17 @@ namespace avmshell
 
         if (print_version)
         {
-            AvmLog("shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE );
+            avmplus::AvmLog("shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE );
             if (RUNNING_ON_VALGRIND)
-                AvmLog("-valgrind");
-            AvmLog(" build " AVMPLUS_BUILD_CODE "\n");
+                avmplus::AvmLog("-valgrind");
+            avmplus::AvmLog(" build " AVMPLUS_BUILD_CODE "\n");
 #ifdef AVMPLUS_DESC_STRING
         if (VMPI_strcmp(AVMPLUS_DESC_STRING, ""))
         {
-            AvmLog("Description: " AVMPLUS_DESC_STRING "\n");
+            avmplus::AvmLog("Description: " AVMPLUS_DESC_STRING "\n");
         }
 #endif
-            AvmLog("features %s\n", avmfeatures);
+            avmplus::AvmLog("features %s\n", avmfeatures);
             Platform::GetInstance()->exit(1);
         }
 
@@ -1122,11 +1122,11 @@ namespace avmshell
 #ifdef AVMSHELL_PROJECTOR_SUPPORT
         if (settings.programFilename != NULL && ShellCore::isValidProjectorFile(settings.programFilename)) {
             if (settings.do_selftest || settings.do_repl || settings.numfiles > 0) {
-                AvmLog("Projector files can't be used with -repl, -Dselftest, or program file arguments.\n");
+                avmplus::AvmLog("Projector files can't be used with -repl, -Dselftest, or program file arguments.\n");
                 usage();
             }
             if (settings.numthreads > 1 || settings.numworkers > 1) {
-                AvmLog("A projector requires exactly one worker on one thread.\n");
+                avmplus::AvmLog("A projector requires exactly one worker on one thread.\n");
                 usage();
             }
             settings.do_projector = 1;
@@ -1138,7 +1138,7 @@ namespace avmshell
         if (settings.numfiles == 0) {
             // no files, so we need something more
             if (!settings.do_selftest && !settings.do_repl) {
-                AvmLog("You must provide input files, -repl, or -Dselftest, or the executable must be a projector file.\n");
+                avmplus::AvmLog("You must provide input files, -repl, or -Dselftest, or the executable must be a projector file.\n");
                 usage();
             }
         }
@@ -1148,7 +1148,7 @@ namespace avmshell
         if (settings.do_repl)
         {
             if (settings.numthreads > 1 || settings.numworkers > 1) {
-                AvmLog("The REPL requires exactly one worker on one thread.\n");
+                avmplus::AvmLog("The REPL requires exactly one worker on one thread.\n");
                 usage();
             }
         }
@@ -1159,7 +1159,7 @@ namespace avmshell
         {
             // Presumably we'd want to use the selftest harness to test multiple workers eventually.
             if (settings.numthreads > 1 || settings.numworkers > 1 || settings.numfiles > 0) {
-                AvmLog("The selftest harness requires exactly one worker on one thread, and no input files.\n");
+                avmplus::AvmLog("The selftest harness requires exactly one worker on one thread, and no input files.\n");
                 usage();
             }
         }
@@ -1171,143 +1171,143 @@ namespace avmshell
     /*static*/
     void Shell::usage()
     {
-        AvmLog("avmplus shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE " build " AVMPLUS_BUILD_CODE "\n\n");
+        avmplus::AvmLog("avmplus shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE " build " AVMPLUS_BUILD_CODE "\n\n");
 #ifdef AVMPLUS_DESC_STRING
         if (VMPI_strcmp(AVMPLUS_DESC_STRING, ""))
         {
-            AvmLog("Description: " AVMPLUS_DESC_STRING "\n\n");
+            avmplus::AvmLog("Description: " AVMPLUS_DESC_STRING "\n\n");
         }
 #endif
-        AvmLog("usage: avmplus\n");
+        avmplus::AvmLog("usage: avmplus\n");
 #ifdef DEBUGGER
-        AvmLog("          [-d]          enter debugger on start\n");
+        avmplus::AvmLog("          [-d]          enter debugger on start\n");
 #endif
-        AvmLog("          [-memstats]   generate statistics on memory usage\n");
-        AvmLog("          [-memstats-verbose]\n"
+        avmplus::AvmLog("          [-memstats]   generate statistics on memory usage\n");
+        avmplus::AvmLog("          [-memstats-verbose]\n"
                "                        generate more statistics on memory usage\n");
-        AvmLog("          [-memlimit d] limit the heap size to d pages\n");
-        AvmLog("          [-eagersweep] sweep the heap synchronously at the end of GC;\n"
+        avmplus::AvmLog("          [-memlimit d] limit the heap size to d pages\n");
+        avmplus::AvmLog("          [-eagersweep] sweep the heap synchronously at the end of GC;\n"
                "                        improves usage statistics.\n");
 #ifdef MMGC_POLICY_PROFILING
-        AvmLog("          [-gcbehavior] summarize GC behavior and policy, after every gc\n");
-        AvmLog("          [-gcsummary]  summarize GC behavior and policy, at end only\n");
+        avmplus::AvmLog("          [-gcbehavior] summarize GC behavior and policy, after every gc\n");
+        avmplus::AvmLog("          [-gcsummary]  summarize GC behavior and policy, at end only\n");
 #endif
-        AvmLog("          [-load L,B, ...\n"
+        avmplus::AvmLog("          [-load L,B, ...\n"
                "                        GC load factor L up to a post-GC heap size of B megabytes.\n"
                "                        Up to %d pairs can be accommodated, the limit for the last pair\n"
                "                        will be ignored and can be omitted\n", int(MMgc::GCHeapConfig::kNumLoadFactors));
-        AvmLog("          [-loadCeiling X] GC load multiplier ceiling (default 1.0)\n");
-        AvmLog("          [-gcwork G]   Max fraction of time (default 0.25) we're willing to spend in GC\n");
-        AvmLog("          [-stack N]    Stack size in bytes (will be honored approximately).\n"
+        avmplus::AvmLog("          [-loadCeiling X] GC load multiplier ceiling (default 1.0)\n");
+        avmplus::AvmLog("          [-gcwork G]   Max fraction of time (default 0.25) we're willing to spend in GC\n");
+        avmplus::AvmLog("          [-stack N]    Stack size in bytes (will be honored approximately).\n"
                "                        Be aware of the stack margin: %u\n", avmshell::kStackMargin);
 #ifdef MMGC_MARKSTACK_ALLOWANCE
-        AvmLog("          [-gcstack N]  Mark stack size allowance (# of segments), for testing.\n");
+        avmplus::AvmLog("          [-gcstack N]  Mark stack size allowance (# of segments), for testing.\n");
 #endif
-        AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
-        AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
-        AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
-        AvmLog("          [-Dgreedy]    collect before every allocation\n");
-        AvmLog("          [-Dnogc]      don't collect (including DRC)\n");
-        AvmLog("          [-Dnodrc]     don't use DRC (only use mark/sweep)\n");
+        avmplus::AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
+        avmplus::AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
+        avmplus::AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
+        avmplus::AvmLog("          [-Dgreedy]    collect before every allocation\n");
+        avmplus::AvmLog("          [-Dnogc]      don't collect (including DRC)\n");
+        avmplus::AvmLog("          [-Dnodrc]     don't use DRC (only use mark/sweep)\n");
 #ifdef VMCFG_SELECTABLE_EXACT_TRACING
-        AvmLog("          [-Dnoexactgc] disable exact tracing\n");
+        avmplus::AvmLog("          [-Dnoexactgc] disable exact tracing\n");
 #endif
-        AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
-        AvmLog("          [-Dnodebugger] do not initialize the debugger (in DEBUGGER builds)\n");
-        AvmLog("          [-Dgcthreshold N] lower bound on allocation budget, in blocks, between collection completions\n");
-        AvmLog("          [-Dnofixedcheck]  don't check FixedMalloc deallocations for correctness (sometimes expensive)\n");
+        avmplus::AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+        avmplus::AvmLog("          [-Dnodebugger] do not initialize the debugger (in DEBUGGER builds)\n");
+        avmplus::AvmLog("          [-Dgcthreshold N] lower bound on allocation budget, in blocks, between collection completions\n");
+        avmplus::AvmLog("          [-Dnofixedcheck]  don't check FixedMalloc deallocations for correctness (sometimes expensive)\n");
 #ifdef DEBUGGER
-        AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
-        AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
-        AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
+        avmplus::AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
+        avmplus::AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
+        avmplus::AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 #endif
 #ifdef AVMPLUS_VERBOSE
-        AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,minaddr,memstats,sweep,occupancy,execpolicy"
+        avmplus::AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,minaddr,memstats,sweep,occupancy,execpolicy"
 #  ifdef VMCFG_NANOJIT
                ",jit,opt,regs,raw,bytes"
 #  endif
                "]]\n");
-        AvmLog("                        With no options, enables extreme! output mode.  Otherwise the\n");
-        AvmLog("                        options are mostly self-descriptive except for the following: \n");
-        AvmLog("                           builtins - includes output from builtin methods\n");
-        AvmLog("                           memstats - generate statistics on memory usage \n");
-        AvmLog("                           sweep - [memstats] include detailed sweep information \n");
-        AvmLog("                           occupancy - [memstats] include occupancy bit graph \n");
-        AvmLog("                           execpolicy - shows which execution method (interpretation, compilation) was chosen and why \n");
+        avmplus::AvmLog("                        With no options, enables extreme! output mode.  Otherwise the\n");
+        avmplus::AvmLog("                        options are mostly self-descriptive except for the following: \n");
+        avmplus::AvmLog("                           builtins - includes output from builtin methods\n");
+        avmplus::AvmLog("                           memstats - generate statistics on memory usage \n");
+        avmplus::AvmLog("                           sweep - [memstats] include detailed sweep information \n");
+        avmplus::AvmLog("                           occupancy - [memstats] include occupancy bit graph \n");
+        avmplus::AvmLog("                           execpolicy - shows which execution method (interpretation, compilation) was chosen and why \n");
 #  ifdef VMCFG_NANOJIT
-        AvmLog("                           jit - output LIR as it is generated, and final assembly code\n");
-        AvmLog("                           opt - [jit] show details about each optimization pass\n");
-        AvmLog("                           regs - [jit] show register allocation state after each assembly instruction\n");
-        AvmLog("                           raw - [jit] assembly code is displayed in raw (i.e unbuffered bottom-up) fashion. \n");
-        AvmLog("                           bytes - [jit] display the byte values of the assembly code. \n");
+        avmplus::AvmLog("                           jit - output LIR as it is generated, and final assembly code\n");
+        avmplus::AvmLog("                           opt - [jit] show details about each optimization pass\n");
+        avmplus::AvmLog("                           regs - [jit] show register allocation state after each assembly instruction\n");
+        avmplus::AvmLog("                           raw - [jit] assembly code is displayed in raw (i.e unbuffered bottom-up) fashion. \n");
+        avmplus::AvmLog("                           bytes - [jit] display the byte values of the assembly code. \n");
 #  endif
 
-        AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
-        AvmLog("                        are contained in [ ] For example, 'sweep' requires 'memstats' \n");
+        avmplus::AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
+        avmplus::AvmLog("                        are contained in [ ] For example, 'sweep' requires 'memstats' \n");
 #endif
 #ifdef VMCFG_NANOJIT
-        AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
-        AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
-        AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");
-        AvmLog("          [-Dnocse]     disable CSE optimization\n");
-        AvmLog("          [-Dnoinline]  disable speculative inlining\n");
-        AvmLog("          [-jitharden]  enable jit hardening techniques\n");
+        avmplus::AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
+        avmplus::AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
+        avmplus::AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");
+        avmplus::AvmLog("          [-Dnocse]     disable CSE optimization\n");
+        avmplus::AvmLog("          [-Dnoinline]  disable speculative inlining\n");
+        avmplus::AvmLog("          [-jitharden]  enable jit hardening techniques\n");
     #ifdef VMCFG_OSR
-        AvmLog("          [-osr=T]      enable OSR with invocation threshold T\n");
+        avmplus::AvmLog("          [-osr=T]      enable OSR with invocation threshold T\n");
     #endif
     #ifdef AVMPLUS_IA32
-        AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
-        AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");
+        avmplus::AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
+        avmplus::AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");
     #endif
     #ifdef AVMPLUS_ARM
-        AvmLog("          [-Darm_arch N]  nanojit assumes ARMvN architecture (default=5)\n");
-        AvmLog("          [-Darm_vfp]     nanojit uses VFP rather than SoftFloat\n");
+        avmplus::AvmLog("          [-Darm_arch N]  nanojit assumes ARMvN architecture (default=5)\n");
+        avmplus::AvmLog("          [-Darm_vfp]     nanojit uses VFP rather than SoftFloat\n");
     #endif
 #endif
 #ifdef AVMPLUS_JITMAX
-        AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
+        avmplus::AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
 #endif
 #ifdef VMCFG_VERIFYALL
-        AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
-        AvmLog("          [-Dverifyonly] verify greedily and don't execute anything\n");
+        avmplus::AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
+        avmplus::AvmLog("          [-Dverifyonly] verify greedily and don't execute anything\n");
 #endif
 #ifdef VMCFG_SELFTEST
-        AvmLog("          [-Dselftest[=component,category,test]]");
-        AvmLog("                        run selftests\n");
+        avmplus::AvmLog("          [-Dselftest[=component,category,test]]");
+        avmplus::AvmLog("                        run selftests\n");
 #endif
-        AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
-        AvmLog("          [-Dversion]   print the version and the list of compiled-in features and then exit\n");
+        avmplus::AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
+        avmplus::AvmLog("          [-Dversion]   print the version and the list of compiled-in features and then exit\n");
 #ifdef AVMPLUS_WIN32
-        AvmLog("          [-error]      crash opens debug dialog, instead of dumping\n");
+        avmplus::AvmLog("          [-error]      crash opens debug dialog, instead of dumping\n");
 #endif
 #ifdef VMCFG_EVAL
-        AvmLog("          [-repl]       read-eval-print mode\n");
+        avmplus::AvmLog("          [-repl]       read-eval-print mode\n");
 #endif
 #ifdef VMCFG_WORKERTHREADS
-        AvmLog("          [-workers W,T[,R]]\n");
-        AvmLog("                        Spawn W worker VMs on T threads where W >= T and T >= 1.\n");
-        AvmLog("                        The files provided are handed off to the workers in the order given,\n");
-        AvmLog("                        as workers become available, and these workers are scheduled onto threads\n");
-        AvmLog("                        in a deterministic order that prevents them from having affinity to a thread.\n");
-        AvmLog("                        To test this functionality you want many more files than workers and many more\n");
-        AvmLog("                        workers than threads, and at least two threads.\n");
-        AvmLog("                        If R > 0 is provided then it is the number of times the list of files is repeated.\n");
+        avmplus::AvmLog("          [-workers W,T[,R]]\n");
+        avmplus::AvmLog("                        Spawn W worker VMs on T threads where W >= T and T >= 1.\n");
+        avmplus::AvmLog("                        The files provided are handed off to the workers in the order given,\n");
+        avmplus::AvmLog("                        as workers become available, and these workers are scheduled onto threads\n");
+        avmplus::AvmLog("                        in a deterministic order that prevents them from having affinity to a thread.\n");
+        avmplus::AvmLog("                        To test this functionality you want many more files than workers and many more\n");
+        avmplus::AvmLog("                        workers than threads, and at least two threads.\n");
+        avmplus::AvmLog("                        If R > 0 is provided then it is the number of times the list of files is repeated.\n");
 #endif
-        AvmLog("          [-swfHasAS3]  Exit with code 0 if the single file argument is a swf that contains a DoABC or DoABC2 tag,\n");
-        AvmLog("                        otherwise exit with code 1.  Do not execute or verify anything.\n");
-        AvmLog("          [-swfversion version]\n");
-        AvmLog("                        Run with a given bug-compatibility version in use by default.\n");
-        AvmLog("                        (This can be overridden on a per-ABC basis by embedded metadata.)\n");
-        AvmLog("                        Legal versions are:\n");
-        for (int j = 0; j < BugCompatibility::VersionCount; ++j)
+        avmplus::AvmLog("          [-swfHasAS3]  Exit with code 0 if the single file argument is a swf that contains a DoABC or DoABC2 tag,\n");
+        avmplus::AvmLog("                        otherwise exit with code 1.  Do not execute or verify anything.\n");
+        avmplus::AvmLog("          [-swfversion version]\n");
+        avmplus::AvmLog("                        Run with a given bug-compatibility version in use by default.\n");
+        avmplus::AvmLog("                        (This can be overridden on a per-ABC basis by embedded metadata.)\n");
+        avmplus::AvmLog("                        Legal versions are:\n");
+        for (int j = 0; j < avmplus::BugCompatibility::VersionCount; ++j)
         {
-        AvmLog("                            %d\n",BugCompatibility::kNames[j]);
+        avmplus::AvmLog("                            %d\n",avmplus::BugCompatibility::kNames[j]);
         }
-        AvmLog("          [-log]\n");
-        AvmLog("          [-api N] execute ABCs as version N (see api-versions.h)\n");
-        AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
-        AvmLog("          [filename.{abc,swf} ...\n");
-        AvmLog("          [-- application argument ...]\n");
+        avmplus::AvmLog("          [-log]\n");
+        avmplus::AvmLog("          [-api N] execute ABCs as version N (see api-versions.h)\n");
+        avmplus::AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
+        avmplus::AvmLog("          [filename.{abc,swf} ...\n");
+        avmplus::AvmLog("          [-- application argument ...]\n");
         Platform::GetInstance()->exit(1);
     }
 }

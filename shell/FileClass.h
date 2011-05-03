@@ -51,14 +51,14 @@ namespace avmshell
     class FileClass : public avmplus::ClassClosure
     {
     public:
-        FileClass(VTable* cvtable);
+        FileClass(avmplus::VTable* cvtable);
 
         /**
          * Implementation of File.exists
          * AS usage: exists = File.exists(filename);
          * Tests whether file "filename" exists.
          */
-        bool exists(Stringp filename);
+        bool exists(avmplus::Stringp filename);
 
         /**
          * Implementation of File.read
@@ -66,17 +66,17 @@ namespace avmshell
          * Reads the file "filename" into memory and returns
          * it as a string
          */
-        Stringp read(Stringp filename);
+        avmplus::Stringp read(avmplus::Stringp filename);
 
         /**
          * Implementation of File.write
          * AS usage: File.write(filename, data);
          * Writes the text "data" to the file "filename"
          */
-        void write(Stringp filename, Stringp data);
+        void write(avmplus::Stringp filename, avmplus::Stringp data);
 
-        ByteArrayObject* readByteArray(Stringp filename);
-        bool writeByteArray(Stringp filename, ByteArrayObject* bytes);
+        avmplus::ByteArrayObject* readByteArray(avmplus::Stringp filename);
+        bool writeByteArray(avmplus::Stringp filename, avmplus::ByteArrayObject* bytes);
 
 
         DECLARE_SLOTS_FileClass;

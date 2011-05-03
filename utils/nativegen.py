@@ -300,7 +300,7 @@ TYPEMAP_MEMBERTYPE = {
     CTYPE_OBJECT:       "DRCWB(%s*)",
     CTYPE_ATOM:         "avmplus::AtomWB",
     CTYPE_VOID:         "#error",
-    CTYPE_BOOLEAN:      "bool32",
+    CTYPE_BOOLEAN:      "avmplus::bool32",
     CTYPE_INT:          "int32_t",
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
@@ -312,7 +312,7 @@ TYPEMAP_ARGTYPE = {
     CTYPE_OBJECT:       "%s*",
     CTYPE_ATOM:         "avmplus::Atom",
     CTYPE_VOID:         "void",
-    CTYPE_BOOLEAN:      "bool32",
+    CTYPE_BOOLEAN:      "avmplus::bool32",
     CTYPE_INT:          "int32_t",
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
@@ -336,7 +336,7 @@ TYPEMAP_ARGTYPE_FOR_UNBOX = {
     CTYPE_OBJECT:       "%s*",
     CTYPE_ATOM:         "avmplus::Atom",
     CTYPE_VOID:         "#error",
-    CTYPE_BOOLEAN:      "bool32",
+    CTYPE_BOOLEAN:      "avmplus::bool32",
     CTYPE_INT:          "int32_t",
     CTYPE_UINT:         "uint32_t",
     CTYPE_DOUBLE:       "double",
@@ -376,15 +376,15 @@ TYPEMAP_TO_ATOM_NEEDS_CORE = {
 TYPEMAP_FROM_ATOM = {
     # We can't use static_cast<> because the subclass might be only forward-declared at this point;
     # use good old brute-force cast instead.
-    CTYPE_OBJECT:       lambda val,type: "(%s*)(AvmCore::atomToScriptObject(%s))" % (type,val),
+    CTYPE_OBJECT:       lambda val,type: "(%s*)(avmplus::AvmCore::atomToScriptObject(%s))" % (type,val),
     CTYPE_ATOM:         lambda val,type: "%s" % val,
-    CTYPE_VOID:         lambda val,type: "undefinedAtom",
-    CTYPE_BOOLEAN:      lambda val,type: "((%s) != falseAtom)" % val,
-    CTYPE_INT:          lambda val,type: "AvmCore::integer(%s)" % val,
-    CTYPE_UINT:         lambda val,type: "AvmCore::toUInt32(%s)" % val,
-    CTYPE_DOUBLE:       lambda val,type: "AvmCore::number(%s)" % val,
-    CTYPE_STRING:       lambda val,type: "AvmCore::atomToString(%s)" % val,
-    CTYPE_NAMESPACE:    lambda val,type: "AvmCore::atomToNamespace(%s)" % val,
+    CTYPE_VOID:         lambda val,type: "avmplus::undefinedAtom",
+    CTYPE_BOOLEAN:      lambda val,type: "((%s) != avmplus::falseAtom)" % val,
+    CTYPE_INT:          lambda val,type: "avmplus::AvmCore::integer(%s)" % val,
+    CTYPE_UINT:         lambda val,type: "avmplus::AvmCore::toUInt32(%s)" % val,
+    CTYPE_DOUBLE:       lambda val,type: "avmplus::AvmCore::number(%s)" % val,
+    CTYPE_STRING:       lambda val,type: "avmplus::AvmCore::atomToString(%s)" % val,
+    CTYPE_NAMESPACE:    lambda val,type: "avmplus::AvmCore::atomToNamespace(%s)" % val,
 }
 
 TYPEMAP_TO_GCREF = {

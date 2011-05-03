@@ -46,7 +46,7 @@ namespace avmshell
     class AbstractBaseClass : public avmplus::ClassClosure
     {
     public:
-        AbstractBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        AbstractBaseClass(avmplus::VTable* cvtable) : ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_AbstractBaseClass;
     };
@@ -54,7 +54,7 @@ namespace avmshell
     class AbstractBaseObject : public avmplus::ScriptObject
     {
     public:
-        AbstractBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+        AbstractBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
         DECLARE_SLOTS_AbstractBaseObject;
     };
@@ -62,7 +62,7 @@ namespace avmshell
     class NativeSubclassOfAbstractBaseClass : public avmplus::ClassClosure
     {
     public:
-        NativeSubclassOfAbstractBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        NativeSubclassOfAbstractBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_NativeSubclassOfAbstractBaseClass;
     };
@@ -70,7 +70,7 @@ namespace avmshell
     class NativeSubclassOfAbstractBaseObject : public AbstractBaseObject
     {
     public:
-        NativeSubclassOfAbstractBaseObject(VTable* vtable, ScriptObject* prototype) : AbstractBaseObject(vtable, prototype) {}
+        NativeSubclassOfAbstractBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : AbstractBaseObject(vtable, prototype) {}
 
         DECLARE_SLOTS_NativeSubclassOfAbstractBaseObject;
     };
@@ -78,7 +78,7 @@ namespace avmshell
     class RestrictedBaseClass : public avmplus::ClassClosure
     {
     public:
-        RestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        RestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_RestrictedBaseClass;
     };
@@ -86,7 +86,7 @@ namespace avmshell
     class RestrictedBaseObject : public avmplus::ScriptObject
     {
     public:
-        RestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+        RestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
         DECLARE_SLOTS_RestrictedBaseObject;
     };
@@ -94,7 +94,7 @@ namespace avmshell
     class NativeSubclassOfRestrictedBaseClass : public avmplus::ClassClosure
     {
     public:
-        NativeSubclassOfRestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        NativeSubclassOfRestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_NativeSubclassOfRestrictedBaseClass;
     };
@@ -102,7 +102,7 @@ namespace avmshell
     class NativeSubclassOfRestrictedBaseObject : public RestrictedBaseObject
     {
     public:
-        NativeSubclassOfRestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : RestrictedBaseObject(vtable, prototype) {}
+        NativeSubclassOfRestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : RestrictedBaseObject(vtable, prototype) {}
 
         DECLARE_SLOTS_NativeSubclassOfRestrictedBaseObject;
     };
@@ -110,7 +110,7 @@ namespace avmshell
     class AbstractRestrictedBaseClass : public avmplus::ClassClosure
     {
     public:
-        AbstractRestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        AbstractRestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_AbstractRestrictedBaseClass;
     };
@@ -118,7 +118,7 @@ namespace avmshell
     class AbstractRestrictedBaseObject : public avmplus::ScriptObject
     {
     public:
-        AbstractRestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+        AbstractRestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
         DECLARE_SLOTS_AbstractRestrictedBaseObject;
     };
@@ -126,7 +126,7 @@ namespace avmshell
     class NativeSubclassOfAbstractRestrictedBaseClass : public avmplus::ClassClosure
     {
     public:
-        NativeSubclassOfAbstractRestrictedBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        NativeSubclassOfAbstractRestrictedBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseClass;
     };
@@ -134,7 +134,7 @@ namespace avmshell
     class NativeSubclassOfAbstractRestrictedBaseObject : public AbstractRestrictedBaseObject
     {
     public:
-        NativeSubclassOfAbstractRestrictedBaseObject(VTable* vtable, ScriptObject* prototype) : AbstractRestrictedBaseObject(vtable, prototype) {}
+        NativeSubclassOfAbstractRestrictedBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : AbstractRestrictedBaseObject(vtable, prototype) {}
 
         DECLARE_SLOTS_NativeSubclassOfAbstractRestrictedBaseObject;
     };
@@ -143,7 +143,7 @@ namespace avmshell
     class MIClass : public avmplus::ClassClosure
     {
     public:
-        MIClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        MIClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
         ~MIClass() {}
 
         DECLARE_SLOTS_MIClass;
@@ -164,14 +164,14 @@ namespace avmshell
     {
     public:
         const double amount;
-        MIObjectImpl(VTable* vtable, ScriptObject* prototype, double a) : ScriptObject(vtable, prototype), amount(a) {}
+        MIObjectImpl(avmplus::VTable* vtable, avmplus::ScriptObject* prototype, double a) : avmplus::ScriptObject(vtable, prototype), amount(a) {}
         double plus(double v) { return v + amount; }
     };
 
     class CheckBaseClass : public avmplus::ClassClosure
     {
     public:
-        CheckBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        CheckBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_CheckBaseClass;
     };
@@ -179,7 +179,7 @@ namespace avmshell
     class CheckBaseObject : public avmplus::ScriptObject
     {
     public:
-        CheckBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+        CheckBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
         DECLARE_SLOTS_CheckBaseObject;
     };
@@ -187,7 +187,7 @@ namespace avmshell
     class NativeBaseClass : public avmplus::ClassClosure
     {
     public:
-        NativeBaseClass(VTable* cvtable) : ClassClosure(cvtable) {}
+        NativeBaseClass(avmplus::VTable* cvtable) : avmplus::ClassClosure(cvtable) {}
 
         DECLARE_SLOTS_NativeBaseClass;
     };
@@ -195,7 +195,7 @@ namespace avmshell
     class NativeBaseObject : public avmplus::ScriptObject
     {
     public:
-        NativeBaseObject(VTable* vtable, ScriptObject* prototype) : ScriptObject(vtable, prototype) {}
+        NativeBaseObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : avmplus::ScriptObject(vtable, prototype) {}
 
         DECLARE_SLOTS_NativeBaseObject;
     };
@@ -204,7 +204,7 @@ namespace avmshell
     class MIObject : public MIObjectImpl, public MixinClassThatDoesNotDescendFromScriptObject
     {
     public:
-        MIObject(VTable* vtable, ScriptObject* prototype) : MIObjectImpl(vtable, prototype, 1), MixinClassThatDoesNotDescendFromScriptObject(2) {}
+        MIObject(avmplus::VTable* vtable, avmplus::ScriptObject* prototype) : MIObjectImpl(vtable, prototype, 1), MixinClassThatDoesNotDescendFromScriptObject(2) {}
         ~MIObject() {}
 
         DECLARE_SLOTS_MIObject;
@@ -219,9 +219,9 @@ namespace avmshell
     {
         uint64_t initialTime;
 
-        SystemClass(VTable* cvtable);
+        SystemClass(avmplus::VTable* cvtable);
     public:
-        REALLY_INLINE static SystemClass* create(MMgc::GC* gc, VTable* cvtable)
+        REALLY_INLINE static SystemClass* create(MMgc::GC* gc, avmplus::VTable* cvtable)
         {
             return new (gc, MMgc::kExact, cvtable->getExtraSize()) SystemClass(cvtable);
         }
@@ -245,21 +245,21 @@ namespace avmshell
          * Returns the current version of AVM+ in the form
          * "1.0 d100"
          */
-        Stringp getAvmplusVersion();
+        avmplus::Stringp getAvmplusVersion();
         
         /**
          * Implementation of System.getFeatures
          * AS usage: System.getFeatures();
          * Returns the compiled in features of AVM+
          */
-        Stringp getFeatures();
+        avmplus::Stringp getFeatures();
         
         /**
          * Implementation of System.getRunmode
          * AS usage: System.getRunmode();
          * Returns the current runmode
          */
-        Stringp getRunmode();
+        avmplus::Stringp getRunmode();
 
         /**
          * Implementation of System.exec
@@ -267,10 +267,10 @@ namespace avmshell
          * Executes the specified command line and returns
          * the status code
          */
-        int exec(Stringp command);
+        int exec(avmplus::Stringp command);
 
-        void trace(ArrayObject* a);
-        void write(Stringp s);
+        void trace(avmplus::ArrayObject* a);
+        void write(avmplus::Stringp s);
 
 
         /**
@@ -289,9 +289,9 @@ namespace avmshell
         unsigned getTimer();
         /*@}*/
 
-        ArrayObject * getArgv();
+        avmplus::ArrayObject * getArgv();
 
-        Stringp readLine();
+        avmplus::Stringp readLine();
 
         double get_totalMemory();
         double get_freeMemory();
@@ -310,9 +310,9 @@ namespace avmshell
         void ns_example_nstest() { }
 
         // function exists solely to test ScriptObject::isGlobalObject
-        bool isGlobal(Atom o);
+        bool isGlobal(avmplus::Atom o);
 
-        void disposeXML(XMLObject *xmlObject);
+        void disposeXML(avmplus::XMLObject *xmlObject);
 
         void pauseForGCIfCollectionImminent(double imminence);
 

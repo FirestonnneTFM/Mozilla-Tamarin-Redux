@@ -211,7 +211,7 @@ avmplus::Atom native_script_function_flash_sampler_sampleInternalAllocs_thunk(Me
     (void)env;
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     SamplerScript::sampleInternalAllocs(obj
-        , AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        , AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
@@ -254,7 +254,7 @@ avmplus::Atom native_script_function_flash_sampler_getMemberNames_thunk(MethodEn
     avmplus::ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::ScriptObject*, argv[argoff0]);
     avmplus::Atom const ret = SamplerScript::getMemberNames(obj
         , AvmThunkUnbox_ATOM(avmplus::Atom, argv[argoff1])
-        , (argc < 2 ? false : AvmThunkUnbox_BOOLEAN(bool32, argv[argoff2]))
+        , (argc < 2 ? false : AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff2]))
     );
     return avmplus::Atom(ret);
 }
@@ -422,7 +422,7 @@ avmplus::Atom flash_utils_Dictionary_private_init_thunk(MethodEnv* env, uint32_t
     (void)env;
     avmplus::DictionaryObject* const obj = AvmThunkUnbox_AvmReceiver(avmplus::DictionaryObject*, argv[argoff0]);
     obj->init(
-        AvmThunkUnbox_BOOLEAN(bool32, argv[argoff1])
+        AvmThunkUnbox_BOOLEAN(avmplus::bool32, argv[argoff1])
     );
     return undefinedAtom;
 }
