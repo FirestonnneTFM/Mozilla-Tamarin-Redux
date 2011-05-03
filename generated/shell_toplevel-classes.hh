@@ -79,7 +79,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -93,22 +93,22 @@ public:
     REALLY_INLINE GCRef<avmplus::CTestObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::CTestObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::CTestObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::CTestObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CTestObject>((avmplus::CTestObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -194,7 +194,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct_native(avmplus::NativeBaseAS3Class::createInstanceProc, 0, args);
-        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -208,22 +208,22 @@ public:
     REALLY_INLINE GCRef<avmplus::NativeBaseAS3Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::NativeBaseAS3Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::NativeBaseAS3Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::NativeBaseAS3Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::NativeBaseAS3Object>((avmplus::NativeBaseAS3Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -272,7 +272,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -286,22 +286,22 @@ public:
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend1Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend1Object>((avmplus::ShellCoreFriend1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -357,7 +357,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -371,22 +371,22 @@ public:
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ShellCoreFriend2Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ShellCoreFriend2Object>((avmplus::ShellCoreFriend2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -441,7 +441,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -455,22 +455,22 @@ public:
     REALLY_INLINE GCRef<avmplus::CapabilitiesObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::CapabilitiesObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::CapabilitiesObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::CapabilitiesObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::CapabilitiesObject>((avmplus::CapabilitiesObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -494,64 +494,64 @@ private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
 public:
     REALLY_INLINE bool get_public_var() const { return m_slots_public_classObject.m_public_var != 0; }
-    REALLY_INLINE void set_public_var(bool32 newVal) { m_slots_public_classObject.m_public_var = newVal; }
+    REALLY_INLINE void set_public_var(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var = newVal; }
 public:
     REALLY_INLINE bool get_public_var_AIR_1_0() const { return m_slots_public_classObject.m_public_var_AIR_1_0 != 0; }
-    REALLY_INLINE void set_public_var_AIR_1_0(bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_0 = newVal; }
+    REALLY_INLINE void set_public_var_AIR_1_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_0 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_FP_10_0() const { return m_slots_public_classObject.m_public_var_FP_10_0 != 0; }
-    REALLY_INLINE void set_public_var_FP_10_0(bool32 newVal) { m_slots_public_classObject.m_public_var_FP_10_0 = newVal; }
+    REALLY_INLINE void set_public_var_FP_10_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_FP_10_0 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_AIR_1_5() const { return m_slots_public_classObject.m_public_var_AIR_1_5 != 0; }
-    REALLY_INLINE void set_public_var_AIR_1_5(bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5 = newVal; }
+    REALLY_INLINE void set_public_var_AIR_1_5(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_AIR_1_5_1() const { return m_slots_public_classObject.m_public_var_AIR_1_5_1 != 0; }
-    REALLY_INLINE void set_public_var_AIR_1_5_1(bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5_1 = newVal; }
+    REALLY_INLINE void set_public_var_AIR_1_5_1(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5_1 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_FP_10_0_32() const { return m_slots_public_classObject.m_public_var_FP_10_0_32 != 0; }
-    REALLY_INLINE void set_public_var_FP_10_0_32(bool32 newVal) { m_slots_public_classObject.m_public_var_FP_10_0_32 = newVal; }
+    REALLY_INLINE void set_public_var_FP_10_0_32(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_FP_10_0_32 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_AIR_1_5_2() const { return m_slots_public_classObject.m_public_var_AIR_1_5_2 != 0; }
-    REALLY_INLINE void set_public_var_AIR_1_5_2(bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5_2 = newVal; }
+    REALLY_INLINE void set_public_var_AIR_1_5_2(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5_2 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_AIR_1_0_FP_10_0() const { return m_slots_public_classObject.m_public_var_AIR_1_0_FP_10_0 != 0; }
-    REALLY_INLINE void set_public_var_AIR_1_0_FP_10_0(bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_0_FP_10_0 = newVal; }
+    REALLY_INLINE void set_public_var_AIR_1_0_FP_10_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_0_FP_10_0 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2() const { return m_slots_public_classObject.m_public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2 != 0; }
-    REALLY_INLINE void set_public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2(bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2 = newVal; }
+    REALLY_INLINE void set_public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_AIR_1_5_1_FP_10_0_AIR_1_5_2 = newVal; }
 public:
     REALLY_INLINE bool get_public_var_FP_10_0_32_AIR_1_0_FP_10_0() const { return m_slots_public_classObject.m_public_var_FP_10_0_32_AIR_1_0_FP_10_0 != 0; }
-    REALLY_INLINE void set_public_var_FP_10_0_32_AIR_1_0_FP_10_0(bool32 newVal) { m_slots_public_classObject.m_public_var_FP_10_0_32_AIR_1_0_FP_10_0 = newVal; }
+    REALLY_INLINE void set_public_var_FP_10_0_32_AIR_1_0_FP_10_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_var_FP_10_0_32_AIR_1_0_FP_10_0 = newVal; }
 public:
     REALLY_INLINE bool get_public_const() const { return m_slots_public_classObject.m_public_const != 0; }
-    REALLY_INLINE void setconst_public_const(bool32 newVal) { m_slots_public_classObject.m_public_const = newVal; }
+    REALLY_INLINE void setconst_public_const(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const = newVal; }
 public:
     REALLY_INLINE bool get_public_const_AIR_1_0() const { return m_slots_public_classObject.m_public_const_AIR_1_0 != 0; }
-    REALLY_INLINE void setconst_public_const_AIR_1_0(bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_0 = newVal; }
+    REALLY_INLINE void setconst_public_const_AIR_1_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_0 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_FP_10_0() const { return m_slots_public_classObject.m_public_const_FP_10_0 != 0; }
-    REALLY_INLINE void setconst_public_const_FP_10_0(bool32 newVal) { m_slots_public_classObject.m_public_const_FP_10_0 = newVal; }
+    REALLY_INLINE void setconst_public_const_FP_10_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_FP_10_0 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_AIR_1_5() const { return m_slots_public_classObject.m_public_const_AIR_1_5 != 0; }
-    REALLY_INLINE void setconst_public_const_AIR_1_5(bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5 = newVal; }
+    REALLY_INLINE void setconst_public_const_AIR_1_5(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_AIR_1_5_1() const { return m_slots_public_classObject.m_public_const_AIR_1_5_1 != 0; }
-    REALLY_INLINE void setconst_public_const_AIR_1_5_1(bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5_1 = newVal; }
+    REALLY_INLINE void setconst_public_const_AIR_1_5_1(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5_1 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_FP_10_0_32() const { return m_slots_public_classObject.m_public_const_FP_10_0_32 != 0; }
-    REALLY_INLINE void setconst_public_const_FP_10_0_32(bool32 newVal) { m_slots_public_classObject.m_public_const_FP_10_0_32 = newVal; }
+    REALLY_INLINE void setconst_public_const_FP_10_0_32(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_FP_10_0_32 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_AIR_1_5_2() const { return m_slots_public_classObject.m_public_const_AIR_1_5_2 != 0; }
-    REALLY_INLINE void setconst_public_const_AIR_1_5_2(bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5_2 = newVal; }
+    REALLY_INLINE void setconst_public_const_AIR_1_5_2(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5_2 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_AIR_1_0_FP_10_0() const { return m_slots_public_classObject.m_public_const_AIR_1_0_FP_10_0 != 0; }
-    REALLY_INLINE void setconst_public_const_AIR_1_0_FP_10_0(bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_0_FP_10_0 = newVal; }
+    REALLY_INLINE void setconst_public_const_AIR_1_0_FP_10_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_0_FP_10_0 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2() const { return m_slots_public_classObject.m_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2 != 0; }
-    REALLY_INLINE void setconst_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2(bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2 = newVal; }
+    REALLY_INLINE void setconst_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_AIR_1_5_1_FP_10_0_AIR_1_5_2 = newVal; }
 public:
     REALLY_INLINE bool get_public_const_FP_10_0_32_AIR_1_0_FP_10_0() const { return m_slots_public_classObject.m_public_const_FP_10_0_32_AIR_1_0_FP_10_0 != 0; }
-    REALLY_INLINE void setconst_public_const_FP_10_0_32_AIR_1_0_FP_10_0(bool32 newVal) { m_slots_public_classObject.m_public_const_FP_10_0_32_AIR_1_0_FP_10_0 = newVal; }
+    REALLY_INLINE void setconst_public_const_FP_10_0_32_AIR_1_0_FP_10_0(avmplus::bool32 newVal) { m_slots_public_classObject.m_public_const_FP_10_0_32_AIR_1_0_FP_10_0 = newVal; }
 private:
     avmplus::NativeID::avmplus_public_classObjectSlots m_slots_public_classObject;
 protected:
@@ -580,7 +580,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -594,22 +594,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_classObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_classObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_classObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_classObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_classObject>((avmplus::public_classObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -657,7 +657,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -671,22 +671,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0Object>((avmplus::public_class_AIR_1_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -734,7 +734,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -748,22 +748,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0Object>((avmplus::public_class_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -811,7 +811,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -825,22 +825,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5Object>((avmplus::public_class_AIR_1_5Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -888,7 +888,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -902,22 +902,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1Object>((avmplus::public_class_AIR_1_5_1Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -965,7 +965,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -979,22 +979,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32Object>((avmplus::public_class_FP_10_0_32Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1042,7 +1042,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1056,22 +1056,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_2Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_2Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_2Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_2Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1119,7 +1119,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1133,22 +1133,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_0_FP_10_0Object>((avmplus::public_class_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1196,7 +1196,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1210,22 +1210,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object>((avmplus::public_class_AIR_1_5_1_FP_10_0_AIR_1_5_2Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1273,7 +1273,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1287,22 +1287,22 @@ public:
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object>((avmplus::public_class_FP_10_0_32_AIR_1_0_FP_10_0Object*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1350,7 +1350,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1364,22 +1364,22 @@ public:
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractBaseObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractBaseObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractBaseObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractBaseObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractBaseObject>((avmplus::SubclassOfAbstractBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1427,7 +1427,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1441,22 +1441,22 @@ public:
     REALLY_INLINE GCRef<avmplus::SubclassOfRestrictedBaseObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfRestrictedBaseObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfRestrictedBaseObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfRestrictedBaseObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfRestrictedBaseObject>((avmplus::SubclassOfRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1504,7 +1504,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1518,22 +1518,22 @@ public:
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SubclassOfAbstractRestrictedBaseObject>((avmplus::SubclassOfAbstractRestrictedBaseObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1595,7 +1595,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1609,22 +1609,22 @@ public:
     REALLY_INLINE GCRef<avmplus::StackFrameObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::StackFrameObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::StackFrameObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::StackFrameObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::StackFrameObject>((avmplus::StackFrameObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1680,7 +1680,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1694,22 +1694,22 @@ public:
     REALLY_INLINE GCRef<avmplus::SampleObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SampleObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SampleObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::SampleObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::SampleObject>((avmplus::SampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1757,7 +1757,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1771,22 +1771,22 @@ public:
     REALLY_INLINE GCRef<avmplus::ClassFactoryObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ClassFactoryObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ClassFactoryObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::ClassFactoryObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::ClassFactoryObject>((avmplus::ClassFactoryObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1856,7 +1856,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1870,22 +1870,22 @@ public:
     REALLY_INLINE GCRef<avmplus::DeleteObjectSampleObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::DeleteObjectSampleObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::DeleteObjectSampleObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::DeleteObjectSampleObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::DeleteObjectSampleObject>((avmplus::DeleteObjectSampleObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;
@@ -1952,7 +1952,7 @@ public:
     {
         avmplus::Atom args[1] = { thisRef.reinterpretCast<avmplus::ScriptObject>()->atom() };
         avmplus::Atom const result = this->construct(0, args);
-        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 public:
     REALLY_INLINE bool isType(avmplus::Atom value)
@@ -1966,22 +1966,22 @@ public:
     REALLY_INLINE GCRef<avmplus::EndianObject> asType(avmplus::Atom value)
     {
         avmplus::Atom const result = asTypeImpl(value);
-        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::EndianObject> asType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = asTypeImpl(value->atom());
-        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::EndianObject> coerceToType(avmplus::Atom value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value);
-        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
     REALLY_INLINE GCRef<avmplus::EndianObject> coerceToType(GCRef<avmplus::ScriptObject> value)
     {
         avmplus::Atom const result = coerceToTypeImpl(value->atom());
-        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(AvmCore::atomToScriptObject(result)));
+        return GCRef<avmplus::EndianObject>((avmplus::EndianObject*)(avmplus::AvmCore::atomToScriptObject(result)));
     }
 private:
     friend class avmplus::NativeID::SlotOffsetsAndAsserts;

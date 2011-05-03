@@ -86,8 +86,6 @@ namespace avmplus
 
 #include "shell_toplevel.h"
 
-using namespace avmplus;
-
 namespace avmplus
 {
     class Dictionary;
@@ -146,12 +144,12 @@ namespace avmshell
     };
 
     // swf support, impl code in swf.cpp
-    bool isSwf(ScriptBuffer);
-    bool handleSwf(const char *, ScriptBuffer, Toplevel*, CodeContext*, bool test_only);
+    bool isSwf(avmplus::ScriptBuffer);
+    bool handleSwf(const char *, avmplus::ScriptBuffer, avmplus::Toplevel*, avmplus::CodeContext*, bool test_only);
 
 #ifdef VMCFG_AOT
     // AOT support, impl code in aot.cpp
-    void handleAOT(AvmCore*, Domain*, DomainEnv*, Toplevel*, CodeContext*);
+    void handleAOT(avmplus::AvmCore*, avmplus::Domain*, avmplus::DomainEnv*, avmplus::Toplevel*, avmplus::CodeContext*);
 #endif
 
     class ShellSettings : public ShellCoreSettings

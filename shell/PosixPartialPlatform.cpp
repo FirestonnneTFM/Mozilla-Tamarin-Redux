@@ -61,7 +61,7 @@ namespace avmshell
     {
         FILE *f = freopen(filename, "w", stdout);
         if (!f)
-            AvmLog("freopen %s failed.\n",filename);
+            avmplus::AvmLog("freopen %s failed.\n",filename);
     }
 
     int PosixPartialPlatform::logMessage(const char* message)

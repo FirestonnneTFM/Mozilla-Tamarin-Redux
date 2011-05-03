@@ -51,14 +51,14 @@ namespace avmshell
     public:
         GCMember<BreakAction> prev;
         GCMember<BreakAction> next;
-        GCMember<SourceFile> sourceFile;
+        GCMember<avmplus::SourceFile> sourceFile;
         int id;
-        GCMember<String> filename;
+        GCMember<avmplus::String> filename;
         int linenum;
 
-        BreakAction(SourceFile *sourceFile,
+        BreakAction(avmplus::SourceFile *sourceFile,
                     int id,
-                    Stringp filename,
+                    avmplus::Stringp filename,
                     int linenum)
         {
             this->sourceFile = sourceFile;
@@ -67,7 +67,7 @@ namespace avmshell
             this->linenum = linenum;
         }
 
-        void print(PrintWriter& out);
+        void print(avmplus::PrintWriter& out);
     };
 
     /**
@@ -79,21 +79,21 @@ namespace avmshell
         virtual ~IValue() {}
 
         virtual bool isLValue() = 0;
-        virtual Atom get() = 0;
-        virtual void set(Atom newValue) = 0;
+        virtual avmplus::Atom get() = 0;
+        virtual void set(avmplus::Atom newValue) = 0;
     };
 
     class ConstantValue: public IValue
     {
     public:
-        ConstantValue(Atom value) : value(value) { }
+        ConstantValue(avmplus::Atom value) : value(value) { }
 
         virtual bool isLValue() { return false; }
-        virtual Atom get() { return value; }
-        virtual void set(Atom /*newValue*/) { AvmAssert(false); }
+        virtual avmplus::Atom get() { return value; }
+        virtual void set(avmplus::Atom /*newValue*/) { AvmAssert(false); }
 
     private:
-        ATOM_WB value;
+        avmplus::AtomWB value;
     };
 
     /**
@@ -102,23 +102,23 @@ namespace avmshell
     class LocalValue: public IValue
     {
     public:
-        LocalValue(DebugFrame* frame, int index) : frame(frame), index(index) { }
+        LocalValue(avmplus::DebugFrame* frame, int index) : frame(frame), index(index) { }
 
         virtual bool isLValue() { return true; }
-        virtual Atom get()
+        virtual avmplus::Atom get()
         {
-            Atom* locals;
+            avmplus::Atom* locals;
             int countLocals;
             frame->locals(locals, countLocals);
             return locals[index];
         }
-        virtual void set(Atom newValue)
+        virtual void set(avmplus::Atom newValue)
         {
             frame->setLocal(index, newValue);
         }
 
     private:
-        GCMember<DebugFrame> frame;
+        GCMember<avmplus::DebugFrame> frame;
         int index;
     };
 
@@ -128,23 +128,23 @@ namespace avmshell
     class ArgumentValue: public IValue
     {
     public:
-        ArgumentValue(DebugFrame* frame, int index) : frame(frame), index(index) { }
+        ArgumentValue(avmplus::DebugFrame* frame, int index) : frame(frame), index(index) { }
 
         virtual bool isLValue() { return true; }
-        virtual Atom get()
+        virtual avmplus::Atom get()
         {
-            Atom* arguments;
+            avmplus::Atom* arguments;
             int countArguments;
             frame->arguments(arguments, countArguments);
             return arguments[index];
         }
-        virtual void set(Atom newValue)
+        virtual void set(avmplus::Atom newValue)
         {
             frame->setArgument(index, newValue);
         }
 
     private:
-        GCMember<DebugFrame> frame;
+        GCMember<avmplus::DebugFrame> frame;
         int index;
     };
 
@@ -154,22 +154,22 @@ namespace avmshell
     class PropertyValue: public IValue
     {
     public:
-        PropertyValue(ScriptObject* parent, Multiname& propertyname)
+        PropertyValue(avmplus::ScriptObject* parent, avmplus::Multiname& propertyname)
             : parent(parent), propertyname(propertyname) { }
 
         virtual bool isLValue() { return true; }
-        virtual Atom get()
+        virtual avmplus::Atom get()
         {
             return parent->toplevel()->getproperty(parent->atom(), propertyname, parent->vtable);
         }
-        virtual void set(Atom newValue)
+        virtual void set(avmplus::Atom newValue)
         {
             parent->toplevel()->setproperty(parent->atom(), propertyname, newValue, parent->vtable);
         }
 
     private:
-        GCMember<ScriptObject> parent;
-        HeapMultiname propertyname;
+        GCMember<avmplus::ScriptObject> parent;
+        avmplus::HeapMultiname propertyname;
     };
 
     /**
@@ -179,7 +179,7 @@ namespace avmshell
     class GC_CPP_EXACT(DebugCLI, avmplus::Debugger)
     {
     private:
-        DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel);
+        DebugCLI(avmplus::AvmCore *core, avmplus::Debugger::TraceLevel tracelevel);
     public:
         /** @name command codes */
         /*@{*/
@@ -224,7 +224,7 @@ namespace avmshell
             int id;
         };
 
-        REALLY_INLINE static DebugCLI* create(MMgc::GC* gc, AvmCore *core, Debugger::TraceLevel tracelevel)
+        REALLY_INLINE static DebugCLI* create(MMgc::GC* gc, avmplus::AvmCore *core, avmplus::Debugger::TraceLevel tracelevel)
         {
             return new (gc, MMgc::kExact) DebugCLI(core, tracelevel);
         }
@@ -232,8 +232,8 @@ namespace avmshell
         ~DebugCLI();
 
         void enterDebugger();
-        void setCurrentSource(Stringp file);
-        bool filterException(Exception *exception, bool willBeCaught);
+        void setCurrentSource(avmplus::Stringp file);
+        bool filterException(avmplus::Exception *exception, bool willBeCaught);
         bool hitWatchpoint() { return false; }
 
         /**
@@ -261,13 +261,13 @@ namespace avmshell
 
         void activate() { activeFlag = true; }
 
-        static MethodInfo* functionFor(SourceInfo* src, int line);
+        static avmplus::MethodInfo* functionFor(avmplus::SourceInfo* src, int line);
 
         /**
          * Formats a value for display to the user.  Very similar to
          * AvmCore::format(), but does a few extra things.
          */
-        Stringp formatValue(Atom value);
+        avmplus::Stringp formatValue(avmplus::Atom value);
 
         GC_DATA_BEGIN(DebugCLI)
         
@@ -275,7 +275,7 @@ namespace avmshell
         bool activeFlag;
         char *currentSource;
         uint32_t currentSourceLen;
-        GCMember<String> GC_POINTER(currentFile);
+        GCMember<avmplus::String> GC_POINTER(currentFile);
         int breakpointCount;
         bool warnMissingSource;
 
@@ -295,7 +295,7 @@ namespace avmshell
         void displayLines(int linenum, int count);
 
         char* lineStart(int linenum);
-        Atom ease2Atom(const char* to, Atom baseline);
+        avmplus::Atom ease2Atom(const char* to, avmplus::Atom baseline);
 
         void throwUndefinedVarError(const char* name);
 
@@ -345,7 +345,7 @@ namespace avmshell
         /**
          * atom: the object whose properties we will iterate over.
          */
-        PropertyIterator(AvmCore* core, Atom atom);
+        PropertyIterator(avmplus::AvmCore* core, avmplus::Atom atom);
         virtual ~PropertyIterator() {}
 
         /**
@@ -359,10 +359,10 @@ namespace avmshell
          * Called once for each property that has been found.  If process()
          * ever returns false, iteration halts.
          */
-        virtual bool process(Multiname* key, BindingKind bk) = 0;
+        virtual bool process(avmplus::Multiname* key, avmplus::BindingKind bk) = 0;
 
-        AvmCore* core;
-        ScriptObject* object;
+        avmplus::AvmCore* core;
+        avmplus::ScriptObject* object;
     };
 
     /**
@@ -384,7 +384,7 @@ namespace avmshell
          * atom:         The object in which we want to look for a property.
          * propertyname: The property name to look for.
          */
-        StPropertyFinder(AvmCore* core, Atom atom, const char* propertyname);
+        StPropertyFinder(avmplus::AvmCore* core, avmplus::Atom atom, const char* propertyname);
 
         IValue* value;
 
@@ -392,9 +392,9 @@ namespace avmshell
         /**
          * Returns true if the key matches the originally passed-in property name.
          */
-        bool matches(const Multiname* key) const;
+        bool matches(const avmplus::Multiname* key) const;
 
-        virtual bool process(Multiname* key, BindingKind bk);
+        virtual bool process(avmplus::Multiname* key, avmplus::BindingKind bk);
 
         const char* propertyname;
     };
@@ -405,10 +405,10 @@ namespace avmshell
     class PropertyPrinter: public PropertyIterator
     {
     public:
-        PropertyPrinter(AvmCore* core, DebugCLI* debugger, Atom atom);
+        PropertyPrinter(avmplus::AvmCore* core, DebugCLI* debugger, avmplus::Atom atom);
 
     protected:
-        virtual bool process(Multiname* key, BindingKind bk);
+        virtual bool process(avmplus::Multiname* key, avmplus::BindingKind bk);
 
         DebugCLI* debugger;
     };

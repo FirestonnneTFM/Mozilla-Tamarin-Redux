@@ -54,9 +54,9 @@ namespace avmshell
         , astrace_console(0)
         , do_verbose(0)
         , enter_debugger_on_launch(false)
-        , interrupts(AvmCore::interrupts_default)
-        , verifyall(AvmCore::verifyall_default)
-        , verifyonly(AvmCore::verifyonly_default)
+        , interrupts(avmplus::AvmCore::interrupts_default)
+        , verifyall(avmplus::AvmCore::verifyall_default)
+        , verifyonly(avmplus::AvmCore::verifyonly_default)
         , greedy(false)
         , nogc(false)
         , incremental(true)
@@ -66,29 +66,29 @@ namespace avmshell
         , fixedcheck(true)
         , gcthreshold(0)
         , langID(-1)
-        , jitordie(AvmCore::jitordie_default)
+        , jitordie(avmplus::AvmCore::jitordie_default)
         , do_testSWFHasAS3(false)
-        , runmode(AvmCore::runmode_default)
+        , runmode(avmplus::AvmCore::runmode_default)
 #ifdef VMCFG_NANOJIT
         , njconfig()
         , jitconfig()
-        , osr_threshold(AvmCore::osr_threshold_default)
+        , osr_threshold(avmplus::AvmCore::osr_threshold_default)
 #endif
         , st_component(NULL)
         , st_category(NULL)
         , st_name(NULL)
-        , apiVersionSeries(kApiVersionSeries_FP)
-        , apiVersion(kApiVersionLatest[kApiVersionSeries_FP])
-        , swfVersion(BugCompatibility::kLatest)
+        , apiVersionSeries(avmplus::kApiVersionSeries_FP)
+        , apiVersion(avmplus::kApiVersionLatest[avmplus::kApiVersionSeries_FP])
+        , swfVersion(avmplus::BugCompatibility::kLatest)
     {
     }
 
-    ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
+    ShellToplevel::ShellToplevel(avmplus::AbcEnv* abcEnv) : avmplus::Toplevel(abcEnv)
     {
     }
 
-    ShellCore::ShellCore(MMgc::GC* gc, ApiVersionSeries apiVersionSeries)
-        : AvmCore(gc, apiVersionSeries)
+    ShellCore::ShellCore(MMgc::GC* gc, avmplus::ApiVersionSeries apiVersionSeries)
+        : avmplus::AvmCore(gc, apiVersionSeries)
     {
         systemClass = NULL;
 
@@ -102,7 +102,7 @@ namespace avmshell
         setConsoleStream(consoleOutputStream);
     }
 
-    void ShellCore::stackOverflow(Toplevel* toplevel)
+    void ShellCore::stackOverflow(avmplus::Toplevel* toplevel)
     {
         if (inStackOverflow)
         {
@@ -117,9 +117,9 @@ namespace avmshell
         // actual stack bottom to do this.
         inStackOverflow = true;
 
-        Stringp errorMessage = getErrorMessage(kStackOverflowError);
-        GCRef<ErrorObject> error = toplevel->errorClass()->constructObject(errorMessage->atom(), this->intToAtom(0));
-        Exception *exception = new (GetGC()) Exception(this, error->atom());
+        avmplus::Stringp errorMessage = getErrorMessage(kStackOverflowError);
+        GCRef<avmplus::ErrorObject> error = toplevel->errorClass()->constructObject(errorMessage->atom(), this->intToAtom(0));
+        avmplus::Exception *exception = new (GetGC()) avmplus::Exception(this, error->atom());
 
         // Restore stack overflow checks
         inStackOverflow = false;
@@ -131,19 +131,19 @@ namespace avmshell
     /* static */
     void ShellCore::interruptTimerCallback(void* data)
     {
-        ((AvmCore*)data)->raiseInterrupt(ScriptTimeout);
+        ((avmplus::AvmCore*)data)->raiseInterrupt(ScriptTimeout);
     }
 
-    void ShellCore::interrupt(Toplevel *toplevel, InterruptReason)
+    void ShellCore::interrupt(avmplus::Toplevel *toplevel, InterruptReason)
     {
         if (gracePeriod) {
             // This script has already had its chance; it violated
             // the grace period.
             // Throw an exception it cannot catch.
-            Stringp errorMessage = getErrorMessage(kScriptTerminatedError);
-            GCRef<ErrorObject> error = toplevel->errorClass()->constructObject(errorMessage->atom(), this->intToAtom(0));
-            Exception *exception = new (GetGC()) Exception(this, error->atom());
-            exception->flags |= Exception::EXIT_EXCEPTION;
+            avmplus::Stringp errorMessage = getErrorMessage(kScriptTerminatedError);
+            GCRef<avmplus::ErrorObject> error = toplevel->errorClass()->constructObject(errorMessage->atom(), this->intToAtom(0));
+            avmplus::Exception *exception = new (GetGC()) avmplus::Exception(this, error->atom());
+            exception->flags |= avmplus::Exception::EXIT_EXCEPTION;
             throwException(exception);
         }
 
@@ -158,7 +158,7 @@ namespace avmshell
 
     void ShellCore::initShellPool()
     {
-        shell_domain = Domain::newDomain(this, builtinDomain);
+        shell_domain = avmplus::Domain::newDomain(this, builtinDomain);
 #ifdef VMCFG_AOT
         NativeInitializer shellNInit(this,
             avmplus::NativeID::shell_toplevel_versioned_uris,
@@ -175,7 +175,7 @@ namespace avmshell
 
     ShellToplevel* ShellCore::createShellToplevel()
     {
-        class CodeContextCreator : public AvmCore::ICodeContextCreator
+        class CodeContextCreator : public avmplus::AvmCore::ICodeContextCreator
         {
         public:
             MMgc::GC* gc;
@@ -184,7 +184,7 @@ namespace avmshell
             {
             }
             
-            virtual CodeContext* create(DomainEnv* domainEnv, const BugCompatibility* bugCompatibility)
+            virtual avmplus::CodeContext* create(avmplus::DomainEnv* domainEnv, const avmplus::BugCompatibility* bugCompatibility)
             {
                 return new (gc) ShellCodeContext(domainEnv, bugCompatibility);
             }
@@ -195,19 +195,19 @@ namespace avmshell
         CodeContextCreator ccc(GetGC());
         ShellToplevel* shell_toplevel = (ShellToplevel*)initToplevel(ccc);
 
-        DomainEnv* builtinDomainEnv = shell_toplevel->domainEnv();
+        avmplus::DomainEnv* builtinDomainEnv = shell_toplevel->domainEnv();
         AvmAssert(builtinDomainEnv->domain() == builtinDomain);
         AvmAssert(builtinDomainEnv->base() == NULL);
 
-        shell_domainEnv = DomainEnv::newDomainEnv(this, shell_domain, builtinDomainEnv);
+        shell_domainEnv = avmplus::DomainEnv::newDomainEnv(this, shell_domain, builtinDomainEnv);
 
         // Initialize the shell builtins in the new Toplevel
         // use the same bugCompatibility that the base builtins use
-        const BugCompatibility* shell_bugCompatibility = shell_toplevel->abcEnv()->codeContext()->bugCompatibility();
+        const avmplus::BugCompatibility* shell_bugCompatibility = shell_toplevel->abcEnv()->codeContext()->bugCompatibility();
         ShellCodeContext* shell_codeContext = new(GetGC()) ShellCodeContext(shell_domainEnv, shell_bugCompatibility);
 
         //handleActionPool(shellPool, shell_toplevel, shell_codeContext);
-        shell_toplevel->shellClasses = prepareBuiltinActionPool<shell_toplevelClassManifest>(shellPool, shell_toplevel, shell_codeContext);
+        shell_toplevel->shellClasses = prepareBuiltinActionPool<avmplus::shell_toplevelClassManifest>(shellPool, shell_toplevel, shell_codeContext);
 
 #ifdef VMCFG_VERIFYALL
         if (!config.verifyonly)
@@ -226,7 +226,7 @@ namespace avmshell
         return shell_toplevel;
     }
 
-    /*virtual*/ Toplevel* ShellCore::createToplevel(AbcEnv* abcEnv)
+    /*virtual*/ avmplus::Toplevel* ShellCore::createToplevel(avmplus::AbcEnv* abcEnv)
     {
         return ShellToplevel::create(GetGC(), abcEnv);
     }
@@ -249,9 +249,9 @@ namespace avmshell
     //
     // Much useful guidance is found at http://www.unicode.org/faq/utf_bom.html.
 
-    String* ShellCore::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
+    avmplus::String* ShellCore::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
     {
-        String* s = newStringUTF8((const char*)bytes, nbytes);
+        avmplus::String* s = newStringUTF8((const char*)bytes, nbytes);
         if (s == NULL)
             s = newStringLatin1((const char*)bytes, nbytes);
         if (terminate)
@@ -259,7 +259,7 @@ namespace avmshell
         return s;
     }
 
-    String* ShellCore::readFileForEval(String* referencingFile, String* filename)
+    avmplus::String* ShellCore::readFileForEval(avmplus::String* referencingFile, avmplus::String* filename)
     {
         // FIXME, filename sanitazion is more complicated than this
         if (referencingFile != NULL && filename->charAt(0) != '/' && filename->charAt(0) != '\\') {
@@ -272,7 +272,7 @@ namespace avmshell
         filename = filename->appendLatin1("\0", 1);
 
         // FIXME, not obvious that UTF8 is correct for all operating systems (far from it!)
-        StUTF8String fn(filename);
+        avmplus::StUTF8String fn(filename);
         FileInputStream f(fn.c_str());
         if (!f.valid() || (uint64_t) f.length() >= UINT32_T_MAX)
             return NULL;
@@ -280,36 +280,36 @@ namespace avmshell
         uint32_t nbytes = (uint32_t) f.available();
         uint8_t* bytes = new uint8_t[nbytes];
         f.read(bytes, nbytes);
-        String* str = decodeBytesAsUTF16String(bytes, nbytes, true);
+        avmplus::String* str = decodeBytesAsUTF16String(bytes, nbytes, true);
         delete [] bytes;
         return str;
     }
 
     // input is always NUL-terminated
-    void ShellCore::evaluateString(String* input, bool record_time)
+    void ShellCore::evaluateString(avmplus::String* input, bool record_time)
     {
         setStackLimit();
 
-        TRY(this, kCatchAction_ReportAsError)
+        TRY(this, avmplus::kCatchAction_ReportAsError)
         {
             // Always Latin-1 here
             input = input->appendLatin1("\0", 1);
             double then = 0, now = 0;
             if (record_time)
                 then = VMPI_getDate();
-            ApiVersion apiVersion = this->getApiVersionFromCallStack();
-            Atom result = handleActionSource(input, /*filename*/NULL, shell_toplevel, /*ninit*/NULL, user_codeContext, apiVersion);
+            avmplus::ApiVersion apiVersion = this->getApiVersionFromCallStack();
+            avmplus::Atom result = handleActionSource(input, /*filename*/NULL, shell_toplevel, /*ninit*/NULL, user_codeContext, apiVersion);
             if (record_time)
                 now = VMPI_getDate();
-            if (result != undefinedAtom)
+            if (result != avmplus::undefinedAtom)
                 console << string(result) << "\n";
             if (record_time)
                 console << "Elapsed time: " << (now - then)/1000 << "s\n";
         }
-        CATCH(Exception *exception)
+        CATCH(avmplus::Exception *exception)
         {
 #ifdef DEBUGGER
-            if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+            if (!(exception->flags & avmplus::Exception::SEEN_BY_DEBUGGER))
             {
                 console << string(exception->atom) << "\n";
             }
@@ -345,7 +345,7 @@ namespace avmshell
                          header[6]<<16 |
                          header[7]<<24);
 
-        ScriptBuffer code = newScriptBuffer(abcLength);
+        avmplus::ScriptBuffer code = newScriptBuffer(abcLength);
         file.seek(file.length() - 8 - abcLength);
         file.read(code.getBuffer(), abcLength);
 
@@ -378,7 +378,7 @@ namespace avmshell
     void ShellCore::executeSelftest(ShellCoreSettings& settings)
     {
         setStackLimit();
-        ::selftests(this, settings.st_component, settings.st_category, settings.st_name);
+        avmplus::selftests(this, settings.st_component, settings.st_category, settings.st_name);
     }
 #endif
 
@@ -395,7 +395,7 @@ namespace avmshell
         this->defaultAPIVersion = settings.apiVersion;
 
         this->defaultBugCompatibilityVersion = settings.swfVersion;
-        this->bugzilla444630 = (this->defaultBugCompatibilityVersion >= BugCompatibility::kSWF10);
+        this->bugzilla444630 = (this->defaultBugCompatibilityVersion >= avmplus::BugCompatibility::kSWF10);
 
         // This is obscure but well-defined: the clearing of this flag is allowed
         // at any time, see comment for checkFixedMemory in GCHeap.h.
@@ -415,7 +415,7 @@ namespace avmshell
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-        if (settings.do_verbose & VB_builtins)
+        if (settings.do_verbose & avmplus::VB_builtins)
             config.verbose_vb = settings.do_verbose;  // ~builtins then skip verbose settings during setup()
 #endif
         config.runmode = settings.runmode;
@@ -435,7 +435,7 @@ namespace avmshell
         langID = settings.langID;
 #endif
 
-        TRY(this, kCatchAction_ReportAsError)
+        TRY(this, avmplus::kCatchAction_ReportAsError)
         {
             setStackLimit();
 
@@ -457,9 +457,9 @@ namespace avmshell
             shell_toplevel = createShellToplevel();
 
             // Create a new Domain/DomainEnv for the user code
-            Domain* user_domain = Domain::newDomain(this, shell_domain);
-            DomainEnv* user_domainEnv = DomainEnv::newDomainEnv(this, user_domain, shell_domainEnv);
-            const BugCompatibility* user_bugCompatibility = createBugCompatibility(defaultBugCompatibilityVersion);
+            avmplus::Domain* user_domain = avmplus::Domain::newDomain(this, shell_domain);
+            avmplus::DomainEnv* user_domainEnv = avmplus::DomainEnv::newDomainEnv(this, user_domain, shell_domainEnv);
+            const avmplus::BugCompatibility* user_bugCompatibility = createBugCompatibility(defaultBugCompatibilityVersion);
             this->user_codeContext = new (GetGC()) ShellCodeContext(user_domainEnv, user_bugCompatibility);
 
 #ifdef AVMPLUS_VERBOSE
@@ -467,10 +467,10 @@ namespace avmshell
 #endif
             return true;
         }
-        CATCH(Exception *exception)
+        CATCH(avmplus::Exception *exception)
         {
 #ifdef DEBUGGER
-            if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+            if (!(exception->flags & avmplus::Exception::SEEN_BY_DEBUGGER))
                 console << string(exception->atom) << "\n";
 
             if (exception->getStackTrace())
@@ -487,7 +487,8 @@ namespace avmshell
     }
 
 #ifdef AVMPLUS_VERBOSE
-    const char* ShellCore::identifyDomain(Domain* domain) {
+    const char* ShellCore::identifyDomain(avmplus::Domain* domain) 
+    {
         return domain == builtinDomain ? "builtin" : (domain == shell_domain ? "shell" : NULL);
     }
 #endif
@@ -515,7 +516,7 @@ namespace avmshell
         }
 
         // parse new bytecode
-        ScriptBuffer code = newScriptBuffer((size_t)f.available());
+        avmplus::ScriptBuffer code = newScriptBuffer((size_t)f.available());
         f.read(code.getBuffer(), (size_t)f.available());
 
 #ifdef DEBUGGER
@@ -534,11 +535,11 @@ namespace avmshell
         return handleArbitraryExecutableContent(settings, code, filename);
     }
 
-    int ShellCore::handleArbitraryExecutableContent(ShellCoreSettings& settings, ScriptBuffer& code, const char * filename)
+    int ShellCore::handleArbitraryExecutableContent(ShellCoreSettings& settings, avmplus::ScriptBuffer& code, const char * filename)
     {
         setStackLimit();
 
-        TRY(this, kCatchAction_ReportAsError)
+        TRY(this, avmplus::kCatchAction_ReportAsError)
         {
             if (settings.do_testSWFHasAS3 && !isSwf(code))
                 return 1;
@@ -547,18 +548,18 @@ namespace avmshell
                 handleAOT(shell_toplevel, user_codeContext);
             } else
 #endif
-            if (AbcParser::canParse(code) == 0) {
+            if (avmplus::AbcParser::canParse(code) == 0) {
                 #ifdef VMCFG_VERIFYALL
-                if (config.verbose_vb & VB_verify)
+                if (config.verbose_vb & avmplus::VB_verify)
                     console << "ABC " << filename << "\n";
                 #endif
 
-                ApiVersion apiVersion = this->getApiVersionFromCallStack();
+                avmplus::ApiVersion apiVersion = this->getApiVersionFromCallStack();
                 handleActionBlock(code, 0, shell_toplevel, NULL, user_codeContext, apiVersion);
             }
             else if (isSwf(code)) {
                 #ifdef VMCFG_VERIFYALL
-                if (config.verbose_vb & VB_verify)
+                if (config.verbose_vb & avmplus::VB_verify)
                     console << "SWF " << filename << "\n";
                 #endif
                 bool result = handleSwf(filename, code, shell_toplevel, user_codeContext, settings.do_testSWFHasAS3);
@@ -570,11 +571,11 @@ namespace avmshell
                 AvmCore* core = shell_toplevel->core();
                 if (!core->config.verifyonly) {
                     // FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
-                    String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
-                    String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
-                    ScriptBuffer empty;     // With luck: allow the
+                    avmplus::String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
+                    avmplus::String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
+                    avmplus::ScriptBuffer empty;     // With luck: allow the
                     code = empty;           //    buffer to be garbage collected
-                    ApiVersion apiVersion = this->getApiVersionFromCallStack();
+                    avmplus::ApiVersion apiVersion = this->getApiVersionFromCallStack();
                     handleActionSource(code_string, filename_string, shell_toplevel, NULL, user_codeContext, apiVersion);
                 }
 #else
@@ -583,12 +584,12 @@ namespace avmshell
 #endif // VMCFG_EVAL
             }
         }
-        CATCH(Exception *exception)
+        CATCH(avmplus::Exception *exception)
         {
-            TRY(this, kCatchAction_ReportAsError)
+            TRY(this, avmplus::kCatchAction_ReportAsError)
             {
     #ifdef DEBUGGER
-                if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+                if (!(exception->flags & avmplus::Exception::SEEN_BY_DEBUGGER))
                 {
                     console << string(exception->atom) << "\n";
                 }
@@ -601,7 +602,7 @@ namespace avmshell
                 console << string(exception->atom) << "\n";
     #endif /* DEBUGGER */
             }
-            CATCH(Exception * e2)
+            CATCH(avmplus::Exception * e2)
             {
                 (void)e2;
                 console << "Sorry, an exception occurred but could not be reported\n";

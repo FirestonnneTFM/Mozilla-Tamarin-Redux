@@ -47,9 +47,9 @@ namespace avmshell
         int bitPos;
         int bitBuf;
     public:
-        ScriptBuffer swf;
+        avmplus::ScriptBuffer swf;
         uint32_t pos;
-        SwfParser(ScriptBuffer swf)
+        SwfParser(avmplus::ScriptBuffer swf)
             : bitPos(0)
             , bitBuf(0)
             , swf(swf)
@@ -120,7 +120,7 @@ namespace avmshell
     /**
      * isSwf() - return true if the swf magic # is present, ignoring version.
      */
-    bool isSwf(ScriptBuffer swf) {
+    bool isSwf(avmplus::ScriptBuffer swf) {
         if (swf.getSize() < 4)
             return false;
         uint32_t magic = swf[0] | swf[1]<<8 | swf[2]<<16;
@@ -133,10 +133,10 @@ namespace avmshell
     static const int stagDoABC2 = 82;
 
     static void handleDoABC(int type, SwfParser &parser, int taglen,
-                  Toplevel* toplevel, CodeContext* codeContext,
-                  GCList<PoolObject>& deferred)
+                  avmplus::Toplevel* toplevel, avmplus::CodeContext* codeContext,
+                  avmplus::GCList<avmplus::PoolObject>& deferred)
     {
-        AvmCore *core = toplevel->core();
+        avmplus::AvmCore *core = toplevel->core();
         int tagstart = parser.pos;
         const int kDoAbcLazyInitializeFlag = 1;
         uint32_t flags = 0;
@@ -159,13 +159,13 @@ namespace avmshell
         // by PoolObject and can outlive the swf it came from.  Using a ReadOnlyScriptBuffer
         // avoids copying, but interior pointers to the swf data do not pin the swf in memory.
         int abclen = taglen - (parser.pos - tagstart);
-        ScriptBuffer code(core->newScriptBuffer(abclen));
+        avmplus::ScriptBuffer code(core->newScriptBuffer(abclen));
         VMPI_memcpy(&code[0], &parser.swf[parser.pos], abclen);
 
         // FIXME get api from the SWF
-        ApiVersion apiVersion = core->getApiVersionFromCallStack();
+        avmplus::ApiVersion apiVersion = core->getApiVersionFromCallStack();
         if (flags & kDoAbcLazyInitializeFlag) {
-            PoolObject* pool = core->parseActionBlock(code, 0, toplevel, codeContext->domainEnv()->domain(), NULL, apiVersion);
+            avmplus::PoolObject* pool = core->parseActionBlock(code, 0, toplevel, codeContext->domainEnv()->domain(), NULL, apiVersion);
             deferred.add(pool);
             // defer: handleActionPool(pool/* result of parse */, domainEnv, toplevel, codeContext);
         } else {
@@ -182,20 +182,20 @@ namespace avmshell
      * else
      *   run it via handleActionBlock() just as if it were on the commandline
      */
-    bool handleSwf(const char *filename, ScriptBuffer swf,
-                   Toplevel* toplevel, CodeContext* codeContext,
+    bool handleSwf(const char *filename, avmplus::ScriptBuffer swf,
+                   avmplus::Toplevel* toplevel, avmplus::CodeContext* codeContext,
                    bool test_only)
     {
         bool has_abc = false;
         SwfParser parser(swf);
         parser.pos = 4; // skip magic #
         uint32_t swflen = parser.readU32();
-        AvmCore *core = toplevel->core();
-        GCList<PoolObject> deferred(core->gc, kListInitialCapacity);
+        avmplus::AvmCore *core = toplevel->core();
+        avmplus::GCList<avmplus::PoolObject> deferred(core->gc, avmplus::kListInitialCapacity);
         if (swf[0] == 'C') {
             // decompress the swf
             swflen -= 8;
-            ScriptBuffer newswf(core->newScriptBuffer(swflen));
+            avmplus::ScriptBuffer newswf(core->newScriptBuffer(swflen));
             uLongf dlen = swflen;
             int e = uncompress((Bytef*)&newswf[0], &dlen, (Bytef*)&swf[8], (uLongf)swf.getSize()-8);
             if (e != Z_OK) {

@@ -40,8 +40,6 @@
 #ifndef __avmshell_core__
 #define __avmshell_core__
 
-using namespace avmplus;
-
 namespace avmshell
 {
     /**
@@ -80,19 +78,19 @@ namespace avmshell
         int langID;                     // copy to ShellCore?
         bool jitordie;                  // copy to config
         bool do_testSWFHasAS3;
-        Runmode runmode;                // copy to config
+        avmplus::Runmode runmode;       // copy to config
 #ifdef VMCFG_NANOJIT
         nanojit::Config njconfig;       // copy to config
         avmplus::JitConfig jitconfig;   // copy to config
         uint32_t osr_threshold;         // Invocation count to trigger JIT.
 #endif
-        AvmCore::CacheSizes cacheSizes; // Default to unlimited
+        avmplus::AvmCore::CacheSizes cacheSizes; // Default to unlimited
         const char* st_component;
         const char* st_category;
         const char* st_name;
-        ApiVersionSeries apiVersionSeries;
-        ApiVersion apiVersion;
-        BugCompatibility::Version swfVersion;
+        avmplus::ApiVersionSeries apiVersionSeries;
+        avmplus::ApiVersion apiVersion;
+        avmplus::BugCompatibility::Version swfVersion;
 
         MMgc::GC::GCMode gcMode()
         {
@@ -103,11 +101,11 @@ namespace avmshell
         }
     };
 
-    class ShellCodeContext : public CodeContext
+    class ShellCodeContext : public avmplus::CodeContext
     {
     public:
-        inline ShellCodeContext(DomainEnv* env, const BugCompatibility* bugCompatibility)
-            : CodeContext(env, bugCompatibility) { }
+        inline ShellCodeContext(avmplus::DomainEnv* env, const avmplus::BugCompatibility* bugCompatibility)
+            : avmplus::CodeContext(env, bugCompatibility) { }
     };
 
     /**
@@ -116,7 +114,7 @@ namespace avmshell
      * and do all the housekeeping that results.  The shell uses this; see the
      * shell code for typical usage patterns.
      */
-    class ShellCore : public AvmCore
+    class ShellCore : public avmplus::AvmCore
     {
     friend class SystemClass;
         friend class avmplus::DomainObject;
@@ -126,7 +124,7 @@ namespace avmshell
          *
          * Requires: MMGC_ENTER and MMGC_GCENTER(gc) on the stack.
          */
-        ShellCore(MMgc::GC *gc, ApiVersionSeries apiVersionSeries);
+        ShellCore(MMgc::GC *gc, avmplus::ApiVersionSeries apiVersionSeries);
 
         /**
          * Initialize the new core from the settings.  This creates a top-level
@@ -153,7 +151,7 @@ namespace avmshell
          *
          * Requires: MMGC_ENTER and MMGC_GCENTER(gc) on the stack.
          */
-        void evaluateString(String* input, bool record_time=false);
+        void evaluateString(avmplus::String* input, bool record_time=false);
 #endif
 
 #ifdef AVMSHELL_PROJECTOR_SUPPORT
@@ -164,22 +162,22 @@ namespace avmshell
         void executeSelftest(ShellCoreSettings& settings);
 #endif
 
-        PoolObject* getShellPool() { return shellPool; }
+        avmplus::PoolObject* getShellPool() { return shellPool; }
 
-        SystemClass* getSystemClass() { return systemClass; }
+        avmshell::SystemClass* getSystemClass() { return systemClass; }
 
 #ifdef AVMSHELL_PROJECTOR_SUPPORT
         static bool isValidProjectorFile(const char* filename);
 #endif
 
-        /*virtual*/ inline ApiVersion getDefaultAPI() { return this->defaultAPIVersion; }
+        /*virtual*/ inline avmplus::ApiVersion getDefaultAPI() { return this->defaultAPIVersion; }
 
-        inline BugCompatibility::Version getDefaultBugCompatibilityVersion() const { return defaultBugCompatibilityVersion; }
+        inline avmplus::BugCompatibility::Version getDefaultBugCompatibilityVersion() const { return defaultBugCompatibilityVersion; }
 
     protected:
         virtual void setStackLimit() = 0;
 
-        virtual Toplevel* createToplevel(AbcEnv* abcEnv);
+        virtual avmplus::Toplevel* createToplevel(avmplus::AbcEnv* abcEnv);
 #ifdef DEBUGGER
         virtual avmplus::Debugger* createDebugger(int tracelevel)
         {
@@ -189,7 +187,7 @@ namespace avmshell
 
 #endif
 #ifdef VMCFG_EVAL
-        virtual String* readFileForEval(String* referencing_filename, String* filename);
+        virtual avmplus::String* readFileForEval(avmplus::String* referencing_filename, avmplus::String* filename);
 #endif
 
     private:
@@ -197,36 +195,36 @@ namespace avmshell
 
         ShellToplevel* createShellToplevel();
 
-        void interrupt(Toplevel*, InterruptReason);
-        void stackOverflow(Toplevel *toplevel);
-        void setEnv(Toplevel *toplevel, int argc, char *argv[]);
+        void interrupt(avmplus::Toplevel*, InterruptReason);
+        void stackOverflow(avmplus::Toplevel *toplevel);
+        void setEnv(avmplus::Toplevel *toplevel, int argc, char *argv[]);
         void initShellPool();
-        int handleArbitraryExecutableContent(ShellCoreSettings& settings, ScriptBuffer& code, const char * filename);
+        int handleArbitraryExecutableContent(ShellCoreSettings& settings, avmplus::ScriptBuffer& code, const char * filename);
 #ifdef VMCFG_EVAL
-        String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
+        avmplus::String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
 #endif // VMCFG_EVAL
 #ifdef DEBUGGER
         DebugCLI* debugCLI() { return (DebugCLI*)debugger(); }
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-        virtual const char* identifyDomain(Domain* domain);
+        virtual const char* identifyDomain(avmplus::Domain* domain);
 #endif
         SystemClass* systemClass;
-        PoolObject* shellPool;
-        GCOutputStream *consoleOutputStream;
+        avmplus::PoolObject* shellPool;
+        avmplus::GCOutputStream *consoleOutputStream;
         bool gracePeriod;
         bool inStackOverflow;
         int allowDebugger;
         ShellToplevel* shell_toplevel;
-        DomainEnv* shell_domainEnv;
-        Domain* shell_domain;
+        avmplus::DomainEnv* shell_domainEnv;
+        avmplus::Domain* shell_domain;
         // Note that this has been renamed to emphasize the fact that it is
         // the CodeContext/DomainEnv that user code will run in (as opposed
         // to the Shell's builtin classes, eg System, File, Domain).
         ShellCodeContext* user_codeContext;
-        ApiVersion defaultAPIVersion;
-        BugCompatibility::Version defaultBugCompatibilityVersion;
+        avmplus::ApiVersion defaultAPIVersion;
+        avmplus::BugCompatibility::Version defaultBugCompatibilityVersion;
     };
 
     class GC_CPP_EXACT(ShellToplevel, avmplus::Toplevel)
@@ -234,10 +232,10 @@ namespace avmshell
         friend class ShellCore;
 
     private:
-        ShellToplevel(AbcEnv* abcEnv);
+        ShellToplevel(avmplus::AbcEnv* abcEnv);
     
     public:
-        REALLY_INLINE static ShellToplevel* create(MMgc::GC* gc, AbcEnv* abcEnv)
+        REALLY_INLINE static ShellToplevel* create(MMgc::GC* gc, avmplus::AbcEnv* abcEnv)
         {
             return new (gc, MMgc::kExact) ShellToplevel(abcEnv);
         }
@@ -249,7 +247,7 @@ namespace avmshell
     private:
         GC_DATA_BEGIN(ShellToplevel)
         
-        GCMember<shell_toplevelClassManifest> GC_POINTER(shellClasses);
+        GCMember<avmplus::shell_toplevelClassManifest> GC_POINTER(shellClasses);
 
         GC_DATA_END(ShellToplevel)
     };

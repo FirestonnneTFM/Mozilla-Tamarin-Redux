@@ -85,7 +85,7 @@ namespace avmshell
         { NULL, 0 }
     };
 
-    DebugCLI::DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel)
+    DebugCLI::DebugCLI(avmplus::AvmCore *core, avmplus::Debugger::TraceLevel tracelevel)
         : Debugger(core, tracelevel)
     {
         currentSourceLen = 0;
@@ -197,11 +197,11 @@ namespace avmshell
 
     bool DebugCLI::printFrame(int k)
     {
-        Atom* ptr;
+        avmplus::Atom* ptr;
         int count, line = -1;
-        SourceInfo* src = NULL;
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(k);
+        avmplus::SourceInfo* src = NULL;
+        avmplus::AvmCore* core = avmplus::AvmCore::getActiveCore();
+        avmplus::DebugFrame* frame = core->debugger()->frameAt(k);
         if (frame == NULL) return false;
 
         // source information
@@ -210,16 +210,16 @@ namespace avmshell
         core->console << "#" << k << "   ";
 
         // this
-        Atom a = nullObjectAtom;
+        avmplus::Atom a = avmplus::nullObjectAtom;
         frame->dhis(a);
-        core->console << asAtom(a) << ".";
+        core->console << avmplus::asAtom(a) << ".";
 
         // method
-        MethodInfo* info = functionFor(src, line);
+        avmplus::MethodInfo* info = functionFor(src, line);
         if (info) {
             core->console << info->getMethodName();
         } else {
-            Stringp name = NULL;
+            avmplus::Stringp name = NULL;
             if (frame->methodName(name))
                 core->console << name;
             else
@@ -235,12 +235,12 @@ namespace avmshell
             // write out the name
             if (info)
             {
-                Stringp nm = info->getArgName(i);
+                avmplus::Stringp nm = info->getArgName(i);
                 if (nm != core->kundefined)
                     core->console << nm << "=";
             }
 
-            core->console << asAtom(*ptr++);
+            core->console << avmplus::asAtom(*ptr++);
             if (i<count-1)
                 core->console << ",";
         }
@@ -255,7 +255,7 @@ namespace avmshell
 
     void DebugCLI::bt()
     {
-          AvmCore* core = AvmCore::getActiveCore();
+        avmplus::AvmCore* core = avmplus::AvmCore::getActiveCore();
         //core->stackTrace->dump(core->console);
         //core->console << '\n';
 
@@ -288,16 +288,16 @@ namespace avmshell
         }
     }
 
-    MethodInfo* DebugCLI::functionFor(SourceInfo* src, int line)
+    avmplus::MethodInfo* DebugCLI::functionFor(avmplus::SourceInfo* src, int line)
     {
-        MethodInfo* info = NULL;
+        avmplus::MethodInfo* info = NULL;
         if (src)
         {
             // find the function at this location
             int size = src->functionCount();
             for(int i=0; i<size; i++)
             {
-                MethodInfo* m = src->functionAt(i);
+                avmplus::MethodInfo* m = src->functionAt(i);
                 if (line >= m->firstSourceLine() && line <= m->lastSourceLine())
                 {
                     info = m;
@@ -389,7 +389,7 @@ namespace avmshell
             return;
         }
 
-        Stringp filename = currentFile;
+        avmplus::Stringp filename = currentFile;
         char *colon = VMPI_strchr(location, ':');
 
         if (colon) {
@@ -403,10 +403,10 @@ namespace avmshell
             return;
         }
 
-        SourceFile* sourceFile = NULL;
+        avmplus::SourceFile* sourceFile = NULL;
         for (int i = 0, n = abcCount(); i < n; ++i)
         {
-            AbcFile* abcFile = (AbcFile*)abcAt(i);
+            avmplus::AbcFile* abcFile = (avmplus::AbcFile*)abcAt(i);
             sourceFile = abcFile->sourceNamed(filename);
             if (sourceFile)
                 break;
@@ -485,29 +485,29 @@ namespace avmshell
 
     void DebugCLI::locals(int frameNumber)
     {
-        Atom* ptr;
+        avmplus::Atom* ptr;
         int count, line;
-        SourceInfo* src = NULL;
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(frameNumber);
+        avmplus::SourceInfo* src = NULL;
+        avmplus::AvmCore* core = avmplus::AvmCore::getActiveCore();
+        avmplus::DebugFrame* frame = core->debugger()->frameAt(frameNumber);
         if (frame == NULL) return;
 
         // source information
         frame->sourceLocation(src, line);
 
         // method
-        MethodInfo* info = functionFor(src, line);
+        avmplus::MethodInfo* info = functionFor(src, line);
         if (info) {
             frame->locals(ptr, count);
             for(int i=0; i<count; i++) {
                 // write out the name
-                Stringp nm = info->getLocalName(i);
+                avmplus::Stringp nm = info->getLocalName(i);
                 core->console << i << ": ";
                 if (nm != core->kundefined)
                     core->console << nm;
                 else
                     core->console << "<local_" << i << ">";
-                core->console << " = " << asAtom(*ptr++) << "\n";
+                core->console << " = " << avmplus::asAtom(*ptr++) << "\n";
             }
         }
     }
@@ -515,28 +515,28 @@ namespace avmshell
     void DebugCLI::arguments(int frameNumber)
     {
          int count;
-         Atom* arr;
-         AvmCore* core = AvmCore::getActiveCore();
-         DebugFrame* frame = core->debugger()->frameAt(frameNumber);
+         avmplus::Atom* arr;
+         avmplus::AvmCore* core = avmplus::AvmCore::getActiveCore();
+         avmplus::DebugFrame* frame = core->debugger()->frameAt(frameNumber);
          if (frame && frame->arguments(arr, count)) {
              for (int i = 0; i < count; i++) {
-                 Stringp nm = NULL;
+                 avmplus::Stringp nm = NULL;
                  frame->argumentName(i, nm);
-                 core->console << i << ": " << nm << " = " << asAtom(*arr++) << "\n";
+                 core->console << i << ": " << nm << " = " << avmplus::asAtom(*arr++) << "\n";
              }
          }
     }
 
-    Atom DebugCLI::ease2Atom(const char* to, Atom baseline)
+    avmplus::Atom DebugCLI::ease2Atom(const char* to, avmplus::Atom baseline)
     {
         // first make a string out of the value
-        Atom a = core->newStringLatin1(to)->atom();
+        avmplus::Atom a = core->newStringLatin1(to)->atom();
 
         // using the type of baseline try to convert to into an appropriate Atom
         if (core->isNumber(baseline))
             return core->numberAtom(a);
         else if (core->isBoolean(baseline))
-            return AvmCore::booleanAtom(a);
+            return avmplus::AvmCore::booleanAtom(a);
 
         return nullStringAtom;
     }
@@ -596,28 +596,28 @@ namespace avmshell
         }
     }
 
-    class ScopeBuilder : public CallStackNode::IScopeChainEnumerator
+    class ScopeBuilder : public avmplus::CallStackNode::IScopeChainEnumerator
     {
     public:
-        ScopeBuilder(MMgc::GC* gc) : scopeChain(gc, kListInitialCapacity) { }
-        /*virtual*/ void addScope(Atom scope)
+        ScopeBuilder(MMgc::GC* gc) : scopeChain(gc, avmplus::kListInitialCapacity) { }
+        /*virtual*/ void addScope(avmplus::Atom scope)
         {
             // null/undefined are not legal entries for scope, but
             // enumerateScopeChainAtoms() can hand them to us, for entries
             // within the max_scope range that aren't in use. just ignore 'em.
 
-            if (AvmCore::isNullOrUndefined(scope))
+            if (avmplus::AvmCore::isNullOrUndefined(scope))
                 return;
 
             scopeChain.add(scope);
         }
 
-        AtomList scopeChain;
+        avmplus::AtomList scopeChain;
     };
 
     void DebugCLI::throwUndefinedVarError(const char* name)
     {
-        Stringp errorMessage = core->newStringLatin1("Error: Variable ");
+        avmplus::Stringp errorMessage = core->newStringLatin1("Error: Variable ");
         errorMessage = errorMessage->appendLatin1(name);
         errorMessage = errorMessage->appendLatin1(" is not defined.");
         core->throwAtom(errorMessage->atom());
@@ -625,11 +625,11 @@ namespace avmshell
 
     IValue* DebugCLI::getValue(const char *name)
     {
-        DebugStackFrame* frame = (DebugStackFrame*)frameAt(0);
-        Atom thisAtom;
+        avmplus::DebugStackFrame* frame = (avmplus::DebugStackFrame*)frameAt(0);
+        avmplus::Atom thisAtom;
         frame->dhis(thisAtom);
 
-        Stringp namestr = core->internStringLatin1(name, -1);
+        avmplus::Stringp namestr = core->internStringLatin1(name, -1);
         if (VMPI_strcmp(name, "this") == 0)
             return new (core->gc) ConstantValue(thisAtom);
         if (VMPI_strcmp(name, "NaN") == 0)
@@ -655,9 +655,9 @@ namespace avmshell
         }
         if (name[0] == '<') // XML or XMLList literal
         {
-            if (AvmCore::isObject(thisAtom))
+            if (avmplus::AvmCore::isObject(thisAtom))
             {
-                Toplevel* toplevel = AvmCore::atomToScriptObject(thisAtom)->toplevel();
+                avmplus::Toplevel* toplevel = avmplus::AvmCore::atomToScriptObject(thisAtom)->toplevel();
                 if (name[1] == '>')
                     return new (core->gc) ConstantValue(toplevel->xmlListClass()->ToXMLList(namestr->atom()));
                 else
@@ -665,37 +665,37 @@ namespace avmshell
             }
         }
 
-            Atom* ptr;
-            int count, line;
-            SourceInfo* src;
+        avmplus::Atom* ptr;
+        int count, line;
+        avmplus::SourceInfo* src;
 
         // See if the name matches a function argument or local
-            frame->sourceLocation(src, line);
+        frame->sourceLocation(src, line);
         if (src)
-            {
-            MethodInfo* info = functionFor(src, line);
+        {
+            avmplus::MethodInfo* info = functionFor(src, line);
             if (info)
             {
                 // see if the name matches a function argument
-            frame->arguments(ptr, count);
-            for(int i=0; i<count; i++)
-            {
-                Stringp arg = info->getArgName(i);
-                    if (arg->equalsLatin1(name))
+                frame->arguments(ptr, count);
+                for(int i=0; i<count; i++)
                 {
-                    // match!
+                    avmplus::Stringp arg = info->getArgName(i);
+                    if (arg->equalsLatin1(name))
+                    {
+                        // match!
                         return new (core->gc) ArgumentValue(frame, i);
+                    }
                 }
-            }
 
                 // see if the name matches a local
-            frame->locals(ptr, count);
-            for(int i=0; i<count; i++)
-            {
-                Stringp local = info->getLocalName(i);
-                    if ( local->equalsLatin1(name))
+                frame->locals(ptr, count);
+                for(int i=0; i<count; i++)
                 {
-                    // match!
+                    avmplus::Stringp local = info->getLocalName(i);
+                    if ( local->equalsLatin1(name))
+                    {
+                        // match!
                         return new (core->gc) LocalValue(frame, i);
                     }
                 }
@@ -706,7 +706,7 @@ namespace avmshell
         // the 'this' object)
         if (frame->trace)
         {
-            MethodEnv* env = frame->trace->env();
+            avmplus::MethodEnv* env = frame->trace->env();
             if (env)
             {
                 ScopeBuilder scopeBuilder(core->GetGC());
@@ -723,15 +723,15 @@ namespace avmshell
             }
 
         // Look for globals like 'Number'
-        MethodEnv* env = frame->trace->env();
+        avmplus::MethodEnv* env = frame->trace->env();
         if (env)
         {
-            Multiname mn(core->getAnyPublicNamespace(),
+            avmplus::Multiname mn(core->getAnyPublicNamespace(),
                          core->internStringLatin1(name));
-            ScriptEnv* script = core->domainMgr()->findScriptEnvInDomainEnvByMultiname(env->domainEnv(), mn);
-            if (script != (ScriptEnv*)BIND_NONE && script != (ScriptEnv*)BIND_AMBIGUOUS)
+            avmplus::ScriptEnv* script = core->domainMgr()->findScriptEnvInDomainEnvByMultiname(env->domainEnv(), mn);
+            if (script != (avmplus::ScriptEnv*)avmplus::BIND_NONE && script != (avmplus::ScriptEnv*)avmplus::BIND_AMBIGUOUS)
             {
-                ScriptObject* global = script->global;
+                avmplus::ScriptObject* global = script->global;
                 if (global)
                 {
                     return new (core->gc) PropertyValue(global, mn);
@@ -791,13 +791,13 @@ namespace avmshell
                 if (*name)
                 {
                     // "foo.bar" -- find property "bar" of object "foo"
-                    Atom parent = value->get();
+                    avmplus::Atom parent = value->get();
                     StPropertyFinder finder(core, parent, name);
                     finder.iterate();
                     value = finder.value;
                     if (!value)
                     {
-                        if (AvmCore::isObject(parent))
+                        if (avmplus::AvmCore::isObject(parent))
                         {
                             // Since we didn't find an existing property, we'll just construct
                             // one.  If the parent object is dynamic, then calling get() on the
@@ -805,9 +805,9 @@ namespace avmshell
                             // on it will define a new property.  If the parent object is not
                             // dynamic, then get() and set() will throw exceptions.  Either way,
                             // that's the correct behavior.
-                            Multiname mn(core->getAnyPublicNamespace(),
+                            avmplus::Multiname mn(core->getAnyPublicNamespace(),
                                          core->internStringLatin1(name));
-                            value = new (core->gc) PropertyValue(AvmCore::atomToScriptObject(parent), mn);
+                            value = new (core->gc) PropertyValue(avmplus::AvmCore::atomToScriptObject(parent), mn);
                         }
                         else
                         {
@@ -857,7 +857,7 @@ namespace avmshell
         }
     }
 
-    bool DebugCLI::filterException(Exception *exception, bool /*willBeCaught*/)
+    bool DebugCLI::filterException(avmplus::Exception *exception, bool /*willBeCaught*/)
     {
         // Filter exceptions when -d switch specified
         if (activeFlag) {
@@ -926,7 +926,7 @@ namespace avmshell
             char *command = nextToken();
             int cmd = commandFor(command);
 
-            TRY(core, kCatchAction_Ignore)
+            TRY(core, avmplus::kCatchAction_Ignore)
             {
             switch (cmd) {
             case -1:
@@ -979,8 +979,8 @@ namespace avmshell
                 core->console << "Command not implemented.\n";
                 break;
             }
-        }
-            CATCH(Exception *exception)
+            }
+            CATCH(avmplus::Exception *exception)
             {
                 core->console << core->string(exception->atom) << '\n';
             }
@@ -989,7 +989,7 @@ namespace avmshell
         }
     }
 
-    void DebugCLI::setCurrentSource(Stringp file)
+    void DebugCLI::setCurrentSource(avmplus::Stringp file)
     {
         if (!file)
             return;
@@ -1003,7 +1003,7 @@ namespace avmshell
         }
 
         // Open this file and suck it into memory
-        StUTF8String currentFileUTF8(currentFile);
+        avmplus::StUTF8String currentFileUTF8(currentFile);
         FileInputStream f(currentFileUTF8.c_str());
         if (f.valid() && ((uint64_t)file->length() < UINT32_T_MAX)) { //cannot handle files > 4GB
             currentSourceLen = (uint32_t) f.available();
@@ -1022,7 +1022,7 @@ namespace avmshell
         }
     }
 
-    Stringp DebugCLI::formatValue(Atom value)
+    avmplus::Stringp DebugCLI::formatValue(avmplus::Atom value)
     {
 // An experiment: Printing XML and XMLList variables with their full toXMLString() form.
 //        if (core->isXMLorXMLList(value))
@@ -1033,8 +1033,8 @@ namespace avmshell
 //            return core->string(object->toplevel()->callproperty(value, &mn, 1, &thisAtom, object->vtable));
 //        }
 
-        StringBuffer sb(core);
-        sb << asAtom(value);
+        avmplus::StringBuffer sb(core);
+        sb << avmplus::asAtom(value);
         return sb.toString();
     }
 
@@ -1042,18 +1042,18 @@ namespace avmshell
     // BreakAction
     //
 
-    void BreakAction::print(PrintWriter& out)
+    void BreakAction::print(avmplus::PrintWriter& out)
     {
         out << id << " at "
             << filename
             << ":" << (linenum) << '\n';
     }
 
-    PropertyIterator::PropertyIterator(AvmCore* core, Atom atom)
+    PropertyIterator::PropertyIterator(avmplus::AvmCore* core, avmplus::Atom atom)
     : core(core)
     {
-        if (AvmCore::isObject(atom))
-            object = AvmCore::atomToScriptObject(atom);
+        if (avmplus::AvmCore::isObject(atom))
+            object = avmplus::AvmCore::atomToScriptObject(atom);
         else
             object = NULL;
     }
@@ -1064,18 +1064,18 @@ namespace avmshell
             return;
 
         // Iterate over the object's traits
-        Traits* t = object->traits();
+        avmplus::Traits* t = object->traits();
         while (t)
         {
-            const TraitsBindings* bindings = t->getTraitsBindings();
-            StTraitsBindingsIterator iter(bindings);
+            const avmplus::TraitsBindings* bindings = t->getTraitsBindings();
+            avmplus::StTraitsBindingsIterator iter(bindings);
             while (iter.next()) {
-                Stringp key = iter.key();
+                avmplus::Stringp key = iter.key();
                 if (!key)
                     continue;
-                Binding b = iter.value();
-                Multiname mn(iter.ns(), key);
-                if (!process(&mn, AvmCore::bindingKind(b)))
+                avmplus::Binding b = iter.value();
+                avmplus::Multiname mn(iter.ns(), key);
+                if (!process(&mn, avmplus::AvmCore::bindingKind(b)))
                     return;
             }
             t = t->base;
@@ -1085,20 +1085,20 @@ namespace avmshell
         int index = 0;
         while ((index = object->nextNameIndex(index)) != 0)
         {
-            Multiname mn(core->getAnyPublicNamespace(), core->string(object->nextName(index)));
-            if (!process(&mn, BKIND_VAR))
+            avmplus::Multiname mn(core->getAnyPublicNamespace(), core->string(object->nextName(index)));
+            if (!process(&mn, avmplus::BKIND_VAR))
                 return;
         }
     }
 
-    StPropertyFinder::StPropertyFinder(AvmCore* core, Atom atom, const char* propertyname)
+    StPropertyFinder::StPropertyFinder(avmplus::AvmCore* core, avmplus::Atom atom, const char* propertyname)
     : PropertyIterator(core, atom),
       value(NULL),
       propertyname(propertyname)
     {
     }
 
-    bool StPropertyFinder::process(Multiname* key, BindingKind /*bk*/)
+    bool StPropertyFinder::process(avmplus::Multiname* key, avmplus::BindingKind /*bk*/)
     {
         if (key->getName()->equalsLatin1(propertyname))
         {
@@ -1109,32 +1109,32 @@ namespace avmshell
         return true;
     }
 
-    PropertyPrinter::PropertyPrinter(AvmCore* core, DebugCLI* debugger, Atom atom)
+    PropertyPrinter::PropertyPrinter(avmplus::AvmCore* core, DebugCLI* debugger, avmplus::Atom atom)
     : PropertyIterator(core, atom),
       debugger(debugger)
     {
     }
 
-    bool PropertyPrinter::process(Multiname* key, BindingKind bk)
+    bool PropertyPrinter::process(avmplus::Multiname* key, avmplus::BindingKind bk)
     {
-        if (bk == BKIND_CONST || bk == BKIND_VAR || bk == BKIND_GET || bk == BKIND_GETSET)
+        if (bk == avmplus::BKIND_CONST || bk == avmplus::BKIND_VAR || bk == avmplus::BKIND_GET || bk == avmplus::BKIND_GETSET)
         {
-            Atom value = object->toplevel()->getproperty(object->atom(), key, object->vtable);
+            avmplus::Atom value = object->toplevel()->getproperty(object->atom(), key, object->vtable);
             switch (bk)
             {
-            case BKIND_CONST:
+            case avmplus::BKIND_CONST:
                 core->console << "const ";
                 break;
-            case BKIND_VAR:
+            case avmplus::BKIND_VAR:
                 core->console << "var ";
                 break;
-            case BKIND_GET:
-            case BKIND_GETSET:
+            case avmplus::BKIND_GET:
+            case avmplus::BKIND_GETSET:
                 core->console << "function get ";
                 break;
             }
-            core->console << Multiname::FormatNameOnly(key);
-            if (bk == BKIND_GET || bk == BKIND_GETSET)
+            core->console << avmplus::Multiname::FormatNameOnly(key);
+            if (bk == avmplus::BKIND_GET || bk == avmplus::BKIND_GETSET)
                 core->console << "()";
             core->console << " = " << debugger->formatValue(value) << '\n';
         }
