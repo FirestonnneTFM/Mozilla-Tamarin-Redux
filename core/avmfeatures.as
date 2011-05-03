@@ -757,6 +757,13 @@ var FEATURES =
     <default> false </default>
   </tweak>
 
+  <tweak>
+    <desc> Heap graph, enables blacklist feature for inspecting object reachability </desc>
+    <name> AVMTWEAK_HEAP_GRAPH </name>
+    <defines> MMGC_HEAP_GRAPH </defines>
+    <default> false </default>
+  </tweak>
+
   <at-most-one>
     <name> AVMTWEAK_EXACT_TRACING </name>
     <name> AVMTWEAK_SELECTABLE_EXACT_TRACING </name>
