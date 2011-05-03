@@ -175,7 +175,7 @@ namespace avmshell
                 return EXCEPTION_CONTINUE_SEARCH;
             }
 
-            AvmLog("avmplus crash: exception 0x%08lX occurred\n", exceptionCode);
+            avmplus::AvmLog("avmplus crash: exception 0x%08lX occurred\n", exceptionCode);
 
             typedef BOOL (WINAPI *MINIDUMP_WRITE_DUMP)(
                 HANDLE hProcess,
@@ -204,7 +204,7 @@ namespace avmshell
                 M.ExceptionPointers = pException;
                 M.ClientPointers = 0;
 
-                AvmLog("Writing minidump crash log to %ls\n", DumpPath);
+                avmplus::AvmLog("Writing minidump crash log to %ls\n", DumpPath);
 
                 HANDLE hDumpFile = CreateFileW(DumpPath, GENERIC_WRITE, 0,
                     NULL, CREATE_ALWAYS,
@@ -220,7 +220,7 @@ namespace avmshell
             }
             else
             {
-                AvmLog("minidump not available, no crash log written.\n");
+                avmplus::AvmLog("minidump not available, no crash log written.\n");
             }
 
             return result;
@@ -242,7 +242,7 @@ namespace avmshell
         #else
             FILE *f = freopen(filename, "w", stdout);
             if (!f)
-                AvmLog("freopen %s failed.\n",filename);
+                avmplus::AvmLog("freopen %s failed.\n",filename);
         #endif /* UNDER_CE */
         }
 
