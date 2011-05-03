@@ -21,7 +21,11 @@ var size:int;
       JGFrun(3);
       var elapsed = getTimer() - start;
   }
-  print("metric time "+elapsed);
+  if (JGFvalidate())
+    print("metric time "+elapsed);
+  else
+    print("validation failed");
+  
   function JGFsetsize(sizel:int):void {
     size = sizel;
   }
@@ -35,9 +39,9 @@ var size:int;
     Do();
   }
 
-  function JGFvalidate():void {
+  function JGFvalidate():Boolean {
     var ref:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(4,true);
-    for(var i=0;i<4;i++)
+    for(var i:int=0;i<4;i++)
     {
       ref[i] = new Vector.<Number>(2,true);
       
@@ -63,11 +67,13 @@ var size:int;
           print("Validation failed for coefficient " + j + "," + i);
           print("Computed value = " + TestArray[j][i]);
           print("Reference value = " + ref[i][j]);
+          return false
         }
         
         print( TestArray[j][i] );
       }
     }
+    return true;
   }
 
   function JGFtidyup():void {

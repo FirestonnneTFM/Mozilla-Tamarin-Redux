@@ -35,7 +35,10 @@ else { // mobile
     JGFrun(4);
     var elapsed = getTimer() - start;
 }
-print("metric time "+elapsed);
+if (JGFvalidate())
+    print("metric time "+elapsed);
+else
+    print("validation failed");
 
 function JGFrun(sizei):void {
     JGFsetsize(sizei);
@@ -60,19 +63,19 @@ function JGFrun(sizei):void {
     inverse(x);
 
   }
-  function JGFvalidate():void {
+  function JGFvalidate():Boolean {
     var refval:Vector.<Number> = new Vector.<Number>(5);
-    refval[0] = 2.236789124999579; 
-    refval[1] = 8.947156499999005;
-    refval[2] = 13.815703907167297;
+    refval[0] = 0.5591972812499846;     // 0.4317407470988178
+    refval[1] = 1.726962988395339;
+    refval[2] = 6.907851953579193;
     refval[3] = 13.815703907167297;
-    refval[4] = 0.034949830078124584;
+    refval[4] = 0.034949830078124584;   // 0.026983796693676648
     var refvali:Vector.<Number> = new Vector.<Number>(5);
-    refvali[0] = 2.0971823750001506; 
-    refvali[1] = 8.388607500000056;
-    refvali[2] = 16.778094422092604;
-    refvali[3] = 13.815703907167297;
-    refvali[4] = 0.03286470898437495;
+    refvali[0] = 0.524416343749985;     // 0.5245436889646894
+    refvali[1] = 2.0974756152524314;
+    refvali[2] = 8.389142211032294;
+    refvali[3] = 16.778094422092604;
+    refvali[4] = 0.03286470898437495;   // 0.03280397441275576
     var dev:Number = Math.abs(JDKtotal - refval[size]);
     var devi:Number = Math.abs(JDKtotali - refvali[size]);
     
@@ -91,7 +94,9 @@ function JGFrun(sizei):void {
     {
       print("Validation sucess");
       print("JDKtotalinverse = " + JDKtotali + "  " + devi + "  " + size);
+      return true;
     }
+    return false;
   }
     /** Compute Inverse Fast Fourier Transform of (complex) data, in place. */
   function inverse(data:Vector.<Number>):void {

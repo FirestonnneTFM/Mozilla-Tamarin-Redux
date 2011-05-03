@@ -328,6 +328,14 @@ package {
     //print("Init "+new Date());
     // init/reset vars
     Origin.V = Vector.<Number>([150,150,20,1]);
+    Testing.LoopCount = 0;
+    Testing.LoopMax = 50;
+    Testing.TimeMax = 0;
+    Testing.TimeAvg = 0;
+    Testing.TimeMin = 0;
+    Testing.TimeTemp = 0;
+    Testing.TimeTotal = 0;
+    Testing.Init = false;
 
     // transformation matrix
     MTrans = new Vector.<Vector.<Number>>(4);
@@ -420,7 +428,7 @@ function run3dCube():int {
   // verify test results
   var expectedResults = [250.49814997925202, 308.02382919560387, -184.27577256519325];
   for (i=0; i<3; i++) {
-    if (cube.Q.elements[5].V[i] - expectedResults[i]>0.00001) {
+    if (Math.abs(cube.Q.elements[5].V[i] - expectedResults[i])>0.00001) {
         print("Test validation failed.  Q[5].V["+i+"]: Expected: "+expectedResults[i]+" Got: "+cube.Q.elements[5].V[i]);
     }
   }

@@ -313,8 +313,26 @@ for (var i:int=0;i<cycles;i++) {
   CopyMatrix(lu, A);
   LU.factor(lu, pivot);
 }
+
 if (CONFIG::desktop)
-    print("metric time "+(new Date()-starttime));
+    var endtime:Number = new Date()-starttime;
 else // mobile
-    print("metric time "+(getTimer()-starttime));
+    var endtime:int = getTimer()-starttime;
+
+
+// verify that LU is correct
+var b:Array = RandomVector(N, R);
+var x:Array = NewVectorCopy(b);
+
+LU.solve(lu, pivot, x);
+
+const EPS:Number = 1.0e-12;
+if ( normabs(b, matvec(A,x)) / N > EPS )
+    print("FAILED verification.");
+else
+    print("metric time "+endtime);
+
+
+
+
 }

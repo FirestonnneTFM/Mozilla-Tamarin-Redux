@@ -17,6 +17,27 @@ function RandomVector(N:uint, R:Random):Array
 			A[i] = R.nextDouble();
 		return A;
 }
+function NewVectorCopy(x:Array):Array
+{
+    var N:int = x.length;
+
+    var y:Array = Array(N);
+    for (var i:int=0; i<N; i++)
+        y[i] = x[i];
+
+    return y;
+}
+
+function normabs(x:Array, y:Array):Number
+{
+    var N:int = x.length;
+    var sum:Number = 0.0;
+
+    for (var i:int=0; i<N; i++)
+        sum += Math.abs(x[i]-y[i]);
+
+    return sum;
+}
 function matvec(A:Array, x:Array):Array
 	{
 		var N = x.length;

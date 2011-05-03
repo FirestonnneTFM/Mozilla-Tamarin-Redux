@@ -46,7 +46,12 @@ else { // mobile
     JGFrun(3);
     var elapsed = getTimer() - start;
 }
-print("metric time "+elapsed);
+if (JGFvalidate())
+    print("metric time "+elapsed);
+else
+    print("validation failed");
+
+
 function _randomInt():int
 {
   lastRandom = (lastRandom * 214013 + 2531011) % 16777216;
@@ -89,7 +94,7 @@ function JGFkernel():void {
 
 }
 
-function JGFvalidate():void {
+function JGFvalidate():Boolean {
 
   var refval:Vector.<Number> = new Vector.<Number>(4,true);
   refval[0] = 75.16427500310363;//75.02484945753453;
@@ -100,12 +105,14 @@ function JGFvalidate():void {
   if (dev > 1.0e-12) {
     print("Validation failed");
     print("ytotal = " + ytotal + "  " + dev + "  " + size);
+    return false;
   }else
   {
     print("Validation passed");
     print("ytotal = " + ytotal + "  " + dev + "  " + size);
   }
   print("Y total: " + ytotal + " Dev: " + dev );
+  return true;
 
 }
 
